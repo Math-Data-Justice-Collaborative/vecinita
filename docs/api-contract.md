@@ -752,13 +752,13 @@ Base path: `/internal/v1/eval` and `/internal/v1/rag/config` (admin JWT; promote
 
 ---
 
-## EV-010 — Playground model download (F38)
+## EV-010 — Playground model download (F38, ADR-037 unified backend)
 
-Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `super-admin`).
+Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `super-admin`). **API paths kept for frontend compat**; Modal backend is **`vecinita-llm`** (not `vecinita-ollama`).
 
 ### GET `/internal/v1/models/ollama`
 
-- **Purpose**: List Ollama models on the Modal `vecinita-models` volume for the Playground picker.
+- **Purpose**: List playground models staged on Modal volume **`llm-models`** for the Playground picker.
 - **Auth**: `WriteActorDep` (`admin` or `super-admin`); `viewer` → `403`.
 - **Response** `200`:
 
@@ -771,11 +771,12 @@ Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `supe
 }
 ```
 
-- **Fallback**: When `VECINITA_MODAL_OLLAMA_URL` is unset, returns a single vLLM default model entry (existing F37 behavior).
+- **Upstream**: Proxies `GET /models/ollama` on **`vecinita-llm`** when `VECINITA_MODAL_LLM_URL` is set.
+- **Fallback**: When LLM URL unset, returns a single default model entry (F37 behavior).
 
 ### POST `/internal/v1/models/ollama/pull`
 
-- **Purpose**: Enqueue a background Ollama pull into the **Modal Volume `vecinita-models`** (super-admin operator action).
+- **Purpose**: Enqueue a background **HuggingFace Hub download** into Modal Volume **`llm-models`** (super-admin operator action).
 - **Auth**: `SuperAdminActorDep` only; `admin` → `403`; `viewer` → `403`.
 - **Request**:
 
@@ -783,7 +784,7 @@ Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `supe
 { "model_id": "qwen2.5:3b-instruct" }
 ```
 
-- **Validation**: `model_id` non-empty, max 128 characters (free-text Ollama tag — no allow-list v1).
+- **Validation**: `model_id` non-empty, max 128 characters (free-text Ollama-style tag — resolved via `llm_model_registry.py`).
 - **Response** `202`:
 
 ```json
@@ -794,23 +795,27 @@ Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `supe
 }
 ```
 
+- **Upstream**: Proxies `POST /models/ollama/pull` on **`vecinita-llm`** → Modal `pull_model_job`.
 - **Concurrent pulls**: Parallel requests for the same tag are allowed (duplicate Modal jobs acceptable in v1).
-- **Errors**: `503` when Ollama client not configured; `502` when Modal proxy fails; `422` on invalid body.
+- **Errors**: `503` when LLM client not configured; `502` when Modal proxy fails; `422` on invalid body; `400` when tag has no HF mapping.
 
 ### Client polling contract (Playground UI)
 
 - After `202`, poll `GET /internal/v1/models/ollama` every **10s** until matching `model_id` has `available: true` or **30 min** elapses (timeout error; operator may retry).
 - No separate job-status endpoint in v1.
 
-### Storage contract (Modal)
+### Storage contract (Modal — ADR-037)
 
 | Item | Value |
 |------|-------|
-| Volume | `vecinita-models` (Modal) |
-| Mount path | `/models` (`OLLAMA_MODELS=/models` in `vecinita-ollama`) |
+| App | **`vecinita-llm`** (`infra/modal/llm_app.py`) |
+| Volume | **`llm-models`** (Modal) |
+| Mount path | `/models` |
 | Manifest | `/models/manifest.json` — `{ models: [{ model_id, available }] }` |
-| Pull execution | Modal function `pull_model_job` — `ollama pull` + `model_volume.commit()` |
+| Pull execution | Modal function `pull_model_job` — **`huggingface_hub.snapshot_download`** + `volume.commit()` |
+| Staging fns | `stage_llm_weights`, `stage_default_model` (operator `modal run`) |
 | Non-storage | Model weights are **not** written to DO Postgres, DO disk, or browser storage |
+| Deprecated | `vecinita-ollama`, volume `vecinita-models` — do not deploy; blobs not migrated |
 
 ---
 

@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-05 (EV-010 F38 — Modal `vecinita-models` playground storage)
+> **Last updated**: 2026-07-08 (S010/EV-011 F39 — unified `vecinita-llm`; deprecate `vecinita-ollama`, ADR-037)
 
 ## Overview
 
@@ -17,8 +17,8 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | DO internal write API | DO App Platform (**standalone** app) | Sole holder of `DATABASE_URL` for writes from Modal; audited S8.4 |
 | data-management-modal | Modal | ASGI + queues + scrape |
 | vecinita-embedding | Modal | FastEmbed 384-dim |
-| vecinita-llm | Modal | **vLLM** — **Qwen2.5-1.5B-Instruct** on **T4** (scale-to-zero) |
-| vecinita-ollama | Modal | Playground Ollama — model list/pull/generate; **storage:** volume `vecinita-models` |
+| vecinita-llm | Modal | **Unified LLM** — vLLM inference + HF model staging; volume **`llm-models`**; list/pull/generate/warm (ADR-037) |
+| ~~vecinita-ollama~~ | ~~Modal~~ | **Deprecated** — de-deploy after S010 smoke; superseded by `vecinita-llm` |
 | database | DO Managed Postgres | Smallest viable tier |
 
 **Topology note (RD-022):** User selected **multi-app** on DO (separate deployables per backend). **05-verify-tech / TP-009:** pilot **~$42–48/mo** fits ≤ **$50** cap with scale-to-zero GPU; consolidate DO if overrun.
@@ -161,7 +161,7 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 | `VECINITA_MODAL_LLM_URL` | internal-write-api, chat-rag-backend | Unified Modal ASGI: generate, warm, list/pull |
 | `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret `vecinita-ollama`* | `X-Vecinita-Proxy-Key` on model routes |
 
-\*Proxy key remains in Modal secret `vecinita-ollama` until merged into `vecinita-llm` (migration).
+\*Proxy key: Modal secret `vecinita-ollama` during migration; merge into `vecinita-llm` secret before de-deploying ollama app.
 
 **`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.
 `POST /warm {"model_id": ...}` preloads the resolved HF model. One active vLLM engine per container;

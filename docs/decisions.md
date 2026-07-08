@@ -442,7 +442,28 @@ Requirements locked RD-146–RD-153 in 01-requirements; implementation details r
 
 EV-010 tech-plan artifacts: ADR-036; execution-plan Phase 16 (M71–M73, T71.1–T73.6); roadmap
 `docs/sessions/S009-playground-model-download/roadmap.md`; report
-`docs/sessions/S009-playground-model-download/reports/04-tech-plan.md`.
+
+### EV-011 requirements decisions (2026-07-08) — RD-154–RD-162
+
+S010 context brief (R1–R5) and user-provided prior-state analysis. 01-requirements delta for F39:
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-154 | Canonical Modal app | **`vecinita-llm` only** — deprecate and de-deploy `vecinita-ollama` | S010 interview; ADR-037 |
+| RD-155 | Download mechanism | **HF Hub** (`snapshot_download`) into `llm-models` — not `ollama pull` (vLLM incompatible with Ollama blobs) | ADR-037 §R1; user context |
+| RD-156 | Modal functions | `stage_llm_weights`, `stage_default_model`, `pull_model_job` on **`llm_app.py`** | S010 scope |
+| RD-157 | Eval routing | **`eval_runtime_for_config` always uses `VECINITA_MODAL_LLM_URL`**; sandbox `model_id` forwarded to `/generate` | User prior-state diagram |
+| RD-158 | ChatRAG routing | **`VECINITA_MODAL_LLM_URL` only** — remove Ollama URL preference | ADR-037 §8 |
+| RD-159 | API compat | Keep `/internal/v1/models/ollama` and Modal `/models/ollama` paths; Ollama-style tags in UI | ADR-037 §5; R5 |
+| RD-160 | Volume | Single **`llm-models`** volume; no migration from `vecinita-models` | ADR-037 §R2 |
+| RD-161 | Env deprecation | Remove `VECINITA_MODAL_OLLAMA_URL` from DO specs; warn-only in legacy clients | ADR-037 §7 |
+| RD-162 | Feature ID | **F39** — unified LLM Modal service; F38 UI unchanged, backend superseded | S010 session-brief |
+
+EV-011 artifacts: feature-list F39 + F38 backend note; user-journeys UJ-048 delta; test-plan TC-139/TC-140;
+api-contract §EV-010 storage; config-spec deprecated env; acceptance-criteria AC-E30–AC-E33; ADR-037;
+cursor rule `.cursor/rules/unified-vecinita-llm.mdc`; context `docs/sessions/S010-unify-llm-service/`.
+
+EV-010 tech-plan report: `docs/sessions/S009-playground-model-download/reports/04-tech-plan.md`.
 
 EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-040; test-plan TC-111–TC-116;
 acceptance-criteria AC-E12–AC-E16; api-contract §EV-008 eval routes; config-spec §RAG evaluation;

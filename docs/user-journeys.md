@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-05 (S009/EV-010 F38 — UJ-048 super-admin model download)
+> **Last updated**: 2026-07-08 (S010/EV-011 F39 — UJ-048 backend unified on `vecinita-llm`, ADR-037)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -53,7 +53,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-045 | Admin configures and runs eval in Playground | Admin operator | DM UI `/evaluation?tab=playground` → preset + run APIs | F37 (EV-009) | local |
 | UJ-046 | Admin compares two eval runs | Admin operator | DM UI `/evaluation` compare view | F37 (EV-009) | local |
 | UJ-047 | Super-admin promotes config to production ChatRAG | Super-admin | Playground → promote API → ChatRAG active config | F37 (EV-009) | local |
-| UJ-048 | Super-admin downloads Ollama model for Playground | Super-admin | DM UI Playground download panel → pull + poll APIs | F38 (EV-010) | local |
+| UJ-048 | Super-admin downloads Ollama model for Playground | Super-admin | DM UI Playground download panel → pull + poll APIs → **`vecinita-llm`** | F38 + F39 (EV-010/EV-011) | local |
 
 ## Visual journey maps
 
@@ -1195,7 +1195,9 @@ flowchart TD
 7. If `available` stays `false` for **30 minutes**, UI shows a timeout error; super-admin may retry (parallel duplicate pulls allowed in v1).
 8. Regular `admin` can list and select the downloaded model for playground runs but receives `403` on pull API and has no download UI.
 
-**Cross-component interactions**: `EvaluationPlaygroundTab` download panel ↔ `admin.ts` `pullOllamaModel()` ↔ internal-write-api pull route ↔ Modal Ollama proxy; poll loop refreshes the same model picker used by UJ-045 run flow.
+**Cross-component interactions**: `EvaluationPlaygroundTab` download panel ↔ `admin.ts` `pullOllamaModel()` ↔ internal-write-api pull route ↔ **`vecinita-llm`** Modal proxy (`pull_model_job` HF download); poll loop refreshes the same model picker used by UJ-045 run flow. Eval runs (UJ-045) with a sandbox `model_id` tag also route to **`vecinita-llm`** `/generate` (no `vecinita-ollama` branch — ADR-037).
+
+**E2E tier**: T0 API (`tests/e2e/`), T0-ui Playwright (`tests/ui/admin/`), Vitest for isolated panel logic. Staging (T3): golden eval with `qwen3:8b` tag hits **`vecinita-llm`** after de-deploy.
 
 **Acceptance**: Super-admin pull succeeds (`202`); admin pull → `403`; viewer → `403`; downloaded model selectable in picker once `available=true`.
 

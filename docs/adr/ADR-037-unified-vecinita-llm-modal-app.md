@@ -1,7 +1,7 @@
 # ADR-037: Unified `vecinita-llm` Modal app (deprecate `vecinita-ollama`)
 
 **Status:** Accepted  
-**Stage:** 00-context (S010 / EV-011)  
+**Stage:** 00-context + 01-requirements (S010 / EV-011)  
 **Date:** 2026-07-08  
 **Supersedes in part:** ADR-009 §Ollama fallback; ADR-036 §Modal Ollama app storage
 
@@ -17,6 +17,17 @@ Vecinita operated **two** Modal LLM apps with split responsibilities:
 Production configured both URLs (`prod.env`). Eval routing (`eval_runtime_for_config`) preferred Ollama when the Ollama URL was set, so golden eval with `qwen3` tags hit `vecinita-ollama`, not vLLM. Operating two GPU apps increased deploy surface, secret drift risk, and cold-start debugging cost (BUG-2026-07-07, BUG-2026-07-08).
 
 **User decision (S010):** One canonical Modal app — **`vecinita-llm`** — with vLLM as the sole inference engine. Model download/staging functions move into that app. Deprecate and de-deploy `vecinita-ollama`. Reuse the `llm-models` volume (single volume; re-stage weights). Wire all consumers to `VECINITA_MODAL_LLM_URL` only.
+
+### Prior state (pre-ADR-037)
+
+| App | Engine | Model | Who uses it |
+|-----|--------|-------|-------------|
+| `vecinita-llm` | vLLM | Fixed `Qwen2.5-1.5B-Instruct` | ChatRAG, ingest/retag, eval **fallback** |
+| `vecinita-ollama` | Ollama | Any tag you pull (e.g. `qwen3:…`) | Playground download UI, eval when `VECINITA_MODAL_OLLAMA_URL` set |
+
+**Eval routing (removed):** When `VECINITA_MODAL_OLLAMA_URL` was set, `eval_runtime_for_config()` sent sandbox `model_id` tags (e.g. `qwen3:8b`) to **`vecinita-ollama`**. Without it, eval used **`vecinita-llm`** but ignored `model_id` (fixed vLLM model). Production configured both URLs, so golden eval with qwen3 tags hit Ollama — not vLLM.
+
+**Persisted pattern:** Cursor rule `.cursor/rules/unified-vecinita-llm.mdc`; standing docs reference ADR-037 for all new LLM work.
 
 ### Technical constraint (R1)
 
