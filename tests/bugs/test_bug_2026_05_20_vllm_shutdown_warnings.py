@@ -16,6 +16,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 
 from infra.modal.llm_app import (  # noqa: E402
+    MODEL_ID,
     _llm_engine_kwargs,  # pyright: ignore[reportPrivateUsage]  # bug repro tests teardown helpers
     _shutdown_vllm_engine,  # pyright: ignore[reportPrivateUsage]  # bug repro tests teardown helpers
 )
@@ -23,7 +24,7 @@ from infra.modal.llm_app import (  # noqa: E402
 
 def test_llm_engine_kwargs_use_half_dtype_on_t4() -> None:
     """Llm engine kwargs use half dtype on t4."""
-    kwargs = _llm_engine_kwargs(max_model_len=512)
+    kwargs = _llm_engine_kwargs(max_model_len=512, model=MODEL_ID)
     assert kwargs["dtype"] == "half"
     hf_overrides = kwargs["hf_overrides"]
     assert isinstance(hf_overrides, dict)
