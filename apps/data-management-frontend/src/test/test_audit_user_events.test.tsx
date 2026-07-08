@@ -130,6 +130,42 @@ describe("AuditPage user events (TC-101, UJ-038)", () => {
     });
   });
 
+  it("pre-filters by entity_id from URL query param", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => MIXED_AUDIT });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAudit(`/audit?entity_id=${USER_ID}`);
+
+    await waitFor(() => {
+      const auditCall = fetchMock.mock.calls.find((call) =>
+        String(call[0]).includes("/internal/v1/audit"),
+      );
+      expect(auditCall?.[0]).toContain(`entity_id=${USER_ID}`);
+    });
+  });
+
+  it("re-applies actor_id filter when Apply filters is clicked after URL pre-filter", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => MIXED_AUDIT });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAudit(`/audit?actor_id=${USER_ID}`);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("apply-filters")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("apply-filters"));
+
+    await waitFor(() => {
+      const lastUrl = fetchMock.mock.calls.at(-1)?.[0] as string;
+      expect(lastUrl).toContain(`actor_id=${USER_ID}`);
+    });
+  });
+
   it("pre-filters by entity_id from the Users page view-activity link", async () => {
     vi.stubEnv("VITE_VECINITA_ADMIN_API_URL", "http://localhost:8001");
     vi.stubEnv("VITE_VECINITA_MODAL_PROXY_KEY", "proxy");
