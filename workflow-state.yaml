@@ -271,12 +271,13 @@ project:
       started_at: '2026-07-07'
       completed_at: '2026-07-07'
       partial_rerun_at: '2026-07-07'
-      partial_rerun_note: EV-010/S009 delta — F38 playground model download QA complete
+      partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved
       session_id: S009-playground-model-download
       branch: feat/S009-playground-model-download
       evolve_cycle_id: EV-010
       report: docs/sessions/S009-playground-model-download/reports/qa-report.md
       overall: fail
+      note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved
       s008_baseline:
         status: completed
         started_at: '2026-07-03'
@@ -503,6 +504,10 @@ project:
       - modal_h4_cors_waived_proxy_auth
       - s001_t12_pending
       - h0ci_blocking_after_merge
+    19-address-pr-review:
+      status: in_progress
+      started: '2026-07-07'
+      last_cycle: PRM-011
 session_counter: 9
 active_session:
   id: S009-playground-model-download
@@ -537,6 +542,7 @@ active_session:
     completed_at: '2026-07-07'
     report: docs/sessions/S009-playground-model-download/reports/qa-report.md
     overall: fail
+    note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved
   - stage: 10-e2e
     status: pending
   - stage: 11-verify-impl
@@ -1955,12 +1961,13 @@ stages:
     started_at: '2026-07-07'
     completed_at: '2026-07-07'
     partial_rerun_at: '2026-07-07'
-    partial_rerun_note: EV-010/S009 delta — F38 playground model download QA complete
+    partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved
     session_id: S009-playground-model-download
     branch: feat/S009-playground-model-download
     evolve_cycle_id: EV-010
     report: docs/sessions/S009-playground-model-download/reports/qa-report.md
     overall: fail
+    note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved
     s008:
       status: completed
       started_at: '2026-07-03'
@@ -2276,13 +2283,13 @@ stages:
   18-pr-review:
     status: completed
     started: '2026-06-30'
-    completed: '2026-06-30'
-    last_cycle: PRR-012
+    completed: '2026-07-07'
+    last_cycle: PRR-140
   19-address-pr-review:
-    status: completed
-    started: '2026-06-25'
-    completed: '2026-06-30'
-    last_cycle: PRM-010
+    status: in_progress
+    started: '2026-07-07'
+    completed: null
+    last_cycle: PRM-011
     history_note: 'PRM-005 closed PR #62 ([M32] Workspace scaffold) on 2026-06-13'
   gather-context:
     status: skipped
@@ -3573,6 +3580,27 @@ pr_review_cycles:
     note: checklist source
   gh_review_url: null
   note: 'Allocated PRR-012 — payload id PRR-011 rejected (PRR-011 already records PR #108 / PRM-009).'
+- id: PRR-140
+  pr_number: 140
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/140
+  title: 'hotfix: attribute audit events to initiating operator (BUG-2026-07-07)'
+  status: completed
+  started: '2026-07-07'
+  completed: '2026-07-07'
+  head_ref: fix/audit-user-activity-actor
+  base_ref: main
+  verdict: REQUEST_CHANGES
+  blockers: 1
+  advisories: 4
+  praise: 3
+  ci_status: partial (coverage fail)
+  subagents:
+    bugbot: failed
+    security_review: failed
+  artifacts:
+  - path: .cursor/skills/18-pr-review/checklist.md
+    note: checklist source
+  gh_review_url: review posted via gh pr review
 pr_remediation_cycles:
 - id: PRM-001
   pr_number: 60
@@ -4144,6 +4172,21 @@ pr_remediation_cycles:
     note: session PR remediation report (PRM-010)
   follow_up:
     pr_review_rerun: offered
+- id: PRM-011
+  pr_number: 140
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/140
+  linked_review_cycle_id: PRR-140
+  title: 'hotfix: attribute audit events to initiating operator (BUG-2026-07-07)'
+  status: in_progress
+  started: '2026-07-07'
+  head_ref: fix/audit-user-activity-actor
+  base_ref: main
+  ci_status: failure (coverage job)
+  counts:
+    fixed: 0
+    deferred: 0
+    wont_fix: 0
+  findings: []
 agents:
   repo_researcher:
     status: completed
@@ -4516,6 +4559,8 @@ decisions_log:
 - 'S009/EV-010 11-verify-impl complete 2026-07-06 — F38 catalog extension approved; UJ-048 approved; super-admin seeded
   for admin@vecinita.admin; 07-build build extension uncommitted'
 - 'S009/EV-010 09-qa complete 2026-07-07 — overall FAIL (coverage gate); report at docs/sessions/S009-playground-model-download/reports/qa-report.md'
+- date: '2026-07-07'
+  note: 'PR #140 remediation: waived S009 session orchestration for cross-session hotfix (precedent PR #66/#68)'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report

@@ -12,8 +12,12 @@ from typing import TYPE_CHECKING, Annotated, cast
 from uuid import UUID, uuid4
 
 import httpx
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, status
 from sqlalchemy import create_engine, text
+from vecinita_shared_schemas.audit_headers import (
+    AUDIT_ACTOR_ID_HEADER,
+    AUDIT_ACTOR_ROLE_HEADER,
+)
 from vecinita_shared_schemas.auth import (
     AuthContext,
     AuthPrincipal,
@@ -30,6 +34,7 @@ from vecinita_shared_schemas.db_mapping import (
     row_str,
     row_str_optional,
     row_uuid,
+    row_uuid_optional,
     row_value,
     scalar_int,
     scalar_uuid,
@@ -231,9 +236,16 @@ def _engine() -> Engine:
 
 def _resolve_write_actor(
     ctx: Annotated[AuthContext, Depends(require_admin_write)],
+    request: Request,
 ) -> tuple[UUID | None, str | None]:
     """Resolved operator actor for audit attribution on write routes."""
-    if ctx.is_service or ctx.principal is None:
+    if ctx.is_service:
+        actor_hdr = request.headers.get(AUDIT_ACTOR_ID_HEADER)
+        if actor_hdr:
+            with contextlib.suppress(ValueError):
+                return (UUID(actor_hdr), request.headers.get(AUDIT_ACTOR_ROLE_HEADER))
+        return (None, None)
+    if ctx.principal is None:
         return (None, None)
     return (ctx.principal.sub, ctx.principal.role)
 
@@ -1066,6 +1078,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         event_type: str | None = None,
         entity_type: str | None = None,
         entity_id: UUID | None = None,
+        actor_id: UUID | None = None,
         since: str | None = None,
         until: str | None = None,
     ) -> AuditLogResponse:
@@ -1085,6 +1098,9 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         if entity_id:
             where_clauses.append("entity_id = :entity_id")
             params["entity_id"] = entity_id
+        if actor_id:
+            where_clauses.append("actor_id = :actor_id")
+            params["actor_id"] = actor_id
         if since:
             where_clauses.append("created_at >= :since")
             params["since"] = since
@@ -1095,7 +1111,8 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
         audit_list_sql = (
-            f"SELECT id, event_type, entity_type, entity_id, request_id, payload, created_at "  # noqa: S608  # fixed filter templates; values bound
+            f"SELECT id, event_type, entity_type, entity_id, request_id, payload, "  # noqa: S608  # fixed filter templates; values bound
+            f"created_at, actor_id, actor_role "
             f"FROM audit_log {where_sql} ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
         )
 
@@ -1131,6 +1148,8 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                     request_id=row_uuid(entry, "request_id"),
                     payload=as_json_object(row_value(entry, "payload")),
                     created_at=_row_datetime(entry, "created_at"),
+                    actor_id=row_uuid_optional(entry, "actor_id"),
+                    actor_role=row_str_optional(entry, "actor_role"),
                 )
                 for raw_row in rows
                 for entry in (mapping_row(raw_row),)

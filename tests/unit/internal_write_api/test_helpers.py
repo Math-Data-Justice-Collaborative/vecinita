@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
+from starlette.requests import Request
 from vecinita_internal_write_api.app import (
     _dependency_health_url,  # pyright: ignore[reportPrivateUsage]
     _normalize_database_url,  # pyright: ignore[reportPrivateUsage]
@@ -13,6 +14,10 @@ from vecinita_internal_write_api.app import (
     _row_datetime,  # pyright: ignore[reportPrivateUsage]
     _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
     _tags_snapshot_list,  # pyright: ignore[reportPrivateUsage]
+)
+from vecinita_shared_schemas.audit_headers import (
+    AUDIT_ACTOR_ID_HEADER,
+    AUDIT_ACTOR_ROLE_HEADER,
 )
 from vecinita_shared_schemas.auth import AuthContext, AuthPrincipal
 
@@ -75,14 +80,37 @@ def test_tags_snapshot_list_returns_empty_for_non_list() -> None:
     assert _tags_snapshot_list({"not": "a list"}) == []
 
 
+def _empty_request() -> Request:
+    """Minimal Starlette request for helper unit tests."""
+    return Request({"type": "http", "method": "GET", "path": "/", "headers": []})
+
+
 def test_resolve_write_actor_returns_principal_sub_and_role() -> None:
     """Operator writes attribute audit rows to the principal's sub and role."""
     sub = uuid4()
     ctx = AuthContext(principal=AuthPrincipal(sub=sub, role="admin"), is_service=False)
-    assert _resolve_write_actor(ctx) == (sub, "admin")
+    assert _resolve_write_actor(ctx, _empty_request()) == (sub, "admin")
 
 
 def test_resolve_write_actor_returns_none_for_service_caller() -> None:
-    """Service-key writes carry no operator attribution."""
+    """Service-key writes without audit headers carry no operator attribution."""
     ctx = AuthContext(principal=None, is_service=True)
-    assert _resolve_write_actor(ctx) == (None, None)
+    assert _resolve_write_actor(ctx, _empty_request()) == (None, None)
+
+
+def test_resolve_write_actor_honors_service_audit_headers() -> None:
+    """Trusted service callers may forward operator attribution via audit headers."""
+    actor_id = uuid4()
+    ctx = AuthContext(principal=None, is_service=True)
+    request = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/internal/v1/documents/batch",
+            "headers": [
+                (AUDIT_ACTOR_ID_HEADER.lower().encode(), str(actor_id).encode()),
+                (AUDIT_ACTOR_ROLE_HEADER.lower().encode(), b"admin"),
+            ],
+        },
+    )
+    assert _resolve_write_actor(ctx, request) == (actor_id, "admin")

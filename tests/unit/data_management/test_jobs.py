@@ -23,6 +23,19 @@ class _StubEmbedClient:
 class _StubWriteClient:
     """StubWriteClient."""
 
+    def with_audit_actor(
+        self,
+        actor_id: UUID | None,
+        actor_role: str | None,
+    ) -> _StubWriteClient:
+        """Return self — audit actor scoping is a no-op in unit stubs."""
+        _ = (actor_id, actor_role)
+        return self
+
+    def post_audit_event(self, event: object) -> None:
+        """No-op audit emit for unit stubs."""
+        _ = event
+
     def upsert_batch(self, body: object) -> None:
         """Upsert batch."""
         _ = body

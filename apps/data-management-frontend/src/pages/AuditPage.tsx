@@ -54,6 +54,9 @@ export function AuditPage() {
   const [entityIdFilter, setEntityIdFilter] = useState(
     () => searchParams.get("entity_id") ?? "",
   );
+  const [actorIdFilter, setActorIdFilter] = useState(
+    () => searchParams.get("actor_id") ?? "",
+  );
   const [entityTypeFilter, setEntityTypeFilter] =
     useState<EntityTypeFilter>("all");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -64,6 +67,7 @@ export function AuditPage() {
         event_type?: string;
         entity_id?: string;
         entity_type?: string;
+        actor_id?: string;
       },
       isActive: () => boolean = () => true,
     ) => {
@@ -89,9 +93,13 @@ export function AuditPage() {
   useEffect(() => {
     let active = true;
     const entityId = searchParams.get("entity_id");
+    const actorId = searchParams.get("actor_id");
     if (entityId) {
       setEntityIdFilter(entityId);
       void load({ entity_id: entityId }, () => active);
+    } else if (actorId) {
+      setActorIdFilter(actorId);
+      void load({ actor_id: actorId }, () => active);
     } else {
       void load(undefined, () => active);
     }
@@ -105,9 +113,11 @@ export function AuditPage() {
       event_type?: string;
       entity_id?: string;
       entity_type?: string;
+      actor_id?: string;
     } = {};
     if (eventTypeFilter.trim()) params.event_type = eventTypeFilter.trim();
     if (entityIdFilter.trim()) params.entity_id = entityIdFilter.trim();
+    if (actorIdFilter.trim()) params.actor_id = actorIdFilter.trim();
     if (entityTypeFilter !== "all") params.entity_type = entityTypeFilter;
     void load(params);
   };

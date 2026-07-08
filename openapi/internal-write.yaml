@@ -333,6 +333,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: actor_id
+          in: query
+          schema:
+            type: string
+            format: uuid
         - name: since
           in: query
           schema:
@@ -1175,6 +1180,13 @@ components:
         created_at:
           type: string
           format: date-time
+        actor_id:
+          type: string
+          format: uuid
+          nullable: true
+        actor_role:
+          type: string
+          nullable: true
     AuditLogResponse:
       type: object
       required:

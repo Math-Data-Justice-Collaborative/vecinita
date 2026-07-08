@@ -311,6 +311,12 @@ Base path: `/internal/v1` (audited S6.2).
 
 **Auth:** `Authorization: Bearer <VECINITA_INTERNAL_API_KEY>` or mTLS.
 
+**Service audit attribution:** When authenticated with the internal API key, only trusted
+Vecinita backends (data-management Modal ASGI → internal-write-api) may set
+`X-Vecinita-Audit-Actor-Id` and `X-Vecinita-Audit-Actor-Role` on mutating requests so
+pipeline writes record the initiating operator. Browser clients and external callers must not
+send these headers; they are honored only on the service-key path (BUG-2026-07-07).
+
 ### POST `/internal/v1/documents/batch`
 
 - **Purpose**: Upsert documents, chunks, embeddings from Modal workers.
@@ -529,7 +535,7 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 ### GET `/internal/v1/audit` (EV-002 / F29)
 
 - **Purpose**: Global audit log (paginated, filterable).
-- **Query**: `page` (default 1), `page_size` (default 50, max 200), `event_type` (filter), `entity_type` (filter), `entity_id` (filter), `since` (ISO8601), `until` (ISO8601).
+- **Query**: `page` (default 1), `page_size` (default 50, max 200), `event_type` (filter), `entity_type` (filter), `entity_id` (filter), `actor_id` (filter — operator who initiated the action; use for user activity), `since` (ISO8601), `until` (ISO8601).
 - **Response** `200`:
 
 ```json

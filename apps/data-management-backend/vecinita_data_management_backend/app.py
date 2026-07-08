@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import TYPE_CHECKING, Annotated, Literal
 from uuid import UUID  # noqa: TC003  # FastAPI path params require UUID at runtime
@@ -16,6 +17,7 @@ from vecinita_shared_schemas.data_management import (
     Job,
     JobList,
 )
+from vecinita_shared_schemas.internal_write import AuditEventRequest
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
 
 from vecinita_data_management_backend.email_test import ResendClient
@@ -31,11 +33,10 @@ from vecinita_data_management_backend.write_client import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from vecinita_shared_schemas.internal_write import AuditEventRequest
-
 _INVITE_MAX_PER_HOUR = 10
 _INVITE_WINDOW_SECONDS = 3600.0
 _EMAIL_TEST_MAX_PER_HOUR = 5
+_logger = logging.getLogger(__name__)
 
 
 def _default_admin_client() -> SupabaseAdminClient | None:
@@ -132,6 +133,7 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     resolved_eval_client = (
         eval_runs_client if eval_runs_client is not None else _default_eval_runs_client()
     )
+    resolved_audit_emit = audit_emit if audit_emit is not None else _default_audit_emit()
 
     def auth_dep(
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
@@ -159,7 +161,7 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     def create_job(  # pyright: ignore[reportUnusedFunction]
         body: CreateJobRequest,
         background: BackgroundTasks,
-        _auth: AuthPrincipal = Depends(write_auth_dep),
+        auth: AuthPrincipal = Depends(write_auth_dep),
     ) -> CreateJobResponse:
         options: dict[str, object] = {}
         job_type = "ingest"
@@ -173,7 +175,25 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
             urls=[str(url) for url in body.urls],
             options=options,
             job_type=job_type,
+            initiated_by_user_id=auth.sub,
+            initiated_by_role=auth.role,
         )
+        try:
+            resolved_audit_emit(
+                AuditEventRequest(
+                    event_type="job.created",
+                    entity_type="job",
+                    entity_id=record.job_id,
+                    actor_id=auth.sub,
+                    actor_role=auth.role,
+                    payload={
+                        "job_type": job_type,
+                        "url_count": len(body.urls),
+                    },
+                )
+            )
+        except Exception:  # noqa: BLE001  # audit is best-effort; never fail job enqueue
+            _logger.warning("audit emit failed for job.created", exc_info=True)
         if runner is not None:
             background.add_task(runner, record.job_id)
         return CreateJobResponse(job_id=record.job_id, status="pending")
@@ -207,7 +227,7 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     register_user_admin_routes(
         app,
         admin_client=admin_client if admin_client is not None else _default_admin_client(),
-        audit_emit=audit_emit if audit_emit is not None else _default_audit_emit(),
+        audit_emit=resolved_audit_emit,
         invite_limiter=invite_limiter
         or SlidingWindowRateLimiter(
             max_events=_INVITE_MAX_PER_HOUR,

@@ -447,7 +447,7 @@ export function UsersPage() {
                         data-testid={`view-activity-${user.id}`}
                         asChild
                       >
-                        <Link to={`/audit?entity_id=${user.id}`}>
+                        <Link to={`/audit?actor_id=${user.id}`}>
                           {tr("admin.users.action.viewActivity")}
                         </Link>
                       </Button>
