@@ -51,12 +51,12 @@ image = (
 
 def _read_manifest() -> dict[str, object]:
     if not _MANIFEST_PATH.exists():
-        return {"models": [{"model_id": DEFAULT_MODEL_ID, "available": True}]}
+        return {"models": [{"model_id": DEFAULT_MODEL_ID, "available": False}]}
     with _MANIFEST_PATH.open(encoding="utf-8") as handle:
         payload = json.load(handle)
     if isinstance(payload, dict):
         return payload
-    return {"models": [{"model_id": DEFAULT_MODEL_ID, "available": True}]}
+    return {"models": [{"model_id": DEFAULT_MODEL_ID, "available": False}]}
 
 
 def _write_manifest(models: list[dict[str, object]]) -> None:
@@ -81,7 +81,7 @@ def _list_models_payload() -> dict[str, object]:
         available = bool(entry.get("available", True))
         items.append({"model_id": model_id, "available": available})
     if not items:
-        items = [{"model_id": DEFAULT_MODEL_ID, "available": True}]
+        items = [{"model_id": DEFAULT_MODEL_ID, "available": False}]
     return {"items": items}
 
 
@@ -119,6 +119,24 @@ def _ensure_ollama_serve() -> None:
     raise RuntimeError(msg)
 
 
+def _mark_model_available(model_id: str) -> None:
+    manifest = _read_manifest()
+    models_raw = manifest.get("models")
+    models: list[dict[str, object]] = (
+        [entry for entry in models_raw if isinstance(entry, dict)]
+        if isinstance(models_raw, list)
+        else []
+    )
+    updated = False
+    for entry in models:
+        if entry.get("model_id") == model_id:
+            entry["available"] = True
+            updated = True
+    if not updated:
+        models.append({"model_id": model_id, "available": True})
+    _write_manifest(models)
+
+
 def _ollama_generate_text(
     model_id: str,
     prompt: str,
@@ -145,15 +163,31 @@ def _ollama_generate_text(
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    try:
+
+    def _read_generate_body() -> dict[str, object]:
         with urllib_request.urlopen(req, timeout=600) as response:
-            body = json.loads(response.read().decode())
+            parsed = json.loads(response.read().decode())
+        if not isinstance(parsed, dict):
+            msg = "ollama generate returned non-object JSON"
+            raise TypeError(msg)
+        return parsed
+
+    try:
+        body = _read_generate_body()
+    except urllib_error.HTTPError as exc:
+        if exc.code != HTTPStatus.NOT_FOUND:
+            msg = f"ollama generate failed: {exc}"
+            raise RuntimeError(msg) from exc
+        _run_ollama_pull(model_id)
+        _mark_model_available(model_id)
+        try:
+            body = _read_generate_body()
+        except urllib_error.URLError as retry_exc:
+            msg = f"ollama generate failed: {retry_exc}"
+            raise RuntimeError(msg) from retry_exc
     except urllib_error.URLError as exc:
         msg = f"ollama generate failed: {exc}"
         raise RuntimeError(msg) from exc
-    if not isinstance(body, dict):
-        msg = "ollama generate returned non-object JSON"
-        raise TypeError(msg)
     text = body.get("response")
     if not isinstance(text, str):
         msg = "ollama generate response missing 'response' string"

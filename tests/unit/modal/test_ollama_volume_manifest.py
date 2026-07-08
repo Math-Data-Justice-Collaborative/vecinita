@@ -41,7 +41,7 @@ def test_read_manifest_defaults_when_missing(manifest_path: Path) -> None:
     assert isinstance(items_raw, list)
     first = as_json_object(cast("object", items_raw[0]))
     assert first.get("model_id") == DEFAULT_MODEL_ID
-    assert first.get("available") is True
+    assert first.get("available") is False
 
 
 def test_write_manifest_marks_model_unavailable_then_available(
