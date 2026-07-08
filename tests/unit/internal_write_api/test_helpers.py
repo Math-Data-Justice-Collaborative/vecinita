@@ -15,6 +15,10 @@ from vecinita_internal_write_api.app import (
     _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
     _tags_snapshot_list,  # pyright: ignore[reportPrivateUsage]
 )
+from vecinita_shared_schemas.audit_headers import (
+    AUDIT_ACTOR_ID_HEADER,
+    AUDIT_ACTOR_ROLE_HEADER,
+)
 from vecinita_shared_schemas.auth import AuthContext, AuthPrincipal
 
 
@@ -89,6 +93,24 @@ def test_resolve_write_actor_returns_principal_sub_and_role() -> None:
 
 
 def test_resolve_write_actor_returns_none_for_service_caller() -> None:
-    """Service-key writes carry no operator attribution."""
+    """Service-key writes without audit headers carry no operator attribution."""
     ctx = AuthContext(principal=None, is_service=True)
     assert _resolve_write_actor(ctx, _empty_request()) == (None, None)
+
+
+def test_resolve_write_actor_honors_service_audit_headers() -> None:
+    """Trusted service callers may forward operator attribution via audit headers."""
+    actor_id = uuid4()
+    ctx = AuthContext(principal=None, is_service=True)
+    request = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/internal/v1/documents/batch",
+            "headers": [
+                (AUDIT_ACTOR_ID_HEADER.lower().encode(), str(actor_id).encode()),
+                (AUDIT_ACTOR_ROLE_HEADER.lower().encode(), b"admin"),
+            ],
+        },
+    )
+    assert _resolve_write_actor(ctx, request) == (actor_id, "admin")
