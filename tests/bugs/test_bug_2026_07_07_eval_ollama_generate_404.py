@@ -25,12 +25,14 @@ _OLLAMA_GENERATE_URL = "http://127.0.0.1:11434/api/generate"
 
 def test_ollama_generate_pulls_missing_model_on_404_then_succeeds(
     monkeypatch: MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     """Fresh vecinita-models volume: first generate 404 must pull model and retry."""
     from infra.modal import ollama_app  # noqa: PLC0415
 
     attempts = 0
     pull = MagicMock()
+    monkeypatch.setattr(ollama_app, "_MANIFEST_PATH", tmp_path / "manifest.json")
     monkeypatch.setattr(ollama_app, "_ensure_ollama_serve", MagicMock())
     monkeypatch.setattr(ollama_app, "_run_ollama_pull", pull)
     monkeypatch.setattr(ollama_app, "model_volume", MagicMock())
