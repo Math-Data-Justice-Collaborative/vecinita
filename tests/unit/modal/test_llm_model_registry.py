@@ -14,7 +14,7 @@ def test_normalize_ollama_tag_strips_quant_suffix() -> None:
 def test_resolve_hf_repo_maps_playground_tags() -> None:
     """Known playground tags resolve to HuggingFace instruct repos."""
     assert resolve_hf_repo("qwen2.5:1.5b-instruct") == "Qwen/Qwen2.5-1.5B-Instruct"
-    assert resolve_hf_repo("qwen3:8b") == "Qwen/Qwen3-8B"
+    assert resolve_hf_repo("qwen3:8b") == "Qwen/Qwen3-8B-AWQ"
 
 
 def test_resolve_hf_repo_unknown_tag_raises() -> None:

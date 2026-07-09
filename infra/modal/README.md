@@ -48,10 +48,28 @@ Endpoints: `GET /health`, `POST /embed`, `POST /embed/batch`
 
 ```bash
 modal serve infra/modal/llm_app.py
-# → set VECINITA_MODAL_LLM_URL to the /generate base
+# → set VECINITA_MODAL_LLM_URL to the ASGI base URL (no trailing slash)
 ```
 
-Endpoints: `GET /health`, `POST /generate`, `POST /generate/stream`
+**Unified surface (ADR-037):** one app for inference, warm-up, and playground model staging.
+`vecinita-ollama` is deprecated — do not deploy.
+
+| Route | Auth | Purpose |
+|-------|------|---------|
+| `GET /health` | — | Liveness |
+| `POST /warm` | — | Preload default or `{"model_id": "qwen3:8b"}` tag into VRAM |
+| `POST /generate` | — | Completion; optional `model_id` (Ollama-style tag → HF repo) |
+| `POST /generate/stream` | — | SSE token stream |
+| `GET /models/ollama` | `X-Vecinita-Proxy-Key` | List staged models (`manifest.json` on `llm-models`) |
+| `POST /models/ollama/pull` | `X-Vecinita-Proxy-Key` | Enqueue HF Hub download (`pull_model_job`) |
+
+**Modal one-shot staging functions:**
+
+```bash
+modal run infra/modal/llm_app.py::stage_llm_weights      # default Qwen2.5-1.5B via vLLM warmup
+modal run infra/modal/llm_app.py::stage_default_model    # playground default tag (HF Hub)
+modal run infra/modal/llm_app.py::pull_model_job --job-id test --model-id qwen3:8b
+```
 
 ### Data management ASGI
 
@@ -128,10 +146,28 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 
 **Staging:** `./scripts/stage_modal_weights.sh` (see `docs/sessions/S000-internal-docs-archive/data-staging-state.md`).
 
-## vecinita-llm (vLLM)
+## vecinita-llm (vLLM — unified inference + staging, ADR-037)
 
-- **Model:** `Qwen/Qwen2.5-1.5B-Instruct` (ADR-009)
-- **GPU:** NVIDIA T4, `scaledown_window=300` (scale-to-zero)
-- **Volume:** `llm-models` (HF cache)
-- **Endpoints:** `GET /health`, `POST /generate`, `POST /generate/stream` (SSE)
-- **Consumer env:** `VECINITA_MODAL_LLM_URL` on DO ChatRAG backend (`packages/llm-client`)
+- **Default model:** `Qwen/Qwen2.5-1.5B-Instruct` (ADR-009); playground tags via `llm_model_registry.py`
+- **GPU:** NVIDIA T4, `timeout=900s`, `scaledown_window=300` (scale-to-zero)
+- **Volume:** `llm-models` (`/models`, `manifest.json`, `/models/repos/<tag>`)
+- **Endpoints:** see table above — inference + `/warm` + `/models/ollama*`
+- **Consumer env:** `VECINITA_MODAL_LLM_URL` on DO chat-rag-backend, internal-write-api (`packages/llm-client`)
+- **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — de-deploy after S010 smoke
+
+**Modal secret `vecinita-llm`** (ASGI proxy auth only):
+
+```bash
+set -a && source prod.env && set +a
+modal profile activate vecinita
+bash scripts/deploy/sync_llm_secret.sh --apply
+```
+
+Key: `VECINITA_MODAL_PROXY_KEY` — must match DO `VECINITA_MODAL_PROXY_KEY` on internal-write-api.
+After migration from `vecinita-ollama` secret, retire the old secret in the Modal dashboard.
+
+**Operator de-deploy (post-smoke):**
+
+```bash
+modal app stop vecinita-ollama
+```

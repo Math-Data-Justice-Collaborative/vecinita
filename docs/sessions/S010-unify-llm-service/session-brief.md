@@ -25,3 +25,7 @@ playground list/pull routes onto **`vecinita-llm`** with vLLM as the sole engine
 ## ADR
 
 `docs/adr/ADR-037-unified-vecinita-llm-modal-app.md`
+
+## Roadmap
+
+`docs/sessions/S010-unify-llm-service/roadmap.md`

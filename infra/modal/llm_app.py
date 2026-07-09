@@ -4,8 +4,8 @@ Deploy: modal deploy infra/modal/llm_app.py
 Stage default weights: modal run infra/modal/llm_app.py::stage_llm_weights
 Stage playground default tag: modal run infra/modal/llm_app.py::stage_default_model
 
-Requires Modal secret ``vecinita-llm`` (or merged ``vecinita-ollama`` during migration) with:
-``VECINITA_MODAL_PROXY_KEY`` — must match DO internal-write-api proxy key.
+Requires Modal secret ``vecinita-llm`` with ``VECINITA_MODAL_PROXY_KEY`` — must match DO
+internal-write-api proxy key (``scripts/deploy/sync_llm_secret.sh``).
 
 ``vecinita-ollama`` is deprecated (ADR-037); all routes live on this app.
 """
@@ -15,7 +15,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import time
 import uuid
 from http import HTTPStatus
 from pathlib import Path
@@ -33,6 +32,18 @@ if TYPE_CHECKING:
     from starlette.requests import Request
 
 logger = logging.getLogger("vecinita.llm")
+
+
+def _resolve_repo_root() -> Path:
+    """Repo root when building from infra/modal; /root when Modal mounts llm_app.py."""
+    here = Path(__file__).resolve()
+    if here.parent.name == "modal" and here.parent.parent.name == "infra":
+        return here.parents[2]
+    return Path("/root")
+
+
+_REPO_ROOT = _resolve_repo_root()
+
 
 APP_NAME = "vecinita-llm"
 VOLUME_NAME = "llm-models"
@@ -83,8 +94,17 @@ def _enforce_eager_from_env() -> bool:
     return raw not in ("0", "false", "no", "off")
 
 
+LLM_MAX_MODEL_LEN: Final[int] = 2048
+
+
+def max_model_len_for(model: str) -> int:
+    """Context window sized for T4 VRAM; golden-eval RAG prompts can exceed 1.5k tokens."""
+    _ = model  # reserved for per-model tuning (AWQ vs fp16)
+    return LLM_MAX_MODEL_LEN
+
+
 def _llm_engine_kwargs(*, max_model_len: int, model: str) -> dict[str, object]:
-    """VLLM init for Tesla T4 (cc 7.5): fp16 only; avoid bf16 cast warning where possible."""
+    """VLLM init for Tesla T4 (cc 7.5): fp16 or AWQ on T4."""
     kwargs: dict[str, object] = {
         "model": model,
         "trust_remote_code": True,
@@ -95,6 +115,10 @@ def _llm_engine_kwargs(*, max_model_len: int, model: str) -> dict[str, object]:
         "enforce_eager": _enforce_eager_from_env(),
         "enable_sleep_mode": True,
     }
+    if "AWQ" in model.upper() or model.endswith("-awq"):
+        kwargs["quantization"] = "awq"
+        kwargs.pop("dtype", None)
+        kwargs.pop("hf_overrides", None)
     if not model.startswith("/"):
         kwargs["download_dir"] = "/models"
     return kwargs
@@ -229,24 +253,27 @@ app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 pull_jobs = modal.Dict.from_name("vecinita-llm-pull-jobs", create_if_missing=True)
 
-_LLM_ASGI_SECRETS = [modal.Secret.from_name("vecinita-ollama")]
+_LLM_ASGI_SECRETS = [modal.Secret.from_name("vecinita-llm")]
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
         "pydantic>=2.7,<3",
         "starlette>=0.37,<1",
-        "transformers>=4.44,<4.47",
+        "transformers==4.51.3",
         "huggingface-hub>=0.23,<1",
-        "vllm>=0.7,<0.8",
+        "vllm>=0.8.5,<0.9",
     )
     .env(
         {
             "TORCHINDUCTOR_COMPILE_THREADS": "1",
             "XFORMERS_ENABLE_TRITON": "1",
+            "PYTHONPATH": "/root",
         }
     )
+    .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
 )
+
 
 with image.imports():
     from vllm import LLM, SamplingParams
@@ -308,38 +335,15 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     volumes={"/models": model_volume},
     scaledown_window=300,
     timeout=900,
-    enable_memory_snapshot=True,
-    experimental_options={"enable_gpu_snapshot": True},
+    # ADR-037: model_id switching requires clean vLLM init — GPU snapshot breaks NCCL on reload.
+    enable_memory_snapshot=False,
 )
 class LlmService:
-    @modal.enter(snap=True)
+    @modal.enter()
     def load_model(self) -> None:
-        t_enter = time.perf_counter()
-        import_s = 0.0
-
-        t1 = time.perf_counter()
-        self._loaded_model_arg = MODEL_ID
-        self._llm = LLM(**_llm_engine_kwargs(max_model_len=1024, model=MODEL_ID))
-        construct_s = time.perf_counter() - t1
-
-        t2 = time.perf_counter()
-        self._llm.generate(["warmup"], SamplingParams(max_tokens=1))
-        warmup_s = time.perf_counter() - t2
-
-        self._llm.sleep(level=1)
-
-        logger.warning(
-            "cold_start_breakdown import_s=%.2f construct_s=%.2f warmup_s=%.2f total_enter_s=%.2f",
-            import_s,
-            construct_s,
-            warmup_s,
-            time.perf_counter() - t_enter,
-        )
-
-    @modal.enter(snap=False)
-    def restore_model(self) -> None:
-        if self._llm is not None:
-            self._llm.wake_up()
+        """Lazy-load vLLM on first request (supports default + playground tag switches)."""
+        self._llm = None
+        self._loaded_model_arg = None
 
     @modal.exit()
     def unload_model(self) -> None:
@@ -352,7 +356,22 @@ class LlmService:
         if getattr(self, "_loaded_model_arg", None) == resolved and self._llm is not None:
             return
         _shutdown_vllm_engine(getattr(self, "_llm", None))
-        self._llm = LLM(**_llm_engine_kwargs(max_model_len=1024, model=resolved))
+        self._llm = None
+        self._loaded_model_arg = None
+        import gc
+
+        gc.collect()
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.synchronize()
+        except Exception:
+            pass
+        self._llm = LLM(
+            **_llm_engine_kwargs(max_model_len=max_model_len_for(resolved), model=resolved)
+        )
         self._loaded_model_arg = resolved
         self._llm.generate(["warmup"], SamplingParams(max_tokens=1))
 

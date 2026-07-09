@@ -94,15 +94,27 @@ project:
         report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
     04-tech-plan:
       status: completed
-      started_at: '2026-07-05'
-      completed_at: '2026-07-05'
-      partial_rerun_at: '2026-07-05'
-      partial_rerun_note: EV-010/S009 delta — F38 playground model download tech plan complete (ADR-036, TP-S009-01–16; Phase
-        16 M71–M73).
-      session_id: S009-playground-model-download
-      branch: feat/S009-playground-model-download
-      evolve_cycle_id: EV-010
-      report: docs/sessions/S009-playground-model-download/reports/04-tech-plan.md
+      started_at: '2026-07-08'
+      completed_at: '2026-07-08'
+      partial_rerun_at: '2026-07-08'
+      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm tech plan (ADR-037, TP-S010-01–16, Phase 17 M74–M76)
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+      s009_baseline:
+        status: paused
+        paused_at: '2026-07-08'
+        started_at: '2026-07-05'
+        completed_at: '2026-07-05'
+        partial_rerun_at: '2026-07-05'
+        partial_rerun_note: EV-010/S009 delta — F38 playground model download tech plan complete (ADR-036, TP-S009-01–16; Phase
+          16 M71–M73).
+        session_id: S009-playground-model-download
+        branch: feat/S009-playground-model-download
+        evolve_cycle_id: EV-010
+        report: docs/sessions/S009-playground-model-download/reports/04-tech-plan.md
+        note: S009/EV-010 F38 tech plan complete 2026-07-05; session parked for S010.
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -228,16 +240,29 @@ project:
           change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
     08-verify-build:
       status: completed
-      started_at: '2026-07-03'
-      completed_at: '2026-07-03'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-      substeps:
-        phase: formal
-        result: PASS
-      note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
+      started_at: '2026-07-08'
+      completed_at: '2026-07-08'
+      partial_rerun_at: '2026-07-08'
+      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+      overall_result: PASS
+      note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+      s008_baseline:
+        status: completed
+        started_at: '2026-07-03'
+        completed_at: '2026-07-03'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+        substeps:
+          phase: formal
+          result: PASS
+        note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
       s004_baseline:
         status: completed
         completed_at: '2026-06-29'
@@ -533,7 +558,7 @@ active_session:
   evolve_cycle_id: EV-011
   artifacts_dir: docs/sessions/S010-unify-llm-service/
   started_at: '2026-07-08'
-  current_stage: 04-tech-plan
+  current_stage: 09-qa
   context_briefs:
   - docs/sessions/S010-unify-llm-service/context-brief.md
   routing_plan:
@@ -546,11 +571,13 @@ active_session:
     started_at: '2026-07-08'
     completed_at: '2026-07-08'
   - stage: 04-tech-plan
-    status: pending
+    status: completed
+    completed_at: '2026-07-08'
   - stage: 07-build
     status: pending
   - stage: 08-verify-build
-    status: pending
+    status: completed
+    completed_at: '2026-07-08'
   - stage: 09-qa
     status: pending
   - stage: 10-e2e
@@ -574,6 +601,18 @@ active_session:
     kind: stage-report
     session_id: S010-unify-llm-service
     stage: 01-requirements
+  - path: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+    kind: stage-report
+    session_id: S010-unify-llm-service
+    stage: 04-tech-plan
+  - path: docs/sessions/S010-unify-llm-service/roadmap.md
+    kind: roadmap
+    session_id: S010-unify-llm-service
+    stage: 04-tech-plan
+  - path: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+    kind: verification-report
+    session_id: S010-unify-llm-service
+    stage: 08-verify-build
 sessions:
 - id: S009-playground-model-download
   type: feature
@@ -1967,14 +2006,18 @@ stages:
         new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
   08-verify-build:
     status: completed
-    started_at: '2026-07-03'
-    completed_at: '2026-07-03'
-    session_id: S008-eval-ux-playground
-    branch: feat/S008-eval-ux-playground
-    evolve_cycle_id: EV-009
-    report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-    note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
-    s008:
+    started_at: '2026-07-08'
+    completed_at: '2026-07-08'
+    partial_rerun_at: '2026-07-08'
+    partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
+    session_id: S010-unify-llm-service
+    branch: feat/S010-unify-llm-service
+    evolve_cycle_id: EV-011
+    report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+    overall_result: PASS
+    note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+      public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+    s008_baseline:
       session_id: S008-eval-ux-playground
       branch: feat/S008-eval-ux-playground
       evolve_cycle_id: EV-009
@@ -1982,11 +2025,7 @@ stages:
       completed_at: '2026-07-03'
       status: completed
       report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-      note: Formal milestone verify PASS — 952 pytest + 725 Vitest
-    partial_rerun_at: '2026-06-28'
-    partial_rerun_note: S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted
-      S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only
-      delta)
+      note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
     scope: standalone
     notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override
       bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2
@@ -2001,6 +2040,10 @@ stages:
       session_id: S003-persistent-chat-history
       branch: main
       completed_at: '2026-06-28'
+      partial_rerun_at: '2026-06-28'
+      partial_rerun_note: S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted
+        S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only
+        delta)
       overall_result: PASS
       report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
       session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
@@ -3376,7 +3419,7 @@ evolve_cycles:
   status: in_progress
   started: '2026-07-08'
   session_id: S010-unify-llm-service
-  current_stage: 04-tech-plan
+  current_stage: 09-qa
   stages:
     00-context:
       status: completed
@@ -3388,6 +3431,19 @@ evolve_cycles:
       started: '2026-07-08'
       completed: '2026-07-08'
       report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+    04-tech-plan:
+      status: completed
+      started: '2026-07-08'
+      completed: '2026-07-08'
+      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+    08-verify-build:
+      status: completed
+      started: '2026-07-08'
+      completed: '2026-07-08'
+      report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+      overall_result: PASS
+      note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
   checkpoints:
     phase_a: pending
     phase_b: pending
@@ -4977,6 +5033,10 @@ artifacts:
   kind: stage-report
   session_id: S010-unify-llm-service
   stage: 01-requirements
+- path: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+  kind: verification-report
+  session_id: S010-unify-llm-service
+  stage: 08-verify-build
 git_history:
   current_branch: feat/S010-unify-llm-service
   branches:

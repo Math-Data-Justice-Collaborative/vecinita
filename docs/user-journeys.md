@@ -1180,9 +1180,9 @@ flowchart TD
 
 **Actor**: Super-admin (`role=super-admin`, seeded from `VECINITA_SUPER_ADMIN_EMAIL`)
 
-**Goal**: Download an additional Ollama model tag onto the Modal `vecinita-models` volume so eval playground experiments can use it.
+**Goal**: Download an additional playground model tag (Ollama-style naming) onto the Modal **`llm-models`** volume so eval playground experiments can use it via vLLM (ADR-037).
 
-**Preconditions**: Super-admin authenticated; `VECINITA_MODAL_OLLAMA_URL` configured on internal-write-api (otherwise pull returns `503`).
+**Preconditions**: Super-admin authenticated; `VECINITA_MODAL_LLM_URL` + `VECINITA_MODAL_PROXY_KEY` configured on internal-write-api (otherwise pull returns `503`).
 
 **Steps**:
 

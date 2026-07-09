@@ -1,10 +1,14 @@
 # ADR-036: EV-010 playground model download (F38)
 
-**Status:** Accepted  
+**Status:** Accepted (backend superseded by [ADR-037](ADR-037-unified-vecinita-llm-modal-app.md))  
 **Stage:** 04-tech-plan (S009, EV-010)  
 **Date:** 2026-07-05  
 **Feature:** **F38** — Playground model download (super-admin)  
 **Builds on:** [ADR-035](ADR-035-ev009-eval-playground-production-config.md), RD-146–RD-153, api-contract §EV-010
+
+> **ADR-037 note (2026-07-08):** F38 UI and API paths unchanged. Modal backend moved from
+> `vecinita-ollama` + `vecinita-models` to **`vecinita-llm`** + **`llm-models`** with HF Hub
+> downloads (not `ollama pull`). See ADR-037 §Decision items 4–5.
 
 ## Context
 

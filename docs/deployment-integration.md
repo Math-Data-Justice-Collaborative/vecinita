@@ -159,9 +159,7 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 | Variable | App | Purpose |
 |----------|-----|---------|
 | `VECINITA_MODAL_LLM_URL` | internal-write-api, chat-rag-backend | Unified Modal ASGI: generate, warm, list/pull |
-| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret `vecinita-ollama`* | `X-Vecinita-Proxy-Key` on model routes |
-
-\*Proxy key: Modal secret `vecinita-ollama` during migration; merge into `vecinita-llm` secret before de-deploying ollama app.
+| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret **`vecinita-llm`** | `X-Vecinita-Proxy-Key` on `/models/ollama*` |
 
 **`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.
 `POST /warm {"model_id": ...}` preloads the resolved HF model. One active vLLM engine per container;

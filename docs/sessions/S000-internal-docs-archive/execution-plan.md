@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; **S010 delta 2026-07-08**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–036
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**037**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 16: EV-010 — Playground model download (F38) |
-| **Active milestone** | M73: Full-stack tests + phase gate |
-| **Active task** | **T73.5** — Phase 16 gate checklist *(next — 08-verify-build)* |
-| **Tasks completed** | Phase 16 M71–M72 complete; M73 T73.1–T73.4, T73.6 complete (S009/F38) |
-| **Last updated** | 2026-07-05 |
-| **Evolve cycle** | EV-010 (F38) — **04-tech-plan complete** |
-| **Git branch** | `feat/S009-playground-model-download` |
-| **Active session** | S009-playground-model-download — evolve-lite. 04-tech-plan approved (ADR-036, TP-S009-01–16). Build order M71→M73. |
-| **Scope addition** | 2026-07-05 — S009/EV-010: super-admin Ollama model download UI + auth tighten + full-stack tests (ADR-036, UJ-048, TC-134–TC-138). |
+| **Active phase** | Phase 17: EV-011 — Unified vecinita-llm (F39) |
+| **Active milestone** | M76: Deprecation cleanup + deploy gate |
+| **Active task** | **08-verify-build** — M76 milestone verification *(after T76.7 complete)* |
+| **Tasks completed** | M74–M76 including T76.7 golden eval smoke (AC-E32) |
+| **Last updated** | 2026-07-08 |
+| **Evolve cycle** | EV-011 (F39) — **04-tech-plan complete** |
+| **Git branch** | `feat/S010-unify-llm-service` |
+| **Active session** | S010-unify-llm-service — evolve-lite. 04-tech-plan approved (ADR-037, TP-S010-01–16). Build order M74→M76. Early 07-build on branch. |
+| **Scope addition** | 2026-07-08 — S010/EV-011: unify LLM onto `vecinita-llm`; deprecate `vecinita-ollama` (ADR-037, UJ-048 backend, TC-139/TC-140, AC-E31–AC-E33). |
 
 ## Template
 
@@ -1496,6 +1496,69 @@ auth, add download UI with model-list polling, full-stack test coverage (TC-134�
 
 ---
 
+### Phase 17: EV-011 — Unified vecinita-llm (F39)
+
+> **Session:** S010-unify-llm-service · **Evolve cycle:** EV-011 · **Feature ID:** F39  
+> **Branch:** `feat/S010-unify-llm-service` → `main` (PR-53) · **ADR:** ADR-037 · **Build order:** M74→M76
+
+**Objective:** Consolidate all LLM inference, model download/staging, and playground list/pull onto
+**`vecinita-llm`** with vLLM + HF Hub downloads. Deprecate and de-deploy **`vecinita-ollama`**.
+
+#### M74: Unified Modal app — vLLM + HF staging
+
+**Goal:** Single `llm_app.py` with inference, `pull_model_job`, `stage_default_model`, model routes; remove `ollama_app.py`.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T74.1 | Test: `tests/unit/modal/test_llm_volume_manifest.py` — TC-139 manifest contract | Test | completed | ADR-037 §4, test-plan TC-139 | — | 2026-07-08 | S010 | F39 |
+| T74.2 | Test: `tests/unit/modal/test_llm_model_registry.py` — tag→HF mapping | Test | completed | ADR-037 §R1, TP-S010-06 | — | 2026-07-08 | S010 | F39 |
+| T74.3 | Code: `infra/modal/llm_app.py` — unified vLLM + model routes + Modal fns | Code | completed | ADR-037 §Decision 1–5 | T74.1 | 2026-07-08 | S010 | F39 |
+| T74.4 | Code: `infra/modal/llm_model_registry.py` — Ollama tag → HF repo | Code | completed | ADR-037 §R1 | — | 2026-07-08 | S010 | F39 |
+| T74.5 | Config: `scripts/deploy/modal.sh` — deploy llm only; deprecate ollama | Config | completed | ADR-037 §6, AC-E33 | T74.3 | 2026-07-08 | S010 | F39 |
+| T74.6 | Code: Remove `infra/modal/ollama_app.py` | Code | completed | ADR-037 §6 | T74.3 | 2026-07-08 | S010 | F39 |
+| T74.7 | Docs: `infra/modal/README.md` — ADR-037 routes (`/warm`, `/models/ollama*`, staging fns) | Docs | completed | deployment-integration §EV-011 | T74.3 | 2026-07-08 | S010 | F39 |
+| T74.8 | Config: Merge Modal secret `vecinita-llm` (proxy key); retire `vecinita-ollama` secret | Config | completed | TP-S010-12, deployment-integration | T74.3 | 2026-07-08 | S010 | F39 |
+
+#### M75: Consumer wiring + eval routing
+
+**Goal:** All clients use `VECINITA_MODAL_LLM_URL`; eval forwards `model_id`; no Ollama URL branch.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T75.1 | Test: `tests/unit/eval/test_modal_llm_model_routing.py` — TC-140 | Test | completed | test-plan TC-140, RD-157 | — | 2026-07-08 | S010 | F39 |
+| T75.2 | Test: `test_llm_client.py`, `test_ollama_models_client.py` — llm URL only | Test | completed | ADR-037 §7–8 | T74.3 | 2026-07-08 | S010 | F39 |
+| T75.3 | Code: `packages/eval/vecinita_eval/modal_llm.py` — remove Ollama branch | Code | completed | RD-157, ADR-037 §8 | T75.1 | 2026-07-08 | S010 | F39 |
+| T75.4 | Code: `LlmClient`, `OllamaModelsClient` → `vecinita-llm` | Code | completed | ADR-037 §5–7 | T74.3 | 2026-07-08 | S010 | F39 |
+| T75.5 | Config: Verify DO specs + `do_apps.py` omit `VECINITA_MODAL_OLLAMA_URL` (AC-E31) | Config | completed | config-spec, staging-secrets-matrix | T75.4 | 2026-07-08 | S010 | F39 |
+| T75.6 | Docs: `user-journeys.md` UJ-048 — `llm-models` + LLM URL preconditions | Docs | completed | UJ-048, ADR-037 | — | 2026-07-08 | S010 | F39 |
+| T75.7 | Test: Re-verify TC-134/TC-138 green against llm backend | Test | completed | test-plan TC-134/138 | T75.4 | 2026-07-08 | S010 | F39 |
+
+#### M76: Deprecation cleanup + deploy gate
+
+**Goal:** Operator de-deploy; staging smoke; Phase 17 gate checklist.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T76.1 | Test: Bug tests aligned (`test_bug_2026_07_05/07/08_*`) | Test | completed | ADR-037 §Consequences | T75.3 | 2026-07-08 | S010 | F39 |
+| T76.2 | Docs: ADR-036 superseded note (backend → ADR-037) | Docs | completed | ADR-036, ADR-037 | — | 2026-07-08 | S010 | F39 |
+| T76.3 | Docs: `deployment-integration.md` — final secret merge + de-deploy order | Docs | completed | deployment-integration §EV-011 | T74.8 | 2026-07-08 | S010 | F39 |
+| T76.4 | Docs: Phase 17 gate checklist + session verify reports pointer | Docs | completed | 08-verify-build | T75.7, T74.7 | 2026-07-08 | S010 | F39 |
+| T76.5 | Operator: `modal deploy llm_app` + `stage_default_model` | Operator | completed | 13-deploy-smoke, AC-E30 | T76.4 | 2026-07-08 | S010 | F39 |
+| T76.6 | Operator: `modal app stop vecinita-ollama` | Operator | completed | ADR-037 §6, TP-S010-13 | T76.5 | 2026-07-08 | S010 | F39 |
+| T76.7 | Operator: Golden eval `qwen3:8b` smoke on `vecinita-llm` (AC-E32) | Operator | completed | acceptance-criteria AC-E32 | T76.6 | — | S010 | F39 | 2026-07-09 |
+
+#### Phase 17 Gate Check
+
+- [x] All M74–M76 tasks completed (T74.1–T76.7)
+- [ ] TC-139, TC-140 green; TC-134/TC-138 green (UJ-048 backend on llm app)
+- [ ] AC-E31–AC-E33 satisfied at T2; AC-E32 at T3 post de-deploy
+- [ ] **`llm-models`** volume + manifest contract (TC-139); no `ollama_app.py`
+- [ ] `scripts/deploy/modal.sh` deploys **`vecinita-llm` only**
+- [ ] **`vecinita-ollama`** de-deployed on Modal workspace
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1609,6 +1672,7 @@ main
 | PR-50 | Major | Phase 14 / S007 (EV-008) | feat/S007-rag-eval | main | pending ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)) |
 | PR-51 | Major | Phase 15 / S008 (EV-009) | feat/S008-eval-ux-playground | main | pending (F37 eval UX + playground) |
 | PR-52 | Major | Phase 16 / S009 (EV-010) | feat/S009-playground-model-download | main | pending (F38 playground model download) |
+| PR-53 | Major | Phase 17 / S010 (EV-011) | feat/S010-unify-llm-service | main | pending (F39 unified vecinita-llm) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
@@ -2077,6 +2141,28 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T73.4 | M73 | 16 | Code | pending | T73.2, T72.7 | — | S009 | F38 | — |
 | T73.5 | M73 | 16 | Docs | pending | T71.4–T73.4 | — | S009 | F38 | — |
 | T73.6 | M73 | 16 | Test | pending | — | — | S009 | F38 | — |
+| T74.1 | M74 | 17 | Test | completed | — | — | S010 | F39 | 2026-07-08 |
+| T74.2 | M74 | 17 | Test | completed | — | — | S010 | F39 | 2026-07-08 |
+| T74.3 | M74 | 17 | Code | completed | T74.1 | — | S010 | F39 | 2026-07-08 |
+| T74.4 | M74 | 17 | Code | completed | — | — | S010 | F39 | 2026-07-08 |
+| T74.5 | M74 | 17 | Config | completed | T74.3 | — | S010 | F39 | 2026-07-08 |
+| T74.6 | M74 | 17 | Code | completed | T74.3 | — | S010 | F39 | 2026-07-08 |
+| T74.7 | M74 | 17 | Docs | pending | T74.3 | — | S010 | F39 | — |
+| T74.8 | M74 | 17 | Config | pending | T74.3 | — | S010 | F39 | — |
+| T75.1 | M75 | 17 | Test | completed | — | — | S010 | F39 | 2026-07-08 |
+| T75.2 | M75 | 17 | Test | completed | T74.3 | — | S010 | F39 | 2026-07-08 |
+| T75.3 | M75 | 17 | Code | completed | T75.1 | — | S010 | F39 | 2026-07-08 |
+| T75.4 | M75 | 17 | Code | completed | T74.3 | — | S010 | F39 | 2026-07-08 |
+| T75.5 | M75 | 17 | Config | pending | T75.4 | — | S010 | F39 | — |
+| T75.6 | M75 | 17 | Docs | completed | — | — | S010 | F39 | 2026-07-08 |
+| T75.7 | M75 | 17 | Test | pending | T75.4 | — | S010 | F39 | — |
+| T76.1 | M76 | 17 | Test | completed | T75.3 | — | S010 | F39 | 2026-07-08 |
+| T76.2 | M76 | 17 | Docs | completed | — | — | S010 | F39 | 2026-07-08 |
+| T76.3 | M76 | 17 | Docs | pending | T74.8 | — | S010 | F39 | — |
+| T76.4 | M76 | 17 | Docs | pending | T75.7, T74.7 | — | S010 | F39 | — |
+| T76.5 | M76 | 17 | Operator | pending | T76.4 | — | S010 | F39 | — |
+| T76.6 | M76 | 17 | Operator | pending | T76.5 | — | S010 | F39 | — |
+| T76.7 | M76 | 17 | Operator | completed | T76.6 | — | S010 | F39 | 2026-07-09 |
 
 ## Phase Gate Log
 
@@ -2166,3 +2252,7 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-010 pull auth — super-admin only; admin list unchanged (TP-S009-03, RD-147)
 - [x] EV-010 poll UX — 10s interval, 30 min timeout (TP-S009-06, RD-150)
 - [x] EV-010 model storage — Modal Volume `vecinita-models` only (TP-S009-17, RD-140)
+- [x] EV-011 build order — M74→M76 Modal app then clients then de-deploy (TP-S010-01, RD-154–162)
+- [x] EV-011 download — HF Hub into `llm-models`; not `ollama pull` (TP-S010-04, ADR-037 §R1)
+- [x] EV-011 eval routing — always `VECINITA_MODAL_LLM_URL` + `model_id` (TP-S010-08, RD-157)
+- [x] EV-011 de-deploy — `vecinita-ollama` removed from deploy; operator stop post-smoke (TP-S010-03, TP-S010-13)

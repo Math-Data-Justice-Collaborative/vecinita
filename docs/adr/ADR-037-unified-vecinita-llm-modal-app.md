@@ -1,7 +1,7 @@
 # ADR-037: Unified `vecinita-llm` Modal app (deprecate `vecinita-ollama`)
 
 **Status:** Accepted  
-**Stage:** 00-context + 01-requirements (S010 / EV-011)  
+**Stage:** 00-context + 01-requirements + 04-tech-plan (S010 / EV-011)  
 **Date:** 2026-07-08  
 **Supersedes in part:** ADR-009 §Ollama fallback; ADR-036 §Modal Ollama app storage
 
@@ -26,6 +26,26 @@ Production configured both URLs (`prod.env`). Eval routing (`eval_runtime_for_co
 | `vecinita-ollama` | Ollama | Any tag you pull (e.g. `qwen3:…`) | Playground download UI, eval when `VECINITA_MODAL_OLLAMA_URL` set |
 
 **Eval routing (removed):** When `VECINITA_MODAL_OLLAMA_URL` was set, `eval_runtime_for_config()` sent sandbox `model_id` tags (e.g. `qwen3:8b`) to **`vecinita-ollama`**. Without it, eval used **`vecinita-llm`** but ignored `model_id` (fixed vLLM model). Production configured both URLs, so golden eval with qwen3 tags hit Ollama — not vLLM.
+
+**Prior eval routing flow** (`eval_runtime_for_config` before ADR-037):
+
+```mermaid
+flowchart TD
+  START["Eval run starts (model_id from sandbox config, e.g. qwen3:8b)"]
+  CHECK{"VECINITA_MODAL_OLLAMA_URL + VECINITA_MODAL_PROXY_KEY set?"}
+  OLLAMA["vecinita-ollama — POST /generate with model_id"]
+  VLLM["vecinita-llm — fixed Qwen2.5-1.5B; model_id ignored (422)"]
+  START --> CHECK
+  CHECK -->|YES| OLLAMA
+  CHECK -->|NO| VLLM
+```
+
+**Production impact:** With both URLs in `prod.env`, qwen3 golden eval hit **`vecinita-ollama`**
+(not vLLM). BUG-2026-07-07/08 traced to CPU-only `ollama_api` with 120s function timeout and
+missing `/warm` — hotfix targeted Ollama app only; **`vecinita-llm` unchanged**.
+
+**Post-ADR-037 routing:** All eval/chat/ingest/playground traffic uses **`VECINITA_MODAL_LLM_URL`**
+only; sandbox `model_id` forwarded to vLLM `/generate`; Ollama URL env deprecated (warn-only).
 
 **Persisted pattern:** Cursor rule `.cursor/rules/unified-vecinita-llm.mdc`; standing docs reference ADR-037 for all new LLM work.
 

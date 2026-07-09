@@ -16,7 +16,7 @@ _OLLAMA_TAG_TO_HF: Final[dict[str, str]] = {
     "qwen3:0.6b": "Qwen/Qwen3-0.6B",
     "qwen3:1.7b": "Qwen/Qwen3-1.7B",
     "qwen3:4b": "Qwen/Qwen3-4B",
-    "qwen3:8b": "Qwen/Qwen3-8B",
+    "qwen3:8b": "Qwen/Qwen3-8B-AWQ",
     "qwen3:14b": "Qwen/Qwen3-14B",
     "qwen3:32b": "Qwen/Qwen3-32B",
 }
