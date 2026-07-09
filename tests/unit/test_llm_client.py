@@ -267,6 +267,94 @@ def test_generate_stream_returns_no_tokens_when_body_empty() -> None:
     client.close()
 
 
+def test_llm_client_falls_back_to_legacy_ollama_url_with_warning(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Legacy VECINITA_MODAL_OLLAMA_URL still resolves base URL with a deprecation warning."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test")
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"text": "legacy"})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        http_client=httpx.Client(transport=transport, base_url="http://legacy-ollama.test"),
+    )
+    assert client.generate("hello") == "legacy"
+    assert "VECINITA_MODAL_OLLAMA_URL is deprecated" in caplog.text
+    client.close()
+
+
+def test_llm_client_default_model_id_from_legacy_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """VECINITA_OLLAMA_MODEL_ID is used when VECINITA_LLM_MODEL_ID is unset."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
+    monkeypatch.delenv("VECINITA_LLM_MODEL_ID", raising=False)
+    monkeypatch.setenv("VECINITA_OLLAMA_MODEL_ID", "llama3.2:3b")
+
+    client = LlmClient("http://llm.test")
+    assert client.default_model_id == "llama3.2:3b"
+    client.close()
+
+
+def test_warm_posts_model_id_when_configured() -> None:
+    """warm() POSTs /warm with the client default model_id when set."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/warm"
+        payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
+        assert payload["model_id"] == "qwen2.5:1.5b-instruct"
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "http://llm.test",
+        model_id="qwen2.5:1.5b-instruct",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    client.warm()
+    client.close()
+
+
+def test_warm_posts_empty_body_without_default_model() -> None:
+    """warm() POSTs an empty JSON body when no default model is configured."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/warm"
+        assert request.content == b"{}"
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "http://llm.test",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    client.warm()
+    client.close()
+
+
+def test_generate_without_proxy_key_omits_auth_header(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Generate omits proxy auth when no proxy key is configured."""
+    monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers.get("X-Vecinita-Proxy-Key") is None
+        return httpx.Response(200, json={"text": "open"})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "http://llm.test",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    assert client.generate("hello") == "open"
+    client.close()
+
+
 def test_llm_client_does_not_close_injected_http_client() -> None:
     """Closing the client must not close an externally injected HTTP client."""
     closed: list[bool] = []

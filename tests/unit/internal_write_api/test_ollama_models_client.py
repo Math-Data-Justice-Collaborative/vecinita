@@ -137,6 +137,28 @@ def test_close_closes_owned_http_client() -> None:
     assert closed == [True]
 
 
+def test_client_falls_back_to_legacy_ollama_url_with_warning(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Legacy VECINITA_MODAL_OLLAMA_URL resolves base URL with a deprecation warning."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test")
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "proxy-secret")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/models/ollama"
+        return httpx.Response(200, json={"items": []})
+
+    transport = httpx.MockTransport(handler)
+    client = OllamaModelsClient(
+        http_client=httpx.Client(transport=transport, base_url="http://legacy-ollama.test"),
+    )
+    assert client.list_models().items == []
+    assert "VECINITA_MODAL_OLLAMA_URL is deprecated" in caplog.text
+    client.close()
+
+
 def test_close_skips_externally_owned_http_client() -> None:
     """close() only closes clients created by OllamaModelsClient itself."""
     closed: list[bool] = []
