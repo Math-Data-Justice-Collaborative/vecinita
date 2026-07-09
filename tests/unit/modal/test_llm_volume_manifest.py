@@ -1,4 +1,4 @@
-"""TC-139: Modal vecinita-models manifest read/write contract (F38 / EV-010)."""
+"""TC-139: Modal llm-models manifest read/write contract (ADR-037 unified vecinita-llm)."""
 
 from __future__ import annotations
 
@@ -15,9 +15,9 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from infra.modal import ollama_app  # noqa: E402
-from infra.modal.ollama_app import (  # noqa: E402
-    DEFAULT_MODEL_ID,
+from infra.modal import llm_app  # noqa: E402
+from infra.modal.llm_app import (  # noqa: E402
+    DEFAULT_PLAYGROUND_MODEL_ID,
     _list_models_payload,  # pyright: ignore[reportPrivateUsage]  # manifest contract under test
     _write_manifest,  # pyright: ignore[reportPrivateUsage]  # manifest contract under test
 )
@@ -28,8 +28,8 @@ def manifest_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     """Redirect manifest I/O to a temp directory."""
     path = tmp_path / "manifest.json"
     monkeypatch.setenv("MODAL_ENVIRONMENT", "test")
-    monkeypatch.setattr(ollama_app, "_MANIFEST_PATH", path)
-    monkeypatch.setattr(ollama_app, "model_volume", MagicMock())
+    monkeypatch.setattr(llm_app, "_MANIFEST_PATH", path)
+    monkeypatch.setattr(llm_app, "model_volume", MagicMock())
     return path
 
 
@@ -40,7 +40,7 @@ def test_read_manifest_defaults_when_missing(manifest_path: Path) -> None:
     items_raw = payload.get("items")
     assert isinstance(items_raw, list)
     first = as_json_object(cast("object", items_raw[0]))
-    assert first.get("model_id") == DEFAULT_MODEL_ID
+    assert first.get("model_id") == DEFAULT_PLAYGROUND_MODEL_ID
     assert first.get("available") is False
 
 
@@ -52,7 +52,7 @@ def test_write_manifest_marks_model_unavailable_then_available(
 
     _write_manifest(
         [
-            {"model_id": DEFAULT_MODEL_ID, "available": True},
+            {"model_id": DEFAULT_PLAYGROUND_MODEL_ID, "available": True},
             {"model_id": model_id, "available": False},
         ]
     )
@@ -70,7 +70,7 @@ def test_write_manifest_marks_model_unavailable_then_available(
 
     _write_manifest(
         [
-            {"model_id": DEFAULT_MODEL_ID, "available": True},
+            {"model_id": DEFAULT_PLAYGROUND_MODEL_ID, "available": True},
             {"model_id": model_id, "available": True},
         ]
     )

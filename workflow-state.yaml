@@ -6,16 +6,22 @@ project:
   stages:
     00-context:
       status: completed
-      started_at: '2026-07-05'
-      completed_at: '2026-07-05'
-      partial_rerun_at: '2026-07-05'
-      partial_rerun_note: EV-010/S009 delta — F38 playground model download; super-admin Ollama model download UI for eval
-        playground
-      session_id: S009-playground-model-download
-      branch: feat/S009-playground-model-download
-      evolve_cycle_id: EV-010
-      note: S009/EV-010 scoped delta — F38 super-admin-only Ollama model download UI for eval playground; admin list+select
-        only; full-stack tests. 00-context completed 2026-07-05.
+      started_at: '2026-07-08'
+      completed_at: '2026-07-08'
+      partial_rerun_at: '2026-07-08'
+      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm (ADR-037); deprecate vecinita-ollama
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      note: S010/EV-011 — ADR-037 accepted; context-brief at docs/sessions/S010-unify-llm-service/context-brief.md. 00-context
+        completed 2026-07-08.
+      s009_baseline:
+        status: paused
+        paused_at: '2026-07-08'
+        session_id: S009-playground-model-download
+        branch: feat/S009-playground-model-download
+        evolve_cycle_id: EV-010
+        note: S009/EV-010 F38 parked 2026-07-08 — 07-build/10-e2e pending; S010 opened for unified LLM service.
       s008_baseline: &id001
         status: paused
         paused_at: '2026-07-05'
@@ -44,14 +50,22 @@ project:
         note: S005/EV-006 F35 00-context completed 2026-06-29; session paused 2026-06-30 before deploy stages.
     01-requirements:
       status: completed
-      started_at: '2026-07-05'
-      completed_at: '2026-07-05'
-      partial_rerun_at: '2026-07-05'
-      partial_rerun_note: EV-010/S009 delta — F38 playground model download requirements complete
-      session_id: S009-playground-model-download
-      branch: feat/S009-playground-model-download
-      evolve_cycle_id: EV-010
-      report: docs/sessions/S009-playground-model-download/reports/01-requirements.md
+      started_at: '2026-07-08'
+      completed_at: '2026-07-08'
+      partial_rerun_at: '2026-07-08'
+      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+      s009_baseline:
+        status: paused
+        paused_at: '2026-07-08'
+        session_id: S009-playground-model-download
+        branch: feat/S009-playground-model-download
+        evolve_cycle_id: EV-010
+        report: docs/sessions/S009-playground-model-download/reports/01-requirements.md
+        note: S009/EV-010 F38 requirements complete 2026-07-05; session parked for S010.
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -80,15 +94,27 @@ project:
         report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
     04-tech-plan:
       status: completed
-      started_at: '2026-07-05'
-      completed_at: '2026-07-05'
-      partial_rerun_at: '2026-07-05'
-      partial_rerun_note: EV-010/S009 delta — F38 playground model download tech plan complete (ADR-036, TP-S009-01–16; Phase
-        16 M71–M73).
-      session_id: S009-playground-model-download
-      branch: feat/S009-playground-model-download
-      evolve_cycle_id: EV-010
-      report: docs/sessions/S009-playground-model-download/reports/04-tech-plan.md
+      started_at: '2026-07-08'
+      completed_at: '2026-07-08'
+      partial_rerun_at: '2026-07-08'
+      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm tech plan (ADR-037, TP-S010-01–16, Phase 17 M74–M76)
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+      s009_baseline:
+        status: paused
+        paused_at: '2026-07-08'
+        started_at: '2026-07-05'
+        completed_at: '2026-07-05'
+        partial_rerun_at: '2026-07-05'
+        partial_rerun_note: EV-010/S009 delta — F38 playground model download tech plan complete (ADR-036, TP-S009-01–16; Phase
+          16 M71–M73).
+        session_id: S009-playground-model-download
+        branch: feat/S009-playground-model-download
+        evolve_cycle_id: EV-010
+        report: docs/sessions/S009-playground-model-download/reports/04-tech-plan.md
+        note: S009/EV-010 F38 tech plan complete 2026-07-05; session parked for S010.
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -214,16 +240,29 @@ project:
           change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
     08-verify-build:
       status: completed
-      started_at: '2026-07-03'
-      completed_at: '2026-07-03'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-      substeps:
-        phase: formal
-        result: PASS
-      note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
+      started_at: '2026-07-08'
+      completed_at: '2026-07-08'
+      partial_rerun_at: '2026-07-08'
+      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+      overall_result: PASS
+      note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+      s008_baseline:
+        status: completed
+        started_at: '2026-07-03'
+        completed_at: '2026-07-03'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+        substeps:
+          phase: formal
+          result: PASS
+        note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
       s004_baseline:
         status: completed
         completed_at: '2026-06-29'
@@ -508,18 +547,86 @@ project:
       status: in_progress
       started: '2026-07-07'
       last_cycle: PRM-011
-session_counter: 9
+session_counter: 10
 active_session:
-  id: S009-playground-model-download
+  id: S010-unify-llm-service
   type: feature
   status: in_progress
+  intent: Deprecate vecinita-ollama; consolidate all LLM inference, model download/staging onto vecinita-llm (ADR-037)
+  branch: feat/S010-unify-llm-service
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-011
+  artifacts_dir: docs/sessions/S010-unify-llm-service/
+  started_at: '2026-07-08'
+  current_stage: 09-qa
+  context_briefs:
+  - docs/sessions/S010-unify-llm-service/context-brief.md
+  routing_plan:
+  - stage: 00-context
+    status: completed
+    completed_at: '2026-07-08'
+    note: context-brief.md exists; ADR-037 accepted
+  - stage: 01-requirements
+    status: completed
+    started_at: '2026-07-08'
+    completed_at: '2026-07-08'
+  - stage: 04-tech-plan
+    status: completed
+    completed_at: '2026-07-08'
+  - stage: 07-build
+    status: pending
+  - stage: 08-verify-build
+    status: completed
+    completed_at: '2026-07-08'
+  - stage: 09-qa
+    status: pending
+  - stage: 10-e2e
+    status: pending
+  - stage: 11-verify-impl
+    status: pending
+  - stage: 12-verify-deploy
+    status: pending
+  - stage: 13-deploy-smoke
+    status: pending
+  artifacts:
+  - path: docs/sessions/S010-unify-llm-service/context-brief.md
+    kind: context-brief
+    session_id: S010-unify-llm-service
+    stage: 00-context
+  - path: docs/sessions/S010-unify-llm-service/session-brief.md
+    kind: session-brief
+    session_id: S010-unify-llm-service
+    stage: 00-context
+  - path: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+    kind: stage-report
+    session_id: S010-unify-llm-service
+    stage: 01-requirements
+  - path: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+    kind: stage-report
+    session_id: S010-unify-llm-service
+    stage: 04-tech-plan
+  - path: docs/sessions/S010-unify-llm-service/roadmap.md
+    kind: roadmap
+    session_id: S010-unify-llm-service
+    stage: 04-tech-plan
+  - path: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+    kind: verification-report
+    session_id: S010-unify-llm-service
+    stage: 08-verify-build
+sessions:
+- id: S009-playground-model-download
+  type: feature
+  status: paused
   intent: Super-admin-only Ollama model download UI for eval playground; admin list+select only; full-stack tests
   branch: feat/S009-playground-model-download
   orchestrator: 16-evolve
   evolve_cycle_id: EV-010
   artifacts_dir: docs/sessions/S009-playground-model-download/
   started_at: '2026-07-05'
+  paused_at: '2026-07-08'
   current_stage: 10-e2e
+  current_stage_note: 09-qa FAIL (coverage); 07-build pending; S010 opened for ADR-037 unified vecinita-llm
+  pause_note: S009 parked 2026-07-08 — ADR-037 unified LLM service; S010/EV-011 opened
   routing_plan:
   - stage: 00-context
     status: completed
@@ -564,7 +671,6 @@ active_session:
     kind: qa-report
     session_id: S009-playground-model-download
     stage: 09-qa
-sessions:
 - id: S008-eval-ux-playground
   type: feature
   status: paused
@@ -1563,15 +1669,23 @@ sessions:
 stages:
   00-context:
     status: completed
-    started_at: '2026-07-05'
-    completed_at: '2026-07-05'
-    partial_rerun_at: '2026-07-05'
-    partial_rerun_note: EV-010/S009 delta — F38 playground model download; super-admin Ollama model download UI for eval playground
-    session_id: S009-playground-model-download
-    branch: feat/S009-playground-model-download
-    evolve_cycle_id: EV-010
+    started_at: '2026-07-08'
+    completed_at: '2026-07-08'
+    partial_rerun_at: '2026-07-08'
+    partial_rerun_note: EV-011/S010 delta — unified vecinita-llm (ADR-037); deprecate vecinita-ollama
+    session_id: S010-unify-llm-service
+    branch: feat/S010-unify-llm-service
+    evolve_cycle_id: EV-011
     artifacts:
-    - docs/sessions/S000-internal-docs-archive/context/eval-ux-playground.md
+    - docs/sessions/S010-unify-llm-service/context-brief.md
+    - docs/sessions/S010-unify-llm-service/session-brief.md
+    s009_baseline:
+      status: paused
+      paused_at: '2026-07-08'
+      session_id: S009-playground-model-download
+      branch: feat/S009-playground-model-download
+      evolve_cycle_id: EV-010
+      note: S009/EV-010 F38 parked 2026-07-08 — S010 opened for unified LLM service.
     s007_baseline:
       status: paused
       paused_at: '2026-07-02'
@@ -1601,18 +1715,25 @@ stages:
         - docs/adr/ADR-019-shared-frontend-i18n.md
         - docs/adr/ADR-020-shared-frontend-ui.md
     s008_baseline: *id001
-    note: S009/EV-010 scoped delta — F38 super-admin-only Ollama model download UI for eval playground; admin list+select
-      only; full-stack tests. 00-context completed 2026-07-05.
+    note: S010/EV-011 — ADR-037 unified vecinita-llm; deprecate vecinita-ollama. 00-context completed 2026-07-08.
   01-requirements:
     status: completed
-    started_at: '2026-07-05'
-    completed_at: '2026-07-05'
-    partial_rerun_at: '2026-07-05'
-    partial_rerun_note: EV-010/S009 delta — F38 playground model download requirements complete
-    session_id: S009-playground-model-download
-    branch: feat/S009-playground-model-download
-    evolve_cycle_id: EV-010
-    report: docs/sessions/S009-playground-model-download/reports/01-requirements.md
+    started_at: '2026-07-08'
+    completed_at: '2026-07-08'
+    partial_rerun_at: '2026-07-08'
+    partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
+    session_id: S010-unify-llm-service
+    branch: feat/S010-unify-llm-service
+    evolve_cycle_id: EV-011
+    report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+    s009_baseline:
+      status: paused
+      paused_at: '2026-07-08'
+      session_id: S009-playground-model-download
+      branch: feat/S009-playground-model-download
+      evolve_cycle_id: EV-010
+      report: docs/sessions/S009-playground-model-download/reports/01-requirements.md
+      note: S009/EV-010 F38 requirements complete 2026-07-05; session parked for S010.
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -1885,14 +2006,18 @@ stages:
         new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
   08-verify-build:
     status: completed
-    started_at: '2026-07-03'
-    completed_at: '2026-07-03'
-    session_id: S008-eval-ux-playground
-    branch: feat/S008-eval-ux-playground
-    evolve_cycle_id: EV-009
-    report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-    note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
-    s008:
+    started_at: '2026-07-08'
+    completed_at: '2026-07-08'
+    partial_rerun_at: '2026-07-08'
+    partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
+    session_id: S010-unify-llm-service
+    branch: feat/S010-unify-llm-service
+    evolve_cycle_id: EV-011
+    report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+    overall_result: PASS
+    note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+      public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+    s008_baseline:
       session_id: S008-eval-ux-playground
       branch: feat/S008-eval-ux-playground
       evolve_cycle_id: EV-009
@@ -1900,11 +2025,7 @@ stages:
       completed_at: '2026-07-03'
       status: completed
       report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-      note: Formal milestone verify PASS — 952 pytest + 725 Vitest
-    partial_rerun_at: '2026-06-28'
-    partial_rerun_note: S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted
-      S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only
-      delta)
+      note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
     scope: standalone
     notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override
       bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2
@@ -1919,6 +2040,10 @@ stages:
       session_id: S003-persistent-chat-history
       branch: main
       completed_at: '2026-06-28'
+      partial_rerun_at: '2026-06-28'
+      partial_rerun_note: S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted
+        S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only
+        delta)
       overall_result: PASS
       report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
       session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
@@ -3252,10 +3377,12 @@ evolve_cycles:
   feature_ids:
   - F38
   title: Playground model download (F38)
-  status: in_progress
+  status: paused
   started: '2026-07-05'
+  paused_at: '2026-07-08'
   session_id: S009-playground-model-download
-  current_stage: 07-build
+  current_stage: 10-e2e
+  pause_note: S009 parked 2026-07-08 — ADR-037 unified LLM service; S010/EV-011 opened
   stages:
     00-context:
       status: completed
@@ -3283,6 +3410,47 @@ evolve_cycles:
     phase_d: pending
     deploy: pending
   note: F38 — super-admin-only Ollama model download UI for eval playground; admin list+select only; full-stack tests.
+    Parked 2026-07-08 for S010/EV-011 unified LLM consolidation.
+- id: EV-011
+  cycle_type: feature
+  feature_ids:
+  - F39
+  title: Unified vecinita-llm Modal app (deprecate vecinita-ollama)
+  status: in_progress
+  started: '2026-07-08'
+  session_id: S010-unify-llm-service
+  current_stage: 09-qa
+  stages:
+    00-context:
+      status: completed
+      started: '2026-07-08'
+      completed: '2026-07-08'
+      note: S010/EV-011 — ADR-037 accepted; context-brief at docs/sessions/S010-unify-llm-service/context-brief.md
+    01-requirements:
+      status: completed
+      started: '2026-07-08'
+      completed: '2026-07-08'
+      report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+    04-tech-plan:
+      status: completed
+      started: '2026-07-08'
+      completed: '2026-07-08'
+      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+    08-verify-build:
+      status: completed
+      started: '2026-07-08'
+      completed: '2026-07-08'
+      report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+      overall_result: PASS
+      note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+  checkpoints:
+    phase_a: pending
+    phase_b: pending
+    phase_c: pending
+    phase_d: pending
+    deploy: pending
+  note: Consolidate LLM onto vecinita-llm; HF Hub staging; deprecate vecinita-ollama per ADR-037
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -4559,6 +4727,8 @@ decisions_log:
 - 'S009/EV-010 11-verify-impl complete 2026-07-06 — F38 catalog extension approved; UJ-048 approved; super-admin seeded
   for admin@vecinita.admin; 07-build build extension uncommitted'
 - 'S009/EV-010 09-qa complete 2026-07-07 — overall FAIL (coverage gate); report at docs/sessions/S009-playground-model-download/reports/qa-report.md'
+- S009 parked 2026-07-08 — ADR-037 unified LLM service; S010/EV-011 opened (evolve-lite 00→01→04→07→08→09→10→11→12→13)
+- EV-011/S010 01-requirements complete — F39 unified vecinita-llm delta (ADR-037)
 - date: '2026-07-07'
   note: 'PR #140 remediation: waived S009 session orchestration for cross-session hotfix (precedent PR #66/#68)'
 artifacts:
@@ -4847,14 +5017,40 @@ artifacts:
   kind: qa-report
   session_id: S009-playground-model-download
   stage: 09-qa
+- path: docs/sessions/S010-unify-llm-service/context-brief.md
+  kind: context-brief
+  session_id: S010-unify-llm-service
+  stage: 00-context
+- path: docs/sessions/S010-unify-llm-service/session-brief.md
+  kind: session-brief
+  session_id: S010-unify-llm-service
+  stage: 00-context
+- path: docs/adr/ADR-037-unified-vecinita-llm-modal-app.md
+  kind: adr
+  session_id: S010-unify-llm-service
+  stage: 00-context
+- path: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+  kind: stage-report
+  session_id: S010-unify-llm-service
+  stage: 01-requirements
+- path: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+  kind: verification-report
+  session_id: S010-unify-llm-service
+  stage: 08-verify-build
 git_history:
-  current_branch: feat/S009-playground-model-download
+  current_branch: feat/S010-unify-llm-service
   branches:
+  - name: feat/S010-unify-llm-service
+    purpose: EV-011 / S010 — unified vecinita-llm Modal app (deprecate vecinita-ollama, ADR-037)
+    base: main
+    status: open
+    created_at: '2026-07-08'
   - name: feat/S009-playground-model-download
     purpose: EV-010 / S009 — F38 playground model download (super-admin Ollama UI)
     base: main
-    status: open
+    status: paused
     created_at: '2026-07-05'
+    pause_note: S009 parked 2026-07-08 — ADR-037 unified LLM service; S010/EV-011 opened
   - name: feat/S008-eval-ux-playground
     purpose: EV-009 / S008 — evaluation UX polish, unified jobs API, dashboard charts, eval playground + super-admin runtime
       promote

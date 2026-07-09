@@ -1,4 +1,8 @@
-"""BUG-2026-07-05: Eval must not send model_id to vecinita-llm /generate (422 extra_forbidden)."""
+"""BUG-2026-07-05 / ADR-037: unified vecinita-llm accepts model_id on /generate.
+
+Pre-ADR-037, fixed-model vLLM rejected extra ``model_id`` fields. The unified app
+forwards playground tags so sandbox eval can select staged models.
+"""
 
 from __future__ import annotations
 
@@ -15,6 +19,7 @@ if TYPE_CHECKING:
     from _pytest.monkeypatch import MonkeyPatch
 
 _VLLM_BASE = "https://vecinita--vecinita-llm-fastapi-app.modal.run"
+_SANDBOX_MODEL_ID = "qwen2.5:1.5b-instruct"
 
 
 def _patched_llm_client_class(
@@ -42,31 +47,29 @@ def _patched_llm_client_class(
     return PatchedLlmClient
 
 
-def test_llm_client_omits_model_id_for_vllm_generate() -> None:
-    """VLLM GenerateRequest forbids model_id — LlmClient must not send it."""
+def test_llm_client_forwards_model_id_for_unified_vllm_generate() -> None:
+    """Unified vecinita-llm /generate accepts model_id for playground tag routing."""
     captured: dict[str, object] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
-        captured["keys"] = sorted(payload.keys())
+        captured["model_id"] = payload.get("model_id")
         return httpx.Response(200, json={"text": "ok"})
 
     transport = httpx.MockTransport(handler)
     client = LlmClient(
         _VLLM_BASE,
-        model_id="qwen2.5:1.5b-instruct",
+        model_id=_SANDBOX_MODEL_ID,
         http_client=httpx.Client(transport=transport, base_url=_VLLM_BASE),
     )
-    assert client.generate("Score this.", model_id="qwen2.5:1.5b-instruct") == "ok"
-    keys = captured.get("keys")
-    assert isinstance(keys, list)
-    assert "model_id" not in keys
+    assert client.generate("Score this.", model_id=_SANDBOX_MODEL_ID) == "ok"
+    assert captured.get("model_id") == _SANDBOX_MODEL_ID
 
 
-def test_eval_runtime_for_config_omits_model_id_when_only_vllm_configured(
+def test_eval_runtime_for_config_forwards_model_id_to_vecinita_llm(
     monkeypatch: MonkeyPatch,
 ) -> None:
-    """Production fallback (LLM URL only) must not forward Ollama model_id."""
+    """Eval always uses vecinita-llm and forwards sandbox model_id (ADR-037)."""
     captured: dict[str, object] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -85,9 +88,9 @@ def test_eval_runtime_for_config_omits_model_id_when_only_vllm_configured(
     )
 
     _judge, synthesis = eval_runtime_for_config(
-        EvalConfig(model_id="qwen2.5:1.5b-instruct"),
+        EvalConfig(model_id=_SANDBOX_MODEL_ID),
     )
     assert synthesis is not None
     synthesis.complete("prompt")
     assert captured["path"] == "/generate"
-    assert captured.get("model_id") is None
+    assert captured.get("model_id") == _SANDBOX_MODEL_ID

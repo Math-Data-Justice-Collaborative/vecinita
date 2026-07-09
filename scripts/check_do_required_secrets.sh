@@ -26,14 +26,14 @@ if ! rg -q 'validate_modal_service_url' scripts/deploy/do_apps.py; then
   exit 1
 fi
 
-if ! rg -q 'key: VECINITA_MODAL_OLLAMA_URL' infra/do/internal-write-api.yaml; then
-  echo "ERROR: internal-write-api.yaml must declare VECINITA_MODAL_OLLAMA_URL." >&2
+if ! rg -q 'key: VECINITA_MODAL_LLM_URL' infra/do/internal-write-api.yaml; then
+  echo "ERROR: internal-write-api.yaml must declare VECINITA_MODAL_LLM_URL." >&2
   exit 1
 fi
 
-if ! rg -q 'VECINITA_MODAL_OLLAMA_URL' scripts/deploy/do_apps.py; then
-  echo "ERROR: do_apps.py must sync VECINITA_MODAL_OLLAMA_URL." >&2
+if ! rg -q 'VECINITA_MODAL_LLM_URL' scripts/deploy/do_apps.py; then
+  echo "ERROR: do_apps.py must sync VECINITA_MODAL_LLM_URL." >&2
   exit 1
 fi
 
-echo "OK: DO specs and sync helper include Modal embed/LLM/Ollama URL guards."
+echo "OK: DO specs and sync helper include Modal embed/LLM URL guards."

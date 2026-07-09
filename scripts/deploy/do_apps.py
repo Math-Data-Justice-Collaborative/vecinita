@@ -201,7 +201,6 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_MODAL_PROXY_KEY",
                 "VECINITA_MODAL_EMBED_URL",
                 "VECINITA_MODAL_LLM_URL",
-                "VECINITA_MODAL_OLLAMA_URL",
                 "VECINITA_CHAT_RAG_URL",
                 "VECINITA_CHAT_FRONTEND_URL",
                 "VECINITA_ADMIN_FRONTEND_URL",

@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-07-05 (S009/EV-010 F38 — super-admin playground model download)
+> **Last updated**: 2026-07-08 (S010/EV-011 F39 — unified `vecinita-llm` Modal service, ADR-037)
 
 ## Summary
 
@@ -47,7 +47,8 @@
 | F35 | Admin user management + remember-me + Resend SMTP/templates | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, supabase config + CI | S005/EV-006 2026-06-29; ADR-029 (#75) |
 | F36 | Admin RAG evaluation tab + golden eval set | Implemented | Data Management | data-management-frontend, internal-write-api, packages/eval | S007/EV-008 2026-07-01; #99 |
 | F37 | Eval UX polish + playground + runtime config promote | Planned | Data Management + ChatRAG | data-management-frontend, internal-write-api, data-management-backend, chat-rag-backend | S008/EV-009 2026-07-02 |
-| F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal Ollama app | S009/EV-010 2026-07-05 |
+| F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal LLM app | S009/EV-010 2026-07-05; backend unified in F39 |
+| F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, all LLM consumers | S010/EV-011 2026-07-08; ADR-037 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -658,7 +659,7 @@
   models for playground runs but cannot trigger pulls.
 - **Inputs**: Super-admin operator (`role=super-admin`); free-text Ollama `model_id` tag
   (non-empty, max 128 chars — e.g. `qwen2.5:3b-instruct`); existing Modal Ollama pull
-  infrastructure (`POST /models/ollama/pull` on `vecinita-ollama`).
+  infrastructure (`POST /models/ollama/pull` on **`vecinita-llm`** — ADR-037; was `vecinita-ollama`).
 - **Outputs**: Background Modal pull job (`202` + `job_id`); manifest entry with
   `available: false` while pulling, `available: true` when complete; model appears in Playground
   picker for all admins once available.
@@ -667,17 +668,47 @@
   |---------|--------|
   | `data-management-frontend` | Super-admin-only **Download model** panel on Playground — enter tag, trigger pull, poll list every **10s** for up to **30 min**; hidden for `admin`/`viewer` |
   | `internal-write-api` | Tighten `POST /internal/v1/models/ollama/pull` to `SuperAdminActorDep`; keep `GET /internal/v1/models/ollama` on `WriteActorDep` (admin list) |
-  | Modal Ollama app | **Storage:** `vecinita-models` volume (`/models`, `manifest.json`); existing `pull_model_job` — no code change v1 |
-- **Storage**: Playground Ollama weights live **only** on Modal Volume **`vecinita-models`** (not DO disk, Postgres, or S3). Download UI triggers pull into this volume; eval runs read models from the same volume via Modal Ollama API (TP-S009-17, ADR-036 §3).
+  | Modal LLM app (`vecinita-llm`) | **Storage:** `llm-models` volume (`/models`, `manifest.json`); `pull_model_job` via HF Hub (ADR-037) |
+- **Storage**: Playground model weights live **only** on Modal Volume **`llm-models`** (not DO disk, Postgres, or S3). Download UI triggers HF Hub staging into this volume; eval/chat read models from the same volume via **`vecinita-llm`** (ADR-037; supersedes ADR-036 `vecinita-models`).
 - **Auth**: Super-admin — pull; admin — list + select (no download UI, `403` on pull API); viewer → `403` on all model routes.
 - **UX rules**:
   - **Progress**: Poll `GET /internal/v1/models/ollama` until entry `available=true` or **30 min timeout** (then show error; super-admin may retry).
   - **Concurrent pulls**: Allow parallel pull requests for the same tag (duplicate Modal jobs acceptable in v1).
   - **Tag policy**: Free-text Ollama tag; server validates non-empty + length only (no allow-list v1).
-- **Limitations / scope**: Pull UI only — no Ollama library catalog browser; no auto-pull on eval run when model missing; requires `VECINITA_MODAL_OLLAMA_URL` configured (deploy prerequisite, not F38 blocker).
+- **Limitations / scope**: Pull UI only — no Ollama library catalog browser; no auto-pull on eval run when model missing; requires `VECINITA_MODAL_LLM_URL` configured (deploy prerequisite).
 - **Milestones**: M71 (API auth: super-admin-only pull) → M72 (Playground download UI + poll) → M73 (full-stack tests).
 - **Source**: S009 / EV-010 interview 2026-07-05 (RD-142–RD-148); context
   `docs/sessions/S000-internal-docs-archive/context/playground-model-download.md`; supersedes TC-134 admin-pull expectation from F37.
+- **Backend note (F39/ADR-037)**: UI and internal-write-api paths unchanged (`/internal/v1/models/ollama/*`); Modal backend is **`vecinita-llm`** with HF downloads, not `ollama pull`.
+
+### F39: Unified LLM Modal service (deprecate `vecinita-ollama`)
+
+- **What it does**: Consolidates all Modal LLM responsibilities onto **`vecinita-llm`**: vLLM inference
+  (`/generate`, `/warm`), playground model list/pull (`/models/ollama`), and weight staging
+  (`stage_llm_weights`, `stage_default_model`, `pull_model_job`). Deprecates and de-deploys
+  **`vecinita-ollama`**.
+- **Inputs**: Existing `VECINITA_MODAL_LLM_URL` + `VECINITA_MODAL_PROXY_KEY`; optional `model_id`
+  on generate/warm (Ollama-style tags resolved via `llm_model_registry.py` → HuggingFace repos).
+- **Outputs**: Single Modal ASGI URL for ChatRAG, ingest/retag, eval, and playground; manifest on
+  **`llm-models`** volume at `/models/manifest.json`.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `infra/modal/llm_app.py` | Add `pull_model_job`, `stage_default_model`, `/models/ollama` routes; HF Hub download |
+  | `packages/llm-client` | Route all HTTP to `VECINITA_MODAL_LLM_URL`; drop Ollama URL branch |
+  | `packages/eval` | `eval_runtime_for_config` always uses `vecinita-llm` + sandbox `model_id` |
+  | `chat-rag-backend` | Prefer LLM URL only (remove Ollama URL preference) |
+  | `internal-write-api` | `OllamaModelsClient` targets `vecinita-llm` routes |
+  | `scripts/deploy/modal.sh` | Deploy `llm_app` only; remove `ollama_app` |
+- **Technical constraints (ADR-037)**:
+  - vLLM cannot read Ollama blob cache — downloads use **`huggingface_hub.snapshot_download`**, not `ollama pull`.
+  - One active vLLM model per GPU instance; tag switch reloads engine (~60–120s); `/warm` accepts `model_id`.
+  - Legacy `vecinita-models` Ollama blobs are **not** migrated — re-stage via HF.
+- **Env deprecation**: `VECINITA_MODAL_OLLAMA_URL` removed from DO specs; clients may warn if still set.
+- **Auth**: Unchanged — proxy key on Modal model routes; admin JWT on internal-write-api.
+- **Milestones**: M74 (extend `llm_app` + registry) → M75 (rewire clients + eval) → M76 (deploy smoke + de-deploy ollama).
+- **Source**: S010 / EV-011 2026-07-08 (RD-154–RD-162); ADR-037; context
+  `docs/sessions/S010-unify-llm-service/context-brief.md`.
 
 ## Planned / Deferred (post-v1)
 

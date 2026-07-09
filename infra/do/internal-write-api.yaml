@@ -46,9 +46,6 @@ services:
       - key: VECINITA_MODAL_LLM_URL
         scope: RUN_TIME
         type: SECRET
-      - key: VECINITA_MODAL_OLLAMA_URL
-        scope: RUN_TIME
-        type: SECRET
       - key: VECINITA_CHAT_RAG_URL
         scope: RUN_TIME
         value: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app

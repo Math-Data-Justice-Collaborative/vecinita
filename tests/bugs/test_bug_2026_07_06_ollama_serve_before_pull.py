@@ -1,24 +1,35 @@
-"""Regression: pull_model_job must start ollama serve before ollama pull (BUG-2026-07-06)."""
+"""Regression: HF model staging for playground pulls (ADR-037; replaces ollama pull)."""
 
 from __future__ import annotations
 
+import sys
+from types import ModuleType
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from _pytest.monkeypatch import MonkeyPatch
 
 
-def test_run_ollama_pull_starts_serve_before_pull(monkeypatch: MonkeyPatch) -> None:
-    """Background pull jobs fail without ollama serve — ensure daemon startup first."""
-    from infra.modal import ollama_app  # noqa: PLC0415
+def test_download_hf_model_resolves_tag_and_writes_to_volume(
+    monkeypatch: MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Playground tags download HuggingFace repos under /models/repos/."""
+    from infra.modal import llm_app  # noqa: PLC0415
 
-    ensure = MagicMock()
-    run = MagicMock()
-    monkeypatch.setattr(ollama_app, "_ensure_ollama_serve", ensure)
-    monkeypatch.setattr(ollama_app.subprocess, "run", run)
+    snapshot = MagicMock()
+    fake_hub = ModuleType("huggingface_hub")
+    fake_hub.snapshot_download = snapshot  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "huggingface_hub", fake_hub)
+    monkeypatch.setattr(llm_app, "_REPOS_ROOT", tmp_path / "repos")
 
-    ollama_app._run_ollama_pull("qwen2.5:0.5b-instruct")  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]  # private helper under test
+    dest = llm_app._download_hf_model("qwen2.5:3b-instruct")  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
 
-    ensure.assert_called_once_with()
-    run.assert_called_once()
+    snapshot.assert_called_once_with(
+        repo_id="Qwen/Qwen2.5-3B-Instruct",
+        local_dir=str(tmp_path / "repos" / "qwen2.5_3b-instruct"),
+    )
+    assert dest.is_dir()

@@ -14,6 +14,7 @@ fi
 source "${ROOT}/scripts/modal_ensure_workspace.sh"
 
 REQUIRED_SECRET="vecinita-data-management"
+LLM_SECRET="vecinita-llm"
 REQUIRED_VOLUMES=(embedding-models llm-models)
 REQUIRED_APPS=(vecinita-embedding vecinita-data-management vecinita-llm)
 
@@ -38,6 +39,20 @@ if ! grep -qx "${REQUIRED_SECRET}" <<<"${secret_names}"; then
   exit 1
 fi
 echo "OK secret ${REQUIRED_SECRET} exists"
+
+echo "==> Required secret: ${LLM_SECRET} (ADR-037 ASGI proxy auth)"
+if ! grep -qx "${LLM_SECRET}" <<<"${secret_names}"; then
+  echo "ERROR: missing Modal secret '${LLM_SECRET}'." >&2
+  echo "Create with: bash scripts/deploy/sync_llm_secret.sh --apply" >&2
+  echo "  (requires VECINITA_MODAL_PROXY_KEY in shell — see infra/modal/.env.example)" >&2
+  exit 1
+fi
+echo "OK secret ${LLM_SECRET} exists"
+
+echo "==> Deprecated secret check (advisory)"
+if grep -qx "vecinita-ollama" <<<"${secret_names}"; then
+  echo "WARN: vecinita-ollama secret still exists — retire after S010 smoke (ADR-037)." >&2
+fi
 
 echo "==> Required volumes"
 vol_names="$(modal volume list --json 2>/dev/null | python3 -c "

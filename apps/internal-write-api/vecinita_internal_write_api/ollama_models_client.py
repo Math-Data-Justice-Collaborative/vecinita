@@ -1,7 +1,8 @@
-"""HTTP client for Modal Ollama model list + pull API (RD-140-141)."""
+"""HTTP client for Modal LLM model list + pull API (ADR-037 — vecinita-llm)."""
 
 from __future__ import annotations
 
+import logging
 import os
 from http import HTTPStatus
 from typing import Final, Protocol
@@ -13,16 +14,19 @@ from vecinita_shared_schemas.ollama_models import (
     OllamaModelPullResponse,
 )
 
+logger = logging.getLogger(__name__)
+
+_ENV_LLM_URL: Final[str] = "VECINITA_MODAL_LLM_URL"
 _ENV_OLLAMA_URL: Final[str] = "VECINITA_MODAL_OLLAMA_URL"
 _ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
 
 
 class OllamaModelsClientError(RuntimeError):
-    """Raised when Modal Ollama model API requests fail."""
+    """Raised when Modal LLM model API requests fail."""
 
 
 class OllamaModelsClientProtocol(Protocol):
-    """List and pull Ollama models on Modal (mockable in tests)."""
+    """List and pull playground models on Modal (mockable in tests)."""
 
     def list_models(self) -> OllamaModelListResponse: ...  # noqa: D102
 
@@ -32,7 +36,7 @@ class OllamaModelsClientProtocol(Protocol):
 
 
 class OllamaModelsClient:
-    """Proxy to vecinita-ollama Modal ASGI routes."""
+    """Proxy to vecinita-llm Modal ASGI model routes (path compat: /models/ollama)."""
 
     def __init__(
         self,
@@ -42,11 +46,18 @@ class OllamaModelsClient:
         http_client: httpx.Client | None = None,
         timeout: float = 120.0,
     ) -> None:
-        """Resolve Modal Ollama URL and proxy key from args or environment."""
-        resolved_url = base_url or os.environ.get(_ENV_OLLAMA_URL)
+        """Resolve Modal LLM URL and proxy key from args or environment."""
+        legacy_ollama = os.environ.get(_ENV_OLLAMA_URL)
+        if legacy_ollama:
+            logger.warning(
+                "%s is deprecated (ADR-037); use %s only",
+                _ENV_OLLAMA_URL,
+                _ENV_LLM_URL,
+            )
+        resolved_url = base_url or os.environ.get(_ENV_LLM_URL) or legacy_ollama
         resolved_key = proxy_key or os.environ.get(_ENV_PROXY_KEY)
         if not resolved_url or not resolved_key:
-            msg = f"{_ENV_OLLAMA_URL} and {_ENV_PROXY_KEY} are required"
+            msg = f"{_ENV_LLM_URL} and {_ENV_PROXY_KEY} are required"
             raise OllamaModelsClientError(msg)
         self._base_url = resolved_url.rstrip("/")
         self._proxy_key = resolved_key
@@ -59,7 +70,7 @@ class OllamaModelsClient:
             self._client.close()
 
     def list_models(self) -> OllamaModelListResponse:
-        """Fetch models stashed on the Modal Ollama volume."""
+        """Fetch models staged on the Modal llm-models volume."""
         response = self._client.get(
             "/models/ollama",
             headers={"X-Vecinita-Proxy-Key": self._proxy_key},
@@ -70,7 +81,7 @@ class OllamaModelsClient:
         return OllamaModelListResponse.model_validate(response.json())
 
     def start_pull(self, model_id: str) -> OllamaModelPullResponse:
-        """Enqueue a background pull for a missing Ollama model tag."""
+        """Enqueue a background HF download for a playground model tag."""
         body = OllamaModelPullRequest(model_id=model_id)
         response = self._client.post(
             "/models/ollama/pull",

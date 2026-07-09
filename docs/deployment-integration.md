@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-05 (EV-010 F38 — Modal `vecinita-models` playground storage)
+> **Last updated**: 2026-07-08 (S010/EV-011 F39 — unified `vecinita-llm`; deprecate `vecinita-ollama`, ADR-037)
 
 ## Overview
 
@@ -17,8 +17,8 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | DO internal write API | DO App Platform (**standalone** app) | Sole holder of `DATABASE_URL` for writes from Modal; audited S8.4 |
 | data-management-modal | Modal | ASGI + queues + scrape |
 | vecinita-embedding | Modal | FastEmbed 384-dim |
-| vecinita-llm | Modal | **vLLM** — **Qwen2.5-1.5B-Instruct** on **T4** (scale-to-zero) |
-| vecinita-ollama | Modal | Playground Ollama — model list/pull/generate; **storage:** volume `vecinita-models` |
+| vecinita-llm | Modal | **Unified LLM** — vLLM inference + HF model staging; volume **`llm-models`**; list/pull/generate/warm (ADR-037) |
+| ~~vecinita-ollama~~ | ~~Modal~~ | **Deprecated** — de-deploy after S010 smoke; superseded by `vecinita-llm` |
 | database | DO Managed Postgres | Smallest viable tier |
 
 **Topology note (RD-022):** User selected **multi-app** on DO (separate deployables per backend). **05-verify-tech / TP-009:** pilot **~$42–48/mo** fits ≤ **$50** cap with scale-to-zero GPU; consolidate DO if overrun.
@@ -150,25 +150,30 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 
 **Post-deploy validation:** Admin triggers golden run on staging; verify history + drill-down; harness green in CI.
 
-### EV-010 — Playground model download + Modal storage (F38)
+### EV-010 — Playground model download + Modal storage (F38, ADR-037 unified)
 
-**Storage target:** all playground Ollama model weights on Modal Volume **`vecinita-models`**
-(mounted `/models` in `vecinita-ollama`). DO services **never** store model blobs.
+**Storage target:** all playground model weights on Modal Volume **`llm-models`**
+(mounted `/models` in **`vecinita-llm`**). Downloads use **HuggingFace Hub** (`pull_model_job`,
+`stage_default_model`); vLLM serves from staged safetensors. DO services **never** store model blobs.
 
 | Variable | App | Purpose |
 |----------|-----|---------|
-| `VECINITA_MODAL_OLLAMA_URL` | internal-write-api | Proxy to Modal ASGI `vecinita-ollama` list/pull routes |
-| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret `vecinita-ollama` | `X-Vecinita-Proxy-Key` auth on Modal HTTP |
-| `vecinita-models` volume | Modal | Persistent Ollama weights + `manifest.json` |
+| `VECINITA_MODAL_LLM_URL` | internal-write-api, chat-rag-backend | Unified Modal ASGI: generate, warm, list/pull |
+| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret **`vecinita-llm`** | `X-Vecinita-Proxy-Key` on `/models/ollama*` |
 
-**Redeploy order (EV-010):**
+**`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.
+`POST /warm {"model_id": ...}` preloads the resolved HF model. One active vLLM engine per container;
+switching `model_id` reloads the engine (~60–120s). **`vecinita-ollama` is deprecated** — do not deploy.
 
-1. **`vecinita-ollama` Modal app** — must be deployed with `vecinita-models` volume (F37 baseline)
-2. **internal-write-api** — `VECINITA_MODAL_OLLAMA_URL` + super-admin pull auth (F38)
-3. **data-management-frontend** — super-admin download UI
+**Redeploy order (EV-010 + ADR-037):**
 
-**Post-deploy validation (T3):** Super-admin pulls a small tag (e.g. `qwen2.5:3b-instruct`); poll until
-`available: true` in Playground picker; optional `modal volume ls vecinita-models` operator check.
+1. **`vecinita-llm` Modal app** — deploy unified app; run `stage_default_model` or `stage_llm_weights`
+2. **internal-write-api** — `VECINITA_MODAL_LLM_URL` only (remove `VECINITA_MODAL_OLLAMA_URL`)
+3. **De-deploy** — `modal app stop vecinita-ollama` after smoke
+4. **data-management-frontend** — unchanged API surface (`/internal/v1/models/ollama/*`)
+
+**Post-deploy validation:** Super-admin pulls a catalog tag; poll until `available: true`; golden eval
+uses `VECINITA_MODAL_LLM_URL` with sandbox `model_id`.
 
 ## Entrypoints & triggers
 

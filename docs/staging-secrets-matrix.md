@@ -84,7 +84,17 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 
 ## Modal — Embedding / LLM
 
-No Vecinita Postgres secrets. HF model cache uses Modal volumes `embedding-models`, `llm-models`.
+| Secret | Required keys | Used by |
+|--------|---------------|---------|
+| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037) |
+
+Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first).
+Proxy key must match DO internal-write-api `VECINITA_MODAL_PROXY_KEY`.
+
+No Vecinita Postgres secrets on embed/LLM apps. HF model cache uses Modal volumes
+`embedding-models`, `llm-models`. Playground staging: `modal run infra/modal/llm_app.py::stage_default_model`.
+
+**Deprecated:** Modal secret `vecinita-ollama`, app `vecinita-ollama`, env `VECINITA_MODAL_OLLAMA_URL`.
 
 ## Staging smoke env (operator shell)
 

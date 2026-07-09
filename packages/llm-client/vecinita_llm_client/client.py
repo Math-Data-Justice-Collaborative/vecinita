@@ -1,8 +1,9 @@
-"""HTTP client for vecinita-llm and vecinita-ollama Modal apps."""
+"""HTTP client for vecinita-llm Modal app (ADR-037 unified LLM surface)."""
 
 from __future__ import annotations
 
 import json
+import logging
 import os
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Final, Self, cast
@@ -13,9 +14,12 @@ from vecinita_shared_schemas.json_types import as_json_object
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+logger = logging.getLogger(__name__)
+
 _ENV_LLM_URL: Final[str] = "VECINITA_MODAL_LLM_URL"
 _ENV_OLLAMA_URL: Final[str] = "VECINITA_MODAL_OLLAMA_URL"
 _ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
+_ENV_LLM_MODEL_ID: Final[str] = "VECINITA_LLM_MODEL_ID"
 _ENV_OLLAMA_MODEL_ID: Final[str] = "VECINITA_OLLAMA_MODEL_ID"
 _PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
 
@@ -25,7 +29,7 @@ class LlmClientError(RuntimeError):
 
 
 class LlmClient:
-    """Call Modal `/generate` and `/generate/stream` endpoints (vLLM or Ollama)."""
+    """Call Modal ``vecinita-llm`` ``/generate`` and ``/generate/stream`` endpoints."""
 
     def __init__(
         self,
@@ -36,13 +40,22 @@ class LlmClient:
         timeout: float = 120.0,
         http_client: httpx.Client | None = None,
     ) -> None:
-        """Initialize the client from ``base_url`` or ``VECINITA_MODAL_*_URL`` env vars."""
-        resolved = base_url or os.environ.get(_ENV_OLLAMA_URL) or os.environ.get(_ENV_LLM_URL)
+        """Initialize the client from ``base_url`` or ``VECINITA_MODAL_LLM_URL``."""
+        legacy_ollama = os.environ.get(_ENV_OLLAMA_URL)
+        if legacy_ollama:
+            logger.warning(
+                "%s is deprecated (ADR-037); use %s only",
+                _ENV_OLLAMA_URL,
+                _ENV_LLM_URL,
+            )
+        resolved = base_url or os.environ.get(_ENV_LLM_URL) or legacy_ollama
         if not resolved:
-            msg = f"{_ENV_OLLAMA_URL}, {_ENV_LLM_URL}, or base_url is required"
+            msg = f"{_ENV_LLM_URL} or base_url is required"
             raise LlmClientError(msg)
         self._base_url = resolved.rstrip("/")
-        self._model_id = model_id or os.environ.get(_ENV_OLLAMA_MODEL_ID)
+        self._model_id = (
+            model_id or os.environ.get(_ENV_LLM_MODEL_ID) or os.environ.get(_ENV_OLLAMA_MODEL_ID)
+        )
         self._proxy_key = proxy_key or os.environ.get(_ENV_PROXY_KEY)
         self._owns_client = http_client is None
         self._client = http_client or httpx.Client(
@@ -58,7 +71,7 @@ class LlmClient:
 
     @property
     def default_model_id(self) -> str | None:
-        """Configured default Ollama model tag, if any."""
+        """Configured default playground model tag, if any."""
         return self._model_id
 
     def __enter__(self) -> Self:
@@ -74,13 +87,6 @@ class LlmClient:
             return {_PROXY_HEADER: self._proxy_key}
         return {}
 
-    def _supports_model_id_in_body(self) -> bool:
-        """Ollama `/generate` accepts model_id; vecinita-llm (vLLM) rejects it."""
-        ollama_url = os.environ.get(_ENV_OLLAMA_URL)
-        if not ollama_url:
-            return False
-        return self._base_url.rstrip("/") == ollama_url.rstrip("/")
-
     def _generate_body(
         self,
         prompt: str,
@@ -95,7 +101,7 @@ class LlmClient:
             "temperature": temperature,
         }
         resolved_model = model_id or self._model_id
-        if resolved_model and self._supports_model_id_in_body():
+        if resolved_model:
             body["model_id"] = resolved_model
         return body
 
@@ -129,8 +135,9 @@ class LlmClient:
         return text
 
     def warm(self) -> None:
-        """Best-effort POST ``/warm`` to reduce cold-start latency."""
-        self._client.post("/warm", timeout=120.0, headers=self._request_headers())
+        """Best-effort POST ``/warm`` to preload the model and reduce cold-start latency."""
+        body = {"model_id": self._model_id} if self._model_id else {}
+        self._client.post("/warm", json=body, headers=self._request_headers())
 
     def generate_stream(
         self,

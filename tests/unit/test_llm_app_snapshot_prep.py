@@ -1,9 +1,11 @@
-"""S001 T4-T6: GPU snapshot prep for vecinita-llm (imports, enter split, snapshot flags)."""
+"""S001 T4-T6 / ADR-037: vecinita-llm image and LlmService lazy-load (no GPU snapshot)."""
 
 from __future__ import annotations
 
 import ast
 from pathlib import Path
+
+from infra.modal.llm_app import LLM_MAX_MODEL_LEN, max_model_len_for
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LLM_APP = REPO_ROOT / "infra" / "modal" / "llm_app.py"
@@ -46,36 +48,18 @@ def _function_has_vllm_import(func: ast.FunctionDef) -> bool:
     return False
 
 
-def _enter_decorator_snap_value(func: ast.FunctionDef) -> bool | None:
-    """Return the ``snap`` argument of a ``modal.enter`` decorator, if present."""
-    for dec in func.decorator_list:
-        if not isinstance(dec, ast.Call):
-            continue
-        if not (
-            isinstance(dec.func, ast.Attribute)
-            and dec.func.attr == "enter"
-            and isinstance(dec.func.value, ast.Name)
-            and dec.func.value.id == "modal"
-        ):
-            continue
-        for keyword in dec.keywords:
-            if keyword.arg == "snap" and isinstance(keyword.value, ast.Constant):
-                return bool(keyword.value.value)
-    return None
-
-
 def test_llm_image_imports_vllm_for_snapshot() -> None:
-    """LLM image imports vllm inside an image.imports() block for snapshotting."""
+    """LLM image imports vllm inside an image.imports() block."""
     source = _llm_app_source()
     assert "with image.imports():" in source
     assert "from vllm import LLM, SamplingParams" in source
 
 
 def test_llm_image_sets_snapshot_mitigation_env_vars() -> None:
-    """LLM image sets the snapshot mitigation environment variables."""
+    """LLM image sets compile/triton mitigation environment variables."""
     source = _llm_app_source()
     for var in SNAPSHOT_ENV_VARS:
-        assert var in source, f"missing snapshot env var {var}"
+        assert var in source, f"missing env var {var}"
 
 
 def test_llm_image_pins_vllm_with_sleep_mode() -> None:
@@ -86,7 +70,7 @@ def test_llm_image_pins_vllm_with_sleep_mode() -> None:
 
 
 def test_load_model_does_not_import_vllm_inline() -> None:
-    """load_model avoids importing vllm inline so snapshotting works."""
+    """load_model avoids importing vllm inline."""
     load_model = _method_named(_llm_service_class(), "load_model")
     assert not _function_has_vllm_import(load_model)
 
@@ -97,29 +81,21 @@ def test_generate_text_does_not_import_sampling_params_inline() -> None:
     assert not _function_has_vllm_import(generate_text)
 
 
-def test_llm_service_splits_enter_for_snapshot() -> None:
-    """LlmService splits enter into snapshot (load) and restore phases."""
-    cls = _llm_service_class()
-    assert _enter_decorator_snap_value(_method_named(cls, "load_model")) is True
-    assert _enter_decorator_snap_value(_method_named(cls, "restore_model")) is False
-
-
-def test_load_model_sleeps_before_snapshot() -> None:
-    """load_model puts the engine to sleep before the snapshot is taken."""
+def test_load_model_lazy_initializes_state() -> None:
+    """ADR-037: load_model defers vLLM init until first request (model_id switching)."""
     load_model = _method_named(_llm_service_class(), "load_model")
     source = ast.unparse(load_model)
-    assert ".sleep(level=1)" in source
+    assert "self._llm = None" in source
+    assert "self._loaded_model_arg = None" in source
 
 
-def test_restore_model_wakes_after_snapshot() -> None:
-    """restore_model wakes the engine after restoring from the snapshot."""
-    restore_model = _method_named(_llm_service_class(), "restore_model")
-    source = ast.unparse(restore_model)
-    assert ".wake_up()" in source
-
-
-def test_llm_service_enables_gpu_memory_snapshot() -> None:
-    """LlmService enables GPU memory snapshotting in its Modal config."""
+def test_llm_service_disables_gpu_memory_snapshot() -> None:
+    """ADR-037: GPU snapshot breaks NCCL when switching model_id — snapshot disabled."""
     source = _llm_app_source()
-    assert "enable_memory_snapshot=True" in source
-    assert '"enable_gpu_snapshot": True' in source
+    assert "enable_memory_snapshot=False" in source
+
+
+def test_max_model_len_supports_golden_eval_prompts() -> None:
+    """Context window must fit RAG golden-eval prompts (>1024 tokens)."""
+    assert max_model_len_for("Qwen/Qwen3-8B-AWQ") >= LLM_MAX_MODEL_LEN
+    assert max_model_len_for("Qwen/Qwen2.5-1.5B-Instruct") >= LLM_MAX_MODEL_LEN

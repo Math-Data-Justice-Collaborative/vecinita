@@ -442,7 +442,54 @@ Requirements locked RD-146–RD-153 in 01-requirements; implementation details r
 
 EV-010 tech-plan artifacts: ADR-036; execution-plan Phase 16 (M71–M73, T71.1–T73.6); roadmap
 `docs/sessions/S009-playground-model-download/roadmap.md`; report
-`docs/sessions/S009-playground-model-download/reports/04-tech-plan.md`.
+
+### EV-011 requirements decisions (2026-07-08) — RD-154–RD-162
+
+S010 context brief (R1–R5) and user-provided prior-state analysis. 01-requirements delta for F39:
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-154 | Canonical Modal app | **`vecinita-llm` only** — deprecate and de-deploy `vecinita-ollama` | S010 interview; ADR-037 |
+| RD-155 | Download mechanism | **HF Hub** (`snapshot_download`) into `llm-models` — not `ollama pull` (vLLM incompatible with Ollama blobs) | ADR-037 §R1; user context |
+| RD-156 | Modal functions | `stage_llm_weights`, `stage_default_model`, `pull_model_job` on **`llm_app.py`** | S010 scope |
+| RD-157 | Eval routing | **`eval_runtime_for_config` always uses `VECINITA_MODAL_LLM_URL`**; sandbox `model_id` forwarded to `/generate` | User prior-state diagram |
+| RD-158 | ChatRAG routing | **`VECINITA_MODAL_LLM_URL` only** — remove Ollama URL preference | ADR-037 §8 |
+| RD-159 | API compat | Keep `/internal/v1/models/ollama` and Modal `/models/ollama` paths; Ollama-style tags in UI | ADR-037 §5; R5 |
+| RD-160 | Volume | Single **`llm-models`** volume; no migration from `vecinita-models` | ADR-037 §R2 |
+| RD-161 | Env deprecation | Remove `VECINITA_MODAL_OLLAMA_URL` from DO specs; warn-only in legacy clients | ADR-037 §7 |
+| RD-162 | Feature ID | **F39** — unified LLM Modal service; F38 UI unchanged, backend superseded | S010 session-brief |
+
+EV-011 artifacts: feature-list F39 + F38 backend note; user-journeys UJ-048 delta; test-plan TC-139/TC-140;
+api-contract §EV-010 storage; config-spec deprecated env; acceptance-criteria AC-E30–AC-E33; ADR-037;
+cursor rule `.cursor/rules/unified-vecinita-llm.mdc`; context `docs/sessions/S010-unify-llm-service/`.
+
+### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
+
+01-requirements locked RD-154–RD-162. 04-tech-plan locks implementation order and operator steps:
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S010-01 | Build order | M74 → M75 → M76 | execution-plan Phase 17 |
+| TP-S010-02 | Branch | `feat/S010-unify-llm-service` from `main` | S010 session-brief |
+| TP-S010-03 | Modal app | **`vecinita-llm` only**; delete `ollama_app.py` | ADR-037 §6 |
+| TP-S010-04 | Download | HF Hub `snapshot_download` into **`llm-models`** | ADR-037 §R1 |
+| TP-S010-05 | Modal functions | `stage_llm_weights`, `stage_default_model`, `pull_model_job` | ADR-037 §4 |
+| TP-S010-06 | Registry | `llm_model_registry.py` — Ollama tag → HF repo | ADR-037 §R1 |
+| TP-S010-07 | Inference | vLLM only; `model_id` on `/generate`; `/warm` reload | ADR-037 §R2–R3 |
+| TP-S010-08 | Eval routing | No Ollama URL branch; always LLM URL + `model_id` | User prior-state diagram |
+| TP-S010-09 | Playground client | `OllamaModelsClient` → llm app `/models/ollama*` | ADR-037 §5 |
+| TP-S010-10 | Env | Drop `VECINITA_MODAL_OLLAMA_URL` from DO specs | RD-161 |
+| TP-S010-11 | Deploy script | `modal.sh` llm-only | AC-E33 |
+| TP-S010-12 | Secret migration | Merge proxy key into `vecinita-llm` Modal secret | deployment-integration |
+| TP-S010-13 | De-deploy | `modal app stop vecinita-ollama` post-smoke | ADR-037 §6 |
+| TP-S010-14 | Re-stage | `stage_default_model` post-deploy; no blob migration | RD-160 |
+| TP-S010-15 | Dependencies | No new runtime deps (`huggingface-hub` already on llm image) | dependency-inventory |
+| TP-S010-16 | PR | Single evolve-lite **PR-53** to `main` | execution-plan Phase 17 |
+
+EV-011 tech-plan report: `docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md`;
+roadmap: `docs/sessions/S010-unify-llm-service/roadmap.md`.
+
+EV-010 tech-plan report: `docs/sessions/S009-playground-model-download/reports/04-tech-plan.md`.
 
 EV-008 artifacts: feature-list F36; user-journeys UJ-039–UJ-040; test-plan TC-111–TC-116;
 acceptance-criteria AC-E12–AC-E16; api-contract §EV-008 eval routes; config-spec §RAG evaluation;

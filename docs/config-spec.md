@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-29 (S005/EV-006 F35 — admin user management + Resend SMTP/templates + remember-me)
+> **Last updated**: 2026-07-08 (S010/EV-011 F39 — unified LLM env vars, ADR-037)
 
 ## Precedence
 
@@ -26,7 +26,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Minimum pgvector similarity (`1 - distance`); chunks below are dropped |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (prod) | Modal FastEmbed base URL |
-| `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal LLM base URL |
+| `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal **`vecinita-llm`** base URL — inference, warm, list/pull (ADR-037) |
+| `VECINITA_MODAL_PROXY_KEY` | string | — | Yes (prod) | `X-Vecinita-Proxy-Key` for Modal LLM model routes |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
@@ -49,7 +50,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_HEALTH_TIMEOUT_MS` | int | `5000` | No | Timeout per service health poll in aggregator (F26); TP-019 |
 | `VECINITA_CHAT_RAG_URL` | string | — | Yes (EV-002) | Chat-rag-backend URL for health aggregator |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (EV-002) | Modal embedding **base** URL for health aggregator (no `/health` suffix) |
-| `VECINITA_MODAL_LLM_URL` | string | — | Yes (EV-002) | Modal LLM URL for health aggregator |
+| `VECINITA_MODAL_LLM_URL` | string | — | Yes (EV-002) | Modal **`vecinita-llm`** URL for health aggregator |
 | `VECINITA_MODAL_DATA_MGMT_URL` | string | — | Yes (EV-001/002) | Modal data-mgmt URL for health aggregator |
 | `VECINITA_CHAT_FRONTEND_URL` | string | — | Yes (EV-002) | Chat static site URL for health aggregator |
 | `VECINITA_ADMIN_FRONTEND_URL` | string | — | Yes (EV-002) | Admin static site URL for health aggregator |
@@ -106,6 +107,12 @@ defaults (RD-137), not live production DB config until user loads a preset.
 Model selection: **Ollama model picker** on Modal (RD-139–RD-141). Playground lists models via
 Ollama API; missing models trigger a Modal background pull job into `vecinita-models`. Promote
 includes `model_id` so production ChatRAG switches LLM at runtime.
+
+**Eval LLM read timeout (BUG-2026-07-08):** eval batches build their `LlmClient` with a
+**900s** read timeout (`vecinita_eval.modal_llm._EVAL_LLM_TIMEOUT_S`), well above the 120s
+`LlmClient` default. This is **scoped to eval only** — interactive chat keeps the 120s default.
+Golden/ad-hoc first-token latency on a freshly-loaded model otherwise surfaced as
+`"The read operation timed out"`.
 
 ### Admin auth — Supabase (EV-005 F34)
 
@@ -234,6 +241,14 @@ corpus DB stays PII-free.
 
 <!-- TP-019 / TS-EV002-C01: Health dashboard uses backend aggregator at GET /internal/v1/health/all
      (via VITE_VECINITA_CORPUS_API_URL). Frontend does NOT poll services directly. -->
+
+### Deprecated (EV-011 F39 — ADR-037)
+
+| Variable | Status | Replacement |
+|----------|--------|-------------|
+| `VECINITA_MODAL_OLLAMA_URL` | **Deprecated** — remove from DO deploy specs | `VECINITA_MODAL_LLM_URL` (unified `vecinita-llm` routes) |
+
+Clients that still read `VECINITA_MODAL_OLLAMA_URL` should log a warning and ignore it (no Ollama URL branch). Operator: `modal app stop vecinita-ollama` after S010 deploy smoke.
 
 ## Recommended defaults (spec)
 
