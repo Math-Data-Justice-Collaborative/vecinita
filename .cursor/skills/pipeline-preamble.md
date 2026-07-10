@@ -285,8 +285,8 @@ user to paste tokens when `prod.env` exists.
 
 | Skill | Primary output | Blocks |
 |-------|----------------|--------|
-| **00-context** | `docs/sessions/S000-internal-docs-archive/context-brief.md` | Optional |
-| **01-requirements** | Product spec suite | Yes (start of A) |
+| **00-context** | Session `context-brief.md` + **`checkpoints/01-requirements-seed.md`** (when 01 is routed) | Optional (but seed mandatory before 01) |
+| **01-requirements** | Product spec suite (loads 00 seed in Phase 0C) | Yes (start of A) |
 | **02-verify-plan** | Audit report, verified specs | Yes |
 | **03-plan-tooling** | Cursor rules, hooks, skills, agents | Yes |
 | **04-tech-plan** | Execution plan, tech docs, ADRs | Yes (start of B) |

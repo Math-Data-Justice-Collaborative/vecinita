@@ -4,12 +4,13 @@ description: >
   Recommended entry for every work session. Classifies session type (greenfield, feature,
   hotfix, integration, new_service, ops, process), allocates SNNN-slug, writes session-brief
   and routing-plan, and sets active_session. Also analyzes any existing codebase, documentation,
-  research paper, or prior work the user provides, producing a context brief that pre-fills
-  Stage 01 (requirements interview). Runs paper-analyst and repo-researcher agents in parallel
-  when applicable, cross-references findings, and surfaces contradictions/ambiguities/decisions.
-  When the project belongs to a multi-repo organization, scans sibling repos to discover
-  integration patterns, API contracts, deployment conventions, and shared dependencies. Use
-  before requirements, features, live E2E, integrations, or evolve cycles.
+  research paper, or prior work the user provides, producing a context brief plus a mandatory
+  checkpoints/01-requirements-seed.md handoff (Phase 4.5) that Stage 01 loads first. Runs
+  paper-analyst and repo-researcher agents in parallel when applicable, cross-references
+  findings, and surfaces contradictions/ambiguities/decisions. When the project belongs to a
+  multi-repo organization, scans sibling repos to discover integration patterns, API contracts,
+  deployment conventions, and shared dependencies. Use before requirements, features, live E2E,
+  integrations, or evolve cycles.
 ---
 
 # 00 — Context Gathering
@@ -556,7 +557,52 @@ Write `{output_directory}/context-brief.md` with these sections:
 9. **Full Agent Reports** — collapsible sections with raw agent outputs (including
    ecosystem scan reports)
 
-**State**: Set Phase 4 to `completed`. Set overall status to `completed`.
+**State**: Set Phase 4 to `completed`.
+
+### Phase 4.5 — Handoff seed for 01-requirements (mandatory when 01 is in routing plan)
+
+**This is the 00→01 bridge.** A context brief alone is not enough — 01 must receive a
+structured seed it can load without re-litigating locked decisions.
+
+When `01-requirements` appears in `active_session.routing_plan` (any mode: full, delta,
+scoped, partial re-run), **before** marking 00 `completed`:
+
+1. Write
+   `{active_session.artifacts_dir}/checkpoints/01-requirements-seed.md`
+   (create `checkpoints/` if missing).
+2. Link it from `session-brief.md` under a **01-requirements handoff** heading.
+3. Link it from `routing-plan.md` under **Next stage after 00**.
+4. Agent `update`: set
+   `artifacts[]` entry for the seed (`session_id` tagged) and
+   `stages.00-context.handoff_seed: <path>`.
+
+#### Seed required sections
+
+| Section | Purpose for 01 |
+|---------|----------------|
+| **How 01 should use this** | Numbered steps: load seed → confirm locked → manifest → open Qs only |
+| **Locked decisions** | Table: Seed ID ↔ 00 Resolution ID ↔ decision text ↔ proposed RD/ADR ids |
+| **Document manifest** | Mandatory / recommended / excluded (delta: sections to update, not whole docs) |
+| **Pre-filled interview answers** | By template — ready for confirm/modify AskQuestion |
+| **Open questions** | **Only** items that still need fresh AskQuestion (defaults recommended) |
+| **Explicitly out of interview scope** | What 01 must not re-open |
+| **Next after 01** | Exact next routing-plan stage (e.g. 02 or 04-delta) |
+
+#### Rules
+
+- **Locked vs open:** Resolutions from Phase 3 (and Phase 0 routing) that the user already
+  answered are **locked** — 01 confirms in batch, does not re-interview from scratch.
+- **Delta / evolve:** Prefer section-level deltas and proposed next RD numbers; do not tell
+  01 to regenerate the full greenfield suite.
+- **Partial 00 re-run:** Refresh or append the seed; do not delete prior locked rows without
+  AskQuestion.
+- **Skip seed only when** 01 is not in the routing plan (e.g. hotfix/ops). Record
+  `handoff_seed: skipped` with rationale via agent `update`.
+
+Reference example (shape, not content):
+`docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md`.
+
+**State**: Set Phase 4.5 to `completed` after the seed file exists and is linked.
 
 ### Phase 5 — Summary
 
@@ -565,7 +611,9 @@ Report to user:
 ```
 Context Gathering Complete.
 
-Context brief written to: docs/sessions/S000-internal-docs-archive/context-brief.md
+Context brief: docs/sessions/{SNNN-slug}/context-brief.md
+01 handoff seed: docs/sessions/{SNNN-slug}/checkpoints/01-requirements-seed.md
+  (or: skipped — 01 not in routing plan)
 
 Sources analyzed:
   [list of sources with key metrics]
@@ -590,12 +638,20 @@ Issues surfaced: [N] total
   Advisory — [N] raised, [N] assumed
 
 Unresolved gaps: [N] (marked for downstream handling)
+Locked decisions in seed: [N]
+Open questions for 01: [N]
 
 Ready for: 01-requirements
+  → Load checkpoints/01-requirements-seed.md first (not a greenfield interview)
 ```
 
 If Phase 1B was skipped, omit the "Ecosystem scan" block.
 If template is `none`, omit "deploy targets" line.
+If handoff seed was skipped, omit locked/open counts and the seed load line.
+
+**Handoff action:** After Phase 5, if 01 is next in the routing plan, **invoke
+[01-requirements](../01-requirements/SKILL.md)** in the same session (or AskQuestion
+"Continue to 01 now?" / "Stop here"). Do not leave the user to discover the seed path.
 
 ## Output Rules
 
@@ -605,3 +661,6 @@ If template is `none`, omit "deploy targets" line.
 4. **Resolution traceability**: Numbered resolutions (R1, R2, ...) referenced downstream.
 5. **No silent resolution**: Never resolve blocking issues without user input.
 6. **State-managed**: All progress tracked in `workflow-state.yaml`. Immediate writes.
+7. **01 handoff seed**: When 01 is in the routing plan, Phase 4.5 seed is mandatory before
+   00 is `completed`. Session-scoped paths only — never write new briefs to
+   `docs/sessions/S000-internal-docs-archive/` for active work.

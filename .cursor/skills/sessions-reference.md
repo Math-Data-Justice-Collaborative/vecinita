@@ -50,6 +50,7 @@ docs/sessions/
   S042-live-e2e/
     session-brief.md                # intent, type, scope, branch, links
     routing-plan.md                 # approved stage list + skip rationale
+    context-brief.md                # 00-context output (when 00 ran)
     roadmap.md                      # GitHub issue decomposition + dependency diagrams (after 04-tech-plan)
     reports/                        # stage outputs for this session
       qa-report.md
@@ -57,8 +58,15 @@ docs/sessions/
       verification-report.md
       deploy-smoke.md
       service-health.md
-    checkpoints/                    # optional phase gate digests
+    checkpoints/                    # phase gate digests + stage handoffs
+      01-requirements-seed.md       # mandatory 00→01 bridge when 01 is in routing plan
 ```
+
+**00→01 handoff:** When the routing plan includes `01-requirements`, **00-context Phase 4.5**
+writes `checkpoints/01-requirements-seed.md` and links it from `session-brief.md` +
+`routing-plan.md`. **01-requirements Phase 0C** loads that seed first (locked decisions =
+confirm-only; open questions = interview). See [00-context](00-context/SKILL.md) Phase 4.5
+and [01-requirements](01-requirements/SKILL.md) Phase 0C.
 
 **Branch naming:** `feat/{session-id}` or type-specific (`fix/`, `evolve/`) — record in
 `session-brief.md` and `active_session.branch`.

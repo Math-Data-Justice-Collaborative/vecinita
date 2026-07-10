@@ -3,9 +3,11 @@ name: 01-requirements
 description: >
   Interviews the user to produce spec-driven development documents (feature-list, spec,
   user-journeys, config-spec, test-plan, etc.) using template-driven questioning. Supports
-  delta mode when adding features to an existing app (multiple Fn per evolve cycle). If
-  00-context ran, pre-populates answers from the context brief. Use for requirements
-  interview, add feature delta specs, or evolve-cycle product planning.
+  delta mode when adding features to an existing app (multiple Fn per evolve cycle). Loads
+  checkpoints/01-requirements-seed.md from 00-context Phase 4.5 first (Phase 0C): locked
+  decisions are confirm-only; open questions drive the interview. Falls back to session
+  context-brief when no seed exists. Use for requirements interview, add feature delta specs,
+  or evolve-cycle product planning.
 ---
 
 # 01 — Product Requirements Interview
@@ -71,14 +73,22 @@ Rules:
 
 ## Prerequisites
 
-1. **Optional**: `docs/sessions/S000-internal-docs-archive/context-brief.md` from 00-context. If it exists, pre-populate
-   interview answers from it and ask user to confirm/modify rather than starting from
-   scratch.
-2. **Optional**: Template selection from `workflow-state.yaml` §template. If a template
+1. **`active_session`** (required unless user waived orchestration). Resolve paths from
+   `active_session.artifacts_dir`, not from archived S000 paths.
+2. **00→01 handoff seed (preferred)**:
+   `{artifacts_dir}/checkpoints/01-requirements-seed.md`.
+   If present, **load it before any interview** (see Phase 0C). This is the primary
+   bridge from [00-context](../00-context/SKILL.md) Phase 4.5.
+3. **Context brief (fallback / supplement)**:
+   `{artifacts_dir}/context-brief.md`, or a path listed in `session-brief.md` /
+   `active_session.context_briefs`. Historical
+   `docs/sessions/S000-internal-docs-archive/context-brief.md` is **read-only archive** —
+   do not treat it as the active handoff for a new session.
+4. **Optional**: Template selection from `workflow-state.yaml` §template. If a template
    was selected in 00-context, use [template-registry.md](../template-registry.md) to
    pre-populate architecture, deployment, and API answers from the template patterns.
-   If 00-context was skipped, template selection happens in Phase 1 of this skill instead.
-3. **Templates**: Read template files from the existing `templates/` directories in skill
+   If 00-context was skipped, template selection happens in Phase 0 of this skill instead.
+5. **Templates**: Read template files from the existing `templates/` directories in skill
    folders. Use [doc-types.md](../doc-planner/doc-types.md) for relevance criteria.
 
 ## Uncertainty Resolution Protocol
@@ -146,6 +156,32 @@ When user adds features or `mode: delta` / active evolve cycle:
   behavior. Update only the affected UJ/TC entries.
 
 ## Workflow
+
+### Phase 0C — Load 00 handoff seed (run first when seed exists)
+
+**Goal:** Connect 00→01 without re-running a greenfield interview.
+
+1. From `read_context`, resolve `artifacts_dir` and check for
+   `checkpoints/01-requirements-seed.md`.
+2. **If the seed exists:**
+   - Read the whole seed + linked context-brief resolutions it cites.
+   - Treat **Locked decisions** as confirm-only (batch AskQuestion: approve all /
+     modify specific IDs / explain) — do **not** re-ask each as a fresh Decision.
+   - Use the seed’s **Document manifest** as the Phase 1/2 starting point (delta:
+     section-level updates only).
+   - Ask **only** the seed’s **Open questions** as new interview items (recommended
+     option first).
+   - Allocate RD/ADR numbers from the seed’s proposed range (or next free after last RD).
+   - In delta/evolve mode: append a new session report
+     (e.g. `reports/01-requirements-<slug>.md`); do not overwrite a prior 01 report
+     unless the seed says to.
+   - Agent `update`: `substeps.seed_loaded: true`, `handoff_seed: <path>`.
+3. **If the seed is missing** but 00 completed in this session’s routing plan:
+   - AskQuestion `[Ambiguity]`: "00 completed without `checkpoints/01-requirements-seed.md`.
+     Generate a seed from context-brief now, continue with context-brief only, or
+     re-open 00 Phase 4.5?"
+   - Recommended: generate a minimal seed from the Resolution Log, then continue.
+4. **If 00 was skipped** (no brief, no seed): proceed to Phase 0 / 1 as a normal interview.
 
 ### Phase 0 — Template Selection (if not already done)
 
@@ -248,6 +284,9 @@ Produce a **Document Manifest**:
 
 ### Phase 2 — Present Manifest for Review
 
+If Phase 0C loaded a seed with a **Document manifest**, present **that** manifest
+(confirm/modify) — do not rebuild a greenfield mandatory suite from scratch in delta mode.
+
 Present the manifest via AskQuestion.
 
 **Mandatory documents**: Only two options:
@@ -267,6 +306,8 @@ Interview Plan:
   Approved:    [N] additional documents
   Skipped:     [N] documents
   Modified:    [N] documents
+  Seed locked decisions: [N] (confirm-only batch)
+  Seed open questions:   [N]
 ```
 
 **State**: Record approved/skipped/modified templates.
@@ -280,13 +321,21 @@ For each approved document, in manifest order:
 Read the template file and identify all sections that need content. Each section becomes
 a set of interview questions.
 
-#### Step 2 — Pre-populate from context (if available)
+#### Step 2 — Pre-populate from seed / context (if available)
 
-If `context-brief.md` exists, map its findings to template sections:
-- For each section, check if the context brief has relevant information
-- If yes, present the pre-populated answer and ask: "Is this correct, or would you like
-  to modify it?"
-- If no, present the question as a fresh prompt
+Priority order for pre-fill:
+
+1. **`checkpoints/01-requirements-seed.md`** (Phase 0C) — locked answers + open questions
+2. **`context-brief.md`** Resolution Log and source summaries
+3. Template defaults (Phase 0B)
+
+For each template section:
+- If the seed has a **locked** pre-fill: present it and ask confirm/modify only
+- Else if the context brief has relevant information: present pre-populated answer →
+  "Is this correct, or would you like to modify it?"
+- Else: present the question as a fresh prompt
+
+Do **not** re-open seed **Out of interview scope** items unless the user explicitly overrides.
 
 #### Step 3 — Interview in batches
 
@@ -377,7 +426,7 @@ ADRs created: [N] in docs/adr/
 
 Decisions log: docs/decisions.md#requirements-decisions-01-requirements
 
-Next step: 02-verify-plan
+Next step: [next stage in active_session.routing_plan — often 02-verify-plan, or 04-tech-plan when 02/03 skipped]
 ```
 
 **State**: Set overall status to `completed`.
@@ -386,11 +435,16 @@ Next step: 02-verify-plan
 
 1. **User is source of truth**: Every claim in generated docs traces to user's interview
    answers. Never fabricate or assume answers.
-2. **Context as pre-fill only**: When 00-context ran, its findings pre-populate answers but
-   the user always confirms or modifies.
+2. **Seed / context as pre-fill only**: When 00-context ran, load
+   `checkpoints/01-requirements-seed.md` first (Phase 0C). Locked decisions are
+   confirm-only; open questions are the real interview. Context-brief findings also
+   pre-populate but the user always confirms or modifies.
 3. **Gap-aware**: Mark unfilled sections rather than guessing.
 4. **Batched questions**: 3-5 questions per batch to balance thoroughness and flow.
 5. **Contradiction detection**: If user answers contradict each other, surface immediately.
 6. **Immediate persistence**: Write each document after its interview completes. State
    updates after every batch.
 7. **Template-faithful**: Generated documents follow template structure exactly.
+8. **No stale archive paths**: Active handoff artifacts live under
+   `docs/sessions/{active_session.id}/` — never require
+   `docs/sessions/S000-internal-docs-archive/context-brief.md` for new work.
