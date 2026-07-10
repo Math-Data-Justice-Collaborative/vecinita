@@ -5792,6 +5792,14 @@ git_history:
     - docs/bug-reports/BUG-2026-07-09-qwen36-not-downloaded.md
     - tests/bugs/test_bug_2026_07_09_qwen36_not_downloaded.py
     timestamp: '2026-07-10'
+  - sha: cbcf712
+    branch: feat/S010-unify-llm-service
+    message: '[S010] chore: mark 01-requirements delta_reopen in progress'
+    stage: 01-requirements
+    session_id: S010-unify-llm-service
+    files_changed:
+    - workflow-state.yaml
+    timestamp: '2026-07-10'
 constraints:
   cost:
     target_usd_per_month: 25
