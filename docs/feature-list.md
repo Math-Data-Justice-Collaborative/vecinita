@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-07-08 (S010/EV-011 F39 — unified `vecinita-llm` Modal service, ADR-037)
+> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — client consolidation RD-163–RD-172)
 
 ## Summary
 
@@ -48,7 +48,7 @@
 | F36 | Admin RAG evaluation tab + golden eval set | Implemented | Data Management | data-management-frontend, internal-write-api, packages/eval | S007/EV-008 2026-07-01; #99 |
 | F37 | Eval UX polish + playground + runtime config promote | Planned | Data Management + ChatRAG | data-management-frontend, internal-write-api, data-management-backend, chat-rag-backend | S008/EV-009 2026-07-02 |
 | F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal LLM app | S009/EV-010 2026-07-05; backend unified in F39 |
-| F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, all LLM consumers | S010/EV-011 2026-07-08; ADR-037 |
+| F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, `packages/llm-client`, all LLM consumers | S010/EV-011; ADR-037; follow-on RD-163–RD-172 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -709,6 +709,22 @@
 - **Milestones**: M74 (extend `llm_app` + registry) → M75 (rewire clients + eval) → M76 (deploy smoke + de-deploy ollama).
 - **Source**: S010 / EV-011 2026-07-08 (RD-154–RD-162); ADR-037; context
   `docs/sessions/S010-unify-llm-service/context-brief.md`.
+
+#### F39 follow-on — client consolidation (2026-07-10, RD-163–RD-172)
+
+Same feature ID (**F39**); no F40. Cleanup after ADR-037 — **not** a multi-provider framework.
+
+| Slice | Scope | User-visible? |
+|-------|--------|---------------|
+| **A** (first) | One `LlmClient` surface (merge generate/stream/warm + list/pull) + rename Ollama modules/types → playground; keep `/models/ollama` path aliases | Mostly internal |
+| **B** | Real vLLM token SSE streaming; `VECINITA_MODAL_PROXY_KEY` required on `/generate`, `/warm`, `/models/*` (`/health` may stay open) | Live tokens; 401 without key |
+| **C** | Shared HF `apply_chat_template` helper; catalog/list/pull gated by `resolve_hf_repo` | Better non-Qwen prompts; clear unmapped errors |
+| **D** | Separate playground Modal class; prod pinned to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` | Playground reload does not stomp ChatRAG |
+| **E** | Drop legacy `VECINITA_MODAL_OLLAMA_URL` / `VECINITA_OLLAMA_MODEL_ID` fallbacks; fix package docs; declare `shared-schemas` on `llm-client` | Operator/docs |
+
+**Out of scope:** Provider ABC / second backend (SaaS, llama.cpp, Ollama runtime); mandatory FE path rename away from `/models/ollama`.
+
+**Source:** S010 seed `checkpoints/01-requirements-seed.md`; interview Q1–Q3 approve-all 2026-07-10.
 
 ## Planned / Deferred (post-v1)
 

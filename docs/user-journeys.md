@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-08 (S010/EV-011 F39 — UJ-048 backend unified on `vecinita-llm`, ADR-037)
+> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — streaming/auth/catalog deltas RD-163–RD-172)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -53,7 +53,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-045 | Admin configures and runs eval in Playground | Admin operator | DM UI `/evaluation?tab=playground` → preset + run APIs | F37 (EV-009) | local |
 | UJ-046 | Admin compares two eval runs | Admin operator | DM UI `/evaluation` compare view | F37 (EV-009) | local |
 | UJ-047 | Super-admin promotes config to production ChatRAG | Super-admin | Playground → promote API → ChatRAG active config | F37 (EV-009) | local |
-| UJ-048 | Super-admin downloads Ollama model for Playground | Super-admin | DM UI Playground download panel → pull + poll APIs → **`vecinita-llm`** | F38 + F39 (EV-010/EV-011) | local |
+| UJ-048 | Super-admin downloads playground model (path aliases) | Super-admin | DM UI Playground download panel → pull + poll APIs → **`vecinita-llm`** | F38 + F39 (EV-010/EV-011) | local |
+| UJ-049 | LLM proxy auth failure (generate/warm/models) | Operator / service | Modal ASGI without proxy key → `401` | F39 follow-on | local |
 
 ## Visual journey maps
 
@@ -175,8 +176,9 @@ flowchart TD
 5. User reads answer; may ask another question (client may keep prior turns in browser memory only).
 
 **Acceptance**: Answer language matches question; sources shown; no login; no server-side session row created.
+Tokens arrive **incrementally from vLLM** (real SSE), not a full reply split into words after generation (RD-164).
 
-**Automated tests**: `tests/e2e/test_uj001_ask_stream.py` (local, mocked Modal)
+**Automated tests**: `tests/e2e/test_uj001_ask_stream.py` (local, mocked Modal) — assert incremental stream contract (API E2E + unit; Playwright only if FE asserts token-by-token UX — RD-172 / Q3e).
 
 **Interview (11)**: "Does a Spanish question return a Spanish answer with relevant corpus citations?"
 
@@ -1176,31 +1178,50 @@ flowchart TD
 
 ---
 
-### UJ-048: Super-admin downloads Ollama model for Playground
+### UJ-048: Super-admin downloads playground model (path aliases `/models/ollama`)
 
 **Actor**: Super-admin (`role=super-admin`, seeded from `VECINITA_SUPER_ADMIN_EMAIL`)
 
-**Goal**: Download an additional playground model tag (Ollama-style naming) onto the Modal **`llm-models`** volume so eval playground experiments can use it via vLLM (ADR-037).
+**Goal**: Download an additional playground model tag (Ollama-style naming in UI) onto the Modal **`llm-models`** volume so eval playground experiments can use it via vLLM (ADR-037). Catalog lists only tags `resolve_hf_repo` accepts (RD-168).
 
-**Preconditions**: Super-admin authenticated; `VECINITA_MODAL_LLM_URL` + `VECINITA_MODAL_PROXY_KEY` configured on internal-write-api (otherwise pull returns `503`).
+**Preconditions**: Super-admin authenticated; `VECINITA_MODAL_LLM_URL` + `VECINITA_MODAL_PROXY_KEY` configured on internal-write-api (otherwise pull returns `503`). Missing proxy key on Modal → `401` (RD-165).
 
 **Steps**:
 
 1. Open `/evaluation?tab=playground` as super-admin.
 2. **Download model** panel is visible (regular `admin` operators do **not** see this section).
-3. Enter a free-text Ollama `model_id` tag (e.g. `qwen2.5:3b-instruct`).
-4. Click **Download** → `POST /internal/v1/models/ollama/pull` with `{ "model_id": "..." }` → `202` with `job_id` and `status: "pulling"`.
+3. Enter a free-text playground `model_id` tag (e.g. `qwen2.5:3b-instruct`) that appears in the HF-gated catalog.
+4. Click **Download** → `POST /internal/v1/models/ollama/pull` with `{ "model_id": "..." }` → `202` with `job_id` and `status: "pulling"` (path alias retained — RD-166).
 5. UI shows in-progress state and polls `GET /internal/v1/models/ollama` every **10 seconds**.
 6. When the matching entry reports `available: true`, UI shows success and the model appears in the shared model picker.
 7. If `available` stays `false` for **30 minutes**, UI shows a timeout error; super-admin may retry (parallel duplicate pulls allowed in v1).
-8. Regular `admin` can list and select the downloaded model for playground runs but receives `403` on pull API and has no download UI.
+8. Unmapped / non-catalog tag → clear error (not “looks available then fails on pull”) — RD-168.
+9. Regular `admin` can list and select the downloaded model for playground runs but receives `403` on pull API and has no download UI.
 
-**Cross-component interactions**: `EvaluationPlaygroundTab` download panel ↔ `admin.ts` `pullOllamaModel()` ↔ internal-write-api pull route ↔ **`vecinita-llm`** Modal proxy (`pull_model_job` HF download); poll loop refreshes the same model picker used by UJ-045 run flow. Eval runs (UJ-045) with a sandbox `model_id` tag also route to **`vecinita-llm`** `/generate` (no `vecinita-ollama` branch — ADR-037).
+**Cross-component interactions**: `EvaluationPlaygroundTab` download panel ↔ admin client pull helper ↔ internal-write-api pull route ↔ **`vecinita-llm`** Modal proxy (`pull_model_job` HF download); poll loop refreshes the same model picker used by UJ-045 run flow. Eval runs (UJ-045) with a sandbox `model_id` tag also route to **`vecinita-llm`** `/generate` (no `vecinita-ollama` branch — ADR-037). After slice D, playground `model_id` reload does not stall/break prod ChatRAG (RD-169).
 
 **E2E tier**: T0 API (`tests/e2e/`), T0-ui Playwright (`tests/ui/admin/`), Vitest for isolated panel logic. Staging (T3): golden eval with `qwen3:8b` tag hits **`vecinita-llm`** after de-deploy.
 
-**Acceptance**: Super-admin pull succeeds (`202`); admin pull → `403`; viewer → `403`; downloaded model selectable in picker once `available=true`.
+**Acceptance**: Super-admin pull succeeds (`202`); admin pull → `403`; viewer → `403`; downloaded model selectable in picker once `available=true`; unmapped tag fails clearly.
 
-**Automated tests**: `tests/e2e/test_uj048_playground_model_download.py` (TC-134, TC-138); Vitest `test_evaluation_playground.test.tsx` (TC-135, TC-136); Playwright `tests/ui/admin/uj048-playground-model-download.spec.ts` (TC-137).
+**Automated tests**: `tests/e2e/test_uj048_playground_model_download.py` (TC-134, TC-138, TC-141); Vitest `test_evaluation_playground.test.tsx` (TC-135, TC-136); Playwright `tests/ui/admin/uj048-playground-model-download.spec.ts` (TC-137).
+
+**E2E tier**: local.
+
+### UJ-049: LLM proxy auth failure (generate / warm / models)
+
+**Actor**: Operator / service client missing or wrong `VECINITA_MODAL_PROXY_KEY`
+
+**Goal**: All LLM ASGI routes except `/health` reject unauthorized callers consistently (RD-165).
+
+**Steps**:
+
+1. Call `POST /generate`, `POST /generate/stream`, `POST /warm`, or `GET/POST /models/ollama*` without valid `X-Vecinita-Proxy-Key`.
+2. Receive `401`.
+3. `/health` may remain open (no proxy key).
+
+**Acceptance**: Unauthorized → `401` on generate/warm/models; health still reachable for probes.
+
+**Automated tests**: Unit + integration (TC-142); optional API E2E if wired through internal-write-api.
 
 **E2E tier**: local.

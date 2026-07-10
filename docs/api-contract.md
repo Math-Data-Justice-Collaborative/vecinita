@@ -277,31 +277,56 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 
 ## Modal LLM (vecinita-llm)
 
-Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumer: ChatRAG Backend via `VECINITA_MODAL_LLM_URL`.
+Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: ChatRAG, eval, ingest/retag, playground via `VECINITA_MODAL_LLM_URL` + **`VECINITA_MODAL_PROXY_KEY`** (required on all routes below except `/health` — RD-165).
+
+**Auth:** `X-Vecinita-Proxy-Key: <VECINITA_MODAL_PROXY_KEY>` on `/generate`, `/generate/stream`, `/warm`, `/models/*`. Missing/wrong key → `401`.
 
 ### POST `/generate`
 
 - **Purpose**: Non-streaming text generation from prompt + retrieved context.
+- **Auth**: Proxy key required.
 - **Request**:
 
 ```json
 {
   "prompt": "string",
   "max_tokens": 512,
-  "temperature": 0.2
+  "temperature": 0.2,
+  "model_id": "qwen2.5:1.5b-instruct"
 }
 ```
 
+(`model_id` optional; playground/eval may set it. Prod class pins default — RD-169.)
+
 - **Response** `200`: `{"text": "string"}`
+- **Errors**: `401` unauthorized; `422` invalid body / unmapped model.
 
 ### POST `/generate/stream`
 
 - **Purpose**: SSE token stream for ChatRAG `/api/v1/ask/stream`.
+- **Auth**: Proxy key required.
+- **Contract (RD-164)**: Tokens are **real incremental vLLM outputs** — not a full completion split into words after the fact.
 - **Response** `200` `text/event-stream`: `data: {"token": "..."}` events, final `data: {"done": true}`.
+- **Errors**: `401` unauthorized.
+
+### POST `/warm`
+
+- **Purpose**: Preload / switch model into vLLM engine.
+- **Auth**: Proxy key required.
+- **Request**: optional `{"model_id": "..."}`.
+- **Errors**: `401` unauthorized.
 
 ### GET `/health`
 
+- **Auth**: May remain open (no proxy key).
 - **Response** `200`: `{"status": "ok"}`
+
+### Playground model routes (path aliases)
+
+- `GET /models/ollama`, `POST /models/ollama/pull` — **kept** for FE compat (RD-166).
+- Optional future: `/models/playground*` aliases (not required in Slice A).
+- Catalog ⊆ `resolve_hf_repo` mappings (RD-168).
+- Proxy key required (same as generate/warm).
 
 ---
 

@@ -463,6 +463,29 @@ EV-011 artifacts: feature-list F39 + F38 backend note; user-journeys UJ-048 delt
 api-contract §EV-010 storage; config-spec deprecated env; acceptance-criteria AC-E30–AC-E33; ADR-037;
 cursor rule `.cursor/rules/unified-vecinita-llm.mdc`; context `docs/sessions/S010-unify-llm-service/`.
 
+### EV-011 requirements decisions (2026-07-10) — RD-163–RD-172
+
+S010 00-context consolidation decisions (R7–R16) + 01-requirements interview Q1–Q3 approve-all.
+Stay under **F39** (no F40). Amend ADR-037 (no ADR-038 unless hard deploy split needs a short ADR).
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-163 | One client | Merge `LlmClient` + `OllamaModelsClient`; shared env/auth/timeout | Seed S1; Q1 |
+| RD-164 | Streaming | Real vLLM token SSE into `/generate/stream` (replace word-chunk fake stream) | Seed S2; Q1 |
+| RD-165 | Auth | Require `VECINITA_MODAL_PROXY_KEY` on `/generate`, `/warm`, `/models/*`; `/health` may stay open | Seed S3; Q1 |
+| RD-166 | Naming | Rename Ollama modules/types → playground; **keep** `/models/ollama` path aliases (Slice A: aliases only) | Seed S4; Q3c |
+| RD-167 | Chat template | Centralize via HF `apply_chat_template` shared helper | Seed S5; Q1 |
+| RD-168 | Catalog gate | List/pull only tags `resolve_hf_repo` accepts; clear error on unmapped | Seed S6; Q1 |
+| RD-169 | Engine isolate | Separate playground Modal class; prod pinned to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` | Seed S7; Q3d |
+| RD-170 | Env cleanup | Drop legacy Ollama URL/model_id fallbacks; fix docs; `shared-schemas` on `llm-client` | Seed S8; Q1 |
+| RD-171 | No provider ABC | Skip multi-provider plugin framework | Seed S9; Q1 |
+| RD-172 | Build order | Slices A→E; first **A = (1)+(4)**; stream tests = API E2E + unit (no Playwright unless FE asserts live tokens) | Seed S10; Q3e |
+
+EV-011 follow-on artifacts: feature-list F39 follow-on; spec LLM client section; UJ-048/UJ-049;
+test-plan TC-141–TC-145; api-contract auth+stream; config-spec proxy+pin; AC-E34–AC-E38;
+ADR-037 amendment; rule `unified-vecinita-llm.mdc`; report
+`docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md`.
+
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 
 01-requirements locked RD-154–RD-162. 04-tech-plan locks implementation order and operator steps:
@@ -488,6 +511,31 @@ cursor rule `.cursor/rules/unified-vecinita-llm.mdc`; context `docs/sessions/S01
 
 EV-011 tech-plan report: `docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md`;
 roadmap: `docs/sessions/S010-unify-llm-service/roadmap.md`.
+
+### EV-011 tech-plan decisions (2026-07-10) — TP-S010-17–31
+
+01-requirements locked RD-163–RD-172. 04-tech-plan delta reopen locks Phase 18 implementation:
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S010-17 | Plan shape | Phase 18 / M77–M81 (one milestone per slice A–E) | Batch 1 Q1a |
+| TP-S010-18 | Client API | Expand `LlmClient`; delete `OllamaModelsClient` | Batch 1 Q2a |
+| TP-S010-19 | Rename | Full BE+FE rename in Slice A; keep `/models/ollama*` aliases | Batch 1 Q3c |
+| TP-S010-20 | Resolver | Shared HTTP config resolver in `packages/shared-schemas` | Batch 1 Q4b |
+| TP-S010-21 | PR | Single evolve PR after A–E (PR-53) | Batch 1 Q5a |
+| TP-S010-22 | Streaming | vLLM `engine.generate` → existing SSE | Batch 2 Q6a |
+| TP-S010-23 | Auth | ASGI middleware; fail closed if proxy key unset in prod | Batch 2 Q7a |
+| TP-S010-24 | Chat template | Helper in `packages/llm-client` | Batch 2 Q8a |
+| TP-S010-25 | Isolation | Two Modal apps: `vecinita-llm` + `vecinita-llm-playground` | Batch 2 Q9b |
+| TP-S010-26 | Catalog | Filter to `resolve_hf_repo`; pull 400 if unmapped | Batch 2 Q10a |
+| TP-S010-27 | Playground URL | `VECINITA_MODAL_LLM_PLAYGROUND_URL`; ChatRAG prod URL only | Batch 3 Q11a |
+| TP-S010-28 | Volume | Both apps mount shared `llm-models` | Batch 3 Q12a |
+| TP-S010-29 | Env cleanup | Slice E removes Ollama fallbacks; missing LLM URL hard-fails | Batch 3 Q13a |
+| TP-S010-30 | Tests | TDD per milestone; FE tests in M77; stream = API E2E+unit | Batch 3 Q14a |
+| TP-S010-31 | Task grain | ~4–8 tasks per milestone | Batch 3 Q15a |
+
+Report: `docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md`.
+Execution plan: Phase 18 (T77.1–T81.5).
 
 EV-010 tech-plan report: `docs/sessions/S009-playground-model-download/reports/04-tech-plan.md`.
 

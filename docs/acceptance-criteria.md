@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-08 (S010/EV-011 F39 — AC-E30 volume unified on `llm-models`, ADR-037)
+> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — AC-E34–AC-E38)
 
 ## Per-feature criteria
 
@@ -150,6 +150,14 @@
 - [ ] **AC-E31**: All LLM consumers (ChatRAG, eval, ingest/retag, playground list/pull) use **`VECINITA_MODAL_LLM_URL` only** — no `VECINITA_MODAL_OLLAMA_URL` in deploy specs (TC-140).
 - [ ] **AC-E32**: Golden eval with Ollama-style tag (e.g. `qwen3:8b`) completes against **`vecinita-llm`** after `vecinita-ollama` de-deploy (T3 staging smoke).
 - [ ] **AC-E33**: `scripts/deploy/modal.sh` deploys **`vecinita-llm` only**; `vecinita-ollama` absent from CI/deploy manifests.
+
+### EV-011 follow-on — client consolidation (F39, RD-163–RD-172)
+
+- [ ] **AC-E34**: Single `LlmClient` covers generate/stream/warm/list/pull with one env/auth/timeout resolver; Ollama module names retired in code (path aliases kept) — TC-144 / Slice A.
+- [ ] **AC-E35**: `/generate/stream` emits real incremental vLLM tokens (not full-then-split) — TC-143 / Slice B.
+- [ ] **AC-E36**: Proxy key required on `/generate`, `/warm`, `/models/*`; missing key → `401`; `/health` may stay open — TC-142 / UJ-049.
+- [ ] **AC-E37**: Catalog/list/pull ⊆ `resolve_hf_repo`; unmapped tags fail clearly — TC-141 / UJ-048.
+- [ ] **AC-E38**: Prod ChatRAG pinned to default model (or separate Modal class); playground/eval reload does not stomp prod — TC-145 / Slice D.
 
 ## Quantitative benchmarks
 

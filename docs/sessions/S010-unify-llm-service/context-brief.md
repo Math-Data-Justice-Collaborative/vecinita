@@ -36,6 +36,15 @@ isolate prod vs playground engines so `vecinita-llm` is the only mental model.
 | R15 | Decision | **Skip provider ABC** — no multi-provider plugin framework. |
 | R16 | Decision | Routing amendment: delta **01 → 04 → 07** (slices A–E) → **08–13**; skip 02/03/05/06. First build slice **A = (1)+(4)**. |
 
+## Handoff to 01-requirements
+
+**Seed (authoritative for delta interview pre-fill):**
+[`checkpoints/01-requirements-seed.md`](./checkpoints/01-requirements-seed.md)
+
+When invoking **01-requirements**, load that seed first: locked decisions S1–S10 → proposed
+RD-163–RD-172, document manifest, pre-filled template answers, and the five open questions
+only. Do not re-run greenfield requirements.
+
 ## Template / deploy
 
 | Field | Value |
