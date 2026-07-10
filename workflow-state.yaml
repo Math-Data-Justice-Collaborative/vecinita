@@ -6122,9 +6122,26 @@ git_history:
     files_changed:
     - workflow-state.yaml
     timestamp: '2026-07-10'
+  - sha: 73e694b
+    branch: feat/S010-unify-llm-service
+    message: '[S010] chore(skills): mandate 00→01 requirements seed handoff'
+    stage: 04-tech-plan
+    session_id: S010-unify-llm-service
+    timestamp: '2026-07-10'
+  - sha: '1527031'
+    branch: feat/S010-unify-llm-service
+    message: '[S010] docs: record RD-163–RD-172 client consolidation requirements'
+    stage: 01-requirements
+    session_id: S010-unify-llm-service
+    timestamp: '2026-07-10'
+  - sha: 67412e2
+    branch: feat/S010-unify-llm-service
+    message: '[S010] docs: Phase 18 tech plan for F39 client consolidation'
+    stage: 04-tech-plan
+    session_id: S010-unify-llm-service
+    timestamp: '2026-07-10'
   notes:
-  - '2026-07-10 S010: Skill handoff edits (00-context, 01-requirements, sessions-reference, pipeline-preamble) uncommitted
-    pending user commit request'
+  - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up chore commit may be needed'
 constraints:
   cost:
     target_usd_per_month: 25
