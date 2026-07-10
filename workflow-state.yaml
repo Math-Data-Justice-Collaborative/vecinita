@@ -258,16 +258,16 @@ project:
       phase: Phase 18 (M77-M81)
       milestone: M77
       substeps:
-        current_task: T77.5
-        in_progress_tasks:
-        - T77.5
+        current_task: T77.6
+        in_progress_tasks: []
         completed_tasks_recent:
         - T77.1
         - T77.2
         - T77.3
         - T77.4
+        - T77.5
       execution_plan:
-        active_task: T77.5
+        active_task: T77.6
         active_milestone: M77
         active_phase: Phase 18
         completed_tasks:
@@ -275,9 +275,11 @@ project:
         - T77.2
         - T77.3
         - T77.4
-      note: 'S010/EV-011 Phase 18 Slice A — T77.5 in_progress: implementing rename
-        ollama_* → playground_* (schemas, modules, FE); path aliases retained. T77.1–T77.4
-        completed 2026-07-10 (ebefa8b, 40112e1, 4039cd2, 7d755fb).'
+        - T77.5
+      note: 'S010/EV-011 Phase 18 Slice A — T77.5 completed (5d7b3cc): rename
+        ollama_* → playground_* (schemas, modules, FE); path aliases /models/ollama*
+        retained. Next: T77.6 pending. T77.1–T77.4 completed 2026-07-10 (ebefa8b,
+        40112e1, 4039cd2, 7d755fb).'
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -716,16 +718,17 @@ active_session:
     - D:7
     - E:8
     first_slice: A
-    current_task: T77.5
-    task_status: in_progress
+    current_task: T77.6
+    task_status: pending
     milestone: M77
     completed_tasks:
     - T77.1
     - T77.2
     - T77.3
     - T77.4
-    note: 'T77.5 in_progress — implementing rename ollama_* → playground_* (schemas,
-      modules, FE); path aliases retained. T77.1–T77.4 completed 2026-07-10.'
+    - T77.5
+    note: 'T77.5 completed (5d7b3cc) — rename ollama_* → playground_* (schemas,
+      modules, FE); path aliases /models/ollama* retained. Next: T77.6 pending.'
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -774,11 +777,11 @@ active_session:
     stage: 08-verify-build
   handoff:
     next_skill: 07-build
-    note: T77.5 in_progress — rename ollama_* → playground_* (schemas, modules, FE);
-      path aliases retained — Phase 18 M77 Slice A
+    note: 'T77.5 completed (5d7b3cc) — rename ollama_* → playground_* (schemas, modules,
+      FE); path aliases /models/ollama* retained. Next: T77.6 pending — Phase 18 M77 Slice A'
     mode: delta
-    current_task: T77.5
-    task_status: in_progress
+    current_task: T77.6
+    task_status: pending
 sessions:
 - id: S009-playground-model-download
   type: feature
@@ -2129,16 +2132,16 @@ stages:
     phase: Phase 18 (M77-M81)
     milestone: M77
     substeps:
-      current_task: T77.5
-      in_progress_tasks:
-      - T77.5
+      current_task: T77.6
+      in_progress_tasks: []
       completed_tasks_recent:
       - T77.1
       - T77.2
       - T77.3
       - T77.4
+      - T77.5
     execution_plan:
-      active_task: T77.5
+      active_task: T77.6
       active_milestone: M77
       active_phase: Phase 18
       completed_tasks:
@@ -2146,9 +2149,11 @@ stages:
       - T77.2
       - T77.3
       - T77.4
-    note: 'S010/EV-011 Phase 18 Slice A — T77.5 in_progress: implementing rename
-      ollama_* → playground_* (schemas, modules, FE); path aliases retained. T77.1–T77.4
-      completed 2026-07-10 (ebefa8b, 40112e1, 4039cd2, 7d755fb).'
+      - T77.5
+    note: 'S010/EV-011 Phase 18 Slice A — T77.5 completed (5d7b3cc): rename
+      ollama_* → playground_* (schemas, modules, FE); path aliases /models/ollama*
+      retained. Next: T77.6 pending. T77.1–T77.4 completed 2026-07-10 (ebefa8b,
+      40112e1, 4039cd2, 7d755fb).'
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -3768,16 +3773,17 @@ evolve_cycles:
       - D:7
       - E:8
       first_slice: A
-      current_task: T77.5
-      task_status: in_progress
+      current_task: T77.6
+      task_status: pending
       milestone: M77
       completed_tasks:
       - T77.1
       - T77.2
       - T77.3
       - T77.4
-      note: 'T77.5 in_progress — implementing rename ollama_* → playground_* (schemas,
-        modules, FE); path aliases retained. T77.1–T77.4 completed 2026-07-10.'
+      - T77.5
+      note: 'T77.5 completed (5d7b3cc) — rename ollama_* → playground_* (schemas,
+        modules, FE); path aliases /models/ollama* retained. Next: T77.6 pending.'
     02-verify-plan:
       status: skipped
       skip_rationale: Tooling/docs already exist
@@ -5358,6 +5364,7 @@ decisions_log:
 - '2026-07-10: S010/EV-011 T77.1 completed (ebefa8b); advanced to T77.2. Stub carry-forward: resolve_llm_http_config NotImplementedError (T77.3); list_models/start_pull missing (T77.4).'
 - '2026-07-10: S010/EV-011 T77.2–T77.4 completed (40112e1, 4039cd2, 7d755fb); advanced to T77.5.'
 - '2026-07-10: S010/EV-011 T77.5 in_progress — implementing rename ollama_* → playground_* (schemas, modules, FE); path aliases retained.'
+- '2026-07-10: S010/EV-011 T77.5 completed (5d7b3cc); advanced to T77.6 pending. Path aliases /models/ollama* retained; schemas/modules/FE renamed to playground_*.'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -6276,11 +6283,19 @@ git_history:
     session_id: S010-unify-llm-service
     files_changed: 11
     timestamp: '2026-07-10T13:00:00Z'
+  - sha: 5d7b3cc
+    branch: feat/S010-unify-llm-service
+    message: '[T77.5] refactor: rename ollama_* → playground_* (keep path aliases)'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 42
+    timestamp: '2026-07-10'
   notes:
   - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up chore commit may be needed'
   - '2026-07-10 S010: T77.1 completed ebefa8b; current_task T77.2; resolve_llm_http_config stub until T77.3; list_models/start_pull until T77.4'
   - '2026-07-10 S010: T77.2–T77.4 completed (40112e1, 4039cd2, 7d755fb); current_task T77.5'
   - '2026-07-10 S010: T77.5 in_progress — rename ollama_* → playground_* (schemas, modules, FE); path aliases retained'
+  - '2026-07-10 S010: T77.5 completed (5d7b3cc); current_task T77.6 pending; path aliases /models/ollama* retained; schemas/modules/FE renamed to playground_*'
 constraints:
   cost:
     target_usd_per_month: 25
