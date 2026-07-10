@@ -69,9 +69,10 @@ project:
         00-context in_progress until routing approved + context brief written.'
       routing_amendment_approved: true
     01-requirements:
-      status: pending
+      status: in_progress
       started_at: '2026-07-08'
       completed_at: '2026-07-08'
+      started_at_reopen: '2026-07-10'
       partial_rerun_at: '2026-07-08'
       partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
       session_id: S010-unify-llm-service
@@ -115,7 +116,14 @@ project:
       prior_status: completed
       prior_completed_at: '2026-07-08'
       mode: delta_reopen
-      note: Delta reopen for F39 client consolidation follow-on (post 00-context routing A)
+      note: Delta reopen started — F39 client consolidation (R-S010-00-1..9). Branch recreated from main after #142 merge.
+      substeps:
+        interviews:
+          completed: 0
+          total: null
+          current_template: document-manifest
+          current_section: phase-2-manifest-review
+        manifest_approved: false
     04-tech-plan:
       status: completed
       started_at: '2026-07-08'
@@ -595,9 +603,9 @@ active_session:
     note: Partial re-run complete; consolidation decisions + routing A approved
   - stage: 01-requirements
     prior_completed_at: '2026-07-08'
-    status: pending
+    status: in_progress
     mode: delta_reopen
-    note: Re-open for F39 client consolidation follow-on
+    note: Re-open for F39 client consolidation follow-on — interview at document manifest
   - stage: 02-verify-plan
     status: skipped
     skip_rationale: Tooling/docs already exist
@@ -1787,9 +1795,10 @@ stages:
       00-context in_progress until routing approved + context brief written.'
     routing_amendment_approved: true
   01-requirements:
-    status: pending
+    status: in_progress
     started_at: '2026-07-08'
     completed_at: '2026-07-08'
+    started_at_reopen: '2026-07-10'
     partial_rerun_at: '2026-07-08'
     partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
     session_id: S010-unify-llm-service
@@ -1859,8 +1868,16 @@ stages:
       - data/fixtures/eval/qa_pairs.json
       report: docs/sessions/S007-rag-eval/reports/01-requirements.md
     prior_status: completed
+    prior_completed_at: '2026-07-08'
     mode: delta_reopen
-    note: Delta reopen for F39 client consolidation follow-on
+    note: Delta reopen started — F39 client consolidation (R-S010-00-1..9). Branch recreated from main after #142 merge.
+    substeps:
+      interviews:
+        completed: 0
+        total: null
+        current_template: document-manifest
+        current_section: phase-2-manifest-review
+      manifest_approved: false
   02-verify-plan:
     status: completed
     started_at: '2026-05-24'
@@ -3531,12 +3548,20 @@ evolve_cycles:
       - R-S010-00-9-no-abc
       routing_amendment_pending: false
     01-requirements:
-      status: pending
+      status: in_progress
       started: '2026-07-08'
+      started_at_reopen: '2026-07-10'
       report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
       prior_completed: '2026-07-08'
       mode: delta_reopen
-      note: Delta reopen for F39 client consolidation follow-on
+      note: Delta reopen started — F39 client consolidation (R-S010-00-1..9). Branch recreated from main after #142 merge.
+      substeps:
+        interviews:
+          completed: 0
+          total: null
+          current_template: document-manifest
+          current_section: phase-2-manifest-review
+        manifest_approved: false
     04-tech-plan:
       status: pending
       started: '2026-07-08'
@@ -4933,6 +4958,7 @@ decisions_log:
   resolution: Parent must manage branch/checkout; workflow-state only
   stage: 00-context
   timestamp: '2026-07-10'
+- '2026-07-10: S010 branch feat/S010-unify-llm-service recreated from main; 00-context artifacts + qwen3.6 registry fix committed and pushed; 01-requirements delta_reopen interview starting at document manifest.'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -5251,6 +5277,8 @@ git_history:
     base: main
     status: open
     created_at: '2026-07-08'
+    recreated_at: '2026-07-10'
+    note: Recreated from main after #142 merge for F39 client consolidation follow-on
   - name: feat/S009-playground-model-download
     purpose: EV-010 / S009 — F38 playground model download (super-admin Ollama UI)
     base: main
@@ -5741,6 +5769,29 @@ git_history:
     session_id: S008-eval-ux-playground
     files_changed: 3
     timestamp: '2026-07-03T16:39:00Z'
+  - sha: 3ef5350
+    branch: feat/S010-unify-llm-service
+    message: '[S010] docs: complete 00-context client consolidation reopen'
+    stage: 00-context
+    session_id: S010-unify-llm-service
+    files_changed:
+    - docs/sessions/S010-unify-llm-service/context-brief.md
+    - docs/sessions/S010-unify-llm-service/session-brief.md
+    - docs/sessions/S010-unify-llm-service/routing-plan.md
+    - workflow-state.yaml
+    timestamp: '2026-07-10'
+  - sha: 46b5f8e
+    branch: feat/S010-unify-llm-service
+    message: '[S010] fix: share HF registry and map qwen3.6 catalog tags'
+    stage: 01-requirements
+    session_id: S010-unify-llm-service
+    note: Carry-forward local fix committed with session branch; catalog gate aligns with R-S010-00-6
+    files_changed:
+    - packages/shared-schemas/vecinita_shared_schemas/ollama_hf_registry.py
+    - infra/modal/llm_model_registry.py
+    - docs/bug-reports/BUG-2026-07-09-qwen36-not-downloaded.md
+    - tests/bugs/test_bug_2026_07_09_qwen36_not_downloaded.py
+    timestamp: '2026-07-10'
 constraints:
   cost:
     target_usd_per_month: 25
