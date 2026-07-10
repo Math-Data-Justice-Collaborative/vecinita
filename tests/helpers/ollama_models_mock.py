@@ -37,4 +37,4 @@ class MockOllamaModelsClient:
         )
 
     def close(self) -> None:
-        """Match OllamaModelsClient lifecycle for create_app teardown."""
+        """Match LlmClient lifecycle for create_app teardown."""

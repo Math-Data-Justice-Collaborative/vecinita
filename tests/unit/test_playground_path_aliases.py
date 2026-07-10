@@ -10,11 +10,11 @@ import ast
 from pathlib import Path
 
 import pytest
-from vecinita_internal_write_api import ollama_models_client as models_client_mod
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _LLM_APP = _REPO_ROOT / "infra" / "modal" / "llm_app.py"
 _WRITE_APP = _REPO_ROOT / "apps" / "internal-write-api" / "vecinita_internal_write_api" / "app.py"
+_LLM_CLIENT = _REPO_ROOT / "packages" / "llm-client" / "vecinita_llm_client" / "client.py"
 
 _MODAL_ALIAS_PATHS = frozenset({"/models/ollama", "/models/ollama/pull"})
 _INTERNAL_ALIAS_PATHS = frozenset(
@@ -51,17 +51,9 @@ def test_internal_write_api_keeps_ollama_path_aliases() -> None:
     assert not missing, f"app.py missing path aliases: {sorted(missing)}"
 
 
-def test_models_client_requests_ollama_modal_paths() -> None:
-    """Upstream Modal client must call ``/models/ollama`` and ``/models/ollama/pull``.
-
-    Today that lives in ``OllamaModelsClient``; after T77.4 it moves to ``LlmClient``.
-    """
-    llm_client_src = (
-        _REPO_ROOT / "packages" / "llm-client" / "vecinita_llm_client" / "client.py"
-    ).read_text(encoding="utf-8")
-    models_client_src = Path(models_client_mod.__file__).read_text(encoding="utf-8")
-    combined = f"{llm_client_src}\n{models_client_src}"
-    tree = ast.parse(combined)
+def test_llm_client_requests_ollama_modal_paths() -> None:
+    """Unified ``LlmClient`` must call ``/models/ollama`` and ``/models/ollama/pull``."""
+    tree = ast.parse(_LLM_CLIENT.read_text(encoding="utf-8"))
     constants = _string_constants(tree)
     assert "/models/ollama" in constants
     assert "/models/ollama/pull" in constants

@@ -2034,6 +2034,7 @@ dependencies = [
     { name = "vecinita-database" },
     { name = "vecinita-embedding-client" },
     { name = "vecinita-eval" },
+    { name = "vecinita-llm-client" },
     { name = "vecinita-shared-schemas" },
 ]
 
@@ -2047,6 +2048,7 @@ requires-dist = [
     { name = "vecinita-database", editable = "apps/database" },
     { name = "vecinita-embedding-client", editable = "packages/embedding-client" },
     { name = "vecinita-eval", editable = "packages/eval" },
+    { name = "vecinita-llm-client", editable = "packages/llm-client" },
     { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
 ]
 

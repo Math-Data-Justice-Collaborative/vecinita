@@ -8,12 +8,13 @@ import time
 import uuid as _uuid
 from datetime import UTC, datetime
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Annotated, cast
+from typing import TYPE_CHECKING, Annotated, Protocol, cast
 from uuid import UUID, uuid4
 
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, status
 from sqlalchemy import create_engine, text
+from vecinita_llm_client import LlmClient, LlmClientError
 from vecinita_shared_schemas.audit_headers import (
     AUDIT_ACTOR_ID_HEADER,
     AUDIT_ACTOR_ROLE_HEADER,
@@ -147,11 +148,6 @@ from vecinita_internal_write_api.ollama_library_client import (
     OllamaLibraryClientError,
     OllamaLibraryClientProtocol,
 )
-from vecinita_internal_write_api.ollama_models_client import (
-    OllamaModelsClient,
-    OllamaModelsClientError,
-    OllamaModelsClientProtocol,
-)
 from vecinita_internal_write_api.rag_production_config_service import (
     RagConfigPromoteNotFoundError,
     get_active_rag_config,
@@ -171,6 +167,16 @@ if TYPE_CHECKING:
     from vecinita_eval.judges import JudgeClient
 
 _MAX_DOCUMENT_TAGS = 10
+
+
+class LlmModelsClientProtocol(Protocol):
+    """List/pull playground models on Modal (mockable in tests; T77.4)."""
+
+    def list_models(self) -> OllamaModelListResponse: ...  # noqa: D102
+
+    def start_pull(self, model_id: str) -> OllamaModelPullResponse: ...  # noqa: D102
+
+    def close(self) -> None: ...  # noqa: D102
 
 
 def _dependency_health_url(base: str) -> str:
@@ -297,11 +303,11 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
         return None
 
 
-def _default_ollama_models_client() -> OllamaModelsClient | None:
-    """Auto-create an OllamaModelsClient from env vars when available."""
+def _default_ollama_models_client() -> LlmClient | None:
+    """Auto-create an LlmClient for Modal list/pull from env vars when available."""
     try:
-        return OllamaModelsClient()
-    except OllamaModelsClientError:
+        return LlmClient(require_proxy_key=True)
+    except LlmClientError:
         return None
 
 
@@ -327,14 +333,14 @@ def _merge_ollama_model_list(response: OllamaModelListResponse) -> OllamaModelLi
 
 
 def _ollama_volume_availability(
-    ollama_models: OllamaModelsClientProtocol | None,
+    ollama_models: LlmModelsClientProtocol | None,
 ) -> dict[str, bool]:
     """Map model_id to volume availability for catalog tag overlays."""
     if ollama_models is None:
         return {}
     try:
         response = _merge_ollama_model_list(ollama_models.list_models())
-    except OllamaModelsClientError:
+    except LlmClientError:
         return {}
     return build_ollama_availability_lookup(list(response.items))
 
@@ -349,7 +355,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     jobs_client: DataManagementJobsClient | None = None,
     eval_embed_fn: Callable[[str], list[float]] | None = None,
     eval_judge: JudgeClient | None = None,
-    ollama_models_client: OllamaModelsClientProtocol | None = None,
+    ollama_models_client: LlmModelsClientProtocol | None = None,
     ollama_library_client: OllamaLibraryClientProtocol | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
@@ -1711,7 +1717,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             return _vllm_fallback_model_list()
         try:
             return _merge_ollama_model_list(ollama_models.list_models())
-        except OllamaModelsClientError:
+        except LlmClientError:
             return _vllm_fallback_model_list()
 
     @app.post(
@@ -1730,7 +1736,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             )
         try:
             return ollama_models.start_pull(body.model_id)
-        except OllamaModelsClientError as exc:
+        except LlmClientError as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=str(exc),

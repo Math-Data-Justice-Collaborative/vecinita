@@ -481,7 +481,7 @@ def test_list_models_returns_parsed_response() -> None:
         proxy_key="proxy-secret",
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
-    listing = client.list_models()  # type: ignore[attr-defined]
+    listing = client.list_models()
     assert isinstance(listing, OllamaModelListResponse)
     assert listing.items[0].model_id == "qwen2.5:1.5b-instruct"
     assert listing.items[0].available is True
@@ -499,7 +499,7 @@ def test_list_models_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     with pytest.raises(LlmClientError, match="list_models failed"):
-        client.list_models()  # type: ignore[attr-defined]
+        client.list_models()
     client.close()
 
 
@@ -527,7 +527,7 @@ def test_start_pull_posts_model_id() -> None:
         proxy_key="proxy-secret",
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
-    response = client.start_pull("mistral:7b")  # type: ignore[attr-defined]
+    response = client.start_pull("mistral:7b")
     assert isinstance(response, OllamaModelPullResponse)
     assert response.job_id == job_id
     assert response.status == "pulling"
@@ -543,7 +543,7 @@ def test_start_pull_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     with pytest.raises(LlmClientError, match="start_pull failed"):
-        client.start_pull("missing:tag")  # type: ignore[attr-defined]
+        client.start_pull("missing:tag")
     client.close()
 
 
@@ -565,5 +565,5 @@ def test_llm_client_uses_shared_resolver_for_env(
         http_client=httpx.Client(transport=transport, base_url="http://resolved.test"),
     )
     assert client.default_model_id == "qwen2.5:1.5b-instruct"
-    assert client.list_models().items == []  # type: ignore[attr-defined]
+    assert client.list_models().items == []
     client.close()

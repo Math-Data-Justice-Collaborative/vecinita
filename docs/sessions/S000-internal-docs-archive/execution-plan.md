@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M77: Slice A — one client + rename |
-| **Active task** | **T77.4** (pending) — expand LlmClient; delete OllamaModelsClient |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T77.3 |
+| **Active task** | **T77.5** (pending) — rename ollama_* → playground_* |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T77.4 |
 | **Last updated** | 2026-07-10 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
@@ -1580,8 +1580,8 @@ path aliases.
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T77.1 | Test: extend `tests/unit/test_llm_client.py` — list/pull + shared resolver (TC-144) | Test | completed | RD-163, TP-S010-18/20, TC-144 | — | 2026-07-10 | S010 | F39 |
 | T77.2 | Test: rename/compat — models list/pull still hit `/models/ollama*` aliases | Test | completed | RD-166, TP-S010-19 | — | 2026-07-10 | S010 | F39 |
-| T77.3 | Code: `shared-schemas` LLM HTTP config resolver (URL/proxy/timeout) | Code | in_progress | TP-S010-20 | T77.1 | — | S010 | F39 |
-| T77.4 | Code: expand `LlmClient`; migrate call sites; delete `OllamaModelsClient` | Code | pending | RD-163, TP-S010-18 | T77.1, T77.3 | — | S010 | F39 |
+| T77.3 | Code: `shared-schemas` LLM HTTP config resolver (URL/proxy/timeout) | Code | completed | TP-S010-20 | T77.1 | 2026-07-10 | S010 | F39 |
+| T77.4 | Code: expand `LlmClient`; migrate call sites; delete `OllamaModelsClient` | Code | completed | RD-163, TP-S010-18 | T77.1, T77.3 | 2026-07-10 | S010 | F39 |
 | T77.5 | Code: rename `ollama_*` → `playground_*` (schemas, modules, FE types/UI copy); path aliases retained | Code | pending | RD-166, TP-S010-19 | T77.2, T77.4 | — | S010 | F39 |
 | T77.6 | Test: Vitest + Playwright T0-ui for FE rename (UJ-048 / TC-135–137) | Test | pending | TP-S010-30 | T77.5 | — | S010 | F39 |
 | T77.7 | Docs: api-contract + feature-list note — aliases + renamed types | Docs | pending | api-contract §playground | T77.5 | — | S010 | F39 |
@@ -2263,8 +2263,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T76.7 | M76 | 17 | Operator | completed | T76.6 | — | S010 | F39 | 2026-07-09 |
 | T77.1 | M77 | 18 | Test | completed | — | 2026-07-10 | S010 | F39 | — |
 | T77.2 | M77 | 18 | Test | completed | — | 2026-07-10 | S010 | F39 | — |
-| T77.3 | M77 | 18 | Code | pending | T77.1 | — | S010 | F39 | — |
-| T77.4 | M77 | 18 | Code | pending | T77.1, T77.3 | — | S010 | F39 | — |
+| T77.3 | M77 | 18 | Code | completed | T77.1 | 2026-07-10 | S010 | F39 | — |
+| T77.4 | M77 | 18 | Code | completed | T77.1, T77.3 | 2026-07-10 | S010 | F39 | — |
 | T77.5 | M77 | 18 | Code | pending | T77.2, T77.4 | — | S010 | F39 | — |
 | T77.6 | M77 | 18 | Test | pending | T77.5 | — | S010 | F39 | — |
 | T77.7 | M77 | 18 | Docs | pending | T77.5 | — | S010 | F39 | — |

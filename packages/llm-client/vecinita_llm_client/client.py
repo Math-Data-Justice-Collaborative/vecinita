@@ -3,25 +3,25 @@
 from __future__ import annotations
 
 import json
-import logging
-import os
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Final, Self, cast
+from typing import TYPE_CHECKING, Self, cast
 
 import httpx
 from vecinita_shared_schemas.json_types import as_json_object
+from vecinita_shared_schemas.llm_http import (
+    LlmHttpConfigError,
+    resolve_llm_http_config,
+)
+from vecinita_shared_schemas.ollama_models import (
+    OllamaModelListResponse,
+    OllamaModelPullRequest,
+    OllamaModelPullResponse,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-logger = logging.getLogger(__name__)
-
-_ENV_LLM_URL: Final[str] = "VECINITA_MODAL_LLM_URL"
-_ENV_OLLAMA_URL: Final[str] = "VECINITA_MODAL_OLLAMA_URL"
-_ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
-_ENV_LLM_MODEL_ID: Final[str] = "VECINITA_LLM_MODEL_ID"
-_ENV_OLLAMA_MODEL_ID: Final[str] = "VECINITA_OLLAMA_MODEL_ID"
-_PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
+_PROXY_HEADER = "X-Vecinita-Proxy-Key"
 
 
 class LlmClientError(RuntimeError):
@@ -29,9 +29,9 @@ class LlmClientError(RuntimeError):
 
 
 class LlmClient:
-    """Call Modal ``vecinita-llm`` ``/generate`` and ``/generate/stream`` endpoints."""
+    """Call Modal ``vecinita-llm`` generate/stream/warm and model list/pull endpoints."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913  # shared resolver surface: url/proxy/timeout/model/http
         self,
         base_url: str | None = None,
         *,
@@ -39,28 +39,26 @@ class LlmClient:
         proxy_key: str | None = None,
         timeout: float = 120.0,
         http_client: httpx.Client | None = None,
+        require_proxy_key: bool = False,
     ) -> None:
         """Initialize the client from ``base_url`` or ``VECINITA_MODAL_LLM_URL``."""
-        legacy_ollama = os.environ.get(_ENV_OLLAMA_URL)
-        if legacy_ollama:
-            logger.warning(
-                "%s is deprecated (ADR-037); use %s only",
-                _ENV_OLLAMA_URL,
-                _ENV_LLM_URL,
+        try:
+            config = resolve_llm_http_config(
+                base_url=base_url,
+                proxy_key=proxy_key,
+                timeout=timeout,
+                model_id=model_id,
+                require_proxy_key=require_proxy_key,
             )
-        resolved = base_url or os.environ.get(_ENV_LLM_URL) or legacy_ollama
-        if not resolved:
-            msg = f"{_ENV_LLM_URL} or base_url is required"
-            raise LlmClientError(msg)
-        self._base_url = resolved.rstrip("/")
-        self._model_id = (
-            model_id or os.environ.get(_ENV_LLM_MODEL_ID) or os.environ.get(_ENV_OLLAMA_MODEL_ID)
-        )
-        self._proxy_key = proxy_key or os.environ.get(_ENV_PROXY_KEY)
+        except LlmHttpConfigError as exc:
+            raise LlmClientError(str(exc)) from exc
+        self._base_url = config.base_url
+        self._model_id = config.model_id
+        self._proxy_key = config.proxy_key
         self._owns_client = http_client is None
         self._client = http_client or httpx.Client(
             base_url=self._base_url,
-            timeout=timeout,
+            timeout=config.timeout,
             follow_redirects=True,
         )
 
@@ -173,3 +171,27 @@ class LlmClient:
                 token = payload.get("token")
                 if isinstance(token, str) and token:
                     yield token
+
+    def list_models(self) -> OllamaModelListResponse:
+        """Fetch models staged on the Modal llm-models volume (path alias ``/models/ollama``)."""
+        response = self._client.get(
+            "/models/ollama",
+            headers=self._request_headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"list_models failed: {response.status_code} {response.text}"
+            raise LlmClientError(msg)
+        return OllamaModelListResponse.model_validate(response.json())
+
+    def start_pull(self, model_id: str) -> OllamaModelPullResponse:
+        """Enqueue a background HF download for a playground model tag."""
+        body = OllamaModelPullRequest(model_id=model_id)
+        response = self._client.post(
+            "/models/ollama/pull",
+            json=body.model_dump(mode="json"),
+            headers=self._request_headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"start_pull failed: {response.status_code} {response.text}"
+            raise LlmClientError(msg)
+        return OllamaModelPullResponse.model_validate(response.json())
