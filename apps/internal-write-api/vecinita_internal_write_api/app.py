@@ -95,7 +95,11 @@ from vecinita_shared_schemas.internal_write import (
     TopServedResponse,
 )
 from vecinita_shared_schemas.json_types import as_json_object
-from vecinita_shared_schemas.ollama_catalog import merge_ollama_catalog_with_volume
+from vecinita_shared_schemas.ollama_catalog import (
+    build_ollama_availability_lookup,
+    merge_ollama_catalog_with_volume,
+    ollama_catalog_tag_available,
+)
 from vecinita_shared_schemas.ollama_models import (
     OllamaModelCatalogFamiliesResponse,
     OllamaModelCatalogFamily,
@@ -332,7 +336,7 @@ def _ollama_volume_availability(
         response = _merge_ollama_model_list(ollama_models.list_models())
     except OllamaModelsClientError:
         return {}
-    return {item.model_id: item.available for item in response.items}
+    return build_ollama_availability_lookup(list(response.items))
 
 
 def _default_ollama_library_client() -> OllamaLibraryClient:
@@ -1771,7 +1775,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             tags=[
                 OllamaModelCatalogTag(
                     model_id=tag,
-                    available=availability.get(tag, False),
+                    available=ollama_catalog_tag_available(tag, availability),
                 )
                 for tag in tags
             ],

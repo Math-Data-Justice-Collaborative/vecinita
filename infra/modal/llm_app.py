@@ -272,6 +272,10 @@ image = (
         }
     )
     .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
+    .add_local_dir(
+        _REPO_ROOT / "packages" / "shared-schemas" / "vecinita_shared_schemas",
+        remote_path="/root/vecinita_shared_schemas",
+    )
 )
 
 
