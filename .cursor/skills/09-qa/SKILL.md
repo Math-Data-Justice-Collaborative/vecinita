@@ -353,3 +353,13 @@ Use as checklist when writing findings; not all apply every run.
 - Present **advisories** with approve / defer / fix-now (fix-now → advisory remediation pass above)
 - Cross-check the session `reports/qa-report.md` against `docs/feature-list.md` and acceptance criteria
 - Not re-run full 09 unless codebase changed materially since report date
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block
+(09 and 10 run in parallel before 11):
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/10-e2e/SKILL.md — then @.cursor/skills/11-verify-impl/SKILL.md after 09+10
+```

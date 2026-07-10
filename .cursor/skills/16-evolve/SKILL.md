@@ -236,3 +236,19 @@ Same as pipeline — never re-run entire phases for verification failures.
 
 - YAML schema, feature intake, checkpoints: [reference.md](reference.md)
 - Full pipeline diagram: [pipeline/SKILL.md](../pipeline/SKILL.md)
+
+## Continue
+
+When this stage completes Phase 0–1 routing, end the user-facing summary with the first routed child stage, for example:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/01-requirements/SKILL.md — delta mode per evolve routing plan
+```
+
+Substitute the actual next path from the approved evolve routing plan. After the cycle closes, optional:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/17-retrospective/SKILL.md
+```

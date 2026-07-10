@@ -283,3 +283,14 @@ repeat post-deploy surprises (RET-001).
 6. **State always current**: Execution plan reflects true progress at all times
 7. **Verify before PR**: Always invoke 08-verify-build at boundaries
 8. **Maximize per pass**: Complete many tasks and milestones per invocation
+
+## Continue
+
+When this stage completes a milestone boundary (or the full build), end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/08-verify-build/SKILL.md
+```
+
+If more tasks remain in the same milestone and 08 is not required yet, omit the continue block and keep building.

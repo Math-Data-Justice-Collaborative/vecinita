@@ -448,3 +448,13 @@ Next step: [next stage in active_session.routing_plan — often 02-verify-plan, 
 8. **No stale archive paths**: Active handoff artifacts live under
    `docs/sessions/{active_session.id}/` — never require
    `docs/sessions/S000-internal-docs-archive/context-brief.md` for new work.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block
+(if the next stage in `active_session.routing_plan` differs, substitute that path):
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/02-verify-plan/SKILL.md
+```

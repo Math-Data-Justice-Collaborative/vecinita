@@ -256,3 +256,12 @@ Next step: 13-deploy-smoke
 3. **Rollback is required**: Every deployment must have a documented rollback procedure.
 4. **User approves risks**: Every accepted risk requires explicit user acknowledgment.
 5. **Checklist persists**: The deploy checklist is a reusable artifact for future deploys.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/13-deploy-smoke/SKILL.md
+```

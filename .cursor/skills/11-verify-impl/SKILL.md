@@ -275,3 +275,12 @@ Write `{active_session.artifacts_dir}/reports/verify-impl.md`.
 3. **Feature-level granularity**: Present results per feature, not per file or per check.
 4. **Scope awareness**: Detect both creep and gaps.
 5. **Evidence-backed**: Every finding cites QA report, E2E report, or acceptance criteria.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/12-verify-deploy/SKILL.md
+```

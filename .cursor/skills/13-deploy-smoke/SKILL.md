@@ -317,3 +317,14 @@ If the user requests a rollback:
 6. **Rollback documented**: Every deployment has a rollback command.
 7. **State persists**: Deploy state survives session boundaries.
 8. **Changelog**: Aggregate commits into structured changelog at deploy time.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/15-service-health/SKILL.md
+```
+
+Or stop here if deploy closure is enough; use `@.cursor/skills/14-hotfix/SKILL.md` only when a production defect needs a surgical patch.

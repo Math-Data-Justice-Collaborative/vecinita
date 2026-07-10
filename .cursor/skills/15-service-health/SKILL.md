@@ -215,3 +215,23 @@ Update `docs/sessions/S000-internal-docs-archive/service-health-state.md` and `w
    red CI before closing the report (see §Main CI).
 6. **CI vs staging:** A red H0ci does not invalidate H1–H5 staging passes — report separately
    (infra can be PASS for live URLs while H0ci FAIL blocks repo health).
+
+## Continue
+
+When this stage completes, end the user-facing summary with the matching verbatim block:
+
+If a code defect needs a patch:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/14-hotfix/SKILL.md
+```
+
+If adding features / scope change:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/16-evolve/SKILL.md
+```
+
+Otherwise no required next stage — stop, or open a new session with `@.cursor/skills/00-context/SKILL.md`.

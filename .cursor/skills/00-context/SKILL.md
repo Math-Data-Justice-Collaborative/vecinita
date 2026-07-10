@@ -649,9 +649,8 @@ If Phase 1B was skipped, omit the "Ecosystem scan" block.
 If template is `none`, omit "deploy targets" line.
 If handoff seed was skipped, omit locked/open counts and the seed load line.
 
-**Handoff action:** After Phase 5, if 01 is next in the routing plan, **invoke
-[01-requirements](../01-requirements/SKILL.md)** in the same session (or AskQuestion
-"Continue to 01 now?" / "Stop here"). Do not leave the user to discover the seed path.
+**Handoff action:** After Phase 5, print the **Continue** block at the end of this skill
+(verbatim). Do not leave the user to discover the seed path or the next skill.
 
 ## Output Rules
 
@@ -664,3 +663,13 @@ If handoff seed was skipped, omit locked/open counts and the seed load line.
 7. **01 handoff seed**: When 01 is in the routing plan, Phase 4.5 seed is mandatory before
    00 is `completed`. Session-scoped paths only — never write new briefs to
    `docs/sessions/S000-internal-docs-archive/` for active work.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block
+(if `01-requirements` is not next in `active_session.routing_plan`, substitute that stage's `@.cursor/skills/.../SKILL.md` path instead):
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/01-requirements/SKILL.md — load checkpoints/01-requirements-seed.md first
+```

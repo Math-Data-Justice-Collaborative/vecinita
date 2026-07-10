@@ -329,3 +329,12 @@ Next step: 03-plan-tooling
 6. **Cite the source**: Every statement notes its origin and confidence rationale.
 7. **Consistency is embedded**: Cross-document checks run as part of this skill, not as
    a separate invocation.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/03-plan-tooling/SKILL.md
+```

@@ -230,3 +230,12 @@ Next step: 06-tech-tooling
 5. **Immediate persistence**: State writes after every verdict.
 6. **Surgical updates**: Change only the specific claim in source documents.
 7. **Product alignment**: Technical decisions must not violate product requirements.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/06-tech-tooling/SKILL.md
+```
