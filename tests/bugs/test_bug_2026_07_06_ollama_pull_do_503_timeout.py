@@ -3,7 +3,7 @@
 Production symptom: POST /internal/v1/models/ollama/pull returns DO HTML 503/504
 (`via_upstream`, `connection_timed_out`) in ~200ms — not a slow gateway timeout.
 
-Root cause: internal-write-api returns JSON 503 when Modal Ollama is unwired; DO App
+Root cause: internal-write-api returns JSON 503 when Modal playground LLM is unwired; DO App
 Platform replaces upstream 503 with its HTML error page. GET list still returns 200
 (vLLM fallback + catalog) so the Download UI is shown for unavailable models.
 """
@@ -32,7 +32,7 @@ from tests.unit.shared_schemas.auth_fixtures import (
 def super_admin_write_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[TestClient, dict[str, str]]:
-    """Super-admin TestClient with eval harness; Modal Ollama env vars unset."""
+    """Super-admin TestClient with eval harness; Modal playground LLM env vars unset."""
     reset_auth_config_for_tests()
     private_key = generate_es256_keypair()
     monkeypatch.setenv(
@@ -88,7 +88,7 @@ def test_ollama_list_still_ok_while_pull_unconfigured(
 def test_ollama_pull_returns_202_when_client_configured(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """After wiring Modal Ollama, pull must return 202 (not DO HTML 503)."""
+    """After wiring Modal playground LLM, pull must return 202 (not DO HTML 503)."""
     reset_auth_config_for_tests()
     private_key = generate_es256_keypair()
     monkeypatch.setenv(
@@ -102,13 +102,13 @@ def test_ollama_pull_returns_202_when_client_configured(
     set_auth_config_for_tests(make_auth_config(private_key))
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
-    from tests.helpers.ollama_models_mock import MockOllamaModelsClient  # noqa: PLC0415
+    from tests.helpers.playground_models_mock import MockPlaygroundModelsClient  # noqa: PLC0415
 
     client = TestClient(
         create_app(
             eval_embed_fn=eval_embed_fn,
             eval_judge=MockEvalJudge(),
-            ollama_models_client=MockOllamaModelsClient(),
+            playground_models_client=MockPlaygroundModelsClient(),
         ),
     )
     headers = {"Authorization": f"Bearer {sign_test_jwt(private_key, role='super-admin')}"}

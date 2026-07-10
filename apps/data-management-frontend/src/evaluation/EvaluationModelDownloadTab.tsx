@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useAdminT } from "@/hooks/useAdminT";
-import { useOllamaModelDownload } from "./useOllamaModelDownload";
+import { usePlaygroundModelDownload } from "./usePlaygroundModelDownload";
 
 function CatalogFamilyRow({
   slug,
@@ -114,7 +114,7 @@ export function EvaluationModelDownloadTab() {
     loadFamilyTags,
     downloadModel,
     resetDownloadStatus,
-  } = useOllamaModelDownload();
+  } = usePlaygroundModelDownload();
   const [customModelTag, setCustomModelTag] = useState("");
 
   useEffect(() => {

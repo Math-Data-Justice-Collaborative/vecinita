@@ -1,10 +1,10 @@
-"""Ollama tag → HuggingFace registry inference (ADR-037)."""
+"""Playground tag → HuggingFace registry inference (ADR-037)."""
 
 from __future__ import annotations
 
 import pytest
-from vecinita_shared_schemas.ollama_hf_registry import (
-    normalize_ollama_tag,
+from vecinita_shared_schemas.playground_hf_registry import (
+    normalize_playground_tag,
     resolve_hf_repo,
 )
 
@@ -32,7 +32,7 @@ _CATALOG_TAG_CASES: tuple[tuple[str, str], ...] = (
 
 
 @pytest.mark.parametrize(("model_id", "expected_repo"), _CATALOG_TAG_CASES)
-def test_resolve_hf_repo_maps_common_ollama_catalog_tags(
+def test_resolve_hf_repo_maps_common_playground_catalog_tags(
     model_id: str,
     expected_repo: str,
 ) -> None:
@@ -40,10 +40,10 @@ def test_resolve_hf_repo_maps_common_ollama_catalog_tags(
     assert resolve_hf_repo(model_id) == expected_repo
 
 
-def test_normalize_ollama_tag_strips_quant_and_mlx_suffixes() -> None:
+def test_normalize_playground_tag_strips_quant_and_mlx_suffixes() -> None:
     """Packaging suffixes strip before registry lookup."""
-    assert normalize_ollama_tag("qwen2.5:3b-instruct-q4_K_M") == "qwen2.5:3b-instruct"
-    assert normalize_ollama_tag("qwen3.6:27b-mlx") == "qwen3.6:27b"
+    assert normalize_playground_tag("qwen2.5:3b-instruct-q4_K_M") == "qwen2.5:3b-instruct"
+    assert normalize_playground_tag("qwen3.6:27b-mlx") == "qwen3.6:27b"
 
 
 def test_resolve_hf_repo_unknown_tag_raises() -> None:

@@ -51,7 +51,7 @@ const PLAYGROUND_RUN_ID = "00000000-0000-0000-0000-0000000000aa";
 /** Eval run surfaced on unified GET /jobs (UJ-044 / TC-124). */
 export const EVAL_JOB_ID = "55555555-5555-4555-8555-555555555555";
 
-const OLLAMA_MODELS_BODY = {
+const PLAYGROUND_MODELS_BODY = {
   items: [
     { model_id: "qwen2.5:1.5b-instruct", available: true },
     { model_id: "llama3.2:3b", available: true },
@@ -280,7 +280,7 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
       contentType: "application/json",
       body: JSON.stringify({
         slug,
-        tags: OLLAMA_MODELS_BODY.items,
+        tags: PLAYGROUND_MODELS_BODY.items,
       }),
     });
     return;
@@ -299,7 +299,7 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify(OLLAMA_MODELS_BODY),
+      body: JSON.stringify(PLAYGROUND_MODELS_BODY),
     });
     return;
   }

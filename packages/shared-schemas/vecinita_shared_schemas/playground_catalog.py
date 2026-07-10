@@ -1,12 +1,12 @@
-"""Curated Ollama model catalog for eval playground picker + download (F38 extension)."""
+"""Curated playground model catalog for eval playground picker + download (F38 extension)."""
 
 from __future__ import annotations
 
-from vecinita_shared_schemas.ollama_hf_registry import normalize_ollama_tag
-from vecinita_shared_schemas.ollama_models import OllamaModelSummary
+from vecinita_shared_schemas.playground_hf_registry import normalize_playground_tag
+from vecinita_shared_schemas.playground_models import PlaygroundModelSummary
 
 # Qwen2.5 instruct family + common quantization tags on the Modal volume.
-OLLAMA_PLAYGROUND_CATALOG: tuple[str, ...] = (
+PLAYGROUND_MODEL_CATALOG: tuple[str, ...] = (
     "qwen2.5:0.5b-instruct",
     "qwen2.5:1.5b-instruct",
     "qwen2.5:3b-instruct",
@@ -22,16 +22,16 @@ OLLAMA_PLAYGROUND_CATALOG: tuple[str, ...] = (
 )
 
 
-def merge_ollama_catalog_with_volume(
-    volume_items: list[OllamaModelSummary],
-) -> list[OllamaModelSummary]:
+def merge_playground_catalog_with_volume(
+    volume_items: list[PlaygroundModelSummary],
+) -> list[PlaygroundModelSummary]:
     """Return full catalog entries with volume availability; append extra volume-only tags."""
     availability = {item.model_id: item.available for item in volume_items}
-    merged: list[OllamaModelSummary] = []
+    merged: list[PlaygroundModelSummary] = []
     seen: set[str] = set()
-    for model_id in OLLAMA_PLAYGROUND_CATALOG:
+    for model_id in PLAYGROUND_MODEL_CATALOG:
         merged.append(
-            OllamaModelSummary(
+            PlaygroundModelSummary(
                 model_id=model_id,
                 available=availability.get(model_id, False),
             ),
@@ -45,21 +45,21 @@ def merge_ollama_catalog_with_volume(
     return merged
 
 
-def build_ollama_availability_lookup(
-    volume_items: list[OllamaModelSummary],
+def build_playground_availability_lookup(
+    volume_items: list[PlaygroundModelSummary],
 ) -> dict[str, bool]:
-    """Map exact and normalized Ollama tags to volume availability."""
+    """Map exact and normalized playground tags to volume availability."""
     lookup: dict[str, bool] = {}
     for item in volume_items:
         if not item.available:
             continue
         lookup[item.model_id] = True
-        lookup[normalize_ollama_tag(item.model_id)] = True
+        lookup[normalize_playground_tag(item.model_id)] = True
     return lookup
 
 
-def ollama_catalog_tag_available(tag: str, availability: dict[str, bool]) -> bool:
+def playground_catalog_tag_available(tag: str, availability: dict[str, bool]) -> bool:
     """Return whether a catalog tag is staged on the Modal volume."""
     if availability.get(tag, False):
         return True
-    return availability.get(normalize_ollama_tag(tag), False)
+    return availability.get(normalize_playground_tag(tag), False)

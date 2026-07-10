@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as adminApi from "@/api/admin";
 import { fetchInputUrl } from "./fetch-mock";
-import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
+import { mockPlaygroundApiFetch } from "./helpers/mockPlaygroundApi";
 import {
   renderAppRoutesReady,
   renderSuperAdminAppRoutesReady,
@@ -80,9 +80,9 @@ function defaultPlaygroundFetch(
   if (url.includes("/internal/v1/eval/criteria")) {
     return { ok: true, json: async () => CRITERIA_BODY };
   }
-  const ollamaMock = mockOllamaApiFetch(url);
-  if (ollamaMock !== null) {
-    return ollamaMock;
+  const playgroundMock = mockPlaygroundApiFetch(url);
+  if (playgroundMock !== null) {
+    return playgroundMock;
   }
   if (url.includes("/internal/v1/eval/config-presets")) {
     return { ok: true, json: async () => ({ items: [] }) };
@@ -260,7 +260,7 @@ describe("EvaluationPlayground (UJ-045)", () => {
     });
   });
 
-  it("loads Ollama models for the model picker (RD-139)", async () => {
+  it("loads playground models for the model picker (RD-139)", async () => {
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
       expect(
@@ -693,12 +693,12 @@ describe("EvaluationPlayground (UJ-045)", () => {
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(
-        /Failed to load Ollama models/i,
+        /Failed to load playground models/i,
       );
     });
   });
 
-  it("falls back to vLLM default model when Ollama list returns 503", async () => {
+  it("falls back to vLLM default model when playground list returns 503", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
@@ -719,7 +719,7 @@ describe("EvaluationPlayground (UJ-045)", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("falls back to vLLM default model when Ollama list returns 504", async () => {
+  it("falls back to vLLM default model when playground list returns 504", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
@@ -826,7 +826,7 @@ describe("EvaluationPlayground (UJ-045)", () => {
     await Promise.resolve();
   });
 
-  it("changes the selected Ollama model from the picker", async () => {
+  it("changes the selected playground model from the picker", async () => {
     await renderAppRoutesReady("/evaluation?tab=playground");
     await waitFor(() => {
       expect(
@@ -1302,17 +1302,17 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   it("super-admin triggers download and polls until model is available (TC-135)", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     let listPollCount = 0;
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockImplementation(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockImplementation(
       async () => {
         return catalogFamilyTagsBody({
           [DOWNLOAD_MODEL_ID]: listPollCount >= 2,
         });
       },
     );
-    vi.spyOn(adminApi, "fetchOllamaModels").mockImplementation(async () => {
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockImplementation(async () => {
       listPollCount += 1;
       return {
         items: catalogItems({
@@ -1320,7 +1320,7 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
         }),
       };
     });
-    const pullSpy = vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+    const pullSpy = vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: DOWNLOAD_MODEL_ID,
       status: "pulling",
@@ -1376,17 +1376,17 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
 
   it("surfaces pull failure and poll errors for super-admin", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
       items: catalogItems(),
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockResolvedValue(
       catalogFamilyTagsBody(),
     );
-    vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce(
-      new Error("Ollama model pull failed (403)"),
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockRejectedValueOnce(
+      new Error("Playground model pull failed (403)"),
     );
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
@@ -1400,12 +1400,12 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       ).toHaveTextContent(/403/);
     });
 
-    vi.mocked(adminApi.pullOllamaModel).mockResolvedValueOnce({
+    vi.mocked(adminApi.pullPlaygroundModel).mockResolvedValueOnce({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: DOWNLOAD_MODEL_ID,
       status: "pulling",
     });
-    vi.spyOn(adminApi, "fetchOllamaModels").mockRejectedValueOnce(
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockRejectedValueOnce(
       "poll failed",
     );
     fireEvent.click(
@@ -1420,16 +1420,16 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   });
 
   it("shows translated error for non-Error pull rejection", async () => {
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
       items: catalogItems(),
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockResolvedValue(
       catalogFamilyTagsBody(),
     );
-    vi.spyOn(adminApi, "pullOllamaModel").mockRejectedValueOnce("pull failed");
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockRejectedValueOnce("pull failed");
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await expandDownloadFamily();
     fireEvent.click(
@@ -1502,18 +1502,18 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
 
   it("surfaces poll Error during model download", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockResolvedValue(
       catalogFamilyTagsBody(),
     );
-    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValueOnce({
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValueOnce({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: DOWNLOAD_MODEL_ID,
       status: "pulling",
     });
-    vi.spyOn(adminApi, "fetchOllamaModels")
+    vi.spyOn(adminApi, "fetchPlaygroundModels")
       .mockResolvedValueOnce({
         items: catalogItems(),
       })
@@ -1533,16 +1533,16 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   });
 
   it("keeps download in progress after switching evaluation tabs", async () => {
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockResolvedValue(
       catalogFamilyTagsBody(),
     );
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
       items: catalogItems(),
     });
-    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: DOWNLOAD_MODEL_ID,
       status: "pulling",
@@ -1577,16 +1577,16 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   });
 
   it("keeps download in progress after navigating away from evaluation", async () => {
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockResolvedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockResolvedValue(
       catalogFamilyTagsBody(),
     );
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
       items: catalogItems(),
     });
-    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: DOWNLOAD_MODEL_ID,
       status: "pulling",
@@ -1608,7 +1608,7 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     await router.navigate("/dashboard");
     await waitFor(() => {
       expect(
-        screen.getByTestId("admin-nav-ollama-download-in-progress"),
+        screen.getByTestId("admin-nav-playground-download-in-progress"),
       ).toBeInTheDocument();
     });
 
@@ -1757,8 +1757,8 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
         resolveCatalog = resolve;
       },
     );
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockReturnValue(
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockReturnValue(
       catalogPromise,
     );
 
@@ -1775,8 +1775,8 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   });
 
   it("surfaces catalog load errors on models tab", async () => {
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockRejectedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockRejectedValue(
       new Error("catalog down"),
     );
 
@@ -1787,11 +1787,11 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   });
 
   it("surfaces family tag load errors when expanding a catalog family", async () => {
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockRejectedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockRejectedValue(
       new Error("tags down"),
     );
 

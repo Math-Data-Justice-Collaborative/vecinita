@@ -14,7 +14,7 @@ import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
 import { useAuth, useIsAdmin } from "@/auth/authContext";
 import { ModelDownloadProgressIndicator } from "@/evaluation/ModelDownloadProgressIndicator";
-import { OllamaModelDownloadProvider } from "@/evaluation/ollamaModelDownloadContext";
+import { PlaygroundModelDownloadProvider } from "@/evaluation/playgroundModelDownloadContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -134,7 +134,7 @@ function NavItems({ onClick }: { onClick?: () => void }) {
           {to === "/evaluation" ? (
             <ModelDownloadProgressIndicator
               className="ml-auto shrink-0 text-xs"
-              testId="admin-nav-ollama-download-in-progress"
+              testId="admin-nav-playground-download-in-progress"
             />
           ) : null}
         </NavLink>
@@ -213,7 +213,7 @@ export function AdminLayout() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
-    <OllamaModelDownloadProvider>
+    <PlaygroundModelDownloadProvider>
       <div className="flex h-screen overflow-hidden" data-testid="admin-layout">
         <IdleTimeoutGuard />
         <DesktopSidebar showChrome={isDesktop} />
@@ -227,6 +227,6 @@ export function AdminLayout() {
           </main>
         </div>
       </div>
-    </OllamaModelDownloadProvider>
+    </PlaygroundModelDownloadProvider>
   );
 }

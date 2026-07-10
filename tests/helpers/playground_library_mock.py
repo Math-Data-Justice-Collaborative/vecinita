@@ -1,9 +1,9 @@
-"""Mock Ollama library client for catalog route tests."""
+"""Mock playground library client for catalog route tests."""
 
 from __future__ import annotations
 
 
-class MockOllamaLibraryClient:
+class MockPlaygroundLibraryClient:
     """In-memory stand-in for ollama.com/library scraper."""
 
     def __init__(self) -> None:
@@ -27,5 +27,5 @@ class MockOllamaLibraryClient:
         return list(self.tags_by_slug.get(slug, []))
 
     def close(self) -> None:
-        """Match OllamaLibraryClient lifecycle for create_app teardown."""
+        """Match PlaygroundLibraryClient lifecycle for create_app teardown."""
         return

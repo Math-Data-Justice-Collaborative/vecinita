@@ -58,7 +58,7 @@ modal serve infra/modal/llm_app.py
 |-------|------|---------|
 | `GET /health` | — | Liveness |
 | `POST /warm` | — | Preload default or `{"model_id": "qwen3:8b"}` tag into VRAM |
-| `POST /generate` | — | Completion; optional `model_id` (Ollama-style tag → HF repo) |
+| `POST /generate` | — | Completion; optional `model_id` (playground-style tag → HF repo) |
 | `POST /generate/stream` | — | SSE token stream |
 | `GET /models/ollama` | `X-Vecinita-Proxy-Key` | List staged models (`manifest.json` on `llm-models`) |
 | `POST /models/ollama/pull` | `X-Vecinita-Proxy-Key` | Enqueue HF Hub download (`pull_model_job`) |

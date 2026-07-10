@@ -18,15 +18,15 @@ import {
   fetchEvalRuns,
   fetchEvalTimeseries,
   fetchHealthAggregate,
-  fetchOllamaCatalogFamilies,
-  fetchOllamaCatalogFamilyTags,
-  fetchOllamaModels,
+  fetchPlaygroundCatalogFamilies,
+  fetchPlaygroundCatalogFamilyTags,
+  fetchPlaygroundModels,
   fetchStatsSummary,
   parseAuditLogResponse,
   parseHealthAggregate,
   parseStatsSummary,
   promoteRagConfig,
-  pullOllamaModel,
+  pullPlaygroundModel,
   triggerEvalRun,
   triggerPlaygroundEvalRun,
   updateEvalConfigPreset,
@@ -783,7 +783,7 @@ describe("admin API eval helpers", () => {
     ).rejects.toThrow(/500/);
   });
 
-  it("fetchOllamaModels fetches models", async () => {
+  it("fetchPlaygroundModels fetches models", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -792,19 +792,19 @@ describe("admin API eval helpers", () => {
         }),
       ),
     );
-    const models = await fetchOllamaModels(CLIENT);
+    const models = await fetchPlaygroundModels(CLIENT);
     expect(models.items[0]?.model_id).toContain("qwen");
   });
 
-  it("fetchOllamaModels throws on HTTP error", async () => {
+  it("fetchPlaygroundModels throws on HTTP error", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 502 })),
     );
-    await expect(fetchOllamaModels(CLIENT)).rejects.toThrow(/502/);
+    await expect(fetchPlaygroundModels(CLIENT)).rejects.toThrow(/502/);
   });
 
-  it("fetchOllamaCatalogFamilies fetches catalog families", async () => {
+  it("fetchPlaygroundCatalogFamilies fetches catalog families", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -813,21 +813,21 @@ describe("admin API eval helpers", () => {
         }),
       ),
     );
-    const catalog = await fetchOllamaCatalogFamilies(JWT_CLIENT);
+    const catalog = await fetchPlaygroundCatalogFamilies(JWT_CLIENT);
     expect(catalog.families[0]?.slug).toBe("qwen2.5");
     expect(mockFetchUrl()).toContain("/internal/v1/models/ollama/catalog");
     expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
   });
 
-  it("fetchOllamaCatalogFamilies throws on HTTP error", async () => {
+  it("fetchPlaygroundCatalogFamilies throws on HTTP error", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 503 })),
     );
-    await expect(fetchOllamaCatalogFamilies(CLIENT)).rejects.toThrow(/503/);
+    await expect(fetchPlaygroundCatalogFamilies(CLIENT)).rejects.toThrow(/503/);
   });
 
-  it("fetchOllamaCatalogFamilyTags fetches tags for a family slug", async () => {
+  it("fetchPlaygroundCatalogFamilyTags fetches tags for a family slug", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -837,7 +837,7 @@ describe("admin API eval helpers", () => {
         }),
       ),
     );
-    const tags = await fetchOllamaCatalogFamilyTags(CLIENT, "qwen2.5");
+    const tags = await fetchPlaygroundCatalogFamilyTags(CLIENT, "qwen2.5");
     expect(tags.tags[0]?.model_id).toBe("qwen2.5:3b-instruct");
     expect(mockFetchUrl()).toContain(
       "/internal/v1/models/ollama/catalog/qwen2.5",
@@ -849,20 +849,20 @@ describe("admin API eval helpers", () => {
     expect(headers["Authorization"]).toBe("Bearer test-key");
   });
 
-  it("fetchOllamaCatalogFamilyTags throws on HTTP error", async () => {
+  it("fetchPlaygroundCatalogFamilyTags throws on HTTP error", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 404 })),
     );
     await expect(
-      fetchOllamaCatalogFamilyTags(
+      fetchPlaygroundCatalogFamilyTags(
         { baseUrl: "http://localhost:8002" },
         "missing",
       ),
     ).rejects.toThrow(/404/);
   });
 
-  it("pullOllamaModel POSTs pull route with model_id (TC-135)", async () => {
+  it("pullPlaygroundModel POSTs pull route with model_id (TC-135)", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -876,24 +876,24 @@ describe("admin API eval helpers", () => {
         ),
       ),
     );
-    const result = await pullOllamaModel(JWT_CLIENT, "qwen2.5:3b-instruct");
+    const result = await pullPlaygroundModel(JWT_CLIENT, "qwen2.5:3b-instruct");
     expect(result.status).toBe("pulling");
     expect(mockFetchUrl()).toContain("/internal/v1/models/ollama/pull");
     expect(mockFetchJsonBody()).toEqual({ model_id: "qwen2.5:3b-instruct" });
     expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
   });
 
-  it("pullOllamaModel throws on HTTP error", async () => {
+  it("pullPlaygroundModel throws on HTTP error", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 403 })),
     );
     await expect(
-      pullOllamaModel(JWT_CLIENT, "qwen2.5:3b-instruct"),
+      pullPlaygroundModel(JWT_CLIENT, "qwen2.5:3b-instruct"),
     ).rejects.toThrow(/403/);
   });
 
-  it("pullOllamaModel uses apiKey when accessToken is absent", async () => {
+  it("pullPlaygroundModel uses apiKey when accessToken is absent", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -907,7 +907,7 @@ describe("admin API eval helpers", () => {
         ),
       ),
     );
-    await pullOllamaModel(CLIENT, "qwen2.5:3b-instruct");
+    await pullPlaygroundModel(CLIENT, "qwen2.5:3b-instruct");
     const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
       string,
       string
@@ -915,7 +915,7 @@ describe("admin API eval helpers", () => {
     expect(headers["Authorization"]).toBe("Bearer test-key");
   });
 
-  it("pullOllamaModel sends empty bearer when auth options are absent", async () => {
+  it("pullPlaygroundModel sends empty bearer when auth options are absent", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -929,7 +929,7 @@ describe("admin API eval helpers", () => {
         ),
       ),
     );
-    await pullOllamaModel(
+    await pullPlaygroundModel(
       { baseUrl: "http://localhost:8002" },
       "qwen2.5:3b-instruct",
     );
@@ -1137,7 +1137,7 @@ describe("admin API eval helpers", () => {
       preset_id: EVAL_PRESET.preset_id,
     });
     await fetchActiveRagConfig(bare);
-    await fetchOllamaModels(bare);
+    await fetchPlaygroundModels(bare);
     await fetchEvalTimeseries(bare);
     await fetchEvalRunDetail(bare, "00000000-0000-0000-0000-000000000099");
     await fetchEvalRuns(bare);
@@ -1241,7 +1241,7 @@ describe("admin API eval helpers", () => {
         items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
       }),
     );
-    await fetchOllamaModels(JWT_CLIENT);
+    await fetchPlaygroundModels(JWT_CLIENT);
     expectBearerJwt(vi.mocked(fetch).mock.calls[8]?.[1]);
 
     vi.mocked(fetch).mockResolvedValue(

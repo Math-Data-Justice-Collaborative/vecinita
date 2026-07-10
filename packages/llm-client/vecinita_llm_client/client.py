@@ -12,10 +12,10 @@ from vecinita_shared_schemas.llm_http import (
     LlmHttpConfigError,
     resolve_llm_http_config,
 )
-from vecinita_shared_schemas.ollama_models import (
-    OllamaModelListResponse,
-    OllamaModelPullRequest,
-    OllamaModelPullResponse,
+from vecinita_shared_schemas.playground_models import (
+    PlaygroundModelListResponse,
+    PlaygroundModelPullRequest,
+    PlaygroundModelPullResponse,
 )
 
 if TYPE_CHECKING:
@@ -172,7 +172,7 @@ class LlmClient:
                 if isinstance(token, str) and token:
                     yield token
 
-    def list_models(self) -> OllamaModelListResponse:
+    def list_models(self) -> PlaygroundModelListResponse:
         """Fetch models staged on the Modal llm-models volume (path alias ``/models/ollama``)."""
         response = self._client.get(
             "/models/ollama",
@@ -181,11 +181,11 @@ class LlmClient:
         if response.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"list_models failed: {response.status_code} {response.text}"
             raise LlmClientError(msg)
-        return OllamaModelListResponse.model_validate(response.json())
+        return PlaygroundModelListResponse.model_validate(response.json())
 
-    def start_pull(self, model_id: str) -> OllamaModelPullResponse:
+    def start_pull(self, model_id: str) -> PlaygroundModelPullResponse:
         """Enqueue a background HF download for a playground model tag."""
-        body = OllamaModelPullRequest(model_id=model_id)
+        body = PlaygroundModelPullRequest(model_id=model_id)
         response = self._client.post(
             "/models/ollama/pull",
             json=body.model_dump(mode="json"),
@@ -194,4 +194,4 @@ class LlmClient:
         if response.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"start_pull failed: {response.status_code} {response.text}"
             raise LlmClientError(msg)
-        return OllamaModelPullResponse.model_validate(response.json())
+        return PlaygroundModelPullResponse.model_validate(response.json())

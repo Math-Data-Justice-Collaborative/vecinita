@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
 
-import { useOllamaModelDownload } from "./useOllamaModelDownload";
+import { usePlaygroundModelDownload } from "./usePlaygroundModelDownload";
 
 export function ModelDownloadProgressIndicator({
   className,
@@ -14,7 +14,7 @@ export function ModelDownloadProgressIndicator({
   testId?: string;
 }) {
   const tr = useAdminT();
-  const { downloadStatus } = useOllamaModelDownload();
+  const { downloadStatus } = usePlaygroundModelDownload();
 
   if (downloadStatus !== "pulling") {
     return null;

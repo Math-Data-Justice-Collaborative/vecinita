@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Final
 
 import modal
 from infra.modal.llm_model_registry import (
-    normalize_ollama_tag,
+    normalize_playground_tag,
     repo_dir_name,
     resolve_hf_repo,
 )
@@ -228,7 +228,7 @@ def _local_repo_path(model_id: str) -> Path:
 
 def _resolve_vllm_model_arg(model_id: str | None) -> str:
     """Resolve playground tag or None to a vLLM ``model`` argument."""
-    if model_id is None or normalize_ollama_tag(model_id) == normalize_ollama_tag(
+    if model_id is None or normalize_playground_tag(model_id) == normalize_playground_tag(
         DEFAULT_PLAYGROUND_MODEL_ID
     ):
         return MODEL_ID

@@ -25,11 +25,11 @@ import {
   type EvalConfigApi,
   type EvalConfigPresetApi,
   type EvalRunModeApi,
-  type OllamaModelSummaryApi,
+  type PlaygroundModelSummaryApi,
   cloneEvalConfigPreset,
   createEvalConfigPreset,
   fetchEvalConfigPresets,
-  fetchOllamaModels,
+  fetchPlaygroundModels,
   promoteRagConfig,
   triggerPlaygroundEvalRun,
   updateEvalConfigPreset,
@@ -43,7 +43,7 @@ import {
 import {
   firstAvailableModelId,
   modelOptionLabel,
-} from "./useOllamaModelDownload";
+} from "./usePlaygroundModelDownload";
 
 const DEFAULT_TOP_K = 5;
 const DEFAULT_MIN_RETRIEVAL_SCORE = 0.2;
@@ -55,12 +55,12 @@ const DEFAULT_TEMPERATURE = 0.2;
 const DEFAULT_JUDGE_TEMPERATURE = 0.2;
 const DEFAULT_MODEL_ID = "qwen2.5:1.5b-instruct";
 
-/** vLLM-only deployments omit Modal Ollama; playground still needs a selectable model tag. */
-const VLLM_FALLBACK_MODELS: readonly OllamaModelSummaryApi[] = [
+/** vLLM-only deployments omit Modal playground LLM; playground still needs a selectable model tag. */
+const VLLM_FALLBACK_MODELS: readonly PlaygroundModelSummaryApi[] = [
   { model_id: DEFAULT_MODEL_ID, available: true },
 ];
 
-function isOllamaModelsUnavailableError(err: unknown): boolean {
+function isPlaygroundModelsUnavailableError(err: unknown): boolean {
   if (!(err instanceof Error)) {
     return false;
   }
@@ -140,7 +140,7 @@ export function EvaluationPlaygroundTab({
   );
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
   const [adhocQuestion, setAdhocQuestion] = useState("");
-  const [models, setModels] = useState<OllamaModelSummaryApi[]>([]);
+  const [models, setModels] = useState<PlaygroundModelSummaryApi[]>([]);
   const [modelsLoading, setModelsLoading] = useState(true);
   const [presets, setPresets] = useState<EvalConfigPresetApi[]>([]);
   const [presetsLoading, setPresetsLoading] = useState(true);
@@ -238,7 +238,7 @@ export function EvaluationPlaygroundTab({
       setError(null);
       try {
         const client = requireCorpusConfig();
-        const data = await fetchOllamaModels(client);
+        const data = await fetchPlaygroundModels(client);
         if (!active) return;
         setModels(data.items);
         setModelId((current) => {
@@ -256,7 +256,7 @@ export function EvaluationPlaygroundTab({
         });
       } catch (err) {
         if (!active) return;
-        if (isOllamaModelsUnavailableError(err)) {
+        if (isPlaygroundModelsUnavailableError(err)) {
           setModels([...VLLM_FALLBACK_MODELS]);
           setModelId(DEFAULT_MODEL_ID);
         } else {

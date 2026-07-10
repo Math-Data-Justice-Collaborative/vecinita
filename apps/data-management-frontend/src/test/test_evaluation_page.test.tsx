@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderAppRoutesReady } from "./renderAppHelpers";
 import { fetchInputUrl } from "./fetch-mock";
-import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
+import { mockPlaygroundApiFetch } from "./helpers/mockPlaygroundApi";
 
 const RUN_ID = "00000000-0000-0000-0000-000000000099";
 const RUN_ID_B = "00000000-0000-0000-0000-000000000088";
@@ -92,9 +92,9 @@ function defaultEvalFetch(
   if (url.includes("/internal/v1/eval/config-presets")) {
     return { ok: true, json: async () => ({ items: [] }) };
   }
-  const ollamaMock = mockOllamaApiFetch(url);
-  if (ollamaMock !== null) {
-    return ollamaMock;
+  const playgroundMock = mockPlaygroundApiFetch(url);
+  if (playgroundMock !== null) {
+    return playgroundMock;
   }
   if (url.includes("/internal/v1/eval/runs/")) {
     return {

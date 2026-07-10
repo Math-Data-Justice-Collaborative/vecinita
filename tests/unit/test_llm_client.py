@@ -16,9 +16,9 @@ from vecinita_shared_schemas.llm_http import (
     LlmHttpConfigError,
     resolve_llm_http_config,
 )
-from vecinita_shared_schemas.ollama_models import (
-    OllamaModelListResponse,
-    OllamaModelPullResponse,
+from vecinita_shared_schemas.playground_models import (
+    PlaygroundModelListResponse,
+    PlaygroundModelPullResponse,
 )
 
 
@@ -482,7 +482,7 @@ def test_list_models_returns_parsed_response() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     listing = client.list_models()
-    assert isinstance(listing, OllamaModelListResponse)
+    assert isinstance(listing, PlaygroundModelListResponse)
     assert listing.items[0].model_id == "qwen2.5:1.5b-instruct"
     assert listing.items[0].available is True
     client.close()
@@ -528,7 +528,7 @@ def test_start_pull_posts_model_id() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     response = client.start_pull("mistral:7b")
-    assert isinstance(response, OllamaModelPullResponse)
+    assert isinstance(response, PlaygroundModelPullResponse)
     assert response.job_id == job_id
     assert response.status == "pulling"
     client.close()

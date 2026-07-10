@@ -1,4 +1,4 @@
-"""Fetch Ollama.com public library metadata for super-admin catalog browsing."""
+"""Fetch ollama.com public library metadata for super-admin catalog browsing."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import Final, Protocol
 
 import httpx
 
-_OLLAMA_LIBRARY_BASE: Final[str] = "https://ollama.com"
+_PLAYGROUND_LIBRARY_BASE: Final[str] = "https://ollama.com"
 _LIBRARY_HREF_RE: Final[re.Pattern[str]] = re.compile(r'href="/library/([^"/]+)"')
 _SLUG_RE: Final[re.Pattern[str]] = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]*$")
 _CACHE_TTL_SECONDS: Final[float] = 3600.0
@@ -17,12 +17,12 @@ _families_cache: tuple[float, list[str]] | None = None
 _tags_cache: dict[str, tuple[float, list[str]]] = {}
 
 
-class OllamaLibraryClientError(RuntimeError):
-    """Raised when Ollama library metadata cannot be fetched or parsed."""
+class PlaygroundLibraryClientError(RuntimeError):
+    """Raised when playground library metadata cannot be fetched or parsed."""
 
 
-class OllamaLibraryClientProtocol(Protocol):
-    """Read Ollama.com library metadata (mockable in tests)."""
+class PlaygroundLibraryClientProtocol(Protocol):
+    """Read ollama.com library metadata (mockable in tests)."""
 
     def list_families(self) -> list[str]: ...  # noqa: D102
 
@@ -35,7 +35,7 @@ def _validate_slug(slug: str) -> str:
     cleaned = slug.strip()
     if not cleaned or not _SLUG_RE.fullmatch(cleaned):
         msg = f"Invalid model slug: {slug!r}"
-        raise OllamaLibraryClientError(msg)
+        raise PlaygroundLibraryClientError(msg)
     return cleaned
 
 
@@ -51,7 +51,7 @@ def parse_model_tags(slug: str, html: str) -> list[str]:
     return sorted(set(tag_re.findall(html)))
 
 
-class OllamaLibraryClient:
+class PlaygroundLibraryClient:
     """Read-only client for ollama.com/library pages (no official registry API)."""
 
     def __init__(
@@ -63,7 +63,7 @@ class OllamaLibraryClient:
         """Optionally inject an HTTP client (for tests) and request timeout."""
         self._owns = http_client is None
         self._client = http_client or httpx.Client(
-            base_url=_OLLAMA_LIBRARY_BASE,
+            base_url=_PLAYGROUND_LIBRARY_BASE,
             timeout=timeout,
             follow_redirects=True,
         )
@@ -84,8 +84,8 @@ class OllamaLibraryClient:
 
         response = self._client.get("/library")
         if response.status_code >= httpx.codes.BAD_REQUEST:
-            msg = f"Ollama library index failed: {response.status_code}"
-            raise OllamaLibraryClientError(msg)
+            msg = f"playground library index failed: {response.status_code}"
+            raise PlaygroundLibraryClientError(msg)
         families = parse_library_slugs(response.text)
         _families_cache = (now, families)
         return list(families)
@@ -102,14 +102,14 @@ class OllamaLibraryClient:
 
         response = self._client.get(f"/library/{validated}/tags")
         if response.status_code >= httpx.codes.BAD_REQUEST:
-            msg = f"Ollama tags page failed for {validated}: {response.status_code}"
-            raise OllamaLibraryClientError(msg)
+            msg = f"playground tags page failed for {validated}: {response.status_code}"
+            raise PlaygroundLibraryClientError(msg)
         tags = parse_model_tags(validated, response.text)
         _tags_cache[validated] = (now, tags)
         return list(tags)
 
 
-def reset_ollama_library_cache_for_tests() -> None:
+def reset_playground_library_cache_for_tests() -> None:
     """Clear in-memory library caches between tests."""
     global _families_cache  # noqa: PLW0603
     _families_cache = None

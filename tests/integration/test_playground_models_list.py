@@ -1,4 +1,4 @@
-"""EV-009/EV-010 F37/F38 — Modal Ollama model list + pull (TC-134, UJ-045, UJ-048)."""
+"""EV-009/EV-010 F37/F38 — Modal playground LLM model list + pull (TC-134, UJ-045, UJ-048)."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
-from tests.helpers.ollama_library_mock import MockOllamaLibraryClient
-from tests.helpers.ollama_models_mock import MockOllamaModelsClient
+from tests.helpers.playground_library_mock import MockPlaygroundLibraryClient
+from tests.helpers.playground_models_mock import MockPlaygroundModelsClient
 from tests.helpers.user_mgmt_e2e import VIEWER_ID
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
@@ -44,10 +44,10 @@ def _database_url() -> str:
 
 
 @pytest.fixture
-def ollama_models_client(
+def playground_models_client(
     monkeypatch: pytest.MonkeyPatch,
-) -> Iterator[tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient]]:
-    """Authenticated internal-write client with mocked Modal Ollama backend."""
+) -> Iterator[tuple[TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient]]:
+    """Authenticated internal-write client with mocked Modal playground LLM backend."""
     reset_auth_config_for_tests()
     private_key = generate_es256_keypair()
     database_url = _database_url()
@@ -55,24 +55,26 @@ def ollama_models_client(
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
     seed_eval_corpus(database_url=database_url)
-    mock_client = MockOllamaModelsClient()
-    mock_library = MockOllamaLibraryClient()
+    mock_client = MockPlaygroundModelsClient()
+    mock_library = MockPlaygroundLibraryClient()
     app = create_app(
         eval_embed_fn=eval_embed_fn,
         eval_judge=MockEvalJudge(),
-        ollama_models_client=mock_client,
-        ollama_library_client=mock_library,
+        playground_models_client=mock_client,
+        playground_library_client=mock_library,
     )
     with TestClient(app) as client:
         yield client, private_key, mock_client
     reset_auth_config_for_tests()
 
 
-def test_admin_lists_ollama_models(
-    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+def test_admin_lists_playground_models(
+    playground_models_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
 ) -> None:
-    """TC-134: admin lists Ollama models for the Playground picker."""
-    client, private_key, _mock_client = ollama_models_client
+    """TC-134: admin lists playground models for the Playground picker."""
+    client, private_key, _mock_client = playground_models_client
     token = sign_test_jwt(private_key, role="admin")
 
     listing = client.get(
@@ -96,10 +98,12 @@ def test_admin_lists_ollama_models(
 
 
 def test_admin_cannot_trigger_ollama_pull(
-    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+    playground_models_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
 ) -> None:
     """TC-134 / F38: admin receives 403 on pull — super-admin only (RD-147)."""
-    client, private_key, mock_client = ollama_models_client
+    client, private_key, mock_client = playground_models_client
     token = sign_test_jwt(private_key, role="admin")
 
     pull = client.post(
@@ -112,10 +116,12 @@ def test_admin_cannot_trigger_ollama_pull(
 
 
 def test_super_admin_triggers_ollama_pull(
-    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+    playground_models_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
 ) -> None:
-    """TC-134 / F38: super-admin can start a background Ollama pull (UJ-048)."""
-    client, private_key, mock_client = ollama_models_client
+    """TC-134 / F38: super-admin can start a background playground pull (UJ-048)."""
+    client, private_key, mock_client = playground_models_client
     token = sign_test_jwt(private_key, role="super-admin")
 
     pull = client.post(
@@ -132,10 +138,12 @@ def test_super_admin_triggers_ollama_pull(
 
 
 def test_viewer_denied_on_ollama_model_routes(
-    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+    playground_models_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
 ) -> None:
-    """TC-134: viewer JWT receives 403 on Ollama model endpoints."""
-    client, private_key, _mock_client = ollama_models_client
+    """TC-134: viewer JWT receives 403 on playground model endpoints."""
+    client, private_key, _mock_client = playground_models_client
     token = sign_test_jwt(private_key, sub=VIEWER_ID, role="viewer")
 
     assert (
@@ -155,11 +163,13 @@ def test_viewer_denied_on_ollama_model_routes(
     )
 
 
-def test_admin_cannot_list_ollama_catalog_families(
-    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+def test_admin_cannot_list_playground_catalog_families(
+    playground_models_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
 ) -> None:
     """F38 catalog tree is super-admin only — admin receives 403."""
-    client, private_key, _mock_client = ollama_models_client
+    client, private_key, _mock_client = playground_models_client
     token = sign_test_jwt(private_key, role="admin")
 
     assert (
@@ -171,11 +181,13 @@ def test_admin_cannot_list_ollama_catalog_families(
     )
 
 
-def test_super_admin_lists_ollama_catalog_tree(
-    ollama_models_client: tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient],
+def test_super_admin_lists_playground_catalog_tree(
+    playground_models_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
 ) -> None:
-    """Super-admin can browse Ollama library families and tags with availability."""
-    client, private_key, _mock_client = ollama_models_client
+    """Super-admin can browse playground library families and tags with availability."""
+    client, private_key, _mock_client = playground_models_client
     token = sign_test_jwt(private_key, role="super-admin")
 
     families = client.get(

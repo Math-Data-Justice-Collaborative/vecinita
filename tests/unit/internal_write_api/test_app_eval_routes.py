@@ -25,7 +25,7 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
-from tests.helpers.ollama_models_mock import MockOllamaModelsClient
+from tests.helpers.playground_models_mock import MockPlaygroundModelsClient
 from tests.unit.internal_write_api.conftest import auth_headers, database_url
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
@@ -38,9 +38,9 @@ _MAX_EVAL_PAGE_SIZE = 100
 if TYPE_CHECKING:
     from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
     from sqlalchemy.engine import Engine
-    from vecinita_shared_schemas.ollama_models import (
-        OllamaModelListResponse,
-        OllamaModelPullResponse,
+    from vecinita_shared_schemas.playground_models import (
+        PlaygroundModelListResponse,
+        PlaygroundModelPullResponse,
     )
 
 
@@ -347,7 +347,7 @@ def test_ollama_model_list_returns_vllm_fallback_when_unconfigured(
 def test_ollama_model_pull_requires_configured_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Pull remains unavailable when Modal Ollama is not wired."""
+    """Pull remains unavailable when Modal playground LLM is not wired."""
     client, _owner_id, headers, _private_key = _admin_jwt_client(
         monkeypatch,
         role="super-admin",
@@ -365,12 +365,12 @@ def test_ollama_model_pull_requires_configured_client(
         reset_auth_config_for_tests()
 
 
-class _FailingOllamaClient:
-    def list_models(self) -> OllamaModelListResponse:
+class _FailingPlaygroundClient:
+    def list_models(self) -> PlaygroundModelListResponse:
         msg = "upstream down"
         raise LlmClientError(msg)
 
-    def start_pull(self, model_id: str) -> OllamaModelPullResponse:
+    def start_pull(self, model_id: str) -> PlaygroundModelPullResponse:
         _ = model_id
         msg = "pull upstream down"
         raise LlmClientError(msg)
@@ -393,7 +393,7 @@ def test_ollama_model_routes_map_client_errors_to_502(
         create_app(
             eval_embed_fn=eval_embed_fn,
             eval_judge=MockEvalJudge(),
-            ollama_models_client=_FailingOllamaClient(),
+            playground_models_client=_FailingPlaygroundClient(),
         )
     )
     list_response = client.get(
@@ -425,12 +425,12 @@ def test_ollama_model_pull_auth_matrix(
     set_auth_config_for_tests(make_auth_config(private_key))
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
-    mock_client = MockOllamaModelsClient()
+    mock_client = MockPlaygroundModelsClient()
     client = TestClient(
         create_app(
             eval_embed_fn=eval_embed_fn,
             eval_judge=MockEvalJudge(),
-            ollama_models_client=mock_client,
+            playground_models_client=mock_client,
         )
     )
     admin_headers = {"Authorization": f"Bearer {sign_test_jwt(private_key, role='admin')}"}
@@ -471,12 +471,12 @@ def test_ollama_model_routes_delegate_to_injected_client(
     )
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
-    mock_client = MockOllamaModelsClient()
+    mock_client = MockPlaygroundModelsClient()
     client = TestClient(
         create_app(
             eval_embed_fn=eval_embed_fn,
             eval_judge=MockEvalJudge(),
-            ollama_models_client=mock_client,
+            playground_models_client=mock_client,
         )
     )
     listing = client.get(

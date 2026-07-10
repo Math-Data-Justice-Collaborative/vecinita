@@ -9,7 +9,7 @@ flips to ``available: true`` after ``pull_model_job`` completes. Pull requires
 from __future__ import annotations
 
 import pytest
-from vecinita_shared_schemas.ollama_hf_registry import resolve_hf_repo
+from vecinita_shared_schemas.playground_hf_registry import resolve_hf_repo
 
 _CATALOG_PULL_CASES: tuple[tuple[str, str], ...] = (
     ("qwen3.6:latest", "Qwen/Qwen3.6-35B-A3B"),

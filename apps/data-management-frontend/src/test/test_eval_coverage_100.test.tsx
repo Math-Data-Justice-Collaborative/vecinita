@@ -16,7 +16,7 @@ import { EvaluationCompareView } from "@/evaluation/EvaluationCompareView";
 import { EvaluationPlaygroundTab } from "@/evaluation/EvaluationPlaygroundTab";
 
 import { fetchInputUrl } from "./fetch-mock";
-import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
+import { mockPlaygroundApiFetch } from "./helpers/mockPlaygroundApi";
 import { renderAppRoutesReady } from "./renderAppHelpers";
 
 const RUN_A_ID = "00000000-0000-0000-0000-0000000000aa";
@@ -85,9 +85,9 @@ function defaultEvalFetch(
   if (url.includes("/internal/v1/eval/config-presets")) {
     return { ok: true, json: async () => ({ items: [] }) };
   }
-  const ollamaMock = mockOllamaApiFetch(url);
-  if (ollamaMock !== null) {
-    return ollamaMock;
+  const playgroundMock = mockPlaygroundApiFetch(url);
+  if (playgroundMock !== null) {
+    return playgroundMock;
   }
   if (url.includes("/internal/v1/eval/runs/timeseries")) {
     return {

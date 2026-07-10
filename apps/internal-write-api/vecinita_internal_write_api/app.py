@@ -96,20 +96,20 @@ from vecinita_shared_schemas.internal_write import (
     TopServedResponse,
 )
 from vecinita_shared_schemas.json_types import as_json_object
-from vecinita_shared_schemas.ollama_catalog import (
-    build_ollama_availability_lookup,
-    merge_ollama_catalog_with_volume,
-    ollama_catalog_tag_available,
+from vecinita_shared_schemas.playground_catalog import (
+    build_playground_availability_lookup,
+    merge_playground_catalog_with_volume,
+    playground_catalog_tag_available,
 )
-from vecinita_shared_schemas.ollama_models import (
-    OllamaModelCatalogFamiliesResponse,
-    OllamaModelCatalogFamily,
-    OllamaModelCatalogFamilyTagsResponse,
-    OllamaModelCatalogTag,
-    OllamaModelListResponse,
-    OllamaModelPullRequest,
-    OllamaModelPullResponse,
-    OllamaModelSummary,
+from vecinita_shared_schemas.playground_models import (
+    PlaygroundModelCatalogFamiliesResponse,
+    PlaygroundModelCatalogFamily,
+    PlaygroundModelCatalogFamilyTagsResponse,
+    PlaygroundModelCatalogTag,
+    PlaygroundModelListResponse,
+    PlaygroundModelPullRequest,
+    PlaygroundModelPullResponse,
+    PlaygroundModelSummary,
 )
 
 from vecinita_internal_write_api.audit import (
@@ -143,10 +143,10 @@ from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
 )
-from vecinita_internal_write_api.ollama_library_client import (
-    OllamaLibraryClient,
-    OllamaLibraryClientError,
-    OllamaLibraryClientProtocol,
+from vecinita_internal_write_api.playground_library_client import (
+    PlaygroundLibraryClient,
+    PlaygroundLibraryClientError,
+    PlaygroundLibraryClientProtocol,
 )
 from vecinita_internal_write_api.rag_production_config_service import (
     RagConfigPromoteNotFoundError,
@@ -172,9 +172,9 @@ _MAX_DOCUMENT_TAGS = 10
 class LlmModelsClientProtocol(Protocol):
     """List/pull playground models on Modal (mockable in tests; T77.4)."""
 
-    def list_models(self) -> OllamaModelListResponse: ...  # noqa: D102
+    def list_models(self) -> PlaygroundModelListResponse: ...  # noqa: D102
 
-    def start_pull(self, model_id: str) -> OllamaModelPullResponse: ...  # noqa: D102
+    def start_pull(self, model_id: str) -> PlaygroundModelPullResponse: ...  # noqa: D102
 
     def close(self) -> None: ...  # noqa: D102
 
@@ -303,7 +303,7 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
         return None
 
 
-def _default_ollama_models_client() -> LlmClient | None:
+def _default_playground_models_client() -> LlmClient | None:
     """Auto-create an LlmClient for Modal list/pull from env vars when available."""
     try:
         return LlmClient(require_proxy_key=True)
@@ -311,12 +311,12 @@ def _default_ollama_models_client() -> LlmClient | None:
         return None
 
 
-def _vllm_fallback_model_list() -> OllamaModelListResponse:
-    """Default model picker entries when Modal Ollama is not wired (vLLM-only eval)."""
-    return OllamaModelListResponse(
-        items=merge_ollama_catalog_with_volume(
+def _vllm_fallback_model_list() -> PlaygroundModelListResponse:
+    """Default model picker entries when Modal playground LLM is not wired (vLLM-only eval)."""
+    return PlaygroundModelListResponse(
+        items=merge_playground_catalog_with_volume(
             [
-                OllamaModelSummary(
+                PlaygroundModelSummary(
                     model_id=DEFAULT_EVAL_MODEL_ID,
                     available=True,
                 ),
@@ -325,29 +325,31 @@ def _vllm_fallback_model_list() -> OllamaModelListResponse:
     )
 
 
-def _merge_ollama_model_list(response: OllamaModelListResponse) -> OllamaModelListResponse:
+def _merge_playground_model_list(
+    response: PlaygroundModelListResponse,
+) -> PlaygroundModelListResponse:
     """Overlay volume manifest onto the curated playground catalog."""
-    return OllamaModelListResponse(
-        items=merge_ollama_catalog_with_volume(list(response.items)),
+    return PlaygroundModelListResponse(
+        items=merge_playground_catalog_with_volume(list(response.items)),
     )
 
 
-def _ollama_volume_availability(
-    ollama_models: LlmModelsClientProtocol | None,
+def _playground_volume_availability(
+    playground_models: LlmModelsClientProtocol | None,
 ) -> dict[str, bool]:
     """Map model_id to volume availability for catalog tag overlays."""
-    if ollama_models is None:
+    if playground_models is None:
         return {}
     try:
-        response = _merge_ollama_model_list(ollama_models.list_models())
+        response = _merge_playground_model_list(playground_models.list_models())
     except LlmClientError:
         return {}
-    return build_ollama_availability_lookup(list(response.items))
+    return build_playground_availability_lookup(list(response.items))
 
 
-def _default_ollama_library_client() -> OllamaLibraryClient:
-    """Auto-create the public Ollama library scraper."""
-    return OllamaLibraryClient()
+def _default_playground_library_client() -> PlaygroundLibraryClient:
+    """Auto-create the public playground library scraper."""
+    return PlaygroundLibraryClient()
 
 
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
@@ -355,23 +357,23 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     jobs_client: DataManagementJobsClient | None = None,
     eval_embed_fn: Callable[[str], list[float]] | None = None,
     eval_judge: JudgeClient | None = None,
-    ollama_models_client: LlmModelsClientProtocol | None = None,
-    ollama_library_client: OllamaLibraryClientProtocol | None = None,
+    playground_models_client: LlmModelsClientProtocol | None = None,
+    playground_library_client: PlaygroundLibraryClientProtocol | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
     retag_jobs = jobs_client if jobs_client is not None else _default_jobs_client()
-    ollama_models = (
-        ollama_models_client
-        if ollama_models_client is not None
-        else _default_ollama_models_client()
+    playground_models = (
+        playground_models_client
+        if playground_models_client is not None
+        else _default_playground_models_client()
     )
-    ollama_library = (
-        ollama_library_client
-        if ollama_library_client is not None
-        else _default_ollama_library_client()
+    playground_library = (
+        playground_library_client
+        if playground_library_client is not None
+        else _default_playground_library_client()
     )
 
     @app.get("/health", response_model=HealthResponse)
@@ -1708,34 +1710,34 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
 
     @app.get(
         "/internal/v1/models/ollama",
-        response_model=OllamaModelListResponse,
+        response_model=PlaygroundModelListResponse,
     )
-    def list_ollama_models_route(  # pyright: ignore[reportUnusedFunction]
+    def list_playground_models_route(  # pyright: ignore[reportUnusedFunction]
         _actor: WriteActorDep,
-    ) -> OllamaModelListResponse:
-        if ollama_models is None:
+    ) -> PlaygroundModelListResponse:
+        if playground_models is None:
             return _vllm_fallback_model_list()
         try:
-            return _merge_ollama_model_list(ollama_models.list_models())
+            return _merge_playground_model_list(playground_models.list_models())
         except LlmClientError:
             return _vllm_fallback_model_list()
 
     @app.post(
         "/internal/v1/models/ollama/pull",
-        response_model=OllamaModelPullResponse,
+        response_model=PlaygroundModelPullResponse,
         status_code=status.HTTP_202_ACCEPTED,
     )
-    def pull_ollama_model_route(  # pyright: ignore[reportUnusedFunction]
+    def pull_playground_model_route(  # pyright: ignore[reportUnusedFunction]
         _actor: SuperAdminActorDep,
-        body: OllamaModelPullRequest,
-    ) -> OllamaModelPullResponse:
-        if ollama_models is None:
+        body: PlaygroundModelPullRequest,
+    ) -> PlaygroundModelPullResponse:
+        if playground_models is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Ollama models client not configured",
+                detail="Playground models client not configured",
             )
         try:
-            return ollama_models.start_pull(body.model_id)
+            return playground_models.start_pull(body.model_id)
         except LlmClientError as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
@@ -1744,44 +1746,44 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
 
     @app.get(
         "/internal/v1/models/ollama/catalog",
-        response_model=OllamaModelCatalogFamiliesResponse,
+        response_model=PlaygroundModelCatalogFamiliesResponse,
     )
-    def list_ollama_catalog_families_route(  # pyright: ignore[reportUnusedFunction]
+    def list_playground_catalog_families_route(  # pyright: ignore[reportUnusedFunction]
         _actor: SuperAdminActorDep,
-    ) -> OllamaModelCatalogFamiliesResponse:
+    ) -> PlaygroundModelCatalogFamiliesResponse:
         try:
-            slugs = ollama_library.list_families()
-        except OllamaLibraryClientError as exc:
+            slugs = playground_library.list_families()
+        except PlaygroundLibraryClientError as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=str(exc),
             ) from exc
-        return OllamaModelCatalogFamiliesResponse(
-            families=[OllamaModelCatalogFamily(slug=slug) for slug in slugs],
+        return PlaygroundModelCatalogFamiliesResponse(
+            families=[PlaygroundModelCatalogFamily(slug=slug) for slug in slugs],
         )
 
     @app.get(
         "/internal/v1/models/ollama/catalog/{slug}",
-        response_model=OllamaModelCatalogFamilyTagsResponse,
+        response_model=PlaygroundModelCatalogFamilyTagsResponse,
     )
-    def list_ollama_catalog_family_tags_route(  # pyright: ignore[reportUnusedFunction]
+    def list_playground_catalog_family_tags_route(  # pyright: ignore[reportUnusedFunction]
         slug: str,
         _actor: SuperAdminActorDep,
-    ) -> OllamaModelCatalogFamilyTagsResponse:
-        availability = _ollama_volume_availability(ollama_models)
+    ) -> PlaygroundModelCatalogFamilyTagsResponse:
+        availability = _playground_volume_availability(playground_models)
         try:
-            tags = ollama_library.list_tags(slug)
-        except OllamaLibraryClientError as exc:
+            tags = playground_library.list_tags(slug)
+        except PlaygroundLibraryClientError as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=str(exc),
             ) from exc
-        return OllamaModelCatalogFamilyTagsResponse(
+        return PlaygroundModelCatalogFamilyTagsResponse(
             slug=slug,
             tags=[
-                OllamaModelCatalogTag(
+                PlaygroundModelCatalogTag(
                     model_id=tag,
-                    available=ollama_catalog_tag_available(tag, availability),
+                    available=playground_catalog_tag_available(tag, availability),
                 )
                 for tag in tags
             ],

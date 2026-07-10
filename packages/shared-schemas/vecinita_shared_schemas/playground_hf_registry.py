@@ -1,7 +1,7 @@
-"""Ollama-style playground tags → HuggingFace Hub repos for vLLM (ADR-037).
+"""Playground model tags → HuggingFace Hub repos for vLLM (ADR-037).
 
 Used by vecinita-llm ``pull_model_job`` and internal-write-api catalog availability.
-Quantization / MLX / packaging suffixes on Ollama tags map to the base HF instruct repo.
+Quantization / MLX / packaging suffixes on playground tags map to the base HF instruct repo.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ _HF_OVERRIDES: Final[dict[str, str]] = {
     "qwen3:8b": "Qwen/Qwen3-8B-AWQ",
 }
 
-# ``:latest`` defaults per Ollama library family slug.
+# ``:latest`` defaults per playground library family slug.
 _LATEST_DEFAULTS: Final[dict[str, str]] = {
     "qwen3.6": "Qwen/Qwen3.6-35B-A3B",
     "llama3.2": "meta-llama/Llama-3.2-3B-Instruct",
@@ -52,8 +52,8 @@ def _cap_b_size(raw: str) -> str:
     return raw
 
 
-def normalize_ollama_tag(model_id: str) -> str:
-    """Strip Ollama quantization and packaging suffixes for registry lookup."""
+def normalize_playground_tag(model_id: str) -> str:
+    """Strip playground tag quantization and packaging suffixes for registry lookup."""
     tag = model_id.strip()
     changed = True
     while changed:
@@ -219,7 +219,7 @@ def _infer_hf_repo(normalized: str) -> str | None:
 
 def resolve_hf_repo(model_id: str) -> str:
     """Map a playground ``model_id`` tag to a HuggingFace Hub repo id."""
-    base = normalize_ollama_tag(model_id)
+    base = normalize_playground_tag(model_id)
     override = _HF_OVERRIDES.get(base)
     if override is not None:
         return override
@@ -232,4 +232,4 @@ def resolve_hf_repo(model_id: str) -> str:
 
 def repo_dir_name(model_id: str) -> str:
     """Filesystem-safe directory name under ``/models/repos/``."""
-    return normalize_ollama_tag(model_id).replace(":", "_").replace("/", "_")
+    return normalize_playground_tag(model_id).replace(":", "_").replace("/", "_")

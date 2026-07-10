@@ -1,15 +1,15 @@
-"""Ollama.com library scraper unit tests."""
+"""ollama.com library scraper unit tests (playground catalog)."""
 
 from __future__ import annotations
 
 import httpx
 import pytest
-from vecinita_internal_write_api.ollama_library_client import (
-    OllamaLibraryClient,
-    OllamaLibraryClientError,
+from vecinita_internal_write_api.playground_library_client import (
+    PlaygroundLibraryClient,
+    PlaygroundLibraryClientError,
     parse_library_slugs,
     parse_model_tags,
-    reset_ollama_library_cache_for_tests,
+    reset_playground_library_cache_for_tests,
 )
 
 _LIBRARY_HTML = """
@@ -43,19 +43,19 @@ def test_parse_model_tags_extracts_full_tag_strings() -> None:
 
 def test_parse_model_tags_rejects_invalid_slug() -> None:
     """Slug validation blocks path traversal in tag fetch URLs."""
-    with pytest.raises(OllamaLibraryClientError, match="Invalid model slug"):
+    with pytest.raises(PlaygroundLibraryClientError, match="Invalid model slug"):
         parse_model_tags("../evil", _TAGS_HTML)
 
 
-def test_ollama_library_client_list_families_uses_http() -> None:
-    """list_families fetches the public Ollama library index."""
+def test_playground_library_client_list_families_uses_http() -> None:
+    """list_families fetches the public playground library index."""
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/library"
         return httpx.Response(200, text=_LIBRARY_HTML)
 
     transport = httpx.MockTransport(handler)
-    client = OllamaLibraryClient(
+    client = PlaygroundLibraryClient(
         http_client=httpx.Client(transport=transport, base_url="https://ollama.com"),
     )
     try:
@@ -66,11 +66,11 @@ def test_ollama_library_client_list_families_uses_http() -> None:
 
 @pytest.fixture(autouse=True)
 def _clear_library_cache() -> None:  # pyright: ignore[reportUnusedFunction]
-    """Isolate tests from the in-memory Ollama library cache."""
-    reset_ollama_library_cache_for_tests()
+    """Isolate tests from the in-memory playground library cache."""
+    reset_playground_library_cache_for_tests()
 
 
-def test_ollama_library_client_list_families_uses_cache_on_second_call() -> None:
+def test_playground_library_client_list_families_uses_cache_on_second_call() -> None:
     """list_families serves cached slugs without a second HTTP request."""
     request_count = 0
 
@@ -81,7 +81,7 @@ def test_ollama_library_client_list_families_uses_cache_on_second_call() -> None
         return httpx.Response(200, text=_LIBRARY_HTML)
 
     transport = httpx.MockTransport(handler)
-    client = OllamaLibraryClient(
+    client = PlaygroundLibraryClient(
         http_client=httpx.Client(transport=transport, base_url="https://ollama.com"),
     )
     try:
@@ -92,7 +92,7 @@ def test_ollama_library_client_list_families_uses_cache_on_second_call() -> None
         client.close()
 
 
-def test_ollama_library_client_list_tags_uses_cache_on_second_call() -> None:
+def test_playground_library_client_list_tags_uses_cache_on_second_call() -> None:
     """list_tags serves cached tags without a second HTTP request."""
     request_count = 0
 
@@ -103,7 +103,7 @@ def test_ollama_library_client_list_tags_uses_cache_on_second_call() -> None:
         return httpx.Response(200, text=_TAGS_HTML)
 
     transport = httpx.MockTransport(handler)
-    client = OllamaLibraryClient(
+    client = PlaygroundLibraryClient(
         http_client=httpx.Client(transport=transport, base_url="https://ollama.com"),
     )
     try:
@@ -115,41 +115,41 @@ def test_ollama_library_client_list_tags_uses_cache_on_second_call() -> None:
         client.close()
 
 
-def test_ollama_library_client_list_families_raises_on_http_error() -> None:
+def test_playground_library_client_list_families_raises_on_http_error() -> None:
     """list_families wraps non-2xx library index responses."""
 
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, text="unavailable")
 
     transport = httpx.MockTransport(handler)
-    client = OllamaLibraryClient(
+    client = PlaygroundLibraryClient(
         http_client=httpx.Client(transport=transport, base_url="https://ollama.com"),
     )
     try:
-        with pytest.raises(OllamaLibraryClientError, match="library index failed"):
+        with pytest.raises(PlaygroundLibraryClientError, match="library index failed"):
             client.list_families()
     finally:
         client.close()
 
 
-def test_ollama_library_client_list_tags_raises_on_http_error() -> None:
+def test_playground_library_client_list_tags_raises_on_http_error() -> None:
     """list_tags wraps non-2xx tag page responses."""
 
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(404, text="missing")
 
     transport = httpx.MockTransport(handler)
-    client = OllamaLibraryClient(
+    client = PlaygroundLibraryClient(
         http_client=httpx.Client(transport=transport, base_url="https://ollama.com"),
     )
     try:
-        with pytest.raises(OllamaLibraryClientError, match="tags page failed"):
+        with pytest.raises(PlaygroundLibraryClientError, match="tags page failed"):
             client.list_tags("qwen2.5")
     finally:
         client.close()
 
 
-def test_ollama_library_client_list_tags_uses_http() -> None:
+def test_playground_library_client_list_tags_uses_http() -> None:
     """list_tags fetches the tags page for one model family."""
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -157,7 +157,7 @@ def test_ollama_library_client_list_tags_uses_http() -> None:
         return httpx.Response(200, text=_TAGS_HTML)
 
     transport = httpx.MockTransport(handler)
-    client = OllamaLibraryClient(
+    client = PlaygroundLibraryClient(
         http_client=httpx.Client(transport=transport, base_url="https://ollama.com"),
     )
     try:

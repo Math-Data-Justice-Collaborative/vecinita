@@ -1,4 +1,4 @@
-"""Modal Ollama model list + pull models (ADR-035 section 6, RD-139-141)."""
+"""Modal playground LLM model list + pull models (ADR-035 section 6, RD-139-141)."""
 
 from __future__ import annotations
 
@@ -7,11 +7,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-OllamaModelPullStatus = Literal["pulling", "available"]
+PlaygroundModelPullStatus = Literal["pulling", "available"]
 
 
-class OllamaModelSummary(BaseModel):
-    """One model entry from the Modal Ollama volume."""
+class PlaygroundModelSummary(BaseModel):
+    """One model entry from the Modal playground LLM volume."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -19,15 +19,15 @@ class OllamaModelSummary(BaseModel):
     available: bool
 
 
-class OllamaModelListResponse(BaseModel):
+class PlaygroundModelListResponse(BaseModel):
     """GET /internal/v1/models/ollama response."""
 
     model_config = ConfigDict(extra="forbid")
 
-    items: list[OllamaModelSummary]
+    items: list[PlaygroundModelSummary]
 
 
-class OllamaModelPullRequest(BaseModel):
+class PlaygroundModelPullRequest(BaseModel):
     """POST /internal/v1/models/ollama/pull body."""
 
     model_config = ConfigDict(extra="forbid")
@@ -35,17 +35,17 @@ class OllamaModelPullRequest(BaseModel):
     model_id: str = Field(min_length=1, max_length=128)
 
 
-class OllamaModelPullResponse(BaseModel):
+class PlaygroundModelPullResponse(BaseModel):
     """POST /internal/v1/models/ollama/pull response."""
 
     model_config = ConfigDict(extra="forbid")
 
     job_id: UUID
     model_id: str = Field(min_length=1, max_length=128)
-    status: OllamaModelPullStatus
+    status: PlaygroundModelPullStatus
 
 
-class OllamaModelCatalogFamily(BaseModel):
+class PlaygroundModelCatalogFamily(BaseModel):
     """One model family slug from ollama.com/library."""
 
     model_config = ConfigDict(extra="forbid")
@@ -53,15 +53,15 @@ class OllamaModelCatalogFamily(BaseModel):
     slug: str = Field(min_length=1, max_length=128)
 
 
-class OllamaModelCatalogFamiliesResponse(BaseModel):
+class PlaygroundModelCatalogFamiliesResponse(BaseModel):
     """GET /internal/v1/models/ollama/catalog response."""
 
     model_config = ConfigDict(extra="forbid")
 
-    families: list[OllamaModelCatalogFamily]
+    families: list[PlaygroundModelCatalogFamily]
 
 
-class OllamaModelCatalogTag(BaseModel):
+class PlaygroundModelCatalogTag(BaseModel):
     """One downloadable tag under a model family."""
 
     model_config = ConfigDict(extra="forbid")
@@ -70,10 +70,10 @@ class OllamaModelCatalogTag(BaseModel):
     available: bool
 
 
-class OllamaModelCatalogFamilyTagsResponse(BaseModel):
+class PlaygroundModelCatalogFamilyTagsResponse(BaseModel):
     """GET /internal/v1/models/ollama/catalog/{slug} response."""
 
     model_config = ConfigDict(extra="forbid")
 
     slug: str = Field(min_length=1, max_length=128)
-    tags: list[OllamaModelCatalogTag]
+    tags: list[PlaygroundModelCatalogTag]
