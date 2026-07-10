@@ -1,7 +1,7 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; **S010 delta 2026-07-08**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; **S010 Phase 18 delta 2026-07-10**)  
 > **Skill**: 04-tech-plan  
 > **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**037**
 
@@ -9,15 +9,15 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 17: EV-011 — Unified vecinita-llm (F39) |
-| **Active milestone** | M76: Deprecation cleanup + deploy gate |
-| **Active task** | **08-verify-build** — M76 milestone verification *(after T76.7 complete)* |
-| **Tasks completed** | M74–M76 including T76.7 golden eval smoke (AC-E32) |
-| **Last updated** | 2026-07-08 |
-| **Evolve cycle** | EV-011 (F39) — **04-tech-plan complete** |
+| **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
+| **Active milestone** | M77: Slice A — one client + rename |
+| **Active task** | **T77.1** (pending) — first task of Phase 18 |
+| **Tasks completed** | Phase 17 M74–M76 (host unify); Phase 18 not started |
+| **Last updated** | 2026-07-10 |
+| **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
-| **Active session** | S010-unify-llm-service — evolve-lite. 04-tech-plan approved (ADR-037, TP-S010-01–16). Build order M74→M76. Early 07-build on branch. |
-| **Scope addition** | 2026-07-08 — S010/EV-011: unify LLM onto `vecinita-llm`; deprecate `vecinita-ollama` (ADR-037, UJ-048 backend, TC-139/TC-140, AC-E31–AC-E33). |
+| **Active session** | S010-unify-llm-service — Phase 18 M77–M81 approved. Build order A→E (M77→M81). Next: **07-build**. |
+| **Scope addition** | 2026-07-10 — F39 follow-on: one `LlmClient`, rename, streaming, auth, chat-template, catalog gate, **two Modal apps** (prod + playground), env cleanup (RD-163–RD-172, TP-S010-17–31). |
 
 ## Template
 
@@ -1559,6 +1559,100 @@ auth, add download UI with model-list polling, full-stack test coverage (TC-134�
 
 ---
 
+### Phase 18: EV-011 — F39 client consolidation (slices A–E)
+
+> **Session:** S010-unify-llm-service · **Evolve cycle:** EV-011 · **Feature ID:** F39 follow-on  
+> **Branch:** `feat/S010-unify-llm-service` → `main` (PR-53) · **ADR:** ADR-037 (amended)  
+> **Build order:** M77→M81 (slices A→E) · **Decisions:** RD-163–RD-172, TP-S010-17–31  
+> **Out of scope:** Provider ABC / multi-provider framework (RD-171)
+
+**Objective:** After host unify (Phase 17), consolidate the client surface, fix streaming/auth,
+rename the Ollama cognitive layer, share prompt/catalog logic, and isolate prod vs playground as
+**two Modal apps** sharing `llm-models`.
+
+#### M77: Slice A — one client + rename
+
+**Goal:** Expand `LlmClient` (generate/stream/warm/list/pull); delete `OllamaModelsClient`; shared
+HTTP config resolver in `shared-schemas`; full BE+FE Ollama→playground rename; keep `/models/ollama*`
+path aliases.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T77.1 | Test: extend `tests/unit/test_llm_client.py` — list/pull + shared resolver (TC-144) | Test | pending | RD-163, TP-S010-18/20, TC-144 | — | — | S010 | F39 |
+| T77.2 | Test: rename/compat — models list/pull still hit `/models/ollama*` aliases | Test | pending | RD-166, TP-S010-19 | — | — | S010 | F39 |
+| T77.3 | Code: `shared-schemas` LLM HTTP config resolver (URL/proxy/timeout) | Code | pending | TP-S010-20 | T77.1 | — | S010 | F39 |
+| T77.4 | Code: expand `LlmClient`; migrate call sites; delete `OllamaModelsClient` | Code | pending | RD-163, TP-S010-18 | T77.1, T77.3 | — | S010 | F39 |
+| T77.5 | Code: rename `ollama_*` → `playground_*` (schemas, modules, FE types/UI copy); path aliases retained | Code | pending | RD-166, TP-S010-19 | T77.2, T77.4 | — | S010 | F39 |
+| T77.6 | Test: Vitest + Playwright T0-ui for FE rename (UJ-048 / TC-135–137) | Test | pending | TP-S010-30 | T77.5 | — | S010 | F39 |
+| T77.7 | Docs: api-contract + feature-list note — aliases + renamed types | Docs | pending | api-contract §playground | T77.5 | — | S010 | F39 |
+
+#### M78: Slice B — real streaming + proxy auth
+
+**Goal:** vLLM live token SSE; ASGI middleware on all non-health routes; fail closed if proxy key unset in prod.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T78.1 | Test: unit — `stream_tokens` yields incremental tokens (not full-then-split) TC-143 | Test | pending | RD-164, TP-S010-22, TC-143 | T77.4 | — | S010 | F39 |
+| T78.2 | Test: unit/integration — unauthorized generate/warm/models → 401; `/health` open (TC-142, UJ-049) | Test | pending | RD-165, TP-S010-23, TC-142 | — | — | S010 | F39 |
+| T78.3 | Code: wire vLLM `engine.generate` async iterator into existing SSE framing | Code | pending | RD-164, TP-S010-22 | T78.1 | — | S010 | F39 |
+| T78.4 | Code: ASGI middleware — proxy key on all non-health routes; fail closed if unset in prod | Code | pending | RD-165, TP-S010-23 | T78.2 | — | S010 | F39 |
+| T78.5 | Test: API E2E — streaming contract TC-143 (no new Playwright) | Test | pending | RD-172, TP-S010-30 | T78.3 | — | S010 | F39 |
+| T78.6 | Docs: api-contract — real stream + auth on generate/warm | Docs | pending | api-contract | T78.3, T78.4 | — | S010 | F39 |
+
+#### M79: Slice C — chat-template + catalog gate
+
+**Goal:** HF `apply_chat_template` helper in `llm-client`; catalog/list/pull ⊆ `resolve_hf_repo`; pull 400 if unmapped.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T79.1 | Test: unit — `apply_chat_template` Qwen + non-Qwen fixtures (TC-145) | Test | pending | RD-167, TP-S010-24, TC-145 | — | — | S010 | F39 |
+| T79.2 | Test: unit — catalog ⊆ registry; unmapped pull → 400 (TC-141) | Test | pending | RD-168, TP-S010-26, TC-141 | — | — | S010 | F39 |
+| T79.3 | Code: shared chat-template helper in `packages/llm-client` (transformers as needed) | Code | pending | RD-167, TP-S010-24 | T79.1 | — | S010 | F39 |
+| T79.4 | Code: chat-rag / tagging / eval call shared helper; remove hand-rolled Qwen wrappers | Code | pending | RD-167, spec.md | T79.3 | — | S010 | F39 |
+| T79.5 | Code: gate list/pull to `resolve_hf_repo`; clear 400 on unmapped | Code | pending | RD-168, TP-S010-26 | T79.2 | — | S010 | F39 |
+| T79.6 | Test: extend UJ-048 API E2E for unmapped-tag error | Test | pending | UJ-048, TC-141 | T79.5 | — | S010 | F39 |
+
+#### M80: Slice D — two Modal apps (prod + playground)
+
+**Goal:** Deploy `vecinita-llm-playground`; shared `llm-models` volume; `VECINITA_MODAL_LLM_PLAYGROUND_URL`;
+prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T80.1 | Test: unit/smoke — prod class ignores playground reload; playground URL routing | Test | pending | RD-169, TP-S010-25/27, TC-145 | — | — | S010 | F39 |
+| T80.2 | Code: `vecinita-llm-playground` Modal app (shared `llm-models` volume) | Code | pending | TP-S010-25/28 | T80.1 | — | S010 | F39 |
+| T80.3 | Code: pin prod `vecinita-llm` to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` | Code | pending | RD-169 | T80.2 | — | S010 | F39 |
+| T80.4 | Config: `VECINITA_MODAL_LLM_PLAYGROUND_URL` on internal-write-api / DM; ChatRAG prod URL only | Config | pending | TP-S010-27, config-spec | T80.2 | — | S010 | F39 |
+| T80.5 | Config: `modal.sh` + secrets — deploy both apps; sync proxy key | Config | pending | deployment-integration | T80.2 | — | S010 | F39 |
+| T80.6 | Docs: deployment-integration + staging-secrets-matrix — two-app order | Docs | pending | TP-S010-25 | T80.4, T80.5 | — | S010 | F39 |
+| T80.7 | Operator: deploy both apps; smoke playground pull + prod chat unaffected | Operator | pending | AC-E38, 13-deploy-smoke | T80.6 | — | S010 | F39 |
+
+#### M81: Slice E — env/doc cleanup
+
+**Goal:** Drop Ollama env fallbacks; fix package docstrings; declare `shared-schemas` on `llm-client`.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T81.1 | Test: missing `VECINITA_MODAL_LLM_URL` hard-fails; no Ollama fallback | Test | pending | RD-170, TP-S010-29 | T77.4 | — | S010 | F39 |
+| T81.2 | Code: remove `VECINITA_MODAL_OLLAMA_URL` / `VECINITA_OLLAMA_MODEL_ID` client fallbacks | Code | pending | RD-170, TP-S010-29 | T81.1 | — | S010 | F39 |
+| T81.3 | Config: `packages/llm-client` declares `shared-schemas` dependency | Config | pending | RD-170, TP-S010-20 | T77.3 | — | S010 | F39 |
+| T81.4 | Docs: package docstrings, config-spec deprecated table, ghcicd.env.example | Docs | pending | RD-170 | T81.2 | — | S010 | F39 |
+| T81.5 | Docs: Phase 18 gate checklist + session verify pointer | Docs | pending | 08-verify-build | T77.7–T81.4 | — | S010 | F39 |
+
+#### Phase 18 Gate Check
+
+- [ ] All M77–M81 tasks completed (T77.1–T81.5)
+- [ ] TC-141–TC-145 green at T2; UJ-048/UJ-049 covered
+- [ ] AC-E34–AC-E38 satisfied at T2; engine isolation smoke at T3
+- [ ] Single `LlmClient`; no `OllamaModelsClient`; FE rename + path aliases
+- [ ] Real vLLM SSE streaming; proxy middleware on non-health routes
+- [ ] Two Modal apps (`vecinita-llm` + `vecinita-llm-playground`); shared `llm-models`
+- [ ] No Ollama env fallbacks; `shared-schemas` on `llm-client`
+- [ ] No provider ABC
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1672,7 +1766,7 @@ main
 | PR-50 | Major | Phase 14 / S007 (EV-008) | feat/S007-rag-eval | main | pending ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)) |
 | PR-51 | Major | Phase 15 / S008 (EV-009) | feat/S008-eval-ux-playground | main | pending (F37 eval UX + playground) |
 | PR-52 | Major | Phase 16 / S009 (EV-010) | feat/S009-playground-model-download | main | pending (F38 playground model download) |
-| PR-53 | Major | Phase 17 / S010 (EV-011) | feat/S010-unify-llm-service | main | pending (F39 unified vecinita-llm) |
+| PR-53 | Major | Phase 17+18 / S010 (EV-011) | feat/S010-unify-llm-service | main | pending (F39 host unify + client consolidation A–E) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
@@ -1696,6 +1790,10 @@ S008 (EV-009) is evolve-lite: M65–M70 land as atomic commits on the single
 S009 (EV-010) is evolve-lite: M71–M73 land as atomic commits on the single
 `feat/S009-playground-model-download` branch (one PR to `main`, PR-52), delivering F38 super-admin
 playground model download + full-stack tests.
+
+S010 (EV-011) is evolve-lite: M74–M76 (Phase 17 host unify) + M77–M81 (Phase 18 client
+consolidation) land as atomic commits on the single `feat/S010-unify-llm-service` branch
+(one PR to `main`, PR-53), per TP-S010-16/21.
 
 ## Task Tracking
 
@@ -2163,6 +2261,37 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T76.5 | M76 | 17 | Operator | pending | T76.4 | — | S010 | F39 | — |
 | T76.6 | M76 | 17 | Operator | pending | T76.5 | — | S010 | F39 | — |
 | T76.7 | M76 | 17 | Operator | completed | T76.6 | — | S010 | F39 | 2026-07-09 |
+| T77.1 | M77 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T77.2 | M77 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T77.3 | M77 | 18 | Code | pending | T77.1 | — | S010 | F39 | — |
+| T77.4 | M77 | 18 | Code | pending | T77.1, T77.3 | — | S010 | F39 | — |
+| T77.5 | M77 | 18 | Code | pending | T77.2, T77.4 | — | S010 | F39 | — |
+| T77.6 | M77 | 18 | Test | pending | T77.5 | — | S010 | F39 | — |
+| T77.7 | M77 | 18 | Docs | pending | T77.5 | — | S010 | F39 | — |
+| T78.1 | M78 | 18 | Test | pending | T77.4 | — | S010 | F39 | — |
+| T78.2 | M78 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T78.3 | M78 | 18 | Code | pending | T78.1 | — | S010 | F39 | — |
+| T78.4 | M78 | 18 | Code | pending | T78.2 | — | S010 | F39 | — |
+| T78.5 | M78 | 18 | Test | pending | T78.3 | — | S010 | F39 | — |
+| T78.6 | M78 | 18 | Docs | pending | T78.3, T78.4 | — | S010 | F39 | — |
+| T79.1 | M79 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T79.2 | M79 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T79.3 | M79 | 18 | Code | pending | T79.1 | — | S010 | F39 | — |
+| T79.4 | M79 | 18 | Code | pending | T79.3 | — | S010 | F39 | — |
+| T79.5 | M79 | 18 | Code | pending | T79.2 | — | S010 | F39 | — |
+| T79.6 | M79 | 18 | Test | pending | T79.5 | — | S010 | F39 | — |
+| T80.1 | M80 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T80.2 | M80 | 18 | Code | pending | T80.1 | — | S010 | F39 | — |
+| T80.3 | M80 | 18 | Code | pending | T80.2 | — | S010 | F39 | — |
+| T80.4 | M80 | 18 | Config | pending | T80.2 | — | S010 | F39 | — |
+| T80.5 | M80 | 18 | Config | pending | T80.2 | — | S010 | F39 | — |
+| T80.6 | M80 | 18 | Docs | pending | T80.4, T80.5 | — | S010 | F39 | — |
+| T80.7 | M80 | 18 | Operator | pending | T80.6 | — | S010 | F39 | — |
+| T81.1 | M81 | 18 | Test | pending | T77.4 | — | S010 | F39 | — |
+| T81.2 | M81 | 18 | Code | pending | T81.1 | — | S010 | F39 | — |
+| T81.3 | M81 | 18 | Config | pending | T77.3 | — | S010 | F39 | — |
+| T81.4 | M81 | 18 | Docs | pending | T81.2 | — | S010 | F39 | — |
+| T81.5 | M81 | 18 | Docs | pending | T77.7–T81.4 | — | S010 | F39 | — |
 
 ## Phase Gate Log
 

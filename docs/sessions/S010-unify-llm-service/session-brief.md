@@ -19,20 +19,20 @@ playground list/pull routes onto **`vecinita-llm`** with vLLM as the sole engine
 - Remove `VECINITA_MODAL_OLLAMA_URL` from DO deploy specs
 - De-deploy `vecinita-ollama` on Modal (operator step post-smoke)
 
-### Client consolidation follow-on (2026-07-10 decisions)
+### Client consolidation follow-on (2026-07-10 — Phase 18)
 
-- One client surface (merge generate + list/pull)
-- Real vLLM streaming; proxy auth on all LLM routes
-- Rename Ollama naming layer → playground (path aliases kept)
+- One `LlmClient` surface (merge generate + list/pull); delete `OllamaModelsClient`
+- Real vLLM streaming; ASGI proxy auth on all non-health LLM routes
+- Full BE+FE rename Ollama → playground (path aliases kept)
 - Shared HF chat-template; catalog gated by HF registry
-- Separate playground Modal class; prod model pinned
+- **Two Modal apps:** `vecinita-llm` (prod pin) + `vecinita-llm-playground` (shared `llm-models`)
 - Drop legacy Ollama env fallbacks + package doc/deps cleanup
+- Build: M77–M81 (slices A–E); next **07-build** T77.1
 
 ## Out of scope
 
 - Provider ABC / multi-provider plugin framework
 - Re-migrating legacy `vecinita-models` Ollama blobs (re-stage via HF)
-- Frontend path rename is optional later; `/models/ollama` aliases remain for now
 
 ## ADR
 
@@ -40,12 +40,22 @@ playground list/pull routes onto **`vecinita-llm`** with vLLM as the sole engine
 
 ## Routing
 
-See [routing-plan.md](./routing-plan.md) (amended 2026-07-10).
+See [routing-plan.md](./routing-plan.md) (04-tech-plan completed 2026-07-10).
 
 ## Roadmap
 
-`docs/sessions/S010-unify-llm-service/roadmap.md`
+[roadmap.md](./roadmap.md) — Phase 18 M77–M81 issue map
+
+## Tech-plan report
+
+[reports/04-tech-plan-client-consolidation.md](./reports/04-tech-plan-client-consolidation.md)
 
 ## Context brief
 
 `docs/sessions/S010-unify-llm-service/context-brief.md`
+
+## 01-requirements handoff
+
+`docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md` — used for 01 delta
+(completed). See `.cursor/skills/00-context/SKILL.md` §Phase 4.5 and
+`.cursor/skills/01-requirements/SKILL.md` §Phase 0C.

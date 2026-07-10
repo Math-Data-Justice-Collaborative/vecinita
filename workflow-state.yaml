@@ -69,16 +69,16 @@ project:
         00-context in_progress until routing approved + context brief written.'
       routing_amendment_approved: true
     01-requirements:
-      status: in_progress
+      status: completed
       started_at: '2026-07-08'
-      completed_at: '2026-07-08'
+      completed_at: '2026-07-10'
       started_at_reopen: '2026-07-10'
       partial_rerun_at: '2026-07-08'
       partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
       session_id: S010-unify-llm-service
       branch: feat/S010-unify-llm-service
       evolve_cycle_id: EV-011
-      report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+      report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
       s009_baseline:
         status: paused
         paused_at: '2026-07-08'
@@ -116,24 +116,43 @@ project:
       prior_status: completed
       prior_completed_at: '2026-07-08'
       mode: delta_reopen
-      note: Delta reopen started — F39 client consolidation (R-S010-00-1..9). Branch recreated from main after #142 merge.
+      note: '01-requirements delta completed 2026-07-10. RD-163–RD-172 written. Report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md.
+        Next: 04-tech-plan (delta) — Slice A first.'
       substeps:
         interviews:
           completed: 0
-          total: null
           current_template: document-manifest
-          current_section: phase-2-manifest-review
-        manifest_approved: false
+          current_section: completed
+          manifest_approved: true
+          total: null
+        seed_loaded: true
+        handoff_seed: docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md
+        current_phase: completed
+        skill_handoff_fix: true
+        phase2_manifest: approved
+        locked_decisions: approved_all
+        open_questions: accepted_recommended
+      decisions: &id002
+      - RD-163
+      - RD-164
+      - RD-165
+      - RD-166
+      - RD-167
+      - RD-168
+      - RD-169
+      - RD-170
+      - RD-171
+      - RD-172
     04-tech-plan:
       status: completed
       started_at: '2026-07-08'
-      completed_at: '2026-07-08'
+      completed_at: '2026-07-10'
       partial_rerun_at: '2026-07-08'
       partial_rerun_note: EV-011/S010 delta — unified vecinita-llm tech plan (ADR-037, TP-S010-01–16, Phase 17 M74–M76)
       session_id: S010-unify-llm-service
       branch: feat/S010-unify-llm-service
       evolve_cycle_id: EV-011
-      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
       s009_baseline:
         status: paused
         paused_at: '2026-07-08'
@@ -201,6 +220,30 @@ project:
           idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47,
           T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED
           (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
+      prior_status: completed
+      prior_completed_at: '2026-07-08'
+      mode: delta_reopen
+      note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
+      started_at_reopen: '2026-07-10'
+      completed_at_reopen: '2026-07-10'
+      batch1_decisions:
+      - TP-S010-17
+      - TP-S010-18
+      - TP-S010-19
+      - TP-S010-20
+      - TP-S010-21
+      batch2_decisions:
+      - TP-S010-22
+      - TP-S010-23
+      - TP-S010-24
+      - TP-S010-25
+      - TP-S010-26
+      batch3_decisions:
+      - TP-S010-27
+      - TP-S010-28
+      - TP-S010-29
+      - TP-S010-30
+      - TP-S010-31
     07-build:
       status: completed
       started_at: '2026-07-02'
@@ -591,7 +634,7 @@ active_session:
   evolve_cycle_id: EV-011
   artifacts_dir: docs/sessions/S010-unify-llm-service/
   started_at: '2026-07-08'
-  current_stage: 01-requirements
+  current_stage: 07-build
   context_briefs:
   - docs/sessions/S010-unify-llm-service/context-brief.md
   - docs/sessions/S010-unify-llm-service/routing-plan.md
@@ -603,9 +646,13 @@ active_session:
     note: Partial re-run complete; consolidation decisions + routing A approved
   - stage: 01-requirements
     prior_completed_at: '2026-07-08'
-    status: in_progress
+    status: completed
     mode: delta_reopen
-    note: Re-open for F39 client consolidation follow-on — interview at document manifest
+    note: Delta complete — RD-163–RD-172; report written
+    seed_path: docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md
+    phase2_approved: true
+    completed_at: '2026-07-10'
+    report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
   - stage: 02-verify-plan
     status: skipped
     skip_rationale: Tooling/docs already exist
@@ -614,9 +661,11 @@ active_session:
     skip_rationale: Tooling already exists
   - stage: 04-tech-plan
     prior_completed_at: '2026-07-08'
-    status: pending
+    status: completed
     mode: delta_reopen
-    note: Re-open after 01 for client merge / rename / streaming / engine split
+    completed_at: '2026-07-10'
+    report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+    note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
   - stage: 05-verify-tech
     status: skipped
     skip_rationale: Tooling already exists
@@ -632,7 +681,7 @@ active_session:
     - D:7
     - E:8
     first_slice: A
-    note: Build slices A–E; first slice A = (1)+(4)
+    note: Start Phase 18 M77 / T77.1 — Slice A one client + rename
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -663,6 +712,14 @@ active_session:
     kind: stage-report
     session_id: S010-unify-llm-service
     stage: 04-tech-plan
+  - path: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+    kind: report
+    session_id: S010-unify-llm-service
+    stage: 04-tech-plan
+  - path: docs/sessions/S000-internal-docs-archive/execution-plan.md
+    kind: plan
+    session_id: S010-unify-llm-service
+    stage: 04-tech-plan
   - path: docs/sessions/S010-unify-llm-service/roadmap.md
     kind: roadmap
     session_id: S010-unify-llm-service
@@ -671,6 +728,10 @@ active_session:
     kind: verification-report
     session_id: S010-unify-llm-service
     stage: 08-verify-build
+  handoff:
+    next_skill: 07-build
+    note: Start Phase 18 M77 / T77.1 — Slice A one client + rename
+    mode: delta
 sessions:
 - id: S009-playground-model-download
   type: feature
@@ -1795,16 +1856,16 @@ stages:
       00-context in_progress until routing approved + context brief written.'
     routing_amendment_approved: true
   01-requirements:
-    status: in_progress
+    status: completed
     started_at: '2026-07-08'
-    completed_at: '2026-07-08'
+    completed_at: '2026-07-10'
     started_at_reopen: '2026-07-10'
     partial_rerun_at: '2026-07-08'
     partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
     session_id: S010-unify-llm-service
     branch: feat/S010-unify-llm-service
     evolve_cycle_id: EV-011
-    report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+    report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
     s009_baseline:
       status: paused
       paused_at: '2026-07-08'
@@ -1870,14 +1931,23 @@ stages:
     prior_status: completed
     prior_completed_at: '2026-07-08'
     mode: delta_reopen
-    note: Delta reopen started — F39 client consolidation (R-S010-00-1..9). Branch recreated from main after #142 merge.
+    note: '01-requirements delta completed 2026-07-10. RD-163–RD-172 written. Report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md.
+      Next: 04-tech-plan (delta) — Slice A first.'
     substeps:
       interviews:
         completed: 0
-        total: null
         current_template: document-manifest
-        current_section: phase-2-manifest-review
-      manifest_approved: false
+        current_section: phase-3-delta-docs
+        manifest_approved: true
+        total: null
+      seed_loaded: true
+      handoff_seed: docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md
+      current_phase: completed
+      skill_handoff_fix: true
+      phase2_manifest: approved
+      locked_decisions: approved_all
+      open_questions: accepted_recommended
+    decisions: *id002
   02-verify-plan:
     status: completed
     started_at: '2026-05-24'
@@ -1921,14 +1991,14 @@ stages:
   04-tech-plan:
     status: completed
     started_at: '2026-07-02'
-    completed_at: '2026-07-02'
+    completed_at: '2026-07-10'
     partial_rerun_at: '2026-07-02'
     partial_rerun_note: EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote (ADR-035,
       TP-S008-01–16).
-    session_id: S008-eval-ux-playground
-    branch: feat/S008-eval-ux-playground
-    evolve_cycle_id: EV-009
-    report: docs/sessions/S008-eval-ux-playground/reports/04-tech-plan.md
+    session_id: S010-unify-llm-service
+    branch: feat/S010-unify-llm-service
+    evolve_cycle_id: EV-011
+    report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
     s007_baseline:
       status: completed
       started_at: '2026-07-01'
@@ -1945,6 +2015,12 @@ stages:
         phase3_execution_plan: completed
         phase4_user_review: completed
         phase4_user_review_note: tech plan approved 2026-06-13
+    prior_status: completed
+    prior_completed_at: '2026-07-02'
+    mode: delta_reopen
+    note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
+    started_at_reopen: '2026-07-10'
+    completed_at_reopen: '2026-07-10'
   05-verify-tech:
     status: completed
     started_at: '2026-05-19'
@@ -3525,7 +3601,7 @@ evolve_cycles:
   status: in_progress
   started: '2026-07-08'
   session_id: S010-unify-llm-service
-  current_stage: 01-requirements
+  current_stage: 07-build
   stages:
     00-context:
       status: completed
@@ -3548,27 +3624,52 @@ evolve_cycles:
       - R-S010-00-9-no-abc
       routing_amendment_pending: false
     01-requirements:
-      status: in_progress
+      status: completed
       started: '2026-07-08'
       started_at_reopen: '2026-07-10'
-      report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+      report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
       prior_completed: '2026-07-08'
       mode: delta_reopen
-      note: Delta reopen started — F39 client consolidation (R-S010-00-1..9). Branch recreated from main after #142 merge.
+      note: Delta complete RD-163–RD-172; advance to 04-tech-plan
       substeps:
         interviews:
           completed: 0
           total: null
           current_template: document-manifest
           current_section: phase-2-manifest-review
-        manifest_approved: false
+          manifest_approved: false
+      seed_path: docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md
+      phase2_approved_at: '2026-07-10'
+      completed: '2026-07-10'
+      completed_at: '2026-07-10'
     04-tech-plan:
-      status: pending
+      status: completed
       started: '2026-07-08'
-      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+      started_at_reopen: '2026-07-10'
+      completed: '2026-07-10'
+      completed_at: '2026-07-10'
+      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
       prior_completed: '2026-07-08'
       mode: delta_reopen
-      note: Delta reopen after 01 — client merge/rename/streaming/engine split
+      note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
+      batch1_decisions:
+      - TP-S010-17
+      - TP-S010-18
+      - TP-S010-19
+      - TP-S010-20
+      - TP-S010-21
+      batch2_decisions:
+      - TP-S010-22
+      - TP-S010-23
+      - TP-S010-24
+      - TP-S010-25
+      - TP-S010-26
+      batch3_decisions:
+      - TP-S010-27
+      - TP-S010-28
+      - TP-S010-29
+      - TP-S010-30
+      - TP-S010-31
     08-verify-build:
       status: pending
       started: '2026-07-08'
@@ -3585,7 +3686,7 @@ evolve_cycles:
       - D:7
       - E:8
       first_slice: A
-      note: Build slices A–E after delta 01+04
+      note: Start Phase 18 M77 / T77.1 — Slice A one client + rename
     02-verify-plan:
       status: skipped
       skip_rationale: Tooling/docs already exist
@@ -4958,7 +5059,197 @@ decisions_log:
   resolution: Parent must manage branch/checkout; workflow-state only
   stage: 00-context
   timestamp: '2026-07-10'
-- '2026-07-10: S010 branch feat/S010-unify-llm-service recreated from main; 00-context artifacts + qwen3.6 registry fix committed and pushed; 01-requirements delta_reopen interview starting at document manifest.'
+- '2026-07-10: S010 branch feat/S010-unify-llm-service recreated from main; 00-context artifacts + qwen3.6 registry fix committed
+  and pushed; 01-requirements delta_reopen interview starting at document manifest.'
+- id: R-S010-00-01-seed-handoff
+  category: Advisory
+  summary: Persisted 01-requirements seed handoff for next skill invocation
+  resolution: seed=docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md; mode=delta; report=reports/01-requirements-client-consolidation.md
+  stage: 00-context
+  timestamp: '2026-07-10'
+- '2026-07-10: S010/EV-011 01-requirements Phase 2 document-manifest AskQuestion in flight — presenting seed manifest for
+  user confirm/modify; not completed.'
+- '2026-07-10: [Decision] 01-requirements resumed for S010 client consolidation; Phase 2 manifest review in flight (session
+  S010-unify-llm-service)'
+- id: R-S010-00-01-skill-handoff
+  category: process
+  summary: Formalized 00 Phase 4.5 seed + 01 Phase 0C; continue 01 from existing S010 seed without re-opening 00
+  stage: 01-requirements
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- '2026-07-10: Process fix — formalized 00→01 handoff in skills; S010 seed reused; 01-requirements resumed at Phase 2 manifest
+  (no 00 re-open). Skill edits uncommitted pending user commit request.'
+- id: R-S010-01-Q1
+  category: Decision
+  summary: Approved locked S1–S10 (RD-163–RD-172)
+  resolution: Q1:1 approve all
+  stage: 01-requirements
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: R-S010-01-Q2
+  category: Decision
+  summary: Approved delta document manifest as-is
+  resolution: Q2:1 approve manifest
+  stage: 01-requirements
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: R-S010-01-Q3
+  category: Decision
+  summary: Accepted recommended open Qs (F39, amend ADR-037, aliases A, qwen pin, API E2E streaming)
+  resolution: Q3:1 accept all recommended
+  stage: 01-requirements
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- '2026-07-10: S010/01-requirements Phase 2 approved (Q1:1 Q2:1 Q3:1); advancing to Phase 3 delta document writes RD-163–RD-172.'
+- id: R-S010-01-complete
+  category: Decision
+  summary: 01-requirements delta complete; RD-163–RD-172; next 04-tech-plan
+  resolution: completed
+  stage: 01-requirements
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+  report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
+  decisions: *id002
+- '2026-07-10: S010/EV-011 01-requirements delta completed (RD-163–RD-172); current_stage advanced to 04-tech-plan (delta,
+  Slice A first).'
+- id: TP-S010-17
+  category: Decision
+  summary: Phase 18 with M77–M81 (one milestone per slice A–E); keep Phase 17 M74–M76 as history
+  source: 04-tech-plan Batch 1 Q1a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-18
+  category: Decision
+  summary: Expand LlmClient with list_models/pull_model; delete OllamaModelsClient after call-site migration
+  source: 04-tech-plan Batch 1 Q2a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-19
+  category: Decision
+  summary: Full rename Ollama→playground in Slice A including FE strings/UI copy; keep /models/ollama path aliases
+  source: 04-tech-plan Batch 1 Q3c
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-20
+  category: Decision
+  summary: Shared env/auth/timeout resolver lives in packages/shared-schemas (Modal + clients share)
+  source: 04-tech-plan Batch 1 Q4b
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-21
+  category: Decision
+  summary: Single evolve PR to main after all slices A–E (evolve-lite)
+  source: 04-tech-plan Batch 1 Q5a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- '2026-07-10: S010/EV-011 04-tech-plan Batch 1 locked (TP-S010-17–21); interviewing Batch 2 (stream/auth/template/engine).'
+- id: TP-S010-22
+  category: Decision
+  summary: Real streaming via vLLM engine.generate / async token iterator into existing SSE framing
+  source: 04-tech-plan Batch 2 Q6a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-23
+  category: Decision
+  summary: ASGI middleware wraps all non-health LLM routes; fail closed if proxy key unset in prod
+  source: 04-tech-plan Batch 2 Q7a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-24
+  category: Decision
+  summary: HF apply_chat_template helper lives in packages/llm-client (or sibling llm-prompt); keep shared-schemas free of transformers
+  source: 04-tech-plan Batch 2 Q8a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-25
+  category: Decision
+  summary: 'Engine isolation = TWO Modal apps: vecinita-llm (prod) + vecinita-llm-playground; stronger than same-app dual class (overrides RD-169 class-only wording)'
+  source: 04-tech-plan Batch 2 Q9b
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-26
+  category: Decision
+  summary: Catalog filter to resolve_hf_repo-mapped tags; pull returns 400 with clear error for unmapped
+  source: 04-tech-plan Batch 2 Q10a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- '2026-07-10: S010/EV-011 04-tech-plan Batch 1–2 locked (TP-S010-17–26); interviewing Batch 3 (URLs/deploy/tests/tasks).'
+- id: TP-S010-27
+  category: Decision
+  summary: Add VECINITA_MODAL_LLM_PLAYGROUND_URL; DM/internal-write list/pull/eval sandbox use it; ChatRAG uses prod VECINITA_MODAL_LLM_URL only
+  source: 04-tech-plan Batch 3 Q11a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-28
+  category: Decision
+  summary: Both vecinita-llm and vecinita-llm-playground mount the same llm-models volume
+  source: 04-tech-plan Batch 3 Q12a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-29
+  category: Decision
+  summary: Slice E removes Ollama URL/model_id fallbacks entirely; missing VECINITA_MODAL_LLM_URL hard-fails
+  source: 04-tech-plan Batch 3 Q13a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-30
+  category: Decision
+  summary: Per-milestone TDD; FE Vitest+Playwright rename in M77; stream TC-143 in M78; no new Playwright for streaming
+  source: 04-tech-plan Batch 3 Q14a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- id: TP-S010-31
+  category: Decision
+  summary: Task grain ~4–8 tasks per milestone M77–M81; TDD order
+  source: 04-tech-plan Batch 3 Q15a
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+- '2026-07-10: S010/EV-011 04-tech-plan Batches 1–3 locked (TP-S010-17–31); awaiting user review of Phase 18 plan before writing docs.'
+- id: R-S010-04-complete
+  category: Decision
+  summary: 04-tech-plan delta complete; Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
+  resolution: completed
+  stage: 04-tech-plan
+  session_id: S010-unify-llm-service
+  evolve_cycle_id: EV-011
+  timestamp: '2026-07-10'
+  report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+- '2026-07-10: S010/EV-011 04-tech-plan completed (Phase 18 M77–M81; TP-S010-17–31); current_stage advanced to 07-build (T77.1 Slice A).'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -5269,6 +5560,37 @@ artifacts:
   session_id: S010-unify-llm-service
   kind: routing_plan
   stage: 00-context
+- path: docs/sessions/S010-unify-llm-service/checkpoints/01-requirements-seed.md
+  session_id: S010-unify-llm-service
+  kind: requirements_seed
+  stage: 00-context
+  note: Handoff for 01-requirements delta — locked S1–S10, proposed RD-163–RD-172
+- path: docs/sessions/S010-unify-llm-service/reports/00-01-handoff-skill-fix.md
+  session_id: S010-unify-llm-service
+  kind: process_report
+- path: .cursor/skills/00-context/SKILL.md
+  kind: skill
+- path: .cursor/skills/01-requirements/SKILL.md
+  kind: skill
+- path: .cursor/skills/sessions-reference.md
+  kind: skill
+- path: .cursor/skills/pipeline-preamble.md
+  kind: skill
+- path: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
+  session_id: S010-unify-llm-service
+  kind: stage_report
+- path: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+  kind: report
+  session_id: S010-unify-llm-service
+  stage: 04-tech-plan
+- path: docs/sessions/S000-internal-docs-archive/execution-plan.md
+  kind: plan
+  session_id: S010-unify-llm-service
+  stage: 04-tech-plan
+- path: docs/sessions/S010-unify-llm-service/roadmap.md
+  kind: roadmap
+  session_id: S010-unify-llm-service
+  stage: 04-tech-plan
 git_history:
   current_branch: feat/S010-unify-llm-service
   branches:
@@ -5278,7 +5600,7 @@ git_history:
     status: open
     created_at: '2026-07-08'
     recreated_at: '2026-07-10'
-    note: Recreated from main after #142 merge for F39 client consolidation follow-on
+    note: Recreated from main after
   - name: feat/S009-playground-model-download
     purpose: EV-010 / S009 — F38 playground model download (super-admin Ollama UI)
     base: main
@@ -5800,6 +6122,9 @@ git_history:
     files_changed:
     - workflow-state.yaml
     timestamp: '2026-07-10'
+  notes:
+  - '2026-07-10 S010: Skill handoff edits (00-context, 01-requirements, sessions-reference, pipeline-preamble) uncommitted
+    pending user commit request'
 constraints:
   cost:
     target_usd_per_month: 25

@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-08 (S010/EV-011 F39 — unified `vecinita-llm`; deprecate `vecinita-ollama`, ADR-037)
+> **Last updated**: 2026-07-10 (S010/EV-011 F39 Phase 18 — two LLM apps + playground URL, TP-S010-25)
 
 ## Overview
 
@@ -17,8 +17,9 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | DO internal write API | DO App Platform (**standalone** app) | Sole holder of `DATABASE_URL` for writes from Modal; audited S8.4 |
 | data-management-modal | Modal | ASGI + queues + scrape |
 | vecinita-embedding | Modal | FastEmbed 384-dim |
-| vecinita-llm | Modal | **Unified LLM** — vLLM inference + HF model staging; volume **`llm-models`**; list/pull/generate/warm (ADR-037) |
-| ~~vecinita-ollama~~ | ~~Modal~~ | **Deprecated** — de-deploy after S010 smoke; superseded by `vecinita-llm` |
+| vecinita-llm | Modal | **Prod LLM** — vLLM pinned to `qwen2.5:1.5b-instruct`; volume **`llm-models`**; generate/warm (ADR-037) |
+| vecinita-llm-playground | Modal | **Playground LLM** — vLLM + HF list/pull/staging; **same** `llm-models` volume; sandbox `model_id` reloads (TP-S010-25) |
+| ~~vecinita-ollama~~ | ~~Modal~~ | **Deprecated** — de-deployed; superseded by `vecinita-llm` (+ playground app) |
 | database | DO Managed Postgres | Smallest viable tier |
 
 **Topology note (RD-022):** User selected **multi-app** on DO (separate deployables per backend). **05-verify-tech / TP-009:** pilot **~$42–48/mo** fits ≤ **$50** cap with scale-to-zero GPU; consolidate DO if overrun.
@@ -158,22 +159,31 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 
 | Variable | App | Purpose |
 |----------|-----|---------|
-| `VECINITA_MODAL_LLM_URL` | internal-write-api, chat-rag-backend | Unified Modal ASGI: generate, warm, list/pull |
-| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secret **`vecinita-llm`** | `X-Vecinita-Proxy-Key` on `/models/ollama*` |
+| `VECINITA_MODAL_LLM_URL` | chat-rag-backend (+ health aggregator) | Prod Modal ASGI: generate, warm |
+| `VECINITA_MODAL_LLM_PLAYGROUND_URL` | internal-write-api / DM | Playground Modal ASGI: list/pull + sandbox eval generate (TP-S010-27) |
+| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secrets for **both** LLM apps | `X-Vecinita-Proxy-Key` on **all** LLM routes except `/health` (RD-165) |
+| `VECINITA_LLM_MODEL_ID` | Modal / consumers | Prod pin default (`qwen2.5:1.5b-instruct`) — RD-169 |
 
 **`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.
-`POST /warm {"model_id": ...}` preloads the resolved HF model. One active vLLM engine per container;
-switching `model_id` reloads the engine (~60–120s). **`vecinita-ollama` is deprecated** — do not deploy.
+Prod app stays pinned; playground app may reload on `model_id` (~60–120s) without stomping ChatRAG.
+Both apps mount **`llm-models`**. **`vecinita-ollama` is deprecated** — do not deploy.
 
-**Redeploy order (EV-010 + ADR-037):**
+**Slice D (engine isolation — TP-S010-25):** Deploy **`vecinita-llm-playground`** as a **second Modal
+app** (not only a second class). ChatRAG never uses the playground URL.
 
-1. **`vecinita-llm` Modal app** — deploy unified app; run `stage_default_model` or `stage_llm_weights`
-2. **internal-write-api** — `VECINITA_MODAL_LLM_URL` only (remove `VECINITA_MODAL_OLLAMA_URL`)
-3. **De-deploy** — `modal app stop vecinita-ollama` after smoke
-4. **data-management-frontend** — unchanged API surface (`/internal/v1/models/ollama/*`)
+**Redeploy order (EV-010 + ADR-037 + Phase 18):**
 
-**Post-deploy validation:** Super-admin pulls a catalog tag; poll until `available: true`; golden eval
-uses `VECINITA_MODAL_LLM_URL` with sandbox `model_id`.
+1. **`vecinita-llm`** — deploy/update prod pin; run `stage_default_model` or `stage_llm_weights`
+2. **`vecinita-llm-playground`** — deploy; same `llm-models` volume; sync proxy secret
+3. **internal-write-api** — set `VECINITA_MODAL_LLM_PLAYGROUND_URL`; keep health/`VECINITA_MODAL_LLM_URL` for prod
+4. **chat-rag-backend** — `VECINITA_MODAL_LLM_URL` only (never playground URL)
+5. **data-management-frontend** — path aliases `/internal/v1/models/ollama/*` retained; UI copy → playground
+6. Confirm **`vecinita-ollama`** remains stopped
+
+**Post-deploy validation:** Super-admin pulls a catalog tag via playground URL; poll until
+`available: true`; golden eval sandbox uses playground URL + `model_id`; ChatRAG prod chat
+unaffected during playground reload; unauthorized generate/warm → `401`; streaming emits
+incremental tokens.
 
 ## Entrypoints & triggers
 

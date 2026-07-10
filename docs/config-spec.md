@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-08 (S010/EV-011 F39 — unified LLM env vars, ADR-037)
+> **Last updated**: 2026-07-10 (S010/EV-011 F39 Phase 18 — playground URL, TP-S010-27)
 
 ## Precedence
 
@@ -26,8 +26,10 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Minimum pgvector similarity (`1 - distance`); chunks below are dropped |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (prod) | Modal FastEmbed base URL |
-| `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal **`vecinita-llm`** base URL — inference, warm, list/pull (ADR-037) |
-| `VECINITA_MODAL_PROXY_KEY` | string | — | Yes (prod) | `X-Vecinita-Proxy-Key` for Modal LLM model routes |
+| `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal **`vecinita-llm`** base URL — ChatRAG / prod inference + warm (ADR-037) |
+| `VECINITA_MODAL_LLM_PLAYGROUND_URL` | string | — | Yes (admin/eval sandbox, Slice D) | Modal **`vecinita-llm-playground`** base URL — list/pull/eval sandbox (TP-S010-27) |
+| `VECINITA_MODAL_PROXY_KEY` | string | — | Yes (prod) | `X-Vecinita-Proxy-Key` for **all** Modal LLM routes except `/health` (RD-165) |
+| `VECINITA_LLM_MODEL_ID` | string | `qwen2.5:1.5b-instruct` | No | Prod pin on `vecinita-llm`; playground overrides only on playground app (RD-169, TP-S010-25) |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
@@ -246,9 +248,10 @@ corpus DB stays PII-free.
 
 | Variable | Status | Replacement |
 |----------|--------|-------------|
-| `VECINITA_MODAL_OLLAMA_URL` | **Deprecated** — remove from DO deploy specs | `VECINITA_MODAL_LLM_URL` (unified `vecinita-llm` routes) |
+| `VECINITA_MODAL_OLLAMA_URL` | **Deprecated** — remove from DO deploy specs; **drop client fallbacks** in slice E (RD-170) | `VECINITA_MODAL_LLM_URL` (unified `vecinita-llm` routes) |
+| `VECINITA_OLLAMA_MODEL_ID` | **Deprecated** — remove fallbacks in slice E (RD-170) | `VECINITA_LLM_MODEL_ID` / playground `model_id` |
 
-Clients that still read `VECINITA_MODAL_OLLAMA_URL` should log a warning and ignore it (no Ollama URL branch). Operator: `modal app stop vecinita-ollama` after S010 deploy smoke.
+Clients must not prefer Ollama URL when set. Operator: `modal app stop vecinita-ollama` after S010 deploy smoke.
 
 ## Recommended defaults (spec)
 

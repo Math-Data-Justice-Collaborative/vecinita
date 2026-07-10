@@ -37,7 +37,8 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_AUDIT_RETENTION_DAYS` | No | Default `365` — EV-002 audit retention for `POST /internal/v1/audit/cleanup` (F29); `0` = skip |
 | `VECINITA_CHAT_RAG_URL` | Yes (EV-002) | Chat-rag-backend URL for `GET /internal/v1/health/all` polling |
 | `VECINITA_MODAL_EMBED_URL` | Yes (EV-002) | Modal embedding **base** URL (no `/health` suffix); health poll appends `/health` |
-| `VECINITA_MODAL_LLM_URL` | Yes (EV-002) | Modal LLM URL for health aggregator |
+| `VECINITA_MODAL_LLM_URL` | Yes (EV-002) | Modal **`vecinita-llm`** URL for health aggregator (prod) |
+| `VECINITA_MODAL_LLM_PLAYGROUND_URL` | Yes (EV-011 Slice D) | Modal **`vecinita-llm-playground`** URL — list/pull + sandbox eval (TP-S010-27) |
 | `VECINITA_MODAL_DATA_MGMT_URL` | Yes (EV-001/002) | Modal data-mgmt URL — retag dispatch + health poll |
 | `VECINITA_CHAT_FRONTEND_URL` | Yes (EV-002) | Chat static site URL for health aggregator HTTP check |
 | `VECINITA_ADMIN_FRONTEND_URL` | Yes (EV-002) | Admin static site URL for health aggregator HTTP check |
