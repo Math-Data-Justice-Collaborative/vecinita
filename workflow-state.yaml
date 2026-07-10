@@ -7,14 +7,15 @@ project:
     00-context:
       status: completed
       started_at: '2026-07-08'
-      completed_at: '2026-07-08'
-      partial_rerun_at: '2026-07-08'
-      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm (ADR-037); deprecate vecinita-ollama
+      completed_at: '2026-07-10'
+      partial_rerun_at: '2026-07-10'
+      partial_rerun_note: EV-011/S010 Option A — LLM client consolidation decisions (1)-(9); preferred slice (1)+(4) then
+        streaming
       session_id: S010-unify-llm-service
       branch: feat/S010-unify-llm-service
       evolve_cycle_id: EV-011
-      note: S010/EV-011 — ADR-037 accepted; context-brief at docs/sessions/S010-unify-llm-service/context-brief.md. 00-context
-        completed 2026-07-08.
+      note: Partial re-run complete 2026-07-10; consolidation decisions R-S010-00-1..9 + host + routing; routing amended for
+        delta 01→04→07(A–E)→08–13
       s009_baseline:
         status: paused
         paused_at: '2026-07-08'
@@ -48,8 +49,27 @@ project:
         session_id: S005-user-mgmt-auth
         branch: feat/S005-user-mgmt-auth
         note: S005/EV-006 F35 00-context completed 2026-06-29; session paused 2026-06-30 before deploy stages.
+      batch1_decisions:
+      - R-S010-00-1-client
+      - R-S010-00-2-streaming
+      - R-S010-00-3-auth
+      - R-S010-00-4-naming
+      - R-S010-00-9-no-abc
+      batch1_note: 'Batch 1 recorded 2026-07-10. Clarification on (1): drop ollama → vLLM+HF. "5. A" interpreted as decision
+        9 (skip provider ABC), not item 5 chat-template. Next: Batch 2 decisions 5,6,7,8.'
+      batch2_decisions:
+      - R-S010-00-5-chat-template
+      - R-S010-00-6-catalog-gate
+      - R-S010-00-7-engine-isolate
+      - R-S010-00-8-env-cleanup
+      consolidation_decisions_complete: true
+      routing_amendment_pending: false
+      batch2_note: 'All nine consolidation decisions recorded (1-9) 2026-07-10. Proposed routing amendment PENDING user AskQuestion
+        — do not apply yet: delta 01+04 then 07 slices A=(1)+(4), B=(2)+(3), C=(5)+(6), D=(7), E=(8); then 08→13; skip 02/03/05/06.
+        00-context in_progress until routing approved + context brief written.'
+      routing_amendment_approved: true
     01-requirements:
-      status: completed
+      status: pending
       started_at: '2026-07-08'
       completed_at: '2026-07-08'
       partial_rerun_at: '2026-07-08'
@@ -92,6 +112,10 @@ project:
         note: 'EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15. Prior EV-006/F35 delta
           (S005): ADR-029, feature-list F35, UJ-030-UJ-033, TC-088-TC-095, AC-U1-AC-U9, RD-080-RD-090.'
         report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
+      prior_status: completed
+      prior_completed_at: '2026-07-08'
+      mode: delta_reopen
+      note: Delta reopen for F39 client consolidation follow-on (post 00-context routing A)
     04-tech-plan:
       status: completed
       started_at: '2026-07-08'
@@ -108,8 +132,8 @@ project:
         started_at: '2026-07-05'
         completed_at: '2026-07-05'
         partial_rerun_at: '2026-07-05'
-        partial_rerun_note: EV-010/S009 delta — F38 playground model download tech plan complete (ADR-036, TP-S009-01–16; Phase
-          16 M71–M73).
+        partial_rerun_note: EV-010/S009 delta — F38 playground model download tech plan complete (ADR-036, TP-S009-01–16;
+          Phase 16 M71–M73).
         session_id: S009-playground-model-download
         branch: feat/S009-playground-model-download
         evolve_cycle_id: EV-010
@@ -249,8 +273,8 @@ project:
       evolve_cycle_id: EV-011
       report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
       overall_result: PASS
-      note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
-        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+      note: S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).
       s008_baseline:
         status: completed
         started_at: '2026-07-03'
@@ -310,7 +334,8 @@ project:
       started_at: '2026-07-07'
       completed_at: '2026-07-07'
       partial_rerun_at: '2026-07-07'
-      partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved
+      partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers
+        resolved
       session_id: S009-playground-model-download
       branch: feat/S009-playground-model-download
       evolve_cycle_id: EV-010
@@ -509,8 +534,8 @@ project:
         branch: feat/S009-playground-model-download
         evolve_cycle_id: EV-010
         report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
-        note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for
-          admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
+        note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for admin@vecinita.admin;
+          07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
     13-deploy-smoke:
       status: completed
       started_at: '2026-06-26'
@@ -558,26 +583,51 @@ active_session:
   evolve_cycle_id: EV-011
   artifacts_dir: docs/sessions/S010-unify-llm-service/
   started_at: '2026-07-08'
-  current_stage: 09-qa
+  current_stage: 01-requirements
   context_briefs:
   - docs/sessions/S010-unify-llm-service/context-brief.md
+  - docs/sessions/S010-unify-llm-service/routing-plan.md
   routing_plan:
   - stage: 00-context
+    prior_completed_at: '2026-07-08'
     status: completed
-    completed_at: '2026-07-08'
-    note: context-brief.md exists; ADR-037 accepted
+    completed_at: '2026-07-10'
+    note: Partial re-run complete; consolidation decisions + routing A approved
   - stage: 01-requirements
-    status: completed
-    started_at: '2026-07-08'
-    completed_at: '2026-07-08'
+    prior_completed_at: '2026-07-08'
+    status: pending
+    mode: delta_reopen
+    note: Re-open for F39 client consolidation follow-on
+  - stage: 02-verify-plan
+    status: skipped
+    skip_rationale: Tooling/docs already exist
+  - stage: 03-plan-tooling
+    status: skipped
+    skip_rationale: Tooling already exists
   - stage: 04-tech-plan
-    status: completed
-    completed_at: '2026-07-08'
+    prior_completed_at: '2026-07-08'
+    status: pending
+    mode: delta_reopen
+    note: Re-open after 01 for client merge / rename / streaming / engine split
+  - stage: 05-verify-tech
+    status: skipped
+    skip_rationale: Tooling already exists
+  - stage: 06-tech-tooling
+    status: skipped
+    skip_rationale: Tooling already exists
   - stage: 07-build
     status: pending
+    slices:
+    - A:1+4
+    - B:2+3
+    - C:5+6
+    - D:7
+    - E:8
+    first_slice: A
+    note: Build slices A–E; first slice A = (1)+(4)
   - stage: 08-verify-build
-    status: completed
-    completed_at: '2026-07-08'
+    status: pending
+    note: Re-run after consolidation build slices
   - stage: 09-qa
     status: pending
   - stage: 10-e2e
@@ -1670,9 +1720,9 @@ stages:
   00-context:
     status: completed
     started_at: '2026-07-08'
-    completed_at: '2026-07-08'
-    partial_rerun_at: '2026-07-08'
-    partial_rerun_note: EV-011/S010 delta — unified vecinita-llm (ADR-037); deprecate vecinita-ollama
+    completed_at: '2026-07-10'
+    partial_rerun_at: '2026-07-10'
+    partial_rerun_note: EV-011/S010 Option A — LLM client consolidation decisions (1)-(9); preferred slice (1)+(4) then streaming
     session_id: S010-unify-llm-service
     branch: feat/S010-unify-llm-service
     evolve_cycle_id: EV-011
@@ -1715,9 +1765,29 @@ stages:
         - docs/adr/ADR-019-shared-frontend-i18n.md
         - docs/adr/ADR-020-shared-frontend-ui.md
     s008_baseline: *id001
-    note: S010/EV-011 — ADR-037 unified vecinita-llm; deprecate vecinita-ollama. 00-context completed 2026-07-08.
+    note: Partial re-run complete 2026-07-10; consolidation decisions R-S010-00-1..9 + host + routing; routing amended for
+      delta 01→04→07(A–E)→08–13
+    batch1_decisions:
+    - R-S010-00-1-client
+    - R-S010-00-2-streaming
+    - R-S010-00-3-auth
+    - R-S010-00-4-naming
+    - R-S010-00-9-no-abc
+    batch1_note: 'Batch 1 recorded 2026-07-10. Clarification on (1): drop ollama → vLLM+HF. "5. A" interpreted as decision
+      9 (skip provider ABC), not item 5 chat-template. Next: Batch 2 decisions 5,6,7,8.'
+    batch2_decisions:
+    - R-S010-00-5-chat-template
+    - R-S010-00-6-catalog-gate
+    - R-S010-00-7-engine-isolate
+    - R-S010-00-8-env-cleanup
+    consolidation_decisions_complete: true
+    routing_amendment_pending: false
+    batch2_note: 'All nine consolidation decisions recorded (1-9) 2026-07-10. Proposed routing amendment PENDING user AskQuestion
+      — do not apply yet: delta 01+04 then 07 slices A=(1)+(4), B=(2)+(3), C=(5)+(6), D=(7), E=(8); then 08→13; skip 02/03/05/06.
+      00-context in_progress until routing approved + context brief written.'
+    routing_amendment_approved: true
   01-requirements:
-    status: completed
+    status: pending
     started_at: '2026-07-08'
     completed_at: '2026-07-08'
     partial_rerun_at: '2026-07-08'
@@ -1788,6 +1858,9 @@ stages:
       - docs/decisions.md
       - data/fixtures/eval/qa_pairs.json
       report: docs/sessions/S007-rag-eval/reports/01-requirements.md
+    prior_status: completed
+    mode: delta_reopen
+    note: Delta reopen for F39 client consolidation follow-on
   02-verify-plan:
     status: completed
     started_at: '2026-05-24'
@@ -2015,8 +2088,8 @@ stages:
     evolve_cycle_id: EV-011
     report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
     overall_result: PASS
-    note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
-      public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+    note: S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+      public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).
     s008_baseline:
       session_id: S008-eval-ux-playground
       branch: feat/S008-eval-ux-playground
@@ -2086,7 +2159,8 @@ stages:
     started_at: '2026-07-07'
     completed_at: '2026-07-07'
     partial_rerun_at: '2026-07-07'
-    partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved
+    partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers
+      resolved
     session_id: S009-playground-model-download
     branch: feat/S009-playground-model-download
     evolve_cycle_id: EV-010
@@ -2494,11 +2568,15 @@ evolve_cycles:
   started: '2026-05-24'
   completed: '2026-05-25'
   note: Deployed 2026-05-25 — all tiers pass (H4 Modal waiver); 2 deploy-time fixes
-  scope_summary: |
-    Community members browse and filter corpus documents by tags (full text on open).
+  scope_summary: 'Community members browse and filter corpus documents by tags (full text on open).
+
     LLM auto-tags at ingest; admins view chunks and edit document/chunk tags (human or LLM).
+
     Tag-aware RAG: optional user tag filter + LLM-inferred tags from question.
+
     Public read API on chat-rag-backend; admin writes via existing protected paths.
+
+    '
   routing_plan:
     required_stages:
     - 00-context
@@ -2690,13 +2768,19 @@ evolve_cycles:
   started: '2026-05-26'
   completed: '2026-05-27'
   note: Deployed 2026-05-27 @ 0a2f813 — H1-H5 + T3 pass (H4 Modal waiver); drift vs HEAD 98bb7f8
-  scope_summary: |
-    F23: Admin UI overhaul (Tailwind CSS + React Router navigation).
+  scope_summary: 'F23: Admin UI overhaul (Tailwind CSS + React Router navigation).
+
     F24: Admin summary statistics dashboard (document/chunk/tag/job aggregates).
+
     F25: System health check dashboard (live service status polling).
+
     F26: Bulk corpus document operations (metadata editing, bulk delete, bulk tags).
+
     F27: Document retrieval usage statistics (new table, counter on RAG responses).
+
     F28: Corpus audit log & version history (new table, hashed IP, JSONB diffs).
+
+    '
   routing_plan:
     required_stages:
     - 00-context
@@ -2807,13 +2891,19 @@ evolve_cycles:
   status: in_progress
   started: '2026-06-13'
   completed: null
-  scope_summary: |
-    F31: Admin UI bilingual (en/es) — mirror ChatRAG i18n.
+  scope_summary: 'F31: Admin UI bilingual (en/es) — mirror ChatRAG i18n.
+
     Shared packages/frontend-i18n + packages/frontend-ui (shared Tailwind UI components).
+
     vecinita.locale persistence (R28, R29).
+
     Sidebar EN/ES toggle beside ThemeToggle (R31); UI chrome only (R30).
+
     Component extraction from ChatRAG/admin into frontend-ui (R34-R38).
+
     No backend or API contract changes.
+
+    '
   routing_plan:
     required_stages:
     - 00-context
@@ -3401,16 +3491,15 @@ evolve_cycles:
       status: completed
       started: '2026-07-06'
       completed: '2026-07-06'
-      note: F38 catalog extension approved; UJ-048 approved; super-admin seeded admin@vecinita.admin; 07-build extension
-        uncommitted
+      note: F38 catalog extension approved; UJ-048 approved; super-admin seeded admin@vecinita.admin; 07-build extension uncommitted
   checkpoints:
     phase_a: pending
     phase_b: pending
     phase_c: pending
     phase_d: pending
     deploy: pending
-  note: F38 — super-admin-only Ollama model download UI for eval playground; admin list+select only; full-stack tests.
-    Parked 2026-07-08 for S010/EV-011 unified LLM consolidation.
+  note: F38 — super-admin-only Ollama model download UI for eval playground; admin list+select only; full-stack tests. Parked
+    2026-07-08 for S010/EV-011 unified LLM consolidation.
 - id: EV-011
   cycle_type: feature
   feature_ids:
@@ -3419,31 +3508,71 @@ evolve_cycles:
   status: in_progress
   started: '2026-07-08'
   session_id: S010-unify-llm-service
-  current_stage: 09-qa
+  current_stage: 01-requirements
   stages:
     00-context:
       status: completed
       started: '2026-07-08'
-      completed: '2026-07-08'
-      note: S010/EV-011 — ADR-037 accepted; context-brief at docs/sessions/S010-unify-llm-service/context-brief.md
+      completed: '2026-07-10'
+      note: Partial re-run complete 2026-07-10; consolidation decisions R-S010-00-1..9 + host + routing; routing amended for
+        delta 01→04→07(A–E)→08–13
+      prior_completed: '2026-07-08'
+      batch1_complete: true
+      batch2_complete: true
+      consolidation_decisions:
+      - R-S010-00-1-client
+      - R-S010-00-2-streaming
+      - R-S010-00-3-auth
+      - R-S010-00-4-naming
+      - R-S010-00-5-chat-template
+      - R-S010-00-6-catalog-gate
+      - R-S010-00-7-engine-isolate
+      - R-S010-00-8-env-cleanup
+      - R-S010-00-9-no-abc
+      routing_amendment_pending: false
     01-requirements:
-      status: completed
+      status: pending
       started: '2026-07-08'
-      completed: '2026-07-08'
       report: docs/sessions/S010-unify-llm-service/reports/01-requirements.md
+      prior_completed: '2026-07-08'
+      mode: delta_reopen
+      note: Delta reopen for F39 client consolidation follow-on
     04-tech-plan:
-      status: completed
+      status: pending
       started: '2026-07-08'
-      completed: '2026-07-08'
       report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan.md
+      prior_completed: '2026-07-08'
+      mode: delta_reopen
+      note: Delta reopen after 01 — client merge/rename/streaming/engine split
     08-verify-build:
-      status: completed
+      status: pending
       started: '2026-07-08'
-      completed: '2026-07-08'
       report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
       overall_result: PASS
-      note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
-        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+      note: Re-run after consolidation build slices
+      prior_completed: '2026-07-08'
+    07-build:
+      status: pending
+      slices:
+      - A:1+4
+      - B:2+3
+      - C:5+6
+      - D:7
+      - E:8
+      first_slice: A
+      note: Build slices A–E after delta 01+04
+    02-verify-plan:
+      status: skipped
+      skip_rationale: Tooling/docs already exist
+    03-plan-tooling:
+      status: skipped
+      skip_rationale: Tooling/docs already exist
+    05-verify-tech:
+      status: skipped
+      skip_rationale: Tooling/docs already exist
+    06-tech-tooling:
+      status: skipped
+      skip_rationale: Tooling/docs already exist
   checkpoints:
     phase_a: pending
     phase_b: pending
@@ -4722,15 +4851,88 @@ decisions_log:
 - S008 11-verify-impl partial waiver approved 2026-07-02 — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion
   skipped
 - S008 parked 2026-07-05 — coverage gate QA-S008-B05 open; S009 opened for F38 playground model download
-- 'EV-010/S009 01-requirements complete — F38 RD-146–RD-153; TC-134 revised; UJ-048 added'
+- EV-010/S009 01-requirements complete — F38 RD-146–RD-153; TC-134 revised; UJ-048 added
 - EV-010/S009 04-tech-plan complete — ADR-036, TP-S009-01–16, Phase 16 M71–M73
-- 'S009/EV-010 11-verify-impl complete 2026-07-06 — F38 catalog extension approved; UJ-048 approved; super-admin seeded
-  for admin@vecinita.admin; 07-build build extension uncommitted'
-- 'S009/EV-010 09-qa complete 2026-07-07 — overall FAIL (coverage gate); report at docs/sessions/S009-playground-model-download/reports/qa-report.md'
+- S009/EV-010 11-verify-impl complete 2026-07-06 — F38 catalog extension approved; UJ-048 approved; super-admin seeded for
+  admin@vecinita.admin; 07-build build extension uncommitted
+- S009/EV-010 09-qa complete 2026-07-07 — overall FAIL (coverage gate); report at docs/sessions/S009-playground-model-download/reports/qa-report.md
 - S009 parked 2026-07-08 — ADR-037 unified LLM service; S010/EV-011 opened (evolve-lite 00→01→04→07→08→09→10→11→12→13)
 - EV-011/S010 01-requirements complete — F39 unified vecinita-llm delta (ADR-037)
 - date: '2026-07-07'
   note: 'PR #140 remediation: waived S009 session orchestration for cross-session hotfix (precedent PR #66/#68)'
+- id: R-S010-00-host
+  category: Decision
+  summary: User chose A — partial 00-context re-run inside S010/EV-011 for LLM client consolidation (not new S011)
+  resolution: Host consolidation decisions in S010/EV-011; amend routing later for delta 01→04→07 after decisions
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-1-client
+  category: Decision
+  summary: Merge LlmClient + OllamaModelsClient into one client; drop Ollama as mental model — vLLM for inference, HuggingFace
+    for downloads
+  resolution: 1A — single client surface with shared env/auth/timeout; engine = vLLM + HF (ADR-037)
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-2-streaming
+  category: Decision
+  summary: Wire real vLLM token streaming into /generate/stream SSE (stop word-chunk fake streaming)
+  resolution: 2A — real token streaming
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-3-auth
+  category: Decision
+  summary: Require proxy key on all LLM routes (/generate, /warm, /models/*); /health may stay open
+  resolution: 3A — auth everywhere on LLM routes
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-4-naming
+  category: Decision
+  summary: Rename Ollama modules/types to playground/LLM; keep /models/ollama path aliases for FE
+  resolution: 4A — rename + path aliases; drop Ollama cognitive load
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-9-no-abc
+  category: Decision
+  summary: Skip provider ABC / multi-provider plugin framework
+  resolution: 9A — skip (user answered as 5th item in batch 1)
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-5-chat-template
+  category: Decision
+  summary: Centralize chat templates via HF apply_chat_template
+  resolution: 5A
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-6-catalog-gate
+  category: Decision
+  summary: Gate list/pull catalog to tags resolve_hf_repo accepts; clear errors on unmapped
+  resolution: 6A
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-7-engine-isolate
+  category: Decision
+  summary: Separate Modal class/app for playground; prod pinned to fixed default model
+  resolution: 7A
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-8-env-cleanup
+  category: Decision
+  summary: Drop legacy Ollama env fallbacks after cutover; fix docstrings; declare shared-schemas on llm-client
+  resolution: 8A
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-routing
+  category: Decision
+  summary: User approved routing A — full amendment with build slices A–E; first slice (1)+(4)
+  resolution: Approve delta 01→04→07(A–E)→08–13; skip 02/03/05/06
+  stage: 00-context
+  timestamp: '2026-07-10'
+- id: R-S010-00-git-advisory
+  category: Advisory
+  summary: Working tree on main may have unrelated dirty files (qwen36 registry); do not auto-commit; checkout feat/S010 separately
+  resolution: Parent must manage branch/checkout; workflow-state only
+  stage: 00-context
+  timestamp: '2026-07-10'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -5037,6 +5239,10 @@ artifacts:
   kind: verification-report
   session_id: S010-unify-llm-service
   stage: 08-verify-build
+- path: docs/sessions/S010-unify-llm-service/routing-plan.md
+  session_id: S010-unify-llm-service
+  kind: routing_plan
+  stage: 00-context
 git_history:
   current_branch: feat/S010-unify-llm-service
   branches:
