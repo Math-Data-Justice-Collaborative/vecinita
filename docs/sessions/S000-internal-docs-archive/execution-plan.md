@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M77: Slice A — one client + rename |
-| **Active task** | **T77.2** (pending) — rename/compat path alias tests |
-| **Tasks completed** | Phase 17 M74–M76 (host unify); Phase 18 not started |
+| **Active task** | **T77.3** (pending) — shared-schemas LLM HTTP config resolver |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1 |
 | **Last updated** | 2026-07-10 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
@@ -1578,8 +1578,8 @@ path aliases.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T77.1 | Test: extend `tests/unit/test_llm_client.py` — list/pull + shared resolver (TC-144) | Test | in_progress | RD-163, TP-S010-18/20, TC-144 | — | — | S010 | F39 |
-| T77.2 | Test: rename/compat — models list/pull still hit `/models/ollama*` aliases | Test | pending | RD-166, TP-S010-19 | — | — | S010 | F39 |
+| T77.1 | Test: extend `tests/unit/test_llm_client.py` — list/pull + shared resolver (TC-144) | Test | completed | RD-163, TP-S010-18/20, TC-144 | — | 2026-07-10 | S010 | F39 |
+| T77.2 | Test: rename/compat — models list/pull still hit `/models/ollama*` aliases | Test | in_progress | RD-166, TP-S010-19 | — | — | S010 | F39 |
 | T77.3 | Code: `shared-schemas` LLM HTTP config resolver (URL/proxy/timeout) | Code | pending | TP-S010-20 | T77.1 | — | S010 | F39 |
 | T77.4 | Code: expand `LlmClient`; migrate call sites; delete `OllamaModelsClient` | Code | pending | RD-163, TP-S010-18 | T77.1, T77.3 | — | S010 | F39 |
 | T77.5 | Code: rename `ollama_*` → `playground_*` (schemas, modules, FE types/UI copy); path aliases retained | Code | pending | RD-166, TP-S010-19 | T77.2, T77.4 | — | S010 | F39 |
@@ -2261,7 +2261,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T76.5 | M76 | 17 | Operator | pending | T76.4 | — | S010 | F39 | — |
 | T76.6 | M76 | 17 | Operator | pending | T76.5 | — | S010 | F39 | — |
 | T76.7 | M76 | 17 | Operator | completed | T76.6 | — | S010 | F39 | 2026-07-09 |
-| T77.1 | M77 | 18 | Test | in_progress | — | — | S010 | F39 | — |
+| T77.1 | M77 | 18 | Test | completed | — | 2026-07-10 | S010 | F39 | — |
 | T77.2 | M77 | 18 | Test | pending | — | — | S010 | F39 | — |
 | T77.3 | M77 | 18 | Code | pending | T77.1 | — | S010 | F39 | — |
 | T77.4 | M77 | 18 | Code | pending | T77.1, T77.3 | — | S010 | F39 | — |
