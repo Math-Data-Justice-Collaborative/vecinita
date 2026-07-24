@@ -55,6 +55,7 @@ def manifest_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     path = tmp_path / "manifest.json"
     monkeypatch.setattr(llm_app, "_MANIFEST_PATH", path)
     monkeypatch.setattr(llm_app, "model_volume", MagicMock())
+    monkeypatch.setattr(llm_app, "_commit_models_volume", MagicMock())
     return path
 
 

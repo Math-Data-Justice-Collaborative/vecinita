@@ -11,22 +11,22 @@
 |-------|--------|-------|
 | M77–M79 (Slices A–C) | **complete** | Prior verify PASS — `verification-report.md` (M79) |
 | M80 T80.1–T80.6 (Slice D) | **complete** | Two apps + prod pin + playground URL routing |
-| M80 T80.7 | **blocked** | Operator live deploy + smoke (defer 13-deploy-smoke) |
+| M80 T80.7 | **completed** | Operator live deploy + smoke — see `t80.7-operator-smoke.md` |
 | M81 T81.1–T81.4 (Slice E) | **complete** | Ollama fallbacks removed; shared-schemas on llm-client |
 | M81 T81.5 | **this doc** | Gate checklist + verify pointer |
 
-**Phase 18 gate:** **PENDING** until T80.7 operator smoke + final `08-verify-build`.
+**Phase 18 gate:** **PENDING** final `08-verify-build` + PR-53 (TP-S010-21). T80.7 live smoke **PASS** 2026-07-24.
 
 ## Gate criteria
 
 | Criterion | T2 (unit/CI) | T3 (live) |
 |-----------|--------------|-----------|
-| All M77–M81 tasks completed (T77.1–T81.5) | ⬜ T80.7 open | — |
-| TC-141–TC-145 green; UJ-048/UJ-049 | ✅ unit/e2e local | ⬜ staging |
-| AC-E34–AC-E38; engine isolation smoke | ✅ unit (TC-145) | ⬜ T80.7 |
+| All M77–M81 tasks completed (T77.1–T81.5) | ✅ T80.7 done | — |
+| TC-141–TC-145 green; UJ-048/UJ-049 | ✅ unit/e2e local | ✅ T80.7 smoke |
+| AC-E34–AC-E38; engine isolation smoke | ✅ unit (TC-145) | ✅ T80.7 (pull + prod chat) |
 | Single `LlmClient`; no `OllamaModelsClient`; FE rename + aliases | ✅ | — |
-| Real vLLM SSE; proxy on non-health | ✅ | ⬜ |
-| Two Modal apps + shared `llm-models` | ✅ code/scripts | ⬜ deploy |
+| Real vLLM SSE; proxy on non-health | ✅ | ✅ |
+| Two Modal apps + shared `llm-models` | ✅ code/scripts | ✅ deployed |
 | No Ollama env fallbacks; `shared-schemas` on llm-client | ✅ | — |
 | No provider ABC | ✅ | — |
 | ruff / basedpyright / ESLint; full suites | ⬜ final 08-verify | — |
@@ -56,6 +56,6 @@ When T80.7 unblocks (or is waived), run **08-verify-build** at Phase 18 scope:
 
 ## Next
 
-1. **Operator:** approve T80.7 — `bash scripts/deploy/modal.sh`, sync `VECINITA_MODAL_LLM_PLAYGROUND_URL`, smoke playground pull + prod chat.
-2. **08-verify-build** Phase 18 final.
-3. Open **PR-53** (TP-S010-21).
+1. ~~**Operator:** approve T80.7~~ — **PASS** 2026-07-24 (`reports/t80.7-operator-smoke.md`).
+2. **08-verify-build** Phase 18 final (commit deploy fixes first — exclude unrelated eval WIP).
+3. Open **PR-53** (TP-S010-21) after push.

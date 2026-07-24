@@ -12,11 +12,11 @@
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M81: Slice E — env/doc cleanup |
 | **Active task** | **T81.5** (pending) — Docs: Phase 18 gate checklist + session verify pointer |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.6; M81 T81.1 in progress (T80.7 blocked) |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T81.5 (incl. T80.7 operator smoke 2026-07-24) |
 | **Last updated** | 2026-07-24 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
-| **Active session** | S010-unify-llm-service — Phase 18 M80: T80.1–T80.6 done; T80.7 blocked (operator live deploy/smoke). Per TP-S010-21 no minor PR. |
+| **Active session** | S010-unify-llm-service — Phase 18 complete pending 08-verify-build + PR-53 (TP-S010-21). T80.7 PASS. |
 | **Scope addition** | 2026-07-10 — F39 follow-on: one `LlmClient`, rename, streaming, auth, chat-template, catalog gate, **two Modal apps** (prod + playground), env cleanup (RD-163–RD-172, TP-S010-17–31). |
 
 ## Template
@@ -1625,7 +1625,7 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 | T80.4 | Config: `VECINITA_MODAL_LLM_PLAYGROUND_URL` on internal-write-api / DM; ChatRAG prod URL only | Config | completed | TP-S010-27, config-spec | T80.2 | 2026-07-24 | S010 | F39 |
 | T80.5 | Config: `modal.sh` + secrets — deploy both apps; sync proxy key | Config | completed | deployment-integration | T80.2 | 2026-07-24 | S010 | F39 |
 | T80.6 | Docs: deployment-integration + staging-secrets-matrix — two-app order | Docs | completed | TP-S010-25 | T80.4, T80.5 | 2026-07-24 | S010 | F39 |
-| T80.7 | Operator: deploy both apps; smoke playground pull + prod chat unaffected | Operator | blocked | AC-E38, 13-deploy-smoke | T80.6 | — | S010 | F39 |
+| T80.7 | Operator: deploy both apps; smoke playground pull + prod chat unaffected | Operator | completed | AC-E38, 13-deploy-smoke | T80.6 | 2026-07-24 | S010 | F39 |
 
 #### M81: Slice E — env/doc cleanup
 
@@ -1641,7 +1641,7 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 
 #### Phase 18 Gate Check
 
-- [ ] All M77–M81 tasks completed (T77.1–T81.5) — **T80.7 blocked** (operator live deploy)
+- [x] All M77–M81 tasks completed (T77.1–T81.5) — **T80.7 PASS** 2026-07-24
 - [x] TC-141–TC-145 green at T2; UJ-048/UJ-049 covered (local)
 - [ ] AC-E34–AC-E38 satisfied at T2; engine isolation smoke at T3 — **T2 unit ✅; T3 pending T80.7**
 - [x] Single `LlmClient`; no `OllamaModelsClient`; FE rename + path aliases
@@ -2288,7 +2288,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T80.4 | M80 | 18 | Config | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
 | T80.5 | M80 | 18 | Config | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
 | T80.6 | M80 | 18 | Docs | completed | T80.4, T80.5 | 2026-07-24 | S010 | F39 | — |
-| T80.7 | M80 | 18 | Operator | blocked | T80.6 | — | S010 | F39 | live Modal/DO smoke |
+| T80.7 | M80 | 18 | Operator | completed | T80.6 | 2026-07-24 | S010 | F39 | live Modal/DO smoke |
 | T81.1 | M81 | 18 | Test | completed | T77.4 | 2026-07-24 | S010 | F39 | — |
 | T81.2 | M81 | 18 | Code | completed | T81.1 | 2026-07-24 | S010 | F39 | — |
 | T81.3 | M81 | 18 | Config | completed | T77.3 | 2026-07-24 | S010 | F39 | — |

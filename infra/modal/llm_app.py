@@ -173,11 +173,16 @@ def _read_manifest() -> dict[str, object]:
     return {"models": [{"model_id": DEFAULT_PLAYGROUND_MODEL_ID, "available": False}]}
 
 
+def _commit_models_volume() -> None:
+    """Commit shared ``llm-models`` by name (prod + playground App Volume handles differ)."""
+    modal.Volume.from_name(VOLUME_NAME).commit()
+
+
 def _write_manifest(models: list[dict[str, object]]) -> None:
     _MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     with _MANIFEST_PATH.open("w", encoding="utf-8") as handle:
         json.dump({"models": models}, handle)
-    model_volume.commit()
+    _commit_models_volume()
 
 
 def _model_id_mapped(model_id: str) -> bool:
@@ -512,6 +517,7 @@ class LlmService:
     image=image,
     timeout=1200,
     secrets=_LLM_ASGI_SECRETS,
+    volumes={"/models": model_volume},
 )
 @modal.asgi_app()
 def fastapi_app():

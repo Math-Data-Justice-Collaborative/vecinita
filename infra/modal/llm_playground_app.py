@@ -244,6 +244,7 @@ class LlmService:
     image=image,
     timeout=1200,
     secrets=_LLM_ASGI_SECRETS,
+    volumes={"/models": model_volume},
 )
 @modal.asgi_app()
 def fastapi_app():

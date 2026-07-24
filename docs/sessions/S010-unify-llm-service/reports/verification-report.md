@@ -41,3 +41,38 @@ Overall: **PASS** (M79 scope)
 ## Next
 
 Continue **07-build** at **M80 / T80.1** (Slice D: two Modal apps + prod pin).
+
+---
+
+# Verification Report — Phase 18 final (T80.7)
+
+> Generated: 2026-07-24  
+> Scope: Phase 18 / T80.7 operator deploy + live smoke + deploy-path regressions  
+> Branch: `feat/S010-unify-llm-service`  
+> Session: S010-unify-llm-service / EV-011 / F39
+
+## Summary
+
+| Check | Status | Findings | Tool |
+|-------|--------|----------|------|
+| Lint (T80.7 fix paths) | PASS | 0 | ruff |
+| Format | PASS | — | ruff format --check |
+| Typecheck (fix paths) | PASS | 0 | basedpyright |
+| Unit (lazy init, ASGI volume, catalog, isolation) | PASS | 26 | pytest |
+| Live T80.7 smoke | PASS | pull + prod isolation + ChatRAG `modal_llm=ok` | operator |
+| DO secrets verify | PASS | `do_verify_required_secrets.sh` | deploy |
+
+Overall: **PASS** (Phase 18 / T80.7) — pending commit + push for **PR-53** (TP-S010-21).
+
+## Live evidence
+
+See `docs/sessions/S010-unify-llm-service/reports/t80.7-operator-smoke.md`.
+
+## Uncommitted fix set (for PR-53)
+
+- Lazy `vecinita_shared_schemas.__init__` (no eager PyJWT on Modal LLM image)
+- ASGI `volumes={/models}` + `_commit_models_volume()` by name
+- `scripts/deploy/modal.sh` → `uv run modal`
+- Regression tests + phase gate / execution-plan bookkeeping
+
+**Exclude from PR:** unrelated eval-golden-sweep WIP on this working tree.
