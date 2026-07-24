@@ -5,21 +5,45 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock
+from typing import TYPE_CHECKING, cast
 
 import pytest
+
+if TYPE_CHECKING:
+    from starlette.requests import Request
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from infra.modal.llm_app import (  # noqa: E402
-    _PROXY_ENV,
-    _PROXY_HEADER,
     _authorized,  # pyright: ignore[reportPrivateUsage]  # auth helper under test
 )
 
 LLM_APP = _REPO_ROOT / "infra" / "modal" / "llm_app.py"
+_PROXY_ENV = "VECINITA_MODAL_PROXY_KEY"
+_PROXY_HEADER = "X-Vecinita-Proxy-Key"
+
+
+class _Headers:
+    """Minimal headers map for ``_authorized`` (avoids MagicMock Any)."""
+
+    def __init__(self, value: str | None) -> None:
+        self._value = value
+        self.last_key: str | None = None
+
+    def get(self, key: str, default: str | None = None) -> str | None:
+        self.last_key = key
+        if self._value is None:
+            return default
+        return self._value
+
+
+class _Request:
+    """Minimal Starlette-like request for auth unit tests."""
+
+    def __init__(self, header_value: str | None) -> None:
+        self.headers = _Headers(header_value)
 
 
 def _find_fastapi_handler(name: str) -> ast.AsyncFunctionDef:
@@ -46,26 +70,21 @@ def test_authorized_rejects_when_proxy_env_unset(
 ) -> None:
     """Fail closed when VECINITA_MODAL_PROXY_KEY is unset (RD-165)."""
     monkeypatch.delenv(_PROXY_ENV, raising=False)
-    request = MagicMock()
-    request.headers.get.return_value = "any-key"
-    assert _authorized(request) is False
+    assert _authorized(cast("Request", _Request("any-key"))) is False
 
 
 def test_authorized_rejects_wrong_proxy_key(monkeypatch: pytest.MonkeyPatch) -> None:
     """Wrong X-Vecinita-Proxy-Key is unauthorized."""
     monkeypatch.setenv(_PROXY_ENV, "expected-secret")
-    request = MagicMock()
-    request.headers.get.return_value = "wrong-secret"
-    assert _authorized(request) is False
-    request.headers.get.assert_called_with(_PROXY_HEADER)
+    request = _Request("wrong-secret")
+    assert _authorized(cast("Request", request)) is False
+    assert request.headers.last_key == _PROXY_HEADER
 
 
 def test_authorized_accepts_matching_proxy_key(monkeypatch: pytest.MonkeyPatch) -> None:
     """Matching proxy key header authorizes the request."""
     monkeypatch.setenv(_PROXY_ENV, "expected-secret")
-    request = MagicMock()
-    request.headers.get.return_value = "expected-secret"
-    assert _authorized(request) is True
+    assert _authorized(cast("Request", _Request("expected-secret"))) is True
 
 
 @pytest.mark.parametrize(
