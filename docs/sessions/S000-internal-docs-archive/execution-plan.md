@@ -1768,7 +1768,7 @@ main
 | PR-50 | Major | Phase 14 / S007 (EV-008) | feat/S007-rag-eval | main | pending ([#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)) |
 | PR-51 | Major | Phase 15 / S008 (EV-009) | feat/S008-eval-ux-playground | main | pending (F37 eval UX + playground) |
 | PR-52 | Major | Phase 16 / S009 (EV-010) | feat/S009-playground-model-download | main | pending (F38 playground model download) |
-| PR-53 | Major | Phase 17+18 / S010 (EV-011) | feat/S010-unify-llm-service | main | pending (F39 host unify + client consolidation A–E) |
+| PR-53 | Major | Phase 17+18 / S010 (EV-011) | feat/S010-unify-llm-service | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/144 |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
