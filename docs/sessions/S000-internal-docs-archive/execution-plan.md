@@ -16,7 +16,7 @@
 | **Last updated** | 2026-07-24 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
-| **Active session** | S010-unify-llm-service — Phase 18 M80 in progress; T80.1 completed (TC-145 engine isolation red). Next T80.2 playground Modal app. Per TP-S010-21 no minor PR. |
+| **Active session** | S010-unify-llm-service — Phase 18 M80: T80.1–T80.6 done; T80.7 blocked (operator live deploy/smoke). Per TP-S010-21 no minor PR. |
 | **Scope addition** | 2026-07-10 — F39 follow-on: one `LlmClient`, rename, streaming, auth, chat-template, catalog gate, **two Modal apps** (prod + playground), env cleanup (RD-163–RD-172, TP-S010-17–31). |
 
 ## Template
@@ -1625,7 +1625,7 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 | T80.4 | Config: `VECINITA_MODAL_LLM_PLAYGROUND_URL` on internal-write-api / DM; ChatRAG prod URL only | Config | completed | TP-S010-27, config-spec | T80.2 | 2026-07-24 | S010 | F39 |
 | T80.5 | Config: `modal.sh` + secrets — deploy both apps; sync proxy key | Config | completed | deployment-integration | T80.2 | 2026-07-24 | S010 | F39 |
 | T80.6 | Docs: deployment-integration + staging-secrets-matrix — two-app order | Docs | completed | TP-S010-25 | T80.4, T80.5 | 2026-07-24 | S010 | F39 |
-| T80.7 | Operator: deploy both apps; smoke playground pull + prod chat unaffected | Operator | pending | AC-E38, 13-deploy-smoke | T80.6 | — | S010 | F39 |
+| T80.7 | Operator: deploy both apps; smoke playground pull + prod chat unaffected | Operator | blocked | AC-E38, 13-deploy-smoke | T80.6 | — | S010 | F39 |
 
 #### M81: Slice E — env/doc cleanup
 
@@ -2286,7 +2286,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T80.4 | M80 | 18 | Config | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
 | T80.5 | M80 | 18 | Config | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
 | T80.6 | M80 | 18 | Docs | completed | T80.4, T80.5 | 2026-07-24 | S010 | F39 | — |
-| T80.7 | M80 | 18 | Operator | pending | T80.6 | — | S010 | F39 | — |
+| T80.7 | M80 | 18 | Operator | blocked | T80.6 | — | S010 | F39 | live Modal/DO smoke |
 | T81.1 | M81 | 18 | Test | pending | T77.4 | — | S010 | F39 | — |
 | T81.2 | M81 | 18 | Code | pending | T81.1 | — | S010 | F39 | — |
 | T81.3 | M81 | 18 | Config | pending | T77.3 | — | S010 | F39 | — |
