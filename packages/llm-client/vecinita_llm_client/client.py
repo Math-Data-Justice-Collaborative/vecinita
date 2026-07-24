@@ -10,6 +10,7 @@ import httpx
 from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.llm_http import (
     LlmHttpConfigError,
+    LlmHttpPurpose,
     resolve_llm_http_config,
 )
 from vecinita_shared_schemas.playground_models import (
@@ -40,8 +41,16 @@ class LlmClient:
         timeout: float = 120.0,
         http_client: httpx.Client | None = None,
         require_proxy_key: bool = False,
+        purpose: LlmHttpPurpose = "prod",
     ) -> None:
-        """Initialize the client from ``base_url`` or ``VECINITA_MODAL_LLM_URL``."""
+        """Initialize the client from env or ``base_url``.
+
+        Parameters
+        ----------
+        purpose
+            ``prod`` uses ``VECINITA_MODAL_LLM_URL``; ``playground`` prefers
+            ``VECINITA_MODAL_LLM_PLAYGROUND_URL`` (TP-S010-27).
+        """
         try:
             config = resolve_llm_http_config(
                 base_url=base_url,
@@ -49,6 +58,7 @@ class LlmClient:
                 timeout=timeout,
                 model_id=model_id,
                 require_proxy_key=require_proxy_key,
+                purpose=purpose,
             )
         except LlmHttpConfigError as exc:
             raise LlmClientError(str(exc)) from exc

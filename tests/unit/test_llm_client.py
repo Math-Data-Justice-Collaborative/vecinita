@@ -464,6 +464,26 @@ def test_resolve_llm_http_config_legacy_ollama_url_with_warning(
     assert "VECINITA_MODAL_OLLAMA_URL is deprecated" in caplog.text
 
 
+def test_resolve_llm_http_config_playground_purpose_prefers_playground_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """purpose=playground reads VECINITA_MODAL_LLM_PLAYGROUND_URL (TP-S010-27)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", "http://playground.env/")
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://prod.env/")
+    config = resolve_llm_http_config(purpose="playground")
+    assert config.base_url == "http://playground.env"
+
+
+def test_resolve_llm_http_config_playground_falls_back_to_prod_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """purpose=playground falls back to prod LLM URL when playground env is unset."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://prod.env/")
+    config = resolve_llm_http_config(purpose="playground")
+    assert config.base_url == "http://prod.env"
+
+
 def test_list_models_returns_parsed_response() -> None:
     """list_models GETs /models/ollama with proxy auth (TC-144 / RD-163)."""
 

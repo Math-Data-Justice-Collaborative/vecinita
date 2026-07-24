@@ -305,9 +305,9 @@ def _default_jobs_client() -> DataManagementJobsClient | None:
 
 
 def _default_playground_models_client() -> LlmClient | None:
-    """Auto-create an LlmClient for Modal list/pull from env vars when available."""
+    """Auto-create an LlmClient for Modal list/pull from playground URL when available."""
     try:
-        return LlmClient(require_proxy_key=True)
+        return LlmClient(require_proxy_key=True, purpose="playground")
     except LlmClientError:
         return None
 
