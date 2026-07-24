@@ -451,17 +451,39 @@ def test_resolve_llm_http_config_require_proxy_key(
         resolve_llm_http_config(require_proxy_key=True)
 
 
-def test_resolve_llm_http_config_legacy_ollama_url_with_warning(
+def test_resolve_llm_http_config_legacy_ollama_url_does_not_resolve(
     monkeypatch: pytest.MonkeyPatch,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Legacy Ollama URL still resolves until Slice E removes the fallback."""
+    """Slice E / RD-170 / TP-S010-29: Ollama URL alone must not satisfy the resolver."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
+    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test/")
+
+    with pytest.raises(LlmHttpConfigError, match="VECINITA_MODAL_LLM_URL"):
+        resolve_llm_http_config()
+
+
+def test_resolve_llm_http_config_ignores_legacy_ollama_model_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """VECINITA_OLLAMA_MODEL_ID must not populate model_id after Slice E (RD-170)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.env/")
+    monkeypatch.delenv("VECINITA_LLM_MODEL_ID", raising=False)
+    monkeypatch.setenv("VECINITA_OLLAMA_MODEL_ID", "legacy-ollama-tag")
+
+    config = resolve_llm_http_config()
+    assert config.model_id is None
+
+
+def test_llm_client_missing_url_hard_fails_even_with_ollama_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """LlmClient hard-fails when only deprecated Ollama URL is set (TP-S010-29)."""
     monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
     monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test/")
 
-    config = resolve_llm_http_config()
-    assert config.base_url == "http://legacy-ollama.test"
-    assert "VECINITA_MODAL_OLLAMA_URL is deprecated" in caplog.text
+    with pytest.raises(LlmClientError, match="VECINITA_MODAL_LLM_URL"):
+        LlmClient()
 
 
 def test_resolve_llm_http_config_playground_purpose_prefers_playground_url(

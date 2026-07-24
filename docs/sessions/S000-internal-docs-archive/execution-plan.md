@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
-| **Active milestone** | M80: Slice D — two Modal apps (prod + playground) |
-| **Active task** | **T80.7** (pending) — Operator: deploy both apps; smoke playground pull + prod chat unaffected |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.6 (M80 docs two-app order) |
+| **Active milestone** | M81: Slice E — env/doc cleanup |
+| **Active task** | **T81.1** (in_progress) — Test: missing `VECINITA_MODAL_LLM_URL` hard-fails; no Ollama fallback |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.6; M81 T81.1 in progress (T80.7 blocked) |
 | **Last updated** | 2026-07-24 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
@@ -1633,7 +1633,7 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T81.1 | Test: missing `VECINITA_MODAL_LLM_URL` hard-fails; no Ollama fallback | Test | pending | RD-170, TP-S010-29 | T77.4 | — | S010 | F39 |
+| T81.1 | Test: missing `VECINITA_MODAL_LLM_URL` hard-fails; no Ollama fallback | Test | completed | RD-170, TP-S010-29 | T77.4 | 2026-07-24 | S010 | F39 |
 | T81.2 | Code: remove `VECINITA_MODAL_OLLAMA_URL` / `VECINITA_OLLAMA_MODEL_ID` client fallbacks | Code | pending | RD-170, TP-S010-29 | T81.1 | — | S010 | F39 |
 | T81.3 | Config: `packages/llm-client` declares `shared-schemas` dependency | Config | pending | RD-170, TP-S010-20 | T77.3 | — | S010 | F39 |
 | T81.4 | Docs: package docstrings, config-spec deprecated table, ghcicd.env.example | Docs | pending | RD-170 | T81.2 | — | S010 | F39 |
@@ -2287,7 +2287,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T80.5 | M80 | 18 | Config | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
 | T80.6 | M80 | 18 | Docs | completed | T80.4, T80.5 | 2026-07-24 | S010 | F39 | — |
 | T80.7 | M80 | 18 | Operator | blocked | T80.6 | — | S010 | F39 | live Modal/DO smoke |
-| T81.1 | M81 | 18 | Test | pending | T77.4 | — | S010 | F39 | — |
+| T81.1 | M81 | 18 | Test | completed | T77.4 | 2026-07-24 | S010 | F39 | — |
 | T81.2 | M81 | 18 | Code | pending | T81.1 | — | S010 | F39 | — |
 | T81.3 | M81 | 18 | Config | pending | T77.3 | — | S010 | F39 | — |
 | T81.4 | M81 | 18 | Docs | pending | T81.2 | — | S010 | F39 | — |
