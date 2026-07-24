@@ -7,7 +7,7 @@ import os
 import re
 from typing import Final, cast
 
-from vecinita_llm_client import LlmClient, LlmClientError
+from vecinita_llm_client import LlmClient, LlmClientError, format_instruct_prompt
 from vecinita_shared_schemas.json_types import as_json_object
 
 _ENV_TAG_MAX_TOKENS: Final[str] = "VECINITA_LLM_TAG_MAX_TOKENS"
@@ -98,18 +98,18 @@ def _build_document_tag_prompt(
     max_tags: int,
 ) -> str:
     vocab_csv = ", ".join(vocabulary)
-    return (
-        "<|im_start|>system\n"
+    system = (
         "You assign corpus tags for a community document. "
         'Respond with JSON only: {"tags": ["slug1", "slug2"]}. '
-        "Use only slugs from the allowed list.\n"
-        "<|im_start|>user\n"
+        "Use only slugs from the allowed list."
+    )
+    user = (
         f"Document language: {language}\n"
         f"Allowed tag slugs (choose up to {max_tags}): {vocab_csv}\n"
         f"Title: {title}\n"
-        f"Text:\n{text}\n"
-        "<|im_start|>assistant\n"
+        f"Text:\n{text}"
     )
+    return format_instruct_prompt(system=system, user=user)
 
 
 def _parse_tag_slugs(raw: str) -> list[str]:

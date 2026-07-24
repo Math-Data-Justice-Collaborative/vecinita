@@ -419,3 +419,12 @@ Before marking 04-tech-plan `completed`, verify these items are **tasks or ADRs*
 4. **Deployment planning here**: Deployment strategy is decided in this stage.
 5. **Batched interviews**: 3-5 questions per batch, grouped by topic.
 6. **ADR for each decision**: Non-obvious tech choices get an ADR.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/05-verify-tech/SKILL.md
+```

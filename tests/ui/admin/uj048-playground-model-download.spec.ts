@@ -14,11 +14,14 @@ test.describe("Playground model download (UJ-048)", () => {
     page,
   }) => {
     let listCallCount = 0;
+    let sawOllamaListAlias = false;
+    let sawOllamaPullAlias = false;
     await mockAuthenticatedSuperAdmin(page);
     await page.route("**/internal/v1/models/ollama**", async (route) => {
       const url = route.request().url();
       const method = route.request().method();
       if (url.includes("/pull") && method === "POST") {
+        sawOllamaPullAlias = true;
         await route.fulfill({
           status: 202,
           contentType: "application/json",
@@ -60,6 +63,7 @@ test.describe("Playground model download (UJ-048)", () => {
         return;
       }
       if (method === "GET") {
+        sawOllamaListAlias = true;
         listCallCount += 1;
         const available = listCallCount >= 2;
         await route.fulfill({
@@ -80,6 +84,13 @@ test.describe("Playground model download (UJ-048)", () => {
 
     await page.goto("/evaluation?tab=models");
     await expect(page.getByTestId("evaluation-models-download")).toBeVisible();
+    // FE rename (RD-166 / TP-S010-19): UI copy is Playground; HTTP still /models/ollama*.
+    await expect(page.getByTestId("evaluation-models-download")).toContainText(
+      /Playground model download/i,
+    );
+    await expect(page.getByTestId("evaluation-models-download")).not.toContainText(
+      /Ollama/i,
+    );
     await page.getByTestId(`eval-models-family-${DOWNLOAD_FAMILY}`).locator("summary").click();
     await expect(
       page.getByTestId(`eval-models-download-${DOWNLOAD_MODEL_ID}`),
@@ -93,6 +104,8 @@ test.describe("Playground model download (UJ-048)", () => {
       /available|disponible/i,
       { timeout: 15_000 },
     );
+    expect(sawOllamaListAlias).toBe(true);
+    expect(sawOllamaPullAlias).toBe(true);
   });
 
   test("admin does not see model download tab (TC-136)", async ({ page }) => {

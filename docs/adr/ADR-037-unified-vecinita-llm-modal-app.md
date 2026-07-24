@@ -1,6 +1,6 @@
 # ADR-037: Unified `vecinita-llm` Modal app (deprecate `vecinita-ollama`)
 
-**Status:** Accepted  
+**Status:** Accepted (amended 2026-07-10 — client consolidation RD-163–RD-172 + TP-S010-17–31)  
 **Stage:** 00-context + 01-requirements + 04-tech-plan (S010 / EV-011)  
 **Date:** 2026-07-08  
 **Supersedes in part:** ADR-009 §Ollama fallback; ADR-036 §Modal Ollama app storage
@@ -78,15 +78,35 @@ vLLM loads **one active model per GPU class instance**. Switching the sandbox/ev
 7. **Env vars:** consumers use `VECINITA_MODAL_LLM_URL` + `VECINITA_MODAL_PROXY_KEY`. `VECINITA_MODAL_OLLAMA_URL` **removed** from deploy specs (deprecated; clients may log a warning if still set).
 8. **Eval routing:** `eval_runtime_for_config` always uses `LlmClient` against `VECINITA_MODAL_LLM_URL`; no Ollama URL branch.
 
+### Amendment (2026-07-10) — client consolidation (RD-163–RD-172)
+
+Same ADR / F39 — cleanup after the unified app landed. **Do not** introduce a provider plugin system.
+
+9. **One client surface:** Merge generate/stream/warm and list/pull behind a single `LlmClient` (shared env/auth/timeout). Rename Ollama modules/types to playground; keep `/models/ollama` path aliases.
+10. **Auth consistency:** `VECINITA_MODAL_PROXY_KEY` required on `/generate`, `/generate/stream`, `/warm`, and `/models/*`. `/health` may stay open.
+11. **Real streaming:** Wire vLLM token streaming into SSE; remove full-reply-then-word-chunk behavior.
+12. **Shared chat template:** Centralize instruct wrapping via HF `apply_chat_template`.
+13. **Catalog gate:** Only list/pull tags accepted by `resolve_hf_repo`.
+14. **Engine isolation (amended TP-S010-25):** Two Modal apps — **`vecinita-llm`** (prod, pinned) and **`vecinita-llm-playground`** — sharing volume **`llm-models`**. Stronger than same-app dual class (RD-169 wording). Prod pin: `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct`.
+15. **Env cleanup:** Drop legacy `VECINITA_MODAL_OLLAMA_URL` / `VECINITA_OLLAMA_MODEL_ID` client fallbacks after cutover; declare `shared-schemas` on `llm-client`.
+16. **Build slices:** A=(1)+(4) first, then B→E per S010 routing plan (Phase 18 M77–M81).
+
+### Amendment (2026-07-10) — 04-tech-plan implementation locks (TP-S010-17–31)
+
+17. **Client merge:** Expand `LlmClient`; delete `OllamaModelsClient`. HTTP config resolver lives in `packages/shared-schemas`. Chat-template helper lives in `packages/llm-client`.
+18. **Two-app wiring:** `VECINITA_MODAL_LLM_URL` (ChatRAG / prod) + `VECINITA_MODAL_LLM_PLAYGROUND_URL` (DM list/pull/eval sandbox). ASGI middleware enforces proxy key on all non-health routes. Real vLLM token SSE (no word-chunk fake stream). Full FE+BE rename in Slice A; path aliases retained.
+
 ## Alternatives considered
 
 | Alternative | Why rejected |
 |-------------|--------------|
-| Keep both apps | User rejected; ops/secrets/routing complexity |
+| Keep both apps (`vecinita-llm` + `vecinita-ollama`) | User rejected; ops/secrets/routing complexity |
 | Ollama engine inside unified app | User chose vLLM-only serving |
 | `ollama pull` + vLLM serve same blobs | **Incompatible formats** — blocked |
 | GGUF download + vLLM experimental GGUF loader | Experimental; multi-file GGUF unsupported; fragile on T4 |
 | Two volumes under one app | User chose single `llm-models` volume |
+| Same-app dual Modal class for playground | Rejected in 04-tech-plan — **two apps** chosen (TP-S010-25) |
+| Provider ABC / multi-provider framework | Explicitly out of scope (RD-171) |
 
 ## Consequences
 
@@ -96,6 +116,8 @@ vLLM loads **one active model per GPU class instance**. Switching the sandbox/ev
 - **ADR-009** Ollama fallback clause is **closed** — no separate Ollama Modal app.
 - **S001** GPU snapshot path on `LlmService` preserved for default model; model-switch reloads bypass snapshot until re-snapshotted.
 - Tests: manifest contract moves from `ollama_app` to `llm_app`; eval routing tests drop Ollama URL branch.
+- **Follow-on (RD-163–RD-172 + TP-S010-17–31):** one client + rename (Slice A / M77), then streaming/auth (M78), chat-template/catalog (M79), **two-app** engine split (M80), env cleanup (M81). Provider ABC explicitly rejected.
+- Playground traffic uses `VECINITA_MODAL_LLM_PLAYGROUND_URL`; ChatRAG never points at the playground app.
 
 ## References
 
@@ -104,3 +126,6 @@ vLLM loads **one active model per GPU class instance**. Switching the sandbox/ev
 - `docs/deployment-integration.md` §vecinita-llm
 - Modal vLLM guide; vLLM GGUF docs (rejected path)
 - Resolution **R1** (S010 context brief): HF Hub download, single volume, vLLM-only
+- RD-163–RD-172 (S010 01-requirements 2026-07-10)
+- TP-S010-17–31 (S010 04-tech-plan 2026-07-10)
+- Report: `docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md`

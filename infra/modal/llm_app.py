@@ -8,6 +8,10 @@ Requires Modal secret ``vecinita-llm`` with ``VECINITA_MODAL_PROXY_KEY`` — mus
 internal-write-api proxy key (``scripts/deploy/sync_llm_secret.sh``).
 
 ``vecinita-ollama`` is deprecated (ADR-037); all routes live on this app.
+
+Prod pin (RD-169 / Slice D): ``ALLOW_MODEL_RELOAD=False`` — request ``model_id``
+does not reload the vLLM engine. Sandbox/eval model switches use
+``vecinita-llm-playground`` (shared ``llm-models`` volume).
 """
 
 from __future__ import annotations
@@ -16,13 +20,14 @@ import json
 import logging
 import os
 import uuid
+from collections.abc import Iterator
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 import modal
 from infra.modal.llm_model_registry import (
-    normalize_ollama_tag,
+    normalize_playground_tag,
     repo_dir_name,
     resolve_hf_repo,
 )
@@ -49,6 +54,9 @@ APP_NAME = "vecinita-llm"
 VOLUME_NAME = "llm-models"
 MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
 DEFAULT_PLAYGROUND_MODEL_ID: Final[str] = "qwen2.5:1.5b-instruct"
+# Prod pin (RD-169 / TP-S010-25): ignore request model_id for vLLM reload.
+# Playground app sets ALLOW_MODEL_RELOAD=True on its own module.
+ALLOW_MODEL_RELOAD: Final[bool] = False
 ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
 _PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
 _PROXY_ENV: Final[str] = "VECINITA_MODAL_PROXY_KEY"
@@ -165,11 +173,25 @@ def _read_manifest() -> dict[str, object]:
     return {"models": [{"model_id": DEFAULT_PLAYGROUND_MODEL_ID, "available": False}]}
 
 
+def _commit_models_volume() -> None:
+    """Commit shared ``llm-models`` by name (prod + playground App Volume handles differ)."""
+    modal.Volume.from_name(VOLUME_NAME).commit()
+
+
 def _write_manifest(models: list[dict[str, object]]) -> None:
     _MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     with _MANIFEST_PATH.open("w", encoding="utf-8") as handle:
         json.dump({"models": models}, handle)
-    model_volume.commit()
+    _commit_models_volume()
+
+
+def _model_id_mapped(model_id: str) -> bool:
+    """Return True when ``model_id`` has a HuggingFace registry mapping (RD-168)."""
+    try:
+        resolve_hf_repo(model_id)
+    except ValueError:
+        return False
+    return True
 
 
 def _list_models_payload() -> dict[str, object]:
@@ -183,6 +205,8 @@ def _list_models_payload() -> dict[str, object]:
             continue
         model_id = entry.get("model_id")
         if not isinstance(model_id, str):
+            continue
+        if not _model_id_mapped(model_id):
             continue
         available = bool(entry.get("available", False))
         items.append({"model_id": model_id, "available": available})
@@ -227,8 +251,14 @@ def _local_repo_path(model_id: str) -> Path:
 
 
 def _resolve_vllm_model_arg(model_id: str | None) -> str:
-    """Resolve playground tag or None to a vLLM ``model`` argument."""
-    if model_id is None or normalize_ollama_tag(model_id) == normalize_ollama_tag(
+    """Resolve playground tag or None to a vLLM ``model`` argument.
+
+    When ``ALLOW_MODEL_RELOAD`` is False (prod pin), always return the pinned
+    ``MODEL_ID`` so playground/eval tags cannot stomp ChatRAG (RD-169 / TC-145).
+    """
+    if not ALLOW_MODEL_RELOAD:
+        return MODEL_ID
+    if model_id is None or normalize_playground_tag(model_id) == normalize_playground_tag(
         DEFAULT_PLAYGROUND_MODEL_ID
     ):
         return MODEL_ID
@@ -272,6 +302,10 @@ image = (
         }
     )
     .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
+    .add_local_dir(
+        _REPO_ROOT / "packages" / "shared-schemas" / "vecinita_shared_schemas",
+        remote_path="/root/vecinita_shared_schemas",
+    )
 )
 
 
@@ -395,6 +429,50 @@ class LlmService:
         outputs = self._llm.generate([prompt], params)
         return outputs[0].outputs[0].text
 
+    def _stream_text_deltas(
+        self,
+        prompt: str,
+        *,
+        max_tokens: int = 512,
+        temperature: float = 0.2,
+        model_id: str | None = None,
+    ) -> Iterator[str]:
+        """Yield incremental token text from the vLLM engine (RD-164 / TP-S010-22).
+
+        Uses ``llm_engine.add_request`` + ``step`` so SSE receives real deltas — not a
+        completed reply split into words.
+        """
+        self._ensure_model_loaded(model_id)
+        if self._llm is None:
+            msg = "LlmService model is not loaded"
+            raise RuntimeError(msg)
+        engine = getattr(self._llm, "llm_engine", None)
+        if engine is None or not hasattr(engine, "add_request") or not hasattr(engine, "step"):
+            msg = "vLLM llm_engine streaming API unavailable"
+            raise RuntimeError(msg)
+        params = SamplingParams(
+            max_tokens=max_tokens,
+            temperature=temperature,
+            repetition_penalty=1.15,
+        )
+        request_id = f"stream-{uuid.uuid4()}"
+        engine.add_request(request_id, prompt, params)
+        previous = ""
+        while engine.has_unfinished_requests():
+            for request_output in engine.step():
+                if getattr(request_output, "request_id", None) != request_id:
+                    continue
+                outputs = getattr(request_output, "outputs", None) or []
+                if not outputs:
+                    continue
+                text = getattr(outputs[0], "text", "") or ""
+                delta = text[len(previous) :]
+                previous = text
+                if delta:
+                    yield delta
+                if getattr(request_output, "finished", False):
+                    return
+
     @modal.method()
     def complete(
         self,
@@ -420,14 +498,13 @@ class LlmService:
         temperature: float = 0.2,
         model_id: str | None = None,
     ):
-        text = self._generate_text(
+        """Yield incremental tokens for SSE (real vLLM deltas — RD-164)."""
+        yield from self._stream_text_deltas(
             prompt,
             max_tokens=max_tokens,
             temperature=temperature,
             model_id=model_id,
         )
-        for piece in text.split():
-            yield piece + " "
 
     @modal.method()
     def warm_model(self, model_id: str | None = None) -> str:
@@ -440,6 +517,7 @@ class LlmService:
     image=image,
     timeout=1200,
     secrets=_LLM_ASGI_SECRETS,
+    volumes={"/models": model_volume},
 )
 @modal.asgi_app()
 def fastapi_app():
@@ -454,6 +532,8 @@ def fastapi_app():
         return JSONResponse({"status": "ok"})
 
     async def warm(request: Request) -> JSONResponse:
+        if not _authorized(request):
+            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
         raw = await request.body()
         try:
             payload = WarmRequest.model_validate(json.loads(raw)) if raw else WarmRequest()
@@ -483,6 +563,10 @@ def fastapi_app():
             payload = PullRequest.model_validate(json.loads(await request.body()))
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
+        try:
+            resolve_hf_repo(payload.model_id)
+        except ValueError as exc:
+            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_REQUEST)
         job_id = str(uuid.uuid4())
         pull_model_job.spawn(job_id, payload.model_id)
         _register_pending_model(payload.model_id)
@@ -496,6 +580,8 @@ def fastapi_app():
         )
 
     async def generate(request: Request) -> JSONResponse:
+        if not _authorized(request):
+            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
         try:
             payload = GenerateRequest.model_validate(json.loads(await request.body()))
         except (json.JSONDecodeError, ValidationError) as exc:
@@ -512,6 +598,8 @@ def fastapi_app():
         return JSONResponse({"text": text})
 
     async def generate_stream(request: Request) -> StreamingResponse | JSONResponse:
+        if not _authorized(request):
+            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
         try:
             payload = GenerateRequest.model_validate(json.loads(await request.body()))
         except (json.JSONDecodeError, ValidationError) as exc:

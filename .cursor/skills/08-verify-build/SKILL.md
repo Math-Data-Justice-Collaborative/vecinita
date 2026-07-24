@@ -195,3 +195,21 @@ After user-approved fixes:
 3. **Security always blocking**: Never auto-dismiss security findings
 4. **Max 3 loops**: Prevent infinite fix-verify cycles
 5. **Report persists**: Written to disk for PR and downstream reference
+
+## Continue
+
+When this stage completes, end the user-facing summary with the matching verbatim block:
+
+If milestones remain:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/07-build/SKILL.md — resume next milestone
+```
+
+If the build phase is complete:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/09-qa/SKILL.md
+```

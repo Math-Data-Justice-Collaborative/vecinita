@@ -12,6 +12,7 @@ dependencies = [
     "vecinita-database",
     "vecinita-embedding-client",
     "vecinita-eval",
+    "vecinita-llm-client",
     "vecinita-shared-schemas",
 ]
 
@@ -27,3 +28,4 @@ vecinita-shared-schemas = { workspace = true }
 vecinita-database = { workspace = true }
 vecinita-eval = { workspace = true }
 vecinita-embedding-client = { workspace = true }
+vecinita-llm-client = { workspace = true }

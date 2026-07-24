@@ -224,12 +224,12 @@ const enStrings = {
   "admin.evaluation.tab.playground": "Playground",
   "admin.evaluation.tab.models": "Model download",
   "admin.evaluation.playground.modelNotDownloaded": "(not downloaded)",
-  "admin.evaluation.models.title": "Ollama model download",
+  "admin.evaluation.models.title": "Playground model download",
   "admin.evaluation.models.subtitle":
     "Download models and quantizations to the Modal volume for playground eval runs.",
   "admin.evaluation.models.catalogTitle": "Available models",
   "admin.evaluation.models.catalogTreeHint":
-    "Browse the full Ollama library. Expand a model slug to see all versions and quantizations, then download into the Modal volume.",
+    "Browse the full playground library. Expand a model slug to see all versions and quantizations, then download into the Modal volume.",
   "admin.evaluation.models.statusAvailable": "Downloaded",
   "admin.evaluation.models.statusNotDownloaded": "Not downloaded",
   "admin.evaluation.models.downloadButton": "Download",
@@ -244,8 +244,8 @@ const enStrings = {
   "admin.evaluation.models.downloadFailed": "Model download failed",
   "admin.evaluation.models.customTitle": "Custom model tag",
   "admin.evaluation.models.customHint":
-    "Pull any valid Ollama tag not listed in the catalog.",
-  "admin.evaluation.models.customModelLabel": "Ollama model tag",
+    "Pull any valid playground model tag not listed in the catalog.",
+  "admin.evaluation.models.customModelLabel": "Playground model tag",
   "admin.evaluation.models.customModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.title": "Evaluation playground",
   "admin.evaluation.playground.subtitle":
@@ -265,7 +265,7 @@ const enStrings = {
   "admin.evaluation.playground.running": "Starting run…",
   "admin.evaluation.playground.recentRun": "Latest run",
   "admin.evaluation.playground.loadModelsFailed":
-    "Failed to load Ollama models",
+    "Failed to load playground models",
   "admin.evaluation.playground.runFailed": "Failed to start playground run",
   "admin.evaluation.playground.presetsTitle": "Saved presets",
   "admin.evaluation.playground.presetsLoad": "Load preset",
@@ -288,8 +288,8 @@ const enStrings = {
   "admin.evaluation.playground.presetsCloneFailed": "Failed to clone preset",
   "admin.evaluation.playground.downloadTitle": "Download model",
   "admin.evaluation.playground.downloadHint":
-    "Pull an Ollama model tag into the Modal volume for playground eval runs.",
-  "admin.evaluation.playground.downloadModelLabel": "Ollama model tag",
+    "Pull a playground model tag into the Modal volume for playground eval runs.",
+  "admin.evaluation.playground.downloadModelLabel": "Playground model tag",
   "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.downloadButton": "Download",
   "admin.evaluation.playground.downloadPulling": "Downloading…",
@@ -673,12 +673,12 @@ const esStrings = {
   "admin.evaluation.tab.playground": "Laboratorio",
   "admin.evaluation.tab.models": "Descarga de modelos",
   "admin.evaluation.playground.modelNotDownloaded": "(no descargado)",
-  "admin.evaluation.models.title": "Descarga de modelos Ollama",
+  "admin.evaluation.models.title": "Descarga de modelos del laboratorio",
   "admin.evaluation.models.subtitle":
     "Descarga modelos y cuantizaciones al volumen Modal para ejecuciones del laboratorio.",
   "admin.evaluation.models.catalogTitle": "Modelos disponibles",
   "admin.evaluation.models.catalogTreeHint":
-    "Explore la biblioteca completa de Ollama. Expanda un slug de modelo para ver todas las versiones y cuantizaciones y descargar al volumen Modal.",
+    "Explore la biblioteca completa del laboratorio. Expanda un slug de modelo para ver todas las versiones y cuantizaciones y descargar al volumen Modal.",
   "admin.evaluation.models.statusAvailable": "Descargado",
   "admin.evaluation.models.statusNotDownloaded": "No descargado",
   "admin.evaluation.models.downloadButton": "Descargar",
@@ -694,8 +694,8 @@ const esStrings = {
   "admin.evaluation.models.downloadFailed": "Error al descargar el modelo",
   "admin.evaluation.models.customTitle": "Etiqueta de modelo personalizada",
   "admin.evaluation.models.customHint":
-    "Descarga cualquier etiqueta Ollama válida que no esté en el catálogo.",
-  "admin.evaluation.models.customModelLabel": "Etiqueta de modelo Ollama",
+    "Descarga cualquier etiqueta de modelo del laboratorio válida que no esté en el catálogo.",
+  "admin.evaluation.models.customModelLabel": "Etiqueta de modelo del laboratorio",
   "admin.evaluation.models.customModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.title": "Laboratorio de evaluación",
   "admin.evaluation.playground.subtitle":
@@ -716,7 +716,7 @@ const esStrings = {
   "admin.evaluation.playground.running": "Iniciando ejecución…",
   "admin.evaluation.playground.recentRun": "Última ejecución",
   "admin.evaluation.playground.loadModelsFailed":
-    "No se pudieron cargar los modelos Ollama",
+    "No se pudieron cargar los modelos del laboratorio",
   "admin.evaluation.playground.runFailed":
     "No se pudo iniciar la ejecución del laboratorio",
   "admin.evaluation.playground.presetsTitle": "Presets guardados",
@@ -744,9 +744,9 @@ const esStrings = {
     "No se pudo clonar el preset",
   "admin.evaluation.playground.downloadTitle": "Descargar modelo",
   "admin.evaluation.playground.downloadHint":
-    "Descarga una etiqueta Ollama al volumen Modal para evaluaciones del laboratorio.",
+    "Descarga una etiqueta de modelo del laboratorio al volumen Modal para evaluaciones.",
   "admin.evaluation.playground.downloadModelLabel":
-    "Etiqueta del modelo Ollama",
+    "Etiqueta del modelo del laboratorio",
   "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
   "admin.evaluation.playground.downloadButton": "Descargar",
   "admin.evaluation.playground.downloadPulling": "Descargando…",

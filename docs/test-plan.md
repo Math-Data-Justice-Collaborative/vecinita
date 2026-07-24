@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-08 (S010/EV-011 F39 — TC-139/TC-140 unified `vecinita-llm`, ADR-037)  
+> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — TC-141–TC-145 client consolidation)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -72,8 +72,10 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-047 Super-admin promote RAG config | `tests/e2e/test_uj047_eval_promote_config.py` | TC-131, TC-132, TC-133 | — |
-| UJ-048 Super-admin downloads Playground model | `tests/e2e/test_uj048_playground_model_download.py` | TC-134, TC-138, TC-139 | `tests/ui/admin/uj048-playground-model-download.spec.ts` |
+| UJ-048 Super-admin downloads Playground model | `tests/e2e/test_uj048_playground_model_download.py` | TC-134, TC-138, TC-139, **TC-141** | `tests/ui/admin/uj048-playground-model-download.spec.ts` |
 | UJ-045 Eval playground (model_id routing) | `tests/e2e/test_uj045_eval_playground.py` (existing) | TC-127, **TC-140** | `tests/ui/admin/uj045-eval-playground.spec.ts` |
+| UJ-001 Ask stream (real tokens) | `tests/e2e/test_uj001_ask_stream.py` | **TC-143** | — (Playwright only if FE asserts live tokens) |
+| UJ-049 LLM proxy auth | unit/integration | **TC-142** | — |
 
 **E2E tier (v1):** `local` — TestClient, test Postgres (Docker/testcontainers), **mocked Modal** HTTP.
 
@@ -848,6 +850,37 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
   - `model_id: "qwen3:8b"` → `/generate` body includes `model_id`; `/warm` called before batch when configured.
   - Missing LLM URL → eval falls back to mock/local per existing harness rules.
 - **Expected**: `LlmClient` base URL is always `VECINITA_MODAL_LLM_URL`; eval no longer bifurcates on Ollama URL presence.
+
+### TC-141: Catalog gated by HF registry (UJ-048, F39 follow-on, RD-168)
+
+- **Objective**: List/pull only expose tags `resolve_hf_repo` accepts; unmapped tags fail clearly.
+- **Input**: Unit tests on registry + catalog helpers; extend UJ-048 e2e for unmapped error path.
+- **Expected**: Catalog ⊆ registry; unmapped pull → explicit 4xx with message (not silent/UI-available-then-fail).
+
+### TC-142: Proxy key required on generate/warm/models (UJ-049, RD-165)
+
+- **Objective**: Missing/wrong `X-Vecinita-Proxy-Key` → `401` on `/generate`, `/generate/stream`, `/warm`, `/models/ollama*`; `/health` may stay open.
+- **Input**: `tests/unit/modal/` (or integration) against ASGI auth helper.
+- **Expected**: Unauthorized → 401; authorized with valid key → pass-through.
+
+### TC-143: Real vLLM token streaming (UJ-001, RD-164)
+
+- **Objective**: `stream_tokens` yields incremental tokens from vLLM SSE — not full-reply-then-word-chunk.
+- **Input**: Unit test of Modal stream helper + API E2E `tests/e2e/test_uj001_ask_stream.py` (mocked upstream that emits multiple token events).
+- **Expected**: Multiple SSE token events before `done`; regression guard against fake word-split stream.
+- **UI E2E**: Playwright **not** required unless FE asserts token-by-token UX (Q3e).
+
+### TC-144: Unified LlmClient + rename aliases (RD-163, RD-166)
+
+- **Objective**: One client class covers generate/stream/warm/list/pull; shared env/auth/timeout; modules renamed playground; `/models/ollama` aliases still work.
+- **Input**: `tests/unit/test_llm_client.py` (extend); integration list/pull still hit ollama paths.
+- **Expected**: Single resolver; no duplicate HTTP client stacks; path aliases green.
+
+### TC-145: Shared apply_chat_template + engine isolation (RD-167, RD-169)
+
+- **Objective**: Chat-rag/tagging/eval use shared HF chat-template helper; prod class pinned so playground reload does not stomp ChatRAG.
+- **Input**: Unit fixtures for Qwen + non-Qwen; unit/smoke for prod pin vs playground class.
+- **Expected**: Non-Qwen prompts use model template (not hand-rolled Qwen wrap); prod ignores playground `model_id` or separate Modal class.
 
 ## Test Data
 

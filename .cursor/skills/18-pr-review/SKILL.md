@@ -166,3 +166,12 @@ Authors should fill [.github/pull_request_template.md](../../.github/pull_reques
 - Posting review without inline comments when 🔴 line-specific issues exist
 - Running Bugbot/Security only in chat — must orchestrate subagents
 - Fixing findings in the same invocation without user request
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/19-address-pr-review/SKILL.md
+```

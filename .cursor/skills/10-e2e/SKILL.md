@@ -235,3 +235,12 @@ Write to `{active_session.artifacts_dir}/reports/e2e-report.md`.
 4. **No user interaction**: This stage does not ask questions. Findings go to 11-verify-impl.
 5. **Async-safe**: Results are self-contained for 11-verify-impl consumption.
 6. **Feature-traced**: Every journey maps to a feature-list entry.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/11-verify-impl/SKILL.md — after 09-qa is also complete
+```

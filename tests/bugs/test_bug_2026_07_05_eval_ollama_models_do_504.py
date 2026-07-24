@@ -1,4 +1,4 @@
-"""BUG-2026-07-05: Ollama models list must not 503 when Modal Ollama is unwired (DO maps 503→504 HTML)."""
+"""BUG-2026-07-05: Ollama models list must not 503 when Modal playground LLM is unwired (DO maps 503→504 HTML)."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ def eval_write_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     )
 
 
-def test_ollama_models_list_returns_vllm_fallback_when_unconfigured(
+def test_playground_models_list_returns_vllm_fallback_when_unconfigured(
     eval_write_client: TestClient,
 ) -> None:
     """Playground model picker works on vLLM-only deployments (no 503/504 from DO edge)."""

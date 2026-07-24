@@ -133,8 +133,22 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 - **Purpose**: Self-hosted embedding (384-dim) and text generation.
 - **Inputs**: Text / chat payloads over HTTP.
 - **Outputs**: Vectors or completions/streams.
-- **Note**: **vLLM primary** on Modal (ADR-009); Ollama documented as fallback if cost proof fails in `04-tech-plan`.
-- **Source**: ADR-002, ADR-004
+- **Note**: **vLLM primary** on Modal (ADR-009); sole LLM deployable is **`vecinita-llm`** (ADR-037). Ollama Modal app deprecated.
+- **Source**: ADR-002, ADR-004, ADR-037
+
+### LLM client + prompt helper (F39 follow-on, RD-163–RD-172)
+
+- **Purpose**: Single HTTP client for all `vecinita-llm` routes; shared chat-template wrapping; catalog gated by HF registry.
+- **Components**:
+  | Component | Location | Change |
+  |-----------|----------|--------|
+  | Unified client | `packages/llm-client` | Merge `LlmClient` + `OllamaModelsClient` (generate/stream/warm + list/pull); one env/auth/timeout resolver |
+  | Playground types | `packages/shared-schemas` | Rename `ollama_*` → `playground_*` (compat re-exports optional); path aliases stay `/models/ollama` |
+  | Modal ASGI | `infra/modal/llm_app.py` | Real vLLM `stream_tokens`; proxy auth on generate/warm; later separate playground class (slice D) |
+  | Chat-template helper | Prefer `packages/llm-client` (or shared-schemas) | HF `apply_chat_template`; used by chat-rag, tagging, eval |
+- **Prod pin**: Default model `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` on prod class; playground overrides only on playground class.
+- **Out of scope**: Provider ABC / multi-provider plugin framework.
+- **Source**: S010 / EV-011 RD-163–RD-172; ADR-037 amendment
 
 ### Frontend i18n (`packages/frontend-i18n`) — EV-004 F31
 

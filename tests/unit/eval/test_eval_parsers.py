@@ -25,6 +25,14 @@ def test_parse_answer_relevancy_output_accepts_qwen_score_format() -> None:
     assert score == pytest.approx(0.0)
 
 
+def test_parse_answer_relevancy_output_accepts_final_result_brackets() -> None:
+    """Qwen often emits [FINAL RESULT] N instead of [RESULT] N."""
+    score, _feedback = parse_answer_relevancy_output(
+        "The response matches the query.\n[FINAL RESULT]\n3\n"
+    )
+    assert score == pytest.approx(3.0)
+
+
 def test_normalize_eval_score_treats_none_as_zero() -> None:
     """Invalid evaluator scores must not crash the eval runner."""
     assert normalize_eval_score(None) == pytest.approx(0.0)

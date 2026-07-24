@@ -9,12 +9,12 @@ import {
 } from "react";
 
 import {
-  type OllamaModelCatalogTagApi,
-  type OllamaModelSummaryApi,
-  fetchOllamaCatalogFamilies,
-  fetchOllamaCatalogFamilyTags,
-  fetchOllamaModels,
-  pullOllamaModel,
+  type PlaygroundModelCatalogTagApi,
+  type PlaygroundModelSummaryApi,
+  fetchPlaygroundCatalogFamilies,
+  fetchPlaygroundCatalogFamilyTags,
+  fetchPlaygroundModels,
+  pullPlaygroundModel,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 
@@ -29,14 +29,14 @@ export type ModelDownloadStatus =
   | "error";
 
 export function firstAvailableModelId(
-  models: readonly OllamaModelSummaryApi[],
+  models: readonly PlaygroundModelSummaryApi[],
 ): string | null {
   const match = models.find((model) => model.available);
   return match?.model_id ?? null;
 }
 
 export function modelOptionLabel(
-  model: OllamaModelSummaryApi,
+  model: PlaygroundModelSummaryApi,
   notDownloadedLabel: string,
 ): string {
   if (model.available) {
@@ -45,14 +45,14 @@ export function modelOptionLabel(
   return `${model.model_id} ${notDownloadedLabel}`;
 }
 
-export interface UseOllamaModelDownloadResult {
-  models: OllamaModelSummaryApi[];
+export interface UsePlaygroundModelDownloadResult {
+  models: PlaygroundModelSummaryApi[];
   modelsLoading: boolean;
   modelsError: string | null;
   catalogFamilies: string[];
   catalogLoading: boolean;
   catalogError: string | null;
-  familyTags: Readonly<Record<string, OllamaModelCatalogTagApi[]>>;
+  familyTags: Readonly<Record<string, PlaygroundModelCatalogTagApi[]>>;
   familyTagsLoading: Readonly<Record<string, boolean>>;
   familyTagsError: Readonly<Record<string, string | null>>;
   activeModelId: string | null;
@@ -65,20 +65,20 @@ export interface UseOllamaModelDownloadResult {
   resetDownloadStatus: () => void;
 }
 
-const OllamaModelDownloadContext =
-  createContext<UseOllamaModelDownloadResult | null>(null);
+const PlaygroundModelDownloadContext =
+  createContext<UsePlaygroundModelDownloadResult | null>(null);
 
-function useOllamaModelDownloadState(): UseOllamaModelDownloadResult & {
+function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadResult & {
   clearDownloadPoll: () => void;
 } {
-  const [models, setModels] = useState<OllamaModelSummaryApi[]>([]);
+  const [models, setModels] = useState<PlaygroundModelSummaryApi[]>([]);
   const [modelsLoading, setModelsLoading] = useState(true);
   const [modelsError, setModelsError] = useState<string | null>(null);
   const [catalogFamilies, setCatalogFamilies] = useState<string[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [familyTags, setFamilyTags] = useState<
-    Record<string, OllamaModelCatalogTagApi[]>
+    Record<string, PlaygroundModelCatalogTagApi[]>
   >({});
   const [familyTagsLoading, setFamilyTagsLoading] = useState<
     Record<string, boolean>
@@ -103,17 +103,17 @@ function useOllamaModelDownloadState(): UseOllamaModelDownloadResult & {
   }, []);
 
   const refreshModelsFromApi = useCallback(async (): Promise<
-    OllamaModelSummaryApi[]
+    PlaygroundModelSummaryApi[]
   > => {
     const client = requireCorpusConfig();
-    const data = await fetchOllamaModels(client);
+    const data = await fetchPlaygroundModels(client);
     setModels(data.items);
     return data.items;
   }, []);
 
   const refreshCatalogFromApi = useCallback(async (): Promise<string[]> => {
     const client = requireCorpusConfig();
-    const data = await fetchOllamaCatalogFamilies(client);
+    const data = await fetchPlaygroundCatalogFamilies(client);
     const slugs = data.families.map((family) => family.slug);
     setCatalogFamilies(slugs);
     return slugs;
@@ -125,7 +125,7 @@ function useOllamaModelDownloadState(): UseOllamaModelDownloadResult & {
     setFamilyTagsError((current) => ({ ...current, [slug]: null }));
     try {
       const client = requireCorpusConfig();
-      const data = await fetchOllamaCatalogFamilyTags(client, slug);
+      const data = await fetchPlaygroundCatalogFamilyTags(client, slug);
       setFamilyTags((current) => ({ ...current, [slug]: data.tags }));
     } catch (err) {
       setFamilyTagsError((current) => ({
@@ -166,7 +166,7 @@ function useOllamaModelDownloadState(): UseOllamaModelDownloadResult & {
       await refreshExpandedFamilyTags();
     } catch (err) {
       setCatalogError(
-        err instanceof Error ? err.message : "Failed to load Ollama catalog",
+        err instanceof Error ? err.message : "Failed to load playground catalog",
       );
     } finally {
       setCatalogLoading(false);
@@ -228,7 +228,7 @@ function useOllamaModelDownloadState(): UseOllamaModelDownloadResult & {
       setDownloadStatus("pulling");
       try {
         const client = requireCorpusConfig();
-        await pullOllamaModel(client, tag);
+        await pullPlaygroundModel(client, tag);
         scheduleDownloadPoll(tag);
       } catch (err) {
         clearDownloadPoll();
@@ -269,12 +269,12 @@ function useOllamaModelDownloadState(): UseOllamaModelDownloadResult & {
   };
 }
 
-export function OllamaModelDownloadProvider({
+export function PlaygroundModelDownloadProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const { clearDownloadPoll, ...value } = useOllamaModelDownloadState();
+  const { clearDownloadPoll, ...value } = usePlaygroundModelDownloadState();
 
   useEffect(() => {
     return () => {
@@ -283,17 +283,17 @@ export function OllamaModelDownloadProvider({
   }, [clearDownloadPoll]);
 
   return (
-    <OllamaModelDownloadContext.Provider value={value}>
+    <PlaygroundModelDownloadContext.Provider value={value}>
       {children}
-    </OllamaModelDownloadContext.Provider>
+    </PlaygroundModelDownloadContext.Provider>
   );
 }
 
-export function useOllamaModelDownload(): UseOllamaModelDownloadResult {
-  const context = useContext(OllamaModelDownloadContext);
+export function usePlaygroundModelDownload(): UsePlaygroundModelDownloadResult {
+  const context = useContext(PlaygroundModelDownloadContext);
   if (context === null) {
     throw new Error(
-      "useOllamaModelDownload must be used within OllamaModelDownloadProvider",
+      "usePlaygroundModelDownload must be used within PlaygroundModelDownloadProvider",
     );
   }
   return context;

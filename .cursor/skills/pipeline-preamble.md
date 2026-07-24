@@ -92,8 +92,14 @@ Most stage skills use this section order (omit sections that do not apply):
 | **Delta / feature-addition mode** | Behavior when adding features or in evolve cycle |
 | **Workflow** | Step-by-step work for this stage |
 | **Output rules** | Artifacts, commits, handoff to next stage |
+| **Continue** | Verbatim “Enter this into the chat to continue:” block with the next `@.cursor/skills/NN-…/SKILL.md` (plus any trailing notes) |
 
 Orchestrators (16) add: routing plans, phase gates, safe stopping points, child-skill tables.
+
+Every numbered stage skill **ends** with a **Continue** section. When the stage completes,
+print that block verbatim at the end of the user-facing summary so the user can paste the
+next skill into chat. If `active_session.routing_plan` names a different next stage,
+substitute that skill’s `@.cursor/skills/.../SKILL.md` path.
 
 ---
 
@@ -285,8 +291,8 @@ user to paste tokens when `prod.env` exists.
 
 | Skill | Primary output | Blocks |
 |-------|----------------|--------|
-| **00-context** | `docs/sessions/S000-internal-docs-archive/context-brief.md` | Optional |
-| **01-requirements** | Product spec suite | Yes (start of A) |
+| **00-context** | Session `context-brief.md` + **`checkpoints/01-requirements-seed.md`** (when 01 is routed) | Optional (but seed mandatory before 01) |
+| **01-requirements** | Product spec suite (loads 00 seed in Phase 0C) | Yes (start of A) |
 | **02-verify-plan** | Audit report, verified specs | Yes |
 | **03-plan-tooling** | Cursor rules, hooks, skills, agents | Yes |
 | **04-tech-plan** | Execution plan, tech docs, ADRs | Yes (start of B) |

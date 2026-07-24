@@ -5,10 +5,12 @@ from __future__ import annotations
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 from vecinita_shared_schemas.cors import (
     configure_cors,
+    cors_headers_for_request,
+    install_cors_exception_handlers,
     parse_cors_origins,
 )
 
@@ -70,3 +72,25 @@ def test_unhandled_exception_includes_cors_headers() -> None:
     response = client.get("/boom", headers={"Origin": ADMIN_ORIGIN})
     assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+
+
+def test_cors_headers_for_request_empty_when_origin_not_allowed() -> None:
+    """Disallowed or missing Origin must not emit Access-Control-Allow-Origin."""
+    app = FastAPI()
+
+    @app.get("/probe")
+    def probe(request: Request) -> dict[str, str]:  # pyright: ignore[reportUnusedFunction]
+        return cors_headers_for_request(request, [ADMIN_ORIGIN])
+
+    client = TestClient(app)
+    response = client.get("/probe")  # no Origin header
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {}
+
+
+def test_install_cors_exception_handlers_noop_when_no_origins() -> None:
+    """Empty origins list skips installing the unhandled-exception CORS handler."""
+    app = FastAPI()
+    before = len(app.exception_handlers)
+    install_cors_exception_handlers(app, [])
+    assert len(app.exception_handlers) == before

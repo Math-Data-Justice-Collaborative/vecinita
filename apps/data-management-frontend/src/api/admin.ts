@@ -649,37 +649,37 @@ export async function triggerPlaygroundEvalRun(
   }>;
 }
 
-export interface OllamaModelSummaryApi {
+export interface PlaygroundModelSummaryApi {
   model_id: string;
   available: boolean;
 }
 
-export interface OllamaModelCatalogFamilyApi {
+export interface PlaygroundModelCatalogFamilyApi {
   slug: string;
 }
 
-export interface OllamaModelCatalogTagApi {
+export interface PlaygroundModelCatalogTagApi {
   model_id: string;
   available: boolean;
 }
 
-export async function fetchOllamaModels(
+export async function fetchPlaygroundModels(
   options: CorpusClientOptions,
-): Promise<{ items: OllamaModelSummaryApi[] }> {
+): Promise<{ items: PlaygroundModelSummaryApi[] }> {
   const response = await fetch(`${options.baseUrl}/internal/v1/models/ollama`, {
     headers: {
       Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
     },
   });
   if (!response.ok) {
-    throw new Error(`Ollama models list failed (${String(response.status)})`);
+    throw new Error(`Playground models list failed (${String(response.status)})`);
   }
-  return response.json() as Promise<{ items: OllamaModelSummaryApi[] }>;
+  return response.json() as Promise<{ items: PlaygroundModelSummaryApi[] }>;
 }
 
-export async function fetchOllamaCatalogFamilies(
+export async function fetchPlaygroundCatalogFamilies(
   options: CorpusClientOptions,
-): Promise<{ families: OllamaModelCatalogFamilyApi[] }> {
+): Promise<{ families: PlaygroundModelCatalogFamilyApi[] }> {
   const response = await fetch(
     `${options.baseUrl}/internal/v1/models/ollama/catalog`,
     {
@@ -690,18 +690,18 @@ export async function fetchOllamaCatalogFamilies(
   );
   if (!response.ok) {
     throw new Error(
-      `Ollama catalog families failed (${String(response.status)})`,
+      `Playground catalog families failed (${String(response.status)})`,
     );
   }
   return response.json() as Promise<{
-    families: OllamaModelCatalogFamilyApi[];
+    families: PlaygroundModelCatalogFamilyApi[];
   }>;
 }
 
-export async function fetchOllamaCatalogFamilyTags(
+export async function fetchPlaygroundCatalogFamilyTags(
   options: CorpusClientOptions,
   slug: string,
-): Promise<{ slug: string; tags: OllamaModelCatalogTagApi[] }> {
+): Promise<{ slug: string; tags: PlaygroundModelCatalogTagApi[] }> {
   const response = await fetch(
     `${options.baseUrl}/internal/v1/models/ollama/catalog/${encodeURIComponent(slug)}`,
     {
@@ -712,25 +712,25 @@ export async function fetchOllamaCatalogFamilyTags(
   );
   if (!response.ok) {
     throw new Error(
-      `Ollama catalog tags failed (${String(response.status)})`,
+      `Playground catalog tags failed (${String(response.status)})`,
     );
   }
   return response.json() as Promise<{
     slug: string;
-    tags: OllamaModelCatalogTagApi[];
+    tags: PlaygroundModelCatalogTagApi[];
   }>;
 }
 
-export interface OllamaModelPullResponseApi {
+export interface PlaygroundModelPullResponseApi {
   job_id: string;
   model_id: string;
   status: "pulling" | "available";
 }
 
-export async function pullOllamaModel(
+export async function pullPlaygroundModel(
   options: CorpusClientOptions,
   modelId: string,
-): Promise<OllamaModelPullResponseApi> {
+): Promise<PlaygroundModelPullResponseApi> {
   const response = await fetch(
     `${options.baseUrl}/internal/v1/models/ollama/pull`,
     {
@@ -743,9 +743,9 @@ export async function pullOllamaModel(
     },
   );
   if (!response.ok) {
-    throw new Error(`Ollama model pull failed (${String(response.status)})`);
+    throw new Error(`Playground model pull failed (${String(response.status)})`);
   }
-  return response.json() as Promise<OllamaModelPullResponseApi>;
+  return response.json() as Promise<PlaygroundModelPullResponseApi>;
 }
 
 export interface EvalTimeseriesPointApi {

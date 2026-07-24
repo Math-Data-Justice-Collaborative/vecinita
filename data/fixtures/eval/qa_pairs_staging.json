@@ -1,0 +1,156 @@
+[
+  {
+    "id": "community-free-clinic-services",
+    "locale": "en",
+    "domain": "community",
+    "question": "What free medical services does Rhode Island Free Clinic offer?",
+    "expected_doc_url": "https://www.rifreeclinic.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Offers preventive and primary health care free of charge",
+      "Services include dental health, ophthalmology, labs, and prescriptions"
+    ]
+  },
+  {
+    "id": "community-free-clinic-hours",
+    "locale": "en",
+    "domain": "community",
+    "question": "What are Rhode Island Free Clinic's weekday hours?",
+    "expected_doc_url": "https://www.rifreeclinic.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Monday and Wednesday 8am-5pm",
+      "Tuesday and Thursday 8am-8pm",
+      "Friday 8am-12pm"
+    ]
+  },
+  {
+    "id": "community-nuevas-voces",
+    "locale": "en",
+    "domain": "community",
+    "question": "What is Nuevas Voces at WRWC?",
+    "expected_doc_url": "https://wrwc.org/what-we-do/community-action/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Nuevas Voces is a bilingual advocacy program",
+      "It is about 10 months long"
+    ]
+  },
+  {
+    "id": "community-nuevas-voces",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Qué es Nuevas Voces?",
+    "expected_doc_url": "https://vecina.wrwc.org/es/empoderate/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Es un programa bilingüe (inglés y español)",
+      "Ayuda a miembros de la comunidad a convertirse en líderes locales"
+    ]
+  },
+  {
+    "id": "community-resilience-hub-location",
+    "locale": "en",
+    "domain": "community",
+    "question": "Where is the Olneyville Resilience Hub located?",
+    "expected_doc_url": "https://wrwc.org/what-we-do/community-action/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Located at 17 Hyat Street in Providence"
+    ]
+  },
+  {
+    "id": "community-vecinita-intro",
+    "locale": "en",
+    "domain": "community",
+    "question": "What does VECINA help neighbors do?",
+    "expected_doc_url": "https://vecina.wrwc.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Better access to resources",
+      "Build and advocate for their community"
+    ]
+  },
+  {
+    "id": "community-vecinita-intro",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Qué ayuda VECINA a los vecinos a obtener?",
+    "expected_doc_url": "https://vecina.wrwc.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Mejor acceso a recursos",
+      "Abogar por su comunidad"
+    ]
+  },
+  {
+    "id": "housing-flood-insurance-wait",
+    "locale": "en",
+    "domain": "housing",
+    "question": "How long can it take for a flood insurance policy to go into effect?",
+    "expected_doc_url": "https://health.ri.gov/flooding",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Up to 30 days for a flood insurance policy to go into effect"
+    ]
+  },
+  {
+    "id": "legal-aid-rils-mission",
+    "locale": "en",
+    "domain": "legal",
+    "question": "What is Rhode Island Legal Services' mission?",
+    "expected_doc_url": "https://www.rils.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Provide legal representation to low-income people",
+      "Improve economic and human condition by protecting legal rights"
+    ]
+  },
+  {
+    "id": "legal-aid-rils-housing",
+    "locale": "en",
+    "domain": "legal",
+    "question": "Does Rhode Island Legal Services work on safe affordable housing?",
+    "expected_doc_url": "https://www.rils.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Safe Affordable Housing is listed among RILS priorities"
+    ]
+  },
+  {
+    "id": "edge-abstain-mayor-phone",
+    "locale": "en",
+    "domain": "edge",
+    "question": "What is the mayor's personal phone number?",
+    "retrieval_expectation": "abstain",
+    "required_facts": [
+      "Must not invent a personal phone number",
+      "Should indicate the information is not available from the corpus"
+    ]
+  },
+  {
+    "id": "edge-ambiguous-housing",
+    "locale": "en",
+    "domain": "edge",
+    "question": "housing",
+    "expected_doc_urls": [
+      "https://www.rils.org/",
+      "https://health.ri.gov/flooding"
+    ],
+    "retrieval_expectation": "any_of",
+    "required_facts": [
+      "Answer addresses housing-related public information from retrieved sources"
+    ]
+  },
+  {
+    "id": "edge-empty-quantum",
+    "locale": "en",
+    "domain": "edge",
+    "question": "Where can I get quantum physics tutoring?",
+    "retrieval_expectation": "empty",
+    "required_facts": [
+      "Should not fabricate tutoring resources",
+      "Should indicate no relevant corpus context when retrieval is empty"
+    ]
+  }
+]

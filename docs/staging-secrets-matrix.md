@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-07-01 (S007/EV-008 F36 — VECINITA_EVAL_* on internal-write-api)
+> **Last updated**: 2026-07-24 (S010/EV-011 F39 M80 — playground Modal app + shared proxy secret)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -37,7 +37,8 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_AUDIT_RETENTION_DAYS` | No | Default `365` — EV-002 audit retention for `POST /internal/v1/audit/cleanup` (F29); `0` = skip |
 | `VECINITA_CHAT_RAG_URL` | Yes (EV-002) | Chat-rag-backend URL for `GET /internal/v1/health/all` polling |
 | `VECINITA_MODAL_EMBED_URL` | Yes (EV-002) | Modal embedding **base** URL (no `/health` suffix); health poll appends `/health` |
-| `VECINITA_MODAL_LLM_URL` | Yes (EV-002) | Modal LLM URL for health aggregator |
+| `VECINITA_MODAL_LLM_URL` | Yes (EV-002) | Modal **`vecinita-llm`** URL for health aggregator (prod) |
+| `VECINITA_MODAL_LLM_PLAYGROUND_URL` | Yes (EV-011 Slice D) | Modal **`vecinita-llm-playground`** URL — list/pull + sandbox eval (TP-S010-27) |
 | `VECINITA_MODAL_DATA_MGMT_URL` | Yes (EV-001/002) | Modal data-mgmt URL — retag dispatch + health poll |
 | `VECINITA_CHAT_FRONTEND_URL` | Yes (EV-002) | Chat static site URL for health aggregator HTTP check |
 | `VECINITA_ADMIN_FRONTEND_URL` | Yes (EV-002) | Admin static site URL for health aggregator HTTP check |
@@ -86,13 +87,17 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 
 | Secret | Required keys | Used by |
 |--------|---------------|---------|
-| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037) |
+| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037 / TP-S010-25) |
 
 Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first).
 Proxy key must match DO internal-write-api `VECINITA_MODAL_PROXY_KEY`.
 
-No Vecinita Postgres secrets on embed/LLM apps. HF model cache uses Modal volumes
-`embedding-models`, `llm-models`. Playground staging: `modal run infra/modal/llm_app.py::stage_default_model`.
+No Vecinita Postgres secrets on embed/LLM apps. HF model cache uses Modal volume
+`llm-models` (shared by prod + playground). Staging:
+
+1. `bash scripts/deploy/modal.sh` (deploys both LLM apps)
+2. `modal run infra/modal/llm_app.py::stage_default_model`
+3. Set DO `VECINITA_MODAL_LLM_URL` + `VECINITA_MODAL_LLM_PLAYGROUND_URL`
 
 **Deprecated:** Modal secret `vecinita-ollama`, app `vecinita-ollama`, env `VECINITA_MODAL_OLLAMA_URL`.
 

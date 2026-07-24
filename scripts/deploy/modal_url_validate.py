@@ -5,12 +5,14 @@ from __future__ import annotations
 import re
 
 _EMBED_HOST_PATTERN = re.compile(r"vecinita--vecinita-embedding")
-_LLM_HOST_PATTERN = re.compile(r"vecinita--vecinita-llm")
+_LLM_HOST_PATTERN = re.compile(r"vecinita--vecinita-llm(?!-playground)")
+_LLM_PLAYGROUND_HOST_PATTERN = re.compile(r"vecinita--vecinita-llm-playground")
 
 _MODAL_URL_KEYS = frozenset(
     {
         "VECINITA_MODAL_EMBED_URL",
         "VECINITA_MODAL_LLM_URL",
+        "VECINITA_MODAL_LLM_PLAYGROUND_URL",
     }
 )
 
@@ -41,8 +43,17 @@ def validate_modal_service_url(key: str, url: str) -> None:
         raise ValueError(msg)
     if key == "VECINITA_MODAL_LLM_URL" and not _LLM_HOST_PATTERN.search(trimmed):
         msg = (
-            f"{key} should target the vecinita-llm app "
-            f"(expected host containing vecinita--vecinita-llm; got {trimmed!r})"
+            f"{key} should target the prod vecinita-llm app "
+            f"(expected host containing vecinita--vecinita-llm without -playground; "
+            f"got {trimmed!r})"
+        )
+        raise ValueError(msg)
+    if key == "VECINITA_MODAL_LLM_PLAYGROUND_URL" and not _LLM_PLAYGROUND_HOST_PATTERN.search(
+        trimmed
+    ):
+        msg = (
+            f"{key} should target the vecinita-llm-playground app "
+            f"(expected host containing vecinita--vecinita-llm-playground; got {trimmed!r})"
         )
         raise ValueError(msg)
 

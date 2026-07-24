@@ -432,3 +432,14 @@ Legacy skills (`doc-planner`, `build-executor`, etc.) are out of scope unless tr
 ## Additional resources
 
 - [reference.md](reference.md) — YAML schema, transcript mining, rubric, question banks, report template
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/00-context/SKILL.md — open a new session when ready
+```
+
+Or stop here if no further work is planned.

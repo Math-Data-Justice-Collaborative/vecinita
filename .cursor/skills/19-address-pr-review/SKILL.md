@@ -166,3 +166,12 @@ When disagreeing with a comment: **won't fix** path — AskQuestion, then reply 
 - Changing CI workflows to greenwash unrelated failures
 - Auto-starting after **18-pr-review** without user invoking **19-address-pr-review**
 - Resolving GitHub threads before user confirms resolution
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/18-pr-review/SKILL.md — re-review after fixes
+```

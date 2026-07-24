@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
 
 _P95_INFORMATIVE_S = 15.0
+_MIN_INCREMENTAL_TOKEN_EVENTS = 2
 
 
 def _parse_sse(raw: str) -> list[JsonObject]:
@@ -56,6 +57,76 @@ def test_uj001_ask_and_stream(chat_client: TestClient) -> None:
     assert stream.status_code == HTTPStatus.OK
     events = _parse_sse(stream.text)
     assert events[-1].get("done") is True
+
+
+class _MultiTokenMockLlmClient:
+    """Upstream mock that emits multiple incremental tokens (TC-143 / RD-164)."""
+
+    def generate(self, prompt: str, **kwargs: object) -> str:
+        """Generate."""
+        _ = (prompt, kwargs)
+        return "Food pantry hours are posted Mondays."
+
+    def generate_stream(self, prompt: str, **kwargs: object) -> Iterator[str]:
+        """Generate stream — multiple token events before done (not one full reply)."""
+        _ = (prompt, kwargs)
+        yield "Food "
+        yield "pantry "
+        yield "hours "
+        yield "are "
+        yield "posted."
+
+    def close(self) -> None:
+        """Close."""
+        return
+
+
+@pytest.fixture
+def multi_token_chat_client(seeded_corpus_db: str) -> TestClient:
+    """Chat client whose LLM emits multiple stream tokens (TC-143)."""
+    attach_embeddings(
+        database_url=seeded_corpus_db,
+        match_substrings={"Food pantry": 0},
+        default_index=0,
+    )
+    settings = ChatRagSettings(
+        database_url=seeded_corpus_db,
+        top_k=5,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+    )
+    retriever = CorpusPgvectorRetriever(
+        embed_fn=lambda _q: basis_vector(0),
+        database_url=settings.database_url,
+        top_k=settings.top_k,
+    )
+    service = ChatRagService(
+        retriever=retriever,
+        llm_client=_MultiTokenMockLlmClient(),  # type: ignore[arg-type]
+    )
+    return TestClient(create_app(settings=settings, chat_service=service))
+
+
+def test_uj001_stream_emits_multiple_token_events_before_done(
+    multi_token_chat_client: TestClient,
+) -> None:
+    """TC-143: SSE must deliver multiple token events before done (real incremental stream)."""
+    stream = multi_token_chat_client.post(
+        "/api/v1/ask/stream",
+        json={"question": "What are the food pantry hours?"},
+    )
+    assert stream.status_code == HTTPStatus.OK
+    events = _parse_sse(stream.text)
+    assert events, "expected SSE events"
+    assert events[-1].get("done") is True
+    token_events = [event for event in events[:-1] if isinstance(event.get("token"), str)]
+    assert len(token_events) >= _MIN_INCREMENTAL_TOKEN_EVENTS, (
+        "TC-143 / RD-164: expect multiple incremental token events before done "
+        f"(got {len(token_events)})"
+    )
+    joined = "".join(str(event.get("token")) for event in token_events)
+    assert "pantry" in joined.lower()
 
 
 class _SpanishMockLlmClient:

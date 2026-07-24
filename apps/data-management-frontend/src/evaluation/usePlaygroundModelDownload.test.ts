@@ -1,22 +1,22 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { MODEL_PULL_POLL_INTERVAL_MS } from "./ollamaModelDownloadContext";
+import { MODEL_PULL_POLL_INTERVAL_MS } from "./playgroundModelDownloadContext";
 import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as adminApi from "@/api/admin";
 
 import {
-  OllamaModelDownloadProvider,
+  PlaygroundModelDownloadProvider,
   firstAvailableModelId,
   modelOptionLabel,
-  useOllamaModelDownload,
-} from "./useOllamaModelDownload";
+  usePlaygroundModelDownload,
+} from "./usePlaygroundModelDownload";
 
 function providerWrapper({ children }: { children: ReactNode }) {
-  return createElement(OllamaModelDownloadProvider, null, children);
+  return createElement(PlaygroundModelDownloadProvider, null, children);
 }
 
-describe("useOllamaModelDownload helpers", () => {
+describe("usePlaygroundModelDownload helpers", () => {
   it("firstAvailableModelId returns null when no model is available", () => {
     expect(
       firstAvailableModelId([
@@ -35,26 +35,26 @@ describe("useOllamaModelDownload helpers", () => {
   });
 });
 
-describe("useOllamaModelDownload hook", () => {
+describe("usePlaygroundModelDownload hook", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("throws when used outside OllamaModelDownloadProvider", () => {
-    expect(() => renderHook(() => useOllamaModelDownload())).toThrow(
-      /OllamaModelDownloadProvider/,
+  it("throws when used outside PlaygroundModelDownloadProvider", () => {
+    expect(() => renderHook(() => usePlaygroundModelDownload())).toThrow(
+      /PlaygroundModelDownloadProvider/,
     );
   });
 
   it("loadFamilyTags surfaces non-Error tag failures", async () => {
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [],
     });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilyTags").mockRejectedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockRejectedValue(
       "tags failed",
     );
-    const { result } = renderHook(() => useOllamaModelDownload(), {
+    const { result } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,
     });
 
@@ -74,11 +74,11 @@ describe("useOllamaModelDownload hook", () => {
   });
 
   it("refreshCatalog surfaces non-Error catalog failures", async () => {
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
-    vi.spyOn(adminApi, "fetchOllamaCatalogFamilies").mockRejectedValue(
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockRejectedValue(
       "catalog failed",
     );
-    const { result } = renderHook(() => useOllamaModelDownload(), {
+    const { result } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,
     });
 
@@ -91,7 +91,7 @@ describe("useOllamaModelDownload hook", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.catalogError).toBe("Failed to load Ollama catalog");
+      expect(result.current.catalogError).toBe("Failed to load playground catalog");
     });
   });
 
@@ -105,18 +105,18 @@ describe("useOllamaModelDownload hook", () => {
     }>((resolve) => {
       resolveList = resolve;
     });
-    vi.spyOn(adminApi, "fetchOllamaModels")
+    vi.spyOn(adminApi, "fetchPlaygroundModels")
       .mockResolvedValueOnce({
         items: [{ model_id: "qwen2.5:3b-instruct", available: false }],
       })
       .mockImplementation(() => listPromise);
-    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: "qwen2.5:3b-instruct",
       status: "pulling",
     });
 
-    const { result, unmount } = renderHook(() => useOllamaModelDownload(), {
+    const { result, unmount } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,
     });
     await waitFor(() => {
@@ -143,8 +143,8 @@ describe("useOllamaModelDownload hook", () => {
   });
 
   it("refreshModels surfaces non-Error list failures", async () => {
-    vi.spyOn(adminApi, "fetchOllamaModels").mockRejectedValue("list failed");
-    const { result } = renderHook(() => useOllamaModelDownload(), {
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockRejectedValue("list failed");
+    const { result } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,
     });
 
@@ -158,9 +158,9 @@ describe("useOllamaModelDownload hook", () => {
   });
 
   it("downloadModel ignores whitespace-only tags", async () => {
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({ items: [] });
-    const pullSpy = vi.spyOn(adminApi, "pullOllamaModel");
-    const { result } = renderHook(() => useOllamaModelDownload(), {
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    const pullSpy = vi.spyOn(adminApi, "pullPlaygroundModel");
+    const { result } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,
     });
 
@@ -178,17 +178,17 @@ describe("useOllamaModelDownload hook", () => {
 
   it("clears download poll timer when provider unmounts", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    vi.spyOn(adminApi, "fetchOllamaModels").mockResolvedValue({
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
       items: [{ model_id: "qwen2.5:3b-instruct", available: false }],
     });
-    vi.spyOn(adminApi, "pullOllamaModel").mockResolvedValue({
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
       job_id: "00000000-0000-0000-0000-0000000000dd",
       model_id: "qwen2.5:3b-instruct",
       status: "pulling",
     });
     const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
 
-    const { result, unmount } = renderHook(() => useOllamaModelDownload(), {
+    const { result, unmount } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,
     });
     await waitFor(() => {

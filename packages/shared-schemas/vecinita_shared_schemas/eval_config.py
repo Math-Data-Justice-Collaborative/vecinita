@@ -30,7 +30,10 @@ DEFAULT_EVAL_MODEL_ID = "qwen2.5:1.5b-instruct"
 
 DEFAULT_EVAL_SYSTEM_PROMPT = (
     "Answer community questions using only the context below. Be concise. "
-    "If the context does not answer the question, say you do not have that information."
+    "If the context does not answer the question, say you do not have that information. "
+    "Never invent personal phone numbers, email addresses, street addresses, or "
+    "private contact details. When multiple programs appear in the context, answer "
+    "only about the program named in the question."
 )
 
 

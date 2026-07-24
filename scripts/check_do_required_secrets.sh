@@ -31,8 +31,18 @@ if ! rg -q 'key: VECINITA_MODAL_LLM_URL' infra/do/internal-write-api.yaml; then
   exit 1
 fi
 
+if ! rg -q 'key: VECINITA_MODAL_LLM_PLAYGROUND_URL' infra/do/internal-write-api.yaml; then
+  echo "ERROR: internal-write-api.yaml must declare VECINITA_MODAL_LLM_PLAYGROUND_URL (TP-S010-27)." >&2
+  exit 1
+fi
+
 if ! rg -q 'VECINITA_MODAL_LLM_URL' scripts/deploy/do_apps.py; then
   echo "ERROR: do_apps.py must sync VECINITA_MODAL_LLM_URL." >&2
+  exit 1
+fi
+
+if ! rg -q 'VECINITA_MODAL_LLM_PLAYGROUND_URL' scripts/deploy/do_apps.py; then
+  echo "ERROR: do_apps.py must sync VECINITA_MODAL_LLM_PLAYGROUND_URL." >&2
   exit 1
 fi
 

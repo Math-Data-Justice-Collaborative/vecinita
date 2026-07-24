@@ -322,3 +322,12 @@ On re-invocation:
 3. **Verify installation**: Confirm tools work before marking complete.
 4. **Match tech stack**: Tool choices must match execution-plan.md §Tech Stack Summary.
 5. **Executable scripts**: Hook scripts must be valid for the user's platform.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/07-build/SKILL.md
+```

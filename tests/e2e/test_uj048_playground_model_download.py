@@ -19,7 +19,7 @@ from tests.helpers.json_response import (
     json_str,
     response_json_object,
 )
-from tests.helpers.ollama_models_mock import MockOllamaModelsClient
+from tests.helpers.playground_models_mock import MockPlaygroundModelsClient
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
@@ -38,13 +38,14 @@ pytestmark = [
 ]
 
 _DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct"
+_UNMAPPED_MODEL_ID = "unknown-custom:7b"
 
 
 @pytest.fixture
 def playground_download_e2e_client(
     monkeypatch: pytest.MonkeyPatch,
-) -> Iterator[tuple[TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient]]:
-    """Write API TestClient with mocked Modal Ollama backend."""
+) -> Iterator[tuple[TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient]]:
+    """Write API TestClient with mocked Modal playground LLM backend."""
     reset_auth_config_for_tests()
     private_key = generate_es256_keypair()
     database_url = os.environ.get(
@@ -55,11 +56,11 @@ def playground_download_e2e_client(
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
     seed_eval_corpus(database_url=database_url)
-    mock_client = MockOllamaModelsClient()
+    mock_client = MockPlaygroundModelsClient()
     app = create_app(
         eval_embed_fn=eval_embed_fn,
         eval_judge=MockEvalJudge(),
-        ollama_models_client=mock_client,
+        playground_models_client=mock_client,
     )
     with TestClient(app) as client:
         yield client, private_key, mock_client
@@ -68,7 +69,7 @@ def playground_download_e2e_client(
 
 def test_uj048_super_admin_pull_then_list_includes_model(
     playground_download_e2e_client: tuple[
-        TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
     ],
 ) -> None:
     """TC-138: super-admin POST pull returns 202; list includes pulling model."""
@@ -101,7 +102,7 @@ def test_uj048_super_admin_pull_then_list_includes_model(
 
 def test_uj048_admin_pull_forbidden(
     playground_download_e2e_client: tuple[
-        TestClient, EllipticCurvePrivateKey, MockOllamaModelsClient
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
     ],
 ) -> None:
     """TC-138 / AC-E28: admin JWT cannot trigger model pull."""
@@ -114,4 +115,25 @@ def test_uj048_admin_pull_forbidden(
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert pull.status_code == HTTPStatus.FORBIDDEN
+    assert mock_client.pull_requests == []
+
+
+def test_uj048_unmapped_tag_pull_returns_400(
+    playground_download_e2e_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
+) -> None:
+    """TC-141 / RD-168: unmapped playground tag fails clearly (not 202 then silent fail)."""
+    client, private_key, mock_client = playground_download_e2e_client
+    super_token = sign_test_jwt(private_key, role="super-admin")
+
+    pull = client.post(
+        "/internal/v1/models/ollama/pull",
+        json={"model_id": _UNMAPPED_MODEL_ID},
+        headers={"Authorization": f"Bearer {super_token}"},
+    )
+    assert pull.status_code == HTTPStatus.BAD_REQUEST
+    detail = response_json_object(pull).get("detail")
+    assert isinstance(detail, str)
+    assert "HuggingFace mapping" in detail or "no HuggingFace" in detail
     assert mock_client.pull_requests == []

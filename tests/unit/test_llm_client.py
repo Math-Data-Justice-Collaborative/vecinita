@@ -1,15 +1,24 @@
-"""LLM client HTTP contract tests (ADR-009, TC-001 prep)."""
+"""LLM client HTTP contract tests (ADR-009, TC-001 prep, TC-144)."""
 
 from __future__ import annotations
 
 import json as json_lib
 from typing import cast
+from uuid import uuid4
 
 import httpx
 import pytest
 from vecinita_llm_client import LlmClient, LlmClientError
 from vecinita_shared_schemas.json_types import (
     as_json_object,
+)
+from vecinita_shared_schemas.llm_http import (
+    LlmHttpConfigError,
+    resolve_llm_http_config,
+)
+from vecinita_shared_schemas.playground_models import (
+    PlaygroundModelListResponse,
+    PlaygroundModelPullResponse,
 )
 
 
@@ -267,36 +276,36 @@ def test_generate_stream_returns_no_tokens_when_body_empty() -> None:
     client.close()
 
 
-def test_llm_client_falls_back_to_legacy_ollama_url_with_warning(
+def test_llm_client_warns_when_legacy_ollama_url_set(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Legacy VECINITA_MODAL_OLLAMA_URL still resolves base URL with a deprecation warning."""
-    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    """Legacy VECINITA_MODAL_OLLAMA_URL is ignored; LLM URL is required (RD-170)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test")
 
     def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, json={"text": "legacy"})
+        return httpx.Response(200, json={"text": "ok"})
 
     transport = httpx.MockTransport(handler)
     client = LlmClient(
-        http_client=httpx.Client(transport=transport, base_url="http://legacy-ollama.test"),
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
-    assert client.generate("hello") == "legacy"
-    assert "VECINITA_MODAL_OLLAMA_URL is deprecated" in caplog.text
+    assert client.generate("hello") == "ok"
+    assert "VECINITA_MODAL_OLLAMA_URL is deprecated and ignored" in caplog.text
     client.close()
 
 
-def test_llm_client_default_model_id_from_legacy_env(
+def test_llm_client_ignores_legacy_ollama_model_id_env(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """VECINITA_OLLAMA_MODEL_ID is used when VECINITA_LLM_MODEL_ID is unset."""
+    """VECINITA_OLLAMA_MODEL_ID is ignored when VECINITA_LLM_MODEL_ID is unset (RD-170)."""
     monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     monkeypatch.delenv("VECINITA_LLM_MODEL_ID", raising=False)
     monkeypatch.setenv("VECINITA_OLLAMA_MODEL_ID", "llama3.2:3b")
 
     client = LlmClient("http://llm.test")
-    assert client.default_model_id == "llama3.2:3b"
+    assert client.default_model_id is None
     client.close()
 
 
@@ -377,3 +386,236 @@ def test_llm_client_does_not_close_injected_http_client() -> None:
     client.close()
 
     assert closed == []
+
+
+# --- TC-144 / T77.1: shared resolver + list/pull on LlmClient (RD-163, TP-S010-18/20) ---
+
+_DEFAULT_LLM_TIMEOUT_S = 120.0
+_CUSTOM_LLM_TIMEOUT_S = 30.0
+
+
+def test_resolve_llm_http_config_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Shared resolver reads URL, proxy key, and model id from env (TP-S010-20)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.env/")
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "env-proxy")
+    monkeypatch.setenv("VECINITA_LLM_MODEL_ID", "qwen2.5:1.5b-instruct")
+    monkeypatch.delenv("VECINITA_MODAL_OLLAMA_URL", raising=False)
+    monkeypatch.delenv("VECINITA_OLLAMA_MODEL_ID", raising=False)
+
+    config = resolve_llm_http_config()
+    assert config.base_url == "http://llm.env"
+    assert config.proxy_key == "env-proxy"
+    assert config.model_id == "qwen2.5:1.5b-instruct"
+    assert config.timeout == _DEFAULT_LLM_TIMEOUT_S
+
+
+def test_resolve_llm_http_config_explicit_args_override_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Explicit resolver args win over environment variables."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://env.test")
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "env-key")
+    monkeypatch.setenv("VECINITA_LLM_MODEL_ID", "env-model")
+
+    config = resolve_llm_http_config(
+        base_url="http://arg.test/",
+        proxy_key="arg-key",
+        model_id="arg-model",
+        timeout=_CUSTOM_LLM_TIMEOUT_S,
+    )
+    assert config.base_url == "http://arg.test"
+    assert config.proxy_key == "arg-key"
+    assert config.model_id == "arg-model"
+    assert config.timeout == _CUSTOM_LLM_TIMEOUT_S
+
+
+def test_resolve_llm_http_config_missing_url_raises(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Resolver raises when neither base_url nor LLM URL env is set."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    monkeypatch.delenv("VECINITA_MODAL_OLLAMA_URL", raising=False)
+
+    with pytest.raises(LlmHttpConfigError, match="VECINITA_MODAL_LLM_URL"):
+        resolve_llm_http_config()
+
+
+def test_resolve_llm_http_config_require_proxy_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """require_proxy_key=True fails closed when the proxy key is unset."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
+    monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
+
+    with pytest.raises(LlmHttpConfigError, match="VECINITA_MODAL_PROXY_KEY"):
+        resolve_llm_http_config(require_proxy_key=True)
+
+
+def test_resolve_llm_http_config_legacy_ollama_url_does_not_resolve(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Slice E / RD-170 / TP-S010-29: Ollama URL alone must not satisfy the resolver."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
+    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test/")
+
+    with pytest.raises(LlmHttpConfigError, match="VECINITA_MODAL_LLM_URL"):
+        resolve_llm_http_config()
+
+
+def test_resolve_llm_http_config_ignores_legacy_ollama_model_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """VECINITA_OLLAMA_MODEL_ID must not populate model_id after Slice E (RD-170)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.env/")
+    monkeypatch.delenv("VECINITA_LLM_MODEL_ID", raising=False)
+    monkeypatch.setenv("VECINITA_OLLAMA_MODEL_ID", "legacy-ollama-tag")
+
+    config = resolve_llm_http_config()
+    assert config.model_id is None
+
+
+def test_llm_client_missing_url_hard_fails_even_with_ollama_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """LlmClient hard-fails when only deprecated Ollama URL is set (TP-S010-29)."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test/")
+
+    with pytest.raises(LlmClientError, match="VECINITA_MODAL_LLM_URL"):
+        LlmClient()
+
+
+def test_resolve_llm_http_config_playground_purpose_prefers_playground_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """purpose=playground reads VECINITA_MODAL_LLM_PLAYGROUND_URL (TP-S010-27)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", "http://playground.env/")
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://prod.env/")
+    config = resolve_llm_http_config(purpose="playground")
+    assert config.base_url == "http://playground.env"
+
+
+def test_resolve_llm_http_config_playground_falls_back_to_prod_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """purpose=playground falls back to prod LLM URL when playground env is unset."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://prod.env/")
+    config = resolve_llm_http_config(purpose="playground")
+    assert config.base_url == "http://prod.env"
+
+
+def test_resolve_llm_http_config_playground_missing_url_raises(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """purpose=playground with no playground or prod URL raises a clear error."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    with pytest.raises(LlmHttpConfigError, match="purpose='playground'"):
+        resolve_llm_http_config(purpose="playground")
+
+
+def test_list_models_returns_parsed_response() -> None:
+    """list_models GETs /models/ollama with proxy auth (TC-144 / RD-163)."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/models/ollama"
+        assert request.headers.get("X-Vecinita-Proxy-Key") == "proxy-secret"
+        return httpx.Response(
+            200,
+            json={"items": [{"model_id": "qwen2.5:1.5b-instruct", "available": True}]},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "http://llm.test/",
+        proxy_key="proxy-secret",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    listing = client.list_models()
+    assert isinstance(listing, PlaygroundModelListResponse)
+    assert listing.items[0].model_id == "qwen2.5:1.5b-instruct"
+    assert listing.items[0].available is True
+    client.close()
+
+
+def test_list_models_raises_on_http_error() -> None:
+    """list_models wraps non-2xx responses as LlmClientError."""
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(503, text="upstream unavailable"),
+    )
+    client = LlmClient(
+        "http://llm.test",
+        proxy_key="proxy-secret",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    with pytest.raises(LlmClientError, match="list_models failed"):
+        client.list_models()
+    client.close()
+
+
+def test_start_pull_posts_model_id() -> None:
+    """start_pull POSTs /models/ollama/pull with the requested model id."""
+    job_id = uuid4()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/models/ollama/pull"
+        assert request.headers.get("X-Vecinita-Proxy-Key") == "proxy-secret"
+        payload = as_json_object(cast("object", json_lib.loads(request.content.decode())))
+        assert payload["model_id"] == "mistral:7b"
+        return httpx.Response(
+            202,
+            json={
+                "job_id": str(job_id),
+                "model_id": "mistral:7b",
+                "status": "pulling",
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        "http://llm.test",
+        proxy_key="proxy-secret",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    response = client.start_pull("mistral:7b")
+    assert isinstance(response, PlaygroundModelPullResponse)
+    assert response.job_id == job_id
+    assert response.status == "pulling"
+    client.close()
+
+
+def test_start_pull_raises_on_http_error() -> None:
+    """start_pull wraps non-2xx responses as LlmClientError."""
+    transport = httpx.MockTransport(lambda _request: httpx.Response(500, text="pull failed"))
+    client = LlmClient(
+        "http://llm.test",
+        proxy_key="proxy-secret",
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
+    )
+    with pytest.raises(LlmClientError, match="start_pull failed"):
+        client.start_pull("missing:tag")
+    client.close()
+
+
+def test_llm_client_uses_shared_resolver_for_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """LlmClient construction resolves URL/proxy/timeout via shared-schemas (TP-S010-20)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://resolved.test")
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "resolved-proxy")
+    monkeypatch.setenv("VECINITA_LLM_MODEL_ID", "qwen2.5:1.5b-instruct")
+    monkeypatch.delenv("VECINITA_MODAL_OLLAMA_URL", raising=False)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers.get("X-Vecinita-Proxy-Key") == "resolved-proxy"
+        return httpx.Response(200, json={"items": []})
+
+    transport = httpx.MockTransport(handler)
+    client = LlmClient(
+        http_client=httpx.Client(transport=transport, base_url="http://resolved.test"),
+    )
+    assert client.default_model_id == "qwen2.5:1.5b-instruct"
+    assert client.list_models().items == []
+    client.close()

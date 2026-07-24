@@ -1,36 +1,67 @@
 ---
-description: Unified vecinita-llm Modal app — single LLM surface (ADR-037)
+description: Unified vecinita-llm Modal apps — prod + playground (ADR-037)
 alwaysApply: true
 ---
 
 # Unified vecinita-llm Modal app (ADR-037)
 
-Vecinita has **one** Modal LLM deployable: **`vecinita-llm`** (`infra/modal/llm_app.py`).
+Vecinita has **two** Modal LLM deployables sharing volume **`llm-models`**:
+
+| App | Role |
+|-----|------|
+| **`vecinita-llm`** | Prod ChatRAG / ingest — pinned model |
+| **`vecinita-llm-playground`** | Playground list/pull + sandbox eval `model_id` reloads |
 
 ## Do
 
-- Route **all** LLM HTTP (chat, eval, ingest/retag, playground list/pull) through
-  `VECINITA_MODAL_LLM_URL` + optional `VECINITA_MODAL_PROXY_KEY`.
+- Route **prod** LLM HTTP (chat, ingest/retag) through `VECINITA_MODAL_LLM_URL` +
+  **`VECINITA_MODAL_PROXY_KEY`** (required on generate/warm/models; `/health` may stay open —
+  RD-165).
+- Route **playground** list/pull/sandbox eval through `VECINITA_MODAL_LLM_PLAYGROUND_URL`
+  (TP-S010-27). ChatRAG must not use the playground URL.
+- Use **one client surface** (`LlmClient`) for generate/stream/warm + list/pull — shared
+  env/auth/timeout resolver in `shared-schemas` (RD-163, TP-S010-20). Do not maintain a
+  parallel models-only HTTP client.
 - Use **vLLM** for inference; **HuggingFace Hub** (`huggingface_hub.snapshot_download`) for
   `pull_model_job` / `stage_default_model` — not `ollama pull`.
-- Keep API path compat: `GET/POST /models/ollama` on `vecinita-llm` (Ollama-style tags in UI;
-  tag→HF mapping in `infra/modal/llm_model_registry.py`).
-- Store weights on Modal volume **`llm-models`** only; manifest at `/models/manifest.json`.
-- Accept optional `model_id` on `/generate`, `/warm` (playground tags).
+- Keep API path aliases: `GET/POST /models/ollama` (FE compat). Rename modules/types/UI to
+  playground/LLM — drop Ollama as the mental model (RD-166, TP-S010-19).
+- Store weights on Modal volume **`llm-models`** only (both apps); manifest at
+  `/models/manifest.json`.
+- Gate catalog/list/pull to tags `resolve_hf_repo` accepts (RD-168).
+- Use shared HF **`apply_chat_template`** in `packages/llm-client` (RD-167, TP-S010-24).
+- Wire **real vLLM token streaming** into SSE (RD-164) — do not fake stream by word-chunking
+  a completed reply.
+- Pin prod to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` (RD-169, TP-S010-25).
 
 ## Do not
 
-- Deploy or add routes to **`vecinita-ollama`** — deprecated; de-deploy after unified smoke.
-- Add `VECINITA_MODAL_OLLAMA_URL` to new DO specs or sync lists (legacy env may warn-only in clients).
+- Deploy or add routes to **`vecinita-ollama`** — deprecated; de-deployed.
+- Add `VECINITA_MODAL_OLLAMA_URL` / `VECINITA_OLLAMA_MODEL_ID` to new DO specs or client
+  fallbacks (RD-170, TP-S010-29).
 - Assume vLLM can read Ollama blob cache — incompatible formats.
+- Build a **provider ABC** / multi-provider plugin framework (RD-171) unless a second backend
+  is explicitly reintroduced.
+- Point ChatRAG at the playground app URL.
 
 ## Model switching
 
 One vLLM engine per GPU class instance; changing `model_id` reloads the engine (~60–120s).
-Use `/warm` before eval batches.
+Use `/warm` before eval batches. Playground reloads must not stomp the **prod** app.
+
+## Build slices (F39 follow-on) — Phase 18
+
+| Slice | Milestone | Focus |
+|-------|-----------|--------|
+| A | M77 | One client + rename (path aliases kept) |
+| B | M78 | Real streaming + proxy auth everywhere |
+| C | M79 | Chat-template helper + catalog gate |
+| D | M80 | Playground **app** + prod pin |
+| E | M81 | Legacy env/doc cleanup |
 
 ## References
 
 - `docs/adr/ADR-037-unified-vecinita-llm-modal-app.md`
 - `docs/deployment-integration.md` §EV-010
+- RD-163–RD-172, TP-S010-17–31
 - ADR-009 (vLLM primary)

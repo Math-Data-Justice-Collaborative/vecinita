@@ -298,3 +298,12 @@ On re-invocation:
 3. **Merge, don't overwrite**: Respect existing hooks.json and rule files.
 4. **Verify installation**: Always confirm tooling is valid before marking complete.
 5. **Domain-specific**: Skills and agents are tailored to THIS project, not generic.
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/04-tech-plan/SKILL.md
+```

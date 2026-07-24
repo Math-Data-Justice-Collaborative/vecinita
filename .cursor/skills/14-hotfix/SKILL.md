@@ -1145,3 +1145,12 @@ When multiple issues are reported at once:
 | [13-deploy-smoke](../13-deploy-smoke/SKILL.md) | Smoke patterns, deploy-state format, monitoring baseline |
 | [15-service-health](../15-service-health/SKILL.md) | Ambiguous production logs; post-hotfix follow-up (Phase 4.4); may originate repro test handed to hotfix |
 | [tdd.mdc](../../rules/tdd.mdc) | Test-first naming, placement, spec-aligned assertions |
+
+## Continue
+
+When this stage completes, end the user-facing summary with this verbatim block:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/15-service-health/SKILL.md
+```

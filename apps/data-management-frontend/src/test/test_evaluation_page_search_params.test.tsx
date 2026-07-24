@@ -8,7 +8,7 @@ import { LocaleProvider } from "vecinita-frontend-ui";
 import { EvaluationPage } from "@/pages/EvaluationPage";
 
 import { fetchInputUrl } from "./fetch-mock";
-import { mockOllamaApiFetch } from "./helpers/mockOllamaApi";
+import { mockPlaygroundApiFetch } from "./helpers/mockPlaygroundApi";
 
 const setSearchParams = vi.fn<
   (updater: (prev: URLSearchParams) => URLSearchParams) => void
@@ -124,9 +124,9 @@ describe("EvaluationPage search params", () => {
             json: async () => ({ points: [], available_metrics: [] }),
           });
         }
-        const ollamaMock = mockOllamaApiFetch(url);
-        if (ollamaMock !== null) {
-          return Promise.resolve(ollamaMock);
+        const playgroundMock = mockPlaygroundApiFetch(url);
+        if (playgroundMock !== null) {
+          return Promise.resolve(playgroundMock);
         }
         if (url.includes("/internal/v1/eval/config-presets")) {
           return Promise.resolve({

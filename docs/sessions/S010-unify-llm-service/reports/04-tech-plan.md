@@ -3,7 +3,12 @@
 **Session:** S010-unify-llm-service  
 **Evolve cycle:** EV-011 (F39)  
 **Date:** 2026-07-08  
-**Status:** Complete — pending user review
+**Status:** Complete — superseded in part by **2026-07-10 delta reopen**
+
+> **Delta reopen (2026-07-10):** Phase 18 client consolidation (slices A–E / M77–M81) is
+> documented in
+> [`04-tech-plan-client-consolidation.md`](./04-tech-plan-client-consolidation.md)
+> (TP-S010-17–31). This file remains the Phase 17 (M74–M76) host-unify record.
 
 ## Intent
 

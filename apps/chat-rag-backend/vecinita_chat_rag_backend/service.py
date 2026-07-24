@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 
 from sqlalchemy import create_engine
 from vecinita_embedding_client import EmbeddingClient
-from vecinita_llm_client import LlmClient
+from vecinita_llm_client import LlmClient, format_instruct_prompt
 from vecinita_rag.engine import answer_from_chunks
 from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.retriever import CorpusPgvectorRetriever
@@ -34,18 +34,10 @@ def _build_prompt(
     *,
     system_prompt: str,
 ) -> str:
-    """Qwen2.5-Instruct chat format — plain completion prompts loop on generic filler."""
+    """Build instruct prompt via shared HF chat-template helper (RD-167 / TC-145)."""
     context = "\n\n".join(chunk.text for chunk in chunks)
-    return (
-        "<|im_start|>system\n"
-        f"{system_prompt}\n"
-        "\n"
-        f"<|im_start|>user\n"
-        f"Context:\n{context}\n\n"
-        f"Question: {question}\n"
-        "\n"
-        "<|im_start|>assistant\n"
-    )
+    user = f"Context:\n{context}\n\nQuestion: {question}"
+    return format_instruct_prompt(system=system_prompt, user=user)
 
 
 def _to_ask_response(result: RagAnswer) -> AskResponse:

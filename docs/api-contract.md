@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — redirect_to, revoke-invite, #109)  
+> **Last updated**: 2026-07-23 (S010/EV-011 F39 Slice A — playground rename + path aliases)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -277,31 +277,82 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 
 ## Modal LLM (vecinita-llm)
 
-Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumer: ChatRAG Backend via `VECINITA_MODAL_LLM_URL`.
+Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: ChatRAG, eval, ingest/retag, playground via `VECINITA_MODAL_LLM_URL` + **`VECINITA_MODAL_PROXY_KEY`** (required on all routes below except `/health` — RD-165).
+
+**Auth:** `X-Vecinita-Proxy-Key: <VECINITA_MODAL_PROXY_KEY>` on `/generate`, `/generate/stream`, `/warm`, `/models/*`. Missing/wrong key → `401`.
 
 ### POST `/generate`
 
 - **Purpose**: Non-streaming text generation from prompt + retrieved context.
+- **Auth**: Proxy key required.
 - **Request**:
 
 ```json
 {
   "prompt": "string",
   "max_tokens": 512,
-  "temperature": 0.2
+  "temperature": 0.2,
+  "model_id": "qwen2.5:1.5b-instruct"
 }
 ```
 
+(`model_id` optional; playground/eval may set it. Prod class pins default — RD-169.)
+
 - **Response** `200`: `{"text": "string"}`
+- **Errors**: `401` unauthorized; `422` invalid body / unmapped model.
 
 ### POST `/generate/stream`
 
 - **Purpose**: SSE token stream for ChatRAG `/api/v1/ask/stream`.
-- **Response** `200` `text/event-stream`: `data: {"token": "..."}` events, final `data: {"done": true}`.
+- **Auth**: Proxy key required (`X-Vecinita-Proxy-Key` / `VECINITA_MODAL_PROXY_KEY`); fail closed if key unset.
+- **Contract (RD-164 / TP-S010-22)**: Tokens are **real incremental vLLM engine deltas** via
+  `llm_engine.add_request` + `step` — **not** a full completion split into words after the fact.
+- **Response** `200` `text/event-stream`: multiple `data: {"token": "..."}` events, final
+  `data: {"done": true}`.
+- **Errors**: `401` unauthorized; `422` invalid body.
+
+### POST `/warm`
+
+- **Purpose**: Preload / switch model into vLLM engine.
+- **Auth**: Proxy key required (same fail-closed rule as generate).
+- **Request**: optional `{"model_id": "..."}`.
+- **Errors**: `401` unauthorized.
 
 ### GET `/health`
 
+- **Auth**: May remain open (no proxy key) — probes only.
 - **Response** `200`: `{"status": "ok"}`
+
+### Auth matrix (UJ-049 / TC-142 / RD-165)
+
+| Route | Proxy key |
+|-------|-----------|
+| `POST /generate` | Required |
+| `POST /generate/stream` | Required |
+| `POST /warm` | Required |
+| `GET /models/ollama*` / `POST /models/ollama/pull` | Required |
+| `GET /health` | Optional (open) |
+
+### Playground model routes (path aliases)
+
+- `GET /models/ollama`, `POST /models/ollama/pull` — **kept** for FE compat (RD-166).
+- Optional future: `/models/playground*` aliases (not required in Slice A).
+- Catalog ⊆ `resolve_hf_repo` mappings (RD-168).
+- Proxy key required (same as generate/warm).
+
+### Playground rename (Slice A / RD-166 / TP-S010-19)
+
+HTTP path aliases stay `/models/ollama*`. Cognitive layer uses **playground** names:
+
+| Layer | Renamed symbols | Path / notes |
+|-------|-----------------|--------------|
+| `shared-schemas` | `playground_models.py` — `PlaygroundModelSummary`, `PlaygroundModelListResponse`, `PlaygroundModelPullRequest` / `PullResponse`, catalog types | Wire JSON unchanged |
+| `llm-client` | `LlmClient.list_models` / `start_pull` (was `OllamaModelsClient`) | Calls `/models/ollama*` aliases |
+| `internal-write-api` | `playground_library_client.py` | Proxies `/internal/v1/models/ollama*` |
+| DM frontend | `fetchPlaygroundModels`, `pullPlaygroundModel`, `PlaygroundModelSummaryApi`, `usePlaygroundModelDownload` | UI copy = Playground; fetch still `/internal/v1/models/ollama*` |
+
+Do **not** reintroduce `OllamaModelsClient` or `ollama_*` schema modules. FE path rename away from
+`/models/ollama` is out of scope (feature-list F39 follow-on).
 
 ---
 
@@ -754,7 +805,7 @@ Base path: `/internal/v1/eval` and `/internal/v1/rag/config` (admin JWT; promote
 
 ## EV-010 — Playground model download (F38, ADR-037 unified backend)
 
-Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `super-admin`). **API paths kept for frontend compat**; Modal backend is **`vecinita-llm`** (not `vecinita-ollama`).
+Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `super-admin`). **API paths kept for frontend compat**; Modal backend is **`vecinita-llm`** (not `vecinita-ollama`). Schema / client types are **`PlaygroundModel*`** / `LlmClient` (Slice A rename — see §Playground rename above); path segment `ollama` is an alias only.
 
 ### GET `/internal/v1/models/ollama`
 
