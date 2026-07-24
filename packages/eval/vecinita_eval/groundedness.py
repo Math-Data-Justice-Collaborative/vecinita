@@ -25,11 +25,11 @@ class GroundednessScorer(Protocol):
 
 
 class LlamaIndexFaithfulnessScorer:
-    """Default v1 scorer delegating to LlamaIndex FaithfulnessEvaluator."""
+    """Default v1 scorer using a direct YES/NO Modal LLM faithfulness prompt."""
 
-    def __init__(self, judge: object) -> None:
-        """Store the LlamaIndex evaluator instance."""
-        self._judge = judge
+    def __init__(self, llm: object) -> None:
+        """Store the LlamaIndex-compatible LLM used for judging."""
+        self._llm = llm
 
     def score(
         self,
@@ -40,7 +40,7 @@ class LlamaIndexFaithfulnessScorer:
     ) -> float:
         """Score faithfulness for one golden row."""
         return score_faithfulness(
-            judge=self._judge,
+            llm=self._llm,
             question=row.question,
             answer=answer,
             context=context,

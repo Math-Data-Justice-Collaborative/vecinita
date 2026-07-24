@@ -1,0 +1,46 @@
+[
+  {
+    "id": "similar-free-clinic-paraphrase",
+    "locale": "en",
+    "domain": "community",
+    "question": "Which free health services can uninsured patients get at RI Free Clinic?",
+    "expected_doc_url": "https://www.rifreeclinic.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Offers preventive and primary health care free of charge"
+    ]
+  },
+  {
+    "id": "similar-nuevas-voces-paraphrase",
+    "locale": "en",
+    "domain": "community",
+    "question": "Is there a bilingual leadership program called Nuevas Voces for Providence neighbors at WRWC?",
+    "expected_doc_url": "https://wrwc.org/what-we-do/community-action/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Nuevas Voces is a bilingual advocacy program"
+    ]
+  },
+  {
+    "id": "similar-flood-insurance-paraphrase",
+    "locale": "en",
+    "domain": "housing",
+    "question": "After I buy flood insurance, how soon does coverage start?",
+    "expected_doc_url": "https://health.ri.gov/flooding",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Up to 30 days for a flood insurance policy to go into effect"
+    ]
+  },
+  {
+    "id": "similar-rils-paraphrase",
+    "locale": "en",
+    "domain": "legal",
+    "question": "Who does Rhode Island Legal Services provide representation for?",
+    "expected_doc_url": "https://www.rils.org/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Provide legal representation to low-income people"
+    ]
+  }
+]

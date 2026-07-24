@@ -49,7 +49,10 @@ const DEFAULT_TOP_K = 5;
 const DEFAULT_MIN_RETRIEVAL_SCORE = 0.2;
 const DEFAULT_SYSTEM_PROMPT =
   "Answer community questions using only the context below. Be concise. " +
-  "If the context does not answer the question, say you do not have that information.";
+  "If the context does not answer the question, say you do not have that information. " +
+  "Never invent personal phone numbers, email addresses, street addresses, or " +
+  "private contact details. When multiple programs appear in the context, answer " +
+  "only about the program named in the question.";
 const DEFAULT_MAX_TOKENS = 256;
 const DEFAULT_TEMPERATURE = 0.2;
 const DEFAULT_JUDGE_TEMPERATURE = 0.2;

@@ -1,0 +1,103 @@
+{
+  "experiment_id": "sample_demo_exp_a",
+  "written_at": "2026-07-23T20:00:00+00:00",
+  "runs_per_config": 2,
+  "row_count": 4,
+  "prompts": [
+    {"name": "concise", "system_prompt": "Be concise."},
+    {"name": "grounded", "system_prompt": "Stay grounded."}
+  ],
+  "rules": [],
+  "cells": [
+    {
+      "label": "qwen2.5:1.5b-instruct|p=concise|t=0.2|k=5",
+      "prompt_name": "concise",
+      "spawn_wall_time_s": 42.0,
+      "config": {
+        "model_id": "qwen2.5:1.5b-instruct",
+        "model_type": "Qwen/Qwen2.5-1.5B-Instruct",
+        "prompt_name": "concise",
+        "temperature": 0.2,
+        "top_k": 5,
+        "max_tokens": 256,
+        "min_retrieval_score": 0.2,
+        "judge_temperature": 0.2,
+        "corpus_profile": "fixture",
+        "system_prompt": "Be concise.",
+        "criteria_ids": [],
+        "rules": []
+      },
+      "averages": {
+        "run_count": 2,
+        "wall_time_s": 11.0,
+        "retrieval_relevance": 0.85,
+        "faithfulness": 0.72,
+        "answer_relevancy": 0.8,
+        "latency_p95_ms": 140.0,
+        "custom_scores": {}
+      },
+      "runs": [],
+      "rows": []
+    },
+    {
+      "label": "qwen3:8b|p=concise|t=0.2|k=5",
+      "prompt_name": "concise",
+      "spawn_wall_time_s": 95.0,
+      "config": {
+        "model_id": "qwen3:8b",
+        "model_type": "Qwen/Qwen3-8B-AWQ",
+        "prompt_name": "concise",
+        "temperature": 0.2,
+        "top_k": 5,
+        "max_tokens": 256,
+        "min_retrieval_score": 0.2,
+        "judge_temperature": 0.2,
+        "corpus_profile": "fixture",
+        "system_prompt": "Be concise.",
+        "criteria_ids": [],
+        "rules": []
+      },
+      "averages": {
+        "run_count": 2,
+        "wall_time_s": 18.5,
+        "retrieval_relevance": 0.95,
+        "faithfulness": 0.88,
+        "answer_relevancy": 0.9,
+        "latency_p95_ms": 210.0,
+        "custom_scores": {}
+      },
+      "runs": [],
+      "rows": []
+    },
+    {
+      "label": "qwen3:8b|p=grounded|t=0.0|k=5",
+      "prompt_name": "grounded",
+      "spawn_wall_time_s": 95.0,
+      "config": {
+        "model_id": "qwen3:8b",
+        "model_type": "Qwen/Qwen3-8B-AWQ",
+        "prompt_name": "grounded",
+        "temperature": 0.0,
+        "top_k": 5,
+        "max_tokens": 256,
+        "min_retrieval_score": 0.2,
+        "judge_temperature": 0.2,
+        "corpus_profile": "fixture",
+        "system_prompt": "Stay grounded.",
+        "criteria_ids": [],
+        "rules": []
+      },
+      "averages": {
+        "run_count": 2,
+        "wall_time_s": 17.0,
+        "retrieval_relevance": 0.95,
+        "faithfulness": 0.93,
+        "answer_relevancy": 0.86,
+        "latency_p95_ms": 200.0,
+        "custom_scores": {}
+      },
+      "runs": [],
+      "rows": []
+    }
+  ]
+}

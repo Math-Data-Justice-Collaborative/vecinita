@@ -49,3 +49,6 @@ htmlcov/
 coverage/
 *.env
 .coverage-data/data-management.json
+
+# Local eval experiment outputs (sweep JSON drops)
+data/eval-experiments/
