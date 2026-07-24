@@ -316,13 +316,13 @@ project:
         - T79.4
         - T79.5
         - T79.6
-        note: M79 complete; next M80 Slice D
+        note: M79 complete; running 08-verify-build then M80
         M79: all tasks completed
       completed_milestones:
       - M77
       - M78
       - M79
-      note: 'M79 Slice C complete (T79.1–T79.6). Per TP-S010-21 no minor PR; next M80/T80.1. Parent will run 08-verify-build for M79 then continue.'
+      note: 'M79 complete; running 08-verify-build then M80'
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -788,7 +788,7 @@ active_session:
     - M77
     - M78
     - M79
-    note: 'M79 Slice C complete (T79.1–T79.6). Per TP-S010-21 no minor PR; next M80/T80.1. Parent will run 08-verify-build for M79 then continue.'
+    note: 'M79 complete; running 08-verify-build then M80'
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -837,7 +837,7 @@ active_session:
     stage: 08-verify-build
   handoff:
     next_skill: 07-build
-    note: 'M79 Slice C complete (T79.1–T79.6). Per TP-S010-21 no minor PR; next M80/T80.1. Parent will run 08-verify-build for M79 then continue.'
+    note: 'M79 complete; running 08-verify-build then M80'
     mode: delta
     current_task: T80.1
     task_status: pending
@@ -2251,13 +2251,13 @@ stages:
       - T79.4
       - T79.5
       - T79.6
-      note: M79 complete; next M80 Slice D
+      note: M79 complete; running 08-verify-build then M80
       M79: all tasks completed
     completed_milestones:
     - M77
     - M78
     - M79
-    note: 'M79 Slice C complete (T79.1–T79.6). Per TP-S010-21 no minor PR; next M80/T80.1. Parent will run 08-verify-build for M79 then continue.'
+    note: 'M79 complete; running 08-verify-build then M80'
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -3904,7 +3904,7 @@ evolve_cycles:
       - M77
       - M78
       - M79
-      note: 'M79 Slice C complete (T79.1–T79.6). Per TP-S010-21 no minor PR; next M80/T80.1. Parent will run 08-verify-build for M79 then continue.'
+      note: 'M79 complete; running 08-verify-build then M80'
       execution_plan:
         active_task: T80.1
         T79.2: completed
@@ -3919,7 +3919,7 @@ evolve_cycles:
         T79.6_completed_at: '2026-07-23'
         T80.1: pending
         active_milestone: M80
-        note: M79 complete; next M80 Slice D
+        note: M79 complete; running 08-verify-build then M80
         M79: all tasks completed
     02-verify-plan:
       status: skipped
@@ -6533,6 +6533,13 @@ git_history:
     session_id: S010-unify-llm-service
     files_changed: 3
     timestamp: '2026-07-24T02:20:00Z'
+  - sha: 4b1370e
+    branch: feat/S010-unify-llm-service
+    message: '[T79.6] test: UJ-048 e2e unmapped pull returns 400 (TC-141)'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 4
+    timestamp: '2026-07-24T02:30:00Z'
   notes:
   - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up chore commit may be needed'
   - '2026-07-10 S010: T77.1 completed ebefa8b; current_task T77.2; resolve_llm_http_config stub until T77.3; list_models/start_pull until T77.4'
@@ -6547,6 +6554,7 @@ git_history:
   - '2026-07-24 S010: T79.2 committed (cf672a2); T79.3 in_progress — shared apply_chat_template helper in llm-client.'
   - '2026-07-24 S010: T79.3 committed (c7529d8); T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
   - '2026-07-24 S010: T79.5 committed (51d97a7); T79.6 in_progress — extend UJ-048 API E2E for unmapped-tag error'
+  - '2026-07-24 S010: T79.6 committed (4b1370e); M79 complete; running 08-verify-build then M80'
 constraints:
   cost:
     target_usd_per_month: 25
