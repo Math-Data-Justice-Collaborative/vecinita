@@ -1374,6 +1374,43 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows Playground UI copy (not Ollama) while listing via /models/ollama alias (FE rename)", async () => {
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = fetchInputUrl(input);
+      return Promise.resolve(defaultPlaygroundFetch(url));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("evaluation-models-download"),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("evaluation-models-download")).toHaveTextContent(
+      /Playground model download/i,
+    );
+    expect(screen.getByTestId("eval-models-custom-download-card")).toHaveTextContent(
+      /Playground model tag/i,
+    );
+    expect(screen.getByTestId("evaluation-models-download")).not.toHaveTextContent(
+      /Ollama/i,
+    );
+
+    await waitFor(() => {
+      const listCalls = fetchMock.mock.calls.filter((call) => {
+        const url = fetchInputUrl(call[0] as RequestInfo | URL);
+        return (
+          url.includes("/internal/v1/models/ollama") &&
+          !url.includes("/pull") &&
+          !url.includes("/catalog")
+        );
+      });
+      expect(listCalls.length).toBeGreaterThan(0);
+    });
+  });
+
   it("surfaces pull failure and poll errors for super-admin", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({

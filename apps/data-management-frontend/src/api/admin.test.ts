@@ -783,7 +783,7 @@ describe("admin API eval helpers", () => {
     ).rejects.toThrow(/500/);
   });
 
-  it("fetchPlaygroundModels fetches models", async () => {
+  it("fetchPlaygroundModels fetches models via /models/ollama alias (FE rename)", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -794,6 +794,9 @@ describe("admin API eval helpers", () => {
     );
     const models = await fetchPlaygroundModels(CLIENT);
     expect(models.items[0]?.model_id).toContain("qwen");
+    // RD-166 / TP-S010-19: playground_* client names; path aliases retained.
+    expect(mockFetchUrl()).toContain("/internal/v1/models/ollama");
+    expect(mockFetchUrl()).not.toMatch(/\/models\/playground(?:\/|$)/);
   });
 
   it("fetchPlaygroundModels throws on HTTP error", async () => {
