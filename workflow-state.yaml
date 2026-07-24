@@ -263,6 +263,8 @@ project:
         current_task: T80.7
         task_status: blocked
         in_progress_tasks: []
+        blocked_tasks:
+        - T80.7
         completed_tasks_recent:
         - T77.1
         - T77.2
@@ -289,6 +291,11 @@ project:
         - T80.4
         - T80.5
         - T80.6
+        - T81.1
+        - T81.2
+        - T81.3
+        - T81.4
+        - T81.5
       execution_plan:
         active_task: T80.7
         T79.2: completed
@@ -314,6 +321,16 @@ project:
         T80.6: completed
         T80.6_completed_at: '2026-07-24'
         T80.7: blocked
+        T81.1: completed
+        T81.1_completed_at: '2026-07-24'
+        T81.2: completed
+        T81.2_completed_at: '2026-07-24'
+        T81.3: completed
+        T81.3_completed_at: '2026-07-24'
+        T81.4: completed
+        T81.4_completed_at: '2026-07-24'
+        T81.5: completed
+        T81.5_completed_at: '2026-07-24'
         active_milestone: M80
         active_phase: Phase 18
         completed_tasks:
@@ -342,13 +359,20 @@ project:
         - T80.4
         - T80.5
         - T80.6
-        note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+        - T81.1
+        - T81.2
+        - T81.3
+        - T81.4
+        - T81.5
+        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
         M79: all tasks completed
+        M81: all tasks completed
       completed_milestones:
       - M77
       - M78
       - M79
-      note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+      - M81
+      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -793,6 +817,8 @@ active_session:
     current_task: T80.7
     task_status: blocked
     milestone: M80
+    blocked_tasks:
+    - T80.7
     completed_tasks:
     - T77.1
     - T77.2
@@ -819,11 +845,17 @@ active_session:
     - T80.4
     - T80.5
     - T80.6
+    - T81.1
+    - T81.2
+    - T81.3
+    - T81.4
+    - T81.5
     completed_milestones:
     - M77
     - M78
     - M79
-    note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+    - M81
+    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -872,12 +904,14 @@ active_session:
     stage: 08-verify-build
   handoff:
     next_skill: 07-build
-    note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
     mode: delta
     current_task: T80.7
     task_status: blocked
     milestone: M80
-    completed_milestone: M79
+    blocked_tasks:
+    - T80.7
+    completed_milestone: M81
 sessions:
 - id: S009-playground-model-download
   type: feature
@@ -2238,6 +2272,8 @@ stages:
       current_task: T80.7
       task_status: blocked
       in_progress_tasks: []
+      blocked_tasks:
+      - T80.7
       completed_tasks_recent:
       - T77.1
       - T77.2
@@ -2264,6 +2300,11 @@ stages:
       - T80.4
       - T80.5
       - T80.6
+      - T81.1
+      - T81.2
+      - T81.3
+      - T81.4
+      - T81.5
     execution_plan:
       active_task: T80.7
       T79.2: completed
@@ -2289,6 +2330,16 @@ stages:
       T80.6: completed
       T80.6_completed_at: '2026-07-24'
       T80.7: blocked
+      T81.1: completed
+      T81.1_completed_at: '2026-07-24'
+      T81.2: completed
+      T81.2_completed_at: '2026-07-24'
+      T81.3: completed
+      T81.3_completed_at: '2026-07-24'
+      T81.4: completed
+      T81.4_completed_at: '2026-07-24'
+      T81.5: completed
+      T81.5_completed_at: '2026-07-24'
       active_milestone: M80
       active_phase: Phase 18
       completed_tasks:
@@ -2317,13 +2368,20 @@ stages:
       - T80.4
       - T80.5
       - T80.6
-      note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+      - T81.1
+      - T81.2
+      - T81.3
+      - T81.4
+      - T81.5
+      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
       M79: all tasks completed
+      M81: all tasks completed
     completed_milestones:
     - M77
     - M78
     - M79
-    note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+    - M81
+    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -3954,6 +4012,8 @@ evolve_cycles:
       current_task: T80.7
       task_status: blocked
       milestone: M80
+      blocked_tasks:
+      - T80.7
       completed_tasks:
       - T77.1
       - T77.2
@@ -3980,11 +4040,17 @@ evolve_cycles:
       - T80.4
       - T80.5
       - T80.6
+      - T81.1
+      - T81.2
+      - T81.3
+      - T81.4
+      - T81.5
       completed_milestones:
       - M77
       - M78
       - M79
-      note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+      - M81
+      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
       execution_plan:
         active_task: T80.7
         T79.2: completed
@@ -4010,9 +4076,20 @@ evolve_cycles:
         T80.6: completed
         T80.6_completed_at: '2026-07-24'
         T80.7: blocked
+        T81.1: completed
+        T81.1_completed_at: '2026-07-24'
+        T81.2: completed
+        T81.2_completed_at: '2026-07-24'
+        T81.3: completed
+        T81.3_completed_at: '2026-07-24'
+        T81.4: completed
+        T81.4_completed_at: '2026-07-24'
+        T81.5: completed
+        T81.5_completed_at: '2026-07-24'
         active_milestone: M80
-        note: 'M80 T80.1–T80.6 completed 2026-07-24 on feat/S010-unify-llm-service. T80.7 Operator deploy/smoke blocked pending live Modal+DO credentials run (defer to explicit operator approval or 13-deploy-smoke). Isolation tests TC-145 green.'
+        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
         M79: all tasks completed
+        M81: all tasks completed
     02-verify-plan:
       status: skipped
       skip_rationale: Tooling/docs already exist
@@ -6691,6 +6768,41 @@ git_history:
     session_id: S010-unify-llm-service
     files_changed: 3
     timestamp: '2026-07-24T13:00:00Z'
+  - sha: a0e38b2
+    branch: feat/S010-unify-llm-service
+    message: '[T81.1] test: lock hard-fail when LLM URL missing; no Ollama fallback'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 2
+    timestamp: '2026-07-24T12:25:58Z'
+  - sha: feca6de
+    branch: feat/S010-unify-llm-service
+    message: '[T81.2] feat: drop Ollama URL and model_id client fallbacks'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 3
+    timestamp: '2026-07-24T12:26:43Z'
+  - sha: 1bd57eb
+    branch: feat/S010-unify-llm-service
+    message: '[T81.3] config: declare shared-schemas dependency on llm-client'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 4
+    timestamp: '2026-07-24T12:27:38Z'
+  - sha: 64ccf9f
+    branch: feat/S010-unify-llm-service
+    message: '[T81.4] docs: mark Ollama env fallbacks removed; refresh llm-client docs'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 5
+    timestamp: '2026-07-24T12:27:59Z'
+  - sha: 5061aa8
+    branch: feat/S010-unify-llm-service
+    message: '[T81.5] docs: Phase 18 gate checklist and 08-verify pointer'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 2
+    timestamp: '2026-07-24T12:28:23Z'
   notes:
   - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up
     chore commit may be needed'
@@ -6713,6 +6825,8 @@ git_history:
   - '2026-07-24 S010: T79.6 committed (4b1370e); M79 complete; running 08-verify-build then M80'
   - '2026-07-24 S010: T80.1 completed (5788fb9); T80.2 in_progress — vecinita-llm-playground Modal app'
   - '2026-07-24 S010: T80.2–T80.6 completed (4c2c149, 60a30c6, 895310c, 05296ce, 4e5c216); T80.7 blocked — operator live Modal+DO deploy/smoke'
+  - '2026-07-24 S010: Advance to M81/T81.1 in_progress while T80.7 remains blocked (operator live deploy)'
+  - '2026-07-24 S010: T81.1–T81.5 completed (a0e38b2–5061aa8); M81 done; active remains T80.7 blocked; Phase 18 gate PENDING; 07-build still in_progress'
 constraints:
   cost:
     target_usd_per_month: 25

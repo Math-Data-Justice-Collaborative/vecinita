@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
-| **Active milestone** | M80/M81 — T80.7 blocked; M81 code/docs complete |
-| **Active task** | **T80.7** (blocked) — Operator: deploy both apps; smoke playground pull + prod chat unaffected |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.6 + T81.1–T81.5 (T80.7 blocked) |
+| **Active milestone** | M81: Slice E — env/doc cleanup |
+| **Active task** | **T81.5** (pending) — Docs: Phase 18 gate checklist + session verify pointer |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.6; M81 T81.1 in progress (T80.7 blocked) |
 | **Last updated** | 2026-07-24 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
@@ -1637,19 +1637,21 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 | T81.2 | Code: remove `VECINITA_MODAL_OLLAMA_URL` / `VECINITA_OLLAMA_MODEL_ID` client fallbacks | Code | completed | RD-170, TP-S010-29 | T81.1 | 2026-07-24 | S010 | F39 |
 | T81.3 | Config: `packages/llm-client` declares `shared-schemas` dependency | Config | completed | RD-170, TP-S010-20 | T77.3 | 2026-07-24 | S010 | F39 |
 | T81.4 | Docs: package docstrings, config-spec deprecated table, ghcicd.env.example | Docs | completed | RD-170 | T81.2 | 2026-07-24 | S010 | F39 |
-| T81.5 | Docs: Phase 18 gate checklist + session verify pointer | Docs | completed | 08-verify-build | T77.7–T81.4 | 2026-07-24 | S010 | F39 |
+| T81.5 | Docs: Phase 18 gate checklist + session verify pointer | Docs | pending | 08-verify-build | T77.7–T81.4 | — | S010 | F39 |
 
 #### Phase 18 Gate Check
 
-- [ ] All M77–M81 tasks completed (T77.1–T81.5)
-- [ ] TC-141–TC-145 green at T2; UJ-048/UJ-049 covered
-- [ ] AC-E34–AC-E38 satisfied at T2; engine isolation smoke at T3
-- [ ] Single `LlmClient`; no `OllamaModelsClient`; FE rename + path aliases
-- [ ] Real vLLM SSE streaming; proxy middleware on non-health routes
-- [ ] Two Modal apps (`vecinita-llm` + `vecinita-llm-playground`); shared `llm-models`
-- [ ] No Ollama env fallbacks; `shared-schemas` on `llm-client`
-- [ ] No provider ABC
-- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green
+- [ ] All M77–M81 tasks completed (T77.1–T81.5) — **T80.7 blocked** (operator live deploy)
+- [x] TC-141–TC-145 green at T2; UJ-048/UJ-049 covered (local)
+- [ ] AC-E34–AC-E38 satisfied at T2; engine isolation smoke at T3 — **T2 unit ✅; T3 pending T80.7**
+- [x] Single `LlmClient`; no `OllamaModelsClient`; FE rename + path aliases
+- [x] Real vLLM SSE streaming; proxy middleware on non-health routes
+- [x] Two Modal apps (`vecinita-llm` + `vecinita-llm-playground`); shared `llm-models` (code)
+- [x] No Ollama env fallbacks; `shared-schemas` on `llm-client`
+- [x] No provider ABC
+- [ ] ruff / basedpyright / ESLint clean; full backend + DM-frontend suites green — **final 08-verify-build**
+
+**Gate pointer:** [`docs/sessions/S010-unify-llm-service/reports/phase18-gate.md`](../../S010-unify-llm-service/reports/phase18-gate.md)
 
 ---
 
@@ -2291,7 +2293,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T81.2 | M81 | 18 | Code | completed | T81.1 | 2026-07-24 | S010 | F39 | — |
 | T81.3 | M81 | 18 | Config | completed | T77.3 | 2026-07-24 | S010 | F39 | — |
 | T81.4 | M81 | 18 | Docs | completed | T81.2 | 2026-07-24 | S010 | F39 | — |
-| T81.5 | M81 | 18 | Docs | completed | T77.7–T81.4 | 2026-07-24 | S010 | F39 | — |
+| T81.5 | M81 | 18 | Docs | pending | T77.7–T81.4 | — | S010 | F39 | — |
 
 ## Phase Gate Log
 
