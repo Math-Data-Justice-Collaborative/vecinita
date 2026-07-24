@@ -7,9 +7,13 @@ fall back to a hand-rolled ``<|im_start|>`` wrap for other families.
 from __future__ import annotations
 
 import importlib
-from typing import Final, Protocol, cast
+from typing import TYPE_CHECKING, Final, Protocol, cast
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from types import ModuleType
 
 _SYSTEM: Final[str] = "You are a helpful assistant."
 _USER: Final[str] = "What are the food pantry hours?"
@@ -43,15 +47,20 @@ class _ApplyChatTemplateFn(Protocol):
     ) -> str: ...
 
 
-def _import_apply_chat_template() -> _ApplyChatTemplateFn:
-    """Load the shared helper (T79.3). ModuleNotFoundError is the T79.1 red phase."""
+def _import_chat_template_mod() -> ModuleType:
+    """Load chat_template module (keeps ModuleNotFoundError as clear T79 failure)."""
     try:
-        mod = importlib.import_module("vecinita_llm_client.chat_template")
+        return importlib.import_module("vecinita_llm_client.chat_template")
     except ModuleNotFoundError as exc:
         pytest.fail(
             "vecinita_llm_client.chat_template missing "
             f"(T79.3 / RD-167 / TP-S010-24 / TC-145): {exc}"
         )
+
+
+def _import_apply_chat_template() -> _ApplyChatTemplateFn:
+    """Load the shared helper (T79.3). ModuleNotFoundError is the T79.1 red phase."""
+    mod = _import_chat_template_mod()
     raw = getattr(mod, "apply_chat_template", None)
     if not callable(raw):
         pytest.fail(
@@ -204,3 +213,65 @@ def test_apply_chat_template_calls_tokenizer_with_tokenize_false(
     assert calls[0]["tokenize"] is False
     assert calls[0]["add_generation_prompt"] is True
     assert calls[0]["conversation"] == _MESSAGES
+
+
+def test_default_qwen_tokenizer_rejects_tokenize_true() -> None:
+    """Embedded Qwen tokenizer only supports ``tokenize=False``."""
+    mod = _import_chat_template_mod()
+    default_chat_tokenizer = cast(
+        "Callable[[], _ChatTemplateTokenizer]",
+        mod.default_chat_tokenizer,
+    )
+    tok = default_chat_tokenizer()
+    with pytest.raises(ValueError, match="tokenize=False"):
+        tok.apply_chat_template(_MESSAGES, tokenize=True, add_generation_prompt=False)
+
+
+def test_default_qwen_tokenizer_omits_generation_prompt_when_false() -> None:
+    """``add_generation_prompt=False`` must not append the assistant header."""
+    mod = _import_chat_template_mod()
+    default_chat_tokenizer = cast(
+        "Callable[[], _ChatTemplateTokenizer]",
+        mod.default_chat_tokenizer,
+    )
+    tok = default_chat_tokenizer()
+    rendered: str = tok.apply_chat_template(
+        _MESSAGES,
+        tokenize=False,
+        add_generation_prompt=False,
+    )
+    assert rendered.endswith("<|im_end|>\n")
+    assert not rendered.endswith("<|im_start|>assistant\n")
+
+
+def test_apply_chat_template_rejects_non_string_render() -> None:
+    """Helper must TypeError when tokenizer returns a non-str at tokenize=False."""
+    apply_chat_template = _import_apply_chat_template()
+
+    class _BadTok:
+        def apply_chat_template(
+            self,
+            conversation: list[dict[str, str]],
+            *,
+            tokenize: bool = True,
+            add_generation_prompt: bool = False,
+        ) -> list[int]:
+            _ = conversation, tokenize, add_generation_prompt
+            return [1, 2, 3]
+
+    with pytest.raises(TypeError, match="must return str"):
+        apply_chat_template(
+            _MESSAGES,
+            tokenizer=cast("_ChatTemplateTokenizer", _BadTok()),
+            add_generation_prompt=True,
+        )
+
+
+def test_format_instruct_prompt_uses_default_tokenizer() -> None:
+    """``format_instruct_prompt`` builds ChatML via the default Qwen tokenizer."""
+    mod = _import_chat_template_mod()
+    format_instruct_prompt = cast("Callable[..., str]", mod.format_instruct_prompt)
+    prompt = format_instruct_prompt(system="sys", user="hi")
+    assert "<|im_start|>system" in prompt
+    assert "<|im_start|>user" in prompt
+    assert prompt.endswith("<|im_start|>assistant\n")

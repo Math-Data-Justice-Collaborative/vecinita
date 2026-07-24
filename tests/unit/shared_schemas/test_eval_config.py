@@ -104,7 +104,26 @@ def test_merge_eval_config_applies_only_set_partial_fields() -> None:
     assert merged.max_tokens == DEFAULT_EVAL_MAX_TOKENS
 
 
+def test_merge_eval_config_none_partial_returns_base() -> None:
+    """``merge_eval_config`` with no partial must return the base unchanged."""
+    base = EvalConfig(top_k=5)
+    assert merge_eval_config(base, None) is base
+
+
+def test_rag_config_promote_requires_run_id_when_source_run() -> None:
+    """Promote from run requires run_id."""
+    with pytest.raises(ValidationError):
+        RagConfigPromoteRequest(source="run")
+
+
 def test_eval_run_create_request_requires_question_for_adhoc() -> None:
     """Ad-hoc eval runs require a question in the POST body."""
     with pytest.raises(ValidationError):
         EvalRunCreateRequest(mode="adhoc")
+
+
+def test_eval_run_create_request_golden_mode_without_question() -> None:
+    """Golden-mode create body does not require a question."""
+    body = EvalRunCreateRequest(mode="golden")
+    assert body.mode == "golden"
+    assert body.question is None

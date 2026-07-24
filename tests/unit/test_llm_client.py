@@ -506,6 +506,16 @@ def test_resolve_llm_http_config_playground_falls_back_to_prod_url(
     assert config.base_url == "http://prod.env"
 
 
+def test_resolve_llm_http_config_playground_missing_url_raises(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """purpose=playground with no playground or prod URL raises a clear error."""
+    monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
+    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    with pytest.raises(LlmHttpConfigError, match="purpose='playground'"):
+        resolve_llm_http_config(purpose="playground")
+
+
 def test_list_models_returns_parsed_response() -> None:
     """list_models GETs /models/ollama with proxy auth (TC-144 / RD-163)."""
 

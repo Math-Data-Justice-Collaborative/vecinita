@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import pytest
 from vecinita_shared_schemas.playground_hf_registry import (
+    _cap_b_size,  # pyright: ignore[reportPrivateUsage]  # branch coverage for size helper
     normalize_playground_tag,
+    repo_dir_name,
     resolve_hf_repo,
 )
 
@@ -50,3 +52,73 @@ def test_resolve_hf_repo_unknown_tag_raises() -> None:
     """Unmapped families raise a clear error (Ollama-only GGUF tags)."""
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
         resolve_hf_repo("unknown-custom:7b")
+
+
+def test_resolve_hf_repo_maps_additional_family_variants() -> None:
+    """Cover alternate sizes / families for branch coverage of infer helpers."""
+    cases = (
+        ("qwen2:7b-instruct", "Qwen/Qwen2-7B-Instruct"),
+        ("llama3.1:70b-instruct", "meta-llama/Llama-3.1-70B-Instruct"),
+        ("llama3:70b", "meta-llama/Meta-Llama-3-70B-Instruct"),
+        ("llama2:7b-chat", "meta-llama/Llama-2-7B-chat-hf"),
+        ("mistral:latest", "mistralai/Mistral-7B-Instruct-v0.3"),
+        ("mixtral:latest", "mistralai/Mixtral-8x7B-Instruct-v0.1"),
+        ("gemma:2b", "google/gemma-2b-it"),
+        ("gemma:7b-it", "google/gemma-7b-it"),
+        ("phi3:small", "microsoft/Phi-3-small-8k-instruct"),
+        ("phi3:medium", "microsoft/Phi-3-medium-4k-instruct"),
+        ("deepseek-r1:1.5b", "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"),
+        ("deepseek-r1:8b", "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"),
+        ("codellama:13b", "codellama/CodeLlama-13b-Instruct-hf"),
+    )
+    for model_id, expected in cases:
+        assert resolve_hf_repo(model_id) == expected, model_id
+
+
+def test_resolve_hf_repo_known_family_unmapped_variant_raises() -> None:
+    """Known family with unmapped variant still raises (inferer returns None)."""
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("mistral:13b")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("llama3.2:70b")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("qwen2.5:7b")  # missing -instruct
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("qwen3.6:1b")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("qwen2:7b")  # missing -instruct
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("qwen3:latest-extra")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("llama3.1:chat")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("llama3:chat")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("llama2:chat")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("mixtral:7b")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("gemma2:2b-it")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("gemma:tiny")
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("codellama:code")
+
+
+def test_resolve_hf_repo_latest_defaults_and_no_colon() -> None:
+    """``:latest`` uses family defaults; tags without ``:`` are unmapped."""
+    assert resolve_hf_repo("gemma:latest") == "google/gemma-7b-it"
+    assert resolve_hf_repo("phi3:latest") == "microsoft/Phi-3-mini-4k-instruct"
+    with pytest.raises(ValueError, match="no HuggingFace mapping"):
+        resolve_hf_repo("notagfamily")
+
+
+def test_cap_b_size_passthrough_without_b_suffix() -> None:
+    """Sizes that do not end in ``b`` are returned unchanged."""
+    assert _cap_b_size("7") == "7"
+    assert _cap_b_size("3b") == "3B"
+
+
+def test_repo_dir_name_sanitizes_colon() -> None:
+    """Repo directory names replace ``:`` for filesystem safety."""
+    assert repo_dir_name("qwen2.5:1.5b-instruct") == "qwen2.5_1.5b-instruct"

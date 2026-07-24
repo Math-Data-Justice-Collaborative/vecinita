@@ -43,3 +43,21 @@ def test_catalog_tag_available_matches_normalized_volume_tag() -> None:
     )
     assert playground_catalog_tag_available("qwen2.5:3b-instruct-q4_K_M", lookup) is True
     assert playground_catalog_tag_available("qwen2.5:7b-instruct", lookup) is False
+
+
+def test_build_availability_lookup_skips_unavailable_volume_items() -> None:
+    """Unavailable volume rows must not mark catalog tags as downloaded."""
+    lookup = build_playground_availability_lookup(
+        [
+            PlaygroundModelSummary(model_id="qwen2.5:3b-instruct", available=False),
+            PlaygroundModelSummary(model_id="qwen2.5:1.5b-instruct", available=True),
+        ],
+    )
+    assert "qwen2.5:3b-instruct" not in lookup
+    assert lookup["qwen2.5:1.5b-instruct"] is True
+
+
+def test_catalog_tag_available_exact_tag_hit() -> None:
+    """Exact catalog tag match returns True without needing normalize fallback."""
+    lookup = {"qwen2.5:1.5b-instruct": True}
+    assert playground_catalog_tag_available("qwen2.5:1.5b-instruct", lookup) is True

@@ -11,6 +11,7 @@ import ast
 from pathlib import Path
 
 import pytest
+import vecinita_shared_schemas as schemas
 from vecinita_shared_schemas.playground_hf_registry import resolve_hf_repo
 
 _INIT = (
@@ -53,3 +54,21 @@ def test_shared_schemas_init_has_no_eager_auth_import() -> None:
 def test_playground_hf_registry_importable_without_package_auth() -> None:
     """Submodule import must succeed even when package __init__ is lazy."""
     assert resolve_hf_repo("qwen2.5:1.5b-instruct") == "Qwen/Qwen2.5-1.5B-Instruct"
+
+
+def test_lazy_getattr_resolves_public_exports() -> None:
+    """``from vecinita_shared_schemas import X`` must resolve via ``__getattr__``."""
+    # Touch several modules so __getattr__ branches hit auth + non-auth paths.
+    assert schemas.AuthConfig is not None
+    assert schemas.AskRequest is not None
+    assert schemas.Job is not None
+    assert schemas.BatchUpsertRequest is not None
+    assert callable(schemas.configure_logging)
+    assert callable(schemas.validate_ask_request)
+    assert "AuthConfig" in dir(schemas)
+
+
+def test_lazy_getattr_unknown_name_raises_attribute_error() -> None:
+    """Unknown package attributes must raise AttributeError (not KeyError)."""
+    with pytest.raises(AttributeError, match="has no attribute"):
+        _ = schemas.definitely_not_an_export_xyz

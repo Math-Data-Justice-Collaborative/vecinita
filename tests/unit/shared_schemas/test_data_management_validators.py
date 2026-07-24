@@ -24,6 +24,11 @@ def test_email_test_request_rejects_invalid_email() -> None:
         EmailTestRequest(to="bad")
 
 
+def test_email_test_request_accepts_valid_email() -> None:
+    body = EmailTestRequest(to="ops@example.com")
+    assert body.to == "ops@example.com"
+
+
 def test_user_summary_accepts_super_admin_role() -> None:
     """UserSummary.role includes super-admin for auth-backed admin listings (ADR-035)."""
     summary = UserSummary(
