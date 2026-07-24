@@ -11,12 +11,12 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M80: Slice D — two Modal apps (prod + playground) |
-| **Active task** | **T80.1** (pending) — Test: unit/smoke — prod class ignores playground reload; playground URL routing |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T79.6 (M77–M79 complete; M79 Slice C done) |
-| **Last updated** | 2026-07-23 |
+| **Active task** | **T80.2** (pending) — Code: `vecinita-llm-playground` Modal app (shared `llm-models` volume) |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.1 (M77–M79 complete; M80 T80.1 red locked) |
+| **Last updated** | 2026-07-24 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
-| **Active session** | S010-unify-llm-service — Phase 18 M79 complete; next M80/T80.1 pending (Slice D). Build order A→E (M77→M81). Per TP-S010-21 no minor PR; parent will run 08-verify-build for M79 then continue. |
+| **Active session** | S010-unify-llm-service — Phase 18 M80 in progress; T80.1 completed (TC-145 engine isolation red). Next T80.2 playground Modal app. Per TP-S010-21 no minor PR. |
 | **Scope addition** | 2026-07-10 — F39 follow-on: one `LlmClient`, rename, streaming, auth, chat-template, catalog gate, **two Modal apps** (prod + playground), env cleanup (RD-163–RD-172, TP-S010-17–31). |
 
 ## Template
@@ -1619,7 +1619,7 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T80.1 | Test: unit/smoke — prod class ignores playground reload; playground URL routing | Test | pending | RD-169, TP-S010-25/27, TC-145 | — | — | S010 | F39 |
+| T80.1 | Test: unit/smoke — prod class ignores playground reload; playground URL routing | Test | completed | RD-169, TP-S010-25/27, TC-145 | — | 2026-07-24 | S010 | F39 |
 | T80.2 | Code: `vecinita-llm-playground` Modal app (shared `llm-models` volume) | Code | pending | TP-S010-25/28 | T80.1 | — | S010 | F39 |
 | T80.3 | Code: pin prod `vecinita-llm` to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` | Code | pending | RD-169 | T80.2 | — | S010 | F39 |
 | T80.4 | Config: `VECINITA_MODAL_LLM_PLAYGROUND_URL` on internal-write-api / DM; ChatRAG prod URL only | Config | pending | TP-S010-27, config-spec | T80.2 | — | S010 | F39 |
@@ -2280,7 +2280,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T79.4 | M79 | 18 | Code | completed | T79.3 | 2026-07-23 | S010 | F39 | — |
 | T79.5 | M79 | 18 | Code | completed | T79.2 | 2026-07-23 | S010 | F39 | — |
 | T79.6 | M79 | 18 | Test | completed | T79.5 | 2026-07-23 | S010 | F39 | — |
-| T80.1 | M80 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T80.1 | M80 | 18 | Test | completed | — | 2026-07-24 | S010 | F39 | — |
 | T80.2 | M80 | 18 | Code | pending | T80.1 | — | S010 | F39 | — |
 | T80.3 | M80 | 18 | Code | pending | T80.2 | — | S010 | F39 | — |
 | T80.4 | M80 | 18 | Config | pending | T80.2 | — | S010 | F39 | — |
