@@ -99,13 +99,11 @@ def test_run_golden_eval_scores_faithfulness_when_chunks_present() -> None:
             llm=None,
             fixture_path=_FIXTURE_PATH,
         )
-    free_clinic = next(
-        row
-        for row in results
-        if row.row.id == "community-free-clinic-services" and row.row.locale == "en"
+    food_pantry = next(
+        row for row in results if row.row.id == "community-food-pantry" and row.row.locale == "en"
     )
-    assert free_clinic.metrics.faithfulness == pytest.approx(0.82)
-    assert free_clinic.metrics.answer_relevancy == pytest.approx(0.79)
+    assert food_pantry.metrics.faithfulness == pytest.approx(0.82)
+    assert food_pantry.metrics.answer_relevancy == pytest.approx(0.79)
     assert summary.faithfulness == pytest.approx(0.82)
     assert summary.answer_relevancy == pytest.approx(0.79)
 
