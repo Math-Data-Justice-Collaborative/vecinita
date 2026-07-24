@@ -304,22 +304,34 @@ Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: C
 ### POST `/generate/stream`
 
 - **Purpose**: SSE token stream for ChatRAG `/api/v1/ask/stream`.
-- **Auth**: Proxy key required.
-- **Contract (RD-164)**: Tokens are **real incremental vLLM outputs** — not a full completion split into words after the fact.
-- **Response** `200` `text/event-stream`: `data: {"token": "..."}` events, final `data: {"done": true}`.
-- **Errors**: `401` unauthorized.
+- **Auth**: Proxy key required (`X-Vecinita-Proxy-Key` / `VECINITA_MODAL_PROXY_KEY`); fail closed if key unset.
+- **Contract (RD-164 / TP-S010-22)**: Tokens are **real incremental vLLM engine deltas** via
+  `llm_engine.add_request` + `step` — **not** a full completion split into words after the fact.
+- **Response** `200` `text/event-stream`: multiple `data: {"token": "..."}` events, final
+  `data: {"done": true}`.
+- **Errors**: `401` unauthorized; `422` invalid body.
 
 ### POST `/warm`
 
 - **Purpose**: Preload / switch model into vLLM engine.
-- **Auth**: Proxy key required.
+- **Auth**: Proxy key required (same fail-closed rule as generate).
 - **Request**: optional `{"model_id": "..."}`.
 - **Errors**: `401` unauthorized.
 
 ### GET `/health`
 
-- **Auth**: May remain open (no proxy key).
+- **Auth**: May remain open (no proxy key) — probes only.
 - **Response** `200`: `{"status": "ok"}`
+
+### Auth matrix (UJ-049 / TC-142 / RD-165)
+
+| Route | Proxy key |
+|-------|-----------|
+| `POST /generate` | Required |
+| `POST /generate/stream` | Required |
+| `POST /warm` | Required |
+| `GET /models/ollama*` / `POST /models/ollama/pull` | Required |
+| `GET /health` | Optional (open) |
 
 ### Playground model routes (path aliases)
 
