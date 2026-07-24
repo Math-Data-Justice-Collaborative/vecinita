@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from vecinita_eval.judges import score_faithfulness
+from vecinita_eval.judges import CompletingLlm, score_faithfulness
 
 if TYPE_CHECKING:
     from vecinita_eval.golden import GoldenRow
@@ -27,7 +27,7 @@ class GroundednessScorer(Protocol):
 class LlamaIndexFaithfulnessScorer:
     """Default v1 scorer using a direct YES/NO Modal LLM faithfulness prompt."""
 
-    def __init__(self, llm: object) -> None:
+    def __init__(self, llm: CompletingLlm) -> None:
         """Store the LlamaIndex-compatible LLM used for judging."""
         self._llm = llm
 

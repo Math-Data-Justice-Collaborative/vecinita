@@ -55,6 +55,20 @@ def truncate_judge_context(
     return context[:max_chars]
 
 
+class CompletingLlm(Protocol):
+    """Minimal LLM surface used by the direct faithfulness judge."""
+
+    def complete(self, prompt: str) -> object: ...
+
+
+def _completion_text(completion: object) -> str:
+    """Extract text from a LlamaIndex-style completion or stringify."""
+    text = getattr(completion, "text", None)
+    if isinstance(text, str):
+        return text
+    return str(completion)
+
+
 def normalize_eval_score(raw: object, *, threshold: float = 1.0) -> float:
     """Coerce evaluator score to [0, 1]; treat missing/invalid as 0.0."""
     if isinstance(raw, bool) or raw is None:
@@ -141,7 +155,7 @@ class LlamaIndexJudgeClient:
 
 def score_faithfulness(
     *,
-    llm: object,
+    llm: CompletingLlm,
     question: str,
     answer: str,
     context: str,
@@ -158,14 +172,12 @@ def score_faithfulness(
         answer=answer,
     )
     try:
-        completion = llm.complete(prompt)  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+        completion = llm.complete(prompt)
     except (LlmClientError, RuntimeError, OSError, ValueError) as exc:
         # Modal 500s and LlamaIndex nested-async fallout must not abort a golden batch.
         logger.warning("faithfulness judge failed: %s", exc)
         return 0.0
-    raw = str(completion)
-    if hasattr(completion, "text"):
-        raw = str(completion.text)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+    raw = _completion_text(completion)
     parsed = parse_faithfulness_output(raw)
     if parsed is None:
         logger.warning("faithfulness judge unparseable reply: %r", raw[:200])
