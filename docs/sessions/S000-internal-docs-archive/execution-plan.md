@@ -11,12 +11,12 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M79: Slice C — chat-template + catalog gate |
-| **Active task** | **T79.2** (pending) — Test: unit — catalog ⊆ registry; unmapped pull → 400 (TC-141) |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T79.1 (M77–M78 complete; M79 T79.1 done) |
+| **Active task** | **T79.3** (pending) — Code: shared chat-template helper in `packages/llm-client` |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T79.2 (M77–M78 complete; M79 T79.1–T79.2 done) |
 | **Last updated** | 2026-07-23 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
-| **Active session** | S010-unify-llm-service — Phase 18 M79/T79.2 pending (Slice C). Build order A→E (M77→M81). |
+| **Active session** | S010-unify-llm-service — Phase 18 M79/T79.3 pending (Slice C). Build order A→E (M77→M81). |
 | **Scope addition** | 2026-07-10 — F39 follow-on: one `LlmClient`, rename, streaming, auth, chat-template, catalog gate, **two Modal apps** (prod + playground), env cleanup (RD-163–RD-172, TP-S010-17–31). |
 
 ## Template
@@ -1606,7 +1606,7 @@ path aliases.
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T79.1 | Test: unit — `apply_chat_template` Qwen + non-Qwen fixtures (TC-145) | Test | completed | RD-167, TP-S010-24, TC-145 | — | 2026-07-23 | S010 | F39 |
-| T79.2 | Test: unit — catalog ⊆ registry; unmapped pull → 400 (TC-141) | Test | pending | RD-168, TP-S010-26, TC-141 | — | — | S010 | F39 |
+| T79.2 | Test: unit — catalog ⊆ registry; unmapped pull → 400 (TC-141) | Test | completed | RD-168, TP-S010-26, TC-141 | — | 2026-07-23 | S010 | F39 |
 | T79.3 | Code: shared chat-template helper in `packages/llm-client` (transformers as needed) | Code | pending | RD-167, TP-S010-24 | T79.1 | — | S010 | F39 |
 | T79.4 | Code: chat-rag / tagging / eval call shared helper; remove hand-rolled Qwen wrappers | Code | pending | RD-167, spec.md | T79.3 | — | S010 | F39 |
 | T79.5 | Code: gate list/pull to `resolve_hf_repo`; clear 400 on unmapped | Code | pending | RD-168, TP-S010-26 | T79.2 | — | S010 | F39 |
@@ -2275,7 +2275,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T78.5 | M78 | 18 | Test | completed | T78.3 | 2026-07-23 | S010 | F39 | — |
 | T78.6 | M78 | 18 | Docs | completed | T78.3, T78.4 | 2026-07-23 | S010 | F39 | — |
 | T79.1 | M79 | 18 | Test | completed | — | 2026-07-23 | S010 | F39 | — |
-| T79.2 | M79 | 18 | Test | pending | — | — | S010 | F39 | — |
+| T79.2 | M79 | 18 | Test | completed | — | 2026-07-23 | S010 | F39 | — |
 | T79.3 | M79 | 18 | Code | pending | T79.1 | — | S010 | F39 | — |
 | T79.4 | M79 | 18 | Code | pending | T79.3 | — | S010 | F39 | — |
 | T79.5 | M79 | 18 | Code | pending | T79.2 | — | S010 | F39 | — |
