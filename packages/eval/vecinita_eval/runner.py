@@ -158,8 +158,8 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
         score_threshold=score_threshold,
     )
     scorer = groundedness
-    if scorer is None and judge is not None and not hasattr(judge, "faithfulness"):
-        scorer = LlamaIndexFaithfulnessScorer(judge)
+    if scorer is None and judge is not None and not hasattr(judge, "faithfulness") and llm is not None:
+        scorer = LlamaIndexFaithfulnessScorer(llm)
 
     results: list[RowResult] = []
     retrieval_passes: dict[tuple[str, str], bool] = {}
