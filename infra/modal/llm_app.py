@@ -8,6 +8,10 @@ Requires Modal secret ``vecinita-llm`` with ``VECINITA_MODAL_PROXY_KEY`` — mus
 internal-write-api proxy key (``scripts/deploy/sync_llm_secret.sh``).
 
 ``vecinita-ollama`` is deprecated (ADR-037); all routes live on this app.
+
+Prod pin (RD-169 / Slice D): ``ALLOW_MODEL_RELOAD=False`` — request ``model_id``
+does not reload the vLLM engine. Sandbox/eval model switches use
+``vecinita-llm-playground`` (shared ``llm-models`` volume).
 """
 
 from __future__ import annotations
@@ -50,6 +54,9 @@ APP_NAME = "vecinita-llm"
 VOLUME_NAME = "llm-models"
 MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"
 DEFAULT_PLAYGROUND_MODEL_ID: Final[str] = "qwen2.5:1.5b-instruct"
+# Prod pin (RD-169 / TP-S010-25): ignore request model_id for vLLM reload.
+# Playground app sets ALLOW_MODEL_RELOAD=True on its own module.
+ALLOW_MODEL_RELOAD: Final[bool] = False
 ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
 _PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
 _PROXY_ENV: Final[str] = "VECINITA_MODAL_PROXY_KEY"
@@ -239,7 +246,13 @@ def _local_repo_path(model_id: str) -> Path:
 
 
 def _resolve_vllm_model_arg(model_id: str | None) -> str:
-    """Resolve playground tag or None to a vLLM ``model`` argument."""
+    """Resolve playground tag or None to a vLLM ``model`` argument.
+
+    When ``ALLOW_MODEL_RELOAD`` is False (prod pin), always return the pinned
+    ``MODEL_ID`` so playground/eval tags cannot stomp ChatRAG (RD-169 / TC-145).
+    """
+    if not ALLOW_MODEL_RELOAD:
+        return MODEL_ID
     if model_id is None or normalize_playground_tag(model_id) == normalize_playground_tag(
         DEFAULT_PLAYGROUND_MODEL_ID
     ):
