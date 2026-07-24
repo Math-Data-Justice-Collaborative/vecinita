@@ -1,4 +1,4 @@
-"""Shared LLM HTTP config resolver (TP-S010-20 / RD-163 / TP-S010-27)."""
+"""Shared LLM HTTP config resolver (TP-S010-20 / RD-163 / TP-S010-27 / RD-170)."""
 
 from __future__ import annotations
 
@@ -51,21 +51,32 @@ def resolve_llm_http_config(  # noqa: PLR0913  # shared resolver surface: url/pr
         ``prod`` reads ``VECINITA_MODAL_LLM_URL`` (ChatRAG). ``playground`` prefers
         ``VECINITA_MODAL_LLM_PLAYGROUND_URL`` for DM list/pull and sandbox eval
         (TP-S010-27). Explicit ``base_url`` always wins.
+
+    Notes:
+    -----
+    Legacy ``VECINITA_MODAL_OLLAMA_URL`` / ``VECINITA_OLLAMA_MODEL_ID`` are **not**
+    used (RD-170 / TP-S010-29). If still set in the environment, a warning is logged.
     """
-    legacy_ollama = os.environ.get(_ENV_OLLAMA_URL)
-    if legacy_ollama:
+    if os.environ.get(_ENV_OLLAMA_URL):
         logger.warning(
-            "%s is deprecated (ADR-037); use %s only",
+            "%s is deprecated and ignored (ADR-037 / RD-170); use %s only",
             _ENV_OLLAMA_URL,
             _ENV_LLM_URL,
+        )
+    if (
+        os.environ.get(_ENV_OLLAMA_MODEL_ID)
+        and model_id is None
+        and not os.environ.get(_ENV_LLM_MODEL_ID)
+    ):
+        logger.warning(
+            "%s is deprecated and ignored (RD-170); use %s",
+            _ENV_OLLAMA_MODEL_ID,
+            _ENV_LLM_MODEL_ID,
         )
 
     if purpose == "playground":
         resolved_url = (
-            base_url
-            or os.environ.get(_ENV_LLM_PLAYGROUND_URL)
-            or os.environ.get(_ENV_LLM_URL)
-            or legacy_ollama
+            base_url or os.environ.get(_ENV_LLM_PLAYGROUND_URL) or os.environ.get(_ENV_LLM_URL)
         )
         if not resolved_url:
             msg = (
@@ -74,7 +85,7 @@ def resolve_llm_http_config(  # noqa: PLR0913  # shared resolver surface: url/pr
             )
             raise LlmHttpConfigError(msg)
     else:
-        resolved_url = base_url or os.environ.get(_ENV_LLM_URL) or legacy_ollama
+        resolved_url = base_url or os.environ.get(_ENV_LLM_URL)
         if not resolved_url:
             msg = f"{_ENV_LLM_URL} or base_url is required"
             raise LlmHttpConfigError(msg)
@@ -84,11 +95,7 @@ def resolve_llm_http_config(  # noqa: PLR0913  # shared resolver surface: url/pr
         msg = f"{_ENV_PROXY_KEY} is required"
         raise LlmHttpConfigError(msg)
 
-    resolved_model = (
-        model_id
-        if model_id is not None
-        else (os.environ.get(_ENV_LLM_MODEL_ID) or os.environ.get(_ENV_OLLAMA_MODEL_ID))
-    )
+    resolved_model = model_id if model_id is not None else os.environ.get(_ENV_LLM_MODEL_ID)
     return LlmHttpConfig(
         base_url=resolved_url.rstrip("/"),
         proxy_key=resolved_key,

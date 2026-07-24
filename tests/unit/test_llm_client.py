@@ -276,36 +276,36 @@ def test_generate_stream_returns_no_tokens_when_body_empty() -> None:
     client.close()
 
 
-def test_llm_client_falls_back_to_legacy_ollama_url_with_warning(
+def test_llm_client_warns_when_legacy_ollama_url_set(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Legacy VECINITA_MODAL_OLLAMA_URL still resolves base URL with a deprecation warning."""
-    monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
+    """Legacy VECINITA_MODAL_OLLAMA_URL is ignored; LLM URL is required (RD-170)."""
+    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test")
 
     def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, json={"text": "legacy"})
+        return httpx.Response(200, json={"text": "ok"})
 
     transport = httpx.MockTransport(handler)
     client = LlmClient(
-        http_client=httpx.Client(transport=transport, base_url="http://legacy-ollama.test"),
+        http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
-    assert client.generate("hello") == "legacy"
-    assert "VECINITA_MODAL_OLLAMA_URL is deprecated" in caplog.text
+    assert client.generate("hello") == "ok"
+    assert "VECINITA_MODAL_OLLAMA_URL is deprecated and ignored" in caplog.text
     client.close()
 
 
-def test_llm_client_default_model_id_from_legacy_env(
+def test_llm_client_ignores_legacy_ollama_model_id_env(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """VECINITA_OLLAMA_MODEL_ID is used when VECINITA_LLM_MODEL_ID is unset."""
+    """VECINITA_OLLAMA_MODEL_ID is ignored when VECINITA_LLM_MODEL_ID is unset (RD-170)."""
     monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     monkeypatch.delenv("VECINITA_LLM_MODEL_ID", raising=False)
     monkeypatch.setenv("VECINITA_OLLAMA_MODEL_ID", "llama3.2:3b")
 
     client = LlmClient("http://llm.test")
-    assert client.default_model_id == "llama3.2:3b"
+    assert client.default_model_id is None
     client.close()
 
 
