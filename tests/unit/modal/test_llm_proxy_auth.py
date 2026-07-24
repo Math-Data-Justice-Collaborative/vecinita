@@ -70,7 +70,7 @@ def test_authorized_accepts_matching_proxy_key(monkeypatch: pytest.MonkeyPatch) 
 
 @pytest.mark.parametrize(
     "handler_name",
-    ("generate", "generate_stream", "warm", "list_models", "pull_model"),
+    ["generate", "generate_stream", "warm", "list_models", "pull_model"],
 )
 def test_asgi_handler_requires_authorized(handler_name: str) -> None:
     """TC-142: all non-health LLM routes must call _authorized (UJ-049)."""

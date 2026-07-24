@@ -502,6 +502,8 @@ def fastapi_app():
         return JSONResponse({"status": "ok"})
 
     async def warm(request: Request) -> JSONResponse:
+        if not _authorized(request):
+            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
         raw = await request.body()
         try:
             payload = WarmRequest.model_validate(json.loads(raw)) if raw else WarmRequest()
@@ -544,6 +546,8 @@ def fastapi_app():
         )
 
     async def generate(request: Request) -> JSONResponse:
+        if not _authorized(request):
+            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
         try:
             payload = GenerateRequest.model_validate(json.loads(await request.body()))
         except (json.JSONDecodeError, ValidationError) as exc:
@@ -560,6 +564,8 @@ def fastapi_app():
         return JSONResponse({"text": text})
 
     async def generate_stream(request: Request) -> StreamingResponse | JSONResponse:
+        if not _authorized(request):
+            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
         try:
             payload = GenerateRequest.model_validate(json.loads(await request.body()))
         except (json.JSONDecodeError, ValidationError) as exc:
