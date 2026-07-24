@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-10 (S010/EV-011 F39 Phase 18 — playground URL, TP-S010-27)
+> **Last updated**: 2026-07-24 (S010/EV-011 F39 M81 — Ollama fallbacks removed, RD-170)
 
 ## Precedence
 
@@ -244,14 +244,15 @@ corpus DB stays PII-free.
 <!-- TP-019 / TS-EV002-C01: Health dashboard uses backend aggregator at GET /internal/v1/health/all
      (via VITE_VECINITA_CORPUS_API_URL). Frontend does NOT poll services directly. -->
 
-### Deprecated (EV-011 F39 — ADR-037)
+### Deprecated (EV-011 F39 — ADR-037 / Slice E)
 
 | Variable | Status | Replacement |
 |----------|--------|-------------|
-| `VECINITA_MODAL_OLLAMA_URL` | **Deprecated** — remove from DO deploy specs; **drop client fallbacks** in slice E (RD-170) | `VECINITA_MODAL_LLM_URL` (unified `vecinita-llm` routes) |
-| `VECINITA_OLLAMA_MODEL_ID` | **Deprecated** — remove fallbacks in slice E (RD-170) | `VECINITA_LLM_MODEL_ID` / playground `model_id` |
+| `VECINITA_MODAL_OLLAMA_URL` | **Removed from clients** (RD-170 / TP-S010-29) — ignored with warning if still set | `VECINITA_MODAL_LLM_URL` / `VECINITA_MODAL_LLM_PLAYGROUND_URL` |
+| `VECINITA_OLLAMA_MODEL_ID` | **Removed from clients** (RD-170) — ignored with warning if still set | `VECINITA_LLM_MODEL_ID` / playground `model_id` |
 
-Clients must not prefer Ollama URL when set. Operator: `modal app stop vecinita-ollama` after S010 deploy smoke.
+Do not set Ollama env vars. Missing `VECINITA_MODAL_LLM_URL` hard-fails.
+Operator: `modal app stop vecinita-ollama` if it still exists.
 
 ## Recommended defaults (spec)
 

@@ -1,4 +1,8 @@
-"""HTTP client for Modal vLLM and shared chat-template helper (ADR-009, ADR-037)."""
+"""HTTP client for Modal ``vecinita-llm`` / ``vecinita-llm-playground`` (ADR-037).
+
+Uses ``vecinita_shared_schemas.llm_http.resolve_llm_http_config`` for URL/proxy/timeout
+(TP-S010-20). Legacy Ollama env fallbacks are removed (RD-170).
+"""
 
 from vecinita_llm_client.chat_template import (
     ChatTemplateTokenizer,

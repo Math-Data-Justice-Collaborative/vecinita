@@ -1,4 +1,8 @@
-"""HTTP client for vecinita-llm Modal app (ADR-037 unified LLM surface)."""
+"""HTTP client for Modal ``vecinita-llm`` / playground apps (ADR-037 unified LLM surface).
+
+Resolves ``VECINITA_MODAL_LLM_URL`` or ``VECINITA_MODAL_LLM_PLAYGROUND_URL`` via
+shared-schemas (no Ollama env fallbacks — RD-170).
+"""
 
 from __future__ import annotations
 
