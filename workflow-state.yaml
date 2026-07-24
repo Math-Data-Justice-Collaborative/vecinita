@@ -256,9 +256,10 @@ project:
       prior_completed_at: '2026-07-03'
       feature: F39
       phase: Phase 18 (M77-M81)
-      milestone: M77
+      milestone: M78
       substeps:
-        current_task: T77.6
+        current_task: T78.1
+        task_status: pending
         in_progress_tasks: []
         completed_tasks_recent:
         - T77.1
@@ -266,9 +267,11 @@ project:
         - T77.3
         - T77.4
         - T77.5
+        - T77.6
+        - T77.7
       execution_plan:
-        active_task: T77.6
-        active_milestone: M77
+        active_task: T78.1
+        active_milestone: M78
         active_phase: Phase 18
         completed_tasks:
         - T77.1
@@ -276,10 +279,17 @@ project:
         - T77.3
         - T77.4
         - T77.5
-      note: 'S010/EV-011 Phase 18 Slice A — T77.5 completed (5d7b3cc): rename
-        ollama_* → playground_* (schemas, modules, FE); path aliases /models/ollama*
-        retained. Next: T77.6 pending. T77.1–T77.4 completed 2026-07-10 (ebefa8b,
-        40112e1, 4039cd2, 7d755fb).'
+        - T77.6
+        - T77.7
+        note: M77 complete; next T78.1 pending. Parent will run 08-verify-build at M77 scope before continuing M78.
+      completed_milestones:
+      - M77
+      note: 'S010/EV-011 Phase 18 Slice A (M77) complete: T77.1–T77.7. T77.6
+        completed (9b929bb): Vitest + Playwright FE playground rename coverage
+        (TC-135–137). T77.7 completed (d86951bb): playground rename and
+        /models/ollama path alias docs. User approved finish M77; per TP-S010-21,
+        use one evolve PR after slices A–E (no M77 minor PR). Next: M78/T78.1
+        pending after 08-verify-build M77-scope verification.'
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -718,17 +728,25 @@ active_session:
     - D:7
     - E:8
     first_slice: A
-    current_task: T77.6
+    current_task: T78.1
     task_status: pending
-    milestone: M77
+    milestone: M78
     completed_tasks:
     - T77.1
     - T77.2
     - T77.3
     - T77.4
     - T77.5
-    note: 'T77.5 completed (5d7b3cc) — rename ollama_* → playground_* (schemas,
-      modules, FE); path aliases /models/ollama* retained. Next: T77.6 pending.'
+    - T77.6
+    - T77.7
+    completed_milestones:
+    - M77
+    note: 'M77 complete (T77.1–T77.7). T77.6 completed (9b929bb) with Vitest +
+      Playwright FE playground rename coverage (TC-135–137); T77.7 completed
+      (d86951bb) documenting playground rename and /models/ollama aliases.
+      User approved finish M77. Per TP-S010-21, use one evolve PR after slices
+      A–E; no M77 minor PR. Parent will run 08-verify-build at M77 scope, then
+      continue M78/T78.1 (pending).'
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -776,11 +794,12 @@ active_session:
     session_id: S010-unify-llm-service
     stage: 08-verify-build
   handoff:
-    next_skill: 07-build
-    note: 'T77.5 completed (5d7b3cc) — rename ollama_* → playground_* (schemas, modules,
-      FE); path aliases /models/ollama* retained. Next: T77.6 pending — Phase 18 M77 Slice A'
+    next_skill: 08-verify-build
+    note: 'M77 complete (T77.1–T77.7); run 08-verify-build at M77 scope before
+      continuing M78/T78.1. TP-S010-21 specifies one evolve PR after slices A–E,
+      so no minor PR is due at M77.'
     mode: delta
-    current_task: T77.6
+    current_task: T78.1
     task_status: pending
 sessions:
 - id: S009-playground-model-download
@@ -2130,9 +2149,10 @@ stages:
     prior_completed_at: '2026-07-03'
     feature: F39
     phase: Phase 18 (M77-M81)
-    milestone: M77
+    milestone: M78
     substeps:
-      current_task: T77.6
+      current_task: T78.1
+      task_status: pending
       in_progress_tasks: []
       completed_tasks_recent:
       - T77.1
@@ -2140,9 +2160,11 @@ stages:
       - T77.3
       - T77.4
       - T77.5
+      - T77.6
+      - T77.7
     execution_plan:
-      active_task: T77.6
-      active_milestone: M77
+      active_task: T78.1
+      active_milestone: M78
       active_phase: Phase 18
       completed_tasks:
       - T77.1
@@ -2150,10 +2172,17 @@ stages:
       - T77.3
       - T77.4
       - T77.5
-    note: 'S010/EV-011 Phase 18 Slice A — T77.5 completed (5d7b3cc): rename
-      ollama_* → playground_* (schemas, modules, FE); path aliases /models/ollama*
-      retained. Next: T77.6 pending. T77.1–T77.4 completed 2026-07-10 (ebefa8b,
-      40112e1, 4039cd2, 7d755fb).'
+      - T77.6
+      - T77.7
+      note: M77 complete; next T78.1 pending. Parent will run 08-verify-build at M77 scope before continuing M78.
+    completed_milestones:
+    - M77
+    note: 'S010/EV-011 Phase 18 Slice A (M77) complete: T77.1–T77.7. T77.6
+      completed (9b929bb): Vitest + Playwright FE playground rename coverage
+      (TC-135–137). T77.7 completed (d86951bb): playground rename and
+      /models/ollama path alias docs. User approved finish M77; per TP-S010-21,
+      use one evolve PR after slices A–E (no M77 minor PR). Next: M78/T78.1
+      pending after 08-verify-build M77-scope verification.'
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -3773,17 +3802,25 @@ evolve_cycles:
       - D:7
       - E:8
       first_slice: A
-      current_task: T77.6
+      current_task: T78.1
       task_status: pending
-      milestone: M77
+      milestone: M78
       completed_tasks:
       - T77.1
       - T77.2
       - T77.3
       - T77.4
       - T77.5
-      note: 'T77.5 completed (5d7b3cc) — rename ollama_* → playground_* (schemas,
-        modules, FE); path aliases /models/ollama* retained. Next: T77.6 pending.'
+      - T77.6
+      - T77.7
+      completed_milestones:
+      - M77
+      note: 'M77 complete (T77.1–T77.7). T77.6 completed (9b929bb) with Vitest +
+        Playwright FE playground rename coverage (TC-135–137); T77.7 completed
+        (d86951bb) documenting playground rename and /models/ollama aliases.
+        User approved finish M77. Per TP-S010-21, use one evolve PR after slices
+        A–E; no M77 minor PR. Parent will run 08-verify-build at M77 scope, then
+        continue M78/T78.1 (pending).'
     02-verify-plan:
       status: skipped
       skip_rationale: Tooling/docs already exist
@@ -5365,6 +5402,7 @@ decisions_log:
 - '2026-07-10: S010/EV-011 T77.2–T77.4 completed (40112e1, 4039cd2, 7d755fb); advanced to T77.5.'
 - '2026-07-10: S010/EV-011 T77.5 in_progress — implementing rename ollama_* → playground_* (schemas, modules, FE); path aliases retained.'
 - '2026-07-10: S010/EV-011 T77.5 completed (5d7b3cc); advanced to T77.6 pending. Path aliases /models/ollama* retained; schemas/modules/FE renamed to playground_*.'
+- '2026-07-23: S010/EV-011 T77.6 in_progress — Vitest + Playwright FE rename (TC-135–137); user approved continue through M77 (T77.6 + T77.7). Parent to sync execution-plan.md Current State → T77.6 in_progress.'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -6290,12 +6328,27 @@ git_history:
     session_id: S010-unify-llm-service
     files_changed: 42
     timestamp: '2026-07-10'
+  - sha: 9b929bb
+    branch: feat/S010-unify-llm-service
+    message: '[T77.6] test: lock FE playground rename in Vitest + Playwright (TC-135–137)'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 4
+    timestamp: '2026-07-24T01:28:51Z'
+  - sha: d86951bb
+    branch: feat/S010-unify-llm-service
+    message: '[T77.7] docs: record playground rename + /models/ollama path aliases'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 3
+    timestamp: '2026-07-24T01:29:50Z'
   notes:
   - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up chore commit may be needed'
   - '2026-07-10 S010: T77.1 completed ebefa8b; current_task T77.2; resolve_llm_http_config stub until T77.3; list_models/start_pull until T77.4'
   - '2026-07-10 S010: T77.2–T77.4 completed (40112e1, 4039cd2, 7d755fb); current_task T77.5'
   - '2026-07-10 S010: T77.5 in_progress — rename ollama_* → playground_* (schemas, modules, FE); path aliases retained'
   - '2026-07-10 S010: T77.5 completed (5d7b3cc); current_task T77.6 pending; path aliases /models/ollama* retained; schemas/modules/FE renamed to playground_*'
+  - '2026-07-23 S010: M77 complete (T77.1–T77.7); T77.6 (9b929bb) and T77.7 (d86951bb) recorded. Per TP-S010-21, no M77 minor PR; parent runs 08-verify-build at M77 scope before M78/T78.1.'
 constraints:
   cost:
     target_usd_per_month: 25
