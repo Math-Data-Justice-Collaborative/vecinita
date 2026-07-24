@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
-| **Active milestone** | M77: Slice A — one client + rename |
-| **Active task** | **T77.7** (pending) — Docs: api-contract + feature-list aliases/rename |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T77.6 |
+| **Active milestone** | M78: Slice B — real streaming + proxy auth |
+| **Active task** | **T78.1** (pending) — Test: unit — stream_tokens incremental (TC-143) |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T77.7 (M77 complete) |
 | **Last updated** | 2026-07-23 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
@@ -1583,8 +1583,8 @@ path aliases.
 | T77.3 | Code: `shared-schemas` LLM HTTP config resolver (URL/proxy/timeout) | Code | completed | TP-S010-20 | T77.1 | 2026-07-10 | S010 | F39 |
 | T77.4 | Code: expand `LlmClient`; migrate call sites; delete `OllamaModelsClient` | Code | completed | RD-163, TP-S010-18 | T77.1, T77.3 | 2026-07-10 | S010 | F39 |
 | T77.5 | Code: rename `ollama_*` → `playground_*` (schemas, modules, FE types/UI copy); path aliases retained | Code | completed | RD-166, TP-S010-19 | T77.2, T77.4 | 2026-07-10 | S010 | F39 |
-| T77.6 | Test: Vitest + Playwright T0-ui for FE rename (UJ-048 / TC-135–137) | Test | in_progress | TP-S010-30 | T77.5 | — | S010 | F39 |
-| T77.7 | Docs: api-contract + feature-list note — aliases + renamed types | Docs | pending | api-contract §playground | T77.5 | — | S010 | F39 |
+| T77.6 | Test: Vitest + Playwright T0-ui for FE rename (UJ-048 / TC-135–137) | Test | completed | TP-S010-30 | T77.5 | 2026-07-23 | S010 | F39 |
+| T77.7 | Docs: api-contract + feature-list note — aliases + renamed types | Docs | completed | api-contract §playground | T77.5 | 2026-07-23 | S010 | F39 |
 
 #### M78: Slice B — real streaming + proxy auth
 
@@ -2266,8 +2266,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T77.3 | M77 | 18 | Code | completed | T77.1 | 2026-07-10 | S010 | F39 | — |
 | T77.4 | M77 | 18 | Code | completed | T77.1, T77.3 | 2026-07-10 | S010 | F39 | — |
 | T77.5 | M77 | 18 | Code | completed | T77.2, T77.4 | 2026-07-10 | S010 | F39 | — |
-| T77.6 | M77 | 18 | Test | in_progress | T77.5 | — | S010 | F39 | — |
-| T77.7 | M77 | 18 | Docs | pending | T77.5 | — | S010 | F39 | — |
+| T77.6 | M77 | 18 | Test | completed | T77.5 | 2026-07-23 | S010 | F39 | — |
+| T77.7 | M77 | 18 | Docs | completed | T77.5 | 2026-07-23 | S010 | F39 | — |
 | T78.1 | M78 | 18 | Test | pending | T77.4 | — | S010 | F39 | — |
 | T78.2 | M78 | 18 | Test | pending | — | — | S010 | F39 | — |
 | T78.3 | M78 | 18 | Code | pending | T78.1 | — | S010 | F39 | — |

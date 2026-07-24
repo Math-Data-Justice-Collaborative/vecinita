@@ -695,10 +695,11 @@
   | Surface | Change |
   |---------|--------|
   | `infra/modal/llm_app.py` | Add `pull_model_job`, `stage_default_model`, `/models/ollama` routes; HF Hub download |
-  | `packages/llm-client` | Route all HTTP to `VECINITA_MODAL_LLM_URL`; drop Ollama URL branch |
+  | `packages/llm-client` | Single `LlmClient` (generate/stream/warm + list/pull); drop Ollama URL branch |
   | `packages/eval` | `eval_runtime_for_config` always uses `vecinita-llm` + sandbox `model_id` |
   | `chat-rag-backend` | Prefer LLM URL only (remove Ollama URL preference) |
-  | `internal-write-api` | `OllamaModelsClient` targets `vecinita-llm` routes |
+  | `internal-write-api` | Playground library client targets `vecinita-llm` `/models/ollama*` aliases |
+  | `data-management-frontend` | `playground_*` API helpers + UI copy; paths stay `/internal/v1/models/ollama*` |
   | `scripts/deploy/modal.sh` | Deploy `llm_app` only; remove `ollama_app` |
 - **Technical constraints (ADR-037)**:
   - vLLM cannot read Ollama blob cache — downloads use **`huggingface_hub.snapshot_download`**, not `ollama pull`.
@@ -716,13 +717,17 @@ Same feature ID (**F39**); no F40. Cleanup after ADR-037 — **not** a multi-pro
 
 | Slice | Scope | User-visible? |
 |-------|--------|---------------|
-| **A** (first) | One `LlmClient` surface (merge generate/stream/warm + list/pull) + rename Ollama modules/types → playground; keep `/models/ollama` path aliases | Mostly internal |
+| **A** (first) | One `LlmClient` surface (merge generate/stream/warm + list/pull) + rename Ollama modules/types → playground; keep `/models/ollama` path aliases | Mostly internal; FE UI copy → Playground (paths unchanged) |
 | **B** | Real vLLM token SSE streaming; `VECINITA_MODAL_PROXY_KEY` required on `/generate`, `/warm`, `/models/*` (`/health` may stay open) | Live tokens; 401 without key |
 | **C** | Shared HF `apply_chat_template` helper; catalog/list/pull gated by `resolve_hf_repo` | Better non-Qwen prompts; clear unmapped errors |
 | **D** | Separate playground Modal class; prod pinned to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` | Playground reload does not stomp ChatRAG |
 | **E** | Drop legacy `VECINITA_MODAL_OLLAMA_URL` / `VECINITA_OLLAMA_MODEL_ID` fallbacks; fix package docs; declare `shared-schemas` on `llm-client` | Operator/docs |
 
 **Out of scope:** Provider ABC / second backend (SaaS, llama.cpp, Ollama runtime); mandatory FE path rename away from `/models/ollama`.
+
+**Slice A rename lock (M77 / RD-166):** Types and modules are `playground_*` /
+`PlaygroundModel*` / `fetchPlaygroundModels` / `LlmClient.list_models|start_pull`. HTTP aliases
+remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient` is deleted.
 
 **Source:** S010 seed `checkpoints/01-requirements-seed.md`; interview Q1–Q3 approve-all 2026-07-10.
 

@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-30 (S006/EV-007 F35 ext — redirect_to, revoke-invite, #109)  
+> **Last updated**: 2026-07-23 (S010/EV-011 F39 Slice A — playground rename + path aliases)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -327,6 +327,20 @@ Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: C
 - Optional future: `/models/playground*` aliases (not required in Slice A).
 - Catalog ⊆ `resolve_hf_repo` mappings (RD-168).
 - Proxy key required (same as generate/warm).
+
+### Playground rename (Slice A / RD-166 / TP-S010-19)
+
+HTTP path aliases stay `/models/ollama*`. Cognitive layer uses **playground** names:
+
+| Layer | Renamed symbols | Path / notes |
+|-------|-----------------|--------------|
+| `shared-schemas` | `playground_models.py` — `PlaygroundModelSummary`, `PlaygroundModelListResponse`, `PlaygroundModelPullRequest` / `PullResponse`, catalog types | Wire JSON unchanged |
+| `llm-client` | `LlmClient.list_models` / `start_pull` (was `OllamaModelsClient`) | Calls `/models/ollama*` aliases |
+| `internal-write-api` | `playground_library_client.py` | Proxies `/internal/v1/models/ollama*` |
+| DM frontend | `fetchPlaygroundModels`, `pullPlaygroundModel`, `PlaygroundModelSummaryApi`, `usePlaygroundModelDownload` | UI copy = Playground; fetch still `/internal/v1/models/ollama*` |
+
+Do **not** reintroduce `OllamaModelsClient` or `ollama_*` schema modules. FE path rename away from
+`/models/ollama` is out of scope (feature-list F39 follow-on).
 
 ---
 
@@ -779,7 +793,7 @@ Base path: `/internal/v1/eval` and `/internal/v1/rag/config` (admin JWT; promote
 
 ## EV-010 — Playground model download (F38, ADR-037 unified backend)
 
-Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `super-admin`). **API paths kept for frontend compat**; Modal backend is **`vecinita-llm`** (not `vecinita-ollama`).
+Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `super-admin`). **API paths kept for frontend compat**; Modal backend is **`vecinita-llm`** (not `vecinita-ollama`). Schema / client types are **`PlaygroundModel*`** / `LlmClient` (Slice A rename — see §Playground rename above); path segment `ollama` is an alias only.
 
 ### GET `/internal/v1/models/ollama`
 
