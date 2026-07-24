@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-10 (S010/EV-011 F39 Phase 18 — two LLM apps + playground URL, TP-S010-25)
+> **Last updated**: 2026-07-24 (S010/EV-011 F39 M80 — deploy both LLM apps + playground URL)
 
 ## Overview
 
@@ -203,7 +203,7 @@ incremental tokens.
 | Query | `packages/rag` + ChatRAG Backend | chat-rag-backend |
 | Ingest | `packages/ingest` + Modal workers | data-management-modal |
 | Embed | FastEmbed service | vecinita-embedding |
-| Generate | vLLM | vecinita-llm |
+| Generate | vLLM | `vecinita-llm` (prod) + `vecinita-llm-playground` |
 | Persist | Internal write API | DO app |
 | Schema | `apps/database` | migrations job |
 
