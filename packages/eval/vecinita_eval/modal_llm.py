@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Final
 from llama_index.core.base.llms.types import CompletionResponse, LLMMetadata
 from llama_index.core.llms.custom import CustomLLM
 from pydantic import ConfigDict
-from vecinita_llm_client import LlmClient, LlmClientError
+from vecinita_llm_client import LlmClient, LlmClientError, format_instruct_prompt
 from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_MODEL_ID, EvalConfig
 
 from vecinita_eval.judges import LlamaIndexJudgeClient
@@ -27,14 +27,11 @@ _ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
 _EVAL_LLM_TIMEOUT_S: Final[float] = 900.0
 
 
-def _qwen_instruct_prompt(prompt: str) -> str:
-    """Wrap a plain prompt in Qwen2.5-Instruct chat format."""
-    return (
-        "<|im_start|>system\n"
-        "Follow the instructions precisely. Be concise.\n"
-        "<|im_start|>user\n"
-        f"{prompt}\n"
-        "<|im_start|>assistant\n"
+def _instruct_prompt(prompt: str) -> str:
+    """Wrap a plain prompt via shared HF chat-template helper (RD-167)."""
+    return format_instruct_prompt(
+        system="Follow the instructions precisely. Be concise.",
+        user=prompt,
     )
 
 
@@ -73,7 +70,7 @@ class ModalHttpLLM(CustomLLM):
         """Complete a prompt via Modal LLM HTTP ``/generate``."""
         _ = (formatted, kwargs)
         text = self.client.generate(
-            _qwen_instruct_prompt(prompt),
+            _instruct_prompt(prompt),
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             model_id=self.model_id,
@@ -90,7 +87,7 @@ class ModalHttpLLM(CustomLLM):
         _ = (formatted, kwargs)
         parts: list[str] = []
         for token in self.client.generate_stream(
-            _qwen_instruct_prompt(prompt),
+            _instruct_prompt(prompt),
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             model_id=self.model_id,

@@ -259,8 +259,9 @@ project:
       milestone: M79
       substeps:
         current_task: T79.4
-        task_status: pending
-        in_progress_tasks: []
+        task_status: in_progress
+        in_progress_tasks:
+        - T79.4
         completed_tasks_recent:
         - T77.1
         - T77.2
@@ -282,7 +283,7 @@ project:
         active_task: T79.4
         T79.2: completed
         T79.3: completed
-        T79.4: pending
+        T79.4: in_progress
         T79.2_completed_at: '2026-07-23'
         T79.3_completed_at: '2026-07-23'
         active_milestone: M79
@@ -304,11 +305,11 @@ project:
         - T79.1
         - T79.2
         - T79.3
-        note: T79.3 completed — apply_chat_template helper in llm-client. Next T79.4 wire call sites.
+        note: T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template
       completed_milestones:
       - M77
       - M78
-      note: 'T79.3 completed — apply_chat_template helper in llm-client. Next T79.4 wire call sites.'
+      note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -748,7 +749,7 @@ active_session:
     - E:8
     first_slice: A
     current_task: T79.4
-    task_status: pending
+    task_status: in_progress
     milestone: M79
     completed_tasks:
     - T77.1
@@ -770,7 +771,7 @@ active_session:
     completed_milestones:
     - M77
     - M78
-    note: 'T79.3 completed — apply_chat_template helper in llm-client. Next T79.4 wire call sites.'
+    note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -819,10 +820,10 @@ active_session:
     stage: 08-verify-build
   handoff:
     next_skill: 07-build
-    note: 'T79.3 completed — apply_chat_template helper in llm-client. Next T79.4 wire call sites.'
+    note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
     mode: delta
     current_task: T79.4
-    task_status: pending
+    task_status: in_progress
 sessions:
 - id: S009-playground-model-download
   type: feature
@@ -2174,8 +2175,9 @@ stages:
     milestone: M79
     substeps:
       current_task: T79.4
-      task_status: pending
-      in_progress_tasks: []
+      task_status: in_progress
+      in_progress_tasks:
+      - T79.4
       completed_tasks_recent:
       - T77.1
       - T77.2
@@ -2197,7 +2199,7 @@ stages:
       active_task: T79.4
       T79.2: completed
       T79.3: completed
-      T79.4: pending
+      T79.4: in_progress
       T79.2_completed_at: '2026-07-23'
       T79.3_completed_at: '2026-07-23'
       active_milestone: M79
@@ -2219,11 +2221,11 @@ stages:
       - T79.1
       - T79.2
       - T79.3
-      note: T79.3 completed — apply_chat_template helper in llm-client. Next T79.4 wire call sites.
+      note: T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template
     completed_milestones:
     - M77
     - M78
-    note: 'T79.3 completed — apply_chat_template helper in llm-client. Next T79.4 wire call sites.'
+    note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -3844,7 +3846,7 @@ evolve_cycles:
       - E:8
       first_slice: A
       current_task: T79.4
-      task_status: pending
+      task_status: in_progress
       milestone: M79
       completed_tasks:
       - T77.1
@@ -3866,12 +3868,12 @@ evolve_cycles:
       completed_milestones:
       - M77
       - M78
-      note: 'T79.3 completed — apply_chat_template helper in llm-client. Next T79.4 wire call sites.'
+      note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
       execution_plan:
         active_task: T79.4
         T79.2: completed
         T79.3: completed
-        T79.4: pending
+        T79.4: in_progress
         T79.2_completed_at: '2026-07-23'
         T79.3_completed_at: '2026-07-23'
     02-verify-plan:
@@ -6465,6 +6467,13 @@ git_history:
     session_id: S010-unify-llm-service
     files_changed: 3
     timestamp: '2026-07-24T02:00:00Z'
+  - sha: c7529d8
+    branch: feat/S010-unify-llm-service
+    message: '[T79.3] feat: shared apply_chat_template helper in llm-client'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 3
+    timestamp: '2026-07-24T02:05:00Z'
   notes:
   - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up chore commit may be needed'
   - '2026-07-10 S010: T77.1 completed ebefa8b; current_task T77.2; resolve_llm_http_config stub until T77.3; list_models/start_pull until T77.4'
@@ -6477,6 +6486,7 @@ git_history:
   - '2026-07-24 S010: T79.2 in_progress — catalog gate unit tests (TC-141)'
   - '2026-07-23 S010: T79.2 completed (TC-141 catalog gate red tests). Next T79.3 pending — chat-template helper.'
   - '2026-07-24 S010: T79.2 committed (cf672a2); T79.3 in_progress — shared apply_chat_template helper in llm-client.'
+  - '2026-07-24 S010: T79.3 committed (c7529d8); T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
 constraints:
   cost:
     target_usd_per_month: 25
