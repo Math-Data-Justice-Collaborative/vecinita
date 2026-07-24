@@ -2058,10 +2058,14 @@ version = "0.1.0"
 source = { editable = "packages/llm-client" }
 dependencies = [
     { name = "httpx" },
+    { name = "vecinita-shared-schemas" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "httpx", specifier = ">=0.27,<1" }]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27,<1" },
+    { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
+]
 
 [[package]]
 name = "vecinita-rag"
