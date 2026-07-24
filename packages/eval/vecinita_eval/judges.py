@@ -58,7 +58,9 @@ def truncate_judge_context(
 class CompletingLlm(Protocol):
     """Minimal LLM surface used by the direct faithfulness judge."""
 
-    def complete(self, prompt: str) -> object: ...
+    def complete(self, prompt: str) -> object:
+        """Return a completion object (often with a ``text`` attribute)."""
+        ...
 
 
 def _completion_text(completion: object) -> str:
