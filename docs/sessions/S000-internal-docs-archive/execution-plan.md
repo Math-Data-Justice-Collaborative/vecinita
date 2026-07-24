@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M80: Slice D — two Modal apps (prod + playground) |
-| **Active task** | **T80.2** (pending) — Code: `vecinita-llm-playground` Modal app (shared `llm-models` volume) |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.1 (M77–M79 complete; M80 T80.1 red locked) |
+| **Active task** | **T80.3** (pending) — Code: pin prod `vecinita-llm` to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.2 (M80 playground app landed) |
 | **Last updated** | 2026-07-24 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
@@ -1620,7 +1620,7 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T80.1 | Test: unit/smoke — prod class ignores playground reload; playground URL routing | Test | completed | RD-169, TP-S010-25/27, TC-145 | — | 2026-07-24 | S010 | F39 |
-| T80.2 | Code: `vecinita-llm-playground` Modal app (shared `llm-models` volume) | Code | pending | TP-S010-25/28 | T80.1 | — | S010 | F39 |
+| T80.2 | Code: `vecinita-llm-playground` Modal app (shared `llm-models` volume) | Code | completed | TP-S010-25/28 | T80.1 | 2026-07-24 | S010 | F39 |
 | T80.3 | Code: pin prod `vecinita-llm` to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` | Code | pending | RD-169 | T80.2 | — | S010 | F39 |
 | T80.4 | Config: `VECINITA_MODAL_LLM_PLAYGROUND_URL` on internal-write-api / DM; ChatRAG prod URL only | Config | pending | TP-S010-27, config-spec | T80.2 | — | S010 | F39 |
 | T80.5 | Config: `modal.sh` + secrets — deploy both apps; sync proxy key | Config | pending | deployment-integration | T80.2 | — | S010 | F39 |
@@ -2281,7 +2281,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T79.5 | M79 | 18 | Code | completed | T79.2 | 2026-07-23 | S010 | F39 | — |
 | T79.6 | M79 | 18 | Test | completed | T79.5 | 2026-07-23 | S010 | F39 | — |
 | T80.1 | M80 | 18 | Test | completed | — | 2026-07-24 | S010 | F39 | — |
-| T80.2 | M80 | 18 | Code | pending | T80.1 | — | S010 | F39 | — |
+| T80.2 | M80 | 18 | Code | completed | T80.1 | 2026-07-24 | S010 | F39 | — |
 | T80.3 | M80 | 18 | Code | pending | T80.2 | — | S010 | F39 | — |
 | T80.4 | M80 | 18 | Config | pending | T80.2 | — | S010 | F39 | — |
 | T80.5 | M80 | 18 | Config | pending | T80.2 | — | S010 | F39 | — |
