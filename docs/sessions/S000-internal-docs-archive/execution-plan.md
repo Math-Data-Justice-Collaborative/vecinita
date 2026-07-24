@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M78: Slice B — real streaming + proxy auth |
-| **Active task** | **T78.1** (pending) — Test: unit — stream_tokens incremental (TC-143) |
+| **Active task** | **T78.1** (in_progress) — Test: unit — stream_tokens incremental (TC-143) |
 | **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T77.7 (M77 complete) |
 | **Last updated** | 2026-07-23 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
@@ -1592,7 +1592,7 @@ path aliases.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T78.1 | Test: unit — `stream_tokens` yields incremental tokens (not full-then-split) TC-143 | Test | pending | RD-164, TP-S010-22, TC-143 | T77.4 | — | S010 | F39 |
+| T78.1 | Test: unit — `stream_tokens` yields incremental tokens (not full-then-split) TC-143 | Test | in_progress | RD-164, TP-S010-22, TC-143 | T77.4 | — | S010 | F39 |
 | T78.2 | Test: unit/integration — unauthorized generate/warm/models → 401; `/health` open (TC-142, UJ-049) | Test | pending | RD-165, TP-S010-23, TC-142 | — | — | S010 | F39 |
 | T78.3 | Code: wire vLLM `engine.generate` async iterator into existing SSE framing | Code | pending | RD-164, TP-S010-22 | T78.1 | — | S010 | F39 |
 | T78.4 | Code: ASGI middleware — proxy key on all non-health routes; fail closed if unset in prod | Code | pending | RD-165, TP-S010-23 | T78.2 | — | S010 | F39 |
