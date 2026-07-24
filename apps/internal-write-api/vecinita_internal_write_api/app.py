@@ -101,6 +101,7 @@ from vecinita_shared_schemas.playground_catalog import (
     merge_playground_catalog_with_volume,
     playground_catalog_tag_available,
 )
+from vecinita_shared_schemas.playground_hf_registry import resolve_hf_repo
 from vecinita_shared_schemas.playground_models import (
     PlaygroundModelCatalogFamiliesResponse,
     PlaygroundModelCatalogFamily,
@@ -1736,6 +1737,13 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Playground models client not configured",
             )
+        try:
+            resolve_hf_repo(body.model_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(exc),
+            ) from exc
         try:
             return playground_models.start_pull(body.model_id)
         except LlmClientError as exc:

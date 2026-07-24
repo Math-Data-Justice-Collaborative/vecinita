@@ -38,6 +38,7 @@ pytestmark = [
 ]
 
 _DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct"
+_UNMAPPED_MODEL_ID = "unknown-custom:7b"
 
 
 @pytest.fixture
@@ -114,4 +115,25 @@ def test_uj048_admin_pull_forbidden(
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert pull.status_code == HTTPStatus.FORBIDDEN
+    assert mock_client.pull_requests == []
+
+
+def test_uj048_unmapped_tag_pull_returns_400(
+    playground_download_e2e_client: tuple[
+        TestClient, EllipticCurvePrivateKey, MockPlaygroundModelsClient
+    ],
+) -> None:
+    """TC-141 / RD-168: unmapped playground tag fails clearly (not 202 then silent fail)."""
+    client, private_key, mock_client = playground_download_e2e_client
+    super_token = sign_test_jwt(private_key, role="super-admin")
+
+    pull = client.post(
+        "/internal/v1/models/ollama/pull",
+        json={"model_id": _UNMAPPED_MODEL_ID},
+        headers={"Authorization": f"Bearer {super_token}"},
+    )
+    assert pull.status_code == HTTPStatus.BAD_REQUEST
+    detail = response_json_object(pull).get("detail")
+    assert isinstance(detail, str)
+    assert "HuggingFace mapping" in detail or "no HuggingFace" in detail
     assert mock_client.pull_requests == []
