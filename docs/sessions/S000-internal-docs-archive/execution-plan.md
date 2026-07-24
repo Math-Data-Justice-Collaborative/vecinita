@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M80: Slice D — two Modal apps (prod + playground) |
-| **Active task** | **T80.5** (pending) — Config: `modal.sh` + secrets — deploy both apps; sync proxy key |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.4 (M80 playground URL routing landed) |
+| **Active task** | **T80.6** (pending) — Docs: deployment-integration + staging-secrets-matrix — two-app order |
+| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T80.5 (M80 deploy scripts both LLM apps) |
 | **Last updated** | 2026-07-24 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
 | **Git branch** | `feat/S010-unify-llm-service` |
@@ -1623,7 +1623,7 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 | T80.2 | Code: `vecinita-llm-playground` Modal app (shared `llm-models` volume) | Code | completed | TP-S010-25/28 | T80.1 | 2026-07-24 | S010 | F39 |
 | T80.3 | Code: pin prod `vecinita-llm` to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` | Code | completed | RD-169 | T80.2 | 2026-07-24 | S010 | F39 |
 | T80.4 | Config: `VECINITA_MODAL_LLM_PLAYGROUND_URL` on internal-write-api / DM; ChatRAG prod URL only | Config | completed | TP-S010-27, config-spec | T80.2 | 2026-07-24 | S010 | F39 |
-| T80.5 | Config: `modal.sh` + secrets — deploy both apps; sync proxy key | Config | pending | deployment-integration | T80.2 | — | S010 | F39 |
+| T80.5 | Config: `modal.sh` + secrets — deploy both apps; sync proxy key | Config | completed | deployment-integration | T80.2 | 2026-07-24 | S010 | F39 |
 | T80.6 | Docs: deployment-integration + staging-secrets-matrix — two-app order | Docs | pending | TP-S010-25 | T80.4, T80.5 | — | S010 | F39 |
 | T80.7 | Operator: deploy both apps; smoke playground pull + prod chat unaffected | Operator | pending | AC-E38, 13-deploy-smoke | T80.6 | — | S010 | F39 |
 
@@ -2284,7 +2284,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T80.2 | M80 | 18 | Code | completed | T80.1 | 2026-07-24 | S010 | F39 | — |
 | T80.3 | M80 | 18 | Code | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
 | T80.4 | M80 | 18 | Config | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
-| T80.5 | M80 | 18 | Config | pending | T80.2 | — | S010 | F39 | — |
+| T80.5 | M80 | 18 | Config | completed | T80.2 | 2026-07-24 | S010 | F39 | — |
 | T80.6 | M80 | 18 | Docs | pending | T80.4, T80.5 | — | S010 | F39 | — |
 | T80.7 | M80 | 18 | Operator | pending | T80.6 | — | S010 | F39 | — |
 | T81.1 | M81 | 18 | Test | pending | T77.4 | — | S010 | F39 | — |

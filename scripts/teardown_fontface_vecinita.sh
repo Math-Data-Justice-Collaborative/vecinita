@@ -6,7 +6,7 @@ set -euo pipefail
 echo "==> Switching to fontface profile..."
 modal profile activate fontface
 
-for app in vecinita-embedding vecinita-llm vecinita-data-management; do
+for app in vecinita-embedding vecinita-llm vecinita-llm-playground vecinita-data-management; do
   echo "==> Stopping ${app} (if deployed)..."
   modal app stop "$app" 2>/dev/null || echo "    (not deployed — skipped)"
 done

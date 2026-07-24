@@ -26,6 +26,7 @@ apps = [
     "infra/modal/embedding_app.py",
     "infra/modal/data_management_app.py",
     "infra/modal/llm_app.py",
+    "infra/modal/llm_playground_app.py",
 ]
 for rel in apps:
     path = Path(rel)

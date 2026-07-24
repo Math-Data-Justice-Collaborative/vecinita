@@ -14,8 +14,12 @@ modal deploy infra/modal/embedding_app.py
 echo "Deploying vecinita-data-management..."
 modal deploy infra/modal/data_management_app.py
 
-echo "Deploying vecinita-llm (unified inference + model staging; ADR-037)..."
+echo "Deploying vecinita-llm (prod pin; ADR-037 / RD-169)..."
 modal deploy infra/modal/llm_app.py
 
+echo "Deploying vecinita-llm-playground (shared llm-models; TP-S010-25)..."
+modal deploy infra/modal/llm_playground_app.py
+
 echo "Done. vecinita-ollama is deprecated — do not deploy (ADR-037)."
-echo "Record VECINITA_MODAL_LLM_URL in DO secrets (see docs/staging-secrets-matrix.md)."
+echo "Record VECINITA_MODAL_LLM_URL (prod) and VECINITA_MODAL_LLM_PLAYGROUND_URL in DO secrets"
+echo "(see docs/staging-secrets-matrix.md)."

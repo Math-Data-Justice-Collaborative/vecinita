@@ -91,10 +91,15 @@ def test_deploy_digitalocean_declares_do_token() -> None:
     assert "DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}" in text
 
 
-def test_deploy_modal_deploys_all_three_apps() -> None:
-    """Modal CD deploys embedding, data-management, and llm apps."""
+def test_deploy_modal_deploys_all_apps_including_playground() -> None:
+    """Modal CD deploys embedding, data-management, prod llm, and playground llm (TP-S010-25)."""
     text = _read("deploy_modal")
     assert "bash scripts/deploy/modal.sh" in text
+    modal_sh = (REPO_ROOT / "scripts/deploy/modal.sh").read_text(encoding="utf-8")
+    assert "infra/modal/llm_app.py" in modal_sh
+    assert "infra/modal/llm_playground_app.py" in modal_sh
+    verify_build = (REPO_ROOT / "scripts/deploy/verify_build.sh").read_text(encoding="utf-8")
+    assert "infra/modal/llm_playground_app.py" in verify_build
 
 
 def test_deploy_digitalocean_deploys_all_four_apps() -> None:

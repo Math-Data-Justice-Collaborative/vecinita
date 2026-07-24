@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Sync the Modal `vecinita-llm` secret from the current shell env (ADR-037).
 #
-# Used by infra/modal/llm_app.py ASGI routes for proxy auth on /models/ollama*.
+# Used by infra/modal/llm_app.py and infra/modal/llm_playground_app.py ASGI routes
+# for proxy auth on /models/ollama* (both apps share secret name ``vecinita-llm``).
 # Key must match DO internal-write-api VECINITA_MODAL_PROXY_KEY.
 #
 # Usage:
@@ -57,5 +58,7 @@ fi
 
 modal secret create --force "${SECRET_NAME}" "${PAIRS[@]}"
 echo "OK: updated Modal secret ${SECRET_NAME}."
-echo "Redeploy LLM app: modal deploy infra/modal/llm_app.py"
+echo "Redeploy both LLM apps:"
+echo "  modal deploy infra/modal/llm_app.py"
+echo "  modal deploy infra/modal/llm_playground_app.py"
 echo "Optional: retire deprecated secret vecinita-ollama in Modal dashboard after smoke."

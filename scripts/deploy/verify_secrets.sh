@@ -16,7 +16,7 @@ source "${ROOT}/scripts/modal_ensure_workspace.sh"
 REQUIRED_SECRET="vecinita-data-management"
 LLM_SECRET="vecinita-llm"
 REQUIRED_VOLUMES=(embedding-models llm-models)
-REQUIRED_APPS=(vecinita-embedding vecinita-data-management vecinita-llm)
+REQUIRED_APPS=(vecinita-embedding vecinita-data-management vecinita-llm vecinita-llm-playground)
 
 echo "==> Modal profile"
 modal profile current
