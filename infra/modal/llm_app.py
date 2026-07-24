@@ -16,6 +16,7 @@ import json
 import logging
 import os
 import uuid
+from collections.abc import Iterator
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
@@ -399,6 +400,50 @@ class LlmService:
         outputs = self._llm.generate([prompt], params)
         return outputs[0].outputs[0].text
 
+    def _stream_text_deltas(
+        self,
+        prompt: str,
+        *,
+        max_tokens: int = 512,
+        temperature: float = 0.2,
+        model_id: str | None = None,
+    ) -> Iterator[str]:
+        """Yield incremental token text from the vLLM engine (RD-164 / TP-S010-22).
+
+        Uses ``llm_engine.add_request`` + ``step`` so SSE receives real deltas — not a
+        completed reply split into words.
+        """
+        self._ensure_model_loaded(model_id)
+        if self._llm is None:
+            msg = "LlmService model is not loaded"
+            raise RuntimeError(msg)
+        engine = getattr(self._llm, "llm_engine", None)
+        if engine is None or not hasattr(engine, "add_request") or not hasattr(engine, "step"):
+            msg = "vLLM llm_engine streaming API unavailable"
+            raise RuntimeError(msg)
+        params = SamplingParams(
+            max_tokens=max_tokens,
+            temperature=temperature,
+            repetition_penalty=1.15,
+        )
+        request_id = f"stream-{uuid.uuid4()}"
+        engine.add_request(request_id, prompt, params)
+        previous = ""
+        while engine.has_unfinished_requests():
+            for request_output in engine.step():
+                if getattr(request_output, "request_id", None) != request_id:
+                    continue
+                outputs = getattr(request_output, "outputs", None) or []
+                if not outputs:
+                    continue
+                text = getattr(outputs[0], "text", "") or ""
+                delta = text[len(previous) :]
+                previous = text
+                if delta:
+                    yield delta
+                if getattr(request_output, "finished", False):
+                    return
+
     @modal.method()
     def complete(
         self,
@@ -424,14 +469,13 @@ class LlmService:
         temperature: float = 0.2,
         model_id: str | None = None,
     ):
-        text = self._generate_text(
+        """Yield incremental tokens for SSE (real vLLM deltas — RD-164)."""
+        yield from self._stream_text_deltas(
             prompt,
             max_tokens=max_tokens,
             temperature=temperature,
             model_id=model_id,
         )
-        for piece in text.split():
-            yield piece + " "
 
     @modal.method()
     def warm_model(self, model_id: str | None = None) -> str:

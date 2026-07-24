@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
 | **Active milestone** | M78: Slice B — real streaming + proxy auth |
-| **Active task** | **T78.2** (in_progress) — Test: unit — proxy auth 401 on generate/warm/models (TC-142) |
+| **Active task** | **T78.3** (in_progress) — Code: wire vLLM engine streaming into SSE |
 | **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T77.7 (M77 complete) |
 | **Last updated** | 2026-07-23 |
 | **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
@@ -1593,8 +1593,8 @@ path aliases.
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T78.1 | Test: unit — `stream_tokens` yields incremental tokens (not full-then-split) TC-143 | Test | completed | RD-164, TP-S010-22, TC-143 | T77.4 | 2026-07-23 | S010 | F39 |
-| T78.2 | Test: unit/integration — unauthorized generate/warm/models → 401; `/health` open (TC-142, UJ-049) | Test | in_progress | RD-165, TP-S010-23, TC-142 | — | — | S010 | F39 |
-| T78.3 | Code: wire vLLM `engine.generate` async iterator into existing SSE framing | Code | pending | RD-164, TP-S010-22 | T78.1 | — | S010 | F39 |
+| T78.2 | Test: unit/integration — unauthorized generate/warm/models → 401; `/health` open (TC-142, UJ-049) | Test | completed | RD-165, TP-S010-23, TC-142 | — | 2026-07-23 | S010 | F39 |
+| T78.3 | Code: wire vLLM `engine.generate` async iterator into existing SSE framing | Code | in_progress | RD-164, TP-S010-22 | T78.1 | — | S010 | F39 |
 | T78.4 | Code: ASGI middleware — proxy key on all non-health routes; fail closed if unset in prod | Code | pending | RD-165, TP-S010-23 | T78.2 | — | S010 | F39 |
 | T78.5 | Test: API E2E — streaming contract TC-143 (no new Playwright) | Test | pending | RD-172, TP-S010-30 | T78.3 | — | S010 | F39 |
 | T78.6 | Docs: api-contract — real stream + auth on generate/warm | Docs | pending | api-contract | T78.3, T78.4 | — | S010 | F39 |
@@ -2269,8 +2269,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T77.6 | M77 | 18 | Test | completed | T77.5 | 2026-07-23 | S010 | F39 | — |
 | T77.7 | M77 | 18 | Docs | completed | T77.5 | 2026-07-23 | S010 | F39 | — |
 | T78.1 | M78 | 18 | Test | completed | T77.4 | 2026-07-23 | S010 | F39 | — |
-| T78.2 | M78 | 18 | Test | in_progress | — | — | S010 | F39 | — |
-| T78.3 | M78 | 18 | Code | pending | T78.1 | — | S010 | F39 | — |
+| T78.2 | M78 | 18 | Test | completed | — | 2026-07-23 | S010 | F39 | — |
+| T78.3 | M78 | 18 | Code | in_progress | T78.1 | — | S010 | F39 | — |
 | T78.4 | M78 | 18 | Code | pending | T78.2 | — | S010 | F39 | — |
 | T78.5 | M78 | 18 | Test | pending | T78.3 | — | S010 | F39 | — |
 | T78.6 | M78 | 18 | Docs | pending | T78.3, T78.4 | — | S010 | F39 | — |
