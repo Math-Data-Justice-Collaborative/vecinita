@@ -1,7 +1,13 @@
-"""HTTP client for Modal vLLM and vecinita-ollama (ADR-009, ADR-035)."""
+"""HTTP client for Modal vLLM and shared chat-template helper (ADR-009, ADR-037)."""
 
+from vecinita_llm_client.chat_template import ChatTemplateTokenizer, apply_chat_template
 from vecinita_llm_client.client import LlmClient, LlmClientError
 
 __version__ = "0.1.0"
 
-__all__ = ["LlmClient", "LlmClientError"]
+__all__ = [
+    "ChatTemplateTokenizer",
+    "LlmClient",
+    "LlmClientError",
+    "apply_chat_template",
+]
