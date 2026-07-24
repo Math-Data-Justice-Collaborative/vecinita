@@ -481,7 +481,9 @@ def main(argv: list[str] | None = None) -> int:
             except (EmbeddingClientError, httpx.HTTPError, httpx.TimeoutException) as exc:
                 last_exc = exc
                 time.sleep(2.0 * (attempt + 1))
-        assert last_exc is not None
+        if last_exc is None:
+            msg = "embed retries exhausted without an exception"
+            raise RuntimeError(msg)
         raise last_exc
 
     spawn_times: dict[str, float] = {}
