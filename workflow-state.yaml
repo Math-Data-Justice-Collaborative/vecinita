@@ -258,10 +258,9 @@ project:
       phase: Phase 18 (M77-M81)
       milestone: M79
       substeps:
-        current_task: T79.4
+        current_task: T79.5
         task_status: in_progress
-        in_progress_tasks:
-        - T79.4
+        in_progress_tasks: []
         completed_tasks_recent:
         - T77.1
         - T77.2
@@ -279,13 +278,16 @@ project:
         - T79.1
         - T79.2
         - T79.3
+        - T79.4
       execution_plan:
-        active_task: T79.4
+        active_task: T79.5
         T79.2: completed
         T79.3: completed
-        T79.4: in_progress
+        T79.4: completed
+        T79.5: in_progress
         T79.2_completed_at: '2026-07-23'
         T79.3_completed_at: '2026-07-23'
+        T79.4_completed_at: '2026-07-23'
         active_milestone: M79
         active_phase: Phase 18
         completed_tasks:
@@ -305,11 +307,12 @@ project:
         - T79.1
         - T79.2
         - T79.3
-        note: T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template
+        - T79.4
+        note: T79.5 in_progress — gate list/pull to resolve_hf_repo; 400 on unmapped
       completed_milestones:
       - M77
       - M78
-      note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
+      note: 'T79.5 in_progress — gate list/pull to resolve_hf_repo; 400 on unmapped'
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -748,7 +751,7 @@ active_session:
     - D:7
     - E:8
     first_slice: A
-    current_task: T79.4
+    current_task: T79.5
     task_status: in_progress
     milestone: M79
     completed_tasks:
@@ -768,10 +771,11 @@ active_session:
     - T79.1
     - T79.2
     - T79.3
+    - T79.4
     completed_milestones:
     - M77
     - M78
-    note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
+    note: 'T79.5 in_progress — gate list/pull to resolve_hf_repo; 400 on unmapped'
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -820,9 +824,9 @@ active_session:
     stage: 08-verify-build
   handoff:
     next_skill: 07-build
-    note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
+    note: 'T79.5 in_progress — gate list/pull to resolve_hf_repo; 400 on unmapped'
     mode: delta
-    current_task: T79.4
+    current_task: T79.5
     task_status: in_progress
 sessions:
 - id: S009-playground-model-download
@@ -2174,10 +2178,9 @@ stages:
     phase: Phase 18 (M77-M81)
     milestone: M79
     substeps:
-      current_task: T79.4
+      current_task: T79.5
       task_status: in_progress
-      in_progress_tasks:
-      - T79.4
+      in_progress_tasks: []
       completed_tasks_recent:
       - T77.1
       - T77.2
@@ -2195,13 +2198,16 @@ stages:
       - T79.1
       - T79.2
       - T79.3
+      - T79.4
     execution_plan:
-      active_task: T79.4
+      active_task: T79.5
       T79.2: completed
       T79.3: completed
-      T79.4: in_progress
+      T79.4: completed
+      T79.5: in_progress
       T79.2_completed_at: '2026-07-23'
       T79.3_completed_at: '2026-07-23'
+      T79.4_completed_at: '2026-07-23'
       active_milestone: M79
       active_phase: Phase 18
       completed_tasks:
@@ -2221,11 +2227,12 @@ stages:
       - T79.1
       - T79.2
       - T79.3
-      note: T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template
+      - T79.4
+      note: T79.5 in_progress — gate list/pull to resolve_hf_repo; 400 on unmapped
     completed_milestones:
     - M77
     - M78
-    note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
+    note: 'T79.5 in_progress — gate list/pull to resolve_hf_repo; 400 on unmapped'
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -3845,7 +3852,7 @@ evolve_cycles:
       - D:7
       - E:8
       first_slice: A
-      current_task: T79.4
+      current_task: T79.5
       task_status: in_progress
       milestone: M79
       completed_tasks:
@@ -3865,17 +3872,20 @@ evolve_cycles:
       - T79.1
       - T79.2
       - T79.3
+      - T79.4
       completed_milestones:
       - M77
       - M78
-      note: 'T79.4 in_progress — wire chat-rag/tagging/eval to apply_chat_template'
+      note: 'T79.5 in_progress — gate list/pull to resolve_hf_repo; 400 on unmapped'
       execution_plan:
-        active_task: T79.4
+        active_task: T79.5
         T79.2: completed
         T79.3: completed
-        T79.4: in_progress
+        T79.4: completed
+        T79.5: in_progress
         T79.2_completed_at: '2026-07-23'
         T79.3_completed_at: '2026-07-23'
+        T79.4_completed_at: '2026-07-23'
     02-verify-plan:
       status: skipped
       skip_rationale: Tooling/docs already exist
@@ -6474,6 +6484,13 @@ git_history:
     session_id: S010-unify-llm-service
     files_changed: 3
     timestamp: '2026-07-24T02:05:00Z'
+  - sha: e616043
+    branch: feat/S010-unify-llm-service
+    message: '[T79.4] feat: wire chat-rag/tagging/eval to shared chat-template helper'
+    stage: 07-build
+    session_id: S010-unify-llm-service
+    files_changed: 6
+    timestamp: '2026-07-24T02:15:00Z'
   notes:
   - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up chore commit may be needed'
   - '2026-07-10 S010: T77.1 completed ebefa8b; current_task T77.2; resolve_llm_http_config stub until T77.3; list_models/start_pull until T77.4'

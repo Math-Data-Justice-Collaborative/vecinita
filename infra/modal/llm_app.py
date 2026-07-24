@@ -173,6 +173,15 @@ def _write_manifest(models: list[dict[str, object]]) -> None:
     model_volume.commit()
 
 
+def _model_id_mapped(model_id: str) -> bool:
+    """Return True when ``model_id`` has a HuggingFace registry mapping (RD-168)."""
+    try:
+        resolve_hf_repo(model_id)
+    except ValueError:
+        return False
+    return True
+
+
 def _list_models_payload() -> dict[str, object]:
     manifest = _read_manifest()
     models_raw = manifest.get("models")
@@ -184,6 +193,8 @@ def _list_models_payload() -> dict[str, object]:
             continue
         model_id = entry.get("model_id")
         if not isinstance(model_id, str):
+            continue
+        if not _model_id_mapped(model_id):
             continue
         available = bool(entry.get("available", False))
         items.append({"model_id": model_id, "available": available})
@@ -533,6 +544,10 @@ def fastapi_app():
             payload = PullRequest.model_validate(json.loads(await request.body()))
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
+        try:
+            resolve_hf_repo(payload.model_id)
+        except ValueError as exc:
+            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_REQUEST)
         job_id = str(uuid.uuid4())
         pull_model_job.spawn(job_id, payload.model_id)
         _register_pending_model(payload.model_id)
