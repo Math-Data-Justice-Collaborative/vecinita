@@ -90,7 +90,7 @@ _ENV_OLLAMA = "VECINITA_MODAL_OLLAMA_URL"
 _ENV_EMBED = "VECINITA_MODAL_EMBED_URL"
 _ENV_DB = "DATABASE_URL"
 _REPO_ROOT = Path(__file__).resolve().parents[1]
-_DEFAULT_GOLDEN = _REPO_ROOT / "data" / "fixtures" / "eval" / "qa_pairs.json"
+_DEFAULT_GOLDEN = _REPO_ROOT / "data" / "fixtures" / "eval" / "qa_pairs_staging.json"
 _DEFAULT_RESULTS = _REPO_ROOT / "data" / "eval-experiments"
 _EVAL_LLM_TIMEOUT_S = 900.0
 

@@ -1,16 +1,28 @@
 # Golden evaluation set — curation runbook
 
 > **Feature:** F36 (EV-008 / S007 / GitHub #99)  
-> **Fixture:** `data/fixtures/eval/qa_pairs.json`  
-> **Last updated:** 2026-07-01 (01-requirements interview RD-099–RD-110)
+> **CI fixture:** `data/fixtures/eval/qa_pairs.json` (`fixture://` URLs)  
+> **Staging fixture:** `data/fixtures/eval/qa_pairs_staging.json` (live `https://` URLs)  
+> **Last updated:** 2026-07-24
 
 ## Purpose
 
 The golden set is the **regression benchmark** for Vecinita RAG quality. It drives:
-
-- CI harness (`tests/eval/`) — retrieval + answer-quality metrics
+- CI harness (`tests/eval/`) — retrieval + answer-quality metrics against a **seeded fixture corpus**
 - Admin **Evaluation** tab — on-demand runs and history (F36)
+- Staging / Modal playground sweeps — live corpus URLs via `qa_pairs_staging.json`
 - Coordination with #83 (reranking) and #84 (groundedness)
+
+## Two fixtures (do not mix)
+
+| File | URLs | Used by |
+|------|------|---------|
+| `qa_pairs.json` | `fixture://corpus/...` | `tests/eval/`, default `load_golden_rows()` |
+| `qa_pairs_staging.json` | live `https://` docs in DO Postgres | `eval_sweep_golden_models.py` default; staging `prod.env` runs |
+
+CI seeds local Postgres from `data/fixtures/corpus/`. Staging sweeps read Managed Postgres
+where documents use real site URLs. Keep both files in sync on **edge** cases
+(`edge-abstain-mayor-phone`, `edge-empty-quantum`); domain hit rows differ by corpus.
 
 ## Fixture schema
 
@@ -28,13 +40,12 @@ Each row is one locale variant of an eval case (`id` groups bilingual pairs).
 | `required_facts` | Yes | Bullets the answer must satisfy for faithfulness / answer relevancy |
 
 **Retrieval aggregate (≥80%):** Computed over rows with `retrieval_expectation` of `hit` or `any_of` only
-(11 rows in the live-URL set). Edge `abstain` / `empty` rows use separate assertions (TC-113).
+(CI fixture: 11 scored rows). Edge `abstain` / `empty` rows use separate assertions (TC-113).
 
 ## Staging live-URL coverage (2026-07-24)
 
-Golden rows for staging / `prod.env` sweeps use **real `https://` corpus URLs only** (no
-`fixture://`). Fixture markdown under `data/fixtures/corpus/` remains for local unit/integration
-tests that seed a local Postgres DB — not for staging eval against DO Managed Postgres.
+`qa_pairs_staging.json` — **real `https://` corpus URLs only** (no `fixture://`). Used by
+playground / staging sweeps (`scripts/eval_sweep_golden_models.py`).
 
 | Domain | Cases | Locales | Notes |
 |--------|-------|---------|-------|

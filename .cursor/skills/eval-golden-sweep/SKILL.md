@@ -79,7 +79,8 @@ uv run python scripts/eval_setup_playground_model.py \
 
 ### Interview first (required for new/changed golden rows)
 
-Before writing `qa_pairs.json`, interview the operator with **AskQuestion** (batch when
+Before writing golden fixtures (`qa_pairs.json` for CI / `qa_pairs_staging.json` for
+live corpus), interview the operator with **AskQuestion** (batch when
 possible). Cover **inputs** (what to capture) and **outputs** (how scoring resolves URLs).
 
 **Inputs — ask:**
@@ -123,8 +124,10 @@ uv run python scripts/eval_create_golden_examples.py \
   --expected-doc-url-multi https://example.org/community-resources \
   --retrieval-expectation any_of \
   --required-fact "..." \
-  --fixture data/fixtures/eval/qa_pairs.json --append
+  --fixture data/fixtures/eval/qa_pairs_staging.json --append
 ```
+
+For CI / seeded fixture corpus, use `--fixture data/fixtures/eval/qa_pairs.json` instead.
 
 Single-URL `hit` still supported via `--expected-doc-url`. Or `--draft path/to/draft.json`
 (object or array). Use `--replace` to overwrite same `id`+`locale`.

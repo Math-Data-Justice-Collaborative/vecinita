@@ -1,120 +1,124 @@
 [
   {
-    "id": "community-free-clinic-services",
+    "id": "community-food-pantry",
     "locale": "en",
     "domain": "community",
-    "question": "What free medical services does Rhode Island Free Clinic offer?",
-    "expected_doc_url": "https://www.rifreeclinic.org/",
+    "question": "When are food pantry hours updated?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
     "retrieval_expectation": "hit",
     "required_facts": [
-      "Offers preventive and primary health care free of charge",
-      "Services include dental health, ophthalmology, labs, and prescriptions"
+      "Food pantry hours are posted on the city website each Monday"
     ]
   },
   {
-    "id": "community-free-clinic-hours",
-    "locale": "en",
-    "domain": "community",
-    "question": "What are Rhode Island Free Clinic's weekday hours?",
-    "expected_doc_url": "https://www.rifreeclinic.org/",
-    "retrieval_expectation": "hit",
-    "required_facts": [
-      "Monday and Wednesday 8am-5pm",
-      "Tuesday and Thursday 8am-8pm",
-      "Friday 8am-12pm"
-    ]
-  },
-  {
-    "id": "community-nuevas-voces",
-    "locale": "en",
-    "domain": "community",
-    "question": "What is Nuevas Voces at WRWC?",
-    "expected_doc_url": "https://wrwc.org/what-we-do/community-action/",
-    "retrieval_expectation": "hit",
-    "required_facts": [
-      "Nuevas Voces is a bilingual advocacy program",
-      "It is about 10 months long"
-    ]
-  },
-  {
-    "id": "community-nuevas-voces",
+    "id": "community-food-pantry",
     "locale": "es",
     "domain": "community",
-    "question": "¿Qué es Nuevas Voces?",
-    "expected_doc_url": "https://vecina.wrwc.org/es/empoderate/",
+    "question": "¿Cuándo se actualizan los horarios del banco de alimentos?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
     "retrieval_expectation": "hit",
     "required_facts": [
-      "Es un programa bilingüe (inglés y español)",
-      "Ayuda a miembros de la comunidad a convertirse en líderes locales"
+      "El banco de alimentos publica horarios en el sitio de la ciudad cada lunes"
     ]
   },
   {
-    "id": "community-resilience-hub-location",
+    "id": "community-library-wifi",
     "locale": "en",
     "domain": "community",
-    "question": "Where is the Olneyville Resilience Hub located?",
-    "expected_doc_url": "https://wrwc.org/what-we-do/community-action/",
+    "question": "Does the library offer free Wi-Fi?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
     "retrieval_expectation": "hit",
     "required_facts": [
-      "Located at 17 Hyat Street in Providence"
+      "The library offers free Wi-Fi"
     ]
   },
   {
-    "id": "community-vecinita-intro",
-    "locale": "en",
-    "domain": "community",
-    "question": "What does VECINA help neighbors do?",
-    "expected_doc_url": "https://vecina.wrwc.org/",
-    "retrieval_expectation": "hit",
-    "required_facts": [
-      "Better access to resources",
-      "Build and advocate for their community"
-    ]
-  },
-  {
-    "id": "community-vecinita-intro",
+    "id": "community-library-wifi",
     "locale": "es",
     "domain": "community",
-    "question": "¿Qué ayuda VECINA a los vecinos a obtener?",
-    "expected_doc_url": "https://vecina.wrwc.org/",
+    "question": "¿La biblioteca ofrece Wi-Fi gratuito?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
     "retrieval_expectation": "hit",
     "required_facts": [
-      "Mejor acceso a recursos",
-      "Abogar por su comunidad"
+      "La biblioteca ofrece Wi-Fi gratuito"
     ]
   },
   {
-    "id": "housing-flood-insurance-wait",
+    "id": "community-story-time",
+    "locale": "en",
+    "domain": "community",
+    "question": "When does the library have bilingual story time?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Bilingual story time on weekends"
+    ]
+  },
+  {
+    "id": "community-story-time",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Cuándo hay cuentacuentos bilingüe en la biblioteca?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Cuentacuentos bilingüe los fines de semana"
+    ]
+  },
+  {
+    "id": "housing-eviction-notice",
     "locale": "en",
     "domain": "housing",
-    "question": "How long can it take for a flood insurance policy to go into effect?",
-    "expected_doc_url": "https://health.ri.gov/flooding",
+    "question": "Do landlords have to give written notice before eviction?",
+    "expected_doc_url": "fixture://corpus/tagged/en/housing-rights.md",
     "retrieval_expectation": "hit",
     "required_facts": [
-      "Up to 30 days for a flood insurance policy to go into effect"
+      "Landlords must provide written notice before eviction proceedings begin"
     ]
   },
   {
-    "id": "legal-aid-rils-mission",
+    "id": "legal-aid-housing",
     "locale": "en",
     "domain": "legal",
-    "question": "What is Rhode Island Legal Services' mission?",
-    "expected_doc_url": "https://www.rils.org/",
+    "question": "Can I get free legal help with a housing dispute?",
+    "expected_doc_url": "fixture://corpus/tagged/en/legal-aid-overview.md",
     "retrieval_expectation": "hit",
     "required_facts": [
-      "Provide legal representation to low-income people",
-      "Improve economic and human condition by protecting legal rights"
+      "Community legal aid clinics offer free consultations",
+      "Help with housing disputes"
     ]
   },
   {
-    "id": "legal-aid-rils-housing",
+    "id": "legal-aid-benefits",
     "locale": "en",
     "domain": "legal",
-    "question": "Does Rhode Island Legal Services work on safe affordable housing?",
-    "expected_doc_url": "https://www.rils.org/",
+    "question": "Can eligible residents get help with benefits appeals?",
+    "expected_doc_url": "fixture://corpus/tagged/en/legal-aid-overview.md",
     "retrieval_expectation": "hit",
     "required_facts": [
-      "Safe Affordable Housing is listed among RILS priorities"
+      "Eligible residents can request help with benefits appeals"
+    ]
+  },
+  {
+    "id": "community-vecinita-intro",
+    "locale": "en",
+    "domain": "community",
+    "question": "What does Vecinita help neighbors find?",
+    "expected_doc_url": "fixture://corpus/en/community-resources.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Public information about local services"
+    ]
+  },
+  {
+    "id": "community-vecinita-intro",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Qué ayuda Vecinita a los vecinos a encontrar?",
+    "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Información pública sobre servicios locales"
     ]
   },
   {
@@ -134,8 +138,8 @@
     "domain": "edge",
     "question": "housing",
     "expected_doc_urls": [
-      "https://www.rils.org/",
-      "https://health.ri.gov/flooding"
+      "fixture://corpus/tagged/en/housing-rights.md",
+      "fixture://corpus/tagged/en/legal-aid-overview.md"
     ],
     "retrieval_expectation": "any_of",
     "required_facts": [
