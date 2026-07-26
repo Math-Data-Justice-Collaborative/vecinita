@@ -184,6 +184,7 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "DATABASE_URL",
                 "VECINITA_MODAL_EMBED_URL",
                 "VECINITA_MODAL_LLM_URL",
+                "VECINITA_MODAL_PROXY_KEY",  # RD-165 — required on /generate
                 "VECINITA_CORS_ORIGINS",
                 "VECINITA_INTERNAL_WRITE_URL",
                 "VECINITA_INTERNAL_API_KEY",

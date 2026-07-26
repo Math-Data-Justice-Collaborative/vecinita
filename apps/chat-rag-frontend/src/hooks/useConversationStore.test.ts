@@ -254,6 +254,33 @@ describe("useConversationStore", () => {
     ).toBe(true);
   });
 
+  it("updateMessageById patches messages in previous after a mid-stream archive", () => {
+    const { result } = renderHook(() => useConversationStore());
+    const assistantId = "asst-inflight";
+    act(() => {
+      result.current.setActiveMessages(() => [
+        userMessage("in flight"),
+        { id: assistantId, role: "assistant", content: "" },
+      ]);
+    });
+    act(() => {
+      result.current.newChat();
+    });
+    act(() => {
+      result.current.updateMessageById(assistantId, (msg) => ({
+        ...msg,
+        content: msg.content + "Recovered",
+      }));
+    });
+
+    const archived = result.current.previous.find((conv) =>
+      conv.messages.some((m) => m.id === assistantId),
+    );
+    expect(archived?.messages.find((m) => m.id === assistantId)?.content).toBe(
+      "Recovered",
+    );
+  });
+
   it("ignores newChat on an empty active conversation and unknown ids", () => {
     const { result } = renderHook(() => useConversationStore());
     act(() => {

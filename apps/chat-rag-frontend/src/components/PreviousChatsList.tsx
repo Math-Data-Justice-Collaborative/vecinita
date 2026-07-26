@@ -12,6 +12,8 @@ type PreviousChatsListProps = {
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   onClearAll: () => void;
+  /** When true, selecting a previous chat is blocked (e.g. stream in flight). */
+  selectDisabled?: boolean;
 };
 
 /**
@@ -25,6 +27,7 @@ export function PreviousChatsList({
   onSelect,
   onDelete,
   onClearAll,
+  selectDisabled = false,
 }: PreviousChatsListProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -59,6 +62,7 @@ export function PreviousChatsList({
                   <button
                     type="button"
                     className="previous-chat-select"
+                    disabled={selectDisabled}
                     onClick={() => {
                       onSelect(conversation.id);
                     }}

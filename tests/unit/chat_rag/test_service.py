@@ -255,10 +255,12 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
             *,
             timeout: float,
             model_id: str | None = None,
+            require_proxy_key: bool = False,
         ) -> None:
             """Init  ."""
-            _ = (timeout, model_id)
+            _ = (timeout, model_id, require_proxy_key)
             captured["llm_url"] = url
+            captured["require_proxy_key"] = require_proxy_key
 
         def generate(
             self,
@@ -325,3 +327,4 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
     assert callable(embed_fn)
     assert embed_fn("housing help") == [0.01] * 384  # type: ignore[operator]
     assert captured["tag_question"] == "housing help"
+    assert captured["require_proxy_key"] is True

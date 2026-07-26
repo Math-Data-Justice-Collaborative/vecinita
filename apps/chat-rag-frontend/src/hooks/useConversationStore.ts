@@ -112,6 +112,11 @@ export type ConversationStore = {
   setActiveMessages: (
     updater: (previous: ChatMessage[]) => ChatMessage[],
   ) => void;
+  /** Patch a message by id in active or previous (survives mid-stream chat switch). */
+  updateMessageById: (
+    messageId: string,
+    updater: (message: ChatMessage) => ChatMessage,
+  ) => void;
   clearActive: () => void;
   newChat: () => void;
   selectConversation: (id: string) => void;
@@ -158,6 +163,37 @@ export function useConversationStore(): ConversationStore {
           messages: updater(current.active.messages),
         },
       }));
+    },
+    [],
+  );
+
+  const updateMessageById = useCallback(
+    (messageId: string, updater: (message: ChatMessage) => ChatMessage) => {
+      setEnvelope((current) => {
+        const patch = (messages: ChatMessage[]): ChatMessage[] =>
+          messages.map((msg) => (msg.id === messageId ? updater(msg) : msg));
+
+        if (current.active.messages.some((msg) => msg.id === messageId)) {
+          return {
+            ...current,
+            active: {
+              ...current.active,
+              messages: patch(current.active.messages),
+            },
+          };
+        }
+
+        const previous = current.previous.map((conv) => {
+          if (!conv.messages.some((msg) => msg.id === messageId)) {
+            return conv;
+          }
+          return { ...conv, messages: patch(conv.messages) };
+        });
+        const unchanged = previous.every(
+          (conv, index) => conv === current.previous[index],
+        );
+        return unchanged ? current : { ...current, previous };
+      });
     },
     [],
   );
@@ -215,6 +251,7 @@ export function useConversationStore(): ConversationStore {
     active: envelope.active,
     previous: envelope.previous,
     setActiveMessages,
+    updateMessageById,
     clearActive,
     newChat,
     selectConversation,

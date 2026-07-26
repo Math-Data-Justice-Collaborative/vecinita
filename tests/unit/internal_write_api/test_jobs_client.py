@@ -32,6 +32,7 @@ def test_enqueue_retag_posts_retag_job() -> None:
         assert request.method == "POST"
         assert request.url.path == "/jobs"
         assert request.headers["X-Vecinita-Proxy-Key"] == "proxy-key"
+        assert request.headers.get("Authorization") == "Bearer operator-jwt"
         body = request.read().decode()
         assert str(document_id) in body
         return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
@@ -43,7 +44,7 @@ def test_enqueue_retag_posts_retag_job() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
     )
 
-    result = client.enqueue_retag(document_id)
+    result = client.enqueue_retag(document_id, authorization="Bearer operator-jwt")
 
     assert result == job_id
     client.close()

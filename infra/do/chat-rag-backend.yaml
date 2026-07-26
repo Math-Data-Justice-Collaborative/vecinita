@@ -35,6 +35,9 @@ services:
       - key: VECINITA_MODAL_LLM_URL
         scope: RUN_TIME
         type: SECRET
+      - key: VECINITA_MODAL_PROXY_KEY
+        scope: RUN_TIME
+        type: SECRET
       - key: VECINITA_TOP_K
         scope: RUN_TIME
         value: "5"

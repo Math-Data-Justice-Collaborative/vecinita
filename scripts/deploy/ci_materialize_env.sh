@@ -14,8 +14,6 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
-CHECK_TARGET="${1:-}"
-
 # prod.env naming aliases
 if [[ -z "${SUPABASE_DB_PASSWORD:-}" && -n "${SUPABASE_DATABASE_PASSWORD:-}" ]]; then
   export SUPABASE_DB_PASSWORD="${SUPABASE_DATABASE_PASSWORD}"
@@ -32,12 +30,15 @@ export VITE_VECINITA_MODAL_PROXY_KEY="${VITE_VECINITA_MODAL_PROXY_KEY:-${VECINIT
 
 # Shared service URLs (Modal secret + DO backends)
 export VECINITA_INTERNAL_WRITE_URL="${VECINITA_INTERNAL_WRITE_URL:-${VECINITA_STAGING_WRITE_URL:-}}"
+export VECINITA_CHAT_RAG_URL="${VECINITA_CHAT_RAG_URL:-${VECINITA_STAGING_CHAT_URL:-}}"
+export VECINITA_CHAT_FRONTEND_URL="${VECINITA_CHAT_FRONTEND_URL:-${VECINITA_STAGING_CHAT_FRONTEND_URL:-}}"
+export VECINITA_ADMIN_FRONTEND_URL="${VECINITA_ADMIN_FRONTEND_URL:-${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}}"
 
 # CORS: derive from frontend URLs when not set explicitly
 if [[ -z "${VECINITA_CORS_ORIGINS:-}" ]]; then
   cors_parts=()
-  admin_origin="${VECINITA_ADMIN_FRONTEND_URL:-${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}}"
-  chat_origin="${VECINITA_CHAT_FRONTEND_URL:-${VECINITA_STAGING_CHAT_FRONTEND_URL:-}}"
+  admin_origin="${VECINITA_ADMIN_FRONTEND_URL:-}"
+  chat_origin="${VECINITA_CHAT_FRONTEND_URL:-}"
   [[ -n "$admin_origin" ]] && cors_parts+=("$admin_origin")
   [[ -n "$chat_origin" ]] && cors_parts+=("$chat_origin")
   if [[ ${#cors_parts[@]} -gt 0 ]]; then
@@ -58,6 +59,13 @@ _missing() {
   fi
   return 0
 }
+
+# When sourced (e.g. by sync_env.sh), only apply aliases — do not parse caller argv.
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+  return 0 2>/dev/null || true
+fi
+
+CHECK_TARGET="${1:-}"
 
 case "$CHECK_TARGET" in
   --check)

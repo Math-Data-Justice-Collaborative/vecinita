@@ -21,7 +21,7 @@ export function useChatHistory(store: ConversationStore) {
   // while a stream is still running across a Chat ⇄ Corpus round-trip,
   // preventing a concurrent stream (BUG-2026-06-25, PR #68).
   const [loading, setLoading] = useState(false);
-  const { setActiveMessages } = store;
+  const { setActiveMessages, updateMessageById } = store;
   const messages = store.active.messages;
 
   const appendUserMessage = useCallback(
@@ -45,22 +45,21 @@ export function useChatHistory(store: ConversationStore) {
 
   const appendAssistantToken = useCallback(
     (messageId: string, token: string) => {
-      setActiveMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId ? { ...msg, content: msg.content + token } : msg,
-        ),
-      );
+      // Update by id across active + previous so mid-stream chat switches
+      // (BUG-2026-07-25 / #145) do not drop tokens onto a blank archive.
+      updateMessageById(messageId, (msg) => ({
+        ...msg,
+        content: msg.content + token,
+      }));
     },
-    [setActiveMessages],
+    [updateMessageById],
   );
 
   const setAssistantSources = useCallback(
     (messageId: string, sources: Source[]) => {
-      setActiveMessages((prev) =>
-        prev.map((msg) => (msg.id === messageId ? { ...msg, sources } : msg)),
-      );
+      updateMessageById(messageId, (msg) => ({ ...msg, sources }));
     },
-    [setActiveMessages],
+    [updateMessageById],
   );
 
   return {

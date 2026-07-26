@@ -89,6 +89,7 @@ class ChatRagService:
             settings.llm_url,
             timeout=settings.request_timeout_s,
             model_id=settings.llm_model_id,
+            require_proxy_key=True,  # RD-165 — Modal /generate requires proxy key
         )
         tag_client = LlmTagClient(llm_client)
         vocabulary = vocabulary_slugs(load_seed_vocabulary())
