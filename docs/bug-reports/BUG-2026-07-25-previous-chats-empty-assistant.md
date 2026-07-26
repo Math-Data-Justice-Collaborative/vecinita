@@ -1,6 +1,6 @@
 # BUG-2026-07-25 — Previous chats restore with empty Vecinita response
 
-> Status: **fix_applied_local**
+> Status: **resolved** (PR #147 merged `f61f820`; chat-rag FE redeployed ACTIVE; staging smoke + UI load OK)
 > Issue: **#145**
 > Session: **S011-hotfix-retag-empty-chats**
 > Feature: **F33** (browser-local persistent chat history) / UJ-025

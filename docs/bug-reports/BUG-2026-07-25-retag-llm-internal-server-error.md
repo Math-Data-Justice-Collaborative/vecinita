@@ -1,6 +1,6 @@
 # BUG-2026-07-25 — Manage Tags LLM retag returns Internal Server Error
 
-> Status: **fix applied (local)** — awaiting PR / staging deploy
+> Status: **resolved** (PR #147 merged `f61f820`; staging write-api returns 502 on enqueue fail, not 500)
 > Issue: **#146**
 > Session: **S011-hotfix-retag-empty-chats**
 > Feature: **F20** (LLM auto-tagging) / Manage Tags retag
