@@ -77,6 +77,14 @@ function ChatPanelView({
     }
   }, []);
 
+  // Clear sticky alerts when the active conversation is emptied (New chat / Clear).
+  useEffect(() => {
+    if (messages.length === 0) {
+      setError(null);
+      setStatusMessage(null);
+    }
+  }, [messages.length]);
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const trimmed = question.trim();

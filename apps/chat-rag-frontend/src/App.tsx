@@ -39,6 +39,7 @@ function AppContent() {
         tags={tagFilters.tags}
         selectedTags={tagFilters.selected}
         previousChats={chat.previousChats}
+        previousSelectDisabled={chat.loading}
         onNavigate={navigate}
         onNewChat={chat.newChat}
         onToggleTag={tagFilters.toggle}

@@ -17,6 +17,8 @@ type SidebarProps = {
   tags: TagFacet[];
   selectedTags: string[];
   previousChats: Conversation[];
+  /** Block selecting previous chats while an ask stream is in flight (#145). */
+  previousSelectDisabled?: boolean;
   onNavigate: (path: string) => void;
   onNewChat: () => void;
   onToggleTag: (slug: string) => void;
@@ -41,6 +43,7 @@ export function Sidebar({
   tags,
   selectedTags,
   previousChats,
+  previousSelectDisabled = false,
   onNavigate,
   onNewChat,
   onToggleTag,
@@ -108,6 +111,7 @@ export function Sidebar({
         <PreviousChatsList
           conversations={previousChats}
           locale={locale}
+          selectDisabled={previousSelectDisabled}
           onSelect={onSelectConversation}
           onDelete={onDeleteConversation}
           onClearAll={onClearAll}
