@@ -47,9 +47,14 @@ def client() -> TestClient:
     os.environ["VECINITA_INTERNAL_API_KEY"] = _API_KEY
 
     class _StubJobsClient:
-        def enqueue_retag(self, document_id: uuid.UUID) -> uuid.UUID:
+        def enqueue_retag(
+            self,
+            document_id: uuid.UUID,
+            *,
+            authorization: str | None = None,
+        ) -> uuid.UUID:
             """Enqueue retag."""
-            _ = document_id
+            _ = (document_id, authorization)
             return uuid.uuid4()
 
     return TestClient(create_app(jobs_client=_StubJobsClient()))  # type: ignore[arg-type]

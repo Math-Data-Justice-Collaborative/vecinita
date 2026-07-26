@@ -47,16 +47,28 @@ class DataManagementJobsClient:
         if self._owns:
             self._client.close()
 
-    def enqueue_retag(self, document_id: UUID) -> UUID:
-        """Enqueue a retag job for one document."""
+    def enqueue_retag(
+        self,
+        document_id: UUID,
+        *,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Enqueue a retag job for one document.
+
+        Modal ``POST /jobs`` requires the proxy key and an admin JWT (F34). Forward the
+        caller's ``Authorization`` bearer when present so write-API→Modal enqueue succeeds.
+        """
         body = CreateJobRequest(
             urls=[],
             options=JobOptions(job_type="retag", document_id=document_id),
         )
+        headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
+        if authorization:
+            headers["Authorization"] = authorization
         response = self._client.post(
             "/jobs",
             json=body.model_dump(mode="json"),
-            headers={"X-Vecinita-Proxy-Key": self._proxy_key},
+            headers=headers,
         )
         if response.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"enqueue_retag failed: {response.status_code} {response.text}"

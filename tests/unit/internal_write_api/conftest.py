@@ -59,8 +59,14 @@ class StubJobsClient:
         """Initialize with an empty list of enqueued document ids."""
         self.enqueued: list[UUID] = []
 
-    def enqueue_retag(self, document_id: UUID) -> UUID:
+    def enqueue_retag(
+        self,
+        document_id: UUID,
+        *,
+        authorization: str | None = None,
+    ) -> UUID:
         """Record the document id and return a synthetic job id."""
+        _ = authorization
         self.enqueued.append(document_id)
         return uuid.uuid4()
 

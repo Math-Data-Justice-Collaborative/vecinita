@@ -212,8 +212,14 @@ def retag_clients(
     dm_client.headers.update({"X-Vecinita-Proxy-Key": _PROXY_KEY})
 
     class _InlineJobsClient:
-        def enqueue_retag(self, document_id: UUID) -> UUID:
+        def enqueue_retag(
+            self,
+            document_id: UUID,
+            *,
+            authorization: str | None = None,
+        ) -> UUID:
             """Enqueue retag."""
+            _ = authorization
             record = store.create_job(
                 urls=[],
                 options={"document_id": str(document_id)},

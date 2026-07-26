@@ -626,7 +626,11 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         response_model=BulkRetagResponse,
         status_code=status.HTTP_202_ACCEPTED,
     )
-    def bulk_retag(body: BulkRetagRequest, actor: WriteActorDep) -> BulkRetagResponse:  # pyright: ignore[reportUnusedFunction]
+    def bulk_retag(  # pyright: ignore[reportUnusedFunction]
+        body: BulkRetagRequest,
+        actor: WriteActorDep,
+        request: Request,
+    ) -> BulkRetagResponse:
         actor_id, actor_role = actor
         if retag_jobs is None:
             raise HTTPException(
@@ -635,6 +639,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             )
         job_ids: list[UUID] = []
         request_id = _uuid.uuid4()
+        authorization = request.headers.get("Authorization")
         for doc_id in body.document_ids:
             with engine.begin() as conn:
                 exists = conn.execute(
@@ -642,7 +647,16 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 ).scalar_one_or_none()
                 if exists is None:
                     continue
-                job_id = retag_jobs.enqueue_retag(doc_id)
+                try:
+                    job_id = retag_jobs.enqueue_retag(
+                        doc_id,
+                        authorization=authorization,
+                    )
+                except DataManagementJobsClientError as exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail=str(exc),
+                    ) from exc
                 job_ids.append(job_id)
                 emit_audit_event(
                     conn,
@@ -985,7 +999,11 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         "/internal/v1/documents/{document_id}/retag",
         response_model=RetagJobResponse,
     )
-    def retag_document(document_id: UUID, actor: WriteActorDep) -> RetagJobResponse:  # pyright: ignore[reportUnusedFunction]
+    def retag_document(  # pyright: ignore[reportUnusedFunction]
+        document_id: UUID,
+        actor: WriteActorDep,
+        request: Request,
+    ) -> RetagJobResponse:
         actor_id, actor_role = actor
         if retag_jobs is None:
             raise HTTPException(
@@ -993,6 +1011,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 detail="Retag job client not configured",
             )
         request_id = _uuid.uuid4()
+        authorization = request.headers.get("Authorization")
         with engine.begin() as conn:
             exists = conn.execute(
                 text("SELECT id FROM documents WHERE id = :document_id"),
@@ -1000,7 +1019,16 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             ).scalar_one_or_none()
             if exists is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-            job_id = retag_jobs.enqueue_retag(document_id)
+            try:
+                job_id = retag_jobs.enqueue_retag(
+                    document_id,
+                    authorization=authorization,
+                )
+            except DataManagementJobsClientError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=str(exc),
+                ) from exc
             emit_audit_event(
                 conn,
                 event_type="document.retagged",
