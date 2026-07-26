@@ -22,6 +22,7 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_INTERNAL_API_KEY` | Yes (EV-002) | Bearer for stats POST; must match write API secret |
 | `VECINITA_ENV` | No | Set `staging` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Comma-separated frontend origins, e.g. `https://vecinita-chat-rag-frontend-….ondigitalocean.app` |
+| `VECINITA_MODAL_PROXY_KEY` | Yes (RD-165) | Same proxy key as Modal `vecinita-llm` — required on `/generate` / `/warm` |
 
 ## DigitalOcean — Internal write API
 
@@ -89,8 +90,11 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 |--------|---------------|---------|
 | **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037 / TP-S010-25) |
 
-Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first).
-Proxy key must match DO internal-write-api `VECINITA_MODAL_PROXY_KEY`.
+Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first),
+or one-shot `bash scripts/deploy/sync_env.sh --modal --apply` (also merges
+`vecinita-data-management`).
+Proxy key must match DO **chat-rag-backend** and **internal-write-api**
+`VECINITA_MODAL_PROXY_KEY` (RD-165).
 
 No Vecinita Postgres secrets on embed/LLM apps. HF model cache uses Modal volume
 `llm-models` (shared by prod + playground). Staging:

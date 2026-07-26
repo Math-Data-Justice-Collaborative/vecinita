@@ -161,7 +161,7 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 |----------|-----|---------|
 | `VECINITA_MODAL_LLM_URL` | chat-rag-backend (+ health aggregator) | Prod Modal ASGI: generate, warm |
 | `VECINITA_MODAL_LLM_PLAYGROUND_URL` | internal-write-api / DM | Playground Modal ASGI: list/pull + sandbox eval generate (TP-S010-27) |
-| `VECINITA_MODAL_PROXY_KEY` | internal-write-api + Modal secrets for **both** LLM apps | `X-Vecinita-Proxy-Key` on **all** LLM routes except `/health` (RD-165) |
+| `VECINITA_MODAL_PROXY_KEY` | chat-rag-backend, internal-write-api + Modal secrets for **both** LLM apps | `X-Vecinita-Proxy-Key` on **all** LLM routes except `/health` (RD-165) |
 | `VECINITA_LLM_MODEL_ID` | Modal / consumers | Prod pin default (`qwen2.5:1.5b-instruct`) — RD-169 |
 
 **`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.

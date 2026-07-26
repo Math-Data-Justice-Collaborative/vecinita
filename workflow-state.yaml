@@ -70,6 +70,17 @@ project:
         — do not apply yet: delta 01+04 then 07 slices A=(1)+(4), B=(2)+(3), C=(5)+(6), D=(7), E=(8); then 08→13; skip 02/03/05/06.
         00-context in_progress until routing approved + context brief written.'
       routing_amendment_approved: true
+      s010_baseline:
+        status: parked
+        parked_at: '2026-07-25'
+        session_id: S010-unify-llm-service
+        branch: feat/S010-unify-llm-service
+        evolve_cycle_id: EV-011
+        note: 'User closed S010 to start hotfix for #146/#145; T80.7 still blocked; EV-011/M80 incomplete; can resume later
+          as a new session if needed.'
+        current_task: T80.7
+        task_status: blocked
+        milestone: M80
     01-requirements:
       status: completed
       started_at: '2026-07-08'
@@ -364,7 +375,10 @@ project:
         - T81.3
         - T81.4
         - T81.5
-        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains
+          (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+          Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+          this session unless user requests.'
         M79: all tasks completed
         M81: all tasks completed
       completed_milestones:
@@ -372,7 +386,10 @@ project:
       - M78
       - M79
       - M81
-      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+        live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+        Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+        this session unless user requests.'
       s008_baseline:
         status: completed
         started_at: '2026-07-02'
@@ -443,6 +460,9 @@ project:
             sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only).
             Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
             change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
+      session_parked_at: '2026-07-25'
+      session_parked_note: 'S010/EV-011 parked 2026-07-25 — session closed for hotfix #146/#145. T80.7 still blocked; M80
+        incomplete; can resume later as new session.'
     08-verify-build:
       status: completed
       started_at: '2026-07-08'
@@ -751,15 +771,124 @@ project:
       - modal_h4_cors_waived_proxy_auth
       - s001_t12_pending
       - h0ci_blocking_after_merge
+      pending_rerun_for_session: S011-hotfix-retag-empty-chats
+      pending_rerun_note: 'Queued after S011 hotfix merge — staging smoke for #146/#145 (2026-07-25).'
     19-address-pr-review:
       status: in_progress
       started: '2026-07-07'
       last_cycle: PRM-011
-session_counter: 10
+    14-hotfix:
+      status: in_progress
+      started_at: '2026-07-25'
+      session_id: S011-hotfix-retag-empty-chats
+      branch: fix/BUG-2026-07-25-retag-llm-500
+      bugs:
+      - id: BUG-2026-07-25-retag-llm-internal-server-error
+        github_issue: 146
+        summary: Manage Tags LLM retag returns Internal Server Error (500)
+        status: fix_applied_local
+        order: 1
+        bug_report: docs/bug-reports/BUG-2026-07-25-retag-llm-internal-server-error.md
+        repro_test: tests/bugs/test_bug_2026_07_25_retag_llm_internal_server_error.py
+        repro_status: red_to_green
+        note: 'Root cause = write API did not forward Authorization JWT to Modal POST /jobs (F34); uncaught DataManagementJobsClientError → 500. Fix forwards Authorization + maps enqueue errors to 502.'
+      - id: BUG-2026-07-25-previous-chats-empty-assistant
+        github_issue: 145
+        summary: Previous chats show empty Vecinita/assistant response
+        status: fix_applied_local
+        order: 2
+        bug_report: docs/bug-reports/BUG-2026-07-25-previous-chats-empty-assistant.md
+        repro_test: apps/chat-rag-frontend/src/test/test_bug_2026_07_25_previous_chats_empty_assistant.test.tsx
+        repro_status: red_to_green
+        note: 'Root cause = mid-stream selectConversation archives empty assistant; stream tokens only updated active. Fix = updateMessageById + disable select while loading. Staging happy-path verified after PROXY_KEY sync (Ask→stream→New chat→select restores assistant+sources).'
+      note: 'S011 hotfix — #146/#145 both fix_applied_local. User continued from 16-evolve attach → 14-hotfix; admin FE ACTIVE + proxy keys match confirmed. Proceeding commit → PR → merge → 15-service-health (S011-D3 / commit_and_pr_when_user_asks). Prior S002 F32 bugs remain in history.'
+      current_bug: BUG-2026-07-25-previous-chats-empty-assistant
+      current_action: commit_pr
+      next_action: committing_and_opening_pr
+      history:
+      - status: in_progress
+        started_at: '2026-06-26'
+        session_id: S002-admin-job-management
+        branch: feat/S002-admin-job-management
+        bugs:
+        - id: BUG-2026-06-26-jobs-dialog-aria-warning
+          summary: Jobs page dialog/sheet emits aria-describedby (DialogContent) accessibility warning
+          layer: frontend
+          bug_report: docs/bug-reports/BUG-2026-06-26-jobs-dialog-aria-warning.md
+          repro_test: apps/data-management-frontend/src/test/test_bug_2026_06_26_jobs_dialog_aria_warning.test.tsx
+          status: open
+        - id: BUG-2026-06-26-get-jobs-405-modal-production
+          summary: GET /jobs returns 405 Method Not Allowed on production Modal data-management service
+          layer: api
+          bug_report: docs/bug-reports/BUG-2026-06-26-get-jobs-405-modal-production.md
+          repro_test: tests/e2e/test_bug_2026_06_26_get_jobs_405.py
+          status: open
+        note: 'Two distinct F32 (#89) bugs surfaced post-build; fixing in-session on feat/S002 before deploy (12/13 still
+          pending). Follows bug-investigation: one report + one repro test per bug.'
+        superseded_at: '2026-07-25'
+        superseded_by: S011-hotfix-retag-empty-chats
+      - status: completed
+        completed_at: '2026-06-25'
+        bug_report: docs/bug-reports/BUG-2026-06-25-chat-disappears-on-corpus-tab.md
+        summary: Chat history lost on Corpus tab switch (#53) — useChatHistory lifted to app shell
+        branch: fix/chat-tab-corpus-state
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
+        head_sha: 6f7875f
+        verified: L1-L2 pass; ci.yml green @ 6f7875f
+        cursor_rule: .cursor/rules/frontend-session-state-lifting.mdc
+        deploy: after merge to main (user triggers)
+      - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
+        completed_at: '2026-05-21'
+      prior_started_at: '2026-06-26'
+session_counter: 11
 active_session:
-  id: S010-unify-llm-service
-  type: feature
+  id: S011-hotfix-retag-empty-chats
+  type: hotfix
   status: in_progress
+  intent: 'Fix #146 Manage Tags LLM retag Internal Server Error, then #145 previous chats empty Vecinita response; PR + staging
+    smoke after merge'
+  branch: fix/BUG-2026-07-25-retag-llm-500
+  orchestrator: 14-hotfix
+  evolve_cycle_id:
+  artifacts_dir: docs/sessions/S011-hotfix-retag-empty-chats/
+  started_at: '2026-07-25'
+  current_stage: 14-hotfix
+  linked_issues:
+  - 146
+  - 145
+  routing_plan:
+  - stage: 14-hotfix
+    required: true
+    status: in_progress
+    started_at: '2026-07-25'
+    note: '#146/#145 both fix_applied_local. User authorized commit→PR→merge; then 15-service-health. Admin FE ACTIVE + proxy keys match confirmed (2026-07-26).'
+  - stage: 15-service-health
+    required: true
+    status: pending
+    note: Staging smoke after merge (H1–H5 / deploy intent).
+  context_briefs:
+  - docs/sessions/S011-hotfix-retag-empty-chats/session-brief.md
+  - docs/sessions/S011-hotfix-retag-empty-chats/routing-plan.md
+  handoff:
+    next_skill: 14-hotfix
+    current_bug: BUG-2026-07-25-previous-chats-empty-assistant
+    next_action: committing_and_opening_pr
+    then_skill: 15-service-health
+    then_note: After merge to main
+    bugs_order:
+    - BUG-2026-07-25-retag-llm-internal-server-error
+    - BUG-2026-07-25-previous-chats-empty-assistant
+    bugs_status:
+      BUG-2026-07-25-retag-llm-internal-server-error: fix_applied_local
+      BUG-2026-07-25-previous-chats-empty-assistant: fix_applied_local
+    deploy_intent: fix_plus_staging_smoke_after_merge
+    deploy_sync_2026_07_25: 'Modal secrets + DO all apps synced; chat-rag + admin-frontend redeployed ACTIVE; Ask/stream/health OK; #145 happy-path verified after PROXY_KEY sync'
+    continued_from_16_evolve_attach: true
+    admin_fe_active_proxy_keys_confirmed: '2026-07-26'
+sessions:
+- id: S010-unify-llm-service
+  type: feature
+  status: parked
   intent: Deprecate vecinita-ollama; consolidate all LLM inference, model download/staging onto vecinita-llm (ADR-037)
   branch: feat/S010-unify-llm-service
   orchestrator: 16-evolve
@@ -855,7 +984,10 @@ active_session:
     - M78
     - M79
     - M81
-    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+      live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+      Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+      this session unless user requests.'
   - stage: 08-verify-build
     status: pending
     note: Re-run after consolidation build slices
@@ -904,7 +1036,10 @@ active_session:
     stage: 08-verify-build
   handoff:
     next_skill: 07-build
-    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+      live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+      Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+      this session unless user requests.'
     mode: delta
     current_task: T80.7
     task_status: blocked
@@ -912,7 +1047,13 @@ active_session:
     blocked_tasks:
     - T80.7
     completed_milestone: M81
-sessions:
+    resume_hint: Resume as new session from feat/S010-unify-llm-service; current_task T80.7 blocked; approve/waive T80.7
+      then 08-verify-build → PR-53.
+  closed_at: '2026-07-25'
+  close_note: 'User closed S010 to start hotfix for #146/#145; T80.7 still blocked; EV-011/M80 incomplete; can resume later
+    as a new session if needed.'
+  current_stage_note: Closed parked at 07-build — T80.7 blocked (operator live Modal+DO); M80 incomplete; Phase 18 gate 
+    PENDING; M77–M79+M81 complete.
 - id: S009-playground-model-download
   type: feature
   status: paused
@@ -2373,7 +2514,10 @@ stages:
       - T81.3
       - T81.4
       - T81.5
-      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+        live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+        Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+        this session unless user requests.'
       M79: all tasks completed
       M81: all tasks completed
     completed_milestones:
@@ -2381,7 +2525,10 @@ stages:
     - M78
     - M79
     - M81
-    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+      live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+      Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+      this session unless user requests.'
     s008_baseline:
       status: completed
       started_at: '2026-07-02'
@@ -2484,6 +2631,9 @@ stages:
         privacy guard (no extra admin traffic on idle/log-out-everywhere), CORS preflight for signout + email-test, e2e UJ-036/UJ-037,
         OpenAPI (signout/email-test/q), runbook (force-signout RPC apply, test-send workflow, AC-U10-U16). DM FE Vitest 303/303;
         new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
+    session_parked_at: '2026-07-25'
+    session_parked_note: 'S010/EV-011 parked 2026-07-25 — session closed for hotfix #146/#145. T80.7 still blocked; M80 incomplete;
+      can resume later as new session.'
   08-verify-build:
     status: completed
     started_at: '2026-07-08'
@@ -2809,28 +2959,54 @@ stages:
     note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
   14-hotfix:
     status: in_progress
-    started_at: '2026-06-26'
-    partial_rerun_at: '2026-06-26'
-    partial_rerun_note: S002 in-session hotfix — F32 Job Management surface; user-amended into S002 routing plan after 
-      09-qa
-    session_id: S002-admin-job-management
-    branch: feat/S002-admin-job-management
+    started_at: '2026-07-25'
+    session_id: S011-hotfix-retag-empty-chats
+    branch: fix/BUG-2026-07-25-retag-llm-500
     bugs:
-    - id: BUG-2026-06-26-jobs-dialog-aria-warning
-      summary: Jobs page dialog/sheet emits aria-describedby (DialogContent) accessibility warning
-      layer: frontend
-      bug_report: docs/bug-reports/BUG-2026-06-26-jobs-dialog-aria-warning.md
-      repro_test: apps/data-management-frontend/src/test/test_bug_2026_06_26_jobs_dialog_aria_warning.test.tsx
-      status: open
-    - id: BUG-2026-06-26-get-jobs-405-modal-production
-      summary: GET /jobs returns 405 Method Not Allowed on production Modal data-management service
-      layer: api
-      bug_report: docs/bug-reports/BUG-2026-06-26-get-jobs-405-modal-production.md
-      repro_test: tests/e2e/test_bug_2026_06_26_get_jobs_405.py
-      status: open
-    note: 'Two distinct F32 (#89) bugs surfaced post-build; fixing in-session on feat/S002 before deploy (12/13 still pending).
-      Follows bug-investigation: one report + one repro test per bug.'
+    - id: BUG-2026-07-25-retag-llm-internal-server-error
+      github_issue: 146
+      summary: Manage Tags LLM retag returns Internal Server Error (500)
+      status: fix_applied_local
+      order: 1
+      bug_report: docs/bug-reports/BUG-2026-07-25-retag-llm-internal-server-error.md
+      repro_test: tests/bugs/test_bug_2026_07_25_retag_llm_internal_server_error.py
+      repro_status: red_to_green
+      note: 'Root cause = write API did not forward Authorization JWT to Modal POST /jobs (F34); uncaught DataManagementJobsClientError → 500. Fix forwards Authorization + maps enqueue errors to 502.'
+    - id: BUG-2026-07-25-previous-chats-empty-assistant
+      github_issue: 145
+      summary: Previous chats show empty Vecinita/assistant response
+      status: fix_applied_local
+      order: 2
+      bug_report: docs/bug-reports/BUG-2026-07-25-previous-chats-empty-assistant.md
+      repro_test: apps/chat-rag-frontend/src/test/test_bug_2026_07_25_previous_chats_empty_assistant.test.tsx
+      repro_status: red_to_green
+      note: 'Root cause = mid-stream selectConversation archives empty assistant; stream tokens only updated active. Fix = updateMessageById + disable select while loading. Staging happy-path verified after PROXY_KEY sync (Ask→stream→New chat→select restores assistant+sources).'
+    note: 'S011 hotfix — #146/#145 both fix_applied_local. User continued from 16-evolve attach → 14-hotfix; admin FE ACTIVE + proxy keys match confirmed. Proceeding commit → PR → merge → 15-service-health (S011-D3 / commit_and_pr_when_user_asks). Prior S002 F32 bugs remain in history.'
+    current_bug: BUG-2026-07-25-previous-chats-empty-assistant
+    current_action: commit_pr
+    next_action: committing_and_opening_pr
     history:
+    - status: in_progress
+      started_at: '2026-06-26'
+      session_id: S002-admin-job-management
+      branch: feat/S002-admin-job-management
+      bugs:
+      - id: BUG-2026-06-26-jobs-dialog-aria-warning
+        summary: Jobs page dialog/sheet emits aria-describedby (DialogContent) accessibility warning
+        layer: frontend
+        bug_report: docs/bug-reports/BUG-2026-06-26-jobs-dialog-aria-warning.md
+        repro_test: apps/data-management-frontend/src/test/test_bug_2026_06_26_jobs_dialog_aria_warning.test.tsx
+        status: open
+      - id: BUG-2026-06-26-get-jobs-405-modal-production
+        summary: GET /jobs returns 405 Method Not Allowed on production Modal data-management service
+        layer: api
+        bug_report: docs/bug-reports/BUG-2026-06-26-get-jobs-405-modal-production.md
+        repro_test: tests/e2e/test_bug_2026_06_26_get_jobs_405.py
+        status: open
+      note: 'Two distinct F32 (#89) bugs surfaced post-build; fixing in-session on feat/S002 before deploy (12/13 still pending).
+        Follows bug-investigation: one report + one repro test per bug.'
+      superseded_at: '2026-07-25'
+      superseded_by: S011-hotfix-retag-empty-chats
     - status: completed
       completed_at: '2026-06-25'
       bug_report: docs/bug-reports/BUG-2026-06-25-chat-disappears-on-corpus-tab.md
@@ -2843,6 +3019,7 @@ stages:
       deploy: after merge to main (user triggers)
     - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
       completed_at: '2026-05-21'
+    prior_started_at: '2026-06-26'
   15-service-health:
     status: completed
     started_at: '2026-06-25'
@@ -2885,6 +3062,8 @@ stages:
       - llm_cold_start_do_504_until_warm
       - modal_h4_cors_waived_proxy_auth
       - deploy_drift_c4bc847_vs_4d2f665
+    pending_rerun_for_session: S011-hotfix-retag-empty-chats
+    pending_rerun_note: 'Queued after S011 hotfix merge — staging smoke for #146/#145 (2026-07-25).'
   17-retrospective:
     status: pending
   18-pr-review:
@@ -2931,7 +3110,7 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: '2026-06-25'
+    last_verified: '2026-07-25'
     commit_deployed: 4f3f741
     commit_head: 4f3f741
     drift: false
@@ -2960,6 +3139,7 @@ deployment:
     - 'S001 deployed 2026-06-26: Modal llm+embedding snapshots; DO chat apps on feat/S001-modal-cold-start-snapshot @ 4f3f741'
     - S001 cold+prewarm ask 14.3s (< 60s DO gateway target)
     - DO chat apps branch pinned to feature branch until merge to main
+    - 'S011 2026-07-25 deploy sync: Modal secrets + DO all apps via sync_env (merge/llm); chat-rag + admin-frontend redeployed ACTIVE; Ask/stream/health OK; #145 staging happy-path verified after chat-rag PROXY_KEY sync. Hotfix code (#146/#145) still local — formal 15-service-health after merge.'
   url_discovery:
     method: uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
     modal_admin_manual: true
@@ -3920,7 +4100,7 @@ evolve_cycles:
   feature_ids:
   - F39
   title: Unified vecinita-llm Modal app (deprecate vecinita-ollama)
-  status: in_progress
+  status: parked
   started: '2026-07-08'
   session_id: S010-unify-llm-service
   current_stage: 07-build
@@ -4050,7 +4230,10 @@ evolve_cycles:
       - M78
       - M79
       - M81
-      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+        live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+        Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+        this session unless user requests.'
       execution_plan:
         active_task: T80.7
         T79.2: completed
@@ -4087,7 +4270,10 @@ evolve_cycles:
         T81.5: completed
         T81.5_completed_at: '2026-07-24'
         active_milestone: M80
-        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md. Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed this session unless user requests.'
+        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains
+          (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+          Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+          this session unless user requests.'
         M79: all tasks completed
         M81: all tasks completed
     02-verify-plan:
@@ -4112,7 +4298,11 @@ evolve_cycles:
     phase_a: Passed 2026-07-10 — Phase A complete via 01-requirements delta (RD-163–RD-172)
     phase_b: Passed 2026-07-10 — Phase B complete via 04-tech-plan (TP-S010-17–31) + approved skip of 05/06; user 
       explicitly started 07-build (/07-build start T77.1)
-  note: Consolidate LLM onto vecinita-llm; HF Hub staging; deprecate vecinita-ollama per ADR-037
+  note: 'F39 unified vecinita-llm — parked 2026-07-25 with S010 close for #146/#145 hotfix. T80.7 blocked; M80 incomplete;
+    M77–M79+M81 complete. Resume with new session on feat/S010-unify-llm-service.'
+  parked_at: '2026-07-25'
+  pause_note: 'User closed S010 to start hotfix for #146/#145; T80.7 still blocked; EV-011/M80 incomplete; can resume later
+    as a new session if needed.'
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -5689,6 +5879,44 @@ decisions_log:
   renamed to playground_*.'
 - '2026-07-23: S010/EV-011 T77.6 in_progress — Vitest + Playwright FE rename (TC-135–137); user approved continue through
   M77 (T77.6 + T77.7). Parent to sync execution-plan.md Current State → T77.6 in_progress.'
+- id: S011-D1-bugs-order
+  category: Decision
+  choice: A
+  summary: 'Bugs to fix in order: GitHub #146 (LLM retag 500) then #145 (previous chats empty assistant); PR + staging smoke
+    after merge'
+  stage: 14-hotfix
+  session_id: S011-hotfix-retag-empty-chats
+  timestamp: '2026-07-25'
+- id: S011-D2-close-s010
+  category: Decision
+  choice: B
+  summary: CLOSE S010-unify-llm-service (not pause) then open new hotfix session; S010 archived as parked with T80.7 
+    blocked / EV-011/M80 incomplete
+  stage: 00-context
+  session_id: S011-hotfix-retag-empty-chats
+  prior_session_id: S010-unify-llm-service
+  timestamp: '2026-07-25'
+- id: S011-D3-deploy-intent
+  category: Decision
+  choice: B
+  summary: 'Deploy intent: fix + staging smoke after merge (not investigate-only; not PR-only)'
+  stage: 14-hotfix
+  session_id: S011-hotfix-retag-empty-chats
+  timestamp: '2026-07-25'
+- id: S011-D4-chat-rag-proxy-key-sync
+  category: Decision
+  choice: applied
+  summary: 'chat-rag requires VECINITA_MODAL_PROXY_KEY for Ask/stream; synced via Modal secrets + DO sync_env merge/llm; chat-rag + admin-frontend redeployed ACTIVE — Ask/stream/health OK; unblocked #145 staging happy-path verification'
+  stage: 14-hotfix
+  session_id: S011-hotfix-retag-empty-chats
+  timestamp: '2026-07-25'
+- id: S011-D5-proceed-commit-pr
+  category: Decision
+  choice: proceed
+  summary: 'User continued from 16-evolve attach; routed to 14-hotfix. Both #146/#145 fix_applied_local; admin FE ACTIVE + proxy keys match confirmed. Proceeding commit → PR → merge → 15-service-health per S011-D3 / commit_and_pr_when_user_asks.'
+  stage: 14-hotfix
+  session_id: S011-hotfix-retag-empty-chats
+  timestamp: '2026-07-26'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -6030,16 +6258,58 @@ artifacts:
   kind: roadmap
   session_id: S010-unify-llm-service
   stage: 04-tech-plan
+- path: docs/sessions/S011-hotfix-retag-empty-chats/session-brief.md
+  kind: session-brief
+  session_id: S011-hotfix-retag-empty-chats
+  stage: 00-context
+- path: docs/sessions/S011-hotfix-retag-empty-chats/routing-plan.md
+  kind: routing-plan
+  session_id: S011-hotfix-retag-empty-chats
+  stage: 00-context
+- path: docs/bug-reports/BUG-2026-07-25-retag-llm-internal-server-error.md
+  kind: bug-report
+  session_id: S011-hotfix-retag-empty-chats
+  stage: 14-hotfix
+  github_issue: 146
+  status: fix_applied_local
+- path: tests/bugs/test_bug_2026_07_25_retag_llm_internal_server_error.py
+  kind: bug-repro-test
+  session_id: S011-hotfix-retag-empty-chats
+  stage: 14-hotfix
+  github_issue: 146
+  repro_status: red_to_green
+- path: docs/bug-reports/BUG-2026-07-25-previous-chats-empty-assistant.md
+  kind: bug-report
+  session_id: S011-hotfix-retag-empty-chats
+  stage: 14-hotfix
+  github_issue: 145
+  status: fix_applied_local
+- path: apps/chat-rag-frontend/src/test/test_bug_2026_07_25_previous_chats_empty_assistant.test.tsx
+  kind: bug-repro-test
+  session_id: S011-hotfix-retag-empty-chats
+  stage: 14-hotfix
+  github_issue: 145
+  repro_status: red_to_green
 git_history:
-  current_branch: feat/S010-unify-llm-service
+  current_branch: fix/BUG-2026-07-25-retag-llm-500
   branches:
+  - name: fix/BUG-2026-07-25-retag-llm-500
+    purpose: 'S011 hotfix — #146 retag LLM 500 then #145 empty assistant'
+    base: main
+    status: open
+    created_at: '2026-07-25'
+    session_id: S011-hotfix-retag-empty-chats
+    note: Will create from main; parent creates branch.
   - name: feat/S010-unify-llm-service
     purpose: EV-011 / S010 — unified vecinita-llm Modal app (deprecate vecinita-ollama, ADR-037)
     base: main
-    status: open
+    status: paused
     created_at: '2026-07-08'
     recreated_at: '2026-07-10'
     note: Recreated from main after
+    paused_at: '2026-07-25'
+    pause_note: 'User closed S010 to start hotfix for #146/#145; T80.7 still blocked; EV-011/M80 incomplete; can resume later
+      as a new session if needed.'
   - name: feat/S009-playground-model-download
     purpose: EV-010 / S009 — F38 playground model download (super-admin Ollama UI)
     base: main
@@ -6824,9 +7094,11 @@ git_history:
   - '2026-07-24 S010: T79.5 committed (51d97a7); T79.6 in_progress — extend UJ-048 API E2E for unmapped-tag error'
   - '2026-07-24 S010: T79.6 committed (4b1370e); M79 complete; running 08-verify-build then M80'
   - '2026-07-24 S010: T80.1 completed (5788fb9); T80.2 in_progress — vecinita-llm-playground Modal app'
-  - '2026-07-24 S010: T80.2–T80.6 completed (4c2c149, 60a30c6, 895310c, 05296ce, 4e5c216); T80.7 blocked — operator live Modal+DO deploy/smoke'
+  - '2026-07-24 S010: T80.2–T80.6 completed (4c2c149, 60a30c6, 895310c, 05296ce, 4e5c216); T80.7 blocked — operator live Modal+DO
+    deploy/smoke'
   - '2026-07-24 S010: Advance to M81/T81.1 in_progress while T80.7 remains blocked (operator live deploy)'
-  - '2026-07-24 S010: T81.1–T81.5 completed (a0e38b2–5061aa8); M81 done; active remains T80.7 blocked; Phase 18 gate PENDING; 07-build still in_progress'
+  - '2026-07-24 S010: T81.1–T81.5 completed (a0e38b2–5061aa8); M81 done; active remains T80.7 blocked; Phase 18 gate PENDING;
+    07-build still in_progress'
 constraints:
   cost:
     target_usd_per_month: 25

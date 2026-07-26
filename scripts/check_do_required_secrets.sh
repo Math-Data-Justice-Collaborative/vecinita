@@ -16,6 +16,16 @@ for spec in infra/do/chat-rag-backend.yaml infra/do/internal-write-api.yaml; do
   fi
 done
 
+# ChatRAG must send X-Vecinita-Proxy-Key on LLM /generate (RD-165).
+if ! rg -q 'key: VECINITA_MODAL_PROXY_KEY' infra/do/chat-rag-backend.yaml; then
+  echo "ERROR: chat-rag-backend.yaml must declare VECINITA_MODAL_PROXY_KEY (RD-165)." >&2
+  exit 1
+fi
+if ! rg -q 'key: VECINITA_MODAL_PROXY_KEY' infra/do/internal-write-api.yaml; then
+  echo "ERROR: internal-write-api.yaml must declare VECINITA_MODAL_PROXY_KEY." >&2
+  exit 1
+fi
+
 if ! rg -q 'VECINITA_MODAL_EMBED_URL' scripts/deploy/do_apps.py; then
   echo "ERROR: do_apps.py must sync VECINITA_MODAL_EMBED_URL." >&2
   exit 1
@@ -43,6 +53,31 @@ fi
 
 if ! rg -q 'VECINITA_MODAL_LLM_PLAYGROUND_URL' scripts/deploy/do_apps.py; then
   echo "ERROR: do_apps.py must sync VECINITA_MODAL_LLM_PLAYGROUND_URL." >&2
+  exit 1
+fi
+
+# do_apps must sync PROXY_KEY onto chat-rag-backend (not only write-api).
+if ! awk '
+  /name == "vecinita-chat-rag-backend"/ { in_block=1 }
+  in_block && /VECINITA_MODAL_PROXY_KEY/ { found=1; exit }
+  in_block && /elif name ==/ { exit }
+  END { exit found ? 0 : 1 }
+' scripts/deploy/do_apps.py; then
+  echo "ERROR: do_apps.py must sync VECINITA_MODAL_PROXY_KEY for chat-rag-backend." >&2
+  exit 1
+fi
+
+# One-shot sync must materialize aliases and push both Modal secrets.
+if ! rg -q 'ci_materialize_env.sh' scripts/deploy/sync_env.sh; then
+  echo "ERROR: sync_env.sh must source ci_materialize_env.sh (staging URL aliases)." >&2
+  exit 1
+fi
+if ! rg -q 'sync_llm_secret.sh' scripts/deploy/sync_env.sh; then
+  echo "ERROR: sync_env.sh must call sync_llm_secret.sh (vecinita-llm proxy key)." >&2
+  exit 1
+fi
+if ! rg -q 'sync_modal_secret.sh --merge' scripts/deploy/sync_env.sh; then
+  echo "ERROR: sync_env.sh Modal path must use --merge (preserve live keys)." >&2
   exit 1
 fi
 

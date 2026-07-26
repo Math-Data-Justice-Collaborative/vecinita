@@ -4,18 +4,21 @@
 #   GitHub    — push Actions repository secrets (sync_github_secrets.sh).
 #   Supabase  — source of truth: validate SUPABASE_URL + JWKS (ES256, ADR-028);
 #               optionally bootstrap the first admin (scripts/seed_first_admin.py).
-#   Modal     — push the `vecinita-data-management` secret (sync_modal_secret.sh).
+#   Modal     — data-mgmt secret (--merge) + llm proxy secret (sync_llm_secret.sh).
 #   DigitalOcean — push app env from shell (do_apps.py sync-all-secrets).
 #
 # Env comes from the shell — load prod.env first (gitignored):
 #   set -a && source prod.env && set +a
 #   export DIGITALOCEAN_TOKEN='dop_v1_...'
 #
+# Staging URL aliases (VECINITA_STAGING_* → sync keys) are applied via
+# ci_materialize_env.sh before any provider sync.
+#
 # Usage:
 #   bash scripts/deploy/sync_env.sh                 # dry run, all environments
 #   bash scripts/deploy/sync_env.sh --apply         # write to all environments
 #   bash scripts/deploy/sync_env.sh --github --apply # only GitHub Actions secrets
-#   bash scripts/deploy/sync_env.sh --modal --apply # only Modal
+#   bash scripts/deploy/sync_env.sh --modal --apply # only Modal (data-mgmt + llm)
 #   bash scripts/deploy/sync_env.sh --do --apply    # only DigitalOcean
 #   bash scripts/deploy/sync_env.sh --supabase --seed-admin --apply
 #
@@ -26,6 +29,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
+
+# Derive deploy aliases from staging / VITE naming used in prod.env.
+# shellcheck source=ci_materialize_env.sh
+source "${ROOT}/scripts/deploy/ci_materialize_env.sh"
 
 APPLY=0
 SEED_ADMIN=0
@@ -119,15 +126,22 @@ if [[ "$DO_GITHUB" -eq 1 ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Modal — vecinita-data-management secret
+# Modal — data-management (--merge) + llm proxy secret
 # ---------------------------------------------------------------------------
 if [[ "$DO_MODAL" -eq 1 ]]; then
   echo
-  echo "==> [Modal] sync vecinita-data-management secret"
+  echo "==> [Modal] sync vecinita-data-management secret (--merge preserves live keys)"
   if [[ "$APPLY" -eq 1 ]]; then
-    bash scripts/deploy/sync_modal_secret.sh --apply
+    bash scripts/deploy/sync_modal_secret.sh --merge --apply
   else
-    bash scripts/deploy/sync_modal_secret.sh
+    bash scripts/deploy/sync_modal_secret.sh --merge
+  fi
+  echo
+  echo "==> [Modal] sync vecinita-llm secret (proxy key for prod + playground)"
+  if [[ "$APPLY" -eq 1 ]]; then
+    bash scripts/deploy/sync_llm_secret.sh --apply
+  else
+    bash scripts/deploy/sync_llm_secret.sh
   fi
 fi
 

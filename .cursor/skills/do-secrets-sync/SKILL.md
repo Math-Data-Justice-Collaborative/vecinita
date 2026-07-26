@@ -44,12 +44,25 @@ Validator: `scripts/deploy/modal_url_validate.py` (also invoked from `do_apps.py
 
 | DO app | Keys |
 |--------|------|
-| `vecinita-chat-rag-backend` | `VECINITA_MODAL_EMBED_URL`, `VECINITA_MODAL_LLM_URL`, `DATABASE_URL`, … |
-| `vecinita-internal-write-api` | Same embed/LLM + `VECINITA_MODAL_DATA_MGMT_URL`, … |
+| `vecinita-chat-rag-backend` | `VECINITA_MODAL_EMBED_URL`, `VECINITA_MODAL_LLM_URL`, `VECINITA_MODAL_PROXY_KEY`, `DATABASE_URL`, … |
+| `vecinita-internal-write-api` | Same embed/LLM + `VECINITA_MODAL_PROXY_KEY` + `VECINITA_MODAL_DATA_MGMT_URL`, … |
 
 YAML declarations: `infra/do/chat-rag-backend.yaml`, `infra/do/internal-write-api.yaml`.
 
 ## Workflow
+
+### 0 — One-shot (preferred)
+
+```bash
+set -a && source prod.env && set +a
+export DIGITALOCEAN_TOKEN='dop_v1_...'
+bash scripts/deploy/sync_env.sh              # dry run (all providers)
+bash scripts/deploy/sync_env.sh --apply      # GitHub + Modal (merge+llm) + DO
+```
+
+`sync_env.sh` materializes `VECINITA_STAGING_*` → sync keys, merges Modal
+data-mgmt, syncs `vecinita-llm` proxy key, and pushes DO app env (including
+chat-rag `VECINITA_MODAL_PROXY_KEY`).
 
 ### 1 — Load operator env
 
