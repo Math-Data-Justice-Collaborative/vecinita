@@ -747,16 +747,17 @@ project:
       partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
       report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
     15-service-health:
-      status: in_progress
+      status: completed
       started_at: '2026-07-26'
-      completed_at: '2026-06-25'
+      completed_at: '2026-07-26'
       partial_rerun_at: '2026-07-26'
-      partial_rerun_note: 'S011 post-merge staging smoke after PR #147 — chat-rag FE redeploy + H0ci/H1–H5 for #145/#146'
+      partial_rerun_note: 'S011 post-merge staging smoke complete (PR #147 / f61f820) — overall PASS; H4 modal waiver; see
+        service-health.md'
       environment: staging
       infra: pass
       e2e: pass
       overall: pass
-      report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+      report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
       tiers:
       - H1
       - H2
@@ -779,10 +780,28 @@ project:
         session_note: S001 baseline (pre-S011 rerun)
         report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
         overall: pass
+      - status: completed
+        completed_at: '2026-07-26'
+        session_id: S011-hotfix-retag-empty-chats
+        session_note: 'S011 post-merge smoke after PR #147 (f61f820)'
+        report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+        overall: pass
+        tiers:
+        - H0ci
+        - H1
+        - H2
+        - H3
+        - H3b
+        - H4
+        - H5
+        advisories:
+        - h4_modal_waiver
+        - h6_browser_uj_waived_v1
       session_id: S011-hotfix-retag-empty-chats
       prior_completed_at: '2026-06-25'
       prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
-      note: 'S011 in_progress: post-merge smoke; prior S001 health record retained in history/prior_*.'
+      note: 'S011 post-merge smoke complete. Overall PASS. Report at docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md'
+      completed: '2026-07-26'
     19-address-pr-review:
       status: in_progress
       started: '2026-07-07'
@@ -796,17 +815,19 @@ project:
       - id: BUG-2026-07-25-retag-llm-internal-server-error
         github_issue: 146
         summary: Manage Tags LLM retag returns Internal Server Error (500)
-        status: fix_applied_local
+        status: resolved
         order: 1
         bug_report: docs/bug-reports/BUG-2026-07-25-retag-llm-internal-server-error.md
         repro_test: tests/bugs/test_bug_2026_07_25_retag_llm_internal_server_error.py
         repro_status: red_to_green
         note: 'Root cause = write API did not forward Authorization JWT to Modal POST /jobs (F34); uncaught DataManagementJobsClientError
           → 500. Fix forwards Authorization + maps enqueue errors to 502.'
+        resolved_at: '2026-07-26'
+        resolved_via: 15-service-health post-merge smoke PASS
       - id: BUG-2026-07-25-previous-chats-empty-assistant
         github_issue: 145
         summary: Previous chats show empty Vecinita/assistant response
-        status: fix_applied_local
+        status: resolved
         order: 2
         bug_report: docs/bug-reports/BUG-2026-07-25-previous-chats-empty-assistant.md
         repro_test: apps/chat-rag-frontend/src/test/test_bug_2026_07_25_previous_chats_empty_assistant.test.tsx
@@ -814,13 +835,15 @@ project:
         note: 'Root cause = mid-stream selectConversation archives empty assistant; stream tokens only updated active. Fix
           = updateMessageById + disable select while loading. Staging happy-path verified after PROXY_KEY sync (Ask→stream→New
           chat→select restores assistant+sources).'
-      note: 'PR #147 merged to main (f61f820). Main CI green. 14-hotfix completed for S011; 15-service-health in progress
-        for staging smoke (#146/#145) + chat-rag FE redeploy.'
+        resolved_at: '2026-07-26'
+        resolved_via: 15-service-health post-merge smoke PASS
+      note: 'PR #147 merged to main (f61f820). 14-hotfix completed; 15-service-health PASS (overall). Bugs #146/#145 marked
+        resolved pending user confirm of Manage Tags JWT retag and/or issue close.'
       current_bug: BUG-2026-07-25-previous-chats-empty-assistant
       current_action: completed
       pr: '#147 merged'
       merge_sha: f61f820
-      next_action: 15_service_health_staging_smoke
+      next_action: session_close_or_user_confirm_146_admin_jwt_retag
       history:
       - status: in_progress
         started_at: '2026-06-26'
@@ -878,20 +901,20 @@ active_session:
     required: true
     status: completed
     started_at: '2026-07-25'
-    note: 'PR #147 merged to main (f61f820). Main CI green. Handed off to 15-service-health for staging smoke + chat-rag FE
-      redeploy.'
+    note: 'PR #147 merged f61f820'
     completed_at: '2026-07-26'
   - stage: 15-service-health
     required: true
-    status: in_progress
-    note: 'Post-merge S011 staging smoke after PR #147 — chat-rag FE redeploy + H0ci/H1–H5 as needed for #145/#146'
+    status: completed
+    note: 'H0ci–H5 pass; H4 modal waiver; see service-health.md'
     started_at: '2026-07-26'
+    completed_at: '2026-07-26'
   context_briefs:
   - docs/sessions/S011-hotfix-retag-empty-chats/session-brief.md
   - docs/sessions/S011-hotfix-retag-empty-chats/routing-plan.md
   handoff:
-    next_skill: 15-service-health
-    next_action: await_main_ci_then_15_service_health
+    next_skill:
+    next_action: session_close_or_user_confirm_146_admin_jwt_retag
     current_bug: BUG-2026-07-25-previous-chats-empty-assistant
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/147
     pr_number: 147
@@ -903,13 +926,16 @@ active_session:
     - BUG-2026-07-25-retag-llm-internal-server-error
     - BUG-2026-07-25-previous-chats-empty-assistant
     bugs_status:
-      BUG-2026-07-25-retag-llm-internal-server-error: fix_applied_local
-      BUG-2026-07-25-previous-chats-empty-assistant: fix_applied_local
+      BUG-2026-07-25-retag-llm-internal-server-error: resolved
+      BUG-2026-07-25-previous-chats-empty-assistant: resolved
     deploy_intent: fix_plus_staging_smoke_after_merge
     deploy_sync_2026_07_25: 'Modal secrets + DO all apps synced; chat-rag + admin-frontend redeployed ACTIVE; Ask/stream/health
       OK; #145 happy-path verified after PROXY_KEY sync'
     continued_from_16_evolve_attach: true
     admin_fe_active_proxy_keys_confirmed: '2026-07-26'
+    service_health_overall: PASS
+    service_health_report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+    service_health_completed: '2026-07-26'
 sessions:
 - id: S010-unify-llm-service
   type: feature
@@ -2991,17 +3017,19 @@ stages:
     - id: BUG-2026-07-25-retag-llm-internal-server-error
       github_issue: 146
       summary: Manage Tags LLM retag returns Internal Server Error (500)
-      status: fix_applied_local
+      status: resolved
       order: 1
       bug_report: docs/bug-reports/BUG-2026-07-25-retag-llm-internal-server-error.md
       repro_test: tests/bugs/test_bug_2026_07_25_retag_llm_internal_server_error.py
       repro_status: red_to_green
       note: 'Root cause = write API did not forward Authorization JWT to Modal POST /jobs (F34); uncaught DataManagementJobsClientError
         → 500. Fix forwards Authorization + maps enqueue errors to 502.'
+      resolved_at: '2026-07-26'
+      resolved_via: 15-service-health post-merge smoke PASS
     - id: BUG-2026-07-25-previous-chats-empty-assistant
       github_issue: 145
       summary: Previous chats show empty Vecinita/assistant response
-      status: fix_applied_local
+      status: resolved
       order: 2
       bug_report: docs/bug-reports/BUG-2026-07-25-previous-chats-empty-assistant.md
       repro_test: apps/chat-rag-frontend/src/test/test_bug_2026_07_25_previous_chats_empty_assistant.test.tsx
@@ -3009,13 +3037,15 @@ stages:
       note: 'Root cause = mid-stream selectConversation archives empty assistant; stream tokens only updated active. Fix =
         updateMessageById + disable select while loading. Staging happy-path verified after PROXY_KEY sync (Ask→stream→New
         chat→select restores assistant+sources).'
-    note: 'PR #147 merged to main (f61f820). Main CI green. 14-hotfix completed for S011; 15-service-health in progress for
-      staging smoke (#146/#145) + chat-rag FE redeploy.'
+      resolved_at: '2026-07-26'
+      resolved_via: 15-service-health post-merge smoke PASS
+    note: 'PR #147 merged to main (f61f820). 14-hotfix completed; 15-service-health PASS (overall). Bugs #146/#145 marked
+      resolved pending user confirm of Manage Tags JWT retag and/or issue close.'
     current_bug: BUG-2026-07-25-previous-chats-empty-assistant
     current_action: completed
     pr: '#147 merged'
     merge_sha: f61f820
-    next_action: 15_service_health_staging_smoke
+    next_action: session_close_or_user_confirm_146_admin_jwt_retag
     history:
     - status: in_progress
       started_at: '2026-06-26'
@@ -3053,16 +3083,16 @@ stages:
     prior_started_at: '2026-06-26'
     completed_at: '2026-07-26'
   15-service-health:
-    status: in_progress
+    status: completed
     started_at: '2026-07-26'
-    completed_at: '2026-06-25'
+    completed_at: '2026-07-26'
     partial_rerun_at: '2026-07-26'
-    partial_rerun_note: 'S011 post-merge staging smoke after PR #147 — chat-rag FE redeploy + H0ci/H1–H5 for #145/#146'
+    partial_rerun_note: 'S011 post-merge staging smoke complete (PR #147 / f61f820) — overall PASS; H4 modal waiver; see service-health.md'
     environment: staging
     infra: pass
     e2e: pass
     overall: pass
-    report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
+    report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
     tiers:
     - H1
     - H2
@@ -3099,12 +3129,30 @@ stages:
       session_note: S001 baseline (pre-S011 rerun)
       report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
       overall: pass
+    - status: completed
+      completed_at: '2026-07-26'
+      session_id: S011-hotfix-retag-empty-chats
+      session_note: 'S011 post-merge smoke after PR #147 (f61f820)'
+      report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+      overall: pass
+      tiers:
+      - H0ci
+      - H1
+      - H2
+      - H3
+      - H3b
+      - H4
+      - H5
+      advisories:
+      - h4_modal_waiver
+      - h6_browser_uj_waived_v1
     pending_rerun_for_session:
     pending_rerun_note:
     session_id: S011-hotfix-retag-empty-chats
     prior_completed_at: '2026-06-25'
     prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
-    note: 'S011 in_progress: post-merge smoke; prior S001 health record retained in history/prior_*.'
+    note: 'S011 post-merge smoke complete. Overall PASS. Report at docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md'
+    completed: '2026-07-26'
   17-retrospective:
     status: pending
   18-pr-review:
@@ -3151,11 +3199,11 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: '2026-07-25'
-    commit_deployed: 4f3f741
-    commit_head: 4f3f741
+    last_verified: '2026-07-26'
+    commit_deployed: f61f820
+    commit_head: f61f820
     drift: false
-    branch: feat/S001-modal-cold-start-snapshot
+    branch: main
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
       internal_write_api: https://vecinita-internal-write-api-icze4.ondigitalocean.app
@@ -3183,6 +3231,9 @@ deployment:
     - 'S011 2026-07-25 deploy sync: Modal secrets + DO all apps via sync_env (merge/llm); chat-rag + admin-frontend redeployed
       ACTIVE; Ask/stream/health OK; #145 staging happy-path verified after chat-rag PROXY_KEY sync. Hotfix code (#146/#145)
       still local — formal 15-service-health after merge.'
+    - S011 2026-07-26 post-merge smoke PASS @ f61f820 (main); H0ci–H5 pass; H4 modal waiver; report 
+      docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md. Session left open for Manage Tags JWT retag
+      confirm / issue close.
   url_discovery:
     method: uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
     modal_admin_manual: true
@@ -5964,6 +6015,8 @@ decisions_log:
   timestamp: '2026-07-26'
 - 'S011 2026-07-26: 14-hotfix completed (PR #147 merged, main CI green); 15-service-health started for staging smoke + chat-rag
   FE redeploy (#145/#146).'
+- 'S011/2026-07-26: 15-service-health completed — overall PASS; session remains open (next_action=session_close_or_user_confirm_146_admin_jwt_retag).
+  Report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -6337,6 +6390,11 @@ artifacts:
   stage: 14-hotfix
   github_issue: 145
   repro_status: red_to_green
+- path: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+  session_id: S011-hotfix-retag-empty-chats
+  kind: report
+  stage: 15-service-health
+  recorded_at: '2026-07-26'
 git_history:
   current_branch: main
   branches:
