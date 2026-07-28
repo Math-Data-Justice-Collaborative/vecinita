@@ -61,9 +61,10 @@ run_sql() {
   return 0
 }
 
-echo "[security] remediating SQL: drop public.rls_auto_enable() if present"
+echo "[security] remediating SQL: revoke PostgREST execute on public.rls_auto_enable()"
 SQL_OK=0
-if run_sql "DROP FUNCTION IF EXISTS public.rls_auto_enable();"; then
+REVOKE_SQL="DO \$\$ BEGIN IF to_regprocedure('public.rls_auto_enable()') IS NOT NULL THEN REVOKE ALL ON FUNCTION public.rls_auto_enable() FROM PUBLIC, anon, authenticated; GRANT EXECUTE ON FUNCTION public.rls_auto_enable() TO postgres, service_role; END IF; END \$\$;"
+if run_sql "${REVOKE_SQL}"; then
   SQL_OK=1
   echo "[security] SQL remediation applied via Management API"
 else
