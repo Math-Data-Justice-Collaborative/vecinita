@@ -4,8 +4,12 @@ info:
   version: 0.2.0
   description: Bilingual community Q&A and public corpus browse (stateless; no identity fields).
 servers:
-  - url: /api/v1
+  - url: https://{host}/api/v1
     description: ChatRAG backend (DigitalOcean)
+    variables:
+      host:
+        default: localhost
+        description: API host (override per environment)
 # Public community API — no authentication required (explicit empty security).
 security: []
 paths:
@@ -60,6 +64,7 @@ paths:
           in: query
           schema:
             type: array
+            maxItems: 100
             items:
               type: string
           style: form
@@ -131,6 +136,15 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
 components:
+  # Documented for OpenAPI completeness; ChatRAG remains public (security: []).
+  securitySchemes:
+    publicUnauthenticated:
+      type: http
+      scheme: bearer
+      bearerFormat: unused
+      description: >
+        Placeholder scheme only — this API does not require credentials.
+        Global security is an empty array.
   schemas:
     AskRequest:
       type: object
@@ -187,6 +201,7 @@ components:
           nullable: true
         tags:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TagSummary"
     DocumentBrowsePage:
@@ -199,6 +214,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/DocumentBrowseItem"
         page:
@@ -234,6 +250,7 @@ components:
       properties:
         tags:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TagFacet"
     Source:
@@ -274,6 +291,7 @@ components:
             - es
         sources:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/Source"
     HealthResponse:

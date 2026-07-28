@@ -42,7 +42,7 @@ if [[ -z "${VECINITA_CORS_ORIGINS:-}" ]]; then
   [[ -n "$admin_origin" ]] && cors_parts+=("$admin_origin")
   [[ -n "$chat_origin" ]] && cors_parts+=("$chat_origin")
   if [[ ${#cors_parts[@]} -gt 0 ]]; then
-    export VECINITA_CORS_ORIGINS="$(IFS=,; echo "${cors_parts[*]}")"
+    export VECINITA_CORS_ORIGINS="$(printf '%s,' "${cors_parts[@]}" | sed 's/,$//')"
   fi
 fi
 

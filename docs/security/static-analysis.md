@@ -17,15 +17,16 @@ Reports land in `.security-reports/` (gitignored). Binaries in `.tools/security/
 |------|------|----------------------------------------|
 | OpenGrep | SAST | ERROR (`--error --severity=ERROR`) |
 | 2ms | Secrets | any finding in tracked paths |
-| KICS | IaC / OpenAPI | high, critical (`SEC_KICS_FAIL_ON`) |
+| KICS | IaC / OpenAPI | medium, high, critical (`SEC_KICS_FAIL_ON`) |
 | SBOM Tool | SPDX SBOM | must generate |
 | Grype | Vulns (SBOM or dir) | high (`SEC_GRYPE_FAIL_ON`) |
 | Supabase advisors | DB security/perf | WARN + ERROR (`SEC_SUPABASE_ADVISOR_FAIL_ON=warn`) |
 
 These are pinned by `make security-scan` and the CI `security` job. Loosening requires an
-explicit env override (not recommended). OpenGrep WARNING and KICS medium/low/info are
-reported in tool output but are not hard-fail thresholds (noise floor: hundreds of
-OpenAPI/IaC INFO–MEDIUM hits).
+explicit env override (not recommended). OpenGrep WARNING findings are fixed when practical
+(pinned Actions SHAs, etc.) but WARNING is not a hard-fail threshold. KICS LOW/INFO remain
+non-blocking; justified MEDIUM OpenAPI noise excludes live in
+`config/security/kics-exclude-queries.txt`.
 
 Config: `config/security/` (KICS query excludes, Grype ignores, OpenGrep notes).
 2ms ignores gitignored local secret files (`.env`, `prod.env`, operator `*-spec.yaml`
@@ -63,12 +64,12 @@ some `.github/workflows/*.yml` lines that embed `${{ ... }}` inside bash snippet
 lines are not fully covered by those rules; do not treat the parse errors as scan failures.
 Prefer env-block interpolation (already used in hardened workflows) when editing Actions.
 
-## KICS MEDIUM backlog
+## KICS MEDIUM / LOW backlog
 
-Fail-on is **high,critical** only. MEDIUM/LOW/INFO volume is dominated by OpenAPI schema
-shape and intentional public `/health` docs. Do not raise the fail threshold without a
-dedicated triage pass; justified excludes live in `config/security/kics-exclude-queries.txt`.
-Re-triage MEDIUM periodically when touching IaC/OpenAPI.
+Fail-on is **medium,high,critical**. Remaining LOW/INFO volume is dominated by OpenAPI
+schema shape (optional fields, INFO-level style). Justified MEDIUM excludes for
+non-actionable OpenAPI pattern/response-$ref queries live in
+`config/security/kics-exclude-queries.txt`. Re-triage when touching IaC/OpenAPI.
 
 ## Related
 

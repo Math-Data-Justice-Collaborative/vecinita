@@ -15,3 +15,11 @@ baee238e-1921-4801-9c3f-79ae1d7b2cbc
 # queries treat that correct documentation as a finding.
 d674aea4-ba8b-454b-bb97-88a772ea33f0
 663c442d-f918-4f62-b096-0bf5dcbeb655
+#
+# --- OpenAPI schema noise (not actionable at fail-on medium) ---
+# Pattern Undefined (v3): requires pattern on every string — false positives on
+# free-text titles, enums, and UUID format fields already constrained by format.
+00b78adf-b83f-419c-8ed8-c6018441dd3a
+# Response body undefined schema (v3): flags operation responses that correctly
+# $ref components/responses/* (shared error bodies). Content lives on the $ref.
+a92be1d5-d762-484a-86d6-8cd0907ba100
