@@ -42,7 +42,7 @@ describe("TC-065: Admin language toggle (UJ-022, F31)", () => {
           });
         }
         if (url.includes("/internal/v1/documents")) {
-          return Promise.resolve({ ok: true, json: async () => [] });
+          return Promise.resolve({ ok: true, json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }) });
         }
         return Promise.resolve({ ok: true, json: async () => ({}) });
       }),

@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AuthContext } from "@/auth/authContext";
+import { AuthContext } from "@/auth/auth-context";
 import {
   type EvalConfigApi,
   type EvalConfigPresetApi,

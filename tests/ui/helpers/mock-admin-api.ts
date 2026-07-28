@@ -226,7 +226,7 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify([]),
+      body: JSON.stringify({ items: [], page: 1, page_size: 50, total: 0 }),
     });
     return;
   }

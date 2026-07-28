@@ -38,7 +38,7 @@ describe("BUG-2026-06-14 corpus list unmount during load", () => {
 
       resolveFetch({
         ok: true,
-        json: async () => [],
+        json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }),
       } as Response);
 
       await new Promise((resolve) => {

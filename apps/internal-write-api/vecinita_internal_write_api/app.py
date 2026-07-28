@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Annotated, Protocol, cast
 from uuid import UUID, uuid4
 
 import httpx
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, status
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request, status
 from sqlalchemy import create_engine, text
 from vecinita_llm_client import LlmClient, LlmClientError
 from vecinita_shared_schemas.audit_headers import (
@@ -39,6 +39,7 @@ from vecinita_shared_schemas.db_mapping import (
     row_value,
     scalar_int,
     scalar_uuid,
+    sqlalchemy_scalar_one,
 )
 from vecinita_shared_schemas.eval_config import (
     DEFAULT_EVAL_MODEL_ID,
@@ -69,6 +70,7 @@ from vecinita_shared_schemas.internal_write import (
     ChunkDetail,
     DocumentDetail,
     DocumentHistoryResponse,
+    DocumentListPage,
     DocumentSummary,
     DocumentVersionEntry,
     EvalCriterionCreateRequest,
@@ -1043,11 +1045,18 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
 
     @app.get(
         "/internal/v1/documents",
-        response_model=list[DocumentSummary],
+        response_model=DocumentListPage,
         dependencies=[Depends(require_authenticated)],
     )
-    def list_documents() -> list[DocumentSummary]:  # pyright: ignore[reportUnusedFunction]
+    def list_documents(  # pyright: ignore[reportUnusedFunction]
+        page: Annotated[int, Query(ge=1)] = 1,
+        page_size: Annotated[int, Query(ge=1, le=100)] = 50,
+    ) -> DocumentListPage:
+        offset = (page - 1) * page_size
         with engine.connect() as conn:
+            total = scalar_int(
+                sqlalchemy_scalar_one(conn.execute(text("SELECT COUNT(*) FROM documents")))
+            )
             rows = (
                 conn.execute(
                     text(
@@ -1055,21 +1064,28 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                     SELECT id, url, title, language
                     FROM documents
                     ORDER BY created_at DESC
+                    LIMIT :limit OFFSET :offset
                     """
-                    )
+                    ),
+                    {"limit": page_size, "offset": offset},
                 )
                 .mappings()
                 .all()
             )
-        return [
-            DocumentSummary(
-                document_id=row_uuid(mapping_row(row), "id"),
-                url=row_str(mapping_row(row), "url"),
-                title=row_str_optional(mapping_row(row), "title"),
-                language=row_str_optional(mapping_row(row), "language"),
-            )
-            for row in rows
-        ]
+        return DocumentListPage(
+            items=[
+                DocumentSummary(
+                    document_id=row_uuid(mapping_row(row), "id"),
+                    url=row_str(mapping_row(row), "url"),
+                    title=row_str_optional(mapping_row(row), "title"),
+                    language=row_str_optional(mapping_row(row), "language"),
+                )
+                for row in rows
+            ],
+            page=page,
+            page_size=page_size,
+            total=total,
+        )
 
     @app.delete(
         "/internal/v1/documents/{document_id}",

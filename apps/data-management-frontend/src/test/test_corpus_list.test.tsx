@@ -48,7 +48,7 @@ describe("CorpusList", () => {
   it("shows empty corpus message", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => [] }),
+      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }) }),
     );
 
     renderCorpus();
@@ -74,8 +74,8 @@ describe("CorpusList", () => {
   it("refreshes document list on Refresh click", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) });
     vi.stubGlobal("fetch", fetchMock);
 
     renderCorpus();
@@ -95,11 +95,11 @@ describe("CorpusList", () => {
     const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(true);
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockResolvedValueOnce({ ok: true, status: 204 })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [MOCK_DOCS[1]],
+        json: async () => ({ items: [MOCK_DOCS[1]], page: 1, page_size: 50, total: 1 }),
       });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -125,7 +125,7 @@ describe("CorpusList", () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) });
     vi.stubGlobal("fetch", fetchMock);
 
     renderCorpus();
@@ -143,7 +143,7 @@ describe("CorpusList", () => {
   it("opens DocumentAdmin when Manage tags is clicked", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockResolvedValueOnce({ ok: true, json: async () => [] })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ tags: [] }) });
     vi.stubGlobal("fetch", fetchMock);
@@ -165,7 +165,7 @@ describe("CorpusList", () => {
   it("closes DocumentAdmin and returns to the corpus table", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockResolvedValueOnce({ ok: true, json: async () => [] })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ tags: [] }) });
     vi.stubGlobal("fetch", fetchMock);
@@ -194,7 +194,7 @@ describe("CorpusList", () => {
   it("deselects all when select-all is toggled off", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS }),
+      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) }),
     );
 
     renderCorpus();
@@ -213,7 +213,7 @@ describe("CorpusList", () => {
   it("toggles an individual row selection on and off", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS }),
+      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) }),
     );
 
     renderCorpus();
@@ -235,7 +235,7 @@ describe("CorpusList", () => {
   it("renders untitled fallback and em dash language", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS }),
+      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) }),
     );
 
     renderCorpus();
@@ -250,7 +250,7 @@ describe("CorpusList", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockRejectedValueOnce(new Error("delete exploded"));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -274,7 +274,7 @@ describe("CorpusList", () => {
       "fetch",
       vi
         .fn()
-        .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
         .mockRejectedValueOnce("delete boom"),
     );
 
@@ -296,7 +296,7 @@ describe("CorpusList", () => {
     const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(false);
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS }),
+      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) }),
     );
 
     renderCorpus();
@@ -329,7 +329,7 @@ describe("CorpusList", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockImplementationOnce(() => new Promise(() => undefined));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -361,7 +361,7 @@ describe("CorpusList", () => {
 
     resolveFetch({
       ok: true,
-      json: async () => MOCK_DOCS,
+      json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }),
     } as Response);
 
     await new Promise((resolve) => {

@@ -27,7 +27,7 @@ from vecinita_shared_schemas.db_mapping import (
 from tests.helpers.json_response import (
     find_json_object_by_str,
     json_str,
-    response_json_list,
+    response_document_list_items,
 )
 
 if TYPE_CHECKING:
@@ -183,7 +183,11 @@ def upsert_document_via_api(
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.OK
-    listing = client.get("/internal/v1/documents", headers=auth_headers())
-    rows = response_json_list(listing)
+    listing = client.get(
+        "/internal/v1/documents",
+        params={"page": 1, "page_size": 100},
+        headers=auth_headers(),
+    )
+    rows = response_document_list_items(listing)
     doc = find_json_object_by_str(rows, "url", doc_url)
     return json_str(doc, "document_id")

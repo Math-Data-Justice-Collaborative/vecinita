@@ -31,7 +31,7 @@ from tests.helpers.json_response import (
     find_json_object_by_str,
     json_list,
     json_str,
-    response_json_list,
+    response_document_list_items,
     response_json_object,
 )
 
@@ -80,7 +80,7 @@ def seeded_document_id(write_client: TestClient) -> UUID:
     )
     assert resp.status_code == HTTPStatus.OK, resp.text
 
-    docs = response_json_list(write_client.get("/internal/v1/documents"))
+    docs = response_document_list_items(write_client.get("/internal/v1/documents"))
     target = find_json_object_by_str(docs, "url", "https://example.com/retag-visible-test")
     return UUID(json_str(target, "document_id"))
 

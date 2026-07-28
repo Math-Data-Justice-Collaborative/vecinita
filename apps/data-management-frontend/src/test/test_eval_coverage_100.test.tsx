@@ -121,7 +121,7 @@ function defaultEvalFetch(
     };
   }
   if (url.includes("/internal/v1/documents")) {
-    return { ok: true, json: async () => [] };
+    return { ok: true, json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }) };
   }
   return { ok: true, json: async () => ({}) };
 }

@@ -55,7 +55,7 @@ describe("Bulk operations UI", () => {
   it("shows checkboxes for each document row", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => MOCK_DOCS,
+      json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -72,7 +72,7 @@ describe("Bulk operations UI", () => {
   it("shows select-all checkbox that toggles all rows", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => MOCK_DOCS,
+      json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -95,7 +95,7 @@ describe("Bulk operations UI", () => {
   it("shows bulk action toolbar when documents are selected", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => MOCK_DOCS,
+      json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -118,14 +118,19 @@ describe("Bulk operations UI", () => {
   it("bulk delete opens confirmation dialog and calls API", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ successes: ["aaa-111"], failures: [] }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => MOCK_DOCS.slice(1),
+        json: async () => ({
+          items: MOCK_DOCS.slice(1),
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.slice(1).length,
+        }),
       });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -158,12 +163,12 @@ describe("Bulk operations UI", () => {
   it("bulk tag opens dialog and applies tags", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ successes: ["aaa-111"], failures: [] }),
       })
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) });
     vi.stubGlobal("fetch", fetchMock);
 
     renderCorpus();
@@ -195,12 +200,12 @@ describe("Bulk operations UI", () => {
   it("bulk metadata opens dialog and updates fields", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ successes: ["aaa-111"], failures: [] }),
       })
-      .mockResolvedValueOnce({ ok: true, json: async () => MOCK_DOCS });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) });
     vi.stubGlobal("fetch", fetchMock);
 
     renderCorpus();

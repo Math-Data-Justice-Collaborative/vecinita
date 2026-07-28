@@ -78,6 +78,15 @@ class DocumentSummary(BaseModel):
     language: str | None = None
 
 
+class DocumentListPage(BaseModel):
+    """Paginated GET /internal/v1/documents response (admin corpus list)."""
+
+    items: list[DocumentSummary]
+    page: int = Field(..., ge=1)
+    page_size: int = Field(..., ge=1, le=100)
+    total: int = Field(..., ge=0)
+
+
 class DocumentDetail(BaseModel):
     """Document body aggregated from chunks for retag jobs."""
 

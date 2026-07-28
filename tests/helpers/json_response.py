@@ -38,6 +38,11 @@ def response_json_list(response: _JsonResponse) -> list[object]:
     return cast("list[object]", data)
 
 
+def response_document_list_items(response: _JsonResponse) -> list[object]:
+    """Parse GET /internal/v1/documents paginated ``items`` array."""
+    return json_list(response_json_object(response), "items")
+
+
 def json_str(obj: JsonObject, key: str) -> str:
     """Return the value at key coerced to str."""
     return str(obj[key])

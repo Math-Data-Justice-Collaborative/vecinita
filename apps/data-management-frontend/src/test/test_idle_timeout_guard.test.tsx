@@ -19,10 +19,10 @@ vi.mock("@/hooks/useIdleTimeout", () => ({
   }),
 }));
 
-vi.mock("@/auth/authContext", async () => {
+vi.mock("@/auth/auth-context", async () => {
   const actual =
-    await vi.importActual<typeof import("@/auth/authContext")>(
-      "@/auth/authContext",
+    await vi.importActual<typeof import("@/auth/auth-context")>(
+      "@/auth/auth-context",
     );
   return {
     ...actual,

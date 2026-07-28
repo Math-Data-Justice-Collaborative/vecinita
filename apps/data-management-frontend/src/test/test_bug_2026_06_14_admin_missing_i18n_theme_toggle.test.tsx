@@ -28,6 +28,12 @@ describe("BUG-2026-06-14 — Admin missing i18n toggle and inconsistent theme ch
             }),
           });
         }
+        if (url.includes("/internal/v1/documents")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }),
+          });
+        }
         return Promise.resolve({ ok: true, json: async () => [] });
       }),
     );

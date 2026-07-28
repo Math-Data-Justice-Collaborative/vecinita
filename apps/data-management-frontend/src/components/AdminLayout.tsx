@@ -12,7 +12,7 @@ import {
 import { useState } from "react";
 import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
 
-import { useAuth, useIsAdmin } from "@/auth/authContext";
+import { useAuth, useIsAdmin } from "@/auth/auth-context";
 import { ModelDownloadProgressIndicator } from "@/evaluation/ModelDownloadProgressIndicator";
 import { PlaygroundModelDownloadProvider } from "@/evaluation/playgroundModelDownloadContext";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,7 @@ function UserMenu() {
         type="button"
         variant="outline"
         size="sm"
+        className="h-auto w-full whitespace-normal text-left"
         data-testid="admin-sign-out-all-devices"
         onClick={() => {
           void signOutAllDevices();
@@ -58,6 +59,7 @@ function UserMenu() {
         type="button"
         variant="outline"
         size="sm"
+        className="h-auto w-full whitespace-normal text-left"
         data-testid="admin-sign-out"
         onClick={() => {
           void signOut();

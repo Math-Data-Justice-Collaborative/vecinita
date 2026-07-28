@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AuthProvider } from "@/auth/AuthContext";
-import { useAuth, useIsAdmin, useIsSuperAdmin } from "@/auth/authContext";
+import { useAuth, useIsAdmin, useIsSuperAdmin } from "@/auth/auth-context";
 
 describe("AuthContext hooks", () => {
   it("updates the session when Supabase emits an auth state change", async () => {
