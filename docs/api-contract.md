@@ -377,6 +377,8 @@ send these headers; they are honored only on the service-key path (BUG-2026-07-0
 ### GET `/internal/v1/documents`
 
 - **Purpose**: List corpus (for admin UI via Modal proxy or direct DO).
+- **Query**: `page` (default 1), `page_size` (default 50, max 100).
+- **Response** `200`: `{ items: DocumentSummary[], page, page_size, total }`.
 
 ### DELETE `/internal/v1/documents/{document_id}`
 

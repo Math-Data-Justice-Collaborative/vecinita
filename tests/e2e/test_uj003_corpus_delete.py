@@ -11,7 +11,10 @@ from httpx import ASGITransport, AsyncClient
 from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.json_types import as_json_object
 
-from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_str,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -58,7 +61,7 @@ async def test_uj003_corpus_delete(write_client: AsyncClient) -> None:
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     assert listed.status_code == HTTPStatus.OK
-    items = response_json_list(listed)
+    items = response_document_list_items(listed)
     doc_id = json_str(find_json_object_by_str(items, "url", doc_url), "document_id")
 
     delete = await write_client.delete(
@@ -71,5 +74,5 @@ async def test_uj003_corpus_delete(write_client: AsyncClient) -> None:
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    urls = [json_str(as_json_object(row), "url") for row in response_json_list(after)]
+    urls = [json_str(as_json_object(row), "url") for row in response_document_list_items(after)]
     assert doc_url not in urls

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useAuth } from "@/auth/authContext";
+import { useAuth } from "@/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

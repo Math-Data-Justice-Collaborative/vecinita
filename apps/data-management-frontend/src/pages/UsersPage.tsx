@@ -20,7 +20,7 @@ import {
   sendTestEmail,
 } from "@/api/users";
 import type { UserRole, UserStatus, UserSummary } from "@/api/types";
-import { useAuth, useIsAdmin } from "@/auth/authContext";
+import { useAuth, useIsAdmin } from "@/auth/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

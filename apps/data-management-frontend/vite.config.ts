@@ -6,6 +6,11 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // Case-insensitive FS: keep AuthContext.tsx distinct from auth-context.ts
+      "@/auth/AuthContext": path.resolve(
+        __dirname,
+        "./src/auth/AuthContext.tsx",
+      ),
       "@": path.resolve(__dirname, "./src"),
       "vecinita-frontend-i18n": path.resolve(
         __dirname,

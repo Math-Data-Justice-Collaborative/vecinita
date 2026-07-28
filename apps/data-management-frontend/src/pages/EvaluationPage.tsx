@@ -14,7 +14,7 @@ import {
   fetchEvalRuns,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
-import { AuthContext } from "@/auth/authContext";
+import { AuthContext } from "@/auth/auth-context";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
 import { EvaluationCompareView } from "@/evaluation/EvaluationCompareView";

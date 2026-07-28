@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PaginationControls } from "vecinita-frontend-ui";
 
 import { deleteDocument, listDocuments } from "../api/corpus";
 import type { DocumentSummary } from "../api/types";
@@ -21,7 +22,9 @@ import { BulkTagDialog } from "@/components/BulkTagDialog";
 import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
 import { Trash2, Tags, FileEdit } from "lucide-react";
 import { useAdminT } from "@/hooks/useAdminT";
-import { useIsAdmin } from "@/auth/authContext";
+import { useIsAdmin } from "@/auth/auth-context";
+
+const DEFAULT_PAGE_SIZE = 50;
 
 export function CorpusList() {
   const tr = useAdminT();
@@ -34,6 +37,8 @@ export function CorpusList() {
     trRef.current = tr;
   }, [tr]);
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -43,40 +48,53 @@ export function CorpusList() {
   const [bulkTagOpen, setBulkTagOpen] = useState(false);
   const [bulkMetadataOpen, setBulkMetadataOpen] = useState(false);
 
-  const refresh = useCallback(async (isActive: () => boolean = () => true) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const client = requireCorpusConfig();
-      const list = await listDocuments(client);
-      if (!isActive()) {
-        return;
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(total / DEFAULT_PAGE_SIZE)),
+    [total],
+  );
+
+  const refresh = useCallback(
+    async (isActive: () => boolean = () => true, nextPage = 1) => {
+      setError(null);
+      setLoading(true);
+      try {
+        const client = requireCorpusConfig();
+        const result = await listDocuments(client, {
+          page: nextPage,
+          pageSize: DEFAULT_PAGE_SIZE,
+        });
+        if (!isActive()) {
+          return;
+        }
+        setDocuments(result.items);
+        setTotal(result.total);
+        setPage(result.page);
+        setSelectedIds(new Set());
+      } catch (err) {
+        if (!isActive()) {
+          return;
+        }
+        setError(
+          err instanceof Error
+            ? err.message
+            : trRef.current("admin.corpusList.loadFailed"),
+        );
+      } finally {
+        if (isActive()) {
+          setLoading(false);
+        }
       }
-      setDocuments(list);
-      setSelectedIds(new Set());
-    } catch (err) {
-      if (!isActive()) {
-        return;
-      }
-      setError(
-        err instanceof Error
-          ? err.message
-          : trRef.current("admin.corpusList.loadFailed"),
-      );
-    } finally {
-      if (isActive()) {
-        setLoading(false);
-      }
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
-    void refresh(() => !cancelled);
+    void refresh(() => !cancelled, page);
     return () => {
       cancelled = true;
     };
-  }, [refresh]);
+  }, [refresh, page]);
 
   const handleDelete = async (doc: DocumentSummary) => {
     const label = doc.title ?? doc.url;
@@ -88,7 +106,7 @@ export function CorpusList() {
     try {
       const client = requireCorpusConfig();
       await deleteDocument(client, doc.document_id);
-      await refresh();
+      await refresh(() => true, page);
     } catch (err) {
       setError(
         err instanceof Error
@@ -112,6 +130,7 @@ export function CorpusList() {
     });
   };
 
+  /** Select-all is page-scoped (BUG-2026-07-28 / #112). */
   const toggleAll = () => {
     if (selectedIds.size === documents.length) {
       setSelectedIds(new Set());
@@ -129,7 +148,7 @@ export function CorpusList() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => void refresh()}
+          onClick={() => void refresh(() => true, page)}
           disabled={loading}
         >
           {tr("shared.refresh")}
@@ -312,23 +331,41 @@ export function CorpusList() {
               </Table>
             )}
 
+            {!loading && total > 0 ? (
+              <div className="mt-4">
+                <PaginationControls
+                  page={page}
+                  totalPages={totalPages}
+                  total={total}
+                  previousDisabled={page <= 1}
+                  nextDisabled={page >= totalPages}
+                  onPrevious={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
+                  onNext={() => {
+                    setPage((current) => Math.min(totalPages, current + 1));
+                  }}
+                />
+              </div>
+            ) : null}
+
             <BulkDeleteDialog
               open={bulkDeleteOpen}
               onOpenChange={setBulkDeleteOpen}
               documentIds={selectionArray}
-              onComplete={() => void refresh()}
+              onComplete={() => void refresh(() => true, page)}
             />
             <BulkTagDialog
               open={bulkTagOpen}
               onOpenChange={setBulkTagOpen}
               documentIds={selectionArray}
-              onComplete={() => void refresh()}
+              onComplete={() => void refresh(() => true, page)}
             />
             <BulkMetadataDialog
               open={bulkMetadataOpen}
               onOpenChange={setBulkMetadataOpen}
               documentIds={selectionArray}
-              onComplete={() => void refresh()}
+              onComplete={() => void refresh(() => true, page)}
             />
           </>
         )}

@@ -6,6 +6,18 @@ export interface CorpusClientOptions {
   accessToken?: string | undefined;
 }
 
+export interface DocumentListPage {
+  items: DocumentSummary[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+export interface ListDocumentsParams {
+  page?: number;
+  pageSize?: number;
+}
+
 function authHeaders(options: CorpusClientOptions): Record<string, string> {
   const bearer = options.accessToken ?? options.apiKey;
   if (!bearer) {
@@ -18,17 +30,27 @@ function authHeaders(options: CorpusClientOptions): Record<string, string> {
 
 export async function listDocuments(
   options: CorpusClientOptions,
-): Promise<DocumentSummary[]> {
-  const response = await fetch(`${options.baseUrl}/internal/v1/documents`, {
-    headers: authHeaders(options),
+  params: ListDocumentsParams = {},
+): Promise<DocumentListPage> {
+  const page = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
+  const query = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
   });
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/documents?${query.toString()}`,
+    {
+      headers: authHeaders(options),
+    },
+  );
   if (!response.ok) {
     const detail = await response.text();
     throw new Error(
       detail || `List documents failed (${String(response.status)})`,
     );
   }
-  return response.json() as Promise<DocumentSummary[]>;
+  return response.json() as Promise<DocumentListPage>;
 }
 
 export async function listDocumentChunks(

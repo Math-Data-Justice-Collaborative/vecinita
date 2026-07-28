@@ -16,7 +16,7 @@ from vecinita_shared_schemas.json_types import (
 from tests.helpers.json_response import (
     json_list,
     json_str,
-    response_json_list,
+    response_document_list_items,
     response_json_object,
 )
 from tests.unit.internal_write_api.conftest import (
@@ -82,7 +82,10 @@ def test_list_documents_includes_seeded_doc(
     """Test list documents includes seeded doc."""
     response = write_client.get("/internal/v1/documents", headers=auth_headers())
     assert response.status_code == HTTPStatus.OK
-    ids = {json_str(as_json_object(item), "document_id") for item in response_json_list(response)}
+    ids = {
+        json_str(as_json_object(item), "document_id")
+        for item in response_document_list_items(response)
+    }
     assert str(seeded_document) in ids
 
 

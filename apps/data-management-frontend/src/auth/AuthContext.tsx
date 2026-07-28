@@ -16,7 +16,7 @@ import {
   roleFromAppMetadata,
   subscribeSupabaseClientVersion,
 } from "@/auth/supabaseClient";
-import { AuthContext, type AuthState } from "@/auth/authContext";
+import { AuthContext, type AuthState } from "@/auth/auth-context";
 import { setOperatorAccessToken } from "@/config";
 
 export function AuthProvider({ children }: { children: ReactNode }) {

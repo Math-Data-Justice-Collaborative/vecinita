@@ -15,6 +15,7 @@ from tests.helpers.json_response import (
     find_json_object_by_str,
     json_list,
     json_str,
+    response_document_list_items,
     response_json_list,
     response_json_object,
 )
@@ -65,7 +66,7 @@ def test_uj011_admin_chunks_and_tag_patch(admin_write_client: TestClient) -> Non
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    rows = response_json_list(listing)
+    rows = response_document_list_items(listing)
     document_id = json_str(find_json_object_by_str(rows, "url", doc_url), "document_id")
 
     chunks = admin_write_client.get(

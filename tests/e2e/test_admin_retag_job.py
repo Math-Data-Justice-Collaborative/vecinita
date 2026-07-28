@@ -35,7 +35,7 @@ from tests.helpers.json_response import (
     find_json_object_by_str,
     json_list,
     json_str,
-    response_json_list,
+    response_document_list_items,
     response_json_object,
 )
 
@@ -154,7 +154,7 @@ class _TestClientWriteClient:
 
 
 def _document_id_for_url(client: TestClient, url: str) -> str:
-    docs = response_json_list(client.get("/internal/v1/documents"))
+    docs = response_document_list_items(client.get("/internal/v1/documents"))
     return json_str(find_json_object_by_str(docs, "url", url), "document_id")
 
 

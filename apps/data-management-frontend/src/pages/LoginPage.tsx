@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 
-import { useAuth } from "@/auth/authContext";
+import { useAuth } from "@/auth/auth-context";
 import { readRememberPreference } from "@/auth/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

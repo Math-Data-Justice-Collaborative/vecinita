@@ -13,7 +13,11 @@ from sqlalchemy import create_engine, text
 from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
-from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_str,
+    response_document_list_items,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -64,7 +68,7 @@ async def test_delete_document_removes_chunks_and_embeddings(write_client: Async
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
 
-    items = response_json_list(listed)
+    items = response_document_list_items(listed)
     doc_id = json_str(find_json_object_by_str(items, "url", doc_url), "document_id")
 
     delete = await write_client.delete(

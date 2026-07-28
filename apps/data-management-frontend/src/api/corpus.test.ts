@@ -9,6 +9,7 @@ import {
   patchDocumentTags,
   retagDocument,
 } from "./corpus";
+import { mockFetchUrl } from "../test/fetch-mock";
 
 const options = {
   baseUrl: "http://localhost:8002",
@@ -28,7 +29,12 @@ describe("corpus api", () => {
   });
 
   it("authHeaders prefers accessToken over apiKey", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([])));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({ items: [], page: 1, page_size: 50, total: 0 }),
+      ),
+    );
 
     await listDocuments({
       baseUrl: "http://localhost:8002",
@@ -38,6 +44,9 @@ describe("corpus api", () => {
 
     const init = vi.mocked(fetch).mock.calls[0]?.[1] as RequestInit;
     expect(init.headers).toMatchObject({ Authorization: "Bearer jwt-token" });
+    const url = mockFetchUrl(0);
+    expect(url).toContain("page=1");
+    expect(url).toContain("page_size=50");
   });
 
   it("authHeaders throws when no bearer is configured", async () => {
@@ -47,12 +56,17 @@ describe("corpus api", () => {
   });
 
   it("listDocuments returns parsed JSON on success", async () => {
-    const docs = [
-      { document_id: "d1", url: "https://example.com", title: "A" },
-    ];
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(docs)));
+    const page = {
+      items: [
+        { document_id: "d1", url: "https://example.com", title: "A" },
+      ],
+      page: 1,
+      page_size: 50,
+      total: 1,
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(page)));
 
-    await expect(listDocuments(options)).resolves.toEqual(docs);
+    await expect(listDocuments(options)).resolves.toEqual(page);
   });
 
   it("listDocuments surfaces API error detail", async () => {

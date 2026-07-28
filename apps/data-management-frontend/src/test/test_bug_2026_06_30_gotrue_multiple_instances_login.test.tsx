@@ -60,7 +60,7 @@ describe("BUG-2026-06-30 — GoTrueClient duplicate on login", () => {
     setSupabaseClientForTests(null);
 
     const { AuthProvider } = await import("@/auth/AuthContext");
-    const { useAuth } = await import("@/auth/authContext");
+    const { useAuth } = await import("@/auth/auth-context");
 
     const wrapper = ({ children }: { children: ReactNode }) => (
       <AuthProvider>{children}</AuthProvider>

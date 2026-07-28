@@ -807,45 +807,66 @@ project:
       started: '2026-07-07'
       last_cycle: PRM-011
     14-hotfix:
-      status: completed
-      started_at: '2026-07-25'
-      session_id: S011-hotfix-retag-empty-chats
-      branch: fix/BUG-2026-07-25-retag-llm-500
+      status: in_progress
+      started_at: '2026-07-28'
+      session_id: S012-hotfix-admin-ui-112-105
+      branch: fix/S012-admin-ui-112-105
       bugs:
-      - id: BUG-2026-07-25-retag-llm-internal-server-error
-        github_issue: 146
-        summary: Manage Tags LLM retag returns Internal Server Error (500)
-        status: resolved
+      - id: BUG-2026-07-28-admin-corpus-pagination
+        github_issue: 112
+        summary: Admin corpus list lacks server-side pagination (mirror Users/browse)
+        status: fix_applied_local
         order: 1
-        bug_report: docs/bug-reports/BUG-2026-07-25-retag-llm-internal-server-error.md
-        repro_test: tests/bugs/test_bug_2026_07_25_retag_llm_internal_server_error.py
-        repro_status: red_to_green
-        note: 'Root cause = write API did not forward Authorization JWT to Modal POST /jobs (F34); uncaught DataManagementJobsClientError
-          → 500. Fix forwards Authorization + maps enqueue errors to 502.'
-        resolved_at: '2026-07-26'
-        resolved_via: 15-service-health post-merge smoke PASS
-      - id: BUG-2026-07-25-previous-chats-empty-assistant
-        github_issue: 145
-        summary: Previous chats show empty Vecinita/assistant response
-        status: resolved
+        seen_on: staging
+        bug_report: docs/bug-reports/BUG-2026-07-28-admin-corpus-pagination.md
+        bug_report_status: written
+        repro_tests:
+        - tests/bugs/test_bug_2026_07_28_admin_corpus_pagination.py
+        - apps/data-management-frontend/src/test/test_bug_2026_07_28_admin_corpus_pagination.test.tsx
+        repro_status: green
+        fix_summary: 'DocumentListPage API pagination + CorpusList PaginationControls; page-scoped select-all'
+        note: 'Treated as hotfix — server-side pagination mirroring Users/browse patterns'
+      - id: BUG-2026-07-28-spanish-signout-overflow
+        github_issue: 105
+        summary: Spanish sign-out label overflows UI
+        status: fix_applied_local
         order: 2
-        bug_report: docs/bug-reports/BUG-2026-07-25-previous-chats-empty-assistant.md
-        repro_test: apps/chat-rag-frontend/src/test/test_bug_2026_07_25_previous_chats_empty_assistant.test.tsx
-        repro_status: red_to_green
-        note: 'Root cause = mid-stream selectConversation archives empty assistant; stream tokens only updated active. Fix
-          = updateMessageById + disable select while loading. Staging happy-path verified after PROXY_KEY sync (Ask→stream→New
-          chat→select restores assistant+sources).'
-        resolved_at: '2026-07-26'
-        resolved_via: 15-service-health post-merge smoke PASS
-      note: 'PR #147 merged to main (f61f820). 14-hotfix + 15-service-health PASS. Bugs #146/#145 resolved; user confirmed
-        Manage Tags / staging working 2026-07-26; S011 closed.'
+        seen_on: staging
+        bug_report: docs/bug-reports/BUG-2026-07-28-spanish-signout-overflow.md
+        bug_report_status: written
+        repro_test: apps/data-management-frontend/src/test/test_bug_2026_07_28_spanish_signout_overflow.test.tsx
+        repro_status: green
+        fix_summary: 'AdminLayout UserMenu wrap classes for Spanish sign-out label'
+        note: 'Admin FE i18n/layout overflow on Spanish sign-out label'
+      note: 'S012 — BOTH #112+#105 fix_applied_local on fix/S012-admin-ui-112-105 (uncommitted). Also authContext.ts→auth-context.ts (case-insensitive FS). Merge+deploy after explicit approval (S012-D5). Waiting user commit/PR request.'
       current_bug:
-      current_action: completed
-      pr: '#147 merged'
-      merge_sha: f61f820
-      next_action:
-      session_closed_at: '2026-07-26'
+      current_action: await_user_commit_and_pr
+      pr:
+      merge_sha:
+      next_action: commit_and_pr_after_user_approval
+      also_changed:
+      - 'authContext.ts → auth-context.ts (case-insensitive FS collision fix)'
+      prior_session_id: S011-hotfix-retag-empty-chats
       history:
+      - status: completed
+        started_at: '2026-07-25'
+        completed_at: '2026-07-26'
+        session_id: S011-hotfix-retag-empty-chats
+        branch: fix/BUG-2026-07-25-retag-llm-500
+        bugs:
+        - id: BUG-2026-07-25-retag-llm-internal-server-error
+          github_issue: 146
+          summary: Manage Tags LLM retag returns Internal Server Error (500)
+          status: resolved
+        - id: BUG-2026-07-25-previous-chats-empty-assistant
+          github_issue: 145
+          summary: Previous chats show empty Vecinita/assistant response
+          status: resolved
+        note: 'PR #147 merged to main (f61f820). 14-hotfix + 15-service-health PASS. Bugs #146/#145 resolved; user confirmed Manage Tags / staging working 2026-07-26; S011 closed.'
+        pr: '#147 merged'
+        merge_sha: f61f820
+        superseded_at: '2026-07-28'
+        superseded_by: S012-hotfix-admin-ui-112-105
       - status: in_progress
         started_at: '2026-06-26'
         session_id: S002-admin-job-management
@@ -881,8 +902,60 @@ project:
         completed_at: '2026-05-21'
       prior_started_at: '2026-06-26'
       completed_at: '2026-07-26'
-session_counter: 11
-active_session: null
+session_counter: 12
+active_session:
+  id: S012-hotfix-admin-ui-112-105
+  type: hotfix
+  intent: 'Fix GitHub #112 (admin corpus list pagination — server-side mirroring Users/browse) and #105 (Spanish sign-out label overflow) in one branch/PR; merge + deploy after explicit user approval; seen on staging'
+  status: in_progress
+  branch: fix/S012-admin-ui-112-105
+  orchestrator: 14-hotfix
+  evolve_cycle_id:
+  artifacts_dir: docs/sessions/S012-hotfix-admin-ui-112-105/
+  started_at: '2026-07-28'
+  current_stage: 14-hotfix
+  linked_issues:
+  - 112
+  - 105
+  routing_plan:
+  - stage: 14-hotfix
+    required: true
+    status: in_progress
+    started_at: '2026-07-28'
+    note: 'Phase 0 approved — BOTH #112 + #105 in ONE branch/PR; #112 treated as hotfix (server-side pagination); seen on staging; merge+deploy after explicit user approval'
+  - stage: 15-service-health
+    required: true
+    status: pending
+    note: 'Post-merge staging smoke after user-approved deploy'
+  context_briefs: []
+  handoff:
+    cleared: false
+    next_skill: 14-hotfix
+    next_action: commit_and_pr_after_user_approval
+    current_bug:
+    bugs_order:
+    - '#112-corpus-pagination'
+    - '#105-spanish-signout-overflow'
+    bugs_status:
+      '#112-corpus-pagination': fix_applied_local
+      '#105-spanish-signout-overflow': fix_applied_local
+    bug_reports:
+      '#112': docs/bug-reports/BUG-2026-07-28-admin-corpus-pagination.md
+      '#105': docs/bug-reports/BUG-2026-07-28-spanish-signout-overflow.md
+    also_changed:
+    - 'authContext.ts → auth-context.ts (case-insensitive FS collision fix)'
+    commit_status: uncommitted_awaiting_user_request
+    deploy_intent: fix_plus_merge_deploy_after_explicit_user_approval
+    deploy_decision: S012-D5
+    seen_on: staging
+    scope: both_112_and_105_one_branch_pr
+    phase0: recorded
+  phase0:
+    scope: both_112_and_105_one_branch_pr
+    env: staging
+    issue_112: hotfix_server_side_pagination
+    deploy: merge_deploy_after_explicit_approval
+    recorded_at: '2026-07-28'
 sessions:
 - id: S011-hotfix-retag-empty-chats
   type: hotfix
@@ -3018,45 +3091,66 @@ stages:
     - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
     note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
   14-hotfix:
-    status: completed
-    started_at: '2026-07-25'
-    session_id: S011-hotfix-retag-empty-chats
-    branch: fix/BUG-2026-07-25-retag-llm-500
+    status: in_progress
+    started_at: '2026-07-28'
+    session_id: S012-hotfix-admin-ui-112-105
+    branch: fix/S012-admin-ui-112-105
     bugs:
-    - id: BUG-2026-07-25-retag-llm-internal-server-error
-      github_issue: 146
-      summary: Manage Tags LLM retag returns Internal Server Error (500)
-      status: resolved
+    - id: BUG-2026-07-28-admin-corpus-pagination
+      github_issue: 112
+      summary: Admin corpus list lacks server-side pagination (mirror Users/browse)
+      status: fix_applied_local
       order: 1
-      bug_report: docs/bug-reports/BUG-2026-07-25-retag-llm-internal-server-error.md
-      repro_test: tests/bugs/test_bug_2026_07_25_retag_llm_internal_server_error.py
-      repro_status: red_to_green
-      note: 'Root cause = write API did not forward Authorization JWT to Modal POST /jobs (F34); uncaught DataManagementJobsClientError
-        → 500. Fix forwards Authorization + maps enqueue errors to 502.'
-      resolved_at: '2026-07-26'
-      resolved_via: 15-service-health post-merge smoke PASS
-    - id: BUG-2026-07-25-previous-chats-empty-assistant
-      github_issue: 145
-      summary: Previous chats show empty Vecinita/assistant response
-      status: resolved
+      seen_on: staging
+      bug_report: docs/bug-reports/BUG-2026-07-28-admin-corpus-pagination.md
+      bug_report_status: written
+      repro_tests:
+      - tests/bugs/test_bug_2026_07_28_admin_corpus_pagination.py
+      - apps/data-management-frontend/src/test/test_bug_2026_07_28_admin_corpus_pagination.test.tsx
+      repro_status: green
+      fix_summary: 'DocumentListPage API pagination + CorpusList PaginationControls; page-scoped select-all'
+      note: 'Treated as hotfix — server-side pagination mirroring Users/browse patterns'
+    - id: BUG-2026-07-28-spanish-signout-overflow
+      github_issue: 105
+      summary: Spanish sign-out label overflows UI
+      status: fix_applied_local
       order: 2
-      bug_report: docs/bug-reports/BUG-2026-07-25-previous-chats-empty-assistant.md
-      repro_test: apps/chat-rag-frontend/src/test/test_bug_2026_07_25_previous_chats_empty_assistant.test.tsx
-      repro_status: red_to_green
-      note: 'Root cause = mid-stream selectConversation archives empty assistant; stream tokens only updated active. Fix =
-        updateMessageById + disable select while loading. Staging happy-path verified after PROXY_KEY sync (Ask→stream→New
-        chat→select restores assistant+sources).'
-      resolved_at: '2026-07-26'
-      resolved_via: 15-service-health post-merge smoke PASS
-    note: 'PR #147 merged to main (f61f820). 14-hotfix + 15-service-health PASS. Bugs #146/#145 resolved; user confirmed
-      Manage Tags / staging working 2026-07-26; S011 closed.'
+      seen_on: staging
+      bug_report: docs/bug-reports/BUG-2026-07-28-spanish-signout-overflow.md
+      bug_report_status: written
+      repro_test: apps/data-management-frontend/src/test/test_bug_2026_07_28_spanish_signout_overflow.test.tsx
+      repro_status: green
+      fix_summary: 'AdminLayout UserMenu wrap classes for Spanish sign-out label'
+      note: 'Admin FE i18n/layout overflow on Spanish sign-out label'
+    note: 'S012 — BOTH #112+#105 fix_applied_local on fix/S012-admin-ui-112-105 (uncommitted). Also authContext.ts→auth-context.ts (case-insensitive FS). Merge+deploy after explicit approval (S012-D5). Waiting user commit/PR request.'
     current_bug:
-    current_action: completed
-    pr: '#147 merged'
-    merge_sha: f61f820
-    next_action:
-    session_closed_at: '2026-07-26'
+    current_action: await_user_commit_and_pr
+    pr:
+    merge_sha:
+    next_action: commit_and_pr_after_user_approval
+    also_changed:
+    - 'authContext.ts → auth-context.ts (case-insensitive FS collision fix)'
+    prior_session_id: S011-hotfix-retag-empty-chats
     history:
+    - status: completed
+      started_at: '2026-07-25'
+      completed_at: '2026-07-26'
+      session_id: S011-hotfix-retag-empty-chats
+      branch: fix/BUG-2026-07-25-retag-llm-500
+      bugs:
+      - id: BUG-2026-07-25-retag-llm-internal-server-error
+        github_issue: 146
+        summary: Manage Tags LLM retag returns Internal Server Error (500)
+        status: resolved
+      - id: BUG-2026-07-25-previous-chats-empty-assistant
+        github_issue: 145
+        summary: Previous chats show empty Vecinita/assistant response
+        status: resolved
+      note: 'PR #147 merged to main (f61f820). 14-hotfix + 15-service-health PASS. Bugs #146/#145 resolved; user confirmed Manage Tags / staging working 2026-07-26; S011 closed.'
+      pr: '#147 merged'
+      merge_sha: f61f820
+      superseded_at: '2026-07-28'
+      superseded_by: S012-hotfix-admin-ui-112-105
     - status: in_progress
       started_at: '2026-06-26'
       session_id: S002-admin-job-management
@@ -6037,6 +6131,44 @@ decisions_log:
   session_id: S011-hotfix-retag-empty-chats
   timestamp: '2026-07-26'
 - 'S011/2026-07-26: Session CLOSED — user confirmed Manage Tags / staging working; #145/#146 resolved; active_session cleared.'
+- id: S012-D1-scope-both-issues
+  category: Decision
+  choice: both_one_branch
+  summary: 'Scope BOTH GitHub #112 (corpus pagination) and #105 (Spanish sign-out overflow) in ONE branch/PR'
+  stage: 14-hotfix
+  session_id: S012-hotfix-admin-ui-112-105
+  timestamp: '2026-07-28'
+- id: S012-D2-open-hotfix-session
+  category: Decision
+  choice: open_hotfix
+  summary: 'Open hotfix session (not investigate-only); type hotfix; routing 14-hotfix primary + 15-service-health after deploy'
+  stage: 00-context
+  session_id: S012-hotfix-admin-ui-112-105
+  timestamp: '2026-07-28'
+- id: S012-D3-seen-on-staging
+  category: Decision
+  choice: staging
+  summary: 'Bugs seen on staging'
+  stage: 14-hotfix
+  session_id: S012-hotfix-admin-ui-112-105
+  timestamp: '2026-07-28'
+- id: S012-D4-112-as-hotfix
+  category: Decision
+  choice: hotfix_server_pagination
+  summary: '#112 treated as hotfix — server-side pagination mirroring Users/browse'
+  stage: 14-hotfix
+  session_id: S012-hotfix-admin-ui-112-105
+  timestamp: '2026-07-28'
+- id: S012-D5-deploy-after-approval
+  category: Decision
+  choice: merge_deploy_after_explicit_approval
+  summary: 'After fix: merge + deploy only after explicit user approval'
+  stage: 14-hotfix
+  session_id: S012-hotfix-admin-ui-112-105
+  timestamp: '2026-07-28'
+- 'S012/2026-07-28: Session OPENED — hotfix #112+#105; active_session set; 14-hotfix in_progress; branch fix/S012-admin-ui-112-105 (parent creates).'
+- 'S012/2026-07-28: Phase 0 recorded — scope both #112+#105 one branch/PR; env=staging; #112 hotfix server-side pagination; deploy=merge+deploy after explicit approval. Branch fix/S012-admin-ui-112-105 created from main (status open). Planned bug reports: BUG-2026-07-28-admin-corpus-pagination.md (#112), BUG-2026-07-28-spanish-signout-overflow.md (#105).'
+- 'S012/2026-07-28: Both fixes implemented locally (uncommitted) — #105 GREEN (AdminLayout UserMenu wrap); #112 GREEN (DocumentListPage API + CorpusList PaginationControls, page-scoped select-all); authContext.ts→auth-context.ts. next_action=commit_and_pr_after_user_approval; deploy per S012-D5 after explicit approval.'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -6415,9 +6547,46 @@ artifacts:
   kind: report
   stage: 15-service-health
   recorded_at: '2026-07-26'
+- path: docs/bug-reports/BUG-2026-07-28-admin-corpus-pagination.md
+  kind: bug-report
+  session_id: S012-hotfix-admin-ui-112-105
+  stage: 14-hotfix
+  github_issue: 112
+  status: fix_applied_local
+- path: tests/bugs/test_bug_2026_07_28_admin_corpus_pagination.py
+  kind: bug-repro-test
+  session_id: S012-hotfix-admin-ui-112-105
+  stage: 14-hotfix
+  github_issue: 112
+  repro_status: green
+- path: apps/data-management-frontend/src/test/test_bug_2026_07_28_admin_corpus_pagination.test.tsx
+  kind: bug-repro-test
+  session_id: S012-hotfix-admin-ui-112-105
+  stage: 14-hotfix
+  github_issue: 112
+  repro_status: green
+- path: docs/bug-reports/BUG-2026-07-28-spanish-signout-overflow.md
+  kind: bug-report
+  session_id: S012-hotfix-admin-ui-112-105
+  stage: 14-hotfix
+  github_issue: 105
+  status: fix_applied_local
+- path: apps/data-management-frontend/src/test/test_bug_2026_07_28_spanish_signout_overflow.test.tsx
+  kind: bug-repro-test
+  session_id: S012-hotfix-admin-ui-112-105
+  stage: 14-hotfix
+  github_issue: 105
+  repro_status: green
 git_history:
-  current_branch: main
+  current_branch: fix/S012-admin-ui-112-105
   branches:
+  - name: fix/S012-admin-ui-112-105
+    purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
+    base: main
+    status: open
+    created_at: '2026-07-28'
+    session_id: S012-hotfix-admin-ui-112-105
+    note: 'Created from main via git checkout -b (2026-07-28)'
   - name: fix/BUG-2026-07-25-retag-llm-500
     purpose: 'S011 hotfix — #146 retag LLM 500 then #145 empty assistant'
     base: main
@@ -7226,6 +7395,9 @@ git_history:
     session_id: S011-hotfix-retag-empty-chats
     timestamp: '2026-07-26'
   notes:
+  - '2026-07-28 S012: #112+#105 fix_applied_local on fix/S012-admin-ui-112-105 — NOT committed yet (awaiting user commit/PR request). next_action=commit_and_pr_after_user_approval. Also authContext→auth-context rename.'
+  - '2026-07-28 S012: Branch fix/S012-admin-ui-112-105 created from main (status open); current_branch set. Phase 0 answers + planned bug-report paths recorded.'
+  - '2026-07-28 S012: Session OPENED — hotfix #112+#105 one branch/PR; active_session=S012-hotfix-admin-ui-112-105; branch recommended fix/S012-admin-ui-112-105 (parent creates).'
   - '2026-07-10 S010: Recorded commits 73e694b, 1527031, 67412e2; workflow-state.yaml dirty after this append — follow-up
     chore commit may be needed'
   - '2026-07-10 S010: T77.1 completed ebefa8b; current_task T77.2; resolve_llm_http_config stub until T77.3; list_models/start_pull

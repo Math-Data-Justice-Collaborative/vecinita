@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from vecinita_shared_schemas.internal_write import (
         BatchUpsertRequest,
         BatchUpsertResponse,
+        DocumentListPage,
         DocumentSummary,
     )
     from vecinita_shared_schemas.observability import configure_logging, log_request_event
@@ -72,6 +73,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "DocumentBrowseDetail": ("vecinita_shared_schemas.chat_rag", "DocumentBrowseDetail"),
     "DocumentBrowseItem": ("vecinita_shared_schemas.chat_rag", "DocumentBrowseItem"),
     "DocumentBrowsePage": ("vecinita_shared_schemas.chat_rag", "DocumentBrowsePage"),
+    "DocumentListPage": ("vecinita_shared_schemas.internal_write", "DocumentListPage"),
     "DocumentSummary": ("vecinita_shared_schemas.internal_write", "DocumentSummary"),
     "HealthResponse": ("vecinita_shared_schemas.chat_rag", "HealthResponse"),
     "Job": ("vecinita_shared_schemas.data_management", "Job"),
@@ -113,6 +115,7 @@ __all__ = [
     "DocumentBrowseDetail",
     "DocumentBrowseItem",
     "DocumentBrowsePage",
+    "DocumentListPage",
     "DocumentSummary",
     "HealthResponse",
     "Job",

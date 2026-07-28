@@ -11,7 +11,12 @@ from httpx import ASGITransport, AsyncClient
 from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.json_types import as_json_object
 
-from tests.helpers.json_response import find_json_object_by_str, json_str, response_json_list
+from tests.helpers.json_response import (
+    find_json_object_by_str,
+    json_str,
+    response_document_list_items,
+    response_json_list,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -57,7 +62,7 @@ async def _seed_document(client: AsyncClient) -> tuple[str, str]:
         "/internal/v1/documents",
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
-    items = response_json_list(list_response)
+    items = response_document_list_items(list_response)
     doc = find_json_object_by_str(items, "url", doc_url)
     document_id = json_str(doc, "document_id")
     chunks_response = await client.get(

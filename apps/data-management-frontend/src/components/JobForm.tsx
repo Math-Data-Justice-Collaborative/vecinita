@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminT } from "@/hooks/useAdminT";
-import { useIsAdmin, useAuth } from "@/auth/authContext";
+import { useIsAdmin, useAuth } from "@/auth/auth-context";
 
 const POLL_MS = 2000;
 const TERMINAL: Job["status"][] = ["completed", "failed"];
