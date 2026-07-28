@@ -107,3 +107,10 @@ content_path = "templates/password-changed.html"
 
 [auth.sms]
 enable_signup = false
+
+# TOTP MFA capability (platform). Clears auth_insufficient_mfa_options advisor.
+# Operator enrollment UX remains deferred (ADR-029 / TP-S005-12); enabling enroll/verify
+# here exposes the Auth MFA APIs without requiring in-app flows yet.
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true

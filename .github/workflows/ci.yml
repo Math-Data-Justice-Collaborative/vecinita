@@ -113,11 +113,24 @@ jobs:
       - name: Install security scanners
         run: SEC_TOOLS_DIR="${GITHUB_WORKSPACE}/.tools/security" bash scripts/security/install-tools.sh
 
+      - name: Remediate Supabase advisor findings (live)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          if [[ -z "${SUPABASE_ACCESS_TOKEN}" ]]; then
+            echo "SUPABASE_ACCESS_TOKEN unset — skipping live advisor remediation"
+            exit 0
+          fi
+          bash scripts/security/remediate-supabase-advisors.sh
+
       - name: Security static analysis (hard-fail)
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
           SEC_TOOLS_DIR: ${{ github.workspace }}/.tools/security
+          # Fail on WARN+ so advisor remediations stay enforced (INFO remains non-blocking).
+          SEC_SUPABASE_ADVISOR_FAIL_ON: warn
           # Skip advisors only when the token secret is unset in the fork/PR context.
           SEC_SKIP_SUPABASE_ADVISORS: ${{ secrets.SUPABASE_ACCESS_TOKEN == '' && '1' || '0' }}
         run: bash scripts/security/run-all.sh

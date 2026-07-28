@@ -101,4 +101,11 @@ if grep -q 'localhost:3000' "$CONFIG"; then
   fail "config.toml must not reference localhost:3000 in auth URL settings"
 fi
 
+# TOTP MFA platform capability (clears auth_insufficient_mfa_options advisor).
+grep -q '\[auth.mfa.totp\]' "$CONFIG" || fail "missing [auth.mfa.totp] section"
+grep -A5 '\[auth.mfa.totp\]' "$CONFIG" | grep -q 'enroll_enabled = true' \
+  || fail "[auth.mfa.totp] enroll_enabled must be true"
+grep -A5 '\[auth.mfa.totp\]' "$CONFIG" | grep -q 'verify_enabled = true' \
+  || fail "[auth.mfa.totp] verify_enabled must be true"
+
 echo "OK: supabase/config.toml passes offline contract checks."
