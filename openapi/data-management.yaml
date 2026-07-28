@@ -6,6 +6,9 @@ info:
 servers:
   - url: /
     description: Modal ASGI app
+security:
+  - bearerAuth: []
+    modalProxyAuth: []
 paths:
   /jobs:
     post:
@@ -450,6 +453,7 @@ paths:
     get:
       operationId: health
       summary: Service health
+      security: []
       responses:
         "200":
           description: Health status

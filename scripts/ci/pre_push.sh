@@ -31,6 +31,18 @@ if [[ "${VECINITA_MEDIUM_PRE_PUSH:-}" == "1" ]]; then
 	exec make test-fast
 fi
 
-echo "pre-push: make check-fast + make test-fast (run make ci-push before opening a PR)"
+echo "pre-push: make check-fast + make test-fast + make security-scan (run make ci-push before opening a PR)"
 make check-fast
 make test-fast
+# Load SUPABASE_ACCESS_TOKEN / PROJECT_REF from .env or prod.env (parse-only) so
+# local pushes exercise advisors the same way CI does when the token is present.
+# shellcheck source=scripts/security/load_supabase_credentials.sh
+source "${ROOT}/scripts/security/load_supabase_credentials.sh"
+vecinita_load_supabase_credentials "${ROOT}"
+if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" && "${SEC_SKIP_SUPABASE_ADVISORS:-}" != "1" ]]; then
+	echo "pre-push: no SUPABASE_ACCESS_TOKEN in env/.env/prod.env — skipping Supabase advisors (set token or SEC_SKIP_SUPABASE_ADVISORS=1)"
+	export SEC_SKIP_SUPABASE_ADVISORS=1
+elif [[ "${SEC_SKIP_SUPABASE_ADVISORS:-}" != "1" ]]; then
+	echo "pre-push: Supabase advisors enabled (token present; ref=${SUPABASE_PROJECT_REF:-unset})"
+fi
+make security-scan

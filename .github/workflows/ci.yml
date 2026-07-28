@@ -105,6 +105,81 @@ jobs:
           done < audit/pip-audit-ignore.txt
           uv run pip-audit "${IGNORE_ARGS[@]}"
 
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install security scanners
+        run: SEC_TOOLS_DIR="${GITHUB_WORKSPACE}/.tools/security" bash scripts/security/install-tools.sh
+
+      - name: Remediate Supabase advisor findings (live)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_CLI_VERSION: "2.84.2"
+        run: |
+          if [[ -z "${SUPABASE_ACCESS_TOKEN}" ]]; then
+            echo "SUPABASE_ACCESS_TOKEN unset — skipping live advisor remediation"
+            exit 0
+          fi
+          # CLI fallback for SQL when Management API query endpoint rejects the statement.
+          curl -fsSL "https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin supabase
+          supabase --version
+          bash scripts/security/remediate-supabase-advisors.sh
+
+      - name: Security static analysis (hard-fail)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
+          SEC_TOOLS_DIR: ${{ github.workspace }}/.tools/security
+          SEC_FAIL_FAST: "1"
+          SEC_KICS_FAIL_ON: high,critical
+          SEC_GRYPE_FAIL_ON: high
+          # Fail on WARN+ so advisor remediations stay enforced (INFO remains non-blocking).
+          SEC_SUPABASE_ADVISOR_FAIL_ON: warn
+          # Skip advisors only when the token secret is unset in the fork/PR context.
+          SEC_SKIP_SUPABASE_ADVISORS: ${{ secrets.SUPABASE_ACCESS_TOKEN == '' && '1' || '0' }}
+        run: bash scripts/security/run-all.sh
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: .security-reports/
+          if-no-files-found: warn
+          include-hidden-files: true
+
+      - name: Publish Supabase advisor summary
+        if: always()
+        run: |
+          if [[ -f .security-reports/supabase-advisors/summary.json ]]; then
+            echo "## Supabase advisors" >> "$GITHUB_STEP_SUMMARY"
+            python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          s = json.loads(Path(".security-reports/supabase-advisors/summary.json").read_text())
+          print(f"- total: **{s.get('total')}**")
+          print(f"- blocking (fail_on={s.get('fail_on')}): **{s.get('blocking')}**")
+          print(f"- by level: `{s.get('by_level')}`")
+          for kind in ("security", "performance"):
+              p = Path(f".security-reports/supabase-advisors/{kind}.json")
+              if not p.exists():
+                  continue
+              data = json.loads(p.read_text())
+              items = data.get("lints", data) if isinstance(data, dict) else data
+              print(f"\n### {kind}")
+              for lint in items or []:
+                  name = lint.get("name") or lint.get("title") or "?"
+                  print(f"- **[{lint.get('level')}]** `{name}` — {(lint.get('detail') or lint.get('description') or '')[:240]}")
+          PY
+          else
+            echo "No supabase advisor summary found" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   coverage:
     runs-on: ubuntu-latest
     services:
@@ -257,7 +332,7 @@ jobs:
   ci-success:
     name: CI success
     runs-on: ubuntu-latest
-    needs: [python, coverage, frontend, packages, ui-e2e]
+    needs: [python, coverage, frontend, packages, ui-e2e, security]
     if: >-
       ${{ always() &&
           !contains(needs.*.result, 'failure') &&

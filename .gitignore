@@ -52,3 +52,7 @@ coverage/
 
 # Local eval experiment outputs (sweep JSON drops)
 data/eval-experiments/
+
+# Security static analysis (local tool installs + reports)
+.tools/security/
+.security-reports/

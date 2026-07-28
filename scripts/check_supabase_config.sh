@@ -101,4 +101,26 @@ if grep -q 'localhost:3000' "$CONFIG"; then
   fail "config.toml must not reference localhost:3000 in auth URL settings"
 fi
 
+# TOTP MFA platform capability (clears auth_insufficient_mfa_options advisor).
+grep -q '\[auth.mfa.totp\]' "$CONFIG" || fail "missing [auth.mfa.totp] section"
+grep -A5 '\[auth.mfa.totp\]' "$CONFIG" | grep -q 'enroll_enabled = true' \
+  || fail "[auth.mfa.totp] enroll_enabled must be true"
+grep -A5 '\[auth.mfa.totp\]' "$CONFIG" | grep -q 'verify_enabled = true' \
+  || fail "[auth.mfa.totp] verify_enabled must be true"
+
+# Auth DB pool unit is Management-API-only (not in config.toml schema). Offline
+# contract requires the remediator + apply_auth scripts to pin percent.
+REMEDIATE="$ROOT/scripts/security/remediate-supabase-advisors.sh"
+APPLY_AUTH="$ROOT/scripts/supabase/apply_auth_config_from_toml.sh"
+[[ -f "$REMEDIATE" ]] || fail "missing $REMEDIATE"
+[[ -f "$APPLY_AUTH" ]] || fail "missing $APPLY_AUTH"
+grep -q 'db_max_pool_size_unit' "$REMEDIATE" \
+  || fail "remediator must pin db_max_pool_size_unit"
+grep -q 'percent' "$REMEDIATE" \
+  || fail "remediator must pin pool unit percent"
+grep -q 'db_max_pool_size_unit' "$APPLY_AUTH" \
+  || fail "apply_auth_config_from_toml.sh must pin db_max_pool_size_unit"
+grep -q 'db_max_pool_size_unit' "$CONFIG" \
+  || fail "config.toml must document db_max_pool_size_unit Management API pin"
+
 echo "OK: supabase/config.toml passes offline contract checks."

@@ -707,8 +707,9 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                     set_clauses.append("language = :language")
                     params["language"] = body.updates.language
                     new_language = body.updates.language
+                # set_clauses are whitelisted column assignments; values bound via :params.
                 conn.execute(
-                    text(
+                    text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                         f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
                     ),
                     params,
@@ -1174,11 +1175,12 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         )
 
         with engine.connect() as conn:
+            # where_sql uses fixed filter templates; values bound via :params.
             total = scalar_int(
                 cast(
                     "object",
                     conn.execute(
-                        text(
+                        text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                             f"SELECT COUNT(*) FROM audit_log {where_sql}"  # noqa: S608  # fixed filter templates; values bound
                         ),
                         params,
@@ -1186,9 +1188,12 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 )
             )
 
+            audit_stmt = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                audit_list_sql
+            )
             rows = (
                 conn.execute(
-                    text(audit_list_sql),
+                    audit_stmt,
                     params,
                 )
                 .mappings()

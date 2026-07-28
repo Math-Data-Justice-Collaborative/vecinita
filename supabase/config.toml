@@ -107,3 +107,16 @@ content_path = "templates/password-changed.html"
 
 [auth.sms]
 enable_signup = false
+
+# TOTP MFA capability (platform). Clears auth_insufficient_mfa_options advisor.
+# Operator enrollment UX remains deferred (ADR-029 / TP-S005-12); enabling enroll/verify
+# here exposes the Auth MFA APIs without requiring in-app flows yet.
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+# Auth DB pool unit (db_max_pool_size_unit=percent) is NOT expressible in config.toml
+# (Supabase CLI has no field; Management API enum only). Keep it pinned via:
+#   scripts/security/remediate-supabase-advisors.sh
+#   scripts/supabase/apply_auth_config_from_toml.sh
+# Target: db_max_pool_size_unit=percent (clears auth_db_connections_absolute advisor).

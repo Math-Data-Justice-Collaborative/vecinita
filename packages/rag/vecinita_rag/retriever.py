@@ -133,7 +133,10 @@ class CorpusPgvectorRetriever(BaseRetriever):
             """
             params["tag_slugs"] = tuple(tag_slugs)
 
-        sql = text(_BASE_SELECT_SQL + language_clause + tag_clause + _ORDER_LIMIT_SQL)
+        # Fixed clause templates; values bound via :params (expanding tag_slugs).
+        sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+            _BASE_SELECT_SQL + language_clause + tag_clause + _ORDER_LIMIT_SQL
+        )
         if tag_slugs:
             sql = sql.bindparams(bindparam("tag_slugs", expanding=True))
         with self._engine.connect() as conn:
