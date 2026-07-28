@@ -27,6 +27,12 @@ function pageFromUrl(url: string): number {
   return match ? Number(match[1]) : 1;
 }
 
+function urlOf(input: RequestInfo | URL): string {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.href;
+  return input.url;
+}
+
 function renderCorpus() {
   return renderWithProviders(
     <ThemeProvider>
@@ -44,8 +50,8 @@ describe("BUG-2026-07-28 — Admin corpus list pagination (#112)", () => {
   });
 
   it("requests a page from the API and renders pagination controls when total exceeds page size", async () => {
-    const fetchMock = vi.fn().mockImplementation((input: RequestInfo) => {
-      const url = String(input);
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = urlOf(input);
       const page = pageFromUrl(url);
       const items =
         page === 1
