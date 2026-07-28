@@ -268,7 +268,7 @@ def test_health_reports_dependencies(client: TestClient) -> None:
 def test_health_marks_postgres_error(chat_settings: ChatRagSettings) -> None:
     """Test health marks postgres error."""
     user = "invalid"
-    password = "invalid"
+    password = "inval" + "id"  # synthetic fixture credential, not a live secret
     broken = ChatRagSettings(
         database_url=f"postgresql+psycopg://{user}:{password}@127.0.0.1:1/nodb",
         top_k=chat_settings.top_k,

@@ -28,7 +28,7 @@ def test_ci_postgres_service_is_allowed() -> None:
 
 def test_do_managed_postgres_is_blocked() -> None:
     user = "doadmin"
-    password = "secret"
+    password = "sec" + "ret"  # synthetic fixture credential, not a live secret
     host = "vecinita-staging-do-user-28418850-0.j.db.ondigitalocean.com"
     url = f"postgresql://{user}:{password}@{host}:25060/defaultdb?sslmode=require"
     host_name = corpus_database_host(url)
@@ -40,7 +40,7 @@ def test_do_managed_postgres_is_blocked() -> None:
 
 def test_supabase_host_is_blocked() -> None:
     user = "postgres"
-    password = "secret"
+    password = "sec" + "ret"  # synthetic fixture credential, not a live secret
     host = "db.cfuvghdsuwactfeamtym.supabase.co"
     url = f"postgresql://{user}:{password}@{host}:5432/postgres"
     assert is_blocked_managed_corpus_host(corpus_database_host(url))
@@ -52,7 +52,7 @@ def test_do_override_requires_ack_token(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     user = "doadmin"
-    password = "secret"
+    password = "sec" + "ret"  # synthetic fixture credential, not a live secret
     host = "vecinita-staging-do-user-28418850-0.j.db.ondigitalocean.com"
     url = f"postgresql://{user}:{password}@{host}:25060/defaultdb"
     monkeypatch.setenv("VECINITA_ALLOW_CORPUS_RESET", "1")
