@@ -68,14 +68,29 @@ for name in ("security.json", "performance.json"):
     items = data.get("lints", data) if isinstance(data, dict) else data
     lints.extend(items or [])
 blocking = [l for l in lints if rank.get(str(l.get("level", "")).upper(), -1) >= thr]
-summary = {"total": len(lints), "blocking": len(blocking), "fail_on": fail_on}
+summary = {
+    "total": len(lints),
+    "blocking": len(blocking),
+    "fail_on": fail_on,
+    "by_level": {},
+}
+for lint in lints:
+    level = str(lint.get("level", "UNKNOWN")).upper()
+    summary["by_level"][level] = summary["by_level"].get(level, 0) + 1
 (reports / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 print(f"[security] supabase advisors: total={len(lints)} blocking={len(blocking)} fail_on={fail_on}")
+# Always print every lint so WARN/INFO are visible in CI logs (hard-fail still uses fail_on).
+for lint in lints:
+    name = lint.get("name") or lint.get("title") or lint.get("cache_key") or "unknown"
+    detail = (lint.get("detail") or lint.get("description") or lint.get("remediation") or "")
+    print(f"  [{lint.get('level')}] {name}: {detail[:300]}")
+    if lint.get("metadata"):
+        meta = lint["metadata"]
+        if isinstance(meta, dict):
+            for key in ("schema", "name", "type", "entity"):
+                if key in meta:
+                    print(f"           {key}={meta[key]}")
 if blocking:
-    for lint in blocking[:20]:
-        print(
-            f"  [{lint.get('level')}] {lint.get('name') or lint.get('title')}: "
-            f"{(lint.get('detail') or lint.get('description') or '')[:160]}"
-        )
+    print(f"[security] ERROR: {len(blocking)} advisor finding(s) at or above fail_on={fail_on}")
 sys.exit(1 if blocking else 0)
 PY

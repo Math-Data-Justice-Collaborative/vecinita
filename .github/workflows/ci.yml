@@ -128,7 +128,35 @@ jobs:
         with:
           name: security-reports
           path: .security-reports/
-          if-no-files-found: ignore
+          if-no-files-found: warn
+          include-hidden-files: true
+
+      - name: Publish Supabase advisor summary
+        if: always()
+        run: |
+          if [[ -f .security-reports/supabase-advisors/summary.json ]]; then
+            echo "## Supabase advisors" >> "$GITHUB_STEP_SUMMARY"
+            python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          s = json.loads(Path(".security-reports/supabase-advisors/summary.json").read_text())
+          print(f"- total: **{s.get('total')}**")
+          print(f"- blocking (fail_on={s.get('fail_on')}): **{s.get('blocking')}**")
+          print(f"- by level: `{s.get('by_level')}`")
+          for kind in ("security", "performance"):
+              p = Path(f".security-reports/supabase-advisors/{kind}.json")
+              if not p.exists():
+                  continue
+              data = json.loads(p.read_text())
+              items = data.get("lints", data) if isinstance(data, dict) else data
+              print(f"\n### {kind}")
+              for lint in items or []:
+                  name = lint.get("name") or lint.get("title") or "?"
+                  print(f"- **[{lint.get('level')}]** `{name}` — {(lint.get('detail') or lint.get('description') or '')[:240]}")
+          PY
+          else
+            echo "No supabase advisor summary found" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   coverage:
     runs-on: ubuntu-latest
