@@ -6,32 +6,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${ROOT}"
 
-load_env_key() {
-  local key="$1" file="$2"
-  [[ -f "${file}" ]] || return 0
-  local line
-  line="$(grep -E "^${key}=" "${file}" | tail -1 || true)"
-  [[ -n "${line}" ]] || return 0
-  printf '%s' "${line#*=}" | sed 's/^["'\'']//; s/["'\'']$//'
-}
-
+# shellcheck source=scripts/security/load_supabase_credentials.sh
+source "${ROOT}/scripts/security/load_supabase_credentials.sh"
+vecinita_load_supabase_credentials "${ROOT}"
 TOKEN="${SUPABASE_ACCESS_TOKEN:-}"
-REF="${SUPABASE_PROJECT_REF:-${SUPABASE_PROJECT_ID:-}}"
-if [[ -z "${TOKEN}" ]]; then
-  TOKEN="$(load_env_key SUPABASE_ACCESS_TOKEN "${ROOT}/.env")"
-fi
-if [[ -z "${TOKEN}" ]]; then
-  TOKEN="$(load_env_key SUPABASE_ACCESS_TOKEN "${ROOT}/prod.env")"
-fi
-if [[ -z "${REF}" ]]; then
-  REF="$(load_env_key SUPABASE_PROJECT_REF "${ROOT}/.env")"
-fi
-if [[ -z "${REF}" ]]; then
-  REF="$(load_env_key SUPABASE_PROJECT_ID "${ROOT}/prod.env")"
-fi
-if [[ -z "${REF}" && -f "${ROOT}/supabase/config.toml" ]]; then
-  REF="$(sed -n 's/^project_id[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' "${ROOT}/supabase/config.toml" | head -1)"
-fi
+REF="${SUPABASE_PROJECT_REF:-}"
 
 if [[ -z "${TOKEN}" || -z "${REF}" ]]; then
   echo "[security] ERROR: need SUPABASE_ACCESS_TOKEN and project ref to remediate advisors" >&2

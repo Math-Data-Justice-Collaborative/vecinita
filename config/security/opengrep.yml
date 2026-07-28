@@ -2,5 +2,11 @@
 # Primary ruleset remains community `p/default` (passed separately by run-all).
 # Intentional sqlalchemy.text usages use bound parameters; suppressions are
 # inline `# nosemgrep: ...` next to the call sites with justification.
+#
+# Known noise (not findings): community rules curl-eval / gha-curl-pipe-shell
+# emit Syntax error parse failures on some .github/workflows lines that embed
+# GitHub Actions ${{ }} expressions inside bash. Those lines are under-scanned
+# by those rules only; prefer env: blocks for secrets/interpolation. See
+# docs/security/static-analysis.md §OpenGrep GHA metavariable noise.
 
 rules: []

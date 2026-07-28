@@ -114,3 +114,9 @@ enable_signup = false
 [auth.mfa.totp]
 enroll_enabled = true
 verify_enabled = true
+
+# Auth DB pool unit (db_max_pool_size_unit=percent) is NOT expressible in config.toml
+# (Supabase CLI has no field; Management API enum only). Keep it pinned via:
+#   scripts/security/remediate-supabase-advisors.sh
+#   scripts/supabase/apply_auth_config_from_toml.sh
+# Target: db_max_pool_size_unit=percent (clears auth_db_connections_absolute advisor).
