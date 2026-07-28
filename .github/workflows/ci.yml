@@ -117,11 +117,17 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_CLI_VERSION: "2.84.2"
         run: |
           if [[ -z "${SUPABASE_ACCESS_TOKEN}" ]]; then
             echo "SUPABASE_ACCESS_TOKEN unset — skipping live advisor remediation"
             exit 0
           fi
+          # CLI fallback for SQL when Management API query endpoint rejects the statement.
+          curl -fsSL "https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin supabase
+          supabase --version
           bash scripts/security/remediate-supabase-advisors.sh
 
       - name: Security static analysis (hard-fail)
