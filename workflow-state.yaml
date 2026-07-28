@@ -748,32 +748,30 @@ project:
       report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
     15-service-health:
       status: completed
-      started_at: '2026-07-26'
-      completed_at: '2026-07-26'
-      partial_rerun_at: '2026-07-26'
-      partial_rerun_note: 'S011 post-merge staging smoke complete (PR #147 / f61f820) — overall PASS; H4 modal waiver; see
-        service-health.md'
+      started_at: '2026-07-28'
+      completed_at: '2026-07-28'
+      partial_rerun_at: '2026-07-28'
+      partial_rerun_note: 'S012 post-merge staging smoke after PR #150 (2b3231d); main HEAD 1b60930; overall PASS'
       environment: staging
       infra: pass
       e2e: pass
       overall: pass
-      report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+      report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
       tiers:
+      - H0ci
       - H1
       - H2
       - H3
       - H3b
       - H4
       - H5
-      - H0ci
       advisories:
       - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml
         CD backstop added'
       - modal_h4_cors_waived_proxy_auth
       - s001_t12_pending
       - h0ci_blocking_after_merge
-      pending_rerun_for_session:
-      pending_rerun_note:
+      - 'H1: transient modal_llm=error recovered'
       history:
       - status: completed
         completed_at: '2026-06-25'
@@ -797,25 +795,46 @@ project:
         advisories:
         - h4_modal_waiver
         - h6_browser_uj_waived_v1
-      session_id: S011-hotfix-retag-empty-chats
-      prior_completed_at: '2026-06-25'
-      prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
-      note: 'S011 post-merge smoke complete. Overall PASS. Report at docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md'
-      completed: '2026-07-26'
+      - status: completed
+        completed_at: '2026-07-28'
+        session_id: S012-hotfix-admin-ui-112-105
+        session_note: 'S012 post-merge smoke after PR #150 (2b3231d); staging @ 1b60930; #112+#105 verified'
+        report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
+        overall: pass
+        tiers:
+        - H0ci
+        - H1
+        - H2
+        - H3
+        - H3b
+        - H4
+        - H5
+        advisories:
+        - 'H1: transient modal_llm=error recovered'
+      session_id: S012-hotfix-admin-ui-112-105
+      prior_completed_at: '2026-07-26'
+      prior_report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+      prior_session_id: S011-hotfix-retag-empty-chats
+      note: 'S012 15-service-health PASS — merge 2b3231d (PR #150); staging @ 1b60930; H0ci–H5 pass; #112 pagination + #105 ES sign-out verified. Session remains open pending user close.'
+      completed: '2026-07-28'
+      ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424
+      deploy_do_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628
+      deploy_preflight_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209
     19-address-pr-review:
       status: in_progress
       started: '2026-07-07'
       last_cycle: PRM-011
     14-hotfix:
-      status: in_progress
+      status: completed
       started_at: '2026-07-28'
+      completed_at: '2026-07-28'
       session_id: S012-hotfix-admin-ui-112-105
       branch: fix/S012-admin-ui-112-105
       bugs:
       - id: BUG-2026-07-28-admin-corpus-pagination
         github_issue: 112
         summary: Admin corpus list lacks server-side pagination (mirror Users/browse)
-        status: in_pr
+        status: resolved
         order: 1
         seen_on: staging
         bug_report: docs/bug-reports/BUG-2026-07-28-admin-corpus-pagination.md
@@ -825,11 +844,11 @@ project:
         - apps/data-management-frontend/src/test/test_bug_2026_07_28_admin_corpus_pagination.test.tsx
         repro_status: green
         fix_summary: 'DocumentListPage API pagination + CorpusList PaginationControls; page-scoped select-all'
-        note: 'Treated as hotfix — server-side pagination mirroring Users/browse patterns'
+        note: 'Treated as hotfix — server-side pagination mirroring Users/browse patterns; GitHub #112 CLOSED'
       - id: BUG-2026-07-28-spanish-signout-overflow
         github_issue: 105
         summary: Spanish sign-out label overflows UI
-        status: in_pr
+        status: resolved
         order: 2
         seen_on: staging
         bug_report: docs/bug-reports/BUG-2026-07-28-spanish-signout-overflow.md
@@ -837,16 +856,17 @@ project:
         repro_test: apps/data-management-frontend/src/test/test_bug_2026_07_28_spanish_signout_overflow.test.tsx
         repro_status: green
         fix_summary: 'AdminLayout UserMenu wrap classes for Spanish sign-out label'
-        note: 'Admin FE i18n/layout overflow on Spanish sign-out label'
-      note: 'S012 — BOTH #112+#105 committed fc51bc5 on fix/S012-admin-ui-112-105 (pushed); PR #150 open. Coverage gate fix (CorpusList previous + drop unused refresh default). Await CI green + explicit merge/deploy approval (S012-D5).'
+        note: 'Admin FE i18n/layout overflow on Spanish sign-out label; GitHub #105 CLOSED'
+      note: 'S012 — PR #150 MERGED @ 2b3231d; 15-service-health PASS @ 1b60930. Session open pending user close (await_user_close_or_start_116).'
       current_bug:
-      current_action: await_ci_and_merge_approval
+      current_action: await_user_close_or_start_116
       pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
       pr_number: 150
-      pr_status: open
+      pr_status: merged
       head_sha: fc51bc5
-      merge_sha:
-      next_action: await_ci_and_merge_approval
+      merge_sha: 2b3231d36753db02294aa6c34b3d3fb48d2cc45a
+      merged_at: '2026-07-28T15:37:56Z'
+      next_action: await_user_close_or_start_116
       also_changed:
       - 'authContext.ts → auth-context.ts (case-insensitive FS collision fix)'
       prior_session_id: S011-hotfix-retag-empty-chats
@@ -904,19 +924,317 @@ project:
       - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
         completed_at: '2026-05-21'
       prior_started_at: '2026-06-26'
-      completed_at: '2026-07-26'
-session_counter: 12
+session_counter: 13
 active_session:
-  id: S012-hotfix-admin-ui-112-105
-  type: hotfix
-  intent: 'Fix GitHub #112 (admin corpus list pagination — server-side mirroring Users/browse) and #105 (Spanish sign-out label overflow) in one branch/PR; merge + deploy after explicit user approval; seen on staging'
+  id: S013-unified-job-monitoring
+  type: feature
+  intent: 'Unified job monitoring in Jobs tab with detail drill-down (GitHub #116) — federate eval runs + Modal ingest/retag jobs; clickable detail; status filter; retag document context'
   status: in_progress
+  branch:
+  proposed_branch: evolve/EV-012-unified-job-monitoring
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-012
+  artifacts_dir: docs/sessions/S013-unified-job-monitoring/
+  started_at: '2026-07-28'
+  current_stage: 16-evolve
+  linked_issues:
+  - '116'
+  features_affected:
+  - F32
+  - F36
+  features_note: 'Evolve delta extending F32 (Admin Job Management) and F36 (RAG evaluation); no new Fn — extend existing per Phase 0 Batch 1'
+  hard_constraints:
+  - admin_dashboard_only
+  - not_chatrag_ui
+  hard_constraints_note: 'Admin Dashboard (data-management-frontend) ONLY — NOT ChatRAG UI. All #116 UX/API work scoped to admin Jobs tab; no chat-rag-frontend changes.'
+  phase_0_scope_approved: true
+  routing_preset_choice: lean_plus_build
+  routing_preset_status: approved
+  routing_plan_status: approved
+  routing_decision_id: S013-D22
+  routing_plan_approved_at: '2026-07-28'
+  phase_0:
+    status: complete
+  phase_1:
+    status: complete
+    note: impact_analysis
+    completed_at: '2026-07-28'
+  phase_0_intake:
+    status: complete
+    phase_0_scope_approved: true
+    routing_preset_choice: lean_plus_build
+    routing_preset_status: approved
+    current_batch: 5
+    batch_1_complete: true
+    batch_1b_complete: true
+    batch_2_complete: true
+    batch_3_complete: true
+    batch_3_status: complete
+    batch_4_complete: true
+    batch_4_status: complete
+    batch_5_complete: true
+    batch_5_status: complete
+  intake_batch_1:
+    s012_artifacts_commit: leave_uncommitted
+    scope: both_v1_and_v2
+    v2_item_selection: all_three_a_b_c
+    feature_identity: extend_F32_F36_no_new_fn
+    success_criteria: issue_116_acs_as_written
+  intake_batch_1b:
+    recorded_at: '2026-07-28'
+    v2_items:
+    - postgres_jobs_alignment_or_document_modal_dict_sot
+    - operator_modal_container_logs_link_on_failed_jobs
+    - cancel_retry
+    decision_id: S013-D5
+  intake_batch_2:
+    recorded_at: '2026-07-28'
+    job_detail_ux: dedicated_route_jobs_id_type_aware
+    eval_row_primary_action: jobs_detail_summary_plus_eval_drilldown_link
+    list_federation: frontend_merge_modal_jobs_and_internal_eval_runs
+    decisions:
+    - id: S013-D6
+      topic: job_detail_ux
+      choice: dedicated_route_jobs_id_type_aware
+    - id: S013-D7
+      topic: eval_row_primary_action
+      choice: jobs_detail_summary_plus_eval_drilldown_link
+    - id: S013-D8
+      topic: list_federation
+      choice: frontend_merge_modal_jobs_and_internal_eval_runs
+  intake_batch_3:
+    recorded_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    status: complete
+    decisions:
+    - id: S013-D9
+      topic: out_of_scope
+      choice: all_long_running_admin_jobs_extensible
+      option: E
+      status: resolved
+      user_clarification: 'All jobs are up for grabs, in terms of long running jobs'
+      interpretation:
+        in_scope:
+        - all_long_running_async_operator_jobs_on_admin_dashboard
+        - ingest_retag_eval_and_future_job_types
+        - extensible_job_type_not_limited_to_known_types
+        out_of_scope:
+        - chatrag_ui
+        not_discussed_implicit_out:
+        - langfuse_external_observability_uis
+        note: 'Do NOT limit Jobs monitoring to ingest/retag/eval only; no dedicated Langfuse/external observability UI work unless user adds later'
+    - id: S013-D10
+      topic: breaking_api_or_config
+      choice: prefer_compatible_additive_changes
+      option: A
+      status: recorded
+    - id: S013-D11
+      topic: privacy_pii_retention
+      choice: keep_f32_limits_no_pii
+      option: A
+      status: recorded
+    - id: S013-D12
+      topic: cycle_size
+      choice: one_cycle_ev012_v1_plus_full_v2
+      option: A
+      status: recorded
+  intake_batch_4:
+    recorded_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    status: complete
+    decisions:
+    - id: S013-D13
+      topic: apps_platform
+      choice: data_mgmt_frontend_modal_jobs_backend_internal_write_api
+      option: A
+      status: recorded
+      apps:
+      - data-management-frontend
+      - modal_data_management_backend_jobs
+      - internal-write-api
+    - id: S013-D14
+      topic: env_secrets
+      choice: prefer_none_reuse_existing
+      option: A
+      status: recorded
+    - id: S013-D15
+      topic: browser_cors_vite
+      choice: no_new_public_origins_same_admin_spa
+      option: A
+      status: recorded
+    - id: S013-D16
+      topic: ui_preview
+      choice: yes_open_local_admin_ui_when_useful
+      option: A
+      status: recorded
+  intake_batch_5:
+    recorded_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    status: complete
+    batch_5_status: complete
+    decisions:
+    - id: S013-D17
+      topic: latency_polling
+      choice: sse_per_source
+      option: B
+      status: resolved
+      resolved_at: '2026-07-28'
+      primary_transport: sse_per_source
+      implementation:
+        modal_data_management: GET /jobs/events_or_similar
+        internal_write_api: eval_events_stream
+        frontend: merge_push_streams_per_S013_D8
+      fallback:
+        polling: may_remain_as_fallback
+        tech_plan_open: true
+        note: 'Poll fallback TBD in 04-tech-plan unless user specifies otherwise'
+      context:
+        jobs_page_poll_ms: 4000
+        chatrag_has_sse_ask: true
+        jobs_sse_websocket: none
+        adr_reference: ADR-035
+        adr_note: unified jobs poll hop
+      note: 'SSE per source — Modal GET /jobs/events (or similar); internal-write eval events stream; frontend merges push streams (S013-D8 federation); polling may remain as fallback (open for tech plan)'
+    - id: S013-D18
+      topic: acceptance_scenarios
+      choice: issue_acs_extend_uj023_unified_list_detail_uj
+      option: A
+      status: recorded
+      note: 'Issue #116 ACs + extend UJ-023 / unified list+detail user journey'
+    - id: S013-D19
+      topic: e2e_tier
+      choice: api_e2e_admin_vitest_live_t3_smoke_after_deploy
+      option: A
+      status: recorded
+      note: 'API e2e + Admin Vitest; live T3 smoke after deploy'
+  intake_phase_0_closure:
+    recorded_at: '2026-07-28'
+    phase_0_scope_approved: true
+    routing_preset_choice: lean_plus_build
+    routing_preset_status: approved
+    routing_plan_status: approved
+    decisions:
+    - id: S013-D20
+      topic: phase_0_scope_approval
+      choice: proceed_impact_analysis_routing_extend_f32_f36_no_new_fn
+      option: A
+      status: approved
+      note: 'Yes — proceed to impact analysis + routing; extend F32/F36; no new Fn'
+    - id: S013-D21
+      topic: routing_preset
+      choice: lean_pending_amendment
+      option: C
+      status: superseded
+      note: 'Superseded by S013-D22 lean_plus_build amendment'
+    - id: S013-D22
+      topic: routing_preset
+      choice: lean_plus_build
+      option: A
+      status: approved
+      recorded_at: '2026-07-28'
+      required_stages:
+      - 00-context
+      - 16-evolve
+      - 01-requirements
+      - 02-verify-plan
+      - 04-tech-plan
+      - 07-build
+      - 08-verify-build
+      - 10-e2e
+      - 13-deploy-smoke
+      skipped_stages:
+      - 03-plan-tooling
+      - 05-verify-tech
+      - 06-tech-tooling
+      - 09-qa
+      - 11-verify-impl
+      - 12-verify-deploy
+      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  prior_related:
+  - 'S008/EV-009 M66 unified jobs'
+  - 'S002 F32 jobs tab'
+  - 'ADR-033 eval on DO not Modal'
+  routing_plan:
+  - stage: 00-context
+    required: true
+    status: completed
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    note: 'Phase 0 intake COMPLETE — scope approved (S013-D20); routing finalized Lean+build (S013-D22)'
+  - stage: 16-evolve
+    required: true
+    status: in_progress
+    started_at: '2026-07-28'
+    phase_1_completed_at: '2026-07-28'
+    note: 'Phase 1 impact analysis COMPLETE — routing approved Lean+build (S013-D22); handoff await_user_start_01_requirements'
+  - stage: 01-requirements
+    required: true
+    status: pending
+  - stage: 02-verify-plan
+    required: true
+    status: pending
+  - stage: 04-tech-plan
+    required: true
+    status: pending
+  - stage: 07-build
+    required: true
+    status: pending
+  - stage: 08-verify-build
+    required: true
+    status: pending
+  - stage: 10-e2e
+    required: true
+    status: pending
+  - stage: 13-deploy-smoke
+    required: true
+    status: pending
+  - stage: 03-plan-tooling
+    required: false
+    status: skipped
+    skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  - stage: 05-verify-tech
+    required: false
+    status: skipped
+    skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  - stage: 06-tech-tooling
+    required: false
+    status: skipped
+    skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  - stage: 09-qa
+    required: false
+    status: skipped
+    skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  - stage: 11-verify-impl
+    required: false
+    status: skipped
+    skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  - stage: 12-verify-deploy
+    required: false
+    status: skipped
+    skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  context_briefs:
+  - docs/sessions/S013-unified-job-monitoring/impact-analysis.md
+  handoff:
+    from_session: S012-hotfix-admin-ui-112-105
+    cleared: true
+    next_action: await_user_start_01_requirements
+    next_skill: 01-requirements
+    proposed_branch: evolve/EV-012-unified-job-monitoring
+    branch_status: not_created
+    git_commits: none
+sessions:
+- id: S012-hotfix-admin-ui-112-105
+  type: hotfix
+  status: completed
+  completed_at: '2026-07-28'
+  close_note: 'User approved close after 15-service-health PASS; starting #116 evolve'
+  intent: 'Fix GitHub #112 (admin corpus list pagination — server-side mirroring Users/browse) and #105 (Spanish sign-out label overflow) in one branch/PR; merge + deploy after explicit user approval; seen on staging'
   branch: fix/S012-admin-ui-112-105
   orchestrator: 14-hotfix
   evolve_cycle_id:
   artifacts_dir: docs/sessions/S012-hotfix-admin-ui-112-105/
   started_at: '2026-07-28'
-  current_stage: 14-hotfix
+  current_stage: 15-service-health
   linked_issues:
   - 112
   - 105
@@ -924,37 +1242,56 @@ active_session:
   routing_plan:
   - stage: 14-hotfix
     required: true
-    status: in_progress
+    status: completed
     started_at: '2026-07-28'
-    note: 'PR #150 open @ fc51bc5 — await CI + merge/deploy approval (S012-D5); #112+#105'
+    completed_at: '2026-07-28'
+    note: 'PR #150 MERGED @ 2b3231d (2026-07-28T15:37:56Z); #112+#105 CLOSED; issues resolved'
   - stage: 15-service-health
     required: true
-    status: pending
-    note: 'Post-merge staging smoke after user-approved deploy'
+    status: completed
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    note: 'PASS — H0ci–H5; #112+#105 verified; report docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md'
   context_briefs: []
+  service_health:
+    overall: PASS
+    report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
+    report_git_status: may_be_uncommitted
+    completed_at: '2026-07-28'
+    h0ci_main: 1b60930
+    tiers: H0ci–H5 pass
+    verified: '#112 pagination + #105 ES sign-out on staging'
   handoff:
-    cleared: false
-    next_skill: 14-hotfix
-    next_action: await_ci_and_merge_approval
+    cleared: true
+    next_action: open feature session for GitHub #116
+    service_health_overall: PASS
+    service_health_report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
+    service_health_completed: '2026-07-28'
     current_bug:
     bugs_order:
     - '#112-corpus-pagination'
     - '#105-spanish-signout-overflow'
     bugs_status:
-      '#112-corpus-pagination': in_pr
-      '#105-spanish-signout-overflow': in_pr
+      '#112-corpus-pagination': resolved
+      '#105-spanish-signout-overflow': resolved
     bug_reports:
       '#112': docs/bug-reports/BUG-2026-07-28-admin-corpus-pagination.md
       '#105': docs/bug-reports/BUG-2026-07-28-spanish-signout-overflow.md
     also_changed:
     - 'authContext.ts → auth-context.ts (case-insensitive FS collision fix)'
-    commit_status: committed_pushed
+    commit_status: merged
     head_sha: fc51bc5
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
     pr_number: 150
-    pr_status: open
+    pr_status: merged
+    pr_merged: true
+    merge_sha: 2b3231d36753db02294aa6c34b3d3fb48d2cc45a
+    merged_at: '2026-07-28T15:37:56Z'
+    main_head: 1b609306defbc78cf766a8bfb8730e23085a8026
     deploy_intent: fix_plus_merge_deploy_after_explicit_user_approval
     deploy_decision: S012-D5
+    deploy_status: succeeded
+    deploy_note: 'DO Deploy succeeded for merge sha 2b3231d and later; main HEAD 1b60930 includes #150 hotfix + later security commits'
     seen_on: staging
     scope: both_112_and_105_one_branch_pr
     phase0: recorded
@@ -964,7 +1301,6 @@ active_session:
     issue_112: hotfix_server_side_pagination
     deploy: merge_deploy_after_explicit_approval
     recorded_at: '2026-07-28'
-sessions:
 - id: S011-hotfix-retag-empty-chats
   type: hotfix
   status: completed
@@ -3099,15 +3435,16 @@ stages:
     - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
     note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
   14-hotfix:
-    status: in_progress
+    status: completed
     started_at: '2026-07-28'
+    completed_at: '2026-07-28'
     session_id: S012-hotfix-admin-ui-112-105
     branch: fix/S012-admin-ui-112-105
     bugs:
     - id: BUG-2026-07-28-admin-corpus-pagination
       github_issue: 112
       summary: Admin corpus list lacks server-side pagination (mirror Users/browse)
-      status: in_pr
+      status: resolved
       order: 1
       seen_on: staging
       bug_report: docs/bug-reports/BUG-2026-07-28-admin-corpus-pagination.md
@@ -3117,11 +3454,11 @@ stages:
       - apps/data-management-frontend/src/test/test_bug_2026_07_28_admin_corpus_pagination.test.tsx
       repro_status: green
       fix_summary: 'DocumentListPage API pagination + CorpusList PaginationControls; page-scoped select-all'
-      note: 'Treated as hotfix — server-side pagination mirroring Users/browse patterns'
+      note: 'Treated as hotfix — server-side pagination mirroring Users/browse patterns; GitHub #112 CLOSED'
     - id: BUG-2026-07-28-spanish-signout-overflow
       github_issue: 105
       summary: Spanish sign-out label overflows UI
-      status: in_pr
+      status: resolved
       order: 2
       seen_on: staging
       bug_report: docs/bug-reports/BUG-2026-07-28-spanish-signout-overflow.md
@@ -3129,16 +3466,17 @@ stages:
       repro_test: apps/data-management-frontend/src/test/test_bug_2026_07_28_spanish_signout_overflow.test.tsx
       repro_status: green
       fix_summary: 'AdminLayout UserMenu wrap classes for Spanish sign-out label'
-      note: 'Admin FE i18n/layout overflow on Spanish sign-out label'
-    note: 'S012 — BOTH #112+#105 committed fc51bc5 on fix/S012-admin-ui-112-105 (pushed); PR #150 open. Await CI green + explicit merge/deploy approval (S012-D5).'
+      note: 'Admin FE i18n/layout overflow on Spanish sign-out label; GitHub #105 CLOSED'
+    note: 'S012 — PR #150 MERGED @ 2b3231d; 15-service-health PASS @ 1b60930. Session open pending user close (await_user_close_or_start_116).'
     current_bug:
-    current_action: await_ci_and_merge_approval
+    current_action: await_user_close_or_start_116
     pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
     pr_number: 150
-    pr_status: open
+    pr_status: merged
     head_sha: fc51bc5
-    merge_sha:
-    next_action: await_ci_and_merge_approval
+    merge_sha: 2b3231d36753db02294aa6c34b3d3fb48d2cc45a
+    merged_at: '2026-07-28T15:37:56Z'
+    next_action: await_user_close_or_start_116
     also_changed:
     - 'authContext.ts → auth-context.ts (case-insensitive FS collision fix)'
     prior_session_id: S011-hotfix-retag-empty-chats
@@ -3196,32 +3534,32 @@ stages:
     - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
       completed_at: '2026-05-21'
     prior_started_at: '2026-06-26'
-    completed_at: '2026-07-26'
   15-service-health:
     status: completed
-    started_at: '2026-07-26'
-    completed_at: '2026-07-26'
-    partial_rerun_at: '2026-07-26'
-    partial_rerun_note: 'S011 post-merge staging smoke complete (PR #147 / f61f820) — overall PASS; H4 modal waiver; see service-health.md'
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    partial_rerun_at: '2026-07-28'
+    partial_rerun_note: 'S012 post-merge staging smoke after PR #150 (2b3231d); main HEAD 1b60930; overall PASS'
     environment: staging
     infra: pass
     e2e: pass
     overall: pass
-    report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+    report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
     tiers:
+    - H0ci
     - H1
     - H2
     - H3
     - H3b
     - H4
     - H5
-    - H0ci
     advisories:
     - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml
       CD backstop added'
     - modal_h4_cors_waived_proxy_auth
     - s001_t12_pending
     - h0ci_blocking_after_merge
+    - 'H1: transient modal_llm=error recovered'
     history:
     - environment: staging
       completed_at: '2026-05-21'
@@ -3261,13 +3599,31 @@ stages:
       advisories:
       - h4_modal_waiver
       - h6_browser_uj_waived_v1
-    pending_rerun_for_session:
-    pending_rerun_note:
-    session_id: S011-hotfix-retag-empty-chats
-    prior_completed_at: '2026-06-25'
-    prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/service-health.md
-    note: 'S011 post-merge smoke complete. Overall PASS. Report at docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md'
-    completed: '2026-07-26'
+    - status: completed
+      completed_at: '2026-07-28'
+      session_id: S012-hotfix-admin-ui-112-105
+      session_note: 'S012 post-merge smoke after PR #150 (2b3231d); staging @ 1b60930; #112+#105 verified'
+      report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
+      overall: pass
+      tiers:
+      - H0ci
+      - H1
+      - H2
+      - H3
+      - H3b
+      - H4
+      - H5
+      advisories:
+      - 'H1: transient modal_llm=error recovered'
+    session_id: S012-hotfix-admin-ui-112-105
+    prior_completed_at: '2026-07-26'
+    prior_report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
+    prior_session_id: S011-hotfix-retag-empty-chats
+    note: 'S012 15-service-health PASS — merge 2b3231d (PR #150); staging @ 1b60930; H0ci–H5 pass; #112 pagination + #105 ES sign-out verified. Session remains open pending user close.'
+    completed: '2026-07-28'
+    ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424
+    deploy_do_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628
+    deploy_preflight_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209
   17-retrospective:
     status: pending
   18-pr-review:
@@ -3297,7 +3653,15 @@ stages:
     status: completed
     note: Corpus/migrations verified per data-management-plan
   audit-licenses:
-    status: pending
+    status: completed
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    scope: full-recursive
+    report: docs/license-audit-2026-07-28.md
+    flags_count: 20
+    blocked_count: 4
+    verdict: FAILED
+    note: 'FAILED — BLOCKED NC (blocked_count=4): playground catalog Qwen2.5-3B-Instruct (qwen-research / non-commercial) via tags qwen2.5:3b-instruct (+ q4/q8). Prod Qwen2.5-1.5B-Instruct Apache-2.0 OK. No PyRosetta. flags_count=20 FLAG-tier. SBOM was all NOASSERTION at audit start; parent follow-up -li/-pm + enrich_sbom_licenses.py.'
   clone-repos:
     status: pending
   config-validator:
@@ -3314,9 +3678,9 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: '2026-07-26'
-    commit_deployed: f61f820
-    commit_head: f61f820
+    last_verified: '2026-07-28'
+    commit_deployed: 1b60930
+    commit_head: 1b60930
     drift: false
     branch: main
     urls:
@@ -3333,7 +3697,7 @@ deployment:
       h2_db_ready: pass
       h3_rag_smoke: pass
       h3b_browse: pass
-      h3_ev002_admin: pass
+      h3_ev002_admin: pending
       h4_cors_preflight: pass
       h4_modal: waiver
       h5_frontend_bundle: pass
@@ -3349,6 +3713,11 @@ deployment:
     - S011 2026-07-26 post-merge smoke PASS @ f61f820 (main); H0ci–H5 pass; H4 modal waiver; report 
       docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md. User confirmed Manage Tags / staging working;
       S011 closed 2026-07-26.
+    - 'S012 2026-07-28: PR #150 merged (2b3231d); DO Deploy succeeded for 2b3231d and later; main HEAD 1b60930 includes #150 hotfix + later security commits; CI green; 15-service-health in_progress.'
+    - 'S012 2026-07-28 PASS: 15-service-health overall/infra/behavior PASS @ 1b60930; H0ci–H5 pass (H1 transient modal_llm=error recovered); #112 write API pagination 200 page=1 page_size=2 total=40; #105 admin ES signOutAllDevices + whitespace-normal; CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628; report docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md. Session open (await_user_close_or_start_116).'
+    - 'S012 2026-07-28 CLOSED — user approved close after 15-service-health PASS; archived; handoff → S013/EV-012 (#116 unified job monitoring). service-health.md may still be uncommitted.'
+    - 'S013 2026-07-28 OPENED — feature session for GitHub #116; orchestrator 16-evolve; EV-012 in_progress; proposed branch evolve/EV-012-unified-job-monitoring (not created).'
+    - 'S013 2026-07-28 Phase 1 COMPLETE — impact analysis + session artifacts written; routing Lean+build approved (S013-D22); handoff await_user_start_01_requirements; no branch/commits yet.'
   url_discovery:
     method: uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
     modal_admin_manual: true
@@ -4512,6 +4881,350 @@ evolve_cycles:
   parked_at: '2026-07-25'
   pause_note: 'User closed S010 to start hotfix for #146/#145; T80.7 still blocked; EV-011/M80 incomplete; can resume later
     as a new session if needed.'
+- id: EV-012
+  cycle_type: feature
+  feature_ids: []
+  affected_features:
+  - F32
+  - F36
+  title: Unified job monitoring (Jobs tab + detail)
+  status: in_progress
+  started: '2026-07-28'
+  session_id: S013-unified-job-monitoring
+  source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/116
+  current_stage: 16-evolve
+  scope_summary: 'Unified job monitoring (GitHub #116) — **Admin Dashboard only (data-management-frontend); NOT ChatRAG UI**. Jobs tab federates Modal GET /jobs + internal-write GET /internal/v1/eval/runs; type-aware detail at /jobs/:id with **extensible job_type** for all long-running/async operator jobs (ingest, retag, eval, and future types — not limited to known types); eval rows show jobs detail summary + link to existing eval drill-down; **job updates transport: SSE per source (S013-D17 option B)** — Modal data-management GET /jobs/events (or similar), internal-write-api eval events stream, frontend merges push streams (S013-D8 federation); polling may remain as fallback (TBD in tech plan); v1 + full v2 in one EV-012 cycle (Postgres jobs alignment or document modal.Dict SoT, operator Modal/container logs on failed jobs, cancel/retry); extend F32/F36; prefer compatible/additive API changes; keep F32 privacy limits (no PII); success = #116 ACs; out of scope: ChatRAG UI; Langfuse/external observability UIs not discussed (implicit out — no dedicated Langfuse UI work).'
+  phase_0_scope_approved: true
+  routing_preset_choice: lean_plus_build
+  routing_preset_status: approved
+  routing_plan_status: approved
+  routing_decision_id: S013-D22
+  routing_plan_approved_at: '2026-07-28'
+  phase_0:
+    status: complete
+  phase_1:
+    status: complete
+    note: impact_analysis
+    completed_at: '2026-07-28'
+  feature_ids_pending_note: 'No new Fn — extend F32 (Admin Job Management) and F36 (RAG evaluation) per Phase 0 Batch 1'
+  scope_notes:
+    version_scope: both_v1_and_v2
+    v2_items:
+    - postgres_jobs_alignment_or_document_modal_dict_sot
+    - operator_modal_container_logs_link_on_failed_jobs
+    - cancel_retry
+    job_detail_ux: dedicated_route_jobs_id_type_aware
+    eval_row_primary_action: jobs_detail_summary_plus_eval_drilldown_link
+    list_federation: frontend_merge_modal_jobs_and_internal_eval_runs
+    job_updates_transport:
+      primary: sse_per_source
+      modal_data_management: GET /jobs/events_or_similar
+      internal_write_api: eval_events_stream
+      frontend: merge_push_streams_per_S013_D8
+      fallback_polling: open_for_tech_plan
+    feature_identity: extend_F32_F36
+    success_criteria: 'GitHub #116 acceptance criteria as written'
+    s012_handoff: 'S012 service-health.md and artifacts left uncommitted per user (Batch 1 Q1 option b)'
+    hard_constraints:
+    - admin_dashboard_only
+    - not_chatrag_ui
+    breaking_api: prefer_compatible_additive_changes
+    privacy: keep_f32_limits_no_pii
+    cycle_size: one_cycle_ev012_v1_plus_full_v2
+    job_type_scope: extensible_all_long_running_admin_jobs
+    platform:
+      apps:
+      - data-management-frontend
+      - modal_data_management_backend_jobs
+      - internal-write-api
+      env_secrets: prefer_none_reuse_existing
+      browser_cors_vite: no_new_public_origins_same_admin_spa
+      ui_preview: yes_open_local_admin_ui_when_useful
+    out_of_scope:
+      explicit:
+      - chatrag_ui
+      not_discussed_implicit_out:
+      - langfuse_external_observability_uis
+      in_scope:
+      - all_long_running_async_operator_jobs_on_admin_dashboard
+      - ingest_retag_eval_and_future_job_types
+  intake_batch_1:
+    recorded_at: '2026-07-28'
+    decisions:
+    - id: S013-D1
+      topic: s012_artifacts_commit
+      choice: leave_uncommitted
+    - id: S013-D2
+      topic: scope
+      choice: both_v1_and_v2
+    - id: S013-D3
+      topic: feature_identity
+      choice: extend_F32_F36_no_new_fn
+    - id: S013-D4
+      topic: success_criteria
+      choice: issue_116_acs_as_written
+  intake_batch_1b:
+    recorded_at: '2026-07-28'
+    v2_items:
+    - postgres_jobs_alignment_or_document_modal_dict_sot
+    - operator_modal_container_logs_link_on_failed_jobs
+    - cancel_retry
+    decisions:
+    - id: S013-D5
+      topic: v2_items
+      choice: all_three_a_b_c
+  intake_batch_2:
+    recorded_at: '2026-07-28'
+    decisions:
+    - id: S013-D6
+      topic: job_detail_ux
+      choice: dedicated_route_jobs_id_type_aware
+    - id: S013-D7
+      topic: eval_row_primary_action
+      choice: jobs_detail_summary_plus_eval_drilldown_link
+    - id: S013-D8
+      topic: list_federation
+      choice: frontend_merge_modal_jobs_and_internal_eval_runs
+  intake_batch_3:
+    recorded_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    status: complete
+    decisions:
+    - id: S013-D9
+      topic: out_of_scope
+      choice: all_long_running_admin_jobs_extensible
+      option: E
+      status: resolved
+      user_clarification: 'All jobs are up for grabs, in terms of long running jobs'
+      interpretation:
+        in_scope:
+        - all_long_running_async_operator_jobs_on_admin_dashboard
+        - ingest_retag_eval_and_future_job_types
+        - extensible_job_type_not_limited_to_known_types
+        out_of_scope:
+        - chatrag_ui
+        not_discussed_implicit_out:
+        - langfuse_external_observability_uis
+        note: 'Do NOT limit Jobs monitoring to ingest/retag/eval only; no dedicated Langfuse/external observability UI work unless user adds later'
+    - id: S013-D10
+      topic: breaking_api_or_config
+      choice: prefer_compatible_additive_changes
+      option: A
+      status: recorded
+    - id: S013-D11
+      topic: privacy_pii_retention
+      choice: keep_f32_limits_no_pii
+      option: A
+      status: recorded
+    - id: S013-D12
+      topic: cycle_size
+      choice: one_cycle_ev012_v1_plus_full_v2
+      option: A
+      status: recorded
+  intake_batch_4:
+    recorded_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    status: complete
+    decisions:
+    - id: S013-D13
+      topic: apps_platform
+      choice: data_mgmt_frontend_modal_jobs_backend_internal_write_api
+      option: A
+      status: recorded
+      apps:
+      - data-management-frontend
+      - modal_data_management_backend_jobs
+      - internal-write-api
+    - id: S013-D14
+      topic: env_secrets
+      choice: prefer_none_reuse_existing
+      option: A
+      status: recorded
+    - id: S013-D15
+      topic: browser_cors_vite
+      choice: no_new_public_origins_same_admin_spa
+      option: A
+      status: recorded
+    - id: S013-D16
+      topic: ui_preview
+      choice: yes_open_local_admin_ui_when_useful
+      option: A
+      status: recorded
+  intake_batch_5:
+    recorded_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    status: complete
+    batch_5_status: complete
+    decisions:
+    - id: S013-D17
+      topic: latency_polling
+      choice: sse_per_source
+      option: B
+      status: resolved
+      resolved_at: '2026-07-28'
+      primary_transport: sse_per_source
+      implementation:
+        modal_data_management: GET /jobs/events_or_similar
+        internal_write_api: eval_events_stream
+        frontend: merge_push_streams_per_S013_D8
+      fallback:
+        polling: may_remain_as_fallback
+        tech_plan_open: true
+        note: 'Poll fallback TBD in 04-tech-plan unless user specifies otherwise'
+      context:
+        jobs_page_poll_ms: 4000
+        chatrag_has_sse_ask: true
+        jobs_sse_websocket: none
+        adr_reference: ADR-035
+        adr_note: unified jobs poll hop
+      note: 'SSE per source — Modal GET /jobs/events (or similar); internal-write eval events stream; frontend merges push streams (S013-D8 federation); polling may remain as fallback (open for tech plan)'
+    - id: S013-D18
+      topic: acceptance_scenarios
+      choice: issue_acs_extend_uj023_unified_list_detail_uj
+      option: A
+      status: recorded
+      note: 'Issue #116 ACs + extend UJ-023 / unified list+detail user journey'
+    - id: S013-D19
+      topic: e2e_tier
+      choice: api_e2e_admin_vitest_live_t3_smoke_after_deploy
+      option: A
+      status: recorded
+      note: 'API e2e + Admin Vitest; live T3 smoke after deploy'
+  intake_phase_0_closure:
+    recorded_at: '2026-07-28'
+    phase_0_scope_approved: true
+    routing_preset_choice: lean_plus_build
+    routing_preset_status: approved
+    routing_plan_status: approved
+    decisions:
+    - id: S013-D20
+      topic: phase_0_scope_approval
+      choice: proceed_impact_analysis_routing_extend_f32_f36_no_new_fn
+      option: A
+      status: approved
+    - id: S013-D21
+      topic: routing_preset
+      choice: lean_pending_amendment
+      option: C
+      status: superseded
+      note: 'Superseded by S013-D22 lean_plus_build amendment'
+    - id: S013-D22
+      topic: routing_preset
+      choice: lean_plus_build
+      option: A
+      status: approved
+      recorded_at: '2026-07-28'
+      required_stages:
+      - 00-context
+      - 16-evolve
+      - 01-requirements
+      - 02-verify-plan
+      - 04-tech-plan
+      - 07-build
+      - 08-verify-build
+      - 10-e2e
+      - 13-deploy-smoke
+      skipped_stages:
+      - 03-plan-tooling
+      - 05-verify-tech
+      - 06-tech-tooling
+      - 09-qa
+      - 11-verify-impl
+      - 12-verify-deploy
+      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  routing_plan:
+    preset: lean_plus_build
+    status: approved
+    approved_at: '2026-07-28'
+    decision_id: S013-D22
+    required_stages:
+    - 00-context
+    - 16-evolve
+    - 01-requirements
+    - 02-verify-plan
+    - 04-tech-plan
+    - 07-build
+    - 08-verify-build
+    - 10-e2e
+    - 13-deploy-smoke
+    skipped_stages:
+    - 03-plan-tooling
+    - 05-verify-tech
+    - 06-tech-tooling
+    - 09-qa
+    - 11-verify-impl
+    - 12-verify-deploy
+    skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+  stages:
+    00-context:
+      status: completed
+      started: '2026-07-28'
+      completed: '2026-07-28'
+      note: 'Phase 0 intake COMPLETE — scope approved (S013-D20); routing finalized Lean+build (S013-D22); admin-dashboard-only'
+      batch_1_complete: true
+      batch_1b_complete: true
+      batch_2_complete: true
+      batch_3_complete: true
+      batch_3_status: complete
+      batch_4_complete: true
+      batch_4_status: complete
+      batch_5_complete: true
+      batch_5_status: complete
+      current_batch: 5
+      phase_0_intake_status: complete
+      phase_0_scope_approved: true
+    16-evolve:
+      status: in_progress
+      started: '2026-07-28'
+      phase_1_completed: '2026-07-28'
+      note: 'Phase 1 impact analysis COMPLETE — routing approved Lean+build (S013-D22); session artifacts written; handoff await_user_start_01_requirements'
+  checkpoints:
+    phase_a: pending
+    phase_b: pending
+    phase_c: pending
+    phase_d: pending
+    deploy: pending
+  gates:
+    a_to_b: pending
+    b_to_c: pending
+    c_to_d: pending
+    deploy: pending
+  prior_related:
+  - 'S008/EV-009 M66 unified jobs'
+  - 'S002 F32 jobs tab'
+  - 'ADR-033 eval on DO not Modal'
+  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22 option A): 00→16→01→02→04→07→08→10→13; skips 03/05/06/09/11/12. Phase 1 impact analysis COMPLETE — session artifacts written; handoff next_action=await_user_start_01_requirements; branch evolve/EV-012-unified-job-monitoring not created; no commits. Advisory — EV-004 remains in_progress historically (07-build); EV-011 parked; no auto-park without user decision.'
+  artifacts:
+  - path: docs/sessions/S013-unified-job-monitoring/session-brief.md
+    kind: session-brief
+    session_id: S013-unified-job-monitoring
+    stage: 16-evolve
+    status: written
+    recorded_at: '2026-07-28'
+  - path: docs/sessions/S013-unified-job-monitoring/routing-plan.md
+    kind: routing-plan
+    session_id: S013-unified-job-monitoring
+    stage: 16-evolve
+    status: written
+    recorded_at: '2026-07-28'
+    preset: lean_plus_build
+    decision_id: S013-D22
+  - path: docs/sessions/S013-unified-job-monitoring/impact-analysis.md
+    kind: impact-analysis
+    session_id: S013-unified-job-monitoring
+    stage: 16-evolve
+    status: written
+    recorded_at: '2026-07-28'
+  - path: docs/decisions/evolve-decisions.md
+    kind: evolve-decisions
+    session_id: S013-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    stage: 16-evolve
+    status: written
+    recorded_at: '2026-07-28'
+    section: 'Cycle EV-012 — Scope'
+  - path: docs/sessions/S013-unified-job-monitoring/reports/evolve-summary.md
+    status: pending
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -5491,6 +6204,16 @@ issue_log:
   resolved_at: '2026-05-19'
   resolution: 04-tech-plan TP-001 — defer gateway to post-v1; direct URLs
   blocking_for:
+- id: ISS-004
+  category: license_blocked
+  summary: 'BLOCKED NC: playground catalog Qwen2.5-3B-Instruct (qwen-research / non-commercial) via tags qwen2.5:3b-instruct (+ q4/q8) — blocked_count=4; remove/replace before commercial deploy'
+  status: open
+  opened_at: '2026-07-28'
+  report: docs/license-audit-2026-07-28.md
+  blocking_for:
+  - audit-licenses
+  - 13-deploy-smoke
+  note: 'Prod Qwen2.5-1.5B-Instruct Apache-2.0 OK; no PyRosetta. FLAG-tier ~20 separate (flags_count). Audit verdict FAILED.'
 decisions_log:
 - R1: five-app monorepo in vecinita — ADR-001
 - R2: hybrid Modal + DigitalOcean — ADR-002
@@ -6181,6 +6904,210 @@ decisions_log:
 - 'S012/2026-07-28: Phase 0 recorded — scope both #112+#105 one branch/PR; env=staging; #112 hotfix server-side pagination; deploy=merge+deploy after explicit approval. Branch fix/S012-admin-ui-112-105 created from main (status open). Planned bug reports: BUG-2026-07-28-admin-corpus-pagination.md (#112), BUG-2026-07-28-spanish-signout-overflow.md (#105).'
 - 'S012/2026-07-28: Both fixes implemented locally (uncommitted) — #105 GREEN (AdminLayout UserMenu wrap); #112 GREEN (DocumentListPage API + CorpusList PaginationControls, page-scoped select-all); authContext.ts→auth-context.ts. next_action=commit_and_pr_after_user_approval; deploy per S012-D5 after explicit approval.'
 - 'S012/2026-07-28: fc51bc5 pushed; PR #150 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150). next_action=await_ci_and_merge_approval; merge/deploy requires explicit user approval (S012-D5).'
+- 'S012/2026-07-28: 14-hotfix completed — PR #150 MERGED @ 2b3231d (2026-07-28T15:37:56Z); #112+#105 CLOSED/resolved; DO Deploy succeeded for 2b3231d+; main HEAD 1b60930 (includes #150 hotfix + later security commits); CI green. 15-service-health started (in_progress); handoff next_skill=15-service-health; next_action=run_service_health.'
+- 'S012/2026-07-28: 15-service-health completed — overall PASS; infra PASS; behavior PASS; staging @ 1b60930; H0ci–H5 pass; #112+#105 verified live; session remains open (next_action=await_user_close_or_start_116; cleared=false). Report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md'
+- 'S012/2026-07-28: Session CLOSED — user approved close after 15-service-health PASS; archived to sessions[]; handoff.cleared=true; PR #150 merged; #112+#105 closed; starting #116 evolve.'
+- 'S013/2026-07-28: Session OPENED — feature GitHub #116 unified job monitoring; active_session=S013-unified-job-monitoring; orchestrator=16-evolve; EV-012 in_progress; proposed branch evolve/EV-012-unified-job-monitoring (parent creates); feature_ids pending Phase 0/1.'
+- id: S013-D1-s012-artifacts
+  category: Decision
+  choice: leave_uncommitted
+  summary: 'S012 artifacts (service-health.md etc.): NO commit — leave uncommitted (option b)'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D2-scope-v1-v2
+  category: Decision
+  choice: both_v1_and_v2
+  summary: 'Scope BOTH v1 AND v2 for #116 unified job monitoring; v2 item selection pending Batch 1b'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D3-extend-f32-f36
+  category: Decision
+  choice: extend_F32_F36_no_new_fn
+  summary: 'Feature identity: extend F32 (and F36 where needed) — no new Fn allocated (option a)'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D4-success-116-acs
+  category: Decision
+  choice: issue_116_acs_as_written
+  summary: 'Success criteria: GitHub issue #116 acceptance criteria as written (option a)'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- 'S013/2026-07-28: Phase 0 Batch 1 recorded — S012 artifacts uncommitted; scope v1+v2 (v2 item TBD Batch 1b); extend F32/F36 no new Fn; success=#116 ACs. current_stage=00-context; next_action=Phase 0 Batch 1b (v2 item selection).'
+- id: S013-D5-v2-items-all
+  category: Decision
+  choice: all_three_a_b_c
+  summary: 'v2 items: ALL of a–c — Postgres jobs alignment (or document modal.Dict SoT); operator Modal/container logs on failed jobs; cancel/retry (option d)'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D6-job-detail-route
+  category: Decision
+  choice: dedicated_route_jobs_id_type_aware
+  summary: 'Job detail UX: dedicated route /jobs/:id (type-aware) — option a'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D7-eval-row-action
+  category: Decision
+  choice: jobs_detail_summary_plus_eval_drilldown_link
+  summary: 'Eval row primary action: Jobs detail summary + link to existing eval drill-down — option a'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D8-list-federation
+  category: Decision
+  choice: frontend_merge_modal_jobs_and_internal_eval_runs
+  summary: 'List federation: frontend merges Modal GET /jobs + internal-write GET /internal/v1/eval/runs — option a'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- 'S013/2026-07-28: Phase 0 Batches 1b+2 recorded — v2 all three (D5); /jobs/:id type-aware (D6); eval row summary+drill-down link (D7); frontend federation Modal /jobs + internal eval runs (D8). Batch 1 reaffirmed. current_batch=3; next_action=Phase 0 Batch 3 (boundaries).'
+- id: S013-D9-out-of-scope-resolved
+  category: Decision
+  choice: all_long_running_admin_jobs_extensible
+  summary: 'Out of scope (Batch 3 Q1) RESOLVED — option E: all long-running/async admin jobs in scope (ingest, retag, eval, future types; extensible job_type); OUT ChatRAG UI; Langfuse/external observability UIs not discussed (implicit out). User: "All jobs are up for grabs, in terms of long running jobs".'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: resolved
+- id: S013-D10-breaking-api
+  category: Decision
+  choice: prefer_compatible_additive_changes
+  summary: 'Breaking API/config: prefer compatible/additive changes — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D11-privacy
+  category: Decision
+  choice: keep_f32_limits_no_pii
+  summary: 'Privacy/PII/retention: keep F32 limits, no PII — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D12-cycle-size
+  category: Decision
+  choice: one_cycle_ev012_v1_plus_full_v2
+  summary: 'Cycle size: one EV-012 cycle for v1 + full v2 — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-hard-constraint-admin-only
+  category: Constraint
+  choice: admin_dashboard_only_not_chatrag_ui
+  summary: 'Hard constraint: Admin Dashboard (data-management-frontend) ONLY — NOT ChatRAG UI; all #116 work scoped to admin Jobs tab'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- 'S013/2026-07-28: Phase 0 Batch 3 PARTIAL — D10 compatible/additive API; D11 F32 privacy/no PII; D12 one cycle v1+full v2; D9 out-of-scope pending (option E user will explain); admin-dashboard-only hard constraint recorded; Batch 4 blocked until Q1; next_action=await_batch_3_q1_out_of_scope_explanation.'
+- 'S013/2026-07-28: Phase 0 Batch 3 COMPLETE — S013-D9 resolved (all long-running admin jobs in scope, extensible job_type; ChatRAG UI out; Langfuse/external observability not discussed); batch_3_complete=true; current_batch=4; next_action=run_16_evolve_phase_0_intake_batch_4.'
+- id: S013-D13-apps
+  category: Decision
+  choice: data_mgmt_frontend_modal_jobs_backend_internal_write_api
+  summary: 'Platform apps (Batch 4 Q1): data-management-frontend + Modal data-management backend (/jobs*) + internal-write-api — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D14-env-secrets
+  category: Decision
+  choice: prefer_none_reuse_existing
+  summary: 'Env/secrets (Batch 4 Q2): prefer none; reuse existing — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D15-cors-vite
+  category: Decision
+  choice: no_new_public_origins_same_admin_spa
+  summary: 'Browser/CORS/VITE (Batch 4 Q3): no new public origins; same Admin SPA — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D16-ui-preview
+  category: Decision
+  choice: yes_open_local_admin_ui_when_useful
+  summary: 'UI preview (Batch 4 Q4): yes — open local Admin UI when useful (non-deployed) — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- 'S013/2026-07-28: Phase 0 Batch 4 COMPLETE — D13 apps (data-mgmt FE + Modal /jobs + internal-write-api); D14 reuse env/secrets; D15 same Admin SPA/no new CORS; D16 local UI preview OK; batch_4_complete=true; current_batch=5; next_action=run_16_evolve_phase_0_intake_batch_5.'
+- id: S013-D17-latency-polling
+  category: Decision
+  choice: sse_per_source
+  option: B
+  summary: 'Latency/polling (Batch 5 Q1): SSE per source — option B — RESOLVED (Modal GET /jobs/events; internal-write eval events stream; frontend merge push streams per S013-D8; poll fallback TBD tech plan)'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  status: resolved
+  timestamp: '2026-07-28'
+- id: S013-D18-acceptance
+  category: Decision
+  choice: issue_acs_extend_uj023_unified_list_detail_uj
+  summary: 'Acceptance (Batch 5 Q2): issue #116 ACs + extend UJ-023 / unified list+detail user journey — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D19-e2e-tier
+  category: Decision
+  choice: api_e2e_admin_vitest_live_t3_smoke_after_deploy
+  summary: 'E2E tier (Batch 5 Q3): API e2e + Admin Vitest; live T3 smoke after deploy — option A'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- 'S013/2026-07-28: Phase 0 Batch 5 COMPLETE — D17 SSE per source (option B); D18 acceptance (issue ACs + UJ-023); D19 E2E tier (API e2e + Admin Vitest + live T3); batch_5_complete=true; phase_0_intake=awaiting_scope_approval; next_action=await_phase_0_scope_approval_and_routing_preset.'
+- id: S013-D20-scope-approve
+  category: Decision
+  choice: proceed_impact_analysis_routing_extend_f32_f36_no_new_fn
+  summary: 'Phase 0 scope approval (option A): Yes — proceed to impact analysis + routing; extend F32/F36; no new Fn'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-D21-lean-pending-amend
+  category: Decision
+  choice: lean_pending_amendment
+  summary: 'Routing preset (option C): Lean 00→16→01→02→10→13 — pending amendment; omits 04/07/08/09/11/12; NOT finalized (pending_lean_amendment_decision)'
+  stage: 00-context
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: superseded
+  superseded_by: S013-D22
+- id: S013-D22-lean-plus-build
+  category: Decision
+  choice: lean_plus_build
+  summary: 'Routing preset (option A): Lean+build — 00→16→01→02→04→07→08→10→13; skips 03/05/06/09/11/12; routing_plan_status=approved'
+  stage: 16-evolve
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: approved
+- 'S013/2026-07-28: Phase 1 impact analysis COMPLETE — session artifacts written (session-brief, routing-plan, impact-analysis, evolve-decisions EV-012); routing approved Lean+build (S013-D22); handoff next_action=await_user_start_01_requirements; branch evolve/EV-012-unified-job-monitoring not created; no commits.'
+- 'S013/2026-07-28: Routing APPROVED Lean+build (S013-D22 option A) — routing_plan_status=approved; phase_0 complete; Phase 1 impact analysis in progress (16-evolve); handoff next_action=write_session_artifacts_then_01_requirements.'
+- 'S013/2026-07-28: Phase 0 scope APPROVED (S013-D20) — proceed impact analysis + routing; extend F32/F36 no new Fn. Lean preset chosen (S013-D21) — routing_plan_status=pending_lean_amendment_decision; current_stage=16-evolve; handoff next_action=await_lean_vs_standard_amendment_for_build.'
+- 'S013/2026-07-28: Phase 0 Batch 5 PARTIAL — D18 acceptance (issue ACs + extend UJ-023/unified list+detail); D19 E2E tier (API e2e + Admin Vitest + live T3 after deploy); D17 latency/polling PENDING (explore event-driven options); batch_5_status=partial; next_action=await_batch_5_d17_event_driven_choice.'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -6589,18 +7516,65 @@ artifacts:
   stage: 14-hotfix
   github_issue: 105
   repro_status: green
+- path: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
+  session_id: S012-hotfix-admin-ui-112-105
+  kind: report
+  stage: 15-service-health
+  recorded_at: '2026-07-28'
+  overall: pass
+  git_status: may_be_uncommitted
+- path: docs/sessions/S013-unified-job-monitoring/session-brief.md
+  kind: session-brief
+  session_id: S013-unified-job-monitoring
+  stage: 16-evolve
+  recorded_at: '2026-07-28'
+- path: docs/sessions/S013-unified-job-monitoring/routing-plan.md
+  kind: routing-plan
+  session_id: S013-unified-job-monitoring
+  stage: 16-evolve
+  recorded_at: '2026-07-28'
+  preset: lean_plus_build
+  decision_id: S013-D22
+- path: docs/sessions/S013-unified-job-monitoring/impact-analysis.md
+  kind: impact-analysis
+  session_id: S013-unified-job-monitoring
+  stage: 16-evolve
+  recorded_at: '2026-07-28'
+- path: docs/decisions/evolve-decisions.md
+  kind: evolve-decisions
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  stage: 16-evolve
+  recorded_at: '2026-07-28'
+  section: 'Cycle EV-012 — Scope'
+- path: docs/sessions/S013-unified-job-monitoring/
+  session_id: S013-unified-job-monitoring
+  kind: session_dir
+  status: created
+  recorded_at: '2026-07-28'
+  note: 'Phase 1 session artifacts written; branch evolve/EV-012-unified-job-monitoring not created yet'
+- path: docs/license-audit-2026-07-28.md
+  kind: license-audit-report
+  stage: audit-licenses
+  recorded_at: '2026-07-28'
+  verdict: FAILED
+  flags_count: 20
+  blocked_count: 4
+  note: 'Standing docs-root report (not an S013 routing-plan deliverable). Parent writes file.'
 git_history:
-  current_branch: fix/S012-admin-ui-112-105
+  current_branch: main
   branches:
   - name: fix/S012-admin-ui-112-105
     purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
     base: main
-    status: open
+    status: merged
     created_at: '2026-07-28'
+    merged_at: '2026-07-28'
     session_id: S012-hotfix-admin-ui-112-105
-    note: 'PR #150 open; fc51bc5 pushed; await CI + merge approval (S012-D5)'
+    note: 'PR #150 MERGED @ 2b3231d (2026-07-28T15:37:56Z); #112+#105 closed; handoff → 15-service-health'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
     head_sha: fc51bc5
+    merge_sha: 2b3231d36753db02294aa6c34b3d3fb48d2cc45a
   - name: fix/BUG-2026-07-25-retag-llm-500
     purpose: 'S011 hotfix — #146 retag LLM 500 then #145 empty assistant'
     base: main
@@ -7416,6 +8390,19 @@ git_history:
     timestamp: '2026-07-28T14:48:00Z'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
   notes:
+  - '2026-07-28 S013/EV-012: Phase 1 impact analysis COMPLETE — session artifacts written; routing Lean+build approved (S013-D22); handoff next_action=await_user_start_01_requirements; branch evolve/EV-012-unified-job-monitoring not created; no commits.'
+  - '2026-07-28 S013/EV-012: Routing APPROVED Lean+build (S013-D22 option A); routing_plan_status=approved; phase_0 complete; Phase 1 impact analysis in progress; handoff next_action=write_session_artifacts_then_01_requirements.'
+  - '2026-07-28 S013/EV-012: Phase 0 scope APPROVED (S013-D20); Lean preset chosen pending amendment (S013-D21); routing_plan_status=pending_lean_amendment_decision; current_stage=16-evolve; next=await_lean_vs_standard_amendment_for_build.'
+  - '2026-07-28 S013/EV-012: Phase 0 intake COMPLETE — Batch 5 done; D17 SSE per source (option B); D18/D19 recorded; batch_5_complete; phase_0_intake=awaiting_scope_approval; next=await_phase_0_scope_approval_and_routing_preset.'
+  - '2026-07-28 S013/EV-012: Phase 0 Batch 5 PARTIAL — D18 acceptance; D19 E2E tier; D17 latency/polling PENDING (explore event-driven); batch_5_status=partial; next=await_batch_5_d17_event_driven_choice.'
+  - '2026-07-28 S013/EV-012: Phase 0 Batch 4 COMPLETE — D13–D16 platform; batch_4_complete; current_batch=5; next=run_16_evolve_phase_0_intake_batch_5.'
+  - '2026-07-28 S013/EV-012: Phase 0 Batch 3 COMPLETE — S013-D9 resolved (all long-running admin jobs, extensible job_type); batch_3_complete; current_batch=4; next=run_16_evolve_phase_0_intake_batch_4.'
+  - '2026-07-28 S013/EV-012: Phase 0 Batch 3 PARTIAL — D10–D12 recorded; D9 out-of-scope pending; admin-dashboard-only constraint; Batch 4 blocked until Q1; next=await_batch_3_q1_out_of_scope_explanation.'
+  - '2026-07-28 S013/EV-012: Phase 0 Batches 1b+2 recorded — v2 all three; /jobs/:id; eval summary+drill-down; frontend federation; next=Batch 3 (boundaries).'
+  - '2026-07-28 S013/EV-012: Phase 0 Batch 1 recorded — S012 artifacts uncommitted; scope v1+v2 (v2 item TBD Batch 1b); extend F32/F36 no new Fn; success=#116 ACs; next=Batch 1b.'
+  - '2026-07-28 S012 CLOSED → S013/EV-012 OPEN (#116 unified job monitoring); service-health.md may be uncommitted.'
+  - '2026-07-28 S012: 15-service-health PASS @ 1b60930; H0ci–H5; session open (await_user_close_or_start_116).'
+  - '2026-07-28 S012: PR #150 MERGED @ 2b3231d; branch fix/S012-admin-ui-112-105 status=merged; current_branch=main; handoff → 15-service-health (main HEAD 1b60930).'
   - '2026-07-28 S012: fc51bc5 pushed on fix/S012-admin-ui-112-105; PR #150 open. next_action=await_ci_and_merge_approval (S012-D5 — user must approve merge/deploy).'
   - '2026-07-28 S012: #112+#105 fix_applied_local on fix/S012-admin-ui-112-105 — NOT committed yet (awaiting user commit/PR request). next_action=commit_and_pr_after_user_approval. Also authContext→auth-context rename.'
   - '2026-07-28 S012: Branch fix/S012-admin-ui-112-105 created from main (status open); current_branch set. Phase 0 answers + planned bug-report paths recorded.'
