@@ -105,6 +105,31 @@ jobs:
           done < audit/pip-audit-ignore.txt
           uv run pip-audit "${IGNORE_ARGS[@]}"
 
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install security scanners
+        run: SEC_TOOLS_DIR="${GITHUB_WORKSPACE}/.tools/security" bash scripts/security/install-tools.sh
+
+      - name: Security static analysis (hard-fail)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
+          SEC_TOOLS_DIR: ${{ github.workspace }}/.tools/security
+          # Skip advisors only when the token secret is unset in the fork/PR context.
+          SEC_SKIP_SUPABASE_ADVISORS: ${{ secrets.SUPABASE_ACCESS_TOKEN == '' && '1' || '0' }}
+        run: bash scripts/security/run-all.sh
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: .security-reports/
+          if-no-files-found: ignore
+
   coverage:
     runs-on: ubuntu-latest
     services:
@@ -257,7 +282,7 @@ jobs:
   ci-success:
     name: CI success
     runs-on: ubuntu-latest
-    needs: [python, coverage, frontend, packages, ui-e2e]
+    needs: [python, coverage, frontend, packages, ui-e2e, security]
     if: >-
       ${{ always() &&
           !contains(needs.*.result, 'failure') &&

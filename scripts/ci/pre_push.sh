@@ -31,6 +31,11 @@ if [[ "${VECINITA_MEDIUM_PRE_PUSH:-}" == "1" ]]; then
 	exec make test-fast
 fi
 
-echo "pre-push: make check-fast + make test-fast (run make ci-push before opening a PR)"
+echo "pre-push: make check-fast + make test-fast + make security-scan (run make ci-push before opening a PR)"
 make check-fast
 make test-fast
+if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" && "${SEC_SKIP_SUPABASE_ADVISORS:-}" != "1" ]]; then
+	echo "pre-push: no SUPABASE_ACCESS_TOKEN — skipping Supabase advisors (set token or SEC_SKIP_SUPABASE_ADVISORS=1)"
+	export SEC_SKIP_SUPABASE_ADVISORS=1
+fi
+make security-scan

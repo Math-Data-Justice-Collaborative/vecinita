@@ -87,10 +87,11 @@ def list_documents(
 
     where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
 
-    count_sql = text(
+    # Fixed filter templates only; user values bound via :params (not interpolated).
+    count_sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
         f"SELECT COUNT(*) FROM documents d {where_clause}"  # noqa: S608  # fixed filter templates; values bound
     )
-    list_sql = text(
+    list_sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
         f"""
         SELECT d.id, d.title, d.url, d.language
         FROM documents d

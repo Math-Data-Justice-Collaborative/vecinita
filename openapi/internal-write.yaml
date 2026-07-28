@@ -6,6 +6,9 @@ info:
 servers:
   - url: /internal/v1
     description: Internal write API (DigitalOcean)
+security:
+  - bearerAuth: []
+  - internalApiKey: []
 paths:
   /documents/batch:
     post:
@@ -451,6 +454,7 @@ paths:
     get:
       operationId: health
       summary: Service health
+      security: []
       responses:
         "200":
           description: Health status

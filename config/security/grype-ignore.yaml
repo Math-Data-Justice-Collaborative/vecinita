@@ -1,0 +1,19 @@
+# Grype ignore config — only justified non-applicable advisories.
+# Prefer upgrading dependencies; add entries here only with a reason.
+#
+# Format: https://github.com/anchore/grype#specifying-matches-to-ignore
+ignore:
+  # GHSA-qwww-vcr4-c8h2 — RSC Mode CSRF Bypass. Fixed only in react-router 8.3.0,
+  # which requires React >=19.2.7. Vecinita admin UI is a Vite SPA on React 18 and
+  # does not enable React Router RSC mode. Track React 19 + RR8 in a follow-up.
+  - vulnerability: GHSA-qwww-vcr4-c8h2
+    reason: RSC-mode advisory; SPA on React 18 / react-router 7.18.1 (RR8 needs React 19)
+
+  # GHSA-mh99-v99m-4gvg publishes a single range "<= 5.0.7" which incorrectly
+  # includes the patched 1.1.16 line (1.x fix is 1.1.16; 5.x fix is 5.0.8).
+  # We pin brace-expansion@1 to 1.1.16 and @5 to 5.0.8 via package.json overrides.
+  - vulnerability: GHSA-mh99-v99m-4gvg
+    package:
+      name: brace-expansion
+      version: 1.1.16
+    reason: Advisory range <=5.0.7 falsely includes patched 1.1.16; 1.x fix is 1.1.16

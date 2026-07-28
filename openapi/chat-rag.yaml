@@ -6,6 +6,8 @@ info:
 servers:
   - url: /api/v1
     description: ChatRAG backend (DigitalOcean)
+# Public community API — no authentication required (explicit empty security).
+security: []
 paths:
   /ask:
     post:

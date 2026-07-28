@@ -1,0 +1,6 @@
+# OpenGrep path / pattern notes for Vecinita.
+# Primary ruleset remains community `p/default` (passed separately by run-all).
+# Intentional sqlalchemy.text usages use bound parameters; suppressions are
+# inline `# nosemgrep: ...` next to the call sites with justification.
+
+rules: []

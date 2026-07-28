@@ -1,0 +1,17 @@
+# KICS query IDs excluded from hard-fail. Do not expand without a ticket + reason.
+#
+# --- Local / CI ephemeral Postgres credentials ---
+# Passwords And Secrets — Generic Password / Password in URL / Generic Token
+# CI service containers and local docker-compose use well-known ephemeral
+# credentials; GitHub Actions `${{ secrets.* }}` refs are not secret values.
+# Real secret scanning remains via gitleaks + 2ms.
+487f4be7-3fd9-4506-a07a-eae252180c08
+c4d3b58a-e6d4-450f-9340-04f1e702eaae
+baee238e-1921-4801-9c3f-79ae1d7b2cbc
+#
+# --- Intentional public OpenAPI security ---
+# ChatRAG is a public community API (explicit security: []). Authenticated
+# services document /health as unauthenticated with security: []. Empty-array
+# queries treat that correct documentation as a finding.
+d674aea4-ba8b-454b-bb97-88a772ea33f0
+663c442d-f918-4f62-b096-0bf5dcbeb655

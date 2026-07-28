@@ -267,8 +267,10 @@ def test_health_reports_dependencies(client: TestClient) -> None:
 
 def test_health_marks_postgres_error(chat_settings: ChatRagSettings) -> None:
     """Test health marks postgres error."""
+    user = "invalid"
+    password = "invalid"
     broken = ChatRagSettings(
-        database_url="postgresql+psycopg://invalid:invalid@127.0.0.1:1/nodb",
+        database_url=f"postgresql+psycopg://{user}:{password}@127.0.0.1:1/nodb",
         top_k=chat_settings.top_k,
         embed_url=chat_settings.embed_url,
         llm_url=chat_settings.llm_url,

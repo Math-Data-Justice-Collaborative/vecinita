@@ -171,6 +171,12 @@ ci-guards: ## CI static guard scripts (secrets, OpenAPI, Modal boundary)
 		echo "skip: gitleaks not installed (install v8.24.2+ for full CI parity)"; \
 	fi
 
+security-scan-install: ## Install OpenGrep, 2ms, KICS, Grype, SBOM Tool into .tools/security
+	SEC_TOOLS_DIR="$(CURDIR)/.tools/security" bash scripts/security/install-tools.sh
+
+security-scan: ## Hard-fail security static analysis suite (see config/security/)
+	SEC_TOOLS_DIR="$(CURDIR)/.tools/security" bash scripts/security/run-all.sh
+
 audit: ## pip-audit with repo ignore list (blocking in CI)
 	@IGNORE_ARGS=(); \
 	while read -r cve; do \
@@ -204,9 +210,9 @@ check-fast: lint typecheck ## Fast gate: lint + typecheck (no format-check; Husk
 
 pre-push: check-fast test-fast ## Husky pre-push tier (fast local gate before git push)
 
-ci: install ci-guards lint format-check typecheck audit test-py test-fe build-frontend ## Full CI-parity run (fail fast)
+ci: install ci-guards lint format-check typecheck audit security-scan test-py test-fe build-frontend ## Full CI-parity run (fail fast)
 
-ci-push: ci-guards lint format-check typecheck audit ci-push-py test-fe build-frontend ## Full CI parity before opening a PR (no reinstall)
+ci-push: ci-guards lint format-check typecheck audit security-scan ci-push-py test-fe build-frontend ## Full CI parity before opening a PR (no reinstall)
 
 ci-push-py: ## Python tests + unit coverage in one Postgres session (compose torn down if we started it)
 	$(WITH_POSTGRES) bash scripts/ci/run_pytest_ci_push.sh

@@ -48,9 +48,12 @@ jobs:
           python-version: "3.11"
 
       - name: Dry-run wiki build (validate manifest + links)
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INCLUDE_OPERATOR: ${{ inputs.include_operator }}
         run: |
           OP_FLAGS="--no-include-operator"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.include_operator }}" = "true" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$INCLUDE_OPERATOR" = "true" ]; then
             OP_FLAGS="--include-operator"
           fi
           uv run python scripts/docs/sync_github_wiki.py \
@@ -60,14 +63,18 @@ jobs:
       - name: Push to GitHub Wiki
         env:
           WIKI_TOKEN: ${{ secrets.WIKI_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          WIKI_PUSH_TOKEN_SET: ${{ secrets.WIKI_PUSH_TOKEN != '' }}
           WIKI_ACTOR: ${{ github.actor }}
           WIKI_REPOSITORY: ${{ github.repository }}
+          WIKI_SHA: ${{ github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          INCLUDE_OPERATOR: ${{ inputs.include_operator }}
         run: |
           OP_FLAGS="--no-include-operator"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.include_operator }}" = "true" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$INCLUDE_OPERATOR" = "true" ]; then
             OP_FLAGS="--include-operator"
           fi
-          if [ -z "${{ secrets.WIKI_PUSH_TOKEN }}" ]; then
+          if [ "$WIKI_PUSH_TOKEN_SET" != "true" ]; then
             echo "::warning::WIKI_PUSH_TOKEN is not set — using GITHUB_TOKEN for wiki push (often fails with 403/404). Add a PAT as WIKI_PUSH_TOKEN repo secret."
           else
             echo "Using WIKI_PUSH_TOKEN for wiki push."
@@ -86,5 +93,5 @@ jobs:
           )"
           uv run python scripts/docs/sync_github_wiki.py \
             --remote-url "$WIKI_REMOTE" \
-            --message "Sync docs from ${{ github.sha }}" \
+            --message "Sync docs from ${WIKI_SHA}" \
             $OP_FLAGS
