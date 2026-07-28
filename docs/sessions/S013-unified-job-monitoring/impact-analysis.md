@@ -4,8 +4,8 @@
 
 | ID | Change |
 |----|--------|
-| F32 | Extend: unified list, detail route, status filter, retag `document_id`, SSE, cancel/retry, logs link, Postgres/SoT |
-| F36 | Extend: eval runs visible on Jobs; detail summary + drill-down link; eval SSE |
+| F32 | Extend: unified Modal list, detail route, status filter, retag `document_id`, SSE, admin CRUD, log links |
+| F36 | Extend: eval lifecycle on Modal (`job_type=eval`); metrics stay in DO Postgres; Jobs detail → eval drill-down |
 
 No new Fn (S013-D3).
 
@@ -13,33 +13,33 @@ No new Fn (S013-D3).
 
 | Doc | Why |
 |-----|-----|
-| `docs/feature-list.md` | F32/F36 delta limitations → capabilities |
-| `docs/api-contract.md` | `/jobs` fields, events SSE, cancel/retry; eval events |
+| `docs/feature-list.md` | F32/F36 EV-012 deltas |
+| `docs/api-contract.md` | `/jobs` fields, events SSE, cancel/retry; eval enqueue note |
 | `openapi/data-management.yaml` | Job schema + events (+ cancel) |
-| `openapi/internal-write.yaml` | Eval list/events; cancel if applicable |
-| `docs/user-journeys.md` | Extend UJ-023; detail + eval federation |
-| `docs/test-plan.md` | TC for unified list, detail, SSE, cancel |
-| `docs/acceptance-criteria.md` | Mirror #116 ACs + SSE |
-| `docs/adr/` | Likely new ADR: SSE + SoT (modal.Dict vs Postgres) |
+| `openapi/internal-write.yaml` | Eval trigger → Modal bridge |
+| `docs/user-journeys.md` | UJ-023, UJ-044, UJ-050 |
+| `docs/test-plan.md` | TC-146–151 |
+| `docs/acceptance-criteria.md` | AC-J1–J10 |
+| `docs/adr/ADR-038-*.md` | Modal job lifecycle + DO storage SoT |
 | Session execution plan (under S013) | Tasks for 07-build |
 
 ## Code / apps
 
 | Area | Touch |
 |------|-------|
-| `apps/data-management-frontend` | JobsPage federation, `/jobs/:id`, filters, SSE clients, cancel/retry UI |
-| `apps/data-management-backend` | Job payload (`document_id`), `GET /jobs/events`, cancel/retry, log link metadata |
-| `apps/internal-write-api` | Eval runs list shape if needed; eval SSE; cancel if eval-owned |
-| `tests/e2e/` | Extend UJ-023 / unified jobs |
-| Vitest | Jobs list + detail journeys |
+| `apps/data-management-frontend` | JobsPage Modal list + SSE, `/jobs/:id`, filters, cancel/retry UI |
+| `apps/data-management-backend` | `document_id`, `/jobs/events`, cancel/retry, log metadata, `job_type=eval` |
+| `apps/internal-write-api` | Trigger eval → enqueue Modal job; keep metrics APIs |
+| `tests/e2e/` | UJ-023 / UJ-044 / UJ-050 |
+| Vitest + Playwright | Jobs list + detail |
 
 ## Connectivity
 
-Admin SPA only (gates 01/04 delta, 07, 12–13 / H4–H5 when UI ships). No ChatRAG.
+Admin SPA only. No ChatRAG.
 
 ## Risks
 
-- Dual-source SSE + federation complexity; poll fallback needed if SSE drops.
-- Postgres SoT vs modal.Dict — product/ADR decision in 04.
-- Cancel/retry across Modal vs DO eval — different ownership.
+- SSE reliability; poll fallback (RD-173).
+- Eval enqueue bridge Modal ↔ DO metrics rows.
+- Cancel/retry vs eval result row ownership.
 - Lean+build skips formal 09/11/12 — rely on 08 + 10 + 13.

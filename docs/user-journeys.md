@@ -49,7 +49,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-041 | Admin views eval metric trends (dashboard) | Admin operator | DM UI `/evaluation?tab=dashboard` → timeseries API | F36 (#99) | local |
 | UJ-042 | Admin explores eval runs via pivot table | Admin operator | DM UI `/evaluation?tab=explore` | F36 (#99) | local |
 | UJ-043 | Admin manages custom eval criteria | Admin operator | DM UI `/evaluation?tab=criteria` → criteria CRUD API | F36 (#99) | local |
-| UJ-044 | Admin sees eval runs on Jobs tab | Admin operator | DM UI `/jobs` → unified `GET /jobs` (`job_type=eval`) | F37 (EV-009) | local |
+| UJ-044 | Admin sees eval runs on Jobs tab | Admin operator | DM UI `/jobs` → Modal `GET /jobs` (`job_type=eval`) | F36/F32 EV-012 (#116); F37 M66 | local |
 | UJ-045 | Admin configures and runs eval in Playground | Admin operator | DM UI `/evaluation?tab=playground` → preset + run APIs | F37 (EV-009) | local |
 | UJ-046 | Admin compares two eval runs | Admin operator | DM UI `/evaluation` compare view | F37 (EV-009) | local |
 | UJ-047 | Super-admin promotes config to production ChatRAG | Super-admin | Playground → promote API → ChatRAG active config | F37 (EV-009) | local |
@@ -1139,9 +1139,9 @@ admin CRUD succeeds; viewer cannot mutate; no PII beyond existing F32 limits.
 **Steps**:
 
 1. Open Data Management admin UI → **Jobs** (`/jobs`).
-2. UI polls `GET /jobs` every ~4s (same as ingest/retag).
+2. UI prefers **SSE** job events; on failure falls back to ~4s poll (RD-173).
 3. Eval runs appear with `job_type: "eval"`, status (`pending` | `running` | `completed` | `failed`), timestamps, and error message when failed.
-4. Clicking an eval job navigates to `/evaluation` with the run selected (or shows eval-specific detail).
+4. Clicking an eval job opens `/jobs/:id` summary + link to `/evaluation` with the run selected (UJ-050).
 
 **Acceptance**: Newly started eval run visible on Jobs tab without navigating away from Jobs;
 ingest/retag behavior unchanged. Eval job lifecycle is Modal (`job_type=eval`); metrics remain in

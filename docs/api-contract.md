@@ -276,7 +276,7 @@ Additive contract changes (exact paths locked in 04-tech-plan / OpenAPI):
 | Change | Purpose |
 |--------|---------|
 | `job_type` includes **`eval`**; optional `document_id` on retag | Unified Modal list; retag context |
-| `GET /jobs/events` (SSE) | Push status updates; FE falls back to 4s poll (RD-173) |
+| `GET /jobs/events` (SSE) + internal-write eval progress SSE | Push updates (02-verify M2); FE falls back to 4s poll (RD-173) |
 | Cancel / retry / delete endpoints (admin JWT) | Full job CRUD (RD-176) |
 | Optional `modal_call_id` / `dashboard_url` on failed jobs | Log affordances (RD-177) |
 

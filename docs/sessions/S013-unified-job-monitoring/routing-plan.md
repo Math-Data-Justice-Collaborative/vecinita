@@ -6,7 +6,7 @@
 | 16-evolve | yes | in_progress | Orchestrator; Phase 1 impact → then child stages |
 | 01-requirements | yes | pending | Delta F32/F36 + #116 ACs |
 | 02-verify-plan | yes | pending | Consistency pass on touched specs |
-| 04-tech-plan | yes | pending | SSE, federation, Postgres/cancel/logs |
+| 04-tech-plan | yes | pending | SSE, Modal job lifecycle, cancel/logs, eval enqueue bridge |
 | 07-build | yes | pending | Admin FE + Modal DM + internal-write |
 | 08-verify-build | yes | pending | Local verify after build |
 | 10-e2e | yes | pending | API e2e + Admin Vitest; extend UJ-023 |

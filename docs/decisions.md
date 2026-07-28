@@ -503,9 +503,17 @@ ADR-033 (eval runner → Modal). New ADR-038 for Modal job lifecycle + storage s
 **S013-D8 amendment:** Jobs tab primary list = Modal `GET /jobs` (not FE merge of Modal +
 internal-write job lists). Eval metrics/results remain in DO Postgres for drill-down.
 
+**02-verify-plan verdicts (2026-07-28):**
+| ID | Verdict |
+|----|---------|
+| M1 | Modal = job lifecycle SoT; DO Postgres = storage/metrics only (no Postgres jobs table as runner SoT) |
+| M2 | SSE on **both** Modal `/jobs/events` and internal-write eval progress events |
+| M3 | `POST /internal/v1/eval/runs` → metrics row + enqueue Modal `job_type=eval` |
+
 Artifacts: feature-list F32/F36 delta; UJ-023/UJ-044/UJ-050; test-plan TC-146–TC-151; AC-J1–J10;
 `docs/adr/ADR-038-modal-job-lifecycle-storage-split.md`; session report
-`docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md`.
+`docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md`;
+`docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md`.
 
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 

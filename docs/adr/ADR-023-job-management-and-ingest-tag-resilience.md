@@ -44,6 +44,7 @@ lifting. This is simpler and more robust than client-state lifting and aligns wi
 - Operators get durable, cross-navigation job visibility (running/completed/failed + error code).
 - `GET /jobs` is a new API surface (GET verb already CORS-allowed; no new preflight verb).
 - No job cancellation/retry yet; status/type enums localized, error messages remain source-form
+  (**superseded for cancel/retry/delete by EV-012 / ADR-038 / RD-176**).
   (consistent with F31 R30). No PII in listings (URLs + status only).
 
 ## Alternatives considered

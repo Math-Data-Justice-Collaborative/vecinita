@@ -23,8 +23,13 @@ ingest/retag used Modal. That split prevented a single job lifecycle and complic
    metrics storage.
 4. **Admin Jobs UI** reads Modal `GET /jobs` as the primary unified list (extensible `job_type`).
    Eval drill-down continues to load metrics from DO via existing internal-write eval APIs.
-5. Job status transport: **SSE** with **4s poll fallback** and SSE retry backoff (RD-173).
+5. Job status transport: **SSE on Modal jobs and internal-write eval progress** (02-verify M2),
+   with **4s poll fallback** and SSE retry backoff (RD-173). Jobs **list** remains Modal-primary.
 6. **Admin-only** full job CRUD (cancel/retry/delete); viewer read-only (RD-176).
+7. Eval **trigger**: `POST /internal/v1/eval/runs` on DO creates the metrics row and **enqueues**
+   Modal `job_type=eval` (02-verify M3).
+8. **Postgres `jobs` table** is not the job-lifecycle SoT (02-verify M1); DO Postgres stores
+   corpus + eval metrics/results only.
 
 ## Consequences
 

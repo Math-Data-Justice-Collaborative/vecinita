@@ -452,13 +452,13 @@
 - **Outputs**: Table of jobs with short job id, type (ingest/retag), status badge, source URLs, last-updated time, and `error_code: error_message` for failed jobs; polled while open; manual refresh.
 - **Backend**: `GET /jobs` list endpoint (newest first) + `list_jobs()` on `JobStore` / `DictJobStore` / `InMemoryJobStore`; `job_type` added to the `Job` schema; `JobList` response model; OpenAPI `openapi/data-management.yaml` updated.
 - **Frontend**: New `/jobs` route + sidebar nav item (`ListChecks`); `JobsPage`; `listJobs()` client; en/es i18n (`admin.nav.jobs`, `admin.jobs.*`).
-- **Limitations**: No PII in listings (URLs + status only, ADR-004). No job cancellation/retry in this iteration. Status/type enums localized; error messages remain in source form (consistent with F31 R30).
+- **Limitations**: No PII in listings (URLs + status only, ADR-004). Status/type enums localized; error messages remain in source form (consistent with F31 R30). **Superseded by EV-012:** cancellation/retry/delete are in scope (RD-176); list updates use SSE + poll fallback (RD-173).
 - **Priority**: High — pairs with #88 ingest tag resilience.
 - **Source**: S002 session (GitHub #89); related bug #88 (graceful ingest tagging).
 - **EV-012 / #116 delta (S013, RD-173–RD-178)**: Unified long-running job monitoring on Admin Jobs only (not ChatRAG).
   - **Lifecycle**: All long-running admin jobs (ingest, retag, **eval**, future types) use **Modal’s job lifecycle** ([Modal job queue](https://modal.com/docs/guide/job-queue)); Admin Jobs list is **Modal `GET /jobs`** with extensible `job_type` (RD-174). Amends ADR-033 (eval leaves DO `BackgroundTasks`).
   - **Storage**: **DO Postgres** remains SoT for durable storage including eval metrics/results; **Supabase = authentication only** (RD-175).
-  - **UX**: Status filter UI; clickable rows → `/jobs/:id` detail; retag shows `document_id` context; SSE per source with **4s poll fallback** + SSE retry backoff (RD-173); failed Modal jobs show function/call id + copy + dashboard link when known (RD-177).
+  - **UX**: Status filter UI; clickable rows → `/jobs/:id` detail; retag shows `document_id` context; SSE on Modal jobs **and** internal-write eval progress with **4s poll fallback** + SSE retry backoff (RD-173, 02-verify M2); failed Modal jobs show function/call id + copy + dashboard link when known (RD-177).
   - **CRUD**: **Admin-only** full job CRUD — create (existing), read/list/detail, cancel/retry, delete from store (RD-176). Viewer read-only.
   - **Tests**: Extend UJ-023; UJ-050 detail; Playwright T0-ui list→detail (RD-178); API e2e + Vitest; live T3 after deploy.
 
