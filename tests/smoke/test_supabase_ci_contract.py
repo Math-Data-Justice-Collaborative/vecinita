@@ -5,6 +5,7 @@ Validates repo-managed Supabase CI artifacts without requiring Docker or cloud c
 
 from __future__ import annotations
 
+import re
 import subprocess
 import tomllib
 from pathlib import Path
@@ -55,7 +56,9 @@ def test_supabase_workflow_uses_setup_cli_and_path_filters() -> None:
     """Workflow is path-filtered and installs Supabase CLI via the official action."""
     text = _workflow_text()
     assert "supabase/**" in text
-    assert "supabase/setup-cli@v1" in text
+    # Pin to an immutable commit SHA (mutable @v1 tags fail OpenGrep WARNING).
+    assert re.search(r"supabase/setup-cli@[0-9a-f]{40}", text)
+    assert "supabase/setup-cli@v1" not in text
     assert "bash scripts/check_supabase_config.sh" in text
 
 
