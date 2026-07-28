@@ -93,7 +93,7 @@ project:
       mode: delta
       report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
       seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
-      note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; handoff → 02-verify-plan (await user start; commit pending)'
+      note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; committed c8cfaa9; handoff → 02-verify-plan (await user start)'
       substeps:
         interviews:
           completed: 6
@@ -1315,7 +1315,7 @@ active_session:
     completed_at: '2026-07-28'
     mode: delta
     report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
-    note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; commit pending'
+    note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; committed c8cfaa9'
   - stage: 02-verify-plan
     required: true
     status: pending
@@ -1442,12 +1442,17 @@ active_session:
     next_skill: 02-verify-plan
     branch: evolve/EV-012-unified-job-monitoring
     branch_status: active
-    pending_commit: true
     git_commits:
     - sha: 74216f1
       message: 'docs(S013): open EV-012 unified job monitoring session'
       stage: 16-evolve
       not_pushed: true
+    - sha: c8cfaa9a72c2d89703267c54ab4c8e6967dcd26a
+      message: 'docs(S013): EV-012 requirements for unified Modal jobs (#116)'
+      stage: 01-requirements
+      session_id: S013-unified-job-monitoring
+      files_changed: 11
+      timestamp: '2026-07-28T23:30:00Z'
 sessions:
 - id: S012-hotfix-admin-ui-112-105
   type: hotfix
@@ -2896,7 +2901,7 @@ stages:
     mode: delta
     report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
     seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
-    note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; handoff → 02-verify-plan (await user start; commit pending)'
+    note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; committed c8cfaa9; handoff → 02-verify-plan (await user start)'
     substeps:
       interviews:
         completed: 6
@@ -5529,7 +5534,7 @@ evolve_cycles:
       mode: delta
       report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
       seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
-      note: 'Delta docs COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; handoff → 02-verify-plan (await user start; commit pending)'
+      note: 'Delta docs COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; committed c8cfaa9; handoff → 02-verify-plan (await user start)'
       requirements_delta_interview:
         status: docs_complete
         handoff: await_user_start_02_verify_plan
@@ -5573,11 +5578,10 @@ evolve_cycles:
   - RD-176
   - RD-177
   - RD-178
-  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22): 00→16→01→02→04→07→08→10→13. Phase 1 COMPLETE — commit 74216f1. 01-requirements delta COMPLETE — RD-173..178 written; ADR-038; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes; commit pending. Advisory — EV-004 remains in_progress historically (07-build); EV-011 parked.'
+  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22): 00→16→01→02→04→07→08→10→13. Phase 1 COMPLETE — commit 74216f1. 01-requirements delta COMPLETE — RD-173..178 written; ADR-038; committed c8cfaa9; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes. Advisory — EV-004 remains in_progress historically (07-build); EV-011 parked.'
   handoff:
     next_action: await_user_start_02_verify_plan
     next_skill: 02-verify-plan
-    pending_commit: true
   adrs:
   - docs/adr/ADR-038-modal-job-lifecycle-storage-split.md
   artifacts:
@@ -7614,6 +7618,7 @@ decisions_log:
   status: amended
   prior_choice: frontend_merge_modal_jobs_and_internal_eval_runs
 - 'S013/2026-07-28: 01-requirements delta COMPLETE — RD-173..178 written; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; report docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md; current_stage=02-verify-plan; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes; commit pending.'
+- 'S013/2026-07-28: 01-requirements delta committed c8cfaa9 on evolve/EV-012-unified-job-monitoring — 11 files; handoff pending_commit cleared; next_action=await_user_start_02_verify_plan.'
 - 'S013/2026-07-28: 01-requirements delta interview COMPLETE (6/6) — RQ2 SSE fallback option A (RD-173); RQ3 Modal-all-jobs + DO Postgres SoT + Supabase auth-only (RD-174/175, amends ADR-033, revises S013-D8); RQ4 admin-only full CRUD option A (RD-176); RQ5/RQ6 → RD-177/178; handoff write_01_requirements_delta_docs; feature-list deferred.'
 - id: S013-RQ5-modal-logs-resolved
   category: Decision
@@ -8113,7 +8118,7 @@ git_history:
     created_at: '2026-07-28'
     session_id: S013-unified-job-monitoring
     evolve_cycle_id: EV-012
-    note: 'Branch created from main; first commit 74216f1 (session artifacts); not pushed'
+    note: 'Branch created from main; commits 74216f1 (session artifacts) + c8cfaa9 (01-requirements delta); not pushed'
   - name: fix/S012-admin-ui-112-105
     purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
     base: main
@@ -8946,7 +8951,15 @@ git_history:
     session_id: S013-unified-job-monitoring
     files_changed: 5
     timestamp: '2026-07-28T23:10:29Z'
+  - sha: c8cfaa9a72c2d89703267c54ab4c8e6967dcd26a
+    branch: evolve/EV-012-unified-job-monitoring
+    message: 'docs(S013): EV-012 requirements for unified Modal jobs (#116)'
+    stage: 01-requirements
+    session_id: S013-unified-job-monitoring
+    files_changed: 11
+    timestamp: '2026-07-28T23:30:00Z'
   notes:
+  - '2026-07-28 S013/EV-012: 01-requirements delta committed c8cfaa9 — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; current_stage=02-verify-plan; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes.'
   - '2026-07-28 S013/EV-012: 01-requirements delta COMPLETE — RD-173..178 written; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; current_stage=02-verify-plan; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes; commit pending (no sha yet).'
   - '2026-07-28 S013/EV-012: 01-requirements delta interview COMPLETE (6/6) — RQ2 option A SSE→4s poll+retry backoff (RD-173); RQ3 Modal-all-jobs + DO Postgres SoT + Supabase auth-only (RD-174/175, amends ADR-033, revises S013-D8); RQ4 admin-only full CRUD option A (RD-176); RQ5/RQ6 → RD-177/178; handoff write_01_requirements_delta_docs; feature-list deferred.'
   - '2026-07-28 S013/EV-012: Branch evolve/EV-012-unified-job-monitoring created; commit 74216f1 (session artifacts); 01-requirements delta in_progress; handoff next_action=01_requirements_delta_interview; not pushed.'
