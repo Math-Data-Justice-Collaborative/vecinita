@@ -76,9 +76,10 @@ fi
 
 # Grype
 if [[ ! -x "${BIN_DIR}/grype" || "${SEC_FORCE:-0}" == "1" ]]; then
+  # Official installer downloaded to a temp file (avoids curl|sh); -b sets install dir.
   _grype_install="$(mktemp)"
   curl -sSfL https://get.anchore.io/grype -o "${_grype_install}"
-  sh "${_grype_install}" -s -- -b "${BIN_DIR}"
+  sh "${_grype_install}" -b "${BIN_DIR}"
   rm -f "${_grype_install}"
 fi
 
