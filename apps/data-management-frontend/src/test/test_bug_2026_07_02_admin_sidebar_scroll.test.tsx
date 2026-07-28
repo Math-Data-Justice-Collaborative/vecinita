@@ -23,6 +23,12 @@ describe("BUG-2026-07-02 — Admin sidebar stays on left while main content scro
             }),
           });
         }
+        if (url.includes("/internal/v1/documents")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }),
+          });
+        }
         return Promise.resolve({ ok: true, json: async () => [] });
       }),
     );

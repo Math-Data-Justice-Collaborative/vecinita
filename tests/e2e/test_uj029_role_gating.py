@@ -19,7 +19,7 @@ from vecinita_shared_schemas.json_types import as_json_object
 from tests.helpers.json_response import (
     find_json_object_by_str,
     json_str,
-    response_json_list,
+    response_document_list_items,
 )
 from tests.unit.shared_schemas.auth_fixtures import sign_test_jwt
 
@@ -101,7 +101,8 @@ def test_internal_write_viewer_cannot_delete_document(
     )
     assert listed.status_code == HTTPStatus.OK
     doc_id = json_str(
-        find_json_object_by_str(response_json_list(listed), "url", doc_url), "document_id"
+        find_json_object_by_str(response_document_list_items(listed), "url", doc_url),
+        "document_id",
     )
 
     delete = write_auth_client.delete(
@@ -115,7 +116,8 @@ def test_internal_write_viewer_cannot_delete_document(
         headers={"Authorization": f"Bearer {_API_KEY}"},
     )
     still_ids = [
-        json_str(as_json_object(row), "document_id") for row in response_json_list(still_there)
+        json_str(as_json_object(row), "document_id")
+        for row in response_document_list_items(still_there)
     ]
     assert doc_id in still_ids
 

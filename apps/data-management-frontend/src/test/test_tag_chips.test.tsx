@@ -6,6 +6,10 @@ import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CorpusList } from "@/components/CorpusList";
 
+function documentsPage<T>(items: T[]) {
+  return { items, page: 1, page_size: 50, total: items.length };
+}
+
 function renderCorpusList() {
   return renderWithProviders(
     <ThemeProvider>
@@ -25,18 +29,19 @@ describe("Tag chips in corpus list", () => {
   it("renders LLM tags with blue styling and human tags with green styling", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => [
-        {
-          document_id: "aaaa-1111",
-          url: "https://example.com/page1",
-          title: "Housing Guide",
-          language: "en",
-          tags: [
-            { slug: "housing", label: "housing", source: "llm" },
-            { slug: "legal", label: "legal", source: "human" },
-          ],
-        },
-      ],
+      json: async () =>
+        documentsPage([
+          {
+            document_id: "aaaa-1111",
+            url: "https://example.com/page1",
+            title: "Housing Guide",
+            language: "en",
+            tags: [
+              { slug: "housing", label: "housing", source: "llm" },
+              { slug: "legal", label: "legal", source: "human" },
+            ],
+          },
+        ]),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -56,15 +61,16 @@ describe("Tag chips in corpus list", () => {
   it("renders documents without tags (no tag section)", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => [
-        {
-          document_id: "bbbb-2222",
-          url: "https://example.com/page2",
-          title: "No Tags Doc",
-          language: "en",
-          tags: [],
-        },
-      ],
+      json: async () =>
+        documentsPage([
+          {
+            document_id: "bbbb-2222",
+            url: "https://example.com/page2",
+            title: "No Tags Doc",
+            language: "en",
+            tags: [],
+          },
+        ]),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -77,22 +83,23 @@ describe("Tag chips in corpus list", () => {
   it("renders multiple documents with their respective tags", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
-      json: async () => [
-        {
-          document_id: "cccc-3333",
-          url: "https://example.com/page3",
-          title: "Doc A",
-          language: "en",
-          tags: [{ slug: "alpha", label: "alpha", source: "llm" }],
-        },
-        {
-          document_id: "dddd-4444",
-          url: "https://example.com/page4",
-          title: "Doc B",
-          language: "es",
-          tags: [{ slug: "beta", label: "beta", source: "human" }],
-        },
-      ],
+      json: async () =>
+        documentsPage([
+          {
+            document_id: "cccc-3333",
+            url: "https://example.com/page3",
+            title: "Doc A",
+            language: "en",
+            tags: [{ slug: "alpha", label: "alpha", source: "llm" }],
+          },
+          {
+            document_id: "dddd-4444",
+            url: "https://example.com/page4",
+            title: "Doc B",
+            language: "es",
+            tags: [{ slug: "beta", label: "beta", source: "human" }],
+          },
+        ]),
     });
     vi.stubGlobal("fetch", fetchMock);
 
