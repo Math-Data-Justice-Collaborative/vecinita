@@ -7,15 +7,24 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { CorpusList } from "@/components/CorpusList";
 
 const PAGE_SIZE = 50;
+const TOTAL = PAGE_SIZE + 10;
 
-function makeDocs(count: number) {
-  return Array.from({ length: count }, (_, i) => ({
-    document_id: `doc-${String(i).padStart(3, "0")}`,
-    url: `https://example.com/doc-${String(i)}`,
-    title: `Doc ${String(i)}`,
-    language: "en",
-    tags: [],
-  }));
+function makeDocs(count: number, offset = 0) {
+  return Array.from({ length: count }, (_, i) => {
+    const n = offset + i;
+    return {
+      document_id: `doc-${String(n).padStart(3, "0")}`,
+      url: `https://example.com/doc-${String(n)}`,
+      title: `Doc ${String(n)}`,
+      language: "en",
+      tags: [],
+    };
+  });
+}
+
+function pageFromUrl(url: string): number {
+  const match = /[?&]page=(\d+)/.exec(url);
+  return match ? Number(match[1]) : 1;
 }
 
 function renderCorpus() {
@@ -35,15 +44,22 @@ describe("BUG-2026-07-28 — Admin corpus list pagination (#112)", () => {
   });
 
   it("requests a page from the API and renders pagination controls when total exceeds page size", async () => {
-    const pageItems = makeDocs(PAGE_SIZE);
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        items: pageItems,
-        page: 1,
-        page_size: PAGE_SIZE,
-        total: PAGE_SIZE + 10,
-      }),
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo) => {
+      const url = String(input);
+      const page = pageFromUrl(url);
+      const items =
+        page === 1
+          ? makeDocs(PAGE_SIZE, 0)
+          : makeDocs(TOTAL - PAGE_SIZE, PAGE_SIZE);
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          items,
+          page,
+          page_size: PAGE_SIZE,
+          total: TOTAL,
+        }),
+      });
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -69,8 +85,19 @@ describe("BUG-2026-07-28 — Admin corpus list pagination (#112)", () => {
     fireEvent.click(screen.getByTestId("pagination-next"));
 
     await waitFor(() => {
-      const urls = fetchMock.mock.calls.map((call) => String(call[0]));
-      expect(urls.some((u) => /[?&]page=2\b/.test(u))).toBe(true);
+      expect(screen.getByText(`Doc ${String(PAGE_SIZE)}`)).toBeInTheDocument();
     });
+    expect(screen.getByTestId("pagination-previous")).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId("pagination-previous"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Doc 0")).toBeInTheDocument();
+    });
+    const page1Calls = fetchMock.mock.calls.filter((call) =>
+      /[?&]page=1\b/.test(String(call[0])),
+    );
+    // Initial load + return from page 2
+    expect(page1Calls.length).toBeGreaterThanOrEqual(2);
   });
 });

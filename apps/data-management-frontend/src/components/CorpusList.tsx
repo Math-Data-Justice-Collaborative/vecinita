@@ -54,7 +54,7 @@ export function CorpusList() {
   );
 
   const refresh = useCallback(
-    async (isActive: () => boolean = () => true, nextPage = 1) => {
+    async (isActive: () => boolean, nextPage = 1) => {
       setError(null);
       setLoading(true);
       try {
