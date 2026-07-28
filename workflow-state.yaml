@@ -838,13 +838,13 @@ project:
         repro_status: green
         fix_summary: 'AdminLayout UserMenu wrap classes for Spanish sign-out label'
         note: 'Admin FE i18n/layout overflow on Spanish sign-out label'
-      note: 'S012 — BOTH #112+#105 coverage-fix commit pending push on fix/S012-admin-ui-112-105 (pushed); PR #150 open. Coverage gate fix (CorpusList previous + drop unused refresh default). Await CI green + explicit merge/deploy approval (S012-D5).'
+      note: 'S012 — BOTH #112+#105 committed fc51bc5 on fix/S012-admin-ui-112-105 (pushed); PR #150 open. Coverage gate fix (CorpusList previous + drop unused refresh default). Await CI green + explicit merge/deploy approval (S012-D5).'
       current_bug:
       current_action: await_ci_and_merge_approval
       pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
       pr_number: 150
       pr_status: open
-      head_sha: pending_push
+      head_sha: fc51bc5
       merge_sha:
       next_action: await_ci_and_merge_approval
       also_changed:
@@ -897,7 +897,7 @@ project:
         summary: Chat history lost on Corpus tab switch (#53) — useChatHistory lifted to app shell
         branch: fix/chat-tab-corpus-state
         pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
-        head_sha: pending_push
+        head_sha: fc51bc5
         verified: L1-L2 pass; ci.yml green @ 6f7875f
         cursor_rule: .cursor/rules/frontend-session-state-lifting.mdc
         deploy: after merge to main (user triggers)
@@ -926,7 +926,7 @@ active_session:
     required: true
     status: in_progress
     started_at: '2026-07-28'
-    note: 'PR #150 open (coverage fix pending push) — await CI + merge/deploy approval (S012-D5); #112+#105'
+    note: 'PR #150 open @ fc51bc5 — await CI + merge/deploy approval (S012-D5); #112+#105'
   - stage: 15-service-health
     required: true
     status: pending
@@ -949,7 +949,7 @@ active_session:
     also_changed:
     - 'authContext.ts → auth-context.ts (case-insensitive FS collision fix)'
     commit_status: committed_pushed
-    head_sha: pending_push
+    head_sha: fc51bc5
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
     pr_number: 150
     pr_status: open
@@ -3130,13 +3130,13 @@ stages:
       repro_status: green
       fix_summary: 'AdminLayout UserMenu wrap classes for Spanish sign-out label'
       note: 'Admin FE i18n/layout overflow on Spanish sign-out label'
-    note: 'S012 — BOTH #112+#105 coverage-fix commit pending push on fix/S012-admin-ui-112-105 (pushed); PR #150 open. Await CI green + explicit merge/deploy approval (S012-D5).'
+    note: 'S012 — BOTH #112+#105 committed fc51bc5 on fix/S012-admin-ui-112-105 (pushed); PR #150 open. Await CI green + explicit merge/deploy approval (S012-D5).'
     current_bug:
     current_action: await_ci_and_merge_approval
     pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
     pr_number: 150
     pr_status: open
-    head_sha: pending_push
+    head_sha: fc51bc5
     merge_sha:
     next_action: await_ci_and_merge_approval
     also_changed:
@@ -3189,7 +3189,7 @@ stages:
       summary: Chat history lost on Corpus tab switch (#53) — useChatHistory lifted to app shell
       branch: fix/chat-tab-corpus-state
       pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/68
-      head_sha: pending_push
+      head_sha: fc51bc5
       verified: L1-L2 pass; ci.yml green @ 6f7875f
       cursor_rule: .cursor/rules/frontend-session-state-lifting.mdc
       deploy: after merge to main (user triggers)
@@ -4549,7 +4549,7 @@ pr_review_cycles:
   advisories: 1
   praise: 3
   ci_status: success
-  head_sha: pending_push
+  head_sha: fc51bc5
   linked_remediation_cycle_id: PRM-001
   note: re-review after PRM-001 remediation; advisory — LocaleContext eslint cosmetic
   subagents:
@@ -4568,7 +4568,7 @@ pr_review_cycles:
   completed: '2026-06-13'
   head_ref: fix/es-en-full-ui
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: APPROVE
   blockers: 0
   advisories: 5
@@ -4591,7 +4591,7 @@ pr_review_cycles:
   completed: '2026-06-13'
   head_ref: fix/es-en-full-ui
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: APPROVE
   blockers: 0
   advisories: 2
@@ -4608,7 +4608,7 @@ pr_review_cycles:
   completed: '2026-06-13'
   head_ref: tests/95-coverage
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: REQUEST_CHANGES
   blockers: 2
   advisories: 3
@@ -4631,7 +4631,7 @@ pr_review_cycles:
   completed: '2026-06-13'
   head_ref: tests/95-coverage
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: APPROVE
   blockers: 0
   advisories: 0
@@ -4651,7 +4651,7 @@ pr_review_cycles:
   completed: '2026-06-13'
   head_ref: feat/M32-workspace-scaffold
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: COMMENT
   blockers: 0
   advisories: 4
@@ -4673,7 +4673,7 @@ pr_review_cycles:
   completed: '2026-06-13'
   head_ref: feat/M32-workspace-scaffold
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: COMMENT
   blockers: 0
   advisories: 3
@@ -4717,7 +4717,7 @@ pr_review_cycles:
   completed: '2026-06-25'
   head_ref: fix/chat-tab-corpus-state
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: APPROVE
   verdict_note: Posted as --comment review (GitHub blocks self-approval; reviewer == author joseph-c-mcguire). 0 
     blockers.
@@ -4769,7 +4769,7 @@ pr_review_cycles:
   completed: '2026-06-30'
   head_ref: fix/BUG-2026-06-30-gotrue-multiple-instances-login
   base_ref: main
-  head_sha: pending_push
+  head_sha: fc51bc5
   verdict: APPROVE
   blockers: 0
   advisories: 2
@@ -4905,7 +4905,7 @@ pr_remediation_cycles:
   commits:
   - 8ff5f9c
   - b6f6b54
-  head_sha: pending_push
+  head_sha: fc51bc5
   follow_up:
     pr_review_rerun: completed
 - id: PRM-002
@@ -4919,7 +4919,7 @@ pr_remediation_cycles:
   head_ref: fix/es-en-full-ui
   base_ref: main
   ci_status: success
-  head_sha: pending_push
+  head_sha: fc51bc5
   counts:
     fixed: 4
     deferred: 0
@@ -4978,7 +4978,7 @@ pr_remediation_cycles:
   head_ref: tests/95-coverage
   base_ref: main
   ci_status: success
-  head_sha: pending_push
+  head_sha: fc51bc5
   counts:
     fixed: 5
     deferred: 0
@@ -5095,7 +5095,7 @@ pr_remediation_cycles:
   head_ref: feat/M32-workspace-scaffold
   base_ref: main
   ci_status: partial
-  head_sha: pending_push
+  head_sha: fc51bc5
   counts:
     fixed: 3
     deferred: 1
@@ -5292,7 +5292,7 @@ pr_remediation_cycles:
   - fb195cf
   - 7619baf
   - 54b8fa5
-  head_sha: pending_push
+  head_sha: fc51bc5
   artifacts:
   - path: docs/sessions/S005-user-mgmt-auth/reports/pr-remediation.md
     note: session PR remediation report (PRM-008)
@@ -5310,7 +5310,7 @@ pr_remediation_cycles:
   base_ref: main
   session_id: S005-user-mgmt-auth
   ci_status: success
-  head_sha: pending_push
+  head_sha: fc51bc5
   counts:
     fixed: 1
     deferred: 1
@@ -5353,7 +5353,7 @@ pr_remediation_cycles:
   base_ref: main
   session_id: S006-invite-acceptance
   ci_status: pending
-  head_sha: pending_push
+  head_sha: fc51bc5
   counts:
     fixed: 2
     deferred: 2
@@ -6180,7 +6180,7 @@ decisions_log:
 - 'S012/2026-07-28: Session OPENED — hotfix #112+#105; active_session set; 14-hotfix in_progress; branch fix/S012-admin-ui-112-105 (parent creates).'
 - 'S012/2026-07-28: Phase 0 recorded — scope both #112+#105 one branch/PR; env=staging; #112 hotfix server-side pagination; deploy=merge+deploy after explicit approval. Branch fix/S012-admin-ui-112-105 created from main (status open). Planned bug reports: BUG-2026-07-28-admin-corpus-pagination.md (#112), BUG-2026-07-28-spanish-signout-overflow.md (#105).'
 - 'S012/2026-07-28: Both fixes implemented locally (uncommitted) — #105 GREEN (AdminLayout UserMenu wrap); #112 GREEN (DocumentListPage API + CorpusList PaginationControls, page-scoped select-all); authContext.ts→auth-context.ts. next_action=commit_and_pr_after_user_approval; deploy per S012-D5 after explicit approval.'
-- 'S012/2026-07-28: coverage fix pending push; PR #150 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150). next_action=await_ci_and_merge_approval; merge/deploy requires explicit user approval (S012-D5).'
+- 'S012/2026-07-28: fc51bc5 pushed; PR #150 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150). next_action=await_ci_and_merge_approval; merge/deploy requires explicit user approval (S012-D5).'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -6598,9 +6598,9 @@ git_history:
     status: open
     created_at: '2026-07-28'
     session_id: S012-hotfix-admin-ui-112-105
-    note: 'PR #150 open; coverage fix pending push; await CI + merge approval (S012-D5)'
+    note: 'PR #150 open; fc51bc5 pushed; await CI + merge approval (S012-D5)'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
-    head_sha: pending_push
+    head_sha: fc51bc5
   - name: fix/BUG-2026-07-25-retag-llm-500
     purpose: 'S011 hotfix — #146 retag LLM 500 then #145 empty assistant'
     base: main
@@ -7416,7 +7416,7 @@ git_history:
     timestamp: '2026-07-28T14:48:00Z'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
   notes:
-  - '2026-07-28 S012: coverage fix pending push on fix/S012-admin-ui-112-105; PR #150 open. next_action=await_ci_and_merge_approval (S012-D5 — user must approve merge/deploy).'
+  - '2026-07-28 S012: fc51bc5 pushed on fix/S012-admin-ui-112-105; PR #150 open. next_action=await_ci_and_merge_approval (S012-D5 — user must approve merge/deploy).'
   - '2026-07-28 S012: #112+#105 fix_applied_local on fix/S012-admin-ui-112-105 — NOT committed yet (awaiting user commit/PR request). next_action=commit_and_pr_after_user_approval. Also authContext→auth-context rename.'
   - '2026-07-28 S012: Branch fix/S012-admin-ui-112-105 created from main (status open); current_branch set. Phase 0 answers + planned bug-report paths recorded.'
   - '2026-07-28 S012: Session OPENED — hotfix #112+#105 one branch/PR; active_session=S012-hotfix-admin-ui-112-105; branch recommended fix/S012-admin-ui-112-105 (parent creates).'
