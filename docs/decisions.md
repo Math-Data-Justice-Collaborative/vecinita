@@ -486,6 +486,27 @@ test-plan TC-141–TC-145; api-contract auth+stream; config-spec proxy+pin; AC-E
 ADR-037 amendment; rule `unified-vecinita-llm.mdc`; report
 `docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md`.
 
+### EV-012 requirements decisions (2026-07-28) — RD-173–RD-178
+
+S013 / GitHub #116 — unified Admin Jobs monitoring. Extend **F32/F36** (no new Fn). Amends
+ADR-033 (eval runner → Modal). New ADR-038 for Modal job lifecycle + storage split.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-173 | Job updates | SSE per source; on failure fall back to **4s poll** + retry SSE with backoff | S013-RQ2 |
+| RD-174 | Job lifecycle | **Modal** owns all long-running admin jobs (ingest/retag/**eval**/future); use Modal job queue lifecycle; amend ADR-033 | S013-RQ3 |
+| RD-175 | Storage vs auth | **DO Postgres** SoT for all storage including metrics; **Supabase = authentication only** | S013-RQ3 |
+| RD-176 | Job CRUD | **Admin-only** full CRUD (create/read/cancel/retry/delete); viewer read-only | S013-RQ4 |
+| RD-177 | Failed logs UX | Function/call id + copy + Modal dashboard link when URL known | S013-RQ5 |
+| RD-178 | UI E2E | Playwright T0-ui for Jobs list → detail (plus Vitest) | S013-RQ6 |
+
+**S013-D8 amendment:** Jobs tab primary list = Modal `GET /jobs` (not FE merge of Modal +
+internal-write job lists). Eval metrics/results remain in DO Postgres for drill-down.
+
+Artifacts: feature-list F32/F36 delta; UJ-023/UJ-044/UJ-050; test-plan TC-146–TC-151; AC-J1–J10;
+`docs/adr/ADR-038-modal-job-lifecycle-storage-split.md`; session report
+`docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md`.
+
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 
 01-requirements locked RD-154–RD-162. 04-tech-plan locks implementation order and operator steps:

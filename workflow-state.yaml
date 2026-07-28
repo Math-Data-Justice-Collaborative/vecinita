@@ -83,15 +83,147 @@ project:
         milestone: M80
     01-requirements:
       status: completed
-      started_at: '2026-07-08'
-      completed_at: '2026-07-10'
-      started_at_reopen: '2026-07-10'
-      partial_rerun_at: '2026-07-08'
-      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
-      session_id: S010-unify-llm-service
-      branch: feat/S010-unify-llm-service
-      evolve_cycle_id: EV-011
-      report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
+      started_at: '2026-07-28'
+      completed_at: '2026-07-28'
+      partial_rerun_at: '2026-07-28'
+      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+      session_id: S013-unified-job-monitoring
+      branch: evolve/EV-012-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      mode: delta
+      report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
+      seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+      note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; handoff → 02-verify-plan (await user start; commit pending)'
+      substeps:
+        interviews:
+          completed: 6
+          total: 6
+          pending: 0
+          current_section: completed
+        seed_loaded: true
+        handoff_seed: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+        current_phase: completed
+        locked_decisions: approved_all
+        open_questions_pending: []
+        feature_list_write: completed
+      requirements_delta_interview:
+        recorded_at: '2026-07-28'
+        resolved_at: '2026-07-28'
+        status: docs_complete
+        handoff: await_user_start_02_verify_plan
+        locked_decisions:
+          status: approved_all
+          option: A
+          scope: S013-D1..D22
+        questions:
+        - id: S013-RQ1
+          seed_ref: locked_decisions_confirm
+          topic: locked_decisions
+          choice: approve_all
+          option: A
+          status: resolved
+          recorded_at: '2026-07-28'
+        - id: S013-RQ2
+          seed_ref: open_q1_sse_fallback
+          topic: sse_failure_fallback
+          choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
+          option: A
+          status: resolved
+          recorded_at: '2026-07-28'
+          rd_id: RD-173
+          note: 'On SSE failure → fall back to 4s poll + retry SSE with backoff'
+        - id: S013-RQ3
+          seed_ref: open_q2_jobs_sot
+          topic: jobs_architecture_modal_lifecycle_do_storage
+          choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
+          status: resolved
+          recorded_at: '2026-07-28'
+          rd_ids:
+          - RD-174
+          - RD-175
+          amends:
+          - ADR-033
+          revises:
+          - S013-D8
+          architecture:
+            modal: 'ALL long-running jobs incl eval; Modal job queue owns job lifecycle'
+            do_postgres: 'SoT for all storage including metrics/results'
+            supabase: authentication only
+            jobs_tab: 'Modal GET /jobs primary unified list (job_type incl eval); DO for metrics/results + eval drill-down — NOT dual job-list federation'
+          note: 'Eval leaves DO BackgroundTasks per ADR-033 amendment; supersedes earlier FE federation of two job lists (S013-D8)'
+        - id: S013-RQ4
+          seed_ref: open_q3_cancel_retry
+          topic: cancel_retry_auth
+          choice: admin_only_full_job_crud
+          option: A
+          status: resolved
+          recorded_at: '2026-07-28'
+          rd_id: RD-176
+          scope: create_read_update_cancel_retry_delete
+          auth: admin_only
+        - id: S013-RQ5
+          seed_ref: open_q4_modal_logs
+          topic: failed_modal_job_logs
+          choice: call_id_copy_plus_dashboard_link_when_known
+          option: A
+          status: resolved
+          recorded_at: '2026-07-28'
+          rd_id: RD-177
+        - id: S013-RQ6
+          seed_ref: open_q5_playwright
+          topic: playwright_t0_ui_jobs_list_detail
+          choice: yes_playwright_t0_ui
+          option: A
+          status: resolved
+          recorded_at: '2026-07-28'
+          rd_id: RD-178
+      rd_allocated:
+        status: written
+        range: RD-173..RD-178
+        allocated_at: '2026-07-28'
+        written_at: '2026-07-28'
+        note: 'RD-173..178 written to docs/decisions.md + delta docs (F32/F36, UJ-023/044/050, TC-146–151, AC-J1–J10, ADR-038, api-contract EV-012)'
+        decisions:
+        - id: RD-173
+          topic: sse_4s_poll_fallback_retry_backoff
+          source: S013-RQ2
+          summary: 'SSE failure → fall back to 4s poll + retry SSE with backoff'
+        - id: RD-174
+          topic: modal_owns_all_long_running_job_lifecycle_incl_eval
+          source: S013-RQ3
+          amends: ADR-033
+          summary: 'Modal owns all long-running job lifecycle incl eval; eval leaves DO BackgroundTasks'
+        - id: RD-175
+          topic: do_postgres_sot_storage_metrics_supabase_auth_only
+          source: S013-RQ3
+          summary: 'DO Postgres SoT for storage/metrics; Supabase auth-only'
+        - id: RD-176
+          topic: admin_only_full_job_crud
+          source: S013-RQ4
+          summary: 'Admin-only full job CRUD (create/read/update/cancel-retry/delete)'
+        - id: RD-177
+          topic: failed_modal_job_logs_ux
+          source: S013-RQ5
+          summary: 'Failed Modal job logs UX — call id + copy + dashboard link'
+        - id: RD-178
+          topic: playwright_t0_ui_jobs_list_detail
+          source: S013-RQ6
+          summary: 'Playwright T0-ui Jobs list→detail'
+      rd_candidates:
+        status: superseded
+        superseded_by: rd_allocated
+        proposed_range: RD-173..RD-178
+      s010_baseline:
+        status: completed
+        started_at: '2026-07-08'
+        completed_at: '2026-07-10'
+        started_at_reopen: '2026-07-10'
+        partial_rerun_at: '2026-07-08'
+        partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
+        session_id: S010-unify-llm-service
+        branch: feat/S010-unify-llm-service
+        evolve_cycle_id: EV-011
+        report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
       s009_baseline:
         status: paused
         paused_at: '2026-07-08'
@@ -928,15 +1060,15 @@ session_counter: 13
 active_session:
   id: S013-unified-job-monitoring
   type: feature
-  intent: 'Unified job monitoring in Jobs tab with detail drill-down (GitHub #116) — federate eval runs + Modal ingest/retag jobs; clickable detail; status filter; retag document context'
+  intent: 'Unified job monitoring in Jobs tab with detail drill-down (GitHub #116) — Modal GET /jobs primary unified list (job_type incl eval); DO Postgres for metrics/results + eval drill-down; clickable detail; status filter; retag document context'
   status: in_progress
-  branch:
-  proposed_branch: evolve/EV-012-unified-job-monitoring
+  branch: evolve/EV-012-unified-job-monitoring
+  mode: delta
   orchestrator: 16-evolve
   evolve_cycle_id: EV-012
   artifacts_dir: docs/sessions/S013-unified-job-monitoring/
   started_at: '2026-07-28'
-  current_stage: 16-evolve
+  current_stage: 02-verify-plan
   linked_issues:
   - '116'
   features_affected:
@@ -983,15 +1115,16 @@ active_session:
   intake_batch_1b:
     recorded_at: '2026-07-28'
     v2_items:
-    - postgres_jobs_alignment_or_document_modal_dict_sot
+    - modal_all_long_running_jobs_do_postgres_storage
     - operator_modal_container_logs_link_on_failed_jobs
-    - cancel_retry
+    - admin_only_full_job_crud_cancel_retry
     decision_id: S013-D5
   intake_batch_2:
     recorded_at: '2026-07-28'
     job_detail_ux: dedicated_route_jobs_id_type_aware
     eval_row_primary_action: jobs_detail_summary_plus_eval_drilldown_link
-    list_federation: frontend_merge_modal_jobs_and_internal_eval_runs
+    list_federation: modal_get_jobs_primary_unified_list
+    list_federation_note: 'REVISED by RQ3/RD-174 — Modal GET /jobs primary unified list (job_type incl eval); DO for metrics/results + eval drill-down; NOT dual FE federation of two job lists'
     decisions:
     - id: S013-D6
       topic: job_detail_ux
@@ -1001,7 +1134,12 @@ active_session:
       choice: jobs_detail_summary_plus_eval_drilldown_link
     - id: S013-D8
       topic: list_federation
-      choice: frontend_merge_modal_jobs_and_internal_eval_runs
+      choice: modal_get_jobs_primary_unified_list
+      status: amended
+      amended_at: '2026-07-28'
+      amended_by: S013-RQ3
+      prior_choice: frontend_merge_modal_jobs_and_internal_eval_runs
+      note: 'Supersedes Phase 0 FE-merge federation — Jobs tab reads Modal GET /jobs as primary unified list; DO for metrics/results storage + eval drill-down only'
   intake_batch_3:
     recorded_at: '2026-07-28'
     completed_at: '2026-07-28'
@@ -1083,18 +1221,20 @@ active_session:
       implementation:
         modal_data_management: GET /jobs/events_or_similar
         internal_write_api: eval_events_stream
-        frontend: merge_push_streams_per_S013_D8
+        frontend: modal_get_jobs_primary_unified_list
       fallback:
-        polling: may_remain_as_fallback
-        tech_plan_open: true
-        note: 'Poll fallback TBD in 04-tech-plan unless user specifies otherwise'
+        polling_interval_ms: 4000
+        on_sse_failure: fall_back_to_poll
+        retry_sse: backoff
+        rd_id: RD-173
+        note: 'On SSE failure → 4s poll fallback + retry SSE with backoff (S013-RQ2 option A)'
       context:
         jobs_page_poll_ms: 4000
         chatrag_has_sse_ask: true
         jobs_sse_websocket: none
         adr_reference: ADR-035
         adr_note: unified jobs poll hop
-      note: 'SSE per source — Modal GET /jobs/events (or similar); internal-write eval events stream; frontend merges push streams (S013-D8 federation); polling may remain as fallback (open for tech plan)'
+      note: 'SSE primary — Modal GET /jobs/events; on failure 4s poll + SSE retry backoff (RD-173); Jobs tab Modal GET /jobs unified list (S013-D8 amended)'
     - id: S013-D18
       topic: acceptance_scenarios
       choice: issue_acs_extend_uj023_unified_list_detail_uj
@@ -1153,7 +1293,7 @@ active_session:
   prior_related:
   - 'S008/EV-009 M66 unified jobs'
   - 'S002 F32 jobs tab'
-  - 'ADR-033 eval on DO not Modal'
+  - 'ADR-033 eval on DO not Modal — AMENDED by RQ3/RD-174 (eval moves to Modal)'
   routing_plan:
   - stage: 00-context
     required: true
@@ -1163,13 +1303,19 @@ active_session:
     note: 'Phase 0 intake COMPLETE — scope approved (S013-D20); routing finalized Lean+build (S013-D22)'
   - stage: 16-evolve
     required: true
-    status: in_progress
+    status: completed
     started_at: '2026-07-28'
+    completed_at: '2026-07-28'
     phase_1_completed_at: '2026-07-28'
-    note: 'Phase 1 impact analysis COMPLETE — routing approved Lean+build (S013-D22); handoff await_user_start_01_requirements'
+    note: 'Phase 1 impact analysis COMPLETE — session artifacts committed (74216f1); handoff → 01-requirements delta'
   - stage: 01-requirements
     required: true
-    status: pending
+    status: completed
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    mode: delta
+    report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
+    note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; commit pending'
   - stage: 02-verify-plan
     required: true
     status: pending
@@ -1214,14 +1360,94 @@ active_session:
     skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
   context_briefs:
   - docs/sessions/S013-unified-job-monitoring/impact-analysis.md
+  requirements_delta_interview:
+    recorded_at: '2026-07-28'
+    resolved_at: '2026-07-28'
+    status: docs_complete
+    seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+    handoff: await_user_start_02_verify_plan
+    feature_list_write: completed
+    locked_decisions:
+      status: approved_all
+      option: A
+      scope: S013-D1..D22
+    resolved:
+    - S013-RQ1
+    - S013-RQ2
+    - S013-RQ3
+    - S013-RQ4
+    - S013-RQ5
+    - S013-RQ6
+    pending: []
+    questions:
+    - id: S013-RQ1
+      topic: locked_decisions
+      option: A
+      status: resolved
+    - id: S013-RQ2
+      topic: sse_failure_fallback
+      option: A
+      status: resolved
+      rd_id: RD-173
+      choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
+    - id: S013-RQ3
+      topic: jobs_architecture_modal_lifecycle_do_storage
+      status: resolved
+      rd_ids:
+      - RD-174
+      - RD-175
+      amends:
+      - ADR-033
+      revises:
+      - S013-D8
+      choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
+    - id: S013-RQ4
+      topic: cancel_retry_auth
+      option: A
+      status: resolved
+      rd_id: RD-176
+      choice: admin_only_full_job_crud
+    - id: S013-RQ5
+      topic: failed_modal_job_logs
+      option: A
+      status: resolved
+      rd_id: RD-177
+      choice: call_id_copy_plus_dashboard_link_when_known
+    - id: S013-RQ6
+      topic: playwright_t0_ui_jobs_list_detail
+      option: A
+      status: resolved
+      rd_id: RD-178
+      choice: yes_playwright_t0_ui
+    rd_allocated:
+      status: written
+      range: RD-173..RD-178
+      allocated_at: '2026-07-28'
+      written_at: '2026-07-28'
+      decisions:
+      - RD-173
+      - RD-174
+      - RD-175
+      - RD-176
+      - RD-177
+      - RD-178
+    rd_candidates:
+      status: superseded
+      superseded_by: rd_allocated
+      proposed_range: RD-173..RD-178
   handoff:
     from_session: S012-hotfix-admin-ui-112-105
     cleared: true
-    next_action: await_user_start_01_requirements
-    next_skill: 01-requirements
-    proposed_branch: evolve/EV-012-unified-job-monitoring
-    branch_status: not_created
-    git_commits: none
+    next_action: await_user_start_02_verify_plan
+    next_skill: 02-verify-plan
+    branch: evolve/EV-012-unified-job-monitoring
+    branch_status: active
+    pending_commit: true
+    git_commits:
+    - sha: 74216f1
+      message: 'docs(S013): open EV-012 unified job monitoring session'
+      stage: 16-evolve
+      not_pushed: true
 sessions:
 - id: S012-hotfix-admin-ui-112-105
   type: hotfix
@@ -2660,15 +2886,119 @@ stages:
     routing_amendment_approved: true
   01-requirements:
     status: completed
-    started_at: '2026-07-08'
-    completed_at: '2026-07-10'
-    started_at_reopen: '2026-07-10'
-    partial_rerun_at: '2026-07-08'
-    partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
-    session_id: S010-unify-llm-service
-    branch: feat/S010-unify-llm-service
-    evolve_cycle_id: EV-011
-    report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    partial_rerun_at: '2026-07-28'
+    partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+    session_id: S013-unified-job-monitoring
+    branch: evolve/EV-012-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    mode: delta
+    report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
+    seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+    note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; handoff → 02-verify-plan (await user start; commit pending)'
+    substeps:
+      interviews:
+        completed: 6
+        total: 6
+        pending: 0
+        current_section: completed
+      seed_loaded: true
+      handoff_seed: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+      current_phase: completed
+      locked_decisions: approved_all
+      open_questions_pending: []
+      feature_list_write: completed
+    requirements_delta_interview:
+      recorded_at: '2026-07-28'
+      resolved_at: '2026-07-28'
+      status: docs_complete
+      handoff: await_user_start_02_verify_plan
+      locked_decisions:
+        status: approved_all
+        option: A
+        scope: S013-D1..D22
+      questions:
+      - id: S013-RQ1
+        seed_ref: locked_decisions_confirm
+        topic: locked_decisions
+        choice: approve_all
+        option: A
+        status: resolved
+        recorded_at: '2026-07-28'
+      - id: S013-RQ2
+        seed_ref: open_q1_sse_fallback
+        topic: sse_failure_fallback
+        choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
+        option: A
+        status: resolved
+        recorded_at: '2026-07-28'
+        rd_id: RD-173
+      - id: S013-RQ3
+        seed_ref: open_q2_jobs_sot
+        topic: jobs_architecture_modal_lifecycle_do_storage
+        choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
+        status: resolved
+        recorded_at: '2026-07-28'
+        rd_ids:
+        - RD-174
+        - RD-175
+        amends:
+        - ADR-033
+        revises:
+        - S013-D8
+      - id: S013-RQ4
+        seed_ref: open_q3_cancel_retry
+        topic: cancel_retry_auth
+        choice: admin_only_full_job_crud
+        option: A
+        status: resolved
+        recorded_at: '2026-07-28'
+        rd_id: RD-176
+      - id: S013-RQ5
+        seed_ref: open_q4_modal_logs
+        topic: failed_modal_job_logs
+        choice: call_id_copy_plus_dashboard_link_when_known
+        option: A
+        status: resolved
+        recorded_at: '2026-07-28'
+        rd_id: RD-177
+      - id: S013-RQ6
+        seed_ref: open_q5_playwright
+        topic: playwright_t0_ui_jobs_list_detail
+        choice: yes_playwright_t0_ui
+        option: A
+        status: resolved
+        recorded_at: '2026-07-28'
+        rd_id: RD-178
+    rd_allocated:
+      status: written
+      range: RD-173..RD-178
+      allocated_at: '2026-07-28'
+      written_at: '2026-07-28'
+      note: 'RD-173..178 written to docs/decisions.md + delta docs (F32/F36, UJ-023/044/050, TC-146–151, AC-J1–J10, ADR-038, api-contract EV-012)'
+      decisions:
+      - RD-173
+      - RD-174
+      - RD-175
+      - RD-176
+      - RD-177
+      - RD-178
+    rd_candidates:
+      status: superseded
+      superseded_by: rd_allocated
+      proposed_range: RD-173..RD-178
+    s010_baseline:
+      status: completed
+      started_at: '2026-07-08'
+      completed_at: '2026-07-10'
+      started_at_reopen: '2026-07-10'
+      partial_rerun_at: '2026-07-08'
+      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm requirements (ADR-037)
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      report: docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md
     s009_baseline:
       status: paused
       paused_at: '2026-07-08'
@@ -3718,6 +4048,8 @@ deployment:
     - 'S012 2026-07-28 CLOSED — user approved close after 15-service-health PASS; archived; handoff → S013/EV-012 (#116 unified job monitoring). service-health.md may still be uncommitted.'
     - 'S013 2026-07-28 OPENED — feature session for GitHub #116; orchestrator 16-evolve; EV-012 in_progress; proposed branch evolve/EV-012-unified-job-monitoring (not created).'
     - 'S013 2026-07-28 Phase 1 COMPLETE — impact analysis + session artifacts written; routing Lean+build approved (S013-D22); handoff await_user_start_01_requirements; no branch/commits yet.'
+    - 'S013 2026-07-28 BRANCH+COMMIT — evolve/EV-012-unified-job-monitoring @ 74216f1 (not pushed); 01-requirements delta in_progress; handoff next_action=01_requirements_delta_interview; S012 service-health.md still uncommitted.'
+    - 'S013 2026-07-28 01-requirements interview COMPLETE (6/6) — RQ2–RQ4 resolved; RD-173..178 allocated; S013-D8 amended; handoff write_01_requirements_delta_docs; feature-list deferred.'
   url_discovery:
     method: uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
     modal_admin_manual: true
@@ -4892,8 +5224,9 @@ evolve_cycles:
   started: '2026-07-28'
   session_id: S013-unified-job-monitoring
   source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/116
-  current_stage: 16-evolve
-  scope_summary: 'Unified job monitoring (GitHub #116) — **Admin Dashboard only (data-management-frontend); NOT ChatRAG UI**. Jobs tab federates Modal GET /jobs + internal-write GET /internal/v1/eval/runs; type-aware detail at /jobs/:id with **extensible job_type** for all long-running/async operator jobs (ingest, retag, eval, and future types — not limited to known types); eval rows show jobs detail summary + link to existing eval drill-down; **job updates transport: SSE per source (S013-D17 option B)** — Modal data-management GET /jobs/events (or similar), internal-write-api eval events stream, frontend merges push streams (S013-D8 federation); polling may remain as fallback (TBD in tech plan); v1 + full v2 in one EV-012 cycle (Postgres jobs alignment or document modal.Dict SoT, operator Modal/container logs on failed jobs, cancel/retry); extend F32/F36; prefer compatible/additive API changes; keep F32 privacy limits (no PII); success = #116 ACs; out of scope: ChatRAG UI; Langfuse/external observability UIs not discussed (implicit out — no dedicated Langfuse UI work).'
+  current_stage: 02-verify-plan
+  mode: delta
+  scope_summary: 'Unified job monitoring (GitHub #116) — **Admin Dashboard only (data-management-frontend); NOT ChatRAG UI**. Jobs tab: **Modal GET /jobs primary unified list** (job_type incl eval; S013-D8 amended) — DO Postgres for metrics/results storage + eval drill-down only; **NOT dual FE federation** of two job lists. Type-aware detail at /jobs/:id with extensible job_type for all long-running jobs (ingest, retag, eval, future). Eval rows: jobs detail summary + link to eval drill-down. **Architecture (RQ3/RD-174–175):** Modal owns ALL long-running job lifecycle incl eval (amends ADR-033 — eval leaves DO BackgroundTasks); DO Postgres SoT for storage/metrics; Supabase auth-only. **Job updates (RD-173):** SSE primary; on failure → 4s poll fallback + retry SSE with backoff. **Admin-only full job CRUD (RD-176):** create/read/update/cancel-retry/delete. **Failed Modal logs UX (RD-177):** call id + copy + dashboard link. **E2E (RD-178):** Playwright T0-ui Jobs list→detail. v1 + full v2 in one EV-012 cycle; extend F32/F36; compatible/additive API; F32 privacy/no PII; success = #116 ACs; out of scope: ChatRAG UI; Langfuse/external observability UIs.'
   phase_0_scope_approved: true
   routing_preset_choice: lean_plus_build
   routing_preset_status: approved
@@ -4910,18 +5243,23 @@ evolve_cycles:
   scope_notes:
     version_scope: both_v1_and_v2
     v2_items:
-    - postgres_jobs_alignment_or_document_modal_dict_sot
+    - modal_all_long_running_jobs_do_postgres_storage
     - operator_modal_container_logs_link_on_failed_jobs
-    - cancel_retry
+    - admin_only_full_job_crud_cancel_retry
     job_detail_ux: dedicated_route_jobs_id_type_aware
     eval_row_primary_action: jobs_detail_summary_plus_eval_drilldown_link
-    list_federation: frontend_merge_modal_jobs_and_internal_eval_runs
+    list_federation: modal_get_jobs_primary_unified_list
+    list_federation_amended: true
+    list_federation_amended_by: S013-RQ3
+    jobs_architecture:
+      modal: all_long_running_jobs_incl_eval_lifecycle
+      do_postgres: sot_storage_metrics_results
+      supabase: auth_only
+      amends: ADR-033
     job_updates_transport:
-      primary: sse_per_source
-      modal_data_management: GET /jobs/events_or_similar
-      internal_write_api: eval_events_stream
-      frontend: merge_push_streams_per_S013_D8
-      fallback_polling: open_for_tech_plan
+      primary: sse
+      fallback: 4s_poll_on_sse_failure_retry_sse_backoff
+      rd_id: RD-173
     feature_identity: extend_F32_F36
     success_criteria: 'GitHub #116 acceptance criteria as written'
     s012_handoff: 'S012 service-health.md and artifacts left uncommitted per user (Batch 1 Q1 option b)'
@@ -4966,9 +5304,9 @@ evolve_cycles:
   intake_batch_1b:
     recorded_at: '2026-07-28'
     v2_items:
-    - postgres_jobs_alignment_or_document_modal_dict_sot
+    - modal_all_long_running_jobs_do_postgres_storage
     - operator_modal_container_logs_link_on_failed_jobs
-    - cancel_retry
+    - admin_only_full_job_crud_cancel_retry
     decisions:
     - id: S013-D5
       topic: v2_items
@@ -4984,7 +5322,11 @@ evolve_cycles:
       choice: jobs_detail_summary_plus_eval_drilldown_link
     - id: S013-D8
       topic: list_federation
-      choice: frontend_merge_modal_jobs_and_internal_eval_runs
+      choice: modal_get_jobs_primary_unified_list
+      status: amended
+      amended_at: '2026-07-28'
+      amended_by: S013-RQ3
+      prior_choice: frontend_merge_modal_jobs_and_internal_eval_runs
   intake_batch_3:
     recorded_at: '2026-07-28'
     completed_at: '2026-07-28'
@@ -5065,19 +5407,20 @@ evolve_cycles:
       primary_transport: sse_per_source
       implementation:
         modal_data_management: GET /jobs/events_or_similar
-        internal_write_api: eval_events_stream
-        frontend: merge_push_streams_per_S013_D8
+        frontend: modal_get_jobs_primary_unified_list
       fallback:
-        polling: may_remain_as_fallback
-        tech_plan_open: true
-        note: 'Poll fallback TBD in 04-tech-plan unless user specifies otherwise'
+        polling_interval_ms: 4000
+        on_sse_failure: fall_back_to_poll
+        retry_sse: backoff
+        rd_id: RD-173
+        note: 'On SSE failure → 4s poll fallback + retry SSE with backoff (S013-RQ2 option A)'
       context:
         jobs_page_poll_ms: 4000
         chatrag_has_sse_ask: true
         jobs_sse_websocket: none
         adr_reference: ADR-035
         adr_note: unified jobs poll hop
-      note: 'SSE per source — Modal GET /jobs/events (or similar); internal-write eval events stream; frontend merges push streams (S013-D8 federation); polling may remain as fallback (open for tech plan)'
+      note: 'SSE primary; 4s poll fallback + SSE retry backoff (RD-173); Modal GET /jobs unified list (S013-D8 amended)'
     - id: S013-D18
       topic: acceptance_scenarios
       choice: issue_acs_extend_uj023_unified_list_detail_uj
@@ -5089,7 +5432,7 @@ evolve_cycles:
       choice: api_e2e_admin_vitest_live_t3_smoke_after_deploy
       option: A
       status: recorded
-      note: 'API e2e + Admin Vitest; live T3 smoke after deploy'
+      note: 'API e2e + Admin Vitest + Playwright T0-ui (RD-178); live T3 smoke after deploy'
   intake_phase_0_closure:
     recorded_at: '2026-07-28'
     phase_0_scope_approved: true
@@ -5174,10 +5517,40 @@ evolve_cycles:
       phase_0_intake_status: complete
       phase_0_scope_approved: true
     16-evolve:
-      status: in_progress
+      status: completed
       started: '2026-07-28'
+      completed: '2026-07-28'
       phase_1_completed: '2026-07-28'
-      note: 'Phase 1 impact analysis COMPLETE — routing approved Lean+build (S013-D22); session artifacts written; handoff await_user_start_01_requirements'
+      note: 'Phase 1 impact analysis COMPLETE — session artifacts committed (74216f1); handoff → 01-requirements delta'
+    01-requirements:
+      status: completed
+      started: '2026-07-28'
+      completed: '2026-07-28'
+      mode: delta
+      report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
+      seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+      note: 'Delta docs COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; handoff → 02-verify-plan (await user start; commit pending)'
+      requirements_delta_interview:
+        status: docs_complete
+        handoff: await_user_start_02_verify_plan
+        resolved_count: 6
+        pending_count: 0
+        feature_list_write: completed
+      rd_allocated:
+        status: written
+        range: RD-173..RD-178
+        allocated_at: '2026-07-28'
+        written_at: '2026-07-28'
+        decisions:
+        - RD-173
+        - RD-174
+        - RD-175
+        - RD-176
+        - RD-177
+        - RD-178
+      rd_candidates:
+        status: superseded
+        superseded_by: rd_allocated
   checkpoints:
     phase_a: pending
     phase_b: pending
@@ -5192,8 +5565,21 @@ evolve_cycles:
   prior_related:
   - 'S008/EV-009 M66 unified jobs'
   - 'S002 F32 jobs tab'
-  - 'ADR-033 eval on DO not Modal'
-  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22 option A): 00→16→01→02→04→07→08→10→13; skips 03/05/06/09/11/12. Phase 1 impact analysis COMPLETE — session artifacts written; handoff next_action=await_user_start_01_requirements; branch evolve/EV-012-unified-job-monitoring not created; no commits. Advisory — EV-004 remains in_progress historically (07-build); EV-011 parked; no auto-park without user decision.'
+  - 'ADR-033 eval on DO not Modal — AMENDED by RQ3/RD-174 (eval moves to Modal)'
+  requirements_decisions:
+  - RD-173
+  - RD-174
+  - RD-175
+  - RD-176
+  - RD-177
+  - RD-178
+  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22): 00→16→01→02→04→07→08→10→13. Phase 1 COMPLETE — commit 74216f1. 01-requirements delta COMPLETE — RD-173..178 written; ADR-038; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes; commit pending. Advisory — EV-004 remains in_progress historically (07-build); EV-011 parked.'
+  handoff:
+    next_action: await_user_start_02_verify_plan
+    next_skill: 02-verify-plan
+    pending_commit: true
+  adrs:
+  - docs/adr/ADR-038-modal-job-lifecycle-storage-split.md
   artifacts:
   - path: docs/sessions/S013-unified-job-monitoring/session-brief.md
     kind: session-brief
@@ -5225,6 +5611,26 @@ evolve_cycles:
     section: 'Cycle EV-012 — Scope'
   - path: docs/sessions/S013-unified-job-monitoring/reports/evolve-summary.md
     status: pending
+  - path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+    kind: checkpoint
+    session_id: S013-unified-job-monitoring
+    stage: 01-requirements
+    status: written
+    recorded_at: '2026-07-28'
+  - path: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
+    kind: stage-report
+    session_id: S013-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    stage: 01-requirements
+    status: written
+    recorded_at: '2026-07-28'
+  - path: docs/adr/ADR-038-modal-job-lifecycle-storage-split.md
+    kind: adr
+    session_id: S013-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    stage: 01-requirements
+    status: written
+    recorded_at: '2026-07-28'
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -7104,6 +7510,130 @@ decisions_log:
   evolve_cycle_id: EV-012
   timestamp: '2026-07-28'
   status: approved
+- id: S013-RQ1-locked-decisions-approved
+  category: Decision
+  choice: approve_all
+  summary: '01-requirements: approve all locked Phase 0 decisions S013-D1..D22 (option A)'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: S013-RQ2-sse-fallback-resolved
+  category: Decision
+  choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
+  summary: '01-requirements Q2 SSE fallback (option A): on SSE failure → 4s poll fallback + retry SSE with backoff → RD-173'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: resolved
+  rd_id: RD-173
+- id: S013-RQ3-jobs-architecture-resolved
+  category: Decision
+  choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
+  summary: '01-requirements Q3 jobs architecture: Modal ALL long-running jobs incl eval (Modal job queue lifecycle); DO Postgres SoT storage/metrics; Supabase auth-only; Jobs tab Modal GET /jobs unified list (amends ADR-033; revises S013-D8) → RD-174, RD-175'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: resolved
+  rd_ids:
+  - RD-174
+  - RD-175
+  amends:
+  - ADR-033
+  revises:
+  - S013-D8
+- id: S013-RQ4-admin-crud-resolved
+  category: Decision
+  choice: admin_only_full_job_crud
+  summary: '01-requirements Q4 cancel/retry (option A): admin-only full job CRUD — create/read/update/cancel-retry/delete → RD-176'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: resolved
+  rd_id: RD-176
+- id: RD-173-sse-poll-fallback
+  category: Decision
+  summary: 'RD-173: SSE failure → 4s poll fallback + retry SSE with backoff'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  source: S013-RQ2
+- id: RD-174-modal-job-lifecycle
+  category: Decision
+  summary: 'RD-174: Modal owns all long-running job lifecycle incl eval; amend ADR-033 (eval leaves DO BackgroundTasks)'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  source: S013-RQ3
+  amends: ADR-033
+- id: RD-175-do-postgres-sot
+  category: Decision
+  summary: 'RD-175: DO Postgres SoT for storage/metrics; Supabase auth-only'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  source: S013-RQ3
+- id: RD-176-admin-job-crud
+  category: Decision
+  summary: 'RD-176: Admin-only full job CRUD (create/read/update/cancel-retry/delete)'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  source: S013-RQ4
+- id: RD-177-modal-logs-ux
+  category: Decision
+  summary: 'RD-177: Failed Modal job logs UX — call id + copy + dashboard link'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  source: S013-RQ5
+- id: RD-178-playwright-jobs-ui
+  category: Decision
+  summary: 'RD-178: Playwright T0-ui Jobs list→detail'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  source: S013-RQ6
+- id: S013-D8-list-federation-amended
+  category: Decision
+  choice: modal_get_jobs_primary_unified_list
+  summary: 'S013-D8 amended by RQ3: Jobs tab Modal GET /jobs primary unified list (job_type incl eval); DO for metrics/results + eval drill-down — NOT dual FE job-list federation'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: amended
+  prior_choice: frontend_merge_modal_jobs_and_internal_eval_runs
+- 'S013/2026-07-28: 01-requirements delta COMPLETE — RD-173..178 written; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; report docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md; current_stage=02-verify-plan; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes; commit pending.'
+- 'S013/2026-07-28: 01-requirements delta interview COMPLETE (6/6) — RQ2 SSE fallback option A (RD-173); RQ3 Modal-all-jobs + DO Postgres SoT + Supabase auth-only (RD-174/175, amends ADR-033, revises S013-D8); RQ4 admin-only full CRUD option A (RD-176); RQ5/RQ6 → RD-177/178; handoff write_01_requirements_delta_docs; feature-list deferred.'
+- id: S013-RQ5-modal-logs-resolved
+  category: Decision
+  choice: call_id_copy_plus_dashboard_link_when_known
+  summary: '01-requirements Q5 failed Modal job logs (option A): show call id + copy + dashboard link when known'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: resolved
+- id: S013-RQ6-playwright-t0-ui-resolved
+  category: Decision
+  choice: yes_playwright_t0_ui
+  summary: '01-requirements Q6 Playwright (option A): T0-ui for Jobs list→detail navigation'
+  stage: 01-requirements
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  status: resolved
+- 'S013/2026-07-28: 01-requirements delta interview PARTIAL — superseded by COMPLETE entry (RQ2–RQ4 resolved; RD-173..178 allocated).'
 - 'S013/2026-07-28: Phase 1 impact analysis COMPLETE — session artifacts written (session-brief, routing-plan, impact-analysis, evolve-decisions EV-012); routing approved Lean+build (S013-D22); handoff next_action=await_user_start_01_requirements; branch evolve/EV-012-unified-job-monitoring not created; no commits.'
 - 'S013/2026-07-28: Routing APPROVED Lean+build (S013-D22 option A) — routing_plan_status=approved; phase_0 complete; Phase 1 impact analysis in progress (16-evolve); handoff next_action=write_session_artifacts_then_01_requirements.'
 - 'S013/2026-07-28: Phase 0 scope APPROVED (S013-D20) — proceed impact analysis + routing; extend F32/F36 no new Fn. Lean preset chosen (S013-D21) — routing_plan_status=pending_lean_amendment_decision; current_stage=16-evolve; handoff next_action=await_lean_vs_standard_amendment_for_build.'
@@ -7561,9 +8091,29 @@ artifacts:
   flags_count: 20
   blocked_count: 4
   note: 'Standing docs-root report (not an S013 routing-plan deliverable). Parent writes file.'
+- path: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
+  kind: stage-report
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  stage: 01-requirements
+  recorded_at: '2026-07-28'
+- path: docs/adr/ADR-038-modal-job-lifecycle-storage-split.md
+  kind: adr
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  stage: 01-requirements
+  recorded_at: '2026-07-28'
 git_history:
-  current_branch: main
+  current_branch: evolve/EV-012-unified-job-monitoring
   branches:
+  - name: evolve/EV-012-unified-job-monitoring
+    purpose: 'EV-012 / S013 — unified job monitoring (#116); extend F32/F36; Lean+build routing'
+    base: main
+    status: open
+    created_at: '2026-07-28'
+    session_id: S013-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    note: 'Branch created from main; first commit 74216f1 (session artifacts); not pushed'
   - name: fix/S012-admin-ui-112-105
     purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
     base: main
@@ -8389,7 +8939,17 @@ git_history:
     session_id: S012-hotfix-admin-ui-112-105
     timestamp: '2026-07-28T14:48:00Z'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/150
+  - sha: 74216f1
+    branch: evolve/EV-012-unified-job-monitoring
+    message: 'docs(S013): open EV-012 unified job monitoring session'
+    stage: 16-evolve
+    session_id: S013-unified-job-monitoring
+    files_changed: 5
+    timestamp: '2026-07-28T23:10:29Z'
   notes:
+  - '2026-07-28 S013/EV-012: 01-requirements delta COMPLETE — RD-173..178 written; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; current_stage=02-verify-plan; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes; commit pending (no sha yet).'
+  - '2026-07-28 S013/EV-012: 01-requirements delta interview COMPLETE (6/6) — RQ2 option A SSE→4s poll+retry backoff (RD-173); RQ3 Modal-all-jobs + DO Postgres SoT + Supabase auth-only (RD-174/175, amends ADR-033, revises S013-D8); RQ4 admin-only full CRUD option A (RD-176); RQ5/RQ6 → RD-177/178; handoff write_01_requirements_delta_docs; feature-list deferred.'
+  - '2026-07-28 S013/EV-012: Branch evolve/EV-012-unified-job-monitoring created; commit 74216f1 (session artifacts); 01-requirements delta in_progress; handoff next_action=01_requirements_delta_interview; not pushed.'
   - '2026-07-28 S013/EV-012: Phase 1 impact analysis COMPLETE — session artifacts written; routing Lean+build approved (S013-D22); handoff next_action=await_user_start_01_requirements; branch evolve/EV-012-unified-job-monitoring not created; no commits.'
   - '2026-07-28 S013/EV-012: Routing APPROVED Lean+build (S013-D22 option A); routing_plan_status=approved; phase_0 complete; Phase 1 impact analysis in progress; handoff next_action=write_session_artifacts_then_01_requirements.'
   - '2026-07-28 S013/EV-012: Phase 0 scope APPROVED (S013-D20); Lean preset chosen pending amendment (S013-D21); routing_plan_status=pending_lean_amendment_decision; current_stage=16-evolve; next=await_lean_vs_standard_amendment_for_build.'

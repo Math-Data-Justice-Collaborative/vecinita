@@ -269,6 +269,20 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 }
 ```
 
+### EV-012 / #116 — Jobs monitoring deltas (ADR-038, RD-173–RD-178)
+
+Additive contract changes (exact paths locked in 04-tech-plan / OpenAPI):
+
+| Change | Purpose |
+|--------|---------|
+| `job_type` includes **`eval`**; optional `document_id` on retag | Unified Modal list; retag context |
+| `GET /jobs/events` (SSE) | Push status updates; FE falls back to 4s poll (RD-173) |
+| Cancel / retry / delete endpoints (admin JWT) | Full job CRUD (RD-176) |
+| Optional `modal_call_id` / `dashboard_url` on failed jobs | Log affordances (RD-177) |
+
+**Architecture:** Modal owns job lifecycle (incl. eval). DO Postgres remains SoT for storage and
+eval metrics (internal-write `GET /internal/v1/eval/runs*`). Supabase = auth only. See ADR-038.
+
 ### GET `/health`
 
 - **Response** `200`: `{"status": "ok"}`

@@ -33,7 +33,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-020 | Navigate modernized admin UI | Operator | Admin UI shadcn/Tailwind navigation | F23 | local |
 | UJ-021 | View document tags in corpus list | Operator | Admin corpus list → tag chips | F24 | local |
 | UJ-022 | Switch admin UI language (en/es) | Operator | Admin UI sidebar `LanguageToggle` → `packages/frontend-i18n` | F31 | local |
-| UJ-023 | View & track jobs in Job Management tab | Operator | Admin UI → `GET /jobs` | F32 (#88, #89) | local |
+| UJ-023 | View & track jobs in Job Management tab | Operator | Admin UI → Modal `GET /jobs` (+ SSE) | F32 (#88, #89); EV-012 #116 | local |
 | UJ-024 | Conversation persists across refresh / tab-away / tab-close / new tab | Community member | ChatRAG Frontend → `localStorage` (device-local) | F33 | local |
 | UJ-025 | Revisit a previous conversation | Community member | ChatRAG Frontend previous-chats list → `localStorage` | F33 | local |
 | UJ-026 | Admin logs in to the Data Management UI | Operator | DM Frontend login → Supabase Auth → protected routes | F34 | local |
@@ -55,6 +55,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-047 | Super-admin promotes config to production ChatRAG | Super-admin | Playground → promote API → ChatRAG active config | F37 (EV-009) | local |
 | UJ-048 | Super-admin downloads playground model (path aliases) | Super-admin | DM UI Playground download panel → pull + poll APIs → **`vecinita-llm`** | F38 + F39 (EV-010/EV-011) | local |
 | UJ-049 | LLM proxy auth failure (generate/warm/models) | Operator / service | Modal ASGI without proxy key → `401` | F39 follow-on | local |
+| UJ-050 | Job detail drill-down + admin job CRUD | Admin operator | Admin UI `/jobs/:id` → Modal job detail / cancel / retry / delete | F32 EV-012 #116 | local |
 
 ## Visual journey maps
 
@@ -606,24 +607,69 @@ Tokens arrive **incrementally from vLLM** (real SSE), not a full reply split int
 
 **Actor**: Operator
 
-**Goal**: See every ingest/retag job (running, completed, failed) from a dedicated admin tab, with failed jobs surfacing their error, regardless of where the job was started or whether the operator navigated away.
+**Goal**: See every long-running admin job (ingest, retag, eval, future types) from a dedicated
+admin tab, with failed jobs surfacing their error, regardless of where the job was started or
+whether the operator navigated away.
 
 **Steps**:
 
-1. Start an ingest job on the **Corpus** tab (`POST /jobs`).
-2. Navigate to another tab (e.g. Dashboard) and back to **Jobs** — the job is **not** lost; the Job Management tab re-fetches `GET /jobs` (server-sourced, ADR-023), so running/completed/failed jobs remain visible (regression class of #53/#89).
-3. A job whose LLM tag completion was empty / non-JSON still appears as **completed** (tagging is best-effort, #88) — the document is ingested without LLM tags rather than the whole job failing.
-4. A genuinely failed job (e.g. bad URL, retag tag error) appears as **failed** with its `error_code` and `error_message`.
-5. Optionally filter by status via `GET /jobs?status=…`.
+1. Start an ingest job on the **Corpus** tab (`POST /jobs` on Modal) and/or an eval run from
+   **Evaluation** (creates Modal `job_type=eval`).
+2. Navigate to another tab (e.g. Dashboard) and back to **Jobs** — the job is **not** lost; the
+   Job Management tab re-fetches Modal `GET /jobs` (server-sourced, ADR-023 / EV-012 RD-174), so
+   running/completed/failed jobs remain visible (regression class of #53/#89).
+3. Prefer **SSE** job events (`GET /jobs/events` or equivalent); on SSE failure, fall back to **4s
+   poll** and retry SSE with backoff (RD-173).
+4. Optionally filter by status via `GET /jobs?status=…` (UI control).
+5. Retag rows show **document context** (`document_id`), not an empty URLs column (#116).
+6. A job whose LLM tag completion was empty / non-JSON still appears as **completed** (tagging is
+   best-effort, #88).
+7. A genuinely failed job appears as **failed** with `error_code` / `error_message`.
+8. Click a row → **UJ-050** detail at `/jobs/:id`.
 
-**Acceptance**: `GET /jobs` returns jobs newest-first with optional `status` filter; failed jobs expose `error_code`/`error_message`; a non-JSON tag completion does not fail an ingest job; job list persists across in-app navigation because it is server-sourced.
+**Acceptance**: Modal `GET /jobs` returns jobs newest-first with optional `status` filter and
+`job_type` including `eval`; failed jobs expose errors; non-JSON tag completion does not fail
+ingest; list persists across in-app navigation; eval appears within one update cycle after start
+(#116).
 
 **Automated tests**:
-- API E2E: `tests/e2e/test_uj023_job_management.py` (list ordering, status filter, failed error surfacing, server-sourced persistence); `tests/e2e/test_uj002_ingest_tag_resilience.py` (#88 non-JSON tag completion → job completed, document written without tags, job observable in list).
-- Regression (pipeline): `tests/bugs/test_bug_2026_06_26_ingest_tag_nonjson_fails_job.py`.
-- UI E2E (Vitest): `apps/data-management-frontend/src/test/test_job_management_navigation.test.tsx` (job started on Corpus still visible after switching to Jobs); `apps/data-management-frontend/src/test/test_jobs_page.test.tsx`.
+- API E2E: `tests/e2e/test_uj023_job_management.py` (extend for eval + filter + retag document_id);
+  `tests/e2e/test_uj044_eval_jobs_tab.py`; `tests/e2e/test_uj002_ingest_tag_resilience.py`.
+- UI: Vitest Jobs page; Playwright `tests/ui/admin/uj023-jobs-tab.spec.ts` / list→detail (RD-178).
 
-**E2E tier**: local (API TestClient + Vitest component smoke); live browser waived at T0 (same as other admin UI journeys).
+**E2E tier**: local (API TestClient + Vitest + Playwright T0-ui); live T3 after deploy (S013-D19).
+
+---
+
+### UJ-050: Job detail drill-down + admin job CRUD
+
+**Actor**: Admin operator (`role=admin`)
+
+**Goal**: Open a job detail view with enough context for progress and post-mortem; cancel, retry,
+or delete jobs (admin-only).
+
+**Preconditions**: Admin authenticated; at least one job exists.
+
+**Steps**:
+
+1. From `/jobs`, click a job row → navigate to `/jobs/:id` (type-aware).
+2. Detail shows: status timeline, timestamps, type-specific context (URLs or `document_id` for
+   retag; eval summary + link to `/evaluation?run=…`), error context on failure, Modal
+   function/call id + copy + dashboard link when known (RD-177).
+3. Admin may **cancel** a pending/running job, **retry** a failed job, or **delete** a terminal
+   job from the Modal job store (RD-176). Viewer sees read-only detail (no mutate controls);
+   mutate APIs return `403` for viewer.
+4. Updates arrive via SSE with 4s poll fallback (RD-173).
+
+**Acceptance**: Detail route works for ingest/retag/eval; eval links to existing drill-down;
+admin CRUD succeeds; viewer cannot mutate; no PII beyond existing F32 limits.
+
+**Automated tests**:
+- API E2E: `tests/e2e/test_uj050_job_detail_crud.py` (TC-146–TC-149).
+- Vitest: Jobs detail page + App router navigation.
+- Playwright: `tests/ui/admin/uj050-job-detail.spec.ts` (list → detail, RD-178).
+
+**E2E tier**: local; live T3 after deploy.
 
 ---
 
@@ -1097,7 +1143,9 @@ Tokens arrive **incrementally from vLLM** (real SSE), not a full reply split int
 3. Eval runs appear with `job_type: "eval"`, status (`pending` | `running` | `completed` | `failed`), timestamps, and error message when failed.
 4. Clicking an eval job navigates to `/evaluation` with the run selected (or shows eval-specific detail).
 
-**Acceptance**: Newly started eval run visible on Jobs tab without navigating away from Jobs; ingest/retag behavior unchanged.
+**Acceptance**: Newly started eval run visible on Jobs tab without navigating away from Jobs;
+ingest/retag behavior unchanged. Eval job lifecycle is Modal (`job_type=eval`); metrics remain in
+Postgres (EV-012 RD-174/RD-175). Click → `/jobs/:id` summary + link to `/evaluation?run=…` (UJ-050).
 
 **Automated tests**: `tests/e2e/test_uj044_eval_jobs_tab.py` (TC-124); Vitest `test_jobs_page.test.tsx`; Playwright `tests/ui/admin/uj044-eval-jobs-tab.spec.ts`.
 
