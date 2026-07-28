@@ -1188,9 +1188,12 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 )
             )
 
+            audit_stmt = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                audit_list_sql
+            )
             rows = (
                 conn.execute(
-                    text(audit_list_sql),  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                    audit_stmt,
                     params,
                 )
                 .mappings()
