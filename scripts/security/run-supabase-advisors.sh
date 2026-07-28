@@ -53,13 +53,14 @@ curl -fsS "https://api.supabase.com/v1/projects/${REF}/advisors/performance" \
   -H "Authorization: Bearer ${TOKEN}" -o "${REPORTS}/performance.json"
 
 export REPORTS
-export SEC_SUPABASE_ADVISOR_FAIL_ON="${SEC_SUPABASE_ADVISOR_FAIL_ON:-error}"
+# Default warn matches CI (stricter than ERROR-only). Override with SEC_SUPABASE_ADVISOR_FAIL_ON.
+export SEC_SUPABASE_ADVISOR_FAIL_ON="${SEC_SUPABASE_ADVISOR_FAIL_ON:-warn}"
 python3 - <<'PY'
 import json, os, sys
 from pathlib import Path
 
 reports = Path(os.environ["REPORTS"])
-fail_on = os.environ.get("SEC_SUPABASE_ADVISOR_FAIL_ON", "error").lower()
+fail_on = os.environ.get("SEC_SUPABASE_ADVISOR_FAIL_ON", "warn").lower()
 rank = {"INFO": 0, "WARN": 1, "WARNING": 1, "ERROR": 2}
 thr = {"none": 99, "warn": 1, "error": 2}.get(fail_on, 2)
 lints = []

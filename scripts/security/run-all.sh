@@ -66,6 +66,8 @@ if [[ -f "${CONFIG_DIR}/opengrep.yml" ]]; then
 fi
 run OpenGrep opengrep "${OPENGREP_ARGS[@]}" "${ROOT}"
 # shellcheck disable=SC2086
+# Ignore gitignored local secret files (2ms has no --exclude-gitignore).
+# Secrets in tracked paths still hard-fail. Complementary: gitleaks in ci-guards.
 run 2ms 2ms filesystem --path "${ROOT}" \
   --report-path "${REPORTS}/2ms.json" --report-path "${REPORTS}/2ms.sarif" \
   --max-target-megabytes 50 \
@@ -80,6 +82,13 @@ run 2ms 2ms filesystem --path "${ROOT}" \
   --ignore-pattern 'dist' \
   --ignore-pattern '.pytest_cache' \
   --ignore-pattern '.ruff_cache' \
+  --ignore-pattern '.env' \
+  --ignore-pattern '*.env' \
+  --ignore-pattern 'prod.env' \
+  --ignore-pattern '.deploy-keys.local' \
+  --ignore-pattern 'admin-fe-spec.yaml' \
+  --ignore-pattern 'internal-write-api-spec.yaml' \
+  --ignore-pattern 'chat-rag-spec.yaml' \
   --allowed-values 'vecinita.eval.explore.v1' \
   --allowed-values 'Qwen2.5-Instruct'
 

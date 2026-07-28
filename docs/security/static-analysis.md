@@ -13,16 +13,23 @@ Reports land in `.security-reports/` (gitignored). Binaries in `.tools/security/
 
 ## Tools
 
-| Tool | Role | Fail threshold |
-|------|------|----------------|
-| OpenGrep | SAST | ERROR |
-| 2ms | Secrets | any finding |
-| KICS | IaC / OpenAPI | high, critical |
+| Tool | Role | Fail threshold (strictest hard-block) |
+|------|------|----------------------------------------|
+| OpenGrep | SAST | ERROR (`--error --severity=ERROR`) |
+| 2ms | Secrets | any finding in tracked paths |
+| KICS | IaC / OpenAPI | high, critical (`SEC_KICS_FAIL_ON`) |
 | SBOM Tool | SPDX SBOM | must generate |
-| Grype | Vulns (SBOM or dir) | high |
-| Supabase advisors | DB security/perf | ERROR (when Supabase configured) |
+| Grype | Vulns (SBOM or dir) | high (`SEC_GRYPE_FAIL_ON`) |
+| Supabase advisors | DB security/perf | WARN + ERROR (`SEC_SUPABASE_ADVISOR_FAIL_ON=warn`) |
+
+These are pinned by `make security-scan` and the CI `security` job. Loosening requires an
+explicit env override (not recommended). OpenGrep WARNING and KICS medium/low/info are
+reported in tool output but are not hard-fail thresholds (noise floor: hundreds of
+OpenAPI/IaC INFO–MEDIUM hits).
 
 Config: `config/security/` (KICS query excludes, Grype ignores, OpenGrep notes).
+2ms ignores gitignored local secret files (`.env`, `prod.env`, operator `*-spec.yaml`
+exports); secrets in tracked files still hard-fail. Complementary: gitleaks in `ci-guards`.
 
 ## Supabase advisors
 

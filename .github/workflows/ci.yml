@@ -135,6 +135,9 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
           SEC_TOOLS_DIR: ${{ github.workspace }}/.tools/security
+          SEC_FAIL_FAST: "1"
+          SEC_KICS_FAIL_ON: high,critical
+          SEC_GRYPE_FAIL_ON: high
           # Fail on WARN+ so advisor remediations stay enforced (INFO remains non-blocking).
           SEC_SUPABASE_ADVISOR_FAIL_ON: warn
           # Skip advisors only when the token secret is unset in the fork/PR context.

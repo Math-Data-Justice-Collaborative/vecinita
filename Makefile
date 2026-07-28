@@ -175,7 +175,14 @@ security-scan-install: ## Install OpenGrep, 2ms, KICS, Grype, SBOM Tool into .to
 	SEC_TOOLS_DIR="$(CURDIR)/.tools/security" bash scripts/security/install-tools.sh
 
 security-scan: ## Hard-fail security static analysis suite (see config/security/)
-	SEC_TOOLS_DIR="$(CURDIR)/.tools/security" bash scripts/security/run-all.sh
+	# Strictest hard-block thresholds (aligned with CI + docs/security/static-analysis.md):
+	# OpenGrep ERROR; 2ms any; KICS high,critical; Grype high; Supabase advisors WARN+.
+	SEC_TOOLS_DIR="$(CURDIR)/.tools/security" \
+	SEC_FAIL_FAST=1 \
+	SEC_KICS_FAIL_ON=high,critical \
+	SEC_GRYPE_FAIL_ON=high \
+	SEC_SUPABASE_ADVISOR_FAIL_ON=warn \
+	bash scripts/security/run-all.sh
 
 audit: ## pip-audit with repo ignore list (blocking in CI)
 	@IGNORE_ARGS=(); \
