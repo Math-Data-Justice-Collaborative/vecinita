@@ -14,6 +14,7 @@ from vecinita_shared_schemas.json_types import as_json_object
 from tests.helpers.json_response import (
     find_json_object_by_str,
     json_str,
+    response_document_list_items,
 )
 
 if TYPE_CHECKING:
