@@ -4,8 +4,12 @@ info:
   version: 0.1.0
   description: Modal ASGI job API (infrastructure auth via Modal proxy).
 servers:
-  - url: /
+  - url: https://{host}/
     description: Modal ASGI app
+    variables:
+      host:
+        default: localhost
+        description: API host (override per environment)
 security:
   - bearerAuth: []
     modalProxyAuth: []
@@ -482,6 +486,7 @@ components:
       properties:
         urls:
           type: array
+          maxItems: 1000
           minItems: 1
           items:
             type: string
@@ -535,6 +540,7 @@ components:
           default: ingest
         urls:
           type: array
+          maxItems: 100
           items:
             type: string
             format: uri
@@ -557,6 +563,7 @@ components:
       properties:
         jobs:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/Job"
     HealthResponse:
@@ -611,6 +618,7 @@ components:
       properties:
         users:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/UserSummary"
         total:

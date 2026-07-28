@@ -4,8 +4,12 @@ info:
   version: 0.4.0
   description: Service-to-service writes from Modal workers (sole DATABASE_URL holder).
 servers:
-  - url: /internal/v1
+  - url: https://{host}/internal/v1
     description: Internal write API (DigitalOcean)
+    variables:
+      host:
+        default: localhost
+        description: API host (override per environment)
 security:
   - bearerAuth: []
   - internalApiKey: []
@@ -108,6 +112,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 100
                 items:
                   $ref: "#/components/schemas/ChunkDetail"
         "401":
@@ -314,6 +319,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 500
                 items:
                   $ref: "#/components/schemas/AuditEvent"
         "401":
@@ -968,6 +974,7 @@ components:
           nullable: true
         chunks:
           type: array
+          maxItems: 100
           minItems: 1
           items:
             $ref: "#/components/schemas/ChunkUpsert"
@@ -1014,6 +1021,7 @@ components:
       properties:
         tags:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TagInput"
     ChunkDetail:
@@ -1035,6 +1043,7 @@ components:
           nullable: true
         tags:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TagInput"
     BatchUpsertRequest:
@@ -1045,6 +1054,7 @@ components:
       properties:
         documents:
           type: array
+          maxItems: 100
           minItems: 1
           items:
             $ref: "#/components/schemas/DocumentUpsert"
@@ -1075,6 +1085,7 @@ components:
           nullable: true
         tags:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TagInput"
     DocumentListPage:
@@ -1087,6 +1098,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/DocumentSummary"
         page:
@@ -1123,10 +1135,12 @@ components:
             format: uuid
         add:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TagInput"
         remove:
           type: array
+          maxItems: 100
           items:
             type: string
     BulkMetadataRequest:
@@ -1154,11 +1168,13 @@ components:
       properties:
         successes:
           type: array
+          maxItems: 500
           items:
             type: string
             format: uuid
         failures:
           type: array
+          maxItems: 500
           items:
             type: object
             properties:
@@ -1175,6 +1191,7 @@ components:
       properties:
         successes:
           type: array
+          maxItems: 100
           items:
             type: object
             properties:
@@ -1185,6 +1202,7 @@ components:
                 type: string
         failures:
           type: array
+          maxItems: 500
           items:
             type: object
             properties:
@@ -1237,6 +1255,7 @@ components:
       properties:
         events:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/AuditEvent"
         total:
@@ -1252,6 +1271,7 @@ components:
       properties:
         document_ids:
           type: array
+          maxItems: 500
           items:
             type: string
             format: uuid
@@ -1271,6 +1291,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 500
           items:
             type: object
             properties:
@@ -1294,6 +1315,7 @@ components:
           type: integer
         tag_distribution:
           type: array
+          maxItems: 100
           items:
             type: object
             properties:
@@ -1303,6 +1325,7 @@ components:
                 type: integer
         language_breakdown:
           type: array
+          maxItems: 100
           items:
             type: object
             properties:
@@ -1312,10 +1335,12 @@ components:
                 type: integer
         recent_activity:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/AuditEvent"
         top_served:
           type: array
+          maxItems: 500
           items:
             type: object
             properties:
@@ -1360,6 +1385,7 @@ components:
             - degraded
         services:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/ServiceHealth"
         checked_at:
@@ -1464,10 +1490,12 @@ components:
       properties:
         points:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/EvalTimeseriesPoint"
         available_metrics:
           type: array
+          maxItems: 1000
           items:
             type: string
     EvalCriterionCreateRequest:
@@ -1559,6 +1587,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/EvalCriterionResponse"
     EvalConfig:
@@ -1597,6 +1626,7 @@ components:
           default: fixture
         criteria_ids:
           type: array
+          maxItems: 100
           items:
             type: string
             format: uuid
@@ -1641,6 +1671,7 @@ components:
             - staging
         criteria_ids:
           type: array
+          maxItems: 100
           items:
             type: string
             format: uuid
@@ -1718,6 +1749,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/EvalConfigPresetResponse"
     EvalConfigPresetCloneRequest:
@@ -1768,6 +1800,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/EvalRunListItem"
         page:
@@ -1817,6 +1850,7 @@ components:
           nullable: true
         retrieved_urls:
           type: array
+          maxItems: 1000
           items:
             type: string
         answer:
@@ -1861,6 +1895,7 @@ components:
           nullable: true
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/EvalRunItemDetail"
     ErrorBody:
@@ -1887,6 +1922,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/OllamaModelSummary"
     OllamaModelPullRequest:
@@ -1933,6 +1969,7 @@ components:
       properties:
         families:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/OllamaModelCatalogFamily"
     OllamaModelCatalogTag:
@@ -1959,6 +1996,7 @@ components:
           maxLength: 128
         tags:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/OllamaModelCatalogTag"
   responses:

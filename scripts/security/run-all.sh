@@ -105,7 +105,7 @@ fi
 KICS_ARGS=(
   scan -p "${ROOT}" -q "${QUERIES}" -o "${REPORTS}/kics"
   --report-formats json,sarif --output-name results
-  --fail-on "${SEC_KICS_FAIL_ON:-high,critical}"
+  --fail-on "${SEC_KICS_FAIL_ON:-medium,high,critical}"
   --exclude-paths ".git,.tools,.security-reports,.venv,node_modules,vendor,coverage,htmlcov,dist"
   --exclude-gitignore
 )

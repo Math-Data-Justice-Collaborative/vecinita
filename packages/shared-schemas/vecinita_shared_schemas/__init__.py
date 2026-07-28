@@ -145,6 +145,8 @@ def __getattr__(name: str) -> object:
         msg = f"module {__name__!r} has no attribute {name!r}"
         raise AttributeError(msg)
     module_name, attr = target
+    # module_name is from the fixed _LAZY_EXPORTS map (not user input).
+    # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
     value = cast("object", getattr(import_module(module_name), attr))
     globals()[name] = value
     return value

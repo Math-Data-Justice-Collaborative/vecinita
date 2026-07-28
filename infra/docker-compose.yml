@@ -4,12 +4,17 @@ services:
   postgres:
     image: pgvector/pgvector:pg15
     container_name: vecinita-postgres
+    # Local-only hardening (KICS): drop caps, no new privileges, bind loopback.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_USER: vecinita
       POSTGRES_PASSWORD: vecinita
       POSTGRES_DB: vecinita
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - vecinita_postgres_data:/var/lib/postgresql/data
     healthcheck:

@@ -26,7 +26,11 @@ log "installing → ${BIN_DIR} (${OS}/${ARCH})"
 
 # OpenGrep
 if [[ ! -x "${BIN_DIR}/opengrep" || "${SEC_FORCE:-0}" == "1" ]]; then
-  curl -fsSL https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh | bash
+  # Official installer; downloaded to a temp file (not curl|bash) then executed.
+  _og_install="$(mktemp)"
+  download "https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh" "${_og_install}"
+  bash "${_og_install}"
+  rm -f "${_og_install}"
   ln -sfn "${HOME}/.opengrep/cli/latest/opengrep" "${BIN_DIR}/opengrep"
 fi
 
@@ -72,7 +76,11 @@ fi
 
 # Grype
 if [[ ! -x "${BIN_DIR}/grype" || "${SEC_FORCE:-0}" == "1" ]]; then
-  curl -sSfL https://get.anchore.io/grype | sh -s -- -b "${BIN_DIR}"
+  # Official installer downloaded to a temp file (avoids curl|sh); -b sets install dir.
+  _grype_install="$(mktemp)"
+  curl -sSfL https://get.anchore.io/grype -o "${_grype_install}"
+  sh "${_grype_install}" -b "${BIN_DIR}"
+  rm -f "${_grype_install}"
 fi
 
 # SBOM Tool
