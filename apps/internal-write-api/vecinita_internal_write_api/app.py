@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Annotated, Protocol, cast
 from uuid import UUID, uuid4
 
 import httpx
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from sqlalchemy import create_engine, text
 from vecinita_llm_client import LlmClient, LlmClientError
 from vecinita_shared_schemas.audit_headers import (
@@ -137,7 +137,6 @@ from vecinita_internal_write_api.eval_service import (
     EvalRunPresetAccessError,
     EvalRunPresetNotFoundError,
     create_eval_run,
-    execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
@@ -364,6 +363,9 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     playground_library_client: PlaygroundLibraryClientProtocol | None = None,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
+    # Eval execution moved to Modal (ADR-038 / TP-S013-06). Params kept for injectability
+    # until the Modal eval worker consumes them; route only enqueues via jobs_client.
+    _ = (eval_embed_fn, eval_judge)
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
@@ -1514,35 +1516,40 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         status_code=status.HTTP_202_ACCEPTED,
     )
     def create_eval_run_route(  # pyright: ignore[reportUnusedFunction]
-        background_tasks: BackgroundTasks,
+        request: Request,
         actor: WriteActorDep,
         body: EvalRunCreateRequest | None = None,
     ) -> EvalRunCreateResponse:
-        request = body or EvalRunCreateRequest()
+        create_body = body or EvalRunCreateRequest()
         owner_id, _role = actor
-        if request.preset_id is not None and owner_id is None:
+        if create_body.preset_id is not None and owner_id is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="authenticated user id required",
             )
         requester_id = owner_id if owner_id is not None else uuid4()
         try:
-            created = create_eval_run(engine, body=request, requester_id=requester_id)
+            created = create_eval_run(engine, body=create_body, requester_id=requester_id)
         except EvalRunPresetNotFoundError as exc:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
         except EvalRunPresetAccessError as exc:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
-        def _run() -> None:
-            execute_eval_run(
-                engine,
-                run_id=created.response.run_id,
-                question=created.question,
-                embed_fn=eval_embed_fn,
-                judge=eval_judge,
+        if retag_jobs is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Eval job client not configured",
             )
-
-        background_tasks.add_task(_run)
+        try:
+            retag_jobs.enqueue_eval(
+                created.response.run_id,
+                authorization=request.headers.get("Authorization"),
+            )
+        except DataManagementJobsClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
         return created.response
 
     @app.get(

@@ -62,6 +62,28 @@ class DataManagementJobsClient:
             urls=[],
             options=JobOptions(job_type="retag", document_id=document_id),
         )
+        return self._post_job(body, authorization=authorization)
+
+    def enqueue_eval(
+        self,
+        eval_run_id: UUID,
+        *,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Enqueue a Modal eval job linked to a DO ``eval_runs`` row (EV-012 / TP-S013-06)."""
+        body = CreateJobRequest(
+            urls=[],
+            options=JobOptions(job_type="eval", eval_run_id=eval_run_id),
+        )
+        return self._post_job(body, authorization=authorization, operation="enqueue_eval")
+
+    def _post_job(
+        self,
+        body: CreateJobRequest,
+        *,
+        authorization: str | None,
+        operation: str = "enqueue_retag",
+    ) -> UUID:
         headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
         if authorization:
             headers["Authorization"] = authorization
@@ -71,6 +93,6 @@ class DataManagementJobsClient:
             headers=headers,
         )
         if response.status_code >= HTTPStatus.BAD_REQUEST:
-            msg = f"enqueue_retag failed: {response.status_code} {response.text}"
+            msg = f"{operation} failed: {response.status_code} {response.text}"
             raise DataManagementJobsClientError(msg)
         return CreateJobResponse.model_validate(response.json()).job_id

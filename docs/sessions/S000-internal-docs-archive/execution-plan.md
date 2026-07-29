@@ -1689,10 +1689,10 @@ eval jobs (TP-S013-03/05/06; M3).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T83.1 | Test: unit/integration — create run enqueues Modal `job_type=eval` (TC-124/AC-J1) — red | Test | in_progress | TP-S013-06, M3, TC-124 | T82.4 | — | S013 | F36 |
+| T83.1 | Test: unit/integration — create run enqueues Modal `job_type=eval` (TC-124/AC-J1) — red | Test | completed | TP-S013-06, M3, TC-124 | T82.4 | 2026-07-28 | S013 | F36 |
 | T83.2 | Test: unit — eval progress SSE + soft-delete hides from default list (TP-S013-03/04/05) — red | Test | pending | TP-S013-03–05, TC-147 | — | — | S013 | F36 |
 | T83.3 | Config: Alembic — `eval_runs.deleted_at` nullable timestamptz | Config | pending | TP-S013-05 | T83.2 | — | S013 | F36 |
-| T83.4 | Code: `DataManagementJobsClient.enqueue_eval` + replace BackgroundTasks runner with Modal spawn | Code | pending | TP-S013-06, ADR-038 | T83.1, T82.4 | — | S013 | F36 |
+| T83.4 | Code: `DataManagementJobsClient.enqueue_eval` + replace BackgroundTasks runner with Modal spawn | Code | completed | TP-S013-06, ADR-038 | T83.1, T82.4 | 2026-07-28 | S013 | F36 |
 | T83.5 | Code: `GET /internal/v1/eval/runs/{run_id}/events` SSE; DELETE job soft-deletes linked eval_run | Code | pending | TP-S013-03/04 | T83.2, T83.3, T83.4 | — | S013 | F36 |
 | T83.6 | Config: `openapi/internal-write.yaml` events path + EvalRun soft-delete fields | Config | pending | TP-S013-04 | T83.5 | — | S013 | F36 |
 
