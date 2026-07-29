@@ -209,6 +209,63 @@ def test_admin_delete_eval_job_soft_delete_error_returns_502() -> None:
     assert store.get_job(record.job_id) is not None
 
 
+def test_admin_delete_unknown_job_returns_404() -> None:
+    """DELETE missing job_id returns 404."""
+    store = InMemoryJobStore()
+    client = _client_with_principal(store, _ADMIN)
+    response = client.delete(f"/jobs/{uuid4()}")
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_admin_delete_eval_job_without_write_client_still_deletes() -> None:
+    """Eval job DELETE without eval_runs_client removes the JobStore row only."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="eval",
+        options={"eval_run_id": str(_EVAL_RUN_ID)},
+    )
+    app = create_app(store=store, require_proxy_auth=False, eval_runs_client=None)
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.delete(f"/jobs/{record.job_id}")
+
+    assert response.status_code == HTTPStatus.NO_CONTENT
+    assert store.get_job(record.job_id) is None
+
+
+def test_admin_delete_eval_job_skips_soft_delete_for_non_str_option() -> None:
+    """Non-string options.eval_run_id is ignored when record.eval_run_id is unset."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=[], job_type="eval", options={})
+    stored = store.get_job(record.job_id)
+    assert stored is not None
+    stored.options["eval_run_id"] = 12345
+    soft_deleted: list[UUID] = []
+
+    class _EvalClient:
+        def soft_delete_eval_run(self, run_id: UUID) -> None:
+            soft_deleted.append(run_id)
+
+        def list_eval_runs(self, *, page: int = 1, page_size: int = 100) -> object:
+            _ = (page, page_size)
+            return type("Empty", (), {"items": []})()
+
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        eval_runs_client=_EvalClient(),  # type: ignore[arg-type]
+    )
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.delete(f"/jobs/{record.job_id}")
+
+    assert response.status_code == HTTPStatus.NO_CONTENT
+    assert soft_deleted == []
+
+
 def test_viewer_delete_returns_403() -> None:
     """Viewer cannot delete jobs (TC-147)."""
     store = InMemoryJobStore()

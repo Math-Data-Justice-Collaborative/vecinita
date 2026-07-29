@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
 from uuid import UUID
 
 from vecinita_internal_write_api.eval_events import (
@@ -35,10 +34,9 @@ def test_iter_eval_run_sse_skips_other_run_ids() -> None:
     broker = EvalRunEventBroker()
     broker.publish(run_id=_RUN_A, status="pending")
     broker.publish(run_id=_RUN_B, status="running")
-    engine = MagicMock()
     frames = list(
         iter_eval_run_sse(
-            engine,
+            object(),  # type: ignore[arg-type]
             broker,
             run_id=_RUN_B,
             last_event_id=None,
@@ -54,11 +52,15 @@ def test_iter_eval_run_sse_skips_other_run_ids() -> None:
 def test_iter_eval_run_sse_stops_when_sync_db_missing() -> None:
     """sync_db path ends the iterator when the run is missing."""
     broker = EvalRunEventBroker()
-    engine = MagicMock()
-    engine.connect.return_value.__enter__.return_value.execute.return_value.mappings.return_value.first.return_value = None
+
+    def _missing(_engine: object, *, run_id: UUID) -> bool:
+        _ = run_id
+        return False
+
+    broker.sync_from_engine = _missing  # type: ignore[method-assign]
     frames = list(
         iter_eval_run_sse(
-            engine,
+            object(),  # type: ignore[arg-type]
             broker,
             run_id=_RUN_A,
             last_event_id=None,
