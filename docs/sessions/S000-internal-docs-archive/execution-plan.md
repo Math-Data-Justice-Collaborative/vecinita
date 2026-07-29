@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
-| **Active milestone** | M84: Admin Jobs UI (list/detail/CRUD + SSE) |
-| **Active task** | **T84.5** (pending) — Evaluation page prefer DO eval SSE |
-| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.6 (M83); T84.1–T84.4 |
+| **Active milestone** | M84: Admin Jobs UI (list/detail/CRUD + SSE) — complete; next M85 |
+| **Active task** | **T85.1** (pending) — API e2e UJ-050 job detail CRUD |
+| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.6 (M83); T84.1–T84.6 (M84 complete) |
 | **Last updated** | 2026-07-28 |
 | **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M83 done → 08 then M84 |
 | **Git branch** | `evolve/EV-012-unified-job-monitoring` |
@@ -1707,8 +1707,8 @@ failed-job log affordances (RD-177); Evaluation page uses DO eval SSE (TP-S013-0
 | T84.2 | Test: Vitest — admin CRUD controls; viewer 403/no mutate (TC-147) — red | Test | completed | RD-176, TC-147 | T82.5 | 2026-07-28 | S013 | F32 |
 | T84.3 | Code: `api/jobs` client — events/cancel/retry/delete + types | Code | completed | TP-S013-01 | T84.1 | 2026-07-28 | S013 | F32 |
 | T84.4 | Code: JobsPage + JobDetailPage — SSE+poll, filter, document_id, log copy/link | Code | completed | UJ-023/050, RD-177 | T84.1, T84.3 | 2026-07-28 | S013 | F32 |
-| T84.5 | Code: Evaluation page — prefer DO eval SSE; keep metrics from internal-write | Code | in_progress | TP-S013-04, UJ-044 | T83.5, T84.3 | — | S013 | F36 |
-| T84.6 | Docs: user-journeys UJ-023/044/050 step alignment (if drift) | Docs | pending | user-journeys | T84.4, T84.5 | — | S013 | F32 |
+| T84.5 | Code: Evaluation page — prefer DO eval SSE; keep metrics from internal-write | Code | completed | TP-S013-04, UJ-044 | T83.5, T84.3 | 2026-07-28 | S013 | F36 |
+| T84.6 | Docs: user-journeys UJ-023/044/050 step alignment (if drift) | Docs | completed | user-journeys | T84.4, T84.5 | 2026-07-28 | S013 | F32 |
 
 #### M85: Full-stack tests (API e2e + Playwright)
 

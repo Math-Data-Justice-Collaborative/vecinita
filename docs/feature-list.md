@@ -458,7 +458,7 @@
 - **EV-012 / #116 delta (S013, RD-173–RD-178)**: Unified long-running job monitoring on Admin Jobs only (not ChatRAG).
   - **Lifecycle**: All long-running admin jobs (ingest, retag, **eval**, future types) use **Modal’s job lifecycle** ([Modal job queue](https://modal.com/docs/guide/job-queue)); Admin Jobs list is **Modal `GET /jobs`** with extensible `job_type` (RD-174). Amends ADR-033 (eval leaves DO `BackgroundTasks`).
   - **Storage**: **DO Postgres** remains SoT for durable storage including eval metrics/results; **Supabase = authentication only** (RD-175).
-  - **UX**: Status filter UI; clickable rows → `/jobs/:id` detail; retag shows `document_id` context; SSE on Modal jobs **and** internal-write eval progress with **4s poll fallback** + SSE retry backoff (RD-173, 02-verify M2); failed Modal jobs show function/call id + copy + dashboard link when known (RD-177).
+  - **UX**: Status filter UI; clickable rows → `/jobs/:id` detail (`JobDetailPage`); retag shows `document_id` context; SSE on Modal jobs **and** internal-write eval progress with **4s poll fallback** + SSE retry backoff (RD-173, 02-verify M2); failed Modal jobs show function/call id + copy + dashboard link when known (RD-177); admin cancel/retry/delete (RD-176).
   - **CRUD**: **Admin-only** full job CRUD — create (existing), read/list/detail, cancel/retry, delete from store (RD-176). Viewer read-only.
   - **Tests**: Extend UJ-023; UJ-050 detail; Playwright T0-ui list→detail (RD-178); API e2e + Vitest; live T3 after deploy.
 
