@@ -1268,128 +1268,144 @@ project:
         note: 'S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for
           admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages'
     13-deploy-smoke:
-      status: completed
+      status: in_progress
       started_at: '2026-07-29'
-      completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
-      session_id: S014-admin-ui-polish-148
-      branch: main
-      evolve_cycle_id: EV-013
+      partial_rerun_note: 'EV-014/S016 — starting after user approved commit+preview+deploy; HEAD 2fe461d'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
       mode: evolve
       delta_only: true
-      deploy_path: A
+      feature: F40
+      head_sha: '2fe461d7d0d3a3fa13c118483f3a83090e9f7866'
       deploy_approved: true
       deploy_approved_at: '2026-07-29'
-      deploy_approval: choice_A_approve_13_deploy_smoke
-      head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-      docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
-      overall_result: PASS
-      report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
-      commits_ahead_of_origin: 0
-      pushed_at: '2026-07-29'
-      pr_number: 154
-      pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
-      pr_status: merged
-      merge_gate: smokes_pass_before_merge
-      do_not_merge_pr: 154
-      merge_approval: executed
-      ci:
-        status: success
-        ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-        head_sha: f85b6ab
-      path_a_progress:
-        push: done
-        ci: pass
-        ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-        coverage_fix: f85b6ab
-        pin_redeploy: pass
-        do_apps:
-          admin_frontend: reset_to_main_active
-          internal_write_api: untouched_main
-          modal_data_management: untouched
-        smokes: pass
-        smoke_tiers:
-          h1: pass
-          h2: pass
-          h3: pass
-          h3b: pass
-          h4: pass
-          h5: pass
-        merge_pr_154: merged
-        h0ci_main: pass
-      next_askquestion:
-      note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml
-        + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
-      s013_baseline:
+      deploy_approval: user_approved_commit_preview_deploy
+      note: 'S016/EV-014 13-deploy-smoke IN_PROGRESS 2026-07-29 — started after user approved commit+preview+deploy @ 2fe461d; prior S014/EV-013 Path A PASS nested under s014_baseline'
+      s014_baseline:
         status: completed
         started_at: '2026-07-29'
         completed_at: '2026-07-29'
         partial_rerun_at: '2026-07-29'
-        session_id: S013-unified-job-monitoring
-        branch: evolve/EV-012-unified-job-monitoring
-        evolve_cycle_id: EV-012
-        mode: delta
+        partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
+        session_id: S014-admin-ui-polish-148
+        branch: main
+        evolve_cycle_id: EV-013
+        mode: evolve
+        delta_only: true
         deploy_path: A
-        head_sha: 113589139659a3508eb68340be91d93e7814ae77
+        deploy_approved: true
+        deploy_approved_at: '2026-07-29'
+        deploy_approval: choice_A_approve_13_deploy_smoke
+        head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+        docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
         overall_result: PASS
-        report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+        report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
         commits_ahead_of_origin: 0
         pushed_at: '2026-07-29'
-        pr_number: 153
+        pr_number: 154
+        pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
+        pr_status: merged
         merge_gate: smokes_pass_before_merge
-        do_not_merge_pr: 153
-        merge_approval: pending_user
-        dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
-        partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE +
-          write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+        do_not_merge_pr: 154
+        merge_approval: executed
+        ci:
+          status: success
+          ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+          head_sha: f85b6ab
         path_a_progress:
           push: done
-          ci_rewatch: pass
-          ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
-          lint_coverage_fix: 746181b
-          iss004_branch_coverage_fix: 1135891
-          h0c_migration_check: pass
-          alembic_revision: 202607280009
+          ci: pass
+          ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+          coverage_fix: f85b6ab
           pin_redeploy: pass
-          modal_data_management: redeployed_from_evolve_checkout
           do_apps:
-            internal_write_api: pinned_active
-            admin_frontend: pinned_active
+            admin_frontend: reset_to_main_active
+            internal_write_api: untouched_main
+            modal_data_management: untouched
           smokes: pass
           smoke_tiers:
-            h0c: pass
             h1: pass
             h2: pass
             h3: pass
             h3b: pass
-            t3_ev002: pass
             h4: pass
             h5: pass
-          jobs_live:
-          - list
-          - retag_detail
-          - eval_run_detail
-          - sse
-          merge_pr_153: awaiting_user_approval
-        next_askquestion: merge_pr_153_or_hold_or_reset_pins
-        note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned ACTIVE;
-          Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit user merge approval;
-          checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
-        s001_baseline:
+          merge_pr_154: merged
+          h0ci_main: pass
+        next_askquestion:
+        note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml
+          + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
+        s013_baseline:
           status: completed
-          started_at: '2026-06-26'
-          completed_at: '2026-06-26'
-          partial_rerun_at: '2026-06-26'
-          partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-          report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
-      merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-      merge:
-        status: merged
-        pr_number: 154
-        merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-        merged_at: '2026-07-29'
-      next_action: none_cycle_closed
+          started_at: '2026-07-29'
+          completed_at: '2026-07-29'
+          partial_rerun_at: '2026-07-29'
+          session_id: S013-unified-job-monitoring
+          branch: evolve/EV-012-unified-job-monitoring
+          evolve_cycle_id: EV-012
+          mode: delta
+          deploy_path: A
+          head_sha: 113589139659a3508eb68340be91d93e7814ae77
+          overall_result: PASS
+          report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+          commits_ahead_of_origin: 0
+          pushed_at: '2026-07-29'
+          pr_number: 153
+          merge_gate: smokes_pass_before_merge
+          do_not_merge_pr: 153
+          merge_approval: pending_user
+          dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
+          partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE +
+            write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+          path_a_progress:
+            push: done
+            ci_rewatch: pass
+            ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
+            lint_coverage_fix: 746181b
+            iss004_branch_coverage_fix: 1135891
+            h0c_migration_check: pass
+            alembic_revision: 202607280009
+            pin_redeploy: pass
+            modal_data_management: redeployed_from_evolve_checkout
+            do_apps:
+              internal_write_api: pinned_active
+              admin_frontend: pinned_active
+            smokes: pass
+            smoke_tiers:
+              h0c: pass
+              h1: pass
+              h2: pass
+              h3: pass
+              h3b: pass
+              t3_ev002: pass
+              h4: pass
+              h5: pass
+            jobs_live:
+            - list
+            - retag_detail
+            - eval_run_detail
+            - sse
+            merge_pr_153: awaiting_user_approval
+          next_askquestion: merge_pr_153_or_hold_or_reset_pins
+          note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned ACTIVE;
+            Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit user merge approval;
+            checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
+          s001_baseline:
+            status: completed
+            started_at: '2026-06-26'
+            completed_at: '2026-06-26'
+            partial_rerun_at: '2026-06-26'
+            partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+            report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+        merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+        merge:
+          status: merged
+          pr_number: 154
+          merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+          merged_at: '2026-07-29'
+        next_action: none_cycle_closed
     15-service-health:
       status: skipped
       started_at: '2026-07-29'
@@ -1637,7 +1653,7 @@ active_session:
   github_issue: 87
   artifacts_dir: docs/sessions/S016-chat-cold-start-ux/
   current_stage: 13-deploy-smoke
-  current_stage_note: '10-e2e done; next 13-deploy-smoke pending user approval; also await commit request'
+  current_stage_note: '13-deploy-smoke in_progress after user approved commit+preview+deploy @ 2fe461d'
   started_at: '2026-07-29'
   routing_preset_choice: lean_plus_build
   routing_preset_status: approved
@@ -1647,7 +1663,7 @@ active_session:
   session_artifacts_note: 'session-brief.md + routing-plan.md written under docs/sessions/S016-chat-cold-start-ux/; session-brief
     updated after Phase 0 scope approval + F40'
   phase0_approved: true
-  note: 'S016/EV-014 10-e2e PASS 2026-07-29 — report e2e-report.md PASS; next 13-deploy-smoke pending user approval; also await commit request.'
+  note: 'S016/EV-014 13-deploy-smoke IN_PROGRESS 2026-07-29 — commit 2fe461d recorded; started after user approved commit+preview+deploy.'
   routing_plan:
   - stage: 00-context
     required: true
@@ -1660,7 +1676,7 @@ active_session:
     required: true
     status: in_progress
     skip_rationale:
-    note: Orchestrator — Phase A/Gate A→B PASSED; phase_a/c checkpoints; 10-e2e PASS; current_stage=13-deploy-smoke pending user approval; await commit request; Lean+build skips 04/05/06/09
+    note: Orchestrator — Phase A/Gate A→B PASSED; phase_a/c; 10-e2e PASS; 13-deploy-smoke in_progress after user approved commit+preview+deploy @ 2fe461d; Lean+build skips 04/05/06/09
     started_at: '2026-07-29'
   - stage: 01-requirements
     required: true
@@ -1725,9 +1741,10 @@ active_session:
     note: 'PASS — T0-ui Playwright chat 8/8 (UJ-052 TC-160); T0 Vitest TC-156–159 (08); T0 API N/A (RD-187); T2/T3 deferred to 13'
   - stage: 13-deploy-smoke
     required: true
-    status: pending
+    status: in_progress
     skip_rationale:
-    note: 'Pending user approval for deploy; do not start yet; also await commit request'
+    started_at: '2026-07-29'
+    note: 'IN_PROGRESS — started after user approved commit+preview+deploy @ 2fe461d'
   - stage: 03-plan-tooling
     required: false
     status: skipped
@@ -1773,7 +1790,7 @@ active_session:
   context_briefs: []
   handoff:
     next_skill: 13-deploy-smoke
-    next_action: 'Await user approval for 13-deploy-smoke (do not start yet); also await commit request. 10-e2e PASS — e2e-report.md.'
+    next_action: 'Run 13-deploy-smoke Path A — push evolve/EV-014-chat-cold-start-ux @ 2fe461d, CI, pin/redeploy chat-rag FE, H1–H5 smokes.'
     prior_session: S015-hotfix-jobs-sse-cors
     prior_close_reason: 'user Option 1 close for #87 evolve priority'
   phase1_routing_confirmed: true
@@ -5497,142 +5514,158 @@ stages:
         template: pass
         connectivity: pass
   13-deploy-smoke:
-    status: completed
+    status: in_progress
     started_at: '2026-07-29'
-    completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
-    session_id: S014-admin-ui-polish-148
-    branch: main
-    evolve_cycle_id: EV-013
+    partial_rerun_note: 'EV-014/S016 — starting after user approved commit+preview+deploy; HEAD 2fe461d'
+    session_id: S016-chat-cold-start-ux
+    branch: evolve/EV-014-chat-cold-start-ux
+    evolve_cycle_id: EV-014
     mode: evolve
     delta_only: true
-    deploy_path: A
+    feature: F40
+    head_sha: '2fe461d7d0d3a3fa13c118483f3a83090e9f7866'
     deploy_approved: true
     deploy_approved_at: '2026-07-29'
-    deploy_approval: choice_A_approve_13_deploy_smoke
-    head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-    docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
-    overall_result: PASS
-    report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
-    commits_ahead_of_origin: 0
-    pushed_at: '2026-07-29'
-    pr_number: 154
-    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
-    pr_status: merged
-    merge_gate: smokes_pass_before_merge
-    do_not_merge_pr: 154
-    merge_approval: executed
-    ci:
-      status: success
-      ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-      head_sha: f85b6ab
-    path_a_progress:
-      push: done
-      ci: pass
-      ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-      coverage_fix: f85b6ab
-      pin_redeploy: pass
-      do_apps:
-        admin_frontend: reset_to_main_active
-        internal_write_api: untouched_main
-        modal_data_management: untouched
-      smokes: pass
-      smoke_tiers:
-        h1: pass
-        h2: pass
-        h3: pass
-        h3b: pass
-        h4: pass
-        h5: pass
-      merge_pr_154: merged
-      h0ci_main: pass
-    next_askquestion:
-    note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml
-      + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
-    s013_baseline:
+    deploy_approval: user_approved_commit_preview_deploy
+    note: 'S016/EV-014 13-deploy-smoke IN_PROGRESS 2026-07-29 — started after user approved commit+preview+deploy @ 2fe461d; prior S014/EV-013 Path A PASS nested under s014_baseline'
+    s014_baseline:
       status: completed
       started_at: '2026-07-29'
       completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      session_id: S013-unified-job-monitoring
-      branch: evolve/EV-012-unified-job-monitoring
-      evolve_cycle_id: EV-012
-      mode: delta
+      partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
+      session_id: S014-admin-ui-polish-148
+      branch: main
+      evolve_cycle_id: EV-013
+      mode: evolve
+      delta_only: true
       deploy_path: A
-      head_sha: 113589139659a3508eb68340be91d93e7814ae77
+      deploy_approved: true
+      deploy_approved_at: '2026-07-29'
+      deploy_approval: choice_A_approve_13_deploy_smoke
+      head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+      docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
       overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+      report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
       commits_ahead_of_origin: 0
       pushed_at: '2026-07-29'
-      pr_number: 153
+      pr_number: 154
+      pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
+      pr_status: merged
       merge_gate: smokes_pass_before_merge
-      do_not_merge_pr: 153
-      merge_approval: pending_user
-      dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
-      partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api
-        from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+      do_not_merge_pr: 154
+      merge_approval: executed
+      ci:
+        status: success
+        ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+        head_sha: f85b6ab
       path_a_progress:
         push: done
-        ci_rewatch: pass
-        ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
-        lint_coverage_fix: 746181b
-        iss004_branch_coverage_fix: 1135891
-        h0c_migration_check: pass
-        alembic_revision: 202607280009
+        ci: pass
+        ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+        coverage_fix: f85b6ab
         pin_redeploy: pass
-        modal_data_management: redeployed_from_evolve_checkout
         do_apps:
-          internal_write_api: pinned_active
-          admin_frontend: pinned_active
+          admin_frontend: reset_to_main_active
+          internal_write_api: untouched_main
+          modal_data_management: untouched
         smokes: pass
         smoke_tiers:
-          h0c: pass
           h1: pass
           h2: pass
           h3: pass
           h3b: pass
-          t3_ev002: pass
           h4: pass
           h5: pass
-        jobs_live:
-        - list
-        - retag_detail
-        - eval_run_detail
-        - sse
-        merge_pr_153: awaiting_user_approval
-      next_askquestion: merge_pr_153_or_hold_or_reset_pins
-      note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge approval;
-        prior EV-002/S001 H1–H5 results preserved below'
-      prior_completed_at: '2026-06-26'
-      prior_started_at: '2026-06-26'
-      prior_partial_rerun_at: '2026-06-26'
-      prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-      prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
-      chat_url: 'https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app'
-      connectivity_validated_at: '2026-05-27'
-      prior_h0c: pass
-      prior_h1: pass
-      prior_h2: pass
-      prior_h3: pass
-      prior_h3b_browse: pass
-      prior_h3_ev002_t3: pass
-      prior_h4_do: pass
-      prior_h4_modal: waiver
-      prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
-      prior_h5: pass
-      cors_deployed: true
-      deploy_time_fixes:
-      - '98cc2ac: tag inference chat template + graceful fallback'
-      - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
-      prior_note: 'EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)'
-    merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-    merge:
-      status: merged
-      pr_number: 154
-      merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-      merged_at: '2026-07-29'
-    next_action: none_cycle_closed
+        merge_pr_154: merged
+        h0ci_main: pass
+      next_askquestion:
+      note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml
+        + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
+      s013_baseline:
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        partial_rerun_at: '2026-07-29'
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        mode: delta
+        deploy_path: A
+        head_sha: 113589139659a3508eb68340be91d93e7814ae77
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+        commits_ahead_of_origin: 0
+        pushed_at: '2026-07-29'
+        pr_number: 153
+        merge_gate: smokes_pass_before_merge
+        do_not_merge_pr: 153
+        merge_approval: pending_user
+        dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
+        partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api
+          from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+        path_a_progress:
+          push: done
+          ci_rewatch: pass
+          ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
+          lint_coverage_fix: 746181b
+          iss004_branch_coverage_fix: 1135891
+          h0c_migration_check: pass
+          alembic_revision: 202607280009
+          pin_redeploy: pass
+          modal_data_management: redeployed_from_evolve_checkout
+          do_apps:
+            internal_write_api: pinned_active
+            admin_frontend: pinned_active
+          smokes: pass
+          smoke_tiers:
+            h0c: pass
+            h1: pass
+            h2: pass
+            h3: pass
+            h3b: pass
+            t3_ev002: pass
+            h4: pass
+            h5: pass
+          jobs_live:
+          - list
+          - retag_detail
+          - eval_run_detail
+          - sse
+          merge_pr_153: awaiting_user_approval
+        next_askquestion: merge_pr_153_or_hold_or_reset_pins
+        note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge approval;
+          prior EV-002/S001 H1–H5 results preserved below'
+        prior_completed_at: '2026-06-26'
+        prior_started_at: '2026-06-26'
+        prior_partial_rerun_at: '2026-06-26'
+        prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+        prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+        chat_url: 'https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app'
+        connectivity_validated_at: '2026-05-27'
+        prior_h0c: pass
+        prior_h1: pass
+        prior_h2: pass
+        prior_h3: pass
+        prior_h3b_browse: pass
+        prior_h3_ev002_t3: pass
+        prior_h4_do: pass
+        prior_h4_modal: waiver
+        prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
+        prior_h5: pass
+        cors_deployed: true
+        deploy_time_fixes:
+        - '98cc2ac: tag inference chat template + graceful fallback'
+        - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
+        prior_note: 'EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)'
+      merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+      merge:
+        status: merged
+        pr_number: 154
+        merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+        merged_at: '2026-07-29'
+      next_action: none_cycle_closed
   14-hotfix:
     status: completed
     started_at: '2026-07-29'
@@ -8349,7 +8382,7 @@ evolve_cycles:
   github_issue: 87
   source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/87
   current_stage: 13-deploy-smoke
-  current_stage_note: '10-e2e done; next 13-deploy-smoke pending user approval; also await commit request'
+  current_stage_note: '13-deploy-smoke in_progress after user approved commit+preview+deploy @ 2fe461d'
   mode: evolve
   delta_only: true
   scope_summary: 'GitHub #87 ChatRAG cold-start UX (F40) — rotating bilingual fun-fact/info messages (WRWC / Providence /
@@ -8531,7 +8564,7 @@ evolve_cycles:
       cookie_scope: first_party_preference_only
     clarifications_note: Q10–Q13 recorded 2026-07-29; backend scope expansion cleared; Q13 options 2+3 locked cookie 
       opt-out + consent banner; Batch 3 COMPLETE
-  next_action: 'Await user approval for 13-deploy-smoke (do not start yet); also await commit request'
+  next_action: 'Run 13-deploy-smoke Path A — push @ 2fe461d, CI, pin/redeploy chat-rag FE, H1–H5 smokes'
   routing_preset_choice: lean_plus_build
   routing_preset_status: approved
   routing_plan_status: approved
@@ -8579,7 +8612,7 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-07-29'
-      note: Phase A/Gate A→B PASSED; phase_a/c; 10-e2e PASS; current_stage=13-deploy-smoke pending user approval; await commit request; Lean+build skips 04/05/06/09
+      note: Phase A/Gate A→B PASSED; phase_a/c; 10-e2e PASS; 13-deploy-smoke in_progress after user approved commit+preview+deploy @ 2fe461d; Lean+build skips 04/05/06/09
     01-requirements:
       status: completed
       started: '2026-07-29'
@@ -8652,8 +8685,10 @@ evolve_cycles:
       report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
       note: 'PASS — T0-ui Playwright chat 8/8 (UJ-052 TC-160); T0 Vitest TC-156–159 (08); T0 API N/A (RD-187); T2/T3 deferred to 13'
     13-deploy-smoke:
-      status: pending
-      note: 'Pending user approval for deploy; do not start yet; also await commit request'
+      status: in_progress
+      started: '2026-07-29'
+      head_sha: '2fe461d7d0d3a3fa13c118483f3a83090e9f7866'
+      note: 'IN_PROGRESS — started after user approved commit+preview+deploy @ 2fe461d'
     03-plan-tooling:
       status: skipped
       skip_rationale: no new tooling
@@ -8760,7 +8795,7 @@ evolve_cycles:
     recorded_at: '2026-07-29'
     overall_result: PASS
   issues: []
-  note: 'EV-014 in_progress 2026-07-29 — Lean+build; 10-e2e PASS (e2e-report.md); current_stage=13-deploy-smoke pending user approval; also await commit request.'
+  note: 'EV-014 in_progress 2026-07-29 — Lean+build; commit 2fe461d recorded; 13-deploy-smoke in_progress after user approved commit+preview+deploy.'
   intake_batch_4:
     recorded_at: '2026-07-29'
     status: complete
@@ -9864,6 +9899,7 @@ issue_log:
   note: Resolved 2026-07-28 — Keep M3 enqueue; TP-S013-06=6a accepted; open_contradictions cleared; Phase 19 tech-plan 
     draft ready; handoff → await_user_review_phase19_tech_plan
 decisions_log:
+- 'EV-014/S016 2026-07-29: Recorded git commit 2fe461d ([F40] feat: ChatRAG cold-start fun facts and consent (#87)); stage=07-build; 13-deploy-smoke marked in_progress after user approved commit+preview+deploy; active_session.current_stage=13-deploy-smoke.'
 - 'EV-014/S016 2026-07-29: 02-verify-plan COMPLETE — Gate A→B PASS; M1–M3 all A (recommended): M1 lock cookie Max-Age=1 year;
   M2 skip deployment-integration.md update for VITE_WRWC_DONATE_URL; M3 defer exact EN/ES fact strings to 07-build; gates.a_to_b=passed;
   checkpoints.phase_a=passed; current_stage=07-build in_progress; report docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md;
@@ -11922,8 +11958,9 @@ git_history:
     created_at: '2026-07-29'
     session_id: S016-chat-cold-start-ux
     evolve_cycle_id: EV-014
-    note: Branch created and checked out locally 2026-07-29; Phase 0/1 CONFIRMED; F40 allocated; Lean+build; UI preview 
-      declined for now; current_stage=01-requirements.
+    head_sha: '2fe461d7d0d3a3fa13c118483f3a83090e9f7866'
+    note: Branch created 2026-07-29; F40 cold-start UX; HEAD 2fe461d; 13-deploy-smoke in_progress after user approved
+      commit+preview+deploy.
   - name: fix/S015-jobs-sse-cors
     purpose: S015 hotfix — Jobs SSE CORS preflight (Cache-Control / Last-Event-ID on GET /jobs/events)
     base: main
@@ -13248,7 +13285,17 @@ git_history:
     pr_number: 155
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155'
     note: 'PR #155 merged to main; Modal DM redeploy + live CORS PASS followed; 14-hotfix completed'
+  - sha: '2fe461d7d0d3a3fa13c118483f3a83090e9f7866'
+    branch: evolve/EV-014-chat-cold-start-ux
+    message: '[F40] feat: ChatRAG cold-start fun facts and consent (#87)'
+    stage: 07-build
+    session_id: S016-chat-cold-start-ux
+    files_changed: 37
+    timestamp: '2026-07-29T17:42:20-04:00'
+    evolve_cycle_id: EV-014
+    note: 'F40 ChatRAG cold-start UX — fun facts, consent, Vitest/Playwright, session reports; HEAD short 2fe461d'
   notes:
+  - '2026-07-29 S016/EV-014: Recorded commit 2fe461d ([F40] feat cold-start UX); 13-deploy-smoke set in_progress after user approved commit+preview+deploy; active_session.current_stage=13-deploy-smoke.'
   - '2026-07-29 S015: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1
     PASS; BUG-2026-07-29 resolved; branch fix/S015-jobs-sse-cors merged; 15-service-health in_progress (formal H0ci–H5 pending);
     optional production Jobs UI SSE visual confirm remaining.'
