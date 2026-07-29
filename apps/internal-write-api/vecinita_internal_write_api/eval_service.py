@@ -278,7 +278,7 @@ def _load_eval_run(engine: Engine, *, run_id: UUID) -> LoadedEvalRun:
                     """
                     SELECT config_snapshot, mode, corpus_profile
                     FROM eval_runs
-                    WHERE id = :id
+                    WHERE id = :id AND deleted_at IS NULL
                     """
                 ),
                 {"id": run_id},

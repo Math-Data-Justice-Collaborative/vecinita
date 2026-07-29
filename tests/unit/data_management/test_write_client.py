@@ -325,3 +325,23 @@ def test_post_audit_event_raises_on_http_error() -> None:
             ),
         )
     client.close()
+
+
+def test_soft_delete_eval_run_deletes_path() -> None:
+    """soft_delete_eval_run DELETEs /internal/v1/eval/runs/{id} (TP-S013-03)."""
+    run_id = uuid4()
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(f"{request.method} {request.url.path}")
+        return httpx.Response(HTTPStatus.NO_CONTENT)
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client.soft_delete_eval_run(run_id)
+    assert seen == [f"DELETE /internal/v1/eval/runs/{run_id}"]
+    client.close()
