@@ -110,6 +110,40 @@ def test_admin_delete_removes_job() -> None:
     assert store.get_job(record.job_id) is None
 
 
+def test_admin_delete_eval_job_soft_deletes_linked_run() -> None:
+    """DELETE eval job soft-deletes linked eval_run via write client (TP-S013-03)."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="eval",
+        options={"eval_run_id": str(_EVAL_RUN_ID)},
+    )
+    store.update_job(record.job_id, eval_run_id=_EVAL_RUN_ID)
+    soft_deleted: list[UUID] = []
+
+    class _EvalClient:
+        def soft_delete_eval_run(self, run_id: UUID) -> None:
+            soft_deleted.append(run_id)
+
+        def list_eval_runs(self, *, page: int = 1, page_size: int = 100) -> object:
+            _ = (page, page_size)
+            return type("Empty", (), {"items": []})()
+
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        eval_runs_client=_EvalClient(),  # type: ignore[arg-type]
+    )
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.delete(f"/jobs/{record.job_id}")
+
+    assert response.status_code == HTTPStatus.NO_CONTENT
+    assert store.get_job(record.job_id) is None
+    assert soft_deleted == [_EVAL_RUN_ID]
+
+
 def test_viewer_delete_returns_403() -> None:
     """Viewer cannot delete jobs (TC-147)."""
     store = InMemoryJobStore()
@@ -362,4 +396,4 @@ def test_list_jobs_swallows_eval_client_errors() -> None:
     response = client.get("/jobs")
 
     assert response.status_code == HTTPStatus.OK
-    assert len(response_json_object(response)["jobs"]) == 1
+    assert len(json_list(response_json_object(response), "jobs")) == 1
