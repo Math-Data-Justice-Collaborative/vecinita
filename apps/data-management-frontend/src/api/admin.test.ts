@@ -1375,4 +1375,226 @@ describe("subscribeEvalRunEvents (TP-S013-04)", () => {
       .headers as Record<string, string>;
     expect(headers["Authorization"]).toBe("Bearer jwt");
   });
+
+  it("sends Last-Event-ID and covers stream edge cases", async () => {
+    const frame = [
+      ": keepalive\n",
+      "event: other\ndata: {}\n\n",
+      "event: eval_run\ndata: {bad}\n\n",
+      'event: eval_run\ndata: {"run_id":"r1","status":"running"}\n\n',
+    ].join("");
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(stream, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const onProgress = vi.fn();
+    const onError = vi.fn();
+    const sub = subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002", apiKey: "k" },
+      "r1",
+      { onProgress, onError, lastEventId: "42" },
+    );
+
+    await vi.waitFor(() => {
+      expect(onProgress).toHaveBeenCalledWith({
+        run_id: "r1",
+        status: "running",
+      });
+    });
+    expect(onError).toHaveBeenCalled();
+    const headers = (fetchMock.mock.calls[0]?.[1] as RequestInit)
+      .headers as Record<string, string>;
+    expect(headers["Last-Event-ID"]).toBe("42");
+    sub.close();
+  });
+
+  it("errors when eval events response is not ok or has no body", async () => {
+    const onErrorEmpty = vi.fn();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("boom", { status: 503 })),
+    );
+    subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002", apiKey: "k" },
+      "r1",
+      { onProgress: vi.fn(), onError: onErrorEmpty },
+    );
+    await vi.waitFor(() => {
+      expect(onErrorEmpty).toHaveBeenCalled();
+    });
+
+    const onErrorNoBody = vi.fn();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(null, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+    subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002", apiKey: "k" },
+      "r1",
+      { onProgress: vi.fn(), onError: onErrorNoBody },
+    );
+    await vi.waitFor(() => {
+      expect(onErrorNoBody).toHaveBeenCalled();
+      expect((onErrorNoBody.mock.calls[0]?.[0] as Error).message).toMatch(
+        /No response body/,
+      );
+    });
+  });
+
+  it("uses fallback message when eval events fail with empty body", async () => {
+    const onError = vi.fn();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 502 })),
+    );
+    subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002", apiKey: "k" },
+      "r1",
+      { onProgress: vi.fn(), onError },
+    );
+    await vi.waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+      expect((onError.mock.calls[0]?.[0] as Error).message).toMatch(
+        /Eval run events failed/,
+      );
+    });
+  });
+
+  it("falls back Authorization when accessToken and apiKey are missing", async () => {
+    const frame =
+      'event: eval_run\ndata: {"run_id":"r1","status":"running"}\n\n';
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(stream, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const sub = subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002" },
+      "r1",
+      { onProgress: vi.fn() },
+    );
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled();
+    });
+    const headers = (fetchMock.mock.calls[0]?.[1] as RequestInit)
+      .headers as Record<string, string>;
+    expect(headers["Authorization"]).toBe("Bearer ");
+    sub.close();
+  });
+
+  it("ignores non-SSE field lines in eval event stream", async () => {
+    const frame =
+      "hello\n" +
+      'event: eval_run\ndata: {"run_id":"r1","status":"running"}\n\n';
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+    const onProgress = vi.fn();
+    subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002", apiKey: "k" },
+      "r1",
+      { onProgress },
+    );
+    await vi.waitFor(() => {
+      expect(onProgress).toHaveBeenCalled();
+    });
+  });
+
+  it("swallows abort errors after close", async () => {
+    let rejectRead: ((reason: unknown) => void) | undefined;
+    const body = {
+      getReader() {
+        return {
+          read: () =>
+            new Promise<ReadableStreamReadResult<Uint8Array>>((_, rej) => {
+              rejectRead = rej;
+            }),
+          cancel: () => Promise.resolve(),
+          releaseLock: () => undefined,
+        };
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(
+        (_url: RequestInfo | URL, init?: RequestInit) => {
+          const signal = init?.signal;
+          if (signal) {
+            signal.addEventListener("abort", () => {
+              rejectRead?.(new DOMException("Aborted", "AbortError"));
+            });
+          }
+          return Promise.resolve({ ok: true, body, status: 200 });
+        },
+      ),
+    );
+    const onError = vi.fn();
+    const sub = subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002", apiKey: "k" },
+      "r1",
+      { onProgress: vi.fn(), onError },
+    );
+    await Promise.resolve();
+    sub.close();
+    await vi.waitFor(() => {
+      expect(rejectRead).toBeTypeOf("function");
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(onError).not.toHaveBeenCalled();
+  });
+});
+
+describe("fetchPlaygroundCatalogFamilies auth fallback", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("sends empty Bearer when neither token nor apiKey is set", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({ families: [] }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await fetchPlaygroundCatalogFamilies({
+      baseUrl: "http://localhost:8002",
+    });
+    const headers = (fetchMock.mock.calls[0]?.[1] as RequestInit)
+      .headers as Record<string, string>;
+    expect(headers["Authorization"]).toBe("Bearer ");
+  });
 });

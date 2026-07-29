@@ -267,6 +267,141 @@ describe("subscribeJobEvents", () => {
       expect(onError).toHaveBeenCalled();
     });
   });
+
+  it("throws when the events response has no body", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(null, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+    const onError = vi.fn();
+    subscribeJobEvents(OPTIONS, { onJob: vi.fn(), onError });
+    await vi.waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+      const err = onError.mock.calls[0]?.[0];
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toMatch(/No response body/);
+    });
+  });
+
+  it("skips non-job event names, comment lines, and bad JSON", async () => {
+    const frame = [
+      ": keepalive\n",
+      "event: ping\ndata: {}\n\n",
+      "event: job\ndata: {not-json}\n\n",
+      "event: job\ndata: " + JSON.stringify(SAMPLE_JOB) + "\n\n",
+    ].join("");
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+    const onJob = vi.fn();
+    const onError = vi.fn();
+    const sub = subscribeJobEvents(OPTIONS, { onJob, onError });
+    await vi.waitFor(() => {
+      expect(onJob).toHaveBeenCalledWith(SAMPLE_JOB);
+    });
+    expect(onError).toHaveBeenCalled();
+    sub.close();
+  });
+
+  it("swallows errors after abort on close", async () => {
+    let rejectRead: ((reason: unknown) => void) | undefined;
+    const stream = new ReadableStream<Uint8Array>({
+      start() {
+        /* hang until abort */
+      },
+      cancel() {
+        rejectRead?.(new DOMException("Aborted", "AbortError"));
+      },
+    });
+    // Override getReader to surface abort after close().
+    const body = {
+      getReader() {
+        return {
+          read: () =>
+            new Promise<ReadableStreamReadResult<Uint8Array>>((_, rej) => {
+              rejectRead = rej;
+            }),
+          cancel: () => Promise.resolve(),
+          releaseLock: () => undefined,
+        };
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        body,
+        status: 200,
+      }),
+    );
+    const onError = vi.fn();
+    const sub = subscribeJobEvents(OPTIONS, { onJob: vi.fn(), onError });
+    await Promise.resolve();
+    sub.close();
+    rejectRead?.(new DOMException("Aborted", "AbortError"));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(onError).not.toHaveBeenCalled();
+  });
+  it("uses fallback message when events fail with an empty body", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 502 })),
+    );
+    const onError = vi.fn();
+    subscribeJobEvents(OPTIONS, { onJob: vi.fn(), onError });
+    await vi.waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+      expect((onError.mock.calls[0]?.[0] as Error).message).toMatch(
+        /Job events failed/,
+      );
+    });
+  });
+
+  it("ignores non-SSE field lines in the event stream", async () => {
+    const frame =
+      "hello\n" +
+      "event: job\ndata: " +
+      JSON.stringify(SAMPLE_JOB) +
+      "\n\n";
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+      ),
+    );
+    const onJob = vi.fn();
+    subscribeJobEvents(OPTIONS, { onJob });
+    await vi.waitFor(() => {
+      expect(onJob).toHaveBeenCalledWith(SAMPLE_JOB);
+    });
+  });
 });
 
 describe("parseUrlsInput", () => {

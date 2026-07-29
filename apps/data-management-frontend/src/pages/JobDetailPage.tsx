@@ -64,7 +64,7 @@ export function JobDetailPage() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(
-    async (isActive: () => boolean = () => true) => {
+    async (isActive: () => boolean) => {
       if (!jobId) return;
       try {
         const client = requireAdminConfig();
@@ -296,7 +296,7 @@ export function JobDetailPage() {
                 variant="outline"
                 aria-label={tr("admin.jobs.copyCallId")}
                 onClick={() => {
-                  void navigator.clipboard.writeText(job.modal_call_id ?? "");
+                  void navigator.clipboard.writeText(job.modal_call_id);
                 }}
               >
                 {tr("admin.jobs.copyCallId")}

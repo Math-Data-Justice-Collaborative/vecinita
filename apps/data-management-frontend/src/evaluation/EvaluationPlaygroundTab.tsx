@@ -413,7 +413,7 @@ export function EvaluationPlaygroundTab({
       const client = requireCorpusConfig();
       const body = selectedPresetId
         ? { source: "preset" as const, preset_id: selectedPresetId }
-        : { source: "run" as const, run_id: lastRunId ?? "" };
+        : { source: "run" as const, run_id: lastRunId! };
       const result = await promoteRagConfig(client, body);
       setPromoteVersion(result.config_version);
       setPromoteDialogOpen(false);

@@ -667,6 +667,53 @@ describe("eval coverage gaps", () => {
     });
   });
 
+  it("EvaluationCompareView handles null B faithfulness without regression", () => {
+    renderWithProviders(
+      <EvaluationCompareView
+        runA={{
+          run_id: RUN_A_ID,
+          status: "completed",
+          metrics_summary: { faithfulness: 0.9 },
+          items: [
+            {
+              case_id: "c1",
+              locale: "en",
+              question: "Q",
+              retrieved_urls: [],
+              answer: "A",
+              metrics: { faithfulness: 0.9, retrieval_pass: true, latency_ms: 1 },
+            },
+          ],
+        }}
+        runB={{
+          run_id: RUN_B_ID,
+          status: "completed",
+          metrics_summary: {
+            faithfulness: null,
+          },
+          items: [
+            {
+              case_id: "c1",
+              locale: "en",
+              question: "Q",
+              retrieved_urls: [],
+              answer: "B",
+              metrics: {
+                faithfulness: null,
+                retrieval_pass: true,
+                latency_ms: 1,
+              },
+            },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByTestId("evaluation-compare")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("eval-compare-regression-c1"),
+    ).not.toBeInTheDocument();
+  });
+
   it("EvaluationCompareView shows zero delta without destructive styling", () => {
     renderWithProviders(
       <EvaluationCompareView
@@ -766,5 +813,200 @@ describe("eval coverage gaps", () => {
     view.unmount();
     releaseModels?.();
     await Promise.resolve();
+  });
+
+  it("EvaluationPlaygroundTab surfaces translated save failure for non-Error rejections", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (
+            url.includes("/internal/v1/eval/config-presets") &&
+            method === "POST" &&
+            !url.includes("/clone")
+          ) {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
+            return Promise.reject("save offline");
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [] }),
+            });
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
+    );
+
+    renderWithProviders(<EvaluationPlaygroundTab />);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-preset-save"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-save"));
+    fireEvent.change(screen.getByTestId("eval-playground-preset-name"), {
+      target: { value: "broken save" },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
+    await waitFor(() => {
+      expect(screen.getByText(/Failed to save preset/i)).toBeInTheDocument();
+    });
+  });
+
+  it("EvaluationPlaygroundTab surfaces Error clone failures", async () => {
+    const presetId = "00000000-0000-0000-0000-0000000000dd";
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (
+            url.includes(
+              `/internal/v1/eval/config-presets/${presetId}/clone`,
+            ) &&
+            method === "POST"
+          ) {
+            return Promise.reject(new Error("clone exploded"));
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                items: [
+                  {
+                    preset_id: presetId,
+                    version: 1,
+                    name: "shared preset",
+                    config: {
+                      top_k: 7,
+                      min_retrieval_score: 0.2,
+                      system_prompt: "Preset prompt",
+                      max_tokens: 256,
+                      temperature: 0.2,
+                      corpus_profile: "staging",
+                      criteria_ids: [],
+                      judge_temperature: 0.2,
+                      model_id: "qwen2.5:1.5b-instruct",
+                    },
+                    shared: true,
+                    owner_id: "33333333-3333-3333-3333-333333333333",
+                    created_at: "2026-07-01T10:00:00Z",
+                    updated_at: "2026-07-01T10:00:00Z",
+                  },
+                ],
+              }),
+            });
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
+    );
+
+    renderWithProviders(<EvaluationPlaygroundTab />);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: presetId },
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-preset-clone"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-clone"));
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/clone exploded/i);
+    });
+  });
+
+  it("EvaluationPlaygroundTab updates one preset among several", async () => {
+    const { installAuthenticatedSupabaseMock } = await import("./supabaseMock");
+    installAuthenticatedSupabaseMock();
+    const ownedA = {
+      preset_id: "00000000-0000-0000-0000-0000000000a1",
+      version: 1,
+      name: "preset-a",
+      config: {
+        top_k: 5,
+        min_retrieval_score: 0.1,
+        system_prompt: "A",
+        max_tokens: 128,
+        temperature: 0.1,
+        corpus_profile: "staging",
+        criteria_ids: [],
+        judge_temperature: 0.1,
+        model_id: "qwen2.5:1.5b-instruct",
+      },
+      shared: false,
+      owner_id: "11111111-1111-1111-1111-111111111111",
+      created_at: "2026-07-01T10:00:00Z",
+      updated_at: "2026-07-01T10:00:00Z",
+    };
+    const ownedB = {
+      ...ownedA,
+      preset_id: "00000000-0000-0000-0000-0000000000b1",
+      name: "preset-b",
+      system_prompt: "B",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          if (
+            url.includes(
+              `/internal/v1/eval/config-presets/${ownedA.preset_id}`,
+            ) &&
+            method === "PATCH"
+          ) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ ...ownedA, version: 2, name: "preset-a-v2" }),
+            });
+          }
+          if (url.includes("/internal/v1/eval/config-presets")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({ items: [ownedA, ownedB] }),
+            });
+          }
+          return Promise.resolve(defaultEvalFetch(url));
+        }),
+    );
+
+    renderWithProviders(<EvaluationPlaygroundTab />);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-preset-select"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByTestId("eval-playground-preset-select"), {
+      target: { value: ownedA.preset_id },
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("eval-playground-preset-update"),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-update"));
+    fireEvent.change(screen.getByTestId("eval-playground-preset-name"), {
+      target: { value: "preset-a-v2" },
+    });
+    fireEvent.click(screen.getByTestId("eval-playground-preset-confirm"));
+    await waitFor(() => {
+      expect(screen.getByTestId("eval-playground-preset-select")).toHaveValue(
+        ownedA.preset_id,
+      );
+    });
   });
 });

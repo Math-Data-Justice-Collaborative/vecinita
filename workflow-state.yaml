@@ -1084,12 +1084,28 @@ project:
           admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy 
           stages
     13-deploy-smoke:
-      status: completed
-      started_at: '2026-06-26'
-      completed_at: '2026-06-26'
-      partial_rerun_at: '2026-06-26'
-      partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-      report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+      status: in_progress
+      started_at: '2026-07-29'
+      partial_rerun_at: '2026-07-29'
+      session_id: S013-unified-job-monitoring
+      branch: evolve/EV-012-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      mode: delta
+      deploy_path: A
+      head_sha: d625dc00bf4b2066b3aced9f6ed76dfe9e2e0fb4
+      commits_ahead_of_origin: 19
+      pr_number: 153
+      merge_gate: smokes_pass_before_merge
+      dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+      partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+      note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A; local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012; do NOT merge PR #153 until smokes pass; 12-verify-deploy remains waived (S013-D22); prior S001 baseline preserved below'
+      s001_baseline:
+        status: completed
+        started_at: '2026-06-26'
+        completed_at: '2026-06-26'
+        partial_rerun_at: '2026-06-26'
+        partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+        report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
     15-service-health:
       status: completed
       started_at: '2026-07-28'
@@ -1704,7 +1720,13 @@ active_session:
       note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke'
     - stage: 13-deploy-smoke
       required: true
-      status: pending
+      status: in_progress
+      started_at: '2026-07-29'
+      mode: delta
+      session_id: S013-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      deploy_path: A
+      note: 'Path A — push evolve → pin/redeploy Modal DM + DO admin FE + write-api → H1–H5/Jobs smokes → merge PR #153 after green; 12-verify-deploy waived (S013-D22)'
     - stage: 03-plan-tooling
       required: false
       status: skipped
@@ -1809,7 +1831,7 @@ active_session:
   handoff:
     from_session: S012-hotfix-admin-ui-112-105
     cleared: true
-    next_action: start_13_deploy_smoke
+    next_action: run_13_deploy_smoke_path_a
     next_skill: 13-deploy-smoke
     resume_at_task:
     branch: evolve/EV-012-unified-job-monitoring
@@ -1819,8 +1841,11 @@ active_session:
     task_status: completed
     milestone: M85
     blocker_advisory:
-    note: '10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13. Next: start_13_deploy_smoke — ISS-004 resolved
-      (45ed688 removed NC Qwen2.5-3B from playground catalog). Do not merge PR #153 yet.'
+    deploy_path: A
+    head_sha: d625dc00bf4b2066b3aced9f6ed76dfe9e2e0fb4
+    commits_ahead_of_origin: 19
+    dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+    note: '13-deploy-smoke IN_PROGRESS — Path A (push evolve → pin/redeploy Modal DM + DO admin FE + write-api from SHA → H1–H5/Jobs smokes → merge PR #153 after green). Local HEAD d625dc0 (19 ahead of origin). Do NOT merge #153 until smokes pass. 12-verify-deploy remains waived (S013-D22). Dirty security/S012 tree NOT EV-012.'
     git_commits:
       - sha: a781a80
         message: '[T82.2] test: add failing jobs/events SSE framing tests'
@@ -2027,15 +2052,15 @@ active_session:
     milestone_gate_passed: Phase19_T2
     resume_confirmed_at: '2026-07-28'
     ci:
-      status: pending_watch
+      status: pending_push
       branch: evolve/EV-012-unified-job-monitoring
-      note: 'HEAD 45ed688 on evolve branch; watch CI when pushing; do not merge PR #153'
+      note: 'Local HEAD d625dc0 (19 ahead of origin); Path A push then watch CI; do not merge PR #153 until smokes pass'
     resume_at: 13-deploy-smoke
     phase_19_gate: passed
   milestone_completed: M85
   milestone_completed_at: '2026-07-29'
-  build_note: 'M85 COMPLETE; Phase D passed; ISS-004 resolved @ 45ed688; next start_13_deploy_smoke; PR #153 open (do not merge)'
-  resume_source: 'ISS-004 resolved — handoff start_13_deploy_smoke'
+  build_note: 'M85 COMPLETE; Phase D passed; ISS-004 resolved @ 45ed688; 13-deploy-smoke IN_PROGRESS Path A; PR #153 open (do not merge until smokes pass)'
+  resume_source: 'User chose deploy Path A — handoff run_13_deploy_smoke_path_a'
   resume_confirmed_at: '2026-07-29'
 sessions:
   - id: S012-hotfix-admin-ui-112-105
@@ -4322,29 +4347,43 @@ stages:
         template: pass
         connectivity: pass
   13-deploy-smoke:
-    status: completed
-    started_at: '2026-06-26'
-    completed_at: '2026-06-26'
-    partial_rerun_at: '2026-06-26'
-    partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-    report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+    status: in_progress
+    started_at: '2026-07-29'
+    partial_rerun_at: '2026-07-29'
+    session_id: S013-unified-job-monitoring
+    branch: evolve/EV-012-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    mode: delta
+    deploy_path: A
+    head_sha: d625dc00bf4b2066b3aced9f6ed76dfe9e2e0fb4
+    commits_ahead_of_origin: 19
+    pr_number: 153
+    merge_gate: smokes_pass_before_merge
+    dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+    partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+    note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A; do NOT merge PR #153 until smokes pass; 12-verify-deploy remains waived (S013-D22); prior EV-002/S001 H1–H5 results preserved below'
+    prior_completed_at: '2026-06-26'
+    prior_started_at: '2026-06-26'
+    prior_partial_rerun_at: '2026-06-26'
+    prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+    prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
     chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
     connectivity_validated_at: '2026-05-27'
-    h0c: pass
-    h1: pass
-    h2: pass
-    h3: pass
-    h3b_browse: pass
-    h3_ev002_t3: pass
-    h4_do: pass
-    h4_modal: waiver
-    h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
-    h5: pass
+    prior_h0c: pass
+    prior_h1: pass
+    prior_h2: pass
+    prior_h3: pass
+    prior_h3b_browse: pass
+    prior_h3_ev002_t3: pass
+    prior_h4_do: pass
+    prior_h4_modal: waiver
+    prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
+    prior_h5: pass
     cors_deployed: true
     deploy_time_fixes:
       - '98cc2ac: tag inference chat template + graceful fallback'
       - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
-    note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
+    prior_note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
   14-hotfix:
     status: completed
     started_at: '2026-07-28'
@@ -6355,6 +6394,20 @@ evolve_cycles:
           t2: pending
           t3: pending
         note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke'
+      13-deploy-smoke:
+        status: in_progress
+        started: '2026-07-29'
+        mode: delta
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        deploy_path: A
+        head_sha: d625dc00bf4b2066b3aced9f6ed76dfe9e2e0fb4
+        commits_ahead_of_origin: 19
+        pr_number: 153
+        merge_gate: smokes_pass_before_merge
+        dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+        note: 'Path A IN_PROGRESS — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api from SHA → H1–H5 / Jobs smokes → merge PR #153 after green; do NOT merge until smokes pass; 12-verify-deploy waived (S013-D22)'
     checkpoints:
       phase_a: passed
       phase_b: passed
@@ -6368,6 +6421,7 @@ evolve_cycles:
       phase_c: 'Passed 2026-07-29 — 08-verify-build M85/Phase19 PASS scoped; Docker integration skipped locally; ChatRAG LocaleContext
         pre-existing out of scope; gate C→D passed; handoff → 10-e2e'
       phase_d: 'Passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13-deploy-smoke; checkpoints.deploy remains pending'
+      deploy: 'Pending 2026-07-29 — Path A chosen; 13-deploy-smoke in_progress; merge PR #153 only after H1–H5/Jobs smokes green'
     gates:
       a_to_b: passed
       b_to_c: passed
@@ -6394,10 +6448,9 @@ evolve_cycles:
       - TP-S013-07
       - TP-S013-08
     open_contradictions: []
-    note: 'EV-012 Phase D passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13; current_stage=13-deploy-smoke;
-      phase_d=passed; deploy checkpoint pending; ISS-004 resolved (45ed688); PR #153 open (do not merge).'
+    note: 'EV-012 13-deploy-smoke IN_PROGRESS 2026-07-29 — Path A (push evolve → pin/redeploy Modal DM + DO admin FE + write-api → H1–H5/Jobs smokes → merge PR #153 after green); current_stage=13-deploy-smoke; checkpoints.deploy=pending; local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012; do NOT merge #153 until smokes pass; 12-verify-deploy waived (S013-D22).'
     handoff:
-      next_action: start_13_deploy_smoke
+      next_action: run_13_deploy_smoke_path_a
       next_skill: 13-deploy-smoke
       interview_cursor: completed
       current_task:
@@ -6407,11 +6460,15 @@ evolve_cycles:
       milestone_completed: M85
       milestone_gate_passed: Phase19_T2
       blocker_advisory:
-      note: 'start_13_deploy_smoke — ISS-004 cleared (NC Qwen2.5-3B removed from playground catalog @ 45ed688). Do not merge PR #153 yet.'
+      deploy_path: A
+      head_sha: d625dc00bf4b2066b3aced9f6ed76dfe9e2e0fb4
+      commits_ahead_of_origin: 19
+      dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+      note: '13-deploy-smoke Path A IN_PROGRESS — push evolve branch first; pin/redeploy from SHA; H1–H5/Jobs smokes; merge PR #153 only after green. 12-verify-deploy remains waived (S013-D22).'
       ci:
-        status: pending_watch
+        status: pending_push
         branch: evolve/EV-012-unified-job-monitoring
-        note: 'HEAD 45ed688; watch CI; do not merge PR #153'
+        note: 'Local HEAD d625dc0 (19 ahead of origin); Path A push then watch CI; do not merge PR #153 until smokes pass'
       orchestrator_resumed_at: '2026-07-29'
       resume_at_task:
       resume_at: 13-deploy-smoke
@@ -8743,6 +8800,7 @@ decisions_log:
     PR #153 do not merge'
   - 'EV-012/S013 2026-07-29: 08-verify-build PASS scoped (M85/Phase19); Docker integration skipped locally; ChatRAG LocaleContext
     pre-existing out of scope; phase_c=passed; gates.c_to_d=passed; handoff → start_10_e2e'
+  - 'EV-012/S013 2026-07-29: Deploy Path A chosen (Recommended) — Push evolve/EV-012-unified-job-monitoring → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green. Do NOT merge #153 until smokes pass. 12-verify-deploy remains waived (S013-D22). 13-deploy-smoke set in_progress; checkpoints.deploy still pending. Local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012 — leave uncommitted.'
 artifacts:
   - docs/sessions/S000-internal-docs-archive/context-brief.md
   - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -9287,9 +9345,9 @@ git_history:
       created_at: '2026-07-28'
       session_id: S013-unified-job-monitoring
       evolve_cycle_id: EV-012
-      note: 'M82–M85 complete; Phase D passed; ISS-004 resolved @ 45ed688 (NC Qwen2.5-3B catalog removal); minor PR #153 open
-        (do not merge); next start_13_deploy_smoke'
-      head_sha: 45ed6882ecd94dc81ed02fc7e0366d90f41e8e09
+      note: 'M82–M85 complete; Phase D passed; ISS-004 resolved @ 45ed688; 13-deploy-smoke Path A in_progress; local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012; minor PR #153 open (do not merge until smokes pass)'
+      head_sha: d625dc00bf4b2066b3aced9f6ed76dfe9e2e0fb4
+      commits_ahead_of_origin: 19
     - name: fix/S012-admin-ui-112-105
       purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
       base: main
@@ -10451,6 +10509,7 @@ git_history:
       note: 'ISS-004 closed — qwen2.5:3b-* removed from catalog; resolve_hf_repo blocks Qwen2.5-3B-Instruct; remediation in
         docs/license-audit-2026-07-28.md'
   notes:
+    - '2026-07-29 S013/EV-012: Deploy Path A chosen — 13-deploy-smoke IN_PROGRESS; push evolve → pin/redeploy Modal DM + DO admin FE + write-api from SHA → H1–H5/Jobs smokes → merge PR #153 after green; do NOT merge until smokes pass; 12-verify-deploy remains waived (S013-D22); checkpoints.deploy=pending; local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012 — leave uncommitted.'
     - '2026-07-29 S013/EV-012: ISS-004 RESOLVED @ 45ed688 — NC Qwen2.5-3B removed from playground catalog; blocker_advisory
       cleared; next_action=start_13_deploy_smoke (no ISS-004 block). License audit remediation: docs/license-audit-2026-07-28.md.'
     - '2026-07-29 S013/EV-012: M85 COMPLETE (T85.1–T85.5); Phase 19 gate PASS @ T2 (phase19-gate.md @ cc1c355); 07-build completed;
