@@ -1092,7 +1092,7 @@ project:
       evolve_cycle_id: EV-012
       mode: delta
       deploy_path: A
-      head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
+      head_sha: 113589139659a3508eb68340be91d93e7814ae77
       commits_ahead_of_origin: 0
       pushed_at: '2026-07-29'
       pr_number: 153
@@ -1106,13 +1106,15 @@ project:
         coverage_fix: ca78c55
         ci_second_run: failed_lint_coverage
         ci_second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths (DM FE Jobs SSE)'
-        lint_coverage_fix: pending_commit_push
-        local_lint_coverage: 'PASS — DM FE lint + coverage (Jobs SSE paths)'
-        ci_rewatch: pending_after_fix_push
+        lint_coverage_fix: 746181b
+        iss004_branch_coverage_fix: 1135891
+        ci_rewatch: pass
+        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+        h0c_migration_check: pending
         pin_redeploy: pending
         smokes: pending
         merge_pr_153: blocked_until_smokes_green
-      note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A; origin HEAD ca78c55; CI coverage fail→fix ca78c55→CI failed eslint+coverage; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green; dirty security/S012 tree NOT EV-012; do NOT merge PR #153 until smokes pass; 12-verify-deploy remains waived (S013-D22); ISS-004 closed; prior S001 baseline preserved below'
+      note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api from evolve SHA then smokes; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed; prior S001 baseline preserved below'
       s001_baseline:
         status: completed
         started_at: '2026-06-26'
@@ -1740,19 +1742,18 @@ active_session:
       session_id: S013-unified-job-monitoring
       evolve_cycle_id: EV-012
       deploy_path: A
-      head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
+      head_sha: 113589139659a3508eb68340be91d93e7814ae77
       path_a_progress:
         push: done
-        ci_first_run: failed_coverage_gate
-        coverage_fix: ca78c55
-        ci_second_run: failed_lint_coverage
-        lint_coverage_fix: pending_commit_push
-        local_lint_coverage: 'PASS — DM FE lint + coverage'
-        ci_rewatch: pending_after_fix_push
+        lint_coverage_fix: 746181b
+        iss004_branch_coverage_fix: 1135891
+        ci_rewatch: pass
+        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+        h0c_migration_check: pending
         pin_redeploy: pending
         smokes: pending
         merge_pr_153: blocked_until_smokes_green
-      note: 'Path A — pushed @ ca78c55; CI coverage fail→fix ca78c55→CI failed eslint+coverage; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green; do NOT merge PR #153; 12-verify-deploy waived (S013-D22); ISS-004 closed'
+      note: 'Path A @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api; do NOT merge PR #153; 12-verify-deploy waived (S013-D22); ISS-004 closed'
     - stage: 03-plan-tooling
       required: false
       status: skipped
@@ -1857,7 +1858,7 @@ active_session:
   handoff:
     from_session: S012-hotfix-admin-ui-112-105
     cleared: true
-    next_action: commit_push_lint_coverage_fix_then_await_ci_green_then_pin_redeploy
+    next_action: h0c_migration_check_then_pin_redeploy_then_smokes
     next_skill: 13-deploy-smoke
     resume_at_task:
     branch: evolve/EV-012-unified-job-monitoring
@@ -1869,10 +1870,10 @@ active_session:
     milestone: M85
     blocker_advisory:
     deploy_path: A
-    head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
+    head_sha: 113589139659a3508eb68340be91d93e7814ae77
     commits_ahead_of_origin: 0
     dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
-    note: '13-deploy-smoke IN_PROGRESS — Path A @ ca78c55; CI coverage fail→fix ca78c55→CI failed eslint+coverage; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green. Do NOT merge #153 until smokes pass. 12-verify-deploy remains waived (S013-D22). ISS-004 closed. Dirty security/S012 tree NOT EV-012.'
+    note: '13-deploy-smoke IN_PROGRESS — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api then smokes. Do NOT merge #153 until smokes pass. 12-verify-deploy waived (S013-D22). ISS-004 closed.'
     git_commits:
       - sha: a781a80
         message: '[T82.2] test: add failing jobs/events SSE framing tests'
@@ -2089,27 +2090,42 @@ active_session:
         timestamp: '2026-07-29T08:47:32-04:00'
         evolve_cycle_id: EV-012
         note: 'CI coverage gate fix — local DM FE coverage PASS 100% lines / 98.18% branches'
+      - sha: 746181b
+        message: '[EV-012] fix: satisfy DM FE eslint without dropping coverage'
+        stage: 13-deploy-smoke
+        session_id: S013-unified-job-monitoring
+        files_changed: 8
+        timestamp: '2026-07-29T08:56:33-04:00'
+        evolve_cycle_id: EV-012
+        note: 'Path A CI lint+coverage remediation — eslint no-non-null-assertion vs coverage resolved'
+      - sha: 1135891
+        message: '[EV-012] test: cover ISS-004 catalog HF gate branches'
+        stage: 16-evolve
+        session_id: S013-unified-job-monitoring
+        files_changed: 2
+        timestamp: '2026-07-29T09:02:51-04:00'
+        evolve_cycle_id: EV-012
+        note: 'ISS-004 write-api branch coverage — CI green @ run 30454245590'
     next_task:
     milestone_completed: M85
     milestone_gate_passed: Phase19_T2
     resume_confirmed_at: '2026-07-28'
     ci:
-      status: remediation_in_progress
+      status: pass
       branch: evolve/EV-012-unified-job-monitoring
-      head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
-      first_run: failed_coverage_gate
-      coverage_fix_sha: ca78c55
-      second_run: failed_lint_coverage
-      second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths'
-      lint_coverage_fix: pending_commit_push
-      local_lint_coverage: 'PASS — DM FE lint + coverage (Jobs SSE paths)'
-      note: 'CI failed on ca78c55 (eslint+coverage); local fix ready; pending commit+push before re-watch CI and pin/redeploy; do not merge PR #153 until smokes pass'
+      head_sha: 113589139659a3508eb68340be91d93e7814ae77
+      run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+      run_id: 30454245590
+      conclusion: success
+      lint_coverage_fix_sha: 746181b
+      iss004_coverage_fix_sha: 1135891
+      note: 'CI green @ 1135891; next H0c + migration check then pin/redeploy from evolve SHA; do not merge PR #153 until smokes pass'
     resume_at: 13-deploy-smoke
     phase_19_gate: passed
   milestone_completed: M85
   milestone_completed_at: '2026-07-29'
-  build_note: 'M85 COMPLETE; Phase D passed; ISS-004 closed; 13-deploy-smoke IN_PROGRESS Path A @ ca78c55 — CI failed eslint+coverage after coverage fix; local lint+coverage fix ready (pending commit+push); PR #153 open (do not merge until smokes pass); 12-verify-deploy waived (S013-D22)'
-  resume_source: 'User chose deploy Path A — handoff commit_push_lint_coverage_fix_then_await_ci_green_then_pin_redeploy'
+  build_note: 'M85 COMPLETE; Phase D passed; ISS-004 closed; 13-deploy-smoke IN_PROGRESS Path A @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy; PR #153 open (do not merge until smokes pass); 12-verify-deploy waived (S013-D22)'
+  resume_source: 'User chose deploy Path A — handoff h0c_migration_check_then_pin_redeploy_then_smokes'
   resume_confirmed_at: '2026-07-29'
 sessions:
   - id: S012-hotfix-admin-ui-112-105
@@ -4404,7 +4420,7 @@ stages:
     evolve_cycle_id: EV-012
     mode: delta
     deploy_path: A
-    head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
+    head_sha: 113589139659a3508eb68340be91d93e7814ae77
     commits_ahead_of_origin: 0
     pushed_at: '2026-07-29'
     pr_number: 153
@@ -4418,13 +4434,15 @@ stages:
       coverage_fix: ca78c55
       ci_second_run: failed_lint_coverage
       ci_second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths (DM FE Jobs SSE)'
-      lint_coverage_fix: pending_commit_push
-      local_lint_coverage: 'PASS — DM FE lint + coverage (Jobs SSE paths)'
-      ci_rewatch: pending_after_fix_push
+      lint_coverage_fix: 746181b
+      iss004_branch_coverage_fix: 1135891
+      ci_rewatch: pass
+      ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+      h0c_migration_check: pending
       pin_redeploy: pending
       smokes: pending
       merge_pr_153: blocked_until_smokes_green
-    note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A @ ca78c55; CI coverage fail→fix ca78c55→CI failed eslint+coverage; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green; do NOT merge PR #153 until smokes pass; 12-verify-deploy remains waived (S013-D22); ISS-004 closed; prior EV-002/S001 H1–H5 results preserved below'
+    note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A @ 1135891; CI green; next H0c + migration check then pin/redeploy then smokes; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed; prior EV-002/S001 H1–H5 results preserved below'
     prior_completed_at: '2026-06-26'
     prior_started_at: '2026-06-26'
     prior_partial_rerun_at: '2026-06-26'
@@ -6465,7 +6483,7 @@ evolve_cycles:
         branch: evolve/EV-012-unified-job-monitoring
         evolve_cycle_id: EV-012
         deploy_path: A
-        head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
+        head_sha: 113589139659a3508eb68340be91d93e7814ae77
         commits_ahead_of_origin: 0
         pushed_at: '2026-07-29'
         pr_number: 153
@@ -6478,13 +6496,15 @@ evolve_cycles:
           coverage_fix: ca78c55
           ci_second_run: failed_lint_coverage
           ci_second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths (DM FE Jobs SSE)'
-          lint_coverage_fix: pending_commit_push
-          local_lint_coverage: 'PASS — DM FE lint + coverage (Jobs SSE paths)'
-          ci_rewatch: pending_after_fix_push
+          lint_coverage_fix: 746181b
+          iss004_branch_coverage_fix: 1135891
+          ci_rewatch: pass
+          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+          h0c_migration_check: pending
           pin_redeploy: pending
           smokes: pending
           merge_pr_153: blocked_until_smokes_green
-        note: 'Path A IN_PROGRESS @ ca78c55 — CI coverage fail→fix ca78c55→CI failed eslint+coverage; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed'
+        note: 'Path A IN_PROGRESS @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed'
     checkpoints:
       phase_a: passed
       phase_b: passed
@@ -6498,7 +6518,7 @@ evolve_cycles:
       phase_c: 'Passed 2026-07-29 — 08-verify-build M85/Phase19 PASS scoped; Docker integration skipped locally; ChatRAG LocaleContext
         pre-existing out of scope; gate C→D passed; handoff → 10-e2e'
       phase_d: 'Passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13-deploy-smoke; checkpoints.deploy remains pending'
-      deploy: 'Pending 2026-07-29 — Path A in progress @ ca78c55; CI failed eslint+coverage after coverage fix; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green; merge PR #153 only after H1–H5/Jobs smokes green'
+      deploy: 'Pending 2026-07-29 — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api; merge PR #153 only after H1–H5/Jobs smokes green'
     gates:
       a_to_b: passed
       b_to_c: passed
@@ -6525,9 +6545,9 @@ evolve_cycles:
       - TP-S013-07
       - TP-S013-08
     open_contradictions: []
-    note: 'EV-012 13-deploy-smoke IN_PROGRESS 2026-07-29 — Path A @ ca78c55; CI coverage fail→fix ca78c55→CI failed eslint+coverage; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green; checkpoints.deploy=pending; dirty security/S012 tree NOT EV-012; do NOT merge #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed.'
+    note: 'EV-012 13-deploy-smoke IN_PROGRESS 2026-07-29 — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy; checkpoints.deploy=pending; do NOT merge #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed.'
     handoff:
-      next_action: commit_push_lint_coverage_fix_then_await_ci_green_then_pin_redeploy
+      next_action: h0c_migration_check_then_pin_redeploy_then_smokes
       next_skill: 13-deploy-smoke
       interview_cursor: completed
       current_task:
@@ -6538,22 +6558,21 @@ evolve_cycles:
       milestone_gate_passed: Phase19_T2
       blocker_advisory:
       deploy_path: A
-      head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
+      head_sha: 113589139659a3508eb68340be91d93e7814ae77
       commits_ahead_of_origin: 0
       branch_synced_with_origin: true
       dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
-      note: '13-deploy-smoke Path A IN_PROGRESS @ ca78c55 — CI failed eslint+coverage after coverage fix; local lint+coverage fix ready (pending commit+push); pin/redeploy blocked until CI green; merge PR #153 only after smokes green. 12-verify-deploy remains waived (S013-D22). ISS-004 closed.'
+      note: '13-deploy-smoke Path A IN_PROGRESS @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy; merge PR #153 only after smokes green. 12-verify-deploy waived (S013-D22). ISS-004 closed.'
       ci:
-        status: remediation_in_progress
+        status: pass
         branch: evolve/EV-012-unified-job-monitoring
-        head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
-        first_run: failed_coverage_gate
-        coverage_fix_sha: ca78c55
-        second_run: failed_lint_coverage
-        second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths'
-        lint_coverage_fix: pending_commit_push
-        local_lint_coverage: 'PASS — DM FE lint + coverage (Jobs SSE paths)'
-        note: 'CI failed on ca78c55 (eslint+coverage); local fix ready; pending commit+push before re-watch CI and pin/redeploy; do not merge PR #153 until smokes pass'
+        head_sha: 113589139659a3508eb68340be91d93e7814ae77
+        run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+        run_id: 30454245590
+        conclusion: success
+        lint_coverage_fix_sha: 746181b
+        iss004_coverage_fix_sha: 1135891
+        note: 'CI green @ 1135891; next H0c + migration check then pin/redeploy; do not merge PR #153 until smokes pass'
       orchestrator_resumed_at: '2026-07-29'
       resume_at_task:
       resume_at: 13-deploy-smoke
@@ -9431,8 +9450,8 @@ git_history:
       created_at: '2026-07-28'
       session_id: S013-unified-job-monitoring
       evolve_cycle_id: EV-012
-      note: 'M82–M85 complete; Phase D passed; ISS-004 closed; 13-deploy-smoke Path A in_progress @ ca78c55 — CI failed eslint+coverage; local lint+coverage fix ready (pending commit+push); dirty security/S012 tree NOT EV-012; minor PR #153 open (do not merge until smokes pass); 12-verify-deploy waived (S013-D22)'
-      head_sha: ca78c55ac05b10766d3c74d1c9098ed57d11c4cf
+      note: 'M82–M85 complete; Phase D passed; ISS-004 closed; 13-deploy-smoke Path A in_progress @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy; PR #153 open (do not merge until smokes pass); 12-verify-deploy waived (S013-D22)'
+      head_sha: 113589139659a3508eb68340be91d93e7814ae77
       commits_ahead_of_origin: 0
       pushed_at: '2026-07-29'
       pr_number: 153
@@ -10624,8 +10643,26 @@ git_history:
       timestamp: '2026-07-29T08:47:32-04:00'
       evolve_cycle_id: EV-012
       note: 'Path A CI coverage gate fix — local DM FE coverage PASS 100% lines / 98.18% branches; re-watch CI before pin/redeploy'
+    - sha: 746181ba6bdc2a450c6c21af39b51764f9d29736
+      branch: evolve/EV-012-unified-job-monitoring
+      message: '[EV-012] fix: satisfy DM FE eslint without dropping coverage'
+      stage: 13-deploy-smoke
+      session_id: S013-unified-job-monitoring
+      files_changed: 8
+      timestamp: '2026-07-29T08:56:33-04:00'
+      evolve_cycle_id: EV-012
+      note: 'Path A CI lint+coverage remediation — eslint no-non-null-assertion vs coverage resolved'
+    - sha: 113589139659a3508eb68340be91d93e7814ae77
+      branch: evolve/EV-012-unified-job-monitoring
+      message: '[EV-012] test: cover ISS-004 catalog HF gate branches'
+      stage: 16-evolve
+      session_id: S013-unified-job-monitoring
+      files_changed: 2
+      timestamp: '2026-07-29T09:02:51-04:00'
+      evolve_cycle_id: EV-012
+      note: 'ISS-004 write-api branch coverage — CI green @ run 30454245590'
   notes:
-    - '2026-07-29 S013/EV-012: Path A CI remediation — ca78c55 CI failed eslint no-non-null-assertion vs coverage (DM FE Jobs SSE); local lint+coverage fix ready; pending commit+push before re-watch CI; pin/redeploy blocked; 13-deploy-smoke in_progress; checkpoints.deploy=pending; do NOT merge PR #153 until smokes pass; ISS-004 closed; 12-verify-deploy waived (S013-D22).'
+    - '2026-07-29 S013/EV-012: Path A CI green @ 1135891 (run 30454245590) — fixes 746181b (DM FE lint+coverage) + 1135891 (ISS-004 HF gate branches); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api then smokes; 13-deploy-smoke in_progress; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22).'
     - '2026-07-29 S013/EV-012: Path A progress — pushed evolve/EV-012-unified-job-monitoring to origin (HEAD ca78c55); first CI failed coverage gate; fixed @ ca78c55; local coverage PASS (100% lines / 98.18% branches); re-watching CI before pin/redeploy; 13-deploy-smoke in_progress; checkpoints.deploy=pending; do NOT merge PR #153 until smokes pass.'
     - '2026-07-29 S013/EV-012: Deploy Path A chosen — 13-deploy-smoke IN_PROGRESS; push evolve → pin/redeploy Modal DM + DO admin FE + write-api from SHA → H1–H5/Jobs smokes → merge PR #153 after green; do NOT merge until smokes pass; 12-verify-deploy remains waived (S013-D22); checkpoints.deploy=pending; local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012 — leave uncommitted.'
     - '2026-07-29 S013/EV-012: ISS-004 RESOLVED @ 45ed688 — NC Qwen2.5-3B removed from playground catalog; blocker_advisory
