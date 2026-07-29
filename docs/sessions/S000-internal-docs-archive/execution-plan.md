@@ -1707,7 +1707,7 @@ failed-job log affordances (RD-177); Evaluation page uses DO eval SSE (TP-S013-0
 | T84.2 | Test: Vitest — admin CRUD controls; viewer 403/no mutate (TC-147) — red | Test | completed | RD-176, TC-147 | T82.5 | 2026-07-28 | S013 | F32 |
 | T84.3 | Code: `api/jobs` client — events/cancel/retry/delete + types | Code | completed | TP-S013-01 | T84.1 | 2026-07-28 | S013 | F32 |
 | T84.4 | Code: JobsPage + JobDetailPage — SSE+poll, filter, document_id, log copy/link | Code | completed | UJ-023/050, RD-177 | T84.1, T84.3 | 2026-07-28 | S013 | F32 |
-| T84.5 | Code: Evaluation page — prefer DO eval SSE; keep metrics from internal-write | Code | pending | TP-S013-04, UJ-044 | T83.5, T84.3 | — | S013 | F36 |
+| T84.5 | Code: Evaluation page — prefer DO eval SSE; keep metrics from internal-write | Code | in_progress | TP-S013-04, UJ-044 | T83.5, T84.3 | — | S013 | F36 |
 | T84.6 | Docs: user-journeys UJ-023/044/050 step alignment (if drift) | Docs | pending | user-journeys | T84.4, T84.5 | — | S013 | F32 |
 
 #### M85: Full-stack tests (API e2e + Playwright)

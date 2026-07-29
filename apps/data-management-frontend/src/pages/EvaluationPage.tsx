@@ -12,6 +12,7 @@ import {
   type EvalRunListItemApi,
   fetchEvalRunDetail,
   fetchEvalRuns,
+  subscribeEvalRunEvents,
 } from "@/api/admin";
 import { requireCorpusConfig } from "@/config";
 import { AuthContext } from "@/auth/auth-context";
@@ -129,8 +130,11 @@ export function EvaluationPage() {
   const pollRun = useCallback(
     async (runId: string) => {
       const client = requireCorpusConfig();
-      for (let attempt = 0; attempt < 40; attempt += 1) {
-        const detail = await fetchEvalRunDetail(client, runId);
+      const POLL_MS = 4000;
+      const SSE_RETRY_BASE_MS = 2000;
+      const SSE_RETRY_MAX_MS = 30000;
+
+      const applyDetail = (detail: EvalRunDetailApi) => {
         setSelectedRun(detail);
         setRuns((prev) =>
           prev.map((run) =>
@@ -144,13 +148,85 @@ export function EvaluationPage() {
               : run,
           ),
         );
-        if (detail.status === "completed" || detail.status === "failed") {
-          break;
-        }
-        await new Promise((resolve) => {
-          setTimeout(resolve, 250);
-        });
-      }
+      };
+
+      await new Promise<void>((resolve) => {
+        let settled = false;
+        let pollTimer: ReturnType<typeof setInterval> | null = null;
+        let retryTimer: ReturnType<typeof setTimeout> | null = null;
+        let subscription: { close: () => void } | null = null;
+        let retryAttempt = 0;
+
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          if (pollTimer !== null) clearInterval(pollTimer);
+          if (retryTimer !== null) clearTimeout(retryTimer);
+          subscription?.close();
+          resolve();
+        };
+
+        const refreshDetail = async () => {
+          const detail = await fetchEvalRunDetail(client, runId);
+          applyDetail(detail);
+          if (detail.status === "completed" || detail.status === "failed") {
+            finish();
+          }
+        };
+
+        const startPoll = () => {
+          if (pollTimer !== null || settled) return;
+          void refreshDetail();
+          pollTimer = setInterval(() => {
+            void refreshDetail();
+          }, POLL_MS);
+        };
+
+        const connectSse = () => {
+          if (settled) return;
+          subscription = subscribeEvalRunEvents(client, runId, {
+            onProgress: (event) => {
+              if (settled) return;
+              if (pollTimer !== null) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+              }
+              retryAttempt = 0;
+              setRuns((prev) =>
+                prev.map((run) =>
+                  run.run_id === runId
+                    ? { ...run, status: event.status }
+                    : run,
+                ),
+              );
+              setSelectedRun((prev) =>
+                prev && prev.run_id === runId
+                  ? { ...prev, status: event.status }
+                  : prev,
+              );
+              void refreshDetail();
+            },
+            onError: () => {
+              if (settled) return;
+              subscription?.close();
+              subscription = null;
+              startPoll();
+              const delay = Math.min(
+                SSE_RETRY_BASE_MS * 2 ** retryAttempt,
+                SSE_RETRY_MAX_MS,
+              );
+              retryAttempt += 1;
+              retryTimer = setTimeout(() => {
+                if (!settled) connectSse();
+              }, delay);
+            },
+          });
+        };
+
+        void refreshDetail();
+        connectSse();
+      });
+
       await loadHistory(() => true);
     },
     [loadHistory],

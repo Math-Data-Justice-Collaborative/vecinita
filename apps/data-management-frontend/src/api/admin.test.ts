@@ -28,6 +28,7 @@ import {
   promoteRagConfig,
   pullPlaygroundModel,
   triggerEvalRun,
+  subscribeEvalRunEvents,
   triggerPlaygroundEvalRun,
   updateEvalConfigPreset,
   updateEvalCriterion,
@@ -1327,5 +1328,51 @@ describe("admin API eval helpers", () => {
     const activeHeaders = vi.mocked(fetch).mock.calls[1]?.[1]
       ?.headers as Record<string, string>;
     expect(activeHeaders["Authorization"]).toBe("Bearer test-key");
+  });
+});
+
+describe("subscribeEvalRunEvents (TP-S013-04)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("streams eval_run progress events with auth headers", async () => {
+    const frame =
+      'id: 1\nevent: eval_run\ndata: {"run_id":"r1","status":"running"}\n\n';
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(stream, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const onProgress = vi.fn();
+    const sub = subscribeEvalRunEvents(
+      { baseUrl: "http://localhost:8002", accessToken: "jwt" },
+      "r1",
+      { onProgress },
+    );
+
+    await vi.waitFor(() => {
+      expect(onProgress).toHaveBeenCalledWith({
+        run_id: "r1",
+        status: "running",
+      });
+    });
+    sub.close();
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://localhost:8002/internal/v1/eval/runs/r1/events",
+    );
+    const headers = (fetchMock.mock.calls[0]?.[1] as RequestInit)
+      .headers as Record<string, string>;
+    expect(headers["Authorization"]).toBe("Bearer jwt");
   });
 });
