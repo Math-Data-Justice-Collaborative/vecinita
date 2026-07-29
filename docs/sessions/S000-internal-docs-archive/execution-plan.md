@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
-| **Active milestone** | M84: Admin Jobs UI (list/detail/CRUD + SSE) — complete; next M85 |
-| **Active task** | **T85.1** (pending) — API e2e UJ-050 job detail CRUD |
+| **Active milestone** | M85: Full-stack tests (API e2e + Playwright) |
+| **Active task** | **T85.2** (pending) — API e2e extend UJ-023/044 eval + document_id |
 | **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.6 (M83); T84.1–T84.6 (M84 complete) |
 | **Last updated** | 2026-07-28 |
 | **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M83 done → 08 then M84 |
@@ -1716,7 +1716,7 @@ failed-job log affordances (RD-177); Evaluation page uses DO eval SSE (TP-S013-0
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T85.1 | Test: API e2e `test_uj050_job_detail_crud.py` (TC-146–149) | Test | pending | UJ-050, e2e-coverage | T84.4 | — | S013 | F32 |
+| T85.1 | Test: API e2e `test_uj050_job_detail_crud.py` (TC-146–149) | Test | completed | UJ-050, e2e-coverage | T84.4 | 2026-07-29 | S013 | F32 |
 | T85.2 | Test: API e2e extend UJ-023/044 — eval on Jobs + document_id (TC-124/150/151) | Test | pending | UJ-023/044 | T83.4, T84.4 | — | S013 | F32 |
 | T85.3 | Test: Playwright `tests/ui/admin/uj050-job-detail.spec.ts` + uj023/uj044 extend (RD-178) | Test | pending | RD-178, TC-146 | T84.4 | — | S013 | F32 |
 | T85.4 | Test: CORS preflight for new `/jobs/*` mutate + events (H0c) | Test | pending | connectivity-gates | T82.4 | — | S013 | F32 |
@@ -2396,7 +2396,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T84.4 | M84 | 19 | Code | completed | T84.1, T84.3 | 2026-07-28 | S013 | F32 | — |
 | T84.5 | M84 | 19 | Code | completed | T83.5, T84.3 | 2026-07-28 | S013 | F36 | — |
 | T84.6 | M84 | 19 | Docs | completed | T84.4, T84.5 | 2026-07-28 | S013 | F32 | — |
-| T85.1 | M85 | 19 | Test | pending | T84.4 | — | S013 | F32 | — |
+| T85.1 | M85 | 19 | Test | completed | T84.4 | — | S013 | F32 | — |
 | T85.2 | M85 | 19 | Test | pending | T83.4, T84.4 | — | S013 | F32 | — |
 | T85.3 | M85 | 19 | Test | pending | T84.4 | — | S013 | F32 | — |
 | T85.4 | M85 | 19 | Test | pending | T82.4 | — | S013 | F32 | — |
