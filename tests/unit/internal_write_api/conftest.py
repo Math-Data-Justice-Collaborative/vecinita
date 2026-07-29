@@ -76,9 +76,10 @@ class StubJobsClient:
         eval_run_id: UUID,
         *,
         authorization: str | None = None,
+        question: str | None = None,
     ) -> UUID:
         """Record the eval run id and return a synthetic job id."""
-        _ = authorization
+        _ = (authorization, question)
         self.enqueued_eval_runs.append(eval_run_id)
         return uuid.uuid4()
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from typing import TYPE_CHECKING, Annotated, Literal
-from uuid import UUID  # noqa: TC003  # FastAPI path params require UUID at runtime
+from uuid import UUID  # FastAPI path params require UUID at runtime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -319,6 +319,23 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
         job_id: UUID,
         _auth: AuthPrincipal = Depends(write_auth_dep),
     ) -> None:
+        record = job_store.get_job(job_id)
+        if record is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if record.job_type == "eval" and resolved_eval_client is not None:
+            eval_run_id = record.eval_run_id
+            if eval_run_id is None:
+                raw = record.options.get("eval_run_id")
+                if isinstance(raw, str) and raw:
+                    eval_run_id = UUID(raw)
+            if eval_run_id is not None:
+                try:
+                    resolved_eval_client.soft_delete_eval_run(eval_run_id)
+                except InternalWriteClientError as exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail=str(exc),
+                    ) from exc
         if not job_store.delete_job(job_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 

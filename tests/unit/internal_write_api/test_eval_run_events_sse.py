@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from vecinita_internal_write_api.eval_events import EvalRunEventBroker
 from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 from tests.eval.conftest import eval_embed_fn
@@ -31,7 +32,13 @@ _ATTR_PAYLOAD = "payload_json"
 
 
 @pytest.fixture
-def eval_sse_app(internal_api_env: None) -> FastAPI:
+def eval_sse_broker() -> EvalRunEventBroker:
+    """Shared broker for injecting into create_app + seeding publishes."""
+    return EvalRunEventBroker()
+
+
+@pytest.fixture
+def eval_sse_app(internal_api_env: None, eval_sse_broker: EvalRunEventBroker) -> FastAPI:
     """FastAPI app for eval SSE route registration checks."""
     _ = internal_api_env
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
@@ -40,6 +47,10 @@ def eval_sse_app(internal_api_env: None) -> FastAPI:
         eval_embed_fn=eval_embed_fn,
         eval_judge=MockEvalJudge(),
         jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+        eval_event_broker=eval_sse_broker,
+        sse_poll_interval_s=0.01,
+        sse_max_cycles=3,
+        eval_sse_sync_db=False,
     )
 
 
@@ -89,7 +100,7 @@ def _parse_sse_blocks(raw: str) -> list[tuple[str | None, str | None, JsonObject
 
 
 def _load_eval_events() -> object:
-    """Import eval_events module (missing until T83.5 — intentional red)."""
+    """Import eval_events module."""
     return importlib.import_module("vecinita_internal_write_api.eval_events")
 
 
@@ -140,11 +151,10 @@ def test_eval_run_event_broker_reconnect_skips_seen_ids() -> None:
 
 def test_eval_run_events_returns_event_stream_content_type(
     eval_sse_client: TestClient,
+    eval_sse_broker: EvalRunEventBroker,
 ) -> None:
     """GET …/events returns text/event-stream when the run exists (TP-S013-04)."""
-    mod = _load_eval_events()
-    broker = _broker(mod)
-    cast("Callable[..., None]", getattr(broker, _ATTR_PUBLISH))(run_id=_RUN_ID, status="pending")
+    eval_sse_broker.publish(run_id=_RUN_ID, status="pending")
 
     with eval_sse_client.stream(
         "GET",
@@ -155,11 +165,12 @@ def test_eval_run_events_returns_event_stream_content_type(
         assert response.headers["content-type"].startswith("text/event-stream")
 
 
-def test_eval_run_events_emits_sse_framed_progress(eval_sse_client: TestClient) -> None:
+def test_eval_run_events_emits_sse_framed_progress(
+    eval_sse_client: TestClient,
+    eval_sse_broker: EvalRunEventBroker,
+) -> None:
     """HTTP stream emits id/event/data framed eval_run JSON (TP-S013-04)."""
-    mod = _load_eval_events()
-    broker = _broker(mod)
-    cast("Callable[..., None]", getattr(broker, _ATTR_PUBLISH))(run_id=_RUN_ID, status="running")
+    eval_sse_broker.publish(run_id=_RUN_ID, status="running")
 
     with eval_sse_client.stream(
         "GET",
@@ -188,7 +199,6 @@ def test_eval_run_events_emits_sse_framed_progress(eval_sse_client: TestClient) 
 
 def test_eval_run_events_unknown_run_returns_404(eval_sse_client: TestClient) -> None:
     """Missing run_id yields 404 on the events stream (TP-S013-04)."""
-    _ = _load_eval_events()
     response = eval_sse_client.get(
         f"/internal/v1/eval/runs/{uuid4()}/events",
         headers=auth_headers(),

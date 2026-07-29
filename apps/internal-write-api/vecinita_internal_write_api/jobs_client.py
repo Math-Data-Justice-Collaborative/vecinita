@@ -69,8 +69,10 @@ class DataManagementJobsClient:
         eval_run_id: UUID,
         *,
         authorization: str | None = None,
+        question: str | None = None,
     ) -> UUID:
         """Enqueue a Modal eval job linked to a DO ``eval_runs`` row (EV-012 / TP-S013-06)."""
+        _ = question  # persisted for Modal worker follow-on; unused on HTTP enqueue body today
         body = CreateJobRequest(
             urls=[],
             options=JobOptions(job_type="eval", eval_run_id=eval_run_id),

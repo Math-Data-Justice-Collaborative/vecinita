@@ -85,8 +85,9 @@ def test_create_eval_run_enqueues_modal_eval_job(internal_api_env: None) -> None
             eval_run_id: UUID,
             *,
             authorization: str | None = None,
+            question: str | None = None,
         ) -> UUID:
-            _ = authorization
+            _ = (authorization, question)
             enqueued.append(eval_run_id)
             return uuid4()
 

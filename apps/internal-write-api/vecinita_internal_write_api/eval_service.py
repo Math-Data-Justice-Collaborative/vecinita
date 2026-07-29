@@ -464,17 +464,35 @@ def _persist_results(
             )
 
 
+def soft_delete_eval_run(engine: Engine, *, run_id: UUID) -> bool:
+    """Stamp ``deleted_at`` on an eval run; return False if missing or already deleted."""
+    with engine.begin() as conn:
+        result = conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET deleted_at = now()
+                WHERE id = :id AND deleted_at IS NULL
+                """
+            ),
+            {"id": run_id},
+        )
+    return int(result.rowcount or 0) > 0
+
+
 def list_eval_runs(
     engine: Engine,
     *,
     page: int,
     page_size: int,
 ) -> EvalRunListResponse:
-    """Return paginated eval run history."""
+    """Return paginated eval run history (excludes soft-deleted rows)."""
     offset = (page - 1) * page_size
     with engine.connect() as conn:
         total = scalar_int(
-            sqlalchemy_scalar_one(conn.execute(text("SELECT COUNT(*) FROM eval_runs")))
+            sqlalchemy_scalar_one(
+                conn.execute(text("SELECT COUNT(*) FROM eval_runs WHERE deleted_at IS NULL"))
+            )
         )
         rows = (
             conn.execute(
@@ -482,6 +500,7 @@ def list_eval_runs(
                     """
                     SELECT id, status, started_at, completed_at, metrics_summary, error_message
                     FROM eval_runs
+                    WHERE deleted_at IS NULL
                     ORDER BY created_at DESC
                     LIMIT :limit OFFSET :offset
                     """
@@ -526,7 +545,8 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
                     """
                     SELECT id, status, metrics_summary, error_message,
                            config_snapshot, mode, preset_id
-                    FROM eval_runs WHERE id = :id
+                    FROM eval_runs
+                    WHERE id = :id AND deleted_at IS NULL
                     """
                 ),
                 {"id": run_id},
