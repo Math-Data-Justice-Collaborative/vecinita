@@ -34,8 +34,8 @@ Modal `job_type=eval`.
 | 04-tech-plan | ✅ Complete | TP-S013-01–08; gate B→C |
 | 07-build M82–M85 | ✅ Complete | M85 T85.1–T85.5; Phase 19 gate PASS at T2 |
 | 08-verify-build | ✅ Complete | M85/Phase 19 PASS 2026-07-29 — see reports/verification-report.md |
-| 10-e2e | 🔄 Next | Lean+build routing |
-| 13-deploy-smoke | ⬜ Pending | After 10; watch ISS-004 |
+| 10-e2e | ✅ Complete | T0 PASS 12/12 + Playwright 9/9; T1 skipped (no Docker); see reports/e2e-report.md |
+| 13-deploy-smoke | 🔄 Next | Lean+build; **ISS-004** may block — confirm before smoke |
 
 ---
 

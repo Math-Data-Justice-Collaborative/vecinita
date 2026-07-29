@@ -1007,14 +1007,23 @@ project:
           + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
     10-e2e:
       status: completed
-      started_at: '2026-06-30'
-      completed_at: '2026-06-30'
-      session_id: S006-invite-acceptance
-      branch: feat/S006-invite-acceptance
-      evolve_cycle_id: EV-007
-      report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-      note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in 
-        s005 slice below.
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      partial_rerun_at: '2026-07-29'
+      session_id: S013-unified-job-monitoring
+      branch: evolve/EV-012-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      mode: delta
+      overall_result: PASS
+      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke; prior S006/S005 baselines preserved below'
+      tiers:
+        t0: pass
+        t1: skipped
+        t1_skip_reason: no_docker
+        t2: pending
+        t3: pending
       s006:
         status: completed
         started_at: '2026-06-30'
@@ -1275,7 +1284,7 @@ active_session:
   evolve_cycle_id: EV-012
   artifacts_dir: docs/sessions/S013-unified-job-monitoring/
   started_at: '2026-07-28'
-  current_stage: 10-e2e
+  current_stage: 13-deploy-smoke
   linked_issues:
     - '116'
   features_affected:
@@ -1678,7 +1687,21 @@ active_session:
       prior_result_scope: scoped
     - stage: 10-e2e
       required: true
-      status: pending
+      status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      mode: delta
+      session_id: S013-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      overall_result: PASS
+      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+      tiers:
+        t0: pass
+        t1: skipped
+        t1_skip_reason: no_docker
+        t2: pending
+        t3: pending
+      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke'
     - stage: 13-deploy-smoke
       required: true
       status: pending
@@ -1786,8 +1809,8 @@ active_session:
   handoff:
     from_session: S012-hotfix-admin-ui-112-105
     cleared: true
-    next_action: start_10_e2e
-    next_skill: 10-e2e
+    next_action: start_13_deploy_smoke
+    next_skill: 13-deploy-smoke
     resume_at_task:
     branch: evolve/EV-012-unified-job-monitoring
     branch_status: active
@@ -1795,7 +1818,8 @@ active_session:
     current_task:
     task_status: completed
     milestone: M85
-    note: 'Do not merge PR #153 yet; 08-verify-build PASS — start 10-e2e'
+    blocker_advisory: ISS-004
+    note: '10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13. Next: start_13_deploy_smoke — ISS-004 may block commercial deploy (NC Qwen2.5-3B playground catalog). Do not merge PR #153 yet.'
     git_commits:
       - sha: a781a80
         message: '[T82.2] test: add failing jobs/events SSE framing tests'
@@ -4157,14 +4181,23 @@ stages:
         data-management-frontend 94.3%/85.8%)
   10-e2e:
     status: completed
-    started_at: '2026-06-30'
-    completed_at: '2026-06-30'
-    session_id: S006-invite-acceptance
-    branch: feat/S006-invite-acceptance
-    evolve_cycle_id: EV-007
-    report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-    note: S006/EV-007 F35 ext 10-e2e COMPLETE 2026-06-30 on feat/S006-invite-acceptance. S005 baseline preserved in s005
-      slice below.
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+    partial_rerun_at: '2026-07-29'
+    session_id: S013-unified-job-monitoring
+    branch: evolve/EV-012-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    mode: delta
+    overall_result: PASS
+    report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+    partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+    note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke; prior S006/S005 baselines preserved below'
+    tiers:
+      t0: pass
+      t1: skipped
+      t1_skip_reason: no_docker
+      t2: pending
+      t3: pending
     s006:
       status: completed
       started_at: '2026-06-30'
@@ -5791,7 +5824,7 @@ evolve_cycles:
     started: '2026-07-28'
     session_id: S013-unified-job-monitoring
     source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/116
-    current_stage: 10-e2e
+    current_stage: 13-deploy-smoke
     mode: delta
     scope_summary: 'Unified job monitoring (GitHub #116) — **Admin Dashboard only (data-management-frontend); NOT ChatRAG
       UI**. Jobs tab: **Modal GET /jobs primary unified list** (job_type incl eval; S013-D8 amended) — DO Postgres for metrics/results
@@ -6303,12 +6336,29 @@ evolve_cycles:
           overall_result: PASS
           result_scope: scoped
           commit: f98d40d
-          partial_rerun_at: '2026-07-29' 
+          partial_rerun_at: '2026-07-29'
+      10-e2e:
+        status: completed
+        started: '2026-07-29'
+        completed: '2026-07-29'
+        mode: delta
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+        tiers:
+          t0: pass
+          t1: skipped
+          t1_skip_reason: no_docker
+          t2: pending
+          t3: pending
+        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke'
     checkpoints:
       phase_a: passed
       phase_b: passed
       phase_c: passed
-      phase_d: pending
+      phase_d: passed
       deploy: pending
     checkpoint_notes:
       phase_a: 'Passed 2026-07-28 — 02-verify-plan delta complete; M1–M3 user verdicts recorded; gate A→B passed'
@@ -6316,6 +6366,7 @@ evolve_cycles:
         skip of 05/06; user approved option A and started 07-build T82.1. Gate B→C may pass when 04 approved without 05.'
       phase_c: 'Passed 2026-07-29 — 08-verify-build M85/Phase19 PASS scoped; Docker integration skipped locally; ChatRAG LocaleContext
         pre-existing out of scope; gate C→D passed; handoff → 10-e2e'
+      phase_d: 'Passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13-deploy-smoke; checkpoints.deploy remains pending'
     gates:
       a_to_b: passed
       b_to_c: passed
@@ -6342,11 +6393,11 @@ evolve_cycles:
       - TP-S013-07
       - TP-S013-08
     open_contradictions: []
-    note: 'EV-012 Phase C complete 2026-07-29 — 08-verify-build M85/Phase19 PASS scoped; current_stage=10-e2e; phase_c=passed;
-      gates.c_to_d=passed; PR #153 open (do not merge).'
+    note: 'EV-012 Phase D passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13; current_stage=13-deploy-smoke;
+      phase_d=passed; deploy checkpoint pending; ISS-004 may block 13 commercial deploy; PR #153 open (do not merge).'
     handoff:
-      next_action: start_10_e2e
-      next_skill: 10-e2e
+      next_action: start_13_deploy_smoke
+      next_skill: 13-deploy-smoke
       interview_cursor: completed
       current_task:
       next_task:
@@ -6354,15 +6405,17 @@ evolve_cycles:
       milestone: M85
       milestone_completed: M85
       milestone_gate_passed: Phase19_T2
-      note: 'Do not merge PR #153 yet; 08-verify-build PASS — start 10-e2e'
+      blocker_advisory: ISS-004
+      note: 'start_13_deploy_smoke — ISS-004 may block (NC Qwen2.5-3B playground catalog). Do not merge PR #153 yet.'
       ci:
         status: pending_watch
         branch: evolve/EV-012-unified-job-monitoring
         note: 'HEAD cc1c355; watch CI; do not merge PR #153'
       orchestrator_resumed_at: '2026-07-29'
       resume_at_task:
-      resume_at: 10-e2e
+      resume_at: 13-deploy-smoke
       phase_19_gate: passed
+      phase_d_passed_at: '2026-07-29'
     adrs:
       - docs/adr/ADR-038-modal-job-lifecycle-storage-split.md
     artifacts:
@@ -6462,6 +6515,15 @@ evolve_cycles:
         result_scope: scoped
         recorded_at: '2026-07-29'
         note: 'M85/Phase19 PASS scoped; Docker integration skipped locally; ChatRAG LocaleContext pre-existing out of scope'
+      - path: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+        kind: e2e-report
+        session_id: S013-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        stage: 10-e2e
+        status: written
+        overall_result: PASS
+        recorded_at: '2026-07-29'
+        note: 'T0 pass; T1 skipped no docker; T2/T3 pending 13-deploy-smoke'
 retrospective_cycles: []
 pr_review_cycles:
   - id: PRR-001
@@ -9201,6 +9263,15 @@ artifacts:
     gate: Phase19_T2
     recorded_at: '2026-07-29'
     commit: cc1c355
+  - path: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+    kind: e2e-report
+    session_id: S013-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    stage: 10-e2e
+    status: written
+    overall_result: PASS
+    recorded_at: '2026-07-29'
+    note: 'T0 pass; T1 skipped no docker; T2/T3 pending 13-deploy-smoke'
 git_history:
   current_branch: evolve/EV-012-unified-job-monitoring
   branches:
