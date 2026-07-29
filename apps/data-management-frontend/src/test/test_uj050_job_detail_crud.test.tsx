@@ -153,6 +153,19 @@ describe("UJ-050 job detail admin CRUD (T84.2 / TC-147)", () => {
       if (method === "DELETE" && url.includes(`/jobs/${FAILED_JOB_ID}`)) {
         return Promise.resolve(new Response(null, { status: 204 }));
       }
+      if (url.includes("/jobs/new-job")) {
+        return Promise.resolve(
+          jsonResponse({
+            job_id: "new-job",
+            status: "pending",
+            job_type: "retag",
+            urls: [],
+            document_id: FAILED_JOB.document_id,
+            created_at: "2026-07-28T12:00:00Z",
+            updated_at: "2026-07-28T12:00:00Z",
+          }),
+        );
+      }
       if (url.includes(`/jobs/${FAILED_JOB_ID}`)) {
         return Promise.resolve(jsonResponse(FAILED_JOB));
       }

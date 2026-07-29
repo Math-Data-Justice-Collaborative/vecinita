@@ -70,7 +70,7 @@ export function JobDetailPage() {
         const client = requireAdminConfig();
         const next = await getJob(client, jobId);
         if (!isActive()) return;
-        setJob(next);
+        setJob({ ...next, urls: next.urls ?? [] });
         setError(null);
       } catch (err) {
         if (!isActive()) return;
