@@ -299,7 +299,7 @@ project:
       branch: evolve/EV-012-unified-job-monitoring
       evolve_cycle_id: EV-012
       mode: delta
-      note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; roadmap.md + reports/04-tech-plan.md; OpenAPI + api-contract + ADR-038 + TP-S013-01–08; ISS-005 resolved (Keep M3 / 6a). Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (git commit SHA pending — record after parent commits). handoff → 07-build T82.1'
+      note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; roadmap.md + reports/04-tech-plan.md; OpenAPI + api-contract + ADR-038 + TP-S013-01–08; ISS-005 resolved (Keep M3 / 6a). Gate B→C passed (Lean+build skips 05). Committed 2cb1def. handoff → 07-build T82.1'
       report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
       draft_status: approved
       tech_plan_interview:
@@ -463,18 +463,19 @@ project:
       feature: F32/F36
       phase: Phase 19 (M82-M85)
       milestone: M82
-      note: '07-build delta IN_PROGRESS — EV-012/S013 Phase 19; start T82.1 cancel/retry/delete tests; Gate B→C passed; 04-tech-plan approved option A'
+      note: '07-build delta IN_PROGRESS — EV-012/S013 Phase 19; T82.1 cancel/retry/delete tests in_progress; Gate B→C passed; 04-tech-plan committed 2cb1def'
       substeps:
         current_task: T82.1
-        task_status: pending
-        in_progress_tasks: []
+        task_status: in_progress
+        in_progress_tasks:
+        - T82.1
         blocked_tasks: []
         completed_tasks_recent: []
       execution_plan:
         active_task: T82.1
         active_milestone: M82
         active_phase: Phase 19
-        note: 'Handoff from approved 04-tech-plan — start_T82_1_cancel_retry_delete_tests'
+        note: 'T82.1 in_progress — cancel/retry/delete tests (after 04-tech-plan commit 2cb1def)'
       s010_baseline:
         status: in_progress
         started_at: '2026-07-10'
@@ -1438,7 +1439,7 @@ active_session:
     completed_at: '2026-07-28'
     ended_at: '2026-07-28'
     mode: delta
-    note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (SHA pending). handoff → 07-build T82.1'
+    note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C passed (Lean+build skips 05). Committed 2cb1def. handoff → 07-build T82.1'
     report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
     draft_status: approved
     gate_b_to_c: passed
@@ -1472,8 +1473,9 @@ active_session:
     status: in_progress
     started_at: '2026-07-28'
     mode: delta
-    note: '07-build delta IN_PROGRESS — Phase 19 M82; start T82.1 cancel/retry/delete tests'
+    note: '07-build delta IN_PROGRESS — Phase 19 M82; T82.1 cancel/retry/delete tests in_progress'
     current_task: T82.1
+    task_status: in_progress
     milestone: M82
   - stage: 08-verify-build
     required: true
@@ -1588,15 +1590,15 @@ active_session:
   handoff:
     from_session: S012-hotfix-admin-ui-112-105
     cleared: true
-    next_action: start_T82_1_cancel_retry_delete_tests
+    next_action: T82_1_in_progress_cancel_retry_delete_tests
     next_skill: 07-build
     branch: evolve/EV-012-unified-job-monitoring
     branch_status: active
     interview_cursor: completed
     current_task: T82.1
+    task_status: in_progress
     milestone: M82
-    note: '04-tech-plan COMPLETE (user option A). Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts — git commit SHA pending (record after parent commits). Next: 07-build start_T82_1_cancel_retry_delete_tests.'
-    commit_note: 'User approved commit of 04-tech-plan artifacts; do not claim SHA until parent records commit'
+    note: '04-tech-plan COMPLETE (user option A) @ 2cb1def. Gate B→C passed (Lean+build skips 05). 07-build T82.1 in_progress — cancel/retry/delete tests.'
     git_commits:
     - sha: 74216f1
       message: 'docs(S013): open EV-012 unified job monitoring session'
@@ -1614,6 +1616,12 @@ active_session:
       session_id: S013-unified-job-monitoring
       files_changed: 12
       timestamp: '2026-07-28T23:35:09Z'
+    - sha: 2cb1def
+      message: 'docs(S013): complete 04-tech-plan Phase 19 for EV-012 Jobs (#116)'
+      stage: 04-tech-plan
+      session_id: S013-unified-job-monitoring
+      files_changed: 11
+      timestamp: '2026-07-28T20:01:14Z'
 sessions:
 - id: S012-hotfix-admin-ui-112-105
   type: hotfix
@@ -3333,7 +3341,7 @@ stages:
     branch: evolve/EV-012-unified-job-monitoring
     evolve_cycle_id: EV-012
     mode: delta
-    note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; roadmap.md + reports/04-tech-plan.md; OpenAPI + api-contract + ADR-038 + TP-S013-01–08; ISS-005 resolved (Keep M3 / 6a). Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (git commit SHA pending — record after parent commits). handoff → 07-build T82.1'
+    note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; roadmap.md + reports/04-tech-plan.md; OpenAPI + api-contract + ADR-038 + TP-S013-01–08; ISS-005 resolved (Keep M3 / 6a). Gate B→C passed (Lean+build skips 05). Committed 2cb1def. handoff → 07-build T82.1'
     report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
     draft_status: approved
     tech_plan_interview:
@@ -3477,18 +3485,19 @@ stages:
     feature: F32/F36
     phase: Phase 19 (M82-M85)
     milestone: M82
-    note: '07-build delta IN_PROGRESS — EV-012/S013 Phase 19; start T82.1 cancel/retry/delete tests; Gate B→C passed; 04-tech-plan approved option A'
+    note: '07-build delta IN_PROGRESS — EV-012/S013 Phase 19; T82.1 cancel/retry/delete tests in_progress; Gate B→C passed; 04-tech-plan committed 2cb1def'
     substeps:
       current_task: T82.1
-      task_status: pending
-      in_progress_tasks: []
+      task_status: in_progress
+      in_progress_tasks:
+      - T82.1
       blocked_tasks: []
       completed_tasks_recent: []
     execution_plan:
       active_task: T82.1
       active_milestone: M82
       active_phase: Phase 19
-      note: 'Handoff from approved 04-tech-plan — start_T82_1_cancel_retry_delete_tests'
+      note: 'T82.1 in_progress — cancel/retry/delete tests (after 04-tech-plan commit 2cb1def)'
     s010_baseline:
       status: in_progress
       started_at: '2026-07-10'
@@ -5864,7 +5873,7 @@ evolve_cycles:
       completed: '2026-07-28'
       ended_at: '2026-07-28'
       mode: delta
-      note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (SHA pending). handoff → 07-build T82.1'
+      note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C passed (Lean+build skips 05). Committed 2cb1def. handoff → 07-build T82.1'
       report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
       draft_status: approved
       tech_plan_interview:
@@ -5934,11 +5943,12 @@ evolve_cycles:
       status: in_progress
       started: '2026-07-28'
       mode: delta
-      note: '07-build delta IN_PROGRESS — Phase 19 M82; start T82.1 cancel/retry/delete tests; Gate B→C passed'
+      note: '07-build delta IN_PROGRESS — Phase 19 M82; T82.1 cancel/retry/delete tests in_progress; 04-tech-plan committed 2cb1def'
       current_task: T82.1
+      task_status: in_progress
       milestone: M82
       phase: Phase 19 (M82-M85)
-      handoff: start_T82_1_cancel_retry_delete_tests
+      handoff: T82_1_in_progress_cancel_retry_delete_tests
   checkpoints:
     phase_a: passed
     phase_b: passed
@@ -5974,15 +5984,15 @@ evolve_cycles:
   - TP-S013-07
   - TP-S013-08
   open_contradictions: []
-  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22): 00→16→01→02→04→07→08→10→13. Phase 1 COMPLETE — commit 74216f1. 01-requirements delta COMPLETE — RD-173..178; ADR-038; c8cfaa9. 02-verify-plan COMPLETE — M1–M3; gates.a_to_b + phase_a passed. 04-tech-plan COMPLETE — user option A; TP-S013-01–08; Phase 19 M82–M85; Gate B→C + phase_b passed (Lean+build skips 05). User approved commit of 04 artifacts (SHA pending — record after parent commits). 07-build IN_PROGRESS — start T82.1. Advisory — EV-004 remains in_progress historically; EV-011 parked.'
+  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22): 00→16→01→02→04→07→08→10→13. Phase 1 COMPLETE — commit 74216f1. 01-requirements delta COMPLETE — RD-173..178; ADR-038; c8cfaa9. 02-verify-plan COMPLETE — M1–M3; gates.a_to_b + phase_a passed. 04-tech-plan COMPLETE — user option A; TP-S013-01–08; Phase 19 M82–M85; Gate B→C + phase_b passed (Lean+build skips 05); committed 2cb1def. 07-build IN_PROGRESS — T82.1 in_progress. Advisory — EV-004 remains in_progress historically; EV-011 parked.'
   handoff:
-    next_action: start_T82_1_cancel_retry_delete_tests
+    next_action: T82_1_in_progress_cancel_retry_delete_tests
     next_skill: 07-build
     interview_cursor: completed
     current_task: T82.1
+    task_status: in_progress
     milestone: M82
-    note: '04-tech-plan COMPLETE (option A). Gate B→C passed. Commit of 04 artifacts approved — SHA pending. Next: 07-build start_T82_1_cancel_retry_delete_tests.'
-    commit_note: 'User approved commit of 04-tech-plan artifacts; do not claim SHA until parent records commit'
+    note: '04-tech-plan COMPLETE (option A) @ 2cb1def. Gate B→C passed. 07-build T82.1 in_progress — cancel/retry/delete tests.'
   adrs:
   - docs/adr/ADR-038-modal-job-lifecycle-storage-split.md
   artifacts:
@@ -8147,6 +8157,7 @@ decisions_log:
   session_id: S013-unified-job-monitoring
   evolve_cycle_id: EV-012
   timestamp: '2026-07-28'
+- 'S013/2026-07-28: Recorded 04-tech-plan commit 2cb1def; pending commit note cleared; T82.1 in_progress (07-build / EV-012).'
 - 'S013/2026-07-28: 04-tech-plan COMPLETE — user approved Phase 19 tech plan (option A: complete 04, commit docs, start 07-build T82.1). Gate B→C passed (Lean+build skips 05/06; phase_b passed). current_stage=07-build; handoff next_action=start_T82_1_cancel_retry_delete_tests. User approved commit of 04 artifacts — git SHA pending (record after parent commits).'
 - 'S013/2026-07-28: 04-tech-plan DRAFT READY for user review (status remains in_progress until approval). Phase 19 M82–M85 drafted in execution-plan; roadmap.md + reports/04-tech-plan.md written; OpenAPI + api-contract + ADR-038 + TP-S013-01–08 updated; ISS-005 resolved (Keep M3 / TP-S013-06=6a). Artifacts created — no git commit claimed yet (awaiting user). handoff next_action=await_user_review_phase19_tech_plan.'
 - 'S013/2026-07-28: ISS-005 RESOLVED — option a Keep M3 / TP-S013-06 ACCEPTED as 6a (enqueue from POST /internal/v1/eval/runs via DataManagementJobsClient.enqueue_eval; NOT 6b). open_contradictions cleared; Batch 2 COMPLETE (05..08); 04-tech-plan remains in_progress; handoff next_action=draft_execution_plan_phase19.'
@@ -8682,7 +8693,7 @@ git_history:
     created_at: '2026-07-28'
     session_id: S013-unified-job-monitoring
     evolve_cycle_id: EV-012
-    note: 'Branch created from main; commits 74216f1 (session artifacts) + c8cfaa9 (01-requirements) + dd858e0 (02-verify-plan); not pushed'
+    note: 'Branch created from main; commits 74216f1 (session) + c8cfaa9 (01-requirements) + dd858e0 (02-verify-plan) + 2cb1def (04-tech-plan Phase 19); not pushed'
   - name: fix/S012-admin-ui-112-105
     purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
     base: main
@@ -9529,7 +9540,16 @@ git_history:
     session_id: S013-unified-job-monitoring
     files_changed: 12
     timestamp: '2026-07-28T23:35:09Z'
+  - sha: 2cb1def
+    branch: evolve/EV-012-unified-job-monitoring
+    message: 'docs(S013): complete 04-tech-plan Phase 19 for EV-012 Jobs (#116)'
+    stage: 04-tech-plan
+    session_id: S013-unified-job-monitoring
+    files_changed: 11
+    timestamp: '2026-07-28T20:01:14Z'
+    files_note: 'ADR-038, api-contract, decisions, execution-plan Phase 19, S013 routing/brief/roadmap/04-report, openapi DM+IW, workflow-state'
   notes:
+  - '2026-07-28 S013/EV-012: Recorded 04-tech-plan commit 2cb1def; cleared pending commit note; T82.1 set in_progress on 07-build / EV-012.'
   - '2026-07-28 S013/EV-012: 04-tech-plan COMPLETE (option A) — Gate B→C + phase_b passed (Lean+build skips 05); current_stage=07-build in_progress; handoff next_action=start_T82_1_cancel_retry_delete_tests; user approved commit of 04 artifacts — SHA pending (record after parent commits).'
   - '2026-07-28 S013/EV-012: 04-tech-plan DRAFT READY for user review — Phase 19 M82–M85 drafted; roadmap.md + reports/04-tech-plan.md written; OpenAPI + api-contract + ADR-038 + TP-S013-01–08 updated; ISS-005 resolved (Keep M3 / 6a); status remains in_progress; handoff next_action=await_user_review_phase19_tech_plan; artifacts created — no git commit claimed yet (awaiting user).'
   - '2026-07-28 S013/EV-012: 04-tech-plan delta START — user chose start after Gate A→B (M1–M3 locked); stages.04-tech-plan + EV-012 equivalent in_progress; handoff next_action=04_tech_plan_in_progress; mode=delta; affected_features=[F32, F36].'

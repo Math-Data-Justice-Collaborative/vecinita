@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
 | **Active milestone** | M82: Modal jobs API + OpenAPI + JobStore |
-| **Active task** | **T82.1** (pending) — Test: cancel/retry/delete + Job extras (TC-146/147) — red |
+| **Active task** | **T82.1** (in_progress) — Test: cancel/retry/delete + Job extras (TC-146/147) — red |
 | **Tasks completed** | Phase 17–18 historical; Phase 19 pending (S013) |
 | **Last updated** | 2026-07-28 |
 | **Evolve cycle** | EV-012 (F32/F36) — **04-tech-plan in progress** (TP-S013-01–08) |
