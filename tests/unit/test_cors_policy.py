@@ -180,6 +180,25 @@ def test_data_management_cors_preflight_on_job_mutate_and_events(
     assert method in allow_methods
 
 
+def test_data_management_cors_preflight_jobs_events_sse_headers() -> None:
+    """H0c: Jobs SSE preflight allows Cache-Control + Last-Event-ID (BUG-2026-07-29)."""
+    client = TestClient(create_data_mgmt_app(require_proxy_auth=False))
+    response = client.options(
+        "/jobs/events",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": (
+                "accept, authorization, cache-control, last-event-id, x-vecinita-proxy-key"
+            ),
+        },
+    )
+    assert response.status_code == HTTPStatus.OK, response.text
+    allow_headers = header_str(response.headers, "access-control-allow-headers").lower()
+    assert "cache-control" in allow_headers
+    assert "last-event-id" in allow_headers
+
+
 def test_data_management_cors_preflight_on_admin_users_invite() -> None:
     """TC-093: DM allows the admin origin to preflight POST /admin/users/invite."""
     client = TestClient(create_data_mgmt_app(require_proxy_auth=False))
