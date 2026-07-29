@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
 | **Active milestone** | M84: Admin Jobs UI (list/detail/CRUD + SSE) |
-| **Active task** | **T84.1** (in_progress) — Test: Vitest Jobs list/detail SSE→poll |
+| **Active task** | **T84.2** (in_progress) — Test: Vitest admin CRUD / viewer no-mutate |
 | **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.6 (M83 complete) |
 | **Last updated** | 2026-07-28 |
 | **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M83 done → 08 then M84 |
@@ -1703,8 +1703,8 @@ failed-job log affordances (RD-177); Evaluation page uses DO eval SSE (TP-S013-0
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T84.1 | Test: Vitest — Jobs list filter, detail route, SSE→poll fallback (TC-148/150/151) — red | Test | in_progress | RD-173/178, TC-148/150/151 | T82.5 | — | S013 | F32 |
-| T84.2 | Test: Vitest — admin CRUD controls; viewer 403/no mutate (TC-147) — red | Test | pending | RD-176, TC-147 | T82.5 | — | S013 | F32 |
+| T84.1 | Test: Vitest — Jobs list filter, detail route, SSE→poll fallback (TC-148/150/151) — red | Test | completed | RD-173/178, TC-148/150/151 | T82.5 | 2026-07-28 | S013 | F32 |
+| T84.2 | Test: Vitest — admin CRUD controls; viewer 403/no mutate (TC-147) — red | Test | in_progress | RD-176, TC-147 | T82.5 | — | S013 | F32 |
 | T84.3 | Code: `api/jobs` client — events/cancel/retry/delete + types | Code | pending | TP-S013-01 | T84.1 | — | S013 | F32 |
 | T84.4 | Code: JobsPage + JobDetailPage — SSE+poll, filter, document_id, log copy/link | Code | pending | UJ-023/050, RD-177 | T84.1, T84.3 | — | S013 | F32 |
 | T84.5 | Code: Evaluation page — prefer DO eval SSE; keep metrics from internal-write | Code | pending | TP-S013-04, UJ-044 | T83.5, T84.3 | — | S013 | F36 |
@@ -2390,8 +2390,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T83.4 | M83 | 19 | Code | completed | T83.1, T82.4 | 2026-07-28 | S013 | F36 | — |
 | T83.5 | M83 | 19 | Code | completed | T83.2, T83.3, T83.4 | 2026-07-28 | S013 | F36 | — |
 | T83.6 | M83 | 19 | Config | completed | T83.5 | 2026-07-28 | S013 | F36 | — |
-| T84.1 | M84 | 19 | Test | in_progress | T82.5 | — | S013 | F32 | — |
-| T84.2 | M84 | 19 | Test | pending | T82.5 | — | S013 | F32 | — |
+| T84.1 | M84 | 19 | Test | completed | T82.5 | 2026-07-28 | S013 | F32 | — |
+| T84.2 | M84 | 19 | Test | in_progress | T82.5 | — | S013 | F32 | — |
 | T84.3 | M84 | 19 | Code | pending | T84.1 | — | S013 | F32 | — |
 | T84.4 | M84 | 19 | Code | pending | T84.1, T84.3 | — | S013 | F32 | — |
 | T84.5 | M84 | 19 | Code | pending | T83.5, T84.3 | — | S013 | F36 | — |
