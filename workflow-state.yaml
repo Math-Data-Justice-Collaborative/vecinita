@@ -1818,8 +1818,9 @@ active_session:
     current_task:
     task_status: completed
     milestone: M85
-    blocker_advisory: ISS-004
-    note: '10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13. Next: start_13_deploy_smoke — ISS-004 may block commercial deploy (NC Qwen2.5-3B playground catalog). Do not merge PR #153 yet.'
+    blocker_advisory:
+    note: '10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13. Next: start_13_deploy_smoke — ISS-004 resolved
+      (45ed688 removed NC Qwen2.5-3B from playground catalog). Do not merge PR #153 yet.'
     git_commits:
       - sha: a781a80
         message: '[T82.2] test: add failing jobs/events SSE framing tests'
@@ -2028,13 +2029,13 @@ active_session:
     ci:
       status: pending_watch
       branch: evolve/EV-012-unified-job-monitoring
-      note: 'HEAD cc1c355 on evolve branch; watch CI when pushing; do not merge PR #153'
-    resume_at: M85_phase19_boundary
+      note: 'HEAD 45ed688 on evolve branch; watch CI when pushing; do not merge PR #153'
+    resume_at: 13-deploy-smoke
     phase_19_gate: passed
   milestone_completed: M85
   milestone_completed_at: '2026-07-29'
-  build_note: 'M85 COMPLETE (T85.1–T85.5); Phase 19 gate PASS @ T2; 08-verify-build PASS scoped (M85/Phase19); next 10-e2e; PR #153 open (do not merge)'
-  resume_source: '08-verify-build PASS — handoff start_10_e2e'
+  build_note: 'M85 COMPLETE; Phase D passed; ISS-004 resolved @ 45ed688; next start_13_deploy_smoke; PR #153 open (do not merge)'
+  resume_source: 'ISS-004 resolved — handoff start_13_deploy_smoke'
   resume_confirmed_at: '2026-07-29'
 sessions:
   - id: S012-hotfix-admin-ui-112-105
@@ -6394,7 +6395,7 @@ evolve_cycles:
       - TP-S013-08
     open_contradictions: []
     note: 'EV-012 Phase D passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13; current_stage=13-deploy-smoke;
-      phase_d=passed; deploy checkpoint pending; ISS-004 may block 13 commercial deploy; PR #153 open (do not merge).'
+      phase_d=passed; deploy checkpoint pending; ISS-004 resolved (45ed688); PR #153 open (do not merge).'
     handoff:
       next_action: start_13_deploy_smoke
       next_skill: 13-deploy-smoke
@@ -6405,12 +6406,12 @@ evolve_cycles:
       milestone: M85
       milestone_completed: M85
       milestone_gate_passed: Phase19_T2
-      blocker_advisory: ISS-004
-      note: 'start_13_deploy_smoke — ISS-004 may block (NC Qwen2.5-3B playground catalog). Do not merge PR #153 yet.'
+      blocker_advisory:
+      note: 'start_13_deploy_smoke — ISS-004 cleared (NC Qwen2.5-3B removed from playground catalog @ 45ed688). Do not merge PR #153 yet.'
       ci:
         status: pending_watch
         branch: evolve/EV-012-unified-job-monitoring
-        note: 'HEAD cc1c355; watch CI; do not merge PR #153'
+        note: 'HEAD 45ed688; watch CI; do not merge PR #153'
       orchestrator_resumed_at: '2026-07-29'
       resume_at_task:
       resume_at: 13-deploy-smoke
@@ -7511,13 +7512,17 @@ issue_log:
     category: license_blocked
     summary: 'BLOCKED NC: playground catalog Qwen2.5-3B-Instruct (qwen-research / non-commercial) via tags qwen2.5:3b-instruct
       (+ q4/q8) — blocked_count=4; remove/replace before commercial deploy'
-    status: open
+    status: resolved
     opened_at: '2026-07-28'
+    closed_at: '2026-07-29'
+    resolved_at: '2026-07-29'
     report: docs/license-audit-2026-07-28.md
-    blocking_for:
-      - audit-licenses
-      - 13-deploy-smoke
-    note: 'Prod Qwen2.5-1.5B-Instruct Apache-2.0 OK; no PyRosetta. FLAG-tier ~20 separate (flags_count). Audit verdict FAILED.'
+    blocking_for: []
+    resolution: 'Removed qwen2.5:3b-* from PLAYGROUND_MODEL_CATALOG; resolve_hf_repo blocks Qwen/Qwen2.5-3B-Instruct;
+      catalog tags filtered via resolve_hf_repo; commit on evolve/EV-012 branch (45ed688). Remediation recorded in
+      docs/license-audit-2026-07-28.md.'
+    note: 'Prod Qwen2.5-1.5B-Instruct Apache-2.0 OK; no PyRosetta. FLAG-tier ~20 separate (flags_count). Closed 2026-07-29
+      — NC Qwen2.5-3B removed from playground catalog; no longer blocks 13-deploy-smoke.'
   - id: ISS-005
     category: contradiction
     summary: 'TP-S013-06 user chose 6b (Modal polls DO for pending eval_runs) contradicts Gate A→B M3 locked choice A (POST
@@ -9282,9 +9287,9 @@ git_history:
       created_at: '2026-07-28'
       session_id: S013-unified-job-monitoring
       evolve_cycle_id: EV-012
-      note: 'M82+M83+M84 complete; M84 08-verify-build scoped PASS @ f98d40d; T85.1 completed (c6a156d); T85.2 in_progress/M85;
-        minor PR #153 open (do not merge)'
-      head_sha: 29635fe
+      note: 'M82–M85 complete; Phase D passed; ISS-004 resolved @ 45ed688 (NC Qwen2.5-3B catalog removal); minor PR #153 open
+        (do not merge); next start_13_deploy_smoke'
+      head_sha: 45ed6882ecd94dc81ed02fc7e0366d90f41e8e09
     - name: fix/S012-admin-ui-112-105
       purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
       base: main
@@ -10435,7 +10440,19 @@ git_history:
       timestamp: '2026-07-29T08:07:05-04:00'
       evolve_cycle_id: EV-012
       note: 10-e2e T0 PASS; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke
+    - sha: 45ed6882ecd94dc81ed02fc7e0366d90f41e8e09
+      branch: evolve/EV-012-unified-job-monitoring
+      message: 'fix: remove NC Qwen2.5-3B from playground catalog (ISS-004)'
+      stage: 16-evolve
+      session_id: S013-unified-job-monitoring
+      files_changed: 23
+      timestamp: '2026-07-29T08:13:51-04:00'
+      evolve_cycle_id: EV-012
+      note: 'ISS-004 closed — qwen2.5:3b-* removed from catalog; resolve_hf_repo blocks Qwen2.5-3B-Instruct; remediation in
+        docs/license-audit-2026-07-28.md'
   notes:
+    - '2026-07-29 S013/EV-012: ISS-004 RESOLVED @ 45ed688 — NC Qwen2.5-3B removed from playground catalog; blocker_advisory
+      cleared; next_action=start_13_deploy_smoke (no ISS-004 block). License audit remediation: docs/license-audit-2026-07-28.md.'
     - '2026-07-29 S013/EV-012: M85 COMPLETE (T85.1–T85.5); Phase 19 gate PASS @ T2 (phase19-gate.md @ cc1c355); 07-build completed;
       current_stage=08-verify-build; phase_c=pending_08_verify; gates.c_to_d=pending; handoff next_action=start_08_verify_build;
       do not merge PR #153.'
