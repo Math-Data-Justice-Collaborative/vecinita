@@ -11,12 +11,12 @@
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
 | **Active milestone** | M82: Modal jobs API + OpenAPI + JobStore |
-| **Active task** | **T82.5** (pending) — Config: OpenAPI + shared-schemas sync (largely done in 04) |
-| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.4 |
+| **Active task** | **T82.2** (in_progress) — Test: `GET /jobs/events` SSE framing + reconnect (TC-148) |
+| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1, T82.3, T82.4 |
 | **Last updated** | 2026-07-28 |
-| **Evolve cycle** | EV-012 (F32/F36) — **04-tech-plan in progress** (TP-S013-01–08) |
+| **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build) |
 | **Git branch** | `evolve/EV-012-unified-job-monitoring` |
-| **Active session** | S013-unified-job-monitoring — Gate A→B passed; drafting Phase 19 for review |
+| **Active session** | S013-unified-job-monitoring — Gate A→B/B→C passed; building M82 |
 | **Scope addition** | 2026-07-28 — Unified Jobs: Modal lifecycle SoT, SSE+poll, eval enqueue, admin CRUD, soft-delete eval_runs (RD-173–178, TP-S013-01–08, ADR-038). |
 
 ## Template
