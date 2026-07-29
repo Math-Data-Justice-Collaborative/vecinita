@@ -515,6 +515,26 @@ Artifacts: feature-list F32/F36 delta; UJ-023/UJ-044/UJ-050; test-plan TC-146–
 `docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md`;
 `docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md`.
 
+### EV-012 tech-plan decisions (2026-07-28) — TP-S013-01–08
+
+04-tech-plan locks implementation paths for S013 / #116 (Lean+build; 05/06 skipped):
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S013-01 | OpenAPI | `GET /jobs/events`; `POST …/cancel`; `POST …/retry`; `DELETE /jobs/{id}`; Job extras | Batch 1 Q1a |
+| TP-S013-02 | JobStore | Keep `DictJobStore` + `modal.Dict`; Modal `.spawn`; no Postgres jobs table | Batch 1 Q2a |
+| TP-S013-03 | Delete | DELETE JobStore + soft-delete linked `eval_runs` when `job_type=eval` | Batch 1 Q3b |
+| TP-S013-04 | Eval SSE | `GET /internal/v1/eval/runs/{run_id}/events`; Jobs list uses Modal `/jobs/events` | Batch 1 Q4a |
+| TP-S013-05 | Soft-delete | `eval_runs.deleted_at` timestamptz; hide from default list/detail | Batch 2 Q5a |
+| TP-S013-06 | Enqueue | `enqueue_eval` from `POST /internal/v1/eval/runs` (Keep M3; ISS-005 resolved) | Batch 2 Q6a |
+| TP-S013-07 | Cancel | JobStore `cancelled` + best-effort `FunctionCall.cancel()` | Batch 2 Q7a |
+| TP-S013-08 | Plan shape | Phase 19 / M82–M85 | Batch 2 Q8a |
+
+**ISS-005:** User briefly chose Modal pull (6b); contradicted Gate A→B M3; resolved by **Keep M3 / 6a**.
+
+Artifacts: execution-plan Phase 19; `docs/sessions/S013-unified-job-monitoring/roadmap.md`;
+`docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md`; ADR-038 amendments §9–12.
+
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 
 01-requirements locked RD-154–RD-162. 04-tech-plan locks implementation order and operator steps:

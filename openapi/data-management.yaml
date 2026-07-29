@@ -55,6 +55,7 @@ paths:
               - running
               - completed
               - failed
+              - cancelled
       responses:
         "200":
           description: Job list
@@ -89,6 +90,102 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/Unauthorized"
+    delete:
+      operationId: deleteJob
+      summary: Delete job record (admin only); soft-deletes linked eval_run when job_type=eval
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Job deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /jobs/events:
+    get:
+      operationId: streamJobEvents
+      summary: SSE stream of job status updates (EV-012)
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      responses:
+        "200":
+          description: Server-sent events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /jobs/{job_id}/cancel:
+    post:
+      operationId: cancelJob
+      summary: Cancel a pending/running job (admin only)
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Cancelled job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /jobs/{job_id}/retry:
+    post:
+      operationId: retryJob
+      summary: Retry a failed/cancelled job (admin only)
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: New or requeued job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateJobResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /admin/users:
     get:
       operationId: listAdminUsers
@@ -531,6 +628,7 @@ components:
             - running
             - completed
             - failed
+            - cancelled
         job_type:
           type: string
           enum:
@@ -544,6 +642,25 @@ components:
           items:
             type: string
             format: uri
+        document_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Retag target document (EV-012)
+        eval_run_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Linked DO eval_runs.id when job_type=eval
+        modal_call_id:
+          type: string
+          nullable: true
+          description: Modal function call id for log affordances (RD-177)
+        dashboard_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Modal dashboard deep link when known (RD-177)
         error_code:
           type: string
           nullable: true

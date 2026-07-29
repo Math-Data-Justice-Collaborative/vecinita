@@ -27,9 +27,17 @@ ingest/retag used Modal. That split prevented a single job lifecycle and complic
    with **4s poll fallback** and SSE retry backoff (RD-173). Jobs **list** remains Modal-primary.
 6. **Admin-only** full job CRUD (cancel/retry/delete); viewer read-only (RD-176).
 7. Eval **trigger**: `POST /internal/v1/eval/runs` on DO creates the metrics row and **enqueues**
-   Modal `job_type=eval` (02-verify M3).
+   Modal `job_type=eval` via `DataManagementJobsClient.enqueue_eval` (02-verify M3, TP-S013-06).
 8. **Postgres `jobs` table** is not the job-lifecycle SoT (02-verify M1); DO Postgres stores
    corpus + eval metrics/results only.
+9. **JobStore backend:** keep `DictJobStore` + `modal.Dict` for operator-visible lifecycle;
+   Modal `.spawn` for work (TP-S013-02). Do not dual-write a Postgres jobs table.
+10. **Cancel:** set JobStore `cancelled` and best-effort `FunctionCall.cancel()` when
+    `modal_call_id` is known; runners check cancelled before continuing (TP-S013-07).
+11. **Delete:** remove Modal JobStore record; when `job_type=eval`, soft-delete linked
+    `eval_runs` with `deleted_at` (TP-S013-03/05).
+12. **SSE paths:** Modal `GET /jobs/events` for Jobs list; DO
+    `GET /internal/v1/eval/runs/{run_id}/events` for Evaluation progress (TP-S013-01/04).
 
 ## Consequences
 

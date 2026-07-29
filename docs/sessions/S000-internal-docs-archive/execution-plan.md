@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; **S010 Phase 18 delta 2026-07-10**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; **S013 Phase 19 delta 2026-07-28**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**037**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**038**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 18: EV-011 — F39 client consolidation (slices A–E) |
-| **Active milestone** | M81: Slice E — env/doc cleanup |
-| **Active task** | **T81.5** (pending) — Docs: Phase 18 gate checklist + session verify pointer |
-| **Tasks completed** | Phase 17 M74–M76; Phase 18: T77.1–T81.5 (incl. T80.7 operator smoke 2026-07-24) |
-| **Last updated** | 2026-07-24 |
-| **Evolve cycle** | EV-011 (F39) — **04-tech-plan delta reopen complete** (TP-S010-17–31) |
-| **Git branch** | `feat/S010-unify-llm-service` |
-| **Active session** | S010-unify-llm-service — Phase 18 complete pending 08-verify-build + PR-53 (TP-S010-21). T80.7 PASS. |
-| **Scope addition** | 2026-07-10 — F39 follow-on: one `LlmClient`, rename, streaming, auth, chat-template, catalog gate, **two Modal apps** (prod + playground), env cleanup (RD-163–RD-172, TP-S010-17–31). |
+| **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
+| **Active milestone** | M82: Modal jobs API + OpenAPI + JobStore |
+| **Active task** | **T82.1** (pending) — Test: cancel/retry/delete + Job extras (TC-146/147) — red |
+| **Tasks completed** | Phase 17–18 historical; Phase 19 pending (S013) |
+| **Last updated** | 2026-07-28 |
+| **Evolve cycle** | EV-012 (F32/F36) — **04-tech-plan in progress** (TP-S013-01–08) |
+| **Git branch** | `evolve/EV-012-unified-job-monitoring` |
+| **Active session** | S013-unified-job-monitoring — Gate A→B passed; drafting Phase 19 for review |
+| **Scope addition** | 2026-07-28 — Unified Jobs: Modal lifecycle SoT, SSE+poll, eval enqueue, admin CRUD, soft-delete eval_runs (RD-173–178, TP-S013-01–08, ADR-038). |
 
 ## Template
 
@@ -1655,6 +1655,89 @@ prod `vecinita-llm` pinned to `qwen2.5:1.5b-instruct`.
 
 ---
 
+### Phase 19: EV-012 — Unified Admin Jobs (#116)
+
+> **Session:** S013-unified-job-monitoring · **Evolve cycle:** EV-012 · **Features:** F32, F36 (extend; no new Fn)  
+> **Branch:** `evolve/EV-012-unified-job-monitoring` → `main` (PR-54) · **ADR:** ADR-038  
+> **Build order:** M82→M85 · **Decisions:** RD-173–RD-178, TP-S013-01–08, Gate A→B M1–M3  
+> **Out of scope:** ChatRAG UI; Postgres jobs table as lifecycle SoT; new CORS origins / secrets
+
+**Objective:** Modal owns all long-running admin job lifecycles (incl. `job_type=eval`); DO Postgres
+remains storage/metrics SoT; Admin Jobs list/detail/CRUD + SSE with 4s poll fallback; eval trigger
+creates metrics row then enqueues Modal via `DataManagementJobsClient.enqueue_eval`.
+
+#### M82: Modal jobs API + OpenAPI + JobStore
+
+**Goal:** Extend Modal DM jobs OpenAPI/schemas/store: SSE events, cancel/retry/delete, Job extras
+(`document_id`, `modal_call_id`, `dashboard_url`, `eval_run_id`), `cancelled` status; keep
+`DictJobStore` + `modal.Dict` (TP-S013-02).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T82.1 | Test: unit — cancel/retry/delete admin-only; Job extras; cancelled status (TC-146/147) — red | Test | pending | TP-S013-01/07, RD-176, TC-146/147 | — | — | S013 | F32 |
+| T82.2 | Test: unit — `GET /jobs/events` SSE framing + reconnect contract (TC-148) — red | Test | pending | TP-S013-01, RD-173, TC-148 | — | — | S013 | F32 |
+| T82.3 | Code: JobStore + schemas — extras, `cancelled`, delete; best-effort `FunctionCall.cancel()` | Code | pending | TP-S013-02/07, ADR-038 | T82.1 | — | S013 | F32 |
+| T82.4 | Code: routes — `GET /jobs/events`, `POST …/cancel`, `POST …/retry`, `DELETE /jobs/{id}` | Code | pending | TP-S013-01, openapi/data-management | T82.1, T82.3 | — | S013 | F32 |
+| T82.5 | Config: `openapi/data-management.yaml` + shared-schemas Job/JobOptions (`eval`, `eval_run_id`) | Config | pending | TP-S013-01, api-contract | T82.4 | — | S013 | F32 |
+| T82.6 | Docs: api-contract EV-012 paths locked to OpenAPI | Docs | pending | api-contract | T82.5 | — | S013 | F32 |
+
+#### M83: Eval enqueue bridge + DO SSE + soft-delete
+
+**Goal:** `POST /internal/v1/eval/runs` creates metrics row then `enqueue_eval`;
+`GET /internal/v1/eval/runs/{run_id}/events` SSE; soft-delete via `deleted_at` when Modal deletes
+eval jobs (TP-S013-03/05/06; M3).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T83.1 | Test: unit/integration — create run enqueues Modal `job_type=eval` (TC-124/AC-J1) — red | Test | pending | TP-S013-06, M3, TC-124 | T82.4 | — | S013 | F36 |
+| T83.2 | Test: unit — eval progress SSE + soft-delete hides from default list (TP-S013-03/04/05) — red | Test | pending | TP-S013-03–05, TC-147 | — | — | S013 | F36 |
+| T83.3 | Config: Alembic — `eval_runs.deleted_at` nullable timestamptz | Config | pending | TP-S013-05 | T83.2 | — | S013 | F36 |
+| T83.4 | Code: `DataManagementJobsClient.enqueue_eval` + replace BackgroundTasks runner with Modal spawn | Code | pending | TP-S013-06, ADR-038 | T83.1, T82.4 | — | S013 | F36 |
+| T83.5 | Code: `GET /internal/v1/eval/runs/{run_id}/events` SSE; DELETE job soft-deletes linked eval_run | Code | pending | TP-S013-03/04 | T83.2, T83.3, T83.4 | — | S013 | F36 |
+| T83.6 | Config: `openapi/internal-write.yaml` events path + EvalRun soft-delete fields | Config | pending | TP-S013-04 | T83.5 | — | S013 | F36 |
+
+#### M84: Admin Jobs UI (list/detail/CRUD + SSE)
+
+**Goal:** `/jobs` + `/jobs/:id` — status filter, retag `document_id`, SSE+4s poll, admin CRUD,
+failed-job log affordances (RD-177); Evaluation page uses DO eval SSE (TP-S013-04).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T84.1 | Test: Vitest — Jobs list filter, detail route, SSE→poll fallback (TC-148/150/151) — red | Test | pending | RD-173/178, TC-148/150/151 | T82.5 | — | S013 | F32 |
+| T84.2 | Test: Vitest — admin CRUD controls; viewer 403/no mutate (TC-147) — red | Test | pending | RD-176, TC-147 | T82.5 | — | S013 | F32 |
+| T84.3 | Code: `api/jobs` client — events/cancel/retry/delete + types | Code | pending | TP-S013-01 | T84.1 | — | S013 | F32 |
+| T84.4 | Code: JobsPage + JobDetailPage — SSE+poll, filter, document_id, log copy/link | Code | pending | UJ-023/050, RD-177 | T84.1, T84.3 | — | S013 | F32 |
+| T84.5 | Code: Evaluation page — prefer DO eval SSE; keep metrics from internal-write | Code | pending | TP-S013-04, UJ-044 | T83.5, T84.3 | — | S013 | F36 |
+| T84.6 | Docs: user-journeys UJ-023/044/050 step alignment (if drift) | Docs | pending | user-journeys | T84.4, T84.5 | — | S013 | F32 |
+
+#### M85: Full-stack tests (API e2e + Playwright)
+
+**Goal:** API e2e for UJ-023/044/050; Playwright T0-ui list→detail; CORS regression if new routes.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T85.1 | Test: API e2e `test_uj050_job_detail_crud.py` (TC-146–149) | Test | pending | UJ-050, e2e-coverage | T84.4 | — | S013 | F32 |
+| T85.2 | Test: API e2e extend UJ-023/044 — eval on Jobs + document_id (TC-124/150/151) | Test | pending | UJ-023/044 | T83.4, T84.4 | — | S013 | F32 |
+| T85.3 | Test: Playwright `tests/ui/admin/uj050-job-detail.spec.ts` + uj023/uj044 extend (RD-178) | Test | pending | RD-178, TC-146 | T84.4 | — | S013 | F32 |
+| T85.4 | Test: CORS preflight for new `/jobs/*` mutate + events (H0c) | Test | pending | connectivity-gates | T82.4 | — | S013 | F32 |
+| T85.5 | Docs: Phase 19 gate checklist + session 04/07 verify pointers | Docs | pending | 08-verify-build | T85.1–T85.4 | — | S013 | F32 |
+
+#### Phase 19 Gate Check
+
+- [ ] All M82–M85 tasks completed (T82.1–T85.5)
+- [ ] TC-146–TC-151 + TC-124 green at T2; Playwright T0-ui list→detail (RD-178)
+- [ ] AC-J1–AC-J10 satisfied at T2
+- [ ] Modal lifecycle SoT; DO metrics SoT; no Postgres jobs table (M1)
+- [ ] SSE on Modal jobs + DO eval progress; 4s poll fallback (M2, RD-173)
+- [ ] Eval create → enqueue Modal `job_type=eval` (M3, TP-S013-06)
+- [ ] Admin CRUD; soft-delete `eval_runs.deleted_at` on eval job delete (TP-S013-03/05)
+- [ ] No new CORS origins / secrets; ChatRAG UI untouched
+- [ ] ruff / basedpyright / ESLint clean; pytest + DM Vitest + `make test-ui` green
+
+**Gate pointer:** [`docs/sessions/S013-unified-job-monitoring/reports/phase19-gate.md`](../../S013-unified-job-monitoring/reports/phase19-gate.md) (created at T85.5)
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1769,6 +1852,7 @@ main
 | PR-51 | Major | Phase 15 / S008 (EV-009) | feat/S008-eval-ux-playground | main | pending (F37 eval UX + playground) |
 | PR-52 | Major | Phase 16 / S009 (EV-010) | feat/S009-playground-model-download | main | pending (F38 playground model download) |
 | PR-53 | Major | Phase 17+18 / S010 (EV-011) | feat/S010-unify-llm-service | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/144 |
+| PR-54 | Major | Phase 19 / S013 (EV-012) | evolve/EV-012-unified-job-monitoring | main | pending — Unified Admin Jobs (#116) |
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
@@ -2294,6 +2378,29 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T81.3 | M81 | 18 | Config | completed | T77.3 | 2026-07-24 | S010 | F39 | — |
 | T81.4 | M81 | 18 | Docs | completed | T81.2 | 2026-07-24 | S010 | F39 | — |
 | T81.5 | M81 | 18 | Docs | pending | T77.7–T81.4 | — | S010 | F39 | — |
+| T82.1 | M82 | 19 | Test | pending | — | — | S013 | F32 | — |
+| T82.2 | M82 | 19 | Test | pending | — | — | S013 | F32 | — |
+| T82.3 | M82 | 19 | Code | pending | T82.1 | — | S013 | F32 | — |
+| T82.4 | M82 | 19 | Code | pending | T82.1, T82.3 | — | S013 | F32 | — |
+| T82.5 | M82 | 19 | Config | pending | T82.4 | — | S013 | F32 | — |
+| T82.6 | M82 | 19 | Docs | pending | T82.5 | — | S013 | F32 | — |
+| T83.1 | M83 | 19 | Test | pending | T82.4 | — | S013 | F36 | — |
+| T83.2 | M83 | 19 | Test | pending | — | — | S013 | F36 | — |
+| T83.3 | M83 | 19 | Config | pending | T83.2 | — | S013 | F36 | — |
+| T83.4 | M83 | 19 | Code | pending | T83.1, T82.4 | — | S013 | F36 | — |
+| T83.5 | M83 | 19 | Code | pending | T83.2, T83.3, T83.4 | — | S013 | F36 | — |
+| T83.6 | M83 | 19 | Config | pending | T83.5 | — | S013 | F36 | — |
+| T84.1 | M84 | 19 | Test | pending | T82.5 | — | S013 | F32 | — |
+| T84.2 | M84 | 19 | Test | pending | T82.5 | — | S013 | F32 | — |
+| T84.3 | M84 | 19 | Code | pending | T84.1 | — | S013 | F32 | — |
+| T84.4 | M84 | 19 | Code | pending | T84.1, T84.3 | — | S013 | F32 | — |
+| T84.5 | M84 | 19 | Code | pending | T83.5, T84.3 | — | S013 | F36 | — |
+| T84.6 | M84 | 19 | Docs | pending | T84.4, T84.5 | — | S013 | F32 | — |
+| T85.1 | M85 | 19 | Test | pending | T84.4 | — | S013 | F32 | — |
+| T85.2 | M85 | 19 | Test | pending | T83.4, T84.4 | — | S013 | F32 | — |
+| T85.3 | M85 | 19 | Test | pending | T84.4 | — | S013 | F32 | — |
+| T85.4 | M85 | 19 | Test | pending | T82.4 | — | S013 | F32 | — |
+| T85.5 | M85 | 19 | Docs | pending | T85.1–T85.4 | — | S013 | F32 | — |
 
 ## Phase Gate Log
 

@@ -269,19 +269,24 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 }
 ```
 
-### EV-012 / #116 — Jobs monitoring deltas (ADR-038, RD-173–RD-178)
+### EV-012 / #116 — Jobs monitoring deltas (ADR-038, RD-173–RD-178, TP-S013-01–08)
 
-Additive contract changes (exact paths locked in 04-tech-plan / OpenAPI):
+Locked OpenAPI paths (04-tech-plan):
 
-| Change | Purpose |
-|--------|---------|
-| `job_type` includes **`eval`**; optional `document_id` on retag | Unified Modal list; retag context |
-| `GET /jobs/events` (SSE) + internal-write eval progress SSE | Push updates (02-verify M2); FE falls back to 4s poll (RD-173) |
-| Cancel / retry / delete endpoints (admin JWT) | Full job CRUD (RD-176) |
-| Optional `modal_call_id` / `dashboard_url` on failed jobs | Log affordances (RD-177) |
+| Method / path | Purpose |
+|---------------|---------|
+| `GET /jobs/events` | Modal jobs SSE (`text/event-stream`); Jobs list primary (M2) |
+| `POST /jobs/{job_id}/cancel` | Admin cancel — JobStore `cancelled` + best-effort `FunctionCall.cancel()` (TP-S013-07) |
+| `POST /jobs/{job_id}/retry` | Admin retry — new pending job / re-spawn (RD-176) |
+| `DELETE /jobs/{job_id}` | Admin delete JobStore record; if `job_type=eval`, soft-delete linked `eval_runs` via `deleted_at` (TP-S013-03/05) |
+| `GET /internal/v1/eval/runs/{run_id}/events` | DO eval progress SSE for Evaluation page (TP-S013-04) |
+| `POST /internal/v1/eval/runs` | Create metrics row **+** `DataManagementJobsClient.enqueue_eval` → Modal `job_type=eval` (M3, TP-S013-06) |
 
-**Architecture:** Modal owns job lifecycle (incl. eval). DO Postgres remains SoT for storage and
-eval metrics (internal-write `GET /internal/v1/eval/runs*`). Supabase = auth only. See ADR-038.
+**Job schema extras:** `document_id`, `modal_call_id`, `dashboard_url`, `eval_run_id`; status includes
+`cancelled`. **JobOptions:** `job_type` ∈ `ingest|retag|eval`; `eval_run_id` required for eval enqueue.
+
+**Architecture:** Modal owns job lifecycle (incl. eval) via `DictJobStore`/`modal.Dict` (TP-S013-02).
+DO Postgres remains SoT for storage and eval metrics. Supabase = auth only. See ADR-038.
 
 ### GET `/health`
 

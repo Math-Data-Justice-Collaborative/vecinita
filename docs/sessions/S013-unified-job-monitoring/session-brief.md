@@ -11,11 +11,14 @@
 
 Unify long-running async work on the **Admin Dashboard Jobs tab**:
 
-1. Federate Modal ingest/retag jobs with eval runs (and leave room for future job types).
+1. Modal-primary Jobs list (`GET /jobs`) including `job_type=eval` (not FE dual-list merge).
 2. Clickable rows → type-aware detail at `/jobs/:id`.
-3. Status filter; retag document context; durable enough for post-mortem.
-4. Event-driven updates via **SSE per source** (Modal + internal-write); poll fallback TBD in tech plan.
-5. v2 in same cycle: Postgres jobs alignment (or document SoT), Modal log links, cancel/retry.
+3. Status filter; retag `document_id`; durable post-mortem fields.
+4. SSE on Modal jobs + DO eval progress; **4s poll** fallback (RD-173).
+5. Admin cancel/retry/delete; Modal log affordances; eval create enqueues Modal.
+
+**Roadmap:** [roadmap.md](./roadmap.md)  
+**04 report:** [reports/04-tech-plan.md](./reports/04-tech-plan.md)
 
 ## Hard constraints
 

@@ -290,14 +290,102 @@ project:
       - RD-172
     04-tech-plan:
       status: completed
-      started_at: '2026-07-08'
-      completed_at: '2026-07-10'
-      partial_rerun_at: '2026-07-08'
-      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm tech plan (ADR-037, TP-S010-01–16, Phase 17 M74–M76)
-      session_id: S010-unify-llm-service
-      branch: feat/S010-unify-llm-service
-      evolve_cycle_id: EV-011
-      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+      started_at: '2026-07-28'
+      completed_at: '2026-07-28'
+      ended_at: '2026-07-28'
+      partial_rerun_at: '2026-07-28'
+      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36; Gate A→B passed (M1–M3 locked); user started 04-tech-plan'
+      session_id: S013-unified-job-monitoring
+      branch: evolve/EV-012-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      mode: delta
+      note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; roadmap.md + reports/04-tech-plan.md; OpenAPI + api-contract + ADR-038 + TP-S013-01–08; ISS-005 resolved (Keep M3 / 6a). Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (git commit SHA pending — record after parent commits). handoff → 07-build T82.1'
+      report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
+      draft_status: approved
+      tech_plan_interview:
+        current_batch: 2
+        batch_1_status: complete
+        batch_1_recorded_at: '2026-07-28'
+        batch_1_topic: architecture
+        batch_2_status: complete
+        batch_2_topic: deploy_test_integration
+        batch_2_recorded_at: '2026-07-28'
+        batch_2_finalize_tp_q6: accepted
+        interview_batches_complete: true
+        draft_execution_plan_phase19: complete
+        interview_cursor: completed
+        next: start_T82_1_cancel_retry_delete_tests
+        user_approval: option_A_complete_04_commit_docs_start_07
+        approved_at: '2026-07-28'
+      batch1_decisions:
+      - TP-S013-01
+      - TP-S013-02
+      - TP-S013-03
+      - TP-S013-04
+      batch2_decisions_accepted:
+      - TP-S013-05
+      - TP-S013-06
+      - TP-S013-07
+      - TP-S013-08
+      batch2_decisions_pending: []
+      batch2_deploy_test_integration:
+        TP-S013-05:
+          choice: 5a
+          status: accepted
+          summary: 'Soft-delete eval_runs via deleted_at (nullable timestamptz); list/detail hide deleted by default'
+        TP-S013-06:
+          choice: 6a
+          status: accepted
+          user_resolution: keep_m3_enqueue
+          summary: 'Keep M3 — enqueue from POST /internal/v1/eval/runs via DataManagementJobsClient.enqueue_eval (NOT 6b poll)'
+          m3_locked:
+            choice: A
+            verdict: 'POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval'
+          issue_id: ISS-005
+          issue_status: resolved
+          resolved_at: '2026-07-28'
+        TP-S013-07:
+          choice: 7a
+          status: accepted
+          summary: 'Cancel = JobStore cancelled + best-effort FunctionCall.cancel() when modal_call_id known; runners check cancelled'
+        TP-S013-08:
+          choice: 8a
+          status: accepted
+          summary: 'Phase 19 M82–M85 milestone shape'
+      s010_baseline:
+        status: completed
+        started_at: '2026-07-08'
+        completed_at: '2026-07-10'
+        partial_rerun_at: '2026-07-08'
+        partial_rerun_note: EV-011/S010 delta — unified vecinita-llm tech plan (ADR-037, TP-S010-01–16, Phase 17 M74–M76)
+        session_id: S010-unify-llm-service
+        branch: feat/S010-unify-llm-service
+        evolve_cycle_id: EV-011
+        report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+        prior_status: completed
+        prior_completed_at: '2026-07-08'
+        mode: delta_reopen
+        note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
+        started_at_reopen: '2026-07-10'
+        completed_at_reopen: '2026-07-10'
+        batch1_decisions:
+        - TP-S010-17
+        - TP-S010-18
+        - TP-S010-19
+        - TP-S010-20
+        - TP-S010-21
+        batch2_decisions:
+        - TP-S010-22
+        - TP-S010-23
+        - TP-S010-24
+        - TP-S010-25
+        - TP-S010-26
+        batch3_decisions:
+        - TP-S010-27
+        - TP-S010-28
+        - TP-S010-29
+        - TP-S010-30
+        - TP-S010-31
       s009_baseline:
         status: paused
         paused_at: '2026-07-08'
@@ -365,236 +453,235 @@ project:
           idempotent first-admin seed; cost cap raised to ~$75/mo (supersedes ADR-004 cap — user-approved). Phase 11 (M43-M47,
           T43.1-T47.6, 29 tasks) appended to execution-plan. R53 unblocked via Supabase CLI (MCP-independent). Commit DEFERRED
           (commit-only-when-asked override). Baseline partial_rerun info preserved in legacy stages.04-tech-plan.'
-      prior_status: completed
-      prior_completed_at: '2026-07-08'
-      mode: delta_reopen
-      note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
-      started_at_reopen: '2026-07-10'
-      completed_at_reopen: '2026-07-10'
-      batch1_decisions:
-      - TP-S010-17
-      - TP-S010-18
-      - TP-S010-19
-      - TP-S010-20
-      - TP-S010-21
-      batch2_decisions:
-      - TP-S010-22
-      - TP-S010-23
-      - TP-S010-24
-      - TP-S010-25
-      - TP-S010-26
-      batch3_decisions:
-      - TP-S010-27
-      - TP-S010-28
-      - TP-S010-29
-      - TP-S010-30
-      - TP-S010-31
     07-build:
       status: in_progress
-      started_at: '2026-07-10'
-      started_at_reopen: '2026-07-10'
-      session_id: S010-unify-llm-service
-      branch: feat/S010-unify-llm-service
-      evolve_cycle_id: EV-011
-      mode: delta_reopen
-      prior_status: completed
-      prior_completed_at: '2026-07-03'
-      feature: F39
-      phase: Phase 18 (M77-M81)
-      milestone: M80
+      started_at: '2026-07-28'
+      session_id: S013-unified-job-monitoring
+      branch: evolve/EV-012-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      mode: delta
+      feature: F32/F36
+      phase: Phase 19 (M82-M85)
+      milestone: M82
+      note: '07-build delta IN_PROGRESS — EV-012/S013 Phase 19; start T82.1 cancel/retry/delete tests; Gate B→C passed; 04-tech-plan approved option A'
       substeps:
-        current_task: T80.7
-        task_status: blocked
+        current_task: T82.1
+        task_status: pending
         in_progress_tasks: []
-        blocked_tasks:
-        - T80.7
-        completed_tasks_recent:
-        - T77.1
-        - T77.2
-        - T77.3
-        - T77.4
-        - T77.5
-        - T77.6
-        - T77.7
-        - T78.1
-        - T78.2
-        - T78.3
-        - T78.4
-        - T78.5
-        - T78.6
-        - T79.1
-        - T79.2
-        - T79.3
-        - T79.4
-        - T79.5
-        - T79.6
-        - T80.1
-        - T80.2
-        - T80.3
-        - T80.4
-        - T80.5
-        - T80.6
-        - T81.1
-        - T81.2
-        - T81.3
-        - T81.4
-        - T81.5
+        blocked_tasks: []
+        completed_tasks_recent: []
       execution_plan:
-        active_task: T80.7
-        T79.2: completed
-        T79.3: completed
-        T79.4: completed
-        T79.5: completed
-        T79.6: completed
-        T79.2_completed_at: '2026-07-23'
-        T79.3_completed_at: '2026-07-23'
-        T79.4_completed_at: '2026-07-23'
-        T79.5_completed_at: '2026-07-23'
-        T79.6_completed_at: '2026-07-23'
-        T80.1: completed
-        T80.1_completed_at: '2026-07-24'
-        T80.2: completed
-        T80.2_completed_at: '2026-07-24'
-        T80.3: completed
-        T80.3_completed_at: '2026-07-24'
-        T80.4: completed
-        T80.4_completed_at: '2026-07-24'
-        T80.5: completed
-        T80.5_completed_at: '2026-07-24'
-        T80.6: completed
-        T80.6_completed_at: '2026-07-24'
-        T80.7: blocked
-        T81.1: completed
-        T81.1_completed_at: '2026-07-24'
-        T81.2: completed
-        T81.2_completed_at: '2026-07-24'
-        T81.3: completed
-        T81.3_completed_at: '2026-07-24'
-        T81.4: completed
-        T81.4_completed_at: '2026-07-24'
-        T81.5: completed
-        T81.5_completed_at: '2026-07-24'
-        active_milestone: M80
-        active_phase: Phase 18
-        completed_tasks:
-        - T77.1
-        - T77.2
-        - T77.3
-        - T77.4
-        - T77.5
-        - T77.6
-        - T77.7
-        - T78.1
-        - T78.2
-        - T78.3
-        - T78.4
-        - T78.5
-        - T78.6
-        - T79.1
-        - T79.2
-        - T79.3
-        - T79.4
-        - T79.5
-        - T79.6
-        - T80.1
-        - T80.2
-        - T80.3
-        - T80.4
-        - T80.5
-        - T80.6
-        - T81.1
-        - T81.2
-        - T81.3
-        - T81.4
-        - T81.5
-        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains
-          (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+        active_task: T82.1
+        active_milestone: M82
+        active_phase: Phase 19
+        note: 'Handoff from approved 04-tech-plan — start_T82_1_cancel_retry_delete_tests'
+      s010_baseline:
+        status: in_progress
+        started_at: '2026-07-10'
+        started_at_reopen: '2026-07-10'
+        session_id: S010-unify-llm-service
+        branch: feat/S010-unify-llm-service
+        evolve_cycle_id: EV-011
+        mode: delta_reopen
+        prior_status: completed
+        prior_completed_at: '2026-07-03'
+        feature: F39
+        phase: Phase 18 (M77-M81)
+        milestone: M80
+        parked_note: 'S010/EV-011 parked; T80.7 blocked — preserved under s010_baseline while S013/EV-012 07-build runs'
+        substeps:
+          current_task: T80.7
+          task_status: blocked
+          in_progress_tasks: []
+          blocked_tasks:
+          - T80.7
+          completed_tasks_recent:
+          - T77.1
+          - T77.2
+          - T77.3
+          - T77.4
+          - T77.5
+          - T77.6
+          - T77.7
+          - T78.1
+          - T78.2
+          - T78.3
+          - T78.4
+          - T78.5
+          - T78.6
+          - T79.1
+          - T79.2
+          - T79.3
+          - T79.4
+          - T79.5
+          - T79.6
+          - T80.1
+          - T80.2
+          - T80.3
+          - T80.4
+          - T80.5
+          - T80.6
+          - T81.1
+          - T81.2
+          - T81.3
+          - T81.4
+          - T81.5
+        execution_plan:
+          active_task: T80.7
+          T79.2: completed
+          T79.3: completed
+          T79.4: completed
+          T79.5: completed
+          T79.6: completed
+          T79.2_completed_at: '2026-07-23'
+          T79.3_completed_at: '2026-07-23'
+          T79.4_completed_at: '2026-07-23'
+          T79.5_completed_at: '2026-07-23'
+          T79.6_completed_at: '2026-07-23'
+          T80.1: completed
+          T80.1_completed_at: '2026-07-24'
+          T80.2: completed
+          T80.2_completed_at: '2026-07-24'
+          T80.3: completed
+          T80.3_completed_at: '2026-07-24'
+          T80.4: completed
+          T80.4_completed_at: '2026-07-24'
+          T80.5: completed
+          T80.5_completed_at: '2026-07-24'
+          T80.6: completed
+          T80.6_completed_at: '2026-07-24'
+          T80.7: blocked
+          T81.1: completed
+          T81.1_completed_at: '2026-07-24'
+          T81.2: completed
+          T81.2_completed_at: '2026-07-24'
+          T81.3: completed
+          T81.3_completed_at: '2026-07-24'
+          T81.4: completed
+          T81.4_completed_at: '2026-07-24'
+          T81.5: completed
+          T81.5_completed_at: '2026-07-24'
+          active_milestone: M80
+          active_phase: Phase 18
+          completed_tasks:
+          - T77.1
+          - T77.2
+          - T77.3
+          - T77.4
+          - T77.5
+          - T77.6
+          - T77.7
+          - T78.1
+          - T78.2
+          - T78.3
+          - T78.4
+          - T78.5
+          - T78.6
+          - T79.1
+          - T79.2
+          - T79.3
+          - T79.4
+          - T79.5
+          - T79.6
+          - T80.1
+          - T80.2
+          - T80.3
+          - T80.4
+          - T80.5
+          - T80.6
+          - T81.1
+          - T81.2
+          - T81.3
+          - T81.4
+          - T81.5
+          note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains
+            (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+            Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+            this session unless user requests.'
+          M79: all tasks completed
+          M81: all tasks completed
+        completed_milestones:
+        - M77
+        - M78
+        - M79
+        - M81
+        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+          live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
           Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
           this session unless user requests.'
-        M79: all tasks completed
-        M81: all tasks completed
-      completed_milestones:
-      - M77
-      - M78
-      - M79
-      - M81
-      note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
-        live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
-        Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
-        this session unless user requests.'
-      s008_baseline:
-        status: completed
-        started_at: '2026-07-02'
-        completed_at: '2026-07-03'
-        session_id: S008-eval-ux-playground
-        branch: feat/S008-eval-ux-playground
-        evolve_cycle_id: EV-009
-        report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
-        substeps:
-          current_task: 08-verify-build — formal phase verify
-          completed_tasks_recent:
-          - T70.8
-          - T67.4
-        execution_plan:
-          active_task: 08-verify-build — formal phase verify
-          phase_15_gate: T2_PASS
-        feature: F36
-        phase: Phase EV-009 (M65-M70)
-        reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 
-          08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened 
-          for active S005/EV-006 F35 build (see s005); closed out completed 2026-06-30 (M53 22/22).
-        s005:
+        s008_baseline:
           status: completed
-          session_id: S005-user-mgmt-auth
-          branch: feat/S005-user-mgmt-auth
-          feature: F35
-          phase: Phase 12 (M48-M53)
-          milestone: M53
-          m53_progress: 22 of 22 tasks completed
-          completed_tasks_recent:
-          - T53.8
-          - T53.9
-          current_task: 07-build complete; 08-verify-build next
-          in_progress_tasks: []
-          started_at: '2026-06-30'
-          completed_at: '2026-06-30'
-          uncommitted: false
-          note: 'S005/EV-006 F35 milestone M53 (auth UX hardening) — close-out 2026-06-30. M53 22/22 (T53.1–T53.22 all committed;
-            execution-plan and git agree). No tasks in progress; working tree clean before close-out. Close-out fixed a typecheck
-            blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks). Next: 08-verify-build
-            + Phase 12 gate.'
-          advisories:
-          - 'Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts
-            (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing),
-            authSessionHarness.ts renamed to .tsx.'
-          - 'New unit tests: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx + test_force_signout.test.tsx.'
-          - DM frontend coverage gate PASS (lines 98.4%, branches 95.53%); lint + typecheck green; 291 Vitest tests 
-            pass.
-        s004_baseline:
-          status: completed
-          completed_at: '2026-06-29'
-          session_id: S004-supabase-auth
-          branch: feat/S004-supabase-auth
-          feature: F34
-          phase: Phase 11 (M43-M47)
-          note: S004/EV-005 F34 Supabase admin auth build (Phase 11 M43-M47) reconciled to completed during 10-e2e.
-        s003_baseline:
-          status: completed
-          completed_at: '2026-06-26'
-          reopened_at: '2026-06-28'
-          session_id: S003-persistent-chat-history
-          branch: feat/S003-persistent-chat-history
-          feature: F33
-          phase: Phase 10 (M39–M42)
-          note: S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% 
-            coverage + build green
-          reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched
-            sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only).
-            Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
-            change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
-      session_parked_at: '2026-07-25'
-      session_parked_note: 'S010/EV-011 parked 2026-07-25 — session closed for hotfix #146/#145. T80.7 still blocked; M80
-        incomplete; can resume later as new session.'
+          started_at: '2026-07-02'
+          completed_at: '2026-07-03'
+          session_id: S008-eval-ux-playground
+          branch: feat/S008-eval-ux-playground
+          evolve_cycle_id: EV-009
+          report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
+          substeps:
+            current_task: 08-verify-build — formal phase verify
+            completed_tasks_recent:
+            - T70.8
+            - T67.4
+          execution_plan:
+            active_task: 08-verify-build — formal phase verify
+            phase_15_gate: T2_PASS
+          feature: F36
+          phase: Phase EV-009 (M65-M70)
+          reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 
+            08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. Reopened 
+            for active S005/EV-006 F35 build (see s005); closed out completed 2026-06-30 (M53 22/22).
+          s005:
+            status: completed
+            session_id: S005-user-mgmt-auth
+            branch: feat/S005-user-mgmt-auth
+            feature: F35
+            phase: Phase 12 (M48-M53)
+            milestone: M53
+            m53_progress: 22 of 22 tasks completed
+            completed_tasks_recent:
+            - T53.8
+            - T53.9
+            current_task: 07-build complete; 08-verify-build next
+            in_progress_tasks: []
+            started_at: '2026-06-30'
+            completed_at: '2026-06-30'
+            uncommitted: false
+            note: 'S005/EV-006 F35 milestone M53 (auth UX hardening) — close-out 2026-06-30. M53 22/22 (T53.1–T53.22 all committed;
+              execution-plan and git agree). No tasks in progress; working tree clean before close-out. Close-out fixed a typecheck
+              blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks). Next: 08-verify-build
+              + Phase 12 gate.'
+            advisories:
+            - 'Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green: useIdleTimeout.ts
+              (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts (idle env typing),
+              authSessionHarness.ts renamed to .tsx.'
+            - 'New unit tests: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx + test_force_signout.test.tsx.'
+            - DM frontend coverage gate PASS (lines 98.4%, branches 95.53%); lint + typecheck green; 291 Vitest tests 
+              pass.
+          s004_baseline:
+            status: completed
+            completed_at: '2026-06-29'
+            session_id: S004-supabase-auth
+            branch: feat/S004-supabase-auth
+            feature: F34
+            phase: Phase 11 (M43-M47)
+            note: S004/EV-005 F34 Supabase admin auth build (Phase 11 M43-M47) reconciled to completed during 10-e2e.
+          s003_baseline:
+            status: completed
+            completed_at: '2026-06-26'
+            reopened_at: '2026-06-28'
+            session_id: S003-persistent-chat-history
+            branch: feat/S003-persistent-chat-history
+            feature: F33
+            phase: Phase 10 (M39–M42)
+            note: S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests + 95% 
+              coverage + build green
+            reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched
+              sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only).
+              Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
+              change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
+        session_parked_at: '2026-07-25'
+        session_parked_note: 'S010/EV-011 parked 2026-07-25 — session closed for hotfix #146/#145. T80.7 still blocked; M80
+          incomplete; can resume later as new session.'
     08-verify-build:
       status: completed
       started_at: '2026-07-08'
@@ -1068,7 +1155,7 @@ active_session:
   evolve_cycle_id: EV-012
   artifacts_dir: docs/sessions/S013-unified-job-monitoring/
   started_at: '2026-07-28'
-  current_stage: 04-tech-plan
+  current_stage: 07-build
   linked_issues:
   - '116'
   features_affected:
@@ -1346,10 +1433,48 @@ active_session:
     gate_a_to_b: passed
   - stage: 04-tech-plan
     required: true
-    status: pending
+    status: completed
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    ended_at: '2026-07-28'
+    mode: delta
+    note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (SHA pending). handoff → 07-build T82.1'
+    report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
+    draft_status: approved
+    gate_b_to_c: passed
+    tech_plan_interview:
+      current_batch: 2
+      batch_1_status: complete
+      batch_1_recorded_at: '2026-07-28'
+      batch1_decisions:
+      - TP-S013-01
+      - TP-S013-02
+      - TP-S013-03
+      - TP-S013-04
+      batch_2_status: complete
+      batch_2_topic: deploy_test_integration
+      batch_2_recorded_at: '2026-07-28'
+      batch_2_finalize_tp_q6: accepted
+      interview_batches_complete: true
+      batch2_decisions_accepted:
+      - TP-S013-05
+      - TP-S013-06
+      - TP-S013-07
+      - TP-S013-08
+      batch2_decisions_pending: []
+      draft_execution_plan_phase19: complete
+      interview_cursor: completed
+      next: start_T82_1_cancel_retry_delete_tests
+      user_approval: option_A_complete_04_commit_docs_start_07
+      approved_at: '2026-07-28'
   - stage: 07-build
     required: true
-    status: pending
+    status: in_progress
+    started_at: '2026-07-28'
+    mode: delta
+    note: '07-build delta IN_PROGRESS — Phase 19 M82; start T82.1 cancel/retry/delete tests'
+    current_task: T82.1
+    milestone: M82
   - stage: 08-verify-build
     required: true
     status: pending
@@ -1463,10 +1588,15 @@ active_session:
   handoff:
     from_session: S012-hotfix-admin-ui-112-105
     cleared: true
-    next_action: await_user_start_04_tech_plan
-    next_skill: 04-tech-plan
+    next_action: start_T82_1_cancel_retry_delete_tests
+    next_skill: 07-build
     branch: evolve/EV-012-unified-job-monitoring
     branch_status: active
+    interview_cursor: completed
+    current_task: T82.1
+    milestone: M82
+    note: '04-tech-plan COMPLETE (user option A). Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts — git commit SHA pending (record after parent commits). Next: 07-build start_T82_1_cancel_retry_delete_tests.'
+    commit_note: 'User approved commit of 04-tech-plan artifacts; do not claim SHA until parent records commit'
     git_commits:
     - sha: 74216f1
       message: 'docs(S013): open EV-012 unified job monitoring session'
@@ -3194,15 +3324,85 @@ stages:
       - spec-consultant
   04-tech-plan:
     status: completed
-    started_at: '2026-07-02'
-    completed_at: '2026-07-10'
-    partial_rerun_at: '2026-07-02'
-    partial_rerun_note: EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote
-      (ADR-035, TP-S008-01–16).
-    session_id: S010-unify-llm-service
-    branch: feat/S010-unify-llm-service
-    evolve_cycle_id: EV-011
-    report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+    started_at: '2026-07-28'
+    completed_at: '2026-07-28'
+    ended_at: '2026-07-28'
+    partial_rerun_at: '2026-07-28'
+    partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36; Gate A→B passed (M1–M3 locked); user started 04-tech-plan'
+    session_id: S013-unified-job-monitoring
+    branch: evolve/EV-012-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    mode: delta
+    note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; roadmap.md + reports/04-tech-plan.md; OpenAPI + api-contract + ADR-038 + TP-S013-01–08; ISS-005 resolved (Keep M3 / 6a). Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (git commit SHA pending — record after parent commits). handoff → 07-build T82.1'
+    report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
+    draft_status: approved
+    tech_plan_interview:
+      current_batch: 2
+      batch_1_status: complete
+      batch_1_recorded_at: '2026-07-28'
+      batch_1_topic: architecture
+      batch_2_status: complete
+      batch_2_topic: deploy_test_integration
+      batch_2_recorded_at: '2026-07-28'
+      batch_2_finalize_tp_q6: accepted
+      interview_batches_complete: true
+      draft_execution_plan_phase19: complete
+      interview_cursor: completed
+      next: start_T82_1_cancel_retry_delete_tests
+      user_approval: option_A_complete_04_commit_docs_start_07
+      approved_at: '2026-07-28'
+    batch1_decisions:
+    - TP-S013-01
+    - TP-S013-02
+    - TP-S013-03
+    - TP-S013-04
+    batch2_decisions_accepted:
+    - TP-S013-05
+    - TP-S013-06
+    - TP-S013-07
+    - TP-S013-08
+    batch2_decisions_pending: []
+    batch2_deploy_test_integration:
+      TP-S013-05:
+        choice: 5a
+        status: accepted
+        summary: 'Soft-delete eval_runs via deleted_at (nullable timestamptz); list/detail hide deleted by default'
+      TP-S013-06:
+        choice: 6a
+        status: accepted
+        user_resolution: keep_m3_enqueue
+        summary: 'Keep M3 — enqueue from POST /internal/v1/eval/runs via DataManagementJobsClient.enqueue_eval (NOT 6b poll)'
+        m3_locked:
+          choice: A
+          verdict: 'POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval'
+        issue_id: ISS-005
+        issue_status: resolved
+        resolved_at: '2026-07-28'
+      TP-S013-07:
+        choice: 7a
+        status: accepted
+        summary: 'Cancel = JobStore cancelled + best-effort FunctionCall.cancel() when modal_call_id known; runners check cancelled'
+      TP-S013-08:
+        choice: 8a
+        status: accepted
+        summary: 'Phase 19 M82–M85 milestone shape'
+    s010_baseline:
+      status: completed
+      started_at: '2026-07-02'
+      completed_at: '2026-07-10'
+      partial_rerun_at: '2026-07-02'
+      partial_rerun_note: EV-009/S008 delta — F36 follow-ons (M65–M67) + F37 eval playground + super-admin runtime promote
+        (ADR-035, TP-S008-01–16).
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      report: docs/sessions/S010-unify-llm-service/reports/04-tech-plan-client-consolidation.md
+      prior_status: completed
+      prior_completed_at: '2026-07-02'
+      mode: delta_reopen
+      note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
+      started_at_reopen: '2026-07-10'
+      completed_at_reopen: '2026-07-10'
     s007_baseline:
       status: completed
       started_at: '2026-07-01'
@@ -3220,12 +3420,6 @@ stages:
         phase3_execution_plan: completed
         phase4_user_review: completed
         phase4_user_review_note: tech plan approved 2026-06-13
-    prior_status: completed
-    prior_completed_at: '2026-07-02'
-    mode: delta_reopen
-    note: Phase 18 M77–M81 approved; TP-S010-17–31; next 07-build T77.1
-    started_at_reopen: '2026-07-10'
-    completed_at_reopen: '2026-07-10'
   05-verify-tech:
     status: completed
     started_at: '2026-05-19'
@@ -3275,242 +3469,265 @@ stages:
     verification: passed
   07-build:
     status: in_progress
-    started_at: '2026-07-10'
-    started_at_reopen: '2026-07-10'
-    session_id: S010-unify-llm-service
-    branch: feat/S010-unify-llm-service
-    evolve_cycle_id: EV-011
-    mode: delta_reopen
-    prior_status: completed
-    prior_completed_at: '2026-07-03'
-    feature: F39
-    phase: Phase 18 (M77-M81)
-    milestone: M80
+    started_at: '2026-07-28'
+    session_id: S013-unified-job-monitoring
+    branch: evolve/EV-012-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    mode: delta
+    feature: F32/F36
+    phase: Phase 19 (M82-M85)
+    milestone: M82
+    note: '07-build delta IN_PROGRESS — EV-012/S013 Phase 19; start T82.1 cancel/retry/delete tests; Gate B→C passed; 04-tech-plan approved option A'
     substeps:
-      current_task: T80.7
-      task_status: blocked
+      current_task: T82.1
+      task_status: pending
       in_progress_tasks: []
-      blocked_tasks:
-      - T80.7
-      completed_tasks_recent:
-      - T77.1
-      - T77.2
-      - T77.3
-      - T77.4
-      - T77.5
-      - T77.6
-      - T77.7
-      - T78.1
-      - T78.2
-      - T78.3
-      - T78.4
-      - T78.5
-      - T78.6
-      - T79.1
-      - T79.2
-      - T79.3
-      - T79.4
-      - T79.5
-      - T79.6
-      - T80.1
-      - T80.2
-      - T80.3
-      - T80.4
-      - T80.5
-      - T80.6
-      - T81.1
-      - T81.2
-      - T81.3
-      - T81.4
-      - T81.5
+      blocked_tasks: []
+      completed_tasks_recent: []
     execution_plan:
-      active_task: T80.7
-      T79.2: completed
-      T79.3: completed
-      T79.4: completed
-      T79.5: completed
-      T79.6: completed
-      T79.2_completed_at: '2026-07-23'
-      T79.3_completed_at: '2026-07-23'
-      T79.4_completed_at: '2026-07-23'
-      T79.5_completed_at: '2026-07-23'
-      T79.6_completed_at: '2026-07-23'
-      T80.1: completed
-      T80.1_completed_at: '2026-07-24'
-      T80.2: completed
-      T80.2_completed_at: '2026-07-24'
-      T80.3: completed
-      T80.3_completed_at: '2026-07-24'
-      T80.4: completed
-      T80.4_completed_at: '2026-07-24'
-      T80.5: completed
-      T80.5_completed_at: '2026-07-24'
-      T80.6: completed
-      T80.6_completed_at: '2026-07-24'
-      T80.7: blocked
-      T81.1: completed
-      T81.1_completed_at: '2026-07-24'
-      T81.2: completed
-      T81.2_completed_at: '2026-07-24'
-      T81.3: completed
-      T81.3_completed_at: '2026-07-24'
-      T81.4: completed
-      T81.4_completed_at: '2026-07-24'
-      T81.5: completed
-      T81.5_completed_at: '2026-07-24'
-      active_milestone: M80
-      active_phase: Phase 18
-      completed_tasks:
-      - T77.1
-      - T77.2
-      - T77.3
-      - T77.4
-      - T77.5
-      - T77.6
-      - T77.7
-      - T78.1
-      - T78.2
-      - T78.3
-      - T78.4
-      - T78.5
-      - T78.6
-      - T79.1
-      - T79.2
-      - T79.3
-      - T79.4
-      - T79.5
-      - T79.6
-      - T80.1
-      - T80.2
-      - T80.3
-      - T80.4
-      - T80.5
-      - T80.6
-      - T81.1
-      - T81.2
-      - T81.3
-      - T81.4
-      - T81.5
+      active_task: T82.1
+      active_milestone: M82
+      active_phase: Phase 19
+      note: 'Handoff from approved 04-tech-plan — start_T82_1_cancel_retry_delete_tests'
+    s010_baseline:
+      status: in_progress
+      started_at: '2026-07-10'
+      started_at_reopen: '2026-07-10'
+      session_id: S010-unify-llm-service
+      branch: feat/S010-unify-llm-service
+      evolve_cycle_id: EV-011
+      mode: delta_reopen
+      prior_status: completed
+      prior_completed_at: '2026-07-03'
+      feature: F39
+      phase: Phase 18 (M77-M81)
+      milestone: M80
+      parked_note: 'S010/EV-011 parked; T80.7 blocked — preserved under s010_baseline while S013/EV-012 07-build runs'
+      substeps:
+        current_task: T80.7
+        task_status: blocked
+        in_progress_tasks: []
+        blocked_tasks:
+        - T80.7
+        completed_tasks_recent:
+        - T77.1
+        - T77.2
+        - T77.3
+        - T77.4
+        - T77.5
+        - T77.6
+        - T77.7
+        - T78.1
+        - T78.2
+        - T78.3
+        - T78.4
+        - T78.5
+        - T78.6
+        - T79.1
+        - T79.2
+        - T79.3
+        - T79.4
+        - T79.5
+        - T79.6
+        - T80.1
+        - T80.2
+        - T80.3
+        - T80.4
+        - T80.5
+        - T80.6
+        - T81.1
+        - T81.2
+        - T81.3
+        - T81.4
+        - T81.5
+      execution_plan:
+        active_task: T80.7
+        T79.2: completed
+        T79.3: completed
+        T79.4: completed
+        T79.5: completed
+        T79.6: completed
+        T79.2_completed_at: '2026-07-23'
+        T79.3_completed_at: '2026-07-23'
+        T79.4_completed_at: '2026-07-23'
+        T79.5_completed_at: '2026-07-23'
+        T79.6_completed_at: '2026-07-23'
+        T80.1: completed
+        T80.1_completed_at: '2026-07-24'
+        T80.2: completed
+        T80.2_completed_at: '2026-07-24'
+        T80.3: completed
+        T80.3_completed_at: '2026-07-24'
+        T80.4: completed
+        T80.4_completed_at: '2026-07-24'
+        T80.5: completed
+        T80.5_completed_at: '2026-07-24'
+        T80.6: completed
+        T80.6_completed_at: '2026-07-24'
+        T80.7: blocked
+        T81.1: completed
+        T81.1_completed_at: '2026-07-24'
+        T81.2: completed
+        T81.2_completed_at: '2026-07-24'
+        T81.3: completed
+        T81.3_completed_at: '2026-07-24'
+        T81.4: completed
+        T81.4_completed_at: '2026-07-24'
+        T81.5: completed
+        T81.5_completed_at: '2026-07-24'
+        active_milestone: M80
+        active_phase: Phase 18
+        completed_tasks:
+        - T77.1
+        - T77.2
+        - T77.3
+        - T77.4
+        - T77.5
+        - T77.6
+        - T77.7
+        - T78.1
+        - T78.2
+        - T78.3
+        - T78.4
+        - T78.5
+        - T78.6
+        - T79.1
+        - T79.2
+        - T79.3
+        - T79.4
+        - T79.5
+        - T79.6
+        - T80.1
+        - T80.2
+        - T80.3
+        - T80.4
+        - T80.5
+        - T80.6
+        - T81.1
+        - T81.2
+        - T81.3
+        - T81.4
+        - T81.5
+        note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
+          live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
+          Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
+          this session unless user requests.'
+        M79: all tasks completed
+        M81: all tasks completed
+      completed_milestones:
+      - M77
+      - M78
+      - M79
+      - M81
       note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
         live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
         Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
         this session unless user requests.'
-      M79: all tasks completed
-      M81: all tasks completed
-    completed_milestones:
-    - M77
-    - M78
-    - M79
-    - M81
-    note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains (operator
-      live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
-      Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin; not pushed
-      this session unless user requests.'
-    s008_baseline:
-      status: completed
-      started_at: '2026-07-02'
-      completed_at: '2026-07-03'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
-      partial_rerun_at: '2026-06-25'
-      partial_rerun_note: S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)
-      substeps:
-        current_task: 08-verify-build — formal phase verify
-        milestone: M32 completed
+      s008_baseline:
+        status: completed
+        started_at: '2026-07-02'
+        completed_at: '2026-07-03'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
+        partial_rerun_at: '2026-06-25'
+        partial_rerun_note: S001 — Modal cold-start reduction (instrumentation, levers, pre-warm, GPU snapshot spike)
+        substeps:
+          current_task: 08-verify-build — formal phase verify
+          milestone: M32 completed
+          completed_tasks:
+          - S001-T1
+          - S001-T4
+          - S001-T5
+          - S001-T6
+          - S001-T7
+          - S001-T8
+          - S001-T9
+          - S001-T10
+          - S001-T11
+          completed_tasks_recent:
+          - T70.8
+          - T67.4
+          note: T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline
+        execution_plan:
+          active_task: 08-verify-build — formal phase verify
+          phase_15_gate: T2_PASS
+        note: S008/EV-009 F36+F37 build — Phase 15 gate T2 PASS (T70.8); M65–M70 complete; handoff to 08-verify-build
+      s003:
+        status: completed
+        session_id: S003-persistent-chat-history
+        branch: feat/S003-persistent-chat-history
+        completed_at: '2026-06-26'
+        reopened_at: '2026-06-28'
+        feature: F33
+        phase: Phase 10 (M39–M42)
+        milestones:
+        - M39
+        - M40
+        - M41
+        - M42
+        note: S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE 
+          tests + 95% coverage + build green
+        reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched
+          sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit
+          eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
+          change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
+      s004:
+        status: completed
+        session_id: S004-supabase-auth
+        branch: feat/S004-supabase-auth
+        started_at: '2026-06-29'
+        completed_at: '2026-06-29'
+        feature: F34
+        phase: Phase 11 (M43-M47, T43.1-T47.6, 29 tasks)
+        milestones_completed:
+        - M47
         completed_tasks:
-        - S001-T1
-        - S001-T4
-        - S001-T5
-        - S001-T6
-        - S001-T7
-        - S001-T8
-        - S001-T9
-        - S001-T10
-        - S001-T11
+        - T47.1
+        - T47.2
+        - T47.3
+        - T47.4
+        - T47.5
+        - T47.6
+        note: 'S004/EV-005 F34 Supabase admin auth build. M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api:
+          ContextVar-based actor propagation replaced with explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check
+          + 08-verify-build.'
+        reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 
+          08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth.
+      s005:
+        status: in_progress
+        session_id: S005-user-mgmt-auth
+        branch: feat/S005-user-mgmt-auth
+        started_at: '2026-06-30'
+        feature: F35
+        phase: Phase 12 (M48-M53)
+        milestone: M53
+        m53_progress: 22 of 22 tasks completed
         completed_tasks_recent:
-        - T70.8
-        - T67.4
-        note: T8 deploy done; snapshot restore confirmed; cold /generate 21.5s vs ~68s baseline
-      execution_plan:
-        active_task: 08-verify-build — formal phase verify
-        phase_15_gate: T2_PASS
-      note: S008/EV-009 F36+F37 build — Phase 15 gate T2 PASS (T70.8); M65–M70 complete; handoff to 08-verify-build
-    s003:
-      status: completed
-      session_id: S003-persistent-chat-history
-      branch: feat/S003-persistent-chat-history
-      completed_at: '2026-06-26'
-      reopened_at: '2026-06-28'
-      feature: F33
-      phase: Phase 10 (M39–M42)
-      milestones:
-      - M39
-      - M40
-      - M41
-      - M42
-      note: S003 F33 browser-local persistent chat history build complete — M39–M42 done; Phase 10 gate PASS; 115 FE 
-        tests + 95% coverage + build green
-      reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage switched
-        sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still device-only). Commit
-        eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green. Frontend-only — no API/contract/CORS
-        change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and ADR-024. Status remains completed.'
-    s004:
-      status: completed
-      session_id: S004-supabase-auth
-      branch: feat/S004-supabase-auth
-      started_at: '2026-06-29'
-      completed_at: '2026-06-29'
-      feature: F34
-      phase: Phase 11 (M43-M47, T43.1-T47.6, 29 tasks)
-      milestones_completed:
-      - M47
-      completed_tasks:
-      - T47.1
-      - T47.2
-      - T47.3
-      - T47.4
-      - T47.5
-      - T47.6
-      note: 'S004/EV-005 F34 Supabase admin auth build. M47 T47.1-T47.6 completed 2026-06-29. Audit-actor fix in apps/internal-write-api:
-        ContextVar-based actor propagation replaced with explicit WriteActorDep FastAPI dependency. Next: Phase 11 gate check
-        + 08-verify-build.'
-      reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 
-        08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth.
-    s005:
-      status: in_progress
-      session_id: S005-user-mgmt-auth
-      branch: feat/S005-user-mgmt-auth
-      started_at: '2026-06-30'
-      feature: F35
-      phase: Phase 12 (M48-M53)
-      milestone: M53
-      m53_progress: 22 of 22 tasks completed
-      completed_tasks_recent:
-      - T53.12
-      - T53.13
-      - T53.14
-      - T53.15
-      - T53.16
-      - T53.17
-      - T53.18
-      - T53.19
-      - T53.20
-      - T53.21
-      - T53.22
-      current_task: 08-verify-build
-      in_progress_tasks: []
-      uncommitted: false
-      note: 'S005/EV-006 F35 M53 (auth UX hardening) COMPLETE 2026-06-30 — T53.12-T53.22 implemented and committed as 9 atomic
-        commits. Deliverability test-send UI + client (sendTestEmail/EmailUnconfiguredError), server-side user search (q)
-        + shared PaginationControls, audit viewer entity_type filter + user/email event labels + per-user View activity link,
-        privacy guard (no extra admin traffic on idle/log-out-everywhere), CORS preflight for signout + email-test, e2e UJ-036/UJ-037,
-        OpenAPI (signout/email-test/q), runbook (force-signout RPC apply, test-send workflow, AC-U10-U16). DM FE Vitest 303/303;
-        new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
-    session_parked_at: '2026-07-25'
-    session_parked_note: 'S010/EV-011 parked 2026-07-25 — session closed for hotfix #146/#145. T80.7 still blocked; M80 incomplete;
-      can resume later as new session.'
+        - T53.12
+        - T53.13
+        - T53.14
+        - T53.15
+        - T53.16
+        - T53.17
+        - T53.18
+        - T53.19
+        - T53.20
+        - T53.21
+        - T53.22
+        current_task: 08-verify-build
+        in_progress_tasks: []
+        uncommitted: false
+        note: 'S005/EV-006 F35 M53 (auth UX hardening) COMPLETE 2026-06-30 — T53.12-T53.22 implemented and committed as 9 atomic
+          commits. Deliverability test-send UI + client (sendTestEmail/EmailUnconfiguredError), server-side user search (q)
+          + shared PaginationControls, audit viewer entity_type filter + user/email event labels + per-user View activity link,
+          privacy guard (no extra admin traffic on idle/log-out-everywhere), CORS preflight for signout + email-test, e2e UJ-036/UJ-037,
+          OpenAPI (signout/email-test/q), runbook (force-signout RPC apply, test-send workflow, AC-U10-U16). DM FE Vitest 303/303;
+          new Python tests pass; ESLint+tsc clean; OpenAPI parses. Next: 08-verify-build then Phase 12 gate + major PR-48.'
+      session_parked_at: '2026-07-25'
+      session_parked_note: 'S010/EV-011 parked 2026-07-25 — session closed for hotfix #146/#145. T80.7 still blocked; M80 incomplete;
+        can resume later as new session.'
   08-verify-build:
     status: completed
     started_at: '2026-07-08'
@@ -5294,7 +5511,7 @@ evolve_cycles:
   started: '2026-07-28'
   session_id: S013-unified-job-monitoring
   source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/116
-  current_stage: 04-tech-plan
+  current_stage: 07-build
   mode: delta
   scope_summary: 'Unified job monitoring (GitHub #116) — **Admin Dashboard only (data-management-frontend); NOT ChatRAG UI**. Jobs tab: **Modal GET /jobs primary unified list** (job_type incl eval; S013-D8 amended) — DO Postgres for metrics/results storage + eval drill-down only; **NOT dual FE federation** of two job lists. Type-aware detail at /jobs/:id with extensible job_type for all long-running jobs (ingest, retag, eval, future). Eval rows: jobs detail summary + link to eval drill-down. **Architecture (RQ3/RD-174–175):** Modal owns ALL long-running job lifecycle incl eval (amends ADR-033 — eval leaves DO BackgroundTasks); DO Postgres SoT for storage/metrics; Supabase auth-only. **Job updates (RD-173):** SSE primary; on failure → 4s poll fallback + retry SSE with backoff. **Admin-only full job CRUD (RD-176):** create/read/update/cancel-retry/delete. **Failed Modal logs UX (RD-177):** call id + copy + dashboard link. **E2E (RD-178):** Playwright T0-ui Jobs list→detail. v1 + full v2 in one EV-012 cycle; extend F32/F36; compatible/additive API; F32 privacy/no PII; success = #116 ACs; out of scope: ChatRAG UI; Langfuse/external observability UIs.'
   phase_0_scope_approved: true
@@ -5641,17 +5858,99 @@ evolve_cycles:
           choice: A
           verdict: 'POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval'
       gate_a_to_b: passed
+    04-tech-plan:
+      status: completed
+      started: '2026-07-28'
+      completed: '2026-07-28'
+      ended_at: '2026-07-28'
+      mode: delta
+      note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C passed (Lean+build skips 05). User approved commit of 04 artifacts (SHA pending). handoff → 07-build T82.1'
+      report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
+      draft_status: approved
+      tech_plan_interview:
+        current_batch: 2
+        batch_1_status: complete
+        batch_1_recorded_at: '2026-07-28'
+        batch_1_topic: architecture
+        batch_2_status: complete
+        batch_2_topic: deploy_test_integration
+        batch_2_recorded_at: '2026-07-28'
+        batch_2_finalize_tp_q6: accepted
+        interview_batches_complete: true
+        draft_execution_plan_phase19: complete
+        interview_cursor: completed
+        next: start_T82_1_cancel_retry_delete_tests
+        user_approval: option_A_complete_04_commit_docs_start_07
+        approved_at: '2026-07-28'
+      batch1_decisions:
+      - TP-S013-01
+      - TP-S013-02
+      - TP-S013-03
+      - TP-S013-04
+      batch1_architecture:
+        TP-S013-01:
+          layer: L1_OpenAPI
+          summary: 'GET /jobs/events SSE; POST /jobs/{id}/cancel; POST /jobs/{id}/retry; DELETE /jobs/{id}; extend Job with document_id, modal_call_id, dashboard_url, eval_run_id'
+        TP-S013-02:
+          layer: L2_JobStore
+          summary: 'Keep DictJobStore + modal.Dict for operator lifecycle; Modal .spawn for work; no Postgres jobs table'
+        TP-S013-03:
+          layer: L3_Delete
+          summary: 'DELETE /jobs/{id} removes Modal JobStore record AND soft-deletes linked eval_runs when job_type=eval'
+        TP-S013-04:
+          layer: M2_eval_SSE_path
+          summary: 'GET /internal/v1/eval/runs/{run_id}/events SSE; Evaluation page uses it; Jobs list uses Modal /jobs/events'
+      batch2_decisions_accepted:
+      - TP-S013-05
+      - TP-S013-06
+      - TP-S013-07
+      - TP-S013-08
+      batch2_decisions_pending: []
+      batch2_deploy_test_integration:
+        TP-S013-05:
+          choice: 5a
+          status: accepted
+          summary: 'Soft-delete eval_runs via deleted_at (nullable timestamptz); list/detail hide deleted by default'
+        TP-S013-06:
+          choice: 6a
+          status: accepted
+          user_resolution: keep_m3_enqueue
+          summary: 'Keep M3 — enqueue from POST /internal/v1/eval/runs via DataManagementJobsClient.enqueue_eval (NOT 6b poll)'
+          m3_locked:
+            choice: A
+            verdict: 'POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval'
+          issue_id: ISS-005
+          issue_status: resolved
+          resolved_at: '2026-07-28'
+        TP-S013-07:
+          choice: 7a
+          status: accepted
+          summary: 'Cancel = JobStore cancelled + best-effort FunctionCall.cancel() when modal_call_id known; runners check cancelled'
+        TP-S013-08:
+          choice: 8a
+          status: accepted
+          summary: 'Phase 19 M82–M85 milestone shape'
+    07-build:
+      status: in_progress
+      started: '2026-07-28'
+      mode: delta
+      note: '07-build delta IN_PROGRESS — Phase 19 M82; start T82.1 cancel/retry/delete tests; Gate B→C passed'
+      current_task: T82.1
+      milestone: M82
+      phase: Phase 19 (M82-M85)
+      handoff: start_T82_1_cancel_retry_delete_tests
   checkpoints:
     phase_a: passed
-    phase_b: pending
+    phase_b: passed
     phase_c: pending
     phase_d: pending
     deploy: pending
   checkpoint_notes:
     phase_a: 'Passed 2026-07-28 — 02-verify-plan delta complete; M1–M3 user verdicts recorded; gate A→B passed'
+    phase_b: 'Passed 2026-07-28 — Phase B complete via 04-tech-plan (TP-S013-01–08 + Phase 19 M82–M85) + Lean+build approved skip of 05/06; user approved option A and started 07-build T82.1. Gate B→C may pass when 04 approved without 05.'
   gates:
     a_to_b: passed
-    b_to_c: pending
+    b_to_c: passed
     c_to_d: pending
     deploy: pending
   prior_related:
@@ -5665,10 +5964,25 @@ evolve_cycles:
   - RD-176
   - RD-177
   - RD-178
-  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22): 00→16→01→02→04→07→08→10→13. Phase 1 COMPLETE — commit 74216f1. 01-requirements delta COMPLETE — RD-173..178 written; ADR-038; committed c8cfaa9. 02-verify-plan delta COMPLETE — M1–M3 resolved; gates.a_to_b passed; checkpoints.phase_a passed; current_stage=04-tech-plan; handoff await_user_start_04_tech_plan. Advisory — EV-004 remains in_progress historically (07-build); EV-011 parked.'
+  tech_decisions:
+  - TP-S013-01
+  - TP-S013-02
+  - TP-S013-03
+  - TP-S013-04
+  - TP-S013-05
+  - TP-S013-06
+  - TP-S013-07
+  - TP-S013-08
+  open_contradictions: []
+  note: 'EV-012 opened from GitHub #116 after S012 hotfix close. Phase 0 COMPLETE (S013-D20); routing APPROVED Lean+build (S013-D22): 00→16→01→02→04→07→08→10→13. Phase 1 COMPLETE — commit 74216f1. 01-requirements delta COMPLETE — RD-173..178; ADR-038; c8cfaa9. 02-verify-plan COMPLETE — M1–M3; gates.a_to_b + phase_a passed. 04-tech-plan COMPLETE — user option A; TP-S013-01–08; Phase 19 M82–M85; Gate B→C + phase_b passed (Lean+build skips 05). User approved commit of 04 artifacts (SHA pending — record after parent commits). 07-build IN_PROGRESS — start T82.1. Advisory — EV-004 remains in_progress historically; EV-011 parked.'
   handoff:
-    next_action: await_user_start_04_tech_plan
-    next_skill: 04-tech-plan
+    next_action: start_T82_1_cancel_retry_delete_tests
+    next_skill: 07-build
+    interview_cursor: completed
+    current_task: T82.1
+    milestone: M82
+    note: '04-tech-plan COMPLETE (option A). Gate B→C passed. Commit of 04 artifacts approved — SHA pending. Next: 07-build start_T82_1_cancel_retry_delete_tests.'
+    commit_note: 'User approved commit of 04-tech-plan artifacts; do not claim SHA until parent records commit'
   adrs:
   - docs/adr/ADR-038-modal-job-lifecycle-storage-split.md
   artifacts:
@@ -5730,6 +6044,22 @@ evolve_cycles:
     status: written
     recorded_at: '2026-07-28'
     note: 'Consistency fixes applied; awaiting user verdict on medium items M1–M3'
+  - path: docs/sessions/S013-unified-job-monitoring/roadmap.md
+    kind: roadmap
+    session_id: S013-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    stage: 04-tech-plan
+    status: written
+    recorded_at: '2026-07-28'
+    note: 'Phase 19 M82–M85 tech-plan draft — commit pending (awaiting user)'
+  - path: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
+    kind: stage-report
+    session_id: S013-unified-job-monitoring
+    evolve_cycle_id: EV-012
+    stage: 04-tech-plan
+    status: draft_ready_for_review
+    recorded_at: '2026-07-28'
+    note: '04-tech-plan draft ready for user review; stage remains in_progress; commit pending (awaiting user)'
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -6719,6 +7049,25 @@ issue_log:
   - audit-licenses
   - 13-deploy-smoke
   note: 'Prod Qwen2.5-1.5B-Instruct Apache-2.0 OK; no PyRosetta. FLAG-tier ~20 separate (flags_count). Audit verdict FAILED.'
+- id: ISS-005
+  category: contradiction
+  summary: 'TP-S013-06 user chose 6b (Modal polls DO for pending eval_runs) contradicts Gate A→B M3 locked choice A (POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval — 6a-style). Resolved: Keep M3 / choice 6a.'
+  status: resolved
+  opened_at: '2026-07-28'
+  resolved_at: '2026-07-28'
+  evolve_cycle_id: EV-012
+  session_id: S013-unified-job-monitoring
+  stage: 04-tech-plan
+  related:
+    locked_gate: M3
+    locked_choice: A
+    locked_verdict: 'POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval'
+    prior_user_tp_choice: 6b
+    resolved_tp_choice: 6a
+    user_tp_id: TP-S013-06
+  resolution: 'Option a — Keep M3: enqueue from POST /internal/v1/eval/runs via DataManagementJobsClient.enqueue_eval; TP-S013-06 ACCEPTED as 6a (NOT 6b)'
+  blocking_for: []
+  note: 'Resolved 2026-07-28 — Keep M3 enqueue; TP-S013-06=6a accepted; open_contradictions cleared; Phase 19 tech-plan draft ready; handoff → await_user_review_phase19_tech_plan'
 decisions_log:
 - R1: five-app monorepo in vecinita — ADR-001
 - R2: hybrid Modal + DigitalOcean — ADR-002
@@ -7715,6 +8064,94 @@ decisions_log:
 - 'S013/2026-07-28: 01-requirements delta COMPLETE — RD-173..178 written; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; report docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md; current_stage=02-verify-plan; handoff await_user_start_02_verify_plan; gates.a_to_b pending until 02 passes; commit pending.'
 - 'S013/2026-07-28: 01-requirements delta committed c8cfaa9 on evolve/EV-012-unified-job-monitoring — 11 files; handoff pending_commit cleared; next_action=await_user_start_02_verify_plan.'
 - 'S013/2026-07-28: 02-verify-plan delta START — user option A; active_session + EV-012 routing/stages in_progress; handoff next_action=run_02_verify_plan_consistency; gates.a_to_b pending until 02 passes.'
+- 'S013/2026-07-28: 04-tech-plan delta START — user chose start after Gate A→B (M1–M3 locked); project.stages + legacy stages.04-tech-plan in_progress; EV-012.stages.04-tech-plan in_progress; active_session.routing_plan 04-tech-plan in_progress; handoff next_action=04_tech_plan_in_progress; mode=delta; feature_ids=[]; affected_features=[F32, F36].'
+- id: TP-S013-01
+  category: Decision
+  summary: 'L1 OpenAPI — GET /jobs/events SSE; POST /jobs/{id}/cancel; POST /jobs/{id}/retry; DELETE /jobs/{id}; extend Job with document_id, modal_call_id, dashboard_url, eval_run_id'
+  source: 04-tech-plan Batch 1 Architecture
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  layer: L1_OpenAPI
+- id: TP-S013-02
+  category: Decision
+  summary: 'L2 JobStore — Keep DictJobStore + modal.Dict for operator lifecycle; Modal .spawn for work; no Postgres jobs table'
+  source: 04-tech-plan Batch 1 Architecture
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  layer: L2_JobStore
+- id: TP-S013-03
+  category: Decision
+  summary: 'L3 Delete — DELETE /jobs/{id} removes Modal JobStore record AND soft-deletes linked eval_runs when job_type=eval'
+  source: 04-tech-plan Batch 1 Architecture
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  layer: L3_Delete
+- id: TP-S013-04
+  category: Decision
+  summary: 'M2 eval SSE path — GET /internal/v1/eval/runs/{run_id}/events SSE; Evaluation page uses it; Jobs list uses Modal /jobs/events'
+  source: 04-tech-plan Batch 1 Architecture
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  layer: M2_eval_SSE_path
+- id: TP-S013-05
+  category: Decision
+  summary: 'Soft-delete eval_runs via deleted_at (nullable timestamptz); list/detail hide deleted by default'
+  choice: 5a
+  status: accepted
+  source: 04-tech-plan Batch 2 deploy/test/integration
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: TP-S013-06
+  category: Decision
+  summary: 'Keep M3 — enqueue from POST /internal/v1/eval/runs via DataManagementJobsClient.enqueue_eval (NOT 6b Modal polls DO)'
+  choice: 6a
+  status: accepted
+  prior_blocked_choice: 6b
+  issue_id: ISS-005
+  issue_status: resolved
+  aligns_with: Gate_A_to_B_M3
+  m3_locked_choice: A
+  source: 04-tech-plan Batch 2 deploy/test/integration
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+  resolved_at: '2026-07-28'
+- id: TP-S013-07
+  category: Decision
+  summary: 'Cancel = JobStore cancelled + best-effort FunctionCall.cancel() when modal_call_id known; runners check cancelled'
+  choice: 7a
+  status: accepted
+  source: 04-tech-plan Batch 2 deploy/test/integration
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- id: TP-S013-08
+  category: Decision
+  summary: 'Phase 19 M82–M85 milestone shape'
+  choice: 8a
+  status: accepted
+  source: 04-tech-plan Batch 2 deploy/test/integration
+  stage: 04-tech-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  timestamp: '2026-07-28'
+- 'S013/2026-07-28: 04-tech-plan COMPLETE — user approved Phase 19 tech plan (option A: complete 04, commit docs, start 07-build T82.1). Gate B→C passed (Lean+build skips 05/06; phase_b passed). current_stage=07-build; handoff next_action=start_T82_1_cancel_retry_delete_tests. User approved commit of 04 artifacts — git SHA pending (record after parent commits).'
+- 'S013/2026-07-28: 04-tech-plan DRAFT READY for user review (status remains in_progress until approval). Phase 19 M82–M85 drafted in execution-plan; roadmap.md + reports/04-tech-plan.md written; OpenAPI + api-contract + ADR-038 + TP-S013-01–08 updated; ISS-005 resolved (Keep M3 / TP-S013-06=6a). Artifacts created — no git commit claimed yet (awaiting user). handoff next_action=await_user_review_phase19_tech_plan.'
+- 'S013/2026-07-28: ISS-005 RESOLVED — option a Keep M3 / TP-S013-06 ACCEPTED as 6a (enqueue from POST /internal/v1/eval/runs via DataManagementJobsClient.enqueue_eval; NOT 6b). open_contradictions cleared; Batch 2 COMPLETE (05..08); 04-tech-plan remains in_progress; handoff next_action=draft_execution_plan_phase19.'
+- 'S013/2026-07-28: 04-tech-plan Batch 2 PARTIAL — TP-S013-05 (5a soft-delete deleted_at) accepted; TP-S013-06 (6b) PENDING/BLOCKED vs Gate A→B M3 (ISS-005 open — do not overwrite M3 / do not finalize TP Q6); TP-S013-07 (7a cancel JobStore+FunctionCall.cancel) accepted; TP-S013-08 (8a Phase 19 M82–M85) accepted. Stage remains in_progress; interview_cursor/handoff=await_user_resolve_m3_vs_tp06_contradiction.'
+- 'S013/2026-07-28: 04-tech-plan Batch 1 Architecture locked (TP-S013-01..04) — L1 OpenAPI job events/cancel/retry/delete + Job field extensions; L2 DictJobStore+modal.Dict+spawn (no Postgres jobs table); L3 DELETE removes JobStore + soft-deletes eval_runs when job_type=eval; M2 dual SSE (internal eval events for Evaluation page; Modal /jobs/events for Jobs list). Stage remains in_progress; next=Batch 2 deploy/test/integration interview; handoff next_action=interview_batch_2_deploy_test_integration.'
 - 'S013/2026-07-28: 02-verify-plan delta COMPLETE — M1 A (Modal lifecycle SoT; DO Postgres storage/metrics only); M2 B (SSE on Modal jobs + internal-write eval progress); M3 A (POST /internal/v1/eval/runs → metrics row + Modal job_type=eval); gates.a_to_b passed; checkpoints.phase_a passed; current_stage=04-tech-plan; handoff next_action=await_user_start_04_tech_plan; report docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md.'
 - 'S013/2026-07-28: 02-verify-plan delta IN_PROGRESS — consistency fixes applied (F32 limitations, ADR-033 banner, UJ-044, ADR-023 note, session docs); audit report docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md; handoff next_action=await_02_medium_verdicts_m1_m2_m3; gates.a_to_b pending until 02 passes.'
 - 'S013/2026-07-28: 01-requirements delta interview COMPLETE (6/6) — RQ2 SSE fallback option A (RD-173); RQ3 Modal-all-jobs + DO Postgres SoT + Supabase auth-only (RD-174/175, amends ADR-033, revises S013-D8); RQ4 admin-only full CRUD option A (RD-176); RQ5/RQ6 → RD-177/178; handoff write_01_requirements_delta_docs; feature-list deferred.'
@@ -8213,6 +8650,28 @@ artifacts:
   stage: 02-verify-plan
   recorded_at: '2026-07-28'
   note: 'Consistency fixes applied; awaiting user verdict on medium items M1–M3'
+- path: docs/sessions/S013-unified-job-monitoring/roadmap.md
+  kind: roadmap
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  stage: 04-tech-plan
+  recorded_at: '2026-07-28'
+  note: 'Phase 19 M82–M85 tech-plan draft — commit pending (awaiting user)'
+- path: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
+  kind: stage-report
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  stage: 04-tech-plan
+  status: draft_ready_for_review
+  recorded_at: '2026-07-28'
+  note: '04-tech-plan draft ready for user review; stage remains in_progress; commit pending (awaiting user)'
+- path: docs/sessions/S000-internal-docs-archive/execution-plan.md
+  kind: execution-plan
+  session_id: S013-unified-job-monitoring
+  evolve_cycle_id: EV-012
+  stage: 04-tech-plan
+  recorded_at: '2026-07-28'
+  note: 'Phase 19 M82–M85 drafted (04-tech-plan); commit pending (awaiting user)'
 git_history:
   current_branch: evolve/EV-012-unified-job-monitoring
   branches:
@@ -9071,6 +9530,9 @@ git_history:
     files_changed: 12
     timestamp: '2026-07-28T23:35:09Z'
   notes:
+  - '2026-07-28 S013/EV-012: 04-tech-plan COMPLETE (option A) — Gate B→C + phase_b passed (Lean+build skips 05); current_stage=07-build in_progress; handoff next_action=start_T82_1_cancel_retry_delete_tests; user approved commit of 04 artifacts — SHA pending (record after parent commits).'
+  - '2026-07-28 S013/EV-012: 04-tech-plan DRAFT READY for user review — Phase 19 M82–M85 drafted; roadmap.md + reports/04-tech-plan.md written; OpenAPI + api-contract + ADR-038 + TP-S013-01–08 updated; ISS-005 resolved (Keep M3 / 6a); status remains in_progress; handoff next_action=await_user_review_phase19_tech_plan; artifacts created — no git commit claimed yet (awaiting user).'
+  - '2026-07-28 S013/EV-012: 04-tech-plan delta START — user chose start after Gate A→B (M1–M3 locked); stages.04-tech-plan + EV-012 equivalent in_progress; handoff next_action=04_tech_plan_in_progress; mode=delta; affected_features=[F32, F36].'
   - '2026-07-28 S013/EV-012: 02-verify-plan delta COMPLETE — M1–M3 user verdicts recorded; gates.a_to_b passed; checkpoints.phase_a passed; current_stage=04-tech-plan; handoff next_action=await_user_start_04_tech_plan; report docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md.'
   - '2026-07-28 S013/EV-012: 02-verify-plan delta IN_PROGRESS — consistency fixes applied; audit report docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md; handoff next_action=await_02_medium_verdicts_m1_m2_m3; gates.a_to_b pending until 02 passes.'
   - '2026-07-28 S013/EV-012: 02-verify-plan delta START — user option A; active_session + EV-012 routing/stages in_progress; handoff next_action=run_02_verify_plan_consistency; gates.a_to_b pending until 02 passes.'
