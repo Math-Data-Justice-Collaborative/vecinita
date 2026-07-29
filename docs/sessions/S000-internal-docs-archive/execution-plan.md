@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
-| **Active milestone** | M82: Modal jobs API + OpenAPI + JobStore |
-| **Active task** | **T83.1** (pending) — Test: create run enqueues Modal `job_type=eval` (next: M83) |
+| **Active milestone** | M83: Eval enqueue bridge + DO SSE + soft-delete |
+| **Active task** | **T83.1** (pending) — Test: create run enqueues Modal `job_type=eval` |
 | **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82 complete) |
 | **Last updated** | 2026-07-28 |
-| **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build) |
+| **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M82 done → 08 then M83 |
 | **Git branch** | `evolve/EV-012-unified-job-monitoring` |
-| **Active session** | S013-unified-job-monitoring — Gate A→B/B→C passed; building M82 |
+| **Active session** | S013-unified-job-monitoring — Gate A→B/B→C passed; building Phase 19 |
 | **Scope addition** | 2026-07-28 — Unified Jobs: Modal lifecycle SoT, SSE+poll, eval enqueue, admin CRUD, soft-delete eval_runs (RD-173–178, TP-S013-01–08, ADR-038). |
 
 ## Template
