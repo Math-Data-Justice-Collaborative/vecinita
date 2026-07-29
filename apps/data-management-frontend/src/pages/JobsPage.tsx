@@ -55,6 +55,7 @@ function contextCell(job: Job, emDash: string): string {
     return job.document_id;
   }
   if (job.urls.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length guard
     const first = job.urls[0]!;
     return job.urls.length > 1
       ? `${first} (+${String(job.urls.length - 1)})`

@@ -282,7 +282,7 @@ describe("subscribeJobEvents", () => {
     subscribeJobEvents(OPTIONS, { onJob: vi.fn(), onError });
     await vi.waitFor(() => {
       expect(onError).toHaveBeenCalled();
-      const err = onError.mock.calls[0]?.[0];
+      const err: unknown = onError.mock.calls[0]?.[0];
       expect(err).toBeInstanceOf(Error);
       expect((err as Error).message).toMatch(/No response body/);
     });
@@ -322,14 +322,6 @@ describe("subscribeJobEvents", () => {
 
   it("swallows errors after abort on close", async () => {
     let rejectRead: ((reason: unknown) => void) | undefined;
-    const stream = new ReadableStream<Uint8Array>({
-      start() {
-        /* hang until abort */
-      },
-      cancel() {
-        rejectRead?.(new DOMException("Aborted", "AbortError"));
-      },
-    });
     // Override getReader to surface abort after close().
     const body = {
       getReader() {

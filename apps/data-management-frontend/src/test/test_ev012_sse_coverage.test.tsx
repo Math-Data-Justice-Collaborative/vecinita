@@ -409,10 +409,12 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
       vi.fn((input: RequestInfo | URL) => {
         const url = urlOf(input);
         if (url.includes("/cancel")) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
           return Promise.reject("cancel-string-error");
         }
         if (url.includes(`/jobs/${JOB_ID}`)) {
           if (phase === "throw") {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
             return Promise.reject("load-string-error");
           }
           return Promise.resolve(
@@ -590,6 +592,7 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
       "fetch",
       vi.fn((input: RequestInfo | URL) => {
         if (urlOf(input).includes(`/jobs/${JOB_ID}`)) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
           return Promise.reject("load-string");
         }
         return Promise.resolve(jsonResponse({}));

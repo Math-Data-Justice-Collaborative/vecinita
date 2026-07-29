@@ -199,6 +199,7 @@ export function JobDetailPage() {
   }
 
   const jobType: JobType = job.job_type ?? "ingest";
+  const modalCallId = job.modal_call_id;
   const canCancel =
     isAdmin && (job.status === "pending" || job.status === "running");
   const canRetry =
@@ -284,19 +285,19 @@ export function JobDetailPage() {
                 : (job.error_message ?? tr("shared.emDash"))}
             </p>
           ) : null}
-          {job.modal_call_id ? (
+          {modalCallId ? (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-muted-foreground">
                 {tr("admin.jobs.modalCallId")}:
               </span>
-              <code className="font-mono text-xs">{job.modal_call_id}</code>
+              <code className="font-mono text-xs">{modalCallId}</code>
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
                 aria-label={tr("admin.jobs.copyCallId")}
                 onClick={() => {
-                  void navigator.clipboard.writeText(job.modal_call_id);
+                  void navigator.clipboard.writeText(modalCallId);
                 }}
               >
                 {tr("admin.jobs.copyCallId")}

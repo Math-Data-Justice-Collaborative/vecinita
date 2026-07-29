@@ -206,6 +206,8 @@ async function readJobEventStream(
       }
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
+      // String.split always yields ≥1 element; avoid ?? which leaves an uncovered arm.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- split remainder
       buffer = lines.pop()!;
       for (const line of lines) {
         if (line === "") {
