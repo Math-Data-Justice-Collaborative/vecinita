@@ -13,7 +13,7 @@ from vecinita_data_management_backend.write_client import InternalWriteClientErr
 from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
 from vecinita_shared_schemas.json_types import as_json_object
 
-from tests.helpers.json_response import json_str, response_json_object
+from tests.helpers.json_response import json_list, json_str, response_json_object
 
 _ADMIN = AuthPrincipal(sub=UUID("11111111-1111-4111-8111-111111111111"), role="admin")
 _VIEWER = AuthPrincipal(sub=UUID("22222222-2222-4222-8222-222222222222"), role="viewer")
