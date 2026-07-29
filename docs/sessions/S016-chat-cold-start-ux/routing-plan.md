@@ -9,7 +9,7 @@
 | 07-build | yes | completed | ChatRAG FE cold-start UX (F40) |
 | 08-verify-build | yes | completed | verification-report.md PASS |
 | 10-e2e | yes | completed | e2e-report.md PASS (chat Playwright 8/8) |
-| 13-deploy-smoke | yes | pending | |
+| 13-deploy-smoke | yes | in_progress | PR #157; staging F40 awaits merge |
 
 ## Skipped
 
