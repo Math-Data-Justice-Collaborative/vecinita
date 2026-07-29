@@ -1185,15 +1185,19 @@ project:
           admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy 
           stages
     13-deploy-smoke:
-      status: pending
+      status: in_progress
+      started_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 13-deploy-smoke READY (pending); awaiting user-approved deploy; Lean+build skips 11'
+      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 13-deploy-smoke in_progress; user approved deploy gate (choice A)'
       session_id: S014-admin-ui-polish-148
       branch: evolve/EV-013-admin-ui-polish-148
       evolve_cycle_id: EV-013
       mode: evolve
       delta_only: true
-      note: 'S014/EV-013 13-deploy-smoke pending/ready 2026-07-29 — 10-e2e PASS complete; not in_progress until user approves deploy; Lean+build skips 11; prior S013/EV-012 baseline preserved below'
+      deploy_approved: true
+      deploy_approved_at: '2026-07-29'
+      deploy_approval: choice_A_approve_13_deploy_smoke
+      note: 'S014/EV-013 13-deploy-smoke in_progress 2026-07-29 — user approved (choice A); FE-only #148 admin UI polish; push branch + PR + connectivity H1–H5 as applicable; Lean+build skips 11; prior S013/EV-012 Path A baseline preserved below'
       s013_baseline:
         status: completed
         started_at: '2026-07-29'
@@ -1453,7 +1457,7 @@ active_session:
   ui_preview: accepted_early_local_non_deployed_preview
   session_artifacts_written_at: '2026-07-29'
   phase0_approved: true
-  note: '10-e2e PASS 2026-07-29 — overall PASS; handoff → 13-deploy-smoke (pending/ready — not in_progress until user approves deploy); Lean+build skips 11; mode=evolve/delta_only; branch=evolve/EV-013-admin-ui-polish-148'
+  note: '13-deploy-smoke in_progress 2026-07-29 — user approved deploy gate (choice A); FE-only #148 admin UI polish; push branch + PR + connectivity H1–H5 as applicable; Lean+build skips 11; mode=evolve/delta_only; branch=evolve/EV-013-admin-ui-polish-148'
   routing_plan:
     - stage: 00-context
       required: true
@@ -1508,8 +1512,11 @@ active_session:
         t3: deferred_to_13
     - stage: 13-deploy-smoke
       required: true
-      status: pending
-      note: 'Ready — awaiting user-approved deploy; Lean+build skips 11; not in_progress until deploy approved'
+      status: in_progress
+      started_at: '2026-07-29'
+      mode: evolve
+      delta_only: true
+      note: 'User approved deploy gate (choice A) 2026-07-29 — FE-only #148; push branch + PR + connectivity H1–H5 as applicable'
     - stage: 03-plan-tooling
       required: false
       status: skipped
@@ -4750,15 +4757,19 @@ stages:
         template: pass
         connectivity: pass
   13-deploy-smoke:
-    status: pending
+    status: in_progress
+    started_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 13-deploy-smoke READY (pending); awaiting user-approved deploy; Lean+build skips 11'
+    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 13-deploy-smoke in_progress; user approved deploy gate (choice A)'
     session_id: S014-admin-ui-polish-148
     branch: evolve/EV-013-admin-ui-polish-148
     evolve_cycle_id: EV-013
     mode: evolve
     delta_only: true
-    note: 'S014/EV-013 13-deploy-smoke pending/ready 2026-07-29 — 10-e2e PASS complete; not in_progress until user approves deploy; Lean+build skips 11; prior S013/EV-012 baseline preserved below'
+    deploy_approved: true
+    deploy_approved_at: '2026-07-29'
+    deploy_approval: choice_A_approve_13_deploy_smoke
+    note: 'S014/EV-013 13-deploy-smoke in_progress 2026-07-29 — user approved (choice A); FE-only #148 admin UI polish; push branch + PR + connectivity H1–H5 as applicable; Lean+build skips 11; prior S013/EV-012 Path A baseline preserved below'
     s013_baseline:
       status: completed
       started_at: '2026-07-29'
@@ -7153,7 +7164,7 @@ evolve_cycles:
       completed_at: '2026-07-29'
       note: 'Fn allocate F9+F12 (no new Fn); page_size 50; UI preview OK; a11y+theme via existing packages'
     ui_preview: accepted_early_local_non_deployed_preview
-    note: '10-e2e PASS 2026-07-29 — overall PASS; handoff → 13-deploy-smoke (pending/ready — not in_progress until user approves deploy); Lean+build skips 11; phase_d pending (e2e done awaiting deploy)'
+    note: '13-deploy-smoke in_progress 2026-07-29 — user approved deploy gate (choice A); FE-only #148 admin UI polish; push branch + PR + connectivity H1–H5 as applicable; Lean+build skips 11; phase_d in progress (deploy started)'
     routing_preset_choice: lean_plus_build
     routing_preset_status: approved
     routing_plan_status: approved
@@ -7289,8 +7300,13 @@ evolve_cycles:
         artifacts:
           - docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
       13-deploy-smoke:
-        status: pending
-        note: 'Ready — awaiting user-approved deploy; Lean+build skips 11; not in_progress until deploy approved'
+        status: in_progress
+        started: '2026-07-29'
+        mode: evolve
+        delta_only: true
+        deploy_approved: true
+        deploy_approval: choice_A_approve_13_deploy_smoke
+        note: 'in_progress 2026-07-29 — user approved (choice A); FE-only #148 admin UI polish; push branch + PR + connectivity H1–H5 as applicable; not completed'
       03-plan-tooling:
         status: skipped
         skip_rationale: no new guardrails
@@ -7317,13 +7333,13 @@ evolve_cycles:
       phase_a: passed
       phase_b: passed
       phase_c: passed
-      phase_d: pending
-      deploy: pending
+      phase_d: in_progress
+      deploy: in_progress
     checkpoint_notes:
       phase_a: 'Passed 2026-07-29 — 02-verify-plan complete; Gate A→B PASS (user chose A); M1 Playwright TC-155 required'
       phase_b: 'Passed 2026-07-29 — 07-build COMPLETE (Lean+build; 04/05/06 skipped); TruncatedText + Corpus density; Vitest 674; uj051 TC-155 pass'
       phase_c: 'Passed 2026-07-29 — 08-verify-build PASS (delta); Lean+build build+verify complete; integration/DB SKIPPED; personas ADVISORY 6/0; Vitest 674; uj051 PASS; make audit PASS; gate C→D passed; handoff → 10-e2e'
-      phase_d: 'Pending 2026-07-29 — 10-e2e PASS complete; awaiting user-approved 13-deploy-smoke (e2e done, deploy not started)'
+      phase_d: 'In progress 2026-07-29 — user approved 13-deploy-smoke (choice A); FE-only #148; push + PR + H1–H5 as applicable'
     gates:
       a_to_b: passed
       b_to_c: passed
@@ -9621,6 +9637,7 @@ decisions_log:
   - 'EV-013 Gate A→B PASS 2026-07-29 — M1 Playwright required; proceed 07-build'
   - 'EV-013 07-build complete — TruncatedText + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts'
   - 'EV-013/S014 2026-07-29: commit 2050c830 recorded; 10-e2e IN_PROGRESS — UJ-051 / TC-152–155; T0 Vitest + Playwright uj051; T1 skip no Docker; T2/T3 deferred to 13'
+  - 'EV-013/S014 2026-07-29: User approved deploy gate (choice A) — 13-deploy-smoke IN_PROGRESS; FE-only #148 admin UI polish; push branch + PR + connectivity H1–H5 as applicable; mode=evolve/delta_only; checkpoints.phase_d/deploy=in_progress; not completed'
 artifacts:
   - docs/sessions/S000-internal-docs-archive/context-brief.md
   - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -11535,6 +11552,7 @@ git_history:
         - workflow-state.yaml
       note: '10-e2e PASS docs — e2e-report.md + routing-plan.md + workflow-state.yaml'
   notes:
+    - '2026-07-29 S014/EV-013: 13-deploy-smoke IN_PROGRESS — user approved deploy gate (choice A); FE-only #148 admin UI polish; push evolve/EV-013-admin-ui-polish-148 + PR + connectivity H1–H5 as applicable; mode=evolve/delta_only; checkpoints.phase_d/deploy=in_progress; not completed. No open ISS blockers (ISS-001–005 resolved). S013 Path A notes: FE pin/redeploy admin FE was primary path; Modal DM + write-api were for EV-012 API work — for FE-only #148 prefer DO admin FE pin/redeploy + H1–H5 as applicable.'
     - '2026-07-29 S014/EV-013: 10-e2e PASS — T0 Vitest (675 full DM / 28 scoped UJ-051) + Playwright uj051 1/1; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; report e2e-report.md; current_stage → 13-deploy-smoke (pending/ready, not in_progress until user approves deploy); phase_d pending (e2e done awaiting deploy); Lean+build skips 11.'
     - '2026-07-29 S014/EV-013: Recorded commit 2050c830 — admin Corpus density + shared table truncation (#148); 10-e2e set in_progress (T0 Vitest+Playwright uj051; T1 skip no Docker; T2/T3 → 13).'
     - '2026-07-29 S013/EV-012: Path A deploy-smoke PASS @ 1135891 — Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; 13-deploy-smoke completed; checkpoints.deploy=pending_merge_approval; AskQuestion merge PR #153 / hold / reset pins.'
