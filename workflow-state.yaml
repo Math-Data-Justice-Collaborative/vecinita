@@ -1302,31 +1302,34 @@ project:
         merged_at: '2026-07-29'
       next_action: none_cycle_closed
     15-service-health:
-      status: completed
-      started_at: '2026-07-28'
-      completed_at: '2026-07-28'
-      partial_rerun_at: '2026-07-28'
-      partial_rerun_note: 'S012 post-merge staging smoke after PR #150 (2b3231d); main HEAD 1b60930; overall PASS'
-      environment: staging
-      infra: pass
-      e2e: pass
-      overall: pass
-      report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
-      tiers:
-      - H0ci
-      - H1
-      - H2
-      - H3
-      - H3b
-      - H4
-      - H5
-      advisories:
-      - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml
-        CD backstop added'
-      - modal_h4_cors_waived_proxy_auth
-      - s001_t12_pending
-      - h0ci_blocking_after_merge
-      - 'H1: transient modal_llm=error recovered'
+      status: in_progress
+      started_at: '2026-07-29'
+      partial_rerun_at: '2026-07-29'
+      partial_rerun_note: 'S015 post-merge after PR #155 (15030fc); Modal DM redeployed; live CORS OPTIONS /jobs/events PASS; live pytest VECINITA_RUN_LIVE_CORS=1 PASS; formal H0ci–H5 pending'
+      session_id: S015-hotfix-jobs-sse-cors
+      environment: production
+      infra: pending
+      e2e: pending
+      overall: pending
+      live_cors:
+        status: pass
+        path: OPTIONS /jobs/events
+        headers:
+        - Cache-Control
+        - Last-Event-ID
+        response: '200; Allow-Headers includes Cache-Control and Last-Event-ID'
+        live_pytest: 'VECINITA_RUN_LIVE_CORS=1 PASS'
+        recorded_at: '2026-07-29'
+      merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+      pr_number: 155
+      modal_dm_redeploy: success
+      report:
+      prior_completed_at: '2026-07-28'
+      prior_report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
+      prior_session_id: S012-hotfix-admin-ui-112-105
+      prior_overall: pass
+      note: 'S015 15-service-health IN_PROGRESS — live CORS PASS post Modal DM redeploy @ 15030fc (PR #155); formal H0ci–H5 / service-health report pending. Session remains open.'
+      next_action: run_service_health
       history:
       - status: completed
         completed_at: '2026-06-25'
@@ -1366,23 +1369,17 @@ project:
         - H5
         advisories:
         - 'H1: transient modal_llm=error recovered'
-      session_id: S012-hotfix-admin-ui-112-105
-      prior_completed_at: '2026-07-26'
-      prior_report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
-      prior_session_id: S011-hotfix-retag-empty-chats
-      note: 'S012 15-service-health PASS — merge 2b3231d (PR #150); staging @ 1b60930; H0ci–H5 pass; #112 pagination + #105
-        ES sign-out verified. Session remains open pending user close.'
-      completed: '2026-07-28'
-      ci_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424'
-      deploy_do_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628'
-      deploy_preflight_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209'
+      s012_ci_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424'
+      s012_deploy_do_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628'
+      s012_deploy_preflight_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209'
     19-address-pr-review:
       status: in_progress
       started: '2026-07-07'
       last_cycle: PRM-011
     14-hotfix:
-      status: in_progress
+      status: completed
       started_at: '2026-07-29'
+      completed_at: '2026-07-29'
       session_id: S015-hotfix-jobs-sse-cors
       branch: fix/S015-jobs-sse-cors
       bugs:
@@ -1390,25 +1387,30 @@ project:
         id: BUG-2026-07-29-jobs-sse-cors-headers
         summary: Admin Jobs SSE live updates unavailable — CORS preflight rejects Cache-Control / Last-Event-ID on GET 
           /jobs/events (production Modal); Jobs list poll works
-        status: open
+        status: resolved
         order: 1
         seen_on: production_modal
         bug_report: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
-        bug_report_status: written
+        bug_report_status: resolved
         repro_test: tests/bugs/test_bug_2026_07_29_jobs_sse_cors_headers.py
         repro_status: green
         fix_summary: Allow Cache-Control and Last-Event-ID in CORS allow_headers for Jobs SSE (/jobs/events)
         fix_commit: '5904552ad459cda3215be64932e056f51bb8f68d'
-        note: Fix committed 5904552; PR #155 open; open until merge + Modal DM redeploy + 15-service-health
-      note: 'S015 2026-07-29 — commit 5904552 on fix/S015-jobs-sse-cors; PR #155 open; 14-hotfix still in_progress;
-        await CI + merge approval; Modal DM redeploy pre-approved after merge (decision C)'
-      current_bug: BUG-2026-07-29-jobs-sse-cors-headers
-      current_action: await_ci_and_merge_approval
-      next_action: await_ci_and_merge_approval
+        merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+        note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved. Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
+      note: 'S015 2026-07-29 COMPLETE — PR #155 MERGED @ 15030fc; Modal data-management redeployed (uv run modal deploy infra/modal/data_management_app.py); live OPTIONS /jobs/events Cache-Control+Last-Event-ID → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1 PASS; handoff → 15-service-health (formal H0ci–H5). Optional user production UI Jobs SSE confirm remaining.'
+      current_bug:
+      current_action: handoff_15_service_health
+      next_action: run_service_health
       head_sha: '5904552ad459cda3215be64932e056f51bb8f68d'
+      merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+      merged_at: '2026-07-29'
       pr: 155
-      pr_status: open
+      pr_number: 155
+      pr_status: merged
       pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155'
+      modal_dm_redeploy: success
+      live_cors: pass
       prior_session_id: S012-hotfix-admin-ui-112-105
       history:
       - status: completed
@@ -1518,43 +1520,53 @@ active_session:
   intent: Fix admin Jobs SSE — live updates unavailable because CORS preflight rejects Cache-Control / Last-Event-ID on 
     GET /jobs/events (production Modal). Jobs list poll works.
   status: in_progress
-  branch: fix/S015-jobs-sse-cors
+  branch: main
   orchestrator: 14-hotfix
   evolve_cycle_id:
   artifacts_dir: docs/sessions/S015-hotfix-jobs-sse-cors/
-  current_stage: 14-hotfix
+  current_stage: 15-service-health
   started_at: '2026-07-29'
   routing_plan_status: approved
   routing_approval: chat A/A/A/A
   bug_id: BUG-2026-07-29-jobs-sse-cors-headers
+  merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+  pr_number: 155
   routing_plan:
   - stage: 14-hotfix
+    required: true
+    status: completed
+    skip_rationale:
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+    note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; bug resolved'
+  - stage: 15-service-health
     required: true
     status: in_progress
     skip_rationale:
     started_at: '2026-07-29'
-    note: 'Fix committed 5904552; PR #155 open; await CI + merge approval; Modal DM redeploy pre-approved (decision C)'
-  - stage: 15-service-health
-    required: true
-    status: pending
-    skip_rationale:
+    note: 'Live CORS PASS recorded; formal H0ci–H5 / service-health report pending'
   context_briefs: []
   handoff:
     cleared: false
-    next_skill: 14-hotfix
-    next_action: await_ci_and_merge_approval
-    current_bug: BUG-2026-07-29-jobs-sse-cors-headers
+    next_skill: 15-service-health
+    next_action: run_service_health
+    current_bug:
     head_sha: '5904552ad459cda3215be64932e056f51bb8f68d'
-    pr_status: open
+    merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+    pr_status: merged
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155'
-    modal_dm_redeploy_after_merge: pre_approved
+    pr_number: 155
+    modal_dm_redeploy_after_merge: completed
     modal_dm_redeploy_decision: C
+    modal_dm_redeploy: success
+    live_cors: pass
     bugs_order:
     - BUG-2026-07-29-jobs-sse-cors-headers
     bugs_status:
-      BUG-2026-07-29-jobs-sse-cors-headers: open
+      BUG-2026-07-29-jobs-sse-cors-headers: resolved
     bug_reports:
       BUG-2026-07-29-jobs-sse-cors-headers: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
+    optional_user_confirm: production_jobs_sse_ui_visual
 sessions:
 - id: S014-admin-ui-polish-148
   type: feature
@@ -5295,21 +5307,26 @@ stages:
       merged_at: '2026-07-29'
     next_action: none_cycle_closed
   14-hotfix:
-    status: in_progress
+    status: completed
     started_at: '2026-07-29'
+    completed_at: '2026-07-29'
     session_id: S015-hotfix-jobs-sse-cors
     branch: fix/S015-jobs-sse-cors
     bugs:
     - *id001
-    note: 'S015 2026-07-29 — commit 5904552 on fix/S015-jobs-sse-cors; PR #155 open; 14-hotfix still in_progress;
-      await CI + merge approval; Modal DM redeploy pre-approved after merge (decision C)'
-    current_bug: BUG-2026-07-29-jobs-sse-cors-headers
-    current_action: await_ci_and_merge_approval
-    next_action: await_ci_and_merge_approval
+    note: 'S015 2026-07-29 COMPLETE — PR #155 MERGED @ 15030fc; Modal data-management redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; handoff → 15-service-health. Optional user production UI Jobs SSE confirm remaining.'
+    current_bug:
+    current_action: handoff_15_service_health
+    next_action: run_service_health
     head_sha: '5904552ad459cda3215be64932e056f51bb8f68d'
+    merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+    merged_at: '2026-07-29'
     pr: 155
-    pr_status: open
+    pr_number: 155
+    pr_status: merged
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155'
+    modal_dm_redeploy: success
+    live_cors: pass
     prior_session_id: S012-hotfix-admin-ui-112-105
     history:
     - status: completed
@@ -5413,31 +5430,34 @@ stages:
       completed_at: '2026-05-21'
     prior_started_at: '2026-06-26'
   15-service-health:
-    status: completed
-    started_at: '2026-07-28'
-    completed_at: '2026-07-28'
-    partial_rerun_at: '2026-07-28'
-    partial_rerun_note: 'S012 post-merge staging smoke after PR #150 (2b3231d); main HEAD 1b60930; overall PASS'
-    environment: staging
-    infra: pass
-    e2e: pass
-    overall: pass
-    report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
-    tiers:
-    - H0ci
-    - H1
-    - H2
-    - H3
-    - H3b
-    - H4
-    - H5
-    advisories:
-    - 'do_branch_pin_feat_S001: RESOLVED 2026-06-28 — DO apps reset to branch:main + deploy_on_push; deploy-digitalocean.yml
-      CD backstop added'
-    - modal_h4_cors_waived_proxy_auth
-    - s001_t12_pending
-    - h0ci_blocking_after_merge
-    - 'H1: transient modal_llm=error recovered'
+    status: in_progress
+    started_at: '2026-07-29'
+    partial_rerun_at: '2026-07-29'
+    partial_rerun_note: 'S015 post-merge after PR #155 (15030fc); Modal DM redeployed; live CORS OPTIONS /jobs/events PASS; live pytest VECINITA_RUN_LIVE_CORS=1 PASS; formal H0ci–H5 pending'
+    session_id: S015-hotfix-jobs-sse-cors
+    environment: production
+    infra: pending
+    e2e: pending
+    overall: pending
+    live_cors:
+      status: pass
+      path: OPTIONS /jobs/events
+      headers:
+      - Cache-Control
+      - Last-Event-ID
+      response: '200; Allow-Headers includes Cache-Control and Last-Event-ID'
+      live_pytest: 'VECINITA_RUN_LIVE_CORS=1 PASS'
+      recorded_at: '2026-07-29'
+    merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+    pr_number: 155
+    modal_dm_redeploy: success
+    report:
+    prior_completed_at: '2026-07-28'
+    prior_report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
+    prior_session_id: S012-hotfix-admin-ui-112-105
+    prior_overall: pass
+    note: 'S015 15-service-health IN_PROGRESS — live CORS PASS post Modal DM redeploy @ 15030fc (PR #155); formal H0ci–H5 / service-health report pending. Session remains open.'
+    next_action: run_service_health
     history:
     - environment: staging
       completed_at: '2026-05-21'
@@ -5493,16 +5513,9 @@ stages:
       - H5
       advisories:
       - 'H1: transient modal_llm=error recovered'
-    session_id: S012-hotfix-admin-ui-112-105
-    prior_completed_at: '2026-07-26'
-    prior_report: docs/sessions/S011-hotfix-retag-empty-chats/reports/service-health.md
-    prior_session_id: S011-hotfix-retag-empty-chats
-    note: 'S012 15-service-health PASS — merge 2b3231d (PR #150); staging @ 1b60930; H0ci–H5 pass; #112 pagination + #105
-      ES sign-out verified. Session remains open pending user close.'
-    completed: '2026-07-28'
-    ci_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424'
-    deploy_do_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628'
-    deploy_preflight_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209'
+    s012_ci_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424'
+    s012_deploy_do_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628'
+    s012_deploy_preflight_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209'
   17-retrospective:
     status: pending
   18-pr-review:
@@ -5560,10 +5573,17 @@ deployment:
   staging:
     status: deployed
     last_verified: '2026-07-29'
-    commit_deployed: ecb9446
-    commit_head: ecb9446
+    commit_deployed: 15030fc
+    commit_head: 15030fc
     drift: false
     branch: main
+    modal_data_management:
+      redeployed_at: '2026-07-29'
+      commit: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
+      command: uv run modal deploy infra/modal/data_management_app.py
+      status: success
+      session_id: S015-hotfix-jobs-sse-cors
+      note: 'S015 Jobs SSE CORS hotfix — live OPTIONS /jobs/events PASS after redeploy'
     evolve_pin:
       cycle: EV-013
       session: S014-admin-ui-polish-148
@@ -5607,6 +5627,7 @@ deployment:
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
     notes:
+    - 'S015 2026-07-29: PR #155 MERGED @ 15030fc; Modal data-management redeployed; live OPTIONS /jobs/events Cache-Control+Last-Event-ID → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1 PASS; 14-hotfix completed; 15-service-health in_progress (formal H0ci–H5 pending).'
     - 'S014/EV-013 2026-07-29 Path A deploy-smoke PASS (FE-only) @ f85b6ab — DO admin FE pin evolve/EV-013-admin-ui-polish-148
       ACTIVE; Modal/write untouched; H1–H5 PASS; CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250;
       report docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md; PR #154 open — merge awaits explicit user approval;
@@ -10220,6 +10241,7 @@ decisions_log:
 - 'S015/2026-07-29: PR #155 open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155 on fix/S015-jobs-sse-cors;
   replaced pr_url pending; 14-hotfix remains in_progress (await_ci_and_merge_approval); Modal DM redeploy pre-approved after
   merge (S015-D-C / decision C).'
+- 'S015/2026-07-29: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal data-management redeployed (uv run modal deploy infra/modal/data_management_app.py); live OPTIONS /jobs/events Cache-Control+Last-Event-ID → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1 PASS; BUG-2026-07-29-jobs-sse-cors-headers resolved; branch fix/S015-jobs-sse-cors merged; 15-service-health started (in_progress); handoff next_skill=15-service-health next_action=run_service_health; optional production Jobs UI SSE visual confirm deferred to user.'
 artifacts:
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - 'docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report'
@@ -10899,8 +10921,11 @@ artifacts:
   session_id: S015-hotfix-jobs-sse-cors
   stage: 14-hotfix
   bug_id: BUG-2026-07-29-jobs-sse-cors-headers
-  status: fix_committed
+  status: resolved
   recorded_at: '2026-07-29'
+  resolved_at: '2026-07-29'
+  merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+  note: 'Live CORS PASS after Modal DM redeploy; optional production UI visual confirm remaining'
 - path: tests/bugs/test_bug_2026_07_29_jobs_sse_cors_headers.py
   kind: bug-repro-test
   session_id: S015-hotfix-jobs-sse-cors
@@ -10920,19 +10945,21 @@ artifacts:
   recorded_at: '2026-07-29'
 
 git_history:
-  current_branch: fix/S015-jobs-sse-cors
+  current_branch: main
   branches:
   - name: fix/S015-jobs-sse-cors
     purpose: S015 hotfix — Jobs SSE CORS preflight (Cache-Control / Last-Event-ID on GET /jobs/events)
     base: main
-    status: open
+    status: merged
     created_at: '2026-07-29'
+    merged_at: '2026-07-29'
     session_id: S015-hotfix-jobs-sse-cors
     head_sha: '5904552ad459cda3215be64932e056f51bb8f68d'
+    merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
     pr_number: 155
-    pr_status: open
+    pr_status: merged
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155'
-    note: 'Commit 5904552; PR #155 open (awaiting merge). Bug BUG-2026-07-29-jobs-sse-cors-headers.'
+    note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; bug resolved.'
   - name: evolve/EV-013-admin-ui-polish-148
     purpose: '#148 admin UI density/truncation polish'
     base: main
@@ -12233,7 +12260,19 @@ git_history:
     - tests/unit/test_cors_policy.py
     - workflow-state.yaml
     note: 'Hotfix CORS allow_headers for Jobs SSE; PR #155 open'
+  - sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+    branch: main
+    message: 'Merge pull request #155 from Math-Data-Justice-Collaborative/fix/S015-jobs-sse-cors'
+    stage: 14-hotfix
+    session_id: S015-hotfix-jobs-sse-cors
+    files_changed: 0
+    timestamp: '2026-07-29T12:46:54-04:00'
+    bug_id: BUG-2026-07-29-jobs-sse-cors-headers
+    pr_number: 155
+    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155'
+    note: 'PR #155 merged to main; Modal DM redeploy + live CORS PASS followed; 14-hotfix completed'
   notes:
+  - '2026-07-29 S015: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; BUG-2026-07-29 resolved; branch fix/S015-jobs-sse-cors merged; 15-service-health in_progress (formal H0ci–H5 pending); optional production Jobs UI SSE visual confirm remaining.'
   - '2026-07-29 S015: PR #155 recorded — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155 on fix/S015-jobs-sse-cors;
     14-hotfix remains in_progress (await_ci_and_merge_approval); Modal DM redeploy pre-approved after merge (decision C).'
   - '2026-07-29 S015: Commit 5904552 on fix/S015-jobs-sse-cors — hotfix Jobs SSE CORS; PR URL pending; 14-hotfix remains

@@ -1,6 +1,6 @@
 # BUG-2026-07-29 — Admin Jobs SSE blocked by CORS (Cache-Control / Last-Event-ID)
 
-**Status:** fixed locally (Modal redeploy pending user approval)  
+**Status:** resolved (PR #155 merged; Modal redeployed; live OPTIONS PASS)  
 **Severity:** high — Jobs tab falls back to polling; live SSE never connects  
 **Feature:** F32 / EV-012 — Modal `GET /jobs/events` (TC-148, RD-173)  
 **Session:** S015-hotfix-jobs-sse-cors  
