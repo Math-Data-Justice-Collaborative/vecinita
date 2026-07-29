@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — AC-E34–AC-E38)
+> **Last updated**: 2026-07-28 (S013/EV-012 #116 — AC-J1–AC-J10)
 
 ## Per-feature criteria
 
@@ -158,6 +158,19 @@
 - [ ] **AC-E36**: Proxy key required on `/generate`, `/warm`, `/models/*`; missing key → `401`; `/health` may stay open — TC-142 / UJ-049.
 - [ ] **AC-E37**: Catalog/list/pull ⊆ `resolve_hf_repo`; unmapped tags fail clearly — TC-141 / UJ-048.
 - [ ] **AC-E38**: Prod ChatRAG pinned to default model (or separate Modal class); playground/eval reload does not stomp prod — TC-145 / Slice D.
+
+### EV-012 — Unified Admin Jobs (#116, F32/F36) — S013
+
+- [ ] **AC-J1**: Starting an eval run shows a corresponding Modal `job_type=eval` entry on `/jobs` within one SSE/poll cycle (UJ-044, TC-124, RD-174).
+- [ ] **AC-J2**: Ingest/retag remain visible and update correctly — no regression vs UJ-023 / TC-049 (TC-150, TC-151).
+- [ ] **AC-J3**: Clicking any job opens `/jobs/:id` with status, timestamps, and actionable error context on failure (UJ-050, TC-146).
+- [ ] **AC-J4**: Retag jobs show document context (`document_id`) — not an empty URLs column (TC-150).
+- [ ] **AC-J5**: Job updates use SSE with 4s poll fallback + SSE retry backoff (RD-173, TC-148).
+- [ ] **AC-J6**: Admin-only cancel/retry/delete; viewer read-only / `403` on mutate (RD-176, TC-147).
+- [ ] **AC-J7**: Failed Modal jobs expose call id + copy + dashboard link when known (RD-177, TC-149).
+- [ ] **AC-J8**: DO Postgres remains SoT for storage/metrics; Supabase used for auth only (RD-175).
+- [ ] **AC-J9**: Playwright T0-ui covers Jobs list → detail navigation (RD-178, UJ-050).
+- [ ] **AC-J10**: ChatRAG UI unchanged (hard constraint).
 
 ## Quantitative benchmarks
 

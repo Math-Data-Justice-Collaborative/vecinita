@@ -53,11 +53,12 @@ def auth_headers() -> dict[str, str]:
 
 
 class StubJobsClient:
-    """Enqueue retag jobs without calling Modal."""
+    """Enqueue retag/eval jobs without calling Modal."""
 
     def __init__(self) -> None:
-        """Initialize with an empty list of enqueued document ids."""
+        """Initialize with empty enqueue logs."""
         self.enqueued: list[UUID] = []
+        self.enqueued_eval_runs: list[UUID] = []
 
     def enqueue_retag(
         self,
@@ -68,6 +69,18 @@ class StubJobsClient:
         """Record the document id and return a synthetic job id."""
         _ = authorization
         self.enqueued.append(document_id)
+        return uuid.uuid4()
+
+    def enqueue_eval(
+        self,
+        eval_run_id: UUID,
+        *,
+        authorization: str | None = None,
+        question: str | None = None,
+    ) -> UUID:
+        """Record the eval run id and return a synthetic job id."""
+        _ = (authorization, question)
+        self.enqueued_eval_runs.append(eval_run_id)
         return uuid.uuid4()
 
 

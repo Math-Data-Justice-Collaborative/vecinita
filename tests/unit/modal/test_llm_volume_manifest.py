@@ -49,7 +49,7 @@ def test_write_manifest_marks_model_unavailable_then_available(
     manifest_path: Path,
 ) -> None:
     """Manifest updates propagate to list payload (Modal volume contract)."""
-    model_id = "qwen2.5:3b-instruct"
+    model_id = "qwen2.5:7b-instruct"
 
     _write_manifest(
         [

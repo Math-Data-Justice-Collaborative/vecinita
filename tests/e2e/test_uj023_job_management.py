@@ -14,6 +14,7 @@ import contextlib
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
@@ -21,13 +22,12 @@ from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
 from vecinita_shared_schemas.internal_write import BatchUpsertRequest, BatchUpsertResponse
 
 from tests.helpers.json_response import json_object_list, json_str, response_json_object
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from vecinita_ingest.models import ScrapedDocument
 
 pytestmark = pytest.mark.e2e
@@ -40,6 +40,8 @@ _EMBED_VECTOR = [0.01] * EMBEDDING_DIMENSION
 _GOOD_URL = "https://example.com/sample-page.html"
 _BAD_URL = "https://invalid.example/bad-page.html"
 _EXPECTED_JOB_LIST_SIZE = 2
+_ADMIN = AuthPrincipal(sub=UUID("11111111-1111-4111-8111-111111111111"), role="admin")
+_DOC_ID = UUID("33333333-3333-4333-8333-333333333333")
 
 
 class _MockEmbedClient:
@@ -157,3 +159,46 @@ def test_jobs_persist_across_client_navigation(dm_jobs_client: TestClient) -> No
     # a brand-new request (no client state) still sees the job because it lives server-side.
     listed = response_json_object(dm_jobs_client.get("/jobs"))
     assert job_id in {json_str(job, "job_id") for job in json_object_list(listed, "jobs")}
+
+
+def test_list_jobs_retag_includes_document_id(monkeypatch: pytest.MonkeyPatch) -> None:
+    """TC-150: Retag jobs expose document_id on GET /jobs (not an empty URLs column)."""
+    reset_auth_config_for_tests()
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="retag",
+        options={"document_id": str(_DOC_ID)},
+    )
+    store.update_job(record.job_id, status="completed")
+    app = create_app(store=store, require_proxy_auth=False)
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    body = response_json_object(client.get("/jobs"))
+    jobs = json_object_list(body, "jobs")
+    assert len(jobs) == 1
+    retag = jobs[0]
+    assert json_str(retag, "job_type") == "retag"
+    assert retag.get("document_id") == str(_DOC_ID)
+    assert json_str(retag, "job_id") == str(record.job_id)
+
+
+def test_list_jobs_status_filter_cancelled(monkeypatch: pytest.MonkeyPatch) -> None:
+    """TC-151: GET /jobs?status=cancelled returns only cancelled jobs."""
+    reset_auth_config_for_tests()
+    monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
+    store = InMemoryJobStore()
+    cancelled = store.create_job(urls=["https://example.com/cancel"])
+    store.update_job(cancelled.job_id, status="cancelled")
+    running = store.create_job(urls=["https://example.com/run"])
+    store.update_job(running.job_id, status="running")
+    app = create_app(store=store, require_proxy_auth=False)
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    filtered = response_json_object(client.get("/jobs", params={"status": "cancelled"}))
+    assert [json_str(job, "job_id") for job in json_object_list(filtered, "jobs")] == [
+        str(cancelled.job_id)
+    ]

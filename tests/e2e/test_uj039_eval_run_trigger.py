@@ -10,11 +10,13 @@ from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
+from tests.helpers.jobs_client_stub import LocalEvalJobsClient
 from tests.helpers.json_response import (
     json_object_get,
     json_object_list,
@@ -54,7 +56,16 @@ def eval_e2e_client(
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
     seed_eval_corpus(database_url=database_url)
-    app = create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge())
+    jobs = LocalEvalJobsClient(
+        create_engine(database_url),
+        embed_fn=eval_embed_fn,
+        judge=MockEvalJudge(),
+    )
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=jobs,  # type: ignore[arg-type]
+    )
     with TestClient(app) as client:
         yield client, private_key
     reset_auth_config_for_tests()

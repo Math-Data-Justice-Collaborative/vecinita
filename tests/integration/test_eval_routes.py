@@ -10,11 +10,14 @@ from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 from vecinita_internal_write_api.app import create_app
+from vecinita_internal_write_api.eval_service import execute_eval_run
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
+from tests.helpers.jobs_client_stub import StubJobsClient
 from tests.helpers.json_response import json_object_get, json_str, response_json_object
 from tests.helpers.user_mgmt_e2e import VIEWER_ID
 from tests.unit.rag.conftest import seed_eval_corpus
@@ -45,7 +48,11 @@ def eval_write_client(
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
     seed_eval_corpus(database_url=database_url)
-    app = create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge())
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+    )
     with TestClient(app) as client:
         yield client, private_key
     reset_auth_config_for_tests()
@@ -72,7 +79,7 @@ def _poll_run(
 def test_admin_triggers_eval_run_and_persists_results(
     eval_write_client: tuple[TestClient, EllipticCurvePrivateKey],
 ) -> None:
-    """TC-114: admin POST creates a run that completes with summary metrics."""
+    """TC-114: admin POST creates a run; harness completes with summary metrics."""
     client, private_key = eval_write_client
     token = sign_test_jwt(private_key, role="admin")
     response = client.post(
@@ -83,6 +90,15 @@ def test_admin_triggers_eval_run_and_persists_results(
     assert response.status_code == HTTPStatus.ACCEPTED
     created = response_json_object(response)
     run_id = UUID(json_str(created, "run_id"))
+    # Route enqueues Modal (TP-S013-06); run harness locally for integration assertion.
+    database_url = os.environ["DATABASE_URL"]
+    execute_eval_run(
+        create_engine(database_url),
+        run_id=run_id,
+        question=None,
+        embed_fn=eval_embed_fn,
+        judge=MockEvalJudge(),
+    )
     detail_obj = _poll_run(client, token, run_id)
     assert json_str(detail_obj, "status") == "completed"
     summary = json_object_get(detail_obj, "metrics_summary")

@@ -486,6 +486,55 @@ test-plan TC-141–TC-145; api-contract auth+stream; config-spec proxy+pin; AC-E
 ADR-037 amendment; rule `unified-vecinita-llm.mdc`; report
 `docs/sessions/S010-unify-llm-service/reports/01-requirements-client-consolidation.md`.
 
+### EV-012 requirements decisions (2026-07-28) — RD-173–RD-178
+
+S013 / GitHub #116 — unified Admin Jobs monitoring. Extend **F32/F36** (no new Fn). Amends
+ADR-033 (eval runner → Modal). New ADR-038 for Modal job lifecycle + storage split.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-173 | Job updates | SSE per source; on failure fall back to **4s poll** + retry SSE with backoff | S013-RQ2 |
+| RD-174 | Job lifecycle | **Modal** owns all long-running admin jobs (ingest/retag/**eval**/future); use Modal job queue lifecycle; amend ADR-033 | S013-RQ3 |
+| RD-175 | Storage vs auth | **DO Postgres** SoT for all storage including metrics; **Supabase = authentication only** | S013-RQ3 |
+| RD-176 | Job CRUD | **Admin-only** full CRUD (create/read/cancel/retry/delete); viewer read-only | S013-RQ4 |
+| RD-177 | Failed logs UX | Function/call id + copy + Modal dashboard link when URL known | S013-RQ5 |
+| RD-178 | UI E2E | Playwright T0-ui for Jobs list → detail (plus Vitest) | S013-RQ6 |
+
+**S013-D8 amendment:** Jobs tab primary list = Modal `GET /jobs` (not FE merge of Modal +
+internal-write job lists). Eval metrics/results remain in DO Postgres for drill-down.
+
+**02-verify-plan verdicts (2026-07-28):**
+| ID | Verdict |
+|----|---------|
+| M1 | Modal = job lifecycle SoT; DO Postgres = storage/metrics only (no Postgres jobs table as runner SoT) |
+| M2 | SSE on **both** Modal `/jobs/events` and internal-write eval progress events |
+| M3 | `POST /internal/v1/eval/runs` → metrics row + enqueue Modal `job_type=eval` |
+
+Artifacts: feature-list F32/F36 delta; UJ-023/UJ-044/UJ-050; test-plan TC-146–TC-151; AC-J1–J10;
+`docs/adr/ADR-038-modal-job-lifecycle-storage-split.md`; session report
+`docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md`;
+`docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md`.
+
+### EV-012 tech-plan decisions (2026-07-28) — TP-S013-01–08
+
+04-tech-plan locks implementation paths for S013 / #116 (Lean+build; 05/06 skipped):
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S013-01 | OpenAPI | `GET /jobs/events`; `POST …/cancel`; `POST …/retry`; `DELETE /jobs/{id}`; Job extras | Batch 1 Q1a |
+| TP-S013-02 | JobStore | Keep `DictJobStore` + `modal.Dict`; Modal `.spawn`; no Postgres jobs table | Batch 1 Q2a |
+| TP-S013-03 | Delete | DELETE JobStore + soft-delete linked `eval_runs` when `job_type=eval` | Batch 1 Q3b |
+| TP-S013-04 | Eval SSE | `GET /internal/v1/eval/runs/{run_id}/events`; Jobs list uses Modal `/jobs/events` | Batch 1 Q4a |
+| TP-S013-05 | Soft-delete | `eval_runs.deleted_at` timestamptz; hide from default list/detail | Batch 2 Q5a |
+| TP-S013-06 | Enqueue | `enqueue_eval` from `POST /internal/v1/eval/runs` (Keep M3; ISS-005 resolved) | Batch 2 Q6a |
+| TP-S013-07 | Cancel | JobStore `cancelled` + best-effort `FunctionCall.cancel()` | Batch 2 Q7a |
+| TP-S013-08 | Plan shape | Phase 19 / M82–M85 | Batch 2 Q8a |
+
+**ISS-005:** User briefly chose Modal pull (6b); contradicted Gate A→B M3; resolved by **Keep M3 / 6a**.
+
+Artifacts: execution-plan Phase 19; `docs/sessions/S013-unified-job-monitoring/roadmap.md`;
+`docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md`; ADR-038 amendments §9–12.
+
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 
 01-requirements locked RD-154–RD-162. 04-tech-plan locks implementation order and operator steps:

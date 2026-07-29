@@ -10,7 +10,7 @@ const PLAYGROUND_CATALOG_TAGS: Record<
     slug: "qwen2.5",
     tags: [
       { model_id: "qwen2.5:1.5b-instruct", available: true },
-      { model_id: "qwen2.5:3b-instruct", available: false },
+      { model_id: "qwen2.5:7b-instruct", available: false },
     ],
   },
   "llama3.2": {

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import patch
@@ -10,11 +11,11 @@ from uuid import UUID, uuid4
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
-from vecinita_eval.runner import EvalSummary
-from vecinita_internal_write_api.eval_service import create_eval_run
+from vecinita_internal_write_api.eval_service import CreatedEvalRun, create_eval_run
 from vecinita_llm_client import LlmClientError
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
-from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
+from vecinita_shared_schemas.eval_config import EvalConfig
+from vecinita_shared_schemas.internal_write import EvalRunCreateRequest, EvalRunCreateResponse
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
@@ -26,7 +27,7 @@ from tests.helpers.json_response import (
     response_json_object,
 )
 from tests.helpers.playground_models_mock import MockPlaygroundModelsClient
-from tests.unit.internal_write_api.conftest import auth_headers, database_url
+from tests.unit.internal_write_api.conftest import StubJobsClient, auth_headers, database_url
 from tests.unit.shared_schemas.auth_fixtures import (
     generate_es256_keypair,
     make_auth_config,
@@ -51,53 +52,122 @@ def eval_write_client(internal_api_env: None) -> TestClient:
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
     return TestClient(
-        create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge()),
+        create_app(
+            eval_embed_fn=eval_embed_fn,
+            eval_judge=MockEvalJudge(),
+            jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+        ),
     )
 
 
 def test_create_eval_run_route_accepts_empty_body(eval_write_client: TestClient) -> None:
-    """POST /eval/runs defaults corpus_profile and schedules background execution."""
-    with patch("vecinita_internal_write_api.app.execute_eval_run"):
-        response = eval_write_client.post(
-            "/internal/v1/eval/runs",
-            headers=auth_headers(),
-        )
+    """POST /eval/runs defaults corpus_profile and enqueues Modal eval job."""
+    response = eval_write_client.post(
+        "/internal/v1/eval/runs",
+        headers=auth_headers(),
+    )
     assert response.status_code == HTTPStatus.ACCEPTED
     body = response_json_object(response)
     assert json_str(body, "status") == "pending"
 
 
-def test_factory_create_app_wires_default_eval_judge_from_env(
-    internal_api_env: None,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """create_app() without eval_judge must still pass a judge when Modal LLM URL is set."""
+def test_create_eval_run_enqueues_modal_eval_job(internal_api_env: None) -> None:
+    """POST /eval/runs enqueues Modal job_type=eval via jobs client (T83.1 / AC-J1)."""
     _ = internal_api_env
-    monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
-    client = TestClient(create_app(eval_embed_fn=eval_embed_fn))
-    with patch(
-        "vecinita_internal_write_api.eval_service.run_golden_eval",
-        return_value=(
-            [],
-            EvalSummary(
-                retrieval_relevance=0.0,
-                faithfulness=None,
-                answer_relevancy=None,
-                latency_p95_ms=1,
+    enqueued: list[UUID] = []
+    run_id = uuid4()
+
+    class _JobsStub:
+        def enqueue_eval(
+            self,
+            eval_run_id: UUID,
+            *,
+            authorization: str | None = None,
+            question: str | None = None,
+        ) -> UUID:
+            _ = (authorization, question)
+            enqueued.append(eval_run_id)
+            return uuid4()
+
+    def _fake_create(
+        _engine: object,
+        *,
+        body: EvalRunCreateRequest,
+        requester_id: UUID,
+    ) -> CreatedEvalRun:
+        _ = (body, requester_id)
+        return CreatedEvalRun(
+            response=EvalRunCreateResponse(
+                run_id=run_id,
+                status="pending",
+                created_at=datetime.now(UTC),
             ),
-        ),
-    ) as mock_run:
+            corpus_profile="fixture",
+            mode="golden",
+            question=None,
+            config_snapshot=EvalConfig(),
+        )
+
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=_JobsStub(),  # type: ignore[arg-type]
+    )
+    client = TestClient(app)
+
+    with patch("vecinita_internal_write_api.app.create_eval_run", side_effect=_fake_create):
+        response = client.post(
+            "/internal/v1/eval/runs",
+            headers=auth_headers(),
+            json={"corpus_profile": "fixture"},
+        )
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    body = response_json_object(response)
+    assert UUID(json_str(body, "run_id")) == run_id
+    assert enqueued == [run_id]
+
+
+def test_create_eval_run_returns_503_when_jobs_client_missing(
+    internal_api_env: None,
+) -> None:
+    """POST /eval/runs fails closed when Modal jobs client is not configured (TP-S013-06)."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    run_id = uuid4()
+
+    def _fake_create(
+        _engine: object,
+        *,
+        body: EvalRunCreateRequest,
+        requester_id: UUID,
+    ) -> CreatedEvalRun:
+        _ = (body, requester_id)
+        return CreatedEvalRun(
+            response=EvalRunCreateResponse(
+                run_id=run_id,
+                status="pending",
+                created_at=datetime.now(UTC),
+            ),
+            corpus_profile="fixture",
+            mode="golden",
+            question=None,
+            config_snapshot=EvalConfig(),
+        )
+
+    client = TestClient(
+        create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge(), jobs_client=None),
+    )
+    with patch("vecinita_internal_write_api.app.create_eval_run", side_effect=_fake_create):
         response = client.post(
             "/internal/v1/eval/runs",
             json={"corpus_profile": "fixture"},
             headers=auth_headers(),
         )
-    assert response.status_code == HTTPStatus.ACCEPTED
-    mock_run.assert_called_once()
-    assert mock_run.call_args.kwargs["judge"] is not None
-    assert mock_run.call_args.kwargs["llm"] is not None
+    assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
 def test_list_eval_runs_clamps_pagination(eval_write_client: TestClient) -> None:
@@ -555,12 +625,11 @@ def test_create_eval_run_with_preset_requires_operator_jwt(
     eval_write_client: TestClient,
 ) -> None:
     """POST /eval/runs rejects preset_id when only the service key is provided."""
-    with patch("vecinita_internal_write_api.app.execute_eval_run"):
-        response = eval_write_client.post(
-            "/internal/v1/eval/runs",
-            json={"preset_id": str(uuid4())},
-            headers=auth_headers(),
-        )
+    response = eval_write_client.post(
+        "/internal/v1/eval/runs",
+        json={"preset_id": str(uuid4())},
+        headers=auth_headers(),
+    )
     assert response.status_code == HTTPStatus.FORBIDDEN
 
 
@@ -610,7 +679,13 @@ def _jwt_client_for_key(
 
     token = sign_test_jwt(private_key, sub=sub, role=role)
     headers = {"Authorization": f"Bearer {token}"}
-    return TestClient(create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge())), headers
+    return TestClient(
+        create_app(
+            eval_embed_fn=eval_embed_fn,
+            eval_judge=MockEvalJudge(),
+            jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+        ),
+    ), headers
 
 
 def _admin_jwt_client(
@@ -687,12 +762,11 @@ def test_create_eval_run_returns_404_for_missing_preset(
     """POST /eval/runs maps unknown preset ids to 404."""
     client, _owner_id, headers, _private_key = _admin_jwt_client(monkeypatch, role="admin")
     try:
-        with patch("vecinita_internal_write_api.app.execute_eval_run"):
-            response = client.post(
-                "/internal/v1/eval/runs",
-                headers=headers,
-                json={"preset_id": str(uuid4())},
-            )
+        response = client.post(
+            "/internal/v1/eval/runs",
+            headers=headers,
+            json={"preset_id": str(uuid4())},
+        )
         assert response.status_code == HTTPStatus.NOT_FOUND
     finally:
         reset_auth_config_for_tests()
@@ -718,12 +792,11 @@ def test_create_eval_run_returns_403_for_private_preset(
         )
         assert create.status_code == HTTPStatus.CREATED
         preset_id = UUID(json_str(response_json_object(create), "preset_id"))
-        with patch("vecinita_internal_write_api.app.execute_eval_run"):
-            response = other_client.post(
-                "/internal/v1/eval/runs",
-                headers=other_headers,
-                json={"preset_id": str(preset_id)},
-            )
+        response = other_client.post(
+            "/internal/v1/eval/runs",
+            headers=other_headers,
+            json={"preset_id": str(preset_id)},
+        )
         assert response.status_code == HTTPStatus.FORBIDDEN
         assert other_id != owner_id
     finally:
@@ -786,3 +859,21 @@ def test_eval_config_preset_routes_return_403_for_private_preset(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )
+
+
+def test_soft_delete_eval_run_route_returns_404_when_missing(internal_api_env: None) -> None:
+    """DELETE /eval/runs/{id} returns 404 when the run is absent (TP-S013-05)."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+    )
+    client = TestClient(app)
+    response = client.delete(
+        f"/internal/v1/eval/runs/{uuid4()}",
+        headers=auth_headers(),
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND

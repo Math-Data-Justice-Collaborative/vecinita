@@ -29,15 +29,22 @@ describe("evalDashboardStorage", () => {
     vi.restoreAllMocks();
   });
 
-  it("loadEvalDashboardLayout returns defaults when storage is empty", () => {
+  it("loadEvalDashboardLayout keeps custom range ISO strings", () => {
+    localStorage.setItem(
+      DASHBOARD_KEY,
+      JSON.stringify({
+        collapsedPanels: {},
+        selectedMetrics: ["faithfulness"],
+        chartType: "line",
+        showThresholds: true,
+        timeRangePreset: "custom",
+        customRangeStart: "2026-01-01",
+        customRangeEnd: "2026-01-31",
+      }),
+    );
     const layout = loadEvalDashboardLayout();
-    expect(layout.chartType).toBe("line");
-    expect(layout.showThresholds).toBe(true);
-    expect(layout.selectedMetrics).toEqual([
-      "retrieval_relevance",
-      "faithfulness",
-      "answer_relevancy",
-    ]);
+    expect(layout.customRangeStart).toBe("2026-01-01");
+    expect(layout.customRangeEnd).toBe("2026-01-31");
   });
 
   it("loadEvalDashboardLayout merges persisted layout and falls back on invalid JSON", () => {

@@ -15,7 +15,7 @@ _CATALOG_PULL_CASES: tuple[tuple[str, str], ...] = (
     ("qwen3.6:latest", "Qwen/Qwen3.6-35B-A3B"),
     ("qwen3.6:27b", "Qwen/Qwen3.6-27B"),
     ("llama3.2:3b", "meta-llama/Llama-3.2-3B-Instruct"),
-    ("qwen2.5:3b-instruct-q4_K_M", "Qwen/Qwen2.5-3B-Instruct"),
+    ("qwen2.5:1.5b-instruct-q4_K_M", "Qwen/Qwen2.5-1.5B-Instruct"),
 )
 
 

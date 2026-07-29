@@ -401,6 +401,132 @@ export async function fetchEvalRunDetail(
   return response.json() as Promise<EvalRunDetailApi>;
 }
 
+export interface EvalRunProgressEvent {
+  run_id?: string;
+  status: EvalRunDetailApi["status"];
+}
+
+export interface EvalRunEventHandlers {
+  onProgress: (event: EvalRunProgressEvent) => void;
+  onError?: ((error: unknown) => void) | undefined;
+  lastEventId?: string | undefined;
+}
+
+export interface EvalRunEventSubscription {
+  close: () => void;
+}
+
+/**
+ * Subscribe to DO `GET /internal/v1/eval/runs/{run_id}/events` (TP-S013-04).
+ * Uses fetch streaming so Bearer auth can be sent (EventSource cannot).
+ */
+export function subscribeEvalRunEvents(
+  options: CorpusClientOptions,
+  runId: string,
+  handlers: EvalRunEventHandlers,
+): EvalRunEventSubscription {
+  const controller = new AbortController();
+  void readEvalRunEventStream(options, runId, handlers, controller.signal);
+  return {
+    close: () => {
+      controller.abort();
+    },
+  };
+}
+
+async function readEvalRunEventStream(
+  options: CorpusClientOptions,
+  runId: string,
+  handlers: EvalRunEventHandlers,
+  signal: AbortSignal,
+): Promise<void> {
+  try {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      Accept: "text/event-stream",
+      "Cache-Control": "no-cache",
+    };
+    if (handlers.lastEventId) {
+      headers["Last-Event-ID"] = handlers.lastEventId;
+    }
+    const response = await fetch(
+      `${options.baseUrl}/internal/v1/eval/runs/${runId}/events`,
+      { headers, signal },
+    );
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(
+        detail || `Eval run events failed (${String(response.status)})`,
+      );
+    }
+    if (!response.body) {
+      throw new Error("No response body from eval run events");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let eventName = "message";
+    let dataLines: string[] = [];
+
+    const flush = (): void => {
+      if (dataLines.length === 0) {
+        eventName = "message";
+        return;
+      }
+      const raw = dataLines.join("\n");
+      dataLines = [];
+      const name = eventName;
+      eventName = "message";
+      if (name !== "eval_run" && name !== "message") {
+        return;
+      }
+      try {
+        handlers.onProgress(JSON.parse(raw) as EvalRunProgressEvent);
+      } catch (err) {
+        handlers.onError?.(err);
+      }
+    };
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      // String.split always yields ≥1 element; avoid ?? which leaves an uncovered arm.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- split remainder
+      buffer = lines.pop()!;
+      for (const line of lines) {
+        if (line === "") {
+          flush();
+          continue;
+        }
+        if (line.startsWith(":")) {
+          continue;
+        }
+        if (line.startsWith("id:")) {
+          continue;
+        }
+        if (line.startsWith("event:")) {
+          eventName = line.slice(6).trim();
+          continue;
+        }
+        if (line.startsWith("data:")) {
+          dataLines.push(line.slice(5).trimStart());
+        }
+      }
+    }
+    flush();
+  } catch (err) {
+    if (signal.aborted) {
+      return;
+    }
+    handlers.onError?.(err);
+  }
+}
+
 export async function triggerEvalRun(
   options: CorpusClientOptions,
   corpusProfile: "fixture" | "staging" = "fixture",

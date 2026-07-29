@@ -12,7 +12,8 @@ from typing import TYPE_CHECKING, Annotated, Protocol, cast
 from uuid import UUID, uuid4
 
 import httpx
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy import create_engine, text
 from vecinita_llm_client import LlmClient, LlmClientError
 from vecinita_shared_schemas.audit_headers import (
@@ -133,14 +134,15 @@ from vecinita_internal_write_api.eval_criteria_service import (
     list_eval_criteria,
     update_eval_criterion,
 )
+from vecinita_internal_write_api.eval_events import EvalRunEventBroker, iter_eval_run_sse
 from vecinita_internal_write_api.eval_service import (
     EvalRunPresetAccessError,
     EvalRunPresetNotFoundError,
     create_eval_run,
-    execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
+    soft_delete_eval_run,
 )
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
@@ -355,15 +357,22 @@ def _default_playground_library_client() -> PlaygroundLibraryClient:
     return PlaygroundLibraryClient()
 
 
-def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
+def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers many route handlers inline
     *,
     jobs_client: DataManagementJobsClient | None = None,
     eval_embed_fn: Callable[[str], list[float]] | None = None,
     eval_judge: JudgeClient | None = None,
     playground_models_client: LlmModelsClientProtocol | None = None,
     playground_library_client: PlaygroundLibraryClientProtocol | None = None,
+    eval_event_broker: EvalRunEventBroker | None = None,
+    sse_poll_interval_s: float = 0.25,
+    sse_max_cycles: int | None = None,
+    eval_sse_sync_db: bool = True,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
+    # Eval execution moved to Modal (ADR-038 / TP-S013-06). Params kept for injectability
+    # until the Modal eval worker consumes them; route only enqueues via jobs_client.
+    _ = (eval_embed_fn, eval_judge)
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
@@ -378,6 +387,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         if playground_library_client is not None
         else _default_playground_library_client()
     )
+    event_broker = eval_event_broker if eval_event_broker is not None else EvalRunEventBroker()
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]
@@ -1514,35 +1524,41 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         status_code=status.HTTP_202_ACCEPTED,
     )
     def create_eval_run_route(  # pyright: ignore[reportUnusedFunction]
-        background_tasks: BackgroundTasks,
+        request: Request,
         actor: WriteActorDep,
         body: EvalRunCreateRequest | None = None,
     ) -> EvalRunCreateResponse:
-        request = body or EvalRunCreateRequest()
+        create_body = body or EvalRunCreateRequest()
         owner_id, _role = actor
-        if request.preset_id is not None and owner_id is None:
+        if create_body.preset_id is not None and owner_id is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="authenticated user id required",
             )
         requester_id = owner_id if owner_id is not None else uuid4()
         try:
-            created = create_eval_run(engine, body=request, requester_id=requester_id)
+            created = create_eval_run(engine, body=create_body, requester_id=requester_id)
         except EvalRunPresetNotFoundError as exc:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
         except EvalRunPresetAccessError as exc:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
-        def _run() -> None:
-            execute_eval_run(
-                engine,
-                run_id=created.response.run_id,
-                question=created.question,
-                embed_fn=eval_embed_fn,
-                judge=eval_judge,
+        if retag_jobs is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Eval job client not configured",
             )
-
-        background_tasks.add_task(_run)
+        try:
+            retag_jobs.enqueue_eval(
+                created.response.run_id,
+                authorization=request.headers.get("Authorization"),
+                question=created.question,
+            )
+        except DataManagementJobsClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
         return created.response
 
     @app.get(
@@ -1835,6 +1851,14 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=str(exc),
             ) from exc
+        # RD-168 / ISS-004: only tags resolve_hf_repo accepts (blocks NC + unmapped).
+        allowed_tags: list[str] = []
+        for tag in tags:
+            try:
+                resolve_hf_repo(tag)
+            except ValueError:
+                continue
+            allowed_tags.append(tag)
         return PlaygroundModelCatalogFamilyTagsResponse(
             slug=slug,
             tags=[
@@ -1842,7 +1866,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                     model_id=tag,
                     available=playground_catalog_tag_available(tag, availability),
                 )
-                for tag in tags
+                for tag in allowed_tags
             ],
         )
 
@@ -1858,5 +1882,56 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         if detail is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
         return detail
+
+    @app.get("/internal/v1/eval/runs/{run_id}/events")
+    def stream_eval_run_events(  # pyright: ignore[reportUnusedFunction]
+        run_id: UUID,
+        _actor: ReadActorDep,
+        last_event_id: Annotated[str | None, Header(alias="Last-Event-ID")] = None,
+    ) -> StreamingResponse:
+        """SSE stream of eval run progress (EV-012 / TP-S013-04)."""
+        if eval_sse_sync_db:
+            if not event_broker.sync_from_engine(engine, run_id=run_id):
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        else:
+            seeded = [
+                event
+                for event in event_broker.events_after(None)
+                if f'"run_id":"{run_id}"' in event.payload_json
+            ]
+            if not seeded:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+        def event_stream() -> object:
+            yield from iter_eval_run_sse(
+                engine,
+                event_broker,
+                run_id=run_id,
+                last_event_id=last_event_id,
+                poll_interval_s=sse_poll_interval_s,
+                max_cycles=sse_max_cycles,
+                sync_db=eval_sse_sync_db,
+            )
+
+        return StreamingResponse(
+            event_stream(),  # pyright: ignore[reportArgumentType]  # sync gen is valid body
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
+    @app.delete(
+        "/internal/v1/eval/runs/{run_id}",
+        status_code=status.HTTP_204_NO_CONTENT,
+    )
+    def soft_delete_eval_run_route(  # pyright: ignore[reportUnusedFunction]
+        run_id: UUID,
+        _actor: WriteActorDep,
+    ) -> None:
+        if not soft_delete_eval_run(engine, run_id=run_id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
     return app

@@ -41,11 +41,11 @@
 | F29 | Audit log & version history | Implemented | Data Management | internal-write-api, data-management-frontend, database | 11-verify-impl 2026-05-27 |
 | F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
 | F31 | Admin + shared frontend bilingual UI (en/es) | Planned | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | EV-004 2026-06-13 |
-| F32 | Admin Job Management tab (list jobs) | Implemented | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89) |
+| F32 | Admin Job Management tab (list jobs) | Implemented → Evolving (EV-012) | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89); S013/EV-012 #116 |
 | F33 | Browser-local persistent chat history (localStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26; ADR-025 2026-06-28 |
 | F34 | Supabase Auth for admin surfaces (invite-only, admin+viewer) | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, internal-write-api | S004/EV-005 2026-06-28; ADR-026 (#75) |
 | F35 | Admin user management + remember-me + Resend SMTP/templates | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, supabase config + CI | S005/EV-006 2026-06-29; ADR-029 (#75) |
-| F36 | Admin RAG evaluation tab + golden eval set | Implemented | Data Management | data-management-frontend, internal-write-api, packages/eval | S007/EV-008 2026-07-01; #99 |
+| F36 | Admin RAG evaluation tab + golden eval set | Implemented → Evolving (EV-012) | Data Management | data-management-frontend, internal-write-api, packages/eval, data-management-backend (Modal jobs) | S007/EV-008 2026-07-01; #99; S013/EV-012 #116 Modal job lifecycle |
 | F37 | Eval UX polish + playground + runtime config promote | Planned | Data Management + ChatRAG | data-management-frontend, internal-write-api, data-management-backend, chat-rag-backend | S008/EV-009 2026-07-02 |
 | F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal LLM app | S009/EV-010 2026-07-05; backend unified in F39 |
 | F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, `packages/llm-client`, all LLM consumers | S010/EV-011; ADR-037; follow-on RD-163–RD-172 |
@@ -452,9 +452,15 @@
 - **Outputs**: Table of jobs with short job id, type (ingest/retag), status badge, source URLs, last-updated time, and `error_code: error_message` for failed jobs; polled while open; manual refresh.
 - **Backend**: `GET /jobs` list endpoint (newest first) + `list_jobs()` on `JobStore` / `DictJobStore` / `InMemoryJobStore`; `job_type` added to the `Job` schema; `JobList` response model; OpenAPI `openapi/data-management.yaml` updated.
 - **Frontend**: New `/jobs` route + sidebar nav item (`ListChecks`); `JobsPage`; `listJobs()` client; en/es i18n (`admin.nav.jobs`, `admin.jobs.*`).
-- **Limitations**: No PII in listings (URLs + status only, ADR-004). No job cancellation/retry in this iteration. Status/type enums localized; error messages remain in source form (consistent with F31 R30).
+- **Limitations**: No PII in listings (URLs + status only, ADR-004). Status/type enums localized; error messages remain in source form (consistent with F31 R30). **Superseded by EV-012:** cancellation/retry/delete are in scope (RD-176); list updates use SSE + poll fallback (RD-173).
 - **Priority**: High — pairs with #88 ingest tag resilience.
 - **Source**: S002 session (GitHub #89); related bug #88 (graceful ingest tagging).
+- **EV-012 / #116 delta (S013, RD-173–RD-178)**: Unified long-running job monitoring on Admin Jobs only (not ChatRAG).
+  - **Lifecycle**: All long-running admin jobs (ingest, retag, **eval**, future types) use **Modal’s job lifecycle** ([Modal job queue](https://modal.com/docs/guide/job-queue)); Admin Jobs list is **Modal `GET /jobs`** with extensible `job_type` (RD-174). Amends ADR-033 (eval leaves DO `BackgroundTasks`).
+  - **Storage**: **DO Postgres** remains SoT for durable storage including eval metrics/results; **Supabase = authentication only** (RD-175).
+  - **UX**: Status filter UI; clickable rows → `/jobs/:id` detail (`JobDetailPage`); retag shows `document_id` context; SSE on Modal jobs **and** internal-write eval progress with **4s poll fallback** + SSE retry backoff (RD-173, 02-verify M2); failed Modal jobs show function/call id + copy + dashboard link when known (RD-177); admin cancel/retry/delete (RD-176).
+  - **CRUD**: **Admin-only** full job CRUD — create (existing), read/list/detail, cancel/retry, delete from store (RD-176). Viewer read-only.
+  - **Tests**: Extend UJ-023; UJ-050 detail; Playwright T0-ui list→detail (RD-178); API e2e + Vitest; live T3 after deploy.
 
 ### F33: Browser-local persistent chat history (sessionStorage + previous-chats list)
 
@@ -615,6 +621,12 @@
 - **S008 follow-ons (EV-009)**: Optimistic run-list refresh (M65); unified `job_type=eval` on Jobs tab
   (M66); dashboard scatter + time-range presets including custom date picker (M67). Playground and
   promote are **F37** — not extensions of F36 limitations.
+- **EV-012 / #116 delta (S013, RD-174–RD-175)**: Eval **run lifecycle** moves to Modal
+  (`job_type=eval` on data-management jobs API; Modal job queue). Trigger may still originate from
+  `/evaluation` / internal-write, but the async job is owned by Modal. **Postgres** keeps
+  `eval_runs` / `eval_run_items` (metrics, per-row results) as storage SoT. Jobs tab shows eval via
+  Modal list; detail summary links to existing eval drill-down (`/evaluation?run=…`). Amends
+  ADR-033 runner placement.
 
 ### F37: Eval UX polish + playground + runtime config promote
 
@@ -658,7 +670,7 @@
   models beyond the default `qwen2.5:1.5b-instruct`. Regular **admins** list and select available
   models for playground runs but cannot trigger pulls.
 - **Inputs**: Super-admin operator (`role=super-admin`); free-text Ollama `model_id` tag
-  (non-empty, max 128 chars — e.g. `qwen2.5:3b-instruct`); existing Modal Ollama pull
+  (non-empty, max 128 chars — e.g. `qwen2.5:1.5b-instruct`); existing Modal Ollama pull
   infrastructure (`POST /models/ollama/pull` on **`vecinita-llm`** — ADR-037; was `vecinita-ollama`).
 - **Outputs**: Background Modal pull job (`202` + `job_id`); manifest entry with
   `available: false` while pulling, `available: true` when complete; model appears in Playground

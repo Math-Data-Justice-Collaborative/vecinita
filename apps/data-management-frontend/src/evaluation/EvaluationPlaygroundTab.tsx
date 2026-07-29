@@ -413,7 +413,12 @@ export function EvaluationPlaygroundTab({
       const client = requireCorpusConfig();
       const body = selectedPresetId
         ? { source: "preset" as const, preset_id: selectedPresetId }
-        : { source: "run" as const, run_id: lastRunId ?? "" };
+        : {
+            source: "run" as const,
+            // promoteDisabled ensures lastRunId when confirm is enabled
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- gated by promoteDisabled
+            run_id: lastRunId!,
+          };
       const result = await promoteRagConfig(client, body);
       setPromoteVersion(result.config_version);
       setPromoteDialogOpen(false);

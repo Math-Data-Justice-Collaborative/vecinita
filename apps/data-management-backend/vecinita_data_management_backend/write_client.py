@@ -144,3 +144,13 @@ class InternalWriteClient:
             msg = f"list_eval_runs failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return EvalRunListResponse.model_validate(response.json())
+
+    def soft_delete_eval_run(self, run_id: UUID) -> None:
+        """Soft-delete a linked eval run via DELETE /internal/v1/eval/runs/{id} (TP-S013-03)."""
+        response = self._client.delete(
+            f"/internal/v1/eval/runs/{run_id}",
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"soft_delete_eval_run failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)

@@ -57,6 +57,9 @@ describe("Job Management navigation persistence (#89)", () => {
         if (url.includes("/internal/v1/documents")) {
           return Promise.resolve(jsonResponse({ items: [], page: 1, page_size: 50, total: 0 }));
         }
+        if (url.includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
         if (url.includes("/jobs")) {
           if (method === "POST") {
             return Promise.resolve(
@@ -93,7 +96,7 @@ describe("Job Management navigation persistence (#89)", () => {
       expect(screen.getByTestId("job-row")).toBeInTheDocument();
     });
     expect(screen.getByText(JOB_ID.slice(0, 8))).toBeInTheDocument();
-    expect(screen.getByText(/Completed/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Completed/).length).toBeGreaterThan(0);
 
     const listCalls = fetchMock.mock.calls.filter(([input, init]) => {
       const url = urlOf(input);

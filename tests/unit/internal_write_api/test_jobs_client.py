@@ -50,17 +50,45 @@ def test_enqueue_retag_posts_retag_job() -> None:
     client.close()
 
 
-def test_enqueue_retag_raises_on_http_error() -> None:
-    """Test enqueue retag raises on http error."""
-    transport = httpx.MockTransport(lambda _request: httpx.Response(500, text="fail"))
+def test_enqueue_eval_posts_eval_job() -> None:
+    """enqueue_eval POSTs job_type=eval with eval_run_id (T83.1 / TP-S013-06)."""
+    eval_run_id = uuid4()
+    job_id = uuid4()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/jobs"
+        assert request.headers["X-Vecinita-Proxy-Key"] == "proxy-key"
+        assert request.headers.get("Authorization") == "Bearer operator-jwt"
+        body = request.read().decode()
+        assert '"job_type":"eval"' in body or '"job_type": "eval"' in body
+        assert str(eval_run_id) in body
+        return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
+
+    transport = httpx.MockTransport(handler)
     client = DataManagementJobsClient(
         base_url="http://data-mgmt.test",
         proxy_key="proxy-key",
         http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
     )
 
-    with pytest.raises(DataManagementJobsClientError, match="500"):
-        client.enqueue_retag(uuid4())
+    result = client.enqueue_eval(eval_run_id, authorization="Bearer operator-jwt")
+
+    assert result == job_id
+    client.close()
+
+
+def test_enqueue_eval_raises_on_http_error() -> None:
+    """enqueue_eval raises DataManagementJobsClientError on HTTP failure."""
+    transport = httpx.MockTransport(lambda _request: httpx.Response(503, text="down"))
+    client = DataManagementJobsClient(
+        base_url="http://data-mgmt.test",
+        proxy_key="proxy-key",
+        http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
+    )
+
+    with pytest.raises(DataManagementJobsClientError, match="503"):
+        client.enqueue_eval(uuid4())
     client.close()
 
 

@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 import os
 from typing import TYPE_CHECKING, Annotated, Literal
-from uuid import UUID  # noqa: TC003  # FastAPI path params require UUID at runtime
+from uuid import UUID  # FastAPI path params require UUID at runtime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, require_role
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import (
@@ -22,6 +23,7 @@ from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, Supabase
 
 from vecinita_data_management_backend.email_test import ResendClient
 from vecinita_data_management_backend.eval_jobs import eval_run_to_job
+from vecinita_data_management_backend.job_events import JobEventBroker, iter_job_sse
 from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
 from vecinita_data_management_backend.user_admin_routes import register_user_admin_routes
@@ -108,7 +110,7 @@ def _fetch_eval_jobs(eval_client: InternalWriteClient | None) -> list[Job]:
 _STAGING_CORS_ORIGINS = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app"
 
 
-def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectable admin deps
+def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes + injectable admin deps
     *,
     store: JobStore | None = None,
     require_proxy_auth: bool = True,
@@ -120,6 +122,10 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     resend_client: ResendClient | None = None,
     email_test_limiter: SlidingWindowRateLimiter | None = None,
     eval_runs_client: InternalWriteClient | None = None,
+    cancel_modal_call: Callable[[str], None] | None = None,
+    job_event_broker: JobEventBroker | None = None,
+    sse_poll_interval_s: float = 0.25,
+    sse_max_cycles: int | None = None,
 ) -> FastAPI:
     """Build the Data Management ASGI app with job routes and optional pipeline runner."""
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
@@ -128,6 +134,7 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
         resolved_cors = os.environ.get("VECINITA_CORS_ORIGINS", "").strip() or _STAGING_CORS_ORIGINS
     configure_cors(app, extra_allow_headers=[_PROXY_HEADER], env_value=resolved_cors)
     job_store = store or InMemoryJobStore()
+    event_broker = job_event_broker if job_event_broker is not None else JobEventBroker()
     runner = pipeline_runner
     require_admin = require_role("admin")
     resolved_eval_client = (
@@ -171,6 +178,8 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
                 options["chunk_size_tokens"] = body.options.chunk_size_tokens
             if body.options.document_id is not None:
                 options["document_id"] = str(body.options.document_id)
+            if body.options.eval_run_id is not None:
+                options["eval_run_id"] = str(body.options.eval_run_id)
         record = job_store.create_job(
             urls=[str(url) for url in body.urls],
             options=options,
@@ -202,7 +211,7 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
     def list_jobs(  # pyright: ignore[reportUnusedFunction]
         _auth: AuthPrincipal = Depends(auth_dep),
         status_filter: Annotated[
-            Literal["pending", "running", "completed", "failed"] | None,
+            Literal["pending", "running", "completed", "failed", "cancelled"] | None,
             Query(alias="status"),
         ] = None,
     ) -> JobList:
@@ -214,6 +223,32 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
         jobs.sort(key=lambda job: job.updated_at, reverse=True)
         return JobList(jobs=jobs)
 
+    @app.get("/jobs/events")
+    def stream_job_events(  # pyright: ignore[reportUnusedFunction]
+        _auth: AuthPrincipal = Depends(auth_dep),
+        last_event_id: Annotated[str | None, Header(alias="Last-Event-ID")] = None,
+    ) -> StreamingResponse:
+        """SSE stream of job status updates (EV-012 / TC-148)."""
+
+        def event_stream() -> object:
+            yield from iter_job_sse(
+                job_store,
+                event_broker,
+                last_event_id=last_event_id,
+                poll_interval_s=sse_poll_interval_s,
+                max_cycles=sse_max_cycles,
+            )
+
+        return StreamingResponse(
+            event_stream(),  # pyright: ignore[reportArgumentType]  # sync gen is valid body
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
     @app.get("/jobs/{job_id}", response_model=Job)
     def get_job(  # pyright: ignore[reportUnusedFunction]
         job_id: UUID,
@@ -223,6 +258,86 @@ def create_app(  # noqa: C901, PLR0913  # FastAPI factory: job routes + injectab
         if record is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
         return job_record_to_schema(record)
+
+    @app.post("/jobs/{job_id}/cancel", response_model=Job)
+    def cancel_job(  # pyright: ignore[reportUnusedFunction]
+        job_id: UUID,
+        _auth: AuthPrincipal = Depends(write_auth_dep),
+    ) -> Job:
+        record = job_store.get_job(job_id)
+        if record is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if record.status in {"completed", "failed", "cancelled"}:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cannot cancel job in status {record.status}",
+            )
+        # Best-effort Modal FunctionCall.cancel when call id is known (TP-S013-07).
+        if record.modal_call_id and cancel_modal_call is not None:
+            try:
+                cancel_modal_call(record.modal_call_id)
+            except Exception:  # noqa: BLE001  # cancel is best-effort
+                _logger.warning(
+                    "modal FunctionCall.cancel failed for %s",
+                    record.modal_call_id,
+                    exc_info=True,
+                )
+        updated = job_store.update_job(job_id, status="cancelled")
+        return job_record_to_schema(updated)
+
+    @app.post(
+        "/jobs/{job_id}/retry",
+        status_code=status.HTTP_202_ACCEPTED,
+        response_model=CreateJobResponse,
+    )
+    def retry_job(  # pyright: ignore[reportUnusedFunction]
+        job_id: UUID,
+        background: BackgroundTasks,
+        auth: AuthPrincipal = Depends(write_auth_dep),
+    ) -> CreateJobResponse:
+        record = job_store.get_job(job_id)
+        if record is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if record.status not in {"failed", "cancelled"}:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cannot retry job in status {record.status}",
+            )
+        new_record = job_store.create_job(
+            urls=list(record.urls),
+            options=dict(record.options),
+            job_type=record.job_type,
+            initiated_by_user_id=auth.sub,
+            initiated_by_role=auth.role,
+        )
+        if runner is not None:
+            background.add_task(runner, new_record.job_id)
+        return CreateJobResponse(job_id=new_record.job_id, status="pending")
+
+    @app.delete("/jobs/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+    def delete_job(  # pyright: ignore[reportUnusedFunction]
+        job_id: UUID,
+        _auth: AuthPrincipal = Depends(write_auth_dep),
+    ) -> None:
+        record = job_store.get_job(job_id)
+        if record is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if record.job_type == "eval" and resolved_eval_client is not None:
+            eval_run_id = record.eval_run_id
+            if eval_run_id is None:
+                raw = record.options.get("eval_run_id")
+                if isinstance(raw, str) and raw:
+                    eval_run_id = UUID(raw)
+            if eval_run_id is not None:
+                try:
+                    resolved_eval_client.soft_delete_eval_run(eval_run_id)
+                except InternalWriteClientError as exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail=str(exc),
+                    ) from exc
+        if not job_store.delete_job(job_id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
     register_user_admin_routes(
         app,

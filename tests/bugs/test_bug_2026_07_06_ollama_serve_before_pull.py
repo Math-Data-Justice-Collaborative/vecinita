@@ -26,10 +26,10 @@ def test_download_hf_model_resolves_tag_and_writes_to_volume(
     monkeypatch.setitem(sys.modules, "huggingface_hub", fake_hub)
     monkeypatch.setattr(llm_app, "_REPOS_ROOT", tmp_path / "repos")
 
-    dest = llm_app._download_hf_model("qwen2.5:3b-instruct")  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
+    dest = llm_app._download_hf_model("qwen2.5:1.5b-instruct")  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
 
     snapshot.assert_called_once_with(
-        repo_id="Qwen/Qwen2.5-3B-Instruct",
-        local_dir=str(tmp_path / "repos" / "qwen2.5_3b-instruct"),
+        repo_id="Qwen/Qwen2.5-1.5B-Instruct",
+        local_dir=str(tmp_path / "repos" / "qwen2.5_1.5b-instruct"),
     )
     assert dest.is_dir()

@@ -92,9 +92,12 @@ def test_admin_lists_playground_models(
     undownloaded = find_json_object_by_str(
         json_list(listing_body, "items"),
         "model_id",
-        "qwen2.5:3b-instruct",
+        "qwen2.5:7b-instruct",
     )
     assert undownloaded.get("available") is False
+    # ISS-004: NC Qwen2.5-3B must not appear in curated playground catalog.
+    items = json_list(listing_body, "items")
+    assert all(as_json_object(row).get("model_id") != "qwen2.5:3b-instruct" for row in items)
 
 
 def test_admin_cannot_trigger_ollama_pull(
@@ -211,5 +214,7 @@ def test_super_admin_lists_playground_catalog_tree(
     tag_items = json_list(tags_body, "tags")
     default_model = find_json_object_by_str(tag_items, "model_id", "qwen2.5:1.5b-instruct")
     assert default_model.get("available") is True
-    missing = find_json_object_by_str(tag_items, "model_id", "qwen2.5:3b-instruct")
+    missing = find_json_object_by_str(tag_items, "model_id", "qwen2.5:7b-instruct")
     assert missing.get("available") is False
+    # ISS-004: NC Qwen2.5-3B filtered from catalog family tags (resolve_hf_repo gate).
+    assert all(as_json_object(row).get("model_id") != "qwen2.5:3b-instruct" for row in tag_items)

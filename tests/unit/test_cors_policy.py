@@ -151,6 +151,35 @@ def test_data_management_cors_preflight_on_jobs() -> None:
     assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
 
 
+@pytest.mark.parametrize(
+    ("path", "method"),
+    [
+        ("/jobs/00000000-0000-4000-8000-000000000001/cancel", "POST"),
+        ("/jobs/00000000-0000-4000-8000-000000000001/retry", "POST"),
+        ("/jobs/00000000-0000-4000-8000-000000000001", "DELETE"),
+        ("/jobs/events", "GET"),
+    ],
+)
+def test_data_management_cors_preflight_on_job_mutate_and_events(
+    path: str,
+    method: str,
+) -> None:
+    """H0c / T85.4: CORS preflight for cancel, retry, delete, and SSE events (EV-012)."""
+    client = TestClient(create_data_mgmt_app(require_proxy_auth=False))
+    response = client.options(
+        path,
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": method,
+            "Access-Control-Request-Headers": ("authorization, content-type, x-vecinita-proxy-key"),
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+    assert method in allow_methods
+
+
 def test_data_management_cors_preflight_on_admin_users_invite() -> None:
     """TC-093: DM allows the admin origin to preflight POST /admin/users/invite."""
     client = TestClient(create_data_mgmt_app(require_proxy_auth=False))

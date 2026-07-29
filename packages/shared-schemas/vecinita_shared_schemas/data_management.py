@@ -16,17 +16,18 @@ UserStatus = Literal["active", "invited", "disabled"]
 
 
 class JobOptions(BaseModel):
-    """Optional ingest or retag tuning parameters for a job."""
+    """Optional ingest, retag, or eval tuning parameters for a job."""
 
     model_config = ConfigDict(extra="forbid")
 
     chunk_size_tokens: int | None = Field(default=None, ge=64, le=2048)
-    job_type: Literal["ingest", "retag"] = "ingest"
+    job_type: Literal["ingest", "retag", "eval"] = "ingest"
     document_id: UUID | None = None
+    eval_run_id: UUID | None = None
 
 
 class CreateJobRequest(BaseModel):
-    """POST /jobs request to enqueue URL ingestion or LLM retag."""
+    """POST /jobs request to enqueue URL ingestion, LLM retag, or eval."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -35,13 +36,16 @@ class CreateJobRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_job_payload(self) -> CreateJobRequest:
-        """Require URLs for ingest jobs and document_id for retag jobs."""
+        """Require URLs for ingest, document_id for retag, eval_run_id for eval."""
         job_type = self.options.job_type if self.options else "ingest"
         if job_type == "ingest" and not self.urls:
             msg = "urls required for ingest jobs"
             raise ValueError(msg)
         if job_type == "retag" and (self.options is None or self.options.document_id is None):
             msg = "document_id required for retag jobs"
+            raise ValueError(msg)
+        if job_type == "eval" and (self.options is None or self.options.eval_run_id is None):
+            msg = "eval_run_id required for eval jobs"
             raise ValueError(msg)
         return self
 
@@ -54,12 +58,16 @@ class CreateJobResponse(BaseModel):
 
 
 class Job(BaseModel):
-    """GET /jobs/{job_id} ingest job status snapshot."""
+    """GET /jobs/{job_id} job status snapshot."""
 
     job_id: UUID
-    status: Literal["pending", "running", "completed", "failed"]
+    status: Literal["pending", "running", "completed", "failed", "cancelled"]
     job_type: Literal["ingest", "retag", "eval"] = "ingest"
     urls: list[HttpUrl]
+    document_id: UUID | None = None
+    eval_run_id: UUID | None = None
+    modal_call_id: str | None = None
+    dashboard_url: str | None = None
     error_code: str | None = None
     error_message: str | None = None
     created_at: datetime

@@ -69,6 +69,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-042 Admin eval pivot explore | Vitest in `data-management-frontend` | TC-118 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
 | UJ-043 Admin eval criteria CRUD | `tests/integration/test_eval_dashboard_routes.py` | TC-120, TC-121 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
 | UJ-044 Eval jobs on Jobs tab | `tests/e2e/test_uj044_eval_jobs_tab.py` | TC-124 | `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` |
+| UJ-050 Job detail + admin CRUD | `tests/e2e/test_uj050_job_detail_crud.py` | TC-146, TC-147, TC-148, TC-149 | `tests/ui/admin/uj050-job-detail.spec.ts` |
+| UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-047 Super-admin promote RAG config | `tests/e2e/test_uj047_eval_promote_config.py` | TC-131, TC-132, TC-133 | — |
@@ -733,11 +735,14 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Vitest `test_evaluation_page.test.tsx` — mock POST returns `run_id`; assert sidebar row with `pending`/`running` before poll completes.
 - **Expected**: `runs` state includes new `run_id` immediately after create; no full-page reload.
 
-### TC-124: Unified jobs list includes eval (UJ-044, F37, EV-009)
+### TC-124: Unified jobs list includes eval (UJ-044, F37/F32 EV-012)
 
-- **Objective**: `GET /jobs` returns eval runs with `job_type: "eval"` and status fields.
-- **Input**: `tests/e2e/test_uj044_eval_jobs_tab.py` — trigger eval run; poll `GET /jobs`.
-- **Expected**: Eval job row present with matching `job_id`/`status`; Vitest Jobs page renders eval badge.
+- **Objective**: Modal `GET /jobs` returns eval runs with `job_type: "eval"` and status fields
+  (Modal job lifecycle — RD-174; not DO BackgroundTasks).
+- **Input**: `tests/e2e/test_uj044_eval_jobs_tab.py` — trigger eval run; observe via `GET /jobs`
+  and/or SSE events.
+- **Expected**: Eval job row present with matching `job_id`/`status`; Vitest Jobs page renders
+  eval badge; metrics remain readable from Postgres eval APIs.
 
 ### TC-125: Dashboard scatter + time-range presets (UJ-041, F37, EV-009)
 
@@ -799,7 +804,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: `tests/integration/test_ollama_models_list.py` — `GET/POST /internal/v1/models/ollama`.
 - **Payloads**:
   - `GET` as `admin` → `200` with `{ items: [{ model_id, available }] }`.
-  - `POST { "model_id": "qwen2.5:3b-instruct" }` as `super-admin` → `202` with `{ job_id, model_id, status: "pulling" }`; internal-write-api forwards to **`vecinita-llm`** `POST /models/ollama/pull`.
+  - `POST { "model_id": "qwen2.5:1.5b-instruct" }` as `super-admin` → `202` with `{ job_id, model_id, status: "pulling" }`; internal-write-api forwards to **`vecinita-llm`** `POST /models/ollama/pull`.
   - Same `POST` as `admin` → `403`.
   - Same `POST` as `viewer` → `403`.
   - `POST` with empty `model_id` → `422`.
@@ -809,7 +814,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: Super-admin download panel submits pull and polls until model is available.
 - **Input**: Vitest `test_evaluation_playground.test.tsx` — mock `POST /internal/v1/models/ollama/pull` (`202`) and sequential `GET /internal/v1/models/ollama` (`available: false` → `true`).
-- **Payloads**: Enter `qwen2.5:3b-instruct`; assert pull called once; assert poll interval ~10s (fake timers); assert success state and picker includes new model.
+- **Payloads**: Enter `qwen2.5:1.5b-instruct`; assert pull called once; assert poll interval ~10s (fake timers); assert success state and picker includes new model.
 - **Expected**: Download button enabled for super-admin; in-progress indicator while polling; success when `available=true`.
 
 ### TC-136: Admin Playground — download UI hidden (UJ-048, F38, EV-010)
@@ -881,6 +886,42 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Chat-rag/tagging/eval use shared HF chat-template helper; prod class pinned so playground reload does not stomp ChatRAG.
 - **Input**: Unit fixtures for Qwen + non-Qwen; unit/smoke for prod pin vs playground class.
 - **Expected**: Non-Qwen prompts use model template (not hand-rolled Qwen wrap); prod ignores playground `model_id` or separate Modal class.
+
+### TC-146: Job detail route (UJ-050, F32 EV-012, #116)
+
+- **Objective**: `GET /jobs/{id}` + Admin `/jobs/:id` show status, timestamps, type context, errors.
+- **Input**: API e2e create ingest/retag/eval job; open detail; Vitest App router.
+- **Expected**: Detail fields present; retag includes `document_id`; eval summary + link to `/evaluation?run=…`.
+
+### TC-147: Admin-only job cancel/retry/delete (UJ-050, RD-176)
+
+- **Objective**: Admin can cancel/retry/delete; viewer gets `403` and no mutate controls.
+- **Input**: Integration/e2e with admin vs viewer JWT against cancel/retry/delete endpoints.
+- **Expected**: Admin mutates succeed; viewer `403`; UI hides controls for viewer.
+
+### TC-148: Jobs SSE + poll fallback (UJ-023, RD-173)
+
+- **Objective**: Client consumes job SSE events; on disconnect/error falls back to 4s poll and retries SSE.
+- **Input**: Unit/integration mock EventSource failure → assert poll interval; e2e mocked stream emits status update.
+- **Expected**: Status updates without full page reload; fallback engages on SSE error.
+
+### TC-149: Failed job Modal log affordances (UJ-050, RD-177)
+
+- **Objective**: Failed Modal job detail shows function/call id, copy action, and dashboard link when URL known.
+- **Input**: Vitest detail page with failed job fixture including `modal_call_id`.
+- **Expected**: Id visible; copy invoked; link rendered when `dashboard_url` present, omitted when absent.
+
+### TC-150: Retag document context on Jobs list (UJ-023, #116)
+
+- **Objective**: Retag jobs expose `document_id` (not empty URLs column).
+- **Input**: E2E retag job; `GET /jobs` payload; Vitest table cell.
+- **Expected**: `document_id` present in API and UI.
+
+### TC-151: Status filter UI (UJ-023, #116)
+
+- **Objective**: Jobs tab status filter uses `GET /jobs?status=`.
+- **Input**: Vitest/Playwright select status; assert request query + filtered rows.
+- **Expected**: Only matching statuses shown; API called with `status`.
 
 ## Test Data
 

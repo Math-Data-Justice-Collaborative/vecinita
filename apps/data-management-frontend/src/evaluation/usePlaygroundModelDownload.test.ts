@@ -20,7 +20,7 @@ describe("usePlaygroundModelDownload helpers", () => {
   it("firstAvailableModelId returns null when no model is available", () => {
     expect(
       firstAvailableModelId([
-        { model_id: "qwen2.5:3b-instruct", available: false },
+        { model_id: "qwen2.5:1.5b-instruct", available: false },
       ]),
     ).toBeNull();
   });
@@ -28,10 +28,10 @@ describe("usePlaygroundModelDownload helpers", () => {
   it("modelOptionLabel appends not-downloaded suffix for unavailable models", () => {
     expect(
       modelOptionLabel(
-        { model_id: "qwen2.5:3b-instruct", available: false },
+        { model_id: "qwen2.5:1.5b-instruct", available: false },
         "(not downloaded)",
       ),
-    ).toBe("qwen2.5:3b-instruct (not downloaded)");
+    ).toBe("qwen2.5:1.5b-instruct (not downloaded)");
   });
 });
 
@@ -107,12 +107,12 @@ describe("usePlaygroundModelDownload hook", () => {
     });
     vi.spyOn(adminApi, "fetchPlaygroundModels")
       .mockResolvedValueOnce({
-        items: [{ model_id: "qwen2.5:3b-instruct", available: false }],
+        items: [{ model_id: "qwen2.5:1.5b-instruct", available: false }],
       })
       .mockImplementation(() => listPromise);
     vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
       job_id: "00000000-0000-0000-0000-0000000000dd",
-      model_id: "qwen2.5:3b-instruct",
+      model_id: "qwen2.5:1.5b-instruct",
       status: "pulling",
     });
 
@@ -124,7 +124,7 @@ describe("usePlaygroundModelDownload hook", () => {
     });
 
     await act(async () => {
-      await result.current.downloadModel("qwen2.5:3b-instruct");
+      await result.current.downloadModel("qwen2.5:1.5b-instruct");
     });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(MODEL_PULL_POLL_INTERVAL_MS);
@@ -132,7 +132,7 @@ describe("usePlaygroundModelDownload hook", () => {
 
     await act(async () => {
       resolveList?.({
-        items: [{ model_id: "qwen2.5:3b-instruct", available: false }],
+        items: [{ model_id: "qwen2.5:1.5b-instruct", available: false }],
       });
       unmount();
       await listPromise;
@@ -179,11 +179,11 @@ describe("usePlaygroundModelDownload hook", () => {
   it("clears download poll timer when provider unmounts", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
-      items: [{ model_id: "qwen2.5:3b-instruct", available: false }],
+      items: [{ model_id: "qwen2.5:1.5b-instruct", available: false }],
     });
     vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
       job_id: "00000000-0000-0000-0000-0000000000dd",
-      model_id: "qwen2.5:3b-instruct",
+      model_id: "qwen2.5:1.5b-instruct",
       status: "pulling",
     });
     const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
@@ -196,7 +196,7 @@ describe("usePlaygroundModelDownload hook", () => {
     });
 
     await act(async () => {
-      await result.current.downloadModel("qwen2.5:3b-instruct");
+      await result.current.downloadModel("qwen2.5:1.5b-instruct");
     });
 
     unmount();

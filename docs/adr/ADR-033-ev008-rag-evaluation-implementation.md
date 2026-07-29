@@ -1,7 +1,7 @@
 # ADR-033: EV-008 admin RAG evaluation — tooling, runner, and persistence
 
-**Status:** Accepted  
-**Stage:** 04-tech-plan (S007, EV-008)  
+**Status:** Accepted (2026-07-01); **Amended by [ADR-038](ADR-038-modal-job-lifecycle-storage-split.md)** (2026-07-28 / EV-012) — eval **job lifecycle** moves to Modal; Postgres remains SoT for eval **metrics/results**. §4 BackgroundTasks placement is historical for EV-008 v1.  
+**Stage:** 04-tech-plan (S007, EV-008); amendment EV-012 / S013  
 **Date:** 2026-07-01  
 **Feature:** F36 — Admin RAG evaluation tab + golden eval set  
 **Issue:** [#99](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/99)  
