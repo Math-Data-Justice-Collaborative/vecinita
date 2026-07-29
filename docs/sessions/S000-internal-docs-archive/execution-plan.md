@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
 | **Active milestone** | M82: Modal jobs API + OpenAPI + JobStore |
-| **Active task** | **T82.6** (pending) — Docs: api-contract EV-012 paths locked to OpenAPI |
-| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.5 |
+| **Active task** | **T83.1** (pending) — Test: create run enqueues Modal `job_type=eval` (next: M83) |
+| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82 complete) |
 | **Last updated** | 2026-07-28 |
 | **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build) |
 | **Git branch** | `evolve/EV-012-unified-job-monitoring` |
@@ -1679,7 +1679,7 @@ creates metrics row then enqueues Modal via `DataManagementJobsClient.enqueue_ev
 | T82.3 | Code: JobStore + schemas — extras, `cancelled`, delete; best-effort `FunctionCall.cancel()` | Code | completed | TP-S013-02/07, ADR-038 | T82.1 | 2026-07-28 | S013 | F32 |
 | T82.4 | Code: routes — `POST …/cancel`, `POST …/retry`, `DELETE /jobs/{id}` (SSE in T82.2 follow-on) | Code | completed | TP-S013-01, openapi/data-management | T82.1, T82.3 | 2026-07-28 | S013 | F32 |
 | T82.5 | Config: `openapi/data-management.yaml` + shared-schemas Job/JobOptions (`eval`, `eval_run_id`) | Config | completed | TP-S013-01, api-contract | T82.4 | 2026-07-28 | S013 | F32 |
-| T82.6 | Docs: api-contract EV-012 paths locked to OpenAPI | Docs | pending | api-contract | T82.5 | — | S013 | F32 |
+| T82.6 | Docs: api-contract EV-012 paths locked to OpenAPI | Docs | completed | api-contract | T82.5 | 2026-07-28 | S013 | F32 |
 
 #### M83: Eval enqueue bridge + DO SSE + soft-delete
 
@@ -2383,7 +2383,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T82.3 | M82 | 19 | Code | pending | T82.1 | — | S013 | F32 | — |
 | T82.4 | M82 | 19 | Code | pending | T82.1, T82.3 | — | S013 | F32 | — |
 | T82.5 | M82 | 19 | Config | completed | T82.4 | 2026-07-28 | S013 | F32 | — |
-| T82.6 | M82 | 19 | Docs | pending | T82.5 | — | S013 | F32 | — |
+| T82.6 | M82 | 19 | Docs | completed | T82.5 | 2026-07-28 | S013 | F32 | — |
 | T83.1 | M83 | 19 | Test | pending | T82.4 | — | S013 | F36 | — |
 | T83.2 | M83 | 19 | Test | pending | — | — | S013 | F36 | — |
 | T83.3 | M83 | 19 | Config | pending | T83.2 | — | S013 | F36 | — |

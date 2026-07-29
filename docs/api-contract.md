@@ -271,7 +271,7 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 
 ### EV-012 / #116 — Jobs monitoring deltas (ADR-038, RD-173–RD-178, TP-S013-01–08)
 
-Locked OpenAPI paths (04-tech-plan):
+Locked OpenAPI paths (`openapi/data-management.yaml`, `openapi/internal-write.yaml`):
 
 | Method / path | Purpose |
 |---------------|---------|
@@ -282,8 +282,20 @@ Locked OpenAPI paths (04-tech-plan):
 | `GET /internal/v1/eval/runs/{run_id}/events` | DO eval progress SSE for Evaluation page (TP-S013-04) |
 | `POST /internal/v1/eval/runs` | Create metrics row **+** `DataManagementJobsClient.enqueue_eval` → Modal `job_type=eval` (M3, TP-S013-06) |
 
+**`GET /jobs/events` SSE contract (TC-148 / RD-173):**
+
+- **Auth:** Bearer JWT + `X-Vecinita-Proxy-Key` (same as other `/jobs*` routes).
+- **Response:** `200` `text/event-stream`; `Cache-Control: no-cache`.
+- **Frame:** `id: <monotonic>`, `event: job`, `data: <Job JSON>` (blank line terminates the event).
+- **Reconnect:** optional request header `Last-Event-ID: <id>` — server emits only events with
+  numeric id strictly greater than the given value.
+- **Client fallback:** on SSE disconnect/error, poll `GET /jobs` every **4s** and retry SSE with
+  backoff (RD-173); poll behavior is client-side (Admin Jobs UI — M84).
+
 **Job schema extras:** `document_id`, `modal_call_id`, `dashboard_url`, `eval_run_id`; status includes
-`cancelled`. **JobOptions:** `job_type` ∈ `ingest|retag|eval`; `eval_run_id` required for eval enqueue.
+`cancelled`. **JobOptions:** `job_type` ∈ `ingest|retag|eval`; `document_id` required for retag;
+`eval_run_id` required for eval enqueue. `urls` may be empty for retag/eval (required non-empty for
+ingest).
 
 **Architecture:** Modal owns job lifecycle (incl. eval) via `DictJobStore`/`modal.Dict` (TP-S013-02).
 DO Postgres remains SoT for storage and eval metrics. Supabase = auth only. See ADR-038.
