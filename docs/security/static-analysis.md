@@ -18,7 +18,7 @@ Reports land in `.security-reports/` (gitignored). Binaries in `.tools/security/
 | OpenGrep | SAST | ERROR (`--error --severity=ERROR`) |
 | 2ms | Secrets | any finding in tracked paths |
 | KICS | IaC / OpenAPI | medium, high, critical (`SEC_KICS_FAIL_ON`) |
-| SBOM Tool | SPDX SBOM | must generate |
+| SBOM Tool | SPDX SBOM (+ licenses via ClearlyDefined) | must generate |
 | Grype | Vulns (SBOM or dir) | high (`SEC_GRYPE_FAIL_ON`) |
 | Supabase advisors | DB security/perf | WARN + ERROR (`SEC_SUPABASE_ADVISOR_FAIL_ON=warn`) |
 
@@ -31,6 +31,27 @@ non-blocking; justified MEDIUM OpenAPI noise excludes live in
 Config: `config/security/` (KICS query excludes, Grype ignores, OpenGrep notes).
 2ms ignores gitignored local secret files (`.env`, `prod.env`, operator `*-spec.yaml`
 exports); secrets in tracked files still hard-fail. Complementary: gitleaks in `ci-guards`.
+
+## SBOM licenses
+
+`sbom-tool` discovers packages via Microsoft Component Detection but does **not** fill
+`licenseDeclared` / `licenseConcluded` unless you opt in. By default every field is
+`NOASSERTION` (known Microsoft behavior when `-li`/`-pm` are omitted).
+
+Our suite enables:
+
+| Step | Env | Effect |
+|------|-----|--------|
+| `-li true` | `SEC_SBOM_FETCH_LICENSES=1` (default) | Fetch from [ClearlyDefined](https://clearlydefined.io) (often fails with HTTP 524 on bulk) |
+| `-pm true` | same | Parse package metadata when the detector supports it (limited for npm/uv) |
+| `-lto` | `SEC_SBOM_LICENSE_TIMEOUT_SEC` (default `300`) | ClearlyDefined timeout |
+| `enrich_sbom_licenses.py` | `SEC_SBOM_ENRICH_LICENSES=1` (default) | Post-pass: resolve licenses from npm/PyPI registries into the SPDX JSON; also write `sbom/python-licenses.json` from `uv.lock` |
+
+**Python gap:** Component Detection’s UvLock detector finds packages, but `sbom-tool` currently
+emits an npm-only SPDX package list. Use `python-licenses.json` (or `audit-licenses`) for
+PyPI commercial/OSS review until upstream includes UvLock in the SPDX document.
+
+Set `SEC_SBOM_FETCH_LICENSES=0` / `SEC_SBOM_ENRICH_LICENSES=0` only when offline.
 
 ## Pre-push + `.env`
 

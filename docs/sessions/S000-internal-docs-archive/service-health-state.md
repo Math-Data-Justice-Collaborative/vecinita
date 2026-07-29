@@ -1,6 +1,6 @@
 # Service Health State
 
-> Last updated: 2026-06-25
+> Last updated: 2026-07-28
 
 | Field | Value |
 |-------|--------|
@@ -8,18 +8,14 @@
 | Infra overall | **PASS** |
 | E2E overall | **PASS** |
 | Overall | **PASS** |
-| Last report | [S001 service-health.md](sessions/S001-modal-cold-start-snapshot/reports/service-health.md) |
-| Session | S001-modal-cold-start-snapshot |
-| Deployed SHA (staging) | `4f3f741` on `feat/S001-modal-cold-start-snapshot` |
-| Main SHA (H0ci) | `a235707` — CI green ([run 28207027346](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/28207027346)) |
+| Last report | [S012 service-health.md](../S012-hotfix-admin-ui-112-105/reports/service-health.md) |
+| Session | S012-hotfix-admin-ui-112-105 |
+| Deployed SHA (staging) | `1b60930` on `main` (includes PR #150 @ `2b3231d`) |
+| Main SHA (H0ci) | `1b60930` — CI green ([run 30404116424](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424)) |
 | Chat URL | https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app |
 
 ## Open advisories
 
-1. ~~DO chat apps pinned to feature branch until S001 merges to `main`.~~ **Resolved
-   2026-06-28** — live specs for all four DO apps reset to `branch: main` +
-   `deploy_on_push: true`; deploy-digitalocean.yml added as a deterministic CD backstop.
-2. H4 Modal data-mgmt CORS waived (`requires_proxy_auth` at proxy).
-3. 07-build T12 (web-fn hop) pending — not blocking health.
-4. Cold ask without pre-warm still exceeds 60s — browser path uses pre-warm on mount (S001 fix).
-5. Re-run blocking H0ci on `main` after S001 merge.
+1. H4 Modal data-mgmt CORS waived (`requires_proxy_auth` at proxy).
+2. Cold ask without pre-warm can exceed 60s (S012 sample ~100s); browser path uses pre-warm on mount.
+3. Transient `modal_llm=error` on ChatRAG `/health` can appear during cold wake — retries recovered in S012.

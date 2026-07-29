@@ -119,10 +119,42 @@ if [[ "${SEC_SKIP_SBOM:-0}" != "1" ]]; then
   MOUT="${REPORTS}/sbom"
   rm -rf "${DROP}" "${MOUT}"
   mkdir -p "${DROP}" "${MOUT}"
-  run SBOM sbom-tool generate -b "${DROP}" -bc "${ROOT}" -m "${MOUT}" \
-    -pn "${SEC_SBOM_PACKAGE_NAME:-vecinita}" -pv "${SEC_SBOM_PACKAGE_VERSION:-0.0.0}" \
-    -ps "${SEC_SBOM_PACKAGE_SUPPLIER:-CogniChem}" \
+  # Without -li/-pm, Microsoft sbom-tool leaves every package license as NOASSERTION
+  # (component-detection does not emit licenses). -li queries ClearlyDefined; -pm
+  # parses package metadata. Disable with SEC_SBOM_FETCH_LICENSES=0 when offline.
+  SBOM_ARGS=(
+    generate -b "${DROP}" -bc "${ROOT}" -m "${MOUT}"
+    -pn "${SEC_SBOM_PACKAGE_NAME:-vecinita}" -pv "${SEC_SBOM_PACKAGE_VERSION:-0.0.0}"
+    -ps "${SEC_SBOM_PACKAGE_SUPPLIER:-CogniChem}"
     -nsb "${SEC_SBOM_NAMESPACE:-https://github.com/Math-Data-Justice-Collaborative/vecinita}"
+    -D true
+  )
+  if [[ "${SEC_SBOM_FETCH_LICENSES:-1}" == "1" ]]; then
+    SBOM_ARGS+=(
+      -li true
+      -pm true
+      -lto "${SEC_SBOM_LICENSE_TIMEOUT_SEC:-300}"
+    )
+  fi
+  run SBOM sbom-tool "${SBOM_ARGS[@]}"
+
+  SPDX_CANDIDATE="$(find "${MOUT}" -type f -name '*.spdx.json' 2>/dev/null | head -1 || true)"
+  if [[ -n "${SPDX_CANDIDATE}" && "${SEC_SBOM_ENRICH_LICENSES:-1}" == "1" ]]; then
+    # ClearlyDefined bulk (-li) often 524s; fill licenses from npm/PyPI registries.
+    # Also emit python-licenses.json from uv.lock (UvLock detections are dropped from SPDX).
+    ENRICH_ARGS=(
+      "${ROOT}/scripts/security/enrich_sbom_licenses.py"
+      --spdx "${SPDX_CANDIDATE}"
+      --summary "${REPORTS}/sbom-license-enrichment.json"
+    )
+    if [[ -f "${ROOT}/uv.lock" ]]; then
+      ENRICH_ARGS+=(
+        --uv-lock "${ROOT}/uv.lock"
+        --uv-out "${REPORTS}/sbom/python-licenses.json"
+      )
+    fi
+    run "SBOM license enrich" python3 "${ENRICH_ARGS[@]}"
+  fi
 fi
 
 SPDX="$(find "${REPORTS}/sbom" -type f -name '*.spdx.json' 2>/dev/null | head -1 || true)"
