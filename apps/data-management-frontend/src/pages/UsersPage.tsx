@@ -23,6 +23,7 @@ import type { UserRole, UserStatus, UserSummary } from "@/api/types";
 import { useAuth, useIsAdmin } from "@/auth/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TruncatedText } from "@/components/TruncatedText";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -398,7 +399,7 @@ export function UsersPage() {
           ) : users.length === 0 ? (
             <p className="text-muted-foreground">{tr("admin.users.empty")}</p>
           ) : (
-            <Table>
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead>{tr("admin.users.columnEmail")}</TableHead>
@@ -412,7 +413,12 @@ export function UsersPage() {
               <TableBody>
                 {users.map((user) => (
                   <TableRow key={user.id} data-testid="user-row">
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="max-w-0">
+                      <TruncatedText
+                        text={user.email}
+                        data-testid={`user-email-${user.id}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       {user.role ? tr(ROLE_KEY[user.role]) : "—"}
                     </TableCell>

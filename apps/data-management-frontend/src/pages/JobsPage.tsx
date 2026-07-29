@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useAdminT } from "@/hooks/useAdminT";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
+import { TruncatedText } from "@/components/TruncatedText";
 
 const POLL_MS = 4000;
 const SSE_RETRY_BASE_MS = 2000;
@@ -244,7 +245,10 @@ export function JobsPage() {
         </p>
       ) : null}
       {sseFailed ? (
-        <p className="text-xs text-muted-foreground" data-testid="jobs-poll-fallback">
+        <p
+          className="text-xs text-muted-foreground"
+          data-testid="jobs-poll-fallback"
+        >
           {tr("admin.jobs.pollFallback")}
         </p>
       ) : null}
@@ -261,7 +265,7 @@ export function JobsPage() {
               {tr("admin.jobs.empty")}
             </p>
           ) : (
-            <Table>
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead>{tr("admin.jobs.columnJob")}</TableHead>
@@ -281,7 +285,9 @@ export function JobsPage() {
                       data-testid="job-row"
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => {
-                        void navigate(`/jobs/${encodeURIComponent(job.job_id)}`);
+                        void navigate(
+                          `/jobs/${encodeURIComponent(job.job_id)}`,
+                        );
                       }}
                     >
                       <TableCell>
@@ -295,16 +301,24 @@ export function JobsPage() {
                           {tr(STATUS_KEY[job.status])}
                         </Badge>
                       </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {contextCell(job, tr("shared.emDash"))}
+                      <TableCell className="max-w-0">
+                        <TruncatedText
+                          text={contextCell(job, tr("shared.emDash"))}
+                          data-testid={`job-context-${job.job_id}`}
+                        />
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {formatLocaleDateTime(locale, job.updated_at)}
                       </TableCell>
-                      <TableCell className="text-xs text-destructive">
-                        {job.status === "failed" && job.error_code
-                          ? `${job.error_code}: ${job.error_message ?? ""}`
-                          : tr("shared.emDash")}
+                      <TableCell className="max-w-0 text-xs text-destructive">
+                        {job.status === "failed" && job.error_code ? (
+                          <TruncatedText
+                            text={`${job.error_code}: ${job.error_message ?? ""}`}
+                            className="text-destructive"
+                          />
+                        ) : (
+                          tr("shared.emDash")
+                        )}
                       </TableCell>
                     </TableRow>
                   );

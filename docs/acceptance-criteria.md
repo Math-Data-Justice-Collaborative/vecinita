@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-28 (S013/EV-012 #116 — AC-J1–AC-J10)
+> **Last updated**: 2026-07-29 (S014/EV-013 #148 — AC-U1–AC-U7 admin table density)
 
 ## Per-feature criteria
 
@@ -171,6 +171,16 @@
 - [ ] **AC-J8**: DO Postgres remains SoT for storage/metrics; Supabase used for auth only (RD-175).
 - [ ] **AC-J9**: Playwright T0-ui covers Jobs list → detail navigation (RD-178, UJ-050).
 - [ ] **AC-J10**: ChatRAG UI unchanged (hard constraint).
+
+### EV-013 — Admin table density / truncation (#148, F9/F12) — S014
+
+- [ ] **AC-U1**: On ~1280×800, paginated `/corpus` is usable without scrolling app chrome to reach first-page Actions (UJ-051, TC-155).
+- [ ] **AC-U2**: Long titles clip with ellipsis; full title via native `title` + accessible name (TC-152).
+- [ ] **AC-U3**: Long URLs clip; link `href` intact; full URL via `title` + accessible name (TC-153).
+- [ ] **AC-U4**: Actions stay visible without horizontal page scroll; tags bounded with `+N` (TC-154).
+- [ ] **AC-U5**: Select-all / bulk delete / tag / manage-tags / delete flows have no regression (UJ-003/015/016).
+- [ ] **AC-U6**: Truncation chrome readable in light + dark (`ThemeProvider`) and under OS `prefers-contrast: more` via semantic tokens / `contrast-more:` — no new high-contrast theme mode (RD-180).
+- [ ] **AC-U7**: **Privacy** — no new cookies; no new `localStorage` keys; no cookie-consent UI; truncation presentational only (RD-181). Shared helpers applied to Jobs/Users/Audit/Eval lists (F12).
 
 ## Quantitative benchmarks
 

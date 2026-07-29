@@ -16,6 +16,7 @@ import {
   fetchEvalRunDetail,
   fetchEvalRuns,
 } from "@/api/admin";
+import { TruncatedText } from "@/components/TruncatedText";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 
@@ -250,7 +251,7 @@ export function EvaluationExploreTab() {
               {tr("admin.evaluation.explore.noData")}
             </p>
           ) : (
-            <Table data-testid="eval-pivot-table">
+            <Table className="table-fixed" data-testid="eval-pivot-table">
               <TableHeader>
                 <TableRow>
                   <TableHead>{axisLabel(layout.rowAxis, tr)}</TableHead>
@@ -262,7 +263,9 @@ export function EvaluationExploreTab() {
               <TableBody>
                 {pivot.rowKeys.map((rowKey) => (
                   <TableRow key={rowKey}>
-                    <TableCell className="font-medium">{rowKey}</TableCell>
+                    <TableCell className="max-w-0 font-medium">
+                      <TruncatedText text={rowKey} />
+                    </TableCell>
                     {pivot.colKeys.map((colKey) => {
                       const cell = pivot.cells.get(`${rowKey}::${colKey}`);
                       return (

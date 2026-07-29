@@ -27,6 +27,7 @@ import {
   type AuditPage as AuditPageData,
   fetchAuditLog,
 } from "@/api/admin";
+import { TruncatedText } from "@/components/TruncatedText";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { auditEventLabelKey } from "@/lib/auditEventLabel";
@@ -260,7 +261,7 @@ export function AuditPage() {
       {data && (
         <Card>
           <CardContent className="pt-6">
-            <Table>
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8" />
@@ -351,7 +352,9 @@ function AuditRow({
           </Badge>
         </TableCell>
         <TableCell>{entityLabel}</TableCell>
-        <TableCell className="font-mono text-xs">{event.entity_id}</TableCell>
+        <TableCell className="max-w-0 font-mono text-xs">
+          <TruncatedText text={event.entity_id} />
+        </TableCell>
         <TableCell className="text-xs text-muted-foreground">
           {formatLocaleDateTime(locale, event.timestamp)}
         </TableCell>

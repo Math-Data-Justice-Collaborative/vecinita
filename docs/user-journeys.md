@@ -56,6 +56,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-048 | Super-admin downloads playground model (path aliases) | Super-admin | DM UI Playground download panel → pull + poll APIs → **`vecinita-llm`** | F38 + F39 (EV-010/EV-011) | local |
 | UJ-049 | LLM proxy auth failure (generate/warm/models) | Operator / service | Modal ASGI without proxy key → `401` | F39 follow-on | local |
 | UJ-050 | Job detail drill-down + admin job CRUD | Admin operator | Admin UI `/jobs/:id` → Modal job detail / cancel / retry / delete | F32 EV-012 #116 | local |
+| UJ-051 | Scan dense corpus / admin tables with truncated titles/URLs | Admin operator | DM UI `/corpus` (+ Jobs/Users/Audit/Eval lists) | F9, F12 EV-013 #148 | local |
 
 ## Visual journey maps
 
@@ -670,6 +671,53 @@ admin CRUD succeeds; viewer cannot mutate; no PII beyond existing F32 limits.
 - Playwright: `tests/ui/admin/uj050-job-detail.spec.ts` (list → detail, RD-178).
 
 **E2E tier**: local; live T3 after deploy.
+
+---
+
+### UJ-051: Scan dense corpus / admin tables with truncated titles/URLs
+
+**Actor**: Admin operator (`role=admin` or viewer for read-only corpus)
+
+**Goal**: Work the Corpus Documents table (and other admin list tables) on a laptop viewport
+without layout blowouts — long titles/URLs clipped, Actions reachable, full text available to
+hover and assistive tech — without cookies or new preference storage.
+
+**Preconditions**: Admin SPA loaded; corpus has at least one document with a long title and long
+URL (or Vitest fixtures); #112 pagination live (`page_size` 50).
+
+**Steps**:
+
+1. Open `/corpus` at ~1280×800. First page of documents is usable without scrolling the whole app
+   chrome just to reach row Actions (sticky header and/or bounded table scroll + compact rows).
+2. Long document titles render with ellipsis; hover (native `title`) and accessible name
+   (`aria-label` / accessible text) expose the full title.
+3. Long URLs render clipped; link remains clickable; full URL on hover + accessible name.
+4. Tag chips under title show a bounded set with `+N` when over the max visible count; row height
+   does not grow unboundedly.
+5. Select-all (page-scoped), bulk toolbar, manage-tags, and delete still work (UJ-003 / UJ-015 /
+   UJ-016 regression).
+6. Toggle light ↔ dark via existing ThemeToggle — truncation chrome uses semantic tokens and
+   remains readable. With OS `prefers-contrast: more` (or Forced Colors), clipped text and links
+   remain distinguishable (CSS-only; no high-contrast theme mode, no new storage).
+7. Repeat truncation/density patterns on Jobs, Users, Audit, and Evaluation list tables where
+   long strings appear (shared helper).
+
+**Privacy / cookies**: Journey must **not** set `document.cookie`, must **not** add localStorage
+keys beyond existing theme/locale/auth prefs, and must **not** introduce a cookie-consent banner.
+Truncation is presentational only.
+
+**Acceptance**: Viewport density AC met; titles/URLs truncated with full text via `title` +
+`aria-label`; Actions visible without horizontal page scroll; bulk/delete/tag flows unchanged;
+theme + OS contrast readable; no new cookies/storage.
+
+**Automated tests**:
+- Vitest: `apps/data-management-frontend/src/test/test_corpus_list_truncation.test.tsx` (and
+  shared `TruncatedText` unit tests) — TC-152–TC-154.
+- Vitest regression: existing corpus bulk/select tests remain green.
+- Playwright T0-ui (required for viewport density AC-U1):  
+  `tests/ui/admin/uj051-corpus-density.spec.ts` — TC-155.
+
+**E2E tier**: local (Vitest primary; Playwright for viewport density).
 
 ---
 

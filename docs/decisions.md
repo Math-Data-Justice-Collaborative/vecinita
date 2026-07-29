@@ -535,6 +535,22 @@ Artifacts: feature-list F32/F36 delta; UJ-023/UJ-044/UJ-050; test-plan TC-146–
 Artifacts: execution-plan Phase 19; `docs/sessions/S013-unified-job-monitoring/roadmap.md`;
 `docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md`; ADR-038 amendments §9–12.
 
+### EV-013 requirements decisions (2026-07-29) — RD-179–RD-182
+
+S014 / [#148](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/148) — Admin
+Corpus & dashboard UI/UX polish (density, truncation, single-screen). Extend **F9** + **F12**
+(no new Fn). Lean+build routing. #112 pagination already shipped.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-179 | Fn scope | Extend **F9** + **F12**; Corpus must-have + shared truncation/density on Jobs/Users/Audit/Eval in one PR; `page_size` remains **50** | Phase 0 Q1–Q3 |
+| RD-180 | Theme / contrast | Keep existing `ThemeProvider` **light/dark/system**; style with semantic tokens; OS **`prefers-contrast: more`** / `contrast-more:` only — **no** high-contrast theme toggle | Intake Q1A |
+| RD-181 | Privacy / cookies | Truncation uses **no cookies**, **no new `localStorage` keys**, no consent banner; theme stays on existing device-local `vecinita-ui-theme` only (not a cookie); full text via native `title` + `aria-label` only | Intake Q2A + privacy note |
+| RD-182 | Tests | Vitest TC-152–154 primary; Playwright TC-155 for viewport density; no API/contract change → no new API e2e | Issue AC + Lean |
+
+Artifacts: feature-list F9/F12 delta; UJ-051; test-plan TC-152–TC-155; AC-U1–U7;
+`docs/sessions/S014-admin-ui-polish-148/reports/01-requirements.md`.
+
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 
 01-requirements locked RD-154–RD-162. 04-tech-plan locks implementation order and operator steps:

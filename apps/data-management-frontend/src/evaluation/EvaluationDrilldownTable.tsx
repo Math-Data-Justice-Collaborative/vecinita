@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { type EvalRunDetailApi } from "@/api/admin";
+import { TruncatedText } from "@/components/TruncatedText";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
 
@@ -180,7 +181,7 @@ export function EvaluationDrilldownTable({
       ) : null}
 
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
               {visibleColumns.map((columnId) => (
@@ -209,7 +210,14 @@ export function EvaluationDrilldownTable({
                         : undefined
                     }
                   >
-                    {renderCell(columnId, item, tr)}
+                    {layout.wrapCells ? (
+                      renderCell(columnId, item, tr)
+                    ) : (
+                      <TruncatedText
+                        text={renderCell(columnId, item, tr)}
+                        className="max-w-md"
+                      />
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
