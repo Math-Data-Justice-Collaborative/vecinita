@@ -16,13 +16,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TagBadge } from "@/components/TagBadge";
 import { BulkDeleteDialog } from "@/components/BulkDeleteDialog";
 import { BulkTagDialog } from "@/components/BulkTagDialog";
 import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
+import { TruncatedText } from "@/components/TruncatedText";
+import { BoundedTagList } from "@/components/BoundedTagList";
 import { Trash2, Tags, FileEdit } from "lucide-react";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useIsAdmin } from "@/auth/auth-context";
+import { cn } from "@/lib/utils";
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -53,40 +55,37 @@ export function CorpusList() {
     [total],
   );
 
-  const refresh = useCallback(
-    async (isActive: () => boolean, nextPage = 1) => {
-      setError(null);
-      setLoading(true);
-      try {
-        const client = requireCorpusConfig();
-        const result = await listDocuments(client, {
-          page: nextPage,
-          pageSize: DEFAULT_PAGE_SIZE,
-        });
-        if (!isActive()) {
-          return;
-        }
-        setDocuments(result.items);
-        setTotal(result.total);
-        setPage(result.page);
-        setSelectedIds(new Set());
-      } catch (err) {
-        if (!isActive()) {
-          return;
-        }
-        setError(
-          err instanceof Error
-            ? err.message
-            : trRef.current("admin.corpusList.loadFailed"),
-        );
-      } finally {
-        if (isActive()) {
-          setLoading(false);
-        }
+  const refresh = useCallback(async (isActive: () => boolean, nextPage = 1) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const client = requireCorpusConfig();
+      const result = await listDocuments(client, {
+        page: nextPage,
+        pageSize: DEFAULT_PAGE_SIZE,
+      });
+      if (!isActive()) {
+        return;
       }
-    },
-    [],
-  );
+      setDocuments(result.items);
+      setTotal(result.total);
+      setPage(result.page);
+      setSelectedIds(new Set());
+    } catch (err) {
+      if (!isActive()) {
+        return;
+      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : trRef.current("admin.corpusList.loadFailed"),
+      );
+    } finally {
+      if (isActive()) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,7 +166,7 @@ export function CorpusList() {
             {selectedIds.size > 0 && isAdmin && (
               <div
                 data-testid="bulk-toolbar"
-                className="mb-4 flex items-center gap-2 rounded-md border bg-muted p-2"
+                className="sticky top-0 z-20 mb-4 flex items-center gap-2 rounded-md border border-border bg-muted p-2 contrast-more:border-foreground"
               >
                 <span className="text-sm font-medium">
                   {tr("admin.corpusList.selectedCount", {
@@ -224,11 +223,15 @@ export function CorpusList() {
                 {tr("admin.corpusList.empty")}
               </p>
             ) : (
-              <Table>
-                <TableHeader>
+              <Table
+                className="table-fixed"
+                containerClassName="max-h-[min(60vh,32rem)] rounded-md border border-border contrast-more:border-foreground"
+                containerTestId="corpus-table-scroll"
+              >
+                <TableHeader className="sticky top-0 z-10 bg-background shadow-sm [&_tr]:border-b">
                   <TableRow>
                     {isAdmin ? (
-                      <TableHead className="w-10">
+                      <TableHead className="w-10 bg-background">
                         <Checkbox
                           data-testid="select-all"
                           checked={
@@ -240,93 +243,112 @@ export function CorpusList() {
                         />
                       </TableHead>
                     ) : null}
-                    <TableHead>{tr("admin.corpusList.columnTitle")}</TableHead>
-                    <TableHead>{tr("admin.corpusList.columnUrl")}</TableHead>
-                    <TableHead>
+                    <TableHead
+                      className={cn(
+                        "bg-background",
+                        isAdmin ? "w-[32%]" : "w-[40%]",
+                      )}
+                    >
+                      {tr("admin.corpusList.columnTitle")}
+                    </TableHead>
+                    <TableHead
+                      className={cn(
+                        "bg-background",
+                        isAdmin ? "w-[28%]" : "w-[40%]",
+                      )}
+                    >
+                      {tr("admin.corpusList.columnUrl")}
+                    </TableHead>
+                    <TableHead className="w-20 bg-background">
                       {tr("admin.corpusList.columnLanguage")}
                     </TableHead>
                     {isAdmin ? (
-                      <TableHead className="text-right">
+                      <TableHead className="w-44 bg-background text-right">
                         {tr("admin.corpusList.columnActions")}
                       </TableHead>
                     ) : null}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {documents.map((doc) => (
-                    <TableRow
-                      key={doc.document_id}
-                      data-state={
-                        selectedIds.has(doc.document_id)
-                          ? "selected"
-                          : undefined
-                      }
-                    >
-                      {isAdmin ? (
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedIds.has(doc.document_id)}
-                            onCheckedChange={() => {
-                              toggleId(doc.document_id);
-                            }}
-                            aria-label={tr("admin.corpusList.selectRow", {
-                              label: doc.title ?? doc.url,
-                            })}
+                  {documents.map((doc) => {
+                    const displayTitle =
+                      doc.title ?? tr("admin.corpusList.untitled");
+                    return (
+                      <TableRow
+                        key={doc.document_id}
+                        data-state={
+                          selectedIds.has(doc.document_id)
+                            ? "selected"
+                            : undefined
+                        }
+                      >
+                        {isAdmin ? (
+                          <TableCell className="py-2">
+                            <Checkbox
+                              checked={selectedIds.has(doc.document_id)}
+                              onCheckedChange={() => {
+                                toggleId(doc.document_id);
+                              }}
+                              aria-label={tr("admin.corpusList.selectRow", {
+                                label: doc.title ?? doc.url,
+                              })}
+                            />
+                          </TableCell>
+                        ) : null}
+                        <TableCell className="max-w-0 py-2">
+                          <TruncatedText
+                            text={displayTitle}
+                            className="font-medium"
+                            data-testid={`corpus-title-${doc.document_id}`}
+                          />
+                          {doc.tags && doc.tags.length > 0 ? (
+                            <BoundedTagList
+                              tags={doc.tags}
+                              moreTestId={`corpus-tags-more-${doc.document_id}`}
+                            />
+                          ) : null}
+                        </TableCell>
+                        <TableCell className="max-w-0 py-2">
+                          <TruncatedText
+                            as="a"
+                            href={doc.url}
+                            text={doc.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            data-testid={`corpus-url-${doc.document_id}`}
                           />
                         </TableCell>
-                      ) : null}
-                      <TableCell>
-                        <div className="font-medium">
-                          {doc.title ?? tr("admin.corpusList.untitled")}
-                        </div>
-                        {doc.tags && doc.tags.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {doc.tags.map((tag) => (
-                              <TagBadge key={tag.slug} tag={tag} />
-                            ))}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary underline-offset-4 hover:underline"
-                        >
-                          {doc.url}
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        {doc.language ?? tr("shared.emDash")}
-                      </TableCell>
-                      {isAdmin ? (
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelected(doc);
-                              }}
-                            >
-                              {tr("admin.corpusList.manageTags")}
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => void handleDelete(doc)}
-                              disabled={deletingId === doc.document_id}
-                            >
-                              {deletingId === doc.document_id
-                                ? tr("admin.actions.deleting")
-                                : tr("admin.actions.delete")}
-                            </Button>
-                          </div>
+                        <TableCell className="py-2">
+                          {doc.language ?? tr("shared.emDash")}
                         </TableCell>
-                      ) : null}
-                    </TableRow>
-                  ))}
+                        {isAdmin ? (
+                          <TableCell className="py-2 text-right">
+                            <div className="flex justify-end gap-2 whitespace-nowrap">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelected(doc);
+                                }}
+                              >
+                                {tr("admin.corpusList.manageTags")}
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => void handleDelete(doc)}
+                                disabled={deletingId === doc.document_id}
+                              >
+                                {deletingId === doc.document_id
+                                  ? tr("admin.actions.deleting")
+                                  : tr("admin.actions.delete")}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        ) : null}
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}

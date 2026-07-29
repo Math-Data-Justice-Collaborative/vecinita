@@ -60,3 +60,10 @@
       "calt" 1;
   }
 }
+
+/* OS high-contrast / Forced Colors — strengthen clipped table text (EV-013 RD-180) */
+@media (prefers-contrast: more) {
+  .truncate {
+    text-decoration-thickness: from-font;
+  }
+}

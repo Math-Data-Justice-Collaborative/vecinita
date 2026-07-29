@@ -32,10 +32,13 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S005 | feature | paused | Admin user mgmt + remember-me + Resend SMTP + email templates (EV-006 / F35); deploy 12/13 deferred | `feat/S005-user-mgmt-auth` | 2026-06-29 | — |
 | S006 | feature | paused | Complete invite acceptance flow — #109 (EV-007 / F35 gap); parked for S007 | `feat/S006-invite-acceptance` | 2026-06-30 | — |
 | S007 | feature | in_progress | Admin RAG evaluation tab + golden set — #99 (EV-008 / F36) | `feat/S007-rag-eval` | 2026-07-01 | — |
+| S012 | hotfix | completed | Admin UI #112 pagination + #105 ES sidebar | `fix/S012-hotfix-admin-ui-112-105` | 2026-07-28 | 2026-07-28 |
+| S013 | feature | completed | Unified job monitoring (#116) | `evolve/EV-012-unified-job-monitoring` | 2026-07-29 | 2026-07-29 |
+| S014 | feature | in_progress | Admin Corpus & dashboard UI/UX polish (#148) | `evolve/EV-013-admin-ui-polish-148` | 2026-07-29 | — |
 
 ## Active session
 
-**S007-rag-eval** — see `docs/sessions/S007-rag-eval/` and
+**S014-admin-ui-polish-148** — see `docs/sessions/S014-admin-ui-polish-148/` and
 `workflow-state.yaml` §`active_session`.
 
 ## Folder layout

@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — TC-141–TC-145 client consolidation)  
+> **Last updated**: 2026-07-29 (S014/EV-013 #148 — TC-152–TC-155 admin table density)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -70,6 +70,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-043 Admin eval criteria CRUD | `tests/integration/test_eval_dashboard_routes.py` | TC-120, TC-121 | `tests/ui/admin/uj041-eval-dashboard-tabs.spec.ts` |
 | UJ-044 Eval jobs on Jobs tab | `tests/e2e/test_uj044_eval_jobs_tab.py` | TC-124 | `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` |
 | UJ-050 Job detail + admin CRUD | `tests/e2e/test_uj050_job_detail_crud.py` | TC-146, TC-147, TC-148, TC-149 | `tests/ui/admin/uj050-job-detail.spec.ts` |
+| UJ-051 Corpus/admin table density | Vitest (no API change) | TC-152, TC-153, TC-154 | `tests/ui/admin/uj051-corpus-density.spec.ts` (TC-155) |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -922,6 +923,30 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Jobs tab status filter uses `GET /jobs?status=`.
 - **Input**: Vitest/Playwright select status; assert request query + filtered rows.
 - **Expected**: Only matching statuses shown; API called with `status`.
+
+### TC-152: Truncated title exposes full text (UJ-051, F9, EV-013, #148)
+
+- **Objective**: Long corpus titles clip with ellipsis; full title available via `title` and accessible name.
+- **Input**: Vitest `CorpusList` (or `TruncatedText`) with fixture title ≥ 120 chars; light + dark theme classes.
+- **Expected**: Visible text truncated (CSS `truncate` / overflow); `title` attribute equals full string; `aria-label` (or accessible name) includes full string; no `document.cookie` writes; no new `localStorage` keys.
+
+### TC-153: Truncated URL stays clickable (UJ-051, F9, EV-013, #148)
+
+- **Objective**: Long URLs clip; anchor `href` remains full URL; full URL on hover/a11y.
+- **Input**: Vitest fixture URL ≥ 120 chars.
+- **Expected**: Link navigable (`href` complete); visual truncation; `title`/`aria-label` = full URL.
+
+### TC-154: Actions + tags bounded; bulk flows intact (UJ-051 / UJ-015, F9/F12, #148)
+
+- **Objective**: Actions column reachable; tags capped with `+N`; select-all / bulk toolbar still work.
+- **Input**: Long title+URL fixtures; many tags; admin role; page of docs.
+- **Expected**: Actions buttons in document; max visible tags + `+N`; existing bulk delete/tag tests remain green.
+
+### TC-155: Single-screen corpus density ~1280×800 (UJ-051, F9, EV-013, #148)
+
+- **Objective**: Paginated corpus page usable without scrolling app chrome to reach first-page Actions.
+- **Input**: Playwright viewport 1280×800; seeded long-title docs; `/corpus`.
+- **Expected**: Sticky header and/or table scroll region; first ~page Actions in reachable layout; no horizontal page overflow for typical columns.
 
 ## Test Data
 

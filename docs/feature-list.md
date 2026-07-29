@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — client consolidation RD-163–RD-172)
+> **Last updated**: 2026-07-29 (S014/EV-013 #148 — F9/F12 admin table density + truncation)
 
 ## Summary
 
@@ -18,10 +18,10 @@
 | F6 | Self-hosted LLM inference | Implemented | ChatRAG | Modal (`vecinita-llm`) + chat-rag-backend | T0 mocked; T3 live pending |
 | F7 | URL scrape → chunk → embed → store | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
 | F8 | Ingest job queue & status API | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
-| F9 | Corpus list / delete (admin) | Implemented | Data Management | data-management-backend, data-management-frontend | 11-verify-impl 2026-05-19 |
+| F9 | Corpus list / delete (admin) | Implemented (+ EV-013 polish) | Data Management | data-management-backend, data-management-frontend | 11-verify-impl 2026-05-19; EV-013 #148 density/truncation |
 | F10 | FastEmbed embeddings (384-dim) on Modal | Implemented | Data Management | data-management-backend (Modal) | D6 verified; live optional |
 | F11 | ChatRAG web UI (React/Vite) | Implemented | ChatRAG | chat-rag-frontend | Vitest smoke; UI E2E waived v1 |
-| F12 | Data management admin UI | Implemented | Data Management | data-management-frontend | Vitest smoke; UI E2E waived v1 |
+| F12 | Data management admin UI | Implemented (+ EV-013 polish) | Data Management | data-management-frontend | Vitest smoke; EV-013 #148 shared table density |
 | F13 | Database migrations & pgvector | Implemented | Database | apps/database | 11-verify-impl 2026-05-19 |
 | F14 | Seed corpus & eval fixtures | Implemented | Database | apps/database | 11-verify-impl 2026-05-19 |
 | F15 | Privacy schema guardrails & tests | Implemented | Cross-cutting | database, all backends | 11-verify-impl 2026-05-19 |
@@ -135,6 +135,7 @@
 - **Outputs**: Updated corpus state in Postgres.
 - **Limitations**: No operator identity stored in Vecinita DB.
 - **Source**: User interview 01-requirements
+- **EV-013 / #148 polish (S014)**: Dense single-screen corpus table — keep server pagination (`page_size` 50 from #112); sticky header; compact rows; truncate long titles/URLs with ellipsis; full text via native `title` + `aria-label` (no Tooltip required); bound tag chips (`+N`); Actions column stays visible without horizontal page scroll on ~1280×800. Empty/loading/error states unchanged. **Privacy**: truncation chrome uses **no cookies** and **no new `localStorage` keys**; theme stays on existing device-local `vecinita-ui-theme` only; OS `prefers-contrast: more` / `contrast-more:` CSS only (no high-contrast toggle, no tracking).
 
 ### F10: FastEmbed embeddings (384-dim) on Modal
 
@@ -158,6 +159,7 @@
 - **Inputs**: Deploy-time API key or platform SSO that does not persist identity in Vecinita DB.
 - **Outputs**: Operator actions against Data Management API.
 - **Source**: User interview 01-requirements
+- **EV-013 / #148 polish (S014)**: Shared truncation/density helpers applied to Jobs, Users, Audit, and Evaluation list tables (same patterns as F9 Corpus). Theme-aware via existing `ThemeProvider` light/dark/system + semantic Tailwind tokens; readable under OS high-contrast (`prefers-contrast`). Must not introduce cookies, consent banners, or new preference storage beyond existing keys (`vecinita-ui-theme`, `vecinita.locale`, auth remember — unchanged).
 
 ### F13: Database migrations & pgvector
 
