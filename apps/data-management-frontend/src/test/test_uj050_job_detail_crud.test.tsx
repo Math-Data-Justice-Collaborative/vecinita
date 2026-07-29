@@ -101,6 +101,9 @@ describe("UJ-050 job detail admin CRUD (T84.2 / TC-147)", () => {
     const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const url = urlOf(input);
       const method = (init?.method ?? "GET").toUpperCase();
+      if (url.includes("/jobs/events")) {
+        return new Promise(() => undefined);
+      }
       if (method === "POST" && url.includes(`/jobs/${RUNNING_JOB_ID}/cancel`)) {
         return Promise.resolve(
           jsonResponse({ ...RUNNING_JOB, status: "cancelled" }),
@@ -139,6 +142,9 @@ describe("UJ-050 job detail admin CRUD (T84.2 / TC-147)", () => {
     const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const url = urlOf(input);
       const method = (init?.method ?? "GET").toUpperCase();
+      if (url.includes("/jobs/events")) {
+        return new Promise(() => undefined);
+      }
       if (method === "POST" && url.includes(`/jobs/${FAILED_JOB_ID}/retry`)) {
         return Promise.resolve(
           jsonResponse({ job_id: "new-job", status: "pending" }),
@@ -160,6 +166,23 @@ describe("UJ-050 job detail admin CRUD (T84.2 / TC-147)", () => {
       expect(screen.getByTestId("job-detail")).toBeInTheDocument();
     });
 
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([input, init]) => {
+          const url = urlOf(input);
+          const method = (init?.method ?? "GET").toUpperCase();
+          return method === "DELETE" && url.includes(`/jobs/${FAILED_JOB_ID}`);
+        }),
+      ).toBe(true);
+    });
+
+    cleanup();
+    renderDetail(FAILED_JOB_ID);
+    await waitFor(() => {
+      expect(screen.getByTestId("job-detail")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole("button", { name: /retry/i }));
     await waitFor(() => {
       expect(
@@ -172,24 +195,18 @@ describe("UJ-050 job detail admin CRUD (T84.2 / TC-147)", () => {
         }),
       ).toBe(true);
     });
-
-    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
-    await waitFor(() => {
-      expect(
-        fetchMock.mock.calls.some(([input, init]) => {
-          const url = urlOf(input);
-          const method = (init?.method ?? "GET").toUpperCase();
-          return method === "DELETE" && url.includes(`/jobs/${FAILED_JOB_ID}`);
-        }),
-      ).toBe(true);
-    });
   });
 
   it("viewer detail is read-only — no cancel/retry/delete controls (TC-147)", async () => {
     installViewerSupabaseMock();
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(jsonResponse(COMPLETED_JOB)),
+      vi.fn((input: RequestInfo | URL) => {
+        if (urlOf(input).includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        return Promise.resolve(jsonResponse(COMPLETED_JOB));
+      }),
     );
 
     renderDetail(COMPLETED_JOB_ID);
@@ -211,7 +228,15 @@ describe("UJ-050 job detail admin CRUD (T84.2 / TC-147)", () => {
 
   it("shows modal call id, copy, and dashboard link on failed jobs (TC-149 / RD-177)", async () => {
     installAuthenticatedSupabaseMock();
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(FAILED_JOB)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        if (urlOf(input).includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        return Promise.resolve(jsonResponse(FAILED_JOB));
+      }),
+    );
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,

@@ -11,7 +11,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import { JobsPage } from "@/pages/JobsPage";
@@ -61,59 +61,8 @@ function urlOf(input: RequestInfo | URL): string {
   return input.url;
 }
 
-type MockEventSourceHandler = ((ev: Event) => void) | null;
-
-class MockEventSource {
-  static instances: MockEventSource[] = [];
-  static readonly CONNECTING = 0;
-  static readonly OPEN = 1;
-  static readonly CLOSED = 2;
-
-  readonly url: string;
-  readyState = MockEventSource.CONNECTING;
-  onopen: MockEventSourceHandler = null;
-  onmessage: MockEventSourceHandler = null;
-  onerror: MockEventSourceHandler = null;
-  close = vi.fn(() => {
-    this.readyState = MockEventSource.CLOSED;
-  });
-
-  constructor(url: string) {
-    this.url = url;
-    MockEventSource.instances.push(this);
-    this.readyState = MockEventSource.OPEN;
-    queueMicrotask(() => {
-      this.onopen?.(new Event("open"));
-    });
-  }
-
-  addEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-  ): void {
-    const handler =
-      typeof listener === "function"
-        ? (listener as (ev: Event) => void)
-        : (ev: Event) => {
-            listener.handleEvent(ev);
-          };
-    if (type === "error") this.onerror = handler;
-    if (type === "message") this.onmessage = handler;
-    if (type === "open") this.onopen = handler;
-    if (type === "job") {
-      // Named SSE event: event: job
-      this.onmessage = handler;
-    }
-  }
-
-  removeEventListener(): void {
-    /* no-op for tests */
-  }
-
-  dispatchError(): void {
-    this.readyState = MockEventSource.CLOSED;
-    this.onerror?.(new Event("error"));
-  }
+function hangingEventsResponse(): Promise<Response> {
+  return new Promise(() => undefined);
 }
 
 function renderJobsRoutes(initialPath = "/jobs") {
@@ -135,11 +84,6 @@ function renderJobsRoutes(initialPath = "/jobs") {
 }
 
 describe("UJ-023 / UJ-050 Jobs monitoring (EV-012 T84.1)", () => {
-  beforeEach(() => {
-    MockEventSource.instances = [];
-    vi.stubGlobal("EventSource", MockEventSource);
-  });
-
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
@@ -149,6 +93,9 @@ describe("UJ-023 / UJ-050 Jobs monitoring (EV-012 T84.1)", () => {
   it("filters the jobs list via GET /jobs?status= (TC-151)", async () => {
     const fetchMock = vi.fn((input: RequestInfo | URL) => {
       const url = urlOf(input);
+      if (url.includes("/jobs/events")) {
+        return hangingEventsResponse();
+      }
       if (url.includes("status=failed")) {
         return Promise.resolve(
           jsonResponse({
@@ -184,7 +131,15 @@ describe("UJ-023 / UJ-050 Jobs monitoring (EV-012 T84.1)", () => {
   });
 
   it("shows retag document_id instead of an empty URLs cell (TC-150)", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MIXED_JOBS)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        if (urlOf(input).includes("/jobs/events")) {
+          return hangingEventsResponse();
+        }
+        return Promise.resolve(jsonResponse(MIXED_JOBS));
+      }),
+    );
 
     renderJobsRoutes();
 
@@ -200,7 +155,15 @@ describe("UJ-023 / UJ-050 Jobs monitoring (EV-012 T84.1)", () => {
   });
 
   it("navigates to /jobs/:id when a non-eval job row is clicked (UJ-050 / TC-146)", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MIXED_JOBS)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        if (urlOf(input).includes("/jobs/events")) {
+          return hangingEventsResponse();
+        }
+        return Promise.resolve(jsonResponse(MIXED_JOBS));
+      }),
+    );
 
     renderJobsRoutes();
 
@@ -219,37 +182,57 @@ describe("UJ-023 / UJ-050 Jobs monitoring (EV-012 T84.1)", () => {
     });
   });
 
-  it("uses SSE for job updates and falls back to 4s poll on SSE error (TC-148 / RD-173)", async () => {
+  it("uses fetch SSE for job updates and falls back to 4s poll on SSE error (TC-148 / RD-173)", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(MIXED_JOBS));
+    let rejectEvents: ((reason: unknown) => void) | undefined;
+    let eventsCalls = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = urlOf(input);
+      if (url.includes("/jobs/events")) {
+        eventsCalls += 1;
+        if (eventsCalls === 1) {
+          return new Promise<Response>((_resolve, reject) => {
+            rejectEvents = reject;
+          });
+        }
+        return hangingEventsResponse();
+      }
+      return Promise.resolve(jsonResponse(MIXED_JOBS));
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     renderJobsRoutes();
 
     await waitFor(() => {
-      expect(MockEventSource.instances.length).toBeGreaterThan(0);
+      expect(
+        fetchMock.mock.calls.some(([input]) =>
+          urlOf(input).includes("/jobs/events"),
+        ),
+      ).toBe(true);
     });
-    const sse = MockEventSource.instances[0];
-    expect(sse).toBeDefined();
-    expect(sse!.url).toMatch(/\/jobs\/events/);
 
     const listCallsBeforeError = fetchMock.mock.calls.filter(([input]) => {
       const url = urlOf(input);
-      return url.includes("/jobs") && !url.includes("/jobs/events");
+      return /\/jobs(?:\?|$)/.test(url) && !url.includes("/jobs/events");
     }).length;
 
-    sse!.dispatchError();
+    rejectEvents?.(new Error("sse disconnected"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("jobs-poll-fallback")).toBeInTheDocument();
+    });
 
     await vi.advanceTimersByTimeAsync(4500);
 
     const listCallsAfterError = fetchMock.mock.calls.filter(([input]) => {
       const url = urlOf(input);
-      return url.includes("/jobs") && !url.includes("/jobs/events");
+      return /\/jobs(?:\?|$)/.test(url) && !url.includes("/jobs/events");
     }).length;
     expect(listCallsAfterError).toBeGreaterThan(listCallsBeforeError);
 
+    await vi.advanceTimersByTimeAsync(2500);
     await waitFor(() => {
-      expect(MockEventSource.instances.length).toBeGreaterThan(1);
+      expect(eventsCalls).toBeGreaterThan(1);
     });
   });
 });

@@ -19,12 +19,31 @@ function renderJobsPage(ui: ReactElement = <JobsPage />) {
       <Routes>
         <Route path="/jobs" element={ui} />
         <Route
+          path="/jobs/:jobId"
+          element={<div data-testid="job-detail-route" />}
+        />
+        <Route
           path="/evaluation"
           element={<div data-testid="evaluation-route" />}
         />
       </Routes>
     </MemoryRouter>,
   );
+}
+
+function mockJobsFetch(body: object) {
+  return vi.fn((input: RequestInfo | URL) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
+    if (url.includes("/jobs/events")) {
+      return new Promise(() => undefined);
+    }
+    return Promise.resolve(jsonResponse(body));
+  });
 }
 
 const MOCK_JOBS = {
@@ -68,26 +87,37 @@ describe("JobsPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders eval job type and navigates to evaluation on row click (TC-124)", async () => {
+  it("renders eval job type and navigates to job detail on row click (TC-124 / UJ-050)", async () => {
     const EVAL_JOB_ID = "55555555-5555-4555-8555-555555555555";
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({
-          jobs: [
-            {
-              job_id: EVAL_JOB_ID,
-              status: "running",
-              job_type: "eval",
-              urls: [],
-              error_code: null,
-              error_message: null,
-              created_at: "2026-07-02T12:00:00Z",
-              updated_at: "2026-07-02T12:00:05Z",
-            },
-          ],
-        }),
-      ),
+      vi.fn((input: RequestInfo | URL) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+        if (url.includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        return Promise.resolve(
+          jsonResponse({
+            jobs: [
+              {
+                job_id: EVAL_JOB_ID,
+                status: "running",
+                job_type: "eval",
+                urls: [],
+                error_code: null,
+                error_message: null,
+                created_at: "2026-07-02T12:00:00Z",
+                updated_at: "2026-07-02T12:00:05Z",
+              },
+            ],
+          }),
+        );
+      }),
     );
 
     renderJobsPage(<JobsPage />);
@@ -97,29 +127,26 @@ describe("JobsPage", () => {
     });
     fireEvent.click(screen.getByTestId("job-row"));
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-route")).toBeInTheDocument();
+      expect(screen.getByTestId("job-detail-route")).toBeInTheDocument();
     });
   });
 
   it("lists jobs returned from the server", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MOCK_JOBS)));
+    vi.stubGlobal("fetch", mockJobsFetch(MOCK_JOBS));
 
     renderJobsPage();
 
     await waitFor(() => {
       expect(screen.getAllByTestId("job-row")).toHaveLength(3);
     });
-    expect(screen.getByText(/Completed/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Completed/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Failed/).length).toBeGreaterThan(0);
     expect(screen.getByText(/LlmTagClientError/)).toBeInTheDocument();
     expect(screen.getByText(/ScrapeError/)).toBeInTheDocument();
   });
 
   it("shows empty state when there are no jobs", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse({ jobs: [] })),
-    );
+    vi.stubGlobal("fetch", mockJobsFetch({ jobs: [] }));
 
     renderJobsPage();
 
@@ -131,7 +158,18 @@ describe("JobsPage", () => {
   it("shows an error when the jobs request fails", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response("boom", { status: 500 })),
+      vi.fn((input: RequestInfo | URL) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+        if (url.includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        return Promise.resolve(new Response("boom", { status: 500 }));
+      }),
     );
 
     renderJobsPage();
@@ -142,7 +180,23 @@ describe("JobsPage", () => {
   });
 
   it("shows a generic error for non-Error failures", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue("network down"));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+        if (url.includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        // Non-Error rejection exercises the JobsPage catch fallback path.
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- intentional non-Error
+        return Promise.reject("network down");
+      }),
+    );
 
     renderJobsPage();
 
@@ -156,19 +210,17 @@ describe("JobsPage", () => {
   it("defaults job type to ingest when job_type is absent", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({
-          jobs: [
-            {
-              job_id: "33333333-3333-4333-8333-333333333333",
-              status: "running",
-              urls: ["https://example.com/x"],
-              created_at: "2026-06-26T08:00:00Z",
-              updated_at: "2026-06-26T08:00:10Z",
-            },
-          ],
-        }),
-      ),
+      mockJobsFetch({
+        jobs: [
+          {
+            job_id: "33333333-3333-4333-8333-333333333333",
+            status: "running",
+            urls: ["https://example.com/x"],
+            created_at: "2026-06-26T08:00:00Z",
+            updated_at: "2026-06-26T08:00:10Z",
+          },
+        ],
+      }),
     );
 
     renderJobsPage();
@@ -180,7 +232,7 @@ describe("JobsPage", () => {
   });
 
   it("refetches jobs when the refresh button is clicked", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ jobs: [] }));
+    const fetchMock = mockJobsFetch({ jobs: [] });
     vi.stubGlobal("fetch", fetchMock);
 
     renderJobsPage();
@@ -196,27 +248,45 @@ describe("JobsPage", () => {
     });
   });
 
-  it("polls for job updates on an interval", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ jobs: [] }));
+  it("subscribes to /jobs/events for live updates (RD-173)", async () => {
+    const fetchMock = mockJobsFetch({ jobs: [] });
     vi.stubGlobal("fetch", fetchMock);
 
     renderJobsPage();
-    await vi.advanceTimersByTimeAsync(4500);
 
-    expect(fetchMock.mock.calls.length).toBeGreaterThan(1);
-    vi.useRealTimers();
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([input]) => {
+          const url =
+            typeof input === "string"
+              ? input
+              : input instanceof URL
+                ? input.href
+                : input.url;
+          return url.includes("/jobs/events");
+        }),
+      ).toBe(true);
+    });
   });
 
   it("ignores a resolved load after unmount", async () => {
     let resolve: ((value: Response) => void) | undefined;
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockReturnValue(
-        new Promise<Response>((res) => {
+      vi.fn((input: RequestInfo | URL) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+        if (url.includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        return new Promise<Response>((res) => {
           resolve = res;
-        }),
-      ),
+        });
+      }),
     );
 
     const { unmount } = renderJobsPage();
@@ -230,11 +300,20 @@ describe("JobsPage", () => {
     let reject: ((reason: unknown) => void) | undefined;
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockReturnValue(
-        new Promise<Response>((_res, rej) => {
+      vi.fn((input: RequestInfo | URL) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+        if (url.includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        return new Promise<Response>((_res, rej) => {
           reject = rej;
-        }),
-      ),
+        });
+      }),
     );
 
     const { unmount } = renderJobsPage();
