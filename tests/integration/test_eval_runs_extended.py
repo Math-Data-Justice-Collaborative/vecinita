@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 from http import HTTPStatus
 from typing import TYPE_CHECKING
-from unittest.mock import patch
 from uuid import UUID, uuid4
 
 import pytest
@@ -16,6 +15,7 @@ from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_c
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
+from tests.helpers.jobs_client_stub import StubJobsClient
 from tests.helpers.json_response import json_object_get, json_str, response_json_object
 from tests.unit.rag.conftest import seed_eval_corpus
 from tests.unit.shared_schemas.auth_fixtures import (
@@ -53,7 +53,11 @@ def extended_eval_client(
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
     seed_eval_corpus(database_url=database_url)
-    app = create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge())
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+    )
     preset_ids: list[UUID] = []
     run_ids: list[UUID] = []
     engine = create_engine(database_url)
@@ -110,18 +114,17 @@ def test_create_eval_run_persists_config_snapshot(
     """TC-128 (API): POST with config overrides persists config_snapshot on the run."""
     client, private_key, _preset_ids, run_ids = extended_eval_client
     token = _admin_token(private_key)
-    with patch("vecinita_internal_write_api.app.execute_eval_run"):
-        response = client.post(
-            "/internal/v1/eval/runs",
-            json={
-                "mode": "golden",
-                "config": {
-                    "top_k": _CUSTOM_TOP_K,
-                    "system_prompt": "Custom sandbox prompt for golden eval.",
-                },
+    response = client.post(
+        "/internal/v1/eval/runs",
+        json={
+            "mode": "golden",
+            "config": {
+                "top_k": _CUSTOM_TOP_K,
+                "system_prompt": "Custom sandbox prompt for golden eval.",
             },
-            headers={"Authorization": f"Bearer {token}"},
-        )
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == HTTPStatus.ACCEPTED
     created = response_json_object(response)
     run_id = UUID(json_str(created, "run_id"))
@@ -148,15 +151,14 @@ def test_create_eval_run_merges_preset_and_request_config(
     token = _admin_token(private_key, sub=owner_id)
     preset_id = _create_preset(client, token, preset_ids, shared=True)
 
-    with patch("vecinita_internal_write_api.app.execute_eval_run"):
-        response = client.post(
-            "/internal/v1/eval/runs",
-            json={
-                "preset_id": str(preset_id),
-                "config": {"top_k": _OVERRIDE_TOP_K},
-            },
-            headers={"Authorization": f"Bearer {token}"},
-        )
+    response = client.post(
+        "/internal/v1/eval/runs",
+        json={
+            "preset_id": str(preset_id),
+            "config": {"top_k": _OVERRIDE_TOP_K},
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == HTTPStatus.ACCEPTED
     run_id = UUID(json_str(response_json_object(response), "run_id"))
     run_ids.append(run_id)
@@ -192,12 +194,11 @@ def test_create_eval_run_unknown_preset_returns_404(
     """POST with unknown preset_id returns 404."""
     client, private_key, _preset_ids, _run_ids = extended_eval_client
     token = _admin_token(private_key)
-    with patch("vecinita_internal_write_api.app.execute_eval_run"):
-        response = client.post(
-            "/internal/v1/eval/runs",
-            json={"preset_id": str(uuid4())},
-            headers={"Authorization": f"Bearer {token}"},
-        )
+    response = client.post(
+        "/internal/v1/eval/runs",
+        json={"preset_id": str(uuid4())},
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 

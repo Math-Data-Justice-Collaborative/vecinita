@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore, job_record_to_schema
+from vecinita_data_management_backend.write_client import InternalWriteClientError
 from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
 from vecinita_shared_schemas.json_types import as_json_object
 
@@ -186,3 +187,179 @@ def test_cancel_unknown_job_returns_404() -> None:
     response = client.post(f"/jobs/{uuid4()}/cancel")
 
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_cancel_terminal_job_returns_409() -> None:
+    """Cannot cancel a completed job (409)."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/a"])
+    store.update_job(record.job_id, status="completed")
+    client = _client_with_principal(store, _ADMIN)
+
+    response = client.post(f"/jobs/{record.job_id}/cancel")
+
+    assert response.status_code == HTTPStatus.CONFLICT
+
+
+def test_cancel_invokes_modal_cancel_when_call_id_present() -> None:
+    """Best-effort FunctionCall.cancel when modal_call_id is set."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/a"])
+    store.update_job(record.job_id, status="running", modal_call_id="fc-123")
+    cancelled: list[str] = []
+
+    def _cancel(call_id: str) -> None:
+        cancelled.append(call_id)
+
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        cancel_modal_call=_cancel,
+    )
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.post(f"/jobs/{record.job_id}/cancel")
+
+    assert response.status_code == HTTPStatus.OK
+    assert cancelled == ["fc-123"]
+
+
+def test_cancel_swallows_modal_cancel_errors() -> None:
+    """Modal cancel failures do not block JobStore cancelled status."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/a"])
+    store.update_job(record.job_id, status="running", modal_call_id="fc-boom")
+
+    def _cancel(_call_id: str) -> None:
+        msg = "modal down"
+        raise RuntimeError(msg)
+
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        cancel_modal_call=_cancel,
+    )
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.post(f"/jobs/{record.job_id}/cancel")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response_json_object(response)["status"] == "cancelled"
+
+
+def test_retry_running_job_returns_409() -> None:
+    """Cannot retry a running job."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/a"])
+    store.update_job(record.job_id, status="running")
+    client = _client_with_principal(store, _ADMIN)
+
+    response = client.post(f"/jobs/{record.job_id}/retry")
+
+    assert response.status_code == HTTPStatus.CONFLICT
+
+
+def test_delete_unknown_job_returns_404() -> None:
+    """DELETE missing job returns 404."""
+    store = InMemoryJobStore()
+    client = _client_with_principal(store, _ADMIN)
+
+    response = client.delete(f"/jobs/{uuid4()}")
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_create_job_with_eval_run_id_option() -> None:
+    """POST /jobs accepts eval job_type with eval_run_id."""
+    store = InMemoryJobStore()
+    client = _client_with_principal(store, _ADMIN)
+    eval_run_id = uuid4()
+
+    response = client.post(
+        "/jobs",
+        json={
+            "urls": [],
+            "options": {"job_type": "eval", "eval_run_id": str(eval_run_id)},
+        },
+    )
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.job_type == "eval"
+    assert record.options.get("eval_run_id") == str(eval_run_id)
+
+
+def test_create_job_continues_when_audit_emit_fails() -> None:
+    """Audit failures must not block job enqueue."""
+    store = InMemoryJobStore()
+
+    def _boom(_event: object) -> None:
+        msg = "audit down"
+        raise RuntimeError(msg)
+
+    app = create_app(store=store, require_proxy_auth=False, audit_emit=_boom)
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.post("/jobs", json={"urls": ["https://example.com/a"]})
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+
+
+def test_retry_unknown_job_returns_404() -> None:
+    """Retry missing job returns 404."""
+    store = InMemoryJobStore()
+    client = _client_with_principal(store, _ADMIN)
+
+    response = client.post(f"/jobs/{uuid4()}/retry")
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_retry_schedules_pipeline_runner_when_injected() -> None:
+    """Retry adds background task when pipeline_runner is set."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/a"])
+    store.update_job(record.job_id, status="failed")
+    ran: list[UUID] = []
+
+    def _runner(job_id: UUID) -> None:
+        ran.append(job_id)
+
+    app = create_app(store=store, require_proxy_auth=False, pipeline_runner=_runner)
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.post(f"/jobs/{record.job_id}/retry")
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    assert len(ran) == 1
+
+
+def test_list_jobs_swallows_eval_client_errors() -> None:
+    """Eval aggregation errors leave Modal jobs list intact."""
+    store = InMemoryJobStore()
+    store.create_job(urls=["https://example.com/a"])
+
+    class _BrokenEval:
+        def list_eval_runs(self, *, page_size: int = 100) -> object:
+            _ = page_size
+            msg = "upstream"
+            raise InternalWriteClientError(msg)
+
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        eval_runs_client=_BrokenEval(),  # type: ignore[arg-type]
+    )
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.get("/jobs")
+
+    assert response.status_code == HTTPStatus.OK
+    assert len(response_json_object(response)["jobs"]) == 1
