@@ -1,4 +1,9 @@
-export type JobStatus = "pending" | "running" | "completed" | "failed";
+export type JobStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "cancelled";
 export type JobType = "ingest" | "retag" | "eval";
 
 export interface Job {
@@ -6,19 +11,23 @@ export interface Job {
   status: JobStatus;
   job_type?: JobType;
   urls: string[];
+  document_id?: string | null;
+  eval_run_id?: string | null;
+  modal_call_id?: string | null;
+  dashboard_url?: string | null;
   error_code?: string | null;
   error_message?: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface JobList {
-  jobs: Job[];
-}
-
 export interface CreateJobResponse {
   job_id: string;
   status: JobStatus;
+}
+
+export interface JobList {
+  jobs: Job[];
 }
 
 export type UserRole = "admin" | "viewer";

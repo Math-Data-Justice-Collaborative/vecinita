@@ -30,6 +30,7 @@ const STATUS_VARIANT: Record<JobStatus, BadgeVariant> = {
   running: "secondary",
   completed: "default",
   failed: "destructive",
+  cancelled: "outline",
 };
 
 const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
@@ -37,6 +38,7 @@ const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
   running: "admin.jobs.status.running",
   completed: "admin.jobs.status.completed",
   failed: "admin.jobs.status.failed",
+  cancelled: "admin.jobs.status.cancelled",
 };
 
 const TYPE_KEY: Record<JobType, StringMessageKey> = {
