@@ -1017,13 +1017,13 @@ project:
       overall_result: PASS
       report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
       partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke; prior S006/S005 baselines preserved below'
+      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes; prior S006/S005 baselines preserved below'
       tiers:
         t0: pass
         t1: skipped
         t1_skip_reason: no_docker
-        t2: pending
-        t3: pending
+        t2: pass
+        t3: pass
       s006:
         status: completed
         started_at: '2026-06-30'
@@ -1084,8 +1084,9 @@ project:
           admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy 
           stages
     13-deploy-smoke:
-      status: in_progress
+      status: completed
       started_at: '2026-07-29'
+      completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
       session_id: S013-unified-job-monitoring
       branch: evolve/EV-012-unified-job-monitoring
@@ -1093,28 +1094,47 @@ project:
       mode: delta
       deploy_path: A
       head_sha: 113589139659a3508eb68340be91d93e7814ae77
+      overall_result: PASS
+      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
       commits_ahead_of_origin: 0
       pushed_at: '2026-07-29'
       pr_number: 153
       merge_gate: smokes_pass_before_merge
       do_not_merge_pr: 153
+      merge_approval: pending_user
       dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
       partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
       path_a_progress:
         push: done
-        ci_first_run: failed_coverage_gate
-        coverage_fix: ca78c55
-        ci_second_run: failed_lint_coverage
-        ci_second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths (DM FE Jobs SSE)'
-        lint_coverage_fix: 746181b
-        iss004_branch_coverage_fix: 1135891
         ci_rewatch: pass
         ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-        h0c_migration_check: pending
-        pin_redeploy: pending
-        smokes: pending
-        merge_pr_153: blocked_until_smokes_green
-      note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api from evolve SHA then smokes; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed; prior S001 baseline preserved below'
+        lint_coverage_fix: 746181b
+        iss004_branch_coverage_fix: 1135891
+        h0c_migration_check: pass
+        alembic_revision: 20260728_0009
+        pin_redeploy: pass
+        modal_data_management: redeployed_from_evolve_checkout
+        do_apps:
+          internal_write_api: pinned_active
+          admin_frontend: pinned_active
+        smokes: pass
+        smoke_tiers:
+          h0c: pass
+          h1: pass
+          h2: pass
+          h3: pass
+          h3b: pass
+          t3_ev002: pass
+          h4: pass
+          h5: pass
+        jobs_live:
+          - list
+          - retag_detail
+          - eval_run_detail
+          - sse
+        merge_pr_153: awaiting_user_approval
+      next_askquestion: merge_pr_153_or_hold_or_reset_pins
+      note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit user merge approval; checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
       s001_baseline:
         status: completed
         started_at: '2026-06-26'
@@ -1736,24 +1756,20 @@ active_session:
       note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke'
     - stage: 13-deploy-smoke
       required: true
-      status: in_progress
+      status: completed
       started_at: '2026-07-29'
+      completed_at: '2026-07-29'
       mode: delta
       session_id: S013-unified-job-monitoring
       evolve_cycle_id: EV-012
       deploy_path: A
       head_sha: 113589139659a3508eb68340be91d93e7814ae77
+      overall_result: PASS
+      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
       path_a_progress:
-        push: done
-        lint_coverage_fix: 746181b
-        iss004_branch_coverage_fix: 1135891
-        ci_rewatch: pass
-        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-        h0c_migration_check: pending
-        pin_redeploy: pending
-        smokes: pending
-        merge_pr_153: blocked_until_smokes_green
-      note: 'Path A @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api; do NOT merge PR #153; 12-verify-deploy waived (S013-D22); ISS-004 closed'
+        smokes: pass
+        merge_pr_153: awaiting_user_approval
+      note: 'Path A PASS @ 1135891 — deploy-smoke complete; PR #153 awaits explicit user merge approval'
     - stage: 03-plan-tooling
       required: false
       status: skipped
@@ -1858,8 +1874,8 @@ active_session:
   handoff:
     from_session: S012-hotfix-admin-ui-112-105
     cleared: true
-    next_action: h0c_migration_check_then_pin_redeploy_then_smokes
-    next_skill: 13-deploy-smoke
+    next_action: askquestion_merge_pr_153_or_hold_or_reset_pins
+    next_skill: 16-evolve
     resume_at_task:
     branch: evolve/EV-012-unified-job-monitoring
     branch_status: active
@@ -1873,7 +1889,7 @@ active_session:
     head_sha: 113589139659a3508eb68340be91d93e7814ae77
     commits_ahead_of_origin: 0
     dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
-    note: '13-deploy-smoke IN_PROGRESS — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api then smokes. Do NOT merge #153 until smokes pass. 12-verify-deploy waived (S013-D22). ISS-004 closed.'
+    note: '13-deploy-smoke PASS @ 1135891 — Path A complete; staging pinned evolve branch; AskQuestion merge PR #153 / hold / reset pins. 12-verify-deploy waived (S013-D22).'
     git_commits:
       - sha: a781a80
         message: '[T82.2] test: add failing jobs/events SSE framing tests'
@@ -2117,15 +2133,18 @@ active_session:
       run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
       run_id: 30454245590
       conclusion: success
-      lint_coverage_fix_sha: 746181b
-      iss004_coverage_fix_sha: 1135891
-      note: 'CI green @ 1135891; next H0c + migration check then pin/redeploy from evolve SHA; do not merge PR #153 until smokes pass'
-    resume_at: 13-deploy-smoke
+    deploy_smoke:
+      status: pass
+      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+      sha: 1135891
+      alembic_revision: 20260728_0009
+      note: 'Path A smokes PASS; PR #153 merge awaits user AskQuestion'
+    resume_at: await_merge_pr_153
     phase_19_gate: passed
   milestone_completed: M85
   milestone_completed_at: '2026-07-29'
-  build_note: 'M85 COMPLETE; Phase D passed; ISS-004 closed; 13-deploy-smoke IN_PROGRESS Path A @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy; PR #153 open (do not merge until smokes pass); 12-verify-deploy waived (S013-D22)'
-  resume_source: 'User chose deploy Path A — handoff h0c_migration_check_then_pin_redeploy_then_smokes'
+  build_note: 'M85 COMPLETE; 13-deploy-smoke PASS @ 1135891 (Path A); staging pinned evolve branch; PR #153 open — merge awaits user AskQuestion; 12-verify-deploy waived (S013-D22)'
+  resume_source: 'Path A deploy-smoke PASS — handoff askquestion_merge_pr_153_or_hold_or_reset_pins'
   resume_confirmed_at: '2026-07-29'
 sessions:
   - id: S012-hotfix-admin-ui-112-105
@@ -4280,16 +4299,16 @@ stages:
     evolve_cycle_id: EV-012
     mode: delta
     overall_result: PASS
-    report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-    partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-    note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke; prior S006/S005 baselines preserved below'
-    tiers:
-      t0: pass
-      t1: skipped
-      t1_skip_reason: no_docker
-      t2: pending
-      t3: pending
-    s006:
+      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes; prior S006/S005 baselines preserved below'
+      tiers:
+        t0: pass
+        t1: skipped
+        t1_skip_reason: no_docker
+        t2: pass
+        t3: pass
+      s006:
       status: completed
       started_at: '2026-06-30'
       completed_at: '2026-06-30'
@@ -4412,8 +4431,9 @@ stages:
         template: pass
         connectivity: pass
   13-deploy-smoke:
-    status: in_progress
+    status: completed
     started_at: '2026-07-29'
+    completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
     session_id: S013-unified-job-monitoring
     branch: evolve/EV-012-unified-job-monitoring
@@ -4421,28 +4441,47 @@ stages:
     mode: delta
     deploy_path: A
     head_sha: 113589139659a3508eb68340be91d93e7814ae77
+    overall_result: PASS
+    report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
     commits_ahead_of_origin: 0
     pushed_at: '2026-07-29'
     pr_number: 153
     merge_gate: smokes_pass_before_merge
     do_not_merge_pr: 153
+    merge_approval: pending_user
     dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
     partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
     path_a_progress:
       push: done
-      ci_first_run: failed_coverage_gate
-      coverage_fix: ca78c55
-      ci_second_run: failed_lint_coverage
-      ci_second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths (DM FE Jobs SSE)'
-      lint_coverage_fix: 746181b
-      iss004_branch_coverage_fix: 1135891
       ci_rewatch: pass
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-      h0c_migration_check: pending
-      pin_redeploy: pending
-      smokes: pending
-      merge_pr_153: blocked_until_smokes_green
-    note: 'S013/EV-012 13-deploy-smoke IN_PROGRESS — Path A @ 1135891; CI green; next H0c + migration check then pin/redeploy then smokes; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed; prior EV-002/S001 H1–H5 results preserved below'
+      lint_coverage_fix: 746181b
+      iss004_branch_coverage_fix: 1135891
+      h0c_migration_check: pass
+      alembic_revision: 20260728_0009
+      pin_redeploy: pass
+      modal_data_management: redeployed_from_evolve_checkout
+      do_apps:
+        internal_write_api: pinned_active
+        admin_frontend: pinned_active
+      smokes: pass
+      smoke_tiers:
+        h0c: pass
+        h1: pass
+        h2: pass
+        h3: pass
+        h3b: pass
+        t3_ev002: pass
+        h4: pass
+        h5: pass
+      jobs_live:
+        - list
+        - retag_detail
+        - eval_run_detail
+        - sse
+      merge_pr_153: awaiting_user_approval
+    next_askquestion: merge_pr_153_or_hold_or_reset_pins
+    note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge approval; prior EV-002/S001 H1–H5 results preserved below'
     prior_completed_at: '2026-06-26'
     prior_started_at: '2026-06-26'
     prior_partial_rerun_at: '2026-06-26'
@@ -4713,11 +4752,20 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: '2026-07-28'
-    commit_deployed: 1b60930
-    commit_head: 1b60930
-    drift: false
-    branch: main
+    last_verified: '2026-07-29'
+    commit_deployed: 1135891
+    commit_head: 1135891
+    drift: true
+    branch: evolve/EV-012-unified-job-monitoring
+    branch_pin:
+      status: active
+      sha: 113589139659a3508eb68340be91d93e7814ae77
+      apps:
+        - vecinita-internal-write-api
+        - vecinita-admin-frontend
+      modal_data_management: redeployed_from_evolve_checkout
+      note: 'S013 Path A — DO write-api + admin FE pinned to evolve/EV-012-unified-job-monitoring @ 1135891 ACTIVE; Modal data-management redeployed from evolve checkout; main not merged — awaiting PR #153 user approval'
+    alembic_revision: 20260728_0009
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
       internal_write_api: https://vecinita-internal-write-api-icze4.ondigitalocean.app
@@ -4732,12 +4780,13 @@ deployment:
       h2_db_ready: pass
       h3_rag_smoke: pass
       h3b_browse: pass
-      h3_ev002_admin: pending
+      h3_ev002_admin: pass
       h4_cors_preflight: pass
-      h4_modal: waiver
+      h4_modal: pass
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
     notes:
+      - 'S013 2026-07-29 Path A deploy-smoke PASS @ 1135891 — Modal DM redeployed; DO write-api + admin FE pinned evolve branch ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md; PR #153 merge awaits user AskQuestion'
       - EV-002 merged to main 2026-05-27; DO apps github branch set to main
       - 'S001 deployed 2026-06-26: Modal llm+embedding snapshots; DO chat apps on feat/S001-modal-cold-start-snapshot @ 4f3f741'
       - S001 cold+prewarm ask 14.3s (< 60s DO gateway target)
