@@ -2394,8 +2394,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T84.2 | M84 | 19 | Test | completed | T82.5 | 2026-07-28 | S013 | F32 | — |
 | T84.3 | M84 | 19 | Code | completed | T84.1 | 2026-07-28 | S013 | F32 | — |
 | T84.4 | M84 | 19 | Code | completed | T84.1, T84.3 | 2026-07-28 | S013 | F32 | — |
-| T84.5 | M84 | 19 | Code | pending | T83.5, T84.3 | — | S013 | F36 | — |
-| T84.6 | M84 | 19 | Docs | pending | T84.4, T84.5 | — | S013 | F32 | — |
+| T84.5 | M84 | 19 | Code | completed | T83.5, T84.3 | 2026-07-28 | S013 | F36 | — |
+| T84.6 | M84 | 19 | Docs | completed | T84.4, T84.5 | 2026-07-28 | S013 | F32 | — |
 | T85.1 | M85 | 19 | Test | pending | T84.4 | — | S013 | F32 | — |
 | T85.2 | M85 | 19 | Test | pending | T83.4, T84.4 | — | S013 | F32 | — |
 | T85.3 | M85 | 19 | Test | pending | T84.4 | — | S013 | F32 | — |

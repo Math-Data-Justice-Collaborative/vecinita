@@ -1,49 +1,40 @@
-# Verification report — M82 (EV-012 / S013)
+# Verification report — EV-012 M84 (Admin Jobs UI)
 
-**Date:** 2026-07-28  
-**Stage:** 08-verify-build  
-**Scope:** Milestone M82 — Modal jobs API + OpenAPI + JobStore  
+**Session:** S013-unified-job-monitoring  
 **Branch:** `evolve/EV-012-unified-job-monitoring`  
-**Verdict:** **PASS** (Python / OpenAPI scoped; FE lint skipped — Node 22 local, requires ≥24)
+**Date:** 2026-07-28  
+**Milestone:** M84 (T84.1–T84.6)  
+**HEAD tip:** `a351a13`
 
-## Milestone tasks
+## Result
 
-| Task | Status |
-|------|--------|
-| T82.1 cancel/retry/delete + Job extras tests | completed |
-| T82.2 `GET /jobs/events` SSE tests + implementation | completed |
-| T82.3 JobStore + schemas extras | completed |
-| T82.4 cancel/retry/delete routes | completed |
-| T82.5 OpenAPI JobOptions + SSE `Last-Event-ID` | completed |
-| T82.6 api-contract SSE lock | completed |
+**PASS** (scoped) — M84 Admin Jobs UI Vitest + jobs/admin client tests green; ruff clean.
 
 ## Checks
 
 | Check | Result | Notes |
 |-------|--------|-------|
-| `ruff check` (apps/packages/tests/infra/scripts) | PASS | |
-| `ruff format --check` (DM backend + shared-schemas + unit DM) | PASS | |
-| `basedpyright` (DM backend + shared-schemas + unit DM) | PASS | |
-| `pytest tests/unit/data_management` + `test_cors_policy.py` | PASS | skips only |
-| `scripts/check_openapi_specs.sh` | PASS | |
-| `make check-fast` FE lint | SKIP / ENV | Node 22.x local; `.nvmrc` requires ≥24 — not a code defect |
-| pip-audit / secret scan | not re-run this gate | no new deps in M82 |
-| Modal GPU smoke | SKIPPED | not requested |
+| Ruff (`apps packages tests infra scripts`) | PASS | `make check-fast` ruff portion |
+| FE ESLint (changed Jobs/Eval files) | PASS | Pre-existing react-refresh warnings only |
+| Vitest M84 suites | PASS | `test_uj023_uj050_jobs_monitoring`, `test_uj050_job_detail_crud`, `test_jobs_page`, `test_job_management_navigation`, `jobs.test`, `admin.test` (subscribeEvalRunEvents) |
+| `make check-fast` full | PARTIAL | FE lint aborted: local Node 22 vs required Node ≥24 (`.nvmrc`) — not a code failure |
 
-## Connectivity (H0c)
+## Delivered (M84)
 
-- Existing `tests/unit/test_cors_policy.py` data-management POST `/jobs` preflight still green.
-- New `GET /jobs/events` uses same CORS stack; dedicated OPTIONS case deferred to **T85.4** (plan).
-
-## Persona panel (M82 surfaces)
-
-| Persona | Notes |
-|---------|-------|
-| Staff Backend | SSE sync generator + `JobEventBroker`; `Last-Event-ID` reconnect — OK |
-| Staff Frontend | No FE in M82 — N/A |
-| DevOps / Privacy | No new secrets/CORS origins — OK (RD-175) |
+- Jobs list: status filter (`?status=`), retag `document_id`, row → `/jobs/:id`
+- Fetch-authenticated SSE `/jobs/events` + 4s poll fallback + SSE retry backoff
+- `JobDetailPage`: admin cancel/retry/delete; viewer read-only; Modal call id copy + dashboard link
+- Evaluation: DO `/eval/runs/{id}/events` preferred over tight poll; metrics via detail GET
 
 ## Next
 
-1. Minor PR for M82 / EV-012 progress → `main`
-2. Resume **07-build** at **T83.1** (M83 eval enqueue)
+- **T85.1+** — API e2e + Playwright (M85)
+- Re-run full `make check-fast` / `make ci-push` under Node 24 before PR updates
+- PR #153 remains open (`do_not_merge` until phase ready)
+
+## Connectivity artifacts
+
+| Artifact | Present |
+|----------|---------|
+| `tests/unit/test_cors_policy.py` | yes (H0c; M85 T85.4 extends if needed) |
+| Staging connectivity scripts | unchanged |
