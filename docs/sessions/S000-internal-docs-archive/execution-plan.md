@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
 | **Active milestone** | M82: Modal jobs API + OpenAPI + JobStore |
-| **Active task** | **T82.1** (in_progress) — Test: cancel/retry/delete + Job extras (TC-146/147) — red |
-| **Tasks completed** | Phase 17–18 historical; Phase 19 pending (S013) |
+| **Active task** | **T82.5** (pending) — Config: OpenAPI + shared-schemas sync (largely done in 04) |
+| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.4 |
 | **Last updated** | 2026-07-28 |
 | **Evolve cycle** | EV-012 (F32/F36) — **04-tech-plan in progress** (TP-S013-01–08) |
 | **Git branch** | `evolve/EV-012-unified-job-monitoring` |
@@ -1674,10 +1674,10 @@ creates metrics row then enqueues Modal via `DataManagementJobsClient.enqueue_ev
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T82.1 | Test: unit — cancel/retry/delete admin-only; Job extras; cancelled status (TC-146/147) — red | Test | pending | TP-S013-01/07, RD-176, TC-146/147 | — | — | S013 | F32 |
+| T82.1 | Test: unit — cancel/retry/delete admin-only; Job extras; cancelled status (TC-146/147) — red | Test | completed | TP-S013-01/07, RD-176, TC-146/147 | — | 2026-07-28 | S013 | F32 |
 | T82.2 | Test: unit — `GET /jobs/events` SSE framing + reconnect contract (TC-148) — red | Test | pending | TP-S013-01, RD-173, TC-148 | — | — | S013 | F32 |
-| T82.3 | Code: JobStore + schemas — extras, `cancelled`, delete; best-effort `FunctionCall.cancel()` | Code | pending | TP-S013-02/07, ADR-038 | T82.1 | — | S013 | F32 |
-| T82.4 | Code: routes — `GET /jobs/events`, `POST …/cancel`, `POST …/retry`, `DELETE /jobs/{id}` | Code | pending | TP-S013-01, openapi/data-management | T82.1, T82.3 | — | S013 | F32 |
+| T82.3 | Code: JobStore + schemas — extras, `cancelled`, delete; best-effort `FunctionCall.cancel()` | Code | completed | TP-S013-02/07, ADR-038 | T82.1 | 2026-07-28 | S013 | F32 |
+| T82.4 | Code: routes — `GET /jobs/events`, `POST …/cancel`, `POST …/retry`, `DELETE /jobs/{id}` | Code | completed | TP-S013-01, openapi/data-management | T82.1, T82.3 | 2026-07-28 | S013 | F32 |
 | T82.5 | Config: `openapi/data-management.yaml` + shared-schemas Job/JobOptions (`eval`, `eval_run_id`) | Config | pending | TP-S013-01, api-contract | T82.4 | — | S013 | F32 |
 | T82.6 | Docs: api-contract EV-012 paths locked to OpenAPI | Docs | pending | api-contract | T82.5 | — | S013 | F32 |
 

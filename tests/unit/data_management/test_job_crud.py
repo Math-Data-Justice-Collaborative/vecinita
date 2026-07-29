@@ -1,7 +1,4 @@
-"""T82.1 / TC-146–147 — Admin job cancel, retry, delete + Job schema extras (EV-012).
-
-Red until M82 store + routes land (T82.3 / T82.4).
-"""
+"""T82.1 / TC-146-147 - Admin job cancel, retry, delete + Job schema extras (EV-012)."""
 
 from __future__ import annotations
 
