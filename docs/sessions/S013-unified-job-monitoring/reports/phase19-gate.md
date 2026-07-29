@@ -5,7 +5,7 @@
 **Branch:** `evolve/EV-012-unified-job-monitoring`  
 **Date:** 2026-07-29  
 **Milestones:** M82–M85  
-**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153 (open; do not merge until deploy policy)
+**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153 (**merged** → `main` @ `6940770`)
 
 ## Gate criteria (execution-plan Phase 19)
 

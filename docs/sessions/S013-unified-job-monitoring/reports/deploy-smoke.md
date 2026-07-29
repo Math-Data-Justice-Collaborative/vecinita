@@ -4,8 +4,8 @@
 > **Session:** S013-unified-job-monitoring  
 > **Cycle:** EV-012  
 > **Stage:** 13-deploy-smoke  
-> **Status:** **deployed** (Path A — branch pin; await merge #153)  
-> **Branch:** `evolve/EV-012-unified-job-monitoring` @ `1135891`
+> **Status:** **deployed** — Path A PASS; #153 merged; DO pins reset to `main`  
+> **Branch:** `main` @ `6940770` (Path A smokes were on evolve @ `1135891`)
 
 ## Pre-Deploy
 
@@ -25,7 +25,7 @@
 | DO `vecinita-admin-frontend` | Pin `github.branch` → evolve branch + force deploy | **ACTIVE** |
 | ChatRAG DO apps | Untouched (remain on prior pin/`main`) | n/a |
 
-**Note:** Staging write-api + admin FE are pinned to `evolve/EV-012-unified-job-monitoring` until PR [#153](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153) merges; then reset branch pins to `main`.
+**Post-merge (2026-07-29):** PR [#153](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153) merged; DO `github.branch` for write-api + admin FE reset to `main` (both ACTIVE). H0ci PASS on `6940770`.
 
 ## Smoke Tests
 
@@ -49,8 +49,8 @@
 | Service | URL | Source SHA / branch |
 |---------|-----|---------------------|
 | Modal data-mgmt | https://vecinita--vecinita-data-management-fastapi-app.modal.run | local deploy @ `1135891` |
-| Internal write API | https://vecinita-internal-write-api-icze4.ondigitalocean.app | evolve pin |
-| Admin frontend | https://vecinita-admin-frontend-ef4ob.ondigitalocean.app | evolve pin |
+| Internal write API | https://vecinita-internal-write-api-icze4.ondigitalocean.app | `main` |
+| Admin frontend | https://vecinita-admin-frontend-ef4ob.ondigitalocean.app | `main` |
 
 ## Rollback
 
@@ -61,5 +61,5 @@
 ## Gate / next
 
 - **13-deploy-smoke:** Path A smokes green.  
-- **PR #153:** do **not** merge until operator approval (AskQuestion).  
-- After merge: reset DO branch pins to `main`; optional 15-service-health.
+- **PR #153:** merged; DO pins on `main`; H0ci PASS.  
+- **Close:** EV-012 completed (user chose skip optional 15-service-health).

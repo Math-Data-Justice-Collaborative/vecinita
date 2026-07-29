@@ -47,3 +47,11 @@ log affordances on failure. Extend F32/F36; no new Fn. See ADR-038, RD-173–RD-
 ### Architecture amendment (01-requirements)
 
 See ADR-038 and `docs/decisions.md` RD-173–RD-178.
+
+### Close (2026-07-29)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S013-D23 | Merge #153 | Approved; merged @ `6940770` |
+| S013-D24 | DO pins | Reset write-api + admin FE to `main` |
+| S013-D25 | Close | Complete EV-012; skip optional 15-service-health |

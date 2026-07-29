@@ -1323,830 +1323,845 @@ project:
           completed_at: '2026-05-21'
       prior_started_at: '2026-06-26'
 session_counter: 13
-active_session:
-  id: S013-unified-job-monitoring
-  type: feature
-  intent: 'Unified job monitoring in Jobs tab with detail drill-down (GitHub #116) — Modal GET /jobs primary unified list
-    (job_type incl eval); DO Postgres for metrics/results + eval drill-down; clickable detail; status filter; retag document
-    context'
-  status: in_progress
-  branch: evolve/EV-012-unified-job-monitoring
-  mode: delta
-  orchestrator: 16-evolve
-  evolve_cycle_id: EV-012
-  artifacts_dir: docs/sessions/S013-unified-job-monitoring/
-  started_at: '2026-07-28'
-  current_stage: 13-deploy-smoke
-  linked_issues:
-    - '116'
-  features_affected:
-    - F32
-    - F36
-  features_note: 'Evolve delta extending F32 (Admin Job Management) and F36 (RAG evaluation); no new Fn — extend existing
-    per Phase 0 Batch 1'
-  hard_constraints:
-    - admin_dashboard_only
-    - not_chatrag_ui
-  hard_constraints_note: 'Admin Dashboard (data-management-frontend) ONLY — NOT ChatRAG UI. All #116 UX/API work scoped to
-    admin Jobs tab; no chat-rag-frontend changes.'
-  phase_0_scope_approved: true
-  routing_preset_choice: lean_plus_build
-  routing_preset_status: approved
-  routing_plan_status: approved
-  routing_decision_id: S013-D22
-  routing_plan_approved_at: '2026-07-28'
-  phase_0:
-    status: complete
-  phase_1:
-    status: complete
-    note: impact_analysis
-    completed_at: '2026-07-28'
-  phase_0_intake:
-    status: complete
-    phase_0_scope_approved: true
-    routing_preset_choice: lean_plus_build
-    routing_preset_status: approved
-    current_batch: 5
-    batch_1_complete: true
-    batch_1b_complete: true
-    batch_2_complete: true
-    batch_3_complete: true
-    batch_3_status: complete
-    batch_4_complete: true
-    batch_4_status: complete
-    batch_5_complete: true
-    batch_5_status: complete
-  intake_batch_1:
-    s012_artifacts_commit: leave_uncommitted
-    scope: both_v1_and_v2
-    v2_item_selection: all_three_a_b_c
-    feature_identity: extend_F32_F36_no_new_fn
-    success_criteria: issue_116_acs_as_written
-  intake_batch_1b:
-    recorded_at: '2026-07-28'
-    v2_items:
-      - modal_all_long_running_jobs_do_postgres_storage
-      - operator_modal_container_logs_link_on_failed_jobs
-      - admin_only_full_job_crud_cancel_retry
-    decision_id: S013-D5
-  intake_batch_2:
-    recorded_at: '2026-07-28'
-    job_detail_ux: dedicated_route_jobs_id_type_aware
-    eval_row_primary_action: jobs_detail_summary_plus_eval_drilldown_link
-    list_federation: modal_get_jobs_primary_unified_list
-    list_federation_note: 'REVISED by RQ3/RD-174 — Modal GET /jobs primary unified list (job_type incl eval); DO for metrics/results
-      + eval drill-down; NOT dual FE federation of two job lists'
-    decisions:
-      - id: S013-D6
-        topic: job_detail_ux
-        choice: dedicated_route_jobs_id_type_aware
-      - id: S013-D7
-        topic: eval_row_primary_action
-        choice: jobs_detail_summary_plus_eval_drilldown_link
-      - id: S013-D8
-        topic: list_federation
-        choice: modal_get_jobs_primary_unified_list
-        status: amended
-        amended_at: '2026-07-28'
-        amended_by: S013-RQ3
-        prior_choice: frontend_merge_modal_jobs_and_internal_eval_runs
-        note: 'Supersedes Phase 0 FE-merge federation — Jobs tab reads Modal GET /jobs as primary unified list; DO for metrics/results
-          storage + eval drill-down only'
-  intake_batch_3:
-    recorded_at: '2026-07-28'
-    completed_at: '2026-07-28'
-    status: complete
-    decisions:
-      - id: S013-D9
-        topic: out_of_scope
-        choice: all_long_running_admin_jobs_extensible
-        option: E
-        status: resolved
-        user_clarification: 'All jobs are up for grabs, in terms of long running jobs'
-        interpretation:
-          in_scope:
-            - all_long_running_async_operator_jobs_on_admin_dashboard
-            - ingest_retag_eval_and_future_job_types
-            - extensible_job_type_not_limited_to_known_types
-          out_of_scope:
-            - chatrag_ui
-          not_discussed_implicit_out:
-            - langfuse_external_observability_uis
-          note: 'Do NOT limit Jobs monitoring to ingest/retag/eval only; no dedicated Langfuse/external observability UI work
-            unless user adds later'
-      - id: S013-D10
-        topic: breaking_api_or_config
-        choice: prefer_compatible_additive_changes
-        option: A
-        status: recorded
-      - id: S013-D11
-        topic: privacy_pii_retention
-        choice: keep_f32_limits_no_pii
-        option: A
-        status: recorded
-      - id: S013-D12
-        topic: cycle_size
-        choice: one_cycle_ev012_v1_plus_full_v2
-        option: A
-        status: recorded
-  intake_batch_4:
-    recorded_at: '2026-07-28'
-    completed_at: '2026-07-28'
-    status: complete
-    decisions:
-      - id: S013-D13
-        topic: apps_platform
-        choice: data_mgmt_frontend_modal_jobs_backend_internal_write_api
-        option: A
-        status: recorded
-        apps:
-          - data-management-frontend
-          - modal_data_management_backend_jobs
-          - internal-write-api
-      - id: S013-D14
-        topic: env_secrets
-        choice: prefer_none_reuse_existing
-        option: A
-        status: recorded
-      - id: S013-D15
-        topic: browser_cors_vite
-        choice: no_new_public_origins_same_admin_spa
-        option: A
-        status: recorded
-      - id: S013-D16
-        topic: ui_preview
-        choice: yes_open_local_admin_ui_when_useful
-        option: A
-        status: recorded
-  intake_batch_5:
-    recorded_at: '2026-07-28'
-    completed_at: '2026-07-28'
-    status: complete
-    batch_5_status: complete
-    decisions:
-      - id: S013-D17
-        topic: latency_polling
-        choice: sse_per_source
-        option: B
-        status: resolved
-        resolved_at: '2026-07-28'
-        primary_transport: sse_per_source
-        implementation:
-          modal_data_management: GET /jobs/events_or_similar
-          internal_write_api: eval_events_stream
-          frontend: modal_get_jobs_primary_unified_list
-        fallback:
-          polling_interval_ms: 4000
-          on_sse_failure: fall_back_to_poll
-          retry_sse: backoff
-          rd_id: RD-173
-          note: 'On SSE failure → 4s poll fallback + retry SSE with backoff (S013-RQ2 option A)'
-        context:
-          jobs_page_poll_ms: 4000
-          chatrag_has_sse_ask: true
-          jobs_sse_websocket: none
-          adr_reference: ADR-035
-          adr_note: unified jobs poll hop
-        note: 'SSE primary — Modal GET /jobs/events; on failure 4s poll + SSE retry backoff (RD-173); Jobs tab Modal GET /jobs
-          unified list (S013-D8 amended)'
-      - id: S013-D18
-        topic: acceptance_scenarios
-        choice: issue_acs_extend_uj023_unified_list_detail_uj
-        option: A
-        status: recorded
-        note: 'Issue #116 ACs + extend UJ-023 / unified list+detail user journey'
-      - id: S013-D19
-        topic: e2e_tier
-        choice: api_e2e_admin_vitest_live_t3_smoke_after_deploy
-        option: A
-        status: recorded
-        note: 'API e2e + Admin Vitest; live T3 smoke after deploy'
-  intake_phase_0_closure:
-    recorded_at: '2026-07-28'
+active_session: null
+sessions:
+  - id: S013-unified-job-monitoring
+    type: feature
+    intent: 'Unified job monitoring in Jobs tab with detail drill-down (GitHub #116) — Modal GET /jobs primary unified list
+      (job_type incl eval); DO Postgres for metrics/results + eval drill-down; clickable detail; status filter; retag document
+      context'
+    status: completed
+    branch: main
+    mode: delta
+    orchestrator: 16-evolve
+    evolve_cycle_id: EV-012
+    artifacts_dir: docs/sessions/S013-unified-job-monitoring/
+    started_at: '2026-07-28'
+    completed_at: '2026-07-29'
+    close_note: 'S013-D25: user chose option A — close EV-012 after DO write-api and admin frontend reached ACTIVE on main; optional 15-service-health skipped.'
+    current_stage: completed
+    merge:
+      pr_number: 153
+      status: merged
+      approved_and_executed_at: '2026-07-29T13:20:40Z'
+      merge_commit: 69407701b3015201a0370c96a953d9dc85932315
+      source_branch: evolve/EV-012-unified-job-monitoring
+      ci:
+        status: pass
+        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455574450
+        deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455818840
+        watch_result: 'OK: required workflows passed for main @ 6940770'
+      next_action: await_do_deployments_then_user_close_or_service_health
+      note: 'Main CI and deploy-preflight passed. DO write-api and admin frontend force deployments may still be finishing; cycle remains open for deploy checkpoint and user close or optional service health.'
+    linked_issues:
+      - '116'
+    features_affected:
+      - F32
+      - F36
+    features_note: 'Evolve delta extending F32 (Admin Job Management) and F36 (RAG evaluation); no new Fn — extend existing
+      per Phase 0 Batch 1'
+    hard_constraints:
+      - admin_dashboard_only
+      - not_chatrag_ui
+    hard_constraints_note: 'Admin Dashboard (data-management-frontend) ONLY — NOT ChatRAG UI. All #116 UX/API work scoped to
+      admin Jobs tab; no chat-rag-frontend changes.'
     phase_0_scope_approved: true
     routing_preset_choice: lean_plus_build
     routing_preset_status: approved
     routing_plan_status: approved
-    decisions:
-      - id: S013-D20
-        topic: phase_0_scope_approval
-        choice: proceed_impact_analysis_routing_extend_f32_f36_no_new_fn
-        option: A
-        status: approved
-        note: 'Yes — proceed to impact analysis + routing; extend F32/F36; no new Fn'
-      - id: S013-D21
-        topic: routing_preset
-        choice: lean_pending_amendment
-        option: C
-        status: superseded
-        note: 'Superseded by S013-D22 lean_plus_build amendment'
-      - id: S013-D22
-        topic: routing_preset
-        choice: lean_plus_build
-        option: A
-        status: approved
-        recorded_at: '2026-07-28'
-        required_stages:
-          - 00-context
-          - 16-evolve
-          - 01-requirements
-          - 02-verify-plan
-          - 04-tech-plan
-          - 07-build
-          - 08-verify-build
-          - 10-e2e
-          - 13-deploy-smoke
-        skipped_stages:
-          - 03-plan-tooling
-          - 05-verify-tech
-          - 06-tech-tooling
-          - 09-qa
-          - 11-verify-impl
-          - 12-verify-deploy
+    routing_decision_id: S013-D22
+    routing_plan_approved_at: '2026-07-28'
+    phase_0:
+      status: complete
+    phase_1:
+      status: complete
+      note: impact_analysis
+      completed_at: '2026-07-28'
+    phase_0_intake:
+      status: complete
+      phase_0_scope_approved: true
+      routing_preset_choice: lean_plus_build
+      routing_preset_status: approved
+      current_batch: 5
+      batch_1_complete: true
+      batch_1b_complete: true
+      batch_2_complete: true
+      batch_3_complete: true
+      batch_3_status: complete
+      batch_4_complete: true
+      batch_4_status: complete
+      batch_5_complete: true
+      batch_5_status: complete
+    intake_batch_1:
+      s012_artifacts_commit: leave_uncommitted
+      scope: both_v1_and_v2
+      v2_item_selection: all_three_a_b_c
+      feature_identity: extend_F32_F36_no_new_fn
+      success_criteria: issue_116_acs_as_written
+    intake_batch_1b:
+      recorded_at: '2026-07-28'
+      v2_items:
+        - modal_all_long_running_jobs_do_postgres_storage
+        - operator_modal_container_logs_link_on_failed_jobs
+        - admin_only_full_job_crud_cancel_retry
+      decision_id: S013-D5
+    intake_batch_2:
+      recorded_at: '2026-07-28'
+      job_detail_ux: dedicated_route_jobs_id_type_aware
+      eval_row_primary_action: jobs_detail_summary_plus_eval_drilldown_link
+      list_federation: modal_get_jobs_primary_unified_list
+      list_federation_note: 'REVISED by RQ3/RD-174 — Modal GET /jobs primary unified list (job_type incl eval); DO for metrics/results
+        + eval drill-down; NOT dual FE federation of two job lists'
+      decisions:
+        - id: S013-D6
+          topic: job_detail_ux
+          choice: dedicated_route_jobs_id_type_aware
+        - id: S013-D7
+          topic: eval_row_primary_action
+          choice: jobs_detail_summary_plus_eval_drilldown_link
+        - id: S013-D8
+          topic: list_federation
+          choice: modal_get_jobs_primary_unified_list
+          status: amended
+          amended_at: '2026-07-28'
+          amended_by: S013-RQ3
+          prior_choice: frontend_merge_modal_jobs_and_internal_eval_runs
+          note: 'Supersedes Phase 0 FE-merge federation — Jobs tab reads Modal GET /jobs as primary unified list; DO for metrics/results
+            storage + eval drill-down only'
+    intake_batch_3:
+      recorded_at: '2026-07-28'
+      completed_at: '2026-07-28'
+      status: complete
+      decisions:
+        - id: S013-D9
+          topic: out_of_scope
+          choice: all_long_running_admin_jobs_extensible
+          option: E
+          status: resolved
+          user_clarification: 'All jobs are up for grabs, in terms of long running jobs'
+          interpretation:
+            in_scope:
+              - all_long_running_async_operator_jobs_on_admin_dashboard
+              - ingest_retag_eval_and_future_job_types
+              - extensible_job_type_not_limited_to_known_types
+            out_of_scope:
+              - chatrag_ui
+            not_discussed_implicit_out:
+              - langfuse_external_observability_uis
+            note: 'Do NOT limit Jobs monitoring to ingest/retag/eval only; no dedicated Langfuse/external observability UI work
+              unless user adds later'
+        - id: S013-D10
+          topic: breaking_api_or_config
+          choice: prefer_compatible_additive_changes
+          option: A
+          status: recorded
+        - id: S013-D11
+          topic: privacy_pii_retention
+          choice: keep_f32_limits_no_pii
+          option: A
+          status: recorded
+        - id: S013-D12
+          topic: cycle_size
+          choice: one_cycle_ev012_v1_plus_full_v2
+          option: A
+          status: recorded
+    intake_batch_4:
+      recorded_at: '2026-07-28'
+      completed_at: '2026-07-28'
+      status: complete
+      decisions:
+        - id: S013-D13
+          topic: apps_platform
+          choice: data_mgmt_frontend_modal_jobs_backend_internal_write_api
+          option: A
+          status: recorded
+          apps:
+            - data-management-frontend
+            - modal_data_management_backend_jobs
+            - internal-write-api
+        - id: S013-D14
+          topic: env_secrets
+          choice: prefer_none_reuse_existing
+          option: A
+          status: recorded
+        - id: S013-D15
+          topic: browser_cors_vite
+          choice: no_new_public_origins_same_admin_spa
+          option: A
+          status: recorded
+        - id: S013-D16
+          topic: ui_preview
+          choice: yes_open_local_admin_ui_when_useful
+          option: A
+          status: recorded
+    intake_batch_5:
+      recorded_at: '2026-07-28'
+      completed_at: '2026-07-28'
+      status: complete
+      batch_5_status: complete
+      decisions:
+        - id: S013-D17
+          topic: latency_polling
+          choice: sse_per_source
+          option: B
+          status: resolved
+          resolved_at: '2026-07-28'
+          primary_transport: sse_per_source
+          implementation:
+            modal_data_management: GET /jobs/events_or_similar
+            internal_write_api: eval_events_stream
+            frontend: modal_get_jobs_primary_unified_list
+          fallback:
+            polling_interval_ms: 4000
+            on_sse_failure: fall_back_to_poll
+            retry_sse: backoff
+            rd_id: RD-173
+            note: 'On SSE failure → 4s poll fallback + retry SSE with backoff (S013-RQ2 option A)'
+          context:
+            jobs_page_poll_ms: 4000
+            chatrag_has_sse_ask: true
+            jobs_sse_websocket: none
+            adr_reference: ADR-035
+            adr_note: unified jobs poll hop
+          note: 'SSE primary — Modal GET /jobs/events; on failure 4s poll + SSE retry backoff (RD-173); Jobs tab Modal GET /jobs
+            unified list (S013-D8 amended)'
+        - id: S013-D18
+          topic: acceptance_scenarios
+          choice: issue_acs_extend_uj023_unified_list_detail_uj
+          option: A
+          status: recorded
+          note: 'Issue #116 ACs + extend UJ-023 / unified list+detail user journey'
+        - id: S013-D19
+          topic: e2e_tier
+          choice: api_e2e_admin_vitest_live_t3_smoke_after_deploy
+          option: A
+          status: recorded
+          note: 'API e2e + Admin Vitest; live T3 smoke after deploy'
+    intake_phase_0_closure:
+      recorded_at: '2026-07-28'
+      phase_0_scope_approved: true
+      routing_preset_choice: lean_plus_build
+      routing_preset_status: approved
+      routing_plan_status: approved
+      decisions:
+        - id: S013-D20
+          topic: phase_0_scope_approval
+          choice: proceed_impact_analysis_routing_extend_f32_f36_no_new_fn
+          option: A
+          status: approved
+          note: 'Yes — proceed to impact analysis + routing; extend F32/F36; no new Fn'
+        - id: S013-D21
+          topic: routing_preset
+          choice: lean_pending_amendment
+          option: C
+          status: superseded
+          note: 'Superseded by S013-D22 lean_plus_build amendment'
+        - id: S013-D22
+          topic: routing_preset
+          choice: lean_plus_build
+          option: A
+          status: approved
+          recorded_at: '2026-07-28'
+          required_stages:
+            - 00-context
+            - 16-evolve
+            - 01-requirements
+            - 02-verify-plan
+            - 04-tech-plan
+            - 07-build
+            - 08-verify-build
+            - 10-e2e
+            - 13-deploy-smoke
+          skipped_stages:
+            - 03-plan-tooling
+            - 05-verify-tech
+            - 06-tech-tooling
+            - 09-qa
+            - 11-verify-impl
+            - 12-verify-deploy
+          skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+    prior_related:
+      - 'S008/EV-009 M66 unified jobs'
+      - 'S002 F32 jobs tab'
+      - 'ADR-033 eval on DO not Modal — AMENDED by RQ3/RD-174 (eval moves to Modal)'
+    routing_plan:
+      - stage: 00-context
+        required: true
+        status: completed
+        started_at: '2026-07-28'
+        completed_at: '2026-07-28'
+        note: 'Phase 0 intake COMPLETE — scope approved (S013-D20); routing finalized Lean+build (S013-D22)'
+      - stage: 16-evolve
+        required: true
+        status: completed
+        started_at: '2026-07-28'
+        completed_at: '2026-07-28'
+        phase_1_completed_at: '2026-07-28'
+        note: 'Phase 1 impact analysis COMPLETE — session artifacts committed (74216f1); handoff → 01-requirements delta'
+        resume_note: '16-evolve resumed 2026-07-29; start M85 T85.1 API e2e UJ-050 (in_progress); prior M84 gate PASS @ f98d40d'
+      - stage: 01-requirements
+        required: true
+        status: completed
+        started_at: '2026-07-28'
+        completed_at: '2026-07-28'
+        mode: delta
+        report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
+        note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract
+          EV-012; committed c8cfaa9'
+      - stage: 02-verify-plan
+        required: true
+        status: completed
+        started_at: '2026-07-28'
+        completed_at: '2026-07-28'
+        mode: delta
+        report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
+        note: '02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28); gates.a_to_b passed; handoff → 04-tech-plan (Lean+build
+          skips 03)'
+        consistency_fixes:
+          applied: true
+          items:
+            - F32 limitations
+            - ADR-033 banner
+            - UJ-044
+            - ADR-023 note
+            - session docs
+        medium_verdicts:
+          recorded_at: '2026-07-28'
+          M1:
+            choice: A
+            verdict: 'Modal = job lifecycle SoT; DO Postgres = storage/metrics only — no Postgres jobs table as runner SoT'
+          M2:
+            choice: B
+            verdict: 'SSE on BOTH Modal jobs AND internal-write eval progress; Jobs list remains Modal-primary'
+          M3:
+            choice: A
+            verdict: 'POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval'
+        gate_a_to_b: passed
+      - stage: 04-tech-plan
+        required: true
+        status: completed
+        started_at: '2026-07-28'
+        completed_at: '2026-07-28'
+        ended_at: '2026-07-28'
+        mode: delta
+        note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C
+          passed (Lean+build skips 05). Committed 2cb1def. handoff → 07-build T82.1'
+        report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
+        draft_status: approved
+        gate_b_to_c: passed
+        tech_plan_interview:
+          current_batch: 2
+          batch_1_status: complete
+          batch_1_recorded_at: '2026-07-28'
+          batch1_decisions:
+            - TP-S013-01
+            - TP-S013-02
+            - TP-S013-03
+            - TP-S013-04
+          batch_2_status: complete
+          batch_2_topic: deploy_test_integration
+          batch_2_recorded_at: '2026-07-28'
+          batch_2_finalize_tp_q6: accepted
+          interview_batches_complete: true
+          batch2_decisions_accepted:
+            - TP-S013-05
+            - TP-S013-06
+            - TP-S013-07
+            - TP-S013-08
+          batch2_decisions_pending: []
+          draft_execution_plan_phase19: complete
+          interview_cursor: completed
+          next: start_T82_1_cancel_retry_delete_tests
+          user_approval: option_A_complete_04_commit_docs_start_07
+          approved_at: '2026-07-28'
+      - stage: 07-build
+        required: true
+        status: completed
+        started_at: '2026-07-28'
+        mode: delta
+        note: 'M85 complete (T85.1-T85.5). Phase 19 gate PASS at T2. Handoff to 08-verify-build. PR #153 open (do not merge).
+          Side-work dirt (license-audit/security/S012) left unstaged — not EV-012.'
+        current_task:
+        task_status: completed
+        milestone: M85
+        completed_tasks_recent:
+          - T82.1
+          - T82.2
+          - T82.3
+          - T82.4
+          - T82.5
+          - T82.6
+          - T83.1
+          - T83.2
+          - T83.3
+          - T83.4
+          - T83.5
+          - T83.6
+          - T84.1
+          - T84.2
+          - T84.3
+          - T84.4
+          - T84.5
+          - T84.6
+          - T85.1
+          - T85.2
+          - T85.3
+          - T85.4
+          - T85.5
+        resume_confirmed_at: '2026-07-28'
+        milestone_completed: M85
+        milestone_completed_at: '2026-07-29'
+        next_task:
+        completed_milestones:
+          - M82
+          - M83
+          - M84
+          - M85
+        orchestrator_handoff_at: '2026-07-28'
+        completed_at: '2026-07-29'
+      - stage: 08-verify-build
+        required: true
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        mode: delta
+        scope: M85/Phase19 full verify after T85.5
+        milestone: M85
+        phase: Phase 19
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
+        commit: f98d40d
+        m84_gate: passed
+        m82:
+          status: completed
+          completed_at: '2026-07-28'
+          scope: M82
+          overall_result: PASS
+          commit: '7209837'
+        note: 'M85/Phase19 PASS scoped; Docker integration skipped locally; ChatRAG LocaleContext pre-existing out of scope'
+        minor_pr: *id001
+        m84:
+          status: completed
+          completed_at: '2026-07-29'
+          scope: M84
+          overall_result: PASS
+          result_scope: scoped
+          commit: f98d40d
+          report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
+          m84_gate: passed
+        prior_overall_result: PASS
+        prior_completed_at: '2026-07-29'
+        prior_partial_rerun_at: '2026-07-29'
+        prior_result_scope: scoped
+      - stage: 10-e2e
+        required: true
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        mode: delta
+        session_id: S013-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+        tiers:
+          t0: pass
+          t1: skipped
+          t1_skip_reason: no_docker
+          t2: pass
+          t3: pass
+        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+      - stage: 13-deploy-smoke
+        required: true
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        mode: delta
+        session_id: S013-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        deploy_path: A
+        head_sha: 113589139659a3508eb68340be91d93e7814ae77
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+        path_a_progress:
+          smokes: pass
+          merge_pr_153: awaiting_user_approval
+        note: 'Path A PASS @ 1135891 — deploy-smoke complete; PR #153 awaits explicit user merge approval'
+      - stage: 03-plan-tooling
+        required: false
+        status: skipped
         skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
-  prior_related:
-    - 'S008/EV-009 M66 unified jobs'
-    - 'S002 F32 jobs tab'
-    - 'ADR-033 eval on DO not Modal — AMENDED by RQ3/RD-174 (eval moves to Modal)'
-  routing_plan:
-    - stage: 00-context
-      required: true
-      status: completed
-      started_at: '2026-07-28'
-      completed_at: '2026-07-28'
-      note: 'Phase 0 intake COMPLETE — scope approved (S013-D20); routing finalized Lean+build (S013-D22)'
-    - stage: 16-evolve
-      required: true
-      status: completed
-      started_at: '2026-07-28'
-      completed_at: '2026-07-28'
-      phase_1_completed_at: '2026-07-28'
-      note: 'Phase 1 impact analysis COMPLETE — session artifacts committed (74216f1); handoff → 01-requirements delta'
-      resume_note: '16-evolve resumed 2026-07-29; start M85 T85.1 API e2e UJ-050 (in_progress); prior M84 gate PASS @ f98d40d'
-    - stage: 01-requirements
-      required: true
-      status: completed
-      started_at: '2026-07-28'
-      completed_at: '2026-07-28'
-      mode: delta
-      report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
-      note: '01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract
-        EV-012; committed c8cfaa9'
-    - stage: 02-verify-plan
-      required: true
-      status: completed
-      started_at: '2026-07-28'
-      completed_at: '2026-07-28'
-      mode: delta
-      report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
-      note: '02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28); gates.a_to_b passed; handoff → 04-tech-plan (Lean+build
-        skips 03)'
-      consistency_fixes:
-        applied: true
-        items:
-          - F32 limitations
-          - ADR-033 banner
-          - UJ-044
-          - ADR-023 note
-          - session docs
-      medium_verdicts:
-        recorded_at: '2026-07-28'
-        M1:
-          choice: A
-          verdict: 'Modal = job lifecycle SoT; DO Postgres = storage/metrics only — no Postgres jobs table as runner SoT'
-        M2:
-          choice: B
-          verdict: 'SSE on BOTH Modal jobs AND internal-write eval progress; Jobs list remains Modal-primary'
-        M3:
-          choice: A
-          verdict: 'POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval'
-      gate_a_to_b: passed
-    - stage: 04-tech-plan
-      required: true
-      status: completed
-      started_at: '2026-07-28'
-      completed_at: '2026-07-28'
-      ended_at: '2026-07-28'
-      mode: delta
-      note: '04-tech-plan delta COMPLETE — user approved Phase 19 tech plan (option A). Phase 19 M82–M85 defined; Gate B→C
-        passed (Lean+build skips 05). Committed 2cb1def. handoff → 07-build T82.1'
-      report: docs/sessions/S013-unified-job-monitoring/reports/04-tech-plan.md
-      draft_status: approved
-      gate_b_to_c: passed
-      tech_plan_interview:
-        current_batch: 2
-        batch_1_status: complete
-        batch_1_recorded_at: '2026-07-28'
-        batch1_decisions:
-          - TP-S013-01
-          - TP-S013-02
-          - TP-S013-03
-          - TP-S013-04
-        batch_2_status: complete
-        batch_2_topic: deploy_test_integration
-        batch_2_recorded_at: '2026-07-28'
-        batch_2_finalize_tp_q6: accepted
-        interview_batches_complete: true
-        batch2_decisions_accepted:
-          - TP-S013-05
-          - TP-S013-06
-          - TP-S013-07
-          - TP-S013-08
-        batch2_decisions_pending: []
-        draft_execution_plan_phase19: complete
-        interview_cursor: completed
-        next: start_T82_1_cancel_retry_delete_tests
-        user_approval: option_A_complete_04_commit_docs_start_07
-        approved_at: '2026-07-28'
-    - stage: 07-build
-      required: true
-      status: completed
-      started_at: '2026-07-28'
-      mode: delta
-      note: 'M85 complete (T85.1-T85.5). Phase 19 gate PASS at T2. Handoff to 08-verify-build. PR #153 open (do not merge).
-        Side-work dirt (license-audit/security/S012) left unstaged — not EV-012.'
+      - stage: 05-verify-tech
+        required: false
+        status: skipped
+        skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+      - stage: 06-tech-tooling
+        required: false
+        status: skipped
+        skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+      - stage: 09-qa
+        required: false
+        status: skipped
+        skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+      - stage: 11-verify-impl
+        required: false
+        status: skipped
+        skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+      - stage: 12-verify-deploy
+        required: false
+        status: skipped
+        skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
+    context_briefs:
+      - docs/sessions/S013-unified-job-monitoring/impact-analysis.md
+    requirements_delta_interview:
+      recorded_at: '2026-07-28'
+      resolved_at: '2026-07-28'
+      status: docs_complete
+      seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+      handoff: run_02_verify_plan_consistency
+      feature_list_write: completed
+      locked_decisions:
+        status: approved_all
+        option: A
+        scope: S013-D1..D22
+      resolved:
+        - S013-RQ1
+        - S013-RQ2
+        - S013-RQ3
+        - S013-RQ4
+        - S013-RQ5
+        - S013-RQ6
+      pending: []
+      questions:
+        - id: S013-RQ1
+          topic: locked_decisions
+          option: A
+          status: resolved
+        - id: S013-RQ2
+          topic: sse_failure_fallback
+          option: A
+          status: resolved
+          rd_id: RD-173
+          choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
+        - id: S013-RQ3
+          topic: jobs_architecture_modal_lifecycle_do_storage
+          status: resolved
+          rd_ids:
+            - RD-174
+            - RD-175
+          amends:
+            - ADR-033
+          revises:
+            - S013-D8
+          choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
+        - id: S013-RQ4
+          topic: cancel_retry_auth
+          option: A
+          status: resolved
+          rd_id: RD-176
+          choice: admin_only_full_job_crud
+        - id: S013-RQ5
+          topic: failed_modal_job_logs
+          option: A
+          status: resolved
+          rd_id: RD-177
+          choice: call_id_copy_plus_dashboard_link_when_known
+        - id: S013-RQ6
+          topic: playwright_t0_ui_jobs_list_detail
+          option: A
+          status: resolved
+          rd_id: RD-178
+          choice: yes_playwright_t0_ui
+      rd_allocated:
+        status: written
+        range: RD-173..RD-178
+        allocated_at: '2026-07-28'
+        written_at: '2026-07-28'
+        decisions:
+          - RD-173
+          - RD-174
+          - RD-175
+          - RD-176
+          - RD-177
+          - RD-178
+      rd_candidates:
+        status: superseded
+        superseded_by: rd_allocated
+        proposed_range: RD-173..RD-178
+    handoff:
+      from_session: S012-hotfix-admin-ui-112-105
+      cleared: true
+      next_action: askquestion_merge_pr_153_or_hold_or_reset_pins
+      next_skill: 16-evolve
+      resume_at_task:
+      branch: evolve/EV-012-unified-job-monitoring
+      branch_status: active
+      branch_synced_with_origin: true
+      interview_cursor: completed
       current_task:
       task_status: completed
       milestone: M85
-      completed_tasks_recent:
-        - T82.1
-        - T82.2
-        - T82.3
-        - T82.4
-        - T82.5
-        - T82.6
-        - T83.1
-        - T83.2
-        - T83.3
-        - T83.4
-        - T83.5
-        - T83.6
-        - T84.1
-        - T84.2
-        - T84.3
-        - T84.4
-        - T84.5
-        - T84.6
-        - T85.1
-        - T85.2
-        - T85.3
-        - T85.4
-        - T85.5
-      resume_confirmed_at: '2026-07-28'
-      milestone_completed: M85
-      milestone_completed_at: '2026-07-29'
-      next_task:
-      completed_milestones:
-        - M82
-        - M83
-        - M84
-        - M85
-      orchestrator_handoff_at: '2026-07-28'
-      completed_at: '2026-07-29'
-    - stage: 08-verify-build
-      required: true
-      status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      mode: delta
-      scope: M85/Phase19 full verify after T85.5
-      milestone: M85
-      phase: Phase 19
-      overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
-      commit: f98d40d
-      m84_gate: passed
-      m82:
-        status: completed
-        completed_at: '2026-07-28'
-        scope: M82
-        overall_result: PASS
-        commit: '7209837'
-      note: 'M85/Phase19 PASS scoped; Docker integration skipped locally; ChatRAG LocaleContext pre-existing out of scope'
-      minor_pr: *id001
-      m84:
-        status: completed
-        completed_at: '2026-07-29'
-        scope: M84
-        overall_result: PASS
-        result_scope: scoped
-        commit: f98d40d
-        report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
-        m84_gate: passed
-      prior_overall_result: PASS
-      prior_completed_at: '2026-07-29'
-      prior_partial_rerun_at: '2026-07-29'
-      prior_result_scope: scoped
-    - stage: 10-e2e
-      required: true
-      status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      mode: delta
-      session_id: S013-unified-job-monitoring
-      evolve_cycle_id: EV-012
-      overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-      tiers:
-        t0: pass
-        t1: skipped
-        t1_skip_reason: no_docker
-        t2: pending
-        t3: pending
-      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke'
-    - stage: 13-deploy-smoke
-      required: true
-      status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      mode: delta
-      session_id: S013-unified-job-monitoring
-      evolve_cycle_id: EV-012
+      blocker_advisory:
       deploy_path: A
       head_sha: 113589139659a3508eb68340be91d93e7814ae77
-      overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
-      path_a_progress:
-        smokes: pass
-        merge_pr_153: awaiting_user_approval
-      note: 'Path A PASS @ 1135891 — deploy-smoke complete; PR #153 awaits explicit user merge approval'
-    - stage: 03-plan-tooling
-      required: false
-      status: skipped
-      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
-    - stage: 05-verify-tech
-      required: false
-      status: skipped
-      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
-    - stage: 06-tech-tooling
-      required: false
-      status: skipped
-      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
-    - stage: 09-qa
-      required: false
-      status: skipped
-      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
-    - stage: 11-verify-impl
-      required: false
-      status: skipped
-      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
-    - stage: 12-verify-deploy
-      required: false
-      status: skipped
-      skip_rationale: 'Lean+build compromise — implement via 04/07/08; skip formal 09/11/12 gates; keep 10-e2e + 13-deploy-smoke'
-  context_briefs:
-    - docs/sessions/S013-unified-job-monitoring/impact-analysis.md
-  requirements_delta_interview:
-    recorded_at: '2026-07-28'
-    resolved_at: '2026-07-28'
-    status: docs_complete
-    seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
-    handoff: run_02_verify_plan_consistency
-    feature_list_write: completed
-    locked_decisions:
-      status: approved_all
-      option: A
-      scope: S013-D1..D22
-    resolved:
-      - S013-RQ1
-      - S013-RQ2
-      - S013-RQ3
-      - S013-RQ4
-      - S013-RQ5
-      - S013-RQ6
-    pending: []
-    questions:
-      - id: S013-RQ1
-        topic: locked_decisions
-        option: A
-        status: resolved
-      - id: S013-RQ2
-        topic: sse_failure_fallback
-        option: A
-        status: resolved
-        rd_id: RD-173
-        choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
-      - id: S013-RQ3
-        topic: jobs_architecture_modal_lifecycle_do_storage
-        status: resolved
-        rd_ids:
-          - RD-174
-          - RD-175
-        amends:
-          - ADR-033
-        revises:
-          - S013-D8
-        choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
-      - id: S013-RQ4
-        topic: cancel_retry_auth
-        option: A
-        status: resolved
-        rd_id: RD-176
-        choice: admin_only_full_job_crud
-      - id: S013-RQ5
-        topic: failed_modal_job_logs
-        option: A
-        status: resolved
-        rd_id: RD-177
-        choice: call_id_copy_plus_dashboard_link_when_known
-      - id: S013-RQ6
-        topic: playwright_t0_ui_jobs_list_detail
-        option: A
-        status: resolved
-        rd_id: RD-178
-        choice: yes_playwright_t0_ui
-    rd_allocated:
-      status: written
-      range: RD-173..RD-178
-      allocated_at: '2026-07-28'
-      written_at: '2026-07-28'
-      decisions:
-        - RD-173
-        - RD-174
-        - RD-175
-        - RD-176
-        - RD-177
-        - RD-178
-    rd_candidates:
-      status: superseded
-      superseded_by: rd_allocated
-      proposed_range: RD-173..RD-178
-  handoff:
-    from_session: S012-hotfix-admin-ui-112-105
-    cleared: true
-    next_action: askquestion_merge_pr_153_or_hold_or_reset_pins
-    next_skill: 16-evolve
-    resume_at_task:
-    branch: evolve/EV-012-unified-job-monitoring
-    branch_status: active
-    branch_synced_with_origin: true
-    interview_cursor: completed
-    current_task:
-    task_status: completed
-    milestone: M85
-    blocker_advisory:
-    deploy_path: A
-    head_sha: 113589139659a3508eb68340be91d93e7814ae77
-    commits_ahead_of_origin: 0
-    dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
-    note: '13-deploy-smoke PASS @ 1135891 — Path A complete; staging pinned evolve branch; AskQuestion merge PR #153 / hold / reset pins. 12-verify-deploy waived (S013-D22).'
-    git_commits:
-      - sha: a781a80
-        message: '[T82.2] test: add failing jobs/events SSE framing tests'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-28T20:17:00-04:00'
-      - sha: af60829
-        message: '[T82.2] code: implement GET /jobs/events SSE stream'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 4
-        timestamp: '2026-07-28T20:19:04-04:00'
-      - sha: b2ccdbe
-        message: '[T82.5] config: sync OpenAPI JobOptions and jobs/events SSE'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-28T20:21:07-04:00'
-      - sha: a8c7905
-        message: '[T82.6] docs: lock EV-012 jobs SSE contract to OpenAPI'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-28T20:21:19-04:00'
-      - sha: '7209837'
-        message: 'docs(S013): M82 verification report; advance Current State to M83'
-        stage: 08-verify-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-28T20:23:01-04:00'
-      - sha: 80bf641
-        message: '[T82.2] test: cover JobEventBroker branches for coverage gate'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 1
-        timestamp: '2026-07-28T20:27:34-04:00'
-      - sha: d1836df
-        message: '[T83.1] test: add failing enqueue_eval and create-run enqueue tests'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-28T20:27:34-04:00'
-      - sha: e55e0fb
-        message: '[T83.4] code: enqueue_eval and replace BackgroundTasks eval runner'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 5
-        timestamp: '2026-07-28T20:29:38-04:00'
-      - sha: 0edab10
-        message: 'fix: restore eval integration after enqueue; lift DM branch coverage'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 4
-        timestamp: '2026-07-28T20:35:46-04:00'
-      - sha: 4144a17
-        message: 'fix: type-safe jobs list length assert in CRUD coverage tests'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 1
-        timestamp: '2026-07-28T20:35:54-04:00'
-      - sha: cfb7a03
-        message: 'fix: import json_list for CRUD coverage assert'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 1
-        timestamp: '2026-07-28T20:36:08-04:00'
-      - sha: 618bb78
-        message: '[T83.2] test: add failing eval SSE and soft-delete hide tests'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-28T20:39:58-04:00'
-      - sha: f6400f8
-        message: '[T83.3] config: add eval_runs.deleted_at Alembic migration'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-28T20:40:22-04:00'
-      - sha: 4281c15
-        message: '[T83.5] feat: eval SSE route and soft-delete on job DELETE'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 13
-        timestamp: '2026-07-28T20:43:07-04:00'
-      - sha: 10f2d04
-        message: '[T83.5] code: eval progress SSE and soft-delete linked eval runs'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-28T20:43:45-04:00'
-      - sha: '32e9131'
-        message: '[T83.6] config: document eval SSE and soft-delete in OpenAPI'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-28T21:01:45-04:00'
-      - sha: 9c61c5b
-        message: 'fix: restore alembic head assert and lift EV-012 branch coverage'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 5
-        timestamp: '2026-07-28T21:05:27-04:00'
-      - sha: 35a9ae2
-        message: 'fix: cover remaining DELETE job branches; drop MagicMock Any'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-28T21:09:36-04:00'
-      - sha: a00921f
-        message: '[T84.1] test: Vitest Jobs filter, detail route, SSE→poll (red)'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T01:52:09-04:00'
-      - sha: d3f82a4
-        message: '[T84.2] test: Vitest job detail admin CRUD vs viewer (red)'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T04:56:10-04:00'
-      - sha: 2b3b5ec
-        message: '[T84.3] code: jobs client cancel/retry/delete + fetch SSE'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 6
-        timestamp: '2026-07-29T07:05:27-04:00'
-      - sha: afb73cb
-        message: '[T84.4] code: Jobs list/detail SSE+poll, filter, CRUD UI'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 9
-        timestamp: '2026-07-29T07:09:18-04:00'
-      - sha: 450ea1f
-        message: '[T84.5] code: Evaluation page prefers DO eval run SSE'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 4
-        timestamp: '2026-07-29T07:11:51-04:00'
-      - sha: cdbff71
-        message: '[T84.6] docs: confirm UJ-023/044/050 Jobs UI alignment'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T07:12:06-04:00'
-        note: M84 tasks complete (pre-verify)
-      - sha: 7c7051b
-        message: '[T84.4] fix: harden job detail urls after retry navigation'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T07:15:31-04:00'
-      - sha: a351a13
-        message: '[T84.4] fix: drop unnecessary urls coalesce for lint'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 1
-        timestamp: '2026-07-29T07:15:52-04:00'
-      - sha: f98d40d
-        message: '[M84] docs: verification report and task tracking for Admin Jobs UI'
-        stage: 08-verify-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T07:16:10-04:00'
-        note: M84 08-verify-build scoped PASS; report path verification-report.md
-      - sha: c6a156d
-        message: '[T85.1] test: add API e2e for UJ-050 job detail CRUD'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-29T11:30:00Z'
-        note: T85.1 completed — API e2e UJ-050
-      - sha: a6ccecf
-        message: '[T85.2] test: extend UJ-023/044 e2e for document_id and Modal eval'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-29T07:38:50-04:00'
-        evolve_cycle_id: EV-012
-      - sha: 06b01df
-        message: '[T85.3] test: Playwright Jobs list to detail (UJ-023/044/050)'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 5
-        timestamp: '2026-07-29T07:43:42-04:00'
-        evolve_cycle_id: EV-012
-      - sha: ea4c51f
-        message: '[T85.4] test: CORS preflight for job mutate and events routes'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T07:44:31-04:00'
-        evolve_cycle_id: EV-012
-      - sha: cc1c355
-        message: '[T85.5] docs: Phase 19 gate checklist for EV-012'
-        stage: 07-build
-        session_id: S013-unified-job-monitoring
-        files_changed: 3
-        timestamp: '2026-07-29T07:45:08-04:00'
-        evolve_cycle_id: EV-012
-        note: T85.5 completed — Phase 19 gate PASS @ T2; M85 complete
-      - sha: d625dc0
-        message: 'chore: close ISS-004 and hand off to 13-deploy-smoke'
-        stage: 13-deploy-smoke
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T08:15:53-04:00'
-        evolve_cycle_id: EV-012
-      - sha: ca78c55
-        message: '[EV-012] test: close DM FE coverage gate for Jobs SSE paths'
-        stage: 13-deploy-smoke
-        session_id: S013-unified-job-monitoring
-        files_changed: 11
-        timestamp: '2026-07-29T08:47:32-04:00'
-        evolve_cycle_id: EV-012
-        note: 'CI coverage gate fix — local DM FE coverage PASS 100% lines / 98.18% branches'
-      - sha: 746181b
-        message: '[EV-012] fix: satisfy DM FE eslint without dropping coverage'
-        stage: 13-deploy-smoke
-        session_id: S013-unified-job-monitoring
-        files_changed: 8
-        timestamp: '2026-07-29T08:56:33-04:00'
-        evolve_cycle_id: EV-012
-        note: 'Path A CI lint+coverage remediation — eslint no-non-null-assertion vs coverage resolved'
-      - sha: 1135891
-        message: '[EV-012] test: cover ISS-004 catalog HF gate branches'
-        stage: 16-evolve
-        session_id: S013-unified-job-monitoring
-        files_changed: 2
-        timestamp: '2026-07-29T09:02:51-04:00'
-        evolve_cycle_id: EV-012
-        note: 'ISS-004 write-api branch coverage — CI green @ run 30454245590'
-    next_task:
+      commits_ahead_of_origin: 0
+      dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+      note: '13-deploy-smoke PASS @ 1135891 — Path A complete; staging pinned evolve branch; AskQuestion merge PR #153 / hold / reset pins. 12-verify-deploy waived (S013-D22).'
+      git_commits:
+        - sha: a781a80
+          message: '[T82.2] test: add failing jobs/events SSE framing tests'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-28T20:17:00-04:00'
+        - sha: af60829
+          message: '[T82.2] code: implement GET /jobs/events SSE stream'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 4
+          timestamp: '2026-07-28T20:19:04-04:00'
+        - sha: b2ccdbe
+          message: '[T82.5] config: sync OpenAPI JobOptions and jobs/events SSE'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-28T20:21:07-04:00'
+        - sha: a8c7905
+          message: '[T82.6] docs: lock EV-012 jobs SSE contract to OpenAPI'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-28T20:21:19-04:00'
+        - sha: '7209837'
+          message: 'docs(S013): M82 verification report; advance Current State to M83'
+          stage: 08-verify-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-28T20:23:01-04:00'
+        - sha: 80bf641
+          message: '[T82.2] test: cover JobEventBroker branches for coverage gate'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 1
+          timestamp: '2026-07-28T20:27:34-04:00'
+        - sha: d1836df
+          message: '[T83.1] test: add failing enqueue_eval and create-run enqueue tests'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-28T20:27:34-04:00'
+        - sha: e55e0fb
+          message: '[T83.4] code: enqueue_eval and replace BackgroundTasks eval runner'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 5
+          timestamp: '2026-07-28T20:29:38-04:00'
+        - sha: 0edab10
+          message: 'fix: restore eval integration after enqueue; lift DM branch coverage'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 4
+          timestamp: '2026-07-28T20:35:46-04:00'
+        - sha: 4144a17
+          message: 'fix: type-safe jobs list length assert in CRUD coverage tests'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 1
+          timestamp: '2026-07-28T20:35:54-04:00'
+        - sha: cfb7a03
+          message: 'fix: import json_list for CRUD coverage assert'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 1
+          timestamp: '2026-07-28T20:36:08-04:00'
+        - sha: 618bb78
+          message: '[T83.2] test: add failing eval SSE and soft-delete hide tests'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-28T20:39:58-04:00'
+        - sha: f6400f8
+          message: '[T83.3] config: add eval_runs.deleted_at Alembic migration'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-28T20:40:22-04:00'
+        - sha: 4281c15
+          message: '[T83.5] feat: eval SSE route and soft-delete on job DELETE'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 13
+          timestamp: '2026-07-28T20:43:07-04:00'
+        - sha: 10f2d04
+          message: '[T83.5] code: eval progress SSE and soft-delete linked eval runs'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-28T20:43:45-04:00'
+        - sha: '32e9131'
+          message: '[T83.6] config: document eval SSE and soft-delete in OpenAPI'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-28T21:01:45-04:00'
+        - sha: 9c61c5b
+          message: 'fix: restore alembic head assert and lift EV-012 branch coverage'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 5
+          timestamp: '2026-07-28T21:05:27-04:00'
+        - sha: 35a9ae2
+          message: 'fix: cover remaining DELETE job branches; drop MagicMock Any'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-28T21:09:36-04:00'
+        - sha: a00921f
+          message: '[T84.1] test: Vitest Jobs filter, detail route, SSE→poll (red)'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T01:52:09-04:00'
+        - sha: d3f82a4
+          message: '[T84.2] test: Vitest job detail admin CRUD vs viewer (red)'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T04:56:10-04:00'
+        - sha: 2b3b5ec
+          message: '[T84.3] code: jobs client cancel/retry/delete + fetch SSE'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 6
+          timestamp: '2026-07-29T07:05:27-04:00'
+        - sha: afb73cb
+          message: '[T84.4] code: Jobs list/detail SSE+poll, filter, CRUD UI'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 9
+          timestamp: '2026-07-29T07:09:18-04:00'
+        - sha: 450ea1f
+          message: '[T84.5] code: Evaluation page prefers DO eval run SSE'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 4
+          timestamp: '2026-07-29T07:11:51-04:00'
+        - sha: cdbff71
+          message: '[T84.6] docs: confirm UJ-023/044/050 Jobs UI alignment'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T07:12:06-04:00'
+          note: M84 tasks complete (pre-verify)
+        - sha: 7c7051b
+          message: '[T84.4] fix: harden job detail urls after retry navigation'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T07:15:31-04:00'
+        - sha: a351a13
+          message: '[T84.4] fix: drop unnecessary urls coalesce for lint'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 1
+          timestamp: '2026-07-29T07:15:52-04:00'
+        - sha: f98d40d
+          message: '[M84] docs: verification report and task tracking for Admin Jobs UI'
+          stage: 08-verify-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T07:16:10-04:00'
+          note: M84 08-verify-build scoped PASS; report path verification-report.md
+        - sha: c6a156d
+          message: '[T85.1] test: add API e2e for UJ-050 job detail CRUD'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-29T11:30:00Z'
+          note: T85.1 completed — API e2e UJ-050
+        - sha: a6ccecf
+          message: '[T85.2] test: extend UJ-023/044 e2e for document_id and Modal eval'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-29T07:38:50-04:00'
+          evolve_cycle_id: EV-012
+        - sha: 06b01df
+          message: '[T85.3] test: Playwright Jobs list to detail (UJ-023/044/050)'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 5
+          timestamp: '2026-07-29T07:43:42-04:00'
+          evolve_cycle_id: EV-012
+        - sha: ea4c51f
+          message: '[T85.4] test: CORS preflight for job mutate and events routes'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T07:44:31-04:00'
+          evolve_cycle_id: EV-012
+        - sha: cc1c355
+          message: '[T85.5] docs: Phase 19 gate checklist for EV-012'
+          stage: 07-build
+          session_id: S013-unified-job-monitoring
+          files_changed: 3
+          timestamp: '2026-07-29T07:45:08-04:00'
+          evolve_cycle_id: EV-012
+          note: T85.5 completed — Phase 19 gate PASS @ T2; M85 complete
+        - sha: d625dc0
+          message: 'chore: close ISS-004 and hand off to 13-deploy-smoke'
+          stage: 13-deploy-smoke
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T08:15:53-04:00'
+          evolve_cycle_id: EV-012
+        - sha: ca78c55
+          message: '[EV-012] test: close DM FE coverage gate for Jobs SSE paths'
+          stage: 13-deploy-smoke
+          session_id: S013-unified-job-monitoring
+          files_changed: 11
+          timestamp: '2026-07-29T08:47:32-04:00'
+          evolve_cycle_id: EV-012
+          note: 'CI coverage gate fix — local DM FE coverage PASS 100% lines / 98.18% branches'
+        - sha: 746181b
+          message: '[EV-012] fix: satisfy DM FE eslint without dropping coverage'
+          stage: 13-deploy-smoke
+          session_id: S013-unified-job-monitoring
+          files_changed: 8
+          timestamp: '2026-07-29T08:56:33-04:00'
+          evolve_cycle_id: EV-012
+          note: 'Path A CI lint+coverage remediation — eslint no-non-null-assertion vs coverage resolved'
+        - sha: 1135891
+          message: '[EV-012] test: cover ISS-004 catalog HF gate branches'
+          stage: 16-evolve
+          session_id: S013-unified-job-monitoring
+          files_changed: 2
+          timestamp: '2026-07-29T09:02:51-04:00'
+          evolve_cycle_id: EV-012
+          note: 'ISS-004 write-api branch coverage — CI green @ run 30454245590'
+      next_task:
+      milestone_completed: M85
+      milestone_gate_passed: Phase19_T2
+      resume_confirmed_at: '2026-07-28'
+      ci:
+        status: pass
+        branch: evolve/EV-012-unified-job-monitoring
+        head_sha: 113589139659a3508eb68340be91d93e7814ae77
+        run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+        run_id: 30454245590
+        conclusion: success
+      deploy_smoke:
+        status: pass
+        report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+        sha: 1135891
+        alembic_revision: 20260728_0009
+        note: 'Path A smokes PASS; PR #153 merge awaits user AskQuestion'
+      resume_at: await_merge_pr_153
+      phase_19_gate: passed
     milestone_completed: M85
-    milestone_gate_passed: Phase19_T2
-    resume_confirmed_at: '2026-07-28'
-    ci:
-      status: pass
-      branch: evolve/EV-012-unified-job-monitoring
-      head_sha: 113589139659a3508eb68340be91d93e7814ae77
-      run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-      run_id: 30454245590
-      conclusion: success
-    deploy_smoke:
-      status: pass
-      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
-      sha: 1135891
-      alembic_revision: 20260728_0009
-      note: 'Path A smokes PASS; PR #153 merge awaits user AskQuestion'
-    resume_at: await_merge_pr_153
-    phase_19_gate: passed
-  milestone_completed: M85
-  milestone_completed_at: '2026-07-29'
-  build_note: 'M85 COMPLETE; 13-deploy-smoke PASS @ 1135891 (Path A); staging pinned evolve branch; PR #153 open — merge awaits user AskQuestion; 12-verify-deploy waived (S013-D22)'
-  resume_source: 'Path A deploy-smoke PASS — handoff askquestion_merge_pr_153_or_hold_or_reset_pins'
-  resume_confirmed_at: '2026-07-29'
-sessions:
+    milestone_completed_at: '2026-07-29'
+    build_note: 'M85 COMPLETE; 13-deploy-smoke PASS @ 1135891 (Path A); staging pinned evolve branch; PR #153 open — merge awaits user AskQuestion; 12-verify-deploy waived (S013-D22)'
+    resume_source: 'Path A deploy-smoke PASS — handoff askquestion_merge_pr_153_or_hold_or_reset_pins'
+    resume_confirmed_at: '2026-07-29'
   - id: S012-hotfix-admin-ui-112-105
     type: hotfix
     status: completed
@@ -4299,16 +4314,16 @@ stages:
     evolve_cycle_id: EV-012
     mode: delta
     overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes; prior S006/S005 baselines preserved below'
-      tiers:
-        t0: pass
-        t1: skipped
-        t1_skip_reason: no_docker
-        t2: pass
-        t3: pass
-      s006:
+    report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+    partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+    note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes; prior S006/S005 baselines preserved below'
+    tiers:
+      t0: pass
+      t1: skipped
+      t1_skip_reason: no_docker
+      t2: pass
+      t3: pass
+    s006:
       status: completed
       started_at: '2026-06-30'
       completed_at: '2026-06-30'
@@ -4753,18 +4768,27 @@ deployment:
   staging:
     status: deployed
     last_verified: '2026-07-29'
-    commit_deployed: 1135891
-    commit_head: 1135891
-    drift: true
-    branch: evolve/EV-012-unified-job-monitoring
-    branch_pin:
-      status: active
-      sha: 113589139659a3508eb68340be91d93e7814ae77
+    commit_deployed: 6940770
+    commit_head: 6940770
+    drift: false
+    branch: main
+    main_transition:
+      merge_commit: 69407701b3015201a0370c96a953d9dc85932315
+      pr_number: 153
+      pins_reset_at: '2026-07-29T13:20:40Z'
       apps:
-        - vecinita-internal-write-api
-        - vecinita-admin-frontend
-      modal_data_management: redeployed_from_evolve_checkout
-      note: 'S013 Path A — DO write-api + admin FE pinned to evolve/EV-012-unified-job-monitoring @ 1135891 ACTIVE; Modal data-management redeployed from evolve checkout; main not merged — awaiting PR #153 user approval'
+        vecinita-internal-write-api:
+          github_branch: main
+          deploy_on_push: false
+          deployment_id: 044bf90f-4553-4976-a94a-6a67ca752c83
+        vecinita-admin-frontend:
+          github_branch: main
+          deploy_on_push: false
+          deployment_id: 2f16668f-e744-4fbc-bab2-9e46e0227b15
+      status: deployments_active_on_main
+      ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455574450
+      deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455818840
+      note: 'Evolve branch pin cleared. DO write-api and admin frontend deployments are ACTIVE on main @ 6940770; CI and deploy-preflight passed.'
     alembic_revision: 20260728_0009
     urls:
       chat_rag_backend: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
@@ -4786,6 +4810,9 @@ deployment:
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
     notes:
+      - 'S013 2026-07-29: H0ci PASS for main @ 6940770 — CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455574450 and deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455818840 succeeded. DO write-api and admin frontend force deployments may still be finishing; EV-012 remains open.'
+      - 'S013 2026-07-29 CLOSED (S013-D25 option A): DO write-api and admin frontend ACTIVE on main @ 6940770; H0ci PASS; EV-012 completed and optional 15-service-health skipped by user choice.'
+      - 'S013 2026-07-29: PR #153 merged at 6940770 after user approval. DO write-api and admin frontend reset from the evolve branch to main with deploy_on_push=false; force deployments started. Awaiting main CI and deploy-preflight before marking the cycle complete.'
       - 'S013 2026-07-29 Path A deploy-smoke PASS @ 1135891 — Modal DM redeployed; DO write-api + admin FE pinned evolve branch ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md; PR #153 merge awaits user AskQuestion'
       - EV-002 merged to main 2026-05-27; DO apps github branch set to main
       - 'S001 deployed 2026-06-26: Modal llm+embedding snapshots; DO chat apps on feat/S001-modal-cold-start-snapshot @ 4f3f741'
@@ -5973,7 +6000,7 @@ evolve_cycles:
       phase_b: passed
       phase_c: pending
       phase_d: pending
-      deploy: pending
+      deploy: passed
     checkpoint_notes:
       phase_a: Passed 2026-07-10 — Phase A complete via 01-requirements delta (RD-163–RD-172)
       phase_b: Passed 2026-07-10 — Phase B complete via 04-tech-plan (TP-S010-17–31) + approved skip of 05/06; user 
@@ -5990,12 +6017,28 @@ evolve_cycles:
       - F32
       - F36
     title: Unified job monitoring (Jobs tab + detail)
-    status: in_progress
+    status: completed
     started: '2026-07-28'
+    completed: '2026-07-29'
     session_id: S013-unified-job-monitoring
     source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/116
-    current_stage: 13-deploy-smoke
+    current_stage: completed
     mode: delta
+    merge:
+      pr_number: 153
+      status: merged
+      approved_and_executed_at: '2026-07-29T13:20:40Z'
+      merge_commit: 69407701b3015201a0370c96a953d9dc85932315
+      do_pins: reset_to_main
+      do_force_deployments:
+        internal_write_api: 044bf90f-4553-4976-a94a-6a67ca752c83
+        admin_frontend: 2f16668f-e744-4fbc-bab2-9e46e0227b15
+      main_ci:
+        status: pass
+        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455574450
+        deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455818840
+        watch_result: 'OK: required workflows passed for main @ 6940770'
+      next_action: await_do_deployments_then_user_close_or_service_health
     scope_summary: 'Unified job monitoring (GitHub #116) — **Admin Dashboard only (data-management-frontend); NOT ChatRAG
       UI**. Jobs tab: **Modal GET /jobs primary unified list** (job_type incl eval; S013-D8 amended) — DO Postgres for metrics/results
       storage + eval drill-down only; **NOT dual FE federation** of two job lists. Type-aware detail at /jobs/:id with extensible
@@ -6521,58 +6564,78 @@ evolve_cycles:
           t0: pass
           t1: skipped
           t1_skip_reason: no_docker
-          t2: pending
-          t3: pending
-        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke'
+          t2: pass
+          t3: pass
+        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
       13-deploy-smoke:
-        status: in_progress
+        status: completed
         started: '2026-07-29'
+        completed: '2026-07-29'
         mode: delta
         session_id: S013-unified-job-monitoring
         branch: evolve/EV-012-unified-job-monitoring
         evolve_cycle_id: EV-012
         deploy_path: A
         head_sha: 113589139659a3508eb68340be91d93e7814ae77
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
         commits_ahead_of_origin: 0
         pushed_at: '2026-07-29'
         pr_number: 153
         merge_gate: smokes_pass_before_merge
         do_not_merge_pr: 153
+        merge_approval: pending_user
         dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
         path_a_progress:
           push: done
-          ci_first_run: failed_coverage_gate
-          coverage_fix: ca78c55
-          ci_second_run: failed_lint_coverage
-          ci_second_run_detail: 'eslint @typescript-eslint/no-non-null-assertion vs coverage paths (DM FE Jobs SSE)'
-          lint_coverage_fix: 746181b
-          iss004_branch_coverage_fix: 1135891
           ci_rewatch: pass
           ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-          h0c_migration_check: pending
-          pin_redeploy: pending
-          smokes: pending
-          merge_pr_153: blocked_until_smokes_green
-        note: 'Path A IN_PROGRESS @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed'
+          lint_coverage_fix: 746181b
+          iss004_branch_coverage_fix: 1135891
+          h0c_migration_check: pass
+          alembic_revision: 20260728_0009
+          pin_redeploy: pass
+          modal_data_management: redeployed_from_evolve_checkout
+          do_apps:
+            internal_write_api: pinned_active
+            admin_frontend: pinned_active
+          smokes: pass
+          smoke_tiers:
+            h0c: pass
+            h1: pass
+            h2: pass
+            h3: pass
+            h3b: pass
+            t3_ev002: pass
+            h4: pass
+            h5: pass
+          jobs_live:
+            - list
+            - retag_detail
+            - eval_run_detail
+            - sse
+          merge_pr_153: merged
+        next_action: await_do_deployments_then_user_close_or_service_health
+        note: 'Path A PASS @ 1135891; PR #153 merged after user approval. Main CI and deploy-preflight passed @ 6940770; DO write-api and admin frontend force deployments may still be finishing.'
     checkpoints:
       phase_a: passed
       phase_b: passed
       phase_c: passed
       phase_d: passed
-      deploy: pending
+      deploy: passed
     checkpoint_notes:
       phase_a: 'Passed 2026-07-28 — 02-verify-plan delta complete; M1–M3 user verdicts recorded; gate A→B passed'
       phase_b: 'Passed 2026-07-28 — Phase B complete via 04-tech-plan (TP-S013-01–08 + Phase 19 M82–M85) + Lean+build approved
         skip of 05/06; user approved option A and started 07-build T82.1. Gate B→C may pass when 04 approved without 05.'
       phase_c: 'Passed 2026-07-29 — 08-verify-build M85/Phase19 PASS scoped; Docker integration skipped locally; ChatRAG LocaleContext
         pre-existing out of scope; gate C→D passed; handoff → 10-e2e'
-      phase_d: 'Passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pending 13-deploy-smoke; checkpoints.deploy remains pending'
-      deploy: 'Pending 2026-07-29 — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api; merge PR #153 only after H1–H5/Jobs smokes green'
+      phase_d: 'Passed 2026-07-29 — 10-e2e PASS (T0); T1 skipped no docker; T2/T3 pass @ 13-deploy-smoke Path A smokes'
+      deploy: 'PR #153 merged at 6940770 after user approval. DO write-api and admin frontend reset to main with force deployments started; await main CI and deploy-preflight before final completion.'
     gates:
       a_to_b: passed
       b_to_c: passed
       c_to_d: passed
-      deploy: pending
+      deploy: passed
     prior_related:
       - 'S008/EV-009 M66 unified jobs'
       - 'S002 F32 jobs tab'
@@ -6594,10 +6657,10 @@ evolve_cycles:
       - TP-S013-07
       - TP-S013-08
     open_contradictions: []
-    note: 'EV-012 13-deploy-smoke IN_PROGRESS 2026-07-29 — Path A @ 1135891; CI green (run 30454245590); next H0c + migration check then pin/redeploy; checkpoints.deploy=pending; do NOT merge #153 until smokes pass; 12-verify-deploy waived (S013-D22); ISS-004 closed.'
+    note: 'EV-012 Path A deploy-smoke PASS @ 1135891. PR #153 merged at 6940770 after user approval; main CI and deploy-preflight passed. DO write-api and admin frontend are reset to main, with force deployments still potentially in progress; cycle remains in_progress pending deploy checkpoint and user close or optional service health.'
     handoff:
-      next_action: h0c_migration_check_then_pin_redeploy_then_smokes
-      next_skill: 13-deploy-smoke
+      next_action: await_do_deployments_then_user_close_or_service_health
+      next_skill: 16-evolve
       interview_cursor: completed
       current_task:
       next_task:
@@ -6611,7 +6674,7 @@ evolve_cycles:
       commits_ahead_of_origin: 0
       branch_synced_with_origin: true
       dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
-      note: '13-deploy-smoke Path A IN_PROGRESS @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy; merge PR #153 only after smokes green. 12-verify-deploy waived (S013-D22). ISS-004 closed.'
+      note: 'PR #153 merged at 6940770 after user approval. CI and deploy-preflight passed on main; DO write-api and admin frontend force deployments may still be finishing. Await deploy checkpoint and user close or optional service health before closing EV-012. 12-verify-deploy remains waived (S013-D22).'
       ci:
         status: pass
         branch: evolve/EV-012-unified-job-monitoring
@@ -6619,12 +6682,15 @@ evolve_cycles:
         run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
         run_id: 30454245590
         conclusion: success
-        lint_coverage_fix_sha: 746181b
-        iss004_coverage_fix_sha: 1135891
-        note: 'CI green @ 1135891; next H0c + migration check then pin/redeploy; do not merge PR #153 until smokes pass'
+      deploy_smoke:
+        status: pass
+        report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+        sha: 1135891
+        alembic_revision: 20260728_0009
+        note: 'Path A smokes PASS; PR #153 merge awaits user AskQuestion'
       orchestrator_resumed_at: '2026-07-29'
       resume_at_task:
-      resume_at: 13-deploy-smoke
+      resume_at: deploy_checkpoint
       phase_19_gate: passed
       phase_d_passed_at: '2026-07-29'
     adrs:
@@ -6659,7 +6725,19 @@ evolve_cycles:
         recorded_at: '2026-07-28'
         section: 'Cycle EV-012 — Scope'
       - path: docs/sessions/S013-unified-job-monitoring/reports/evolve-summary.md
-        status: pending
+        kind: evolve-summary
+        session_id: S013-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        stage: 16-evolve
+        status: completed
+        recorded_at: '2026-07-29'
+      - path: docs/evolve-report-EV-012.md
+        kind: evolve-report
+        session_id: S013-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        stage: 16-evolve
+        status: completed
+        recorded_at: '2026-07-29'
       - path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
         kind: checkpoint
         session_id: S013-unified-job-monitoring
@@ -8955,6 +9033,9 @@ decisions_log:
     pre-existing out of scope; phase_c=passed; gates.c_to_d=passed; handoff → start_10_e2e'
   - 'EV-012/S013 2026-07-29: Deploy Path A chosen (Recommended) — Push evolve/EV-012-unified-job-monitoring → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green. Do NOT merge #153 until smokes pass. 12-verify-deploy remains waived (S013-D22). 13-deploy-smoke set in_progress; checkpoints.deploy still pending. Local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012 — leave uncommitted.'
   - 'EV-012/S013 2026-07-29 Path A progress: evolve/EV-012-unified-job-monitoring pushed to origin (HEAD ca78c55). First CI failed coverage gate; fixed with [EV-012] test: close DM FE coverage gate for Jobs SSE paths @ ca78c55. Local coverage PASS (100% lines / 98.18% branches). Re-watching CI before pin/redeploy. 13-deploy-smoke remains in_progress; checkpoints.deploy pending; do NOT merge PR #153 until smokes pass.'
+  - 'EV-012/S013 2026-07-29: User merge approval executed — PR #153 merged at 2026-07-29T13:20:40Z as main commit 69407701b3015201a0370c96a953d9dc85932315. DO write-api and admin frontend pins reset to main with deploy_on_push=false; force deployments 044bf90f-4553-4976-a94a-6a67ca752c83 and 2f16668f-e744-4fbc-bab2-9e46e0227b15 started. Awaiting CI and deploy-preflight on main.'
+  - 'EV-012/S013 2026-07-29: H0ci PASS on main @ 6940770 — ci.yml https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455574450 and deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455818840 succeeded; watch_github_ci.sh reported required workflows passed. DO write-api and admin frontend force deployments may still be finishing; EV-012 remains in_progress at deploy_checkpoint pending user close or optional 15-service-health.'
+  - 'S013-D25 (2026-07-29): User chose option A — close EV-012/S013 after DO write-api and admin frontend reached ACTIVE on main @ 6940770; H0ci PASS; optional 15-service-health skipped.'
 artifacts:
   - docs/sessions/S000-internal-docs-archive/context-brief.md
   - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -9490,22 +9571,24 @@ artifacts:
     recorded_at: '2026-07-29'
     note: 'T0 pass; T1 skipped no docker; T2/T3 pending 13-deploy-smoke'
 git_history:
-  current_branch: evolve/EV-012-unified-job-monitoring
+  current_branch: main
   branches:
     - name: evolve/EV-012-unified-job-monitoring
       purpose: 'EV-012 / S013 — unified job monitoring (#116); extend F32/F36; Lean+build routing'
       base: main
-      status: open
+      status: merged
       created_at: '2026-07-28'
+      merged_at: '2026-07-29T13:20:40Z'
       session_id: S013-unified-job-monitoring
       evolve_cycle_id: EV-012
-      note: 'M82–M85 complete; Phase D passed; ISS-004 closed; 13-deploy-smoke Path A in_progress @ 1135891 — CI green (run 30454245590); next H0c + migration check then pin/redeploy; PR #153 open (do not merge until smokes pass); 12-verify-deploy waived (S013-D22)'
+      note: 'PR #153 merged after user approval at 6940770. DO write-api and admin frontend reset to main; force deployments and main CI/deploy-preflight are in progress. 12-verify-deploy waived (S013-D22).'
       head_sha: 113589139659a3508eb68340be91d93e7814ae77
       commits_ahead_of_origin: 0
       pushed_at: '2026-07-29'
       pr_number: 153
       pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153
-      do_not_merge_until: smokes_pass
+      merge_sha: 69407701b3015201a0370c96a953d9dc85932315
+      merge_approval: executed
     - name: fix/S012-admin-ui-112-105
       purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
       base: main
@@ -10711,6 +10794,7 @@ git_history:
       evolve_cycle_id: EV-012
       note: 'ISS-004 write-api branch coverage — CI green @ run 30454245590'
   notes:
+    - '2026-07-29 S013/EV-012: Path A deploy-smoke PASS @ 1135891 — Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; 13-deploy-smoke completed; checkpoints.deploy=pending_merge_approval; AskQuestion merge PR #153 / hold / reset pins.'
     - '2026-07-29 S013/EV-012: Path A CI green @ 1135891 (run 30454245590) — fixes 746181b (DM FE lint+coverage) + 1135891 (ISS-004 HF gate branches); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api then smokes; 13-deploy-smoke in_progress; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22).'
     - '2026-07-29 S013/EV-012: Path A progress — pushed evolve/EV-012-unified-job-monitoring to origin (HEAD ca78c55); first CI failed coverage gate; fixed @ ca78c55; local coverage PASS (100% lines / 98.18% branches); re-watching CI before pin/redeploy; 13-deploy-smoke in_progress; checkpoints.deploy=pending; do NOT merge PR #153 until smokes pass.'
     - '2026-07-29 S013/EV-012: Deploy Path A chosen — 13-deploy-smoke IN_PROGRESS; push evolve → pin/redeploy Modal DM + DO admin FE + write-api from SHA → H1–H5/Jobs smokes → merge PR #153 after green; do NOT merge until smokes pass; 12-verify-deploy remains waived (S013-D22); checkpoints.deploy=pending; local HEAD d625dc0 (19 ahead of origin); dirty security/S012 tree NOT EV-012 — leave uncommitted.'

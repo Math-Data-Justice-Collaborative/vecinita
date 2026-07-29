@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### EV-012: Unified Admin Jobs (F32/F36) — S013 / #116
+
+- Modal-primary Jobs API: extras, admin cancel/retry/delete, `GET /jobs/events` SSE
+- Eval enqueue bridge + soft-delete (`eval_runs.deleted_at`); Admin `/jobs` + `/jobs/:id`
+- ADR-038 Modal lifecycle / DO storage split; Phase 19 M82–M85
+- **PR:** [#153](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153) → `main` @ `6940770`
+
 ## [0.3.0] — 2026-05-27
 
 ### EV-002: Admin Dashboard, Bulk Ops, Usage Stats, Audit Log (F23–F28)

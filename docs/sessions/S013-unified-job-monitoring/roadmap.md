@@ -35,7 +35,8 @@ Modal `job_type=eval`.
 | 07-build M82–M85 | ✅ Complete | M85 T85.1–T85.5; Phase 19 gate PASS at T2 |
 | 08-verify-build | ✅ Complete | M85/Phase 19 PASS 2026-07-29 — see reports/verification-report.md |
 | 10-e2e | ✅ Complete | T0 PASS 12/12 + Playwright 9/9; T1 skipped (no Docker); see reports/e2e-report.md |
-| 13-deploy-smoke | 🔄 Next | ISS-004 closed; Lean+build deploy smoke |
+| 13-deploy-smoke | ✅ Complete | Path A PASS; #153 merged; DO pins → main; H0ci PASS |
+| Close | ✅ Complete | evolve-summary; skip 15-service-health (S013-D25) |
 
 ---
 

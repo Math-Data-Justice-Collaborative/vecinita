@@ -2,6 +2,14 @@
 
 Archived evolve cycle reports.
 
+## EV-012 — Unified Admin Jobs (F32/F36)
+
+**Cycle:** EV-012  
+**Completed:** 2026-07-29  
+**Session:** S013-unified-job-monitoring  
+**PR:** [#153](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153) @ `6940770`  
+**Report:** [evolve-report-EV-012.md](../evolve-report-EV-012.md) · [evolve-summary](../sessions/S013-unified-job-monitoring/reports/evolve-summary.md)
+
 ## EV-003 — Strict typing (no Any/any)
 
 **Cycle:** EV-003  
