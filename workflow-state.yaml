@@ -11521,6 +11521,19 @@ git_history:
       timestamp: '2026-07-29T11:10:30-04:00'
       evolve_cycle_id: EV-013
       note: '07-build+08-verify-build artifacts — TruncatedText, BoundedTagList, CorpusList, shared tables, S014 reports, uj051, docs, workflow-state'
+    - sha: fad037df119fcf9df315eb786be87813eeed79cb
+      branch: evolve/EV-013-admin-ui-polish-148
+      message: '[EV-013] docs: 10-e2e PASS for UJ-051 admin table density'
+      stage: 10-e2e
+      session_id: S014-admin-ui-polish-148
+      files_changed: 3
+      timestamp: '2026-07-29T11:14:57-04:00'
+      evolve_cycle_id: EV-013
+      files:
+        - docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+        - docs/sessions/S014-admin-ui-polish-148/routing-plan.md
+        - workflow-state.yaml
+      note: '10-e2e PASS docs — e2e-report.md + routing-plan.md + workflow-state.yaml'
   notes:
     - '2026-07-29 S014/EV-013: 10-e2e PASS — T0 Vitest (675 full DM / 28 scoped UJ-051) + Playwright uj051 1/1; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; report e2e-report.md; current_stage → 13-deploy-smoke (pending/ready, not in_progress until user approves deploy); phase_d pending (e2e done awaiting deploy); Lean+build skips 11.'
     - '2026-07-29 S014/EV-013: Recorded commit 2050c830 — admin Corpus density + shared table truncation (#148); 10-e2e set in_progress (T0 Vitest+Playwright uj051; T1 skip no Docker; T2/T3 → 13).'
