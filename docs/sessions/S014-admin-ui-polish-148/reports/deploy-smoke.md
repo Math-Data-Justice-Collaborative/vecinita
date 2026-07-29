@@ -4,8 +4,8 @@
 > **Session:** S014-admin-ui-polish-148  
 > **Cycle:** EV-013  
 > **Stage:** 13-deploy-smoke  
-> **Status:** **deployed** — Path A PASS (FE-only); awaiting merge approval for PR #154  
-> **Branch:** `evolve/EV-013-admin-ui-polish-148` @ `f85b6ab` (smokes @ pin `72747f5`+; coverage fix `f85b6ab`)
+> **Status:** **deployed** — Path A PASS; #154 merged; DO admin FE pin reset to `main`; H0ci PASS  
+> **Branch:** `main` @ `ecb9446` (Path A smokes were on evolve; coverage fix `f85b6ab`)
 
 ## Pre-Deploy
 
@@ -25,6 +25,8 @@
 | DO `vecinita-admin-frontend` | Pin `github.branch` → `evolve/EV-013-admin-ui-polish-148` + force deploy | **ACTIVE** (`d0595145-…`) |
 | Modal / write-api / ChatRAG | Untouched (no backend delta) | n/a |
 
+**Post-merge (2026-07-29):** PR [#154](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154) merged @ `ecb9446`; DO `github.branch` for admin FE reset to `main` (**ACTIVE**). H0ci PASS on `ecb9446` ([CI](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions) + deploy-preflight).
+
 ## Smoke Tests
 
 | Test | Status | Notes |
@@ -40,7 +42,7 @@
 
 | Service | URL | Source |
 |---------|-----|--------|
-| Admin frontend | https://vecinita-admin-frontend-ef4ob.ondigitalocean.app | pin evolve/EV-013 |
+| Admin frontend | https://vecinita-admin-frontend-ef4ob.ondigitalocean.app | `main` @ `ecb9446` |
 | Internal write API | https://vecinita-internal-write-api-icze4.ondigitalocean.app | `main` (unchanged) |
 | Modal data-mgmt | https://vecinita--vecinita-data-management-fastapi-app.modal.run | unchanged |
 | ChatRAG | https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app | unchanged |
@@ -52,7 +54,6 @@
 
 ## Gate / next
 
-- **13-deploy-smoke:** Path A smokes green (FE-only pin).  
-- **PR #154:** open — **do not merge** without explicit user approval.  
-- After merge: reset DO admin FE pin → `main`; watch H0ci on `main`.  
-- Optional: 15-service-health / 17-retrospective.
+- **13-deploy-smoke:** Path A smokes green; post-merge pin on `main`; H0ci PASS.  
+- **PR #154:** **merged**.  
+- **Close:** EV-013 / S014 completed (see `evolve-summary.md`). Optional 15-service-health.

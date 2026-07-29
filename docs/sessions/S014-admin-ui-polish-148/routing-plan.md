@@ -3,13 +3,13 @@
 | Stage | Required | Status | Notes |
 |-------|----------|--------|-------|
 | 00-context | yes | completed | Session open; early UI preview; Phase 0 intake done |
-| 16-evolve | yes | in_progress | Orchestrator EV-013 |
+| 16-evolve | yes | completed | EV-013 closed after #154 merge + H0ci |
 | 01-requirements | yes | completed | RD-179–182; UJ-051; TC-152–155; AC-U1–U7 |
 | 02-verify-plan | yes | completed | Gate A→B passed; M1 Playwright required |
 | 07-build | yes | completed | TruncatedText + CorpusList + shared tables; Vitest + uj051 Playwright green |
 | 08-verify-build | yes | completed | PASS — report `reports/verification-report.md`; personas ADVISORY (0 🔴) |
 | 10-e2e | yes | completed | PASS T0/T0-ui UJ-051; T1 skip; T2/T3 → 13; report `reports/e2e-report.md` |
-| 13-deploy-smoke | yes | in_progress | Path A FE pin ACTIVE; H1–H5 PASS; PR #154 open; report `reports/deploy-smoke.md` |
+| 13-deploy-smoke | yes | completed | Path A PASS; #154 merged; pin → main; H0ci PASS; `reports/deploy-smoke.md` |
 
 ## Skipped
 
