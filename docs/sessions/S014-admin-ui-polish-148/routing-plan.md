@@ -9,7 +9,7 @@
 | 07-build | yes | completed | TruncatedText + CorpusList + shared tables; Vitest + uj051 Playwright green |
 | 08-verify-build | yes | completed | PASS — report `reports/verification-report.md`; personas ADVISORY (0 🔴) |
 | 10-e2e | yes | completed | PASS T0/T0-ui UJ-051; T1 skip; T2/T3 → 13; report `reports/e2e-report.md` |
-| 13-deploy-smoke | yes | pending | After user-approved deploy |
+| 13-deploy-smoke | yes | in_progress | Path A FE pin ACTIVE; H1–H5 PASS; PR #154 open; report `reports/deploy-smoke.md` |
 
 ## Skipped
 
