@@ -116,12 +116,23 @@ paths:
     get:
       operationId: streamJobEvents
       summary: SSE stream of job status updates (EV-012)
+      description: >
+        Emits `text/event-stream` frames with `id`, `event: job`, and `data` as a Job JSON
+        object. Clients may reconnect with the `Last-Event-ID` header to skip already
+        delivered events (TC-148 / RD-173).
       security:
         - bearerAuth: []
           modalProxyAuth: []
+      parameters:
+        - name: Last-Event-ID
+          in: header
+          required: false
+          description: Resume after this numeric SSE event id
+          schema:
+            type: string
       responses:
         "200":
-          description: Server-sent events
+          description: "Server-sent events (id / event job / data Job JSON)"
           content:
             text/event-stream:
               schema:
@@ -578,24 +589,43 @@ components:
     CreateJobRequest:
       type: object
       additionalProperties: false
-      required:
-        - urls
       properties:
         urls:
           type: array
           maxItems: 1000
-          minItems: 1
+          minItems: 0
+          default: []
           items:
             type: string
             format: uri
+          description: Required non-empty for ingest; empty for retag/eval
         options:
-          type: object
-          additionalProperties: false
-          properties:
-            chunk_size_tokens:
-              type: integer
-              minimum: 64
-              maximum: 2048
+          $ref: "#/components/schemas/JobOptions"
+    JobOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        chunk_size_tokens:
+          type: integer
+          minimum: 64
+          maximum: 2048
+        job_type:
+          type: string
+          enum:
+            - ingest
+            - retag
+            - eval
+          default: ingest
+        document_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Required for retag jobs
+        eval_run_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Required for eval jobs (DO eval_runs.id)
     CreateJobResponse:
       type: object
       required:
