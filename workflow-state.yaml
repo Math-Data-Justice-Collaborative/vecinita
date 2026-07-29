@@ -13294,6 +13294,15 @@ git_history:
     timestamp: '2026-07-29T17:42:20-04:00'
     evolve_cycle_id: EV-014
     note: 'F40 ChatRAG cold-start UX — fun facts, consent, Vitest/Playwright, session reports; HEAD short 2fe461d'
+  - sha: '464f46f7d2d98d4b48e036d084a9f23166e29bf5'
+    branch: evolve/EV-014-chat-cold-start-ux
+    message: 'chore: record EV-014 F40 commit and start 13-deploy-smoke'
+    stage: 13-deploy-smoke
+    session_id: S016-chat-cold-start-ux
+    files_changed: 1
+    timestamp: '2026-07-29T17:45:56-04:00'
+    evolve_cycle_id: EV-014
+    note: 'Record F40 commit + start 13-deploy-smoke; HEAD short 464f46f'
   notes:
   - '2026-07-29 S016/EV-014: Recorded commit 2fe461d ([F40] feat cold-start UX); 13-deploy-smoke set in_progress after user approved commit+preview+deploy; active_session.current_stage=13-deploy-smoke.'
   - '2026-07-29 S015: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1
