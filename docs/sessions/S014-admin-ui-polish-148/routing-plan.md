@@ -8,7 +8,7 @@
 | 02-verify-plan | yes | completed | Gate A→B passed; M1 Playwright required |
 | 07-build | yes | completed | TruncatedText + CorpusList + shared tables; Vitest + uj051 Playwright green |
 | 08-verify-build | yes | completed | PASS — report `reports/verification-report.md`; personas ADVISORY (0 🔴) |
-| 10-e2e | yes | pending | Admin Vitest (truncation + a11y) + Playwright density |
+| 10-e2e | yes | completed | PASS T0/T0-ui UJ-051; T1 skip; T2/T3 → 13; report `reports/e2e-report.md` |
 | 13-deploy-smoke | yes | pending | After user-approved deploy |
 
 ## Skipped

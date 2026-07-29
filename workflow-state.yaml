@@ -1086,20 +1086,45 @@ project:
       started_at: '2026-07-29'
       completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      session_id: S013-unified-job-monitoring
-      branch: evolve/EV-012-unified-job-monitoring
-      evolve_cycle_id: EV-012
-      mode: delta
+      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+      session_id: S014-admin-ui-polish-148
+      branch: evolve/EV-013-admin-ui-polish-148
+      evolve_cycle_id: EV-013
+      mode: evolve
+      delta_only: true
+      scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
       overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes; prior S006/S005 baselines preserved below'
+      report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+      note: 'S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below'
       tiers:
-        t0: pass
-        t1: skipped
+        t0: PASS
+        t0_detail: 'Vitest PASS (675 full DM / 28 scoped UJ-051)'
+        t0_ui: PASS
+        t0_ui_detail: 'Playwright uj051 1/1 PASS'
+        t0_api: N/A
+        t0_api_waive_reason: UI-only
+        t1: SKIPPED
         t1_skip_reason: no_docker
-        t2: pass
-        t3: pass
+        t2: deferred_to_13
+        t3: deferred_to_13
+      s013_baseline:
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        mode: delta
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+        partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+        tiers:
+          t0: pass
+          t1: skipped
+          t1_skip_reason: no_docker
+          t2: pass
+          t3: pass
       s006:
         status: completed
         started_at: '2026-06-30'
@@ -1160,64 +1185,74 @@ project:
           admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy 
           stages
     13-deploy-smoke:
-      status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
+      status: pending
       partial_rerun_at: '2026-07-29'
-      session_id: S013-unified-job-monitoring
-      branch: evolve/EV-012-unified-job-monitoring
-      evolve_cycle_id: EV-012
-      mode: delta
-      deploy_path: A
-      head_sha: 113589139659a3508eb68340be91d93e7814ae77
-      overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
-      commits_ahead_of_origin: 0
-      pushed_at: '2026-07-29'
-      pr_number: 153
-      merge_gate: smokes_pass_before_merge
-      do_not_merge_pr: 153
-      merge_approval: pending_user
-      dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
-      partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
-      path_a_progress:
-        push: done
-        ci_rewatch: pass
-        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-        lint_coverage_fix: 746181b
-        iss004_branch_coverage_fix: 1135891
-        h0c_migration_check: pass
-        alembic_revision: 20260728_0009
-        pin_redeploy: pass
-        modal_data_management: redeployed_from_evolve_checkout
-        do_apps:
-          internal_write_api: pinned_active
-          admin_frontend: pinned_active
-        smokes: pass
-        smoke_tiers:
-          h0c: pass
-          h1: pass
-          h2: pass
-          h3: pass
-          h3b: pass
-          t3_ev002: pass
-          h4: pass
-          h5: pass
-        jobs_live:
-          - list
-          - retag_detail
-          - eval_run_detail
-          - sse
-        merge_pr_153: awaiting_user_approval
-      next_askquestion: merge_pr_153_or_hold_or_reset_pins
-      note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit user merge approval; checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
-      s001_baseline:
+      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 13-deploy-smoke READY (pending); awaiting user-approved deploy; Lean+build skips 11'
+      session_id: S014-admin-ui-polish-148
+      branch: evolve/EV-013-admin-ui-polish-148
+      evolve_cycle_id: EV-013
+      mode: evolve
+      delta_only: true
+      note: 'S014/EV-013 13-deploy-smoke pending/ready 2026-07-29 — 10-e2e PASS complete; not in_progress until user approves deploy; Lean+build skips 11; prior S013/EV-012 baseline preserved below'
+      s013_baseline:
         status: completed
-        started_at: '2026-06-26'
-        completed_at: '2026-06-26'
-        partial_rerun_at: '2026-06-26'
-        partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-        report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        partial_rerun_at: '2026-07-29'
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        mode: delta
+        deploy_path: A
+        head_sha: 113589139659a3508eb68340be91d93e7814ae77
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+        commits_ahead_of_origin: 0
+        pushed_at: '2026-07-29'
+        pr_number: 153
+        merge_gate: smokes_pass_before_merge
+        do_not_merge_pr: 153
+        merge_approval: pending_user
+        dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+        partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+        path_a_progress:
+          push: done
+          ci_rewatch: pass
+          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+          lint_coverage_fix: 746181b
+          iss004_branch_coverage_fix: 1135891
+          h0c_migration_check: pass
+          alembic_revision: 20260728_0009
+          pin_redeploy: pass
+          modal_data_management: redeployed_from_evolve_checkout
+          do_apps:
+            internal_write_api: pinned_active
+            admin_frontend: pinned_active
+          smokes: pass
+          smoke_tiers:
+            h0c: pass
+            h1: pass
+            h2: pass
+            h3: pass
+            h3b: pass
+            t3_ev002: pass
+            h4: pass
+            h5: pass
+          jobs_live:
+            - list
+            - retag_detail
+            - eval_run_detail
+            - sse
+          merge_pr_153: awaiting_user_approval
+        next_askquestion: merge_pr_153_or_hold_or_reset_pins
+        note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit user merge approval; checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
+        s001_baseline:
+          status: completed
+          started_at: '2026-06-26'
+          completed_at: '2026-06-26'
+          partial_rerun_at: '2026-06-26'
+          partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+          report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
     15-service-health:
       status: completed
       started_at: '2026-07-28'
@@ -1410,7 +1445,7 @@ active_session:
   evolve_cycle_id: EV-013
   github_issue: 148
   artifacts_dir: docs/sessions/S014-admin-ui-polish-148/
-  current_stage: 10-e2e
+  current_stage: 13-deploy-smoke
   started_at: '2026-07-29'
   routing_preset_choice: lean_plus_build
   routing_preset_status: approved
@@ -1418,7 +1453,7 @@ active_session:
   ui_preview: accepted_early_local_non_deployed_preview
   session_artifacts_written_at: '2026-07-29'
   phase0_approved: true
-  note: '08-verify-build PASS (delta) 2026-07-29; handoff → 10-e2e (pending/ready); uncommitted 07-build still dirty; advisory persona nits (6/0) optional before 10; mode=evolve/delta_only; branch=evolve/EV-013-admin-ui-polish-148'
+  note: '10-e2e PASS 2026-07-29 — overall PASS; handoff → 13-deploy-smoke (pending/ready — not in_progress until user approves deploy); Lean+build skips 11; mode=evolve/delta_only; branch=evolve/EV-013-admin-ui-polish-148'
   routing_plan:
     - stage: 00-context
       required: true
@@ -1455,11 +1490,26 @@ active_session:
       note: 'PASS (delta) — integration/DB SKIPPED; personas ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier auto-fixed 3 EV-013 files'
     - stage: 10-e2e
       required: true
-      status: pending
-      note: 'Ready to start after 08 PASS; uncommitted 07-build still dirty; advisory nits optional'
+      status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      mode: evolve
+      delta_only: true
+      scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+      overall_result: PASS
+      report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+      note: 'PASS — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13'
+      tiers:
+        t0: PASS
+        t0_ui: PASS
+        t0_api: N/A
+        t1: SKIPPED
+        t2: deferred_to_13
+        t3: deferred_to_13
     - stage: 13-deploy-smoke
       required: true
       status: pending
+      note: 'Ready — awaiting user-approved deploy; Lean+build skips 11; not in_progress until deploy approved'
     - stage: 03-plan-tooling
       required: false
       status: skipped
@@ -4538,20 +4588,45 @@ stages:
     started_at: '2026-07-29'
     completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    session_id: S013-unified-job-monitoring
-    branch: evolve/EV-012-unified-job-monitoring
-    evolve_cycle_id: EV-012
-    mode: delta
+    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+    session_id: S014-admin-ui-polish-148
+    branch: evolve/EV-013-admin-ui-polish-148
+    evolve_cycle_id: EV-013
+    mode: evolve
+    delta_only: true
+    scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
     overall_result: PASS
-    report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-    partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-    note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes; prior S006/S005 baselines preserved below'
+    report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+    note: 'S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below'
     tiers:
-      t0: pass
-      t1: skipped
+      t0: PASS
+      t0_detail: 'Vitest PASS (675 full DM / 28 scoped UJ-051)'
+      t0_ui: PASS
+      t0_ui_detail: 'Playwright uj051 1/1 PASS'
+      t0_api: N/A
+      t0_api_waive_reason: UI-only
+      t1: SKIPPED
       t1_skip_reason: no_docker
-      t2: pass
-      t3: pass
+      t2: deferred_to_13
+      t3: deferred_to_13
+    s013_baseline:
+      status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      session_id: S013-unified-job-monitoring
+      branch: evolve/EV-012-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      mode: delta
+      overall_result: PASS
+      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+      tiers:
+        t0: pass
+        t1: skipped
+        t1_skip_reason: no_docker
+        t2: pass
+        t3: pass
     s006:
       status: completed
       started_at: '2026-06-30'
@@ -4675,79 +4750,89 @@ stages:
         template: pass
         connectivity: pass
   13-deploy-smoke:
-    status: completed
-    started_at: '2026-07-29'
-    completed_at: '2026-07-29'
+    status: pending
     partial_rerun_at: '2026-07-29'
-    session_id: S013-unified-job-monitoring
-    branch: evolve/EV-012-unified-job-monitoring
-    evolve_cycle_id: EV-012
-    mode: delta
-    deploy_path: A
-    head_sha: 113589139659a3508eb68340be91d93e7814ae77
-    overall_result: PASS
-    report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
-    commits_ahead_of_origin: 0
-    pushed_at: '2026-07-29'
-    pr_number: 153
-    merge_gate: smokes_pass_before_merge
-    do_not_merge_pr: 153
-    merge_approval: pending_user
-    dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
-    partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
-    path_a_progress:
-      push: done
-      ci_rewatch: pass
-      ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-      lint_coverage_fix: 746181b
-      iss004_branch_coverage_fix: 1135891
-      h0c_migration_check: pass
-      alembic_revision: 20260728_0009
-      pin_redeploy: pass
-      modal_data_management: redeployed_from_evolve_checkout
-      do_apps:
-        internal_write_api: pinned_active
-        admin_frontend: pinned_active
-      smokes: pass
-      smoke_tiers:
-        h0c: pass
-        h1: pass
-        h2: pass
-        h3: pass
-        h3b: pass
-        t3_ev002: pass
-        h4: pass
-        h5: pass
-      jobs_live:
-        - list
-        - retag_detail
-        - eval_run_detail
-        - sse
-      merge_pr_153: awaiting_user_approval
-    next_askquestion: merge_pr_153_or_hold_or_reset_pins
-    note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge approval; prior EV-002/S001 H1–H5 results preserved below'
-    prior_completed_at: '2026-06-26'
-    prior_started_at: '2026-06-26'
-    prior_partial_rerun_at: '2026-06-26'
-    prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-    prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
-    chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
-    connectivity_validated_at: '2026-05-27'
-    prior_h0c: pass
-    prior_h1: pass
-    prior_h2: pass
-    prior_h3: pass
-    prior_h3b_browse: pass
-    prior_h3_ev002_t3: pass
-    prior_h4_do: pass
-    prior_h4_modal: waiver
-    prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
-    prior_h5: pass
-    cors_deployed: true
-    deploy_time_fixes:
-      - '98cc2ac: tag inference chat template + graceful fallback'
-      - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
-    prior_note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
+    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 13-deploy-smoke READY (pending); awaiting user-approved deploy; Lean+build skips 11'
+    session_id: S014-admin-ui-polish-148
+    branch: evolve/EV-013-admin-ui-polish-148
+    evolve_cycle_id: EV-013
+    mode: evolve
+    delta_only: true
+    note: 'S014/EV-013 13-deploy-smoke pending/ready 2026-07-29 — 10-e2e PASS complete; not in_progress until user approves deploy; Lean+build skips 11; prior S013/EV-012 baseline preserved below'
+    s013_baseline:
+      status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      partial_rerun_at: '2026-07-29'
+      session_id: S013-unified-job-monitoring
+      branch: evolve/EV-012-unified-job-monitoring
+      evolve_cycle_id: EV-012
+      mode: delta
+      deploy_path: A
+      head_sha: 113589139659a3508eb68340be91d93e7814ae77
+      overall_result: PASS
+      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+      commits_ahead_of_origin: 0
+      pushed_at: '2026-07-29'
+      pr_number: 153
+      merge_gate: smokes_pass_before_merge
+      do_not_merge_pr: 153
+      merge_approval: pending_user
+      dirty_tree_note: 'security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted'
+      partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+      path_a_progress:
+        push: done
+        ci_rewatch: pass
+        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+        lint_coverage_fix: 746181b
+        iss004_branch_coverage_fix: 1135891
+        h0c_migration_check: pass
+        alembic_revision: 20260728_0009
+        pin_redeploy: pass
+        modal_data_management: redeployed_from_evolve_checkout
+        do_apps:
+          internal_write_api: pinned_active
+          admin_frontend: pinned_active
+        smokes: pass
+        smoke_tiers:
+          h0c: pass
+          h1: pass
+          h2: pass
+          h3: pass
+          h3b: pass
+          t3_ev002: pass
+          h4: pass
+          h5: pass
+        jobs_live:
+          - list
+          - retag_detail
+          - eval_run_detail
+          - sse
+        merge_pr_153: awaiting_user_approval
+      next_askquestion: merge_pr_153_or_hold_or_reset_pins
+      note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge approval; prior EV-002/S001 H1–H5 results preserved below'
+      prior_completed_at: '2026-06-26'
+      prior_started_at: '2026-06-26'
+      prior_partial_rerun_at: '2026-06-26'
+      prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+      prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+      chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
+      connectivity_validated_at: '2026-05-27'
+      prior_h0c: pass
+      prior_h1: pass
+      prior_h2: pass
+      prior_h3: pass
+      prior_h3b_browse: pass
+      prior_h3_ev002_t3: pass
+      prior_h4_do: pass
+      prior_h4_modal: waiver
+      prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
+      prior_h5: pass
+      cors_deployed: true
+      deploy_time_fixes:
+        - '98cc2ac: tag inference chat template + graceful fallback'
+        - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
+      prior_note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
   14-hotfix:
     status: completed
     started_at: '2026-07-28'
@@ -7056,7 +7141,7 @@ evolve_cycles:
     session_id: S014-admin-ui-polish-148
     github_issue: 148
     source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/148
-    current_stage: 10-e2e
+    current_stage: 13-deploy-smoke
     mode: evolve
     delta_only: true
     scope_summary: '#148 Corpus density/truncation + shared table polish (Jobs/Users/Audit/Eval); extend F9+F12; page_size 50; accessible truncation (title/aria-label); theme-aware dark/light/high-contrast using existing frontend-ui ThemeProvider/packages'
@@ -7068,7 +7153,7 @@ evolve_cycles:
       completed_at: '2026-07-29'
       note: 'Fn allocate F9+F12 (no new Fn); page_size 50; UI preview OK; a11y+theme via existing packages'
     ui_preview: accepted_early_local_non_deployed_preview
-    note: '08-verify-build PASS (delta) 2026-07-29; phase_c passed (Lean+build build+verify); handoff → 10-e2e (pending/ready); uncommitted 07-build still dirty; advisory persona nits optional before 10; mode=evolve/delta_only'
+    note: '10-e2e PASS 2026-07-29 — overall PASS; handoff → 13-deploy-smoke (pending/ready — not in_progress until user approves deploy); Lean+build skips 11; phase_d pending (e2e done awaiting deploy)'
     routing_preset_choice: lean_plus_build
     routing_preset_status: approved
     routing_plan_status: approved
@@ -7181,10 +7266,31 @@ evolve_cycles:
         artifacts:
           - docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
       10-e2e:
-        status: pending
-        note: 'Ready to start after 08 PASS; uncommitted 07-build still dirty; advisory nits optional'
+        status: completed
+        started: '2026-07-29'
+        completed: '2026-07-29'
+        mode: evolve
+        delta_only: true
+        scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+        overall_result: PASS
+        report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+        note: 'PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy'
+        tiers:
+          t0: PASS
+          t0_detail: 'Vitest PASS (675 full DM / 28 scoped UJ-051)'
+          t0_ui: PASS
+          t0_ui_detail: 'Playwright uj051 1/1 PASS'
+          t0_api: N/A
+          t0_api_waive_reason: UI-only
+          t1: SKIPPED
+          t1_skip_reason: no_docker
+          t2: deferred_to_13
+          t3: deferred_to_13
+        artifacts:
+          - docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
       13-deploy-smoke:
         status: pending
+        note: 'Ready — awaiting user-approved deploy; Lean+build skips 11; not in_progress until deploy approved'
       03-plan-tooling:
         status: skipped
         skip_rationale: no new guardrails
@@ -7217,6 +7323,7 @@ evolve_cycles:
       phase_a: 'Passed 2026-07-29 — 02-verify-plan complete; Gate A→B PASS (user chose A); M1 Playwright TC-155 required'
       phase_b: 'Passed 2026-07-29 — 07-build COMPLETE (Lean+build; 04/05/06 skipped); TruncatedText + Corpus density; Vitest 674; uj051 TC-155 pass'
       phase_c: 'Passed 2026-07-29 — 08-verify-build PASS (delta); Lean+build build+verify complete; integration/DB SKIPPED; personas ADVISORY 6/0; Vitest 674; uj051 PASS; make audit PASS; gate C→D passed; handoff → 10-e2e'
+      phase_d: 'Pending 2026-07-29 — 10-e2e PASS complete; awaiting user-approved 13-deploy-smoke (e2e done, deploy not started)'
     gates:
       a_to_b: passed
       b_to_c: passed
@@ -7276,6 +7383,10 @@ evolve_cycles:
       - path: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
         stage: 08-verify-build
         recorded_at: '2026-07-29'
+      - path: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+        stage: 10-e2e
+        recorded_at: '2026-07-29'
+        note: 'PASS — T0 Vitest/Playwright; T1 skip; T2/T3 → 13'
     issues: []
 retrospective_cycles: []
 pr_review_cycles:
@@ -9509,6 +9620,7 @@ decisions_log:
   - 'EV-013/RD-181: privacy alignment — no cookies / no new storage; theme continues via existing localStorage (not cookies)'
   - 'EV-013 Gate A→B PASS 2026-07-29 — M1 Playwright required; proceed 07-build'
   - 'EV-013 07-build complete — TruncatedText + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts'
+  - 'EV-013/S014 2026-07-29: commit 2050c830 recorded; 10-e2e IN_PROGRESS — UJ-051 / TC-152–155; T0 Vitest + Playwright uj051; T1 skip no Docker; T2/T3 deferred to 13'
 artifacts:
   - docs/sessions/S000-internal-docs-archive/context-brief.md
   - docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report
@@ -10162,6 +10274,13 @@ artifacts:
     stage: 07-build
     recorded_at: '2026-07-29'
     note: 'UJ-051 / TC-155'
+  - path: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+    kind: stage-report
+    session_id: S014-admin-ui-polish-148
+    evolve_cycle_id: EV-013
+    stage: 10-e2e
+    recorded_at: '2026-07-29'
+    note: 'PASS — T0 Vitest (675/28) + Playwright uj051 1/1; T0 API N/A waived; T1 skip no Docker; T2/T3 → 13'
 git_history:
   current_branch: evolve/EV-013-admin-ui-polish-148
   branches:
@@ -11393,7 +11512,18 @@ git_history:
       timestamp: '2026-07-29T09:02:51-04:00'
       evolve_cycle_id: EV-012
       note: 'ISS-004 write-api branch coverage — CI green @ run 30454245590'
+    - sha: 2050c8309a8070aae420c26da6d6290196e3e653
+      branch: evolve/EV-013-admin-ui-polish-148
+      message: '[EV-013] feat: admin Corpus density and shared table truncation (#148)'
+      stage: 07-build
+      session_id: S014-admin-ui-polish-148
+      files_changed: 27
+      timestamp: '2026-07-29T11:10:30-04:00'
+      evolve_cycle_id: EV-013
+      note: '07-build+08-verify-build artifacts — TruncatedText, BoundedTagList, CorpusList, shared tables, S014 reports, uj051, docs, workflow-state'
   notes:
+    - '2026-07-29 S014/EV-013: 10-e2e PASS — T0 Vitest (675 full DM / 28 scoped UJ-051) + Playwright uj051 1/1; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; report e2e-report.md; current_stage → 13-deploy-smoke (pending/ready, not in_progress until user approves deploy); phase_d pending (e2e done awaiting deploy); Lean+build skips 11.'
+    - '2026-07-29 S014/EV-013: Recorded commit 2050c830 — admin Corpus density + shared table truncation (#148); 10-e2e set in_progress (T0 Vitest+Playwright uj051; T1 skip no Docker; T2/T3 → 13).'
     - '2026-07-29 S013/EV-012: Path A deploy-smoke PASS @ 1135891 — Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; 13-deploy-smoke completed; checkpoints.deploy=pending_merge_approval; AskQuestion merge PR #153 / hold / reset pins.'
     - '2026-07-29 S013/EV-012: Path A CI green @ 1135891 (run 30454245590) — fixes 746181b (DM FE lint+coverage) + 1135891 (ISS-004 HF gate branches); next H0c + migration check then pin/redeploy Modal DM + DO admin FE + write-api then smokes; 13-deploy-smoke in_progress; do NOT merge PR #153 until smokes pass; 12-verify-deploy waived (S013-D22).'
     - '2026-07-29 S013/EV-012: Path A progress — pushed evolve/EV-012-unified-job-monitoring to origin (HEAD ca78c55); first CI failed coverage gate; fixed @ ca78c55; local coverage PASS (100% lines / 98.18% branches); re-watching CI before pin/redeploy; 13-deploy-smoke in_progress; checkpoints.deploy=pending; do NOT merge PR #153 until smokes pass.'
