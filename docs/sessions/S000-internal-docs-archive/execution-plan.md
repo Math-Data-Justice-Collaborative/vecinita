@@ -10,11 +10,11 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
-| **Active milestone** | M83: Eval enqueue bridge + DO SSE + soft-delete |
-| **Active task** | **T83.6** (pending) — Config: openapi/internal-write.yaml events + soft-delete fields |
-| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.5 |
+| **Active milestone** | M84: Admin Jobs UI (list/detail/CRUD + SSE) |
+| **Active task** | **T84.1** (pending) — Test: Vitest Jobs list/detail SSE→poll |
+| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.6 (M83 complete) |
 | **Last updated** | 2026-07-28 |
-| **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M83 @ T83.6 |
+| **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M83 done → 08 then M84 |
 | **Git branch** | `evolve/EV-012-unified-job-monitoring` |
 | **Active session** | S013-unified-job-monitoring — Gate A→B/B→C passed; building Phase 19 |
 | **Scope addition** | 2026-07-28 — Unified Jobs: Modal lifecycle SoT, SSE+poll, eval enqueue, admin CRUD, soft-delete eval_runs (RD-173–178, TP-S013-01–08, ADR-038). |
@@ -1694,7 +1694,7 @@ eval jobs (TP-S013-03/05/06; M3).
 | T83.3 | Config: Alembic — `eval_runs.deleted_at` nullable timestamptz | Config | completed | TP-S013-05 | T83.2 | 2026-07-28 | S013 | F36 |
 | T83.4 | Code: `DataManagementJobsClient.enqueue_eval` + replace BackgroundTasks runner with Modal spawn | Code | completed | TP-S013-06, ADR-038 | T83.1, T82.4 | 2026-07-28 | S013 | F36 |
 | T83.5 | Code: `GET /internal/v1/eval/runs/{run_id}/events` SSE; DELETE job soft-deletes linked eval_run | Code | completed | TP-S013-03/04 | T83.2, T83.3, T83.4 | 2026-07-28 | S013 | F36 |
-| T83.6 | Config: `openapi/internal-write.yaml` events path + EvalRun soft-delete fields | Config | pending | TP-S013-04 | T83.5 | — | S013 | F36 |
+| T83.6 | Config: `openapi/internal-write.yaml` events path + EvalRun soft-delete fields | Config | completed | TP-S013-04 | T83.5 | 2026-07-28 | S013 | F36 |
 
 #### M84: Admin Jobs UI (list/detail/CRUD + SSE)
 
@@ -2389,7 +2389,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T83.3 | M83 | 19 | Config | completed | T83.2 | 2026-07-28 | S013 | F36 | — |
 | T83.4 | M83 | 19 | Code | completed | T83.1, T82.4 | 2026-07-28 | S013 | F36 | — |
 | T83.5 | M83 | 19 | Code | completed | T83.2, T83.3, T83.4 | 2026-07-28 | S013 | F36 | — |
-| T83.6 | M83 | 19 | Config | pending | T83.5 | — | S013 | F36 | — |
+| T83.6 | M83 | 19 | Config | completed | T83.5 | 2026-07-28 | S013 | F36 | — |
 | T84.1 | M84 | 19 | Test | pending | T82.5 | — | S013 | F32 | — |
 | T84.2 | M84 | 19 | Test | pending | T82.5 | — | S013 | F32 | — |
 | T84.3 | M84 | 19 | Code | pending | T84.1 | — | S013 | F32 | — |

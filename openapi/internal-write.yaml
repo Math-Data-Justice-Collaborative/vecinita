@@ -499,6 +499,7 @@ paths:
     get:
       operationId: listEvalRuns
       summary: List eval run history (EV-008 F36)
+      description: Soft-deleted runs (deleted_at set) are omitted (TP-S013-05).
       security:
         - bearerAuth: []
         - internalApiKey: []
@@ -557,6 +558,7 @@ paths:
     get:
       operationId: getEvalRun
       summary: Eval run detail with per-question drill-down (EV-008 F36)
+      description: Soft-deleted runs (deleted_at set) return 404 (TP-S013-05).
       security:
         - bearerAuth: []
         - internalApiKey: []
@@ -580,10 +582,12 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
-  /eval/runs/{run_id}/events:
-    get:
-      operationId: streamEvalRunEvents
-      summary: SSE stream of eval run progress (EV-012 / TP-S013-04)
+    delete:
+      operationId: softDeleteEvalRun
+      summary: Soft-delete eval run via deleted_at (EV-012 / TP-S013-05)
+      description: >
+        Sets eval_runs.deleted_at. Soft-deleted runs are hidden from default list/detail.
+        Called when Modal DELETE /jobs/{id} removes a job_type=eval record (TP-S013-03).
       security:
         - bearerAuth: []
         - internalApiKey: []
@@ -595,8 +599,41 @@ paths:
             type: string
             format: uuid
       responses:
+        "204":
+          description: Soft-deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /eval/runs/{run_id}/events:
+    get:
+      operationId: streamEvalRunEvents
+      summary: SSE stream of eval run progress (EV-012 / TP-S013-04)
+      description: >
+        Emits text/event-stream frames with id, event: eval_run, and data as JSON
+        {run_id, status}. Clients may reconnect with Last-Event-ID to skip already
+        delivered events. Soft-deleted or unknown runs return 404.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Last-Event-ID
+          in: header
+          required: false
+          description: Resume after this numeric SSE event id
+          schema:
+            type: string
+      responses:
         "200":
-          description: Server-sent events
+          description: "Server-sent events (id / event eval_run / data JSON)"
           content:
             text/event-stream:
               schema:
