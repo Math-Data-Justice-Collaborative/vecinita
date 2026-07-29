@@ -9,14 +9,14 @@ project:
       started_at: '2026-07-08'
       completed_at: '2026-07-10'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 — #148 admin Corpus & dashboard UI/UX polish; 00-context COMPLETE; Phase 0 intake approved
-        (F9+F12)'
-      session_id: S014-admin-ui-polish-148
-      branch: evolve/EV-013-admin-ui-polish-148
-      evolve_cycle_id: EV-013
+      partial_rerun_note: 'EV-014/S016-chat-cold-start-ux — #87 ChatRAG cold-start UX; 00-context COMPLETE; Phase 1 routing
+        confirmed (Lean+build); proceeding to 01-requirements'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
       s014_00_completed_at: '2026-07-29'
-      note: S014 00-context COMPLETE 2026-07-29 — Phase 0 approved; Fn F9+F12; page_size 50; UI preview OK; a11y+theme 
-        via existing packages; handoff → 01-requirements
+      note: S016 00-context COMPLETE 2026-07-29 — session open + Lean+build approved; EV-014 Phase 0/1 confirmed; F40 
+        allocated; handoff → 01-requirements delta (UI preview deferred — remind at 11 or after build)
       s009_baseline:
         status: paused
         paused_at: '2026-07-08'
@@ -81,18 +81,28 @@ project:
         current_task: T80.7
         task_status: blocked
         milestone: M80
+      s016_00_completed_at: '2026-07-29'
     01-requirements:
       status: completed
       started_at: '2026-07-28'
       completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 delta — #148 Corpus density/truncation + shared table polish; extend F9+F12 — COMPLETE'
-      session_id: S014-admin-ui-polish-148
-      branch: evolve/EV-013-admin-ui-polish-148
-      evolve_cycle_id: EV-013
+      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); RD-183–187; ADR-039; UJ-052; TC-156–160;
+        AC-CS1–8'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
       mode: delta
-      report: docs/sessions/S014-admin-ui-polish-148/reports/01-requirements.md
-      seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+      report: docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+      seed_path: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+      s014_baseline:
+        status: completed
+        completed_at: '2026-07-29'
+        session_id: S014-admin-ui-polish-148
+        branch: evolve/EV-013-admin-ui-polish-148
+        evolve_cycle_id: EV-013
+        report: docs/sessions/S014-admin-ui-polish-148/reports/01-requirements.md
+        note: 'S014/EV-013 01-requirements COMPLETE — RD-179–182; UJ-051; TC-152–155; AC-U1–U7'
       s013_baseline:
         status: completed
         completed_at: '2026-07-28'
@@ -102,30 +112,55 @@ project:
         report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
         note: 01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; 
           api-contract EV-012; committed c8cfaa9
-      note: 'S014/EV-013 01-requirements COMPLETE 2026-07-29 — RD-179–182; UJ-051; TC-152–155; AC-U1–U7; privacy no-cookies/no-new-storage
-        (RD-181 aligns with existing localStorage theme, not cookies); handoff → 02-verify-plan'
+      note: 'S016/EV-014 01-requirements COMPLETE 2026-07-29 — RD-183–187; ADR-039; UJ-052; TC-156–160; AC-CS1–8; handoff
+        → AskQuestion proceed to 02-verify-plan'
+      substeps:
+        seed_loaded: true
+        handoff_seed: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+        current_phase: completed
       rd_allocated:
         status: written
-        range: RD-179..RD-182
+        range: RD-183..RD-187
         allocated_at: '2026-07-29'
         written_at: '2026-07-29'
         decisions:
-        - RD-179
-        - RD-180
-        - RD-181
-        - RD-182
-        note: 'RD-181: privacy — no cookies / no new storage; theme remains existing localStorage (not cookies)'
+        - RD-183
+        - RD-184
+        - RD-185
+        - RD-186
+        - RD-187
+        note: 'S016/EV-014 F40 cold-start UX — RD-183–187; S014 RD-179–182 retained in s014_baseline'
+      artifacts:
+      - docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+      - docs/adr/ADR-039-chat-cold-start-fun-fact-consent.md
+      - docs/user-journeys.md
+      - docs/test-plan.md
+      - docs/acceptance-criteria.md
+      - docs/decisions.md
+      - docs/feature-list.md
     02-verify-plan:
       status: completed
       started_at: '2026-07-29'
       completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: EV-013/S014 delta — consistency pass COMPLETE; Gate A→B PASS (choice A); M1 Playwright TC-155 
-        required
-      session_id: S014-admin-ui-polish-148
-      branch: evolve/EV-013-admin-ui-polish-148
-      evolve_cycle_id: EV-013
+      partial_rerun_note: EV-014/S016 delta COMPLETE — Gate A→B PASS for F40 ChatRAG cold-start UX (#87); M1–M3 all A
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
       mode: delta
+      report: docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md
+      gate_a_to_b: passed
+      medium_verdicts:
+        recorded_at: '2026-07-29'
+        M1:
+          choice: A
+          verdict: Lock cookie Max-Age to 1 year
+        M2:
+          choice: A
+          verdict: Skip deployment-integration.md update for VITE_WRWC_DONATE_URL
+        M3:
+          choice: A
+          verdict: Defer exact EN/ES fact strings to 07-build
       s013_baseline:
         status: completed
         completed_at: '2026-07-28'
@@ -134,100 +169,14 @@ project:
         evolve_cycle_id: EV-012
         report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
         note: 02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28)
-      report: docs/sessions/S014-admin-ui-polish-148/reports/02-verify-plan-audit.md
-      gate_a_to_b: passed
-      medium_verdicts:
-        recorded_at: '2026-07-29'
-        M1:
-          choice: A
-          verdict: Playwright TC-155 required for Corpus/admin table polish e2e
-      note: S014/EV-013 02-verify-plan COMPLETE 2026-07-29 — Gate A→B PASS (user chose A); M1 Playwright TC-155 
-        required; handoff → 07-build
+      note: 'S016/EV-014 02-verify-plan COMPLETE 2026-07-29 — Gate A→B PASS (M1–M3 all A); cookie Max-Age=1y; skip deployment-integration
+        VITE_WRWC_DONATE_URL; defer EN/ES fact strings to 07-build; handoff → 07-build'
       substeps:
-        interviews:
-          completed: 6
-          total: 6
-          pending: 0
-          current_section: completed
-        seed_loaded: true
-        handoff_seed: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
         current_phase: completed
-        locked_decisions: approved_all
-        open_questions_pending: []
-        feature_list_write: completed
-      requirements_delta_interview:
-        recorded_at: '2026-07-28'
-        resolved_at: '2026-07-28'
-        status: docs_complete
-        handoff: run_02_verify_plan_consistency
-        locked_decisions:
-          status: approved_all
-          option: A
-          scope: S013-D1..D22
-        questions:
-        - id: S013-RQ1
-          seed_ref: locked_decisions_confirm
-          topic: locked_decisions
-          choice: approve_all
-          option: A
-          status: resolved
-          recorded_at: '2026-07-28'
-        - id: S013-RQ2
-          seed_ref: open_q1_sse_fallback
-          topic: sse_failure_fallback
-          choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
-          option: A
-          status: resolved
-          recorded_at: '2026-07-28'
-          rd_id: RD-173
-          note: On SSE failure → fall back to 4s poll + retry SSE with backoff
-        - id: S013-RQ3
-          seed_ref: open_q2_jobs_sot
-          topic: jobs_architecture_modal_lifecycle_do_storage
-          choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
-          status: resolved
-          recorded_at: '2026-07-28'
-          rd_ids:
-          - RD-174
-          - RD-175
-          amends:
-          - ADR-033
-          revises:
-          - S013-D8
-          architecture:
-            modal: ALL long-running jobs incl eval; Modal job queue owns job lifecycle
-            do_postgres: SoT for all storage including metrics/results
-            supabase: authentication only
-            jobs_tab: Modal GET /jobs primary unified list (job_type incl eval); DO for metrics/results + eval 
-              drill-down — NOT dual job-list federation
-          note: Eval leaves DO BackgroundTasks per ADR-033 amendment; supersedes earlier FE federation of two job lists 
-            (S013-D8)
-        - id: S013-RQ4
-          seed_ref: open_q3_cancel_retry
-          topic: cancel_retry_auth
-          choice: admin_only_full_job_crud
-          option: A
-          status: resolved
-          recorded_at: '2026-07-28'
-          rd_id: RD-176
-          scope: create_read_update_cancel_retry_delete
-          auth: admin_only
-        - id: S013-RQ5
-          seed_ref: open_q4_modal_logs
-          topic: failed_modal_job_logs
-          choice: call_id_copy_plus_dashboard_link_when_known
-          option: A
-          status: resolved
-          recorded_at: '2026-07-28'
-          rd_id: RD-177
-        - id: S013-RQ6
-          seed_ref: open_q5_playwright
-          topic: playwright_t0_ui_jobs_list_detail
-          choice: yes_playwright_t0_ui
-          option: A
-          status: resolved
-          recorded_at: '2026-07-28'
-          rd_id: RD-178
+        seed_loaded: true
+        handoff_seed: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+        gate_a_to_b: passed
+        medium_verdicts_recorded: true
       rd_allocated:
         status: written
         range: RD-173..RD-178
@@ -310,8 +259,6 @@ project:
         note: 'EV-007/S006 01-requirements complete — RD-091–RD-098; AC-U3 revised; F35.12–F35.15. Prior EV-006/F35 delta
           (S005): ADR-029, feature-list F35, UJ-030-UJ-033, TC-088-TC-095, AC-U1-AC-U9, RD-080-RD-090.'
         report: docs/sessions/S006-invite-acceptance/reports/01-requirements.md
-      prior_status: completed
-      prior_completed_at: '2026-07-08'
       decisions:
       - RD-163
       - RD-164
@@ -323,6 +270,113 @@ project:
       - RD-170
       - RD-171
       - RD-172
+      s014_baseline:
+        status: completed
+        completed_at: '2026-07-29'
+        session_id: S014-admin-ui-polish-148
+        branch: evolve/EV-013-admin-ui-polish-148
+        evolve_cycle_id: EV-013
+        report: docs/sessions/S014-admin-ui-polish-148/reports/02-verify-plan-audit.md
+        gate_a_to_b: passed
+        note: S014/EV-013 02-verify-plan COMPLETE 2026-07-29 — Gate A→B PASS (choice A); M1 Playwright TC-155 required
+        medium_verdicts:
+          recorded_at: '2026-07-29'
+          M1:
+            choice: A
+            verdict: Playwright TC-155 required for Corpus/admin table polish e2e
+        s013_baseline:
+          status: completed
+          completed_at: '2026-07-28'
+          session_id: S013-unified-job-monitoring
+          branch: evolve/EV-012-unified-job-monitoring
+          evolve_cycle_id: EV-012
+          report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
+          note: 02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28)
+        requirements_delta_interview:
+          recorded_at: '2026-07-28'
+          resolved_at: '2026-07-28'
+          status: docs_complete
+          handoff: run_02_verify_plan_consistency
+          locked_decisions:
+            status: approved_all
+            option: A
+            scope: S013-D1..D22
+          questions:
+          - id: S013-RQ1
+            seed_ref: locked_decisions_confirm
+            topic: locked_decisions
+            choice: approve_all
+            option: A
+            status: resolved
+            recorded_at: '2026-07-28'
+          - id: S013-RQ2
+            seed_ref: open_q1_sse_fallback
+            topic: sse_failure_fallback
+            choice: sse_failure_fallback_to_4s_poll_retry_sse_backoff
+            option: A
+            status: resolved
+            recorded_at: '2026-07-28'
+            rd_id: RD-173
+            note: On SSE failure → fall back to 4s poll + retry SSE with backoff
+          - id: S013-RQ3
+            seed_ref: open_q2_jobs_sot
+            topic: jobs_architecture_modal_lifecycle_do_storage
+            choice: modal_all_long_running_jobs_do_postgres_storage_supabase_auth_only
+            status: resolved
+            recorded_at: '2026-07-28'
+            rd_ids:
+            - RD-174
+            - RD-175
+            amends:
+            - ADR-033
+            revises:
+            - S013-D8
+            architecture:
+              modal: ALL long-running jobs incl eval; Modal job queue owns job lifecycle
+              do_postgres: SoT for all storage including metrics/results
+              supabase: authentication only
+              jobs_tab: Modal GET /jobs primary unified list (job_type incl eval); DO for metrics/results + eval 
+                drill-down — NOT dual job-list federation
+            note: Eval leaves DO BackgroundTasks per ADR-033 amendment; supersedes earlier FE federation of two job 
+              lists (S013-D8)
+          - id: S013-RQ4
+            seed_ref: open_q3_cancel_retry
+            topic: cancel_retry_auth
+            choice: admin_only_full_job_crud
+            option: A
+            status: resolved
+            recorded_at: '2026-07-28'
+            rd_id: RD-176
+            scope: create_read_update_cancel_retry_delete
+            auth: admin_only
+          - id: S013-RQ5
+            seed_ref: open_q4_modal_logs
+            topic: failed_modal_job_logs
+            choice: call_id_copy_plus_dashboard_link_when_known
+            option: A
+            status: resolved
+            recorded_at: '2026-07-28'
+            rd_id: RD-177
+          - id: S013-RQ6
+            seed_ref: open_q5_playwright
+            topic: playwright_t0_ui_jobs_list_detail
+            choice: yes_playwright_t0_ui
+            option: A
+            status: resolved
+            recorded_at: '2026-07-28'
+            rd_id: RD-178
+        substeps:
+          interviews:
+            completed: 6
+            total: 6
+            pending: 0
+            current_section: completed
+          seed_loaded: true
+          handoff_seed: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+          current_phase: completed
+          locked_decisions: approved_all
+          open_questions_pending: []
+          feature_list_write: completed
     04-tech-plan:
       status: completed
       started_at: '2026-07-28'
@@ -496,56 +550,46 @@ project:
     07-build:
       status: completed
       started_at: '2026-07-29'
-      completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 — #148 TruncatedText + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass
-        — COMPLETE'
-      session_id: S014-admin-ui-polish-148
-      branch: evolve/EV-013-admin-ui-polish-148
-      evolve_cycle_id: EV-013
+      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); Vitest TC-156–159 + Playwright TC-160
+        pass; locale-context rename for macOS casing'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
       mode: delta
-      feature: F9/F12
-      phase: Phase 19 (M82-M85)
-      milestone: M85
-      report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
-      s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion 
-        detail
-      note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 
-        green; Playwright uj051 TC-155 pass; privacy no-cookie asserts; handoff → 08-verify-build
+      feature: F40
+      s014_baseline:
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        session_id: S014-admin-ui-polish-148
+        branch: evolve/EV-013-admin-ui-polish-148
+        evolve_cycle_id: EV-013
+        mode: delta
+        feature: F9/F12
+        phase: Phase 19 (M82-M85)
+        milestone: M85
+        report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
+        note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 
+          green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
+        s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion 
+          detail
+      note: 'S016/EV-014 07-build COMPLETE 2026-07-29 — F40 ChatRAG cold-start UX implemented (Vitest TC-156–159 + Playwright
+        TC-160 pass); locale-context rename for macOS casing; handoff → 08-verify-build'
       substeps:
         current_task:
         task_status: completed
         in_progress_tasks: []
         blocked_tasks: []
-        completed_tasks_recent:
-        - T82.1
-        - T82.2
-        - T82.3
-        - T82.4
-        - T82.5
-        - T82.6
-        - T83.1
-        - T83.2
-        - T83.3
-        - T83.4
-        - T83.5
-        - T83.6
-        - T84.1
-        - T84.2
-        - T84.3
-        - T84.4
-        - T84.5
-        - T84.6
-        - T85.1
-        - T85.2
-        - T85.3
-        - T85.4
-        - T85.5
+        completed_tasks_recent: []
         next_task:
+        note: F40 cold-start UX build COMPLETE; Vitest TC-156–159 + Playwright TC-160 pass; locale-context rename for 
+          macOS casing
       execution_plan:
         active_task:
         active_milestone: M85
         active_phase: Phase 19
+        note: Historical S014/EV-013 Phase 19 / M85 COMPLETE — retained; S016/F40 cold-start UX build COMPLETE
         T85.1:
           status: completed
           started_at: '2026-07-29'
@@ -554,23 +598,21 @@ project:
           status: completed
           started_at: '2026-07-29'
           completed_at: '2026-07-29'
-        note: 'Current State (YAML): Phase 19 / M85 COMPLETE (T85.1–T85.5); phase_19_gate=passed @ T2; handoff → 08-verify-build;
-          PR #153 open (do not merge)'
         execution_plan_md_sync:
           status: synced_at_T85_5
           file: docs/sessions/S000-internal-docs-archive/execution-plan.md
           synced_as_of: '2026-07-29'
           sync_owner: 07-build
           pr_plan_note: 'Minor PR #153 (M82) open — do not merge; M83–M85 on same evolve branch'
-          note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355)
+          note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
           canonical_current_state:
-            active_phase: 'Phase 19: EV-012 — Unified Admin Jobs (#116)'
-            active_milestone: 'M85: Full-stack tests (API e2e + Playwright) — COMPLETE'
+            active_phase: 'Phase 19: EV-012 — Unified Admin Jobs (#116) — COMPLETE (S014 baseline)'
+            active_milestone: 'M85 COMPLETE (S014); S016/F40 cold-start UX build COMPLETE'
             active_task:
             task_status: completed
             tasks_completed: 'T82.1–T82.6 (M82); T83.1–T83.6 (M83); T84.1–T84.6 (M84); T85.1–T85.5 (M85); Phase 19 gate PASS
-              @ T2; 08-verify-build M82 PASS + M84 scoped PASS'
-            orchestrator_resume: '08-verify-build @ M85 / Phase 19 full verify (08_in_progress)'
+              @ T2'
+            orchestrator_resume: 'S016/EV-014 10-e2e PASS; next 13-deploy-smoke pending user approval; await commit request'
         phase_19_gate: passed
         T85.3:
           status: completed
@@ -801,140 +843,160 @@ project:
       - M83
       - M84
       - M85
+      completed_at: '2026-07-29'
+      report: docs/sessions/S016-chat-cold-start-ux/reports/07-build-cold-start-ux.md
     08-verify-build:
       status: completed
       started_at: '2026-07-29'
       completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish Phase 2 PASS (delta) 2026-07-29 (F9+F12); scope=data-management-frontend
-        + related tests/docs'
-      session_id: S014-admin-ui-polish-148
-      branch: evolve/EV-013-admin-ui-polish-148
-      evolve_cycle_id: EV-013
+      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162;
+        Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
       mode: delta
-      feature: F9/F12
-      scope: data-management-frontend + related tests/docs
+      feature: F40
       overall_result: PASS
       result_scope: delta
-      report: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
-      substeps:
-        phase: 2
-        phase_note: Phase 2 PASS 2026-07-29
-        integration_db: SKIPPED
-        integration_db_reason: no Docker/Postgres
-        personas: ADVISORY
-        persona_nits: 6
-        persona_blockers: 0
-        vitest: 674
-        uj051: PASS
-        make_audit: PASS
-        make_audit_note: 1 ignored nltk
-        prettier: auto_fixed_3_ev013_files
-      note: S014/EV-013 08-verify-build PASS (delta) 2026-07-29 — integration/DB SKIPPED (no Docker/Postgres); personas 
-        ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier auto-fixed 3 
-        EV-013 files; handoff → 10-e2e; uncommitted 07-build still dirty; advisory nits optional before 10
-      s013_baseline:
+      report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+      note: 'S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged;
+        handoff → 10-e2e'
+      s014_baseline:
         status: completed
-        started_at: '2026-07-28'
+        started_at: '2026-07-29'
         completed_at: '2026-07-29'
         partial_rerun_at: '2026-07-29'
-        partial_rerun_note: EV-012/S013 delta — M84 milestone verify gate (Phase 19)
-        session_id: S013-unified-job-monitoring
-        branch: evolve/EV-012-unified-job-monitoring
-        evolve_cycle_id: EV-012
-        milestone: M84
-        scope: M84
-        report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
+        partial_rerun_note: 'EV-013/S014 — #148 admin UI polish Phase 2 PASS (delta) 2026-07-29 (F9+F12); scope=data-management-frontend
+          + related tests/docs'
+        session_id: S014-admin-ui-polish-148
+        branch: evolve/EV-013-admin-ui-polish-148
+        evolve_cycle_id: EV-013
+        mode: delta
+        feature: F9/F12
+        scope: data-management-frontend + related tests/docs
         overall_result: PASS
-        result_scope: scoped
-        commit: f98d40d
-        m82_gate:
-          status: passed
-          completed_at: '2026-07-28'
-          commit: '7209837'
-          overall_result: PASS
-        m84_gate: passed
-        m84_gate_passed_at: '2026-07-29'
-        note: 'M84 scoped PASS @ f98d40d retained (historical). M85/Phase19 08-verify-build completed PASS scoped 2026-07-29.
-          PR #153 open (do not merge).'
-        checks:
-          vitest_m84_suites: pass
-          ruff: pass
-          make_check_fast_fe_lint: blocked_local_node22_vs_nvmrc24_environment
-        minor_pr:
-          url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153'
-          number: 153
-          status: open
-          merge_policy: do_not_merge
-          title: '[M82] EV-012 Unified Admin Jobs — Modal jobs API + SSE + CRUD'
-        m85_pending: false
-      s010_baseline:
-        status: completed
-        started_at: '2026-07-08'
-        completed_at: '2026-07-08'
-        partial_rerun_at: '2026-07-08'
-        partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
-        session_id: S010-unify-llm-service
-        branch: feat/S010-unify-llm-service
-        evolve_cycle_id: EV-011
-        report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
-        overall_result: PASS
-        note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
-          public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
-      s008_baseline:
-        status: completed
-        started_at: '2026-07-03'
-        completed_at: '2026-07-03'
-        session_id: S008-eval-ux-playground
-        branch: feat/S008-eval-ux-playground
-        evolve_cycle_id: EV-009
-        report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+        result_scope: delta
+        report: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
         substeps:
-          phase: formal
-          result: PASS
-        note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
-      s004_baseline:
-        status: completed
-        completed_at: '2026-06-29'
-        session_id: S004-supabase-auth
-        branch: feat/S004-supabase-auth
-        overall_result: PASS
-        report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-        blocking_failures: []
-        note: 'S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures
-          (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.'
-      s005:
-        status: completed
-        completed_at: '2026-06-30'
-        session_id: S005-user-mgmt-auth
-        branch: feat/S005-user-mgmt-auth
-        feature: F35
-        milestone: M53
-        overall_result: PASS
-        report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-        session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
-        blocking_failures: []
-        remediated:
-        - Python lint (11)
-        - Python typecheck (2 casts)
-        - Frontend lint (1)
-        - Frontend format (1)
-        - 'DM FE branch coverage 94.18% < 95%'
-        green:
-        - make check
-        - make test-unit-coverage
-        - 681+ pytest
-        - 312 vitest admin
-        note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck,
-          FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage
-          green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12
-          gate.'
-      s003_baseline:
-        status: completed
-        completed_at: '2026-06-28'
-        session_id: S003-persistent-chat-history
-        overall_result: PASS
-        session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+          phase: 2
+          phase_note: Phase 2 PASS 2026-07-29
+          integration_db: SKIPPED
+          integration_db_reason: no Docker/Postgres
+          personas: ADVISORY
+          persona_nits: 6
+          persona_blockers: 0
+          vitest: 674
+          uj051: PASS
+          make_audit: PASS
+          make_audit_note: 1 ignored nltk
+          prettier: auto_fixed_3_ev013_files
+        note: S014/EV-013 08-verify-build PASS (delta) 2026-07-29 — integration/DB SKIPPED (no Docker/Postgres); 
+          personas ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier 
+          auto-fixed 3 EV-013 files; handoff → 10-e2e; uncommitted 07-build still dirty; advisory nits optional before 
+          10
+        s013_baseline:
+          status: completed
+          started_at: '2026-07-28'
+          completed_at: '2026-07-29'
+          partial_rerun_at: '2026-07-29'
+          partial_rerun_note: EV-012/S013 delta — M84 milestone verify gate (Phase 19)
+          session_id: S013-unified-job-monitoring
+          branch: evolve/EV-012-unified-job-monitoring
+          evolve_cycle_id: EV-012
+          milestone: M84
+          scope: M84
+          report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
+          overall_result: PASS
+          result_scope: scoped
+          commit: f98d40d
+          m82_gate:
+            status: passed
+            completed_at: '2026-07-28'
+            commit: '7209837'
+            overall_result: PASS
+          m84_gate: passed
+          m84_gate_passed_at: '2026-07-29'
+          note: 'M84 scoped PASS @ f98d40d retained (historical). M85/Phase19 08-verify-build completed PASS scoped 2026-07-29.
+            PR #153 open (do not merge).'
+          checks:
+            vitest_m84_suites: pass
+            ruff: pass
+            make_check_fast_fe_lint: blocked_local_node22_vs_nvmrc24_environment
+          minor_pr:
+            url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153'
+            number: 153
+            status: open
+            merge_policy: do_not_merge
+            title: '[M82] EV-012 Unified Admin Jobs — Modal jobs API + SSE + CRUD'
+          m85_pending: false
+        s010_baseline:
+          status: completed
+          started_at: '2026-07-08'
+          completed_at: '2026-07-08'
+          partial_rerun_at: '2026-07-08'
+          partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
+          session_id: S010-unify-llm-service
+          branch: feat/S010-unify-llm-service
+          evolve_cycle_id: EV-011
+          report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+          overall_result: PASS
+          note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+            public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+        s008_baseline:
+          status: completed
+          started_at: '2026-07-03'
+          completed_at: '2026-07-03'
+          session_id: S008-eval-ux-playground
+          branch: feat/S008-eval-ux-playground
+          evolve_cycle_id: EV-009
+          report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+          substeps:
+            phase: formal
+            result: PASS
+          note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
+        s004_baseline:
+          status: completed
+          completed_at: '2026-06-29'
+          session_id: S004-supabase-auth
+          branch: feat/S004-supabase-auth
+          overall_result: PASS
+          report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+          blocking_failures: []
+          note: 'S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking failures
+            (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.'
+        s005:
+          status: completed
+          completed_at: '2026-06-30'
+          session_id: S005-user-mgmt-auth
+          branch: feat/S005-user-mgmt-auth
+          feature: F35
+          milestone: M53
+          overall_result: PASS
+          report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+          session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
+          blocking_failures: []
+          remediated:
+          - Python lint (11)
+          - Python typecheck (2 casts)
+          - Frontend lint (1)
+          - Frontend format (1)
+          - 'DM FE branch coverage 94.18% < 95%'
+          green:
+          - make check
+          - make test-unit-coverage
+          - 681+ pytest
+          - 312 vitest admin
+          note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck,
+            FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage
+            green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase 12
+            gate.'
+        s003_baseline:
+          status: completed
+          completed_at: '2026-06-28'
+          session_id: S003-persistent-chat-history
+          overall_result: PASS
+          session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
     09-qa:
       status: completed
       started_at: '2026-07-07'
@@ -1079,66 +1141,93 @@ project:
       started_at: '2026-07-29'
       completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
-      session_id: S014-admin-ui-polish-148
-      branch: evolve/EV-013-admin-ui-polish-148
-      evolve_cycle_id: EV-013
+      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
       mode: evolve
       delta_only: true
-      scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+      feature: F40
+      scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
       overall_result: PASS
-      report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
-      note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051
-        1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff 
-        → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
+      report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+      note: 'S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below'
       tiers:
         t0: PASS
-        t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+        t0_detail: Vitest TC-156–159 PASS (covered in 08)
         t0_ui: PASS
-        t0_ui_detail: Playwright uj051 1/1 PASS
+        t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
         t0_api: N/A
-        t0_api_waive_reason: UI-only
+        t0_api_waive_reason: no API contract change (RD-187)
         t1: SKIPPED
-        t1_skip_reason: no_docker
+        t1_skip_reason: not required for FE-only F40 delta
         t2: deferred_to_13
         t3: deferred_to_13
-      s013_baseline:
+      s014_baseline:
         status: completed
         started_at: '2026-07-29'
         completed_at: '2026-07-29'
-        session_id: S013-unified-job-monitoring
-        branch: evolve/EV-012-unified-job-monitoring
-        evolve_cycle_id: EV-012
-        mode: delta
+        partial_rerun_at: '2026-07-29'
+        partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+        session_id: S014-admin-ui-polish-148
+        branch: evolve/EV-013-admin-ui-polish-148
+        evolve_cycle_id: EV-013
+        mode: evolve
+        delta_only: true
+        scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
         overall_result: PASS
-        report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-        partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+        report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+        note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051
+          1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff
+          → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
         tiers:
-          t0: pass
-          t1: skipped
+          t0: PASS
+          t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+          t0_ui: PASS
+          t0_ui_detail: Playwright uj051 1/1 PASS
+          t0_api: N/A
+          t0_api_waive_reason: UI-only
+          t1: SKIPPED
           t1_skip_reason: no_docker
-          t2: pass
-          t3: pass
-      s006:
-        status: completed
-        started_at: '2026-06-30'
-        completed_at: '2026-06-30'
-        session_id: S006-invite-acceptance
-        branch: feat/S006-invite-acceptance
-        feature: F35
-        evolve_cycle_id: EV-007
-        report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-        note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract;
-          T3 deferred'
-      s005:
-        status: completed
-        completed_at: '2026-06-30'
-        session_id: S005-user-mgmt-auth
-        branch: feat/S005-user-mgmt-auth
-        report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
-        note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
-          T3 deferred'
+          t2: deferred_to_13
+          t3: deferred_to_13
+        s013_baseline:
+          status: completed
+          started_at: '2026-07-29'
+          completed_at: '2026-07-29'
+          session_id: S013-unified-job-monitoring
+          branch: evolve/EV-012-unified-job-monitoring
+          evolve_cycle_id: EV-012
+          mode: delta
+          overall_result: PASS
+          report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+          partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+          note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+          tiers:
+            t0: pass
+            t1: skipped
+            t1_skip_reason: no_docker
+            t2: pass
+            t3: pass
+        s006:
+          status: completed
+          started_at: '2026-06-30'
+          completed_at: '2026-06-30'
+          session_id: S006-invite-acceptance
+          branch: feat/S006-invite-acceptance
+          feature: F35
+          evolve_cycle_id: EV-007
+          report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+          note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract;
+            T3 deferred'
+        s005:
+          status: completed
+          completed_at: '2026-06-30'
+          session_id: S005-user-mgmt-auth
+          branch: feat/S005-user-mgmt-auth
+          report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
+          note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
+            T3 deferred'
     11-verify-impl:
       status: completed
       completed_at: '2026-07-01'
@@ -1302,15 +1391,16 @@ project:
         merged_at: '2026-07-29'
       next_action: none_cycle_closed
     15-service-health:
-      status: in_progress
+      status: skipped
       started_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'S015 post-merge after PR #155 (15030fc); Modal DM redeployed; live CORS OPTIONS /jobs/events PASS; live pytest VECINITA_RUN_LIVE_CORS=1 PASS; formal H0ci–H5 pending'
+      partial_rerun_note: 'S015 post-merge after PR #155 (15030fc); Modal DM redeployed; live CORS OPTIONS /jobs/events PASS;
+        live pytest VECINITA_RUN_LIVE_CORS=1 PASS; formal H0ci–H5 pending'
       session_id: S015-hotfix-jobs-sse-cors
       environment: production
-      infra: pending
-      e2e: pending
-      overall: pending
+      infra: waived
+      e2e: waived
+      overall: waived
       live_cors:
         status: pass
         path: OPTIONS /jobs/events
@@ -1328,8 +1418,9 @@ project:
       prior_report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
       prior_session_id: S012-hotfix-admin-ui-112-105
       prior_overall: pass
-      note: 'S015 15-service-health IN_PROGRESS — live CORS PASS post Modal DM redeploy @ 15030fc (PR #155); formal H0ci–H5 / service-health report pending. Session remains open.'
-      next_action: run_service_health
+      note: 'S015 15-service-health WAIVED 2026-07-29 — user Option 1 close for #87 evolve priority; live CORS PASS retained;
+        formal H0ci–H5 not run. Session closed.'
+      next_action: none_session_closed
       history:
       - status: completed
         completed_at: '2026-06-25'
@@ -1369,9 +1460,25 @@ project:
         - H5
         advisories:
         - 'H1: transient modal_llm=error recovered'
+      - status: skipped
+        completed_at: '2026-07-29'
+        session_id: S015-hotfix-jobs-sse-cors
+        session_note: 'S015 waived formal H0ci–H5; user Option 1 close for #87; live CORS OPTIONS /jobs/events PASS @ 15030fc
+          (PR #155)'
+        overall: waived
+        live_cors: pass
+        merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
+        pr_number: 155
+        waiver: 'User waived formal 15-service-health wrap to prioritize #87 evolve session; live CORS PASS already recorded
+          post Modal DM redeploy @ 15030fc (PR #155).'
       s012_ci_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424'
       s012_deploy_do_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628'
       s012_deploy_preflight_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209'
+      completed_at: '2026-07-29'
+      waiver: 'User waived formal 15-service-health wrap to prioritize #87 evolve session; live CORS PASS already recorded
+        post Modal DM redeploy @ 15030fc (PR #155).'
+      waived_at: '2026-07-29'
+      waived_for: github_issue_87_feature_session
     19-address-pr-review:
       status: in_progress
       started: '2026-07-07'
@@ -1383,8 +1490,7 @@ project:
       session_id: S015-hotfix-jobs-sse-cors
       branch: fix/S015-jobs-sse-cors
       bugs:
-      - &id001
-        id: BUG-2026-07-29-jobs-sse-cors-headers
+      - id: BUG-2026-07-29-jobs-sse-cors-headers
         summary: Admin Jobs SSE live updates unavailable — CORS preflight rejects Cache-Control / Last-Event-ID on GET 
           /jobs/events (production Modal); Jobs list poll works
         status: resolved
@@ -1397,11 +1503,13 @@ project:
         fix_summary: Allow Cache-Control and Last-Event-ID in CORS allow_headers for Jobs SSE (/jobs/events)
         fix_commit: '5904552ad459cda3215be64932e056f51bb8f68d'
         merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
-        note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved. Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
-      note: 'S015 2026-07-29 COMPLETE — PR #155 MERGED @ 15030fc; Modal data-management redeployed (uv run modal deploy infra/modal/data_management_app.py); live OPTIONS /jobs/events Cache-Control+Last-Event-ID → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1 PASS; handoff → 15-service-health (formal H0ci–H5). Optional user production UI Jobs SSE confirm remaining.'
+        note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved.
+          Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
+      note: 'S015 2026-07-29 CLOSED — PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; 15-service-health waived
+        (user Option 1 for #87); orchestrator cleared.'
       current_bug:
-      current_action: handoff_15_service_health
-      next_action: run_service_health
+      current_action:
+      next_action: none_session_closed
       head_sha: '5904552ad459cda3215be64932e056f51bb8f68d'
       merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
       merged_at: '2026-07-29'
@@ -1513,18 +1621,180 @@ project:
       - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
         completed_at: '2026-05-21'
       prior_started_at: '2026-06-26'
-session_counter: 15
+      session_closed_at: '2026-07-29'
+      orchestrator_blocking: false
+session_counter: 16
 active_session:
-  id: S015-hotfix-jobs-sse-cors
+  id: S016-chat-cold-start-ux
+  type: feature
+  intent: 'GitHub #87 — better ChatRAG UI/UX during long startups/cold starts with rotating informational/fun-fact messages
+    (WRWC / Providence / ways-to-give content)'
+  status: in_progress
+  branch: evolve/EV-014-chat-cold-start-ux
+  mode: evolve
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-014
+  github_issue: 87
+  artifacts_dir: docs/sessions/S016-chat-cold-start-ux/
+  current_stage: 13-deploy-smoke
+  current_stage_note: '10-e2e done; next 13-deploy-smoke pending user approval; also await commit request'
+  started_at: '2026-07-29'
+  routing_preset_choice: lean_plus_build
+  routing_preset_status: approved
+  routing_plan_status: approved
+  routing_approval: user-approved Lean+build via chat
+  session_artifacts_pending: false
+  session_artifacts_note: 'session-brief.md + routing-plan.md written under docs/sessions/S016-chat-cold-start-ux/; session-brief
+    updated after Phase 0 scope approval + F40'
+  phase0_approved: true
+  note: 'S016/EV-014 10-e2e PASS 2026-07-29 — report e2e-report.md PASS; next 13-deploy-smoke pending user approval; also await commit request.'
+  routing_plan:
+  - stage: 00-context
+    required: true
+    status: completed
+    skip_rationale:
+    note: Session open — routing Lean+build approved; EV-014 stub allocated
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  - stage: 16-evolve
+    required: true
+    status: in_progress
+    skip_rationale:
+    note: Orchestrator — Phase A/Gate A→B PASSED; phase_a/c checkpoints; 10-e2e PASS; current_stage=13-deploy-smoke pending user approval; await commit request; Lean+build skips 04/05/06/09
+    started_at: '2026-07-29'
+  - stage: 01-requirements
+    required: true
+    status: completed
+    skip_rationale:
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+    note: 'COMPLETE — RD-183–187; ADR-039; UJ-052; TC-156–160; AC-CS1–8'
+    report: docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+    seed_path: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+    substeps:
+      seed_loaded: true
+      handoff_seed: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+      current_phase: completed
+  - stage: 02-verify-plan
+    required: true
+    status: completed
+    skip_rationale:
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+    report: docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md
+    gate_a_to_b: passed
+    note: 'COMPLETE — Gate A→B PASS; M1–M3 all A (cookie Max-Age=1y; skip deployment-integration VITE_WRWC_DONATE_URL; defer
+      EN/ES fact strings to 07-build)'
+    medium_verdicts:
+      recorded_at: '2026-07-29'
+      M1:
+        choice: A
+        verdict: Lock cookie Max-Age to 1 year
+      M2:
+        choice: A
+        verdict: Skip deployment-integration.md update for VITE_WRWC_DONATE_URL
+      M3:
+        choice: A
+        verdict: Defer exact EN/ES fact strings to 07-build
+  - stage: 07-build
+    required: true
+    status: completed
+    skip_rationale:
+    started_at: '2026-07-29'
+    note: COMPLETE — F40 ChatRAG cold-start UX implemented (Vitest TC-156–159 + Playwright TC-160 pass); locale-context 
+      rename for macOS casing
+    completed_at: '2026-07-29'
+    report: docs/sessions/S016-chat-cold-start-ux/reports/07-build-cold-start-ux.md
+  - stage: 08-verify-build
+    required: true
+    status: completed
+    skip_rationale:
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+    report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+    overall_result: PASS
+    note: 'COMPLETE — Lean+build 08 PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+  - stage: 10-e2e
+    required: true
+    status: completed
+    skip_rationale:
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+    overall_result: PASS
+    report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+    note: 'PASS — T0-ui Playwright chat 8/8 (UJ-052 TC-160); T0 Vitest TC-156–159 (08); T0 API N/A (RD-187); T2/T3 deferred to 13'
+  - stage: 13-deploy-smoke
+    required: true
+    status: pending
+    skip_rationale:
+    note: 'Pending user approval for deploy; do not start yet; also await commit request'
+  - stage: 03-plan-tooling
+    required: false
+    status: skipped
+    skip_rationale: no new tooling
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  - stage: 04-tech-plan
+    required: false
+    status: skipped
+    skip_rationale: reuse existing FE cold-start patterns (ChatPanel statusMessage)
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  - stage: 05-verify-tech
+    required: false
+    status: skipped
+    skip_rationale: fold into 02/08
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  - stage: 06-tech-tooling
+    required: false
+    status: skipped
+    skip_rationale: N/A
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  - stage: 09-qa
+    required: false
+    status: skipped
+    skip_rationale: Lean — rely on 08 + 10
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  - stage: 11-verify-impl
+    required: false
+    status: skipped
+    skip_rationale: Lean — sign-off via 10/13
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  - stage: 12-verify-deploy
+    required: false
+    status: skipped
+    skip_rationale: Lean — 13-deploy-smoke
+    started_at: '2026-07-29'
+    completed_at: '2026-07-29'
+  context_briefs: []
+  handoff:
+    next_skill: 13-deploy-smoke
+    next_action: 'Await user approval for 13-deploy-smoke (do not start yet); also await commit request. 10-e2e PASS — e2e-report.md.'
+    prior_session: S015-hotfix-jobs-sse-cors
+    prior_close_reason: 'user Option 1 close for #87 evolve priority'
+  phase1_routing_confirmed: true
+  phase1_routing_confirmed_at: '2026-07-29'
+  gate_a_to_b_passed_at: '2026-07-29'
+  ui_preview:
+    status: declined_for_now
+    declined_at: '2026-07-29'
+    remind_at: 11-verify-impl or after 07-build
+    note: User declined UI preview for now; remind at 11-verify-impl or after build
+sessions:
+- id: S015-hotfix-jobs-sse-cors
   type: hotfix
   intent: Fix admin Jobs SSE — live updates unavailable because CORS preflight rejects Cache-Control / Last-Event-ID on 
     GET /jobs/events (production Modal). Jobs list poll works.
-  status: in_progress
+  status: completed
   branch: main
   orchestrator: 14-hotfix
   evolve_cycle_id:
   artifacts_dir: docs/sessions/S015-hotfix-jobs-sse-cors/
-  current_stage: 15-service-health
+  current_stage: completed
   started_at: '2026-07-29'
   routing_plan_status: approved
   routing_approval: chat A/A/A/A
@@ -1541,15 +1811,17 @@ active_session:
     note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; bug resolved'
   - stage: 15-service-health
     required: true
-    status: in_progress
-    skip_rationale:
+    status: skipped
+    skip_rationale: 'User waived formal 15-service-health wrap to prioritize #87 evolve session; live CORS PASS already recorded
+      post Modal DM redeploy @ 15030fc (PR #155).'
     started_at: '2026-07-29'
-    note: 'Live CORS PASS recorded; formal H0ci–H5 / service-health report pending'
+    note: 'WAIVED — user chose close for #87 evolve priority; live CORS PASS retained; formal H0ci–H5 not run'
+    completed_at: '2026-07-29'
   context_briefs: []
   handoff:
-    cleared: false
-    next_skill: 15-service-health
-    next_action: run_service_health
+    cleared: true
+    next_skill:
+    next_action: open_feature_session_for_github_87
     current_bug:
     head_sha: '5904552ad459cda3215be64932e056f51bb8f68d'
     merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
@@ -1567,7 +1839,12 @@ active_session:
     bug_reports:
       BUG-2026-07-29-jobs-sse-cors-headers: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
     optional_user_confirm: production_jobs_sse_ui_visual
-sessions:
+    session_closed: true
+    close_decision: option_1_close_for_87
+  completed_at: '2026-07-29'
+  close_note: 'User Option 1: close S015 now (service-health wrap optional/minimal) to open feature session for GitHub #87.
+    Formal H0ci–H5 waived; live CORS OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 already PASS post PR #155 @ 15030fc.'
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155
 - id: S014-admin-ui-polish-148
   type: feature
   intent: 'Implement GitHub #148 — Corpus & admin dashboard UI/UX polish (density, truncation, single-screen). Must-have on
@@ -3943,11 +4220,11 @@ stages:
     started_at: '2026-07-08'
     completed_at: '2026-07-10'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-013/S014 — #148 admin Corpus & dashboard UI/UX polish; 00-context COMPLETE; Phase 0 intake approved
-      (F9+F12)'
-    session_id: S014-admin-ui-polish-148
-    branch: evolve/EV-013-admin-ui-polish-148
-    evolve_cycle_id: EV-013
+    partial_rerun_note: 'EV-014/S016-chat-cold-start-ux — #87 ChatRAG cold-start UX; 00-context COMPLETE (session open); Phase
+      0 intake NOT started; handoff → 16-evolve'
+    session_id: S016-chat-cold-start-ux
+    branch: evolve/EV-014-chat-cold-start-ux
+    evolve_cycle_id: EV-014
     artifacts:
     - docs/sessions/S014-admin-ui-polish-148/session-brief.md
     - docs/sessions/S014-admin-ui-polish-148/routing-plan.md
@@ -4023,13 +4300,22 @@ stages:
     started_at: '2026-07-28'
     completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-013/S014 delta — #148 Corpus density/truncation + shared table polish; extend F9+F12 — COMPLETE'
-    session_id: S014-admin-ui-polish-148
-    branch: evolve/EV-013-admin-ui-polish-148
-    evolve_cycle_id: EV-013
+    partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); RD-183–187; ADR-039; UJ-052; TC-156–160;
+      AC-CS1–8'
+    session_id: S016-chat-cold-start-ux
+    branch: evolve/EV-014-chat-cold-start-ux
+    evolve_cycle_id: EV-014
     mode: delta
-    report: docs/sessions/S014-admin-ui-polish-148/reports/01-requirements.md
-    seed_path: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+    report: docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+    seed_path: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+    s014_baseline:
+      status: completed
+      completed_at: '2026-07-29'
+      session_id: S014-admin-ui-polish-148
+      branch: evolve/EV-013-admin-ui-polish-148
+      evolve_cycle_id: EV-013
+      report: docs/sessions/S014-admin-ui-polish-148/reports/01-requirements.md
+      note: 'S014/EV-013 01-requirements COMPLETE — RD-179–182; UJ-051; TC-152–155; AC-U1–U7'
     s013_baseline:
       status: completed
       completed_at: '2026-07-28'
@@ -4039,35 +4325,33 @@ stages:
       report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
       note: 01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; 
         api-contract EV-012; committed c8cfaa9
-    note: 'S014/EV-013 01-requirements COMPLETE 2026-07-29 — RD-179–182; UJ-051; TC-152–155; AC-U1–U7; privacy no-cookies/no-new-storage
-      (RD-181 aligns with existing localStorage theme, not cookies); handoff → 02-verify-plan'
+    note: 'S016/EV-014 01-requirements COMPLETE 2026-07-29 — RD-183–187; ADR-039; UJ-052; TC-156–160; AC-CS1–8; handoff →
+      AskQuestion proceed to 02-verify-plan'
     rd_allocated:
       status: written
-      range: RD-173..RD-178
-      allocated_at: '2026-07-28'
-      written_at: '2026-07-28'
-      note: 'RD-173..178 written to docs/decisions.md + delta docs (F32/F36, UJ-023/044/050, TC-146–151, AC-J1–J10, ADR-038,
-        api-contract EV-012)'
+      range: RD-183..RD-187
+      allocated_at: '2026-07-29'
+      written_at: '2026-07-29'
+      note: 'S016/EV-014 F40 cold-start UX — RD-183–187; S013 RD-173–178 retained in s013_baseline; S014 RD-179–182 in s014_baseline'
       decisions:
-      - RD-173
-      - RD-174
-      - RD-175
-      - RD-176
-      - RD-177
-      - RD-178
+      - RD-183
+      - RD-184
+      - RD-185
+      - RD-186
+      - RD-187
     substeps:
-      interviews:
-        completed: 6
-        total: 6
-        pending: 0
-        current_section: completed
       seed_loaded: true
-      handoff_seed: docs/sessions/S013-unified-job-monitoring/checkpoints/01-requirements-seed.md
+      handoff_seed: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
       current_phase: completed
-      locked_decisions: approved_all
-      open_questions_pending: []
-      feature_list_write: completed
-    requirements_delta_interview:
+    artifacts:
+    - docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+    - docs/adr/ADR-039-chat-cold-start-fun-fact-consent.md
+    - docs/user-journeys.md
+    - docs/test-plan.md
+    - docs/acceptance-criteria.md
+    - docs/decisions.md
+    - docs/feature-list.md
+    s013_requirements_delta_interview:
       recorded_at: '2026-07-28'
       resolved_at: '2026-07-28'
       status: docs_complete
@@ -4225,15 +4509,24 @@ stages:
     started_at: '2026-07-29'
     completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: EV-013/S014 delta — consistency pass COMPLETE; Gate A→B PASS (choice A); M1 Playwright TC-155 
-      required
-    session_id: S014-admin-ui-polish-148
-    branch: evolve/EV-013-admin-ui-polish-148
-    evolve_cycle_id: EV-013
+    partial_rerun_note: EV-014/S016 delta COMPLETE — Gate A→B PASS for F40 ChatRAG cold-start UX (#87); M1–M3 all A
+    session_id: S016-chat-cold-start-ux
+    branch: evolve/EV-014-chat-cold-start-ux
+    evolve_cycle_id: EV-014
     mode: delta
-    prior_status: completed
-    prior_completed_at: '2026-06-13'
-    report: docs/sessions/S014-admin-ui-polish-148/reports/02-verify-plan-audit.md
+    report: docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md
+    gate_a_to_b: passed
+    medium_verdicts:
+      recorded_at: '2026-07-29'
+      M1:
+        choice: A
+        verdict: Lock cookie Max-Age to 1 year
+      M2:
+        choice: A
+        verdict: Skip deployment-integration.md update for VITE_WRWC_DONATE_URL
+      M3:
+        choice: A
+        verdict: Defer exact EN/ES fact strings to 07-build
     s013_baseline:
       status: completed
       completed_at: '2026-07-28'
@@ -4243,33 +4536,8 @@ stages:
       report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
       note: 02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28); gates.a_to_b passed; handoff → 04-tech-plan 
         (Lean+build skips 03)
-    gate_a_to_b: passed
-    s014_medium_verdicts:
-      recorded_at: '2026-07-29'
-      M1:
-        choice: A
-        verdict: Playwright TC-155 required for Corpus/admin table polish e2e
-    note: S014/EV-013 02-verify-plan COMPLETE 2026-07-29 — Gate A→B PASS (user chose A); M1 Playwright TC-155 required; 
-      handoff → 07-build
-    consistency_fixes:
-      applied: true
-      items:
-      - F32 limitations
-      - ADR-033 banner
-      - UJ-044
-      - ADR-023 note
-      - session docs
-    medium_verdicts:
-      recorded_at: '2026-07-28'
-      M1:
-        choice: A
-        verdict: Modal = job lifecycle SoT; DO Postgres = storage/metrics only — no Postgres jobs table as runner SoT
-      M2:
-        choice: B
-        verdict: SSE on BOTH Modal jobs AND internal-write eval progress; Jobs list remains Modal-primary
-      M3:
-        choice: A
-        verdict: POST /internal/v1/eval/runs creates metrics row + enqueues Modal job_type=eval
+    note: 'S016/EV-014 02-verify-plan COMPLETE 2026-07-29 — Gate A→B PASS (M1–M3 all A); cookie Max-Age=1y; skip deployment-integration
+      VITE_WRWC_DONATE_URL; defer EN/ES fact strings to 07-build; handoff → 07-build'
     ev004_baseline:
       status: completed
       started_at: '2026-05-24'
@@ -4296,6 +4564,30 @@ stages:
     ev004_user_approved: 5
     ev004_denied: 1
     ev004_contradictions_resolved: 2
+    s014_baseline:
+      status: completed
+      completed_at: '2026-07-29'
+      session_id: S014-admin-ui-polish-148
+      branch: evolve/EV-013-admin-ui-polish-148
+      evolve_cycle_id: EV-013
+      report: docs/sessions/S014-admin-ui-polish-148/reports/02-verify-plan-audit.md
+      gate_a_to_b: passed
+      note: S014/EV-013 02-verify-plan COMPLETE 2026-07-29 — Gate A→B PASS (choice A); M1 Playwright TC-155 required
+      s013_baseline:
+        status: completed
+        completed_at: '2026-07-28'
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
+        note: 02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28); gates.a_to_b passed; handoff → 04-tech-plan 
+          (Lean+build skips 03)
+    substeps:
+      current_phase: completed
+      seed_loaded: true
+      handoff_seed: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+      gate_a_to_b: passed
+      medium_verdicts_recorded: true
   03-plan-tooling:
     status: completed
     started_at: '2026-05-19'
@@ -4463,55 +4755,46 @@ stages:
   07-build:
     status: completed
     started_at: '2026-07-29'
-    completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-013/S014 — #148 TruncatedText + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass
-      — COMPLETE'
-    session_id: S014-admin-ui-polish-148
-    branch: evolve/EV-013-admin-ui-polish-148
-    evolve_cycle_id: EV-013
+    partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); Vitest TC-156–159 + Playwright TC-160
+      pass; locale-context rename for macOS casing'
+    session_id: S016-chat-cold-start-ux
+    branch: evolve/EV-014-chat-cold-start-ux
+    evolve_cycle_id: EV-014
     mode: delta
-    feature: F9/F12
-    phase: Phase 19 (M82-M85)
-    milestone: M85
-    report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
-    s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion detail
-    note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 green; 
-      Playwright uj051 TC-155 pass; privacy no-cookie asserts; handoff → 08-verify-build
+    feature: F40
+    s014_baseline:
+      status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      session_id: S014-admin-ui-polish-148
+      branch: evolve/EV-013-admin-ui-polish-148
+      evolve_cycle_id: EV-013
+      mode: delta
+      feature: F9/F12
+      phase: Phase 19 (M82-M85)
+      milestone: M85
+      report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
+      note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 
+        green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
+      s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion 
+        detail
+    note: 'S016/EV-014 07-build COMPLETE 2026-07-29 — F40 ChatRAG cold-start UX implemented (Vitest TC-156–159 + Playwright
+      TC-160 pass); locale-context rename for macOS casing; handoff → 08-verify-build'
     substeps:
       current_task:
       next_task:
       task_status: completed
       in_progress_tasks: []
       blocked_tasks: []
-      completed_tasks_recent:
-      - T82.1
-      - T82.2
-      - T82.3
-      - T82.4
-      - T82.5
-      - T82.6
-      - T83.1
-      - T83.2
-      - T83.3
-      - T83.4
-      - T83.5
-      - T83.6
-      - T84.1
-      - T84.2
-      - T84.3
-      - T84.4
-      - T84.5
-      - T84.6
-      - T85.1
-      - T85.2
-      - T85.3
-      - T85.4
-      - T85.5
+      completed_tasks_recent: []
+      note: F40 cold-start UX build COMPLETE; Vitest TC-156–159 + Playwright TC-160 pass; locale-context rename for 
+        macOS casing
     execution_plan:
       active_task:
       active_milestone: M85
       active_phase: Phase 19
+      note: Historical S014/EV-013 Phase 19 / M85 COMPLETE — retained; S016/F40 cold-start UX build COMPLETE
       T85.1:
         status: completed
         started_at: '2026-07-29'
@@ -4520,23 +4803,21 @@ stages:
         status: completed
         started_at: '2026-07-29'
         completed_at: '2026-07-29'
-      note: 'Current State (YAML): Phase 19 / M85 COMPLETE (T85.1–T85.5); phase_19_gate=passed @ T2; handoff → 08-verify-build;
-        PR #153 open (do not merge)'
       execution_plan_md_sync:
         status: synced_at_T85_5
         file: docs/sessions/S000-internal-docs-archive/execution-plan.md
         synced_as_of: '2026-07-29'
         sync_owner: 07-build
         pr_plan_note: 'Minor PR #153 (M82) open — do not merge; M83–M85 on same evolve branch'
-        note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355)
+        note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
         canonical_current_state:
-          active_phase: 'Phase 19: EV-012 — Unified Admin Jobs (#116)'
-          active_milestone: 'M85: Full-stack tests (API e2e + Playwright) — COMPLETE'
+          active_phase: 'Phase 19: EV-012 — Unified Admin Jobs (#116) — COMPLETE (S014 baseline)'
+          active_milestone: 'M85 COMPLETE (S014); S016/F40 cold-start UX build COMPLETE'
           active_task:
           task_status: completed
           tasks_completed: 'T82.1–T82.6 (M82); T83.1–T83.6 (M83); T84.1–T84.6 (M84); T85.1–T85.5 (M85); Phase 19 gate PASS
-            @ T2; 08-verify-build M82 PASS + M84 scoped PASS'
-          orchestrator_resume: '08-verify-build @ M85 / Phase 19 full verify (08_in_progress)'
+            @ T2'
+          orchestrator_resume: 'S016/EV-014 10-e2e PASS; next 13-deploy-smoke pending user approval; await commit request'
       phase_19_gate: passed
       T85.3:
         status: completed
@@ -4767,150 +5048,169 @@ stages:
     - M83
     - M84
     - M85
+    completed_at: '2026-07-29'
+    report: docs/sessions/S016-chat-cold-start-ux/reports/07-build-cold-start-ux.md
   08-verify-build:
     status: completed
     started_at: '2026-07-29'
     completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish Phase 2 PASS (delta) 2026-07-29 (F9+F12); scope=data-management-frontend
-      + related tests/docs'
-    session_id: S014-admin-ui-polish-148
-    branch: evolve/EV-013-admin-ui-polish-148
-    evolve_cycle_id: EV-013
+    partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162;
+      Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+    session_id: S016-chat-cold-start-ux
+    branch: evolve/EV-014-chat-cold-start-ux
+    evolve_cycle_id: EV-014
     mode: delta
-    feature: F9/F12
-    scope: data-management-frontend + related tests/docs
+    feature: F40
     overall_result: PASS
     result_scope: delta
-    report: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
-    substeps:
-      phase: 2
-      phase_note: Phase 2 PASS 2026-07-29
-      integration_db: SKIPPED
-      integration_db_reason: no Docker/Postgres
-      personas: ADVISORY
-      persona_nits: 6
-      persona_blockers: 0
-      vitest: 674
-      uj051: PASS
-      make_audit: PASS
-      make_audit_note: 1 ignored nltk
-      prettier: auto_fixed_3_ev013_files
-    note: S014/EV-013 08-verify-build PASS (delta) 2026-07-29 — integration/DB SKIPPED (no Docker/Postgres); personas 
-      ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier auto-fixed 3 
-      EV-013 files; handoff → 10-e2e; uncommitted 07-build still dirty; advisory nits optional before 10
-    s013_baseline:
+    report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+    note: 'S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged;
+      handoff → 10-e2e'
+    s014_baseline:
       status: completed
-      started_at: '2026-07-28'
+      started_at: '2026-07-29'
       completed_at: '2026-07-29'
       partial_rerun_at: '2026-07-29'
-      partial_rerun_note: EV-012/S013 delta — M84 milestone verify gate (Phase 19)
-      session_id: S013-unified-job-monitoring
-      branch: evolve/EV-012-unified-job-monitoring
-      evolve_cycle_id: EV-012
-      milestone: M84
-      scope: M84
-      report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
+      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish Phase 2 PASS (delta) 2026-07-29 (F9+F12); scope=data-management-frontend
+        + related tests/docs'
+      session_id: S014-admin-ui-polish-148
+      branch: evolve/EV-013-admin-ui-polish-148
+      evolve_cycle_id: EV-013
+      mode: delta
+      feature: F9/F12
+      scope: data-management-frontend + related tests/docs
       overall_result: PASS
-      result_scope: scoped
-      commit: f98d40d
-      m82_gate:
-        status: passed
-        completed_at: '2026-07-28'
-        commit: '7209837'
+      result_scope: delta
+      report: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
+      substeps:
+        phase: 2
+        phase_note: Phase 2 PASS 2026-07-29
+        integration_db: SKIPPED
+        integration_db_reason: no Docker/Postgres
+        personas: ADVISORY
+        persona_nits: 6
+        persona_blockers: 0
+        vitest: 674
+        uj051: PASS
+        make_audit: PASS
+        make_audit_note: 1 ignored nltk
+        prettier: auto_fixed_3_ev013_files
+      note: S014/EV-013 08-verify-build PASS (delta) 2026-07-29 — integration/DB SKIPPED (no Docker/Postgres); personas 
+        ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier auto-fixed 3 
+        EV-013 files; handoff → 10-e2e; uncommitted 07-build still dirty; advisory nits optional before 10
+      s013_baseline:
+        status: completed
+        started_at: '2026-07-28'
+        completed_at: '2026-07-29'
+        partial_rerun_at: '2026-07-29'
+        partial_rerun_note: EV-012/S013 delta — M84 milestone verify gate (Phase 19)
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        milestone: M84
+        scope: M84
+        report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
         overall_result: PASS
-      m84_gate: passed
-      m84_gate_passed_at: '2026-07-29'
-      note: 'M84 scoped PASS @ f98d40d retained (historical). M85/Phase19 08-verify-build completed PASS scoped 2026-07-29.
-        PR #153 open (do not merge).'
-      checks:
-        vitest_m84_suites: pass
-        ruff: pass
-        make_check_fast_fe_lint: blocked_local_node22_vs_nvmrc24_environment
-      minor_pr:
-        url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153'
-        number: 153
-        status: open
-        merge_policy: do_not_merge
-        title: '[M82] EV-012 Unified Admin Jobs — Modal jobs API + SSE + CRUD'
-      m85_pending: false
-    s010_baseline:
-      status: completed
-      started_at: '2026-07-08'
-      completed_at: '2026-07-08'
-      partial_rerun_at: '2026-07-08'
-      partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
-      session_id: S010-unify-llm-service
-      branch: feat/S010-unify-llm-service
-      evolve_cycle_id: EV-011
-      report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
-      overall_result: PASS
-      note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
-        public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
-    s008_baseline:
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      started_at: '2026-07-03'
-      completed_at: '2026-07-03'
-      status: completed
-      report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-      note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
-    historical_scope: standalone
-    notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override
-      bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2
-      uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta;
-      Modal smoke SKIPPED | S005: interim milestone-boundary verify PASS after in-session remediation — initial FAIL (Python
-      lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage
-      green, 681+ pytest + 312 vitest admin'
-    historical_substeps:
-      phase: formal
-      result: PASS
-    s003:
-      session_id: S003-persistent-chat-history
-      branch: main
-      completed_at: '2026-06-28'
-      partial_rerun_at: '2026-06-28'
-      partial_rerun_note: 'S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with
-        uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED —
-        frontend-only delta)'
-      overall_result: PASS
-      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-      session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
-      user_invoked: true
-      notes:
-      - 'Branch main@9bd7a50; uncommitted S003/chat-UI work'
-      - 2 prettier auto-fixes uncommitted in chat-rag-frontend tests
-      - Modal smoke SKIPPED (frontend-only delta)
-    s004:
-      session_id: S004-supabase-auth
-      branch: feat/S004-supabase-auth
-      completed_at: '2026-06-29'
-      overall_result: PASS
-      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-      blocking_failures: []
-      note: S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures 
-        (cryptography CVEs; admin FE branch coverage) resolved.
-    s005:
-      session_id: S005-user-mgmt-auth
-      branch: feat/S005-user-mgmt-auth
-      completed_at: '2026-06-30'
-      feature: F35
-      milestone: M53
-      overall_result: PASS
-      report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-      session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
-      blocking_failures: []
-      remediated:
-      - Python lint (11)
-      - Python typecheck (2 casts)
-      - Frontend lint (1)
-      - Frontend format (1)
-      - 'DM FE branch coverage 94.18% < 95%'
-      green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
-      note: 'S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck,
-        format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30
-        FAIL; cleared for Phase 12 gate.'
+        result_scope: scoped
+        commit: f98d40d
+        m82_gate:
+          status: passed
+          completed_at: '2026-07-28'
+          commit: '7209837'
+          overall_result: PASS
+        m84_gate: passed
+        m84_gate_passed_at: '2026-07-29'
+        note: 'M84 scoped PASS @ f98d40d retained (historical). M85/Phase19 08-verify-build completed PASS scoped 2026-07-29.
+          PR #153 open (do not merge).'
+        checks:
+          vitest_m84_suites: pass
+          ruff: pass
+          make_check_fast_fe_lint: blocked_local_node22_vs_nvmrc24_environment
+        minor_pr:
+          url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153'
+          number: 153
+          status: open
+          merge_policy: do_not_merge
+          title: '[M82] EV-012 Unified Admin Jobs — Modal jobs API + SSE + CRUD'
+        m85_pending: false
+      s010_baseline:
+        status: completed
+        started_at: '2026-07-08'
+        completed_at: '2026-07-08'
+        partial_rerun_at: '2026-07-08'
+        partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
+        session_id: S010-unify-llm-service
+        branch: feat/S010-unify-llm-service
+        evolve_cycle_id: EV-011
+        report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+        overall_result: PASS
+        note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for
+          public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+      s008_baseline:
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        started_at: '2026-07-03'
+        completed_at: '2026-07-03'
+        status: completed
+        report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+        note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
+      historical_scope: standalone
+      notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override
+        bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build;
+        2 uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta;
+        Modal smoke SKIPPED | S005: interim milestone-boundary verify PASS after in-session remediation — initial FAIL (Python
+        lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage
+        green, 681+ pytest + 312 vitest admin'
+      historical_substeps:
+        phase: formal
+        result: PASS
+      s003:
+        session_id: S003-persistent-chat-history
+        branch: main
+        completed_at: '2026-06-28'
+        partial_rerun_at: '2026-06-28'
+        partial_rerun_note: 'S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with
+          uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED
+          — frontend-only delta)'
+        overall_result: PASS
+        report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+        session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+        user_invoked: true
+        notes:
+        - 'Branch main@9bd7a50; uncommitted S003/chat-UI work'
+        - 2 prettier auto-fixes uncommitted in chat-rag-frontend tests
+        - Modal smoke SKIPPED (frontend-only delta)
+      s004:
+        session_id: S004-supabase-auth
+        branch: feat/S004-supabase-auth
+        completed_at: '2026-06-29'
+        overall_result: PASS
+        report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+        blocking_failures: []
+        note: S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures 
+          (cryptography CVEs; admin FE branch coverage) resolved.
+      s005:
+        session_id: S005-user-mgmt-auth
+        branch: feat/S005-user-mgmt-auth
+        completed_at: '2026-06-30'
+        feature: F35
+        milestone: M53
+        overall_result: PASS
+        report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+        session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
+        blocking_failures: []
+        remediated:
+        - Python lint (11)
+        - Python typecheck (2 casts)
+        - Frontend lint (1)
+        - Frontend format (1)
+        - 'DM FE branch coverage 94.18% < 95%'
+        green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
+        note: 'S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck,
+          format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30
+          FAIL; cleared for Phase 12 gate.'
   09-qa:
     status: completed
     started_at: '2026-07-07'
@@ -5006,110 +5306,137 @@ stages:
     started_at: '2026-07-29'
     completed_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
-    session_id: S014-admin-ui-polish-148
-    branch: evolve/EV-013-admin-ui-polish-148
-    evolve_cycle_id: EV-013
+    partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
+    session_id: S016-chat-cold-start-ux
+    branch: evolve/EV-014-chat-cold-start-ux
+    evolve_cycle_id: EV-014
     mode: evolve
     delta_only: true
-    scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+    feature: F40
+    scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
     overall_result: PASS
-    report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
-    note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 
-      1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 
-      13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
+    report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+    note: 'S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below'
     tiers:
       t0: PASS
-      t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+      t0_detail: Vitest TC-156–159 PASS (covered in 08)
       t0_ui: PASS
-      t0_ui_detail: Playwright uj051 1/1 PASS
+      t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
       t0_api: N/A
-      t0_api_waive_reason: UI-only
+      t0_api_waive_reason: no API contract change (RD-187)
       t1: SKIPPED
-      t1_skip_reason: no_docker
+      t1_skip_reason: not required for FE-only F40 delta
       t2: deferred_to_13
       t3: deferred_to_13
-    s013_baseline:
+    s014_baseline:
       status: completed
       started_at: '2026-07-29'
       completed_at: '2026-07-29'
-      session_id: S013-unified-job-monitoring
-      branch: evolve/EV-012-unified-job-monitoring
-      evolve_cycle_id: EV-012
-      mode: delta
+      partial_rerun_at: '2026-07-29'
+      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+      session_id: S014-admin-ui-polish-148
+      branch: evolve/EV-013-admin-ui-polish-148
+      evolve_cycle_id: EV-013
+      mode: evolve
+      delta_only: true
+      scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
       overall_result: PASS
-      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+      report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+      note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051
+        1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff →
+        13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
       tiers:
-        t0: pass
-        t1: skipped
+        t0: PASS
+        t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+        t0_ui: PASS
+        t0_ui_detail: Playwright uj051 1/1 PASS
+        t0_api: N/A
+        t0_api_waive_reason: UI-only
+        t1: SKIPPED
         t1_skip_reason: no_docker
-        t2: pass
-        t3: pass
-    s006:
-      status: completed
-      started_at: '2026-06-30'
-      completed_at: '2026-06-30'
-      session_id: S006-invite-acceptance
-      branch: feat/S006-invite-acceptance
-      feature: F35
-      evolve_cycle_id: EV-007
-      report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-      note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract;
-        T3 deferred'
-      t0: pass
-      t0_tests: 69
-      t1_integration: pass
-      t1_tests: 62
-      vitest: 500
-      supabase_contract: 17
-      t3_live: deferred
-    mechanism: api+frontend
-    t0: pass
-    t0_tests: 59
-    t1_integration: pass
-    t1_tests: 35
-    t3_live: pending
-    journeys_passed: 29
-    journeys_failed: 0
-    ev001_journeys_added: 4
-    ev001_tests_passed: 5
-    ev002_journeys_added: 9
-    ev002_tests_passed: 40
-    ev005_journeys_added: 4
-    ev005_tests_passed: 14
-    s002:
-      report: docs/sessions/S002-admin-job-management/reports/e2e-report.md
-      branch: feat/S002-admin-job-management
-      partial_rerun_at: '2026-06-26'
-      t0: pass
-      t0_tests: 45
-      t3_live: fail
-      t3_live_note: GET /jobs returns 405 on production Modal data-management
-    s004:
-      report: docs/sessions/S004-supabase-auth/reports/e2e-report.md
-      branch: feat/S004-supabase-auth
-      partial_rerun_at: '2026-06-29'
+        t2: deferred_to_13
+        t3: deferred_to_13
+      s013_baseline:
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        session_id: S013-unified-job-monitoring
+        branch: evolve/EV-012-unified-job-monitoring
+        evolve_cycle_id: EV-012
+        mode: delta
+        overall_result: PASS
+        report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+        partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+        tiers:
+          t0: pass
+          t1: skipped
+          t1_skip_reason: no_docker
+          t2: pass
+          t3: pass
+      s006:
+        status: completed
+        started_at: '2026-06-30'
+        completed_at: '2026-06-30'
+        session_id: S006-invite-acceptance
+        branch: feat/S006-invite-acceptance
+        feature: F35
+        evolve_cycle_id: EV-007
+        report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+        note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract;
+          T3 deferred'
+        t0: pass
+        t0_tests: 69
+        t1_integration: pass
+        t1_tests: 62
+        vitest: 500
+        supabase_contract: 17
+        t3_live: deferred
+      mechanism: api+frontend
       t0: pass
       t0_tests: 59
+      t1_integration: pass
+      t1_tests: 35
       t3_live: pending
+      journeys_passed: 29
+      journeys_failed: 0
+      ev001_journeys_added: 4
+      ev001_tests_passed: 5
+      ev002_journeys_added: 9
+      ev002_tests_passed: 40
       ev005_journeys_added: 4
       ev005_tests_passed: 14
-    s005:
-      report: docs/sessions/S005-user-mgmt-auth/reports/e2e-report.md
-      branch: feat/S005-user-mgmt-auth
-      session_id: S005-user-mgmt-auth
-      partial_rerun_at: '2026-06-30'
-      t0: pass
-      t0_tests: 68
-      t1_integration: pass
-      t1_tests: 62
-      vitest: 483
-      supabase_contract: 14
-      t3_live: deferred
-      note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
-        T3 deferred'
+      s002:
+        report: docs/sessions/S002-admin-job-management/reports/e2e-report.md
+        branch: feat/S002-admin-job-management
+        partial_rerun_at: '2026-06-26'
+        t0: pass
+        t0_tests: 45
+        t3_live: fail
+        t3_live_note: GET /jobs returns 405 on production Modal data-management
+      s004:
+        report: docs/sessions/S004-supabase-auth/reports/e2e-report.md
+        branch: feat/S004-supabase-auth
+        partial_rerun_at: '2026-06-29'
+        t0: pass
+        t0_tests: 59
+        t3_live: pending
+        ev005_journeys_added: 4
+        ev005_tests_passed: 14
+      s005:
+        report: docs/sessions/S005-user-mgmt-auth/reports/e2e-report.md
+        branch: feat/S005-user-mgmt-auth
+        session_id: S005-user-mgmt-auth
+        partial_rerun_at: '2026-06-30'
+        t0: pass
+        t0_tests: 68
+        t1_integration: pass
+        t1_tests: 62
+        vitest: 483
+        supabase_contract: 14
+        t3_live: deferred
+        note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
+          T3 deferred'
   11-verify-impl:
     status: completed
     started_at: '2026-05-27'
@@ -5313,11 +5640,26 @@ stages:
     session_id: S015-hotfix-jobs-sse-cors
     branch: fix/S015-jobs-sse-cors
     bugs:
-    - *id001
-    note: 'S015 2026-07-29 COMPLETE — PR #155 MERGED @ 15030fc; Modal data-management redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; handoff → 15-service-health. Optional user production UI Jobs SSE confirm remaining.'
+    - id: BUG-2026-07-29-jobs-sse-cors-headers
+      summary: Admin Jobs SSE live updates unavailable — CORS preflight rejects Cache-Control / Last-Event-ID on GET 
+        /jobs/events (production Modal); Jobs list poll works
+      status: resolved
+      order: 1
+      seen_on: production_modal
+      bug_report: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
+      bug_report_status: resolved
+      repro_test: tests/bugs/test_bug_2026_07_29_jobs_sse_cors_headers.py
+      repro_status: green
+      fix_summary: Allow Cache-Control and Last-Event-ID in CORS allow_headers for Jobs SSE (/jobs/events)
+      fix_commit: '5904552ad459cda3215be64932e056f51bb8f68d'
+      merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
+      note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved.
+        Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
+    note: 'S015 2026-07-29 CLOSED — PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; 15-service-health waived
+      (user Option 1 for #87); orchestrator cleared.'
     current_bug:
-    current_action: handoff_15_service_health
-    next_action: run_service_health
+    current_action:
+    next_action: none_session_closed
     head_sha: '5904552ad459cda3215be64932e056f51bb8f68d'
     merge_sha: '15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b'
     merged_at: '2026-07-29'
@@ -5429,16 +5771,19 @@ stages:
     - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
       completed_at: '2026-05-21'
     prior_started_at: '2026-06-26'
+    session_closed_at: '2026-07-29'
+    orchestrator_blocking: false
   15-service-health:
-    status: in_progress
+    status: skipped
     started_at: '2026-07-29'
     partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'S015 post-merge after PR #155 (15030fc); Modal DM redeployed; live CORS OPTIONS /jobs/events PASS; live pytest VECINITA_RUN_LIVE_CORS=1 PASS; formal H0ci–H5 pending'
+    partial_rerun_note: 'S015 post-merge after PR #155 (15030fc); Modal DM redeployed; live CORS OPTIONS /jobs/events PASS;
+      live pytest VECINITA_RUN_LIVE_CORS=1 PASS; formal H0ci–H5 pending'
     session_id: S015-hotfix-jobs-sse-cors
     environment: production
-    infra: pending
-    e2e: pending
-    overall: pending
+    infra: waived
+    e2e: waived
+    overall: waived
     live_cors:
       status: pass
       path: OPTIONS /jobs/events
@@ -5456,8 +5801,9 @@ stages:
     prior_report: docs/sessions/S012-hotfix-admin-ui-112-105/reports/service-health.md
     prior_session_id: S012-hotfix-admin-ui-112-105
     prior_overall: pass
-    note: 'S015 15-service-health IN_PROGRESS — live CORS PASS post Modal DM redeploy @ 15030fc (PR #155); formal H0ci–H5 / service-health report pending. Session remains open.'
-    next_action: run_service_health
+    note: 'S015 15-service-health WAIVED 2026-07-29 — user Option 1 close for #87 evolve priority; live CORS PASS retained;
+      formal H0ci–H5 not run. Session closed.'
+    next_action: none_session_closed
     history:
     - environment: staging
       completed_at: '2026-05-21'
@@ -5513,9 +5859,25 @@ stages:
       - H5
       advisories:
       - 'H1: transient modal_llm=error recovered'
+    - status: skipped
+      completed_at: '2026-07-29'
+      session_id: S015-hotfix-jobs-sse-cors
+      session_note: 'S015 waived formal H0ci–H5; user Option 1 close for #87; live CORS OPTIONS /jobs/events PASS @ 15030fc
+        (PR #155)'
+      overall: waived
+      live_cors: pass
+      merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
+      pr_number: 155
+      waiver: 'User waived formal 15-service-health wrap to prioritize #87 evolve session; live CORS PASS already recorded
+        post Modal DM redeploy @ 15030fc (PR #155).'
     s012_ci_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404116424'
     s012_deploy_do_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404413628'
     s012_deploy_preflight_run: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30404305209'
+    completed_at: '2026-07-29'
+    waiver: 'User waived formal 15-service-health wrap to prioritize #87 evolve session; live CORS PASS already recorded post
+      Modal DM redeploy @ 15030fc (PR #155).'
+    waived_at: '2026-07-29'
+    waived_for: github_issue_87_feature_session
   17-retrospective:
     status: pending
   18-pr-review:
@@ -5627,7 +5989,11 @@ deployment:
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
     notes:
-    - 'S015 2026-07-29: PR #155 MERGED @ 15030fc; Modal data-management redeployed; live OPTIONS /jobs/events Cache-Control+Last-Event-ID → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1 PASS; 14-hotfix completed; 15-service-health in_progress (formal H0ci–H5 pending).'
+    - 'S015 2026-07-29 CLOSED — user Option 1; 15-service-health waived for #87 evolve priority; live CORS PASS @ 15030fc
+      retained; active_session null (ready for new session).'
+    - 'S015 2026-07-29: PR #155 MERGED @ 15030fc; Modal data-management redeployed; live OPTIONS /jobs/events Cache-Control+Last-Event-ID
+      → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1 PASS; 14-hotfix completed; 15-service-health
+      in_progress (formal H0ci–H5 pending).'
     - 'S014/EV-013 2026-07-29 Path A deploy-smoke PASS (FE-only) @ f85b6ab — DO admin FE pin evolve/EV-013-admin-ui-polish-148
       ACTIVE; Modal/write untouched; H1–H5 PASS; CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250;
       report docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md; PR #154 open — merge awaits explicit user approval;
@@ -7970,6 +8336,519 @@ evolve_cycles:
     next_action: none_cycle_closed
     note: 'EV-013/S014 closed after PR #154 MERGED @ ecb9446 on main; DO vecinita-admin-frontend github.branch reset to main
       (ACTIVE); H0ci PASS on main @ ecb9446 (ci.yml + deploy-preflight.yml); evolve-summary written.'
+- id: EV-014
+  cycle_type: feature
+  feature_ids:
+  - F40
+  feature_ids_pending_note: Resolved Phase 0 — allocate new F40 (ChatRAG cold-start UX); confirmed 2026-07-29
+  title: ChatRAG cold-start UX — rotating fun-fact/info messages (#87)
+  status: in_progress
+  started: '2026-07-29'
+  completed:
+  session_id: S016-chat-cold-start-ux
+  github_issue: 87
+  source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/87
+  current_stage: 13-deploy-smoke
+  current_stage_note: '10-e2e done; next 13-deploy-smoke pending user approval; also await commit request'
+  mode: evolve
+  delta_only: true
+  scope_summary: 'GitHub #87 ChatRAG cold-start UX (F40) — rotating bilingual fun-fact/info messages (WRWC / Providence /
+    ways-to-give); soft donate CTA; light FE /warm only (no Modal/backend); localStorage seen-facts + cookie consent/opt-out;
+    Vitest + UI e2e (T0); Lean+build.'
+  phase0_approved: true
+  phase_0:
+    status: completed
+    completed_at: '2026-07-29'
+    note: Phase 0 scope APPROVED 2026-07-29 — F40 allocated; Lean+build confirmed; handoff → AskQuestion confirm routing
+      + optional UI preview, then invoke 01-requirements delta
+  phase_0_intake:
+    status: complete
+    current_batch: 5
+    batch_1_complete: true
+    batch_1_status: complete
+    batch_1_recorded_at: '2026-07-29'
+    batch_1_topic: Intent/Scope
+    batch_2_complete: true
+    batch_2_status: complete
+    batch_2_recorded_at: '2026-07-29'
+    batch_2_topic: Behavior
+    batch_3_complete: true
+    batch_3_status: complete
+    batch_3_recorded_at: '2026-07-29'
+    batch_3_topic: Boundaries
+    pending_clarifications: []
+    batch_3_clarifications_recorded_at: '2026-07-29'
+    resolved_clarifications:
+    - id: Q10
+      decision_id: S016-D8
+      topic: backend_warm_path_scope
+      question: Q10
+      option: 2
+      choice: light_fe_triggered_warm_only_extend_prewarmChatServices_warm_client
+      note: Light FE-triggered warm only (extend prewarmChatServices /warm client); no Modal/backend code changes. 
+        Sufficient for all use cases. Revises S016-D8 backend part — clears backend-scope expansion; routing 04/backend 
+        apps stay skipped.
+      status: recorded
+      recorded_at: '2026-07-29'
+      revises: S016-D8 backend warm-path
+    - id: Q11
+      decision_id: S016-D8
+      topic: donate_cta_placement
+      question: Q11
+      option: 1
+      choice: secondary_donate_cta_line_under_rotating_fact_wrwc_donate_en_es
+      note: Secondary donate CTA line under rotating fact → wrwc.org/donate (EN/ES); optional ways-to-give noted as 
+        optional secondary
+      status: recorded
+      recorded_at: '2026-07-29'
+      revises: S016-D8 donate link placement
+    - id: Q12
+      decision_id: S016-D9
+      topic: localstorage_seen_facts
+      question: Q12
+      option: 1
+      choice: device_local_localstorage_seen_facts_key
+      note: Device-local localStorage seen-facts key locked. User also asked allow opt-out in cookies — mechanism 
+        deferred to Q13 AskQuestion.
+      status: recorded
+      recorded_at: '2026-07-29'
+      pending_followup: Q13
+      revises: S016-D9 privacy clarification
+    batch_3_q13_recorded_at: '2026-07-29'
+    batch_4_complete: true
+    batch_4_status: complete
+    batch_4_recorded_at: '2026-07-29'
+    batch_4_topic: Platform
+    batch_5_complete: true
+    batch_5_status: complete
+    batch_5_recorded_at: '2026-07-29'
+    batch_5_topic: Quality & tests
+    phase_0_scope_approved: true
+    phase_0_scope_approved_at: '2026-07-29'
+    feature_allocation: allocate_new_F40
+  intake_batch_1:
+    recorded_at: '2026-07-29'
+    status: complete
+    topic: Intent/Scope
+    decisions:
+    - id: S016-D1
+      topic: who_when
+      question: Q1
+      option: 1
+      choice: community_chat_users_only_during_cold_start_retries
+      note: Community chat users only, during cold-start retries
+      status: recorded
+    - id: S016-D2
+      topic: problem
+      question: Q2
+      option: 1
+      choice: distract_inform_during_wait_fun_facts_wrwc_providence
+      note: Distract/inform during wait with fun facts + WRWC/Providence
+      status: recorded
+    - id: S016-D3
+      topic: success
+      question: Q3
+      option: 1
+      choice: ux_plus_tests_rotating_messages_vitest_ui_e2e
+      note: 'UX + tests: rotating messages; Vitest + UI e2e'
+      status: recorded
+  intake_batch_2:
+    recorded_at: '2026-07-29'
+    status: complete
+    topic: Behavior
+    decisions:
+    - id: S016-D4
+      topic: rotation_ux
+      question: Q4
+      option: 1
+      choice: rotate_every_4_5s_bilingual_fun_fact_list_keep_short_starting_up_line
+      note: Rotate every ~4–5s through bilingual fun-fact list; keep short starting-up line
+      status: recorded
+    - id: S016-D5
+      topic: content_source
+      question: Q5
+      option: 1
+      choice: static_en_es_lists_in_frontend_i18n_no_api
+      note: Static EN/ES lists in frontend i18n (no API)
+      status: recorded
+    - id: S016-D6
+      topic: slow_stream_trigger
+      question: Q6
+      option: 2
+      choice: also_show_facts_if_stream_slow_before_first_token_even_without_retry
+      note: Also show facts if stream is slow (>8 s) before first token even without retry
+      n_seconds: 8
+      n_locked_by: S016-D7
+      status: recorded
+  intake_batch_3:
+    recorded_at: '2026-07-29'
+    status: complete
+    topic: Boundaries
+    decisions:
+    - id: S016-D7
+      topic: slow_wait_threshold
+      question: Q7
+      option: 3
+      choice: n_equals_8_seconds
+      note: Slow-wait threshold N = 8 seconds
+      n_seconds: 8
+      status: recorded
+    - id: S016-D8
+      topic: donate_link_and_backend_warm_path
+      question: Q8
+      options:
+      - 2
+      choice: soft_donate_cta_plus_light_fe_warm_no_backend
+      note: 'Soft donate CTA (secondary under rotating fact → wrwc.org/donate EN/ES; ways-to-give optional secondary) + light
+        FE-triggered /warm via prewarmChatServices only — NO Modal/backend code changes. Q10 option 2 cleared backend-scope
+        expansion; Q11 option 1 locked CTA placement.'
+      scope_expansion: false
+      clarification_required: false
+      status: recorded
+      backend_warm_path: fe_client_only
+      donate_cta: secondary_under_fact_wrwc_donate
+      clarifications:
+      - Q10
+      - Q11
+    - id: S016-D9
+      topic: persist_seen_facts
+      question: Q9
+      option: 1
+      choice: device_local_localstorage_seen_facts_with_http_cookie_optout_and_consent_banner
+      note: Device-local localStorage seen-facts key (Q12 option 1) + HTTP cookie opt-out AND full cookie-consent banner
+        before persistence (Q13 options 2+3). Copy/tone refine EN/ES in 01-requirements; no-analytics claim must be 
+        accurate.
+      privacy_note: localStorage device-local for seen-facts; first-party HTTP cookie preference for opt-out; consent 
+        banner before persistence; cookie must NOT be required by ChatRAG APIs; align existing privacy ADRs in 01
+      clarification_required: false
+      status: recorded
+      clarifications:
+      - Q12
+      - Q13
+      cookie_optout: http_cookie
+      cookie_consent_banner: required_before_seen_facts_persistence
+      cookie_api_required: false
+      cookie_scope: first_party_preference_only
+    clarifications_note: Q10–Q13 recorded 2026-07-29; backend scope expansion cleared; Q13 options 2+3 locked cookie 
+      opt-out + consent banner; Batch 3 COMPLETE
+  next_action: 'Await user approval for 13-deploy-smoke (do not start yet); also await commit request'
+  routing_preset_choice: lean_plus_build
+  routing_preset_status: approved
+  routing_plan_status: approved
+  routing_amendment_pending: false
+  routing_amendment_note: 'CLEARED 2026-07-29 via Q10 — light FE /warm only; no need to un-skip 04-tech-plan or add backend
+    apps'
+  routing_plan:
+    preset: lean_plus_build
+    status: approved
+    approved_at: '2026-07-29'
+    required_stages:
+    - 00-context
+    - 01-requirements
+    - 02-verify-plan
+    - 07-build
+    - 08-verify-build
+    - 10-e2e
+    - 13-deploy-smoke
+    skipped_stages:
+    - 03-plan-tooling
+    - 04-tech-plan
+    - 05-verify-tech
+    - 06-tech-tooling
+    - 09-qa
+    - 11-verify-impl
+    - 12-verify-deploy
+    skip_rationale:
+      03-plan-tooling: no new tooling
+      04-tech-plan: reuse existing FE cold-start patterns (ChatPanel statusMessage) + extend prewarmChatServices /warm 
+        client only (Q10 — no Modal/backend code)
+      05-verify-tech: fold into 02/08
+      06-tech-tooling: N/A
+      09-qa: Lean — rely on 08 + 10
+      11-verify-impl: Lean — sign-off via 10/13
+      12-verify-deploy: Lean — 13-deploy-smoke
+    confirmed_at: '2026-07-29'
+    note: 'Phase 1 Lean+build CONFIRMED; Gate A→B PASSED 2026-07-29 (M1–M3 all A); current_stage=07-build; UI preview declined
+      for now (remind at 11 or after build)'
+  stages:
+    00-context:
+      status: completed
+      started: '2026-07-29'
+      completed: '2026-07-29'
+      note: S016 open_session — Lean+build routing approved; EV-014 stub; handoff → 16-evolve Phase 0
+    16-evolve:
+      status: in_progress
+      started: '2026-07-29'
+      note: Phase A/Gate A→B PASSED; phase_a/c; 10-e2e PASS; current_stage=13-deploy-smoke pending user approval; await commit request; Lean+build skips 04/05/06/09
+    01-requirements:
+      status: completed
+      started: '2026-07-29'
+      completed: '2026-07-29'
+      mode: delta
+      report: docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+      seed_path: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+      note: 'Delta COMPLETE — RD-183–187; F40; UJ-052; TC-156–160; AC-CS1–8; ADR-039; handoff → AskQuestion proceed to 02-verify-plan'
+      rd_allocated:
+        status: written
+        range: RD-183..RD-187
+        decisions:
+        - RD-183
+        - RD-184
+        - RD-185
+        - RD-186
+        - RD-187
+      substeps:
+        seed_loaded: true
+        handoff_seed: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+        current_phase: completed
+      artifacts:
+      - docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+      - docs/adr/ADR-039-chat-cold-start-fun-fact-consent.md
+      - docs/user-journeys.md
+      - docs/test-plan.md
+      - docs/acceptance-criteria.md
+      - docs/decisions.md
+      - docs/feature-list.md
+    02-verify-plan:
+      status: completed
+      started: '2026-07-29'
+      completed: '2026-07-29'
+      mode: delta
+      report: docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md
+      gate_a_to_b: passed
+      medium_verdicts:
+        recorded_at: '2026-07-29'
+        M1:
+          choice: A
+          verdict: Lock cookie Max-Age to 1 year
+        M2:
+          choice: A
+          verdict: Skip deployment-integration.md update for VITE_WRWC_DONATE_URL
+        M3:
+          choice: A
+          verdict: Defer exact EN/ES fact strings to 07-build
+      note: '02-verify-plan delta COMPLETE — Gate A→B PASS (M1–M3 all A); cookie Max-Age=1y; skip deployment-integration VITE_WRWC_DONATE_URL;
+        defer EN/ES fact strings to 07-build; handoff → 07-build'
+    07-build:
+      status: completed
+      started: '2026-07-29'
+      mode: delta
+      note: COMPLETE — F40 ChatRAG cold-start UX implemented (Vitest TC-156–159 + Playwright TC-160 pass); 
+        locale-context rename for macOS casing
+      completed: '2026-07-29'
+      report: docs/sessions/S016-chat-cold-start-ux/reports/07-build-cold-start-ux.md
+    08-verify-build:
+      status: completed
+      started: '2026-07-29'
+      completed: '2026-07-29'
+      report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+      overall_result: PASS
+      note: 'COMPLETE — Lean+build 08 PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+    10-e2e:
+      status: completed
+      started: '2026-07-29'
+      completed: '2026-07-29'
+      overall_result: PASS
+      report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+      note: 'PASS — T0-ui Playwright chat 8/8 (UJ-052 TC-160); T0 Vitest TC-156–159 (08); T0 API N/A (RD-187); T2/T3 deferred to 13'
+    13-deploy-smoke:
+      status: pending
+      note: 'Pending user approval for deploy; do not start yet; also await commit request'
+    03-plan-tooling:
+      status: skipped
+      skip_rationale: no new tooling
+    04-tech-plan:
+      status: skipped
+      skip_rationale: reuse existing FE cold-start patterns (ChatPanel statusMessage) + extend prewarmChatServices /warm
+        client only (Q10 — no Modal/backend code)
+    05-verify-tech:
+      status: skipped
+      skip_rationale: fold into 02/08
+    06-tech-tooling:
+      status: skipped
+      skip_rationale: N/A
+    09-qa:
+      status: skipped
+      skip_rationale: Lean — rely on 08 + 10
+    11-verify-impl:
+      status: skipped
+      skip_rationale: Lean — sign-off via 10/13
+    12-verify-deploy:
+      status: skipped
+      skip_rationale: Lean — 13-deploy-smoke
+  gates:
+    a_to_b: passed
+    b_to_c: passed
+    c_to_d: pending
+    deploy: pending
+  checkpoints:
+    phase_a: passed
+    phase_b: passed
+    phase_c: passed
+    phase_d: pending
+    deploy: pending
+  checkpoint_notes:
+    phase_a: 'Passed 2026-07-29 — 02-verify-plan complete; Gate A→B PASS (M1–M3 all A); cookie Max-Age=1y; skip deployment-integration
+      VITE_WRWC_DONATE_URL; defer EN/ES fact strings to 07-build'
+    phase_b: 'Passed 2026-07-29 — 07-build COMPLETE (Lean+build; 04/05/06 skipped); F40 cold-start UX; Vitest TC-156–159 + Playwright TC-160'
+    phase_c: 'Passed 2026-07-29 — 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; Lean+build; handoff → 10-e2e'
+  adrs:
+  - ADR-039
+  artifacts:
+  - path: docs/sessions/S016-chat-cold-start-ux/session-brief.md
+    status: written
+    note: Updated after Phase 0 scope approval + F40 allocation
+  - path: docs/sessions/S016-chat-cold-start-ux/routing-plan.md
+    status: written
+  - path: docs/feature-list.md
+    status: written
+    note: F40 ChatRAG cold-start UX allocated
+  - path: docs/decisions/evolve-decisions.md
+    status: written
+    note: Cycle EV-014
+  - path: docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+    status: written
+    stage: 01-requirements
+    note: Seed loaded 2026-07-29 — requirements delta complete
+  - path: docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+    status: written
+    stage: 01-requirements
+    note: '01-requirements COMPLETE — RD-183–187; ADR-039; UJ-052; TC-156–160; AC-CS1–8'
+  - path: docs/adr/ADR-039-chat-cold-start-fun-fact-consent.md
+    status: written
+    stage: 01-requirements
+    note: Consent cookie + seen-facts privacy for F40 cold-start UX
+  - path: docs/user-journeys.md
+    status: written
+    stage: 01-requirements
+    note: UJ-052
+  - path: docs/test-plan.md
+    status: written
+    stage: 01-requirements
+    note: TC-156–160
+  - path: docs/acceptance-criteria.md
+    status: written
+    stage: 01-requirements
+    note: AC-CS1–8
+  - path: docs/decisions.md
+    status: written
+    stage: 01-requirements
+    note: RD-183–187
+  - path: docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md
+    status: written
+    stage: 02-verify-plan
+    note: 'Gate A→B PASS — M1–M3 all A (cookie Max-Age=1y; skip deployment-integration VITE_WRWC_DONATE_URL; defer EN/ES fact
+      strings to 07-build)'
+    recorded_at: '2026-07-29'
+  - path: docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md
+    status: pending
+  - path: docs/sessions/S016-chat-cold-start-ux/reports/07-build-cold-start-ux.md
+    status: written
+    stage: 07-build
+    note: F40 ChatRAG cold-start UX implemented — Vitest TC-156–159 + Playwright TC-160 pass; locale-context rename for 
+      macOS casing
+    recorded_at: '2026-07-29'
+  - path: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+    status: written
+    stage: 08-verify-build
+    note: '08 PASS — FE Vitest 162; Playwright TC-160; CORS unchanged'
+    recorded_at: '2026-07-29'
+  - path: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+    status: written
+    stage: 10-e2e
+    note: '10-e2e PASS — T0-ui Playwright chat 8/8 (UJ-052 TC-160); T0 Vitest TC-156–159 (08); T2/T3 deferred to 13'
+    recorded_at: '2026-07-29'
+    overall_result: PASS
+  issues: []
+  note: 'EV-014 in_progress 2026-07-29 — Lean+build; 10-e2e PASS (e2e-report.md); current_stage=13-deploy-smoke pending user approval; also await commit request.'
+  intake_batch_4:
+    recorded_at: '2026-07-29'
+    status: complete
+    topic: Platform
+    decisions:
+    - id: S016-D10
+      topic: apps_platform
+      question: Q14
+      option: 2
+      choice: chat_rag_frontend_primary_shared_packages_as_needed_for_consent_banner
+      note: chat-rag-frontend primary; packages/frontend-i18n and/or frontend-ui only if shared consent banner helps
+      apps:
+      - chat-rag-frontend
+      optional_packages_as_needed:
+      - packages/frontend-i18n
+      - packages/frontend-ui
+      status: recorded
+    - id: S016-D11
+      topic: env_secrets
+      question: Q15
+      option: 1
+      choice: no_required_secrets_donate_url_constant_or_vite_with_default
+      note: No required secrets; donate URL as constant or VITE_WRWC_DONATE_URL with default https://wrwc.org/donate/
+      donate_url_default: https://wrwc.org/donate/
+      env_optional: VITE_WRWC_DONATE_URL
+      required_secrets: false
+      status: recorded
+    - id: S016-D12
+      topic: browser_cors_api
+      question: Q16
+      option: 1
+      choice: no_cors_api_changes_first_party_consent_cookie_external_donate_anchor
+      note: No CORS/API changes; first-party consent cookie; external donate via <a href>
+      cors_changes: false
+      api_changes: false
+      consent_cookie: first_party
+      donate_link: external_anchor_href
+      status: recorded
+  intake_batch_5:
+    recorded_at: '2026-07-29'
+    completed_at: '2026-07-29'
+    status: complete
+    batch_5_status: complete
+    topic: Quality & tests
+    decisions:
+    - id: S016-D13
+      topic: latency_throughput
+      question: Q17
+      option: 1
+      choice: keep_cold_start_retry_policy_facts_on_retry_or_after_8s_rotate_4_5s_no_new_p95
+      note: Keep existing cold-start retry policy; show facts on retry or after 8s slow-wait; rotate ~4–5s; no new p95 
+        latency/throughput target
+      rotate_seconds: 4-5
+      slow_wait_seconds: 8
+      new_p95_target: false
+      status: recorded
+    - id: S016-D14
+      topic: acceptance_scenarios
+      question: Q18
+      option: 1
+      choice: full_acceptance_rotating_facts_donate_cta_consent_before_remember_optout_cookie_vitest_ui_e2e
+      note: Full acceptance — rotating facts + donate CTA; consent before remember (seen-facts); opt-out cookie; Vitest 
+        + UI e2e
+      status: recorded
+    - id: S016-D15
+      topic: e2e_tier
+      question: Q19
+      option: 1
+      choice: t0_vitest_ui_e2e_live_t2_t3_only_at_13_if_easy
+      note: T0 Vitest UI e2e required; live T2/T3 only at 13-deploy-smoke if easy
+      t0: vitest_ui_e2e
+      live_t2_t3: optional_at_13_if_easy
+      status: recorded
+  phase_0_scope_approved: true
+  phase_1:
+    status: completed
+    completed_at: '2026-07-29'
+    routing: lean_plus_build
+    note: Phase 1 Lean+build CONFIRMED; Gate A→B PASSED 2026-07-29 (M1–M3 all A); current_stage=08-verify-build; UI 
+      preview declined for now (remind at 11 or after build)
+  phase1_confirmed: true
+  phase1_confirmed_at: '2026-07-29'
+  phase_1_routing: lean_plus_build_confirmed
+  ui_preview:
+    status: declined_for_now
+    declined_at: '2026-07-29'
+    remind_at: 11-verify-impl or after 07-build
+    note: User declined UI preview for now; remind at 11-verify-impl or after build
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -8985,6 +9864,39 @@ issue_log:
   note: Resolved 2026-07-28 — Keep M3 enqueue; TP-S013-06=6a accepted; open_contradictions cleared; Phase 19 tech-plan 
     draft ready; handoff → await_user_review_phase19_tech_plan
 decisions_log:
+- 'EV-014/S016 2026-07-29: 02-verify-plan COMPLETE — Gate A→B PASS; M1–M3 all A (recommended): M1 lock cookie Max-Age=1 year;
+  M2 skip deployment-integration.md update for VITE_WRWC_DONATE_URL; M3 defer exact EN/ES fact strings to 07-build; gates.a_to_b=passed;
+  checkpoints.phase_a=passed; current_stage=07-build in_progress; report docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md;
+  no git commit recorded (none provided).'
+- 'EV-014/S016 2026-07-29: 02-verify-plan marked in_progress — Gate A→B for F40 ChatRAG cold-start UX; next_action=run 02-verify-plan
+  Gate A→B for F40.'
+- 'EV-014/S016 2026-07-29: 01-requirements COMPLETE — RD-183–187; ADR-039; UJ-052; TC-156–160; AC-CS1–8; report docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md;
+  current_stage=02-verify-plan (pending); next_action=AskQuestion proceed to 02-verify-plan.'
+- 'EV-014/S016 2026-07-29: Phase 1 routing confirmed (Lean+build); UI preview declined for now (remind at 11-verify-impl or
+  after 07-build); proceed to 01-requirements delta for F40'
+- 'EV-014/S016 2026-07-29: Phase 0 scope APPROVED — phase0_approved=true; phase_0.status=completed; feature_ids [F40] confirmed
+  (allocate new Fn); Lean+build Phase 1/routing confirmed (already in routing plan); artifacts: docs/feature-list.md F40,
+  docs/decisions/evolve-decisions.md Cycle EV-014, session-brief updated.'
+- 'EV-014/S016 2026-07-29: Phase 0 Batch 3 clarifications Q10–Q12 recorded — Q10 option 2 light FE-triggered warm only (extend
+  prewarmChatServices /warm client; no Modal/backend; sufficient for all use cases; revises S016-D8 backend part; clears backend-scope
+  expansion + routing_amendment); Q11 option 1 secondary donate CTA under rotating fact → wrwc.org/donate (EN/ES), ways-to-give
+  optional secondary; Q12 option 1 device-local localStorage seen-facts key; cookie opt-out requested → pending Q13 AskQuestion
+  on mechanism; batch_3_status=recorded_pending_q13_cookie_optout; next_action=Q13 cookie opt-out lock then Batch 4 Platform.'
+- 'EV-014/S016 2026-07-29: Phase 0 Batch 3 (Boundaries) recorded — S016-D7 N=8s slow-wait; S016-D8 options 2+3 soft donate
+  link (wrwc.org/donate / ways-to-give) AND backend warm-path (scope expansion — clarification AskQuestion pending on warm-path
+  scope + whether routing must add 04/backend apps); S016-D9 persist seen facts in localStorage (privacy note — clarify before
+  Batch 4); batch_3_status=recorded_pending_clarification; next_action=Clarify Q8/Q9 before Batch 4.'
+- 'EV-014/S016 2026-07-29: Phase 0 Batch 2 (Behavior) COMPLETE — S016-D4 rotation=~4–5s bilingual fun-fact list + short starting-up
+  line; S016-D5 content=static EN/ES frontend i18n (no API); S016-D6 trigger=also show facts if stream slow (>N s) before
+  first token even without retry (N→Batch 3); batch_2_complete; current_batch=3; next_action=Phase 0 Batch 3 Boundaries.'
+- 'EV-014/S016 2026-07-29: Phase 0 Batch 1 (Intent/Scope) COMPLETE — S016-D1 who/when=community chat users only during cold-start
+  retries; S016-D2 problem=distract/inform with fun facts + WRWC/Providence; S016-D3 success=UX+tests rotating messages Vitest+UI
+  e2e; batch_1_complete; current_batch=2; next_action=Phase 0 Batch 2 Behavior.'
+- 'EV-014/S016-chat-cold-start-ux: 2026-07-29 — session artifacts written (session-brief.md + routing-plan.md); branch evolve/EV-014-chat-cold-start-ux
+  created/checked out (status open); EV-014 + phase_0 + routing 16-evolve → in_progress; next_action=Phase 0 intake batch
+  1 (Intent/Scope).'
+- 'EV-014/S016-chat-cold-start-ux: session opened 2026-07-29 — GitHub #87 ChatRAG cold-start UX; Lean+build routing approved;
+  feature_ids [F40] tentative pending Phase 0; branch evolve/EV-014-chat-cold-start-ux recorded as planned (not checked out).'
 - R1: five-app monorepo in vecinita — ADR-001
 - R2: hybrid Modal + DigitalOcean — ADR-002
 - R3: 'greenfield APIs, siblings reference only — ADR-003'
@@ -10241,8 +11153,64 @@ decisions_log:
 - 'S015/2026-07-29: PR #155 open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155 on fix/S015-jobs-sse-cors;
   replaced pr_url pending; 14-hotfix remains in_progress (await_ci_and_merge_approval); Modal DM redeploy pre-approved after
   merge (S015-D-C / decision C).'
-- 'S015/2026-07-29: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal data-management redeployed (uv run modal deploy infra/modal/data_management_app.py); live OPTIONS /jobs/events Cache-Control+Last-Event-ID → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1 PASS; BUG-2026-07-29-jobs-sse-cors-headers resolved; branch fix/S015-jobs-sse-cors merged; 15-service-health started (in_progress); handoff next_skill=15-service-health next_action=run_service_health; optional production Jobs UI SSE visual confirm deferred to user.'
+- 'S015/2026-07-29: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal data-management redeployed (uv run modal deploy infra/modal/data_management_app.py);
+  live OPTIONS /jobs/events Cache-Control+Last-Event-ID → 200 (Allow-Headers includes both); live pytest VECINITA_RUN_LIVE_CORS=1
+  PASS; BUG-2026-07-29-jobs-sse-cors-headers resolved; branch fix/S015-jobs-sse-cors merged; 15-service-health started (in_progress);
+  handoff next_skill=15-service-health next_action=run_service_health; optional production Jobs UI SSE visual confirm deferred
+  to user.'
+- 'S015/2026-07-29: User Option 1 — close S015-hotfix-jobs-sse-cors now (15-service-health wrap waived/minimal) to open feature
+  session for GitHub #87. Formal H0ci–H5 not required; live CORS PASS already recorded. active_session cleared; session_counter
+  remains 15 (next allocatable S016).'
+- 'EV-014/S016 2026-07-29: Phase 0 Batch 3 recorded (S016-D7..D9); pending Q8/Q9 clarification before Batch 4; next_action=Clarify
+  Q8/Q9 before Batch 4.'
+- 'EV-014/S016 2026-07-29: Phase 0 Batch 1 COMPLETE (S016-D1..D3); next_action=Phase 0 Batch 2 Behavior.'
+- 'S016/EV-014 2026-07-29: session-brief.md + routing-plan.md written; branch evolve/EV-014-chat-cold-start-ux open (checked
+  out); active_session.current_stage=16-evolve in_progress; EV-014 status+phase_0 in_progress; next_action=Phase 0 intake
+  batch 1 (Intent/Scope).'
+- 'EV-014/S016 2026-07-29: 01-requirements seed loaded at docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md;
+  substeps.seed_loaded=true; next_action=AskQuestion confirm locked + open questions.'
+- 'S016/EV-014 2026-07-29: 07-build COMPLETE — F40 ChatRAG cold-start UX implemented (Vitest TC-156–159 + Playwright TC-160
+  pass); locale-context rename for macOS casing; handoff → 08-verify-build.'
+- 'S016/EV-014 2026-07-29: Lean+build — 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; ready for 10-e2e.'
+- 'S016/EV-014 2026-07-29: 10-e2e PASS — e2e-report.md; next 13-deploy-smoke pending user approval; also await commit request; no git commits this update.'
 artifacts:
+- path: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+  kind: e2e-report
+  session_id: S016-chat-cold-start-ux
+  stage: 10-e2e
+  evolve_cycle_id: EV-014
+  recorded_at: '2026-07-29'
+  overall_result: PASS
+  note: '10-e2e PASS — T0-ui Playwright chat 8/8 (UJ-052 TC-160); T0 Vitest TC-156–159 (08); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval'
+- path: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+  kind: verification-report
+  session_id: S016-chat-cold-start-ux
+  stage: 08-verify-build
+  evolve_cycle_id: EV-014
+  recorded_at: '2026-07-29'
+  overall_result: PASS
+  note: 'Lean+build 08 PASS — FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+- path: docs/sessions/S016-chat-cold-start-ux/reports/07-build-cold-start-ux.md
+  kind: build-report
+  session_id: S016-chat-cold-start-ux
+  stage: 07-build
+  evolve_cycle_id: EV-014
+  recorded_at: '2026-07-29'
+  note: F40 ChatRAG cold-start UX implemented — Vitest TC-156–159 + Playwright TC-160 pass; locale-context rename for 
+    macOS casing
+- path: docs/sessions/S016-chat-cold-start-ux/reports/02-verify-plan-audit.md
+  kind: verify-plan-audit
+  session_id: S016-chat-cold-start-ux
+  stage: 02-verify-plan
+  evolve_cycle_id: EV-014
+  recorded_at: '2026-07-29'
+  note: 'Gate A→B PASS — M1–M3 all A'
+- docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md
+- docs/adr/ADR-039-chat-cold-start-fun-fact-consent.md
+- docs/sessions/S016-chat-cold-start-ux/checkpoints/01-requirements-seed.md
+- docs/decisions/evolve-decisions.md
+- docs/sessions/S016-chat-cold-start-ux/routing-plan.md
+- docs/sessions/S016-chat-cold-start-ux/session-brief.md
 - docs/sessions/S000-internal-docs-archive/context-brief.md
 - 'docs/sessions/S000-internal-docs-archive/audits.md#product-plan-audit-report'
 - 'docs/decisions.md#product-decisions-02-verify-plan'
@@ -10945,8 +11913,17 @@ artifacts:
   recorded_at: '2026-07-29'
 
 git_history:
-  current_branch: main
+  current_branch: evolve/EV-014-chat-cold-start-ux
   branches:
+  - name: evolve/EV-014-chat-cold-start-ux
+    purpose: EV-014 / S016 — ChatRAG cold-start UX rotating messages (#87); F40
+    base: main
+    status: open
+    created_at: '2026-07-29'
+    session_id: S016-chat-cold-start-ux
+    evolve_cycle_id: EV-014
+    note: Branch created and checked out locally 2026-07-29; Phase 0/1 CONFIRMED; F40 allocated; Lean+build; UI preview 
+      declined for now; current_stage=01-requirements.
   - name: fix/S015-jobs-sse-cors
     purpose: S015 hotfix — Jobs SSE CORS preflight (Cache-Control / Last-Event-ID on GET /jobs/events)
     base: main
@@ -12272,11 +13249,13 @@ git_history:
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155'
     note: 'PR #155 merged to main; Modal DM redeploy + live CORS PASS followed; 14-hotfix completed'
   notes:
-  - '2026-07-29 S015: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; BUG-2026-07-29 resolved; branch fix/S015-jobs-sse-cors merged; 15-service-health in_progress (formal H0ci–H5 pending); optional production Jobs UI SSE visual confirm remaining.'
+  - '2026-07-29 S015: 14-hotfix COMPLETE — PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1
+    PASS; BUG-2026-07-29 resolved; branch fix/S015-jobs-sse-cors merged; 15-service-health in_progress (formal H0ci–H5 pending);
+    optional production Jobs UI SSE visual confirm remaining.'
   - '2026-07-29 S015: PR #155 recorded — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155 on fix/S015-jobs-sse-cors;
     14-hotfix remains in_progress (await_ci_and_merge_approval); Modal DM redeploy pre-approved after merge (decision C).'
-  - '2026-07-29 S015: Commit 5904552 on fix/S015-jobs-sse-cors — hotfix Jobs SSE CORS; PR URL pending; 14-hotfix remains
-    in_progress (await_ci_and_merge_approval); Modal DM redeploy pre-approved after merge (decision C).'
+  - '2026-07-29 S015: Commit 5904552 on fix/S015-jobs-sse-cors — hotfix Jobs SSE CORS; PR URL pending; 14-hotfix remains in_progress
+    (await_ci_and_merge_approval); Modal DM redeploy pre-approved after merge (decision C).'
   - '2026-07-29 S015: Session OPENED — hotfix Jobs SSE CORS (BUG-2026-07-29-jobs-sse-cors-headers); active_session=S015-hotfix-jobs-sse-cors;
     branch fix/S015-jobs-sse-cors; 14-hotfix in_progress; 15-service-health pending; routing approved chat A/A/A/A.'
   - '2026-07-29 S014/EV-013: 13-deploy-smoke PASS (Path A FE-only) @ f85b6ab — DO admin FE pin evolve/EV-013 ACTIVE; Modal/write

@@ -82,10 +82,11 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### ChatRAG Frontend
 
-- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001); **bilingual UI chrome** via shared packages (EV-004 F31).
-- **Inputs**: User messages in browser; tag chip selection for RAG; browse filters (tags, title/URL search); locale from `vecinita.locale` / browser detect.
-- **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader); UI strings from `packages/frontend-i18n`.
-- **Source**: feature-list F11, F19, F22, F31
+- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001); **bilingual UI chrome** via shared packages (EV-004 F31); **cold-start / long-wait UX** with rotating fun facts + consent (EV-014 F40).
+- **Inputs**: User messages in browser; tag chip selection for RAG; browse filters (tags, title/URL search); locale from `vecinita.locale` / browser detect; optional cold-start consent cookie + seen-fact ids (device-local only).
+- **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader); UI strings from `packages/frontend-i18n` (+ ChatRAG message tables); wait-status region with facts / donate CTA / consent banner during cold start or >8s first-token delay.
+- **Cold-start wait (F40)**: Reuse `streamAsk` retry + `prewarmChatServices`; rotate ~10 static EN/ES facts; no API/CMS; no Modal changes.
+- **Source**: feature-list F11, F19, F22, F31, F40
 
 ### Data Management (Modal ASGI + workers)
 

@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
 import {
   formatAskFailureMessage,
@@ -9,11 +9,13 @@ import {
 } from "../api/ask";
 import { prewarmChatServices } from "../api/warm";
 import type { Source } from "../api/types";
+import { SLOW_STREAM_WAIT_MS } from "../coldstart/constants";
 import { requireChatApiConfig } from "../config";
 import { useLocale } from "../hooks/useLocale";
 import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
 import { useConversationStore } from "../hooks/useConversationStore";
 import { t } from "../i18n/messages";
+import { ColdStartWait } from "./ColdStartWait";
 import { SourceList } from "./SourceList";
 import { SuggestedQuestions } from "./SuggestedQuestions";
 
@@ -55,7 +57,8 @@ function ChatPanelView({
 }) {
   const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [waitUxActive, setWaitUxActive] = useState(false);
+  const sawFirstTokenRef = useRef(false);
   const { locale } = useLocale();
   const {
     messages,
@@ -81,7 +84,7 @@ function ChatPanelView({
   useEffect(() => {
     if (messages.length === 0) {
       setError(null);
-      setStatusMessage(null);
+      setWaitUxActive(false);
     }
   }, [messages.length]);
 
@@ -93,11 +96,18 @@ function ChatPanelView({
     }
 
     setError(null);
-    setStatusMessage(null);
+    setWaitUxActive(false);
+    sawFirstTokenRef.current = false;
     setLoading(true);
     appendUserMessage(trimmed);
     setQuestion("");
     const assistantId = appendAssistantPlaceholder();
+
+    const slowTimer = window.setTimeout(() => {
+      if (!sawFirstTokenRef.current) {
+        setWaitUxActive(true);
+      }
+    }, SLOW_STREAM_WAIT_MS);
 
     try {
       const { baseUrl } = requireChatApiConfig();
@@ -107,11 +117,12 @@ function ChatPanelView({
         language: locale,
         tags: selectedTags.length > 0 ? selectedTags : undefined,
         onRetry: () => {
-          setStatusMessage(t(locale, "coldStartStatus"));
+          setWaitUxActive(true);
         },
       })) {
-        setStatusMessage(null);
         if (isTokenEvent(chunk)) {
+          sawFirstTokenRef.current = true;
+          setWaitUxActive(false);
           appendAssistantToken(assistantId, chunk.token);
         } else if (isSourcesEvent(chunk)) {
           sources = chunk.sources;
@@ -126,7 +137,8 @@ function ChatPanelView({
       setError(message);
       appendAssistantToken(assistantId, message);
     } finally {
-      setStatusMessage(null);
+      window.clearTimeout(slowTimer);
+      setWaitUxActive(false);
       setLoading(false);
     }
   }
@@ -168,11 +180,7 @@ function ChatPanelView({
         )}
       </div>
 
-      {statusMessage ? (
-        <p className="status-hint" role="status">
-          {statusMessage}
-        </p>
-      ) : null}
+      <ColdStartWait locale={locale} active={waitUxActive} />
 
       {error ? (
         <p className="error" role="alert">

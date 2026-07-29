@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-10 (S010/EV-011 F39 follow-on — streaming/auth/catalog deltas RD-163–RD-172)
+> **Last updated**: 2026-07-29 (S016/EV-014 #87 — UJ-052 ChatRAG cold-start wait UX)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -57,6 +57,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-049 | LLM proxy auth failure (generate/warm/models) | Operator / service | Modal ASGI without proxy key → `401` | F39 follow-on | local |
 | UJ-050 | Job detail drill-down + admin job CRUD | Admin operator | Admin UI `/jobs/:id` → Modal job detail / cancel / retry / delete | F32 EV-012 #116 | local |
 | UJ-051 | Scan dense corpus / admin tables with truncated titles/URLs | Admin operator | DM UI `/corpus` (+ Jobs/Users/Audit/Eval lists) | F9, F12 EV-013 #148 | local |
+| UJ-052 | Cold-start / long-wait fun facts + consent | Community member | ChatRAG Frontend wait UX (retry or >8s) | F40 EV-014 #87 | local |
 
 ## Visual journey maps
 
@@ -718,6 +719,52 @@ theme + OS contrast readable; no new cookies/storage.
   `tests/ui/admin/uj051-corpus-density.spec.ts` — TC-155.
 
 **E2E tier**: local (Vitest primary; Playwright for viewport density).
+
+---
+
+### UJ-052: Cold-start / long-wait fun facts + consent
+
+**Actor**: Community member (no account)
+
+**Goal**: While the assistant is cold-starting or slow to produce the first token, see rotating
+bilingual WRWC / Providence fun facts and a soft donate CTA so the wait feels informative — without
+tracking personal data. Optionally remember which facts were already shown (device-local) after an
+explicit friendly consent choice.
+
+**Preconditions**: ChatRAG SPA loaded; ask path can simulate cold-start retry and/or delayed first
+token; locale `en` or `es`.
+
+**Steps**:
+
+1. User submits a question (UJ-001). Existing cold-start retries and/or client `/warm` prewarm run
+   as today (`prewarmChatServices`).
+2. **Trigger A — cold-start retry:** On retry (`onRetry`), show short “starting up…” status **and**
+   begin rotating fun facts (~4–5s).
+3. **Trigger B — slow stream:** If **8s** elapse with no first token (even without a retry), show
+   the same wait UX.
+4. Fun facts rotate through a static EN/ES curated list (~10). A secondary line links to
+   [wrwc.org/donate](https://wrwc.org/donate/) (or `VITE_WRWC_DONATE_URL`) in a new tab.
+5. **Consent banner** (first time, before remembering): friendly copy that we are **not** tracking
+   the user — we only want to avoid repeating messages. Actions: **Accept** (remember) /
+   **No thanks** (opt-out). Facts may rotate either way; **memory only after Accept**.
+6. On **Accept**: set first-party HTTP preference cookie; store seen fact ids in `localStorage`
+   (`vecinita.chat.coldstart.facts.v1`). Prefer unseen facts when rotating.
+7. On **No thanks**: set opt-out cookie; do **not** persist seen-fact ids; still rotate facts.
+8. On first streamed token or final error: clear wait UX; keep existing failure copy.
+9. Cookie / storage are **not** sent to ChatRAG APIs and are not required for ask/stream.
+
+**Cross-component interaction**: Chat shell / `ChatPanel` status region ↔ consent banner ↔ donate
+link (Playwright T0-ui).
+
+**Acceptance**: Triggers at retry or 8s; rotation + donate CTA; consent before remember; opt-out
+stops persistence; EN/ES; no PII; no API contract change.
+
+**Automated tests**:
+- Vitest: rotation timer, 8s slow-trigger, consent Accept/Opt-out, storage/cookie helpers,
+  donate href — TC-156–TC-159.
+- Playwright T0-ui: `tests/ui/chat/uj052-cold-start-wait.spec.ts` — TC-160.
+
+**E2E tier**: local (Vitest + Playwright); live observation at 13-deploy-smoke only if easy.
 
 ---
 

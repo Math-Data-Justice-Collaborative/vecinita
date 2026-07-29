@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-07-29 (S014/EV-013 #148 — F9/F12 admin table density + truncation)
+> **Last updated**: 2026-07-29 (S016/EV-014 #87 — F40 ChatRAG cold-start UX / fun facts)
 
 ## Summary
 
@@ -49,6 +49,7 @@
 | F37 | Eval UX polish + playground + runtime config promote | Planned | Data Management + ChatRAG | data-management-frontend, internal-write-api, data-management-backend, chat-rag-backend | S008/EV-009 2026-07-02 |
 | F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal LLM app | S009/EV-010 2026-07-05; backend unified in F39 |
 | F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, `packages/llm-client`, all LLM consumers | S010/EV-011; ADR-037; follow-on RD-163–RD-172 |
+| F40 | ChatRAG cold-start wait UX (rotating fun facts + consent) | Planned | ChatRAG | chat-rag-frontend; optional `frontend-i18n` / `frontend-ui` | S016/EV-014 #87 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -727,7 +728,8 @@
 
 #### F39 follow-on — client consolidation (2026-07-10, RD-163–RD-172)
 
-Same feature ID (**F39**); no F40. Cleanup after ADR-037 — **not** a multi-provider framework.
+Same feature ID (**F39**); follow-on did not allocate a new Fn (F40 later used for ChatRAG
+cold-start UX in EV-014). Cleanup after ADR-037 — **not** a multi-provider framework.
 
 | Slice | Scope | User-visible? |
 |-------|--------|---------------|
@@ -744,6 +746,27 @@ Same feature ID (**F39**); no F40. Cleanup after ADR-037 — **not** a multi-pro
 remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient` is deleted.
 
 **Source:** S010 seed `checkpoints/01-requirements-seed.md`; interview Q1–Q3 approve-all 2026-07-10.
+
+### F40: ChatRAG cold-start wait UX (rotating fun facts + consent)
+
+- **What it does**: During ChatRAG cold-start retries or slow first-token waits (>8s), show
+  rotating bilingual (EN/ES) WRWC / Providence / ways-to-give fun facts plus a short
+  “starting up…” status line, a soft donate CTA (`wrwc.org/donate`), and a friendly
+  first-party consent banner before remembering which facts were shown (opt-out via HTTP
+  cookie). Extends existing `coldStartStatus` / `prewarmChatServices` client warm only —
+  no Modal/backend latency work.
+- **Inputs**: Locale; cold-start retry / stream timing; optional `VITE_WRWC_DONATE_URL`
+  (default `https://wrwc.org/donate/`); consent choice; seen-fact ids in `localStorage`.
+- **Outputs**: Improved wait UX; device-local preference cookie + seen-facts list (no PII,
+  not required by ChatRAG APIs).
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/chat-rag-frontend` | Rotating facts UI, consent banner, donate CTA, warm reuse |
+  | `packages/frontend-i18n` / `frontend-ui` | Optional shared banner/copy if needed |
+- **Out of scope**: Modal/backend warm-path changes; CMS/API-backed facts; admin UI;
+  analytics of which facts were shown.
+- **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15).
 
 ## Planned / Deferred (post-v1)
 

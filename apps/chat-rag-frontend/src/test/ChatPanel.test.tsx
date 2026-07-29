@@ -162,6 +162,8 @@ describe("ChatPanel", () => {
     });
 
     expect(screen.getByRole("status")).toHaveTextContent(/starting up/i);
+    expect(screen.getByTestId("cold-start-wait")).toBeInTheDocument();
+    expect(screen.getByTestId("cold-start-fact")).toBeInTheDocument();
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
@@ -446,5 +448,70 @@ describe("ChatPanel", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       /not authorized/i,
     );
+  });
+
+  it("shows wait UX after 8s with no first token even without retry (TC-157)", async () => {
+    vi.useFakeTimers();
+
+    let releaseStream: ((value: Response) => void) | undefined;
+    const pendingStream = new Promise<Response>((resolve) => {
+      releaseStream = resolve;
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("/api/v1/warm")) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ status: "warming" }), {
+              status: 200,
+            }),
+          );
+        }
+        if (url.includes("/api/v1/tags")) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ tags: [] }), { status: 200 }),
+          );
+        }
+        if (url.includes("/api/v1/ask/stream")) {
+          return pendingStream;
+        }
+        return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Slow start?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+
+    expect(screen.queryByTestId("cold-start-wait")).not.toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(8_000);
+    });
+
+    expect(screen.getByTestId("cold-start-wait")).toBeInTheDocument();
+    expect(screen.getByTestId("cold-start-fact")).toBeInTheDocument();
+
+    await act(async () => {
+      releaseStream?.(
+        sseResponse(
+          'data: {"token":"Ready"}\n\n' +
+            'data: {"sources":[]}\n\n' +
+            'data: {"done":true}\n\n',
+        ),
+      );
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(screen.queryByTestId("cold-start-wait")).not.toBeInTheDocument();
+    expect(screen.getByText(/^Ready$/)).toBeInTheDocument();
   });
 });

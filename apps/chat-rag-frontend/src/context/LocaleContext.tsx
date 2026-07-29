@@ -12,7 +12,7 @@ import {
   readStoredLocale,
 } from "../hooks/useLocale.types";
 
-import { LocaleContext } from "./localeContext";
+import { LocaleContext } from "./locale-context";
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(
