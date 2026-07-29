@@ -9284,7 +9284,7 @@ git_history:
       evolve_cycle_id: EV-012
       note: 'M82+M83+M84 complete; M84 08-verify-build scoped PASS @ f98d40d; T85.1 completed (c6a156d); T85.2 in_progress/M85;
         minor PR #153 open (do not merge)'
-      head_sha: c6a156d
+      head_sha: 29635fe
     - name: fix/S012-admin-ui-112-105
       purpose: 'S012 hotfix — GitHub #112 corpus pagination + #105 Spanish sign-out overflow (one PR)'
       base: main
@@ -10417,6 +10417,24 @@ git_history:
       timestamp: '2026-07-29T07:45:08-04:00'
       evolve_cycle_id: EV-012
       note: T85.5 completed — Phase 19 gate PASS @ T2; M85 complete
+    - sha: a6094dc
+      branch: evolve/EV-012-unified-job-monitoring
+      message: '[M85] docs: Phase 19 08-verify-build PASS for EV-012'
+      stage: 08-verify-build
+      session_id: S013-unified-job-monitoring
+      files_changed: 4
+      timestamp: '2026-07-29T08:03:05-04:00'
+      evolve_cycle_id: EV-012
+      note: M85/Phase19 08-verify-build scoped PASS
+    - sha: 29635fe
+      branch: evolve/EV-012-unified-job-monitoring
+      message: '[M85] docs: EV-012 10-e2e T0 PASS report'
+      stage: 10-e2e
+      session_id: S013-unified-job-monitoring
+      files_changed: 3
+      timestamp: '2026-07-29T08:07:05-04:00'
+      evolve_cycle_id: EV-012
+      note: 10-e2e T0 PASS; T1 skipped (no docker); T2/T3 pending 13-deploy-smoke
   notes:
     - '2026-07-29 S013/EV-012: M85 COMPLETE (T85.1–T85.5); Phase 19 gate PASS @ T2 (phase19-gate.md @ cc1c355); 07-build completed;
       current_stage=08-verify-build; phase_c=pending_08_verify; gates.c_to_d=pending; handoff next_action=start_08_verify_build;
