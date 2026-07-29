@@ -50,6 +50,11 @@ const RUN_B_ID = "00000000-0000-0000-0000-000000000088";
 const PLAYGROUND_RUN_ID = "00000000-0000-0000-0000-0000000000aa";
 /** Eval run surfaced on unified GET /jobs (UJ-044 / TC-124). */
 export const EVAL_JOB_ID = "55555555-5555-4555-8555-555555555555";
+/** Ingest job used for Jobs list → detail (UJ-050 / RD-178). */
+export const INGEST_JOB_ID = "job-playwright-001";
+/** Retag job with document_id on Jobs list (UJ-023 / TC-150). */
+export const RETAG_JOB_ID = "66666666-6666-4666-8666-666666666666";
+export const RETAG_DOC_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
 const PLAYGROUND_MODELS_BODY = {
   items: [
@@ -59,6 +64,68 @@ const PLAYGROUND_MODELS_BODY = {
 };
 
 const EVAL_CONFIG_PRESETS_BODY = { items: [] };
+
+type MockJob = {
+  job_id: string;
+  status: string;
+  job_type: string;
+  urls: string[];
+  document_id: string | null;
+  eval_run_id: string | null;
+  error_code: string | null;
+  error_message: string | null;
+  modal_call_id: string | null;
+  dashboard_url: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+function mockJobsCatalog(): MockJob[] {
+  return [
+    {
+      job_id: INGEST_JOB_ID,
+      status: "completed",
+      job_type: "ingest",
+      urls: ["https://example.com/page-a"],
+      document_id: null,
+      eval_run_id: null,
+      error_code: null,
+      error_message: null,
+      modal_call_id: null,
+      dashboard_url: null,
+      created_at: "2026-07-01T12:00:00Z",
+      updated_at: "2026-07-01T12:01:00Z",
+    },
+    {
+      job_id: RETAG_JOB_ID,
+      status: "failed",
+      job_type: "retag",
+      urls: [],
+      document_id: RETAG_DOC_ID,
+      eval_run_id: null,
+      error_code: "LlmTagClientError",
+      error_message: "tag response is not valid JSON",
+      modal_call_id: "fc-retag-fail",
+      dashboard_url: "https://modal.com/apps/vecinita/logs/fc-retag-fail",
+      created_at: "2026-07-01T11:00:00Z",
+      updated_at: "2026-07-01T11:00:30Z",
+    },
+    {
+      job_id: EVAL_JOB_ID,
+      status: "running",
+      job_type: "eval",
+      urls: [],
+      document_id: null,
+      eval_run_id: EVAL_JOB_ID,
+      error_code: null,
+      error_message: null,
+      modal_call_id: null,
+      dashboard_url: null,
+      created_at: "2026-07-02T12:00:00Z",
+      updated_at: "2026-07-02T12:00:05Z",
+    },
+  ];
+}
 
 function evalRunsList() {
   return {
@@ -146,63 +213,85 @@ function evalRunDetail(runId: string) {
 async function fulfillJobsRoute(route: Route): Promise<void> {
   const url = route.request().url();
   const method = route.request().method();
+  const parsed = new URL(url);
+  const path = parsed.pathname;
 
-  if (method === "POST" && url.endsWith("/jobs")) {
+  // Force poll fallback in T0-ui (SSE auth headers not needed for list assertions).
+  if (method === "GET" && path.endsWith("/jobs/events")) {
+    await route.fulfill({ status: 503, body: "sse unavailable in playwright mock" });
+    return;
+  }
+
+  if (method === "POST" && path.endsWith("/jobs")) {
     await route.fulfill({
-      status: 200,
+      status: 202,
       contentType: "application/json",
-      body: JSON.stringify({ job_id: "job-playwright-001" }),
+      body: JSON.stringify({ job_id: INGEST_JOB_ID, status: "pending" }),
     });
     return;
   }
-  if (method === "GET" && url.includes("/jobs/job-playwright-001")) {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        job_id: "job-playwright-001",
-        status: "completed",
-        job_type: "ingest",
-        urls: ["https://example.com/page-a"],
-        error_code: null,
-        error_message: null,
-        created_at: "2026-07-01T12:00:00Z",
-        updated_at: "2026-07-01T12:01:00Z",
-      }),
-    });
-    return;
-  }
-  if (method === "GET" && url.endsWith("/jobs")) {
+
+  const cancelMatch = path.match(/\/jobs\/([^/]+)\/cancel$/);
+  if (method === "POST" && cancelMatch?.[1]) {
+    const jobId = decodeURIComponent(cancelMatch[1]);
+    const job = mockJobsCatalog().find((row) => row.job_id === jobId);
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        jobs: [
-          {
-            job_id: "job-playwright-001",
-            status: "completed",
-            job_type: "ingest",
-            urls: ["https://example.com/page-a"],
-            error_code: null,
-            error_message: null,
-            created_at: "2026-07-01T12:00:00Z",
-            updated_at: "2026-07-01T12:01:00Z",
-          },
-          {
-            job_id: EVAL_JOB_ID,
-            status: "running",
-            job_type: "eval",
-            urls: [],
-            error_code: null,
-            error_message: null,
-            created_at: "2026-07-02T12:00:00Z",
-            updated_at: "2026-07-02T12:00:05Z",
-          },
-        ],
+        ...(job ?? { job_id: jobId, job_type: "ingest", urls: [] }),
+        status: "cancelled",
       }),
     });
     return;
   }
+
+  const retryMatch = path.match(/\/jobs\/([^/]+)\/retry$/);
+  if (method === "POST" && retryMatch?.[1]) {
+    await route.fulfill({
+      status: 202,
+      contentType: "application/json",
+      body: JSON.stringify({ job_id: "job-playwright-retry", status: "pending" }),
+    });
+    return;
+  }
+
+  const deleteMatch = path.match(/\/jobs\/([^/]+)$/);
+  if (method === "DELETE" && deleteMatch?.[1] && !path.endsWith("/jobs")) {
+    await route.fulfill({ status: 204, body: "" });
+    return;
+  }
+
+  const detailMatch = path.match(/\/jobs\/([^/]+)$/);
+  if (method === "GET" && detailMatch?.[1] && !path.endsWith("/jobs")) {
+    const jobId = decodeURIComponent(detailMatch[1]);
+    const job = mockJobsCatalog().find((row) => row.job_id === jobId);
+    if (job === undefined) {
+      await route.fulfill({ status: 404, body: "Not found" });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(job),
+    });
+    return;
+  }
+
+  if (method === "GET" && path.endsWith("/jobs")) {
+    const statusFilter = parsed.searchParams.get("status");
+    let jobs = mockJobsCatalog();
+    if (statusFilter !== null && statusFilter !== "") {
+      jobs = jobs.filter((job) => job.status === statusFilter);
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ jobs }),
+    });
+    return;
+  }
+
   await route.fulfill({
     status: 200,
     contentType: "application/json",

@@ -5,7 +5,7 @@ import {
   mockAuthenticatedAdmin,
 } from "../helpers/mock-admin-api";
 
-/** UJ-044 / TC-124: eval runs on unified Jobs tab with navigation to evaluation. */
+/** UJ-044 / TC-124: eval runs on unified Jobs tab; drill-down via UJ-050 detail. */
 test.describe("Eval jobs on Jobs tab (UJ-044)", () => {
   test.beforeEach(async ({ page }) => {
     await mockAuthenticatedAdmin(page);
@@ -24,7 +24,7 @@ test.describe("Eval jobs on Jobs tab (UJ-044)", () => {
     await expect(evalRow).toContainText(/Running/i);
   });
 
-  test("clicking eval row navigates to evaluation run drill-down", async ({
+  test("clicking eval row opens detail then evaluation drill-down", async ({
     page,
   }) => {
     await page.goto("/jobs");
@@ -34,6 +34,12 @@ test.describe("Eval jobs on Jobs tab (UJ-044)", () => {
       .filter({ hasText: EVAL_JOB_ID.slice(0, 8) });
     await evalRow.click();
 
+    await expect(page).toHaveURL(
+      new RegExp(`/jobs/${encodeURIComponent(EVAL_JOB_ID)}$`),
+    );
+    await expect(page.getByTestId("job-detail")).toBeVisible();
+
+    await page.getByRole("link", { name: "Open evaluation run" }).click();
     await expect(page).toHaveURL(
       new RegExp(
         `/evaluation\\?run=${encodeURIComponent(EVAL_JOB_ID)}.*tab=runs`,
@@ -46,7 +52,8 @@ test.describe("Eval jobs on Jobs tab (UJ-044)", () => {
   test("ingest jobs still render alongside eval rows", async ({ page }) => {
     await page.goto("/jobs");
 
-    await expect(page.getByTestId("job-row")).toHaveCount(2);
-    await expect(page.getByText(/Ingest/i)).toBeVisible();
+    await expect(page.getByTestId("job-row").first()).toBeVisible();
+    await expect(page.getByText(/Ingest/i).first()).toBeVisible();
+    await expect(page.getByText(/Eval/i).first()).toBeVisible();
   });
 });
