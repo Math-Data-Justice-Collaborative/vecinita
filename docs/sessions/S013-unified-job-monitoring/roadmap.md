@@ -4,8 +4,8 @@
 > **Evolve cycle:** EV-012  
 > **Features:** F32, F36 (extend; no new Fn)  
 > **Branch:** `evolve/EV-012-unified-job-monitoring` → `main` (PR-54)  
-> **Last updated:** 2026-07-28  
-> **Sources:** [session-brief](./session-brief.md) · [routing-plan](./routing-plan.md) · [execution-plan](../S000-internal-docs-archive/execution-plan.md) Phase 19 · [ADR-038](../../adr/ADR-038-modal-job-lifecycle-storage-split.md)
+> **Last updated:** 2026-07-29  
+> **Sources:** [session-brief](./session-brief.md) · [routing-plan](./routing-plan.md) · [execution-plan](../S000-internal-docs-archive/execution-plan.md) Phase 19 · [ADR-038](../../adr/ADR-038-modal-job-lifecycle-storage-split.md) · [phase19-gate](./reports/phase19-gate.md)
 
 ## Purpose
 
@@ -31,9 +31,10 @@ Modal `job_type=eval`.
 | 00-context | ✅ Complete | Session open |
 | 01-requirements | ✅ Complete | RD-173–RD-178; ADR-038 |
 | 02-verify-plan | ✅ Complete | Gate A→B; M1–M3 |
-| 04-tech-plan | 🔄 In progress | TP-S013-01–08; Phase 19 draft for review |
-| 07-build M82–M85 | ⬜ Pending | Start T82.1 after 04 approval |
-| 08 / 10 / 13 | ⬜ Pending | Lean+build routing |
+| 04-tech-plan | ✅ Complete | TP-S013-01–08; gate B→C |
+| 07-build M82–M85 | ✅ Complete | M85 T85.1–T85.5; Phase 19 gate PASS at T2 |
+| 08-verify-build | 🔄 Next | M85 / Phase 19 boundary |
+| 10 / 13 | ⬜ Pending | Lean+build routing |
 
 ---
 
@@ -45,8 +46,8 @@ Modal `job_type=eval`.
 | **GH-S013-1** | `[EV-012][F32] M82 — Modal jobs API + SSE + CRUD` | `evolve`, `app:admin` | T82.1–T82.6 | GH-S013-0 | ⬜ Pending |
 | **GH-S013-2** | `[EV-012][F36] M83 — Eval enqueue + DO SSE + soft-delete` | `evolve`, `app:admin` | T83.1–T83.6 | GH-S013-1 | ⬜ Pending |
 | **GH-S013-3** | `[EV-012][F32/F36] M84 — Admin Jobs UI` | `evolve`, `app:admin` | T84.1–T84.6 | GH-S013-1 | ⬜ Pending |
-| **GH-S013-4** | `[EV-012] M85 — API e2e + Playwright T0-ui` | `evolve`, `app:admin` | T85.1–T85.5 | GH-S013-2, GH-S013-3 | ⬜ Pending |
-| **GH-S013-5** | `[EV-012] Phase 19 gate + PR-54` | `evolve`, `deploy` | Phase 19 gate | GH-S013-4 | ⬜ Pending |
+| **GH-S013-4** | `[EV-012] M85 — API e2e + Playwright T0-ui` | `evolve`, `app:admin` | T85.1–T85.5 | GH-S013-2, GH-S013-3 | ✅ Done |
+| **GH-S013-5** | `[EV-012] Phase 19 gate + PR-54` | `evolve`, `deploy` | Phase 19 gate | GH-S013-4 | 🔄 Gate PASS; 08 next |
 
 Do **not** create GitHub issues until user approves.
 

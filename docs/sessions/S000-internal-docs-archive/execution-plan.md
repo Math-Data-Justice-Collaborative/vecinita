@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
-| **Active milestone** | M85: Full-stack tests (API e2e + Playwright) |
-| **Active task** | **T85.5** (pending) — Phase 19 gate checklist docs |
+| **Active milestone** | M85: Full-stack tests (API e2e + Playwright) — complete; invoke 08-verify-build |
+| **Active task** | **T85.5** (completed) — Phase 19 gate checklist; next 08-verify-build |
 | **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.6 (M83); T84.1–T84.6 (M84 complete) |
 | **Last updated** | 2026-07-28 |
 | **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M83 done → 08 then M84 |
@@ -1720,21 +1720,21 @@ failed-job log affordances (RD-177); Evaluation page uses DO eval SSE (TP-S013-0
 | T85.2 | Test: API e2e extend UJ-023/044 — eval on Jobs + document_id (TC-124/150/151) | Test | completed | UJ-023/044 | T83.4, T84.4 | 2026-07-29 | S013 | F32 |
 | T85.3 | Test: Playwright `tests/ui/admin/uj050-job-detail.spec.ts` + uj023/uj044 extend (RD-178) | Test | completed | RD-178, TC-146 | T84.4 | 2026-07-29 | S013 | F32 |
 | T85.4 | Test: CORS preflight for new `/jobs/*` mutate + events (H0c) | Test | completed | connectivity-gates | T82.4 | 2026-07-29 | S013 | F32 |
-| T85.5 | Docs: Phase 19 gate checklist + session 04/07 verify pointers | Docs | pending | 08-verify-build | T85.1–T85.4 | — | S013 | F32 |
+| T85.5 | Docs: Phase 19 gate checklist + session 04/07 verify pointers | Docs | completed | 08-verify-build | T85.1–T85.4 | 2026-07-29 | S013 | F32 |
 
 #### Phase 19 Gate Check
 
-- [ ] All M82–M85 tasks completed (T82.1–T85.5)
-- [ ] TC-146–TC-151 + TC-124 green at T2; Playwright T0-ui list→detail (RD-178)
-- [ ] AC-J1–AC-J10 satisfied at T2
-- [ ] Modal lifecycle SoT; DO metrics SoT; no Postgres jobs table (M1)
-- [ ] SSE on Modal jobs + DO eval progress; 4s poll fallback (M2, RD-173)
-- [ ] Eval create → enqueue Modal `job_type=eval` (M3, TP-S013-06)
-- [ ] Admin CRUD; soft-delete `eval_runs.deleted_at` on eval job delete (TP-S013-03/05)
-- [ ] No new CORS origins / secrets; ChatRAG UI untouched
-- [ ] ruff / basedpyright / ESLint clean; pytest + DM Vitest + `make test-ui` green
+- [x] All M82–M85 tasks completed (T82.1–T85.5)
+- [x] TC-146–TC-151 + TC-124 green at T2; Playwright T0-ui list→detail (RD-178)
+- [x] AC-J1–AC-J10 satisfied at T2
+- [x] Modal lifecycle SoT; DO metrics SoT; no Postgres jobs table (M1)
+- [x] SSE on Modal jobs + DO eval progress; 4s poll fallback (M2, RD-173)
+- [x] Eval create → enqueue Modal `job_type=eval` (M3, TP-S013-06)
+- [x] Admin CRUD; soft-delete `eval_runs.deleted_at` on eval job delete (TP-S013-03/05)
+- [x] No new CORS origins / secrets; ChatRAG UI untouched
+- [x] ruff / basedpyright / ESLint clean; pytest + DM Vitest + `make test-ui` green
 
-**Gate pointer:** [`docs/sessions/S013-unified-job-monitoring/reports/phase19-gate.md`](../../S013-unified-job-monitoring/reports/phase19-gate.md) (created at T85.5)
+**Gate pointer:** [`docs/sessions/S013-unified-job-monitoring/reports/phase19-gate.md`](../../S013-unified-job-monitoring/reports/phase19-gate.md) (T85.5)
 
 ---
 
@@ -2399,8 +2399,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T85.1 | M85 | 19 | Test | completed | T84.4 | — | S013 | F32 | — |
 | T85.2 | M85 | 19 | Test | completed | T83.4, T84.4 | — | S013 | F32 | — |
 | T85.3 | M85 | 19 | Test | completed | T84.4 | — | S013 | F32 | — |
-| T85.4 | M85 | 19 | Test | pending | T82.4 | — | S013 | F32 | — |
-| T85.5 | M85 | 19 | Docs | pending | T85.1–T85.4 | — | S013 | F32 | — |
+| T85.4 | M85 | 19 | Test | completed | T82.4 | — | S013 | F32 | — |
+| T85.5 | M85 | 19 | Docs | completed | T85.1–T85.4 | — | S013 | F32 | — |
 
 ## Phase Gate Log
 
