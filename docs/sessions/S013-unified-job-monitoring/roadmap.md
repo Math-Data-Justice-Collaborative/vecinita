@@ -33,8 +33,9 @@ Modal `job_type=eval`.
 | 02-verify-plan | ✅ Complete | Gate A→B; M1–M3 |
 | 04-tech-plan | ✅ Complete | TP-S013-01–08; gate B→C |
 | 07-build M82–M85 | ✅ Complete | M85 T85.1–T85.5; Phase 19 gate PASS at T2 |
-| 08-verify-build | 🔄 Next | M85 / Phase 19 boundary |
-| 10 / 13 | ⬜ Pending | Lean+build routing |
+| 08-verify-build | ✅ Complete | M85/Phase 19 PASS 2026-07-29 — see reports/verification-report.md |
+| 10-e2e | 🔄 Next | Lean+build routing |
+| 13-deploy-smoke | ⬜ Pending | After 10; watch ISS-004 |
 
 ---
 

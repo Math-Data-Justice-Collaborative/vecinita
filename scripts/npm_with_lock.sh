@@ -8,9 +8,19 @@ bash "${ROOT}/scripts/ensure_node24.sh"
 DIGEST="$(printf '%s' "$ROOT" | sha256sum | awk '{print substr($1,1,16)}')"
 LOCK="/tmp/vecinita-make-hooks-${DIGEST}.lock"
 
+# Prefer util-linux flock when present; otherwise run unlocked (common on macOS).
+run_locked() {
+  if command -v flock >/dev/null 2>&1; then
+    flock -w 600 "$LOCK" "$@"
+  else
+    "$@"
+  fi
+}
+
 if [[ "${1:-}" == "bash" ]]; then
   shift
-  exec flock -w 600 "$LOCK" bash --noprofile --norc "$@"
+  run_locked bash --noprofile --norc "$@"
+  exit $?
 fi
 
-exec flock -w 600 "$LOCK" "$@"
+run_locked "$@"
