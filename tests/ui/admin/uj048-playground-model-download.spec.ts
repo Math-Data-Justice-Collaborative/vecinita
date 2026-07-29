@@ -5,7 +5,7 @@ import {
   mockAuthenticatedSuperAdmin,
 } from "../helpers/mock-admin-api";
 
-const DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct";
+const DOWNLOAD_MODEL_ID = "qwen2.5:7b-instruct";
 const DOWNLOAD_FAMILY = "qwen2.5";
 
 /** UJ-048 / TC-137: super-admin model download tab + poll UX. */
@@ -46,7 +46,7 @@ test.describe("Playground model download (UJ-048)", () => {
             tags: [
               { model_id: "qwen2.5:1.5b-instruct", available: true },
               { model_id: DOWNLOAD_MODEL_ID, available },
-              { model_id: "qwen2.5:7b-instruct", available: false },
+              { model_id: "qwen2.5:14b-instruct", available: false },
             ],
           }),
         });
@@ -73,7 +73,7 @@ test.describe("Playground model download (UJ-048)", () => {
             items: [
               { model_id: "qwen2.5:1.5b-instruct", available: true },
               { model_id: DOWNLOAD_MODEL_ID, available },
-              { model_id: "qwen2.5:7b-instruct", available: false },
+              { model_id: "qwen2.5:14b-instruct", available: false },
             ],
           }),
         });

@@ -27,6 +27,14 @@ _HF_OVERRIDES: Final[dict[str, str]] = {
     "qwen3:8b": "Qwen/Qwen3-8B-AWQ",
 }
 
+# HuggingFace repos that are non-commercial / research-only (ISS-004).
+# Commercial SaaS must not pull or load these via resolve_hf_repo.
+_BLOCKED_NC_HF_REPOS: Final[frozenset[str]] = frozenset(
+    {
+        "Qwen/Qwen2.5-3B-Instruct",
+    },
+)
+
 # ``:latest`` defaults per playground library family slug.
 _LATEST_DEFAULTS: Final[dict[str, str]] = {
     "qwen3.6": "Qwen/Qwen3.6-35B-A3B",
@@ -218,16 +226,25 @@ def _infer_hf_repo(normalized: str) -> str | None:
 
 
 def resolve_hf_repo(model_id: str) -> str:
-    """Map a playground ``model_id`` tag to a HuggingFace Hub repo id."""
+    """Map a playground ``model_id`` tag to a HuggingFace Hub repo id.
+
+    Raises:
+        ValueError: When no mapping exists, or the mapped repo is blocked for
+            non-commercial (NC) / research-only licensing (ISS-004).
+    """
     base = normalize_playground_tag(model_id)
     override = _HF_OVERRIDES.get(base)
-    if override is not None:
-        return override
-    inferred = _infer_hf_repo(base)
-    if inferred is not None:
-        return inferred
-    msg = f"no HuggingFace mapping for model_id {model_id!r} (normalized {base!r})"
-    raise ValueError(msg)
+    inferred = override if override is not None else _infer_hf_repo(base)
+    if inferred is None:
+        msg = f"no HuggingFace mapping for model_id {model_id!r} (normalized {base!r})"
+        raise ValueError(msg)
+    if inferred in _BLOCKED_NC_HF_REPOS:
+        msg = (
+            f"blocked non-commercial HuggingFace repo {inferred!r} for model_id "
+            f"{model_id!r} (Qwen Research License; ISS-004)"
+        )
+        raise ValueError(msg)
+    return inferred
 
 
 def repo_dir_name(model_id: str) -> str:

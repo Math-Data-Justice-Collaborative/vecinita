@@ -1238,7 +1238,7 @@ Postgres (EV-012 RD-174/RD-175). Click → `/jobs/:id` summary + link to `/evalu
 
 1. Open `/evaluation?tab=playground` as super-admin.
 2. **Download model** panel is visible (regular `admin` operators do **not** see this section).
-3. Enter a free-text playground `model_id` tag (e.g. `qwen2.5:3b-instruct`) that appears in the HF-gated catalog.
+3. Enter a free-text playground `model_id` tag (e.g. `qwen2.5:1.5b-instruct`) that appears in the HF-gated catalog.
 4. Click **Download** → `POST /internal/v1/models/ollama/pull` with `{ "model_id": "..." }` → `202` with `job_id` and `status: "pulling"` (path alias retained — RD-166).
 5. UI shows in-progress state and polls `GET /internal/v1/models/ollama` every **10 seconds**.
 6. When the matching entry reports `available: true`, UI shows success and the model appears in the shared model picker.

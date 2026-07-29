@@ -37,7 +37,7 @@ pytestmark = [
     pytest.mark.skipif(os.environ.get("VECINITA_SKIP_E2E") == "1", reason="E2E skipped"),
 ]
 
-_DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct"
+_DOWNLOAD_MODEL_ID = "qwen2.5:7b-instruct"
 _UNMAPPED_MODEL_ID = "unknown-custom:7b"
 
 

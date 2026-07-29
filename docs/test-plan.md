@@ -804,7 +804,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: `tests/integration/test_ollama_models_list.py` — `GET/POST /internal/v1/models/ollama`.
 - **Payloads**:
   - `GET` as `admin` → `200` with `{ items: [{ model_id, available }] }`.
-  - `POST { "model_id": "qwen2.5:3b-instruct" }` as `super-admin` → `202` with `{ job_id, model_id, status: "pulling" }`; internal-write-api forwards to **`vecinita-llm`** `POST /models/ollama/pull`.
+  - `POST { "model_id": "qwen2.5:1.5b-instruct" }` as `super-admin` → `202` with `{ job_id, model_id, status: "pulling" }`; internal-write-api forwards to **`vecinita-llm`** `POST /models/ollama/pull`.
   - Same `POST` as `admin` → `403`.
   - Same `POST` as `viewer` → `403`.
   - `POST` with empty `model_id` → `422`.
@@ -814,7 +814,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: Super-admin download panel submits pull and polls until model is available.
 - **Input**: Vitest `test_evaluation_playground.test.tsx` — mock `POST /internal/v1/models/ollama/pull` (`202`) and sequential `GET /internal/v1/models/ollama` (`available: false` → `true`).
-- **Payloads**: Enter `qwen2.5:3b-instruct`; assert pull called once; assert poll interval ~10s (fake timers); assert success state and picker includes new model.
+- **Payloads**: Enter `qwen2.5:1.5b-instruct`; assert pull called once; assert poll interval ~10s (fake timers); assert success state and picker includes new model.
 - **Expected**: Download button enabled for super-admin; in-progress indicator while polling; success when `available=true`.
 
 ### TC-136: Admin Playground — download UI hidden (UJ-048, F38, EV-010)

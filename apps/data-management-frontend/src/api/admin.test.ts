@@ -837,12 +837,12 @@ describe("admin API eval helpers", () => {
       vi.fn().mockResolvedValue(
         jsonResponse({
           slug: "qwen2.5",
-          tags: [{ model_id: "qwen2.5:3b-instruct", available: false }],
+          tags: [{ model_id: "qwen2.5:1.5b-instruct", available: false }],
         }),
       ),
     );
     const tags = await fetchPlaygroundCatalogFamilyTags(CLIENT, "qwen2.5");
-    expect(tags.tags[0]?.model_id).toBe("qwen2.5:3b-instruct");
+    expect(tags.tags[0]?.model_id).toBe("qwen2.5:1.5b-instruct");
     expect(mockFetchUrl()).toContain(
       "/internal/v1/models/ollama/catalog/qwen2.5",
     );
@@ -873,17 +873,17 @@ describe("admin API eval helpers", () => {
         jsonResponse(
           {
             job_id: "00000000-0000-0000-0000-0000000000dd",
-            model_id: "qwen2.5:3b-instruct",
+            model_id: "qwen2.5:1.5b-instruct",
             status: "pulling",
           },
           202,
         ),
       ),
     );
-    const result = await pullPlaygroundModel(JWT_CLIENT, "qwen2.5:3b-instruct");
+    const result = await pullPlaygroundModel(JWT_CLIENT, "qwen2.5:1.5b-instruct");
     expect(result.status).toBe("pulling");
     expect(mockFetchUrl()).toContain("/internal/v1/models/ollama/pull");
-    expect(mockFetchJsonBody()).toEqual({ model_id: "qwen2.5:3b-instruct" });
+    expect(mockFetchJsonBody()).toEqual({ model_id: "qwen2.5:1.5b-instruct" });
     expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
   });
 
@@ -893,7 +893,7 @@ describe("admin API eval helpers", () => {
       vi.fn().mockResolvedValue(new Response("", { status: 403 })),
     );
     await expect(
-      pullPlaygroundModel(JWT_CLIENT, "qwen2.5:3b-instruct"),
+      pullPlaygroundModel(JWT_CLIENT, "qwen2.5:1.5b-instruct"),
     ).rejects.toThrow(/403/);
   });
 
@@ -904,14 +904,14 @@ describe("admin API eval helpers", () => {
         jsonResponse(
           {
             job_id: "00000000-0000-0000-0000-0000000000dd",
-            model_id: "qwen2.5:3b-instruct",
+            model_id: "qwen2.5:1.5b-instruct",
             status: "pulling",
           },
           202,
         ),
       ),
     );
-    await pullPlaygroundModel(CLIENT, "qwen2.5:3b-instruct");
+    await pullPlaygroundModel(CLIENT, "qwen2.5:1.5b-instruct");
     const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
       string,
       string
@@ -926,7 +926,7 @@ describe("admin API eval helpers", () => {
         jsonResponse(
           {
             job_id: "00000000-0000-0000-0000-0000000000dd",
-            model_id: "qwen2.5:3b-instruct",
+            model_id: "qwen2.5:1.5b-instruct",
             status: "pulling",
           },
           202,
@@ -935,7 +935,7 @@ describe("admin API eval helpers", () => {
     );
     await pullPlaygroundModel(
       { baseUrl: "http://localhost:8002" },
-      "qwen2.5:3b-instruct",
+      "qwen2.5:1.5b-instruct",
     );
     const headers = vi.mocked(fetch).mock.calls[0]?.[1]?.headers as Record<
       string,

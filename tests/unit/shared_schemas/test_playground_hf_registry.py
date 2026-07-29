@@ -12,7 +12,7 @@ from vecinita_shared_schemas.playground_hf_registry import (
 
 _CATALOG_TAG_CASES: tuple[tuple[str, str], ...] = (
     ("qwen2.5:1.5b-instruct", "Qwen/Qwen2.5-1.5B-Instruct"),
-    ("qwen2.5:3b-instruct-q4_K_M", "Qwen/Qwen2.5-3B-Instruct"),
+    ("qwen2.5:7b-instruct-q4_K_M", "Qwen/Qwen2.5-7B-Instruct"),
     ("qwen3:8b", "Qwen/Qwen3-8B-AWQ"),
     ("qwen3:4b", "Qwen/Qwen3-4B"),
     ("qwen3.6:latest", "Qwen/Qwen3.6-35B-A3B"),
@@ -44,8 +44,22 @@ def test_resolve_hf_repo_maps_common_playground_catalog_tags(
 
 def test_normalize_playground_tag_strips_quant_and_mlx_suffixes() -> None:
     """Packaging suffixes strip before registry lookup."""
-    assert normalize_playground_tag("qwen2.5:3b-instruct-q4_K_M") == "qwen2.5:3b-instruct"
+    assert normalize_playground_tag("qwen2.5:7b-instruct-q4_K_M") == "qwen2.5:7b-instruct"
     assert normalize_playground_tag("qwen3.6:27b-mlx") == "qwen3.6:27b"
+
+
+@pytest.mark.parametrize(
+    "model_id",
+    [
+        "qwen2.5:3b-instruct",
+        "qwen2.5:3b-instruct-q4_K_M",
+        "qwen2.5:3b-instruct-q8_0",
+    ],
+)
+def test_resolve_hf_repo_blocks_nc_qwen25_3b(model_id: str) -> None:
+    """ISS-004: Qwen2.5-3B Research License (NC) must not resolve for pull/load."""
+    with pytest.raises(ValueError, match=r"blocked non-commercial"):
+        resolve_hf_repo(model_id)
 
 
 def test_resolve_hf_repo_unknown_tag_raises() -> None:

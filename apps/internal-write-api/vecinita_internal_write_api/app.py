@@ -1851,6 +1851,14 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=str(exc),
             ) from exc
+        # RD-168 / ISS-004: only tags resolve_hf_repo accepts (blocks NC + unmapped).
+        allowed_tags: list[str] = []
+        for tag in tags:
+            try:
+                resolve_hf_repo(tag)
+            except ValueError:
+                continue
+            allowed_tags.append(tag)
         return PlaygroundModelCatalogFamilyTagsResponse(
             slug=slug,
             tags=[
@@ -1858,7 +1866,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     model_id=tag,
                     available=playground_catalog_tag_available(tag, availability),
                 )
-                for tag in tags
+                for tag in allowed_tags
             ],
         )
 

@@ -670,7 +670,7 @@
   models beyond the default `qwen2.5:1.5b-instruct`. Regular **admins** list and select available
   models for playground runs but cannot trigger pulls.
 - **Inputs**: Super-admin operator (`role=super-admin`); free-text Ollama `model_id` tag
-  (non-empty, max 128 chars — e.g. `qwen2.5:3b-instruct`); existing Modal Ollama pull
+  (non-empty, max 128 chars — e.g. `qwen2.5:1.5b-instruct`); existing Modal Ollama pull
   infrastructure (`POST /models/ollama/pull` on **`vecinita-llm`** — ADR-037; was `vecinita-ollama`).
 - **Outputs**: Background Modal pull job (`202` + `job_id`); manifest entry with
   `available: false` while pulling, `available: true` when complete; model appears in Playground

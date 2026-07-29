@@ -12,8 +12,8 @@ class MockPlaygroundLibraryClient:
         self.tags_by_slug: dict[str, list[str]] = {
             "qwen2.5": [
                 "qwen2.5:1.5b-instruct",
-                "qwen2.5:3b-instruct",
-                "qwen2.5:3b-instruct-q4_K_M",
+                "qwen2.5:7b-instruct",
+                "qwen2.5:7b-instruct-q4_K_M",
             ],
             "llama3.2": ["llama3.2:1b", "llama3.2:3b"],
         }

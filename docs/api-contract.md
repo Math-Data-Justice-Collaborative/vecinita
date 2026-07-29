@@ -850,7 +850,7 @@ Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `supe
 {
   "items": [
     { "model_id": "qwen2.5:1.5b-instruct", "available": true },
-    { "model_id": "qwen2.5:3b-instruct", "available": false }
+    { "model_id": "qwen2.5:1.5b-instruct", "available": false }
   ]
 }
 ```
@@ -865,7 +865,7 @@ Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `supe
 - **Request**:
 
 ```json
-{ "model_id": "qwen2.5:3b-instruct" }
+{ "model_id": "qwen2.5:1.5b-instruct" }
 ```
 
 - **Validation**: `model_id` non-empty, max 128 characters (free-text Ollama-style tag — resolved via `llm_model_registry.py`).
@@ -874,7 +874,7 @@ Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `supe
 ```json
 {
   "job_id": "uuid",
-  "model_id": "qwen2.5:3b-instruct",
+  "model_id": "qwen2.5:1.5b-instruct",
   "status": "pulling"
 }
 ```

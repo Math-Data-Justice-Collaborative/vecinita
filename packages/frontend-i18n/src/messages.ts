@@ -246,7 +246,7 @@ const enStrings = {
   "admin.evaluation.models.customHint":
     "Pull any valid playground model tag not listed in the catalog.",
   "admin.evaluation.models.customModelLabel": "Playground model tag",
-  "admin.evaluation.models.customModelPlaceholder": "qwen2.5:3b-instruct",
+  "admin.evaluation.models.customModelPlaceholder": "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.title": "Evaluation playground",
   "admin.evaluation.playground.subtitle":
     "Experiment with RAG and judge settings in an isolated sandbox.",
@@ -290,7 +290,7 @@ const enStrings = {
   "admin.evaluation.playground.downloadHint":
     "Pull a playground model tag into the Modal volume for playground eval runs.",
   "admin.evaluation.playground.downloadModelLabel": "Playground model tag",
-  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
+  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.downloadButton": "Download",
   "admin.evaluation.playground.downloadPulling": "Downloading…",
   "admin.evaluation.playground.downloadStatusIdle":
@@ -711,7 +711,7 @@ const esStrings = {
   "admin.evaluation.models.customHint":
     "Descarga cualquier etiqueta de modelo del laboratorio válida que no esté en el catálogo.",
   "admin.evaluation.models.customModelLabel": "Etiqueta de modelo del laboratorio",
-  "admin.evaluation.models.customModelPlaceholder": "qwen2.5:3b-instruct",
+  "admin.evaluation.models.customModelPlaceholder": "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.title": "Laboratorio de evaluación",
   "admin.evaluation.playground.subtitle":
     "Experimenta con ajustes de RAG y juez en un entorno aislado.",
@@ -762,7 +762,7 @@ const esStrings = {
     "Descarga una etiqueta de modelo del laboratorio al volumen Modal para evaluaciones.",
   "admin.evaluation.playground.downloadModelLabel":
     "Etiqueta del modelo del laboratorio",
-  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:3b-instruct",
+  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.downloadButton": "Descargar",
   "admin.evaluation.playground.downloadPulling": "Descargando…",
   "admin.evaluation.playground.downloadStatusIdle":

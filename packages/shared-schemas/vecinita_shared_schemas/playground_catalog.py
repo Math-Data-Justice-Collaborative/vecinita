@@ -6,12 +6,10 @@ from vecinita_shared_schemas.playground_hf_registry import normalize_playground_
 from vecinita_shared_schemas.playground_models import PlaygroundModelSummary
 
 # Qwen2.5 instruct family + common quantization tags on the Modal volume.
+# Omit qwen2.5:3b-* — Qwen2.5-3B-Instruct is Qwen Research License (NC); ISS-004.
 PLAYGROUND_MODEL_CATALOG: tuple[str, ...] = (
     "qwen2.5:0.5b-instruct",
     "qwen2.5:1.5b-instruct",
-    "qwen2.5:3b-instruct",
-    "qwen2.5:3b-instruct-q4_K_M",
-    "qwen2.5:3b-instruct-q8_0",
     "qwen2.5:7b-instruct",
     "qwen2.5:7b-instruct-q4_K_M",
     "qwen2.5:7b-instruct-q8_0",

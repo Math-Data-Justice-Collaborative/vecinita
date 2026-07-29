@@ -1208,7 +1208,7 @@ describe("EvaluationPlayground (UJ-045)", () => {
 });
 
 describe("EvaluationPlayground model download (UJ-048)", () => {
-  const DOWNLOAD_MODEL_ID = "qwen2.5:3b-instruct";
+  const DOWNLOAD_MODEL_ID = "qwen2.5:7b-instruct";
   const DOWNLOAD_FAMILY = "qwen2.5";
 
   const catalogItems = (
@@ -1223,8 +1223,8 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       available: overrides[DOWNLOAD_MODEL_ID] ?? false,
     },
     {
-      model_id: "qwen2.5:7b-instruct",
-      available: overrides["qwen2.5:7b-instruct"] ?? false,
+      model_id: "qwen2.5:14b-instruct",
+      available: overrides["qwen2.5:14b-instruct"] ?? false,
     },
   ];
 
