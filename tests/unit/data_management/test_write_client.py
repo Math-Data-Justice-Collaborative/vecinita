@@ -345,3 +345,21 @@ def test_soft_delete_eval_run_deletes_path() -> None:
     client.soft_delete_eval_run(run_id)
     assert seen == [f"DELETE /internal/v1/eval/runs/{run_id}"]
     client.close()
+
+
+def test_soft_delete_eval_run_raises_on_http_error() -> None:
+    """soft_delete_eval_run raises InternalWriteClientError on HTTP failure."""
+    run_id = uuid4()
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(HTTPStatus.BAD_GATEWAY, text="down")
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="soft_delete_eval_run failed"):
+        client.soft_delete_eval_run(run_id)
+    client.close()

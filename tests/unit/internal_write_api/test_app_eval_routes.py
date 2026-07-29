@@ -859,3 +859,21 @@ def test_eval_config_preset_routes_return_403_for_private_preset(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )
+
+
+def test_soft_delete_eval_run_route_returns_404_when_missing(internal_api_env: None) -> None:
+    """DELETE /eval/runs/{id} returns 404 when the run is absent (TP-S013-05)."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+    )
+    client = TestClient(app)
+    response = client.delete(
+        f"/internal/v1/eval/runs/{uuid4()}",
+        headers=auth_headers(),
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND

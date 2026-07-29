@@ -144,6 +144,71 @@ def test_admin_delete_eval_job_soft_deletes_linked_run() -> None:
     assert soft_deleted == [_EVAL_RUN_ID]
 
 
+def test_admin_delete_eval_job_reads_eval_run_id_from_options() -> None:
+    """When record.eval_run_id is unset, DELETE reads options.eval_run_id (TP-S013-03)."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=[], job_type="eval", options={})
+    stored = store.get_job(record.job_id)
+    assert stored is not None
+    stored.options["eval_run_id"] = str(_EVAL_RUN_ID)
+    soft_deleted: list[UUID] = []
+
+    class _EvalClient:
+        def soft_delete_eval_run(self, run_id: UUID) -> None:
+            soft_deleted.append(run_id)
+
+        def list_eval_runs(self, *, page: int = 1, page_size: int = 100) -> object:
+            _ = (page, page_size)
+            return type("Empty", (), {"items": []})()
+
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        eval_runs_client=_EvalClient(),  # type: ignore[arg-type]
+    )
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.delete(f"/jobs/{record.job_id}")
+
+    assert response.status_code == HTTPStatus.NO_CONTENT
+    assert soft_deleted == [_EVAL_RUN_ID]
+
+
+def test_admin_delete_eval_job_soft_delete_error_returns_502() -> None:
+    """Write-API soft-delete failure surfaces as 502 on Modal DELETE."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="eval",
+        options={"eval_run_id": str(_EVAL_RUN_ID)},
+    )
+    store.update_job(record.job_id, eval_run_id=_EVAL_RUN_ID)
+
+    class _EvalClient:
+        def soft_delete_eval_run(self, run_id: UUID) -> None:
+            _ = run_id
+            msg = "write down"
+            raise InternalWriteClientError(msg)
+
+        def list_eval_runs(self, *, page: int = 1, page_size: int = 100) -> object:
+            _ = (page, page_size)
+            return type("Empty", (), {"items": []})()
+
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        eval_runs_client=_EvalClient(),  # type: ignore[arg-type]
+    )
+    app.dependency_overrides[get_principal] = lambda: _ADMIN
+    client = TestClient(app)
+
+    response = client.delete(f"/jobs/{record.job_id}")
+
+    assert response.status_code == HTTPStatus.BAD_GATEWAY
+    assert store.get_job(record.job_id) is not None
+
+
 def test_viewer_delete_returns_403() -> None:
     """Viewer cannot delete jobs (TC-147)."""
     store = InMemoryJobStore()
