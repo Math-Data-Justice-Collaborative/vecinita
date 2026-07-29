@@ -6031,8 +6031,10 @@ evolve_cycles:
       merge_commit: 69407701b3015201a0370c96a953d9dc85932315
       do_pins: reset_to_main
       do_force_deployments:
-        internal_write_api: 044bf90f-4553-4976-a94a-6a67ca752c83
-        admin_frontend: 2f16668f-e744-4fbc-bab2-9e46e0227b15
+        vecinita-internal-write-api:
+          deployment_id: 044bf90f-4553-4976-a94a-6a67ca752c83
+        vecinita-admin-frontend:
+          deployment_id: 2f16668f-e744-4fbc-bab2-9e46e0227b15
       main_ci:
         status: pass
         ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30455574450
