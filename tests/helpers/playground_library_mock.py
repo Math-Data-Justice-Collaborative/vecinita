@@ -12,6 +12,7 @@ class MockPlaygroundLibraryClient:
         self.tags_by_slug: dict[str, list[str]] = {
             "qwen2.5": [
                 "qwen2.5:1.5b-instruct",
+                "qwen2.5:3b-instruct",  # NC — filtered by resolve_hf_repo (ISS-004)
                 "qwen2.5:7b-instruct",
                 "qwen2.5:7b-instruct-q4_K_M",
             ],
