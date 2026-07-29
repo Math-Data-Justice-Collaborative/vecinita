@@ -175,7 +175,18 @@ def _license_from_importlib(name: str) -> str | None:
         md = metadata.metadata(name)
     except metadata.PackageNotFoundError:
         return None
-    return _normalize_spdx(md.get("License-Expression") or md.get("License"))
+    # PackageMetadata stubs omit Mapping.get; use KeyError-safe lookup.
+    raw: object | None
+    try:
+        raw = md["License-Expression"]
+    except KeyError:
+        try:
+            raw = md["License"]
+        except KeyError:
+            raw = None
+    if not isinstance(raw, str):
+        return None
+    return _normalize_spdx(raw)
 
 
 def parse_purl(purl: str) -> tuple[str, str, str | None] | None:
