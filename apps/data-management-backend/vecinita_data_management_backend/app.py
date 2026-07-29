@@ -132,7 +132,14 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
     resolved_cors = cors_env_value
     if resolved_cors is None:
         resolved_cors = os.environ.get("VECINITA_CORS_ORIGINS", "").strip() or _STAGING_CORS_ORIGINS
-    configure_cors(app, extra_allow_headers=[_PROXY_HEADER], env_value=resolved_cors)
+    # Cache-Control + Last-Event-ID: fetch-based SSE (subscribeJobEvents / TC-148).
+    # Without them, browser OPTIONS /jobs/events → 400 Disallowed CORS headers
+    # (BUG-2026-07-29).
+    configure_cors(
+        app,
+        extra_allow_headers=[_PROXY_HEADER, "Cache-Control", "Last-Event-ID"],
+        env_value=resolved_cors,
+    )
     job_store = store or InMemoryJobStore()
     event_broker = job_event_broker if job_event_broker is not None else JobEventBroker()
     runner = pipeline_runner
