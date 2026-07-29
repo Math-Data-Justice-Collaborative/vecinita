@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Annotated, Literal
 from uuid import UUID  # noqa: TC003  # FastAPI path params require UUID at runtime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, require_role
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import (
@@ -22,6 +23,7 @@ from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, Supabase
 
 from vecinita_data_management_backend.email_test import ResendClient
 from vecinita_data_management_backend.eval_jobs import eval_run_to_job
+from vecinita_data_management_backend.job_events import JobEventBroker, iter_job_sse
 from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
 from vecinita_data_management_backend.user_admin_routes import register_user_admin_routes
@@ -121,6 +123,9 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
     email_test_limiter: SlidingWindowRateLimiter | None = None,
     eval_runs_client: InternalWriteClient | None = None,
     cancel_modal_call: Callable[[str], None] | None = None,
+    job_event_broker: JobEventBroker | None = None,
+    sse_poll_interval_s: float = 0.25,
+    sse_max_cycles: int | None = None,
 ) -> FastAPI:
     """Build the Data Management ASGI app with job routes and optional pipeline runner."""
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
@@ -129,6 +134,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
         resolved_cors = os.environ.get("VECINITA_CORS_ORIGINS", "").strip() or _STAGING_CORS_ORIGINS
     configure_cors(app, extra_allow_headers=[_PROXY_HEADER], env_value=resolved_cors)
     job_store = store or InMemoryJobStore()
+    event_broker = job_event_broker if job_event_broker is not None else JobEventBroker()
     runner = pipeline_runner
     require_admin = require_role("admin")
     resolved_eval_client = (
@@ -216,6 +222,32 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
             jobs = [job for job in jobs if job.status == status_filter]
         jobs.sort(key=lambda job: job.updated_at, reverse=True)
         return JobList(jobs=jobs)
+
+    @app.get("/jobs/events")
+    def stream_job_events(  # pyright: ignore[reportUnusedFunction]
+        _auth: AuthPrincipal = Depends(auth_dep),
+        last_event_id: Annotated[str | None, Header(alias="Last-Event-ID")] = None,
+    ) -> StreamingResponse:
+        """SSE stream of job status updates (EV-012 / TC-148)."""
+
+        def event_stream() -> object:
+            yield from iter_job_sse(
+                job_store,
+                event_broker,
+                last_event_id=last_event_id,
+                poll_interval_s=sse_poll_interval_s,
+                max_cycles=sse_max_cycles,
+            )
+
+        return StreamingResponse(
+            event_stream(),  # pyright: ignore[reportArgumentType]  # sync gen is valid body
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
 
     @app.get("/jobs/{job_id}", response_model=Job)
     def get_job(  # pyright: ignore[reportUnusedFunction]

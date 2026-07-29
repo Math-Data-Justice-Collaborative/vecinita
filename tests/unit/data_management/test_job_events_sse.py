@@ -25,9 +25,28 @@ def _disable_auth_required(monkeypatch: pytest.MonkeyPatch) -> None:  # pyright:
 
 
 def _client_with_principal(store: InMemoryJobStore, principal: AuthPrincipal) -> TestClient:
-    app = create_app(store=store, require_proxy_auth=False)
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        sse_poll_interval_s=0.05,
+        sse_max_cycles=3,
+    )
     app.dependency_overrides[get_principal] = lambda: principal
     return TestClient(app)
+
+
+def _flush_sse_block(
+    blocks: list[tuple[str | None, str | None, JsonObject | None]],
+    event_id: str | None,
+    event_name: str | None,
+    data_lines: list[str],
+) -> None:
+    if event_id is None and event_name is None and not data_lines:
+        return
+    data_obj: JsonObject | None = None
+    if data_lines:
+        data_obj = as_json_object(cast("object", json.loads("\n".join(data_lines))))
+    blocks.append((event_id, event_name, data_obj))
 
 
 def _parse_sse_blocks(raw: str) -> list[tuple[str | None, str | None, JsonObject | None]]:
@@ -38,11 +57,7 @@ def _parse_sse_blocks(raw: str) -> list[tuple[str | None, str | None, JsonObject
     data_lines: list[str] = []
     for line in raw.splitlines():
         if line == "":
-            if event_id is not None or event_name is not None or data_lines:
-                data_obj: JsonObject | None = None
-                if data_lines:
-                    data_obj = as_json_object(cast("object", json.loads("\n".join(data_lines))))
-                blocks.append((event_id, event_name, data_obj))
+            _flush_sse_block(blocks, event_id, event_name, data_lines)
             event_id = None
             event_name = None
             data_lines = []
@@ -55,11 +70,7 @@ def _parse_sse_blocks(raw: str) -> list[tuple[str | None, str | None, JsonObject
             event_name = line.removeprefix("event:").lstrip()
         elif line.startswith("data:"):
             data_lines.append(line.removeprefix("data:").lstrip())
-    if event_id is not None or event_name is not None or data_lines:
-        data_obj = None
-        if data_lines:
-            data_obj = as_json_object(cast("object", json.loads("\n".join(data_lines))))
-        blocks.append((event_id, event_name, data_obj))
+    _flush_sse_block(blocks, event_id, event_name, data_lines)
     return blocks
 
 
@@ -100,7 +111,8 @@ def test_jobs_events_emits_sse_framed_job_snapshot() -> None:
     ]
     assert job_blocks
     event_id, _name, data = job_blocks[0]
-    assert event_id is not None and event_id != ""
+    assert event_id is not None
+    assert event_id != ""
     assert data is not None
     assert data.get("job_id") == str(record.job_id)
     assert data.get("status") == "running"
