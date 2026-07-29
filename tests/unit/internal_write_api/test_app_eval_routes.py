@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import patch
@@ -11,10 +12,11 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from vecinita_eval.runner import EvalSummary
-from vecinita_internal_write_api.eval_service import create_eval_run
+from vecinita_internal_write_api.eval_service import CreatedEvalRun, create_eval_run
 from vecinita_llm_client import LlmClientError
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests, set_auth_config_for_tests
-from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
+from vecinita_shared_schemas.eval_config import EvalConfig
+from vecinita_shared_schemas.internal_write import EvalRunCreateRequest, EvalRunCreateResponse
 
 from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
@@ -65,6 +67,68 @@ def test_create_eval_run_route_accepts_empty_body(eval_write_client: TestClient)
     assert response.status_code == HTTPStatus.ACCEPTED
     body = response_json_object(response)
     assert json_str(body, "status") == "pending"
+
+
+def test_create_eval_run_enqueues_modal_eval_job(internal_api_env: None) -> None:
+    """POST /eval/runs enqueues Modal job_type=eval via jobs client (T83.1 / AC-J1)."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    enqueued: list[UUID] = []
+    run_id = uuid4()
+
+    class _JobsStub:
+        def enqueue_eval(
+            self,
+            eval_run_id: UUID,
+            *,
+            authorization: str | None = None,
+        ) -> UUID:
+            _ = authorization
+            enqueued.append(eval_run_id)
+            return uuid4()
+
+    def _fake_create(
+        _engine: object,
+        *,
+        body: EvalRunCreateRequest,
+        requester_id: UUID,
+    ) -> CreatedEvalRun:
+        _ = (body, requester_id)
+        return CreatedEvalRun(
+            response=EvalRunCreateResponse(
+                run_id=run_id,
+                status="pending",
+                created_at=datetime.now(UTC),
+            ),
+            corpus_profile="fixture",
+            mode="golden",
+            question=None,
+            config_snapshot=EvalConfig(),
+        )
+
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=_JobsStub(),  # type: ignore[arg-type]
+    )
+    client = TestClient(app)
+
+    with (
+        patch("vecinita_internal_write_api.app.create_eval_run", side_effect=_fake_create),
+        patch("vecinita_internal_write_api.app.execute_eval_run") as execute_mock,
+    ):
+        response = client.post(
+            "/internal/v1/eval/runs",
+            headers=auth_headers(),
+            json={"corpus_profile": "fixture"},
+        )
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    body = response_json_object(response)
+    assert UUID(json_str(body, "run_id")) == run_id
+    assert enqueued == [run_id]
+    execute_mock.assert_not_called()
 
 
 def test_factory_create_app_wires_default_eval_judge_from_env(
