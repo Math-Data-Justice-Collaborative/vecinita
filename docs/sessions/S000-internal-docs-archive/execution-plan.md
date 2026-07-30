@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
 | **Active milestone** | M88: Rebuild job + shadow dry-run |
-| **Active task** | **T88.1** (in_progress) — JobOptions rebuild validation tests (TC-161/162/166) |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE) |
+| **Active task** | **T88.2** (in_progress) — dry_run writes shadow only (TC-164) |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1 |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **04-tech-plan drafting**; Standard+build (skip 05/06) |
 | **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
@@ -2511,7 +2511,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T87.4 | M87 | 20 | Code | completed | T87.3 | 2026-07-30 | S017 | F41 | — |
 | T87.5 | M87 | 20 | Code | completed | T87.2, T87.4 | 2026-07-30 | S017 | F41 | — |
 | T87.6 | M87 | 20 | Config | completed | T87.3, T87.5 | 2026-07-30 | S017 | F41 | — |
-| T88.1 | M88 | 20 | Test | pending | T86.3 | — | S017 | F41 | — |
+| T88.1 | M88 | 20 | Test | completed | T86.3 | 2026-07-30 | S017 | F41 | — |
+| T88.2 | M88 | 20 | Test | in_progress | T86.3 | — | S017 | F41 | — |
 | T88.2 | M88 | 20 | Test | pending | T86.3 | — | S017 | F41 | — |
 | T88.3 | M88 | 20 | Code | pending | T88.1, T87.4 | — | S017 | F41 | — |
 | T88.4 | M88 | 20 | Code | pending | T88.2, T88.3 | — | S017 | F41 | — |
