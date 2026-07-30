@@ -219,12 +219,20 @@ corpus DB stays PII-free.
 | `VITE_VECINITA_ADMIN_API_URL` | string | — | Yes | Modal ASGI or gateway URL for jobs |
 | `VITE_VECINITA_CORPUS_API_URL` | string | — | Yes (admin) | Internal write API base for corpus/tag admin |
 | `VITE_VECINITA_CORPUS_API_KEY` | string | — | Yes (admin build) | Bearer token for tag/chunk admin routes |
+| `VITE_WRWC_DONATE_URL` | string | `https://wrwc.org/donate/` | No | ChatRAG cold-start donate CTA href (F40 / EV-014) |
 
 ### Browser locale (EV-004 F31 — not server env)
 
 | Key | Storage | Default | Values | Description |
 |-----|---------|---------|--------|-------------|
 | `vecinita.locale` | `localStorage` | Browser-detected | `en` \| `es` | Shared UI locale for ChatRAG + admin; `detectBrowserLocale()` when unset |
+
+### ChatRAG cold-start wait prefs (EV-014 F40 — not server env)
+
+| Key | Storage | Default | Values | Description |
+|-----|---------|---------|--------|-------------|
+| `vecinita.chat.coldstart.facts.v1` | `localStorage` | unset | JSON list of fact ids | Seen fun-fact ids after consent Accept (ADR-039) |
+| `vecinita_chat_coldstart_consent` | HTTP cookie (first-party) | unset | `1` accept / `0` opt-out | Preference only; **not** sent to ChatRAG APIs; Path=/; SameSite=Lax; **Max-Age=31536000** (1 year; Gate A→B M1) |
 
 **Detection rules:** `navigator.language` starting with `en` → `en`; starting with `es` → `es`; otherwise **ES** (matches ChatRAG).
 

@@ -55,3 +55,46 @@ See ADR-038 and `docs/decisions.md` RD-173–RD-178.
 | S013-D23 | Merge #153 | Approved; merged @ `6940770` |
 | S013-D24 | DO pins | Reset write-api + admin FE to `main` |
 | S013-D25 | Close | Complete EV-012; skip optional 15-service-health |
+
+
+## Cycle EV-014 — Scope (S016 / #87)
+
+**Approved:** 2026-07-29  
+**Session:** S016-chat-cold-start-ux  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/87  
+**Feature:** F40
+
+### Scope summary
+
+ChatRAG cold-start / long-wait UX: rotating bilingual WRWC/Providence fun facts, soft donate
+CTA, friendly consent banner + HTTP cookie opt-out before remembering seen facts in
+localStorage. FE `/warm` via existing `prewarmChatServices` only — no Modal/backend work.
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S016-D1 | Who/when | Community chat; cold-start retries |
+| S016-D2 | Problem | Distract/inform with fun facts |
+| S016-D3 | Success | Vitest + UI e2e for rotation/content |
+| S016-D4 | Flow | Rotate ~4–5s; keep starting-up line |
+| S016-D5 | Content | Static EN/ES i18n (no API) |
+| S016-D6 | Triggers | Retry **or** slow stream >8s before first token |
+| S016-D7 | N | 8 seconds |
+| S016-D8 | Warm | FE `/warm` only (prewarmChatServices) |
+| S016-D8b | Donate | Secondary CTA under fact → wrwc.org/donate |
+| S016-D9 | Remember | localStorage seen-fact ids |
+| S016-D9b | Consent | Banner + HTTP cookie opt-out; friendly no-tracking copy |
+| S016-D10 | Apps | chat-rag-frontend; shared packages as needed |
+| S016-D11 | Env | Optional VITE_WRWC_DONATE_URL w/ default |
+| S016-D12 | CORS | None; external donate link; first-party cookie |
+| S016-D13 | Timing | Keep retry policy; rotate 4–5s; no new p95 |
+| S016-D14 | Acceptance | Facts + CTA + consent/opt-out; Vitest + UI e2e |
+| S016-D15 | E2E | T0 Vitest UI e2e; live at 13 if easy |
+| S016-D16 | Scope gate | Approve → allocate **F40** |
+| S016-D17 | Routing | Lean+build (session open) |
+
+### Docs to update (Phase A)
+
+feature-list (done F40 stub), user-journeys, test-plan, acceptance-criteria, spec (delta),
+config-spec if VITE_*, privacy/ADR if cookie consent, 01 seed.

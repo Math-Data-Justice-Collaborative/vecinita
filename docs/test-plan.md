@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-29 (S014/EV-013 #148 — TC-152–TC-155 admin table density)  
+> **Last updated**: 2026-07-29 (S016/EV-014 #87 — TC-156–TC-160 ChatRAG cold-start wait UX)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -71,6 +71,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-044 Eval jobs on Jobs tab | `tests/e2e/test_uj044_eval_jobs_tab.py` | TC-124 | `tests/ui/admin/uj044-eval-jobs-tab.spec.ts` |
 | UJ-050 Job detail + admin CRUD | `tests/e2e/test_uj050_job_detail_crud.py` | TC-146, TC-147, TC-148, TC-149 | `tests/ui/admin/uj050-job-detail.spec.ts` |
 | UJ-051 Corpus/admin table density | Vitest (no API change) | TC-152, TC-153, TC-154 | `tests/ui/admin/uj051-corpus-density.spec.ts` (TC-155) |
+| UJ-052 Cold-start wait fun facts | Vitest (no API change) | TC-156, TC-157, TC-158, TC-159 | `tests/ui/chat/uj052-cold-start-wait.spec.ts` (TC-160) |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -947,6 +948,36 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Paginated corpus page usable without scrolling app chrome to reach first-page Actions.
 - **Input**: Playwright viewport 1280×800; seeded long-title docs; `/corpus`.
 - **Expected**: Sticky header and/or table scroll region; first ~page Actions in reachable layout; no horizontal page overflow for typical columns.
+
+### TC-156: Fun facts rotate during cold-start wait (UJ-052, F40, EV-014, #87)
+
+- **Objective**: During cold-start retry status, facts rotate ~4–5s with a short starting-up line.
+- **Input**: Vitest `ChatPanel` (or wait-UX helper) with mocked `onRetry` / fake timers; locale en + es.
+- **Expected**: Status line + at least two distinct facts over time; EN/ES strings from i18n; cleared on first token.
+
+### TC-157: Slow stream (>8s) triggers wait UX without retry (UJ-052, F40)
+
+- **Objective**: After 8s with no first token, show rotating facts even if no cold-start retry fired.
+- **Input**: Vitest fake timers; stream mock that emits first token after >8s (or never until assert).
+- **Expected**: Wait UX visible at t≥8s; cleared when first token arrives.
+
+### TC-158: Consent Accept remembers; Opt-out cookie skips persistence (UJ-052, F40, ADR-039)
+
+- **Objective**: Banner before remembering; Accept → localStorage seen ids + consent cookie; No thanks → opt-out cookie, no seen-ids persistence.
+- **Input**: Vitest consent component + cookie/storage helpers; jsdom.
+- **Expected**: Facts still rotate after either choice; memory only after Accept; cookie not required by ask/stream mocks; friendly no-tracking copy present.
+
+### TC-159: Donate CTA href (UJ-052, F40)
+
+- **Objective**: Secondary donate line links to default `https://wrwc.org/donate/` (or `VITE_WRWC_DONATE_URL`).
+- **Input**: Vitest render wait UX; inspect anchor.
+- **Expected**: `target="_blank"` (or equivalent new-tab); `rel` includes `noopener`; href matches config default.
+
+### TC-160: Playwright cold-start wait shell (UJ-052, F40)
+
+- **Objective**: Real-browser shell shows wait UX + consent interaction.
+- **Input**: Playwright `tests/ui/chat/uj052-cold-start-wait.spec.ts` with mocked slow/retry ask.
+- **Expected**: Starting-up + fact visible; consent Accept/No thanks interactable; donate link present.
 
 ## Test Data
 

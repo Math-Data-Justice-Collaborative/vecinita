@@ -423,6 +423,50 @@ button.secondary:hover:not(:disabled) {
   margin: 0 0 0.5rem;
 }
 
+.cold-start-wait {
+  margin: 0 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cold-start-fact {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.cold-start-donate {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.cold-start-donate a {
+  color: var(--accent);
+}
+
+.cold-start-consent {
+  margin-top: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.cold-start-consent-copy {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.cold-start-consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .error {
   color: var(--danger);
   margin: 0 0 0.75rem;

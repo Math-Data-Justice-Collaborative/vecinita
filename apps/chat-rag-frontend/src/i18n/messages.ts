@@ -34,6 +34,12 @@ const en = {
   noPreviousChats: "No previous chats yet.",
   coldStartStatus:
     "The assistant is starting up — this can take up to a minute on the first question…",
+  coldStartDonateCta: "Support the river → Donate",
+  coldStartConsentLabel: "Cold-start message preferences",
+  coldStartConsentCopy:
+    "We’re not tracking you. We only remember which tips you’ve already seen so we don’t repeat them right away — if you allow it.",
+  coldStartConsentAccept: "Accept",
+  coldStartConsentOptOut: "No thanks",
   askStillStarting:
     "The assistant is still starting up. Please wait a moment and try again.",
   askStartingWait:
@@ -94,6 +100,12 @@ const es = {
   noPreviousChats: "Aún no hay chats anteriores.",
   coldStartStatus:
     "El asistente se está iniciando — la primera pregunta puede tardar hasta un minuto…",
+  coldStartDonateCta: "Apoya el río → Donar",
+  coldStartConsentLabel: "Preferencias de mensajes al iniciar",
+  coldStartConsentCopy:
+    "No te rastreamos. Solo recordamos qué consejos ya viste para no repetirlos de inmediato — si lo permites.",
+  coldStartConsentAccept: "Aceptar",
+  coldStartConsentOptOut: "No, gracias",
   askStillStarting:
     "El asistente aún se está iniciando. Espera un momento e inténtalo de nuevo.",
   askStartingWait:

@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-29 (S014/EV-013 #148 — AC-U1–AC-U7 admin table density)
+> **Last updated**: 2026-07-29 (S016/EV-014 #87 — AC-CS1–AC-CS8 ChatRAG cold-start wait UX)
 
 ## Per-feature criteria
 
@@ -181,6 +181,17 @@
 - [ ] **AC-U5**: Select-all / bulk delete / tag / manage-tags / delete flows have no regression (UJ-003/015/016).
 - [ ] **AC-U6**: Truncation chrome readable in light + dark (`ThemeProvider`) and under OS `prefers-contrast: more` via semantic tokens / `contrast-more:` — no new high-contrast theme mode (RD-180).
 - [ ] **AC-U7**: **Privacy** — no new cookies; no new `localStorage` keys; no cookie-consent UI; truncation presentational only (RD-181). Shared helpers applied to Jobs/Users/Audit/Eval lists (F12).
+
+### EV-014 — ChatRAG cold-start wait UX (#87, F40) — S016
+
+- [ ] **AC-CS1**: On cold-start retry, UI shows short starting-up status and rotating bilingual fun facts (~4–5s) (UJ-052, TC-156).
+- [ ] **AC-CS2**: After **8s** with no first token (no retry required), the same wait UX appears (TC-157).
+- [ ] **AC-CS3**: Soft donate CTA under the fact links to `https://wrwc.org/donate/` (or `VITE_WRWC_DONATE_URL`) in a new tab (TC-159).
+- [ ] **AC-CS4**: Friendly consent banner before remembering seen facts; Accept / No thanks; facts may rotate either way; memory only after Accept (TC-158, ADR-039).
+- [ ] **AC-CS5**: Accept persists seen-fact ids in `localStorage` (`vecinita.chat.coldstart.facts.v1`) and sets first-party consent cookie; No thanks sets opt-out cookie and does not persist seen ids (TC-158).
+- [ ] **AC-CS6**: Wait UX clears on first token or final error; existing cold-start failure copy unchanged; FE `/warm` via `prewarmChatServices` only — no Modal/backend changes (RD-184).
+- [ ] **AC-CS7**: Cookie/storage are not required by ChatRAG APIs and are not sent as ask/stream auth (ADR-039, RD-185).
+- [ ] **AC-CS8**: Playwright T0-ui covers wait UX + consent interaction (TC-160); Vitest covers TC-156–159.
 
 ## Quantitative benchmarks
 

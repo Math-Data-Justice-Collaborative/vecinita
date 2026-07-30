@@ -551,6 +551,23 @@ Corpus & dashboard UI/UX polish (density, truncation, single-screen). Extend **F
 Artifacts: feature-list F9/F12 delta; UJ-051; test-plan TC-152–TC-155; AC-U1–U7;
 `docs/sessions/S014-admin-ui-polish-148/reports/01-requirements.md`.
 
+### EV-014 requirements decisions (2026-07-29) — RD-183–RD-187
+
+S016 / [#87](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/87) — ChatRAG
+cold-start / long-wait UX with rotating fun facts, donate CTA, and consent before remembering
+seen facts. New Fn **F40**. Lean+build routing.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-183 | Fn scope | Allocate **F40**; ChatRAG FE wait UX only | Scope gate Q20 |
+| RD-184 | Warm path | Extend **FE** `prewarmChatServices` / client `/warm` only — no Modal/backend changes | Q10→2 |
+| RD-185 | Privacy | Consent banner + HTTP cookie opt-out + `localStorage` seen-fact ids; no PII; not required by APIs (ADR-039) | Q12/Q13/Q23 |
+| RD-186 | Triggers / timing | Retry **or** >**8s** no first token; rotate ~**4–5s**; ~10 curated EN/ES facts; donate CTA | Q4–Q7, Q21 |
+| RD-187 | Tests | Vitest TC-156–159 + Playwright TC-160 (UJ-052); no new API e2e (no contract change) | Q22 |
+
+Artifacts: feature-list F40; UJ-052; test-plan TC-156–160; AC-CS1–CS8; ADR-039;
+`docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md`.
+
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 
 01-requirements locked RD-154–RD-162. 04-tech-plan locks implementation order and operator steps:
