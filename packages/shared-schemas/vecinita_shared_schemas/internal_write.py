@@ -98,6 +98,29 @@ class CreateRebuildRunResponse(BaseModel):
     status: str = "running"
 
 
+class CreateRebuildRunRequest(BaseModel):
+    """POST /internal/v1/rebuild/runs request body (TP-S017-02)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: Literal["reembed", "rechunk", "rescrape"]
+    dry_run: bool = False
+    force: bool = False
+    status: Literal["pending", "running", "completed", "failed", "promoted"] = "running"
+    job_id: UUID | None = None
+    embedding_model_id: str | None = None
+    embedding_dim: int | None = Field(default=None, ge=1)
+    chunk_size_tokens: int | None = Field(default=None, ge=1)
+
+
+class UpdateRebuildRunRequest(BaseModel):
+    """PATCH /internal/v1/rebuild/{rebuild_run_id} status lifecycle (TP-S017-02)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["pending", "running", "completed", "failed", "promoted"]
+
+
 class DocumentSummary(BaseModel):
     """Brief document row returned by the list endpoint."""
 

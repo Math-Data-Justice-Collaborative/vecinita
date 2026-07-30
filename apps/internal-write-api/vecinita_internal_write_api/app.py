@@ -69,6 +69,8 @@ from vecinita_shared_schemas.internal_write import (
     BulkRetagResponse,
     BulkTagRequest,
     ChunkDetail,
+    CreateRebuildRunRequest,
+    CreateRebuildRunResponse,
     DocumentDetail,
     DocumentHistoryResponse,
     DocumentListPage,
@@ -97,6 +99,7 @@ from vecinita_shared_schemas.internal_write import (
     TagPatchResponse,
     TopServedItem,
     TopServedResponse,
+    UpdateRebuildRunRequest,
 )
 from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.playground_catalog import (
@@ -545,6 +548,165 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     tags_snapshot=tag_slugs,
                 )
 
+        return BatchUpsertResponse(upserted_chunks=upserted)
+
+    @app.post(
+        "/internal/v1/rebuild/runs",
+        response_model=CreateRebuildRunResponse,
+    )
+    def create_rebuild_run(  # pyright: ignore[reportUnusedFunction]
+        body: CreateRebuildRunRequest,
+        _actor: WriteActorDep,
+    ) -> CreateRebuildRunResponse:
+        """Insert a rebuild_runs row for dry-run / live tracking (TP-S017-02)."""
+        with engine.begin() as conn:
+            run_id = scalar_uuid(
+                cast(
+                    "object",
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO rebuild_runs (
+                                mode, dry_run, force, status, job_id,
+                                embedding_model_id, embedding_dim, chunk_size_tokens
+                            )
+                            VALUES (
+                                :mode, :dry_run, :force, :status, :job_id,
+                                :embedding_model_id, :embedding_dim, :chunk_size_tokens
+                            )
+                            RETURNING id
+                            """
+                        ),
+                        {
+                            "mode": body.mode,
+                            "dry_run": body.dry_run,
+                            "force": body.force,
+                            "status": body.status,
+                            "job_id": body.job_id,
+                            "embedding_model_id": body.embedding_model_id,
+                            "embedding_dim": body.embedding_dim,
+                            "chunk_size_tokens": body.chunk_size_tokens,
+                        },
+                    ).scalar_one(),
+                )
+            )
+        return CreateRebuildRunResponse(rebuild_run_id=run_id, status=body.status)
+
+    @app.patch(
+        "/internal/v1/rebuild/{rebuild_run_id}",
+        response_model=CreateRebuildRunResponse,
+    )
+    def update_rebuild_run(  # pyright: ignore[reportUnusedFunction]
+        rebuild_run_id: UUID,
+        body: UpdateRebuildRunRequest,
+        _actor: WriteActorDep,
+    ) -> CreateRebuildRunResponse:
+        """Update rebuild_runs.status lifecycle (pending/running/completed/failed)."""
+        with engine.begin() as conn:
+            updated = (
+                conn.execute(
+                    text(
+                        """
+                        UPDATE rebuild_runs
+                        SET status = :status, updated_at = now()
+                        WHERE id = :id
+                        RETURNING id, status
+                        """
+                    ),
+                    {"id": rebuild_run_id, "status": body.status},
+                )
+                .mappings()
+                .first()
+            )
+            if updated is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            row = mapping_row(updated)
+        return CreateRebuildRunResponse(
+            rebuild_run_id=row_uuid(row, "id"),
+            status=row_str(row, "status"),
+        )
+
+    @app.post(
+        "/internal/v1/rebuild/{rebuild_run_id}/shadow/batch",
+        response_model=BatchUpsertResponse,
+    )
+    def upsert_shadow_batch(  # pyright: ignore[reportUnusedFunction]
+        rebuild_run_id: UUID,
+        body: BatchUpsertRequest,
+        _actor: WriteActorDep,
+    ) -> BatchUpsertResponse:
+        """Write shadow_chunks + shadow_embeddings; leave live retrieval unchanged (TC-164)."""
+        with engine.begin() as conn:
+            run_row = (
+                conn.execute(
+                    text("SELECT id, dry_run FROM rebuild_runs WHERE id = :id"),
+                    {"id": rebuild_run_id},
+                )
+                .mappings()
+                .first()
+            )
+            if run_row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+            upserted = 0
+            for document in body.documents:
+                doc_row = (
+                    conn.execute(
+                        text("SELECT id FROM documents WHERE url = :url"),
+                        {"url": str(document.url)},
+                    )
+                    .mappings()
+                    .first()
+                )
+                if doc_row is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Document not found for url={document.url}",
+                    )
+                doc_id = row_uuid(mapping_row(doc_row), "id")
+                for chunk in document.chunks:
+                    shadow_chunk_id = scalar_uuid(
+                        cast(
+                            "object",
+                            conn.execute(
+                                text(
+                                    """
+                                    INSERT INTO shadow_chunks (
+                                        rebuild_run_id, document_id, chunk_index, text
+                                    )
+                                    VALUES (
+                                        :rebuild_run_id, :document_id, :chunk_index, :text
+                                    )
+                                    ON CONFLICT (rebuild_run_id, document_id, chunk_index)
+                                    DO UPDATE SET text = EXCLUDED.text
+                                    RETURNING id
+                                    """
+                                ),
+                                {
+                                    "rebuild_run_id": rebuild_run_id,
+                                    "document_id": doc_id,
+                                    "chunk_index": chunk.chunk_index,
+                                    "text": chunk.text,
+                                },
+                            ).scalar_one(),
+                        )
+                    )
+                    vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO shadow_embeddings (shadow_chunk_id, embedding)
+                            VALUES (:shadow_chunk_id, CAST(:embedding AS vector))
+                            ON CONFLICT (shadow_chunk_id)
+                            DO UPDATE SET embedding = EXCLUDED.embedding
+                            """
+                        ),
+                        {
+                            "shadow_chunk_id": shadow_chunk_id,
+                            "embedding": vector_literal,
+                        },
+                    )
+                    upserted += 1
         return BatchUpsertResponse(upserted_chunks=upserted)
 
     @app.delete(

@@ -363,3 +363,91 @@ def test_soft_delete_eval_run_raises_on_http_error() -> None:
     with pytest.raises(InternalWriteClientError, match="soft_delete_eval_run failed"):
         client.soft_delete_eval_run(run_id)
     client.close()
+
+
+def test_create_rebuild_run_posts_and_returns_id() -> None:
+    """T88.4: create_rebuild_run POSTs /rebuild/runs and returns rebuild_run_id."""
+    run_id = uuid4()
+    seen: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path.endswith("/internal/v1/rebuild/runs")
+        seen.append(cast("dict[str, object]", json.loads(request.content.decode())))
+        return httpx.Response(
+            HTTPStatus.OK,
+            json={"rebuild_run_id": str(run_id), "status": "running"},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    result = client.create_rebuild_run(
+        {
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "status": "running",
+        }
+    )
+    assert result == run_id
+    assert seen[0].get("dry_run") is True
+    client.close()
+
+
+def test_upsert_shadow_batch_posts_under_rebuild_run() -> None:
+    """T88.4: upsert_shadow_batch POSTs shadow dual-write under rebuild_run_id."""
+    run_id = uuid4()
+    paths: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        paths.append(request.url.path)
+        return httpx.Response(HTTPStatus.OK, json={"upserted_chunks": 1})
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client.upsert_shadow_batch(
+        BatchUpsertRequest(
+            documents=[
+                DocumentUpsert(
+                    url=HttpUrl("https://example.com/shadow"),
+                    rebuild_run_id=run_id,
+                    chunks=[
+                        ChunkUpsert(chunk_index=0, text="shadow chunk", embedding=_EMBEDDING),
+                    ],
+                )
+            ]
+        )
+    )
+    assert any(f"/internal/v1/rebuild/{run_id}/shadow/batch" in path for path in paths)
+    client.close()
+
+
+def test_complete_rebuild_run_patches_status() -> None:
+    """T88.4: complete_rebuild_run PATCHes rebuild_runs status lifecycle."""
+    run_id = uuid4()
+    seen: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "PATCH"
+        assert str(run_id) in request.url.path
+        seen.append(cast("dict[str, object]", json.loads(request.content.decode())))
+        return httpx.Response(
+            HTTPStatus.OK, json={"rebuild_run_id": str(run_id), "status": "completed"}
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client.complete_rebuild_run(run_id, status="completed")
+    assert seen[0].get("status") == "completed"
+    client.close()

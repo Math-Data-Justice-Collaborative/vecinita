@@ -24,6 +24,7 @@ class _RecordingWriteClient:
         self.live_batches: list[BatchUpsertRequest] = []
         self.shadow_batches: list[object] = []
         self.created_rebuild_runs: list[dict[str, object]] = []
+        self.completed_rebuild_runs: list[tuple[UUID, str]] = []
 
     def list_documents(
         self,
@@ -53,6 +54,9 @@ class _RecordingWriteClient:
         run_id = uuid4()
         self.created_rebuild_runs.append({**body, "rebuild_run_id": run_id})
         return run_id
+
+    def complete_rebuild_run(self, rebuild_run_id: UUID, *, status: str) -> None:
+        self.completed_rebuild_runs.append((rebuild_run_id, status))
 
 
 class _StubEmbedClient:
@@ -107,6 +111,8 @@ def test_run_rebuild_job_dry_run_writes_shadow_not_live() -> None:
     assert write_client.created_rebuild_runs[0].get("dry_run") is True
     assert write_client.shadow_batches, "expected shadow dual-write"
     assert write_client.live_batches == [], "live retrieval must stay unchanged until promote"
+    assert write_client.completed_rebuild_runs, "expected rebuild_runs completed status"
+    assert write_client.completed_rebuild_runs[0][1] == "completed"
     updated = store.get_job(record.job_id)
     assert updated is not None
     assert updated.status == "completed"

@@ -130,6 +130,17 @@ class InternalWriteClient:
             msg = f"upsert_shadow_batch failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
 
+    def complete_rebuild_run(self, rebuild_run_id: UUID, *, status: str) -> None:
+        """PATCH rebuild_runs status (running → completed/failed) (TP-S017-02)."""
+        response = self._client.patch(
+            f"/internal/v1/rebuild/{rebuild_run_id}",
+            json={"status": status},
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"complete_rebuild_run failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+
     def get_document_detail(self, document_id: UUID) -> DocumentDetail:
         """Fetch document text and metadata for retag jobs."""
         response = self._client.get(

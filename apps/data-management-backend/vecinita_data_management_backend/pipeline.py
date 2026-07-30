@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 from hashlib import sha256
@@ -465,9 +466,9 @@ def run_rebuild_job(
 
     store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
+    rebuild_run_id: UUID | None = None
 
     try:
-        rebuild_run_id: UUID | None = None
         if dry_run:
             # force is recorded for hash-skip bypass (#163) when promote/write enforces skip.
             rebuild_run_id = write_client.create_rebuild_run(
@@ -494,8 +495,13 @@ def run_rebuild_job(
             rebuild_run_id=rebuild_run_id,
         )
         _write_rebuild_batch(write_client, documents, dry_run=dry_run)
+        if dry_run and rebuild_run_id is not None:
+            write_client.complete_rebuild_run(rebuild_run_id, status="completed")
         store.update_job(job_id, status="completed")
     except Exception as exc:
+        if dry_run and rebuild_run_id is not None:
+            with contextlib.suppress(Exception):
+                write_client.complete_rebuild_run(rebuild_run_id, status="failed")
         store.update_job(
             job_id,
             status="failed",
