@@ -140,4 +140,64 @@ describe("BackfillForm (T87.5 / TP-S017-08)", () => {
     ).toBeInTheDocument();
     expect(screen.queryByTestId("backfill-submit")).not.toBeInTheDocument();
   });
+
+  it("clears from_chunks ack when switching back to rescrape", async () => {
+    installAuthenticatedSupabaseMock();
+    renderWithProviders(<BackfillForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("backfill-submit")).toBeInTheDocument();
+    });
+
+    const source = screen.getByLabelText(/backfill source/i);
+    fireEvent.change(source, { target: { value: "from_chunks" } });
+    fireEvent.click(screen.getByTestId("backfill-ack"));
+    expect(screen.getByTestId("backfill-ack")).toBeChecked();
+
+    fireEvent.change(source, { target: { value: "rescrape" } });
+    expect(screen.queryByTestId("backfill-ack")).not.toBeInTheDocument();
+
+    fireEvent.change(source, { target: { value: "from_chunks" } });
+    expect(screen.getByTestId("backfill-ack")).not.toBeChecked();
+
+    fireEvent.change(source, { target: { value: "not-a-source" } });
+    expect(source).toHaveValue("from_chunks");
+  });
+
+  it("shows API error message when backfill enqueue fails", async () => {
+    installAuthenticatedSupabaseMock();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .mockRejectedValueOnce(new Error("backfill enqueue boom")),
+    );
+
+    renderWithProviders(<BackfillForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("backfill-submit")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("backfill-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "backfill enqueue boom",
+    );
+  });
+
+  it("shows fallback backfill error when reject is not an Error", async () => {
+    installAuthenticatedSupabaseMock();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .mockRejectedValueOnce("not-an-error"),
+    );
+
+    renderWithProviders(<BackfillForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("backfill-submit")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("backfill-submit"));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+  });
 });

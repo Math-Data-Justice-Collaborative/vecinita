@@ -787,10 +787,12 @@ project:
       completed: '2026-07-30'
       completed_at: '2026-07-30'
     07-build:
-      status: in_progress
+      status: completed
       started_at: '2026-07-30'
+      completed_at: '2026-07-30'
       partial_rerun_at: '2026-07-30'
-      partial_rerun_note: 'EV-015/S017 delta STARTED — F41 corpus rebuild Phase 20 / 07-build after Gate B→C; prior S016/EV-014 COMPLETE nested under s016_baseline'
+      partial_rerun_note: 'EV-015/S017 delta COMPLETE — F41 corpus rebuild Phase 20 / 07-build COMPLETE (M86–M90); prior S016/EV-014 COMPLETE nested under s016_baseline'
+      report: docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md
       session_id: S017-corpus-reembed-migration
       branch: evolve/EV-015-corpus-reembed-migration
       evolve_cycle_id: EV-015
@@ -810,14 +812,15 @@ project:
         report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
         note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
         s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion detail
-      note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); T89.1 import/unit tests green @ 301c31a; T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB (same as T87.1/T88.4)'
+      note: 'S017/EV-015 07-build COMPLETE 2026-07-30 — Phase 20 COMPLETE (M86–M90); T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; M90 COMPLETE; checkpoints.phase_c pending (Phase 20 build done, awaiting 08-verify-build); next → 08-verify-build; TP-S017-05 single PR-55 at phase end'
       phase: Phase 20 (M86-M90)
-      milestone: M89
+      milestone: M90
+      milestone_status: COMPLETE
+      phase_status: COMPLETE
       substeps:
-        current_task: T89.2
-        task_status: in_progress
-        in_progress_tasks:
-          - T89.2
+        current_task: none
+        task_status: completed
+        in_progress_tasks: []
         blocked_tasks: []
         completed_tasks_recent:
           - T86.1
@@ -838,17 +841,29 @@ project:
           - T88.6
           - T89.1
           - T89.3
-        next_action: 'T89.2 eval rebuild_run_id reads shadow (TC-168); continue M89 after T89.2'
+          - T89.2
+          - T89.4
+          - T89.5
+          - T89.6
+          - T89.7
+          - T90.1
+          - T90.2
+          - T90.3
+          - T90.4
+          - T90.5
+        next_action: 'Phase 20 COMPLETE — invoke 08-verify-build on evolve/EV-015-corpus-reembed-migration; then 09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05)'
         completed_milestones:
           - M86
           - M87
           - M88
-        note: 'T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
+          - M89
+          - M90
+        note: 'M90 COMPLETE @ 7c1c61b (T90.3–T90.5); Phase 20 COMPLETE (M86–M90); T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; checkpoints.phase_c pending (Phase 20 build done, awaiting 08); TP-S017-05 single PR-55 at phase end'
       execution_plan:
-        active_task: T89.2
-        active_milestone: M89
+        active_task: none
+        active_milestone: M90
         active_phase: Phase 20
-        note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.2 (eval rebuild_run_id / TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
+        note: 'S017/EV-015 Phase 20 COMPLETE — M86–M90 COMPLETE; T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; active_task=none; next → 08-verify-build; checkpoints.phase_c pending until 08 passes; TP-S017-05 single PR-55; historical S014 M85 / S016 F40 retained below'
         T86.1:
           status: completed
           started_at: '2026-07-30'
@@ -937,13 +952,13 @@ project:
           pr_plan_note: 'Minor PR #153 (M82) open — do not merge; M83–M85 on same evolve branch'
           note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
           canonical_current_state:
-            active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-            active_milestone: 'M89 — T89.2 in_progress (T89.3 COMPLETE @ 301c31a)'
-            active_task: T89.2
-            task_status: in_progress
-            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1+T89.3 (M89 partial); historical Phase 19 T82–T85 retained'
-            orchestrator_resume: 'S017/EV-015 07-build — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres promote API test still needs local DB'
-            execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.2 in_progress'
+            active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — COMPLETE (S017)'
+            active_milestone: 'M90 COMPLETE — T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b'
+            active_task: none
+            task_status: completed
+            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1–T89.7 (M89); T90.1–T90.5 (M90 COMPLETE); historical Phase 19 T82–T85 retained'
+            orchestrator_resume: 'S017/EV-015 07-build COMPLETE — Phase 20 COMPLETE @ 7c1c61b; next invoke 08-verify-build; then 09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05); phase_c pending until 08 passes'
+            execution_plan_md_note: 'Phase 20 COMPLETE — T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; M90 COMPLETE; Current State → 08-verify-build'
         phase_19_gate: passed
         T85.3:
           status: completed
@@ -965,13 +980,13 @@ project:
           depends_on:
             - T88.3
           note: 'Config OpenAPI JobOptions rebuild fields locked @ 6841672 ([T88.5] config: lock OpenAPI JobOptions rebuild fields)'
-        T88.6: &id005
+        T88.6: &id004
           status: completed
           started_at: '2026-07-30'
           completed_at: '2026-07-30'
           commit: 12b6689d84eef17b8214fad4d05af0adc0b0a7a3
           note: 'Docs api-contract EV-015 rebuild JobOptions locked to OpenAPI @ 12b6689 ([T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI)'
-        T89.1: &id006
+        T89.1: &id005
           status: completed
           started_at: '2026-07-30'
           completed_at: '2026-07-30'
@@ -979,16 +994,74 @@ project:
           tdd: green
           greened_by: T89.3 @ 301c31a
           note: 'promote shadow-to-live unit coverage (TC-165) @ 0006c0d — was red ModuleNotFoundError rebuild_promote; greened by T89.3 @ 301c31a (import/unit tests green); Postgres promote API test still needs local DB'
-        T89.2: &id007
-          status: in_progress
+        T89.2: &id006
+          status: completed
           started_at: '2026-07-30'
-          note: 'eval rebuild_run_id reads shadow (TC-168) — in_progress after T89.3 @ 301c31a'
-        T89.3: &id008
+          completed_at: '2026-07-30'
+          commit: bb2148b9c5561971a358ac71f3ef80faaaffcf9a
+          tdd: green
+          greened_by: T89.4 @ 653452a
+          note: 'eval rebuild_run_id shadow retrieval (TC-168) @ bb2148b — completed red; greened by T89.4 @ 653452a'
+        T89.3: &id007
           status: completed
           started_at: '2026-07-30'
           completed_at: '2026-07-30'
           commit: 301c31a2c5b790d436205172ff04e739b9a11bd0
           note: 'transactional promote shadow rebuild to live @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); greens T89.1 import/unit tests'
+        T89.4: &id008
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 653452a3ed15ae13ab45458ad518fb5dfc82f807
+          note: 'eval rebuild_run_id and shadow retrieval path @ 653452a ([T89.4] feat: eval rebuild_run_id and shadow retrieval path); greens T89.2 TC-168; follow-on docs pointer HEAD=227f0ac'
+        T89.5: &id009
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 5d3189fd8944ca4b49272e938f298014c3f570dc
+          note: 'Vitest rebuild enqueue + promote controls (TC-167/169) @ 5d3189f'
+        T89.6: &id010
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: b4e349779e0bc5a5e58686c28684a0c7d7472367
+          note: 'Admin rebuild enqueue and promote UI @ b4e3497'
+        T89.7: &id011
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 8f004f619fbdb765118e7644d77bcb58da1eefa4
+          note: 'OpenAPI promote path and eval rebuild_run_id @ 8f004f6; M89 COMPLETE'
+        T90.1: &id012
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 4ea891d14aff2e575dd225c3fd2ae8529136873d
+          note: 'API e2e corpus rebuild enqueue (UJ-053) @ 4ea891d'
+        T90.2: &id013
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 6e553acb17aea6c713024844efac5a1aab2f0c8c
+          note: 'API e2e shadow dry-run promote (UJ-054) @ 6e553ac — Postgres-backed; local DB unavailable at write time (CI Postgres)'
+        T90.3: &id014
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 0eaf1f8d09e9f2e3e2a104b13117d1184f295a85
+          note: 'Playwright rebuild enqueue and promote UI (uj053/uj054) @ 0eaf1f8'
+        T90.4: &id015
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: db3148749345bf0e1603f6ced105362915958663
+          note: 'CORS preflight for rebuild promote (H0c) @ db31487'
+        T90.5: &id016
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 7c1c61b0e51efce4a111fc415e5c9ccd7d4d0a0a
+          note: 'Phase 20 gate and rebuild ops runbook @ 7c1c61b; M90 COMPLETE; Phase 20 COMPLETE'
       s010_baseline:
         status: in_progress
         started_at: '2026-07-10'
@@ -1188,8 +1261,6 @@ project:
         - M83
         - M84
         - M85
-      completed_at:
-      report:
       s016_baseline:
         status: completed
         started_at: '2026-07-29'
@@ -1213,19 +1284,30 @@ project:
           - M85
     08-verify-build:
       status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
-      session_id: S016-chat-cold-start-ux
-      branch: evolve/EV-014-chat-cold-start-ux
-      evolve_cycle_id: EV-014
+      started_at: '2026-07-30'
+      partial_rerun_at: '2026-07-30'
+      partial_rerun_note: 'EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline'
+      session_id: S017-corpus-reembed-migration
+      branch: evolve/EV-015-corpus-reembed-migration
+      evolve_cycle_id: EV-015
       mode: delta
-      feature: F40
-      overall_result: PASS
-      result_scope: delta
-      report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
-      note: 'S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+      feature: F41
+      note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
+      s016_baseline:
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        partial_rerun_at: '2026-07-29'
+        partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+        session_id: S016-chat-cold-start-ux
+        branch: evolve/EV-014-chat-cold-start-ux
+        evolve_cycle_id: EV-014
+        mode: delta
+        feature: F40
+        overall_result: PASS
+        result_scope: delta
+        report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+        note: 'S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
       s014_baseline:
         status: completed
         started_at: '2026-07-29'
@@ -1351,199 +1433,115 @@ project:
           session_id: S003-persistent-chat-history
           overall_result: PASS
           session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+      completed_at: '2026-07-30'
+      overall: pass
+      overall_result: PASS
+      result_scope: EV-015_scoped
+      report: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+      substeps:
+        result: PASS
+        result_scope: EV-015_scoped
+        integration_db: SKIPPED
+        integration_db_reason: no local Postgres/Docker
+        playwright_uj053_054: PASS
+        h0c: PASS
+        make_audit: PASS
+        dm_vitest: 688/688
+        ci_collection_fix: committed
+        ci_collection_fix_commit: a9c7eeb
+        ci_collection_fix_note: removed pytest_plugins from UJ-054; fixtures moved to tests/e2e/conftest.py
+        phase_c: passed
+        gate_c_to_d: passed
+        pending_commit: false
+      next_action: commit B01 tests + report, then complete 11-verify-impl sign-off
     09-qa:
       status: completed
-      started_at: '2026-07-07'
-      completed_at: '2026-07-07'
-      partial_rerun_at: '2026-07-07'
-      partial_rerun_note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
-      session_id: S009-playground-model-download
-      branch: feat/S009-playground-model-download
-      evolve_cycle_id: EV-010
-      report: docs/sessions/S009-playground-model-download/reports/qa-report.md
-      overall: fail
-      note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
-      s008_baseline:
-        status: completed
-        started_at: '2026-07-03'
-        completed_at: '2026-07-03'
-        session_id: S008-eval-ux-playground
-        branch: feat/S008-eval-ux-playground
-        evolve_cycle_id: EV-009
-        report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
-        overall: fail
-        note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking'
-      s007:
-        status: completed
-        started_at: '2026-07-01'
-        completed_at: '2026-07-01'
-        partial_rerun_at: '2026-07-01'
-        session_id: S007-rag-eval
-        branch: feat/S007-rag-eval
-        feature: F36
-        evolve_cycle_id: EV-008
-        overall: fail
-        report: docs/sessions/S007-rag-eval/reports/qa-report.md
-        reports:
-          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-          - docs/sessions/S007-rag-eval/reports/qa-report.md
-        blocking:
-          - id: QA-S007-B05
-            category: coverage_gate
-            summary: 'internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8% below thresholds'
-        results:
-          lint: PASS
-          format: PASS
-          typecheck: PASS
-          python_tests: PASS
-          frontend: all green — PASS
-          coverage_gate: FAIL
-        note: 'Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate'
-      s006:
-        status: completed
-        started_at: '2026-06-30'
-        completed_at: '2026-06-30'
-        session_id: S006-invite-acceptance
-        branch: feat/S006-invite-acceptance
-        feature: F35
-        overall: pass_with_advisories
-        report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
-        reports:
-          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-          - docs/sessions/S006-invite-acceptance/reports/qa-report.md
-        results:
-          python: 729 passed — PASS
-          frontend: all green — PASS
-          coverage_gate: PASS
-        note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
-      s005:
-        status: completed
-        started_at: '2026-06-30'
-        completed_at: '2026-06-30'
-        session_id: S005-user-mgmt-auth
-        branch: feat/S005-user-mgmt-auth
-        feature: F35
-        overall: pass_with_advisories
-        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-        reports:
-          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-          - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
-        results:
-          python: 703 passed — PASS
-          frontend: all green — PASS
-          coverage_gate: PASS
-        note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
-      s004:
-        status: completed
-        started_at: '2026-06-29'
-        completed_at: '2026-06-29'
-        session_id: S004-supabase-auth
-        overall: pass_with_advisories
-        rerun_at: '2026-06-29'
-        rerun_overall: fail
-        remediation_at: '2026-06-29'
-        remediation_overall: pass_with_advisories
-        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-        reports:
-          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-          - docs/sessions/S004-supabase-auth/reports/qa-report.md
-        blocking: []
-        resolved:
-          - id: QA-S004-010
-            status: resolved
-            resolved_at: '2026-06-29'
-            summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage async cleanup
-            resolution: 'Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches).'
-          - id: QA-S004-011
-            status: resolved
-            resolved_at: '2026-06-29'
-            summary: 'Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)'
-            resolution: 'ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md (TP-S004-11/ADR-019)/dependency-inventory.md updated.'
-        accepted_or_deferred:
-          - 'QA-S004-003: resolved (auth hooks split; lint clean)'
-          - 'QA-S004-004 / QA-S004-012: documented/accepted'
-          - 'QA-S004-005/006/007/008/009: deferred (env/GPU/ops)'
-        rerun_results:
-          python: '603 passed, 33 skipped — PASS'
-          chat_fe: 142/142 — PASS
-          coverage_gate: 'PASS (100%)'
-          admin_fe: 230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation
-        remediation_results:
-          admin_fe: '242 passed, vitest exit 0 (QA-S004-010 resolved)'
-          coverage_gate: 'PASS combined 100% (1278/1278 branches)'
-        prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
-        note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
-    10-e2e:
-      status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
-      session_id: S016-chat-cold-start-ux
-      branch: evolve/EV-014-chat-cold-start-ux
-      evolve_cycle_id: EV-014
-      mode: evolve
-      delta_only: true
-      feature: F40
-      scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
+      started_at: '2026-07-30'
+      completed_at: '2026-07-30'
+      partial_rerun_at: '2026-07-30'
+      partial_rerun_note: 'EV-015/S017 COMPLETE — 09-qa overall PASS after QA-S017-B01 remediation (DM FE coverage lines 100% 2814/2814, branches 98.11% 1817/1852); F41 Rebuild* covered; prior baseline nested'
+      session_id: S017-corpus-reembed-migration
+      branch: evolve/EV-015-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      mode: delta
+      feature: F41
+      overall: pass
       overall_result: PASS
-      report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
-      note: 'S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below'
-      tiers:
-        t0: PASS
-        t0_detail: Vitest TC-156–159 PASS (covered in 08)
-        t0_ui: PASS
-        t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
-        t0_api: N/A
-        t0_api_waive_reason: no API contract change (RD-187)
-        t1: SKIPPED
-        t1_skip_reason: not required for FE-only F40 delta
-        t2: deferred_to_13
-        t3: deferred_to_13
-      s014_baseline:
+      report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+      report_amended: true
+      blocking:
+        - id: QA-S017-B01
+          category: coverage_gate
+          summary: 'DM FE coverage gate FAIL — lines 99.78% / branches 97.46% (need 100% / 98%) — RESOLVED'
+          status: resolved
+          blocking_for: []
+          remediation_note: 'RESOLVED 2026-07-30 — qa-report.md amended (overall pass); make test-coverage-fe FE_APP=data-management-frontend PASS (lines 100% 2814/2814, branches 98.11% 1817/1852) via test_rebuild_form.test.tsx + test_backfill_form.test.tsx. Changes still uncommitted (committed: false).'
+          local_coverage:
+            lines: '100% (2814/2814)'
+            branches: '98.11% (1817/1852)'
+            command: make test-coverage-fe FE_APP=data-management-frontend
+            committed: false
+      results:
+        lint: PASS
+        format: PASS
+        typecheck: PASS
+        python_tests: PASS_scoped
+        frontend: 'DM Vitest 688/688 — PASS'
+        playwright_uj053_054: PASS
+        coverage_gate: PASS
+        coverage_gate_detail: 'lines 100% (2814/2814), branches 98.11% (1817/1852)'
+        security: PASS
+        rebuild_coverage: F41 Rebuild* covered
+      next_action: 'commit B01 tests + report, then complete 11-verify-impl sign-off'
+      note: 'S017/EV-015 09-qa PASS 2026-07-30 — QA-S017-B01 resolved; qa-report.md amended (overall pass); coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852) via test_rebuild_form.test.tsx + test_backfill_form.test.tsx; changes still uncommitted (committed: false); next → commit B01 tests + report, then complete 11-verify-impl sign-off'
+      s009_baseline:
         status: completed
-        started_at: '2026-07-29'
-        completed_at: '2026-07-29'
-        partial_rerun_at: '2026-07-29'
-        partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
-        session_id: S014-admin-ui-polish-148
-        branch: evolve/EV-013-admin-ui-polish-148
-        evolve_cycle_id: EV-013
-        mode: evolve
-        delta_only: true
-        scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
-        overall_result: PASS
-        report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
-        note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
-        tiers:
-          t0: PASS
-          t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
-          t0_ui: PASS
-          t0_ui_detail: Playwright uj051 1/1 PASS
-          t0_api: N/A
-          t0_api_waive_reason: UI-only
-          t1: SKIPPED
-          t1_skip_reason: no_docker
-          t2: deferred_to_13
-          t3: deferred_to_13
-        s013_baseline:
+        started_at: '2026-07-07'
+        completed_at: '2026-07-07'
+        partial_rerun_at: '2026-07-07'
+        partial_rerun_note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
+        session_id: S009-playground-model-download
+        branch: feat/S009-playground-model-download
+        evolve_cycle_id: EV-010
+        report: docs/sessions/S009-playground-model-download/reports/qa-report.md
+        overall: fail
+        note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
+        s008_baseline:
           status: completed
-          started_at: '2026-07-29'
-          completed_at: '2026-07-29'
-          session_id: S013-unified-job-monitoring
-          branch: evolve/EV-012-unified-job-monitoring
-          evolve_cycle_id: EV-012
-          mode: delta
-          overall_result: PASS
-          report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-          partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-          note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
-          tiers:
-            t0: pass
-            t1: skipped
-            t1_skip_reason: no_docker
-            t2: pass
-            t3: pass
+          started_at: '2026-07-03'
+          completed_at: '2026-07-03'
+          session_id: S008-eval-ux-playground
+          branch: feat/S008-eval-ux-playground
+          evolve_cycle_id: EV-009
+          report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+          overall: fail
+          note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking'
+        s007:
+          status: completed
+          started_at: '2026-07-01'
+          completed_at: '2026-07-01'
+          partial_rerun_at: '2026-07-01'
+          session_id: S007-rag-eval
+          branch: feat/S007-rag-eval
+          feature: F36
+          evolve_cycle_id: EV-008
+          overall: fail
+          report: docs/sessions/S007-rag-eval/reports/qa-report.md
+          reports:
+            - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+            - docs/sessions/S007-rag-eval/reports/qa-report.md
+          blocking:
+            - id: QA-S007-B05
+              category: coverage_gate
+              summary: 'internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8% below thresholds'
+          results:
+            lint: PASS
+            format: PASS
+            typecheck: PASS
+            python_tests: PASS
+            frontend: all green — PASS
+            coverage_gate: FAIL
+          note: 'Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate'
         s006:
           status: completed
           started_at: '2026-06-30'
@@ -1551,16 +1549,192 @@ project:
           session_id: S006-invite-acceptance
           branch: feat/S006-invite-acceptance
           feature: F35
-          evolve_cycle_id: EV-007
-          report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-          note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
+          overall: pass_with_advisories
+          report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
+          reports:
+            - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+            - docs/sessions/S006-invite-acceptance/reports/qa-report.md
+          results:
+            python: 729 passed — PASS
+            frontend: all green — PASS
+            coverage_gate: PASS
+          note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
         s005:
           status: completed
+          started_at: '2026-06-30'
           completed_at: '2026-06-30'
           session_id: S005-user-mgmt-auth
           branch: feat/S005-user-mgmt-auth
-          report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
-          note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
+          feature: F35
+          overall: pass_with_advisories
+          report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          reports:
+            - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+            - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+          results:
+            python: 703 passed — PASS
+            frontend: all green — PASS
+            coverage_gate: PASS
+          note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
+        s004:
+          status: completed
+          started_at: '2026-06-29'
+          completed_at: '2026-06-29'
+          session_id: S004-supabase-auth
+          overall: pass_with_advisories
+          rerun_at: '2026-06-29'
+          rerun_overall: fail
+          remediation_at: '2026-06-29'
+          remediation_overall: pass_with_advisories
+          report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          reports:
+            - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+            - docs/sessions/S004-supabase-auth/reports/qa-report.md
+          blocking: []
+          resolved:
+            - id: QA-S004-010
+              status: resolved
+              resolved_at: '2026-06-29'
+              summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage async cleanup
+              resolution: 'Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches).'
+            - id: QA-S004-011
+              status: resolved
+              resolved_at: '2026-06-29'
+              summary: 'Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)'
+              resolution: 'ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md (TP-S004-11/ADR-019)/dependency-inventory.md updated.'
+          accepted_or_deferred:
+            - 'QA-S004-003: resolved (auth hooks split; lint clean)'
+            - 'QA-S004-004 / QA-S004-012: documented/accepted'
+            - 'QA-S004-005/006/007/008/009: deferred (env/GPU/ops)'
+          rerun_results:
+            python: '603 passed, 33 skipped — PASS'
+            chat_fe: 142/142 — PASS
+            coverage_gate: 'PASS (100%)'
+            admin_fe: 230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation
+          remediation_results:
+            admin_fe: '242 passed, vitest exit 0 (QA-S004-010 resolved)'
+            coverage_gate: 'PASS combined 100% (1278/1278 branches)'
+          prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
+          note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+    10-e2e:
+      status: completed
+      started_at: '2026-07-30'
+      completed_at: '2026-07-30'
+      partial_rerun_at: '2026-07-30'
+      partial_rerun_note: 'EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres; T2/T3 deferred); prior S016/EV-014 COMPLETE nested under s016_baseline'
+      session_id: S017-corpus-reembed-migration
+      branch: evolve/EV-015-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      mode: delta
+      delta_only: true
+      feature: F41
+      scope: UJ-053/054 / TC-161–168 (#167 corpus rebuild)
+      overall: pass
+      overall_result: PASS
+      result_scope: EV-015_scoped
+      advisories:
+        - 'UJ-054 API promote SKIPPED (no local Postgres) — CI Postgres'
+        - 'T2/T3 deferred to 13-deploy-smoke / 15-service-health'
+      report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
+      tiers:
+        t0_uj053: PASS
+        t0_uj054_playwright: PASS
+        t0_uj054_api_promote: SKIPPED
+        t0_uj054_api_skip_reason: no local Postgres
+        t1: SKIPPED
+        t1_skip_reason: no Docker/Postgres
+        t2: deferred_to_13
+        t3: deferred_to_13
+      next_action: 'commit B01 tests + report, then complete 11-verify-impl sign-off'
+      note: 'S017/EV-015 10-e2e COMPLETE 2026-07-30 — overall PASS with advisories; T0 UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED (no Postgres); T2/T3 deferred; report docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md; next → 11-verify-impl'
+      s016_baseline:
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        partial_rerun_at: '2026-07-29'
+        partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
+        session_id: S016-chat-cold-start-ux
+        branch: evolve/EV-014-chat-cold-start-ux
+        evolve_cycle_id: EV-014
+        mode: evolve
+        delta_only: true
+        feature: F40
+        scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
+        overall_result: PASS
+        report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+        note: 'S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below'
+        tiers:
+          t0: PASS
+          t0_detail: Vitest TC-156–159 PASS (covered in 08)
+          t0_ui: PASS
+          t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
+          t0_api: N/A
+          t0_api_waive_reason: no API contract change (RD-187)
+          t1: SKIPPED
+          t1_skip_reason: not required for FE-only F40 delta
+          t2: deferred_to_13
+          t3: deferred_to_13
+        s014_baseline:
+          status: completed
+          started_at: '2026-07-29'
+          completed_at: '2026-07-29'
+          partial_rerun_at: '2026-07-29'
+          partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+          session_id: S014-admin-ui-polish-148
+          branch: evolve/EV-013-admin-ui-polish-148
+          evolve_cycle_id: EV-013
+          mode: evolve
+          delta_only: true
+          scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+          overall_result: PASS
+          report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+          note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
+          tiers:
+            t0: PASS
+            t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+            t0_ui: PASS
+            t0_ui_detail: Playwright uj051 1/1 PASS
+            t0_api: N/A
+            t0_api_waive_reason: UI-only
+            t1: SKIPPED
+            t1_skip_reason: no_docker
+            t2: deferred_to_13
+            t3: deferred_to_13
+          s013_baseline:
+            status: completed
+            started_at: '2026-07-29'
+            completed_at: '2026-07-29'
+            session_id: S013-unified-job-monitoring
+            branch: evolve/EV-012-unified-job-monitoring
+            evolve_cycle_id: EV-012
+            mode: delta
+            overall_result: PASS
+            report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+            partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+            note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+            tiers:
+              t0: pass
+              t1: skipped
+              t1_skip_reason: no_docker
+              t2: pass
+              t3: pass
+          s006:
+            status: completed
+            started_at: '2026-06-30'
+            completed_at: '2026-06-30'
+            session_id: S006-invite-acceptance
+            branch: feat/S006-invite-acceptance
+            feature: F35
+            evolve_cycle_id: EV-007
+            report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+            note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
+          s005:
+            status: completed
+            completed_at: '2026-06-30'
+            session_id: S005-user-mgmt-auth
+            branch: feat/S005-user-mgmt-auth
+            report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
+            note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
     11-verify-impl:
       status: completed
       completed_at: '2026-07-01'
@@ -2027,7 +2201,7 @@ active_session:
   evolve_cycle_id: EV-015
   github_issue: 167
   artifacts_dir: docs/sessions/S017-corpus-reembed-migration/
-  current_stage: 07-build
+  current_stage: 11-verify-impl
   started_at: '2026-07-30'
   routing_preset_choice: standard_plus_build
   routing_preset_status: approved
@@ -2036,7 +2210,7 @@ active_session:
   session_artifacts_pending: false
   session_artifacts_note: 'session-brief.md + routing-plan.md written under docs/sessions/S017-corpus-reembed-migration/'
   phase0_approved: true
-  note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; 04 completed; Gate B→C passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
+  note: 'S017/EV-015 current_stage=11-verify-impl — QA-S017-B01 resolved; 09-qa overall PASS (qa-report amended); coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852); B01 tests + report still uncommitted (committed: false); next → commit B01 tests + report, then complete 11-verify-impl sign-off; phase_d pending until 11+12; TP-S017-05 single PR-55 at phase end'
   routing_plan:
     - stage: 00-context
       required: true
@@ -2071,26 +2245,46 @@ active_session:
       completed_at: '2026-07-30'
     - stage: 07-build
       required: true
-      status: in_progress
+      status: completed
       started_at: '2026-07-30'
-      note: 'M86+M87+M88 COMPLETE; T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
+      completed_at: '2026-07-30'
+      note: 'Phase 20 COMPLETE — M86–M90; T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; report phase20-gate.md'
+      report: docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md
       skip_rationale:
     - stage: 08-verify-build
       required: true
-      status: pending
+      status: completed
+      started_at: '2026-07-30'
+      note: 'COMPLETE — EV-015 scoped PASS; UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed'
       skip_rationale:
+      completed_at: '2026-07-30'
+      report: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+      overall: pass
+      overall_result: PASS
     - stage: 09-qa
       required: true
-      status: pending
+      status: completed
       skip_rationale:
+      started_at: '2026-07-30'
+      completed_at: '2026-07-30'
+      report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+      overall: pass
+      note: 'COMPLETE — overall PASS; QA-S017-B01 resolved; qa-report amended; coverage_gate PASS 100%/98.11%; B01 tests + report still uncommitted'
     - stage: 10-e2e
       required: true
-      status: pending
+      status: completed
       skip_rationale:
+      started_at: '2026-07-30'
+      completed_at: '2026-07-30'
+      report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
+      overall: pass
+      note: 'COMPLETE — PASS with advisories; UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED (no Postgres); T2/T3 deferred'
     - stage: 11-verify-impl
       required: true
-      status: pending
+      status: in_progress
+      started_at: '2026-07-30'
       skip_rationale:
+      note: 'IN PROGRESS — QA-S017-B01 resolved; 09-qa PASS; awaiting user commit approval for B01 tests + report, then journey/feature sign-off; phase_d pending until 11+12'
     - stage: 12-verify-deploy
       required: true
       status: pending
@@ -2111,7 +2305,7 @@ active_session:
       required: false
       status: skipped
       skip_rationale: N/A
-  current_stage_note: 'S017/EV-015 07-build in_progress — Phase 20; M89; current_task=T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres promote API test still needs local DB'
+  current_stage_note: 'S017/EV-015 current_stage=11-verify-impl — QA-S017-B01 resolved; 09-qa PASS (qa-report amended; coverage 100%/98.11%); B01 tests + report uncommitted; 10-e2e PASS w/ advisories; awaiting commit then 11-verify-impl sign-off; phase_d pending until 11+12; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015'
 sessions:
   - id: S016-chat-cold-start-ux
     type: feature
@@ -2286,7 +2480,7 @@ sessions:
       remind_at: 11-verify-impl or after 07-build
       note: User declined UI preview for now; remind at 11-verify-impl or after build
     completed_at: '2026-07-29'
-    merge: &id004
+    merge: &id017
       pr_number: 157
       pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157
       status: merged
@@ -5355,10 +5549,12 @@ stages:
       - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: in_progress
+    status: completed
     started_at: '2026-07-30'
+    completed_at: '2026-07-30'
     partial_rerun_at: '2026-07-30'
-    partial_rerun_note: 'EV-015/S017 delta STARTED — F41 corpus rebuild Phase 20 / 07-build after Gate B→C; prior S016/EV-014 COMPLETE nested under s016_baseline'
+    partial_rerun_note: 'EV-015/S017 delta COMPLETE — F41 corpus rebuild Phase 20 / 07-build COMPLETE (M86–M90); prior S016/EV-014 COMPLETE nested under s016_baseline'
+    report: docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md
     session_id: S017-corpus-reembed-migration
     branch: evolve/EV-015-corpus-reembed-migration
     evolve_cycle_id: EV-015
@@ -5378,15 +5574,16 @@ stages:
       report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
       note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
       s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion detail
-    note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); T89.1 import/unit tests green @ 301c31a; T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB (same as T87.1/T88.4)'
+    note: 'S017/EV-015 07-build COMPLETE 2026-07-30 — Phase 20 COMPLETE (M86–M90); T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; M90 COMPLETE; checkpoints.phase_c pending (Phase 20 build done, awaiting 08-verify-build); next → 08-verify-build; TP-S017-05 single PR-55 at phase end'
     phase: Phase 20 (M86-M90)
-    milestone: M89
+    milestone: M90
+    milestone_status: COMPLETE
+    phase_status: COMPLETE
     substeps:
-      current_task: T89.2
-      next_action: 'T89.2 eval rebuild_run_id reads shadow (TC-168); continue M89 after T89.2'
-      task_status: in_progress
-      in_progress_tasks:
-        - T89.2
+      current_task: none
+      next_action: 'Phase 20 COMPLETE — invoke 08-verify-build on evolve/EV-015-corpus-reembed-migration; then 09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05)'
+      task_status: completed
+      in_progress_tasks: []
       blocked_tasks: []
       completed_tasks_recent:
         - T86.1
@@ -5407,16 +5604,28 @@ stages:
         - T88.6
         - T89.1
         - T89.3
+        - T89.2
+        - T89.4
+        - T89.5
+        - T89.6
+        - T89.7
+        - T90.1
+        - T90.2
+        - T90.3
+        - T90.4
+        - T90.5
       completed_milestones:
         - M86
         - M87
         - M88
-      note: 'T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
+        - M89
+        - M90
+      note: 'M90 COMPLETE @ 7c1c61b (T90.3–T90.5); Phase 20 COMPLETE (M86–M90); T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; checkpoints.phase_c pending (Phase 20 build done, awaiting 08); TP-S017-05 single PR-55 at phase end'
     execution_plan:
-      active_task: T89.2
-      active_milestone: M89
+      active_task: none
+      active_milestone: M90
       active_phase: Phase 20
-      note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.2 (eval rebuild_run_id / TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
+      note: 'S017/EV-015 Phase 20 COMPLETE — M86–M90 COMPLETE; T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; active_task=none; next → 08-verify-build; checkpoints.phase_c pending until 08 passes; TP-S017-05 single PR-55; historical S014 M85 / S016 F40 retained below'
       T86.1:
         status: completed
         started_at: '2026-07-30'
@@ -5500,13 +5709,13 @@ stages:
         pr_plan_note: 'Minor PR #153 (M82) open — do not merge; M83–M85 on same evolve branch'
         note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
         canonical_current_state:
-          active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-          active_milestone: 'M89 — T89.2 in_progress (T89.3 COMPLETE @ 301c31a)'
-          active_task: T89.2
-          task_status: in_progress
-          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1+T89.3 (M89 partial); historical Phase 19 T82–T85 retained'
-          orchestrator_resume: 'S017/EV-015 07-build — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres promote API test still needs local DB'
-          execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.2 in_progress'
+          active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — COMPLETE (S017)'
+          active_milestone: 'M90 COMPLETE — T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b'
+          active_task: none
+          task_status: completed
+          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1–T89.7 (M89); T90.1–T90.5 (M90 COMPLETE); historical Phase 19 T82–T85 retained'
+          orchestrator_resume: 'S017/EV-015 07-build COMPLETE — Phase 20 COMPLETE @ 7c1c61b; next invoke 08-verify-build; then 09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05); phase_c pending until 08 passes'
+          execution_plan_md_note: 'Phase 20 COMPLETE — T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; M90 COMPLETE; Current State → 08-verify-build'
       phase_19_gate: passed
       T85.3:
         status: completed
@@ -5521,10 +5730,19 @@ stages:
         started_at: '2026-07-29'
         completed_at: '2026-07-29'
       T88.5: *id003
-      T88.6: *id005
-      T89.1: *id006
-      T89.2: *id007
-      T89.3: *id008
+      T88.6: *id004
+      T89.1: *id005
+      T89.2: *id006
+      T89.3: *id007
+      T89.4: *id008
+      T89.5: *id009
+      T89.6: *id010
+      T89.7: *id011
+      T90.1: *id012
+      T90.2: *id013
+      T90.3: *id014
+      T90.4: *id015
+      T90.5: *id016
     s010_baseline:
       status: in_progress
       started_at: '2026-07-10'
@@ -5724,8 +5942,6 @@ stages:
       - M83
       - M84
       - M85
-    completed_at:
-    report:
     s016_baseline:
       status: completed
       started_at: '2026-07-29'
@@ -5749,19 +5965,30 @@ stages:
         - M85
   08-verify-build:
     status: completed
-    started_at: '2026-07-29'
-    completed_at: '2026-07-29'
-    partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
-    session_id: S016-chat-cold-start-ux
-    branch: evolve/EV-014-chat-cold-start-ux
-    evolve_cycle_id: EV-014
+    started_at: '2026-07-30'
+    partial_rerun_at: '2026-07-30'
+    partial_rerun_note: 'EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline'
+    session_id: S017-corpus-reembed-migration
+    branch: evolve/EV-015-corpus-reembed-migration
+    evolve_cycle_id: EV-015
     mode: delta
-    feature: F40
-    overall_result: PASS
-    result_scope: delta
-    report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
-    note: 'S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+    feature: F41
+    note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
+    s016_baseline:
+      status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      partial_rerun_at: '2026-07-29'
+      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
+      mode: delta
+      feature: F40
+      overall_result: PASS
+      result_scope: delta
+      report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+      note: 'S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
     s014_baseline:
       status: completed
       started_at: '2026-07-29'
@@ -5891,161 +6118,115 @@ stages:
           - 'DM FE branch coverage 94.18% < 95%'
         green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
         note: 'S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck, format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30 FAIL; cleared for Phase 12 gate.'
+    completed_at: '2026-07-30'
+    overall: pass
+    overall_result: PASS
+    result_scope: EV-015_scoped
+    report: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+    substeps:
+      result: PASS
+      result_scope: EV-015_scoped
+      integration_db: SKIPPED
+      integration_db_reason: no local Postgres/Docker
+      playwright_uj053_054: PASS
+      h0c: PASS
+      make_audit: PASS
+      dm_vitest: 688/688
+      ci_collection_fix: committed
+      ci_collection_fix_commit: a9c7eeb
+      ci_collection_fix_note: removed pytest_plugins from UJ-054; fixtures moved to tests/e2e/conftest.py
+      phase_c: passed
+      gate_c_to_d: passed
+      pending_commit: false
+    next_action: commit B01 tests + report, then complete 11-verify-impl sign-off
   09-qa:
     status: completed
-    started_at: '2026-07-07'
-    completed_at: '2026-07-07'
-    partial_rerun_at: '2026-07-07'
-    partial_rerun_note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
-    session_id: S009-playground-model-download
-    branch: feat/S009-playground-model-download
-    evolve_cycle_id: EV-010
-    report: docs/sessions/S009-playground-model-download/reports/qa-report.md
-    overall: fail
-    note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
-    s008:
-      status: completed
-      started_at: '2026-07-03'
-      completed_at: '2026-07-03'
-      session_id: S008-eval-ux-playground
-      branch: feat/S008-eval-ux-playground
-      evolve_cycle_id: EV-009
-      overall: fail
-      report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
-      note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking'
-    s001:
-      report: docs/sessions/S001-modal-cold-start-snapshot/reports/qa-report.md
-      branch: feat/S001-modal-cold-start-snapshot
-      commit: 4f3f741
-      overall: pass_with_advisories
-      note: 'S001 branch full-repo QA @ 4f3f741; 500 passed 38 skipped Python; 271 FE tests; advisories QA-001–011 (QA-010 resolved in CI)'
-    s002:
-      report: docs/sessions/S002-admin-job-management/reports/qa-report.md
-      branch: feat/S002-admin-job-management
-      partial_rerun_at: '2026-06-26'
-      overall: fail
-      note: 'S002 partial rerun post-hotfix 2026-06-26 — overall FAIL: typecheck (reportAny) + live GET /jobs 405.'
-    s005:
-      status: completed
-      started_at: '2026-06-30'
-      completed_at: '2026-06-30'
-      session_id: S005-user-mgmt-auth
-      branch: feat/S005-user-mgmt-auth
-      feature: F35
-      overall: pass_with_advisories
-      report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-      session_report: docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
-      results:
-        python: 703 passed — PASS
-        frontend: all green — PASS
-        coverage_gate: PASS
-      note: S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS.
-    s006:
-      status: completed
-      started_at: '2026-06-30'
-      completed_at: '2026-06-30'
-      session_id: S006-invite-acceptance
-      branch: feat/S006-invite-acceptance
-      feature: F35
-      overall: pass_with_advisories
-      report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
-      session_report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
-      results:
-        python: 729 passed — PASS
-        frontend: all green — PASS
-        coverage_gate: PASS
-      note: S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Handoff to 10-e2e.
-    s007:
-      status: completed
-      started_at: '2026-07-01'
-      completed_at: '2026-07-01'
-      partial_rerun_at: '2026-07-01'
-      session_id: S007-rag-eval
-      branch: feat/S007-rag-eval
-      feature: F36
-      evolve_cycle_id: EV-008
-      overall: fail
-      report: docs/sessions/S007-rag-eval/reports/qa-report.md
-      session_report: docs/sessions/S007-rag-eval/reports/qa-report.md
-      results:
-        lint: PASS
-        format: PASS
-        typecheck: PASS
-        python_tests: PASS
-        frontend: all green — PASS
-        coverage_gate: FAIL
-      note: 'Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate (internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8%)'
-  10-e2e:
-    status: completed
-    started_at: '2026-07-29'
-    completed_at: '2026-07-29'
-    partial_rerun_at: '2026-07-29'
-    partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
-    session_id: S016-chat-cold-start-ux
-    branch: evolve/EV-014-chat-cold-start-ux
-    evolve_cycle_id: EV-014
-    mode: evolve
-    delta_only: true
-    feature: F40
-    scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
+    started_at: '2026-07-30'
+    completed_at: '2026-07-30'
+    partial_rerun_at: '2026-07-30'
+    partial_rerun_note: 'EV-015/S017 COMPLETE — 09-qa overall PASS after QA-S017-B01 remediation (DM FE coverage lines 100% 2814/2814, branches 98.11% 1817/1852); F41 Rebuild* covered; prior baseline nested'
+    session_id: S017-corpus-reembed-migration
+    branch: evolve/EV-015-corpus-reembed-migration
+    evolve_cycle_id: EV-015
+    mode: delta
+    feature: F41
+    overall: pass
     overall_result: PASS
-    report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
-    note: 'S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below'
-    tiers:
-      t0: PASS
-      t0_detail: Vitest TC-156–159 PASS (covered in 08)
-      t0_ui: PASS
-      t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
-      t0_api: N/A
-      t0_api_waive_reason: no API contract change (RD-187)
-      t1: SKIPPED
-      t1_skip_reason: not required for FE-only F40 delta
-      t2: deferred_to_13
-      t3: deferred_to_13
-    s014_baseline:
+    report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+    report_amended: true
+    blocking:
+      - id: QA-S017-B01
+        category: coverage_gate
+        summary: 'DM FE coverage gate FAIL — lines 99.78% / branches 97.46% (need 100% / 98%) — RESOLVED'
+        status: resolved
+        blocking_for: []
+        remediation_note: 'RESOLVED 2026-07-30 — qa-report.md amended (overall pass); make test-coverage-fe FE_APP=data-management-frontend PASS (lines 100% 2814/2814, branches 98.11% 1817/1852) via test_rebuild_form.test.tsx + test_backfill_form.test.tsx. Changes still uncommitted (committed: false).'
+        local_coverage:
+          lines: '100% (2814/2814)'
+          branches: '98.11% (1817/1852)'
+          command: make test-coverage-fe FE_APP=data-management-frontend
+          committed: false
+    results:
+      lint: PASS
+      format: PASS
+      typecheck: PASS
+      python_tests: PASS_scoped
+      frontend: 'DM Vitest 688/688 — PASS'
+      playwright_uj053_054: PASS
+      coverage_gate: PASS
+      coverage_gate_detail: 'lines 100% (2814/2814), branches 98.11% (1817/1852)'
+      security: PASS
+      rebuild_coverage: F41 Rebuild* covered
+    next_action: 'commit B01 tests + report, then complete 11-verify-impl sign-off'
+    note: 'S017/EV-015 09-qa PASS 2026-07-30 — QA-S017-B01 resolved; qa-report.md amended (overall pass); coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852) via test_rebuild_form.test.tsx + test_backfill_form.test.tsx; changes still uncommitted (committed: false); next → commit B01 tests + report, then complete 11-verify-impl sign-off'
+    s009_baseline:
       status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      partial_rerun_at: '2026-07-29'
-      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
-      session_id: S014-admin-ui-polish-148
-      branch: evolve/EV-013-admin-ui-polish-148
-      evolve_cycle_id: EV-013
-      mode: evolve
-      delta_only: true
-      scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
-      overall_result: PASS
-      report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
-      note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
-      tiers:
-        t0: PASS
-        t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
-        t0_ui: PASS
-        t0_ui_detail: Playwright uj051 1/1 PASS
-        t0_api: N/A
-        t0_api_waive_reason: UI-only
-        t1: SKIPPED
-        t1_skip_reason: no_docker
-        t2: deferred_to_13
-        t3: deferred_to_13
-      s013_baseline:
+      started_at: '2026-07-07'
+      completed_at: '2026-07-07'
+      partial_rerun_at: '2026-07-07'
+      partial_rerun_note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
+      session_id: S009-playground-model-download
+      branch: feat/S009-playground-model-download
+      evolve_cycle_id: EV-010
+      report: docs/sessions/S009-playground-model-download/reports/qa-report.md
+      overall: fail
+      note: 'Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers resolved'
+      s008_baseline:
         status: completed
-        started_at: '2026-07-29'
-        completed_at: '2026-07-29'
-        session_id: S013-unified-job-monitoring
-        branch: evolve/EV-012-unified-job-monitoring
-        evolve_cycle_id: EV-012
-        mode: delta
-        overall_result: PASS
-        report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-        partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
-        tiers:
-          t0: pass
-          t1: skipped
-          t1_skip_reason: no_docker
-          t2: pass
-          t3: pass
+        started_at: '2026-07-03'
+        completed_at: '2026-07-03'
+        session_id: S008-eval-ux-playground
+        branch: feat/S008-eval-ux-playground
+        evolve_cycle_id: EV-009
+        report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+        overall: fail
+        note: 'S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking'
+      s007:
+        status: completed
+        started_at: '2026-07-01'
+        completed_at: '2026-07-01'
+        partial_rerun_at: '2026-07-01'
+        session_id: S007-rag-eval
+        branch: feat/S007-rag-eval
+        feature: F36
+        evolve_cycle_id: EV-008
+        overall: fail
+        report: docs/sessions/S007-rag-eval/reports/qa-report.md
+        reports:
+          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          - docs/sessions/S007-rag-eval/reports/qa-report.md
+        blocking:
+          - id: QA-S007-B05
+            category: coverage_gate
+            summary: 'internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8% below thresholds'
+        results:
+          lint: PASS
+          format: PASS
+          typecheck: PASS
+          python_tests: PASS
+          frontend: all green — PASS
+          coverage_gate: FAIL
+        note: 'Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate'
       s006:
         status: completed
         started_at: '2026-06-30'
@@ -6053,60 +6234,192 @@ stages:
         session_id: S006-invite-acceptance
         branch: feat/S006-invite-acceptance
         feature: F35
-        evolve_cycle_id: EV-007
-        report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-        note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
-        t0: pass
-        t0_tests: 69
-        t1_integration: pass
-        t1_tests: 62
-        vitest: 500
-        supabase_contract: 17
-        t3_live: deferred
-      mechanism: api+frontend
-      t0: pass
-      t0_tests: 59
-      t1_integration: pass
-      t1_tests: 35
-      t3_live: pending
-      journeys_passed: 29
-      journeys_failed: 0
-      ev001_journeys_added: 4
-      ev001_tests_passed: 5
-      ev002_journeys_added: 9
-      ev002_tests_passed: 40
-      ev005_journeys_added: 4
-      ev005_tests_passed: 14
-      s002:
-        report: docs/sessions/S002-admin-job-management/reports/e2e-report.md
-        branch: feat/S002-admin-job-management
-        partial_rerun_at: '2026-06-26'
-        t0: pass
-        t0_tests: 45
-        t3_live: fail
-        t3_live_note: GET /jobs returns 405 on production Modal data-management
-      s004:
-        report: docs/sessions/S004-supabase-auth/reports/e2e-report.md
-        branch: feat/S004-supabase-auth
-        partial_rerun_at: '2026-06-29'
-        t0: pass
-        t0_tests: 59
-        t3_live: pending
-        ev005_journeys_added: 4
-        ev005_tests_passed: 14
+        overall: pass_with_advisories
+        report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
+        reports:
+          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          - docs/sessions/S006-invite-acceptance/reports/qa-report.md
+        results:
+          python: 729 passed — PASS
+          frontend: all green — PASS
+          coverage_gate: PASS
+        note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729 passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
       s005:
-        report: docs/sessions/S005-user-mgmt-auth/reports/e2e-report.md
-        branch: feat/S005-user-mgmt-auth
+        status: completed
+        started_at: '2026-06-30'
+        completed_at: '2026-06-30'
         session_id: S005-user-mgmt-auth
-        partial_rerun_at: '2026-06-30'
-        t0: pass
-        t0_tests: 68
-        t1_integration: pass
-        t1_tests: 62
-        vitest: 483
-        supabase_contract: 14
-        t3_live: deferred
-        note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
+        branch: feat/S005-user-mgmt-auth
+        feature: F35
+        overall: pass_with_advisories
+        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+        reports:
+          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+        results:
+          python: 703 passed — PASS
+          frontend: all green — PASS
+          coverage_gate: PASS
+        note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
+      s004:
+        status: completed
+        started_at: '2026-06-29'
+        completed_at: '2026-06-29'
+        session_id: S004-supabase-auth
+        overall: pass_with_advisories
+        rerun_at: '2026-06-29'
+        rerun_overall: fail
+        remediation_at: '2026-06-29'
+        remediation_overall: pass_with_advisories
+        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+        reports:
+          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+          - docs/sessions/S004-supabase-auth/reports/qa-report.md
+        blocking: []
+        resolved:
+          - id: QA-S004-010
+            status: resolved
+            resolved_at: '2026-06-29'
+            summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage async cleanup
+            resolution: 'Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 passed); coverage gate PASS combined 100% (1278/1278 branches).'
+          - id: QA-S004-011
+            status: resolved
+            resolved_at: '2026-06-29'
+            summary: 'Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)'
+            resolution: 'ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md (TP-S004-11/ADR-019)/dependency-inventory.md updated.'
+        accepted_or_deferred:
+          - 'QA-S004-003: resolved (auth hooks split; lint clean)'
+          - 'QA-S004-004 / QA-S004-012: documented/accepted'
+          - 'QA-S004-005/006/007/008/009: deferred (env/GPU/ops)'
+        rerun_results:
+          python: '603 passed, 33 skipped — PASS'
+          chat_fe: 142/142 — PASS
+          coverage_gate: 'PASS (100%)'
+          admin_fe: 230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation
+        remediation_results:
+          admin_fe: '242 passed, vitest exit 0 (QA-S004-010 resolved)'
+          coverage_gate: 'PASS combined 100% (1278/1278 branches)'
+        prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
+        note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+  10-e2e:
+    status: completed
+    started_at: '2026-07-30'
+    completed_at: '2026-07-30'
+    partial_rerun_at: '2026-07-30'
+    partial_rerun_note: 'EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres; T2/T3 deferred); prior S016/EV-014 COMPLETE nested under s016_baseline'
+    session_id: S017-corpus-reembed-migration
+    branch: evolve/EV-015-corpus-reembed-migration
+    evolve_cycle_id: EV-015
+    mode: delta
+    delta_only: true
+    feature: F41
+    scope: UJ-053/054 / TC-161–168 (#167 corpus rebuild)
+    overall: pass
+    overall_result: PASS
+    result_scope: EV-015_scoped
+    advisories:
+      - 'UJ-054 API promote SKIPPED (no local Postgres) — CI Postgres'
+      - 'T2/T3 deferred to 13-deploy-smoke / 15-service-health'
+    report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
+    tiers:
+      t0_uj053: PASS
+      t0_uj054_playwright: PASS
+      t0_uj054_api_promote: SKIPPED
+      t0_uj054_api_skip_reason: no local Postgres
+      t1: SKIPPED
+      t1_skip_reason: no Docker/Postgres
+      t2: deferred_to_13
+      t3: deferred_to_13
+    next_action: 'commit B01 tests + report, then complete 11-verify-impl sign-off'
+    note: 'S017/EV-015 10-e2e COMPLETE 2026-07-30 — overall PASS with advisories; T0 UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED (no Postgres); T2/T3 deferred; report docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md; next → 11-verify-impl'
+    s016_baseline:
+      status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      partial_rerun_at: '2026-07-29'
+      partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
+      session_id: S016-chat-cold-start-ux
+      branch: evolve/EV-014-chat-cold-start-ux
+      evolve_cycle_id: EV-014
+      mode: evolve
+      delta_only: true
+      feature: F40
+      scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
+      overall_result: PASS
+      report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+      note: 'S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below'
+      tiers:
+        t0: PASS
+        t0_detail: Vitest TC-156–159 PASS (covered in 08)
+        t0_ui: PASS
+        t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
+        t0_api: N/A
+        t0_api_waive_reason: no API contract change (RD-187)
+        t1: SKIPPED
+        t1_skip_reason: not required for FE-only F40 delta
+        t2: deferred_to_13
+        t3: deferred_to_13
+      s014_baseline:
+        status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        partial_rerun_at: '2026-07-29'
+        partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+        session_id: S014-admin-ui-polish-148
+        branch: evolve/EV-013-admin-ui-polish-148
+        evolve_cycle_id: EV-013
+        mode: evolve
+        delta_only: true
+        scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+        overall_result: PASS
+        report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+        note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
+        tiers:
+          t0: PASS
+          t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+          t0_ui: PASS
+          t0_ui_detail: Playwright uj051 1/1 PASS
+          t0_api: N/A
+          t0_api_waive_reason: UI-only
+          t1: SKIPPED
+          t1_skip_reason: no_docker
+          t2: deferred_to_13
+          t3: deferred_to_13
+        s013_baseline:
+          status: completed
+          started_at: '2026-07-29'
+          completed_at: '2026-07-29'
+          session_id: S013-unified-job-monitoring
+          branch: evolve/EV-012-unified-job-monitoring
+          evolve_cycle_id: EV-012
+          mode: delta
+          overall_result: PASS
+          report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+          partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+          note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+          tiers:
+            t0: pass
+            t1: skipped
+            t1_skip_reason: no_docker
+            t2: pass
+            t3: pass
+        s006:
+          status: completed
+          started_at: '2026-06-30'
+          completed_at: '2026-06-30'
+          session_id: S006-invite-acceptance
+          branch: feat/S006-invite-acceptance
+          feature: F35
+          evolve_cycle_id: EV-007
+          report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+          note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
+        s005:
+          status: completed
+          completed_at: '2026-06-30'
+          session_id: S005-user-mgmt-auth
+          branch: feat/S005-user-mgmt-auth
+          report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
+          note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
   11-verify-impl:
     status: completed
     started_at: '2026-05-27'
@@ -9481,7 +9794,7 @@ evolve_cycles:
       remind_at: 11-verify-impl or after 07-build
       note: User declined UI preview for now; remind at 11-verify-impl or after build
     completed_at: '2026-07-29'
-    merge: *id004
+    merge: *id017
     docs_close_commit: 0144ee66631c78fe549745d5f5fe309196ccaa59
     close_out_commit:
       sha: 0144ee66631c78fe549745d5f5fe309196ccaa59
@@ -9506,8 +9819,8 @@ evolve_cycles:
     session_id: S017-corpus-reembed-migration
     github_issue: 167
     source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/167
-    current_stage: 07-build
-    current_stage_note: '07-build in_progress — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
+    current_stage: 11-verify-impl
+    current_stage_note: 'current_stage=11-verify-impl; QA-S017-B01 resolved; 09-qa PASS (qa-report amended; coverage lines 100% 2814/2814, branches 98.11% 1817/1852); B01 tests + report still uncommitted; 10-e2e PASS w/ advisories; next → commit B01 tests + report, then complete 11-verify-impl sign-off; phase_d pending until 11+12'
     mode: evolve
     delta_only: true
     branch: evolve/EV-015-corpus-reembed-migration
@@ -9529,16 +9842,17 @@ evolve_cycles:
       phase_0: completed
       phase_a: passed
       phase_b: passed
-      phase_c: pending
+      phase_c: passed
       phase_d: pending
       deploy: pending
     checkpoint_notes:
       phase_a: 'Passed 2026-07-30 — user approved option 1: Yes — start 04 toward full build this session; Gate A→B already passed; M5 deferred to 04; M6 promote auth=admin'
       phase_b: 'Passed 2026-07-30 — user approved Phase 4 option 1: Approve Phase 20 + TP-S017-01–09 → Gate B→C → 07-build; 05-verify-tech/06-tech-tooling skipped per routing'
+      phase_c: 'PASSED 2026-07-30 — user option 1; 08 PASS + UJ-054 collection fix committed @a9c7eeb; Gate C→D passed; 09+10 COMPLETE (09 PASS after QA-S017-B01 remediation; 10 PASS w/ advisories)'
     gates:
       a_to_b: passed
       b_to_c: passed
-      c_to_d: pending
+      c_to_d: passed
       deploy: pending
     intake_decisions:
       - id: S017-D4
@@ -9662,7 +9976,7 @@ evolve_cycles:
       16-evolve:
         status: in_progress
         started: '2026-07-30'
-        note: 'Phase A PASS 2026-07-30 — option 1 Yes start 04; checkpoints.phase_a=passed; driving 04-tech-plan delta for F41; full build this session'
+        note: '11-verify-impl in progress; QA-S017-B01 resolved; 09-qa PASS (report amended); B01 tests + report still uncommitted; phase_d pending until 11+12; next → commit B01 tests + report, then complete 11-verify-impl sign-off'
       01-requirements:
         status: completed
         started: '2026-07-30'
@@ -9864,22 +10178,28 @@ evolve_cycles:
         completed: '2026-07-30'
         completed_at: '2026-07-30'
       07-build:
-        status: in_progress
+        status: completed
         started: '2026-07-30'
         started_at: '2026-07-30'
+        completed: '2026-07-30'
+        completed_at: '2026-07-30'
         mode: delta
-        note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; M86 COMPLETE (T86.1–T86.4) 2026-07-30; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending; advisory: Postgres promote API test still needs local DB'
-        active_milestone: M89
-        active_task: T89.2
+        report: docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md
+        note: 'S017/EV-015 07-build COMPLETE 2026-07-30 — Phase 20 COMPLETE (M86–M90); T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; M90 COMPLETE; checkpoints.phase_c pending (Phase 20 build done, awaiting 08-verify-build); next → 08-verify-build; TP-S017-05 single PR-55 at phase end'
+        active_milestone: M90
+        active_task: none
         completed_milestones:
           - M86
           - M87
           - M88
+          - M89
+          - M90
+        phase: Phase 20
+        phase_status: COMPLETE
         substeps:
-          current_task: T89.2
-          task_status: in_progress
-          in_progress_tasks:
-            - T89.2
+          current_task: none
+          task_status: completed
+          in_progress_tasks: []
           completed_tasks_recent:
             - T86.1
             - T86.2
@@ -9899,6 +10219,16 @@ evolve_cycles:
             - T88.6
             - T89.1
             - T89.3
+            - T89.2
+            - T89.4
+            - T89.5
+            - T89.6
+            - T89.7
+            - T90.1
+            - T90.2
+            - T90.3
+            - T90.4
+            - T90.5
           T87.1:
             status: completed
             started_at: '2026-07-30'
@@ -9951,21 +10281,101 @@ evolve_cycles:
             note: 'run_rebuild_job + dispatch @ 78e7a8c — TC-164 unit tests green; ADR-040/RD-190'
           T88.4: *id002
           T88.5: *id003
-          T88.6: *id005
-          T89.1: *id006
-          T89.2: *id007
-          T89.3: *id008
+          T88.6: *id004
+          T89.1: *id005
+          T89.2: *id006
+          T89.3: *id007
+          T89.4: *id008
+          T89.5: *id009
+          T89.6: *id010
+          T89.7: *id011
+          T90.1: *id012
+          T90.2: *id013
+          T90.3: *id014
+          T90.4: *id015
+          T90.5: *id016
         advisory:
           - local Docker/Postgres unavailable — T87.1 + T88.4 Postgres-backed internal_write_api tests written but not executed
           - T89.1 import/unit tests green @ 301c31a; Postgres promote API test still needs local DB
+          - T90.2 Postgres-backed; local DB unavailable at write time (CI Postgres)
+      T90.2: *id013
+      T90.3: *id014
+      T90.4: *id015
+      T90.5: *id016
       08-verify-build:
-        status: pending
+        status: completed
+        started: '2026-07-30'
+        started_at: '2026-07-30'
+        mode: delta
+        note: 'COMPLETE 2026-07-30 — EV-015 scoped PASS; UJ-054 collection fix committed @a9c7eeb; phase_c=passed; gates.c_to_d=passed'
+        completed: '2026-07-30'
+        completed_at: '2026-07-30'
+        report: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+        overall: pass
+        overall_result: PASS
+        result_scope: EV-015_scoped
+        substeps:
+          result: PASS
+          result_scope: EV-015_scoped
+          integration_db: SKIPPED
+          integration_db_reason: no local Postgres/Docker
+          playwright_uj053_054: PASS
+          h0c: PASS
+          make_audit: PASS
+          dm_vitest: 688/688
+          ci_collection_fix: committed
+          ci_collection_fix_commit: a9c7eeb
+          ci_collection_fix_note: removed pytest_plugins from UJ-054; fixtures moved to tests/e2e/conftest.py
+          phase_c: passed
+          gate_c_to_d: passed
+          pending_commit: false
       09-qa:
-        status: pending
+        status: completed
+        started: '2026-07-30'
+        started_at: '2026-07-30'
+        completed: '2026-07-30'
+        completed_at: '2026-07-30'
+        mode: delta
+        session_id: S017-corpus-reembed-migration
+        overall: pass
+        overall_result: PASS
+        report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+        report_amended: true
+        blocking:
+          - id: QA-S017-B01
+            category: coverage_gate
+            summary: 'DM FE coverage gate FAIL — lines 99.78% / branches 97.46% (need 100% / 98%) — RESOLVED'
+            status: resolved
+            remediation_note: 'RESOLVED 2026-07-30 — qa-report.md amended (overall pass); make test-coverage-fe FE_APP=data-management-frontend PASS (lines 100% 2814/2814, branches 98.11% 1817/1852) via test_rebuild_form.test.tsx + test_backfill_form.test.tsx. Changes still uncommitted (committed: false).'
+            local_coverage:
+              lines: '100% (2814/2814)'
+              branches: '98.11% (1817/1852)'
+              command: make test-coverage-fe FE_APP=data-management-frontend
+              committed: false
+        results:
+          coverage_gate: PASS
+          coverage_gate_detail: 'lines 100% (2814/2814), branches 98.11% (1817/1852)'
+        note: 'COMPLETE 2026-07-30 — overall PASS; QA-S017-B01 resolved; qa-report.md amended; coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852); F41 Rebuild* covered; B01 tests + report still uncommitted'
       10-e2e:
-        status: pending
+        status: completed
+        started: '2026-07-30'
+        started_at: '2026-07-30'
+        completed: '2026-07-30'
+        completed_at: '2026-07-30'
+        mode: delta
+        session_id: S017-corpus-reembed-migration
+        overall: pass
+        overall_result: PASS
+        report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
+        advisories:
+          - 'UJ-054 API promote SKIPPED (no local Postgres)'
+          - 'T2/T3 deferred'
+        note: 'COMPLETE 2026-07-30 — PASS with advisories; UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED'
       11-verify-impl:
-        status: pending
+        status: in_progress
+        started: '2026-07-30'
+        started_at: '2026-07-30'
+        note: 'IN PROGRESS — QA-S017-B01 resolved; 09-qa PASS; awaiting user commit approval for B01 tests + report, then journey/feature sign-off; phase_d pending until 11+12'
       12-verify-deploy:
         status: pending
       13-deploy-smoke:
@@ -9979,8 +10389,33 @@ evolve_cycles:
       06-tech-tooling:
         status: skipped
         skip_rationale: N/A
-    next_action: 'T89.2 eval rebuild_run_id reads shadow (TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green'
+    next_action: 'commit B01 tests + report, then complete 11-verify-impl sign-off; phase_d pending until 11+12'
     artifacts:
+      - path: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+        kind: qa-report
+        stage: 09-qa
+        session_id: S017-corpus-reembed-migration
+        recorded_at: '2026-07-30'
+        overall: pass
+        note: 'QA-S017-B01 resolved; qa-report amended overall PASS; coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852); B01 tests + report still uncommitted; F41 Rebuild* covered'
+      - path: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
+        kind: e2e-report
+        stage: 10-e2e
+        session_id: S017-corpus-reembed-migration
+        recorded_at: '2026-07-30'
+        overall: pass
+        note: 'UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED; T2/T3 deferred'
+      - path: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+        kind: verification-report
+        stage: 08-verify-build
+        recorded_at: '2026-07-30'
+        overall_result: PASS
+        note: 08 COMPLETE scoped PASS; collection fix @a9c7eeb; phase_c=passed
+      - path: docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md
+        kind: phase-gate
+        stage: 07-build
+        recorded_at: '2026-07-30'
+        note: Phase 20 COMPLETE — M86–M90
       - path: docs/sessions/S017-corpus-reembed-migration/session-brief.md
         status: completed
       - path: docs/sessions/S017-corpus-reembed-migration/routing-plan.md
@@ -11109,6 +11544,10 @@ issue_log:
     blocking_for: []
     note: 'RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.'
 decisions_log:
+  - 'S017/EV-015 2026-07-30: User approved proceed with 08-verify-build on evolve/EV-015-corpus-reembed-migration @ 7c1c61b; 08-verify-build status=in_progress; active_session.current_stage=08-verify-build; evolve_cycles EV-015 current_stage=08-verify-build; routing_plan 08=in_progress; mode=evolve delta_only=true feature_ids=[F41]; checkpoints.phase_c remains pending until 08 PASSes.'
+  - 'S017/EV-015 2026-07-30: Phase 20 / 07-build COMPLETE @ 7c1c61b (T90.3 @ 0eaf1f8 Playwright; T90.4 @ db31487 CORS; T90.5 @ 7c1c61b gate docs); M90 COMPLETE; M86–M90 COMPLETE; 07-build status=completed; current_stage=08-verify-build ready; checkpoints.phase_c pending (Phase 20 build done, awaiting 08 PASS); next_action=Phase 20 COMPLETE — invoke 08-verify-build on evolve/EV-015-corpus-reembed-migration; then 09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05); artifact=docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md.'
+  - 'S017/EV-015 2026-07-30: T90.2 completed @ 6e553ac ([T90.2] test: API e2e shadow dry-run promote (UJ-054)); Postgres-backed; local DB unavailable at write time (CI Postgres); current_task=T90.3 in_progress (Playwright uj053/uj054); next_action=Continue M90 — T90.3 Playwright uj053/uj054, T90.4 CORS, T90.5 docs/gate; defer 08 until Phase 20 complete; milestone=M90 in_progress; 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
+  - 'S017/EV-015 2026-07-30: T90.1 completed @ 4ea891d ([T90.1] test: API e2e corpus rebuild enqueue (UJ-053)); current_task=T90.2 in_progress (API e2e UJ-054); next_action=Continue M90 — T90.3 Playwright uj053/uj054, T90.4 CORS, T90.5 docs/gate; defer 08 until Phase 20 complete; milestone=M90 in_progress; 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T88.6 completed @ 12b6689 ([T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI); M88 COMPLETE (T88.1–T88.6). Active milestone → M89 / T89.1 in_progress — unit test promote shadow→live (TC-165) red, then T89.2. TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87). current_stage remains 07-build; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T88.5 completed @ 6841672 ([T88.5] config: lock OpenAPI JobOptions rebuild fields) — OpenAPI JobOptions rebuild fields locked. current_task=T88.6 in_progress (Docs api-contract EV-015 rebuild paths locked to OpenAPI); next_action=Complete T88.6; after T88.6: M88 complete then M89 T89.1. milestone=M88 in_progress (T88.6 remains); M87 COMPLETE; 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T88.5 marked in_progress — Config OpenAPI data-management JobOptions rebuild fields (depends T88.3 met). Resume into T88.5 on branch evolve/EV-015-corpus-reembed-migration; current_stage remains 07-build; active_session=S017; cycle=EV-015. Parent will sync execution-plan.md Current State pointer (workflow-state canonical_current_state updated). next_action=Complete T88.5 then T88.6; M88 in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
@@ -12150,7 +12589,27 @@ decisions_log:
   - 'S017/EV-015 2026-07-30: 02-verify-plan M1–M4 applied — M1 approve fix (TC-166 under UJ-053); M2 lock (F36 against shadow before promote); M3 modify (Admin UI promote + full build this session; TC-169 added); M4 approve (one-time backfill in F41). Awaiting M5–M6; gates.a_to_b and checkpoints.phase_a still pending.'
   - 'S017/EV-015 2026-07-30: 02-verify-plan COMPLETE — Gate A→B PASS; M5 deferred (deployment-integration + data-flow F41 delta → 04-tech-plan); M6 approved (rebuild promote auth = admin, enqueue parity); M1–M4 previously applied; report docs/sessions/S017-corpus-reembed-migration/reports/02-verify-plan-audit.md; gates.a_to_b=passed; checkpoints.phase_a still pending — Phase A checkpoint AskQuestion next before 04-tech-plan; full build this session after Phase A.'
   - 'S017/EV-015 2026-07-30: Phase 4 / 04-tech-plan APPROVED — user option 1: Approve Phase 20 + TP-S017-01–09 → Gate B→C → 07-build; stages.04-tech-plan COMPLETE (report docs/sessions/S017-corpus-reembed-migration/reports/04-tech-plan.md); gates.b_to_c=passed (05-verify-tech/06-tech-tooling skipped per routing); checkpoints.phase_b=passed; current_stage=07-build in_progress; start 07-build for F41 corpus rebuild.'
+  - 'S017/EV-015 2026-07-30: user /16-evolve Continue — resume 07-build at T89.5 (Vitest TC-167/169) in_progress; nothing marked completed; next_action updated.'
+  - 'EV-015/S017 2026-07-30: user approved option 1 — commit UJ-054 collection fix + verification-report; mark checkpoints.phase_c=passed and gates.c_to_d=passed; proceed to 09-qa + 10-e2e in parallel (commit a9c7eeb)'
+  - 'EV-015/S017 2026-07-30: 09-qa + 10-e2e parallel COMPLETE — 09 overall fail (QA-S017-B01 DM FE coverage gate); 10 PASS with advisories (UJ-054 API promote SKIPPED); reports @6f3832e; phase_d remains pending until 11+12; next 11-verify-impl'
+  - 'EV-015/S017 2026-07-30: QA-S017-B01 coverage fix IMPLEMENTED LOCALLY — test_rebuild_form.test.tsx + test_backfill_form.test.tsx; make test-coverage-fe FE_APP=data-management-frontend PASS (lines 100% 2814/2814, branches 98.11% 1817/1852); status=resolved_pending_report; 09-qa overall remains fail until qa-report.md amended; not committed; current_stage remains 11-verify-impl; next → commit then 11-verify-impl sign-off'
+  - 'EV-015/S017 2026-07-30: QA-S017-B01 RESOLVED — qa-report.md amended (overall pass); coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852); 09-qa overall=pass / PASS; report path docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md; B01 tests + report still uncommitted (committed: false); 11-verify-impl remains in_progress — next_action: commit B01 tests + report, then complete 11-verify-impl sign-off'
 artifacts:
+  - path: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+    kind: verification-report
+    session_id: S017-corpus-reembed-migration
+    stage: 08-verify-build
+    evolve_cycle_id: EV-015
+    recorded_at: '2026-07-30'
+    overall_result: PASS
+    note: EV-015 scoped PASS; UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; proceed 09+10
+  - path: docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md
+    kind: phase-gate
+    session_id: S017-corpus-reembed-migration
+    stage: 07-build
+    evolve_cycle_id: EV-015
+    recorded_at: '2026-07-30'
+    note: 'Phase 20 gate COMPLETE — M86–M90; T90.5 @ 7c1c61b; handoff → 08-verify-build'
   - path: docs/sessions/S017-corpus-reembed-migration/session-brief.md
     kind: session-brief
     session_id: S017-corpus-reembed-migration
@@ -13061,6 +13520,25 @@ artifacts:
     evolve_cycle_id: EV-015
     recorded_at: '2026-07-30'
     note: runbook outline updated (04) — Phase 4 approved
+  - path: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+    kind: qa-report
+    session_id: S017-corpus-reembed-migration
+    stage: 09-qa
+    skill_id: 09-qa
+    evolve_cycle_id: EV-015
+    recorded_at: '2026-07-30'
+    overall: pass
+    note: 'QA-S017-B01 resolved; qa-report amended overall PASS; coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852); B01 tests + report still uncommitted; F41 Rebuild* covered'
+    report_amended: true
+  - path: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
+    kind: e2e-report
+    session_id: S017-corpus-reembed-migration
+    stage: 10-e2e
+    skill_id: 10-e2e
+    evolve_cycle_id: EV-015
+    recorded_at: '2026-07-30'
+    overall: pass
+    note: 'UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED; T2/T3 deferred'
 git_history:
   current_branch: evolve/EV-015-corpus-reembed-migration
   branches:
@@ -14540,7 +15018,156 @@ git_history:
       files_changed: 4
       timestamp: '2026-07-30T14:35:44-04:00'
       note: 'T89.3 COMPLETE @ 301c31a; T89.1 import/unit tests green; active_task=T89.2 in_progress (eval rebuild_run_id / TC-168); advisory: Postgres promote API test still needs local DB; phase_c remains pending'
+    - sha: bb2148b9c5561971a358ac71f3ef80faaaffcf9a
+      short: bb2148b
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T89.2] test: eval rebuild_run_id shadow retrieval (TC-168)'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 4
+      timestamp: '2026-07-30T14:41:11-04:00'
+      note: 'T89.2 COMPLETE @ bb2148b — red confirmed (TC-168); T89.4 greened tests; phase_c remains pending'
+    - sha: 653452a3ed15ae13ab45458ad518fb5dfc82f807
+      short: 653452a
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T89.4] feat: eval rebuild_run_id and shadow retrieval path'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 6
+      timestamp: '2026-07-30T14:43:32-04:00'
+      note: 'T89.4 COMPLETE @ 653452a; greened T89.2 TC-168; active_task=T89.5 in_progress (Vitest rebuild enqueue + promote TC-167/169); phase_c remains pending'
+    - sha: 227f0acec29cd48f2d44c71b3d7afef7d1900301
+      short: 227f0ac
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T89.4] feat: eval rebuild_run_id and shadow retrieval path'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 1
+      timestamp: '2026-07-30T14:45:02-04:00'
+      note: 'docs pointer only — execution-plan Current State follow-on after T89.4 code @ 653452a; HEAD=227f0ac; T89.4 remains completed; active_task=T89.5'
+    - sha: 5d3189fd8944ca4b49272e938f298014c3f570dc
+      short: 5d3189f
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T89.5] test: Vitest rebuild enqueue + promote controls (TC-167/169)'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 2
+      timestamp: '2026-07-30T15:05:50-04:00'
+      note: 'T89.5 COMPLETE @ 5d3189f — Vitest TC-167/169; T89.6 Admin UI next'
+    - sha: b4e349779e0bc5a5e58686c28684a0c7d7472367
+      short: b4e3497
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T89.6] feat: Admin rebuild enqueue and promote UI'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 8
+      timestamp: '2026-07-30T15:08:26-04:00'
+      note: 'T89.6 COMPLETE @ b4e3497 — RebuildForm + RebuildPromoteForm; T89.7 OpenAPI next'
+    - sha: 8f004f619fbdb765118e7644d77bcb58da1eefa4
+      short: 8f004f6
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T89.7] config: OpenAPI promote path and eval rebuild_run_id'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 4
+      timestamp: '2026-07-30T15:09:50-04:00'
+      note: 'T89.7 COMPLETE @ 8f004f6; M89 COMPLETE; active_task=T90.1 in_progress (API e2e UJ-053); phase_c remains pending until Phase 20 / 07-build completes'
+    - sha: 4ea891d14aff2e575dd225c3fd2ae8529136873d
+      short: 4ea891d
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T90.1] test: API e2e corpus rebuild enqueue (UJ-053)'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 2
+      timestamp: '2026-07-30T15:17:37-04:00'
+      note: 'T90.1 COMPLETE @ 4ea891d — API e2e UJ-053 corpus rebuild enqueue; active_task=T90.2 in_progress (API e2e UJ-054); phase_c remains pending until Phase 20 / 07-build completes'
+    - sha: 6e553acb17aea6c713024844efac5a1aab2f0c8c
+      short: 6e553ac
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T90.2] test: API e2e shadow dry-run promote (UJ-054)'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 2
+      timestamp: '2026-07-30T15:21:17-04:00'
+      note: 'T90.2 COMPLETE @ 6e553ac — API e2e UJ-054 shadow dry-run promote; Postgres-backed (local DB unavailable — CI Postgres)'
+    - sha: 0eaf1f8d09e9f2e3e2a104b13117d1184f295a85
+      short: 0eaf1f8
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T90.3] test: Playwright rebuild enqueue and promote UI'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 4
+      timestamp: '2026-07-30T15:28:18-04:00'
+      note: 'T90.3 COMPLETE @ 0eaf1f8 — Playwright uj053/uj054'
+    - sha: db3148749345bf0e1603f6ced105362915958663
+      short: db31487
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T90.4] test: CORS preflight for rebuild promote (H0c)'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 1
+      timestamp: '2026-07-30T15:28:52-04:00'
+      note: 'T90.4 COMPLETE @ db31487 — CORS preflight rebuild promote (H0c)'
+    - sha: 7c1c61b0e51efce4a111fc415e5c9ccd7d4d0a0a
+      short: 7c1c61b
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T90.5] docs: Phase 20 gate and rebuild ops runbook'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 4
+      timestamp: '2026-07-30T15:29:49-04:00'
+      note: 'T90.5 COMPLETE @ 7c1c61b — Phase 20 gate; M90 COMPLETE; Phase 20 COMPLETE; 07-build COMPLETE'
+    - sha: a9c7eeba7f25371fdd1ef8cb11cc2782b9da35bb
+      short: a9c7eeb
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T90.2] fix: avoid UJ-054 pytest plugin double-register'
+      stage: 08-verify-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 3
+      timestamp: '2026-07-30T21:31:50Z'
+      note: UJ-054 collection fix + verification-report; phase_c + Gate C→D passed; proceed 09+10
+      files:
+        - tests/e2e/conftest.py
+        - tests/e2e/test_uj054_rebuild_shadow_promote.py
+        - docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+    - sha: 6f3832e99427bce1e5ff674b4da8e43152b24a83
+      short: 6f3832e
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: 'docs: EV-015 09-qa and 10-e2e reports for F41'
+      stage: 09-qa
+      stages:
+        - 09-qa
+        - 10-e2e
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 2
+      timestamp: '2026-07-30T21:34:47Z'
+      note: '09-qa + 10-e2e reports; 09 overall fail (QA-S017-B01); 10 PASS w/ advisories; phase_d still pending'
+      files:
+        - docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+        - docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
   notes:
+    - '2026-07-30 S017/EV-015: QA-S017-B01 RESOLVED — qa-report.md amended (overall pass); coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852); 09-qa overall=pass; B01 tests in test_rebuild_form.test.tsx + test_backfill_form.test.tsx + report still uncommitted (committed: false); 11-verify-impl remains in_progress; next_action: commit B01 tests + report, then complete 11-verify-impl sign-off.'
+    - '2026-07-30 S017/EV-015: QA-S017-B01 coverage fix IMPLEMENTED LOCALLY (test_rebuild_form.test.tsx + test_backfill_form.test.tsx); make test-coverage-fe FE_APP=data-management-frontend PASS — lines 100% (2814/2814), branches 98.11% (1817/1852); blocker status=resolved_pending_report; 09-qa overall still fail pending qa-report amend; uncommitted; current_stage remains 11-verify-impl; next → commit B01 fix → amend report → 11-verify-impl sign-off.'
+    - '2026-07-30 S017/EV-015: 09-qa COMPLETE (overall fail — blocking QA-S017-B01 DM FE coverage 99.78%/97.46%) + 10-e2e COMPLETE (PASS w/ advisories — UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED no Postgres; T2/T3 deferred); reports committed @ 6f3832e; stages/routing_plan 09+10=completed; current_stage=11-verify-impl; next_action=resolve QA-S017-B01 then 11-verify-impl sign-off; checkpoints.phase_d still pending until 11+12.'
+    - '2026-07-30 S017/EV-015: Phase 20 / 07-build COMPLETE @ 7c1c61b (T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b); M90 COMPLETE; M86–M90 COMPLETE; stages.07-build=completed; current_stage=08-verify-build ready; checkpoints.phase_c pending (Phase 20 build done, awaiting 08); next_action=Phase 20 COMPLETE — invoke 08-verify-build on evolve/EV-015-corpus-reembed-migration; then 09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05).'
+    - '2026-07-30 S017/EV-015: T90.2 COMPLETE @ 6e553ac ([T90.2] test: API e2e shadow dry-run promote (UJ-054)); Postgres-backed; local DB unavailable at write time (CI Postgres); active_task=T90.3 in_progress (Playwright uj053/uj054); next_action=Continue M90 — T90.3 Playwright uj053/uj054, T90.4 CORS, T90.5 docs/gate; defer 08 until Phase 20 complete; phase_c remains pending.'
+    - '2026-07-30 S017/EV-015: T90.1 COMPLETE @ 4ea891d ([T90.1] test: API e2e corpus rebuild enqueue (UJ-053)); active_task=T90.2 in_progress (API e2e UJ-054); next_action=Continue M90 — T90.2 then T90.3 Playwright, T90.4 CORS, T90.5 docs/gate; defer 08-verify-build until Phase 20 complete; phase_c remains pending.'
+    - '2026-07-30 S017/EV-015: M89 COMPLETE (T89.5 @ 5d3189f, T89.6 @ b4e3497, T89.7 @ 8f004f6); active_milestone=M90; active_task=T90.1 in_progress (API e2e UJ-053); next_action=Continue 07-build M90 — T90.1 then T90.2–T90.5; defer 08-verify-build until Phase 20 complete (TP-S017-05); phase_c remains pending.'
+    - '2026-07-30 S017/EV-015 minor sync: HEAD=227f0ac (docs pointer after T89.4 @ 653452a); T89.4 completed; active_task=T89.5 (Vitest rebuild enqueue + promote); current_stage=07-build; M89; next_action=T89.5 Vitest TC-167/169 red, then T89.6 Admin UI, T89.7 OpenAPI.'
+    - '2026-07-30 S017/EV-015: T89.2 COMPLETE @ bb2148b + T89.4 COMPLETE @ 653452a ([T89.4] feat: eval rebuild_run_id and shadow retrieval path); T89.2 was red then greened by T89.4; active_task=T89.5 in_progress (Vitest rebuild enqueue + promote TC-167/169); phase_c remains pending.'
     - '2026-07-30 S017/EV-015: T89.3 COMPLETE @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); T89.1 import tests green; active_task=T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); advisory Postgres promote API test still needs local DB.'
     - '2026-07-30 S017/EV-015: T89.1 COMPLETE @ 0006c0d ([T89.1] test: promote shadow-to-live unit coverage (TC-165)); red confirmed ModuleNotFoundError rebuild_promote; active_task=T89.3 in_progress; T89.2 pending; advisory Postgres API test needs local DB.'
     - '2026-07-30 S017/EV-015: T88.6 COMPLETE @ 12b6689; M88 COMPLETE; advancing to M89/T89.1; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87).'

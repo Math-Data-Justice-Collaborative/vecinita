@@ -90,6 +90,77 @@ describe("RebuildForm (T89.5 / TC-167 / UJ-053)", () => {
     ).toBeInTheDocument();
     expect(screen.queryByTestId("rebuild-submit")).not.toBeInTheDocument();
   });
+
+  it("accepts reembed and rescrape modes and ignores invalid mode values", async () => {
+    installAuthenticatedSupabaseMock();
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValue(
+        jsonResponse({
+          job_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+          status: "pending",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithProviders(<RebuildForm />);
+    const mode = await screen.findByTestId("rebuild-mode");
+
+    fireEvent.change(mode, { target: { value: "reembed" } });
+    expect(mode).toHaveValue("reembed");
+    fireEvent.change(mode, { target: { value: "rescrape" } });
+    expect(mode).toHaveValue("rescrape");
+    fireEvent.change(mode, { target: { value: "not-a-mode" } });
+    expect(mode).toHaveValue("rescrape");
+
+    fireEvent.click(screen.getByTestId("rebuild-submit"));
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled();
+    });
+    const init = fetchMock.mock.calls[0]?.[1];
+    const body = JSON.parse(init?.body as string) as {
+      options: { mode: string };
+    };
+    expect(body.options.mode).toBe("rescrape");
+  });
+
+  it("shows API error message when rebuild enqueue fails", async () => {
+    installAuthenticatedSupabaseMock();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .mockRejectedValueOnce(new Error("rebuild enqueue boom")),
+    );
+
+    renderWithProviders(<RebuildForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("rebuild-submit")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("rebuild-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "rebuild enqueue boom",
+    );
+  });
+
+  it("shows fallback rebuild error when reject is not an Error", async () => {
+    installAuthenticatedSupabaseMock();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .mockRejectedValueOnce("not-an-error"),
+    );
+
+    renderWithProviders(<RebuildForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("rebuild-submit")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("rebuild-submit"));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+  });
 });
 
 describe("RebuildPromoteForm (T89.5 / TC-169 / UJ-054)", () => {
@@ -166,6 +237,69 @@ describe("RebuildPromoteForm (T89.5 / TC-169 / UJ-054)", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(/confirm/i);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("requires rebuild_run_id before promote API call", async () => {
+    installAuthenticatedSupabaseMock();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithProviders(<RebuildPromoteForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("rebuild-promote-submit")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("rebuild-promote-confirm"));
+    fireEvent.click(screen.getByTestId("rebuild-promote-submit"));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("shows API error message when promote fails", async () => {
+    installAuthenticatedSupabaseMock();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .mockRejectedValueOnce(new Error("promote boom")),
+    );
+
+    renderWithProviders(<RebuildPromoteForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("rebuild-promote-submit")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("rebuild-promote-run-id"), {
+      target: { value: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" },
+    });
+    fireEvent.click(screen.getByTestId("rebuild-promote-confirm"));
+    fireEvent.click(screen.getByTestId("rebuild-promote-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("promote boom");
+  });
+
+  it("shows fallback promote error when reject is not an Error", async () => {
+    installAuthenticatedSupabaseMock();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .mockRejectedValueOnce("not-an-error"),
+    );
+
+    renderWithProviders(<RebuildPromoteForm />);
+    await waitFor(() => {
+      expect(screen.getByTestId("rebuild-promote-submit")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("rebuild-promote-run-id"), {
+      target: { value: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" },
+    });
+    fireEvent.click(screen.getByTestId("rebuild-promote-confirm"));
+    fireEvent.click(screen.getByTestId("rebuild-promote-submit"));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
 
   it("viewer sees read-only notice instead of promote controls", async () => {

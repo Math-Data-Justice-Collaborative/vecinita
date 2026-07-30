@@ -1,8 +1,9 @@
 # QA Report — EV-015 / S017 (F41)
 
 > Generated: 2026-07-30  
+> Amended: 2026-07-30 — QA-S017-B01 closed (DM FE coverage gate)  
 > Scope: delta — F41 corpus rebuild / re-embed migration (#167)  
-> Branch: `evolve/EV-015-corpus-reembed-migration` @ `a9c7eeb`  
+> Branch: `evolve/EV-015-corpus-reembed-migration`  
 > Mode: evolve / delta_only · parallel with 10-e2e
 
 ```text
@@ -11,9 +12,9 @@ QA Results:
   Format:         PASS — 422 Python files; DM rebuild FE Prettier clean
   Typecheck:      PASS — 0 errors (1 pre-existing warning)
   Tests (Python): PASS (scoped) — H0c + UJ-053 + EV-015 unit; DB suite SKIPPED (no Docker)
-  Tests (FE):     PASS — DM Vitest 688/688; ESLint 0 errors (3 react-refresh warnings)
+  Tests (FE):     PASS — DM Vitest 697/697; ESLint 0 errors (3 react-refresh warnings)
   Tests (UI):     PASS — Playwright UJ-053 + UJ-054 (2/2)
-  Coverage gate:  FAIL — DM FE lines 99.78% / branches 97.46% (need 100% / 98%)
+  Coverage gate:  PASS — DM FE lines 100% (2814/2814) / branches 98.11% (1817/1852)
   Security:       PASS — 0 CVEs (1 ignored nltk); secrets OK; gitleaks not installed
   Cross-file:     PASS — ruff clean; no modal imports outside scripts/infra
   Dependencies:   advisory — workspace packages skipped by pip-audit
@@ -21,8 +22,8 @@ QA Results:
   Data / Modal:   D6/D7 verified (staging state); live Modal/staging URLs unset
 ```
 
-**Overall: fail** — sole blocking item is DM frontend coverage gate (QA-S017-B01). All other
-blocking checks for F41 green. Local Postgres/Docker unavailable (same as 08).
+**Overall: pass** — QA-S017-B01 resolved. Remaining items are advisory (Postgres local,
+staging H4–H5, chat-rag Prettier drift).
 
 ## Executive summary
 
@@ -34,10 +35,21 @@ blocking checks for F41 green. Local Postgres/Docker unavailable (same as 08).
 | DM Vitest + ESLint | yes | PASS |
 | Playwright T0-ui (UJ-053/054) | yes | PASS |
 | `make audit` + secrets + OpenAPI + Modal DB guard | yes | PASS |
-| DM FE coverage (`make test-coverage-fe FE_APP=data-management-frontend`) | yes | **FAIL** |
+| DM FE coverage (`make test-coverage-fe FE_APP=data-management-frontend`) | yes | **PASS** |
 | Full pytest + integration (Postgres) | yes (CI) | SKIPPED locally |
 | chat-rag Prettier drift (3 files) | no | ADVISORY — not in F41 delta |
 | Staging H4–H5 / live Modal | no | ADVISORY — env unset |
+
+## QA-S017-B01 remediation
+
+| Field | Value |
+|-------|--------|
+| Status | **resolved** |
+| Prior | lines 99.78% / branches 97.46% |
+| After | lines **100%** / branches **98.11%** |
+| Cause | Uncovered error/validation/mode edges in `RebuildForm`, `RebuildPromoteForm`, `BackfillForm` (not Evaluation*/SSE) |
+| Tests added | `test_rebuild_form.test.tsx` — mode edges, enqueue/promote errors, empty `run_id`; `test_backfill_form.test.tsx` — ack clear on source switch, enqueue errors |
+| Re-run | `make test-coverage-fe FE_APP=data-management-frontend` → exit 0 |
 
 ## Commands run
 
@@ -61,10 +73,9 @@ bash scripts/check_openapi_specs.sh
 
 ## F41 surface coverage note
 
-Istanbul gaps do **not** include `RebuildForm.tsx`, `RebuildPromoteForm.tsx`, or rebuild API
-helpers — those meet thresholds. Residual shortfall is elsewhere in DM FE (SSE poll edges on
-Jobs/JobDetail, Evaluation* tabs, BoundedTagList, auth link callback). EV-015 touched Jobs
-pages only for `job_type=rebuild` i18n keys.
+Rebuild*/Backfill forms now meet thresholds including error and validation branches.
+Residual branch misses elsewhere in DM FE (Evaluation*, Jobs SSE edges, auth link) remain
+under the global 98% branch budget and do not fail the gate.
 
 ## Connectivity
 
@@ -89,7 +100,7 @@ pages only for `job_type=rebuild` i18n keys.
 
 | ID | Severity | Finding | Suggested action |
 |----|----------|---------|------------------|
-| **QA-S017-B01** | **blocking** | DM FE coverage gate FAIL: lines 99.78% / branches 97.46% (thresholds 100% / 98%). Gaps in Evaluation*, Jobs SSE edges, BoundedTagList — not Rebuild* forms. | Add branch tests for uncovered edges **or** confirm pre-existing on `main` and waive for F41; re-run `make test-coverage-fe FE_APP=data-management-frontend` |
+| ~~QA-S017-B01~~ | ~~blocking~~ | **Resolved** — DM FE coverage 100% / 98.11% | — |
 | QA-S017-A01 | advisory | Local Postgres/Docker down — full unit/integration/UJ-054 promote not executed | CI Postgres after push; optional local compose for 11 |
 | QA-S017-A02 | advisory | chat-rag Prettier dirty on 3 files (also unclean vs Prettier on `main` content) | Out of F41 scope; separate chore |
 | QA-S017-A03 | advisory | Staging H4–H5 / live Modal unset | 12/13 deploy path |
@@ -99,5 +110,5 @@ pages only for `job_type=rebuild` i18n keys.
 ## Phase alignment
 
 - Phase 20 / 07-build complete; 08 PASS @ verification-report.md; collection fix `a9c7eeb`.
-- Gate C→D passed; `phase_c` passed.
-- Next: 11-verify-impl consumes this report + e2e-report (resolve B01 before deploy sign-off).
+- Gate C→D passed; `phase_c` passed; 09+10 complete; B01 closed.
+- Next: 11-verify-impl sign-off (commit B01 tests first if not yet on branch).
