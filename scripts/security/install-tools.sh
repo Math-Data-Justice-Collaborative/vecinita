@@ -59,14 +59,40 @@ if [[ ! -x "${BIN_DIR}/2ms" || "${SEC_FORCE:-0}" == "1" ]]; then
   rm -rf "${tmp}"
 fi
 
-# KICS
+# KICS — skip draft/empty "latest" releases; pick newest tag with a linux/darwin tarball
 if [[ ! -x "${BIN_DIR}/kics" || ! -d "${ASSETS_DIR}/kics/assets/queries" || "${SEC_FORCE:-0}" == "1" ]]; then
-  ver="$(curl -fsSL https://api.github.com/repos/Checkmarx/kics/releases/latest | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -1)"
-  ver_num="${ver#v}"
   case "${OS}" in linux) osn=linux ;; darwin) osn=darwin ;; esac
-  asset="kics_${ver_num}_${osn}_${ARCH}.tar.gz"
   tmp="$(mktemp -d)"
-  download "https://github.com/Checkmarx/kics/releases/download/${ver}/${asset}" "${tmp}/${asset}"
+  # Prints: tag_name|browser_download_url|asset_name
+  kics_meta="$(
+    python3 - "${osn}" "${ARCH}" <<'PY'
+import json, sys, urllib.request
+
+osn, arch = sys.argv[1], sys.argv[2]
+suffix = f"_{osn}_{arch}.tar.gz"
+req = urllib.request.Request(
+    "https://api.github.com/repos/Checkmarx/kics/releases?per_page=30",
+    headers={"Accept": "application/vnd.github+json", "User-Agent": "vecinita-ci"},
+)
+with urllib.request.urlopen(req, timeout=60) as resp:
+    releases = json.load(resp)
+for rel in releases:
+    tag = rel.get("tag_name") or ""
+    for asset in rel.get("assets") or []:
+        name = asset.get("name") or ""
+        if name.startswith("kics_") and name.endswith(suffix):
+            url = asset.get("browser_download_url") or ""
+            if tag and url:
+                print(f"{tag}|{url}|{name}")
+                raise SystemExit(0)
+raise SystemExit("no KICS release asset found for " + suffix)
+PY
+  )"
+  ver="${kics_meta%%|*}"
+  rest="${kics_meta#*|}"
+  asset_url="${rest%%|*}"
+  asset="${rest##*|}"
+  download "${asset_url}" "${tmp}/${asset}"
   tar -xzf "${tmp}/${asset}" -C "${tmp}"
   bin="$(find "${tmp}" -type f -name kics | head -1)"
   install -m 0755 "${bin}" "${BIN_DIR}/kics"
