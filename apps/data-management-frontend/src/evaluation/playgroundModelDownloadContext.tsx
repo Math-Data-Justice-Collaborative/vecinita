@@ -22,11 +22,7 @@ export const MODEL_PULL_POLL_INTERVAL_MS = 10_000;
 export const MODEL_PULL_TIMEOUT_MS = 30 * 60 * 1000;
 
 export type ModelDownloadStatus =
-  | "idle"
-  | "pulling"
-  | "success"
-  | "timeout"
-  | "error";
+  "idle" | "pulling" | "success" | "timeout" | "error";
 
 export function firstAvailableModelId(
   models: readonly PlaygroundModelSummaryApi[],
@@ -166,7 +162,9 @@ function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadResult & {
       await refreshExpandedFamilyTags();
     } catch (err) {
       setCatalogError(
-        err instanceof Error ? err.message : "Failed to load playground catalog",
+        err instanceof Error
+          ? err.message
+          : "Failed to load playground catalog",
       );
     } finally {
       setCatalogLoading(false);

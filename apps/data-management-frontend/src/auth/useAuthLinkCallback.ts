@@ -5,11 +5,7 @@ import { getSupabaseClient } from "@/auth/supabaseClient";
 const SESSION_WAIT_MS = 10_000;
 
 export type AuthLinkCallbackStatus =
-  | "loading"
-  | "ready"
-  | "expired"
-  | "denied"
-  | "invalid";
+  "loading" | "ready" | "expired" | "denied" | "invalid";
 
 function parseAuthParams(): URLSearchParams {
   const hash = window.location.hash.startsWith("#")

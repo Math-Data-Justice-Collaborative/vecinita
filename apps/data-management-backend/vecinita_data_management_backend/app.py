@@ -17,6 +17,7 @@ from vecinita_shared_schemas.data_management import (
     HealthResponse,
     Job,
     JobList,
+    JobOptions,
 )
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
@@ -39,6 +40,33 @@ _INVITE_MAX_PER_HOUR = 10
 _INVITE_WINDOW_SECONDS = 3600.0
 _EMAIL_TEST_MAX_PER_HOUR = 5
 _logger = logging.getLogger(__name__)
+
+
+def _store_options_from_request(job_options: JobOptions | None) -> tuple[str, dict[str, object]]:
+    """Map CreateJobRequest.options into job_store options payload."""
+    if job_options is None:
+        return "ingest", {}
+    optional_scalars: tuple[tuple[str, object | None], ...] = (
+        ("chunk_size_tokens", job_options.chunk_size_tokens),
+        ("document_id", str(job_options.document_id) if job_options.document_id else None),
+        ("eval_run_id", str(job_options.eval_run_id) if job_options.eval_run_id else None),
+        ("mode", job_options.mode),
+    )
+    options: dict[str, object] = {
+        key: value for key, value in optional_scalars if value is not None
+    }
+    if job_options.force:
+        options["force"] = True
+    if job_options.dry_run:
+        options["dry_run"] = True
+    if job_options.document_ids is not None:
+        options["document_ids"] = [str(doc_id) for doc_id in job_options.document_ids]
+    if job_options.backfill:
+        options["backfill"] = True
+        options["backfill_source"] = job_options.backfill_source
+        if job_options.ack_reconstruct_from_chunks:
+            options["ack_reconstruct_from_chunks"] = True
+    return job_options.job_type, options
 
 
 def _default_admin_client() -> SupabaseAdminClient | None:
@@ -177,16 +205,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
         background: BackgroundTasks,
         auth: AuthPrincipal = Depends(write_auth_dep),
     ) -> CreateJobResponse:
-        options: dict[str, object] = {}
-        job_type = "ingest"
-        if body.options is not None:
-            job_type = body.options.job_type
-            if body.options.chunk_size_tokens is not None:
-                options["chunk_size_tokens"] = body.options.chunk_size_tokens
-            if body.options.document_id is not None:
-                options["document_id"] = str(body.options.document_id)
-            if body.options.eval_run_id is not None:
-                options["eval_run_id"] = str(body.options.eval_run_id)
+        job_type, options = _store_options_from_request(body.options)
         record = job_store.create_job(
             urls=[str(url) for url in body.urls],
             options=options,

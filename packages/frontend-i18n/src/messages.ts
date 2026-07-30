@@ -290,7 +290,8 @@ const enStrings = {
   "admin.evaluation.playground.downloadHint":
     "Pull a playground model tag into the Modal volume for playground eval runs.",
   "admin.evaluation.playground.downloadModelLabel": "Playground model tag",
-  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:1.5b-instruct",
+  "admin.evaluation.playground.downloadModelPlaceholder":
+    "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.downloadButton": "Download",
   "admin.evaluation.playground.downloadPulling": "Downloading…",
   "admin.evaluation.playground.downloadStatusIdle":
@@ -375,6 +376,21 @@ const enStrings = {
   "admin.jobs.type.ingest": "Ingest",
   "admin.jobs.type.retag": "Retag",
   "admin.jobs.type.eval": "Eval",
+  "admin.jobs.type.rebuild": "Rebuild",
+  "admin.backfill.title": "Backfill document store",
+  "admin.backfill.description":
+    "One-time fill of normalized body text for existing corpus documents. Prefer rescrape; reconstruct from chunks only with explicit acknowledgment.",
+  "admin.backfill.sourceLabel": "Backfill source",
+  "admin.backfill.source.rescrape": "Rescrape URLs (preferred)",
+  "admin.backfill.source.fromChunks": "Reconstruct from chunks",
+  "admin.backfill.ackLabel":
+    "I acknowledge reconstructing body text from chunks is best-effort and may not match the original page.",
+  "admin.backfill.submit": "Enqueue backfill",
+  "admin.backfill.running": "Enqueueing…",
+  "admin.backfill.failed": "Backfill enqueue failed",
+  "admin.backfill.jobStatusPrefix": "Backfill job",
+  "admin.backfill.validation.ackRequired":
+    "Acknowledge reconstruct-from-chunks before enqueueing.",
   "admin.ingest.title": "Ingest URLs",
   "admin.ingest.urlsLabel": "Public URLs (one per line)",
   "admin.ingest.urlsPlaceholder": "https://example.org/community/page",
@@ -710,7 +726,8 @@ const esStrings = {
   "admin.evaluation.models.customTitle": "Etiqueta de modelo personalizada",
   "admin.evaluation.models.customHint":
     "Descarga cualquier etiqueta de modelo del laboratorio válida que no esté en el catálogo.",
-  "admin.evaluation.models.customModelLabel": "Etiqueta de modelo del laboratorio",
+  "admin.evaluation.models.customModelLabel":
+    "Etiqueta de modelo del laboratorio",
   "admin.evaluation.models.customModelPlaceholder": "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.title": "Laboratorio de evaluación",
   "admin.evaluation.playground.subtitle":
@@ -762,7 +779,8 @@ const esStrings = {
     "Descarga una etiqueta de modelo del laboratorio al volumen Modal para evaluaciones.",
   "admin.evaluation.playground.downloadModelLabel":
     "Etiqueta del modelo del laboratorio",
-  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:1.5b-instruct",
+  "admin.evaluation.playground.downloadModelPlaceholder":
+    "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.downloadButton": "Descargar",
   "admin.evaluation.playground.downloadPulling": "Descargando…",
   "admin.evaluation.playground.downloadStatusIdle":
@@ -851,6 +869,21 @@ const esStrings = {
   "admin.jobs.type.ingest": "Ingesta",
   "admin.jobs.type.retag": "Re-etiquetar",
   "admin.jobs.type.eval": "Evaluación",
+  "admin.jobs.type.rebuild": "Reconstrucción",
+  "admin.backfill.title": "Rellenar almacén de documentos",
+  "admin.backfill.description":
+    "Relleno único del texto normalizado para documentos existentes. Prefiera volver a rastrear; reconstruir desde fragmentos solo con reconocimiento explícito.",
+  "admin.backfill.sourceLabel": "Origen del relleno",
+  "admin.backfill.source.rescrape": "Volver a rastrear URLs (preferido)",
+  "admin.backfill.source.fromChunks": "Reconstruir desde fragmentos",
+  "admin.backfill.ackLabel":
+    "Reconozco que reconstruir el texto desde fragmentos es una aproximación y puede no coincidir con la página original.",
+  "admin.backfill.submit": "Encolar relleno",
+  "admin.backfill.running": "Encolando…",
+  "admin.backfill.failed": "Falló el encolado del relleno",
+  "admin.backfill.jobStatusPrefix": "Trabajo de relleno",
+  "admin.backfill.validation.ackRequired":
+    "Reconozca la reconstrucción desde fragmentos antes de encolar.",
   "admin.ingest.title": "Ingestar URLs",
   "admin.ingest.urlsLabel": "URLs públicas (una por línea)",
   "admin.ingest.urlsPlaceholder": "https://example.org/community/page",

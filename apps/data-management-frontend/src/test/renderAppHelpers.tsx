@@ -100,10 +100,9 @@ export function renderSuperAdminAppWithRouter(
   router: ReturnType<typeof createMemoryRouter>;
 } {
   installSuperAdminSupabaseMock();
-  const router = createMemoryRouter(
-    [{ path: "/*", element: <App /> }],
-    { initialEntries: [initialRoute] },
-  );
+  const router = createMemoryRouter([{ path: "/*", element: <App /> }], {
+    initialEntries: [initialRoute],
+  });
   const result = render(
     <LocaleProvider>
       <ThemeProvider>

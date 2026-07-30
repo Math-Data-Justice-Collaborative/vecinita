@@ -74,11 +74,7 @@ export function saveEvalDashboardLayout(layout: EvalDashboardLayout): void {
 export const EXPLORE_STORAGE_KEY = "vecinita.eval.explore.v1";
 
 export type EvalPivotAxis =
-  | "locale"
-  | "case_id"
-  | "metric"
-  | "pass_fail"
-  | "run_date";
+  "locale" | "case_id" | "metric" | "pass_fail" | "run_date";
 
 export type EvalPivotValue = "avg_score" | "count" | "pass_rate";
 

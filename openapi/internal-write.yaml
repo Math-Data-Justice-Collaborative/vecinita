@@ -61,6 +61,13 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: missing_body
+          in: query
+          required: false
+          description: When true, only documents without store body_text (F41 backfill)
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Paginated document list
@@ -1022,7 +1029,6 @@ components:
       type: object
       required:
         - url
-        - chunks
       properties:
         url:
           type: string
@@ -1036,10 +1042,33 @@ components:
         language:
           type: string
           nullable: true
+        body_text:
+          type: string
+          nullable: true
+          description: Normalized scrape body for document store (F41 / ADR-040)
+        embedding_model_id:
+          type: string
+          nullable: true
+          description: Version stamp for embeddings (F41)
+        embedding_dim:
+          type: integer
+          minimum: 1
+          nullable: true
+        chunk_size_tokens:
+          type: integer
+          minimum: 1
+          nullable: true
+        rebuild_run_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional rebuild run association for revision stamps
         chunks:
           type: array
           maxItems: 100
-          minItems: 1
+          minItems: 0
+          description: >
+            Empty when body-only store backfill (TP-S017-08); ingest still sends chunks.
           items:
             $ref: "#/components/schemas/ChunkUpsert"
         tags:

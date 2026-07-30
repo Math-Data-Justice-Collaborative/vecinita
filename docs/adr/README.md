@@ -34,6 +34,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-031](ADR-031-ev006-auth-ux-hardening.md) | EV-006 auth UX hardening — idle timeout, log-out-everywhere, deliverability test-send, audit viewer (F35 scope addition, TP-S005-17–24) | Accepted | 04-tech-plan (S005/EV-006) |
 | [ADR-038](ADR-038-modal-job-lifecycle-storage-split.md) | Modal job lifecycle + DO storage SoT | Accepted | 01-requirements (S013/EV-012) |
 | [ADR-039](ADR-039-chat-cold-start-fun-fact-consent.md) | ChatRAG cold-start fun-fact consent cookie | Accepted | 01-requirements (S016/EV-014) |
+| [ADR-040](ADR-040-corpus-document-store-rebuild.md) | Corpus document store + rebuild job + version stamps | Accepted | 01-requirements (S017/EV-015) |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost

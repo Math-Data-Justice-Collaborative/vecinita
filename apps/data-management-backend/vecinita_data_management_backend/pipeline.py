@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import logging
+import os
 from hashlib import sha256
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 from uuid import UUID
 
 from pydantic import HttpUrl
+from vecinita_embedding_client import EMBEDDING_DIMENSION
 from vecinita_ingest import chunk_text, fetch_url
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.scrape import parse_html
@@ -33,6 +35,13 @@ if TYPE_CHECKING:
     from vecinita_data_management_backend.write_client import InternalWriteClient
 
 logger = logging.getLogger(__name__)
+
+_DEFAULT_EMBEDDING_MODEL_ID = "BAAI/bge-small-en-v1.5"
+
+
+def _embedding_model_id() -> str:
+    """Resolve revision stamp model id from env (config-spec VECINITA_EMBEDDING_MODEL_ID)."""
+    return os.environ.get("VECINITA_EMBEDDING_MODEL_ID", _DEFAULT_EMBEDDING_MODEL_ID)
 
 
 def _raise_no_chunks(url: str) -> None:
@@ -138,6 +147,10 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
                     title=scraped.title,
                     content_hash=sha256(text.encode("utf-8")).hexdigest(),
                     language=language,
+                    body_text=text,
+                    embedding_model_id=_embedding_model_id(),
+                    embedding_dim=EMBEDDING_DIMENSION,
+                    chunk_size_tokens=chunk_size,
                     chunks=chunk_models,
                     tags=tag_models,
                 )
@@ -199,6 +212,153 @@ def run_retag_job(  # noqa: PLR0913  # retag pipeline needs explicit stage depen
             source="llm",
         )
         write_client.patch_document_tags(UUID(document_id_raw), tags)
+        store.update_job(job_id, status="completed")
+    except Exception as exc:
+        store.update_job(
+            job_id,
+            status="failed",
+            error_code=type(exc).__name__,
+            error_message=str(exc)[:500],
+        )
+        raise
+
+
+def _option_bool(options: dict[str, object], key: str) -> bool:
+    value = options.get(key)
+    return value is True or value == "true"
+
+
+def _option_str(options: dict[str, object], key: str, default: str) -> str:
+    value = options.get(key)
+    return value if isinstance(value, str) else default
+
+
+def _chunk_size_from_options(options: dict[str, object]) -> int:
+    raw = options.get("chunk_size_tokens", 256)
+    return int(raw) if isinstance(raw, (int, str)) else 256
+
+
+def _document_ids_from_options(options: dict[str, object]) -> list[UUID] | None:
+    raw = options.get("document_ids")
+    if raw is None:
+        return None
+    if not isinstance(raw, list):
+        msg = "document_ids must be a list"
+        raise ValueError(msg)  # noqa: TRY004
+    ids: list[UUID] = []
+    for item in cast("list[object]", raw):
+        if not isinstance(item, str):
+            msg = "document_ids entries must be UUID strings"
+            raise ValueError(msg)  # noqa: TRY004
+        ids.append(UUID(item))
+    return ids
+
+
+def _list_missing_body_docs(
+    write_client: InternalWriteClient,
+) -> list[tuple[UUID, str, str | None, str | None]]:
+    """Return (document_id, url, title, language) for docs without store body."""
+    targets: list[tuple[UUID, str, str | None, str | None]] = []
+    page = 1
+    page_size = 100
+    while True:
+        listing = write_client.list_documents(
+            page=page,
+            page_size=page_size,
+            missing_body=True,
+        )
+        targets.extend(
+            (item.document_id, item.url, item.title, item.language) for item in listing.items
+        )
+        if page * page_size >= listing.total or not listing.items:
+            break
+        page += 1
+    return targets
+
+
+def run_backfill_job(
+    job_id: UUID,
+    *,
+    store: JobStore,
+    write_client: InternalWriteClient,
+    fetch_document: DocumentFetcher | None = None,
+) -> None:
+    """Populate document store body_text for existing corpus docs (TP-S017-08 / ADR-040 §5)."""
+    record = store.get_job(job_id)
+    if record is None:
+        raise KeyError(job_id)
+    if not _option_bool(record.options, "backfill"):
+        msg = f"job {job_id} is not a backfill job"
+        raise ValueError(msg)
+
+    source = _option_str(record.options, "backfill_source", "rescrape")
+    if source == "from_chunks" and not _option_bool(record.options, "ack_reconstruct_from_chunks"):
+        msg = "ack_reconstruct_from_chunks required when backfill_source is from_chunks"
+        store.update_job(
+            job_id,
+            status="failed",
+            error_code="ValueError",
+            error_message=msg[:500],
+        )
+        raise ValueError(msg)
+
+    store.update_job(job_id, status="running")
+    fetcher = fetch_document or fetch_url
+    chunk_size = _chunk_size_from_options(record.options)
+
+    try:
+        scoped_ids = _document_ids_from_options(record.options)
+        if scoped_ids is not None:
+            targets = [
+                (
+                    detail.document_id,
+                    detail.url,
+                    detail.title,
+                    detail.language,
+                    detail.text if source == "from_chunks" else None,
+                )
+                for detail in (write_client.get_document_detail(doc_id) for doc_id in scoped_ids)
+            ]
+        else:
+            targets = [
+                (doc_id, url, title, language, None)
+                for doc_id, url, title, language in _list_missing_body_docs(write_client)
+            ]
+
+        documents: list[DocumentUpsert] = []
+        for doc_id, url, title, language, cached_text in targets:
+            if source == "from_chunks":
+                body = cached_text
+                resolved_title = title
+                resolved_language = language
+                if body is None:
+                    detail = write_client.get_document_detail(doc_id)
+                    body = detail.text
+                    resolved_title = detail.title
+                    resolved_language = detail.language or language
+                resolved_language = resolved_language or detect_document_language(body)
+            else:
+                scraped = fetcher(url)
+                body = scraped.text
+                resolved_title = scraped.title or title
+                resolved_language = detect_document_language(body)
+
+            documents.append(
+                DocumentUpsert(
+                    url=HttpUrl(url),
+                    title=resolved_title,
+                    content_hash=sha256(body.encode("utf-8")).hexdigest(),
+                    language=resolved_language,
+                    body_text=body,
+                    embedding_model_id=_embedding_model_id(),
+                    embedding_dim=EMBEDDING_DIMENSION,
+                    chunk_size_tokens=chunk_size,
+                    chunks=[],
+                )
+            )
+
+        if documents:
+            write_client.upsert_batch(BatchUpsertRequest(documents=documents))
         store.update_job(job_id, status="completed")
     except Exception as exc:
         store.update_job(

@@ -409,12 +409,13 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         conn.execute(
                             text(
                                 """
-                        INSERT INTO documents (url, title, content_hash, language)
-                        VALUES (:url, :title, :content_hash, :language)
+                        INSERT INTO documents (url, title, content_hash, language, body_text)
+                        VALUES (:url, :title, :content_hash, :language, :body_text)
                         ON CONFLICT (url) DO UPDATE
                         SET title = EXCLUDED.title,
                             content_hash = EXCLUDED.content_hash,
                             language = EXCLUDED.language,
+                            body_text = COALESCE(EXCLUDED.body_text, documents.body_text),
                             updated_at = now()
                         RETURNING id
                         """
@@ -424,52 +425,90 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 "title": document.title,
                                 "content_hash": document.content_hash,
                                 "language": document.language,
+                                "body_text": document.body_text,
                             },
                         ).scalar_one(),
                     )
                 )
 
-                conn.execute(
-                    text("DELETE FROM chunks WHERE document_id = :document_id"),
-                    {"document_id": doc_id},
-                )
+                if document.body_text is not None:
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO document_revisions (
+                                document_id,
+                                content_hash,
+                                body_text,
+                                embedding_model_id,
+                                embedding_dim,
+                                chunk_size_tokens,
+                                rebuild_run_id
+                            )
+                            VALUES (
+                                :document_id,
+                                :content_hash,
+                                :body_text,
+                                :embedding_model_id,
+                                :embedding_dim,
+                                :chunk_size_tokens,
+                                :rebuild_run_id
+                            )
+                            """
+                        ),
+                        {
+                            "document_id": doc_id,
+                            "content_hash": document.content_hash,
+                            "body_text": document.body_text,
+                            "embedding_model_id": document.embedding_model_id,
+                            "embedding_dim": document.embedding_dim,
+                            "chunk_size_tokens": document.chunk_size_tokens,
+                            "rebuild_run_id": document.rebuild_run_id,
+                        },
+                    )
 
-                for chunk in document.chunks:
-                    chunk_id = scalar_uuid(
-                        cast(
-                            "object",
-                            conn.execute(
-                                text(
-                                    """
+                # Body-only backfill (empty chunks) must not wipe live retrieval (TP-S017-08).
+                if document.chunks:
+                    conn.execute(
+                        text("DELETE FROM chunks WHERE document_id = :document_id"),
+                        {"document_id": doc_id},
+                    )
+
+                    for chunk in document.chunks:
+                        chunk_id = scalar_uuid(
+                            cast(
+                                "object",
+                                conn.execute(
+                                    text(
+                                        """
                             INSERT INTO chunks (document_id, chunk_index, text)
                             VALUES (:document_id, :chunk_index, :text)
                             RETURNING id
                             """
-                                ),
-                                {
-                                    "document_id": doc_id,
-                                    "chunk_index": chunk.chunk_index,
-                                    "text": chunk.text,
-                                },
-                            ).scalar_one(),
+                                    ),
+                                    {
+                                        "document_id": doc_id,
+                                        "chunk_index": chunk.chunk_index,
+                                        "text": chunk.text,
+                                    },
+                                ).scalar_one(),
+                            )
                         )
-                    )
-                    vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
-                    conn.execute(
-                        text(
-                            """
+                        vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
+                        conn.execute(
+                            text(
+                                """
                             INSERT INTO embeddings (chunk_id, embedding)
                             VALUES (:chunk_id, CAST(:embedding AS vector))
                             ON CONFLICT (chunk_id) DO UPDATE
                             SET embedding = EXCLUDED.embedding
                             """
-                        ),
-                        {
-                            "chunk_id": chunk_id,
-                            "embedding": vector_literal,
-                        },
-                    )
-                    upserted += 1
+                            ),
+                            {
+                                "chunk_id": chunk_id,
+                                "embedding": vector_literal,
+                            },
+                        )
+                        upserted += 1
 
                 tag_slugs = []
                 if document.tags is not None:
@@ -754,7 +793,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 conn.execute(
                     text(
                         """
-                        SELECT id, url, title, language
+                        SELECT id, url, title, language, body_text
                         FROM documents
                         WHERE id = :document_id
                         """
@@ -767,31 +806,35 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             if row is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
             doc = mapping_row(row)
-            scalar_chunks = cast(
-                "list[object]",
-                list(
-                    conn.execute(
-                        text(
-                            """
+            store_body = row_str_optional(doc, "body_text")
+            if store_body is not None and store_body.strip():
+                detail_text = store_body
+            else:
+                scalar_chunks = cast(
+                    "list[object]",
+                    list(
+                        conn.execute(
+                            text(
+                                """
                     SELECT text
                     FROM chunks
                     WHERE document_id = :document_id
                     ORDER BY chunk_index ASC
                     """
-                        ),
-                        {"document_id": document_id},
-                    )
-                    .scalars()
-                    .all()
-                ),
-            )
-            chunk_texts = [str(chunk_text) for chunk_text in scalar_chunks]
+                            ),
+                            {"document_id": document_id},
+                        )
+                        .scalars()
+                        .all()
+                    ),
+                )
+                detail_text = "\n\n".join(str(chunk_text) for chunk_text in scalar_chunks)
         return DocumentDetail(
             document_id=row_uuid(doc, "id"),
             url=row_str(doc, "url"),
             title=row_str_optional(doc, "title"),
             language=row_str_optional(doc, "language"),
-            text="\n\n".join(chunk_texts),
+            text=detail_text,
         )
 
     @app.get(
@@ -1062,22 +1105,35 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
     def list_documents(  # pyright: ignore[reportUnusedFunction]
         page: Annotated[int, Query(ge=1)] = 1,
         page_size: Annotated[int, Query(ge=1, le=100)] = 50,
+        missing_body: Annotated[bool, Query()] = False,  # noqa: FBT002  # FastAPI Query bool default
     ) -> DocumentListPage:
         offset = (page - 1) * page_size
+        count_sql = (
+            "SELECT COUNT(*) FROM documents WHERE body_text IS NULL OR btrim(body_text) = ''"
+            if missing_body
+            else "SELECT COUNT(*) FROM documents"
+        )
+        list_sql = (
+            """
+            SELECT id, url, title, language
+            FROM documents
+            WHERE body_text IS NULL OR btrim(body_text) = ''
+            ORDER BY created_at DESC
+            LIMIT :limit OFFSET :offset
+            """
+            if missing_body
+            else """
+            SELECT id, url, title, language
+            FROM documents
+            ORDER BY created_at DESC
+            LIMIT :limit OFFSET :offset
+            """
+        )
         with engine.connect() as conn:
-            total = scalar_int(
-                sqlalchemy_scalar_one(conn.execute(text("SELECT COUNT(*) FROM documents")))
-            )
+            total = scalar_int(sqlalchemy_scalar_one(conn.execute(text(count_sql))))
             rows = (
                 conn.execute(
-                    text(
-                        """
-                    SELECT id, url, title, language
-                    FROM documents
-                    ORDER BY created_at DESC
-                    LIMIT :limit OFFSET :offset
-                    """
-                    ),
+                    text(list_sql),
                     {"limit": page_size, "offset": offset},
                 )
                 .mappings()

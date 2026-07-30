@@ -59,9 +59,15 @@ describe("BUG-2026-06-25: CorpusList locale toggle preserves selection", () => {
 
   it("keeps bulk selection and does not refetch when the locale is switched", async () => {
     localStorage.setItem("vecinita.locale", "en");
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        items: MOCK_DOCS,
+        page: 1,
+        page_size: 50,
+        total: MOCK_DOCS.length,
+      }),
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     renderCorpusWithSwitcher();

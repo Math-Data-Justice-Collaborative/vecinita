@@ -121,7 +121,10 @@ function defaultEvalFetch(
     };
   }
   if (url.includes("/internal/v1/documents")) {
-    return { ok: true, json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }) };
+    return {
+      ok: true,
+      json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }),
+    };
   }
   return { ok: true, json: async () => ({}) };
 }
@@ -681,7 +684,11 @@ describe("eval coverage gaps", () => {
               question: "Q",
               retrieved_urls: [],
               answer: "A",
-              metrics: { faithfulness: 0.9, retrieval_pass: true, latency_ms: 1 },
+              metrics: {
+                faithfulness: 0.9,
+                retrieval_pass: true,
+                latency_ms: 1,
+              },
             },
           ],
         }}
@@ -971,7 +978,11 @@ describe("eval coverage gaps", () => {
           ) {
             return Promise.resolve({
               ok: true,
-              json: async () => ({ ...ownedA, version: 2, name: "preset-a-v2" }),
+              json: async () => ({
+                ...ownedA,
+                version: 2,
+                name: "preset-a-v2",
+              }),
             });
           }
           if (url.includes("/internal/v1/eval/config-presets")) {

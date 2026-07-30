@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-29 (S016/EV-014 #87 — TC-156–TC-160 ChatRAG cold-start wait UX)  
+> **Last updated**: 2026-07-30 (S017/EV-015 #167 — TC-161–169 corpus rebuild + document store)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -72,6 +72,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-050 Job detail + admin CRUD | `tests/e2e/test_uj050_job_detail_crud.py` | TC-146, TC-147, TC-148, TC-149 | `tests/ui/admin/uj050-job-detail.spec.ts` |
 | UJ-051 Corpus/admin table density | Vitest (no API change) | TC-152, TC-153, TC-154 | `tests/ui/admin/uj051-corpus-density.spec.ts` (TC-155) |
 | UJ-052 Cold-start wait fun facts | Vitest (no API change) | TC-156, TC-157, TC-158, TC-159 | `tests/ui/chat/uj052-cold-start-wait.spec.ts` (TC-160) |
+| UJ-053 Corpus rebuild enqueue | `tests/e2e/test_uj053_corpus_rebuild.py` | TC-161, TC-162, TC-163, TC-166 | `tests/ui/admin/uj053-corpus-rebuild.spec.ts` (TC-167) |
+| UJ-054 Shadow dry-run → promote | `tests/e2e/test_uj054_rebuild_shadow_promote.py` | TC-164, TC-165, TC-168 | `tests/ui/admin/uj054-rebuild-promote.spec.ts` (TC-169) |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -979,16 +981,71 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Playwright `tests/ui/chat/uj052-cold-start-wait.spec.ts` with mocked slow/retry ask.
 - **Expected**: Starting-up + fact visible; consent Accept/No thanks interactable; donate link present.
 
+### TC-161: Enqueue rebuild job (UJ-053, F41)
+
+- **Objective**: `POST /jobs` with `job_type=rebuild` + `mode` returns `202` and listable job.
+- **Input**: `{ "options": { "job_type": "rebuild", "mode": "rechunk", "force": true } }` (urls optional/empty).
+- **Expected**: Job record `rebuild`; status progresses; store-backed path does not call scraper.
+
+### TC-162: Rebuild modes + force (UJ-053, F41)
+
+- **Objective**: `reembed` / `rechunk` / `rescrape` accepted; `force` bypasses hash-skip.
+- **Input**: Three mode payloads; document with unchanged `content_hash` under skip policy.
+- **Expected**: Without force, skip/no-op when applicable; with force, rebuild proceeds.
+
+### TC-163: Document store write on ingest (F41)
+
+- **Objective**: Ingest persists normalized body + revision with version stamps.
+- **Input**: Fixture URL ingest through TestClient / pipeline mock.
+- **Expected**: `documents.body_text` (or revision row) non-empty; `content_hash` matches body.
+
+### TC-164: Shadow dry-run does not change live retrieval (UJ-054, F41)
+
+- **Objective**: `dry_run=true` writes shadow only.
+- **Input**: Rebuild dry-run on seeded corpus; ask/retrieve before promote.
+- **Expected**: Live chunk/embedding ids unchanged; shadow rows exist for `rebuild_run_id`.
+
+### TC-165: Promote activates shadow revision (UJ-054, F41)
+
+- **Objective**: Promote swaps live to shadow revision.
+- **Input**: Completed dry-run `rebuild_run_id` + promote API/job.
+- **Expected**: Live retrieval uses new chunks/embeddings; prior revision retained.
+
+### TC-166: Scoped `document_ids` rebuild (UJ-053, F41)
+
+- **Objective**: Optional document filter limits work.
+- **Input**: `document_ids: [id1]` on multi-doc corpus.
+- **Expected**: Only listed docs rebuilt; others untouched.
+
+### TC-167: Playwright rebuild enqueue UI (UJ-053, F41)
+
+- **Objective**: Admin can set mode/force/dry-run and see job on Jobs tab.
+- **Input**: `tests/ui/admin/uj053-corpus-rebuild.spec.ts`.
+- **Expected**: Controls visible; submitted job row shows `rebuild`.
+
+### TC-168: F36 gate checklist before promote (UJ-054, F41)
+
+- **Objective**: Documented F36 eval gate against **shadow** before promote is allowed.
+- **Input**: F36 run against shadow-backed staging config (CI or staging harness); then promote.
+- **Expected**: Eval run linked in report; promote blocked/refused without gate record (AC-RB8).
+
+### TC-169: Playwright rebuild promote UI (UJ-054, F41)
+
+- **Objective**: Admin can promote a completed shadow `rebuild_run_id` from Admin UI.
+- **Input**: `tests/ui/admin/uj054-rebuild-promote.spec.ts`.
+- **Expected**: Promote control visible after dry-run success; confirm invokes promote API; live stamp updates.
+
 ## Test Data
 
 | Asset | Location | Used by |
 |-------|----------|---------|
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
-| Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness |
-| URL ingest fixture | `data/fixtures/ingest/` | TC-010 |
+| Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness, TC-168 |
+| URL ingest fixture | `data/fixtures/ingest/` | TC-010, TC-163 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |
 | Privacy negative payloads | `tests/privacy/fixtures/` | TC-030 |
+| Rebuild fixtures (store body) | `data/fixtures/rebuild/` (to add in 07) | TC-161–166 |
 
 Detailed inventory: `docs/data-management-plan.md` (interview pending).
 

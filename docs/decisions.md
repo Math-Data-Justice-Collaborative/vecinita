@@ -5,13 +5,20 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-06-13 (EV-004 F31 delta)
+> **Last updated**: 2026-07-30 (EV-015 F41 delta)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-07-30 | EV015-H1–H14 | auto-approved | F41 locked RD-188–196 / ADR-040 (see S017 02 audit) |
+| 2026-07-30 | EV015-M1 | approved (fix) | TC-166 under UJ-053 in journey↔test matrix |
+| 2026-07-30 | EV015-M2 | approved (lock) | F36 against shadow **before** promote; TC-168/UJ-054/runbook fixed |
+| 2026-07-30 | EV015-M3 | modified | Admin UI **promote** in F41 + full build this session; TC-169 added |
+| 2026-07-30 | EV015-M4 | approved | One-time **backfill** in F41 scope |
+| 2026-07-30 | EV015-M5 | deferred | deployment-integration / data-flow F41 delta → **04-tech-plan** |
+| 2026-07-30 | EV015-M6 | approved | Rebuild promote auth = **`admin`** (enqueue parity; not super-admin-only) |
 | 2026-05-19 | S1.1–S1.18 | auto-approved | Features F1–F18 scope from interview (RD-002–RD-011, RD-014) |
 | 2026-05-19 | S2.1–S2.12 | auto-approved | Core architecture/constraints from interview + ADRs |
 | 2026-05-19 | S3.1–S3.8 | auto-approved | UJ-001–UJ-008 from feature-list mapping |
@@ -567,6 +574,46 @@ seen facts. New Fn **F40**. Lean+build routing.
 
 Artifacts: feature-list F40; UJ-052; test-plan TC-156–160; AC-CS1–CS8; ADR-039;
 `docs/sessions/S016-chat-cold-start-ux/reports/01-requirements-cold-start-ux.md`.
+
+### EV-015 requirements decisions (2026-07-30) — RD-188–RD-196
+
+S017 / [#167](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/167) — Corpus
+document store + rebuild job (F41). Standard+build. Expands issue beyond investigation-only.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-188 | Fn scope | **F41** = document store + rebuild (not split F42) | Q E→1 |
+| RD-189 | Job shape | `job_type=rebuild` + `mode ∈ {reembed,rechunk,rescrape}` | Q A→1 |
+| RD-190 | Ops source | Prefer **store-backed** reembed/rechunk; no live scrape unless rescrape | User clarify C |
+| RD-191 | Dry-run | **Shadow dual-write**; F36 on shadow **then** promote | Q B→2; 02 M2 |
+| RD-192 | Scope | Whole corpus default + optional `document_ids` | Q3→1 |
+| RD-193 | Versioning | Stamps + revision history; dim dual-write deferred to #159 | Q4→1 |
+| RD-194 | Retag | Separate job only | Q5→1 |
+| RD-195 | Progress | Jobs SSE + detail only | Q6→1 |
+| RD-196 | Store | Postgres body + `document_revisions`; ADR-007 writes | Q D→1 |
+
+Artifacts: feature-list F41; UJ-053–054; TC-161–169; AC-RB1–10; ADR-040;
+`docs/sessions/S017-corpus-reembed-migration/reports/01-requirements-corpus-rebuild.md`;
+02 audit M1–M4 applied 2026-07-30.
+
+### EV-015 tech-plan decisions (2026-07-30) — TP-S017-01–09
+
+01-requirements locked RD-188–196. 04-tech-plan locks schema, promote, ops, and Phase 20:
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S017-01 | Build vs ops | Build full shadow+promote+F36; ops = live same-settings **and** staging shadow path (see TP-S017-07) | ISS-006 → option 2 + Q10 |
+| TP-S017-02 | Shadow schema | Dedicated `shadow_chunks` / `shadow_embeddings` + `rebuild_runs` | Q5→1 |
+| TP-S017-03 | Promote | Transactional copy shadow → live | Q6→1 |
+| TP-S017-04 | F36-on-shadow | Eval enqueue optional `rebuild_run_id` | Q7→1 |
+| TP-S017-05 | Plan shape | Phase 20 / M86–M90 | Q8→1 |
+| TP-S017-06 | Promote API | Response `{promoted, rebuild_run_id, chunks_promoted, documents_promoted}`; Admin via corpus proxy | Q9→1 |
+| TP-S017-07 | Staging ops | Staging **requires** shadow→F36→promote (+ live equivalence) | Q10→2 |
+| TP-S017-08 | Backfill | Rebuild/job + Admin; prefer rescrape; chunks+ack | Q11→1 |
+| TP-S017-09 | Dependencies | Minor deps allowed in 07; flag in inventory | Q12→2 |
+
+Artifacts: execution-plan Phase 20; S017 `reports/04-tech-plan.md`; `roadmap.md`;
+deployment-integration §EV-015; data-flow ERD delta.
 
 ### EV-011 tech-plan decisions (2026-07-08) — TP-S010-01–16
 

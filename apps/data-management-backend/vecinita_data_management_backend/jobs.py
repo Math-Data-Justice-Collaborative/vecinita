@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING
 
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 
-from vecinita_data_management_backend.pipeline import run_ingest_job, run_retag_job
+from vecinita_data_management_backend.pipeline import (
+    run_backfill_job,
+    run_ingest_job,
+    run_retag_job,
+)
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -70,7 +74,14 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
         record.initiated_by_role,
     )
     try:
-        if record.job_type == "retag":
+        if record.options.get("backfill") is True:
+            run_backfill_job(
+                job_id,
+                store=store,
+                write_client=scoped_write,
+                fetch_document=fetch_document,
+            )
+        elif record.job_type == "retag":
             run_retag_job(
                 job_id,
                 store=store,

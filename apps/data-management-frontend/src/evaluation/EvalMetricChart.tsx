@@ -123,8 +123,7 @@ export function EvalMetricChart({
               }
               labelFormatter={(_, payload) => {
                 const entry = payload[0]?.payload as
-                  | { run_id?: string }
-                  | undefined;
+                  { run_id?: string } | undefined;
                 return entry?.run_id ?? metricLabel;
               }}
             />
@@ -157,8 +156,7 @@ export function EvalMetricChart({
               }
               labelFormatter={(_, payload) => {
                 const entry = payload[0]?.payload as
-                  | { run_id?: string }
-                  | undefined;
+                  { run_id?: string } | undefined;
                 return entry?.run_id ?? metricLabel;
               }}
             />
@@ -199,8 +197,7 @@ export function EvalMetricChart({
             }
             labelFormatter={(_, payload) => {
               const entry = payload[0]?.payload as
-                | { run_id?: string }
-                | undefined;
+                { run_id?: string } | undefined;
               return entry?.run_id ?? metricLabel;
             }}
           />

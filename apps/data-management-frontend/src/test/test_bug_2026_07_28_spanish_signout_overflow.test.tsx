@@ -7,10 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LOCALE_STORAGE_KEY } from "vecinita-frontend-i18n";
 
-import {
-  renderSignedInApp,
-  waitForAdminNav,
-} from "./authSessionHarness";
+import { renderSignedInApp, waitForAdminNav } from "./authSessionHarness";
 
 describe("BUG-2026-07-28 — Spanish sign-out-all overflows sidebar (#105)", () => {
   beforeEach(() => {
@@ -50,7 +47,9 @@ describe("BUG-2026-07-28 — Spanish sign-out-all overflows sidebar (#105)", () 
     });
 
     const button = screen.getByTestId("admin-sign-out-all-devices");
-    expect(button).toHaveTextContent(/cerrar sesión en todos los dispositivos/i);
+    expect(button).toHaveTextContent(
+      /cerrar sesión en todos los dispositivos/i,
+    );
 
     // Regression: long ES label must wrap within md:w-60 sidebar (issue #105).
     expect(button.className.split(/\s+/)).toContain("w-full");

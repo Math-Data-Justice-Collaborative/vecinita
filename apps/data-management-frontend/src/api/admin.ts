@@ -798,7 +798,9 @@ export async function fetchPlaygroundModels(
     },
   });
   if (!response.ok) {
-    throw new Error(`Playground models list failed (${String(response.status)})`);
+    throw new Error(
+      `Playground models list failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<{ items: PlaygroundModelSummaryApi[] }>;
 }
@@ -869,7 +871,9 @@ export async function pullPlaygroundModel(
     },
   );
   if (!response.ok) {
-    throw new Error(`Playground model pull failed (${String(response.status)})`);
+    throw new Error(
+      `Playground model pull failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<PlaygroundModelPullResponseApi>;
 }

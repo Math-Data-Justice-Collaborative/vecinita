@@ -194,9 +194,7 @@ export function EvaluationPage() {
               retryAttempt = 0;
               setRuns((prev) =>
                 prev.map((run) =>
-                  run.run_id === runId
-                    ? { ...run, status: event.status }
-                    : run,
+                  run.run_id === runId ? { ...run, status: event.status } : run,
                 ),
               );
               setSelectedRun((prev) =>
@@ -379,9 +377,7 @@ export function EvaluationPage() {
               className="gap-2"
             >
               {tr("admin.evaluation.tab.models")}
-              <ModelDownloadProgressIndicator
-                testId="eval-tab-models-download-in-progress"
-              />
+              <ModelDownloadProgressIndicator testId="eval-tab-models-download-in-progress" />
             </TabsTrigger>
           ) : null}
         </TabsList>

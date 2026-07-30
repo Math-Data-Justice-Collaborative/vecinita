@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-10 (S010/EV-011 Phase 18 — llm-client + shared-schemas; transformers for chat-template)
+> **Last updated**: 2026-07-30 (S017/EV-015 F41 — no new required deps; TP-S017-09 allows minor in 07)
 
 ## Runtime dependencies (Python — planned)
 
@@ -163,6 +163,10 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
   storage adapter); user-search `filter` is a query param on the existing GoTrue Admin REST call. The
   `admin_delete_user_sessions` RPC (force sign-out) is committed SQL under `supabase/migrations/`, not
   a package.
+
+- **EV-015 F41 (TP-S017-09):** No new **required** runtime deps for document store / rebuild /
+  shadow promote (Alembic + existing FastAPI/Modal/Jobs/Playwright). Minor deps may be added
+  during 07-build if needed — flag here before merge.
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)
 

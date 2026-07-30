@@ -1,3 +1,4 @@
+import { BackfillForm } from "@/components/BackfillForm";
 import { CorpusList } from "@/components/CorpusList";
 import { JobForm } from "@/components/JobForm";
 import { useAdminT } from "@/hooks/useAdminT";
@@ -14,6 +15,7 @@ export function CorpusPage() {
         <p className="text-muted-foreground">{tr("admin.corpus.subtitle")}</p>
       </div>
       <JobForm />
+      <BackfillForm />
       <CorpusList />
     </div>
   );

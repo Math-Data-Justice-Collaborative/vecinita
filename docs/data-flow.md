@@ -345,7 +345,9 @@ sequenceDiagram
 
 ## 8. Entity-relationship diagram (corpus Postgres)
 
-Alembic head `20260702_0007`. **Supabase `auth.users` is a separate database** — not shown. `owner_id` / `promoted_by` / `actor_id` are opaque UUIDs only (ADR-004, ADR-026).
+Alembic head includes EV-015 store/shadow (Phase 20 / M86 — revision id assigned at T86.2).
+**Supabase `auth.users` is a separate database** — not shown. `owner_id` / `promoted_by` /
+`actor_id` are opaque UUIDs only (ADR-004, ADR-026).
 
 ```mermaid
 erDiagram
@@ -357,6 +359,9 @@ erDiagram
     tags ||--o{ chunk_tags : "applied"
     documents ||--o{ document_versions : "history"
     documents ||--o| document_serving_stats : "served_count"
+    documents ||--o{ document_revisions : "body history"
+    rebuild_runs ||--o{ shadow_chunks : "dry_run"
+    shadow_chunks ||--o| shadow_embeddings : "vector384"
     eval_runs ||--o{ eval_run_items : "contains"
     eval_config_presets ||--o{ eval_runs : "optional preset"
 
@@ -365,8 +370,40 @@ erDiagram
         text url UK
         text title
         text content_hash
+        text body_text
         string language
         timestamptz created_at
+    }
+    document_revisions {
+        uuid revision_id PK
+        uuid document_id FK
+        text content_hash
+        text body_text
+        string embedding_model_id
+        int embedding_dim
+        int chunk_size_tokens
+        uuid rebuild_run_id
+        timestamptz created_at
+    }
+    rebuild_runs {
+        uuid id PK
+        string mode
+        bool dry_run
+        bool force
+        string status
+        timestamptz created_at
+    }
+    shadow_chunks {
+        uuid id PK
+        uuid rebuild_run_id FK
+        uuid document_id FK
+        int chunk_index
+        text text
+    }
+    shadow_embeddings {
+        uuid id PK
+        uuid shadow_chunk_id FK UK
+        vector384 embedding
     }
     chunks {
         uuid id PK
@@ -463,7 +500,31 @@ erDiagram
     }
 ```
 
-**Note:** `GET /jobs` may surface eval runs with virtual `job_type=eval` merged from `eval_runs` (F37) — not a `jobs` table column.
+**Note:** `GET /jobs` surfaces Modal JobStore rows including `job_type` ∈
+`ingest | retag | eval | rebuild` (F32 / F41) — not a Postgres jobs-table SoT (ADR-038).
+
+---
+
+## 8b. Sequence — Rebuild dry-run → F36 → promote (F41)
+
+```mermaid
+sequenceDiagram
+    participant Op as Admin UI
+    participant DM as Modal data-mgmt
+    participant IW as Internal write
+    participant PG as Postgres
+    participant Ev as Eval (F36)
+
+    Op->>DM: POST /jobs job_type=rebuild dry_run=true
+    DM->>IW: create rebuild_runs + upsert shadow_*
+    IW->>PG: shadow_chunks / shadow_embeddings
+    Note over PG: live chunks unchanged
+    Op->>Ev: POST eval/runs rebuild_run_id=...
+    Ev->>PG: retrieve from shadow for run
+    Ev-->>Op: metrics vs baseline
+    Op->>IW: POST /rebuild/{id}/promote (admin)
+    IW->>PG: txn copy shadow → live
+```
 
 ---
 
@@ -483,7 +544,7 @@ stateDiagram-v2
     failed --> [*]
 
     note right of pending
-        job_type: ingest | retag
+        job_type: ingest | retag | eval | rebuild
         No operator email in row (ADR-004)
     end note
 ```

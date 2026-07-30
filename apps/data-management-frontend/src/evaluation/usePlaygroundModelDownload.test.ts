@@ -47,7 +47,9 @@ describe("usePlaygroundModelDownload hook", () => {
   });
 
   it("loadFamilyTags surfaces non-Error tag failures", async () => {
-    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
+      items: [],
+    });
     vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [],
     });
@@ -74,7 +76,9 @@ describe("usePlaygroundModelDownload hook", () => {
   });
 
   it("refreshCatalog surfaces non-Error catalog failures", async () => {
-    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
+      items: [],
+    });
     vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockRejectedValue(
       "catalog failed",
     );
@@ -91,7 +95,9 @@ describe("usePlaygroundModelDownload hook", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.catalogError).toBe("Failed to load playground catalog");
+      expect(result.current.catalogError).toBe(
+        "Failed to load playground catalog",
+      );
     });
   });
 
@@ -143,7 +149,9 @@ describe("usePlaygroundModelDownload hook", () => {
   });
 
   it("refreshModels surfaces non-Error list failures", async () => {
-    vi.spyOn(adminApi, "fetchPlaygroundModels").mockRejectedValue("list failed");
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockRejectedValue(
+      "list failed",
+    );
     const { result } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,
     });
@@ -158,7 +166,9 @@ describe("usePlaygroundModelDownload hook", () => {
   });
 
   it("downloadModel ignores whitespace-only tags", async () => {
-    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
+      items: [],
+    });
     const pullSpy = vi.spyOn(adminApi, "pullPlaygroundModel");
     const { result } = renderHook(() => usePlaygroundModelDownload(), {
       wrapper: providerWrapper,

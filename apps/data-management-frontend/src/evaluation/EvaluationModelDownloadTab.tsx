@@ -45,9 +45,14 @@ function CatalogFamilyRow({
         <ChevronRight className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90" />
         {slug}
       </summary>
-      <div className="space-y-2 border-t px-3 py-2" data-testid={`eval-models-tags-${slug}`}>
+      <div
+        className="space-y-2 border-t px-3 py-2"
+        data-testid={`eval-models-tags-${slug}`}
+      >
         {tagsLoading ? (
-          <p className="text-sm text-muted-foreground">{tr("shared.loading")}</p>
+          <p className="text-sm text-muted-foreground">
+            {tr("shared.loading")}
+          </p>
         ) : null}
         {tagsError ? (
           <p role="alert" className="text-sm text-destructive">

@@ -16,6 +16,7 @@ from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
     DocumentDetail,
+    DocumentListPage,
     EvalRunListResponse,
     TagInput,
     TagPatchRequest,
@@ -108,6 +109,27 @@ class InternalWriteClient:
             msg = f"get_document_detail failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return DocumentDetail.model_validate(response.json())
+
+    def list_documents(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 50,
+        missing_body: bool = False,
+    ) -> DocumentListPage:
+        """List corpus documents; optionally only those missing store body_text."""
+        params: dict[str, int | bool] = {"page": page, "page_size": page_size}
+        if missing_body:
+            params["missing_body"] = True
+        response = self._client.get(
+            "/internal/v1/documents",
+            params=params,
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"list_documents failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        return DocumentListPage.model_validate(response.json())
 
     def patch_document_tags(self, document_id: UUID, tags: list[TagInput]) -> TagPatchResponse:
         """Replace document tags via the internal write API."""

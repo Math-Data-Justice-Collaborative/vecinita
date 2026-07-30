@@ -2,12 +2,7 @@
  * EV-012 — cover Jobs/JobDetail/Evaluation SSE UI handlers for the unit
  * coverage gate (lines 100% / branches 98%).
  */
-import {
-  cleanup,
-  fireEvent,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
@@ -157,21 +152,17 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
       expect(jobSse.handlers).not.toBeNull();
     });
     await waitFor(() => {
-      expect(
-        screen.getAllByText(/running/i).length,
-      ).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/running/i).length).toBeGreaterThanOrEqual(1);
     });
 
     jobSse.handlers?.onJob({ ...COMPLETED_JOB, job_id: OTHER_ID });
-    expect(
-      screen.getAllByText(/running/i).length,
-    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/running/i).length).toBeGreaterThanOrEqual(1);
 
     jobSse.handlers?.onJob(COMPLETED_JOB);
     await waitFor(() => {
-      expect(
-        screen.getAllByText(/completed/i).length,
-      ).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/completed/i).length).toBeGreaterThanOrEqual(
+        1,
+      );
     });
   });
 
@@ -197,7 +188,9 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /cancel/i }),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
     await waitFor(() => {
@@ -272,9 +265,7 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
 
     await waitFor(() => {
       expect(detailHits).toBeGreaterThanOrEqual(1);
-      expect(
-        screen.getAllByText(/running/i).length,
-      ).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/running/i).length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -435,7 +426,9 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: /evaluation/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /evaluation/i }),
+      ).toBeInTheDocument();
     });
     expect(screen.getByText(/only-message/i)).toBeInTheDocument();
 
@@ -447,9 +440,11 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /^copy$/i }));
-    jobSse.handlers?.onJob({ ...RUNNING_JOB, job_type: undefined } as Job);
+    jobSse.handlers?.onJob({ ...RUNNING_JOB, job_type: undefined });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /cancel/i }),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
     await waitFor(() => {
@@ -611,7 +606,8 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
   });
 
   it("EvaluationPage SSE progress with sibling runs and zero relevance", async () => {
-    const { mockPlaygroundApiFetch } = await import("./helpers/mockPlaygroundApi");
+    const { mockPlaygroundApiFetch } =
+      await import("./helpers/mockPlaygroundApi");
     const otherId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
     const runningDetail = {
       run_id: RUN_ID,
@@ -680,7 +676,9 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-run-button")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-run-button"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-playground-run-button"));
     await waitFor(() => {
@@ -698,7 +696,8 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
   });
 
   it("EvaluationPage finishes immediately when run is already completed", async () => {
-    const { mockPlaygroundApiFetch } = await import("./helpers/mockPlaygroundApi");
+    const { mockPlaygroundApiFetch } =
+      await import("./helpers/mockPlaygroundApi");
     const completedDetail = {
       run_id: RUN_ID,
       status: "completed",
@@ -766,7 +765,9 @@ describe("EV-012 SSE coverage (Jobs / JobDetail / Evaluation)", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId("eval-playground-run-button")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("eval-playground-run-button"),
+      ).toBeInTheDocument();
     });
     fireEvent.click(screen.getByTestId("eval-playground-run-button"));
     await waitFor(() => {

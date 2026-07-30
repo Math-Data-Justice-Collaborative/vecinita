@@ -3,7 +3,7 @@
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Version**: greenfield (`fresh-start` branch)  
-> **Last updated**: 2026-06-13 (EV-004 F31 delta)
+> **Last updated**: 2026-07-30 (EV-015 F41 corpus document store + rebuild)
 
 ## Overview
 
@@ -90,24 +90,35 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### Data Management (Modal ASGI + workers)
 
-- **Purpose**: Operator-triggered ingest jobs and job status; no Vecinita user accounts.
-- **Inputs**: `POST /jobs` (URLs, options); `GET /jobs/{id}`; protected by Modal `requires_proxy_auth` + deploy secret at edge.
-- **Outputs**: Job records (URL, status, error codes — no operator identity).
+- **Purpose**: Operator-triggered ingest / retag / eval / **rebuild** jobs and job status.
+- **Inputs**: `POST /jobs` (URLs, options including `job_type` + rebuild `mode`); `GET /jobs/{id}`;
+  Jobs SSE; protected by Modal `requires_proxy_auth` + deploy secret at edge.
+- **Outputs**: Job records (URL, status, error codes — no operator identity); rebuild progress.
 - **Algorithm** (ingest):
   1. ASGI enqueues scrape job on Modal queue.
   2. Worker fetches URL, normalizes HTML/text.
-  3. Chunk text.
-  4. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20).
-  5. Call FastEmbed on Modal.
-  6. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
-  7. Update job status via DO API or job store on DO.
-- **Source**: feature-list F7–F10, F20; RD-016
+  3. **Persist normalized body** to Postgres document store via internal-write (F41 / ADR-040).
+  4. Chunk text.
+  5. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20).
+  6. Call FastEmbed on Modal.
+  7. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
+  8. Update job status via job store on Modal.
+- **Algorithm** (rebuild — F41):
+  1. Operator enqueues `job_type=rebuild` with `mode` (`reembed`|`rechunk`|`rescrape`), optional
+     `document_ids`, `force`, `dry_run` (Admin Jobs UI).
+  2. Worker reads body from **document store** (store-backed modes); `rescrape` may refresh store from URL.
+     Existing corpus gets **one-time backfill** into store (02 M4).
+  3. Re-chunk and/or re-embed per mode; stamp revision / `rebuild_run_id`.
+  4. If `dry_run`, write **shadow** rows; run **F36 against shadow before promote**; operator
+     promotes via **Admin UI** → internal-write promote (02 M2/M3).
+  5. Retag is **not** part of rebuild (separate job).
+- **Source**: feature-list F7–F10, F20, F32, F41; RD-016; ADR-040; 02-verify-plan M1–M4
 
 ### DO internal write API
 
-- **Purpose**: Sole component(s) with `DATABASE_URL`; accepts service-authenticated writes from Modal; serves stats, audit, bulk operations, and health aggregation (EV-002).
-- **Inputs**: Authenticated requests (mTLS, API key, or private network) with document/chunk/embedding/tag payloads; chunk list; tag PATCH; bulk operations (F27); stats increment (F28); audit queries (F29).
-- **Outputs**: Upserted rows; corpus list/delete; chunk list; tag CRUD for admin (F21); aggregated stats (F25); audit log entries (F29); serving stats (F28).
+- **Purpose**: Sole component(s) with `DATABASE_URL`; accepts service-authenticated writes from Modal; serves stats, audit, bulk operations, health aggregation (EV-002), and **rebuild promote / store upserts** (EV-015).
+- **Inputs**: Authenticated requests (mTLS, API key, or private network) with document/chunk/embedding/tag payloads (**incl. `body_text`**); chunk list; tag PATCH; bulk operations (F27); stats increment (F28); audit queries (F29); rebuild promote.
+- **Outputs**: Upserted rows; corpus list/delete; chunk list; tag CRUD for admin (F21); aggregated stats (F25); audit log entries (F29); serving stats (F28); promoted rebuild revisions.
 - **New endpoints (EV-002)**:
   | Method | Path | Feature |
   |--------|------|---------|
@@ -120,11 +131,16 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
   | PATCH | `/internal/v1/documents/bulk/metadata` | F27 — bulk edit metadata |
   | GET | `/internal/v1/audit` | F29 — global audit log (paginated, filterable) |
   | GET | `/internal/v1/documents/{id}/history` | F29 — per-document version history |
-- **Source**: RD-016; EV-001 / ADR-014; EV-002
+- **New endpoints (EV-015 F41)**:
+  | Method | Path | Feature |
+  |--------|------|---------|
+  | POST | `/internal/v1/rebuild/{rebuild_run_id}/promote` | Promote shadow rebuild → live |
+- **Source**: RD-016; EV-001 / ADR-014; EV-002; EV-015 / ADR-040
 
 ### Database app
 
-- **Purpose**: Schema migrations, pgvector extension, seed corpus, privacy regression tests.
+- **Purpose**: Schema migrations, pgvector extension, seed corpus, privacy regression tests;
+  **document store + revision/shadow metadata** (F41).
 - **Inputs**: Alembic revisions.
 - **Outputs**: Applied schema; forbidden-table CI checks.
 - **Source**: feature-list F13–F15; ADR-004
@@ -285,6 +301,7 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 | Internal write | PATCH | `/internal/v1/documents/bulk/metadata` | Bulk edit metadata (F27) |
 | Internal write | GET | `/internal/v1/audit` | Global audit log (F29) |
 | Internal write | GET | `/internal/v1/documents/{id}/history` | Per-document history (F29) |
+| Internal write | POST | `/internal/v1/rebuild/{rebuild_run_id}/promote` | Promote shadow rebuild (F41) |
 | Internal write | GET | `/internal/v1/health/all` | Health aggregator — polls all 8 services (F26, TP-019) |
 | Health | GET | `/health` | All HTTP services |
 
@@ -297,6 +314,7 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | Session / cycle | Date | Change |
 |-----------------|------|--------|
 | S004 / EV-005 (F34) | 2026-06-28 | Added admin Supabase Auth: §Component Details "Admin authentication"; H5 amended + H11 added; forbidden-schema EV-005 exception (`actor_id`/`actor_role`); API surface auth note. Supersedes ADR-004 admin auth clause (ADR-026). |
+| S017 / EV-015 (F41) | 2026-07-30 | Document store + rebuild job (`reembed`/`rechunk`/`rescrape`); shadow dry-run + promote; version stamps (ADR-040). |
 
 ## References
 
