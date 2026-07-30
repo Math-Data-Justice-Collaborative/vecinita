@@ -810,14 +810,14 @@ project:
         report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
         note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
         s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion detail
-      note: 'S017/EV-015 07-build in_progress — T89.1 COMPLETE @ 0006c0d (TC-165 red confirmed ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote to green T89.1); T89.2 still pending (can parallel); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres API test needs local DB (same as T87.1/T88.4)'
+      note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); T89.1 import/unit tests green @ 301c31a; T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB (same as T87.1/T88.4)'
       phase: Phase 20 (M86-M90)
       milestone: M89
       substeps:
-        current_task: T89.3
+        current_task: T89.2
         task_status: in_progress
         in_progress_tasks:
-          - T89.3
+          - T89.2
         blocked_tasks: []
         completed_tasks_recent:
           - T86.1
@@ -837,18 +837,18 @@ project:
           - T88.5
           - T88.6
           - T89.1
-        next_task: T89.2
-        next_action: 'T89.3 implement promote shadow→live (green T89.1); T89.2 still pending (can parallel)'
+          - T89.3
+        next_action: 'T89.2 eval rebuild_run_id reads shadow (TC-168); continue M89 after T89.2'
         completed_milestones:
           - M86
           - M87
           - M88
-        note: 'T89.1 COMPLETE @ 0006c0d — red confirmed (ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote); T89.2 pending; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres API test needs local DB'
+        note: 'T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
       execution_plan:
-        active_task: T89.3
+        active_task: T89.2
         active_milestone: M89
         active_phase: Phase 20
-        note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.3 (implement promote; green T89.1 @ 0006c0d); T89.2 still pending; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
+        note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.2 (eval rebuild_run_id / TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
         T86.1:
           status: completed
           started_at: '2026-07-30'
@@ -938,12 +938,12 @@ project:
           note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
           canonical_current_state:
             active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-            active_milestone: 'M89 — T89.3 in_progress (T89.1 COMPLETE @ 0006c0d)'
-            active_task: T89.3
+            active_milestone: 'M89 — T89.2 in_progress (T89.3 COMPLETE @ 301c31a)'
+            active_task: T89.2
             task_status: in_progress
-            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1 (M89 partial); historical Phase 19 T82–T85 retained'
-            orchestrator_resume: 'S017/EV-015 07-build — T89.1 COMPLETE @ 0006c0d (TC-165 red ModuleNotFoundError rebuild_promote); T89.3 in_progress implement promote; T89.2 still pending (can parallel); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres API test needs local DB'
-            execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.3 in_progress'
+            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1+T89.3 (M89 partial); historical Phase 19 T82–T85 retained'
+            orchestrator_resume: 'S017/EV-015 07-build — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres promote API test still needs local DB'
+            execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.2 in_progress'
         phase_19_gate: passed
         T85.3:
           status: completed
@@ -976,15 +976,19 @@ project:
           started_at: '2026-07-30'
           completed_at: '2026-07-30'
           commit: 0006c0d3c3a06b912953d531ca9d33a45ddf9f68
-          tdd: red
-          note: 'promote shadow-to-live unit coverage (TC-165) @ 0006c0d — red confirmed (ModuleNotFoundError rebuild_promote); greened by T89.3; Postgres API test needs local DB'
+          tdd: green
+          greened_by: T89.3 @ 301c31a
+          note: 'promote shadow-to-live unit coverage (TC-165) @ 0006c0d — was red ModuleNotFoundError rebuild_promote; greened by T89.3 @ 301c31a (import/unit tests green); Postgres promote API test still needs local DB'
         T89.2: &id007
-          status: pending
-          note: 'pending — can start after/parallel with T89.3; prefer T89.3 next to green T89.1'
-        T89.3: &id008
           status: in_progress
           started_at: '2026-07-30'
-          note: 'implement promote shadow→live — green T89.1 (ModuleNotFoundError rebuild_promote); T89.2 still pending'
+          note: 'eval rebuild_run_id reads shadow (TC-168) — in_progress after T89.3 @ 301c31a'
+        T89.3: &id008
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 301c31a2c5b790d436205172ff04e739b9a11bd0
+          note: 'transactional promote shadow rebuild to live @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); greens T89.1 import/unit tests'
       s010_baseline:
         status: in_progress
         started_at: '2026-07-10'
@@ -2032,7 +2036,7 @@ active_session:
   session_artifacts_pending: false
   session_artifacts_note: 'session-brief.md + routing-plan.md written under docs/sessions/S017-corpus-reembed-migration/'
   phase0_approved: true
-  note: 'S017/EV-015 07-build in_progress — T89.1 COMPLETE @ 0006c0d (TC-165 red confirmed ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote); T89.2 still pending (can parallel); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; 04 completed; Gate B→C passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres API test needs local DB'
+  note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; 04 completed; Gate B→C passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
   routing_plan:
     - stage: 00-context
       required: true
@@ -2069,7 +2073,7 @@ active_session:
       required: true
       status: in_progress
       started_at: '2026-07-30'
-      note: 'M86+M87+M88 COMPLETE; T89.1 COMPLETE @ 0006c0d (TC-165 red ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote); T89.2 still pending (can parallel); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres API test needs local DB'
+      note: 'M86+M87+M88 COMPLETE; T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
       skip_rationale:
     - stage: 08-verify-build
       required: true
@@ -2107,7 +2111,7 @@ active_session:
       required: false
       status: skipped
       skip_rationale: N/A
-  current_stage_note: 'S017/EV-015 07-build in_progress — Phase 20; M89; current_task=T89.3 in_progress (implement promote; green T89.1 @ 0006c0d red ModuleNotFoundError rebuild_promote); T89.2 still pending (can parallel); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres API test needs local DB'
+  current_stage_note: 'S017/EV-015 07-build in_progress — Phase 20; M89; current_task=T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres promote API test still needs local DB'
 sessions:
   - id: S016-chat-cold-start-ux
     type: feature
@@ -5374,16 +5378,15 @@ stages:
       report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
       note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
       s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion detail
-    note: 'S017/EV-015 07-build in_progress — T89.1 COMPLETE @ 0006c0d (TC-165 red confirmed ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote to green T89.1); T89.2 still pending (can parallel); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres API test needs local DB (same as T87.1/T88.4)'
+    note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); T89.1 import/unit tests green @ 301c31a; T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB (same as T87.1/T88.4)'
     phase: Phase 20 (M86-M90)
     milestone: M89
     substeps:
-      current_task: T89.3
-      next_task: T89.2
-      next_action: 'T89.3 implement promote shadow→live (green T89.1); T89.2 still pending (can parallel)'
+      current_task: T89.2
+      next_action: 'T89.2 eval rebuild_run_id reads shadow (TC-168); continue M89 after T89.2'
       task_status: in_progress
       in_progress_tasks:
-        - T89.3
+        - T89.2
       blocked_tasks: []
       completed_tasks_recent:
         - T86.1
@@ -5403,16 +5406,17 @@ stages:
         - T88.5
         - T88.6
         - T89.1
+        - T89.3
       completed_milestones:
         - M86
         - M87
         - M88
-      note: 'T89.1 COMPLETE @ 0006c0d — red confirmed (ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote); T89.2 pending; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres API test needs local DB'
+      note: 'T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
     execution_plan:
-      active_task: T89.3
+      active_task: T89.2
       active_milestone: M89
       active_phase: Phase 20
-      note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.3 (implement promote; green T89.1 @ 0006c0d); T89.2 still pending; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
+      note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.2 (eval rebuild_run_id / TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
       T86.1:
         status: completed
         started_at: '2026-07-30'
@@ -5497,12 +5501,12 @@ stages:
         note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
         canonical_current_state:
           active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-          active_milestone: 'M89 — T89.3 in_progress (T89.1 COMPLETE @ 0006c0d)'
-          active_task: T89.3
+          active_milestone: 'M89 — T89.2 in_progress (T89.3 COMPLETE @ 301c31a)'
+          active_task: T89.2
           task_status: in_progress
-          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1 (M89 partial); historical Phase 19 T82–T85 retained'
-          orchestrator_resume: 'S017/EV-015 07-build — T89.1 COMPLETE @ 0006c0d (TC-165 red ModuleNotFoundError rebuild_promote); T89.3 in_progress implement promote; T89.2 still pending (can parallel); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres API test needs local DB'
-          execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.3 in_progress'
+          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1+T89.3 (M89 partial); historical Phase 19 T82–T85 retained'
+          orchestrator_resume: 'S017/EV-015 07-build — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes; advisory: Postgres promote API test still needs local DB'
+          execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.2 in_progress'
       phase_19_gate: passed
       T85.3:
         status: completed
@@ -9503,7 +9507,7 @@ evolve_cycles:
     github_issue: 167
     source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/167
     current_stage: 07-build
-    current_stage_note: '07-build in_progress — T89.1 COMPLETE @ 0006c0d (TC-165 red ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote); T89.2 still pending (can parallel); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres API test needs local DB'
+    current_stage_note: '07-build in_progress — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: Postgres promote API test still needs local DB'
     mode: evolve
     delta_only: true
     branch: evolve/EV-015-corpus-reembed-migration
@@ -9864,18 +9868,18 @@ evolve_cycles:
         started: '2026-07-30'
         started_at: '2026-07-30'
         mode: delta
-        note: 'S017/EV-015 07-build in_progress — T89.1 COMPLETE @ 0006c0d (TC-165 red ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote); T89.2 still pending (can parallel); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; M86 COMPLETE (T86.1–T86.4) 2026-07-30; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending; advisory: Postgres API test needs local DB'
+        note: 'S017/EV-015 07-build in_progress — T89.3 COMPLETE @ 301c31a; T89.1 import tests green; T89.2 in_progress (eval rebuild_run_id / TC-168); M88 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; M86 COMPLETE (T86.1–T86.4) 2026-07-30; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending; advisory: Postgres promote API test still needs local DB'
         active_milestone: M89
-        active_task: T89.3
+        active_task: T89.2
         completed_milestones:
           - M86
           - M87
           - M88
         substeps:
-          current_task: T89.3
+          current_task: T89.2
           task_status: in_progress
           in_progress_tasks:
-            - T89.3
+            - T89.2
           completed_tasks_recent:
             - T86.1
             - T86.2
@@ -9894,6 +9898,7 @@ evolve_cycles:
             - T88.5
             - T88.6
             - T89.1
+            - T89.3
           T87.1:
             status: completed
             started_at: '2026-07-30'
@@ -9952,7 +9957,7 @@ evolve_cycles:
           T89.3: *id008
         advisory:
           - local Docker/Postgres unavailable — T87.1 + T88.4 Postgres-backed internal_write_api tests written but not executed
-          - T89.1 @ 0006c0d red confirmed (ModuleNotFoundError rebuild_promote); Postgres API test needs local DB
+          - T89.1 import/unit tests green @ 301c31a; Postgres promote API test still needs local DB
       08-verify-build:
         status: pending
       09-qa:
@@ -9974,7 +9979,7 @@ evolve_cycles:
       06-tech-tooling:
         status: skipped
         skip_rationale: N/A
-    next_action: 'T89.3 implement promote shadow→live (green T89.1 @ 0006c0d); T89.2 still pending (can parallel)'
+    next_action: 'T89.2 eval rebuild_run_id reads shadow (TC-168); T89.3 COMPLETE @ 301c31a; T89.1 import tests green'
     artifacts:
       - path: docs/sessions/S017-corpus-reembed-migration/session-brief.md
         status: completed
@@ -14525,7 +14530,18 @@ git_history:
       files_changed: 3
       timestamp: '2026-07-30T14:30:53-04:00'
       note: 'T89.1 COMPLETE @ 0006c0d — red confirmed (ModuleNotFoundError rebuild_promote); T89.3 in_progress (implement promote to green T89.1); T89.2 still pending (can parallel); advisory: Postgres API test needs local DB; phase_c remains pending'
+    - sha: 301c31a2c5b790d436205172ff04e739b9a11bd0
+      short: 301c31a
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T89.3] feat: transactional promote shadow rebuild to live'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 4
+      timestamp: '2026-07-30T14:35:44-04:00'
+      note: 'T89.3 COMPLETE @ 301c31a; T89.1 import/unit tests green; active_task=T89.2 in_progress (eval rebuild_run_id / TC-168); advisory: Postgres promote API test still needs local DB; phase_c remains pending'
   notes:
+    - '2026-07-30 S017/EV-015: T89.3 COMPLETE @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); T89.1 import tests green; active_task=T89.2 in_progress (eval rebuild_run_id reads shadow TC-168); advisory Postgres promote API test still needs local DB.'
     - '2026-07-30 S017/EV-015: T89.1 COMPLETE @ 0006c0d ([T89.1] test: promote shadow-to-live unit coverage (TC-165)); red confirmed ModuleNotFoundError rebuild_promote; active_task=T89.3 in_progress; T89.2 pending; advisory Postgres API test needs local DB.'
     - '2026-07-30 S017/EV-015: T88.6 COMPLETE @ 12b6689; M88 COMPLETE; advancing to M89/T89.1; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87).'
     - '2026-07-30 S016/EV-014: user_close_choice=done (option 1) — leave EV-014 closed; next_action=none; active_session remains null; no 15-service-health / close #87 / 17-retrospective.'
