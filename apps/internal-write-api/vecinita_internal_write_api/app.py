@@ -201,6 +201,11 @@ def _dependency_health_url(base: str) -> str:
     return f"{normalized}/health"
 
 
+def _document_url_key(url: object) -> str:
+    """Normalize document URLs for lookup (Pydantic HttpUrl adds a trailing slash)."""
+    return str(url).rstrip("/")
+
+
 def _row_datetime(row: Mapping[str, object], key: str) -> datetime:
     value = row_value(row, key)
     if isinstance(value, datetime):
@@ -656,10 +661,16 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
 
             upserted = 0
             for document in body.documents:
+                url_key = _document_url_key(document.url)
                 doc_row = (
                     conn.execute(
-                        text("SELECT id FROM documents WHERE url = :url"),
-                        {"url": str(document.url)},
+                        text(
+                            """
+                            SELECT id FROM documents
+                            WHERE rtrim(url, '/') = :url_key
+                            """
+                        ),
+                        {"url_key": url_key},
                     )
                     .mappings()
                     .first()

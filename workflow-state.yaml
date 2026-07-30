@@ -1947,7 +1947,7 @@ project:
       deploy_approval: phase_d_path_a_staging_sequence
       path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
       path_a_staging_result: PASS
-      head_sha: 180ad14
+      head_sha: 489a575
       commit_deployed: 180ad14
       alembic_revision: '20260730_0010'
       alembic_from: '20260728_0009'
@@ -1955,7 +1955,7 @@ project:
       untracked_left:
       - scripts/deploy/_tmp_proxy_key_check.py
       untracked_note: 'Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py'
-      next_action: 'Open PR to main; DO pins stay on evolve until merge'
+      next_action: 'CI red on PR #168 (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
       overall_result: PASS
       path_a_progress:
         alembic: pass
@@ -1985,7 +1985,7 @@ project:
       - full backfill still pending
       - DO pins on evolve until merge
       - do not commit scripts/deploy/_tmp_proxy_key_check.py
-      note: 'S017/EV-015 13-deploy-smoke COMPLETE 2026-07-30 — Path A deploy checkpoint APPROVED; report docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md; preparing PR to main; DO pins stay on evolve until merge; left untracked scripts/deploy/_tmp_proxy_key_check.py'
+      note: 'S017/EV-015 13-deploy-smoke COMPLETE — Path A approved; PR #168 open → main @ 489a575; CI red (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
       s016_baseline:
         status: completed
         started_at: '2026-07-29'
@@ -2184,6 +2184,10 @@ project:
       completed_at: '2026-07-30'
       deploy_checkpoint: approved
       deploy_checkpoint_at: '2026-07-30'
+      pr_number: 168
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+      pr_status: open
+      merge_approval: pending
     15-service-health:
       status: skipped
       started_at: '2026-07-29'
@@ -2428,7 +2432,7 @@ active_session:
   session_artifacts_pending: false
   session_artifacts_note: session-brief.md + routing-plan.md written under docs/sessions/S017-corpus-reembed-migration/
   phase0_approved: true
-  note: 'S017/EV-015 Path A deploy checkpoint APPROVED 2026-07-30 — 13 completed; preparing PR; DO pins stay on evolve until merge'
+  note: 'S017/EV-015 PR #168 opened 2026-07-30 → main @ 489a575 after Path A approval; CI red (coverage/security/ui-e2e); DO pins remain on evolve until merge; merge awaits explicit approval'
   routing_plan:
   - stage: 00-context
     required: true
@@ -2540,8 +2544,12 @@ active_session:
     skip_rationale:
     report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
     overall_result: PASS
-    note: 'COMPLETE — Path A deploy checkpoint approved; PR to main next; DO pins stay on evolve'
+    note: 'COMPLETE — Path A approved; PR #168 open → main; CI red — fix before merge; DO pins stay on evolve'
     completed_at: '2026-07-30'
+    pr_number: 168
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+    pr_status: open
+    next_action: 'CI red on PR #168 (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
   - stage: 03-plan-tooling
     required: false
     status: skipped
@@ -2554,7 +2562,10 @@ active_session:
     required: false
     status: skipped
     skip_rationale: N/A
-  current_stage_note: '13 COMPLETE — Path A approved; prepare PR to main'
+  current_stage_note: 'PR #168 open @ 489a575; CI red — fix before merge; DO pins stay on evolve'
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+  pr_number: 168
+  pr_status: open
 sessions:
 - id: S016-chat-cold-start-ux
   type: feature
@@ -6871,7 +6882,7 @@ stages:
     deploy_approval: phase_d_path_a_staging_sequence
     path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
     path_a_staging_result: PASS
-    head_sha: 180ad14
+    head_sha: 489a575
     commit_deployed: 180ad14
     alembic_revision: '20260730_0010'
     alembic_from: '20260728_0009'
@@ -6879,7 +6890,7 @@ stages:
     untracked_left:
     - scripts/deploy/_tmp_proxy_key_check.py
     untracked_note: 'Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py'
-    next_action: 'Open PR to main; DO pins stay on evolve until merge'
+    next_action: 'CI red on PR #168 (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
     overall_result: PASS
     path_a_progress:
       alembic: pass
@@ -6909,7 +6920,7 @@ stages:
     - full backfill still pending
     - DO pins on evolve until merge
     - do not commit scripts/deploy/_tmp_proxy_key_check.py
-    note: 'S017/EV-015 13-deploy-smoke COMPLETE 2026-07-30 — Path A deploy checkpoint APPROVED; report docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md; preparing PR to main; DO pins stay on evolve until merge; left untracked scripts/deploy/_tmp_proxy_key_check.py'
+    note: 'S017/EV-015 13-deploy-smoke COMPLETE — Path A approved; PR #168 open → main @ 489a575; CI red (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
     s016_baseline:
       status: completed
       started_at: '2026-07-29'
@@ -7123,6 +7134,10 @@ stages:
     completed_at: '2026-07-30'
     deploy_checkpoint: approved
     deploy_checkpoint_at: '2026-07-30'
+    pr_number: 168
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+    pr_status: open
+    merge_approval: pending
   14-hotfix:
     status: completed
     started_at: '2026-07-29'
@@ -10275,7 +10290,7 @@ evolve_cycles:
   github_issue: 167
   source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/167
   current_stage: pr_closeout
-  current_stage_note: '13 COMPLETE — Path A approved; preparing PR to main; DO pins stay on evolve'
+  current_stage_note: 'PR #168 open → main @ 489a575; CI red (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
   mode: evolve
   delta_only: true
   branch: evolve/EV-015-corpus-reembed-migration
@@ -10457,7 +10472,10 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-07-30'
-      note: '13 COMPLETE; PR closeout in progress; DO pins on evolve until merge'
+      note: 'PR #168 open → main @ 489a575; CI red — fix before merge; DO pins on evolve; merge awaits explicit approval'
+      pr_number: 168
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+      pr_status: open
     01-requirements:
       status: completed
       started: '2026-07-30'
@@ -11066,13 +11084,13 @@ evolve_cycles:
       deploy_approval: phase_d_path_a_staging_sequence
       path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
       path_a_staging_result: PASS
-      head_sha: 180ad14
+      head_sha: 489a575
       commit_deployed: 180ad14
       alembic_revision: '20260730_0010'
       report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
       untracked_left:
       - scripts/deploy/_tmp_proxy_key_check.py
-      next_action: 'Open PR to main; DO pins stay on evolve until merge'
+      next_action: 'CI red on PR #168 (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
       overall_result: PASS
       rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
       f36_eval_run_id: 01ca4019
@@ -11085,11 +11103,15 @@ evolve_cycles:
       - full backfill still pending
       - DO pins on evolve until merge
       - do not commit scripts/deploy/_tmp_proxy_key_check.py
-      note: 'S017/EV-015 13-deploy-smoke COMPLETE 2026-07-30 — Path A deploy checkpoint APPROVED; report docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md; preparing PR to main; DO pins stay on evolve until merge'
+      note: 'S017/EV-015 13-deploy-smoke COMPLETE — Path A approved; PR #168 open → main @ 489a575; CI watching/red; DO pins stay on evolve; merge awaits explicit approval'
       completed_at: '2026-07-30'
       completed: '2026-07-30'
       deploy_checkpoint: approved
       deploy_checkpoint_at: '2026-07-30'
+      pr_number: 168
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+      pr_status: open
+      merge_approval: pending
     03-plan-tooling:
       status: skipped
       skip_rationale: no new tooling surface for rebuild job beyond existing Modal/admin patterns
@@ -11099,7 +11121,7 @@ evolve_cycles:
     06-tech-tooling:
       status: skipped
       skip_rationale: N/A
-  next_action: 'Open PR evolve/EV-015-corpus-reembed-migration → main (TP-S017-05); hold DO pins until merge'
+  next_action: 'CI red on PR #168 (coverage/security/ui-e2e) — fix before merge; DO pins stay on evolve; merge awaits explicit approval'
   artifacts:
   - path: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
     kind: qa-report
@@ -11249,6 +11271,10 @@ evolve_cycles:
     choice: option_2
     summary: RESOLVED option 2 / TP-S017-01 — BUILD keeps full shadow dual-write + promote + F36-on-shadow in F41; OPS this cycle = live same-settings rebuild equivalence test; Q3 prefer rescrape. Specs rewrite deferred to 04 deliverables after full interview (deployment-integration / runbook / tech-plan report).
     blocking_for: []
+  pr_number: 168
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+  pr_status: open
+  merge_approval: pending
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -13333,6 +13359,7 @@ decisions_log:
 - 'EV-015/S017 2026-07-30: 12-verify-deploy COMPLETE — report docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md; result=ready; HEAD ref at checklist write 1c2e46e (deploy-checklist commit may follow); TP-S017-12-A/B prior; checkpoints.phase_d=pending_user_checkpoint; gates.deploy pending; next_action: Phase D checkpoint AskQuestion then invoke 13-deploy-smoke'
 - 'EV-015/S017 2026-07-30: 12-verify-deploy post-commit @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41); HEAD refs updated to 180ad14; checkpoints.phase_d remains pending_user_checkpoint (presenting AskQuestion now); left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit)'
 - 'S017/EV-015 2026-07-30: Path A deploy checkpoint APPROVED — mark 13-deploy-smoke completed; prepare PR to main; DO pins stay on evolve until merge'
+- 'S017/EV-015 2026-07-30: PR #168 opened → main after Path A approval; DO pins remain on evolve until merge'
 artifacts:
 - path: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
   kind: verification-report
@@ -14362,7 +14389,10 @@ git_history:
     created_at: '2026-07-30'
     session_id: S017-corpus-reembed-migration
     evolve_cycle_id: EV-015
-    note: Opened 2026-07-30 after 00-context complete; EV-015 allocated 2026-07-30 (F41); Phase 0 COMPLETE; evolve_cycle_id=EV-015
+    note: 'PR #168 open → main; merge awaits approval; DO pins on evolve'
+    pr_number: 168
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
+    head_sha: 489a575
   - name: evolve/EV-014-chat-cold-start-ux
     purpose: EV-014 / S016 — ChatRAG cold-start UX rotating messages (#87); F40
     base: main
@@ -16009,6 +16039,16 @@ git_history:
     - docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md
     - docs/sessions/S017-corpus-reembed-migration/reports/inspection/
     - workflow-state.yaml
+  - sha: 489a575
+    branch: evolve/EV-015-corpus-reembed-migration
+    message: '[EV-015] docs: Path A deploy-smoke PASS and 13 complete'
+    stage: 16-evolve
+    files_changed:
+    - docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
+    - workflow-state.yaml
+    timestamp: '2026-07-30T23:49:41Z'
+    session_id: S017-corpus-reembed-migration
+    evolve_cycle_id: EV-015
   notes:
   - '2026-07-30 S017/EV-015: 13-deploy-smoke Path A staging PASS @ 180ad14 — Alembic 20260730_0010; DO pins ACTIVE evolve; Modal DM redeployed; H1–H5 PASS; shadow→F36→promote 60/2; report deploy-smoke.md; checkpoints.deploy=pending_user_checkpoint; cycle NOT completed; do not commit scripts/deploy/_tmp_proxy_key_check.py.'
   - '2026-07-30 S017/EV-015: 12-verify-deploy post-commit @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41); HEAD refs → 180ad14; phase_d=pending_user_checkpoint (presenting AskQuestion now); left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit).'

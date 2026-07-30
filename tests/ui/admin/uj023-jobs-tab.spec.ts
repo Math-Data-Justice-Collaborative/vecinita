@@ -18,9 +18,11 @@ test.describe("Jobs tab monitoring (UJ-023)", () => {
   }) => {
     await page.goto("/jobs");
 
-    await expect(page.getByTestId("job-row")).toHaveCount(3);
+    // ingest + retag + eval + rebuild (F41) in mockJobsCatalog
+    await expect(page.getByTestId("job-row")).toHaveCount(4);
     await expect(page.getByText(/Ingest/i).first()).toBeVisible();
     await expect(page.getByText(/Retag/i).first()).toBeVisible();
+    await expect(page.getByText(/Rebuild/i).first()).toBeVisible();
     await expect(
       page.getByTestId("job-row").filter({ hasText: INGEST_JOB_ID.slice(0, 8) }),
     ).toBeVisible();
@@ -42,7 +44,7 @@ test.describe("Jobs tab monitoring (UJ-023)", () => {
     page,
   }) => {
     await page.goto("/jobs");
-    await expect(page.getByTestId("job-row")).toHaveCount(3);
+    await expect(page.getByTestId("job-row")).toHaveCount(4);
 
     const statusSelect = page.getByLabel(/status/i);
     await statusSelect.selectOption("failed");

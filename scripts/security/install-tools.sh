@@ -34,7 +34,7 @@ if [[ ! -x "${BIN_DIR}/opengrep" || "${SEC_FORCE:-0}" == "1" ]]; then
   ln -sfn "${HOME}/.opengrep/cli/latest/opengrep" "${BIN_DIR}/opengrep"
 fi
 
-# 2ms
+# 2ms — resolve asset URL via GitHub API (avoids /latest/download 404 races)
 if [[ ! -x "${BIN_DIR}/2ms" || "${SEC_FORCE:-0}" == "1" ]]; then
   case "${OS}-${ARCH}" in
     linux-amd64) A=linux-amd64.zip ;;
@@ -44,7 +44,15 @@ if [[ ! -x "${BIN_DIR}/2ms" || "${SEC_FORCE:-0}" == "1" ]]; then
     *) err "no 2ms asset"; exit 1 ;;
   esac
   tmp="$(mktemp -d)"
-  download "https://github.com/checkmarx/2ms/releases/latest/download/${A}" "${tmp}/${A}"
+  asset_url="$(
+    curl -fsSL https://api.github.com/repos/checkmarx/2ms/releases/latest \
+      | sed -n "s/.*\"browser_download_url\": *\"\\([^\"]*${A}\\)\".*/\\1/p" \
+      | head -1
+  )"
+  if [[ -z "${asset_url}" ]]; then
+    asset_url="https://github.com/checkmarx/2ms/releases/latest/download/${A}"
+  fi
+  download "${asset_url}" "${tmp}/${A}"
   unzip -qo "${tmp}/${A}" -d "${tmp}/out"
   bin="$(find "${tmp}/out" -type f \( -name 2ms -o -name 2ms.exe \) | head -1)"
   install -m 0755 "${bin}" "${BIN_DIR}/2ms"

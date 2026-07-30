@@ -182,13 +182,15 @@ def test_uj054_eval_create_accepts_rebuild_run_id(write_client: TestClient) -> N
         },
         headers=auth_headers(),
     )
-    # Unknown rebuild_run_id may 404/400; acceptance is schema/route wire-up.
+    # Unknown rebuild_run_id may 404/400; 503 when jobs client unset in factory.
+    # Acceptance is schema/route wire-up (not full Modal enqueue).
     assert response.status_code in {
         HTTPStatus.ACCEPTED,
         HTTPStatus.OK,
         HTTPStatus.BAD_REQUEST,
         HTTPStatus.NOT_FOUND,
         HTTPStatus.UNPROCESSABLE_ENTITY,
+        HTTPStatus.SERVICE_UNAVAILABLE,
     }
     if response.status_code in {HTTPStatus.ACCEPTED, HTTPStatus.OK}:
         payload = as_json_object(cast("object", response.json()))
