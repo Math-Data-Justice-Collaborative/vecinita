@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
 | **Active milestone** | M88: Rebuild job + shadow dry-run |
-| **Active task** | **T88.2** (in_progress) — dry_run writes shadow only (TC-164) |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1 |
+| **Active task** | **T88.4** (pending) — shadow dual-write + rebuild_runs lifecycle |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.3 |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **04-tech-plan drafting**; Standard+build (skip 05/06) |
 | **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
@@ -1786,7 +1786,7 @@ store-backed reembed/rechunk; `dry_run` → shadow tables keyed by `rebuild_run_
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T88.1 | Test: unit — JobOptions rebuild validation (modes, force, dry_run, document_ids) (TC-161/162/166) — red | Test | completed | RD-189–192, TC-161/162/166 | T86.3 | 2026-07-30 | S017 | F41 |
 | T88.2 | Test: unit — dry_run writes shadow only; live retrieval unchanged (TC-164) — red | Test | completed | RD-191, TP-S017-02, TC-164 | T86.3 | 2026-07-30 | S017 | F41 |
-| T88.3 | Code: rebuild worker — reembed / rechunk / rescrape; force bypass; stamps | Code | pending | ADR-040, RD-190 | T88.1, T87.4 | — | S017 | F41 |
+| T88.3 | Code: rebuild worker — reembed / rechunk / rescrape; force bypass; stamps | Code | completed | ADR-040, RD-190 | T88.1, T87.4 | 2026-07-30 | S017 | F41 |
 | T88.4 | Code: shadow dual-write path + `rebuild_runs` row lifecycle | Code | pending | TP-S017-02, TC-164 | T88.2, T88.3 | — | S017 | F41 |
 | T88.5 | Config: OpenAPI data-management JobOptions rebuild fields | Config | pending | TP-S017-06, openapi/data-management | T88.3 | — | S017 | F41 |
 | T88.6 | Docs: api-contract EV-015 rebuild paths locked to OpenAPI | Docs | pending | api-contract | T88.5 | — | S017 | F41 |
@@ -2512,9 +2512,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T87.5 | M87 | 20 | Code | completed | T87.2, T87.4 | 2026-07-30 | S017 | F41 | — |
 | T87.6 | M87 | 20 | Config | completed | T87.3, T87.5 | 2026-07-30 | S017 | F41 | — |
 | T88.1 | M88 | 20 | Test | completed | T86.3 | 2026-07-30 | S017 | F41 | — |
-| T88.2 | M88 | 20 | Test | in_progress | T86.3 | — | S017 | F41 | — |
-| T88.2 | M88 | 20 | Test | pending | T86.3 | — | S017 | F41 | — |
-| T88.3 | M88 | 20 | Code | pending | T88.1, T87.4 | — | S017 | F41 | — |
+| T88.2 | M88 | 20 | Test | completed | T86.3 | 2026-07-30 | S017 | F41 | — |
+| T88.3 | M88 | 20 | Code | completed | T88.1, T87.4 | 2026-07-30 | S017 | F41 | — |
 | T88.4 | M88 | 20 | Code | pending | T88.2, T88.3 | — | S017 | F41 | — |
 | T88.5 | M88 | 20 | Config | pending | T88.3 | — | S017 | F41 | — |
 | T88.6 | M88 | 20 | Docs | pending | T88.5 | — | S017 | F41 | — |

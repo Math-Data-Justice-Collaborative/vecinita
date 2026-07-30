@@ -10,6 +10,7 @@ from vecinita_shared_schemas.internal_write import AuditEventRequest
 from vecinita_data_management_backend.pipeline import (
     run_backfill_job,
     run_ingest_job,
+    run_rebuild_job,
     run_retag_job,
 )
 
@@ -87,6 +88,14 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
                 store=store,
                 write_client=scoped_write,
                 tag_client=_require_tag_client(tag_client),
+            )
+        elif record.job_type == "rebuild":
+            run_rebuild_job(
+                job_id,
+                store=store,
+                embed_client=embed_client,
+                write_client=scoped_write,
+                fetch_document=fetch_document,
             )
         else:
             run_ingest_job(

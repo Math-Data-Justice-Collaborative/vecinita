@@ -873,14 +873,14 @@ project:
           green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
         s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion 
           detail
-      note: 'S017/EV-015 07-build in_progress 2026-07-30 — T88.1 COMPLETE @ 430eb9e ([T88.1] test: JobOptions rebuild validation TC-161/162/166); advancing to T88.2 in_progress — unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker; M88; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes'
+      note: 'S017/EV-015 07-build in_progress — T88.3 in_progress (implement run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (TC-164 red ImportError awaiting T88.3+T88.4); next_action=Implement run_rebuild_job then T88.4 shadow dual-write to green T88.2; M88 in_progress; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes'
       phase: Phase 20 (M86-M90)
       milestone: M88
       substeps:
-        current_task: T88.2
+        current_task: T88.3
         task_status: in_progress
         in_progress_tasks:
-          - T88.2
+          - T88.3
         blocked_tasks: []
         completed_tasks_recent:
           - T86.1
@@ -894,16 +894,18 @@ project:
           - T87.5
           - T87.6
           - T88.1
-        next_task: T88.2
+          - T88.2
+        next_task: T88.4
+        next_action: 'Implement run_rebuild_job (T88.3); then T88.4 shadow dual-write to green T88.2 tests'
         completed_milestones:
           - M86
           - M87
-        note: 'T88.1 COMPLETE @ 430eb9e (JobOptions rebuild validation TC-161/162/166); T88.2 in_progress — unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker; M87 COMPLETE @ cb1bda8; advisory: local Docker unavailable — T87.1 TestClient persistence test not executed against Postgres yet'
+        note: 'T88.3 in_progress — implement run_rebuild_job; T88.2 COMPLETE @ 9cdc496 (red ImportError); then T88.4 shadow dual-write; M87 COMPLETE @ cb1bda8; advisory: local Docker unavailable — T87.1 TestClient persistence test not executed against Postgres yet'
       execution_plan:
-        active_task: T88.2
+        active_task: T88.3
         active_milestone: M88
         active_phase: Phase 20
-        note: 'S017/EV-015 Phase 20 — M86+M87 COMPLETE; M88 in_progress — T88.1 COMPLETE @ 430eb9e; T88.2 in_progress (TC-164 dry_run shadow-only); next T88.3 rebuild worker; historical S014 M85 / S016 F40 retained below'
+        note: 'S017/EV-015 Phase 20 — M86+M87 COMPLETE; M88 in_progress — T88.3 in_progress (run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (red ImportError); then T88.4 shadow dual-write; historical S014 M85 / S016 F40 retained below'
         T86.1:
           status: completed
           started_at: '2026-07-30'
@@ -957,9 +959,20 @@ project:
           commit: 430eb9e4f4d032f2967716687b1db7a3a6f23969
           note: 'JobOptions rebuild validation tests (TC-161/162/166) @ 430eb9e'
         T88.2:
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 9cdc4965c33f1db18537d2ba4a38cd44f898e17d
+          note: 'dry_run rebuild writes shadow only (TC-164) @ 9cdc496 — red (ImportError: run_rebuild_job); greened by T88.3+T88.4'
+          tdd: red
+          red_reason: ImportError run_rebuild_job
+        T88.3:
           status: in_progress
           started_at: '2026-07-30'
-          note: 'unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker'
+          note: 'Implement run_rebuild_job — reembed/rechunk/rescrape; force bypass; stamps (ADR-040, RD-190)'
+        T88.4:
+          status: pending
+          note: 'Shadow dual-write — green T88.2 dry_run shadow-only tests (TC-164)'
         T85.1:
           status: completed
           started_at: '2026-07-29'
@@ -977,11 +990,11 @@ project:
           note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
           canonical_current_state:
             active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-            active_milestone: 'M88 — T88.2 in_progress'
-            active_task: T88.2
+            active_milestone: 'M88 — T88.3 in_progress'
+            active_task: T88.3
             task_status: in_progress
-            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1; historical Phase 19 T82–T85 retained'
-            orchestrator_resume: 'S017/EV-015 07-build — T88.2: unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker; phase_c remains pending until Phase 20 / 07-build completes'
+            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.2; historical Phase 19 T82–T85 retained'
+            orchestrator_resume: 'S017/EV-015 07-build — T88.3 in_progress: implement run_rebuild_job; then T88.4 shadow dual-write to green T88.2 TC-164 (currently red ImportError); phase_c remains pending until Phase 20 / 07-build completes'
         phase_19_gate: passed
         T85.3:
           status: completed
@@ -2124,7 +2137,7 @@ active_session:
   session_artifacts_pending: false
   session_artifacts_note: 'session-brief.md + routing-plan.md written under docs/sessions/S017-corpus-reembed-migration/'
   phase0_approved: true
-  note: 'S017/EV-015 07-build in_progress — T88.1 COMPLETE @ 430eb9e; T88.2 in_progress (TC-164 dry_run shadow-only); then T88.3 rebuild worker; M88; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; 04 completed; Gate B→C passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: local Docker unavailable — T87.1 TestClient persistence not run against Postgres'
+  note: 'S017/EV-015 07-build in_progress — T88.3 in_progress (run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (TC-164 red ImportError); next_action=Implement run_rebuild_job then T88.4 shadow dual-write; M88 in_progress; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; 04 completed; Gate B→C passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: local Docker unavailable — T87.1 TestClient persistence not run against Postgres'
   routing_plan:
     - stage: 00-context
       required: true
@@ -2163,7 +2176,7 @@ active_session:
       required: true
       status: in_progress
       started_at: '2026-07-30'
-      note: 'M86+M87 COMPLETE; T88.1 COMPLETE @ 430eb9e; T88.2 in_progress (TC-164); then T88.3 rebuild worker'
+      note: 'M86+M87 COMPLETE; T88.3 in_progress — run_rebuild_job; T88.2 COMPLETE @ 9cdc496 (TC-164 red ImportError); then T88.4 shadow dual-write'
       skip_rationale:
     - stage: 08-verify-build
       required: true
@@ -2201,7 +2214,7 @@ active_session:
       required: false
       status: skipped
       skip_rationale: N/A
-  current_stage_note: 'S017/EV-015 07-build in_progress — Phase 20; M88; T88.1 COMPLETE @ 430eb9e; next_action=T88.2 — unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015; phase_c remains pending until Phase 20 / 07-build completes'
+  current_stage_note: 'S017/EV-015 07-build in_progress — Phase 20; M88; T88.3 in_progress (run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (red ImportError); next=T88.4 after T88.3; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015; phase_c remains pending until Phase 20 / 07-build completes'
 sessions:
   - id: S016-chat-cold-start-ux
     type: feature
@@ -5654,15 +5667,16 @@ stages:
         green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
       s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion 
         detail
-    note: 'S017/EV-015 07-build in_progress 2026-07-30 — T88.1 COMPLETE @ 430eb9e ([T88.1] test: JobOptions rebuild validation TC-161/162/166); advancing to T88.2 in_progress — unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker; M88; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes'
+    note: 'S017/EV-015 07-build in_progress — T88.3 in_progress (implement run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (TC-164 red ImportError awaiting T88.3+T88.4); next_action=Implement run_rebuild_job then T88.4 shadow dual-write to green T88.2; M88 in_progress; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes'
     phase: Phase 20 (M86-M90)
     milestone: M88
     substeps:
-      current_task: T88.2
-      next_task: T88.2
+      current_task: T88.3
+      next_task: T88.4
+      next_action: 'Implement run_rebuild_job (T88.3); then T88.4 shadow dual-write to green T88.2 tests'
       task_status: in_progress
       in_progress_tasks:
-        - T88.2
+        - T88.3
       blocked_tasks: []
       completed_tasks_recent:
         - T86.1
@@ -5676,15 +5690,16 @@ stages:
         - T87.5
         - T87.6
         - T88.1
+        - T88.2
       completed_milestones:
         - M86
         - M87
-      note: 'T88.1 COMPLETE @ 430eb9e (JobOptions rebuild validation TC-161/162/166); T88.2 in_progress — unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker; M87 COMPLETE @ cb1bda8; advisory: local Docker unavailable — T87.1 TestClient persistence test not executed against Postgres yet'
+      note: 'T88.3 in_progress — implement run_rebuild_job; T88.2 COMPLETE @ 9cdc496 (red ImportError); then T88.4 shadow dual-write; M87 COMPLETE @ cb1bda8; advisory: local Docker unavailable — T87.1 TestClient persistence test not executed against Postgres yet'
     execution_plan:
-      active_task: T88.2
+      active_task: T88.3
       active_milestone: M88
       active_phase: Phase 20
-      note: 'S017/EV-015 Phase 20 — M86+M87 COMPLETE; M88 in_progress — T88.1 COMPLETE @ 430eb9e; T88.2 in_progress (TC-164 dry_run shadow-only); next T88.3 rebuild worker; historical S014 M85 / S016 F40 retained below'
+      note: 'S017/EV-015 Phase 20 — M86+M87 COMPLETE; M88 in_progress — T88.3 in_progress (run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (red ImportError); then T88.4 shadow dual-write; historical S014 M85 / S016 F40 retained below'
       T86.1:
         status: completed
         started_at: '2026-07-30'
@@ -5738,9 +5753,20 @@ stages:
         commit: 430eb9e4f4d032f2967716687b1db7a3a6f23969
         note: 'JobOptions rebuild validation tests (TC-161/162/166) @ 430eb9e'
       T88.2:
+        status: completed
+        started_at: '2026-07-30'
+        completed_at: '2026-07-30'
+        commit: 9cdc4965c33f1db18537d2ba4a38cd44f898e17d
+        note: 'dry_run rebuild writes shadow only (TC-164) @ 9cdc496 — red (ImportError: run_rebuild_job); greened by T88.3+T88.4'
+        tdd: red
+        red_reason: ImportError run_rebuild_job
+      T88.3:
         status: in_progress
         started_at: '2026-07-30'
-        note: 'unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker'
+        note: 'Implement run_rebuild_job — reembed/rechunk/rescrape; force bypass; stamps (ADR-040, RD-190)'
+      T88.4:
+        status: pending
+        note: 'Shadow dual-write — green T88.2 dry_run shadow-only tests (TC-164)'
       T85.1:
         status: completed
         started_at: '2026-07-29'
@@ -5758,11 +5784,11 @@ stages:
         note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
         canonical_current_state:
           active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-          active_milestone: 'M88 — T88.2 in_progress'
-          active_task: T88.2
+          active_milestone: 'M88 — T88.3 in_progress'
+          active_task: T88.3
           task_status: in_progress
-          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1; historical Phase 19 T82–T85 retained'
-          orchestrator_resume: 'S017/EV-015 07-build — T88.2: unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker; phase_c remains pending until Phase 20 / 07-build completes'
+          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.2; historical Phase 19 T82–T85 retained'
+          orchestrator_resume: 'S017/EV-015 07-build — T88.3 in_progress: implement run_rebuild_job; then T88.4 shadow dual-write to green T88.2 TC-164 (currently red ImportError); phase_c remains pending until Phase 20 / 07-build completes'
       phase_19_gate: passed
       T85.3:
         status: completed
@@ -10014,7 +10040,7 @@ evolve_cycles:
     github_issue: 167
     source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/167
     current_stage: 07-build
-    current_stage_note: '07-build in_progress — T88.1 COMPLETE @ 430eb9e; T88.2 in_progress (TC-164 dry_run shadow-only); then T88.3 rebuild worker; M88; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: local Docker unavailable — T87.1 TestClient persistence test not executed against Postgres yet'
+    current_stage_note: '07-build in_progress — T88.3 in_progress (run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (TC-164 red ImportError); next_action=Implement run_rebuild_job then T88.4 shadow dual-write; M88 in_progress; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: local Docker unavailable — T87.1 TestClient persistence test not executed against Postgres yet'
     mode: evolve
     delta_only: true
     branch: evolve/EV-015-corpus-reembed-migration
@@ -10401,17 +10427,17 @@ evolve_cycles:
         started: '2026-07-30'
         started_at: '2026-07-30'
         mode: delta
-        note: 'S017/EV-015 07-build in_progress — T88.1 COMPLETE @ 430eb9e; T88.2 in_progress (TC-164); then T88.3; M87 COMPLETE @ cb1bda8; M86 COMPLETE (T86.1–T86.4) 2026-07-30; phase_c remains pending'
+        note: 'S017/EV-015 07-build in_progress — T88.3 in_progress (run_rebuild_job); T88.2 COMPLETE @ 9cdc496 (TC-164 red ImportError); then T88.4; M88 in_progress; M87 COMPLETE @ cb1bda8; M86 COMPLETE (T86.1–T86.4) 2026-07-30; phase_c remains pending'
         active_milestone: M88
-        active_task: T88.2
+        active_task: T88.3
         completed_milestones:
           - M86
           - M87
         substeps:
-          current_task: T88.2
+          current_task: T88.3
           task_status: in_progress
           in_progress_tasks:
-            - T88.2
+            - T88.3
           completed_tasks_recent:
             - T86.1
             - T86.2
@@ -10424,6 +10450,7 @@ evolve_cycles:
             - T87.5
             - T87.6
             - T88.1
+            - T88.2
           T87.1:
             status: completed
             started_at: '2026-07-30'
@@ -10461,9 +10488,20 @@ evolve_cycles:
             commit: 430eb9e4f4d032f2967716687b1db7a3a6f23969
             note: 'JobOptions rebuild validation tests (TC-161/162/166) @ 430eb9e'
           T88.2:
+            status: completed
+            started_at: '2026-07-30'
+            completed_at: '2026-07-30'
+            commit: 9cdc4965c33f1db18537d2ba4a38cd44f898e17d
+            note: 'dry_run rebuild writes shadow only (TC-164) @ 9cdc496 — red (ImportError: run_rebuild_job); greened by T88.3+T88.4'
+            tdd: red
+            red_reason: ImportError run_rebuild_job
+          T88.3:
             status: in_progress
             started_at: '2026-07-30'
-            note: 'unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker'
+            note: 'Implement run_rebuild_job — reembed/rechunk/rescrape; force bypass; stamps (ADR-040, RD-190)'
+          T88.4:
+            status: pending
+            note: 'Shadow dual-write — green T88.2 dry_run shadow-only tests (TC-164)'
         advisory:
           - 'local Docker unavailable — T87.1 TestClient persistence test not executed against Postgres yet'
       08-verify-build:
@@ -11651,6 +11689,8 @@ issue_log:
     note: 'RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains
       in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.'
 decisions_log:
+  - 'S017/EV-015 2026-07-30: T88.3 marked in_progress — implement run_rebuild_job (reembed/rechunk/rescrape; force bypass; stamps per ADR-040/RD-190). Deps T88.1+T87.4 met. T88.2 remains red (ImportError) until T88.3+T88.4. 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
+  - 'S017/EV-015 2026-07-30: T88.2 completed @ 9cdc496 ([T88.2] test: dry_run rebuild writes shadow only (TC-164)) — red (ImportError run_rebuild_job). current_task=T88.3 pending; next_action=Implement run_rebuild_job (T88.3) + shadow dual-write (T88.4) to green T88.2 tests. milestone=M88 in_progress; M87 COMPLETE; 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T88.1 completed @ 430eb9e ([T88.1] test: JobOptions rebuild validation TC-161/162/166); chore 02c8ca7 recorded plan advance. current_task=T88.2 in_progress; next_action=T88.2 — unit test dry_run writes shadow only (TC-164); then T88.3 rebuild worker. milestone=M88; M87 COMPLETE @ cb1bda8; 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T87.5 completed @ cb1bda8 ([T87.5] feat: store backfill worker and Admin BackfillForm); M87 COMPLETE (T87.1–T87.6). next_action=Start M88 T88.1 — JobOptions rebuild validation tests (TC-161/162/166). 07-build remains in_progress; active_session note: M87 done; advancing to M88; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: Resuming T87.5 — implementing run_backfill_job + Admin backfill UI (TP-S017-08 / ADR-040 §5). next_action=Implement T87.5 run_backfill_job + Admin BackfillForm; then complete M87. active_session.current_stage=07-build; stages.07-build.status=in_progress; checkpoints.phase_c remains pending (do not mark complete).'
@@ -15384,6 +15424,16 @@ git_history:
       files_changed: 2
       timestamp: '2026-07-30T13:49:02-04:00'
       note: 'Plan/state bookkeeping after T88.1; pointer advanced toward T88.2 (content initially recorded M87→T88.1; this update confirms T88.1→T88.2)'
+    - sha: 9cdc4965c33f1db18537d2ba4a38cd44f898e17d
+      short: 9cdc496
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T88.2] test: dry_run rebuild writes shadow only (TC-164)'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 3
+      timestamp: '2026-07-30T13:54:45-04:00'
+      note: 'TDD red: ImportError run_rebuild_job; greened by T88.3+T88.4; tests/unit/data_management/test_ev015_rebuild_shadow.py'
   notes:
     - '2026-07-30 S016/EV-014: user_close_choice=done (option 1) — leave EV-014 closed; next_action=none; active_session remains
       null; no 15-service-health / close #87 / 17-retrospective.'

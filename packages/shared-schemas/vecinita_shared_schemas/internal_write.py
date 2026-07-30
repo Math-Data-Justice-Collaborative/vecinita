@@ -91,6 +91,13 @@ class RebuildPromoteResponse(BaseModel):
     documents_promoted: int = Field(..., ge=0)
 
 
+class CreateRebuildRunResponse(BaseModel):
+    """POST /internal/v1/rebuild/runs response (TP-S017-02)."""
+
+    rebuild_run_id: UUID
+    status: str = "running"
+
+
 class DocumentSummary(BaseModel):
     """Brief document row returned by the list endpoint."""
 
