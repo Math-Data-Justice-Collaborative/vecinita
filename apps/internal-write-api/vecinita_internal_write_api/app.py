@@ -87,6 +87,7 @@ from vecinita_shared_schemas.internal_write import (
     EvalTimeseriesResponse,
     HealthAggregateResponse,
     HealthResponse,
+    RebuildPromoteResponse,
     RecentActivity,
     RetagJobResponse,
     ServiceHealth,
@@ -160,6 +161,11 @@ from vecinita_internal_write_api.rag_production_config_service import (
     RagConfigPromoteNotFoundError,
     get_active_rag_config,
     promote_rag_config,
+)
+from vecinita_internal_write_api.rebuild_promote import (
+    RebuildPromoteConflictError,
+    RebuildPromoteNotFoundError,
+    promote_rebuild_run,
 )
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
@@ -708,6 +714,28 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     )
                     upserted += 1
         return BatchUpsertResponse(upserted_chunks=upserted)
+
+    @app.post(
+        "/internal/v1/rebuild/{rebuild_run_id}/promote",
+        response_model=RebuildPromoteResponse,
+    )
+    def promote_rebuild_run_route(  # pyright: ignore[reportUnusedFunction]
+        rebuild_run_id: UUID,
+        _actor: WriteActorDep,
+    ) -> RebuildPromoteResponse:
+        """Copy shadow revision into live chunks/embeddings (TP-S017-03 / TC-165)."""
+        try:
+            return promote_rebuild_run(engine, rebuild_run_id=rebuild_run_id)
+        except RebuildPromoteNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc),
+            ) from exc
+        except RebuildPromoteConflictError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(exc),
+            ) from exc
 
     @app.delete(
         "/internal/v1/documents/bulk",

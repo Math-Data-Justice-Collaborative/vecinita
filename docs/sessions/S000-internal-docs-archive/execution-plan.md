@@ -12,7 +12,7 @@
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
 | **Active milestone** | M89: Promote + F36 rebuild_run_id + Admin UI |
 | **Active task** | **T89.2** (pending) — eval with rebuild_run_id reads shadow (TC-168) |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE); T89.1 |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE); T89.1; T89.3 |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **07-build** Phase 20; Standard+build (skip 05/06) |
 | **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
@@ -1798,9 +1798,9 @@ Admin Jobs enqueue rebuild + promote UI (admin role); response shape TP-S017-06.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T89.1 | Test: unit — promote copies shadow→live in one txn; counts (TC-165) — red | Test | pending | TP-S017-03/06, TC-165 | T88.4 | — | S017 | F41 |
+| T89.1 | Test: unit — promote copies shadow→live in one txn; counts (TC-165) — red | Test | completed | TP-S017-03/06, TC-165 | T88.4 | 2026-07-30 | S017 | F41 |
 | T89.2 | Test: unit — eval with `rebuild_run_id` reads shadow (TC-168) — red | Test | pending | TP-S017-04, TC-168, 02 M2 | T88.4 | — | S017 | F41 |
-| T89.3 | Code: `POST /internal/v1/rebuild/{rebuild_run_id}/promote` (admin JWT / service key) | Code | pending | TP-S017-06, 02 M6 | T89.1 | — | S017 | F41 |
+| T89.3 | Code: `POST /internal/v1/rebuild/{rebuild_run_id}/promote` (admin JWT / service key) | Code | completed | TP-S017-06, 02 M6 | T89.1 | 2026-07-30 | S017 | F41 |
 | T89.4 | Code: eval enqueue accepts `rebuild_run_id`; retrieval path for shadow | Code | pending | TP-S017-04 | T89.2 | — | S017 | F41 |
 | T89.5 | Test: Vitest — rebuild enqueue form (mode/force/dry_run) + promote control (TC-167/169) — red | Test | pending | UJ-053/054, TC-167/169 | T88.5 | — | S017 | F41 |
 | T89.6 | Code: Admin Jobs UI — enqueue rebuild + promote (admin-only) | Code | pending | S017-D5, 02 M3/M6 | T89.3, T89.5 | — | S017 | F41 |
@@ -2517,7 +2517,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T88.4 | M88 | 20 | Code | completed | T88.2, T88.3 | 2026-07-30 | S017 | F41 | — |
 | T88.5 | M88 | 20 | Config | completed | T88.3 | 2026-07-30 | S017 | F41 | — |
 | T88.6 | M88 | 20 | Docs | completed | T88.5 | 2026-07-30 | S017 | F41 | — |
-| T89.1 | M89 | 20 | Test | pending | T88.4 | — | S017 | F41 | — |
+| T89.1 | M89 | 20 | Test | completed | T88.4 | 2026-07-30 | S017 | F41 | — |
 | T89.2 | M89 | 20 | Test | pending | T88.4 | — | S017 | F41 | — |
 | T89.3 | M89 | 20 | Code | pending | T89.1 | — | S017 | F41 | — |
 | T89.4 | M89 | 20 | Code | pending | T89.2 | — | S017 | F41 | — |
