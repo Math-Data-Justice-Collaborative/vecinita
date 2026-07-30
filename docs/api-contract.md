@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-23 (S010/EV-011 F39 Slice A — playground rename + path aliases)  
+> **Last updated**: 2026-07-30 (S017/EV-015 F41 — JobOptions rebuild locked to OpenAPI)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -303,11 +303,25 @@ DO Postgres remains SoT for storage and eval metrics. Supabase = auth only. See 
 
 ### EV-015 / #167 — Corpus rebuild + document store (ADR-040, RD-188–RD-196)
 
+Locked OpenAPI paths (`openapi/data-management.yaml` JobOptions; promote / eval
+`rebuild_run_id` openapi deltas land in M89 / T89.7):
+
 | Method / path | Purpose |
 |---------------|---------|
 | `POST /jobs` (`job_type=rebuild`) | Enqueue rebuild with `mode` / `force` / `dry_run` / optional `document_ids` |
 | `POST /internal/v1/rebuild/{rebuild_run_id}/promote` | Promote shadow revision → live (staging; prod via runbook); **Admin UI** invokes this (02 M3); auth = **`admin`** (enqueue parity, 02 M6) |
 | `GET /internal/v1/documents/{id}/revisions` | List document revisions / version stamps (optional in M1) |
+
+**`POST /jobs` rebuild JobOptions (T88.5 / `openapi/data-management.yaml`, RD-189–192):**
+
+- **`job_type`:** `rebuild` (enum also includes `ingest|retag|eval`).
+- **`mode`:** required for rebuild — `reembed` | `rechunk` | `rescrape` (nullable in schema; validated required when `job_type=rebuild`).
+- **`force`:** bool, default `false` — bypass content_hash skip.
+- **`dry_run`:** bool, default `false` — shadow dual-write only until promote.
+- **`document_ids`:** optional UUID array (`maxItems` 1000); omit = whole corpus.
+- **`backfill` / `backfill_source` / `ack_reconstruct_from_chunks`:** one-time store backfill
+  (TP-S017-08); `from_chunks` requires ack.
+- **`urls`:** may be empty for rebuild (same as retag/eval); required non-empty for ingest.
 
 **Batch upsert delta:** documents may include `body_text`; revisions stamped with
 `embedding_model_id`, `embedding_dim`, `chunk_size_tokens`, `rebuild_run_id` as applicable.

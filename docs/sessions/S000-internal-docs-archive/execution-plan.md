@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
-| **Active milestone** | M88: Rebuild job + shadow dry-run |
-| **Active task** | **T88.6** (pending) — api-contract EV-015 rebuild paths locked to OpenAPI |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.5 |
+| **Active milestone** | M89: Promote + F36 rebuild_run_id + Admin UI |
+| **Active task** | **T89.1** (pending) — promote copies shadow→live (TC-165) |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE) |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **07-build** Phase 20; Standard+build (skip 05/06) |
 | **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
@@ -1789,7 +1789,7 @@ store-backed reembed/rechunk; `dry_run` → shadow tables keyed by `rebuild_run_
 | T88.3 | Code: rebuild worker — reembed / rechunk / rescrape; force bypass; stamps | Code | completed | ADR-040, RD-190 | T88.1, T87.4 | 2026-07-30 | S017 | F41 |
 | T88.4 | Code: shadow dual-write path + `rebuild_runs` row lifecycle | Code | completed | TP-S017-02, TC-164 | T88.2, T88.3 | 2026-07-30 | S017 | F41 |
 | T88.5 | Config: OpenAPI data-management JobOptions rebuild fields | Config | completed | TP-S017-06, openapi/data-management | T88.3 | 2026-07-30 | S017 | F41 |
-| T88.6 | Docs: api-contract EV-015 rebuild paths locked to OpenAPI | Docs | pending | api-contract | T88.5 | — | S017 | F41 |
+| T88.6 | Docs: api-contract EV-015 rebuild paths locked to OpenAPI | Docs | completed | api-contract | T88.5 | 2026-07-30 | S017 | F41 |
 
 #### M89: Promote + F36 rebuild_run_id + Admin UI
 
@@ -2516,7 +2516,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T88.3 | M88 | 20 | Code | completed | T88.1, T87.4 | 2026-07-30 | S017 | F41 | — |
 | T88.4 | M88 | 20 | Code | completed | T88.2, T88.3 | 2026-07-30 | S017 | F41 | — |
 | T88.5 | M88 | 20 | Config | completed | T88.3 | 2026-07-30 | S017 | F41 | — |
-| T88.6 | M88 | 20 | Docs | pending | T88.5 | — | S017 | F41 | — |
+| T88.6 | M88 | 20 | Docs | completed | T88.5 | 2026-07-30 | S017 | F41 | — |
 | T89.1 | M89 | 20 | Test | pending | T88.4 | — | S017 | F41 | — |
 | T89.2 | M89 | 20 | Test | pending | T88.4 | — | S017 | F41 | — |
 | T89.3 | M89 | 20 | Code | pending | T89.1 | — | S017 | F41 | — |
