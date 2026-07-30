@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
 | **Active milestone** | M88: Rebuild job + shadow dry-run |
-| **Active task** | **T88.1** (pending) — JobOptions rebuild validation tests (TC-161/162/166) |
+| **Active task** | **T88.1** (in_progress) — JobOptions rebuild validation tests (TC-161/162/166) |
 | **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE) |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **04-tech-plan drafting**; Standard+build (skip 05/06) |
@@ -1784,7 +1784,7 @@ store-backed reembed/rechunk; `dry_run` → shadow tables keyed by `rebuild_run_
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T88.1 | Test: unit — JobOptions rebuild validation (modes, force, dry_run, document_ids) (TC-161/162/166) — red | Test | pending | RD-189–192, TC-161/162/166 | T86.3 | — | S017 | F41 |
+| T88.1 | Test: unit — JobOptions rebuild validation (modes, force, dry_run, document_ids) (TC-161/162/166) — red | Test | completed | RD-189–192, TC-161/162/166 | T86.3 | 2026-07-30 | S017 | F41 |
 | T88.2 | Test: unit — dry_run writes shadow only; live retrieval unchanged (TC-164) — red | Test | pending | RD-191, TP-S017-02, TC-164 | T86.3 | — | S017 | F41 |
 | T88.3 | Code: rebuild worker — reembed / rechunk / rescrape; force bypass; stamps | Code | pending | ADR-040, RD-190 | T88.1, T87.4 | — | S017 | F41 |
 | T88.4 | Code: shadow dual-write path + `rebuild_runs` row lifecycle | Code | pending | TP-S017-02, TC-164 | T88.2, T88.3 | — | S017 | F41 |
