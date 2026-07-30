@@ -193,7 +193,12 @@ def resolve_eval_run_config(
             raise EvalRunPresetNotFoundError(msg)
         base = preset.config
     resolved = merge_eval_config(base, body.config)
-    return resolved.model_copy(update={"corpus_profile": body.corpus_profile})
+    return resolved.model_copy(
+        update={
+            "corpus_profile": body.corpus_profile,
+            "rebuild_run_id": body.rebuild_run_id,
+        }
+    )
 
 
 def create_eval_run(

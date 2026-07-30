@@ -397,6 +397,7 @@ class EvalRunCreateRequest(BaseModel):
     question: str | None = Field(default=None, min_length=1, max_length=2000)
     config: EvalConfigPartial | None = None
     preset_id: UUID | None = None
+    rebuild_run_id: UUID | None = None
 
     @model_validator(mode="after")
     def _require_question_for_adhoc(self) -> EvalRunCreateRequest:
