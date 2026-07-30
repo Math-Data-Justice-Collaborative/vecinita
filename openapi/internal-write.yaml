@@ -991,6 +991,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+  /rebuild/{rebuild_run_id}/promote:
+    post:
+      operationId: promoteRebuildRun
+      summary: Promote shadow rebuild revision to live corpus (EV-015 F41)
+      description: >
+        Transactional copy of shadow_chunks / shadow_embeddings for the given
+        rebuild_run_id into live tables (TP-S017-03/06). Admin JWT or internal
+        service key. Requires a completed dry-run run; already-promoted runs
+        return 409.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: rebuild_run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Shadow revision promoted to live
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RebuildPromoteResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Run not promotable (already promoted or not a completed dry-run)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 components:
   securitySchemes:
     bearerAuth:
@@ -1520,6 +1558,33 @@ components:
           type: string
           format: uuid
           nullable: true
+        rebuild_run_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: >
+            Optional F36-on-shadow binding (TP-S017-04). When set, retrieval/eval
+            reads shadow tables for this rebuild_run_id before promote.
+    RebuildPromoteResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - promoted
+        - rebuild_run_id
+        - chunks_promoted
+        - documents_promoted
+      properties:
+        promoted:
+          type: boolean
+        rebuild_run_id:
+          type: string
+          format: uuid
+        chunks_promoted:
+          type: integer
+          minimum: 0
+        documents_promoted:
+          type: integer
+          minimum: 0
     EvalRunCreateResponse:
       type: object
       required:

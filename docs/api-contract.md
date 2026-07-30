@@ -303,8 +303,9 @@ DO Postgres remains SoT for storage and eval metrics. Supabase = auth only. See 
 
 ### EV-015 / #167 — Corpus rebuild + document store (ADR-040, RD-188–RD-196)
 
-Locked OpenAPI paths (`openapi/data-management.yaml` JobOptions; promote / eval
-`rebuild_run_id` openapi deltas land in M89 / T89.7):
+Locked OpenAPI paths (`openapi/data-management.yaml` JobOptions;
+`openapi/internal-write.yaml` promote + `EvalRunCreateRequest.rebuild_run_id`
+— T89.7):
 
 | Method / path | Purpose |
 |---------------|---------|
