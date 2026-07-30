@@ -52,9 +52,12 @@ const PLAYGROUND_RUN_ID = "00000000-0000-0000-0000-0000000000aa";
 export const EVAL_JOB_ID = "55555555-5555-4555-8555-555555555555";
 /** Ingest job used for Jobs list → detail (UJ-050 / RD-178). */
 export const INGEST_JOB_ID = "job-playwright-001";
+/** Rebuild job for UJ-053 / TC-167. */
+export const REBUILD_JOB_ID = "77777777-7777-4777-8777-777777777777";
 /** Retag job with document_id on Jobs list (UJ-023 / TC-150). */
 export const RETAG_JOB_ID = "66666666-6666-4666-8666-666666666666";
 export const RETAG_DOC_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+export const REBUILD_RUN_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
 const PLAYGROUND_MODELS_BODY = {
   items: [
@@ -123,6 +126,20 @@ function mockJobsCatalog(): MockJob[] {
       dashboard_url: null,
       created_at: "2026-07-02T12:00:00Z",
       updated_at: "2026-07-02T12:00:05Z",
+    },
+    {
+      job_id: REBUILD_JOB_ID,
+      status: "completed",
+      job_type: "rebuild",
+      urls: [],
+      document_id: null,
+      eval_run_id: null,
+      error_code: null,
+      error_message: null,
+      modal_call_id: null,
+      dashboard_url: null,
+      created_at: "2026-07-01T09:00:00Z",
+      updated_at: "2026-07-01T09:05:00Z",
     },
   ];
 }
@@ -223,10 +240,21 @@ async function fulfillJobsRoute(route: Route): Promise<void> {
   }
 
   if (method === "POST" && path.endsWith("/jobs")) {
+    const raw = route.request().postData() ?? "{}";
+    let jobType = "ingest";
+    try {
+      const parsedBody = JSON.parse(raw) as {
+        options?: { job_type?: string };
+      };
+      jobType = parsedBody.options?.job_type ?? "ingest";
+    } catch {
+      jobType = "ingest";
+    }
+    const jobId = jobType === "rebuild" ? REBUILD_JOB_ID : INGEST_JOB_ID;
     await route.fulfill({
       status: 202,
       contentType: "application/json",
-      body: JSON.stringify({ job_id: INGEST_JOB_ID, status: "pending" }),
+      body: JSON.stringify({ job_id: jobId, status: "pending" }),
     });
     return;
   }
@@ -425,6 +453,19 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
         run_id: PLAYGROUND_RUN_ID,
         status: "pending",
         created_at: "2026-07-02T12:00:00Z",
+      }),
+    });
+    return;
+  }
+  if (url.includes("/internal/v1/rebuild/") && url.includes("/promote") && method === "POST") {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        promoted: true,
+        rebuild_run_id: REBUILD_RUN_ID,
+        chunks_promoted: 12,
+        documents_promoted: 3,
       }),
     });
     return;

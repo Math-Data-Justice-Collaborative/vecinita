@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
 | **Active milestone** | M90: Full-stack tests + deploy docs |
-| **Active task** | **T90.2** (pending) — API e2e UJ-054 shadow promote |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE); T89.1–T89.7 (M89 COMPLETE); T90.1 |
+| **Active task** | **T90.4** (pending) — CORS preflight for promote routes |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE); T89.1–T89.7 (M89 COMPLETE); T90.1–T90.3 |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **07-build** Phase 20; Standard+build (skip 05/06) |
 | **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
@@ -1814,8 +1814,8 @@ runbook ops (live equivalence + shadow→F36→promote); Phase 20 gate.
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T90.1 | Test: API e2e `test_uj053_rebuild_enqueue.py` (TC-161–163, TC-166) | Test | completed | UJ-053, e2e-coverage | T88.4, T89.6 | 2026-07-30 | S017 | F41 |
-| T90.2 | Test: API e2e `test_uj054_shadow_promote.py` (TC-164–165, TC-168) | Test | pending | UJ-054, TP-S017-07 | T89.3, T89.4 | — | S017 | F41 |
-| T90.3 | Test: Playwright `tests/ui/admin/uj053-rebuild-enqueue.spec.ts` + `uj054-rebuild-promote.spec.ts` | Test | pending | TC-167/169 | T89.6 | — | S017 | F41 |
+| T90.2 | Test: API e2e `test_uj054_shadow_promote.py` (TC-164–165, TC-168) | Test | completed | UJ-054, TP-S017-07 | T89.3, T89.4 | 2026-07-30 | S017 | F41 |
+| T90.3 | Test: Playwright `tests/ui/admin/uj053-rebuild-enqueue.spec.ts` + `uj054-rebuild-promote.spec.ts` | Test | completed | TC-167/169 | T89.6 | 2026-07-30 | S017 | F41 |
 | T90.4 | Test: CORS preflight for promote / new rebuild-related routes (H0c) | Test | pending | connectivity-gates | T89.3 | — | S017 | F41 |
 | T90.5 | Docs: deployment-integration + data-flow M5; runbook outline ops (TP-S017-01/07); Phase 20 gate | Docs | pending | M5, runbook | T90.1–T90.4 | — | S017 | F41 |
 
@@ -2525,8 +2525,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T89.6 | M89 | 20 | Code | completed | T89.3, T89.5 | 2026-07-30 | S017 | F41 | — |
 | T89.7 | M89 | 20 | Config | completed | T89.3, T89.4 | 2026-07-30 | S017 | F41 | — |
 | T90.1 | M90 | 20 | Test | completed | T88.4, T89.6 | 2026-07-30 | S017 | F41 | — |
-| T90.2 | M90 | 20 | Test | pending | T89.3, T89.4 | — | S017 | F41 | — |
-| T90.3 | M90 | 20 | Test | pending | T89.6 | — | S017 | F41 | — |
+| T90.2 | M90 | 20 | Test | completed | T89.3, T89.4 | 2026-07-30 | S017 | F41 | — |
+| T90.3 | M90 | 20 | Test | completed | T89.6 | 2026-07-30 | S017 | F41 | — |
 | T90.4 | M90 | 20 | Test | pending | T89.3 | — | S017 | F41 | — |
 | T90.5 | M90 | 20 | Docs | pending | T90.1–T90.4 | — | S017 | F41 | — |
 
