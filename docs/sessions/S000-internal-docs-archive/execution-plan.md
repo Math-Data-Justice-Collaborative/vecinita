@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
 | **Active milestone** | M89: Promote + F36 rebuild_run_id + Admin UI |
-| **Active task** | **T89.1** (pending) — promote copies shadow→live (TC-165) |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE) |
+| **Active task** | **T89.2** (pending) — eval with rebuild_run_id reads shadow (TC-168) |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE); T89.1 |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **07-build** Phase 20; Standard+build (skip 05/06) |
 | **Git branch** | `evolve/EV-015-corpus-reembed-migration` |

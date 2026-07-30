@@ -810,14 +810,14 @@ project:
         report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
         note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
         s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion detail
-      note: 'S017/EV-015 07-build in_progress — T88.6 in_progress: Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672 (lock OpenAPI JobOptions rebuild fields); M88 in_progress (T88.6 remains); T88.4 COMPLETE @ d889660; T88.3 COMPLETE @ 78e7a8c; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: TC-164 pipeline unit tests green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
+      note: 'S017/EV-015 07-build in_progress — T89.1 in_progress: unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689 (T88.1–T88.6); T88.6 COMPLETE @ 12b6689 ([T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI); M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87); advisory: TC-164 pipeline unit tests green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
       phase: Phase 20 (M86-M90)
-      milestone: M88
+      milestone: M89
       substeps:
-        current_task: T88.6
+        current_task: T89.1
         task_status: in_progress
         in_progress_tasks:
-          - T88.6
+          - T89.1
         blocked_tasks: []
         completed_tasks_recent:
           - T86.1
@@ -835,17 +835,19 @@ project:
           - T88.3
           - T88.4
           - T88.5
-        next_task: T89.1
-        next_action: 'Complete T88.6 — Docs api-contract EV-015 rebuild paths locked to OpenAPI; after T88.6: M88 complete then M89 T89.1'
+          - T88.6
+        next_task: T89.2
+        next_action: 'T89.1 unit test promote shadow→live (TC-165) red, then T89.2'
         completed_milestones:
           - M86
           - M87
-        note: 'T88.6 in_progress — Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672; M88 in_progress (T88.6 remains); advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
+          - M88
+        note: 'T89.1 in_progress — unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
       execution_plan:
-        active_task: T88.6
-        active_milestone: M88
+        active_task: T89.1
+        active_milestone: M89
         active_phase: Phase 20
-        note: 'S017/EV-015 Phase 20 — M86+M87 COMPLETE; M88 in_progress — active_task=T88.6 in_progress (Docs api-contract EV-015 rebuild paths locked to OpenAPI); T88.5 COMPLETE @ 6841672; historical S014 M85 / S016 F40 retained below'
+        note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.1 in_progress (unit test promote shadow→live TC-165 red, then T89.2); T88.6 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
         T86.1:
           status: completed
           started_at: '2026-07-30'
@@ -935,12 +937,12 @@ project:
           note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
           canonical_current_state:
             active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-            active_milestone: 'M88 — T88.6 in_progress (T88.5 COMPLETE)'
-            active_task: T88.6
+            active_milestone: 'M89 — T89.1 in_progress (M88 COMPLETE)'
+            active_task: T89.1
             task_status: in_progress
-            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.5; historical Phase 19 T82–T85 retained'
-            orchestrator_resume: 'S017/EV-015 07-build — T88.6 in_progress: Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672; after T88.6: M88 complete then M89 T89.1; M88 in_progress; phase_c remains pending until Phase 20 / 07-build completes'
-            execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T88.6 in_progress'
+            tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); historical Phase 19 T82–T85 retained'
+            orchestrator_resume: 'S017/EV-015 07-build — T89.1 in_progress: unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes'
+            execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.1 in_progress'
         phase_19_gate: passed
         T85.3:
           status: completed
@@ -963,9 +965,15 @@ project:
             - T88.3
           note: 'Config OpenAPI JobOptions rebuild fields locked @ 6841672 ([T88.5] config: lock OpenAPI JobOptions rebuild fields)'
         T88.6: &id005
+          status: completed
+          started_at: '2026-07-30'
+          completed_at: '2026-07-30'
+          commit: 12b6689d84eef17b8214fad4d05af0adc0b0a7a3
+          note: 'Docs api-contract EV-015 rebuild JobOptions locked to OpenAPI @ 12b6689 ([T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI)'
+        T89.1: &id006
           status: in_progress
           started_at: '2026-07-30'
-          note: 'Docs api-contract EV-015 rebuild paths locked to OpenAPI'
+          note: 'unit test promote shadow→live (TC-165) — expect red; then T89.2'
       s010_baseline:
         status: in_progress
         started_at: '2026-07-10'
@@ -2013,7 +2021,7 @@ active_session:
   session_artifacts_pending: false
   session_artifacts_note: 'session-brief.md + routing-plan.md written under docs/sessions/S017-corpus-reembed-migration/'
   phase0_approved: true
-  note: 'S017/EV-015 07-build in_progress — T88.6 in_progress: Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672 (lock OpenAPI JobOptions rebuild fields); M88 in_progress (T88.6 remains); T88.4 COMPLETE @ d889660; T88.3 COMPLETE @ 78e7a8c; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; 04 completed; Gate B→C passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
+  note: 'S017/EV-015 07-build in_progress — T89.1 in_progress: unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689 (T88.1–T88.6); T88.6 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; 04 completed; Gate B→C passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87); advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
   routing_plan:
     - stage: 00-context
       required: true
@@ -2050,7 +2058,7 @@ active_session:
       required: true
       status: in_progress
       started_at: '2026-07-30'
-      note: 'M86+M87 COMPLETE; T88.6 in_progress (Docs api-contract EV-015 rebuild paths locked to OpenAPI); T88.5 COMPLETE @ 6841672; M88 in_progress (T88.6 remains)'
+      note: 'M86+M87+M88 COMPLETE; T89.1 in_progress (unit test promote shadow→live TC-165 red, then T89.2); M88 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete'
       skip_rationale:
     - stage: 08-verify-build
       required: true
@@ -2088,7 +2096,7 @@ active_session:
       required: false
       status: skipped
       skip_rationale: N/A
-  current_stage_note: 'S017/EV-015 07-build in_progress — Phase 20; M88; current_task=T88.6 in_progress (Docs api-contract EV-015 rebuild paths locked to OpenAPI); T88.5 COMPLETE @ 6841672; next after T88.6: M88 complete then M89 T89.1; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015; phase_c remains pending until Phase 20 / 07-build completes'
+  current_stage_note: 'S017/EV-015 07-build in_progress — Phase 20; M89; current_task=T89.1 in_progress (unit test promote shadow→live TC-165 red, then T89.2); M88 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; mode=evolve delta_only=true feature_ids=[F41] cycle=EV-015; phase_c remains pending until Phase 20 / 07-build completes'
 sessions:
   - id: S016-chat-cold-start-ux
     type: feature
@@ -5355,16 +5363,16 @@ stages:
       report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
       note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
       s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 completion detail
-    note: 'S017/EV-015 07-build in_progress — T88.6 in_progress: Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672 (lock OpenAPI JobOptions rebuild fields); M88 in_progress (T88.6 remains); T88.4 COMPLETE @ d889660; T88.3 COMPLETE @ 78e7a8c; M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: TC-164 pipeline unit tests green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
+    note: 'S017/EV-015 07-build in_progress — T89.1 in_progress: unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689 (T88.1–T88.6); T88.6 COMPLETE @ 12b6689 ([T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI); M87 COMPLETE @ cb1bda8; F41 / Phase 20; M86 COMPLETE; Phase 4 + Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87); advisory: TC-164 pipeline unit tests green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
     phase: Phase 20 (M86-M90)
-    milestone: M88
+    milestone: M89
     substeps:
-      current_task: T88.6
-      next_task: T89.1
-      next_action: 'Complete T88.6 — Docs api-contract EV-015 rebuild paths locked to OpenAPI; after T88.6: M88 complete then M89 T89.1'
+      current_task: T89.1
+      next_task: T89.2
+      next_action: 'T89.1 unit test promote shadow→live (TC-165) red, then T89.2'
       task_status: in_progress
       in_progress_tasks:
-        - T88.6
+        - T89.1
       blocked_tasks: []
       completed_tasks_recent:
         - T86.1
@@ -5382,15 +5390,17 @@ stages:
         - T88.3
         - T88.4
         - T88.5
+        - T88.6
       completed_milestones:
         - M86
         - M87
-      note: 'T88.6 in_progress — Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672; M88 in_progress (T88.6 remains); advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
+        - M88
+      note: 'T89.1 in_progress — unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
     execution_plan:
-      active_task: T88.6
-      active_milestone: M88
+      active_task: T89.1
+      active_milestone: M89
       active_phase: Phase 20
-      note: 'S017/EV-015 Phase 20 — M86+M87 COMPLETE; M88 in_progress — active_task=T88.6 in_progress (Docs api-contract EV-015 rebuild paths locked to OpenAPI); T88.5 COMPLETE @ 6841672; historical S014 M85 / S016 F40 retained below'
+      note: 'S017/EV-015 Phase 20 — M86+M87+M88 COMPLETE; M89 in_progress — active_task=T89.1 in_progress (unit test promote shadow→live TC-165 red, then T89.2); T88.6 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; historical S014 M85 / S016 F40 retained below'
       T86.1:
         status: completed
         started_at: '2026-07-30'
@@ -5475,12 +5485,12 @@ stages:
         note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
         canonical_current_state:
           active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — in_progress (S017)'
-          active_milestone: 'M88 — T88.6 in_progress (T88.5 COMPLETE)'
-          active_task: T88.6
+          active_milestone: 'M89 — T89.1 in_progress (M88 COMPLETE)'
+          active_task: T89.1
           task_status: in_progress
-          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.5; historical Phase 19 T82–T85 retained'
-          orchestrator_resume: 'S017/EV-015 07-build — T88.6 in_progress: Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672; after T88.6: M88 complete then M89 T89.1; M88 in_progress; phase_c remains pending until Phase 20 / 07-build completes'
-          execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T88.6 in_progress'
+          tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); historical Phase 19 T82–T85 retained'
+          orchestrator_resume: 'S017/EV-015 07-build — T89.1 in_progress: unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending until Phase 20 / 07-build completes'
+          execution_plan_md_note: 'Parent (07-build) will edit docs/sessions/S000-internal-docs-archive/execution-plan.md Current State pointer to T89.1 in_progress'
       phase_19_gate: passed
       T85.3:
         status: completed
@@ -5496,6 +5506,7 @@ stages:
         completed_at: '2026-07-29'
       T88.5: *id003
       T88.6: *id005
+      T89.1: *id006
     s010_baseline:
       status: in_progress
       started_at: '2026-07-10'
@@ -9478,7 +9489,7 @@ evolve_cycles:
     github_issue: 167
     source_issue: https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/167
     current_stage: 07-build
-    current_stage_note: '07-build in_progress — T88.6 in_progress: Docs api-contract EV-015 rebuild paths locked to OpenAPI; T88.5 COMPLETE @ 6841672 (lock OpenAPI JobOptions rebuild fields); M88 in_progress (T88.6 remains); T88.4 COMPLETE @ d889660; T88.3 COMPLETE @ 78e7a8c; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
+    current_stage_note: '07-build in_progress — T89.1 in_progress: unit test promote shadow→live (TC-165) red, then T89.2; M88 COMPLETE @ 12b6689 (T88.1–T88.6); T88.6 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; Phase 20; M86 COMPLETE; Gate B→C PASS; checkpoints.phase_b=passed; phase_c remains pending until Phase 20 / 07-build completes; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87); advisory: TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same as T87.1)'
     mode: evolve
     delta_only: true
     branch: evolve/EV-015-corpus-reembed-migration
@@ -9839,17 +9850,18 @@ evolve_cycles:
         started: '2026-07-30'
         started_at: '2026-07-30'
         mode: delta
-        note: 'S017/EV-015 07-build in_progress — T88.6 in_progress (Docs api-contract EV-015 rebuild paths locked to OpenAPI); T88.5 COMPLETE @ 6841672; M88 in_progress (T88.6 remains); T88.4 COMPLETE @ d889660; T88.3 COMPLETE @ 78e7a8c; M87 COMPLETE @ cb1bda8; M86 COMPLETE (T86.1–T86.4) 2026-07-30; phase_c remains pending'
-        active_milestone: M88
-        active_task: T88.6
+        note: 'S017/EV-015 07-build in_progress — T89.1 in_progress (unit test promote shadow→live TC-165 red, then T89.2); M88 COMPLETE @ 12b6689 (T88.1–T88.6); T88.6 COMPLETE @ 12b6689; M87 COMPLETE @ cb1bda8; M86 COMPLETE (T86.1–T86.4) 2026-07-30; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete; phase_c remains pending'
+        active_milestone: M89
+        active_task: T89.1
         completed_milestones:
           - M86
           - M87
+          - M88
         substeps:
-          current_task: T88.6
+          current_task: T89.1
           task_status: in_progress
           in_progress_tasks:
-            - T88.6
+            - T89.1
           completed_tasks_recent:
             - T86.1
             - T86.2
@@ -9866,6 +9878,7 @@ evolve_cycles:
             - T88.3
             - T88.4
             - T88.5
+            - T88.6
           T87.1:
             status: completed
             started_at: '2026-07-30'
@@ -9919,6 +9932,7 @@ evolve_cycles:
           T88.4: *id002
           T88.5: *id003
           T88.6: *id005
+          T89.1: *id006
         advisory:
           - local Docker/Postgres unavailable — T87.1 + T88.4 Postgres-backed internal_write_api tests written but not executed
       08-verify-build:
@@ -9942,7 +9956,7 @@ evolve_cycles:
       06-tech-tooling:
         status: skipped
         skip_rationale: N/A
-    next_action: 'Complete T88.6 — Docs api-contract EV-015 rebuild paths locked to OpenAPI; after T88.6: M88 complete then M89 T89.1'
+    next_action: 'T89.1 unit test promote shadow→live (TC-165) red, then T89.2'
     artifacts:
       - path: docs/sessions/S017-corpus-reembed-migration/session-brief.md
         status: completed
@@ -11072,6 +11086,7 @@ issue_log:
     blocking_for: []
     note: 'RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.'
 decisions_log:
+  - 'S017/EV-015 2026-07-30: T88.6 completed @ 12b6689 ([T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI); M88 COMPLETE (T88.1–T88.6). Active milestone → M89 / T89.1 in_progress — unit test promote shadow→live (TC-165) red, then T89.2. TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87). current_stage remains 07-build; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T88.5 completed @ 6841672 ([T88.5] config: lock OpenAPI JobOptions rebuild fields) — OpenAPI JobOptions rebuild fields locked. current_task=T88.6 in_progress (Docs api-contract EV-015 rebuild paths locked to OpenAPI); next_action=Complete T88.6; after T88.6: M88 complete then M89 T89.1. milestone=M88 in_progress (T88.6 remains); M87 COMPLETE; 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T88.5 marked in_progress — Config OpenAPI data-management JobOptions rebuild fields (depends T88.3 met). Resume into T88.5 on branch evolve/EV-015-corpus-reembed-migration; current_stage remains 07-build; active_session=S017; cycle=EV-015. Parent will sync execution-plan.md Current State pointer (workflow-state canonical_current_state updated). next_action=Complete T88.5 then T88.6; M88 in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
   - 'S017/EV-015 2026-07-30: T88.4 completed @ d889660 ([T88.4] feat: shadow dual-write and rebuild_runs lifecycle) — shadow dual-write + rebuild_runs lifecycle (internal-write routes + complete_rebuild_run); TC-164 pipeline unit tests green; Postgres-backed internal_write_api tests written but not executed (local Docker/Postgres unavailable — same advisory as T87.1). current_task=T88.5 pending; next_action=T88.5 — OpenAPI data-management JobOptions rebuild fields. milestone=M88 in_progress (T88.5, T88.6 remain); M87 COMPLETE; 07-build remains in_progress; checkpoints.phase_c remains pending until Phase 20 / 07-build completes (do not mark complete).'
@@ -14472,7 +14487,18 @@ git_history:
       files_changed: 3
       timestamp: '2026-07-30T14:19:27-04:00'
       note: 'T88.5 COMPLETE; T88.6 in_progress — Docs api-contract EV-015 rebuild paths locked to OpenAPI; after T88.6: M88 complete then M89 T89.1; phase_c remains pending'
+    - sha: 12b6689d84eef17b8214fad4d05af0adc0b0a7a3
+      short: 12b6689
+      branch: evolve/EV-015-corpus-reembed-migration
+      message: '[T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI'
+      stage: 07-build
+      session_id: S017-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      files_changed: 3
+      timestamp: '2026-07-30T14:25:58-04:00'
+      note: 'T88.6 COMPLETE; M88 COMPLETE (T88.1–T88.6); active milestone M89 / T89.1 in_progress — unit test promote shadow→live (TC-165) red, then T89.2; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87); phase_c remains pending'
   notes:
+    - '2026-07-30 S017/EV-015: T88.6 COMPLETE @ 12b6689; M88 COMPLETE; advancing to M89/T89.1; TP-S017-05 single PR-55 at phase end — no per-milestone minor PR; defer 08-verify-build until Phase 20 complete (same as M86/M87).'
     - '2026-07-30 S016/EV-014: user_close_choice=done (option 1) — leave EV-014 closed; next_action=none; active_session remains null; no 15-service-health / close #87 / 17-retrospective.'
     - "2026-07-29 S016/EV-014: Close-out docs commit 0144ee6 pushed to origin/main ('docs: close EV-014 / S016 after F40 staging deploy'); watching CI for docs commit; F40 feature already live @ 82ad84e; EV-014 remains completed; active_session not reopened."
     - '2026-07-29 S016/EV-014 CLOSED — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533; F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app (index-Biqk9SBJ.js); H0c+H4/H5 PASS; 13-deploy-smoke completed; checkpoints.deploy/phase_d/gates.deploy/c_to_d=passed; active_session archived; next_action=AskQuestion close options (done / 15-service-health / close #87 / retrospective)'
