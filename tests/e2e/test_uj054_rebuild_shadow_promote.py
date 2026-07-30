@@ -24,7 +24,9 @@ if TYPE_CHECKING:
     from fastapi.testclient import TestClient
     from sqlalchemy.engine import Engine
 
-pytest_plugins = ["tests.unit.internal_write_api.conftest"]
+# Fixtures write_client / engine / seeded_document live in tests/e2e/conftest.py.
+# Do not pytest_plugins the unit conftest — it double-registers when CI collects
+# tests/unit and tests/e2e together.
 
 pytestmark = pytest.mark.e2e
 
