@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### EV-014: ChatRAG cold-start wait UX (F40) — S016 / #87
+
+- Rotating bilingual fun-fact/info messages during cold-start / slow first token
+- Soft donate CTA + cookie/localStorage consent (ADR-039)
+- ChatRAG FE only (no Modal/backend change)
+- **PR:** [#157](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157) → `main` @ `82ad84e`
+
 ### EV-012: Unified Admin Jobs (F32/F36) — S013 / #116
 
 - Modal-primary Jobs API: extras, admin cancel/retry/delete, `GET /jobs/events` SSE

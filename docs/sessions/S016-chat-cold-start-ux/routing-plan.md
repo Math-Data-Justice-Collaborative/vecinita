@@ -3,13 +3,13 @@
 | Stage | Required | Status | Notes |
 |-------|----------|--------|-------|
 | 00-context | yes | completed | Session open; EV-014 stub; Lean+build approved |
-| 16-evolve | yes | in_progress | Orchestrator — Phase A specs written |
+| 16-evolve | yes | completed | Orchestrator — EV-014 closed after 13 PASS |
 | 01-requirements | yes | completed | F40; UJ-052; TC-156–160; AC-CS1–8; ADR-039; RD-183–187 |
 | 02-verify-plan | yes | completed | Gate A→B passed (M1–M3 A) |
 | 07-build | yes | completed | ChatRAG FE cold-start UX (F40) |
 | 08-verify-build | yes | completed | verification-report.md PASS |
 | 10-e2e | yes | completed | e2e-report.md PASS (chat Playwright 8/8) |
-| 13-deploy-smoke | yes | in_progress | PR #157; staging F40 awaits merge |
+| 13-deploy-smoke | yes | completed | PR #157 merged; F40 live; H0ci + H4/H5 PASS |
 
 ## Skipped
 
