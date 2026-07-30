@@ -1,9 +1,10 @@
 # Deploy Checklist
 
-> **Generated**: 2026-06-26 (S002 delta)  
-> **Status**: **not ready**  
-> **Session**: S002-admin-job-management
+> **Generated**: 2026-07-30 (S017 / EV-015 delta)  
+> **Status**: **ready**  
+> **Session**: S017-corpus-reembed-migration  
+> **Feature**: F41 corpus rebuild / shadow promote (#167)
 
-S002 F32 + #88 deploy checklist — Modal `GET /jobs` redeploy required before Jobs tab works in production.
+Full checklist: [sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md](sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md)
 
-Full checklist: [sessions/S002-admin-job-management/reports/deploy-checklist.md](sessions/S002-admin-job-management/reports/deploy-checklist.md)
+Prior: [sessions/S002-admin-job-management/reports/deploy-checklist.md](sessions/S002-admin-job-management/reports/deploy-checklist.md)

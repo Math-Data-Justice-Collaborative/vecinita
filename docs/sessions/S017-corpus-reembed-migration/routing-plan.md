@@ -7,12 +7,12 @@
 | 01-requirements | yes | completed | F41 delta specs + ADR-040 |
 | 02-verify-plan | yes | completed | Gate A→B PASS 2026-07-30; M1–M6 |
 | 04-tech-plan | yes | completed | TP-S017-01–09; Phase 20; Gate B→C PASS |
-| 07-build | yes | in_progress | Phase 20 M86 done → M87 |
-| 08-verify-build | yes | pending | verification-report.md |
-| 09-qa | yes | pending | Standard includes QA |
-| 10-e2e | yes | pending | API (+ UI if admin trigger) |
-| 11-verify-impl | yes | pending | Per-AC sign-off |
-| 12-verify-deploy | yes | pending | Staging deploy verify |
+| 07-build | yes | completed | Phase 20 M86–M90 |
+| 08-verify-build | yes | completed | verification-report.md |
+| 09-qa | yes | completed | qa-report.md |
+| 10-e2e | yes | completed | e2e-report.md |
+| 11-verify-impl | yes | completed | verify-impl.md |
+| 12-verify-deploy | yes | completed | deploy-checklist.md — ready |
 | 13-deploy-smoke | yes | pending | Staging smoke → prod cutover policy |
 
 ## Skipped

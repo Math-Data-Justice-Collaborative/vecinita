@@ -195,16 +195,17 @@
 
 ### EV-015 — Corpus document store + rebuild (#167, F41) — S017
 
-- [ ] **AC-RB1**: Ingest persists normalized body + revision in Postgres document store (TC-163, ADR-040); **one-time backfill** fills store for existing corpus docs (02 M4).
-- [ ] **AC-RB2**: `job_type=rebuild` supports `mode ∈ {reembed, rechunk, rescrape}` (TC-161–162).
-- [ ] **AC-RB3**: Store-backed `reembed`/`rechunk` do not scrape URLs (TC-161, RD-190).
-- [ ] **AC-RB4**: `force=true` bypasses content_hash skip (TC-162, #163).
-- [ ] **AC-RB5**: Optional `document_ids` scopes rebuild; default whole corpus (TC-166).
-- [ ] **AC-RB6**: `dry_run=true` writes shadow only; live retrieval unchanged until promote (TC-164).
-- [ ] **AC-RB7**: Promote activates shadow revision; prior revision retained (TC-165); **Admin UI** promote control for **`admin`** role (TC-169, 02 M3/M6).
-- [ ] **AC-RB8**: Staging promote requires **F36 gate record against shadow before promote** (TC-168, S017-D6, 02 M2).
-- [ ] **AC-RB9**: Version stamps (`embedding_model_id`, dim, chunk settings, `rebuild_run_id`) queryable (RD-193).
-- [ ] **AC-RB10**: Admin Jobs UI enqueues rebuild; progress via Jobs SSE/detail only (TC-167, UJ-053); retag remains separate; writes via internal-write only (ADR-007); prod live rebuild not required in EV-015.
+- [x] **AC-RB1**: Ingest persists normalized body + revision in Postgres document store (TC-163, ADR-040); **one-time backfill** fills store for existing corpus docs (02 M4). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB2**: `job_type=rebuild` supports `mode ∈ {reembed, rechunk, rescrape}` (TC-161–162). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB3**: Store-backed `reembed`/`rechunk` do not scrape URLs (TC-161, RD-190). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB4**: `force=true` bypasses content_hash skip (TC-162, #163). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB5**: Optional `document_ids` scopes rebuild; default whole corpus (TC-166). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB6**: `dry_run=true` writes shadow only; live retrieval unchanged until promote (TC-164). *(11-verify-impl S017 2026-07-30; live promote API local deferred to CI)*
+- [x] **AC-RB7**: Promote activates shadow revision; prior revision retained (TC-165); **Admin UI** promote control for **`admin`** role (TC-169, 02 M3/M6). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB8**: Staging promote requires **F36 gate record against shadow before promote** (TC-168, S017-D6, 02 M2). *(approved w/ staging drill deferred to 12/13 — S017 2026-07-30)*
+- [x] **AC-RB9**: Version stamps (`embedding_model_id`, dim, chunk settings, `rebuild_run_id`) queryable (RD-193). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB10**: Admin Jobs UI enqueues rebuild; progress via Jobs SSE/detail only (TC-167, UJ-053); retag remains separate; writes via internal-write only (ADR-007); prod live rebuild not required in EV-015. *(11-verify-impl S017 2026-07-30)*
+
 
 ## Quantitative benchmarks
 

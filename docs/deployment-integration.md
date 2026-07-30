@@ -254,12 +254,13 @@ See **`docs/sessions/S000-internal-docs-archive/execution-plan.md` §Cost Estima
 
 | Variable | Where | Notes |
 |----------|-------|-------|
-| `VECINITA_REBUILD_SHADOW_ENABLED` | Modal DM (+ write API if gated) | Default `true`; allow `dry_run` |
+| `VECINITA_REBUILD_SHADOW_ENABLED` | — | **Planned/unused (TP-S017-12-A):** not wired; `dry_run` always available |
 | `VECINITA_EMBEDDING_MODEL_ID` | Modal DM / write stamps | Version stamp on revisions |
 | Existing `VECINITA_INTERNAL_*` | Unchanged | ADR-007 write boundary |
 
 No new CORS origins required if Admin continues to use existing Modal DM + corpus API URLs
-(T90.4 verifies promote preflight).
+(T90.4 verifies promote preflight). OpenAPI for write-API create/patch/shadow rebuild routes
+is deferred this cycle (TP-S017-12-B); promote + DM Jobs OpenAPI are the operator surfaces.
 
 ### Redeploy order (staging)
 

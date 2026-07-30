@@ -210,7 +210,7 @@ corpus DB stays PII-free.
 | `VECINITA_CHUNK_SIZE_TOKENS` | int | `256` | No | Ingest chunk target (tokenizer-based) |
 | `VECINITA_SCRAPE_TIMEOUT_S` | int | `30` | No | Per-URL fetch timeout |
 | `VECINITA_LLM_TAG_MAX_TOKENS` | int | `128` | No | Max tokens for LLM tagging completion per document |
-| `VECINITA_REBUILD_SHADOW_ENABLED` | bool | `true` | No | Allow `dry_run` shadow dual-write for rebuild (F41) |
+| `VECINITA_REBUILD_SHADOW_ENABLED` | bool | `true` | No | **Planned/unused (TP-S017-12-A):** not read in code; `dry_run` shadow dual-write is always available for rebuild (F41) |
 | `VECINITA_EMBEDDING_MODEL_ID` | string | FastEmbed default pin | No | Version stamp on revisions/embeddings (F41; #159 may change) |
 
 ### Frontends
