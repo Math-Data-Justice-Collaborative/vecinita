@@ -247,7 +247,7 @@ See **`docs/sessions/S000-internal-docs-archive/execution-plan.md` §Cost Estima
 | DO Managed Postgres | Alembic: `body_text`, `document_revisions`, `rebuild_runs`, `shadow_chunks`, `shadow_embeddings` |
 | DO internal-write-api | Store upsert fields; `POST /internal/v1/rebuild/{id}/promote`; eval `rebuild_run_id` |
 | Modal data-management | `job_type=rebuild` worker; shadow dual-write; backfill path; Jobs OpenAPI |
-| data-management-frontend | Jobs enqueue rebuild + promote (admin) |
+| data-management-frontend | Corpus page: RebuildForm enqueue + RebuildPromoteForm (admin) |
 | ChatRAG | No schema change; retrieval stays live until promote (shadow only via eval path) |
 
 ### Secrets / config
