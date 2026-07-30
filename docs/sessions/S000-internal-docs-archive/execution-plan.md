@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) |
 | **Active milestone** | M89: Promote + F36 rebuild_run_id + Admin UI |
-| **Active task** | **T89.6** (pending) — Admin Jobs UI enqueue rebuild + promote |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE); T89.1–T89.5 |
+| **Active task** | **T89.7** (pending) — OpenAPI promote + eval rebuild_run_id |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T86.4; T87.1–T87.6 (M87 COMPLETE); T88.1–T88.6 (M88 COMPLETE); T89.1–T89.6 |
 | **Last updated** | 2026-07-30 |
 | **Evolve cycle** | EV-015 (F41) — **07-build** Phase 20; Standard+build (skip 05/06) |
 | **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
@@ -1803,7 +1803,7 @@ Admin Jobs enqueue rebuild + promote UI (admin role); response shape TP-S017-06.
 | T89.3 | Code: `POST /internal/v1/rebuild/{rebuild_run_id}/promote` (admin JWT / service key) | Code | completed | TP-S017-06, 02 M6 | T89.1 | 2026-07-30 | S017 | F41 |
 | T89.4 | Code: eval enqueue accepts `rebuild_run_id`; retrieval path for shadow | Code | completed | TP-S017-04 | T89.2 | 2026-07-30 | S017 | F41 |
 | T89.5 | Test: Vitest — rebuild enqueue form (mode/force/dry_run) + promote control (TC-167/169) — red | Test | completed | UJ-053/054, TC-167/169 | T88.5 | 2026-07-30 | S017 | F41 |
-| T89.6 | Code: Admin Jobs UI — enqueue rebuild + promote (admin-only) | Code | pending | S017-D5, 02 M3/M6 | T89.3, T89.5 | — | S017 | F41 |
+| T89.6 | Code: Admin Jobs UI — enqueue rebuild + promote (admin-only) | Code | completed | S017-D5, 02 M3/M6 | T89.3, T89.5 | 2026-07-30 | S017 | F41 |
 | T89.7 | Config: OpenAPI promote + eval `rebuild_run_id` | Config | pending | TP-S017-04/06 | T89.3, T89.4 | — | S017 | F41 |
 
 #### M90: Full-stack tests + deploy docs
@@ -2522,7 +2522,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T89.3 | M89 | 20 | Code | completed | T89.1 | 2026-07-30 | S017 | F41 | — |
 | T89.4 | M89 | 20 | Code | completed | T89.2 | 2026-07-30 | S017 | F41 | — |
 | T89.5 | M89 | 20 | Test | completed | T88.5 | 2026-07-30 | S017 | F41 | — |
-| T89.6 | M89 | 20 | Code | pending | T89.3, T89.5 | — | S017 | F41 | — |
+| T89.6 | M89 | 20 | Code | completed | T89.3, T89.5 | 2026-07-30 | S017 | F41 | — |
 | T89.7 | M89 | 20 | Config | pending | T89.3, T89.4 | — | S017 | F41 | — |
 | T90.1 | M90 | 20 | Test | pending | T88.4, T89.6 | — | S017 | F41 | — |
 | T90.2 | M90 | 20 | Test | pending | T89.3, T89.4 | — | S017 | F41 | — |

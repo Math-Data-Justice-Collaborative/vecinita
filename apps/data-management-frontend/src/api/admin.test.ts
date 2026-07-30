@@ -26,6 +26,7 @@ import {
   parseHealthAggregate,
   parseStatsSummary,
   promoteRagConfig,
+  promoteRebuildRun,
   pullPlaygroundModel,
   triggerEvalRun,
   subscribeEvalRunEvents,
@@ -725,6 +726,37 @@ describe("admin API eval helpers", () => {
         preset_id: EVAL_PRESET.preset_id,
       }),
     ).rejects.toThrow(/403/);
+  });
+
+  it("promoteRebuildRun posts to rebuild promote path (TP-S017-06)", async () => {
+    const runId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          promoted: true,
+          rebuild_run_id: runId,
+          chunks_promoted: 4,
+          documents_promoted: 1,
+        }),
+      ),
+    );
+    const result = await promoteRebuildRun(JWT_CLIENT, runId);
+    expect(result.promoted).toBe(true);
+    expect(result.chunks_promoted).toBe(4);
+    expect(mockFetchUrl()).toContain(`/internal/v1/rebuild/${runId}/promote`);
+    expect(vi.mocked(fetch).mock.calls[0]?.[1]?.method).toBe("POST");
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+  });
+
+  it("promoteRebuildRun throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("conflict", { status: 409 })),
+    );
+    await expect(
+      promoteRebuildRun(JWT_CLIENT, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+    ).rejects.toThrow(/conflict|409/);
   });
 
   it("fetchActiveRagConfig reads active production config", async () => {

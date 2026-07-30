@@ -137,7 +137,15 @@ describe("RebuildPromoteForm (T89.5 / TC-169 / UJ-054)", () => {
     });
 
     const [url, init] = fetchMock.mock.calls[0] ?? [];
-    expect(String(url)).toContain(`/internal/v1/rebuild/${runId}/promote`);
+    const urlText =
+      typeof url === "string"
+        ? url
+        : url instanceof URL
+          ? url.href
+          : url instanceof Request
+            ? url.url
+            : "";
+    expect(urlText).toContain(`/internal/v1/rebuild/${runId}/promote`);
     expect(init?.method).toBe("POST");
   });
 
