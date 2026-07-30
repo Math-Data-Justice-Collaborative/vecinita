@@ -2520,7 +2520,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T89.1 | M89 | 20 | Test | completed | T88.4 | 2026-07-30 | S017 | F41 | — |
 | T89.2 | M89 | 20 | Test | completed | T88.4 | 2026-07-30 | S017 | F41 | — |
 | T89.3 | M89 | 20 | Code | completed | T89.1 | 2026-07-30 | S017 | F41 | — |
-| T89.4 | M89 | 20 | Code | pending | T89.2 | — | S017 | F41 | — |
+| T89.4 | M89 | 20 | Code | completed | T89.2 | 2026-07-30 | S017 | F41 | — |
 | T89.5 | M89 | 20 | Test | pending | T88.5 | — | S017 | F41 | — |
 | T89.6 | M89 | 20 | Code | pending | T89.3, T89.5 | — | S017 | F41 | — |
 | T89.7 | M89 | 20 | Config | pending | T89.3, T89.4 | — | S017 | F41 | — |
