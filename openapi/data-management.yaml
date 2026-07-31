@@ -627,6 +627,12 @@ components:
           format: uuid
           nullable: true
           description: Required for eval jobs (DO eval_runs.id)
+        question:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          nullable: true
+          description: Adhoc eval question forwarded to DO execute (BUG-2026-07-31)
         mode:
           type: string
           enum:

@@ -415,6 +415,21 @@ class EvalRunCreateResponse(BaseModel):
     created_at: datetime
 
 
+class EvalRunExecuteRequest(BaseModel):
+    """POST /internal/v1/eval/runs/{run_id}/execute body (Modal eval worker)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    question: str | None = Field(default=None, min_length=1, max_length=2000)
+
+
+class EvalRunExecuteResponse(BaseModel):
+    """POST /internal/v1/eval/runs/{run_id}/execute response after synchronous run."""
+
+    run_id: UUID
+    status: Literal["completed"]
+
+
 class EvalMetricsSummary(BaseModel):
     """Aggregate eval metrics for a run."""
 

@@ -877,3 +877,80 @@ def test_soft_delete_eval_run_route_returns_404_when_missing(internal_api_env: N
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_execute_eval_run_route_invokes_execute_service(internal_api_env: None) -> None:
+    """POST /eval/runs/{id}/execute runs execute_eval_run (BUG-2026-07-31)."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+
+    run_id = uuid4()
+    called: list[tuple[UUID, str | None]] = []
+
+    def _fake_execute(
+        _engine: object,
+        *,
+        run_id: UUID,
+        question: str | None = None,
+        embed_fn: object = None,
+        judge: object = None,
+        llm: object = None,
+    ) -> None:
+        _ = (embed_fn, judge, llm)
+        called.append((run_id, question))
+
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+    )
+    client = TestClient(app)
+    with patch(
+        "vecinita_internal_write_api.app.execute_eval_run",
+        _fake_execute,
+    ):
+        response = client.post(
+            f"/internal/v1/eval/runs/{run_id}/execute",
+            headers=auth_headers(),
+            json={"question": "What hours?"},
+        )
+    assert response.status_code == HTTPStatus.OK
+    body = response_json_object(response)
+    assert json_str(body, "status") == "completed"
+    assert called == [(run_id, "What hours?")]
+
+
+def test_execute_eval_run_route_returns_404_when_missing(internal_api_env: None) -> None:
+    """POST /eval/runs/{id}/execute returns 404 for unknown runs."""
+    _ = internal_api_env
+    from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
+    from vecinita_internal_write_api.eval_service import EvalRunNotFoundError  # noqa: PLC0415
+
+    def _missing(
+        _engine: object,
+        *,
+        run_id: UUID,
+        question: str | None = None,
+        embed_fn: object = None,
+        judge: object = None,
+        llm: object = None,
+    ) -> None:
+        _ = (question, embed_fn, judge, llm)
+        msg = f"eval run not found: {run_id}"
+        raise EvalRunNotFoundError(msg)
+
+    app = create_app(
+        eval_embed_fn=eval_embed_fn,
+        eval_judge=MockEvalJudge(),
+        jobs_client=StubJobsClient(),  # type: ignore[arg-type]
+    )
+    client = TestClient(app)
+    with patch(
+        "vecinita_internal_write_api.app.execute_eval_run",
+        _missing,
+    ):
+        response = client.post(
+            f"/internal/v1/eval/runs/{uuid4()}/execute",
+            headers=auth_headers(),
+        )
+    assert response.status_code == HTTPStatus.NOT_FOUND

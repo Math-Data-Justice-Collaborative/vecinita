@@ -11,6 +11,25 @@ from vecinita_rag.types import RagAnswer, RetrievedChunk
 if TYPE_CHECKING:
     from llama_index.core.llms import LLM
 
+# Empirically top_k=5 x ~256-token chunks exceeded pinned vLLM max_model_len=2048
+# (HTTP 500) during S017 F36 drill; top_k=2 succeeded. Cap synthesis context so
+# default top_k remains usable for retrieval metrics (BUG-2026-07-31).
+DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS = 3500
+
+
+def truncate_synthesis_context(
+    context: str,
+    *,
+    max_chars: int = DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS,
+) -> str:
+    """Return ``context`` capped to ``max_chars`` (prefix) for RAG synthesis prompts."""
+    if max_chars < 1:
+        msg = "max_chars must be >= 1"
+        raise ValueError(msg)
+    if len(context) <= max_chars:
+        return context
+    return context[:max_chars]
+
 
 def synthesize_with_system_prompt(
     question: str,
@@ -23,7 +42,7 @@ def synthesize_with_system_prompt(
     if not chunks:
         return answer_without_context(question)
     language = detect_query_language(question)
-    context = "\n\n".join(chunk.text for chunk in chunks)
+    context = truncate_synthesis_context("\n\n".join(chunk.text for chunk in chunks))
     prompt = (
         f"{system_prompt.strip()}\n\nContext:\n{context}\n\nQuestion: {question.strip()}\n\nAnswer:"
     )

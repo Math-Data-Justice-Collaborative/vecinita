@@ -83,6 +83,8 @@ from vecinita_shared_schemas.internal_write import (
     EvalRunCreateRequest,
     EvalRunCreateResponse,
     EvalRunDetailResponse,
+    EvalRunExecuteRequest,
+    EvalRunExecuteResponse,
     EvalRunListResponse,
     EvalTimeseriesResponse,
     HealthAggregateResponse,
@@ -140,9 +142,11 @@ from vecinita_internal_write_api.eval_criteria_service import (
 )
 from vecinita_internal_write_api.eval_events import EvalRunEventBroker, iter_eval_run_sse
 from vecinita_internal_write_api.eval_service import (
+    EvalRunNotFoundError,
     EvalRunPresetAccessError,
     EvalRunPresetNotFoundError,
     create_eval_run,
+    execute_eval_run,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
@@ -384,13 +388,15 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
     eval_sse_sync_db: bool = True,
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
-    # Eval execution moved to Modal (ADR-038 / TP-S013-06). Params kept for injectability
-    # until the Modal eval worker consumes them; route only enqueues via jobs_client.
-    _ = (eval_embed_fn, eval_judge)
+    # Modal owns eval job lifecycle (ADR-038); this app executes metrics work when
+    # Modal POSTs /eval/runs/{id}/execute (BUG-2026-07-31). Injected embed/judge
+    # remain available for tests; production execute uses eval_service defaults.
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
     configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
     retag_jobs = jobs_client if jobs_client is not None else _default_jobs_client()
+    resolved_eval_embed = eval_embed_fn
+    resolved_eval_judge = eval_judge
     playground_models = (
         playground_models_client
         if playground_models_client is not None
@@ -2139,6 +2145,37 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         if detail is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
         return detail
+
+    @app.post(
+        "/internal/v1/eval/runs/{run_id}/execute",
+        response_model=EvalRunExecuteResponse,
+    )
+    def execute_eval_run_route(  # pyright: ignore[reportUnusedFunction]
+        run_id: UUID,
+        _actor: WriteActorDep,
+        body: EvalRunExecuteRequest | None = None,
+    ) -> EvalRunExecuteResponse:
+        """Synchronous eval execution for Modal job_type=eval workers (BUG-2026-07-31)."""
+        execute_body = body or EvalRunExecuteRequest()
+        try:
+            execute_eval_run(
+                engine,
+                run_id=run_id,
+                question=execute_body.question,
+                embed_fn=resolved_eval_embed,
+                judge=resolved_eval_judge,
+            )
+        except EvalRunNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc),
+            ) from exc
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(exc)[:500],
+            ) from exc
+        return EvalRunExecuteResponse(run_id=run_id, status="completed")
 
     @app.get("/internal/v1/eval/runs/{run_id}/events")
     def stream_eval_run_events(  # pyright: ignore[reportUnusedFunction]

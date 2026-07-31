@@ -63,6 +63,7 @@ def test_enqueue_eval_posts_eval_job() -> None:
         body = request.read().decode()
         assert '"job_type":"eval"' in body or '"job_type": "eval"' in body
         assert str(eval_run_id) in body
+        assert "What hours" in body
         return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
 
     transport = httpx.MockTransport(handler)
@@ -72,7 +73,11 @@ def test_enqueue_eval_posts_eval_job() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
     )
 
-    result = client.enqueue_eval(eval_run_id, authorization="Bearer operator-jwt")
+    result = client.enqueue_eval(
+        eval_run_id,
+        authorization="Bearer operator-jwt",
+        question="What hours?",
+    )
 
     assert result == job_id
     client.close()

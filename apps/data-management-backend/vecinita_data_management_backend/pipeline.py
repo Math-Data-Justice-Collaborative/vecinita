@@ -32,7 +32,7 @@ from vecinita_tagging.vocabulary import (
 if TYPE_CHECKING:
     from vecinita_embedding_client import EmbeddingClient
 
-    from vecinita_data_management_backend.store import JobStore
+    from vecinita_data_management_backend.store import JobRecord, JobStore
     from vecinita_data_management_backend.write_client import InternalWriteClient
 
 logger = logging.getLogger(__name__)
@@ -502,6 +502,53 @@ def run_rebuild_job(
         if dry_run and rebuild_run_id is not None:
             with contextlib.suppress(Exception):
                 write_client.complete_rebuild_run(rebuild_run_id, status="failed")
+        store.update_job(
+            job_id,
+            status="failed",
+            error_code=type(exc).__name__,
+            error_message=str(exc)[:500],
+        )
+        raise
+
+
+def _eval_run_id_from_record(record: JobRecord) -> UUID:
+    if record.eval_run_id is not None:
+        return record.eval_run_id
+    raw = record.options.get("eval_run_id")
+    if raw is not None:
+        return UUID(str(raw))
+    msg = "eval_run_id required for eval jobs"
+    raise ValueError(msg)
+
+
+def _eval_question_from_options(options: dict[str, object]) -> str | None:
+    raw = options.get("question")
+    if isinstance(raw, str) and raw.strip():
+        return raw
+    return None
+
+
+def run_eval_job(
+    job_id: UUID,
+    *,
+    store: JobStore,
+    write_client: InternalWriteClient,
+) -> None:
+    """Run Modal eval lifecycle by calling DO write-api execute (ADR-038 / ADR-007)."""
+    record = store.get_job(job_id)
+    if record is None:
+        raise KeyError(job_id)
+    if record.job_type != "eval":
+        msg = f"job {job_id} is not an eval job"
+        raise ValueError(msg)
+
+    eval_run_id = _eval_run_id_from_record(record)
+    question = _eval_question_from_options(record.options)
+    store.update_job(job_id, status="running", eval_run_id=eval_run_id)
+    try:
+        write_client.execute_eval_run(eval_run_id, question=question)
+        store.update_job(job_id, status="completed")
+    except Exception as exc:
         store.update_job(
             job_id,
             status="failed",
