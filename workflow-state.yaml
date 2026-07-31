@@ -16428,6 +16428,15 @@ git_history:
     evolve_cycle_id: EV-015
     timestamp: '2026-07-30T21:00:00Z'
     note: Closeout docs + workflow-state; H0ci (CI + deploy-preflight) PASS after security-job flake rerun; active_session=null; pipeline idle
+  - sha: c2858d3eaddd309ce962fbcf8ea56b2c5d704283
+    short: c2858d3
+    branch: main
+    message: '[EV-015] chore: archive S017 session state after closeout push'
+    stage: 16-evolve
+    session_id: S017-corpus-reembed-migration
+    evolve_cycle_id: EV-015
+    timestamp: '2026-07-31T01:12:00Z'
+    note: Archive-state commit after closeout docs @ 1af649c; H0ci PASS on main @ c2858d3; active_session=null; pipeline idle; next_action=none
   notes:
   - '2026-07-30 S017/EV-015: 13-deploy-smoke Path A staging PASS @ 180ad14 — Alembic 20260730_0010; DO pins ACTIVE evolve; Modal DM redeployed; H1–H5 PASS; shadow→F36→promote 60/2; report deploy-smoke.md; checkpoints.deploy=pending_user_checkpoint; cycle NOT completed; do not commit scripts/deploy/_tmp_proxy_key_check.py.'
   - '2026-07-30 S017/EV-015: 12-verify-deploy post-commit @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41); HEAD refs → 180ad14; phase_d=pending_user_checkpoint (presenting AskQuestion now); left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit).'
