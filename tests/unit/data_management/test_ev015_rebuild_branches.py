@@ -477,6 +477,34 @@ def test_run_backfill_job_missing_job_raises_keyerror() -> None:
         )
 
 
+def test_run_rebuild_job_empty_document_ids_is_noop_success() -> None:
+    """document_ids=[] builds no upserts; job still completes."""
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "document_ids": [],
+            "chunk_size_tokens": None,
+        },
+    )
+    run_rebuild_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+    )
+    assert write_client.shadow_batches == []
+    assert write_client.live_batches == []
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+
+
 def test_run_rebuild_job_rejects_bad_document_ids_type() -> None:
     """document_ids must be a list of UUID strings."""
     store = InMemoryJobStore()

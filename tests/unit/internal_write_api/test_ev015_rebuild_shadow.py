@@ -174,6 +174,16 @@ def test_create_rebuild_run_rejects_unknown_mode(write_client: TestClient) -> No
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
+def test_patch_rebuild_unknown_run_returns_404(write_client: TestClient) -> None:
+    """PATCH /rebuild/{id} maps missing runs to 404."""
+    response = write_client.patch(
+        f"/internal/v1/rebuild/{uuid4()}",
+        json={"status": "completed"},
+        headers=auth_headers(),
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
 def test_shadow_batch_unknown_rebuild_run_returns_404(write_client: TestClient) -> None:
     """Shadow batch for a missing rebuild_run_id returns 404 before doc lookup."""
     response = write_client.post(
