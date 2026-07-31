@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from http import HTTPStatus
 from typing import TYPE_CHECKING, cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import text
 from vecinita_embedding_client import EMBEDDING_DIMENSION
@@ -172,6 +172,44 @@ def test_create_rebuild_run_rejects_unknown_mode(write_client: TestClient) -> No
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_shadow_batch_unknown_rebuild_run_returns_404(write_client: TestClient) -> None:
+    """Shadow batch for a missing rebuild_run_id returns 404."""
+    response = write_client.post(
+        f"/internal/v1/rebuild/{uuid4()}/shadow/batch",
+        json={"documents": []},
+        headers=auth_headers(),
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_shadow_batch_empty_documents_ok(
+    write_client: TestClient,
+) -> None:
+    """Empty documents list is a valid no-op upsert (upserted_chunks=0)."""
+    create = write_client.post(
+        "/internal/v1/rebuild/runs",
+        json={
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "status": "running",
+            "embedding_model_id": "BAAI/bge-small-en-v1.5",
+            "embedding_dim": EMBEDDING_DIMENSION,
+            "chunk_size_tokens": 64,
+        },
+        headers=auth_headers(),
+    )
+    assert create.status_code == HTTPStatus.OK, create.text
+    rebuild_run_id = json_str(as_json_object(cast("object", create.json())), "rebuild_run_id")
+    shadow = write_client.post(
+        f"/internal/v1/rebuild/{rebuild_run_id}/shadow/batch",
+        json={"documents": []},
+        headers=auth_headers(),
+    )
+    assert shadow.status_code == HTTPStatus.OK, shadow.text
+    assert as_json_object(cast("object", shadow.json())).get("upserted_chunks") == 0
 
 
 def test_shadow_batch_unknown_url_returns_404(write_client: TestClient) -> None:

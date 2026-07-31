@@ -477,6 +477,100 @@ def test_run_backfill_job_missing_job_raises_keyerror() -> None:
         )
 
 
+def test_run_rebuild_job_rejects_bad_document_ids_type() -> None:
+    """document_ids must be a list of UUID strings."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={"mode": "rechunk", "dry_run": False, "document_ids": "not-a-list"},
+    )
+    with pytest.raises(ValueError, match="document_ids must be a list"):
+        run_rebuild_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        )
+
+
+def test_run_rebuild_job_rejects_bad_document_ids_entry() -> None:
+    """Non-string document_ids entries raise ValueError."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={"mode": "rechunk", "dry_run": False, "document_ids": [123]},
+    )
+    with pytest.raises(ValueError, match="UUID strings"):
+        run_rebuild_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        )
+
+
+def test_run_rebuild_job_paginates_document_list() -> None:
+    """_list_all_docs walks pages until total is exhausted (page_size=100)."""
+    page_count = 120
+
+    class _PagedClient(_RecordingWriteClient):
+        def list_documents(
+            self,
+            *,
+            page: int = 1,
+            page_size: int = 50,
+            missing_body: bool = False,
+        ) -> DocumentListPage:
+            _ = missing_body
+            start = (page - 1) * page_size
+            end = start + page_size
+            items = self._docs[start:end]
+            return DocumentListPage(
+                items=items,
+                page=page,
+                page_size=page_size,
+                total=len(self._docs),
+            )
+
+    # page_count > pipeline page_size (100) → two list pages
+    many = [
+        DocumentSummary(
+            document_id=uuid4(),
+            url=f"https://example.com/many-{i}",
+            title=f"M{i}",
+            language="en",
+        )
+        for i in range(page_count)
+    ]
+    many_details = {
+        d.document_id: DocumentDetail(
+            document_id=d.document_id,
+            url=d.url,
+            title=d.title,
+            language="en",
+            text="shared body for pagination rebuild",
+        )
+        for d in many
+    }
+    store = InMemoryJobStore()
+    write_client = _PagedClient(docs=many, details=many_details)
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={"mode": "rechunk", "dry_run": False, "chunk_size_tokens": "64"},
+    )
+    run_rebuild_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+    )
+    assert write_client.live_batches
+    assert len(write_client.live_batches[0].documents) == page_count
+
+
 def test_upsert_shadow_batch_requires_rebuild_run_id() -> None:
     """Shadow batch without rebuild_run_id on documents is rejected locally."""
 
