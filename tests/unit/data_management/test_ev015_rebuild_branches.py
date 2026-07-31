@@ -377,6 +377,106 @@ def test_run_backfill_job_rejects_non_backfill() -> None:
         )
 
 
+def test_run_backfill_job_from_chunks_unscoped_loads_detail_text() -> None:
+    """Unscoped from_chunks uses missing-body list then detail.text."""
+    doc_id = uuid4()
+    url = "https://example.com/from-chunks-unscoped"
+    body = "reconstructed from chunk store"
+    summary = DocumentSummary(document_id=doc_id, url=url, title="T", language="en")
+    detail = DocumentDetail(
+        document_id=doc_id,
+        url=url,
+        title="T",
+        language="en",
+        text=body,
+    )
+    store = InMemoryJobStore()
+
+    class _MissingBodyClient(_RecordingWriteClient):
+        def list_documents(
+            self,
+            *,
+            page: int = 1,
+            page_size: int = 50,
+            missing_body: bool = False,
+        ) -> DocumentListPage:
+            items = self._docs if missing_body else []
+            return DocumentListPage(
+                items=items,
+                page=page,
+                page_size=page_size,
+                total=len(items),
+            )
+
+    write_client = _MissingBodyClient(docs=[summary], details={doc_id: detail})
+    record = store.create_job(
+        urls=[],
+        job_type="ingest",
+        options={
+            "backfill": True,
+            "backfill_source": "from_chunks",
+            "ack_reconstruct_from_chunks": True,
+        },
+    )
+    run_backfill_job(
+        record.job_id,
+        store=store,
+        write_client=write_client,  # type: ignore[arg-type]
+    )
+    assert write_client.live_batches
+    assert write_client.live_batches[0].documents[0].body_text == body
+
+
+def test_run_backfill_job_marks_failed_on_write_error() -> None:
+    """Upsert failures mark the job failed and re-raise."""
+    doc_id = uuid4()
+    url = "https://example.com/backfill-fail"
+    summary, detail = _doc(doc_id, url, text="unused")
+    store = InMemoryJobStore()
+
+    class _FailingClient(_RecordingWriteClient):
+        def upsert_batch(self, body: BatchUpsertRequest) -> None:
+            _ = body
+            msg = "write failed"
+            raise RuntimeError(msg)
+
+    write_client = _FailingClient(docs=[summary], details={doc_id: detail})
+    record = store.create_job(
+        urls=[],
+        job_type="ingest",
+        options={
+            "backfill": True,
+            "backfill_source": "rescrape",
+            "document_ids": [str(doc_id)],
+        },
+    )
+    with pytest.raises(RuntimeError, match="write failed"):
+        run_backfill_job(
+            record.job_id,
+            store=store,
+            write_client=write_client,  # type: ignore[arg-type]
+            fetch_document=lambda url: ScrapedDocument(
+                url=url,
+                title="Fresh",
+                text="scraped body",
+            ),
+        )
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "failed"
+
+
+def test_run_backfill_job_missing_job_raises_keyerror() -> None:
+    """Unknown job id raises KeyError."""
+    store = InMemoryJobStore()
+    with pytest.raises(KeyError):
+        run_backfill_job(
+            uuid4(),
+            store=store,
+            write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        )
+
+
 def test_upsert_shadow_batch_requires_rebuild_run_id() -> None:
     """Shadow batch without rebuild_run_id on documents is rejected locally."""
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 import importlib
 from http import HTTPStatus
 from typing import TYPE_CHECKING, cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import text
 from vecinita_embedding_client import EMBEDDING_DIMENSION
@@ -33,6 +33,40 @@ def test_promote_rebuild_run_service_is_importable() -> None:
     module = importlib.import_module(_PROMOTE_MODULE)
     promote_rebuild_run = getattr(module, "promote_rebuild_run", None)
     assert callable(promote_rebuild_run)
+
+
+def test_promote_unknown_run_returns_404(write_client: TestClient) -> None:
+    """Promote maps RebuildPromoteNotFoundError → HTTP 404."""
+    response = write_client.post(
+        f"/internal/v1/rebuild/{uuid4()}/promote",
+        headers=auth_headers(),
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_promote_running_run_returns_409(write_client: TestClient) -> None:
+    """Promote maps RebuildPromoteConflictError → HTTP 409 for non-completed runs."""
+    create = write_client.post(
+        "/internal/v1/rebuild/runs",
+        json={
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "status": "running",
+            "embedding_model_id": "BAAI/bge-small-en-v1.5",
+            "embedding_dim": EMBEDDING_DIMENSION,
+            "chunk_size_tokens": 64,
+        },
+        headers=auth_headers(),
+    )
+    assert create.status_code == HTTPStatus.OK, create.text
+    rebuild_run_id = json_str(as_json_object(cast("object", create.json())), "rebuild_run_id")
+    promote = write_client.post(
+        f"/internal/v1/rebuild/{rebuild_run_id}/promote",
+        headers=auth_headers(),
+    )
+    assert promote.status_code == HTTPStatus.CONFLICT
+    assert "completed" in promote.text.lower() or "shadow" in promote.text.lower()
 
 
 def test_promote_copies_shadow_to_live_and_returns_counts(
