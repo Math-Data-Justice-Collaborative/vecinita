@@ -2286,11 +2286,11 @@ project:
       status: in_progress
       started_at: '2026-07-31'
       session_id: S018-eval-job-dispatch
-      branch: fix/S018-eval-job-dispatch
+      branch: fix/S018-job-dispatch-prevention
       bugs:
       - id: BUG-2026-07-31-eval-job-dispatch
         summary: Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError
-        status: fix_implemented_uncommitted
+        status: resolved
         order: 1
         seen_on: staging_and_production
         severity: medium
@@ -2300,13 +2300,39 @@ project:
         repro_status: green
         secondary_issue: top_k=5 vs vLLM max_model_len=2048 — include if straightforward
         remediation_path: A_wire_run_job
-        note: Repro GREEN; local fix ready; awaiting user confirm verify→commit/PR→deploy. Do not mark resolved until deploy verified.
+        note: 'RESOLVED 2026-07-31 — PR #169 MERGED @ a6c39e5; CD + live smoke PASS; Phase 5 prevention implemented (registry + husky + checklist + job-terminal-state.mdc). Prevention commit pending on fix/S018-job-dispatch-prevention.'
         fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
-        fix_committed: false
-      note: 'S018 2026-07-31 — Phase 0 complete; repro RED→GREEN; fix implemented locally (NOT committed). Awaiting user confirmation: verify → commit/PR → deploy (write-api DO + Modal data-mgmt). Bug NOT resolved yet.'
+        fix_committed: true
+        fix_commit: 207df88
+        merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+      note: 'S018 2026-07-31 — BUG resolved. Phase 5 prevention implemented (fail-closed job_type registry, husky pre-commit, deploy-checklist row, job-terminal-state.mdc). Prevention commit pending on fix/S018-job-dispatch-prevention. current_action=Phase 5.6 Hotfix Complete — AskQuestion close_session; next_action=User close checkpoint then close_session; then Batch A / 00-context. Session remains open (do not close_session yet). Batch A deferred until S018 close_session. Report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md.'
       current_bug: BUG-2026-07-31-eval-job-dispatch
-      current_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
-      next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+      current_action: Phase 5.6 Hotfix Complete — AskQuestion close_session
+      next_action: User close checkpoint then close_session; then Batch A / 00-context
+      prevention_plan_confirmed: true
+      prevention_implemented: true
+      bug_status: resolved
+      prevention_pa:
+        recurrence_risk: possible_on_similar_changes
+        detect_earlier: local_husky_precommit_bug_repro
+      prevention_pc:
+        when: now_same_session
+        who: agent_now
+      post_deploy_monitoring: none
+      layer4_production_verified: true
+      cd:
+        status: success
+        merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+        ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30633805272
+        deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634041609
+        deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634088059
+        deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634163306
+      live_smoke:
+        status: pass
+        report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
+        adhoc_run_id: eb76b740-4aa5-4977-b519-0b133cd48b5c
+        modal_job_id: d0a9f39c-df25-445f-87ac-9e07a1c7429d
+        note: both completed; no ValidationError ingest fall-through
       prior_session_id: S015-hotfix-jobs-sse-cors
       history:
       - status: completed
@@ -2453,20 +2479,36 @@ project:
         secondary_top_k: include
         note: 'User interview: intent=new_bug; env=both staging+production; severity=medium; path=A wire run_job; secondary top_k=include'
       fix_local: true
-      fix_committed: false
+      fix_committed: true
       repro_status: green
       tests_note: 43 related passed; ruff+basedpyright clean on touched files
       fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
+      pr: 169
+      pr_number: 169
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/169
+      pr_status: merged
+      merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+      merged_at: '2026-07-31'
+      head_sha: 207df88
+      prevention_pb:
+        automated: husky_precommit_eval_dispatch_tests
+        code_hardening: explicit_job_type_handler_registry
+        process: deploy_job_checklist_row
+      prevention_pc:
+        when: now_same_session
+        who: agent_now
 session_counter: 18
 active_session:
   id: S018-eval-job-dispatch
   type: hotfix
   intent: Fix Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError. Wire run_job to eval worker (path A). Also address/document secondary top_k=5 vs vLLM max_model_len=2048 issue in same hotfix if straightforward.
   status: in_progress
-  branch: fix/S018-eval-job-dispatch
+  branch: fix/S018-job-dispatch-prevention
   orchestrator: 14-hotfix
   evolve_cycle_id:
   artifacts_dir: docs/sessions/S018-eval-job-dispatch/
+  artifacts:
+  - docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
   current_stage: 14-hotfix
   started_at: '2026-07-31'
   routing_plan_status: approved
@@ -2487,18 +2529,45 @@ active_session:
     status: in_progress
     skip_rationale:
     started_at: '2026-07-31'
-    note: Repro GREEN; local fix ready (uncommitted); awaiting user confirm verify→commit/PR→deploy
+    note: 'BUG resolved; Phase 5 prevention implemented; stage in_progress — Phase 5.6 AskQuestion close_session; prevention commit pending; do not close_session yet'
   - stage: 15-service-health
     required: false
-    status: pending
-    skip_rationale:
-    note: Optional after deploy verify
+    status: skipped
+    skip_rationale: 'Phase 4.4 hotfix_monitoring_followup option 1 — No follow-up; one-shot verification enough; optional 15-service-health not needed'
+    note: Skipped — user chose no post-deploy monitoring follow-up
   context_briefs: []
-  note: 'S018 2026-07-31 — Phase 0 complete; repro RED→GREEN; fix implemented locally (NOT committed). Awaiting user confirmation: verify → commit/PR → deploy (write-api DO + Modal data-mgmt). Bug NOT resolved yet.'
+  note: 'S018 — BUG-2026-07-31 resolved. Phase 5 prevention implemented (fail-closed job_type registry, husky pre-commit, deploy-checklist row, job-terminal-state.mdc). Prevention commit pending on fix/S018-job-dispatch-prevention. current_action=Phase 5.6 Hotfix Complete — AskQuestion close_session; next_action=User close checkpoint then close_session; then Batch A / 00-context. Session remains open. Report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md | Batch A deferred until S018 close_session.'
   fix_local: true
   fix_committed: false
   repro_status: green
-  next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+  next_action: User close checkpoint then close_session; then Batch A / 00-context
+  current_action: Phase 5.6 Hotfix Complete — AskQuestion close_session
+  prevention_plan_confirmed: true
+  prevention_implemented: true
+  bug_status: resolved
+  prevention_pa:
+    recurrence_risk: possible_on_similar_changes
+    detect_earlier: local_husky_precommit_bug_repro
+  post_deploy_monitoring: none
+  layer4_production_verified: true
+  live_smoke:
+    status: pass
+    report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
+    adhoc_run_id: eb76b740-4aa5-4977-b519-0b133cd48b5c
+    modal_job_id: d0a9f39c-df25-445f-87ac-9e07a1c7429d
+  pr_number: 169
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/169
+  pr_status: merged
+  merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+  merged_at: '2026-07-31'
+  notes: 'BUG-2026-07-31 resolved. Prevention commit pending on fix/S018-job-dispatch-prevention. Phase 5.6 AskQuestion close_session next; do not close_session yet. Batch A deferred until S018 close_session.'
+  prevention_pb:
+    automated: husky_precommit_eval_dispatch_tests
+    code_hardening: explicit_job_type_handler_registry
+    process: deploy_job_checklist_row
+  prevention_pc:
+    when: now_same_session
+    who: agent_now
 sessions:
 - id: S017-corpus-reembed-migration
   type: feature
@@ -7315,11 +7384,11 @@ stages:
     status: in_progress
     started_at: '2026-07-31'
     session_id: S018-eval-job-dispatch
-    branch: fix/S018-eval-job-dispatch
+    branch: fix/S018-job-dispatch-prevention
     bugs:
     - id: BUG-2026-07-31-eval-job-dispatch
       summary: Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError
-      status: fix_implemented_uncommitted
+      status: resolved
       order: 1
       seen_on: staging_and_production
       severity: medium
@@ -7329,13 +7398,39 @@ stages:
       repro_status: green
       secondary_issue: top_k=5 vs vLLM max_model_len=2048 — include if straightforward
       remediation_path: A_wire_run_job
-      note: Repro GREEN; local fix ready; awaiting user confirm verify→commit/PR→deploy. Do not mark resolved until deploy verified.
+      note: 'RESOLVED 2026-07-31 — PR #169 MERGED @ a6c39e5; CD + live smoke PASS; Phase 5 prevention implemented (registry + husky + checklist + job-terminal-state.mdc). Prevention commit pending on fix/S018-job-dispatch-prevention.'
       fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
-      fix_committed: false
-    note: 'S018 2026-07-31 — Phase 0 complete; repro RED→GREEN; fix implemented locally (NOT committed). Awaiting user confirmation: verify → commit/PR → deploy (write-api DO + Modal data-mgmt). Bug NOT resolved yet.'
+      fix_committed: true
+      fix_commit: 207df88
+      merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+    note: 'S018 2026-07-31 — BUG resolved. Phase 5 prevention implemented (fail-closed job_type registry, husky pre-commit, deploy-checklist row, job-terminal-state.mdc). Prevention commit pending on fix/S018-job-dispatch-prevention. current_action=Phase 5.6 Hotfix Complete — AskQuestion close_session; next_action=User close checkpoint then close_session; then Batch A / 00-context. Session remains open (do not close_session yet). Batch A deferred until S018 close_session. Report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md.'
     current_bug: BUG-2026-07-31-eval-job-dispatch
-    current_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
-    next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+    current_action: Phase 5.6 Hotfix Complete — AskQuestion close_session
+    next_action: User close checkpoint then close_session; then Batch A / 00-context
+    prevention_plan_confirmed: true
+    prevention_implemented: true
+    bug_status: resolved
+    prevention_pa:
+      recurrence_risk: possible_on_similar_changes
+      detect_earlier: local_husky_precommit_bug_repro
+    prevention_pc:
+      when: now_same_session
+      who: agent_now
+    post_deploy_monitoring: none
+    layer4_production_verified: true
+    cd:
+      status: success
+      merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+      ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30633805272
+      deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634041609
+      deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634088059
+      deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634163306
+    live_smoke:
+      status: pass
+      report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
+      adhoc_run_id: eb76b740-4aa5-4977-b519-0b133cd48b5c
+      modal_job_id: d0a9f39c-df25-445f-87ac-9e07a1c7429d
+      note: both completed; no ValidationError ingest fall-through
     prior_session_id: S015-hotfix-jobs-sse-cors
     history:
     - status: completed
@@ -7482,10 +7577,24 @@ stages:
       secondary_top_k: include
       note: 'User interview: intent=new_bug; env=both staging+production; severity=medium; path=A wire run_job; secondary top_k=include'
     fix_local: true
-    fix_committed: false
+    fix_committed: true
     repro_status: green
     tests_note: 43 related passed; ruff+basedpyright clean on touched files
     fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
+    pr: 169
+    pr_number: 169
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/169
+    pr_status: merged
+    merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+    merged_at: '2026-07-31'
+    head_sha: 207df88
+    prevention_pb:
+      automated: husky_precommit_eval_dispatch_tests
+      code_hardening: explicit_job_type_handler_registry
+      process: deploy_job_checklist_row
+    prevention_pc:
+      when: now_same_session
+      who: agent_now
   15-service-health:
     status: skipped
     started_at: '2026-07-29'
@@ -7640,20 +7749,25 @@ deployment:
     t0_journeys_passed: 16
   staging:
     status: deployed
-    last_verified: '2026-07-30'
-    commit_deployed: c7cda84
-    commit_head: c7cda84
+    last_verified: '2026-07-31'
+    commit_deployed: a6c39e5
+    commit_head: a6c39e5
     drift: false
     branch: main
-    commit_deployed_note: 'S017/EV-015 post-merge — DO write-api + admin FE on main @ c7cda84 (PR #168); drift=false; H0ci PASS'
+    commit_deployed_note: 'S018 post-merge CD — Modal DM + DO write-api redeployed for eval job dispatch hotfix @ a6c39e5 (PR #169); drift=false; Admin Evaluation live smoke PASS'
     modal_data_management:
-      redeployed_at: '2026-07-30'
-      commit: 180ad14
+      redeployed_at: '2026-07-31'
+      commit: a6c39e57e856e75d149b1ac1af82d6e92243af19
       command: uv run modal deploy infra/modal/data_management_app.py
       status: success
-      session_id: S017-corpus-reembed-migration
-      evolve_cycle_id: EV-015
-      note: S017/EV-015 Path A — Modal DM redeployed for F41 rebuild/shadow/promote; prior S015 CORS hotfix retained in history
+      session_id: S018-eval-job-dispatch
+      note: 'S018 — Modal DM redeployed via Deploy Modal CD after PR #169; Admin Evaluation eval dispatch smoke PASS'
+      prior_s017:
+        redeployed_at: '2026-07-30'
+        commit: 180ad14
+        session_id: S017-corpus-reembed-migration
+        evolve_cycle_id: EV-015
+        note: S017/EV-015 Path A — Modal DM redeployed for F41 rebuild/shadow/promote; prior S015 CORS hotfix retained in history
       prior_s015:
         redeployed_at: '2026-07-29'
         commit: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
@@ -7728,6 +7842,8 @@ deployment:
       h6_browser_uj: waived_v1
       h0c: pass
     notes:
+    - 'S018 2026-07-31: BUG-2026-07-31 resolved. Prevention implemented (registry + husky + checklist + rule). Prevention commit pending on fix/S018-job-dispatch-prevention. Phase 5.6 AskQuestion close_session next; do not close_session yet.'
+    - 'S018 2026-07-31 CD + Admin Evaluation smoke PASS @ a6c39e5 — PR #169; CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30633805272; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634041609; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634088059; Deploy DigitalOcean https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634163306; live smoke run_id=eb76b740-4aa5-4977-b519-0b133cd48b5c job_id=d0a9f39c-df25-445f-87ac-9e07a1c7429d both completed; no ValidationError ingest fall-through; Modal DM + DO write-api redeployed; report docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md; bug open until Phase 5; next Phase 4 AskQuestion then Phase 5 prevention'
     - S017/EV-015 2026-07-30 CLOSED+ARCHIVED — phase4 close_cycle (option 1); S017 in sessions[]; active_session=null; EV-015 completed (closed/archived); DO pins main; drift=false @ c7cda84; H0ci PASS; closeout docs+workflow-state commit to main (exclude scripts/deploy/_tmp_proxy_key_check.py); next_action=none/idle
     - 'S017/EV-015 2026-07-30 Phase 4 AskQuestion decided close_cycle (option 1) — Close EV-015 / S017; session status=closing; NOT archived yet (commit+push closeout to main first). Post-merge: PR #168 MERGED @ c7cda84181da7dddd43c4e1fe813d7f4e8e7c412; DO pins main; H0ci PASS @ c7cda84; reports evolve-summary.md + deploy-smoke.md + docs/evolve-report-EV-015.md (closeout commit pending); 15-service-health NOT required/completed'
     - 'S017/EV-015 2026-07-30 Path A staging PASS @ 180ad14 — Alembic 20260728_0009→20260730_0010; DO write-api+admin FE ACTIVE evolve pin; Modal DM redeployed; secret sync + do_verify PASS; H1–H5 PASS pre/post promote; shadow dry_run rebuild_run_id=e3a78965-448f-4246-ab6f-d29f36feceaa; F36 eval 01ca4019… (operator-local execute_eval_run, top_k=2); promote chunks_promoted=60 documents_promoted=2; report docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md; advisories: Modal eval job_type falls through to ingest; full backfill still pending; DO pins on evolve until merge; do not commit scripts/deploy/_tmp_proxy_key_check.py; drift=true (evolve pin); checkpoints.deploy=pending_user_checkpoint'
@@ -7783,6 +7899,25 @@ deployment:
       archived_at: '2026-07-30'
       drift: false
       next_action: none
+    s018_hotfix:
+      session: S018-eval-job-dispatch
+      pr_number: 169
+      merge_commit: a6c39e57e856e75d149b1ac1af82d6e92243af19
+      commit_deployed: a6c39e5
+      bug_id: BUG-2026-07-31-eval-job-dispatch
+      bug_status: open
+      ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30633805272
+      deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634041609
+      deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634088059
+      deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634163306
+      live_smoke:
+        status: pass
+        adhoc_run_id: eb76b740-4aa5-4977-b519-0b133cd48b5c
+        modal_job_id: d0a9f39c-df25-445f-87ac-9e07a1c7429d
+        note: both completed; no ValidationError ingest fall-through
+      report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
+      note: Modal DM + DO write-api redeployed for S018; production_verified=true (user option 1); 14-hotfix still in_progress pending Phase 4.4 monitoring + Phase 5 prevention
+      layer4_production_verified: true
   url_discovery:
     method: uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
     modal_admin_manual: true
@@ -12696,6 +12831,45 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  decision: 'Phase 5.1 cursor_rule_approve_draft: approved — extended job-terminal-state.mdc. Prevention implemented: fail-closed job_type registry, husky pre-commit gate, deploy-checklist row.'
+  note: 'prevention_implemented=true; bug_status=resolved; current_action=Phase 5.6 Hotfix Complete — AskQuestion close_session; prevention commit pending on fix/S018-job-dispatch-prevention; do not close_session yet.'
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  decision: 'Phase 5 prevention_plan_confirm: Proceed — husky pre-commit, job_type registry refactor, deploy checklist row; then Cursor rule ask; implement now.'
+  note: 'prevention_plan_confirmed=true; next AskQuestion prevention_cursor_rule then implement prevention artifacts; then resolve bug and close. Batch A still deferred until S018 close_session.'
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  decision: 'Phase 5 P-C: prevention_when=Now (same session); prevention_who=Agent now — husky pre-commit + checklist + job_type registry refactor before Batch A.'
+  note: 'P-C recorded; AskQuestion prevention_plan_confirm next. prevention_pc.when=now_same_session; prevention_pc.who=agent_now.'
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  decision: 'Phase 5 P-A correction: detect_earlier = local husky pre-commit (NOT cloud runner). P-B: automated=husky pre-commit running eval-dispatch bug/repro tests; code_hardening=refactor run_job to explicit job_type→handler registry; process=deploy/job checklist row for new job_type.'
+  note: P-A corrected + P-B recorded; proceed to P-C. prevention_pa.detect_earlier=local_husky_precommit_bug_repro; prevention_pb.automated=husky_precommit_eval_dispatch_tests; prevention_pb.code_hardening=explicit_job_type_handler_registry; prevention_pb.process=deploy_job_checklist_row.
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  decision: 'Phase 5 P-A: prevention_recurrence_risk=Possible on similar changes; prevention_detect_earlier=Main CI/unit+bug repro via a pre-commit-style gate that runs on a cloud runner (not only local).'
+  note: 'P-A recorded; proceed to P-B. prevention_pa.recurrence_risk=possible_on_similar_changes; prevention_pa.detect_earlier=ci_unit_bug_repro_cloud_runner_precommit_gate.'
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  decision: 'Phase 4.4 hotfix_monitoring_followup: No follow-up — one-shot verification enough.'
+  note: 'User option 1 — no post-deploy monitoring follow-up; post_deploy_monitoring=none; optional 15-service-health skipped; proceed Phase 5 prevention.'
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  decision: 'Phase 4 production_verified: Production fixed (user confirmed; live smoke PASS).'
+  note: 'Phase 4 production_verified: Production fixed (user confirmed; live smoke PASS). layer4_production_verified=true; next Phase 4.4 monitoring AskQuestion then Phase 5 prevention.'
+- date: '2026-07-31'
+  skill: 14-hotfix
+  session_id: S018-eval-job-dispatch
+  note: User chose option 3 — finish full S018 (Phase 4 + Phase 5 + close) before starting Batch A retrieval quality evolve (#158/#161/#165/#162). Batch A deferred until S018 close_session.
 - 'S017/EV-015 2026-07-30: Closeout AskQuestion option 1 APPROVED — Approve merge of PR #168; closeout_decision=merge_approved; pr_168_merge_or_hold=approved_merge; S017-D31 recorded; active_session + EV-015 current_stage remains pr_closeout until merge via gh + DO pin reset to main + CI watch on main complete; next_action=Merge PR #168 via gh, reset DO pins to main, watch CI on main, continue closeout.'
 - 'S017/EV-015 2026-07-30: 13-deploy-smoke Path A staging PASS @ 180ad14 — Alembic 20260728_0009→20260730_0010; DO write-api+admin FE ACTIVE evolve; Modal DM redeployed; secret sync + do_verify PASS; H1–H5 PASS pre/post promote; ops: scoped backfill → live equiv → shadow dry_run e3a78965-448f-4246-ab6f-d29f36feceaa → F36 01ca4019… (operator-local execute_eval_run, top_k=2) → promote chunks_promoted=60 documents_promoted=2; report docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md; stages.13 + project.stages.13 + routing_plan 13 = pending_user_checkpoint; checkpoints.deploy=pending_user_checkpoint; cycle NOT completed; advisories: Modal eval job_type falls through to ingest; F36 top_k=2 + local execute_eval_run; full backfill pending; DO pins on evolve until merge; do not commit scripts/deploy/_tmp_proxy_key_check.py; next_action=AskQuestion deploy checkpoint.'
 - 'S017/EV-015 2026-07-30: Phase D approved — Path A staging sequence chosen (Alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote); checkpoints.phase_d=passed; gates.deploy=approved; checkpoints.deploy=in_progress; active_session.current_stage=13-deploy-smoke; EV-015 current_stage=13-deploy-smoke in_progress; project.stages.13-deploy-smoke + stages.13-deploy-smoke + routing_plan 13 = in_progress; do not commit scripts/deploy/_tmp_proxy_key_check.py; next_action=invoke 13-deploy-smoke Path A staging.'
@@ -13769,9 +13943,19 @@ decisions_log:
 - 'S017/EV-015 2026-07-30: close_session COMPLETE — S017 archived to sessions[]; active_session=null; EV-015 status remains completed (closed/archived); closeout artifacts recorded; agent will commit closeout docs + workflow-state.yaml to main (exclude scripts/deploy/_tmp_proxy_key_check.py); next_action=none/idle'
 - 'S017/EV-015 2026-07-30: S017-D34 recorded — session archived after Phase 4 option 1 close_cycle; idle'
 - '2026-07-30 S017/EV-015: closeout commit pushed to main @ 1af649c7bb691af5fef93f68d71b7811f7b66343 ([EV-015] docs: close S017 after PR #168 merge and pin reset); H0ci PASS after security-job flake rerun; closeout artifacts commit_pending=false; active_session=null; S017 completed; pipeline idle'
+- 'S018 2026-07-31: BUG-2026-07-31 resolved. Prevention implemented (fail-closed job_type registry, husky pre-commit, deploy-checklist row, job-terminal-state.mdc). Prevention commit pending on fix/S018-job-dispatch-prevention. Phase 5.6 AskQuestion close_session next; do not close_session yet; then Batch A / 00-context.'
 - 'S018 2026-07-31 Phase 0: intent=new_bug; env=both staging+production; severity=medium; path=A wire run_job to eval worker; secondary top_k=5 vs max_model_len=2048 include if straightforward'
 - 'S018 2026-07-31: repro RED→GREEN; local fix implemented (uncommitted) — run_job→run_eval_job; Modal→DO /internal/v1/eval/runs/{id}/execute; JobOptions.question; synthesis truncation. Awaiting user confirm verify→commit/PR→deploy. Bug NOT resolved.'
+- 'S018 2026-07-31: PR #169 MERGED @ a6c39e57e856e75d149b1ac1af82d6e92243af19; branch fix/S018-eval-job-dispatch merged; bug BUG-2026-07-31-eval-job-dispatch remains open until deploy smoke + prevention; next_action=watch main CI + deploy-preflight, then await user approval for dual deploy (DO write-api + Modal data-management)'
+- 'S018 2026-07-31: CD PASS after PR #169 @ a6c39e5 — CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30633805272; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634041609; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634088059; Deploy DigitalOcean https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634163306; Admin Evaluation live smoke PASS run_id=eb76b740-4aa5-4977-b519-0b133cd48b5c job_id=d0a9f39c-df25-445f-87ac-9e07a1c7429d both completed no ValidationError ingest fall-through; report docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md; bug remains open until Phase 5; next_action=Phase 4 AskQuestion (production fixed?) then Phase 5 prevention'
 artifacts:
+- path: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
+  kind: deploy-smoke
+  session_id: S018-eval-job-dispatch
+  stage: 14-hotfix
+  recorded_at: '2026-07-31'
+  overall_result: PASS
+  note: 'S018 CD + Admin Evaluation live smoke PASS @ a6c39e5 — run_id=eb76b740-4aa5-4977-b519-0b133cd48b5c; Modal job_id=d0a9f39c-df25-445f-87ac-9e07a1c7429d; both completed; no ValidationError ingest fall-through; Modal DM + DO write-api redeployed'
 - path: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
   kind: verification-report
   session_id: S017-corpus-reembed-migration
@@ -14831,15 +15015,29 @@ artifacts:
   session_archived: true
   commit_sha: 1af649c7bb691af5fef93f68d71b7811f7b66343
 git_history:
-  current_branch: fix/S018-eval-job-dispatch
+  current_branch: fix/S018-job-dispatch-prevention
   branches:
+  - name: fix/S018-job-dispatch-prevention
+    purpose: Phase 5 prevention (registry + husky + checklist + rule)
+    base: main
+    status: active
+    created_at: '2026-07-31'
+    session_id: S018-eval-job-dispatch
+    note: 'S018 Phase 5 prevention — fail-closed job_type registry, husky pre-commit, deploy-checklist, job-terminal-state.mdc; commit pending'
   - name: fix/S018-eval-job-dispatch
     purpose: S018 hotfix — wire run_job for job_type=eval (Admin Evaluation Modal)
     base: main
-    status: open
+    status: merged
     created_at: '2026-07-31'
     session_id: S018-eval-job-dispatch
-    note: 'Local fix ready (uncommitted): eval dispatch + DO execute + JobOptions.question + synthesis truncation; awaiting user confirm before commit/PR/deploy'
+    note: 'PR #169 MERGED @ a6c39e5; CD + Admin Evaluation smoke PASS; next: Phase 4 AskQuestion then Phase 5 prevention'
+    pr_number: 169
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/169
+    pr_status: merged
+    merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+    merge_commit: a6c39e57e856e75d149b1ac1af82d6e92243af19
+    merged_at: '2026-07-31'
+    head_sha: 207df88
   - name: evolve/EV-015-corpus-reembed-migration
     purpose: EV-015 / S017 — corpus re-embed / re-chunk migration (#167); Standard+build
     base: main
@@ -15032,6 +15230,14 @@ git_history:
     created_at: '2026-06-25'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
   commits:
+  - sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
+    branch: main
+    message: 'Merge PR #169: hotfix eval job_type dispatch (S018)'
+    stage: 14-hotfix
+    session_id: S018-eval-job-dispatch
+    timestamp: '2026-07-31T13:17:10Z'
+    pr_number: 169
+    note: 'PR #169 MERGED; fix branch fix/S018-eval-job-dispatch'
   - sha: e3c952e
     branch: feat/connectivity-gates
     message: 'feat: add connectivity gates (H0c/H0i/H4/H5) across skills 00-15'
@@ -16670,6 +16876,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+next_action: watch main CI + deploy-preflight, then await user approval for dual deploy (DO write-api + Modal data-management)
 pipeline_idle: false
-pipeline_idle_note: 2026-07-31 — S018 active; local fix ready uncommitted; await user confirm verify→commit/PR→deploy
+pipeline_idle_note: '2026-07-31 — S018 PR #169 MERGED @ a6c39e5; watch main CI + deploy-preflight; then await dual-deploy approval'

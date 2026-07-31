@@ -46,3 +46,18 @@ Evidence: BUG-2026-05-25 — retag jobs stuck at "pending" because RuntimeError 
 before run_retag_job's own try/except could mark it "failed".
 
 Test: `tests/bugs/test_bug_2026_05_25_retag_job_never_completes.py`
+
+## Fail-closed job_type dispatch (BUG-2026-07-31)
+
+`run_job` must use an **explicit registry** of known `job_type` → handler.
+Never use a catch-all `else` that runs ingest for unknown types.
+
+When adding a job type:
+
+1. Register the handler in the dispatch map (ingest only for `job_type=ingest`)
+2. Unknown `job_type` → fail the job with a clear error (do not call `run_ingest_job`)
+3. Add/extend `tests/bugs/` coverage; keep husky pre-commit dispatch gate green
+4. Update `docs/deploy-checklist.md` job_type row
+
+Evidence: BUG-2026-07-31 — `job_type=eval` fell through to ingest → empty BatchUpsertRequest.
+Test: `tests/bugs/test_bug_2026_07_31_eval_job_dispatch.py`

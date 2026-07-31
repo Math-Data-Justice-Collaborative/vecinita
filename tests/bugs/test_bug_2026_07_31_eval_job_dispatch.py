@@ -112,3 +112,28 @@ def test_run_job_eval_without_eval_run_id_fails_closed() -> None:
     updated = store.get_job(record.job_id)
     assert updated is not None
     assert updated.status == "failed"
+
+
+def test_run_job_unknown_job_type_fails_closed_not_ingest() -> None:
+    """Unknown job_type must fail closed — never fall through to ingest.
+
+    Prevention for BUG-2026-07-31 class: catch-all else → run_ingest_job.
+    """
+    store = InMemoryJobStore()
+    record = store.create_job(urls=[], job_type="not_a_real_job_type", options={})
+    write = _CapturingWriteClient()
+
+    with pytest.raises(ValueError, match="unknown job_type"):
+        run_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=write,  # type: ignore[arg-type]
+        )
+
+    assert write.upsert_batches == []
+    assert write.executed_eval_runs == []
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "failed"
+    assert updated.error_code == "ValueError"
