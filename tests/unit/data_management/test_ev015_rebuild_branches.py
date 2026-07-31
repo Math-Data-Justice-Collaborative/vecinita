@@ -477,6 +477,44 @@ def test_run_backfill_job_missing_job_raises_keyerror() -> None:
         )
 
 
+def test_run_rebuild_job_suppresses_complete_failure_after_shadow_error() -> None:
+    """If complete_rebuild_run fails during error handling, original error still raises."""
+    doc_id = uuid4()
+    url = "https://example.com/complete-suppress"
+    summary, detail = _doc(doc_id, url, text="body")
+    store = InMemoryJobStore()
+
+    class _FailBoth(_RecordingWriteClient):
+        def upsert_shadow_batch(self, body: object) -> None:
+            _ = body
+            msg = "shadow boom"
+            raise RuntimeError(msg)
+
+        def complete_rebuild_run(self, rebuild_run_id: UUID, *, status: str) -> None:
+            _ = (rebuild_run_id, status)
+            msg = "complete boom"
+            raise RuntimeError(msg)
+
+    write_client = _FailBoth(docs=[summary], details={doc_id: detail})
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "document_ids": [str(doc_id)],
+        },
+    )
+    with pytest.raises(RuntimeError, match="shadow boom"):
+        run_rebuild_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=write_client,  # type: ignore[arg-type]
+        )
+
+
 def test_run_rebuild_job_empty_document_ids_is_noop_success() -> None:
     """document_ids=[] builds no upserts; job still completes."""
     store = InMemoryJobStore()

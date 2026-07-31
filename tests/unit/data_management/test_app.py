@@ -174,6 +174,31 @@ def test_create_job_accepts_backfill_rebuild_options() -> None:
     assert record.options["force"] is True
 
 
+def test_create_job_persists_from_chunks_ack_flag() -> None:
+    """ack_reconstruct_from_chunks is stored when backfill_source=from_chunks."""
+    store = InMemoryJobStore()
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+    response = client.post(
+        "/jobs",
+        json={
+            "urls": [],
+            "options": {
+                "job_type": "rebuild",
+                "mode": "rechunk",
+                "backfill": True,
+                "backfill_source": "from_chunks",
+                "ack_reconstruct_from_chunks": True,
+            },
+        },
+    )
+    assert response.status_code == HTTPStatus.ACCEPTED
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.options["backfill_source"] == "from_chunks"
+    assert record.options["ack_reconstruct_from_chunks"] is True
+
+
 def test_create_job_emits_job_created_audit() -> None:
     """POST /jobs records job.created with the initiating operator."""
     captured: list[AuditEventRequest] = []
