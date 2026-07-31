@@ -16,6 +16,7 @@ from vecinita_data_management_backend.pipeline import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from uuid import UUID
 
     from vecinita_embedding_client import EmbeddingClient
@@ -26,6 +27,9 @@ if TYPE_CHECKING:
     from vecinita_data_management_backend.write_client import InternalWriteClient
 
 _logger = logging.getLogger(__name__)
+
+# Explicit registry — unknown job_type must fail closed (BUG-2026-07-31).
+_KNOWN_JOB_TYPES: frozenset[str] = frozenset({"ingest", "retag", "rebuild", "eval"})
 
 
 def _require_tag_client(tag_client: LlmTagClient | None) -> LlmTagClient:
@@ -58,7 +62,53 @@ def _emit_job_terminal_audit(
         _logger.warning("audit emit failed for %s", event_type, exc_info=True)
 
 
-def run_job(  # noqa: PLR0913, C901  # job dispatch mirrors pipeline dependency surface
+def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
+    record: JobRecord,
+    *,
+    store: JobStore,
+    embed_client: EmbeddingClient,
+    write_client: InternalWriteClient,
+    fetch_document: DocumentFetcher | None,
+    tag_client: LlmTagClient | None,
+) -> None:
+    """Run the handler for a registered job_type (backfill handled by caller)."""
+    job_id = record.job_id
+    handlers: dict[str, Callable[[], None]] = {
+        "ingest": lambda: run_ingest_job(
+            job_id,
+            store=store,
+            embed_client=embed_client,
+            write_client=write_client,
+            fetch_document=fetch_document,
+            tag_client=tag_client,
+        ),
+        "retag": lambda: run_retag_job(
+            job_id,
+            store=store,
+            write_client=write_client,
+            tag_client=_require_tag_client(tag_client),
+        ),
+        "rebuild": lambda: run_rebuild_job(
+            job_id,
+            store=store,
+            embed_client=embed_client,
+            write_client=write_client,
+            fetch_document=fetch_document,
+        ),
+        "eval": lambda: run_eval_job(
+            job_id,
+            store=store,
+            write_client=write_client,
+        ),
+    }
+    handler = handlers.get(record.job_type)
+    if handler is None:
+        msg = f"unknown job_type: {record.job_type!r}; known={sorted(_KNOWN_JOB_TYPES)}"
+        raise ValueError(msg)
+    handler()
+
+
+def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surface
     job_id: UUID,
     *,
     store: JobStore,
@@ -83,30 +133,9 @@ def run_job(  # noqa: PLR0913, C901  # job dispatch mirrors pipeline dependency 
                 write_client=scoped_write,
                 fetch_document=fetch_document,
             )
-        elif record.job_type == "retag":
-            run_retag_job(
-                job_id,
-                store=store,
-                write_client=scoped_write,
-                tag_client=_require_tag_client(tag_client),
-            )
-        elif record.job_type == "rebuild":
-            run_rebuild_job(
-                job_id,
-                store=store,
-                embed_client=embed_client,
-                write_client=scoped_write,
-                fetch_document=fetch_document,
-            )
-        elif record.job_type == "eval":
-            run_eval_job(
-                job_id,
-                store=store,
-                write_client=scoped_write,
-            )
         else:
-            run_ingest_job(
-                job_id,
+            _dispatch_known_job(
+                record,
                 store=store,
                 embed_client=embed_client,
                 write_client=scoped_write,
