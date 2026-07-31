@@ -294,6 +294,89 @@ def test_write_client_rebuild_helpers_raise_on_http_error() -> None:
     client.close()
 
 
+def test_run_rebuild_job_lists_all_docs_when_unscoped() -> None:
+    """Without document_ids, rebuild enumerates list_documents."""
+    doc_id = uuid4()
+    url = "https://example.com/unscoped"
+    summary, detail = _doc(doc_id, url, text="unscoped store body for rebuild")
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient(docs=[summary], details={doc_id: detail})
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={"mode": "rechunk", "dry_run": False, "force": True, "chunk_size_tokens": 64},
+    )
+    run_rebuild_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+    )
+    assert write_client.live_batches
+    assert str(write_client.live_batches[0].documents[0].url).rstrip("/") == url
+
+
+def test_run_rebuild_job_fetches_detail_when_list_has_no_cached_text() -> None:
+    """Unscoped list path has cached_text=None; resolve body via get_document_detail."""
+    doc_id = uuid4()
+    url = "https://example.com/detail-fetch"
+    summary = DocumentSummary(document_id=doc_id, url=url, title="T", language="en")
+    detail = DocumentDetail(
+        document_id=doc_id,
+        url=url,
+        title="T",
+        language="en",
+        text="body loaded from detail",
+    )
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient(docs=[summary], details={doc_id: detail})
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={"mode": "reembed", "dry_run": False, "chunk_size_tokens": 64},
+    )
+    run_rebuild_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+    )
+    assert write_client.live_batches[0].documents[0].body_text == "body loaded from detail"
+
+
+def test_run_backfill_job_empty_targets_completes_without_upsert() -> None:
+    """No missing-body docs → completed with no batch write."""
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient(docs=[], details={})
+    record = store.create_job(
+        urls=[],
+        job_type="ingest",
+        options={"backfill": True, "backfill_source": "rescrape"},
+    )
+    run_backfill_job(
+        record.job_id,
+        store=store,
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=lambda url: ScrapedDocument(url=url, title="x", text="y"),
+    )
+    assert write_client.live_batches == []
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+
+
+def test_run_backfill_job_rejects_non_backfill() -> None:
+    """Jobs without backfill=true are rejected."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=[], job_type="ingest", options={})
+    with pytest.raises(ValueError, match="not a backfill"):
+        run_backfill_job(
+            record.job_id,
+            store=store,
+            write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        )
+
+
 def test_upsert_shadow_batch_requires_rebuild_run_id() -> None:
     """Shadow batch without rebuild_run_id on documents is rejected locally."""
 

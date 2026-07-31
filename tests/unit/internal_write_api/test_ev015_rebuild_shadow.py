@@ -172,3 +172,43 @@ def test_create_rebuild_run_rejects_unknown_mode(write_client: TestClient) -> No
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_shadow_batch_unknown_url_returns_404(write_client: TestClient) -> None:
+    """Unknown document URL on shadow batch returns 404 (missing-doc branch)."""
+    create = write_client.post(
+        "/internal/v1/rebuild/runs",
+        json={
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "status": "running",
+            "embedding_model_id": "BAAI/bge-small-en-v1.5",
+            "embedding_dim": EMBEDDING_DIMENSION,
+            "chunk_size_tokens": 64,
+        },
+        headers=auth_headers(),
+    )
+    assert create.status_code == HTTPStatus.OK, create.text
+    rebuild_run_id = json_str(as_json_object(cast("object", create.json())), "rebuild_run_id")
+    shadow = write_client.post(
+        f"/internal/v1/rebuild/{rebuild_run_id}/shadow/batch",
+        json={
+            "documents": [
+                {
+                    "url": "https://missing-doc-for-shadow.example.com",
+                    "rebuild_run_id": rebuild_run_id,
+                    "chunks": [
+                        {
+                            "chunk_index": 0,
+                            "text": "orphan shadow",
+                            "embedding": _EMBEDDING,
+                        }
+                    ],
+                }
+            ]
+        },
+        headers=auth_headers(),
+    )
+    assert shadow.status_code == HTTPStatus.NOT_FOUND
+    assert "Document not found" in shadow.text
