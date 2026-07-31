@@ -1,4 +1,4 @@
-"""Dispatch ingest or retag jobs based on job_type."""
+"""Dispatch ingest, retag, rebuild, or eval jobs based on job_type."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from vecinita_shared_schemas.internal_write import AuditEventRequest
 
 from vecinita_data_management_backend.pipeline import (
     run_backfill_job,
+    run_eval_job,
     run_ingest_job,
     run_rebuild_job,
     run_retag_job,
@@ -57,7 +58,7 @@ def _emit_job_terminal_audit(
         _logger.warning("audit emit failed for %s", event_type, exc_info=True)
 
 
-def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surface
+def run_job(  # noqa: PLR0913, C901  # job dispatch mirrors pipeline dependency surface
     job_id: UUID,
     *,
     store: JobStore,
@@ -66,7 +67,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
     fetch_document: DocumentFetcher | None = None,
     tag_client: LlmTagClient | None = None,
 ) -> None:
-    """Run ingest or retag pipeline for a queued job."""
+    """Run ingest, retag, rebuild, or eval pipeline for a queued job."""
     record = store.get_job(job_id)
     if record is None:
         raise KeyError(job_id)
@@ -96,6 +97,12 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
                 embed_client=embed_client,
                 write_client=scoped_write,
                 fetch_document=fetch_document,
+            )
+        elif record.job_type == "eval":
+            run_eval_job(
+                job_id,
+                store=store,
+                write_client=scoped_write,
             )
         else:
             run_ingest_job(

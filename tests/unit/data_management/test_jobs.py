@@ -148,6 +148,39 @@ def test_run_job_dispatches_rebuild(
     assert called == [record.job_id]
 
 
+def test_run_job_dispatches_eval(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """job_type=eval routes to run_eval_job (BUG-2026-07-31 / ADR-038)."""
+    store = InMemoryJobStore()
+    eval_run_id = uuid4()
+    record = store.create_job(
+        urls=[],
+        job_type="eval",
+        options={"eval_run_id": str(eval_run_id)},
+    )
+    called: list[UUID] = []
+
+    def _eval(job_id: UUID, **kwargs: object) -> None:
+        _ = kwargs
+        called.append(job_id)
+        store.update_job(job_id, status="completed")
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_eval_job",
+        _eval,
+    )
+
+    run_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_StubWriteClient(),  # type: ignore[arg-type]
+    )
+
+    assert called == [record.job_id]
+
+
 def test_run_job_dispatches_retag(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

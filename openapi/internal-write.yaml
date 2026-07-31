@@ -614,6 +614,45 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+  /eval/runs/{run_id}/execute:
+    post:
+      operationId: executeEvalRun
+      summary: Execute a pending eval run (Modal job_type=eval worker)
+      description: >
+        Synchronous golden/adhoc eval execution for Modal data-management run_job
+        when job_type=eval (BUG-2026-07-31 / ADR-038). Modal owns job lifecycle;
+        this route holds DATABASE_URL and persists metrics (ADR-007).
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalRunExecuteRequest"
+      responses:
+        "200":
+          description: Eval run completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalRunExecuteResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          description: Eval execution failed (run marked failed in Postgres)
   /eval/runs/{run_id}/events:
     get:
       operationId: streamEvalRunEvents
@@ -1605,6 +1644,29 @@ components:
         created_at:
           type: string
           format: date-time
+    EvalRunExecuteRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Required for adhoc runs; ignored for golden
+    EvalRunExecuteResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - run_id
+        - status
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - completed
     EvalMetricsSummary:
       type: object
       properties:

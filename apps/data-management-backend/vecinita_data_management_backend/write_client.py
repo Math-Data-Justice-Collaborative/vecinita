@@ -218,3 +218,24 @@ class InternalWriteClient:
         if response.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"soft_delete_eval_run failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
+
+    def execute_eval_run(
+        self,
+        eval_run_id: UUID,
+        *,
+        question: str | None = None,
+        timeout: float = 600.0,
+    ) -> None:
+        """POST Modal→DO eval execute (BUG-2026-07-31 / ADR-038; long-running)."""
+        payload: dict[str, object] = {}
+        if question is not None:
+            payload["question"] = question
+        response = self._client.post(
+            f"/internal/v1/eval/runs/{eval_run_id}/execute",
+            json=payload,
+            headers=self._headers(),
+            timeout=timeout,
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"execute_eval_run failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)

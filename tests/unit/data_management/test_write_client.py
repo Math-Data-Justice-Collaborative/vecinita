@@ -492,3 +492,67 @@ def test_complete_rebuild_run_patches_status() -> None:
     client.complete_rebuild_run(run_id, status="completed")
     assert seen[0].get("status") == "completed"
     client.close()
+
+
+def test_execute_eval_run_posts_with_question() -> None:
+    """BUG-2026-07-31: execute_eval_run POSTs /eval/runs/{id}/execute with question."""
+    run_id = uuid4()
+    seen: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path.endswith(f"/internal/v1/eval/runs/{run_id}/execute")
+        seen.append(cast("dict[str, object]", json.loads(request.content.decode())))
+        return httpx.Response(
+            HTTPStatus.OK,
+            json={"run_id": str(run_id), "status": "completed"},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client.execute_eval_run(run_id, question="What hours?")
+    assert seen[0].get("question") == "What hours?"
+    client.close()
+
+
+def test_execute_eval_run_omits_question_when_none() -> None:
+    """Golden runs POST an empty JSON body when question is omitted."""
+    run_id = uuid4()
+    seen: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(cast("dict[str, object]", json.loads(request.content.decode() or "{}")))
+        return httpx.Response(
+            HTTPStatus.OK,
+            json={"run_id": str(run_id), "status": "completed"},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client.execute_eval_run(run_id)
+    assert "question" not in seen[0]
+    client.close()
+
+
+def test_execute_eval_run_raises_on_http_error() -> None:
+    """execute_eval_run raises InternalWriteClientError on non-2xx."""
+    run_id = uuid4()
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(HTTPStatus.INTERNAL_SERVER_ERROR, text="boom")
+    )
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="execute_eval_run"):
+        client.execute_eval_run(run_id, question="x")
+    client.close()

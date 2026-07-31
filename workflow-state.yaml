@@ -2283,40 +2283,67 @@ project:
       started: '2026-07-07'
       last_cycle: PRM-011
     14-hotfix:
-      status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      session_id: S015-hotfix-jobs-sse-cors
-      branch: fix/S015-jobs-sse-cors
+      status: in_progress
+      started_at: '2026-07-31'
+      session_id: S018-eval-job-dispatch
+      branch: fix/S018-eval-job-dispatch
       bugs:
-      - id: BUG-2026-07-29-jobs-sse-cors-headers
-        summary: Admin Jobs SSE live updates unavailable — CORS preflight rejects Cache-Control / Last-Event-ID on GET /jobs/events (production Modal); Jobs list poll works
-        status: resolved
+      - id: BUG-2026-07-31-eval-job-dispatch
+        summary: Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError
+        status: fix_implemented_uncommitted
         order: 1
-        seen_on: production_modal
-        bug_report: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
-        bug_report_status: resolved
-        repro_test: tests/bugs/test_bug_2026_07_29_jobs_sse_cors_headers.py
+        seen_on: staging_and_production
+        severity: medium
+        bug_report: docs/bug-reports/BUG-2026-07-31-eval-job-dispatch.md
+        bug_report_status: written
+        repro_test: tests/bugs/test_bug_2026_07_31_eval_job_dispatch.py
         repro_status: green
-        fix_summary: Allow Cache-Control and Last-Event-ID in CORS allow_headers for Jobs SSE (/jobs/events)
-        fix_commit: 5904552ad459cda3215be64932e056f51bb8f68d
-        merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
-        note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved. Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
-      note: 'S015 2026-07-29 CLOSED — PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; 15-service-health waived (user Option 1 for #87); orchestrator cleared.'
-      current_bug:
-      current_action:
-      next_action: none_session_closed
-      head_sha: 5904552ad459cda3215be64932e056f51bb8f68d
-      merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
-      merged_at: '2026-07-29'
-      pr: 155
-      pr_number: 155
-      pr_status: merged
-      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155
-      modal_dm_redeploy: success
-      live_cors: pass
-      prior_session_id: S012-hotfix-admin-ui-112-105
+        secondary_issue: top_k=5 vs vLLM max_model_len=2048 — include if straightforward
+        remediation_path: A_wire_run_job
+        note: Repro GREEN; local fix ready; awaiting user confirm verify→commit/PR→deploy. Do not mark resolved until deploy verified.
+        fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
+        fix_committed: false
+      note: 'S018 2026-07-31 — Phase 0 complete; repro RED→GREEN; fix implemented locally (NOT committed). Awaiting user confirmation: verify → commit/PR → deploy (write-api DO + Modal data-mgmt). Bug NOT resolved yet.'
+      current_bug: BUG-2026-07-31-eval-job-dispatch
+      current_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+      next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+      prior_session_id: S015-hotfix-jobs-sse-cors
       history:
+      - status: completed
+        started_at: '2026-07-29'
+        completed_at: '2026-07-29'
+        session_id: S015-hotfix-jobs-sse-cors
+        branch: fix/S015-jobs-sse-cors
+        bugs:
+        - id: BUG-2026-07-29-jobs-sse-cors-headers
+          summary: Admin Jobs SSE live updates unavailable — CORS preflight rejects Cache-Control / Last-Event-ID on GET /jobs/events (production Modal); Jobs list poll works
+          status: resolved
+          order: 1
+          seen_on: production_modal
+          bug_report: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
+          bug_report_status: resolved
+          repro_test: tests/bugs/test_bug_2026_07_29_jobs_sse_cors_headers.py
+          repro_status: green
+          fix_summary: Allow Cache-Control and Last-Event-ID in CORS allow_headers for Jobs SSE (/jobs/events)
+          fix_commit: 5904552ad459cda3215be64932e056f51bb8f68d
+          merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
+          note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved. Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
+        note: 'S015 2026-07-29 CLOSED — PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; 15-service-health waived (user Option 1 for #87); orchestrator cleared.'
+        current_bug:
+        current_action:
+        next_action: none_session_closed
+        head_sha: 5904552ad459cda3215be64932e056f51bb8f68d
+        merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
+        merged_at: '2026-07-29'
+        pr: 155
+        pr_number: 155
+        pr_status: merged
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155
+        modal_dm_redeploy: success
+        live_cors: pass
+        prior_session_id: S012-hotfix-admin-ui-112-105
+        superseded_at: '2026-07-31'
+        superseded_by: S018-eval-job-dispatch
       - status: completed
         started_at: '2026-07-28'
         completed_at: '2026-07-28'
@@ -2415,10 +2442,63 @@ project:
       - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
         completed_at: '2026-05-21'
       prior_started_at: '2026-06-26'
-      session_closed_at: '2026-07-29'
-      orchestrator_blocking: false
-session_counter: 17
+      orchestrator_blocking: true
+      phase0:
+        status: completed
+        completed_at: '2026-07-31'
+        intent: new_bug
+        env: both_staging_and_production
+        severity: medium
+        remediation_path: A_wire_run_job
+        secondary_top_k: include
+        note: 'User interview: intent=new_bug; env=both staging+production; severity=medium; path=A wire run_job; secondary top_k=include'
+      fix_local: true
+      fix_committed: false
+      repro_status: green
+      tests_note: 43 related passed; ruff+basedpyright clean on touched files
+      fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
+session_counter: 18
 active_session:
+  id: S018-eval-job-dispatch
+  type: hotfix
+  intent: Fix Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError. Wire run_job to eval worker (path A). Also address/document secondary top_k=5 vs vLLM max_model_len=2048 issue in same hotfix if straightforward.
+  status: in_progress
+  branch: fix/S018-eval-job-dispatch
+  orchestrator: 14-hotfix
+  evolve_cycle_id:
+  artifacts_dir: docs/sessions/S018-eval-job-dispatch/
+  current_stage: 14-hotfix
+  started_at: '2026-07-31'
+  routing_plan_status: approved
+  routing_approval: parent open_session with Phase 0 interview answers
+  phase0:
+    status: completed
+    completed_at: '2026-07-31'
+    intent: new_bug
+    env: both_staging_and_production
+    severity: medium
+    remediation_path: A_wire_run_job
+    secondary_top_k: include
+    note: 'User interview: intent=new_bug; env=both staging+production; severity=medium; path=A wire run_job; secondary top_k=include'
+  bug_id: BUG-2026-07-31-eval-job-dispatch
+  routing_plan:
+  - stage: 14-hotfix
+    required: true
+    status: in_progress
+    skip_rationale:
+    started_at: '2026-07-31'
+    note: Repro GREEN; local fix ready (uncommitted); awaiting user confirm verify→commit/PR→deploy
+  - stage: 15-service-health
+    required: false
+    status: pending
+    skip_rationale:
+    note: Optional after deploy verify
+  context_briefs: []
+  note: 'S018 2026-07-31 — Phase 0 complete; repro RED→GREEN; fix implemented locally (NOT committed). Awaiting user confirmation: verify → commit/PR → deploy (write-api DO + Modal data-mgmt). Bug NOT resolved yet.'
+  fix_local: true
+  fix_committed: false
+  repro_status: green
+  next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
 sessions:
 - id: S017-corpus-reembed-migration
   type: feature
@@ -7232,40 +7312,67 @@ stages:
     session_closed: true
     session_closed_at: '2026-07-30'
   14-hotfix:
-    status: completed
-    started_at: '2026-07-29'
-    completed_at: '2026-07-29'
-    session_id: S015-hotfix-jobs-sse-cors
-    branch: fix/S015-jobs-sse-cors
+    status: in_progress
+    started_at: '2026-07-31'
+    session_id: S018-eval-job-dispatch
+    branch: fix/S018-eval-job-dispatch
     bugs:
-    - id: BUG-2026-07-29-jobs-sse-cors-headers
-      summary: Admin Jobs SSE live updates unavailable — CORS preflight rejects Cache-Control / Last-Event-ID on GET /jobs/events (production Modal); Jobs list poll works
-      status: resolved
+    - id: BUG-2026-07-31-eval-job-dispatch
+      summary: Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError
+      status: fix_implemented_uncommitted
       order: 1
-      seen_on: production_modal
-      bug_report: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
-      bug_report_status: resolved
-      repro_test: tests/bugs/test_bug_2026_07_29_jobs_sse_cors_headers.py
+      seen_on: staging_and_production
+      severity: medium
+      bug_report: docs/bug-reports/BUG-2026-07-31-eval-job-dispatch.md
+      bug_report_status: written
+      repro_test: tests/bugs/test_bug_2026_07_31_eval_job_dispatch.py
       repro_status: green
-      fix_summary: Allow Cache-Control and Last-Event-ID in CORS allow_headers for Jobs SSE (/jobs/events)
-      fix_commit: 5904552ad459cda3215be64932e056f51bb8f68d
-      merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
-      note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved. Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
-    note: 'S015 2026-07-29 CLOSED — PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; 15-service-health waived (user Option 1 for #87); orchestrator cleared.'
-    current_bug:
-    current_action:
-    next_action: none_session_closed
-    head_sha: 5904552ad459cda3215be64932e056f51bb8f68d
-    merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
-    merged_at: '2026-07-29'
-    pr: 155
-    pr_number: 155
-    pr_status: merged
-    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155
-    modal_dm_redeploy: success
-    live_cors: pass
-    prior_session_id: S012-hotfix-admin-ui-112-105
+      secondary_issue: top_k=5 vs vLLM max_model_len=2048 — include if straightforward
+      remediation_path: A_wire_run_job
+      note: Repro GREEN; local fix ready; awaiting user confirm verify→commit/PR→deploy. Do not mark resolved until deploy verified.
+      fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
+      fix_committed: false
+    note: 'S018 2026-07-31 — Phase 0 complete; repro RED→GREEN; fix implemented locally (NOT committed). Awaiting user confirmation: verify → commit/PR → deploy (write-api DO + Modal data-mgmt). Bug NOT resolved yet.'
+    current_bug: BUG-2026-07-31-eval-job-dispatch
+    current_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+    next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+    prior_session_id: S015-hotfix-jobs-sse-cors
     history:
+    - status: completed
+      started_at: '2026-07-29'
+      completed_at: '2026-07-29'
+      session_id: S015-hotfix-jobs-sse-cors
+      branch: fix/S015-jobs-sse-cors
+      bugs:
+      - id: BUG-2026-07-29-jobs-sse-cors-headers
+        summary: Admin Jobs SSE live updates unavailable — CORS preflight rejects Cache-Control / Last-Event-ID on GET /jobs/events (production Modal); Jobs list poll works
+        status: resolved
+        order: 1
+        seen_on: production_modal
+        bug_report: docs/bug-reports/BUG-2026-07-29-jobs-sse-cors-headers.md
+        bug_report_status: resolved
+        repro_test: tests/bugs/test_bug_2026_07_29_jobs_sse_cors_headers.py
+        repro_status: green
+        fix_summary: Allow Cache-Control and Last-Event-ID in CORS allow_headers for Jobs SSE (/jobs/events)
+        fix_commit: 5904552ad459cda3215be64932e056f51bb8f68d
+        merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
+        note: 'PR #155 MERGED @ 15030fc; Modal DM redeployed; live OPTIONS /jobs/events + VECINITA_RUN_LIVE_CORS=1 PASS; resolved. Optional production Jobs UI SSE visual confirm deferred to user / 15-service-health.'
+      note: 'S015 2026-07-29 CLOSED — PR #155 MERGED @ 15030fc; Modal DM redeployed; live CORS PASS; 15-service-health waived (user Option 1 for #87); orchestrator cleared.'
+      current_bug:
+      current_action:
+      next_action: none_session_closed
+      head_sha: 5904552ad459cda3215be64932e056f51bb8f68d
+      merge_sha: 15030fcaf050ba9c4ffe5d5c46d4b2a097ab169b
+      merged_at: '2026-07-29'
+      pr: 155
+      pr_number: 155
+      pr_status: merged
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/155
+      modal_dm_redeploy: success
+      live_cors: pass
+      prior_session_id: S012-hotfix-admin-ui-112-105
+      superseded_at: '2026-07-31'
+      superseded_by: S018-eval-job-dispatch
     - status: completed
       started_at: '2026-07-28'
       completed_at: '2026-07-28'
@@ -7364,8 +7471,21 @@ stages:
     - bug_report: docs/bug-reports/BUG-2026-05-21-stream-tokens-function-not-callable.md
       completed_at: '2026-05-21'
     prior_started_at: '2026-06-26'
-    session_closed_at: '2026-07-29'
-    orchestrator_blocking: false
+    orchestrator_blocking: true
+    phase0:
+      status: completed
+      completed_at: '2026-07-31'
+      intent: new_bug
+      env: both_staging_and_production
+      severity: medium
+      remediation_path: A_wire_run_job
+      secondary_top_k: include
+      note: 'User interview: intent=new_bug; env=both staging+production; severity=medium; path=A wire run_job; secondary top_k=include'
+    fix_local: true
+    fix_committed: false
+    repro_status: green
+    tests_note: 43 related passed; ruff+basedpyright clean on touched files
+    fix_summary: run_job dispatches job_type=eval → run_eval_job; Modal calls DO POST /internal/v1/eval/runs/{id}/execute; JobOptions.question for adhoc; synthesis context truncation for max_model_len
   15-service-health:
     status: skipped
     started_at: '2026-07-29'
@@ -13649,6 +13769,8 @@ decisions_log:
 - 'S017/EV-015 2026-07-30: close_session COMPLETE — S017 archived to sessions[]; active_session=null; EV-015 status remains completed (closed/archived); closeout artifacts recorded; agent will commit closeout docs + workflow-state.yaml to main (exclude scripts/deploy/_tmp_proxy_key_check.py); next_action=none/idle'
 - 'S017/EV-015 2026-07-30: S017-D34 recorded — session archived after Phase 4 option 1 close_cycle; idle'
 - '2026-07-30 S017/EV-015: closeout commit pushed to main @ 1af649c7bb691af5fef93f68d71b7811f7b66343 ([EV-015] docs: close S017 after PR #168 merge and pin reset); H0ci PASS after security-job flake rerun; closeout artifacts commit_pending=false; active_session=null; S017 completed; pipeline idle'
+- 'S018 2026-07-31 Phase 0: intent=new_bug; env=both staging+production; severity=medium; path=A wire run_job to eval worker; secondary top_k=5 vs max_model_len=2048 include if straightforward'
+- 'S018 2026-07-31: repro RED→GREEN; local fix implemented (uncommitted) — run_job→run_eval_job; Modal→DO /internal/v1/eval/runs/{id}/execute; JobOptions.question; synthesis truncation. Awaiting user confirm verify→commit/PR→deploy. Bug NOT resolved.'
 artifacts:
 - path: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
   kind: verification-report
@@ -14709,8 +14831,15 @@ artifacts:
   session_archived: true
   commit_sha: 1af649c7bb691af5fef93f68d71b7811f7b66343
 git_history:
-  current_branch: main
+  current_branch: fix/S018-eval-job-dispatch
   branches:
+  - name: fix/S018-eval-job-dispatch
+    purpose: S018 hotfix — wire run_job for job_type=eval (Admin Evaluation Modal)
+    base: main
+    status: open
+    created_at: '2026-07-31'
+    session_id: S018-eval-job-dispatch
+    note: 'Local fix ready (uncommitted): eval dispatch + DO execute + JobOptions.question + synthesis truncation; awaiting user confirm before commit/PR/deploy'
   - name: evolve/EV-015-corpus-reembed-migration
     purpose: EV-015 / S017 — corpus re-embed / re-chunk migration (#167); Standard+build
     base: main
@@ -16541,6 +16670,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: none
-pipeline_idle: true
-pipeline_idle_note: 2026-07-30 — S017/EV-015 archived; active_session=null; next_action=none; await next session via 00-context
+next_action: awaiting user confirmation for verify → commit/PR → deploy (write-api DO + Modal data-mgmt)
+pipeline_idle: false
+pipeline_idle_note: 2026-07-31 — S018 active; local fix ready uncommitted; await user confirm verify→commit/PR→deploy

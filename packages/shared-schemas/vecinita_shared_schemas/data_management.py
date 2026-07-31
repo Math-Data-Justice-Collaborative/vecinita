@@ -27,6 +27,7 @@ class JobOptions(BaseModel):
     job_type: JobType = "ingest"
     document_id: UUID | None = None
     eval_run_id: UUID | None = None
+    question: str | None = Field(default=None, min_length=1, max_length=2000)
     mode: RebuildMode | None = None
     force: bool = False
     dry_run: bool = False

@@ -50,6 +50,7 @@ def _store_options_from_request(job_options: JobOptions | None) -> tuple[str, di
         ("chunk_size_tokens", job_options.chunk_size_tokens),
         ("document_id", str(job_options.document_id) if job_options.document_id else None),
         ("eval_run_id", str(job_options.eval_run_id) if job_options.eval_run_id else None),
+        ("question", job_options.question),
         ("mode", job_options.mode),
     )
     options: dict[str, object] = {
