@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-24 (S010/EV-011 F39 M80 — deploy both LLM apps + playground URL)
+> **Last updated**: 2026-07-30 (S017/EV-015 F41 — corpus store + rebuild / shadow promote)
 
 ## Overview
 
@@ -235,6 +235,49 @@ See **`docs/sessions/S000-internal-docs-archive/execution-plan.md` §Cost Estima
 
 **Targets:** ≤ **$25/mo** preferred, ≤ **$50/mo** hard cap (ADR-004).  
 **04-tech-plan gate:** Pilot traffic **~$42–48/mo** achievable; consolidate DO first if over cap (user decision).
+
+## EV-015 — Corpus document store + rebuild (F41 / #167)
+
+**ADR:** ADR-040 · **Tech:** TP-S017-01–09 · **Session:** S017
+
+### Deploy units touched
+
+| Unit | Change |
+|------|--------|
+| DO Managed Postgres | Alembic: `body_text`, `document_revisions`, `rebuild_runs`, `shadow_chunks`, `shadow_embeddings` |
+| DO internal-write-api | Store upsert fields; `POST /internal/v1/rebuild/{id}/promote`; eval `rebuild_run_id` |
+| Modal data-management | `job_type=rebuild` worker; shadow dual-write; backfill path; Jobs OpenAPI |
+| data-management-frontend | Corpus page: RebuildForm enqueue + RebuildPromoteForm (admin) |
+| ChatRAG | No schema change; retrieval stays live until promote (shadow only via eval path) |
+
+### Secrets / config
+
+| Variable | Where | Notes |
+|----------|-------|-------|
+| `VECINITA_REBUILD_SHADOW_ENABLED` | — | **Planned/unused (TP-S017-12-A):** not wired; `dry_run` always available |
+| `VECINITA_EMBEDDING_MODEL_ID` | Modal DM / write stamps | Version stamp on revisions |
+| Existing `VECINITA_INTERNAL_*` | Unchanged | ADR-007 write boundary |
+
+No new CORS origins required if Admin continues to use existing Modal DM + corpus API URLs
+(T90.4 verifies promote preflight). OpenAPI for write-API create/patch/shadow rebuild routes
+is deferred this cycle (TP-S017-12-B); promote + DM Jobs OpenAPI are the operator surfaces.
+
+### Redeploy order (staging)
+
+1. `alembic upgrade head` (store + shadow tables)
+2. internal-write-api (promote + batch body_text)
+3. Modal data-management (rebuild worker)
+4. Admin frontend (enqueue + promote UI)
+5. **Ops smokes (TP-S017-01 / TP-S017-07):**
+   - **Live equivalence:** rebuild with **today’s** chunk/embed settings (force as needed)
+   - **Shadow path (required):** `dry_run=true` → F36 with `rebuild_run_id` → promote
+6. Prod live rebuild **out of scope** — follow runbook outline only
+
+### Rollback
+
+- Keep prior live chunks/embeddings until promote; promote is transactional.
+- Rollback after promote: re-promote prior `rebuild_run_id` if retained, or restore from
+  `document_revisions` checklist (runbook). Never TRUNCATE without corpus-db-safety guards.
 
 ## Open questions
 

@@ -727,6 +727,37 @@ export async function promoteRagConfig(
   return response.json() as Promise<RagConfigPromoteResponseApi>;
 }
 
+/** TP-S017-06 / UJ-054 — promote shadow rebuild revision to live. */
+export interface RebuildPromoteResponseApi {
+  promoted: boolean;
+  rebuild_run_id: string;
+  chunks_promoted: number;
+  documents_promoted: number;
+}
+
+export async function promoteRebuildRun(
+  options: CorpusClientOptions,
+  rebuildRunId: string,
+): Promise<RebuildPromoteResponseApi> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/rebuild/${rebuildRunId}/promote`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(
+      detail || `Rebuild promote failed (${String(response.status)})`,
+    );
+  }
+  return response.json() as Promise<RebuildPromoteResponseApi>;
+}
+
 export async function fetchActiveRagConfig(
   options: CorpusClientOptions,
 ): Promise<RagConfigActiveResponseApi> {
@@ -798,7 +829,9 @@ export async function fetchPlaygroundModels(
     },
   });
   if (!response.ok) {
-    throw new Error(`Playground models list failed (${String(response.status)})`);
+    throw new Error(
+      `Playground models list failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<{ items: PlaygroundModelSummaryApi[] }>;
 }
@@ -869,7 +902,9 @@ export async function pullPlaygroundModel(
     },
   );
   if (!response.ok) {
-    throw new Error(`Playground model pull failed (${String(response.status)})`);
+    throw new Error(
+      `Playground model pull failed (${String(response.status)})`,
+    );
   }
   return response.json() as Promise<PlaygroundModelPullResponseApi>;
 }

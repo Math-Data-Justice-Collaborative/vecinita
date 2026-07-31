@@ -31,9 +31,11 @@ describe("corpus api", () => {
   it("authHeaders prefers accessToken over apiKey", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ items: [], page: 1, page_size: 50, total: 0 }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ items: [], page: 1, page_size: 50, total: 0 }),
+        ),
     );
 
     await listDocuments({
@@ -57,9 +59,7 @@ describe("corpus api", () => {
 
   it("listDocuments returns parsed JSON on success", async () => {
     const page = {
-      items: [
-        { document_id: "d1", url: "https://example.com", title: "A" },
-      ],
+      items: [{ document_id: "d1", url: "https://example.com", title: "A" }],
       page: 1,
       page_size: 50,
       total: 1,

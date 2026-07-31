@@ -55,7 +55,9 @@ describe("Job Management navigation persistence (#89)", () => {
         const method = (init?.method ?? "GET").toUpperCase();
 
         if (url.includes("/internal/v1/documents")) {
-          return Promise.resolve(jsonResponse({ items: [], page: 1, page_size: 50, total: 0 }));
+          return Promise.resolve(
+            jsonResponse({ items: [], page: 1, page_size: 50, total: 0 }),
+          );
         }
         if (url.includes("/jobs/events")) {
           return new Promise(() => undefined);

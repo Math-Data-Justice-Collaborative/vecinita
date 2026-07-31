@@ -218,9 +218,7 @@ describe("subscribeJobEvents", () => {
 
   it("streams job events from /jobs/events with auth headers (TC-148)", async () => {
     const frame =
-      "id: 1\nevent: job\ndata: " +
-      JSON.stringify(SAMPLE_JOB) +
-      "\n\n";
+      "id: 1\nevent: job\ndata: " + JSON.stringify(SAMPLE_JOB) + "\n\n";
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
         controller.enqueue(new TextEncoder().encode(frame));
@@ -369,10 +367,7 @@ describe("subscribeJobEvents", () => {
 
   it("ignores non-SSE field lines in the event stream", async () => {
     const frame =
-      "hello\n" +
-      "event: job\ndata: " +
-      JSON.stringify(SAMPLE_JOB) +
-      "\n\n";
+      "hello\n" + "event: job\ndata: " + JSON.stringify(SAMPLE_JOB) + "\n\n";
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
         controller.enqueue(new TextEncoder().encode(frame));

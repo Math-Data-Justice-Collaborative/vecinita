@@ -412,6 +412,28 @@ def test_internal_write_cors_preflight_on_rag_config_routes(
         assert method in allow_methods
 
 
+def test_internal_write_cors_preflight_on_rebuild_promote(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """EV-015 / T90.4: CORS preflight allows POST on rebuild promote (H0c)."""
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    response = client.options(
+        "/internal/v1/rebuild/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/promote",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization, content-type",
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+    allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+    assert "POST" in allow_methods
+
+
 def test_internal_write_cors_preflight_on_ollama_model_routes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

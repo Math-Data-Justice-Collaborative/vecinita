@@ -69,6 +69,8 @@ from vecinita_shared_schemas.internal_write import (
     BulkRetagResponse,
     BulkTagRequest,
     ChunkDetail,
+    CreateRebuildRunRequest,
+    CreateRebuildRunResponse,
     DocumentDetail,
     DocumentHistoryResponse,
     DocumentListPage,
@@ -85,6 +87,7 @@ from vecinita_shared_schemas.internal_write import (
     EvalTimeseriesResponse,
     HealthAggregateResponse,
     HealthResponse,
+    RebuildPromoteResponse,
     RecentActivity,
     RetagJobResponse,
     ServiceHealth,
@@ -97,6 +100,7 @@ from vecinita_shared_schemas.internal_write import (
     TagPatchResponse,
     TopServedItem,
     TopServedResponse,
+    UpdateRebuildRunRequest,
 )
 from vecinita_shared_schemas.json_types import as_json_object
 from vecinita_shared_schemas.playground_catalog import (
@@ -158,6 +162,11 @@ from vecinita_internal_write_api.rag_production_config_service import (
     get_active_rag_config,
     promote_rag_config,
 )
+from vecinita_internal_write_api.rebuild_promote import (
+    RebuildPromoteConflictError,
+    RebuildPromoteNotFoundError,
+    promote_rebuild_run,
+)
 from vecinita_internal_write_api.tags import (
     replace_chunk_tags,
     replace_document_tags,
@@ -190,6 +199,11 @@ def _dependency_health_url(base: str) -> str:
     if normalized.endswith("/health"):
         return normalized
     return f"{normalized}/health"
+
+
+def _document_url_key(url: object) -> str:
+    """Normalize document URLs for lookup (Pydantic HttpUrl adds a trailing slash)."""
+    return str(url).rstrip("/")
 
 
 def _row_datetime(row: Mapping[str, object], key: str) -> datetime:
@@ -409,12 +423,13 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         conn.execute(
                             text(
                                 """
-                        INSERT INTO documents (url, title, content_hash, language)
-                        VALUES (:url, :title, :content_hash, :language)
+                        INSERT INTO documents (url, title, content_hash, language, body_text)
+                        VALUES (:url, :title, :content_hash, :language, :body_text)
                         ON CONFLICT (url) DO UPDATE
                         SET title = EXCLUDED.title,
                             content_hash = EXCLUDED.content_hash,
                             language = EXCLUDED.language,
+                            body_text = COALESCE(EXCLUDED.body_text, documents.body_text),
                             updated_at = now()
                         RETURNING id
                         """
@@ -424,52 +439,90 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 "title": document.title,
                                 "content_hash": document.content_hash,
                                 "language": document.language,
+                                "body_text": document.body_text,
                             },
                         ).scalar_one(),
                     )
                 )
 
-                conn.execute(
-                    text("DELETE FROM chunks WHERE document_id = :document_id"),
-                    {"document_id": doc_id},
-                )
+                if document.body_text is not None:
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO document_revisions (
+                                document_id,
+                                content_hash,
+                                body_text,
+                                embedding_model_id,
+                                embedding_dim,
+                                chunk_size_tokens,
+                                rebuild_run_id
+                            )
+                            VALUES (
+                                :document_id,
+                                :content_hash,
+                                :body_text,
+                                :embedding_model_id,
+                                :embedding_dim,
+                                :chunk_size_tokens,
+                                :rebuild_run_id
+                            )
+                            """
+                        ),
+                        {
+                            "document_id": doc_id,
+                            "content_hash": document.content_hash,
+                            "body_text": document.body_text,
+                            "embedding_model_id": document.embedding_model_id,
+                            "embedding_dim": document.embedding_dim,
+                            "chunk_size_tokens": document.chunk_size_tokens,
+                            "rebuild_run_id": document.rebuild_run_id,
+                        },
+                    )
 
-                for chunk in document.chunks:
-                    chunk_id = scalar_uuid(
-                        cast(
-                            "object",
-                            conn.execute(
-                                text(
-                                    """
+                # Body-only backfill (empty chunks) must not wipe live retrieval (TP-S017-08).
+                if document.chunks:
+                    conn.execute(
+                        text("DELETE FROM chunks WHERE document_id = :document_id"),
+                        {"document_id": doc_id},
+                    )
+
+                    for chunk in document.chunks:
+                        chunk_id = scalar_uuid(
+                            cast(
+                                "object",
+                                conn.execute(
+                                    text(
+                                        """
                             INSERT INTO chunks (document_id, chunk_index, text)
                             VALUES (:document_id, :chunk_index, :text)
                             RETURNING id
                             """
-                                ),
-                                {
-                                    "document_id": doc_id,
-                                    "chunk_index": chunk.chunk_index,
-                                    "text": chunk.text,
-                                },
-                            ).scalar_one(),
+                                    ),
+                                    {
+                                        "document_id": doc_id,
+                                        "chunk_index": chunk.chunk_index,
+                                        "text": chunk.text,
+                                    },
+                                ).scalar_one(),
+                            )
                         )
-                    )
-                    vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
-                    conn.execute(
-                        text(
-                            """
+                        vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
+                        conn.execute(
+                            text(
+                                """
                             INSERT INTO embeddings (chunk_id, embedding)
                             VALUES (:chunk_id, CAST(:embedding AS vector))
                             ON CONFLICT (chunk_id) DO UPDATE
                             SET embedding = EXCLUDED.embedding
                             """
-                        ),
-                        {
-                            "chunk_id": chunk_id,
-                            "embedding": vector_literal,
-                        },
-                    )
-                    upserted += 1
+                            ),
+                            {
+                                "chunk_id": chunk_id,
+                                "embedding": vector_literal,
+                            },
+                        )
+                        upserted += 1
 
                 tag_slugs = []
                 if document.tags is not None:
@@ -507,6 +560,193 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 )
 
         return BatchUpsertResponse(upserted_chunks=upserted)
+
+    @app.post(
+        "/internal/v1/rebuild/runs",
+        response_model=CreateRebuildRunResponse,
+    )
+    def create_rebuild_run(  # pyright: ignore[reportUnusedFunction]
+        body: CreateRebuildRunRequest,
+        _actor: WriteActorDep,
+    ) -> CreateRebuildRunResponse:
+        """Insert a rebuild_runs row for dry-run / live tracking (TP-S017-02)."""
+        with engine.begin() as conn:
+            run_id = scalar_uuid(
+                cast(
+                    "object",
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO rebuild_runs (
+                                mode, dry_run, force, status, job_id,
+                                embedding_model_id, embedding_dim, chunk_size_tokens
+                            )
+                            VALUES (
+                                :mode, :dry_run, :force, :status, :job_id,
+                                :embedding_model_id, :embedding_dim, :chunk_size_tokens
+                            )
+                            RETURNING id
+                            """
+                        ),
+                        {
+                            "mode": body.mode,
+                            "dry_run": body.dry_run,
+                            "force": body.force,
+                            "status": body.status,
+                            "job_id": body.job_id,
+                            "embedding_model_id": body.embedding_model_id,
+                            "embedding_dim": body.embedding_dim,
+                            "chunk_size_tokens": body.chunk_size_tokens,
+                        },
+                    ).scalar_one(),
+                )
+            )
+        return CreateRebuildRunResponse(rebuild_run_id=run_id, status=body.status)
+
+    @app.patch(
+        "/internal/v1/rebuild/{rebuild_run_id}",
+        response_model=CreateRebuildRunResponse,
+    )
+    def update_rebuild_run(  # pyright: ignore[reportUnusedFunction]
+        rebuild_run_id: UUID,
+        body: UpdateRebuildRunRequest,
+        _actor: WriteActorDep,
+    ) -> CreateRebuildRunResponse:
+        """Update rebuild_runs.status lifecycle (pending/running/completed/failed)."""
+        with engine.begin() as conn:
+            updated = (
+                conn.execute(
+                    text(
+                        """
+                        UPDATE rebuild_runs
+                        SET status = :status, updated_at = now()
+                        WHERE id = :id
+                        RETURNING id, status
+                        """
+                    ),
+                    {"id": rebuild_run_id, "status": body.status},
+                )
+                .mappings()
+                .first()
+            )
+            if updated is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            row = mapping_row(updated)
+        return CreateRebuildRunResponse(
+            rebuild_run_id=row_uuid(row, "id"),
+            status=row_str(row, "status"),
+        )
+
+    @app.post(
+        "/internal/v1/rebuild/{rebuild_run_id}/shadow/batch",
+        response_model=BatchUpsertResponse,
+    )
+    def upsert_shadow_batch(  # pyright: ignore[reportUnusedFunction]
+        rebuild_run_id: UUID,
+        body: BatchUpsertRequest,
+        _actor: WriteActorDep,
+    ) -> BatchUpsertResponse:
+        """Write shadow_chunks + shadow_embeddings; leave live retrieval unchanged (TC-164)."""
+        with engine.begin() as conn:
+            run_row = (
+                conn.execute(
+                    text("SELECT id, dry_run FROM rebuild_runs WHERE id = :id"),
+                    {"id": rebuild_run_id},
+                )
+                .mappings()
+                .first()
+            )
+            if run_row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+            upserted = 0
+            for document in body.documents:
+                url_key = _document_url_key(document.url)
+                doc_row = (
+                    conn.execute(
+                        text(
+                            """
+                            SELECT id FROM documents
+                            WHERE rtrim(url, '/') = :url_key
+                            """
+                        ),
+                        {"url_key": url_key},
+                    )
+                    .mappings()
+                    .first()
+                )
+                if doc_row is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Document not found for url={document.url}",
+                    )
+                doc_id = row_uuid(mapping_row(doc_row), "id")
+                for chunk in document.chunks:
+                    shadow_chunk_id = scalar_uuid(
+                        cast(
+                            "object",
+                            conn.execute(
+                                text(
+                                    """
+                                    INSERT INTO shadow_chunks (
+                                        rebuild_run_id, document_id, chunk_index, text
+                                    )
+                                    VALUES (
+                                        :rebuild_run_id, :document_id, :chunk_index, :text
+                                    )
+                                    ON CONFLICT (rebuild_run_id, document_id, chunk_index)
+                                    DO UPDATE SET text = EXCLUDED.text
+                                    RETURNING id
+                                    """
+                                ),
+                                {
+                                    "rebuild_run_id": rebuild_run_id,
+                                    "document_id": doc_id,
+                                    "chunk_index": chunk.chunk_index,
+                                    "text": chunk.text,
+                                },
+                            ).scalar_one(),
+                        )
+                    )
+                    vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO shadow_embeddings (shadow_chunk_id, embedding)
+                            VALUES (:shadow_chunk_id, CAST(:embedding AS vector))
+                            ON CONFLICT (shadow_chunk_id)
+                            DO UPDATE SET embedding = EXCLUDED.embedding
+                            """
+                        ),
+                        {
+                            "shadow_chunk_id": shadow_chunk_id,
+                            "embedding": vector_literal,
+                        },
+                    )
+                    upserted += 1
+        return BatchUpsertResponse(upserted_chunks=upserted)
+
+    @app.post(
+        "/internal/v1/rebuild/{rebuild_run_id}/promote",
+        response_model=RebuildPromoteResponse,
+    )
+    def promote_rebuild_run_route(  # pyright: ignore[reportUnusedFunction]
+        rebuild_run_id: UUID,
+        _actor: WriteActorDep,
+    ) -> RebuildPromoteResponse:
+        """Copy shadow revision into live chunks/embeddings (TP-S017-03 / TC-165)."""
+        try:
+            return promote_rebuild_run(engine, rebuild_run_id=rebuild_run_id)
+        except RebuildPromoteNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc),
+            ) from exc
+        except RebuildPromoteConflictError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(exc),
+            ) from exc
 
     @app.delete(
         "/internal/v1/documents/bulk",
@@ -754,7 +994,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 conn.execute(
                     text(
                         """
-                        SELECT id, url, title, language
+                        SELECT id, url, title, language, body_text
                         FROM documents
                         WHERE id = :document_id
                         """
@@ -767,31 +1007,35 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             if row is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
             doc = mapping_row(row)
-            scalar_chunks = cast(
-                "list[object]",
-                list(
-                    conn.execute(
-                        text(
-                            """
+            store_body = row_str_optional(doc, "body_text")
+            if store_body is not None and store_body.strip():
+                detail_text = store_body
+            else:
+                scalar_chunks = cast(
+                    "list[object]",
+                    list(
+                        conn.execute(
+                            text(
+                                """
                     SELECT text
                     FROM chunks
                     WHERE document_id = :document_id
                     ORDER BY chunk_index ASC
                     """
-                        ),
-                        {"document_id": document_id},
-                    )
-                    .scalars()
-                    .all()
-                ),
-            )
-            chunk_texts = [str(chunk_text) for chunk_text in scalar_chunks]
+                            ),
+                            {"document_id": document_id},
+                        )
+                        .scalars()
+                        .all()
+                    ),
+                )
+                detail_text = "\n\n".join(str(chunk_text) for chunk_text in scalar_chunks)
         return DocumentDetail(
             document_id=row_uuid(doc, "id"),
             url=row_str(doc, "url"),
             title=row_str_optional(doc, "title"),
             language=row_str_optional(doc, "language"),
-            text="\n\n".join(chunk_texts),
+            text=detail_text,
         )
 
     @app.get(
@@ -1062,22 +1306,35 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
     def list_documents(  # pyright: ignore[reportUnusedFunction]
         page: Annotated[int, Query(ge=1)] = 1,
         page_size: Annotated[int, Query(ge=1, le=100)] = 50,
+        missing_body: Annotated[bool, Query()] = False,  # noqa: FBT002  # FastAPI Query bool default
     ) -> DocumentListPage:
         offset = (page - 1) * page_size
+        count_sql = (
+            "SELECT COUNT(*) FROM documents WHERE body_text IS NULL OR btrim(body_text) = ''"
+            if missing_body
+            else "SELECT COUNT(*) FROM documents"
+        )
+        list_sql = (
+            """
+            SELECT id, url, title, language
+            FROM documents
+            WHERE body_text IS NULL OR btrim(body_text) = ''
+            ORDER BY created_at DESC
+            LIMIT :limit OFFSET :offset
+            """
+            if missing_body
+            else """
+            SELECT id, url, title, language
+            FROM documents
+            ORDER BY created_at DESC
+            LIMIT :limit OFFSET :offset
+            """
+        )
         with engine.connect() as conn:
-            total = scalar_int(
-                sqlalchemy_scalar_one(conn.execute(text("SELECT COUNT(*) FROM documents")))
-            )
+            total = scalar_int(sqlalchemy_scalar_one(conn.execute(text(count_sql))))
             rows = (
                 conn.execute(
-                    text(
-                        """
-                    SELECT id, url, title, language
-                    FROM documents
-                    ORDER BY created_at DESC
-                    LIMIT :limit OFFSET :offset
-                    """
-                    ),
+                    text(list_sql),
                     {"limit": page_size, "offset": offset},
                 )
                 .mappings()

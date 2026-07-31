@@ -21,7 +21,11 @@ describe("BoundedTagList", () => {
 
   it("renders all tags without +N when within maxVisible", () => {
     render(
-      <BoundedTagList tags={TAGS.slice(0, 2)} maxVisible={3} moreTestId="more" />,
+      <BoundedTagList
+        tags={TAGS.slice(0, 2)}
+        maxVisible={3}
+        moreTestId="more"
+      />,
     );
     expect(screen.getByText("Label 0")).toBeInTheDocument();
     expect(screen.getByText("Label 1")).toBeInTheDocument();

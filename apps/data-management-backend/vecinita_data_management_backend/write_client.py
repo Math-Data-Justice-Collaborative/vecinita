@@ -15,7 +15,9 @@ from vecinita_shared_schemas.internal_write import (
     AuditEventRequest,
     BatchUpsertRequest,
     BatchUpsertResponse,
+    CreateRebuildRunResponse,
     DocumentDetail,
+    DocumentListPage,
     EvalRunListResponse,
     TagInput,
     TagPatchRequest,
@@ -98,6 +100,47 @@ class InternalWriteClient:
             raise InternalWriteClientError(msg)
         return BatchUpsertResponse.model_validate(response.json())
 
+    def create_rebuild_run(self, body: dict[str, object]) -> UUID:
+        """Create a rebuild_runs row for dry-run / live rebuild tracking (TP-S017-02)."""
+        response = self._client.post(
+            "/internal/v1/rebuild/runs",
+            json=body,
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"create_rebuild_run failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        return CreateRebuildRunResponse.model_validate(response.json()).rebuild_run_id
+
+    def upsert_shadow_batch(self, body: BatchUpsertRequest) -> None:
+        """POST shadow chunk/embedding dual-write for a dry_run rebuild (TC-164)."""
+        rebuild_run_id = next(
+            (document.rebuild_run_id for document in body.documents if document.rebuild_run_id),
+            None,
+        )
+        if rebuild_run_id is None:
+            msg = "upsert_shadow_batch requires rebuild_run_id on documents"
+            raise InternalWriteClientError(msg)
+        response = self._client.post(
+            f"/internal/v1/rebuild/{rebuild_run_id}/shadow/batch",
+            json=body.model_dump(mode="json"),
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"upsert_shadow_batch failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+
+    def complete_rebuild_run(self, rebuild_run_id: UUID, *, status: str) -> None:
+        """PATCH rebuild_runs status (running → completed/failed) (TP-S017-02)."""
+        response = self._client.patch(
+            f"/internal/v1/rebuild/{rebuild_run_id}",
+            json={"status": status},
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"complete_rebuild_run failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+
     def get_document_detail(self, document_id: UUID) -> DocumentDetail:
         """Fetch document text and metadata for retag jobs."""
         response = self._client.get(
@@ -108,6 +151,27 @@ class InternalWriteClient:
             msg = f"get_document_detail failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return DocumentDetail.model_validate(response.json())
+
+    def list_documents(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 50,
+        missing_body: bool = False,
+    ) -> DocumentListPage:
+        """List corpus documents; optionally only those missing store body_text."""
+        params: dict[str, int | bool] = {"page": page, "page_size": page_size}
+        if missing_body:
+            params["missing_body"] = True
+        response = self._client.get(
+            "/internal/v1/documents",
+            params=params,
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"list_documents failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        return DocumentListPage.model_validate(response.json())
 
     def patch_document_tags(self, document_id: UUID, tags: list[TagInput]) -> TagPatchResponse:
         """Replace document tags via the internal write API."""

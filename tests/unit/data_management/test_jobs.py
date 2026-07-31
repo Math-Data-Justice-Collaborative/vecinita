@@ -86,6 +86,68 @@ def test_run_job_retag_requires_tag_client() -> None:
         )
 
 
+def test_run_job_dispatches_backfill(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Backfill flag routes to run_backfill_job (T87.5 / TP-S017-08)."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={"mode": "rescrape", "backfill": True, "backfill_source": "rescrape"},
+    )
+    called: list[UUID] = []
+
+    def _backfill(job_id: UUID, **kwargs: object) -> None:
+        _ = kwargs
+        called.append(job_id)
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_backfill_job",
+        _backfill,
+    )
+
+    run_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_StubWriteClient(),  # type: ignore[arg-type]
+    )
+
+    assert called == [record.job_id]
+
+
+def test_run_job_dispatches_rebuild(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """job_type=rebuild routes to run_rebuild_job (T88.3 / ADR-040)."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={"mode": "rechunk", "force": True},
+    )
+    called: list[UUID] = []
+
+    def _rebuild(job_id: UUID, **kwargs: object) -> None:
+        _ = kwargs
+        called.append(job_id)
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_rebuild_job",
+        _rebuild,
+    )
+
+    run_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_StubWriteClient(),  # type: ignore[arg-type]
+    )
+
+    assert called == [record.job_id]
+
+
 def test_run_job_dispatches_retag(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

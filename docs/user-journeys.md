@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-29 (S016/EV-014 #87 — UJ-052 ChatRAG cold-start wait UX)
+> **Last updated**: 2026-07-30 (S017/EV-015 #167 — UJ-053/054 corpus rebuild + document store)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -58,6 +58,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-050 | Job detail drill-down + admin job CRUD | Admin operator | Admin UI `/jobs/:id` → Modal job detail / cancel / retry / delete | F32 EV-012 #116 | local |
 | UJ-051 | Scan dense corpus / admin tables with truncated titles/URLs | Admin operator | DM UI `/corpus` (+ Jobs/Users/Audit/Eval lists) | F9, F12 EV-013 #148 | local |
 | UJ-052 | Cold-start / long-wait fun facts + consent | Community member | ChatRAG Frontend wait UX (retry or >8s) | F40 EV-014 #87 | local |
+| UJ-053 | Enqueue corpus rebuild (store-backed) | Admin operator | Admin Jobs → Modal `rebuild` job | F41 EV-015 #167 | local |
+| UJ-054 | Shadow dry-run rebuild → F36 → promote | Admin operator | Jobs detail + eval + Admin promote | F41 EV-015 #167 | local |
 
 ## Visual journey maps
 
@@ -765,6 +767,67 @@ stops persistence; EN/ES; no PII; no API contract change.
 - Playwright T0-ui: `tests/ui/chat/uj052-cold-start-wait.spec.ts` — TC-160.
 
 **E2E tier**: local (Vitest + Playwright); live observation at 13-deploy-smoke only if easy.
+
+---
+
+### UJ-053: Enqueue corpus rebuild (store-backed)
+
+**Actor**: Admin operator (`admin` role)
+
+**Goal**: Trigger a corpus rebuild from the Admin Jobs UI without ad-hoc SQL, using the
+Postgres document store as the text source (no live scrape for default staging runs).
+
+**Preconditions**: F41 deployed; document store populated for target docs; operator authenticated.
+
+**Steps**:
+
+1. Open Admin **Jobs** (UJ-023) and choose **Rebuild corpus** (or equivalent enqueue control).
+2. Select `mode`: `reembed` | `rechunk` | `rescrape` (default staging: `rechunk` or `reembed`).
+3. Optionally set `document_ids` (default = whole corpus); set **force** to bypass hash-skip.
+4. Leave **dry_run** off for a live staging write, or use UJ-054 for shadow path.
+5. Submit → `202` with `job_id`; job appears with `job_type=rebuild`.
+6. Watch SSE / poll; open `/jobs/:id` for progress and per-doc failures.
+7. On success, version stamps on revisions/embeddings match current model + chunk settings.
+
+**Cross-component**: Jobs list ↔ job detail ↔ enqueue form (Playwright T0-ui).
+
+**Acceptance**: Rebuild enqueued with mode/force; store-backed modes do not fetch URLs unless
+`rescrape`; failures isolated per document; ADR-007 write path only.
+
+**Automated tests**: API e2e TC-161–163, TC-166; Vitest enqueue form; Playwright TC-167.
+
+**E2E tier**: local (API + UI); staging smoke at 13.
+
+---
+
+### UJ-054: Shadow dry-run rebuild → F36 → promote
+
+**Actor**: Admin operator (`admin` role)
+
+**Goal**: Preview a rebuild into shadow tables, validate with F36 eval, then promote to live
+staging corpus (prod promote deferred to runbook).
+
+**Preconditions**: UJ-053 capable; F36 golden set available on staging.
+
+**Steps**:
+
+1. Enqueue rebuild with `dry_run=true` (and `force` as needed).
+2. Job writes shadow chunks/embeddings keyed by `rebuild_run_id` — live retrieval unchanged.
+3. Review job detail counts / failures.
+4. Run **F36 against shadow-backed** staging configuration (**before** promote).
+5. If gate passes, invoke **promote** for that `rebuild_run_id` from **Admin UI** (Jobs
+   detail / promote control) → `POST /internal/v1/rebuild/{rebuild_run_id}/promote`
+   (`admin` role — same as enqueue).
+6. Confirm live retrieval uses new revision stamps; prior revision retained for rollback.
+
+**Acceptance**: Dry-run never mutates live retrieval until promote; F36 gate recorded **before**
+promote; Admin UI promote control; version stamps queryable; prod live promote not required in
+EV-015.
+
+**Automated tests**: API e2e TC-164–165; integration promote; eval gate checklist TC-168;
+Playwright TC-169.
+
+**E2E tier**: local API/integration + UI; staging at 12/13.
 
 ---
 

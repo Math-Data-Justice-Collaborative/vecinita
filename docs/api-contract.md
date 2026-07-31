@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-23 (S010/EV-011 F39 Slice A — playground rename + path aliases)  
+> **Last updated**: 2026-07-30 (S017/EV-015 F41 — JobOptions rebuild locked to OpenAPI)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -241,7 +241,7 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
     {
       "job_id": "uuid",
       "status": "pending | running | completed | failed",
-      "job_type": "ingest | retag | eval",
+      "job_type": "ingest | retag | eval | rebuild",
       "urls": ["string"],
       "error_code": "string | null",
       "error_message": "string | null",
@@ -260,7 +260,7 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 {
   "job_id": "uuid",
   "status": "pending | running | completed | failed",
-  "job_type": "ingest | retag",
+  "job_type": "ingest | retag | eval | rebuild",
   "urls": ["string"],
   "error_code": "string | null",
   "error_message": "string | null",
@@ -293,12 +293,47 @@ Locked OpenAPI paths (`openapi/data-management.yaml`, `openapi/internal-write.ya
   backoff (RD-173); poll behavior is client-side (Admin Jobs UI — M84).
 
 **Job schema extras:** `document_id`, `modal_call_id`, `dashboard_url`, `eval_run_id`; status includes
-`cancelled`. **JobOptions:** `job_type` ∈ `ingest|retag|eval`; `document_id` required for retag;
-`eval_run_id` required for eval enqueue. `urls` may be empty for retag/eval (required non-empty for
-ingest).
+`cancelled`. **JobOptions:** `job_type` ∈ `ingest|retag|eval|rebuild`; `document_id` required for retag;
+`eval_run_id` required for eval enqueue; for **rebuild**: `mode` ∈ `reembed|rechunk|rescrape` required;
+optional `document_ids[]`, `force` (bool), `dry_run` (bool). `urls` may be empty for retag/eval/rebuild
+(required non-empty for ingest).
 
 **Architecture:** Modal owns job lifecycle (incl. eval) via `DictJobStore`/`modal.Dict` (TP-S013-02).
 DO Postgres remains SoT for storage and eval metrics. Supabase = auth only. See ADR-038.
+
+### EV-015 / #167 — Corpus rebuild + document store (ADR-040, RD-188–RD-196)
+
+Locked OpenAPI paths (`openapi/data-management.yaml` JobOptions;
+`openapi/internal-write.yaml` promote + `EvalRunCreateRequest.rebuild_run_id`
+— T89.7):
+
+| Method / path | Purpose |
+|---------------|---------|
+| `POST /jobs` (`job_type=rebuild`) | Enqueue rebuild with `mode` / `force` / `dry_run` / optional `document_ids` |
+| `POST /internal/v1/rebuild/{rebuild_run_id}/promote` | Promote shadow revision → live (staging; prod via runbook); **Admin UI** invokes this (02 M3); auth = **`admin`** (enqueue parity, 02 M6) |
+| `GET /internal/v1/documents/{id}/revisions` | List document revisions / version stamps (optional in M1) |
+
+**`POST /jobs` rebuild JobOptions (T88.5 / `openapi/data-management.yaml`, RD-189–192):**
+
+- **`job_type`:** `rebuild` (enum also includes `ingest|retag|eval`).
+- **`mode`:** required for rebuild — `reembed` | `rechunk` | `rescrape` (nullable in schema; validated required when `job_type=rebuild`).
+- **`force`:** bool, default `false` — bypass content_hash skip.
+- **`dry_run`:** bool, default `false` — shadow dual-write only until promote.
+- **`document_ids`:** optional UUID array (`maxItems` 1000); omit = whole corpus.
+- **`backfill` / `backfill_source` / `ack_reconstruct_from_chunks`:** one-time store backfill
+  (TP-S017-08); `from_chunks` requires ack.
+- **`urls`:** may be empty for rebuild (same as retag/eval); required non-empty for ingest.
+
+**Batch upsert delta:** documents may include `body_text`; revisions stamped with
+`embedding_model_id`, `embedding_dim`, `chunk_size_tokens`, `rebuild_run_id` as applicable.
+Body-only upserts (empty `chunks`) update the store without rewriting live chunks
+(TP-S017-08 backfill). `GET /internal/v1/documents?missing_body=true` lists docs lacking
+store body for backfill targeting.
+
+**Dry-run:** shadow tables/rows keyed by `rebuild_run_id`; live retrieval unchanged until promote.
+**F36:** eval against shadow **before** promote (02 M2). **Backfill:** F41 includes one-time
+store population for existing docs via `job_type=rebuild` + `backfill=true` (prefer
+`backfill_source=rescrape`; `from_chunks` requires `ack_reconstruct_from_chunks`) (02 M4).
 
 ### GET `/health`
 
@@ -402,8 +437,35 @@ send these headers; they are honored only on the service-key path (BUG-2026-07-0
 ### POST `/internal/v1/documents/batch`
 
 - **Purpose**: Upsert documents, chunks, embeddings from Modal workers.
-- **Request**: Batch payload with document metadata, chunks, and 384-dim vectors.
+- **Request**: Batch payload with document metadata (**incl. `body_text` / store fields — F41**),
+  chunks, and 384-dim vectors; optional version-stamp fields.
 - **Response** `200`: `{"upserted_chunks": N}`
+
+### POST `/internal/v1/rebuild/{rebuild_run_id}/promote`
+
+- **Purpose**: Promote shadow rebuild revision to live corpus (F41 / UJ-054).
+  Transactional copy `shadow_chunks` / `shadow_embeddings` → live for that
+  `rebuild_run_id` (TP-S017-03).
+- **Auth**: `admin` JWT (enqueue parity, 02 M6) via Admin corpus API proxy, or internal
+  service key (TP-S017-06).
+- **Response** `200` (TP-S017-06):
+
+```json
+{
+  "promoted": true,
+  "rebuild_run_id": "uuid",
+  "chunks_promoted": 0,
+  "documents_promoted": 0
+}
+```
+
+- **Errors**: `404` unknown run; `409` already promoted / not dry-run; `403` non-admin.
+
+### Eval enqueue delta (F36-on-shadow)
+
+- `POST /internal/v1/eval/runs` (and Modal eval job options) accept optional
+  `rebuild_run_id`. When set, retrieval/eval reads **shadow** for that run
+  (TP-S017-04; 02 M2 — F36 before promote).
 
 ### GET `/internal/v1/documents`
 

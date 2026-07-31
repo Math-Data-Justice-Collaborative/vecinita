@@ -29,6 +29,8 @@ from vecinita_eval.retrieval import (
 from vecinita_eval.sandbox import synthesize_with_system_prompt
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from llama_index.core.llms import LLM
 
     from vecinita_eval.judges import JudgeClient
@@ -150,6 +152,7 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
     criteria: list[EvalCriterionDef],
     system_prompt: str | None,
     adhoc: bool,
+    rebuild_run_id: UUID | None = None,
 ) -> tuple[list[RowResult], EvalSummary]:
     retriever = CorpusPgvectorRetriever(
         embed_fn=embed_fn,
@@ -173,7 +176,7 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
 
     for row in rows:
         start = time.monotonic()
-        chunks = retriever.retrieve_chunks(row.question)
+        chunks = retriever.retrieve_chunks(row.question, rebuild_run_id=rebuild_run_id)
         retrieved_urls = [chunk.url for chunk in chunks if chunk.url]
         rag_answer = _answer_for_row(
             row=row,
@@ -276,6 +279,7 @@ def run_golden_eval(  # noqa: PLR0913
     retriever_top_k = config.top_k if config is not None else top_k
     score_threshold = config.min_retrieval_score if config is not None else 0.5
     system_prompt = config.system_prompt if config is not None else None
+    rebuild_run_id = config.rebuild_run_id if config is not None else None
     return _evaluate_rows(
         rows=rows,
         embed_fn=embed_fn,
@@ -288,6 +292,7 @@ def run_golden_eval(  # noqa: PLR0913
         criteria=criteria or [],
         system_prompt=system_prompt,
         adhoc=False,
+        rebuild_run_id=rebuild_run_id,
     )
 
 
@@ -317,6 +322,7 @@ def run_adhoc_eval(  # noqa: PLR0913
         criteria=criteria or [],
         system_prompt=resolved.system_prompt,
         adhoc=True,
+        rebuild_run_id=resolved.rebuild_run_id,
     )
 
 

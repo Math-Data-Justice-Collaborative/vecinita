@@ -26,6 +26,7 @@ import {
   parseHealthAggregate,
   parseStatsSummary,
   promoteRagConfig,
+  promoteRebuildRun,
   pullPlaygroundModel,
   triggerEvalRun,
   subscribeEvalRunEvents,
@@ -727,6 +728,37 @@ describe("admin API eval helpers", () => {
     ).rejects.toThrow(/403/);
   });
 
+  it("promoteRebuildRun posts to rebuild promote path (TP-S017-06)", async () => {
+    const runId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          promoted: true,
+          rebuild_run_id: runId,
+          chunks_promoted: 4,
+          documents_promoted: 1,
+        }),
+      ),
+    );
+    const result = await promoteRebuildRun(JWT_CLIENT, runId);
+    expect(result.promoted).toBe(true);
+    expect(result.chunks_promoted).toBe(4);
+    expect(mockFetchUrl()).toContain(`/internal/v1/rebuild/${runId}/promote`);
+    expect(vi.mocked(fetch).mock.calls[0]?.[1]?.method).toBe("POST");
+    expectBearerJwt(vi.mocked(fetch).mock.calls[0]?.[1]);
+  });
+
+  it("promoteRebuildRun throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("conflict", { status: 409 })),
+    );
+    await expect(
+      promoteRebuildRun(JWT_CLIENT, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+    ).rejects.toThrow(/conflict|409/);
+  });
+
   it("fetchActiveRagConfig reads active production config", async () => {
     vi.stubGlobal(
       "fetch",
@@ -880,7 +912,10 @@ describe("admin API eval helpers", () => {
         ),
       ),
     );
-    const result = await pullPlaygroundModel(JWT_CLIENT, "qwen2.5:1.5b-instruct");
+    const result = await pullPlaygroundModel(
+      JWT_CLIENT,
+      "qwen2.5:1.5b-instruct",
+    );
     expect(result.status).toBe("pulling");
     expect(mockFetchUrl()).toContain("/internal/v1/models/ollama/pull");
     expect(mockFetchJsonBody()).toEqual({ model_id: "qwen2.5:1.5b-instruct" });
@@ -1551,8 +1586,9 @@ describe("subscribeEvalRunEvents (TP-S013-04)", () => {
     };
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation(
-        (_url: RequestInfo | URL, init?: RequestInit) => {
+      vi
+        .fn()
+        .mockImplementation((_url: RequestInfo | URL, init?: RequestInit) => {
           const signal = init?.signal;
           if (signal) {
             signal.addEventListener("abort", () => {
@@ -1560,8 +1596,7 @@ describe("subscribeEvalRunEvents (TP-S013-04)", () => {
             });
           }
           return Promise.resolve({ ok: true, body, status: 200 });
-        },
-      ),
+        }),
     );
     const onError = vi.fn();
     const sub = subscribeEvalRunEvents(
@@ -1586,9 +1621,7 @@ describe("fetchPlaygroundCatalogFamilies auth fallback", () => {
   });
 
   it("sends empty Bearer when neither token nor apiKey is set", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      jsonResponse({ families: [] }),
-    );
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ families: [] }));
     vi.stubGlobal("fetch", fetchMock);
     await fetchPlaygroundCatalogFamilies({
       baseUrl: "http://localhost:8002",

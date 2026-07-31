@@ -1,4 +1,10 @@
-import type { CreateJobResponse, Job, JobList, JobStatus } from "./types";
+import type {
+  CreateJobOptions,
+  CreateJobResponse,
+  Job,
+  JobList,
+  JobStatus,
+} from "./types";
 
 export interface JobsClientOptions {
   baseUrl: string;
@@ -33,13 +39,15 @@ function jobsHeaders(
 export async function createJob(
   options: JobsClientOptions,
   urls: string[],
-  chunkSizeTokens?: number,
+  chunkSizeTokensOrOptions?: number | CreateJobOptions,
 ): Promise<CreateJobResponse> {
-  const body: { urls: string[]; options?: { chunk_size_tokens: number } } = {
-    urls,
-  };
-  if (chunkSizeTokens !== undefined) {
-    body.options = { chunk_size_tokens: chunkSizeTokens };
+  const jobOptions: CreateJobOptions =
+    typeof chunkSizeTokensOrOptions === "number"
+      ? { chunk_size_tokens: chunkSizeTokensOrOptions }
+      : (chunkSizeTokensOrOptions ?? {});
+  const body: { urls: string[]; options?: CreateJobOptions } = { urls };
+  if (Object.keys(jobOptions).length > 0) {
+    body.options = jobOptions;
   }
   const response = await fetch(`${options.baseUrl}/jobs`, {
     method: "POST",

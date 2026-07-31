@@ -115,7 +115,10 @@ function defaultPlaygroundFetch(
     };
   }
   if (url.includes("/internal/v1/documents")) {
-    return { ok: true, json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }) };
+    return {
+      ok: true,
+      json: async () => ({ items: [], page: 1, page_size: 50, total: 0 }),
+    };
   }
   return { ok: true, json: async () => ({}) };
 }
@@ -1320,11 +1323,13 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
         }),
       };
     });
-    const pullSpy = vi.spyOn(adminApi, "pullPlaygroundModel").mockResolvedValue({
-      job_id: "00000000-0000-0000-0000-0000000000dd",
-      model_id: DOWNLOAD_MODEL_ID,
-      status: "pulling",
-    });
+    const pullSpy = vi
+      .spyOn(adminApi, "pullPlaygroundModel")
+      .mockResolvedValue({
+        job_id: "00000000-0000-0000-0000-0000000000dd",
+        model_id: DOWNLOAD_MODEL_ID,
+        status: "pulling",
+      });
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await expandDownloadFamily();
@@ -1391,12 +1396,12 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     expect(screen.getByTestId("evaluation-models-download")).toHaveTextContent(
       /Playground model download/i,
     );
-    expect(screen.getByTestId("eval-models-custom-download-card")).toHaveTextContent(
-      /Playground model tag/i,
-    );
-    expect(screen.getByTestId("evaluation-models-download")).not.toHaveTextContent(
-      /Ollama/i,
-    );
+    expect(
+      screen.getByTestId("eval-models-custom-download-card"),
+    ).toHaveTextContent(/Playground model tag/i);
+    expect(
+      screen.getByTestId("evaluation-models-download"),
+    ).not.toHaveTextContent(/Ollama/i);
 
     await waitFor(() => {
       const listCalls = fetchMock.mock.calls.filter((call) => {
@@ -1466,7 +1471,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilyTags").mockResolvedValue(
       catalogFamilyTagsBody(),
     );
-    vi.spyOn(adminApi, "pullPlaygroundModel").mockRejectedValueOnce("pull failed");
+    vi.spyOn(adminApi, "pullPlaygroundModel").mockRejectedValueOnce(
+      "pull failed",
+    );
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     await expandDownloadFamily();
     fireEvent.click(
@@ -1508,7 +1515,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
             return Promise.resolve({
               ok: true,
               json: async () => {
-                if (url.includes("/internal/v1/models/ollama/catalog/qwen2.5")) {
+                if (
+                  url.includes("/internal/v1/models/ollama/catalog/qwen2.5")
+                ) {
                   return catalogFamilyTagsBody();
                 }
                 if (url.includes("/internal/v1/models/ollama/catalog")) {
@@ -1604,7 +1613,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     });
     fireEvent.click(screen.getByTestId("eval-tab-models"));
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-models-download")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("evaluation-models-download"),
+      ).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(
@@ -1651,7 +1662,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
 
     await router.navigate("/evaluation?tab=models");
     await waitFor(() => {
-      expect(screen.getByTestId("evaluation-models-download")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("evaluation-models-download"),
+      ).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(
@@ -1688,7 +1701,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
             return Promise.resolve({
               ok: true,
               json: async () => {
-                if (url.includes("/internal/v1/models/ollama/catalog/qwen2.5")) {
+                if (
+                  url.includes("/internal/v1/models/ollama/catalog/qwen2.5")
+                ) {
                   return catalogFamilyTagsBody();
                 }
                 if (url.includes("/internal/v1/models/ollama/catalog")) {
@@ -1745,7 +1760,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
             return Promise.resolve({
               ok: true,
               json: async () => {
-                if (url.includes("/internal/v1/models/ollama/catalog/qwen2.5")) {
+                if (
+                  url.includes("/internal/v1/models/ollama/catalog/qwen2.5")
+                ) {
                   return catalogFamilyTagsBody();
                 }
                 if (url.includes("/internal/v1/models/ollama/catalog")) {
@@ -1787,14 +1804,15 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
 
   it("shows catalog loading state before families load", async () => {
     let resolveCatalog:
-      | ((value: { families: { slug: string }[] }) => void)
-      | undefined;
+      ((value: { families: { slug: string }[] }) => void) | undefined;
     const catalogPromise = new Promise<{ families: { slug: string }[] }>(
       (resolve) => {
         resolveCatalog = resolve;
       },
     );
-    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
+      items: [],
+    });
     vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockReturnValue(
       catalogPromise,
     );
@@ -1812,7 +1830,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   });
 
   it("surfaces catalog load errors on models tab", async () => {
-    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
+      items: [],
+    });
     vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockRejectedValue(
       new Error("catalog down"),
     );
@@ -1824,7 +1844,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
   });
 
   it("surfaces family tag load errors when expanding a catalog family", async () => {
-    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({ items: [] });
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockResolvedValue({
+      items: [],
+    });
     vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockResolvedValue({
       families: [{ slug: DOWNLOAD_FAMILY }],
     });

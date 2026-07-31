@@ -10,9 +10,8 @@ import { EvaluationPage } from "@/pages/EvaluationPage";
 import { fetchInputUrl } from "./fetch-mock";
 import { mockPlaygroundApiFetch } from "./helpers/mockPlaygroundApi";
 
-const setSearchParams = vi.fn<
-  (updater: (prev: URLSearchParams) => URLSearchParams) => void
->();
+const setSearchParams =
+  vi.fn<(updater: (prev: URLSearchParams) => URLSearchParams) => void>();
 
 vi.mock("@/config", () => ({
   requireCorpusConfig: () => ({

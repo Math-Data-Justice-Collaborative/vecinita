@@ -45,6 +45,7 @@ const TYPE_KEY: Record<JobType, StringMessageKey> = {
   ingest: "admin.jobs.type.ingest",
   retag: "admin.jobs.type.retag",
   eval: "admin.jobs.type.eval",
+  rebuild: "admin.jobs.type.rebuild",
 };
 
 export function JobDetailPage() {
@@ -172,9 +173,7 @@ export function JobDetailPage() {
       }
     } catch (err) {
       setActionError(
-        err instanceof Error
-          ? err.message
-          : tr("admin.jobs.actionFailed"),
+        err instanceof Error ? err.message : tr("admin.jobs.actionFailed"),
       );
     } finally {
       setBusy(false);
@@ -217,7 +216,9 @@ export function JobDetailPage() {
           <h2 className="text-3xl font-bold tracking-tight">
             {tr("admin.jobs.detailTitle")}
           </h2>
-          <p className="font-mono text-sm text-muted-foreground">{job.job_id}</p>
+          <p className="font-mono text-sm text-muted-foreground">
+            {job.job_id}
+          </p>
         </div>
         <Button variant="outline" asChild>
           <Link to="/jobs">{tr("admin.jobs.backToList")}</Link>

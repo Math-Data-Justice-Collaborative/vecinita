@@ -61,6 +61,13 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: missing_body
+          in: query
+          required: false
+          description: When true, only documents without store body_text (F41 backfill)
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Paginated document list
@@ -984,6 +991,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+  /rebuild/{rebuild_run_id}/promote:
+    post:
+      operationId: promoteRebuildRun
+      summary: Promote shadow rebuild revision to live corpus (EV-015 F41)
+      description: >
+        Transactional copy of shadow_chunks / shadow_embeddings for the given
+        rebuild_run_id into live tables (TP-S017-03/06). Admin JWT or internal
+        service key. Requires a completed dry-run run; already-promoted runs
+        return 409.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: rebuild_run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Shadow revision promoted to live
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RebuildPromoteResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Run not promotable (already promoted or not a completed dry-run)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 components:
   securitySchemes:
     bearerAuth:
@@ -1022,7 +1067,6 @@ components:
       type: object
       required:
         - url
-        - chunks
       properties:
         url:
           type: string
@@ -1036,10 +1080,33 @@ components:
         language:
           type: string
           nullable: true
+        body_text:
+          type: string
+          nullable: true
+          description: Normalized scrape body for document store (F41 / ADR-040)
+        embedding_model_id:
+          type: string
+          nullable: true
+          description: Version stamp for embeddings (F41)
+        embedding_dim:
+          type: integer
+          minimum: 1
+          nullable: true
+        chunk_size_tokens:
+          type: integer
+          minimum: 1
+          nullable: true
+        rebuild_run_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional rebuild run association for revision stamps
         chunks:
           type: array
           maxItems: 100
-          minItems: 1
+          minItems: 0
+          description: >
+            Empty when body-only store backfill (TP-S017-08); ingest still sends chunks.
           items:
             $ref: "#/components/schemas/ChunkUpsert"
         tags:
@@ -1491,6 +1558,33 @@ components:
           type: string
           format: uuid
           nullable: true
+        rebuild_run_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: >
+            Optional F36-on-shadow binding (TP-S017-04). When set, retrieval/eval
+            reads shadow tables for this rebuild_run_id before promote.
+    RebuildPromoteResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - promoted
+        - rebuild_run_id
+        - chunks_promoted
+        - documents_promoted
+      properties:
+        promoted:
+          type: boolean
+        rebuild_run_id:
+          type: string
+          format: uuid
+        chunks_promoted:
+          type: integer
+          minimum: 0
+        documents_promoted:
+          type: integer
+          minimum: 0
     EvalRunCreateResponse:
       type: object
       required:

@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; **S013 Phase 19 delta 2026-07-28**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; **S017 Phase 20 delta 2026-07-30**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**038**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**040**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 19: EV-012 — Unified Admin Jobs (#116) |
-| **Active milestone** | M85: Full-stack tests (API e2e + Playwright) — complete; invoke 08-verify-build |
-| **Active task** | **T85.5** (completed) — Phase 19 gate checklist; next 08-verify-build |
-| **Tasks completed** | Phase 17–18 historical; Phase 19: T82.1–T82.6 (M82); T83.1–T83.6 (M83); T84.1–T84.6 (M84 complete) |
-| **Last updated** | 2026-07-28 |
-| **Evolve cycle** | EV-012 (F32/F36) — **07-build in progress** (Lean+build); M83 done → 08 then M84 |
-| **Git branch** | `evolve/EV-012-unified-job-monitoring` |
-| **Active session** | S013-unified-job-monitoring — Gate A→B/B→C passed; building Phase 19 |
-| **Scope addition** | 2026-07-28 — Unified Jobs: Modal lifecycle SoT, SSE+poll, eval enqueue, admin CRUD, soft-delete eval_runs (RD-173–178, TP-S013-01–08, ADR-038). |
+| **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) — **COMPLETE** |
+| **Active milestone** | M90 COMPLETE — next: 08-verify-build |
+| **Active task** | Phase 20 complete; handoff → **08-verify-build** |
+| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T90.5 (M86–M90 COMPLETE) |
+| **Last updated** | 2026-07-30 |
+| **Evolve cycle** | EV-015 (F41) — **07-build** Phase 20; Standard+build (skip 05/06) |
+| **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
+| **Active session** | S017-corpus-reembed-migration — Gate B→C passed; 07-build in progress |
+| **Scope addition** | 2026-07-30 — F41 document store + rebuild + shadow/promote + backfill (RD-188–196, TP-S017-01–09, ADR-040). |
 
 ## Template
 
@@ -1738,6 +1738,103 @@ failed-job log affordances (RD-177); Evaluation page uses DO eval SSE (TP-S013-0
 
 ---
 
+### Phase 20: EV-015 — Corpus document store + rebuild (#167, F41)
+
+> **Session:** S017-corpus-reembed-migration · **Evolve cycle:** EV-015 · **Feature:** F41  
+> **Branch:** `evolve/EV-015-corpus-reembed-migration` → `main` (PR-55) · **ADR:** ADR-040  
+> **Build order:** M86→M90 · **Decisions:** RD-188–196, TP-S017-01–09, Gate A→B M1–M6  
+> **Out of scope:** Live prod rebuild; #159 model pick; #160 overlap values; dim dual-write impl; retag-in-rebuild
+
+**Objective:** Persist normalized document bodies + revisions; run `job_type=rebuild` with
+`mode ∈ {reembed,rechunk,rescrape}`; `dry_run` writes dedicated shadow tables; promote copies
+shadow→live; F36 can target `rebuild_run_id`; Admin enqueue + promote; one-time store backfill.
+**Staging ops (TP-S017-01/07):** (1) live same-settings equivalence rebuild; (2) full
+shadow→F36→promote required this cycle. Prod cutover = runbook only.
+
+#### M86: Schema — store + shadow + rebuild_runs
+
+**Goal:** Alembic migration for `documents.body_text`, `document_revisions`, `rebuild_runs`,
+`shadow_chunks`, `shadow_embeddings` (+ version-stamp columns). ADR-007 write boundary unchanged.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T86.1 | Test: unit — migration upgrade/downgrade shape; body_text + revisions + shadow FKs (TC-163) — red | Test | completed | ADR-040, TP-S017-02, TC-163 | — | 2026-07-30 | S017 | F41 |
+| T86.2 | Config: Alembic revision — `body_text`, `document_revisions`, `rebuild_runs`, `shadow_chunks`, `shadow_embeddings` | Config | completed | ADR-040, RD-196 | T86.1 | 2026-07-30 | S017 | F41 |
+| T86.3 | Code: shared-schemas / DB models for store + shadow + rebuild_run stamps | Code | completed | api-contract EV-015 | T86.2 | 2026-07-30 | S017 | F41 |
+| T86.4 | Docs: data-flow ERD + alembic head note | Docs | completed | data-flow.md M5 | T86.2 | 2026-07-30 | S017 | F41 |
+
+#### M87: Ingest store writes + backfill
+
+**Goal:** Ingest upserts `body_text` / revisions via internal-write; backfill job path prefers
+rescrape, reconstruct-from-chunks only with operator ack (TP-S017-08).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T87.1 | Test: unit/e2e — ingest batch writes `body_text` + revision stamp (TC-163) — red | Test | completed | RD-196, TC-163 | T86.3 | 2026-07-30 | S017 | F41 |
+| T87.2 | Test: unit — backfill prefer rescrape; chunks path requires ack flag (AC-RB / M4) — red | Test | completed | TP-S017-08, ADR-040 §5 | T86.3 | 2026-07-30 | S017 | F41 |
+| T87.3 | Code: internal-write batch upsert accepts `body_text` + revision fields | Code | completed | api-contract batch | T87.1 | 2026-07-30 | S017 | F41 |
+| T87.4 | Code: Modal ingest pipeline writes store body on scrape success | Code | completed | spec Jobs, ADR-040 | T87.3 | 2026-07-30 | S017 | F41 |
+| T87.5 | Code: backfill path (rebuild/job or flag) + Admin control surface | Code | completed | TP-S017-08, UJ-053 | T87.2, T87.4 | 2026-07-30 | S017 | F41 |
+| T87.6 | Config: OpenAPI internal-write batch + backfill options | Config | completed | openapi/internal-write | T87.3, T87.5 | 2026-07-30 | S017 | F41 |
+
+#### M88: Rebuild job (Modal) + shadow dry-run
+
+**Goal:** `POST /jobs` `job_type=rebuild` with `mode` / `force` / `dry_run` / `document_ids`;
+store-backed reembed/rechunk; `dry_run` → shadow tables keyed by `rebuild_run_id` (TP-S017-02).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T88.1 | Test: unit — JobOptions rebuild validation (modes, force, dry_run, document_ids) (TC-161/162/166) — red | Test | completed | RD-189–192, TC-161/162/166 | T86.3 | 2026-07-30 | S017 | F41 |
+| T88.2 | Test: unit — dry_run writes shadow only; live retrieval unchanged (TC-164) — red | Test | completed | RD-191, TP-S017-02, TC-164 | T86.3 | 2026-07-30 | S017 | F41 |
+| T88.3 | Code: rebuild worker — reembed / rechunk / rescrape; force bypass; stamps | Code | completed | ADR-040, RD-190 | T88.1, T87.4 | 2026-07-30 | S017 | F41 |
+| T88.4 | Code: shadow dual-write path + `rebuild_runs` row lifecycle | Code | completed | TP-S017-02, TC-164 | T88.2, T88.3 | 2026-07-30 | S017 | F41 |
+| T88.5 | Config: OpenAPI data-management JobOptions rebuild fields | Config | completed | TP-S017-06, openapi/data-management | T88.3 | 2026-07-30 | S017 | F41 |
+| T88.6 | Docs: api-contract EV-015 rebuild paths locked to OpenAPI | Docs | completed | api-contract | T88.5 | 2026-07-30 | S017 | F41 |
+
+#### M89: Promote + F36 rebuild_run_id + Admin UI
+
+**Goal:** Transactional promote (TP-S017-03); eval enqueue optional `rebuild_run_id` (TP-S017-04);
+Admin Jobs enqueue rebuild + promote UI (admin role); response shape TP-S017-06.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T89.1 | Test: unit — promote copies shadow→live in one txn; counts (TC-165) — red | Test | completed | TP-S017-03/06, TC-165 | T88.4 | 2026-07-30 | S017 | F41 |
+| T89.2 | Test: unit — eval with `rebuild_run_id` reads shadow (TC-168) — red | Test | completed | TP-S017-04, TC-168, 02 M2 | T88.4 | 2026-07-30 | S017 | F41 |
+| T89.3 | Code: `POST /internal/v1/rebuild/{rebuild_run_id}/promote` (admin JWT / service key) | Code | completed | TP-S017-06, 02 M6 | T89.1 | 2026-07-30 | S017 | F41 |
+| T89.4 | Code: eval enqueue accepts `rebuild_run_id`; retrieval path for shadow | Code | completed | TP-S017-04 | T89.2 | 2026-07-30 | S017 | F41 |
+| T89.5 | Test: Vitest — rebuild enqueue form (mode/force/dry_run) + promote control (TC-167/169) — red | Test | completed | UJ-053/054, TC-167/169 | T88.5 | 2026-07-30 | S017 | F41 |
+| T89.6 | Code: Admin Jobs UI — enqueue rebuild + promote (admin-only) | Code | completed | S017-D5, 02 M3/M6 | T89.3, T89.5 | 2026-07-30 | S017 | F41 |
+| T89.7 | Config: OpenAPI promote + eval `rebuild_run_id` | Config | completed | TP-S017-04/06 | T89.3, T89.4 | 2026-07-30 | S017 | F41 |
+
+#### M90: Full-stack tests + deploy docs
+
+**Goal:** API e2e UJ-053/054; Playwright TC-167/169; CORS if new routes; deployment-integration +
+runbook ops (live equivalence + shadow→F36→promote); Phase 20 gate.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T90.1 | Test: API e2e `test_uj053_rebuild_enqueue.py` (TC-161–163, TC-166) | Test | completed | UJ-053, e2e-coverage | T88.4, T89.6 | 2026-07-30 | S017 | F41 |
+| T90.2 | Test: API e2e `test_uj054_shadow_promote.py` (TC-164–165, TC-168) | Test | completed | UJ-054, TP-S017-07 | T89.3, T89.4 | 2026-07-30 | S017 | F41 |
+| T90.3 | Test: Playwright `tests/ui/admin/uj053-rebuild-enqueue.spec.ts` + `uj054-rebuild-promote.spec.ts` | Test | completed | TC-167/169 | T89.6 | 2026-07-30 | S017 | F41 |
+| T90.4 | Test: CORS preflight for promote / new rebuild-related routes (H0c) | Test | completed | connectivity-gates | T89.3 | 2026-07-30 | S017 | F41 |
+| T90.5 | Docs: deployment-integration + data-flow M5; runbook outline ops (TP-S017-01/07); Phase 20 gate | Docs | completed | M5, runbook | T90.1–T90.4 | 2026-07-30 | S017 | F41 |
+
+#### Phase 20 Gate Check
+
+- [x] All M86–M90 tasks completed (T86.1–T90.5)
+- [x] TC-161–TC-169 green at T2; Playwright T0-ui enqueue + promote
+- [x] AC-RB1–AC-RB10 satisfied at T2
+- [x] Document store + backfill; shadow tables; transactional promote; F36 `rebuild_run_id`
+- [x] Staging ops plan: live same-settings **and** shadow→F36→promote (TP-S017-07)
+- [x] Prod live rebuild out of scope (runbook only)
+- [x] No Modal `DATABASE_URL`; ADR-007 intact
+- [x] ruff / basedpyright / ESLint clean; pytest + DM Vitest + `make test-ui` green
+
+**Gate pointer:** `docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md` (T90.5)  
+**Gate log:** PASS 2026-07-30 — see phase20-gate.md; proceed to 08-verify-build (TP-S017-05 single PR).
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -1853,6 +1950,10 @@ main
 | PR-52 | Major | Phase 16 / S009 (EV-010) | feat/S009-playground-model-download | main | pending (F38 playground model download) |
 | PR-53 | Major | Phase 17+18 / S010 (EV-011) | feat/S010-unify-llm-service | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/144 |
 | PR-54 | Major | Phase 19 / S013 (EV-012) | evolve/EV-012-unified-job-monitoring | main | pending — Unified Admin Jobs (#116) |
+| PR-55 | Major | Phase 20 / S017 (EV-015) | evolve/EV-015-corpus-reembed-migration | main | pending — Corpus document store + rebuild (#167 / F41) |
+
+S017 (EV-015) is evolve Standard+build: M86–M90 land as atomic commits on the single
+`evolve/EV-015-corpus-reembed-migration` branch (one PR to `main`, PR-55), per TP-S017-05.
 
 S003 is evolve-lite + frontend-only: M39–M42 land as atomic commits on the single
 `feat/S003-persistent-chat-history` branch (one PR to `main`, PR-46), matching the S002 pattern.
@@ -2401,6 +2502,34 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T85.3 | M85 | 19 | Test | completed | T84.4 | — | S013 | F32 | — |
 | T85.4 | M85 | 19 | Test | completed | T82.4 | — | S013 | F32 | — |
 | T85.5 | M85 | 19 | Docs | completed | T85.1–T85.4 | — | S013 | F32 | — |
+| T86.1 | M86 | 20 | Test | completed | — | — | S017 | F41 | — |
+| T86.2 | M86 | 20 | Config | completed | T86.1 | — | S017 | F41 | — |
+| T86.3 | M86 | 20 | Code | completed | T86.2 | — | S017 | F41 | — |
+| T86.4 | M86 | 20 | Docs | completed | T86.2 | — | S017 | F41 | — |
+| T87.1 | M87 | 20 | Test | completed | T86.3 | 2026-07-30 | S017 | F41 | — |
+| T87.2 | M87 | 20 | Test | completed | T86.3 | 2026-07-30 | S017 | F41 | — |
+| T87.3 | M87 | 20 | Code | completed | T87.1 | 2026-07-30 | S017 | F41 | — |
+| T87.4 | M87 | 20 | Code | completed | T87.3 | 2026-07-30 | S017 | F41 | — |
+| T87.5 | M87 | 20 | Code | completed | T87.2, T87.4 | 2026-07-30 | S017 | F41 | — |
+| T87.6 | M87 | 20 | Config | completed | T87.3, T87.5 | 2026-07-30 | S017 | F41 | — |
+| T88.1 | M88 | 20 | Test | completed | T86.3 | 2026-07-30 | S017 | F41 | — |
+| T88.2 | M88 | 20 | Test | completed | T86.3 | 2026-07-30 | S017 | F41 | — |
+| T88.3 | M88 | 20 | Code | completed | T88.1, T87.4 | 2026-07-30 | S017 | F41 | — |
+| T88.4 | M88 | 20 | Code | completed | T88.2, T88.3 | 2026-07-30 | S017 | F41 | — |
+| T88.5 | M88 | 20 | Config | completed | T88.3 | 2026-07-30 | S017 | F41 | — |
+| T88.6 | M88 | 20 | Docs | completed | T88.5 | 2026-07-30 | S017 | F41 | — |
+| T89.1 | M89 | 20 | Test | completed | T88.4 | 2026-07-30 | S017 | F41 | — |
+| T89.2 | M89 | 20 | Test | completed | T88.4 | 2026-07-30 | S017 | F41 | — |
+| T89.3 | M89 | 20 | Code | completed | T89.1 | 2026-07-30 | S017 | F41 | — |
+| T89.4 | M89 | 20 | Code | completed | T89.2 | 2026-07-30 | S017 | F41 | — |
+| T89.5 | M89 | 20 | Test | completed | T88.5 | 2026-07-30 | S017 | F41 | — |
+| T89.6 | M89 | 20 | Code | completed | T89.3, T89.5 | 2026-07-30 | S017 | F41 | — |
+| T89.7 | M89 | 20 | Config | completed | T89.3, T89.4 | 2026-07-30 | S017 | F41 | — |
+| T90.1 | M90 | 20 | Test | completed | T88.4, T89.6 | 2026-07-30 | S017 | F41 | — |
+| T90.2 | M90 | 20 | Test | completed | T89.3, T89.4 | 2026-07-30 | S017 | F41 | — |
+| T90.3 | M90 | 20 | Test | completed | T89.6 | 2026-07-30 | S017 | F41 | — |
+| T90.4 | M90 | 20 | Test | completed | T89.3 | 2026-07-30 | S017 | F41 | — |
+| T90.5 | M90 | 20 | Docs | completed | T90.1–T90.4 | 2026-07-30 | S017 | F41 | — |
 
 ## Phase Gate Log
 

@@ -98,3 +98,65 @@ localStorage. FE `/warm` via existing `prewarmChatServices` only — no Modal/ba
 
 feature-list (done F40 stub), user-journeys, test-plan, acceptance-criteria, spec (delta),
 config-spec if VITE_*, privacy/ADR if cookie consent, 01 seed.
+
+## Cycle EV-015 — Scope (S017 / #167)
+
+**Approved:** 2026-07-30  
+**Session:** S017-corpus-reembed-migration  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/167  
+**Feature:** F41
+
+### Scope summary
+
+Implement a **safe, repeatable corpus rebuild** (re-embed only; re-chunk + re-embed; full
+re-scrape) via Admin Jobs UI + Modal job with a **force** flag (bypass content_hash skip).
+Staging dry-run + F36 eval gate; **prod cutover = runbook only** this cycle (no live prod
+rebuild). Expands #167 beyond investigation-only (S017-D3). Write boundary: Modal →
+internal-write → Postgres (ADR-007).
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S017-D1 | Session type | `feature` → 16-evolve |
+| S017-D2 | Routing | Standard+build (`01→02→04→07→08→09→10→11→12→13`; skip 03, 05, 06) |
+| S017-D3 | #167 scope | Expand from investigation-only → **implement** rebuild |
+| S017-D4 | Rebuild modes | All three: re-embed / re-chunk+re-embed / full re-scrape |
+| S017-D5 | Operator UX | Admin Jobs UI + Modal job + **force** flag |
+| S017-D6 | Prod cutover | Staging + F36 gate; prod = runbook only |
+| S017-D7 | Fn | Allocate **F41** |
+| S017-D8 | Phase gate | Proceed to Phase A (01-requirements) |
+| S017-D9 | Mode ops | All three modes in API; **staging runs store-backed** (no live scrape unless rescrape) |
+| S017-D10 | Job typing | `job_type=rebuild` + `mode` enum |
+| S017-D11 | Dry-run | Shadow dual-write + promote |
+| S017-D12 | Scope | Whole corpus default + optional `document_ids` |
+| S017-D13 | Versioning | Version stamps + track across revisions; dim dual-write → #159 |
+| S017-D14 | Retag | Separate retag job only |
+| S017-D15 | Progress UX | Jobs SSE + `/jobs/:id` only |
+| S017-D16 | Document store | Postgres `body_text` + `document_revisions` (ADR-040) |
+| S017-D17 | Fn packing | Document store folded into **F41** |
+| S017-D19 / **TP-S017-01** | Build vs ops (ISS-006) | **Option 2** (2026-07-30): **BUILD** keeps full shadow dual-write + promote + F36-on-shadow in F41 (RD-191 / ADR-040 §3 / 02 M2 / UJ-054 / Admin promote / TC-164–169); **OPS** = live same-settings rebuild as equivalence test. **Amended by TP-S017-07 / S017-D25:** staging this cycle **REQUIRES** full shadow→F36→promote (shadow path exercised, not deferred-unused) **in addition to** live equivalence. Q3 backfill prefer rescrape (reconstruct-from-chunks only w/ operator ack). Specs drafting as 04 artifacts now. |
+| S017-D20 / **TP-S017-02** | Shadow schema (Q5) | **Option 1** (2026-07-30): Dedicated `shadow_chunks` + `shadow_embeddings` + `rebuild_runs` table |
+| S017-D21 / **TP-S017-03** | Promote cutover (Q6) | **Option 1** (2026-07-30): Transactional copy shadow → live on promote |
+| S017-D22 / **TP-S017-04** | F36-on-shadow wire (Q7) | **Option 1** (2026-07-30): Eval enqueue accepts optional `rebuild_run_id` for F36-on-shadow |
+| S017-D23 / **TP-S017-05** | Milestone shape (Q8) | **Option 1** (2026-07-30): **Phase 20** with **M86–M90** (store+migration → ingest+backfill → rebuild job → promote+Admin UI → tests/docs) |
+| S017-D24 / **TP-S017-06** | Promote OpenAPI (Q9) | **Option 1** (2026-07-30): `POST /internal/v1/rebuild/{id}/promote` → `{promoted, rebuild_run_id, chunks_promoted, documents_promoted}`; Admin FE via corpus API proxy (admin JWT) |
+| S017-D25 / **TP-S017-07** | Staging ops (Q10) | **Option 2** (2026-07-30): Staging this cycle **REQUIRES** full shadow→F36→promote (in addition to live same-settings equivalence from TP-S017-01). Ops note: shadow path exercised on staging, not deferred-unused. Amends S017-D19. |
+| S017-D26 / **TP-S017-08** | Backfill path (Q11) | **Option 1** (2026-07-30): Backfill via rebuild/job path + Admin control; prefer rescrape; reconstruct-from-chunks only with operator ack |
+| S017-D27 / **TP-S017-09** | Dependency policy (Q12) | **Option 2** (2026-07-30): Allow minor deps in 07 if needed; flag in dependency-inventory |
+
+### 02-verify-plan verdicts (2026-07-30)
+
+| ID | Verdict | Decision |
+|----|---------|----------|
+| M1 | Approve fix | TC-166 mapped under UJ-053 |
+| M2 | Lock | F36 against shadow **before** promote |
+| M3 | Modify | Admin UI **promote** + **full build this session** |
+| M4 | Approve | One-time corpus **backfill** in F41 |
+| M5 | Defer | deployment-integration / data-flow → **04-tech-plan** |
+| M6 | Approve | Promote auth = **`admin`** (enqueue parity) |
+
+### Docs to update (Phase A)
+
+feature-list (F41), user-journeys (UJ-053–054), test-plan (TC-161–169), acceptance-criteria
+(AC-RB*), spec/api-contract/config-spec delta, ADR-040, runbook outline, decisions RD-188+.

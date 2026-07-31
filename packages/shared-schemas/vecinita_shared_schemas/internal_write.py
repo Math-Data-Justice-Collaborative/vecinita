@@ -51,8 +51,21 @@ class DocumentUpsert(BaseModel):
     title: str | None = None
     content_hash: str | None = None
     language: str | None = None
-    chunks: list[ChunkUpsert] = Field(..., min_length=1)
+    body_text: str | None = None
+    embedding_model_id: str | None = None
+    embedding_dim: int | None = Field(default=None, ge=1)
+    chunk_size_tokens: int | None = Field(default=None, ge=1)
+    rebuild_run_id: UUID | None = None
+    chunks: list[ChunkUpsert] = Field(default_factory=list)
     tags: list[TagInput] | None = Field(default=None, max_length=10)
+
+    @model_validator(mode="after")
+    def require_chunks_or_body_text(self) -> DocumentUpsert:
+        """Ingest needs chunks; store-only backfill may send body_text alone (TP-S017-08)."""
+        if not self.chunks and self.body_text is None:
+            msg = "chunks or body_text required"
+            raise ValueError(msg)
+        return self
 
 
 class BatchUpsertRequest(BaseModel):
@@ -67,6 +80,45 @@ class BatchUpsertResponse(BaseModel):
     """Count of chunk rows written by a batch upsert."""
 
     upserted_chunks: int = Field(..., ge=0)
+
+
+class RebuildPromoteResponse(BaseModel):
+    """POST /internal/v1/rebuild/{rebuild_run_id}/promote response (TP-S017-06)."""
+
+    promoted: bool
+    rebuild_run_id: UUID
+    chunks_promoted: int = Field(..., ge=0)
+    documents_promoted: int = Field(..., ge=0)
+
+
+class CreateRebuildRunResponse(BaseModel):
+    """POST /internal/v1/rebuild/runs response (TP-S017-02)."""
+
+    rebuild_run_id: UUID
+    status: str = "running"
+
+
+class CreateRebuildRunRequest(BaseModel):
+    """POST /internal/v1/rebuild/runs request body (TP-S017-02)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: Literal["reembed", "rechunk", "rescrape"]
+    dry_run: bool = False
+    force: bool = False
+    status: Literal["pending", "running", "completed", "failed", "promoted"] = "running"
+    job_id: UUID | None = None
+    embedding_model_id: str | None = None
+    embedding_dim: int | None = Field(default=None, ge=1)
+    chunk_size_tokens: int | None = Field(default=None, ge=1)
+
+
+class UpdateRebuildRunRequest(BaseModel):
+    """PATCH /internal/v1/rebuild/{rebuild_run_id} status lifecycle (TP-S017-02)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["pending", "running", "completed", "failed", "promoted"]
 
 
 class DocumentSummary(BaseModel):
@@ -345,6 +397,7 @@ class EvalRunCreateRequest(BaseModel):
     question: str | None = Field(default=None, min_length=1, max_length=2000)
     config: EvalConfigPartial | None = None
     preset_id: UUID | None = None
+    rebuild_run_id: UUID | None = None
 
     @model_validator(mode="after")
     def _require_question_for_adhoc(self) -> EvalRunCreateRequest:

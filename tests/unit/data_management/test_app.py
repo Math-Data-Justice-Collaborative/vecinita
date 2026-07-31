@@ -108,6 +108,97 @@ def test_create_job_accepts_retag_options() -> None:
     assert record.options["chunk_size_tokens"] == _CHUNK_SIZE_TOKENS
 
 
+def test_create_job_accepts_rebuild_options_without_backfill() -> None:
+    """POST /jobs persists rebuild mode/force/dry_run/document_ids (T88.1 / TC-161)."""
+    store = InMemoryJobStore()
+    doc_id = uuid4()
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+
+    response = client.post(
+        "/jobs",
+        json={
+            "urls": [],
+            "options": {
+                "job_type": "rebuild",
+                "mode": "rechunk",
+                "force": True,
+                "dry_run": True,
+                "document_ids": [str(doc_id)],
+            },
+        },
+    )
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.job_type == "rebuild"
+    assert record.options["mode"] == "rechunk"
+    assert record.options["force"] is True
+    assert record.options["dry_run"] is True
+    assert record.options["document_ids"] == [str(doc_id)]
+    assert "backfill" not in record.options
+
+
+def test_create_job_accepts_backfill_rebuild_options() -> None:
+    """POST /jobs persists rebuild backfill options (T87.5 / TP-S017-08)."""
+    store = InMemoryJobStore()
+    doc_id = uuid4()
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+
+    response = client.post(
+        "/jobs",
+        json={
+            "urls": [],
+            "options": {
+                "job_type": "rebuild",
+                "mode": "rescrape",
+                "backfill": True,
+                "backfill_source": "rescrape",
+                "document_ids": [str(doc_id)],
+                "force": True,
+                "dry_run": False,
+            },
+        },
+    )
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.job_type == "rebuild"
+    assert record.options["mode"] == "rescrape"
+    assert record.options["backfill"] is True
+    assert record.options["backfill_source"] == "rescrape"
+    assert record.options["document_ids"] == [str(doc_id)]
+    assert record.options["force"] is True
+
+
+def test_create_job_persists_from_chunks_ack_flag() -> None:
+    """ack_reconstruct_from_chunks is stored when backfill_source=from_chunks."""
+    store = InMemoryJobStore()
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+    response = client.post(
+        "/jobs",
+        json={
+            "urls": [],
+            "options": {
+                "job_type": "rebuild",
+                "mode": "rechunk",
+                "backfill": True,
+                "backfill_source": "from_chunks",
+                "ack_reconstruct_from_chunks": True,
+            },
+        },
+    )
+    assert response.status_code == HTTPStatus.ACCEPTED
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.options["backfill_source"] == "from_chunks"
+    assert record.options["ack_reconstruct_from_chunks"] is True
+
+
 def test_create_job_emits_job_created_audit() -> None:
     """POST /jobs records job.created with the initiating operator."""
     captured: list[AuditEventRequest] = []

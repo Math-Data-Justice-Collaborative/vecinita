@@ -35,10 +35,14 @@ def test_openapi_job_options_include_eval_and_document_fields() -> None:
     option_props = as_json_object(_job_options_schema(spec)["properties"])
     assert "job_type" in option_props
     job_type = as_json_object(option_props["job_type"])
-    assert set(cast("list[str]", job_type["enum"])) == {"ingest", "retag", "eval"}
+    assert set(cast("list[str]", job_type["enum"])) == {"ingest", "retag", "eval", "rebuild"}
     assert "document_id" in option_props
     assert "eval_run_id" in option_props
     assert "chunk_size_tokens" in option_props
+    assert "mode" in option_props
+    assert "backfill" in option_props
+    assert "backfill_source" in option_props
+    assert "ack_reconstruct_from_chunks" in option_props
 
 
 def test_openapi_create_job_allows_empty_urls_for_non_ingest() -> None:

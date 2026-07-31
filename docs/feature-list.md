@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-07-29 (S016/EV-014 #87 — F40 ChatRAG cold-start UX / fun facts)
+> **Last updated**: 2026-07-30 (S017/EV-015 #167 — F41 corpus re-embed / re-chunk rebuild)
 
 ## Summary
 
@@ -50,6 +50,7 @@
 | F38 | Playground model download (super-admin) | Implemented | Data Management | data-management-frontend, internal-write-api, Modal LLM app | S009/EV-010 2026-07-05; backend unified in F39 |
 | F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, `packages/llm-client`, all LLM consumers | S010/EV-011; ADR-037; follow-on RD-163–RD-172 |
 | F40 | ChatRAG cold-start wait UX (rotating fun facts + consent) | Planned | ChatRAG | chat-rag-frontend; optional `frontend-i18n` / `frontend-ui` | S016/EV-014 #87 |
+| F41 | Corpus re-embed / re-chunk rebuild (migration job) | Planned | Data Management | data-management-backend, internal-write-api, data-management-frontend, Modal | S017/EV-015 #167 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -767,6 +768,34 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Out of scope**: Modal/backend warm-path changes; CMS/API-backed facts; admin UI;
   analytics of which facts were shown.
 - **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15).
+
+### F41: Corpus re-embed / re-chunk rebuild (migration job)
+
+- **What it does**: Safe, repeatable corpus rebuild plus a **Postgres document store**
+  (normalized body + revisions) so operators can re-embed / re-chunk / rescrape without
+  ad-hoc SQL. Modes: **`reembed`**, **`rechunk`**, **`rescrape`** via single
+  `job_type=rebuild`. EV-015 staging ops prefer **store-backed** reembed/rechunk (**no live
+  scrape** unless explicit rescrape). Dry-run uses **shadow dual-write**; **F36 against
+  shadow before promote**. **Version stamps** track embedding model/dim, chunk settings, and
+  `rebuild_run_id` across revisions. **force** bypasses content_hash skip (#163). Includes
+  **one-time backfill** of existing corpus into `body_text` / revisions. Prod cutover =
+  runbook only.
+- **Inputs**: `mode`; optional `document_ids`; `force`; `dry_run`; current chunk/embed settings.
+- **Outputs**: Store body/revisions (incl. backfill); shadow or live chunks/embeddings; Jobs
+  progress; Admin promote; version stamps; #159–#166 dependency checklist; staging→prod
+  runbook outline.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/database` | Migration: body_text, document_revisions, shadow/rebuild metadata |
+  | `apps/internal-write-api` | Store upsert + rebuild promote paths |
+  | `apps/data-management-backend` | Rebuild pipeline; ingest writes store; **backfill** job/path |
+  | `apps/data-management-frontend` | Jobs UI: enqueue rebuild (mode/force/dry-run) + **promote** |
+  | Modal data-management | Long-running rebuild worker |
+- **Out of scope (this cycle)**: Live prod rebuild; multilingual model pick (#159); chunk
+  overlap values (#160); dual-write dim migration impl; retag-inside-rebuild; new % widget.
+- **Source**: S017 / EV-015; GitHub #167; ADR-040; intake 2026-07-30 (S017-D1–D17);
+  02-verify-plan M1–M4 (2026-07-30).
 
 ## Planned / Deferred (post-v1)
 

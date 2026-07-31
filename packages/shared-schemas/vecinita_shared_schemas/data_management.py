@@ -13,21 +13,46 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 AssignableRole = Literal["admin", "viewer"]
 Role = Literal["admin", "viewer", "super-admin"]
 UserStatus = Literal["active", "invited", "disabled"]
+JobType = Literal["ingest", "retag", "eval", "rebuild"]
+RebuildMode = Literal["reembed", "rechunk", "rescrape"]
+BackfillSource = Literal["rescrape", "from_chunks"]
 
 
 class JobOptions(BaseModel):
-    """Optional ingest, retag, or eval tuning parameters for a job."""
+    """Optional ingest, retag, eval, or rebuild tuning parameters for a job."""
 
     model_config = ConfigDict(extra="forbid")
 
     chunk_size_tokens: int | None = Field(default=None, ge=64, le=2048)
-    job_type: Literal["ingest", "retag", "eval"] = "ingest"
+    job_type: JobType = "ingest"
     document_id: UUID | None = None
     eval_run_id: UUID | None = None
+    mode: RebuildMode | None = None
+    force: bool = False
+    dry_run: bool = False
+    document_ids: list[UUID] | None = None
+    backfill: bool = False
+    backfill_source: BackfillSource = "rescrape"
+    ack_reconstruct_from_chunks: bool = False
+
+    @model_validator(mode="after")
+    def validate_rebuild_and_backfill(self) -> JobOptions:
+        """Require rebuild mode; from_chunks backfill needs operator ack (TP-S017-08)."""
+        if self.job_type == "rebuild" and self.mode is None:
+            msg = "mode required for rebuild jobs"
+            raise ValueError(msg)
+        if (
+            self.backfill
+            and self.backfill_source == "from_chunks"
+            and not self.ack_reconstruct_from_chunks
+        ):
+            msg = "ack_reconstruct_from_chunks required when backfill_source is from_chunks"
+            raise ValueError(msg)
+        return self
 
 
 class CreateJobRequest(BaseModel):
-    """POST /jobs request to enqueue URL ingestion, LLM retag, or eval."""
+    """POST /jobs request to enqueue URL ingestion, LLM retag, eval, or rebuild."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -36,7 +61,7 @@ class CreateJobRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_job_payload(self) -> CreateJobRequest:
-        """Require URLs for ingest, document_id for retag, eval_run_id for eval."""
+        """Require URLs for ingest; ids for retag/eval; allow empty urls for rebuild."""
         job_type = self.options.job_type if self.options else "ingest"
         if job_type == "ingest" and not self.urls:
             msg = "urls required for ingest jobs"
@@ -62,7 +87,7 @@ class Job(BaseModel):
 
     job_id: UUID
     status: Literal["pending", "running", "completed", "failed", "cancelled"]
-    job_type: Literal["ingest", "retag", "eval"] = "ingest"
+    job_type: JobType = "ingest"
     urls: list[HttpUrl]
     document_id: UUID | None = None
     eval_run_id: UUID | None = None

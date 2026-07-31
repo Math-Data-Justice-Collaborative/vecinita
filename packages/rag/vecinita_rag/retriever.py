@@ -21,6 +21,8 @@ from vecinita_rag.constants import DEFAULT_TOP_K, EMBEDDING_DIMENSION, MAX_TOP_K
 from vecinita_rag.types import RetrievedChunk
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from sqlalchemy.engine import Engine
 
 EmbedFn = Callable[[str], list[float]]
@@ -40,8 +42,28 @@ _BASE_SELECT_SQL = """
             WHERE 1=1
             """
 
+_SHADOW_SELECT_SQL = """
+            SELECT
+                sc.id AS chunk_id,
+                d.id AS document_id,
+                sc.text,
+                d.title,
+                d.url,
+                d.language,
+                1 - (se.embedding <=> CAST(:query_embedding AS vector)) AS score
+            FROM shadow_embeddings se
+            JOIN shadow_chunks sc ON sc.id = se.shadow_chunk_id
+            JOIN documents d ON d.id = sc.document_id
+            WHERE sc.rebuild_run_id = :rebuild_run_id
+            """
+
 _ORDER_LIMIT_SQL = """
             ORDER BY e.embedding <=> CAST(:query_embedding AS vector)
+            LIMIT :top_k
+            """
+
+_SHADOW_ORDER_LIMIT_SQL = """
+            ORDER BY se.embedding <=> CAST(:query_embedding AS vector)
             LIMIT :top_k
             """
 
@@ -90,7 +112,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
         self._top_k = top_k
         self._score_threshold = score_threshold
 
-    def retrieve_chunks(
+    def retrieve_chunks(  # noqa: PLR0913  # filter kwargs: tags/lang/top_k/threshold/shadow run
         self,
         query: str,
         *,
@@ -98,6 +120,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
         language: str | None = None,
         top_k: int | None = None,
         score_threshold: float | None = None,
+        rebuild_run_id: UUID | None = None,
     ) -> list[RetrievedChunk]:
         """Run pgvector search and return ranked chunks with optional tag/language filters."""
         query_vector = self._embed_fn(query)
@@ -112,31 +135,49 @@ class CorpusPgvectorRetriever(BaseRetriever):
         if language is not None:
             language_clause = "AND d.language = :language"
             params["language"] = language
-        if tag_slugs:
-            tag_clause = """
-              AND (
-                EXISTS (
-                  SELECT 1
-                  FROM document_tags dt
-                  JOIN tags t ON t.id = dt.tag_id
-                  WHERE dt.document_id = d.id
-                    AND t.slug IN :tag_slugs
-                )
-                OR EXISTS (
-                  SELECT 1
-                  FROM chunk_tags ct
-                  JOIN tags t ON t.id = ct.tag_id
-                  WHERE ct.chunk_id = c.id
-                    AND t.slug IN :tag_slugs
-                )
-              )
-            """
-            params["tag_slugs"] = tuple(tag_slugs)
+        if rebuild_run_id is not None:
+            params["rebuild_run_id"] = rebuild_run_id
+            # Shadow path: tag filters apply to document tags only (no live chunk_id).
+            if tag_slugs:
+                tag_clause = """
+                  AND EXISTS (
+                    SELECT 1
+                    FROM document_tags dt
+                    JOIN tags t ON t.id = dt.tag_id
+                    WHERE dt.document_id = d.id
+                      AND t.slug IN :tag_slugs
+                  )
+                """
+                params["tag_slugs"] = tuple(tag_slugs)
+            sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                _SHADOW_SELECT_SQL + language_clause + tag_clause + _SHADOW_ORDER_LIMIT_SQL
+            )
+        else:
+            if tag_slugs:
+                tag_clause = """
+                  AND (
+                    EXISTS (
+                      SELECT 1
+                      FROM document_tags dt
+                      JOIN tags t ON t.id = dt.tag_id
+                      WHERE dt.document_id = d.id
+                        AND t.slug IN :tag_slugs
+                    )
+                    OR EXISTS (
+                      SELECT 1
+                      FROM chunk_tags ct
+                      JOIN tags t ON t.id = ct.tag_id
+                      WHERE ct.chunk_id = c.id
+                        AND t.slug IN :tag_slugs
+                    )
+                  )
+                """
+                params["tag_slugs"] = tuple(tag_slugs)
 
-        # Fixed clause templates; values bound via :params (expanding tag_slugs).
-        sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
-            _BASE_SELECT_SQL + language_clause + tag_clause + _ORDER_LIMIT_SQL
-        )
+            # Fixed clause templates; values bound via :params (expanding tag_slugs).
+            sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                _BASE_SELECT_SQL + language_clause + tag_clause + _ORDER_LIMIT_SQL
+            )
         if tag_slugs:
             sql = sql.bindparams(bindparam("tag_slugs", expanding=True))
         with self._engine.connect() as conn:

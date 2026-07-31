@@ -598,7 +598,7 @@ components:
           items:
             type: string
             format: uri
-          description: Required non-empty for ingest; empty for retag/eval
+          description: Required non-empty for ingest; empty for retag/eval/rebuild
         options:
           $ref: "#/components/schemas/JobOptions"
     JobOptions:
@@ -615,6 +615,7 @@ components:
             - ingest
             - retag
             - eval
+            - rebuild
           default: ingest
         document_id:
           type: string
@@ -626,6 +627,45 @@ components:
           format: uuid
           nullable: true
           description: Required for eval jobs (DO eval_runs.id)
+        mode:
+          type: string
+          enum:
+            - reembed
+            - rechunk
+            - rescrape
+          nullable: true
+          description: Required for rebuild jobs (F41)
+        force:
+          type: boolean
+          default: false
+          description: Bypass content_hash skip on rebuild
+        dry_run:
+          type: boolean
+          default: false
+          description: Shadow dual-write only until promote
+        document_ids:
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+            format: uuid
+          nullable: true
+          description: Optional rebuild scope; omit for whole corpus
+        backfill:
+          type: boolean
+          default: false
+          description: One-time document store backfill (TP-S017-08)
+        backfill_source:
+          type: string
+          enum:
+            - rescrape
+            - from_chunks
+          default: rescrape
+          description: Prefer rescrape; from_chunks requires ack
+        ack_reconstruct_from_chunks:
+          type: boolean
+          default: false
+          description: Operator ack required when backfill_source=from_chunks
     CreateJobResponse:
       type: object
       required:
@@ -665,6 +705,7 @@ components:
             - ingest
             - retag
             - eval
+            - rebuild
           default: ingest
         urls:
           type: array

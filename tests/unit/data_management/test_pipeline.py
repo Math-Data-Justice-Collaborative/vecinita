@@ -121,6 +121,39 @@ def test_fetch_html_fixture_parses_fixture() -> None:
     assert "Neighborhood clinic" in doc.text
 
 
+def test_run_ingest_job_writes_body_text_and_version_stamps() -> None:
+    """Ingest upsert includes store body_text and revision stamps (T87.4 / TC-163)."""
+    from hashlib import sha256  # noqa: PLC0415
+
+    from vecinita_embedding_client import EMBEDDING_DIMENSION  # noqa: PLC0415
+
+    chunk_size = 64
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": str(chunk_size)},
+    )
+
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
+        tag_vocabulary=_VOCAB,
+    )
+
+    assert write_client.last_batch is not None
+    doc = write_client.last_batch.documents[0]
+    assert doc.body_text is not None
+    assert "Neighborhood clinic" in doc.body_text
+    assert doc.content_hash == sha256(doc.body_text.encode("utf-8")).hexdigest()
+    assert doc.chunk_size_tokens == chunk_size
+    assert doc.embedding_dim == EMBEDDING_DIMENSION
+    assert doc.embedding_model_id
+
+
 def test_run_ingest_job_completes_with_fixture_html() -> None:
     """Test run ingest job completes with fixture html."""
     store = InMemoryJobStore()

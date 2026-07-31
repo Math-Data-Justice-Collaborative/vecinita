@@ -1,24 +1,34 @@
 export type JobStatus =
-  | "pending"
-  | "running"
-  | "completed"
-  | "failed"
-  | "cancelled";
-export type JobType = "ingest" | "retag" | "eval";
+  "pending" | "running" | "completed" | "failed" | "cancelled";
+export type JobType = "ingest" | "retag" | "eval" | "rebuild";
+export type RebuildMode = "reembed" | "rechunk" | "rescrape";
+export type BackfillSource = "rescrape" | "from_chunks";
 
 export interface Job {
   job_id: string;
   status: JobStatus;
-  job_type?: JobType;
+  job_type?: JobType | undefined;
   urls: string[];
-  document_id?: string | null;
-  eval_run_id?: string | null;
-  modal_call_id?: string | null;
-  dashboard_url?: string | null;
-  error_code?: string | null;
-  error_message?: string | null;
+  document_id?: string | null | undefined;
+  eval_run_id?: string | null | undefined;
+  modal_call_id?: string | null | undefined;
+  dashboard_url?: string | null | undefined;
+  error_code?: string | null | undefined;
+  error_message?: string | null | undefined;
   created_at: string;
   updated_at: string;
+}
+
+export interface CreateJobOptions {
+  chunk_size_tokens?: number;
+  job_type?: JobType;
+  mode?: RebuildMode;
+  force?: boolean;
+  dry_run?: boolean;
+  document_ids?: string[];
+  backfill?: boolean;
+  backfill_source?: BackfillSource;
+  ack_reconstruct_from_chunks?: boolean;
 }
 
 export interface CreateJobResponse {

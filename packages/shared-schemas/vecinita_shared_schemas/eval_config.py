@@ -103,6 +103,7 @@ class EvalConfig(BaseModel):
         le=MAX_EVAL_TEMPERATURE,
     )
     model_id: str = Field(default=DEFAULT_EVAL_MODEL_ID, min_length=1, max_length=128)
+    rebuild_run_id: UUID | None = None
 
 
 def merge_eval_config(base: EvalConfig, partial: EvalConfigPartial | None) -> EvalConfig:

@@ -49,6 +49,7 @@ const TYPE_KEY: Record<JobType, StringMessageKey> = {
   ingest: "admin.jobs.type.ingest",
   retag: "admin.jobs.type.retag",
   eval: "admin.jobs.type.eval",
+  rebuild: "admin.jobs.type.rebuild",
 };
 
 function contextCell(job: Job, emDash: string): string {

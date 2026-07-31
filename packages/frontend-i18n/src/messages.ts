@@ -290,7 +290,8 @@ const enStrings = {
   "admin.evaluation.playground.downloadHint":
     "Pull a playground model tag into the Modal volume for playground eval runs.",
   "admin.evaluation.playground.downloadModelLabel": "Playground model tag",
-  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:1.5b-instruct",
+  "admin.evaluation.playground.downloadModelPlaceholder":
+    "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.downloadButton": "Download",
   "admin.evaluation.playground.downloadPulling": "Downloading…",
   "admin.evaluation.playground.downloadStatusIdle":
@@ -375,6 +376,50 @@ const enStrings = {
   "admin.jobs.type.ingest": "Ingest",
   "admin.jobs.type.retag": "Retag",
   "admin.jobs.type.eval": "Eval",
+  "admin.jobs.type.rebuild": "Rebuild",
+  "admin.backfill.title": "Backfill document store",
+  "admin.backfill.description":
+    "One-time fill of normalized body text for existing corpus documents. Prefer rescrape; reconstruct from chunks only with explicit acknowledgment.",
+  "admin.backfill.sourceLabel": "Backfill source",
+  "admin.backfill.source.rescrape": "Rescrape URLs (preferred)",
+  "admin.backfill.source.fromChunks": "Reconstruct from chunks",
+  "admin.backfill.ackLabel":
+    "I acknowledge reconstructing body text from chunks is best-effort and may not match the original page.",
+  "admin.backfill.submit": "Enqueue backfill",
+  "admin.backfill.running": "Enqueueing…",
+  "admin.backfill.failed": "Backfill enqueue failed",
+  "admin.backfill.jobStatusPrefix": "Backfill job",
+  "admin.backfill.validation.ackRequired":
+    "Acknowledge reconstruct-from-chunks before enqueueing.",
+  "admin.rebuild.title": "Rebuild corpus",
+  "admin.rebuild.description":
+    "Store-backed rebuild of embeddings and/or chunks. Use dry-run to write shadow tables before promote.",
+  "admin.rebuild.modeLabel": "Rebuild mode",
+  "admin.rebuild.mode.reembed": "Re-embed (keep chunks)",
+  "admin.rebuild.mode.rechunk": "Re-chunk + embed",
+  "admin.rebuild.mode.rescrape": "Rescrape URLs",
+  "admin.rebuild.forceLabel": "Force (bypass content-hash skip)",
+  "admin.rebuild.dryRunLabel": "Dry-run (shadow tables only)",
+  "admin.rebuild.submit": "Enqueue rebuild",
+  "admin.rebuild.running": "Enqueueing…",
+  "admin.rebuild.failed": "Rebuild enqueue failed",
+  "admin.rebuild.jobStatusPrefix": "Rebuild job",
+  "admin.rebuild.promote.title": "Promote shadow rebuild",
+  "admin.rebuild.promote.description":
+    "After F36 eval against a completed dry-run, promote shadow chunks/embeddings to live.",
+  "admin.rebuild.promote.runIdLabel": "Rebuild run ID",
+  "admin.rebuild.promote.runIdPlaceholder": "uuid from dry-run rebuild",
+  "admin.rebuild.promote.confirmLabel":
+    "I confirm F36 passed on this shadow run and want to promote to live.",
+  "admin.rebuild.promote.submit": "Promote to live",
+  "admin.rebuild.promote.running": "Promoting…",
+  "admin.rebuild.promote.failed": "Rebuild promote failed",
+  "admin.rebuild.promote.validation.runId": "Enter a rebuild run ID.",
+  "admin.rebuild.promote.validation.confirmRequired":
+    "Confirm before promoting this shadow rebuild.",
+  "admin.rebuild.promote.resultPrefix": "Promoted",
+  "admin.rebuild.promote.chunksLabel": "chunks",
+  "admin.rebuild.promote.documentsLabel": "documents",
   "admin.ingest.title": "Ingest URLs",
   "admin.ingest.urlsLabel": "Public URLs (one per line)",
   "admin.ingest.urlsPlaceholder": "https://example.org/community/page",
@@ -710,7 +755,8 @@ const esStrings = {
   "admin.evaluation.models.customTitle": "Etiqueta de modelo personalizada",
   "admin.evaluation.models.customHint":
     "Descarga cualquier etiqueta de modelo del laboratorio válida que no esté en el catálogo.",
-  "admin.evaluation.models.customModelLabel": "Etiqueta de modelo del laboratorio",
+  "admin.evaluation.models.customModelLabel":
+    "Etiqueta de modelo del laboratorio",
   "admin.evaluation.models.customModelPlaceholder": "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.title": "Laboratorio de evaluación",
   "admin.evaluation.playground.subtitle":
@@ -762,7 +808,8 @@ const esStrings = {
     "Descarga una etiqueta de modelo del laboratorio al volumen Modal para evaluaciones.",
   "admin.evaluation.playground.downloadModelLabel":
     "Etiqueta del modelo del laboratorio",
-  "admin.evaluation.playground.downloadModelPlaceholder": "qwen2.5:1.5b-instruct",
+  "admin.evaluation.playground.downloadModelPlaceholder":
+    "qwen2.5:1.5b-instruct",
   "admin.evaluation.playground.downloadButton": "Descargar",
   "admin.evaluation.playground.downloadPulling": "Descargando…",
   "admin.evaluation.playground.downloadStatusIdle":
@@ -851,6 +898,51 @@ const esStrings = {
   "admin.jobs.type.ingest": "Ingesta",
   "admin.jobs.type.retag": "Re-etiquetar",
   "admin.jobs.type.eval": "Evaluación",
+  "admin.jobs.type.rebuild": "Reconstrucción",
+  "admin.backfill.title": "Rellenar almacén de documentos",
+  "admin.backfill.description":
+    "Relleno único del texto normalizado para documentos existentes. Prefiera volver a rastrear; reconstruir desde fragmentos solo con reconocimiento explícito.",
+  "admin.backfill.sourceLabel": "Origen del relleno",
+  "admin.backfill.source.rescrape": "Volver a rastrear URLs (preferido)",
+  "admin.backfill.source.fromChunks": "Reconstruir desde fragmentos",
+  "admin.backfill.ackLabel":
+    "Reconozco que reconstruir el texto desde fragmentos es una aproximación y puede no coincidir con la página original.",
+  "admin.backfill.submit": "Encolar relleno",
+  "admin.backfill.running": "Encolando…",
+  "admin.backfill.failed": "Falló el encolado del relleno",
+  "admin.backfill.jobStatusPrefix": "Trabajo de relleno",
+  "admin.backfill.validation.ackRequired":
+    "Reconozca la reconstrucción desde fragmentos antes de encolar.",
+  "admin.rebuild.title": "Reconstruir corpus",
+  "admin.rebuild.description":
+    "Reconstrucción basada en el almacén de embeddings y/o fragmentos. Use dry-run para escribir tablas sombra antes de promover.",
+  "admin.rebuild.modeLabel": "Modo de reconstrucción",
+  "admin.rebuild.mode.reembed": "Re-embeber (mantener fragmentos)",
+  "admin.rebuild.mode.rechunk": "Re-fragmentar + embeber",
+  "admin.rebuild.mode.rescrape": "Volver a rastrear URLs",
+  "admin.rebuild.forceLabel": "Forzar (omitir salto por hash de contenido)",
+  "admin.rebuild.dryRunLabel": "Dry-run (solo tablas sombra)",
+  "admin.rebuild.submit": "Encolar reconstrucción",
+  "admin.rebuild.running": "Encolando…",
+  "admin.rebuild.failed": "Falló el encolado de la reconstrucción",
+  "admin.rebuild.jobStatusPrefix": "Trabajo de reconstrucción",
+  "admin.rebuild.promote.title": "Promover reconstrucción sombra",
+  "admin.rebuild.promote.description":
+    "Tras la eval F36 contra un dry-run completado, promueva fragmentos/embeddings sombra a producción.",
+  "admin.rebuild.promote.runIdLabel": "ID de ejecución de reconstrucción",
+  "admin.rebuild.promote.runIdPlaceholder": "uuid del dry-run",
+  "admin.rebuild.promote.confirmLabel":
+    "Confirmo que F36 pasó en esta ejecución sombra y quiero promover a producción.",
+  "admin.rebuild.promote.submit": "Promover a producción",
+  "admin.rebuild.promote.running": "Promoviendo…",
+  "admin.rebuild.promote.failed": "Falló la promoción de la reconstrucción",
+  "admin.rebuild.promote.validation.runId":
+    "Introduzca un ID de ejecución de reconstrucción.",
+  "admin.rebuild.promote.validation.confirmRequired":
+    "Confirme antes de promover esta reconstrucción sombra.",
+  "admin.rebuild.promote.resultPrefix": "Promovido",
+  "admin.rebuild.promote.chunksLabel": "fragmentos",
+  "admin.rebuild.promote.documentsLabel": "documentos",
   "admin.ingest.title": "Ingestar URLs",
   "admin.ingest.urlsLabel": "URLs públicas (una por línea)",
   "admin.ingest.urlsPlaceholder": "https://example.org/community/page",

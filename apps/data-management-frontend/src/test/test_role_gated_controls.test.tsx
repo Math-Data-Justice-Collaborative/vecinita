@@ -54,7 +54,15 @@ describe("UJ-029 role-gated write controls (TC-085)", () => {
     installViewerSupabaseMock();
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) }),
+      vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: MOCK_DOCS,
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.length,
+        }),
+      }),
     );
 
     renderCorpusList();
@@ -89,7 +97,15 @@ describe("UJ-029 role-gated write controls (TC-085)", () => {
     installAuthenticatedSupabaseMock();
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ items: MOCK_DOCS, page: 1, page_size: 50, total: MOCK_DOCS.length }) }),
+      vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: MOCK_DOCS,
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.length,
+        }),
+      }),
     );
 
     renderCorpusList();
