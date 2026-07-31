@@ -4,8 +4,8 @@
 > **Session:** S017-corpus-reembed-migration  
 > **Cycle:** EV-015  
 > **Stage:** 13-deploy-smoke  
-> **Status:** **PASS** — Path A deploy checkpoint **approved** 2026-07-30 (option 1: prepare PR; DO pins stay on evolve until merge)  
-> **Branch:** `evolve/EV-015-corpus-reembed-migration` @ `180ad14`  
+> **Status:** **deployed** — Path A PASS; [#168](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168) merged; DO pins reset to `main`; H0ci PASS  
+> **Branch:** `evolve/EV-015-corpus-reembed-migration` @ `180ad14` (Path A); `main` @ `c7cda84` (post-merge)  
 > **Operator env:** `.env` (no `prod.env` on this machine)
 
 ## Pre-Deploy
@@ -53,17 +53,19 @@ Scoped to 2 docs (store was empty: 40/40 `missing_body` before backfill).
 
 | Service | URL | Pin |
 |---------|-----|-----|
-| Internal write API | https://vecinita-internal-write-api-icze4.ondigitalocean.app | evolve |
-| Admin frontend | https://vecinita-admin-frontend-ef4ob.ondigitalocean.app | evolve |
+| Internal write API | https://vecinita-internal-write-api-icze4.ondigitalocean.app | `main` (reset post-merge) |
+| Admin frontend | https://vecinita-admin-frontend-ef4ob.ondigitalocean.app | `main` (reset post-merge) |
 | Modal data-mgmt | https://vecinita--vecinita-data-management-fastapi-app.modal.run | redeployed |
 | ChatRAG BE/FE | unchanged staging URLs | `main` |
+
+**Post-merge (2026-07-30):** PR [#168](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168) merged @ `c7cda84`; DO `github.branch` for write-api + admin FE reset to `main` (both **ACTIVE**). H0ci PASS — [CI](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30594671225) + [deploy-preflight](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30594830511).
 
 ## Advisories (non-blocking for Path A promote path; follow-ups)
 
 1. **Modal `job_type=eval` dispatch gap:** `run_job` falls through to ingest → `BatchUpsertRequest(documents=[])` ValidationError. F36 was completed via operator-local `execute_eval_run` against staging DB. Needs hotfix / Modal eval worker before relying on Admin Evaluation enqueue alone.
 2. **Prompt length:** default `top_k=5` + 256-token chunks exceeded vLLM `max_model_len=2048` (500). Staging F36 used `config.top_k=2`.
 3. **Full-corpus backfill** still pending (38 docs without `body_text`); only scoped store backfill done for the drill.
-4. **DO pins** still on evolve — reset to `main` after merge (S013/S014 pattern).
+4. **DO pins** reset to `main` after merge (write-api + admin FE **ACTIVE**).
 5. Do **not** commit `scripts/deploy/_tmp_proxy_key_check.py`.
 
 ## Rollback
@@ -76,8 +78,9 @@ Scoped to 2 docs (store was empty: 40/40 `missing_body` before backfill).
 ## Gate / next
 
 - **13-deploy-smoke Path A:** **COMPLETE** — user approved deploy checkpoint (option 1).  
-- **PR:** prepare / open `evolve/EV-015-corpus-reembed-migration` → `main` (TP-S017-05 / #167).  
-- **DO pins:** remain on evolve until merge; reset to `main` after merge.  
+- **PR #168:** **merged** @ `c7cda84` (user closeout option 1).  
+- **DO pins:** write-api + admin FE on `main` (**ACTIVE**).  
+- **H0ci:** **PASS** on `main` @ `c7cda84`.  
 - Optional follow-ups: Modal eval dispatch hotfix; full store backfill (38 docs); 15-service-health.
 
 > CI note: coverage gate green on `1928b62+`; security re-run after Supabase advisor 502.
