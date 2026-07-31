@@ -365,6 +365,47 @@ def test_soft_delete_eval_run_raises_on_http_error() -> None:
     client.close()
 
 
+def test_list_documents_includes_missing_body_query() -> None:
+    """list_documents(missing_body=True) sends missing_body query param."""
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(str(request.url))
+        return httpx.Response(
+            HTTPStatus.OK,
+            json={"items": [], "page": 1, "page_size": 50, "total": 0},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    page = client.list_documents(missing_body=True)
+    assert page.total == 0
+    assert any("missing_body=true" in url for url in seen)
+    client.close()
+
+
+def test_list_documents_raises_on_http_error() -> None:
+    """list_documents surfaces non-2xx as InternalWriteClientError."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        return httpx.Response(HTTPStatus.BAD_GATEWAY, text="down")
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="list_documents"):
+        client.list_documents()
+    client.close()
+
+
 def test_create_rebuild_run_posts_and_returns_id() -> None:
     """T88.4: create_rebuild_run POSTs /rebuild/runs and returns rebuild_run_id."""
     run_id = uuid4()
