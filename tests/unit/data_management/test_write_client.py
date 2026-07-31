@@ -517,3 +517,42 @@ def test_execute_eval_run_posts_with_question() -> None:
     client.execute_eval_run(run_id, question="What hours?")
     assert seen[0].get("question") == "What hours?"
     client.close()
+
+
+def test_execute_eval_run_omits_question_when_none() -> None:
+    """Golden runs POST an empty JSON body when question is omitted."""
+    run_id = uuid4()
+    seen: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(cast("dict[str, object]", json.loads(request.content.decode() or "{}")))
+        return httpx.Response(
+            HTTPStatus.OK,
+            json={"run_id": str(run_id), "status": "completed"},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client.execute_eval_run(run_id)
+    assert "question" not in seen[0]
+    client.close()
+
+
+def test_execute_eval_run_raises_on_http_error() -> None:
+    """execute_eval_run raises InternalWriteClientError on non-2xx."""
+    run_id = uuid4()
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(HTTPStatus.INTERNAL_SERVER_ERROR, text="boom")
+    )
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="execute_eval_run"):
+        client.execute_eval_run(run_id, question="x")
+    client.close()

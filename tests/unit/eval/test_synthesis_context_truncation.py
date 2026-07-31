@@ -62,6 +62,53 @@ def test_synthesize_with_system_prompt_truncates_context() -> None:
     assert ("c" * (DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS + 1)) not in prompt
 
 
+def test_synthesize_with_system_prompt_empty_chunks_abstains() -> None:
+    """Empty retrieval returns the no-context abstain answer."""
+
+    class _UnusedLlm:
+        def complete(self, prompt: str) -> SimpleNamespace:
+            _ = prompt
+            msg = "llm must not be called"
+            raise AssertionError(msg)
+
+    answer = synthesize_with_system_prompt(
+        "When are hours updated?",
+        [],
+        _UnusedLlm(),
+        system_prompt="Answer using only the context.",
+    )
+    assert "information" in answer.answer.lower() or "no" in answer.answer.lower()
+
+
+def test_synthesize_with_system_prompt_uses_str_when_no_text_attr() -> None:
+    """Completions without a text attribute stringify."""
+    captured: dict[str, str] = {}
+
+    class _StrLlm:
+        def complete(self, prompt: str) -> object:
+            captured["prompt"] = prompt
+            return "plain-string-answer"
+
+    answer = synthesize_with_system_prompt(
+        "q",
+        [
+            RetrievedChunk(
+                chunk_id=uuid4(),
+                document_id=uuid4(),
+                text="short",
+                score=0.9,
+                title="t",
+                url="https://example.com/a",
+                language="en",
+            )
+        ],
+        _StrLlm(),
+        system_prompt="Use context.",
+    )
+    assert answer.answer == "plain-string-answer"
+    assert "short" in captured["prompt"]
+
+
 def test_truncate_synthesis_context_rejects_non_positive_max() -> None:
     """max_chars must be >= 1."""
     with pytest.raises(ValueError, match="max_chars"):

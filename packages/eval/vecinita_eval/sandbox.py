@@ -2,19 +2,24 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 from vecinita_rag.engine import answer_without_context
 from vecinita_rag.language import detect_query_language
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 
-if TYPE_CHECKING:
-    from llama_index.core.llms import LLM
-
 # Empirically top_k=5 x ~256-token chunks exceeded pinned vLLM max_model_len=2048
 # (HTTP 500) during S017 F36 drill; top_k=2 succeeded. Cap synthesis context so
 # default top_k remains usable for retrieval metrics (BUG-2026-07-31).
 DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS = 3500
+
+
+class CompletingLlm(Protocol):
+    """Minimal LLM surface used by sandbox synthesis (matches judge contract)."""
+
+    def complete(self, prompt: str) -> object:
+        """Return a completion object (often with a ``text`` attribute)."""
+        ...
 
 
 def truncate_synthesis_context(
@@ -34,7 +39,7 @@ def truncate_synthesis_context(
 def synthesize_with_system_prompt(
     question: str,
     chunks: list[RetrievedChunk],
-    llm: LLM,
+    llm: CompletingLlm,
     *,
     system_prompt: str,
 ) -> RagAnswer:

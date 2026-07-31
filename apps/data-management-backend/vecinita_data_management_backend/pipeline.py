@@ -542,10 +542,11 @@ def run_eval_job(
         msg = f"job {job_id} is not an eval job"
         raise ValueError(msg)
 
-    eval_run_id = _eval_run_id_from_record(record)
-    question = _eval_question_from_options(record.options)
-    store.update_job(job_id, status="running", eval_run_id=eval_run_id)
+    store.update_job(job_id, status="running")
     try:
+        eval_run_id = _eval_run_id_from_record(record)
+        question = _eval_question_from_options(record.options)
+        store.update_job(job_id, eval_run_id=eval_run_id)
         write_client.execute_eval_run(eval_run_id, question=question)
         store.update_job(job_id, status="completed")
     except Exception as exc:
