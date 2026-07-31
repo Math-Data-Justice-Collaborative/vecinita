@@ -79,3 +79,5 @@ Scoped to 2 docs (store was empty: 40/40 `missing_body` before backfill).
 - **PR:** prepare / open `evolve/EV-015-corpus-reembed-migration` → `main` (TP-S017-05 / #167).  
 - **DO pins:** remain on evolve until merge; reset to `main` after merge.  
 - Optional follow-ups: Modal eval dispatch hotfix; full store backfill (38 docs); 15-service-health.
+
+> CI note: coverage gate green on `1928b62+`; security re-run after Supabase advisor 502.
