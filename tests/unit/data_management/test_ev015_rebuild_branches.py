@@ -477,6 +477,72 @@ def test_run_backfill_job_missing_job_raises_keyerror() -> None:
         )
 
 
+def test_run_rebuild_job_rescrape_falls_back_to_store_title() -> None:
+    """Rescrape uses store title when scraped title is empty."""
+    doc_id = uuid4()
+    url = "https://example.com/no-scrape-title"
+    summary, detail = _doc(doc_id, url, text="stale")
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient(docs=[summary], details={doc_id: detail})
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={
+            "mode": "rescrape",
+            "dry_run": False,
+            "document_ids": [str(doc_id)],
+            "chunk_size_tokens": 64,
+        },
+    )
+
+    def fetcher(url: str) -> ScrapedDocument:
+        return ScrapedDocument(url=url, title=None, text="fresh body without title")
+
+    run_rebuild_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=fetcher,
+    )
+    assert write_client.live_batches[0].documents[0].title == "Doc"
+
+
+def test_run_backfill_job_detects_language_when_detail_language_missing() -> None:
+    """from_chunks with language=None falls back to detect_document_language."""
+    doc_id = uuid4()
+    url = "https://example.com/no-lang"
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient(
+        details={
+            doc_id: DocumentDetail(
+                document_id=doc_id,
+                url=url,
+                title="T",
+                language=None,
+                text="Food pantry hours are posted weekly for neighbors.",
+            )
+        }
+    )
+    record = store.create_job(
+        urls=[],
+        job_type="ingest",
+        options={
+            "backfill": True,
+            "backfill_source": "from_chunks",
+            "ack_reconstruct_from_chunks": True,
+            "document_ids": [str(doc_id)],
+        },
+    )
+    run_backfill_job(
+        record.job_id,
+        store=store,
+        write_client=write_client,  # type: ignore[arg-type]
+    )
+    assert write_client.live_batches
+    assert write_client.live_batches[0].documents[0].language is not None
+
+
 def test_run_rebuild_job_suppresses_complete_failure_after_shadow_error() -> None:
     """If complete_rebuild_run fails during error handling, original error still raises."""
     doc_id = uuid4()
