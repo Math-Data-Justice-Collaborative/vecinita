@@ -1,0 +1,1055 @@
+{
+  "fixture": "data/fixtures/eval/qa_pairs_staging.json",
+  "min_retrieval_score": 0.2,
+  "scored_rows": 11,
+  "cells": [
+    {
+      "top_k": 3,
+      "retrieval_relevance": 1.0,
+      "hits": 11,
+      "n": 11,
+      "retrieve_wall_ms": 1992,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "scores": [
+            0.8293,
+            0.7793,
+            0.7292
+          ]
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "scores": [
+            0.7822,
+            0.6911,
+            0.6789
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "scores": [
+            0.6983,
+            0.6663,
+            0.6528
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/"
+          ],
+          "scores": [
+            0.6556,
+            0.6484,
+            0.6385
+          ]
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "scores": [
+            0.82,
+            0.7816,
+            0.7199
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "scores": [
+            0.7589,
+            0.719,
+            0.6188
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "scores": [
+            0.7735,
+            0.6912,
+            0.6869
+          ]
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/"
+          ],
+          "scores": [
+            0.79,
+            0.7289,
+            0.7188
+          ]
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "scores": [
+            0.8087,
+            0.7754,
+            0.7098
+          ]
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "scores": [
+            0.8279,
+            0.7691,
+            0.6919
+          ]
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 3,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.rils.org/"
+          ],
+          "scores": [
+            0.6222,
+            0.6222,
+            0.6096
+          ]
+        }
+      ]
+    },
+    {
+      "top_k": 5,
+      "retrieval_relevance": 1.0,
+      "hits": 11,
+      "n": 11,
+      "retrieve_wall_ms": 1305,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "scores": [
+            0.8293,
+            0.7793,
+            0.7292,
+            0.6933,
+            0.6913
+          ]
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "scores": [
+            0.7822,
+            0.6911,
+            0.6789,
+            0.6721,
+            0.6607
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "scores": [
+            0.6983,
+            0.6663,
+            0.6528,
+            0.6433,
+            0.6346
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/"
+          ],
+          "scores": [
+            0.6556,
+            0.6484,
+            0.6385,
+            0.6284,
+            0.6083
+          ]
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "scores": [
+            0.82,
+            0.7816,
+            0.7199,
+            0.6836,
+            0.6764
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "scores": [
+            0.7589,
+            0.719,
+            0.6188,
+            0.613,
+            0.5968
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "scores": [
+            0.7735,
+            0.6912,
+            0.6869,
+            0.5996,
+            0.5905
+          ]
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://health.ri.gov/flooding"
+          ],
+          "scores": [
+            0.79,
+            0.7289,
+            0.7188,
+            0.7173,
+            0.7106
+          ]
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ],
+          "scores": [
+            0.8087,
+            0.7754,
+            0.7098,
+            0.6771,
+            0.6531
+          ]
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding"
+          ],
+          "scores": [
+            0.8279,
+            0.7691,
+            0.6919,
+            0.6604,
+            0.6602
+          ]
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 5,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "scores": [
+            0.6222,
+            0.6222,
+            0.6096,
+            0.5946,
+            0.5943
+          ]
+        }
+      ]
+    },
+    {
+      "top_k": 8,
+      "retrieval_relevance": 1.0,
+      "hits": 11,
+      "n": 11,
+      "retrieve_wall_ms": 1449,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rient.net/",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group"
+          ],
+          "scores": [
+            0.8293,
+            0.7793,
+            0.7292,
+            0.6933,
+            0.6913,
+            0.6788,
+            0.6686,
+            0.6656
+          ]
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rient.net/",
+            "https://health.ri.gov/flooding",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ],
+          "scores": [
+            0.7822,
+            0.6911,
+            0.6789,
+            0.6721,
+            0.6607,
+            0.6564,
+            0.651,
+            0.6495
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.tapaprovidence.org/"
+          ],
+          "scores": [
+            0.6983,
+            0.6663,
+            0.6528,
+            0.6433,
+            0.6346,
+            0.6088,
+            0.6086,
+            0.6069
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view"
+          ],
+          "scores": [
+            0.6556,
+            0.6484,
+            0.6385,
+            0.6284,
+            0.6083,
+            0.5967,
+            0.5954,
+            0.5943
+          ]
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://www.3crs.org/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "scores": [
+            0.82,
+            0.7816,
+            0.7199,
+            0.6836,
+            0.6764,
+            0.6592,
+            0.6405,
+            0.6003
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "scores": [
+            0.7589,
+            0.719,
+            0.6188,
+            0.613,
+            0.5968,
+            0.5848,
+            0.5814,
+            0.5658
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.tapaprovidence.org/"
+          ],
+          "scores": [
+            0.7735,
+            0.6912,
+            0.6869,
+            0.5996,
+            0.5905,
+            0.5771,
+            0.5766,
+            0.5749
+          ]
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents"
+          ],
+          "scores": [
+            0.79,
+            0.7289,
+            0.7188,
+            0.7173,
+            0.7106,
+            0.7004,
+            0.6982,
+            0.6915
+          ]
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.thelearningcommunity.com/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ],
+          "scores": [
+            0.8087,
+            0.7754,
+            0.7098,
+            0.6771,
+            0.6531,
+            0.6453,
+            0.6363,
+            0.6329
+          ]
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://health.ri.gov/flooding"
+          ],
+          "scores": [
+            0.8279,
+            0.7691,
+            0.6919,
+            0.6604,
+            0.6602,
+            0.6543,
+            0.6427,
+            0.6404
+          ]
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 8,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view",
+            "https://www.providenceschools.org/",
+            "https://www.rils.org/"
+          ],
+          "scores": [
+            0.6222,
+            0.6222,
+            0.6096,
+            0.5946,
+            0.5943,
+            0.5943,
+            0.5932,
+            0.592
+          ]
+        }
+      ]
+    },
+    {
+      "top_k": 10,
+      "retrieval_relevance": 1.0,
+      "hits": 11,
+      "n": 11,
+      "retrieve_wall_ms": 1448,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rient.net/",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rils.org/"
+          ],
+          "scores": [
+            0.8293,
+            0.7793,
+            0.7292,
+            0.6933,
+            0.6913,
+            0.6788,
+            0.6686,
+            0.6656,
+            0.6564,
+            0.6483
+          ]
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rient.net/",
+            "https://health.ri.gov/flooding",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.womenandinfants.org/services/primary-care",
+            "https://www.rient.net/"
+          ],
+          "scores": [
+            0.7822,
+            0.6911,
+            0.6789,
+            0.6721,
+            0.6607,
+            0.6564,
+            0.651,
+            0.6495,
+            0.6444,
+            0.6442
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.tapaprovidence.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/"
+          ],
+          "scores": [
+            0.6983,
+            0.6663,
+            0.6528,
+            0.6433,
+            0.6346,
+            0.6088,
+            0.6086,
+            0.6069,
+            0.6066,
+            0.6036
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "scores": [
+            0.6556,
+            0.6484,
+            0.6385,
+            0.6284,
+            0.6083,
+            0.5967,
+            0.5954,
+            0.5943,
+            0.5943,
+            0.5855
+          ]
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://www.3crs.org/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.3crs.org/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "scores": [
+            0.82,
+            0.7816,
+            0.7199,
+            0.6836,
+            0.6764,
+            0.6592,
+            0.6405,
+            0.6003,
+            0.5985,
+            0.5929
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://wrwc.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "scores": [
+            0.7589,
+            0.719,
+            0.6188,
+            0.613,
+            0.5968,
+            0.5848,
+            0.5814,
+            0.5658,
+            0.5578,
+            0.5513
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.tapaprovidence.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://wrwc.org/"
+          ],
+          "scores": [
+            0.7735,
+            0.6912,
+            0.6869,
+            0.5996,
+            0.5905,
+            0.5771,
+            0.5766,
+            0.5749,
+            0.5405,
+            0.539
+          ]
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://health.ri.gov/flooding"
+          ],
+          "scores": [
+            0.79,
+            0.7289,
+            0.7188,
+            0.7173,
+            0.7106,
+            0.7004,
+            0.6982,
+            0.6915,
+            0.6811,
+            0.6773
+          ]
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.thelearningcommunity.com/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.providenceri.gov/pema/",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group"
+          ],
+          "scores": [
+            0.8087,
+            0.7754,
+            0.7098,
+            0.6771,
+            0.6531,
+            0.6453,
+            0.6363,
+            0.6329,
+            0.6278,
+            0.6256
+          ]
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://health.ri.gov/flooding",
+            "https://www.providenceri.gov/pema/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ],
+          "scores": [
+            0.8279,
+            0.7691,
+            0.6919,
+            0.6604,
+            0.6602,
+            0.6543,
+            0.6427,
+            0.6404,
+            0.6332,
+            0.6326
+          ]
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "pass": true,
+          "n_chunks": 10,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view",
+            "https://www.providenceschools.org/",
+            "https://www.rils.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/"
+          ],
+          "scores": [
+            0.6222,
+            0.6222,
+            0.6096,
+            0.5946,
+            0.5943,
+            0.5943,
+            0.5932,
+            0.592,
+            0.5913,
+            0.5836
+          ]
+        }
+      ]
+    }
+  ]
+}

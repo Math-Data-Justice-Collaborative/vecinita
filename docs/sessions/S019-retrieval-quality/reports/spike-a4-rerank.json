@@ -1,0 +1,1335 @@
+{
+  "fixture": "/Users/bigme/Documents/GitHub/vecinita/data/fixtures/eval/qa_pairs_staging.json",
+  "top_k": 5,
+  "min_retrieval_score": 0.2,
+  "retrieve_n_max": 20,
+  "scored_rows": 11,
+  "cells": [
+    {
+      "label": "R0+P0",
+      "rerank": "R0",
+      "pack": "P0",
+      "retrieve_n": 5,
+      "top_k": 5,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.15384615384615385,
+      "latency_p95_ms": 5071,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5071,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3833,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5216,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3900,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2033,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2817,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3915,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3227,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://health.ri.gov/flooding"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 4136,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 2417,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3730,
+          "urls": [
+            "https://www.providenceschools.org/",
+            "https://www.providenceri.gov/pema/",
+            "https://health.ri.gov/flooding",
+            "https://baysideobgyn.com/",
+            "https://www.thelearningcommunity.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1632,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3075,
+          "urls": [
+            "https://www.providenceschools.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.thelearningcommunity.com/",
+            "https://www.providenceschools.org/",
+            "https://vgonline.org/"
+          ],
+          "n_chosen": 5
+        }
+      ]
+    },
+    {
+      "label": "R1+P0",
+      "rerank": "R1",
+      "pack": "P0",
+      "retrieve_n": 20,
+      "top_k": 5,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.8181818181818182,
+      "answer_relevancy": 0.15384615384615385,
+      "latency_p95_ms": 4485,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3685,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4097,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.womenandinfants.org/services/womens-care-services?hsCtaTracking=4ffa6b30-00ce-412b-8e95-b626f41d8536%7C6fb0cd10-eae4-438d-90ae-23d6fd1ed398",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4485,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4035,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://vecina.wrwc.org/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1916,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2971,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3585,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3647,
+          "urls": [
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 4979,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 2431,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1343,
+          "urls": [
+            "https://www.thelearningcommunity.com/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.providenceschools.org/",
+            "https://www.womenandinfants.org/services/womens-care-services?hsCtaTracking=4ffa6b30-00ce-412b-8e95-b626f41d8536%7C6fb0cd10-eae4-438d-90ae-23d6fd1ed398",
+            "https://www.providenceri.gov/pema/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1724,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1948,
+          "urls": [
+            "https://www.providenceschools.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.thelearningcommunity.com/",
+            "https://vgonline.org/",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view"
+          ],
+          "n_chosen": 5
+        }
+      ]
+    },
+    {
+      "label": "R2+P0",
+      "rerank": "R2",
+      "pack": "P0",
+      "retrieve_n": 20,
+      "top_k": 5,
+      "retrieval_relevance": 0.8181818181818182,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.07692307692307693,
+      "latency_p95_ms": 4283,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3744,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3470,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3656,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5148,
+          "urls": [
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1905,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2882,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": false,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4265,
+          "urls": [
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3440,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://health.ri.gov/flooding",
+            "https://health.ri.gov/flooding",
+            "https://health.ri.gov/flooding",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4283,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 4271,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2759,
+          "urls": [
+            "https://www.providenceri.gov/pema/",
+            "https://wrwc.org/",
+            "https://baysideobgyn.com/",
+            "https://www.thelearningcommunity.com/",
+            "https://www.achievementfirst.org/school/achievement-first-promesa-mayoral-academy-elementary/?utm_source=google&utm_medium=listing&utm_campaign=promesa_elementary"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3535,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://vecina.wrwc.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1914,
+          "urls": [
+            "https://vgonline.org/",
+            "https://www.butler.org/",
+            "https://www.providenceschools.org/",
+            "https://baysideobgyn.com/",
+            "https://aventure.providenceschools.org/"
+          ],
+          "n_chosen": 5
+        }
+      ]
+    },
+    {
+      "label": "R0+P1",
+      "rerank": "R0",
+      "pack": "P1",
+      "retrieve_n": 5,
+      "top_k": 5,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p95_ms": 4522,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3066,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4194,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4522,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5514,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2092,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3023,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3493,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3296,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://health.ri.gov/flooding"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 4109,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 2414,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3888,
+          "urls": [
+            "https://www.providenceschools.org/",
+            "https://www.providenceri.gov/pema/",
+            "https://health.ri.gov/flooding",
+            "https://baysideobgyn.com/",
+            "https://www.thelearningcommunity.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3749,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4110,
+          "urls": [
+            "https://www.providenceschools.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.thelearningcommunity.com/",
+            "https://www.providenceschools.org/",
+            "https://vgonline.org/"
+          ],
+          "n_chosen": 5
+        }
+      ]
+    },
+    {
+      "label": "R1+P1",
+      "rerank": "R1",
+      "pack": "P1",
+      "retrieve_n": 20,
+      "top_k": 5,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.8181818181818182,
+      "answer_relevancy": 0.3076923076923077,
+      "latency_p95_ms": 4249,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3237,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4249,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.womenandinfants.org/services/womens-care-services?hsCtaTracking=4ffa6b30-00ce-412b-8e95-b626f41d8536%7C6fb0cd10-eae4-438d-90ae-23d6fd1ed398",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3903,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5132,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://vecina.wrwc.org/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2241,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3252,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3357,
+          "urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4076,
+          "urls": [
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 4200,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 2649,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3561,
+          "urls": [
+            "https://www.thelearningcommunity.com/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.providenceschools.org/",
+            "https://www.womenandinfants.org/services/womens-care-services?hsCtaTracking=4ffa6b30-00ce-412b-8e95-b626f41d8536%7C6fb0cd10-eae4-438d-90ae-23d6fd1ed398",
+            "https://www.providenceri.gov/pema/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3334,
+          "urls": [
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2082,
+          "urls": [
+            "https://www.providenceschools.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.thelearningcommunity.com/",
+            "https://vgonline.org/",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view"
+          ],
+          "n_chosen": 5
+        }
+      ]
+    },
+    {
+      "label": "R2+P1",
+      "rerank": "R2",
+      "pack": "P1",
+      "retrieve_n": 20,
+      "top_k": 5,
+      "retrieval_relevance": 0.8181818181818182,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.07692307692307693,
+      "latency_p95_ms": 4618,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3415,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3899,
+          "urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4466,
+          "urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5116,
+          "urls": [
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2152,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3840,
+          "urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": false,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3450,
+          "urls": [
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3464,
+          "urls": [
+            "https://health.ri.gov/flooding",
+            "https://health.ri.gov/flooding",
+            "https://health.ri.gov/flooding",
+            "https://health.ri.gov/flooding",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4452,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3049,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://www.rifreeclinic.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3035,
+          "urls": [
+            "https://www.providenceri.gov/pema/",
+            "https://wrwc.org/",
+            "https://baysideobgyn.com/",
+            "https://www.thelearningcommunity.com/",
+            "https://www.achievementfirst.org/school/achievement-first-promesa-mayoral-academy-elementary/?utm_source=google&utm_medium=listing&utm_campaign=promesa_elementary"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4618,
+          "urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://vecina.wrwc.org/"
+          ],
+          "n_chosen": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1916,
+          "urls": [
+            "https://vgonline.org/",
+            "https://www.butler.org/",
+            "https://www.providenceschools.org/",
+            "https://baysideobgyn.com/",
+            "https://aventure.providenceschools.org/"
+          ],
+          "n_chosen": 5
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,289 @@
+{
+  "experiment_id": "20260731T155721Z_golden-sweep_1f41c0f7",
+  "runs_per_config": 1,
+  "row_count": 13,
+  "prompts": [
+    {
+      "name": "default",
+      "system_prompt": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question."
+    }
+  ],
+  "rules": [],
+  "cells": [
+    {
+      "label": "qwen2.5:1.5b-instruct|p=default|t=0.0|k=5|mt=128|mrs=0.2|jt=0.2",
+      "prompt_name": "default",
+      "spawn_wall_time_s": 1.3992961659969296,
+      "config": {
+        "model_id": "qwen2.5:1.5b-instruct",
+        "model_type": "Qwen/Qwen2.5-1.5B-Instruct",
+        "prompt_name": "default",
+        "temperature": 0.0,
+        "top_k": 5,
+        "max_tokens": 128,
+        "min_retrieval_score": 0.2,
+        "judge_temperature": 0.2,
+        "corpus_profile": "fixture",
+        "system_prompt": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.",
+        "criteria_ids": [],
+        "rules": []
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "wall_time_s": 65.07349037498352,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.9090909090909091,
+          "answer_relevancy": 0.07692307692307693,
+          "latency_p95_ms": 6547.0,
+          "custom_scores": {}
+        }
+      ],
+      "averages": {
+        "run_count": 1,
+        "wall_time_s": 65.07349037498352,
+        "retrieval_relevance": 1.0,
+        "faithfulness": 0.9090909090909091,
+        "answer_relevancy": 0.07692307692307693,
+        "latency_p95_ms": 6547.0,
+        "custom_scores": {}
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "domain": "community",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 6165,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "answer": "Rhode Island Free Clinic offers various free medical services including dental health, ophthalmology labs & diagnostic imaging, wellness & education services, prescriptions, behavioral health services, physical therapy, podiatry, gynecology, urology, specialty referrals, nephrology, social services, and more. They also provide workforce development opportunities through their partnership with American Association of Healthcare Centralized Admissions Centers (AHEC).",
+          "custom_scores": null
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "domain": "community",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4709,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "answer": "Rhode Island Free Clinic has weekday hours from 8 AM to 5 PM on Mondays through Thursdays, and from 8 AM to 8 PM on Tuesdays and Wednesdays. They also provide services on Fridays from 8 AM to 12 PM.",
+          "custom_scores": null
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "domain": "community",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 6547,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer": "Nuevas Voces at WRWC is a 10-month bilingual advocacy program aimed at empowering neighborhood leaders in Providence's Olneyville area. It focuses on environmental science and community advocacy, offering classroom learning combined with hands-on site visits. Students receive financial support, meal assistance, and childcare services. Over 50 participants have graduated since 2020, many of whom now actively participate in various community-driven initiatives such as the Nine Neighborhood Fund's Participatory Budgeting Initiative, the Olneyville Neighborhood Association, and others.",
+          "custom_scores": null
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "domain": "community",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 6605,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.tapaprovidence.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/"
+          ],
+          "answer": "Nuevas Voces es nuestro 10-mensual programa bilingüe (inglés y español) centrado en la educación ambiental y la participación comunitaria. Se dedica a capacitar a vecinos de nuestra comunidad Providence en habilidades de liderazgo local mediante una combinación de clases teóricas con visitas prácticas. Ofrecemos apoyos económicos, alimenticios gratuitos y servicios educativos para familias trabajadoras. Desde su inicio en 2020, hemos formado más de 50 residentes, muchos de quienes ahora desempeñ",
+          "custom_scores": null
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "domain": "community",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4857,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer": "The Olneyville Resilience Hub is located at 17 Hyat Street in Providence.",
+          "custom_scores": null
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "domain": "community",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4914,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "answer": "VECINA helps neighbors find educational and health care resources related to K-12 education and healthcare within their neighborhoods. It provides maps highlighting details like dual-language programming at schools, test scores, and enrollment processes; it also shows nearby medical facilities and healthcare services.",
+          "custom_scores": null
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "domain": "community",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5126,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "answer": "VECINA ayuda a los vecinos a mejorar sus accesos a recursos educativos, sanitarios y comunitarios.",
+          "custom_scores": null
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "domain": "housing",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5128,
+          "retrieved_urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://health.ri.gov/flooding"
+          ],
+          "answer": "It typically takes 30 days for a flood insurance policy to go into effect.",
+          "custom_scores": null
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "domain": "legal",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5365,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ],
+          "answer": "Rhode Island Legal Services' mission is to provide legal representation to low-income people for the purpose of improving their economic and human condition by protecting and enforcing legal rights; stabilizing the family unit; promoting self-reliance; reaching out to groups with added burdens on their access to the legal system and affording dignity to people.",
+          "custom_scores": null
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "domain": "legal",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3100,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding"
+          ],
+          "answer": "Yes, Rhode Island Legal Services works on safe affordable housing projects such as the \"Public Benefits\" group, which helps ensure stable living conditions for low-income families.",
+          "custom_scores": null
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "domain": "edge",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4640,
+          "retrieved_urls": [
+            "https://www.providenceschools.org/",
+            "https://www.providenceri.gov/pema/",
+            "https://health.ri.gov/flooding",
+            "https://baysideobgyn.com/",
+            "https://www.thelearningcommunity.com/"
+          ],
+          "answer": "I do not have access to specific personal phone numbers like those associated with elected officials. For official communications related to city services and operations, please refer to the provided resources such as the \"City of Providence\" website which includes various departments and their respective contacts.",
+          "custom_scores": null
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "domain": "edge",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3476,
+          "retrieved_urls": [
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "answer": "I don't have specific information about housing-related resources from the provided text. The document focuses primarily on legal assistance and outreach efforts rather than direct housing support.",
+          "custom_scores": null
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "domain": "edge",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4368,
+          "retrieved_urls": [
+            "https://www.providenceschools.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.thelearningcommunity.com/",
+            "https://www.providenceschools.org/",
+            "https://vgonline.org/"
+          ],
+          "answer": "I cannot provide answers on specific topics like quantum physics tutoring as it goes beyond my capabilities. However, for general academic support resources, you might consider visiting websites dedicated to education such as Khan Academy or Coursera which offer free online courses and tutorials across various subjects including physics. Additionally, local libraries often host workshops and study groups where you could find assistance if needed.",
+          "custom_scores": null
+        }
+      ]
+    }
+  ]
+}

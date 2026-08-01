@@ -1,0 +1,624 @@
+{
+  "fixture": "/Users/bigme/Documents/GitHub/vecinita/data/fixtures/eval/qa_pairs_staging.json",
+  "top_k": 5,
+  "min_retrieval_score": 0.2,
+  "scored_rows": 11,
+  "variants": [
+    {
+      "name": "P0",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.15384615384615385,
+      "latency_p95_ms": 5066,
+      "mean_context_chars": 7256.615384615385,
+      "mean_docs_packed": 3.3846153846153846,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5115,
+          "context_chars": 7826,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3271,
+          "context_chars": 7793,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5066,
+          "context_chars": 8611,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3773,
+          "context_chars": 7268,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2107,
+          "context_chars": 8732,
+          "n_chunks_in": 5,
+          "n_docs_packed": 2
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2919,
+          "context_chars": 7770,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3748,
+          "context_chars": 7604,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3470,
+          "context_chars": 7343,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 4928,
+          "context_chars": 7431,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 2451,
+          "context_chars": 8137,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3851,
+          "context_chars": 6899,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1798,
+          "context_chars": 2613,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3170,
+          "context_chars": 6309,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        }
+      ]
+    },
+    {
+      "name": "P1",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p95_ms": 4671,
+      "mean_context_chars": 7710.538461538462,
+      "mean_docs_packed": 3.3846153846153846,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3347,
+          "context_chars": 8213,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4089,
+          "context_chars": 8180,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4593,
+          "context_chars": 9142,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5165,
+          "context_chars": 7677,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2085,
+          "context_chars": 9421,
+          "n_chunks_in": 5,
+          "n_docs_packed": 2
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2651,
+          "context_chars": 8195,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3614,
+          "context_chars": 7983,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3348,
+          "context_chars": 8003,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 4671,
+          "context_chars": 7807,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 2389,
+          "context_chars": 8491,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3973,
+          "context_chars": 7346,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3857,
+          "context_chars": 3080,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 4091,
+          "context_chars": 6699,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        }
+      ]
+    },
+    {
+      "name": "P2",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.19230769230769232,
+      "latency_p95_ms": 5120,
+      "mean_context_chars": 4866.923076923077,
+      "mean_docs_packed": 3.3846153846153846,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3022,
+          "context_chars": 5581,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3794,
+          "context_chars": 4484,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3636,
+          "context_chars": 5259,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5151,
+          "context_chars": 5642,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 1900,
+          "context_chars": 3781,
+          "n_chunks_in": 5,
+          "n_docs_packed": 2
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2880,
+          "context_chars": 4534,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3325,
+          "context_chars": 4534,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3566,
+          "context_chars": 4746,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5120,
+          "context_chars": 4377,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "latency_ms": 3158,
+          "context_chars": 5127,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3502,
+          "context_chars": 7346,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3711,
+          "context_chars": 3080,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2320,
+          "context_chars": 4779,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        }
+      ]
+    },
+    {
+      "name": "P3",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.19230769230769232,
+      "latency_p95_ms": 5115,
+      "mean_context_chars": 3467.6923076923076,
+      "mean_docs_packed": 3.3846153846153846,
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3203,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3671,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "latency_ms": 3789,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5724,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2195,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 2
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3178,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3628,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3231,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 5115,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "latency_ms": 2929,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 3
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3679,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "latency_ms": 3686,
+          "context_chars": 3080,
+          "n_chunks_in": 5,
+          "n_docs_packed": 5
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "latency_ms": 2151,
+          "context_chars": 3500,
+          "n_chunks_in": 5,
+          "n_docs_packed": 4
+        }
+      ]
+    }
+  ]
+}

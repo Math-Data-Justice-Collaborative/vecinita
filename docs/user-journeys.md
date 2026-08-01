@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-07-30 (S017/EV-015 #167 — UJ-053/054 corpus rebuild + document store)
+> **Last updated**: 2026-08-01 (S019/EV-016 F42 — UJ-055/056 H7+P1 packing + staging eval gate)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -11,7 +11,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 
 | ID | Journey | Actor | Entry point | Feature | E2E tier |
 |----|---------|-------|-------------|---------|----------|
-| UJ-001 | Ask community question (bilingual, streaming) | Community member | ChatRAG Frontend → `POST /api/v1/ask/stream` | F1, F2, F11 | local |
+| UJ-001 | Ask community question (bilingual, streaming) | Community member | ChatRAG Frontend → `POST /api/v1/ask/stream` | F1, F2, F11, F42 | local |
 | UJ-002 | Ingest public URLs | Operator | Data Mgmt Frontend → Modal `POST /jobs` | F7, F8, F12 | local |
 | UJ-003 | Delete outdated document | Operator | Admin UI → corpus delete API | F9 | local |
 | UJ-004 | Bootstrap local dev stack | Developer | CLI / docker-compose / Modal serve | F18 | local |
@@ -60,6 +60,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-052 | Cold-start / long-wait fun facts + consent | Community member | ChatRAG Frontend wait UX (retry or >8s) | F40 EV-014 #87 | local |
 | UJ-053 | Enqueue corpus rebuild (store-backed) | Admin operator | Admin Jobs → Modal `rebuild` job | F41 EV-015 #167 | local |
 | UJ-054 | Shadow dry-run rebuild → F36 → promote | Admin operator | Jobs detail + eval + Admin promote | F41 EV-015 #167 | local |
+| UJ-055 | Ask with H7+P1 packed multi-query retrieval | Community member | ChatRAG → `POST /api/v1/ask` / stream | F42 EV-016 #165 | local |
+| UJ-056 | Admin validates F42 via F36 staging golden (Hy1) | Admin operator | DM UI `/evaluation` → staging fixture | F36, F42 EV-016 | local (+ live promote smoke) |
 
 ## Visual journey maps
 
@@ -116,8 +118,9 @@ sequenceDiagram
     CF->>CB: POST /api/v1/ask/stream
     CB->>FE: Embed query
     FE-->>CB: vector(384)
-    CB->>PG: pgvector retrieval
+    CB->>PG: pgvector retrieval (H7 rewrites → merge)
     PG-->>CB: top_k chunks
+    Note over CB: P1 pack Source/URL headers
     CB->>LLM: Generate stream
     LLM-->>CB: SSE tokens
     CB-->>CF: Stream answer + sources
@@ -177,13 +180,16 @@ flowchart TD
 1. Open ChatRAG web UI.
 2. Type a question in English or Spanish.
 3. UI calls `POST /api/v1/ask/stream`.
-4. System auto-detects language, retrieves chunks, streams answer with source references.
+4. System auto-detects language; **H7** multi-query fan-out merges retrieval; **P1** packs
+   chunks with Source/URL headers (F42 — same public API; invisible to the user); streams
+   answer with source references.
 5. User reads answer; may ask another question (client may keep prior turns in browser memory only).
 
 **Acceptance**: Answer language matches question; sources shown; no login; no server-side session row created.
 Tokens arrive **incrementally from vLLM** (real SSE), not a full reply split into words after generation (RD-164).
+Packed context uses shared `packages/rag` helpers (not bare concat).
 
-**Automated tests**: `tests/e2e/test_uj001_ask_stream.py` (local, mocked Modal) — assert incremental stream contract (API E2E + unit; Playwright only if FE asserts token-by-token UX — RD-172 / Q3e).
+**Automated tests**: `tests/e2e/test_uj001_ask_stream.py` (local, mocked Modal) — assert incremental stream contract (API E2E + unit; Playwright only if FE asserts token-by-token UX — RD-172 / Q3e). F42 packer/H7 unit + UJ-055.
 
 **Interview (11)**: "Does a Spanish question return a Spanish answer with relevant corpus citations?"
 
@@ -828,6 +834,59 @@ EV-015.
 Playwright TC-169.
 
 **E2E tier**: local API/integration + UI; staging at 12/13.
+
+---
+
+### UJ-055: Ask with H7+P1 packed multi-query retrieval
+
+**Actor**: Community member (no account)
+
+**Goal**: Receive an answer grounded in packed retrieval context (title/URL headers + H7
+fan-out) for English and Spanish questions, without any new UI surface.
+
+**Preconditions**: ChatRAG backend wired to `packages/rag` P1 packer + H7 (F42); E0 embed pin.
+
+**Steps**:
+
+1. Call `POST /api/v1/ask` or `/ask/stream` with an English community question.
+2. Backend runs H7 rewrites → merged retrieval → P1 pack → synthesis.
+3. Repeat with a Spanish (`es`) question (Spanish-aware rewrites).
+4. Observe answer language match and source references (same response shape as UJ-001).
+
+**Acceptance**: Prompt assembly uses P1 headers (not bare concat); H7 runs by default;
+`answer_lang_match` for en/es; no new request fields required; P3 remains off unless configured.
+
+**Automated tests**: Unit packer/H7 (TC-170–172); API e2e `tests/e2e/test_uj055_h7_p1_ask.py`
+(TC-173).
+
+**E2E tier**: local.
+
+---
+
+### UJ-056: Admin validates F42 via F36 staging golden (Hy1)
+
+**Actor**: Admin operator (`admin` role)
+
+**Goal**: Confirm F42 ship quality on the **staging** golden set (Hy1 cell: H7+P1 on E0)
+before promote-path smoke.
+
+**Preconditions**: ISS-008 deployed — Admin `corpus_profile=staging` loads
+`qa_pairs_staging.json`; F42 ChatRAG/eval sandbox share packing+H7 helpers.
+
+**Steps**:
+
+1. Open DM UI `/evaluation` (or enqueue eval job) with staging corpus profile.
+2. Run golden eval using the same packer+H7 path as ChatRAG.
+3. Review aggregate answer relevancy / faithfulness (and EN/ES breakdown when present).
+4. Gate promote / ship smoke only if Hy1 thresholds in acceptance criteria pass.
+
+**Acceptance**: Staging fixture used (not prod `qa_pairs.json`); eval path shares
+`packages/rag` helpers; Hy1 gate recorded for F42 ship (ISS-008 prereq).
+
+**Automated tests**: Unit ISS-008 fixture mapping (existing); e2e/eval gate TC-174–175;
+live promote smoke at 12/13 after write-api deploy.
+
+**E2E tier**: local (+ live promote smoke).
 
 ---
 

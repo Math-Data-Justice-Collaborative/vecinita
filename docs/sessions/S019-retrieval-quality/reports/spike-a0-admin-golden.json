@@ -1,0 +1,322 @@
+{
+  "run_id": "4aef1fae-f4b1-4123-b931-6da7fe090aa0",
+  "status": "completed",
+  "mode": "golden",
+  "preset_id": null,
+  "config_snapshot": {
+    "top_k": 5,
+    "min_retrieval_score": 0.2,
+    "system_prompt": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.",
+    "max_tokens": 128,
+    "temperature": 0.0,
+    "corpus_profile": "staging",
+    "criteria_ids": [],
+    "judge_temperature": 0.2,
+    "model_id": "qwen2.5:1.5b-instruct",
+    "rebuild_run_id": null
+  },
+  "metrics_summary": {
+    "retrieval_relevance": 0.0,
+    "faithfulness": 0.25,
+    "answer_relevancy": 0.10714285714285714,
+    "latency_p95_ms": 5125,
+    "custom_scores": null
+  },
+  "items": [
+    {
+      "case_id": "community-food-pantry",
+      "locale": "en",
+      "question": "When are food pantry hours updated?",
+      "expected_doc_url": "fixture://corpus/en/community-resources.md",
+      "retrieved_urls": [
+        "https://www.thelearningcommunity.com/",
+        "https://health.ri.gov/flooding",
+        "https://www.providenceschools.org/",
+        "https://baysideobgyn.com/",
+        "https://www.rifreeclinic.org/"
+      ],
+      "answer": "No results found.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 5125,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "community-food-pantry",
+      "locale": "es",
+      "question": "\u00bfCu\u00e1ndo se actualizan los horarios del banco de alimentos?",
+      "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+      "retrieved_urls": [
+        "https://vecina.wrwc.org/",
+        "https://www.tapaprovidence.org/",
+        "https://vecina.wrwc.org/es/empoderate/",
+        "https://vecina.wrwc.org/es/empoderate/",
+        "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view"
+      ],
+      "answer": "No tengo informaci\u00f3n espec\u00edfica sobre cu\u00e1ndo se actualizan los horarios del banco de alimentos.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 3045,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "community-library-wifi",
+      "locale": "en",
+      "question": "Does the library offer free Wi-Fi?",
+      "expected_doc_url": "fixture://corpus/en/community-resources.md",
+      "retrieved_urls": [
+        "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+        "https://wrwc.org/",
+        "https://www.providenceschools.org/",
+        "https://www.thelearningcommunity.com/",
+        "https://www.rifreeclinic.org/"
+      ],
+      "answer": "No, the provided text does not mention anything about a library offering free Wi-Fi.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 4827,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "community-library-wifi",
+      "locale": "es",
+      "question": "\u00bfLa biblioteca ofrece Wi-Fi gratuito?",
+      "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+      "retrieved_urls": [
+        "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+        "https://vecina.wrwc.org/",
+        "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+        "https://wrwc.org/what-we-do/community-action/",
+        "https://vecina.wrwc.org/es/empoderate/"
+      ],
+      "answer": "No, no se menciona si la biblioteca ofrece Wi-Fi gratuito en el contexto proporcionado.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 3894,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "community-story-time",
+      "locale": "en",
+      "question": "When does the library have bilingual story time?",
+      "expected_doc_url": "fixture://corpus/en/community-resources.md",
+      "retrieved_urls": [
+        "https://www.tapaprovidence.org/",
+        "https://wrwc.org/what-we-do/community-action/",
+        "https://www.thelearningcommunity.com/",
+        "https://www.providenceschools.org/",
+        "https://vecina.wrwc.org/"
+      ],
+      "answer": "I do not have enough specific information from the given context to determine when the library has bilingual storytime.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 2861,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "community-story-time",
+      "locale": "es",
+      "question": "\u00bfCu\u00e1ndo hay cuentacuentos biling\u00fce en la biblioteca?",
+      "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+      "retrieved_urls": [
+        "https://vecina.wrwc.org/",
+        "https://www.tapaprovidence.org/",
+        "https://wrwc.org/what-we-do/community-action/",
+        "https://vecina.wrwc.org/es/empoderate/",
+        "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+      ],
+      "answer": "No se proporcionan detalles espec\u00edficos sobre cu\u00e1ndo ocurren los cuentacuentos biling\u00fces en la biblioteca.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 4710,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "community-vecinita-intro",
+      "locale": "en",
+      "question": "What does Vecinita help neighbors find?",
+      "expected_doc_url": "fixture://corpus/en/community-resources.md",
+      "retrieved_urls": [
+        "https://wrwc.org/what-we-do/community-action/",
+        "https://vecina.wrwc.org/",
+        "https://wrwc.org/what-we-do/community-action/",
+        "https://vecina.wrwc.org/es/empoderate/",
+        "https://wrwc.org/what-we-do/community-action/"
+      ],
+      "answer": "Vecinita helps neighbors find educational and health-related resources. Specifically:\n\n- Access to a neighborhood map highlighting details of each public school in Providence.\n- An overview of local medical facilities through another neighborhood map focusing on healthcare services.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 5056,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "community-vecinita-intro",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 ayuda Vecinita a los vecinos a encontrar?",
+      "expected_doc_url": "fixture://corpus/es/recursos-comunitarios.md",
+      "retrieved_urls": [
+        "https://vecina.wrwc.org/",
+        "https://vecina.wrwc.org/es/empoderate/",
+        "https://wrwc.org/what-we-do/community-action/",
+        "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+        "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+      ],
+      "answer": "Vecinita ayuda a los vecinos a encontrar:\n\n\u2013 Mejor acceso a recursos.\n\u2013 Construir sus comunidades a trav\u00e9s de Vecinita.\n\u2013 Oportunidades para defender su comunidad.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "latency_ms": 4334,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "edge-abstain-mayor-phone",
+      "locale": "en",
+      "question": "What is the mayor's personal phone number?",
+      "expected_doc_url": null,
+      "retrieved_urls": [
+        "https://www.providenceschools.org/",
+        "https://www.providenceri.gov/pema/",
+        "https://health.ri.gov/flooding",
+        "https://baysideobgyn.com/",
+        "https://www.thelearningcommunity.com/"
+      ],
+      "answer": "I do not have access to specific personal phone numbers like those associated with elected officials. For official communications related to city services and operations, please refer to the provided resources such as the \"City of Providence\" website which includes various departments and their respective contacts.",
+      "metrics": {
+        "retrieval_pass": true,
+        "faithfulness": null,
+        "answer_relevancy": 0.0,
+        "latency_ms": 4279,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "edge-ambiguous-housing",
+      "locale": "en",
+      "question": "housing",
+      "expected_doc_url": null,
+      "retrieved_urls": [
+        "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+        "https://math-data-justice-collaborative.github.io/medico-pvd/",
+        "https://www.rils.org/",
+        "https://vecina.wrwc.org/",
+        "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+      ],
+      "answer": "I don't have specific information about housing-related resources from the provided text. The document focuses primarily on legal assistance and outreach efforts rather than direct housing support.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 2433,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "edge-empty-quantum",
+      "locale": "en",
+      "question": "Where can I get quantum physics tutoring?",
+      "expected_doc_url": null,
+      "retrieved_urls": [
+        "https://www.providenceschools.org/",
+        "https://aventure.providenceschools.org/",
+        "https://www.thelearningcommunity.com/",
+        "https://www.providenceschools.org/",
+        "https://vgonline.org/"
+      ],
+      "answer": "I cannot provide answers on specific topics like quantum physics tutoring as it goes beyond my capabilities. However, for general academic support resources, you might consider visiting websites dedicated to education such as Khan Academy or Coursera which offer free online courses and tutorials across various subjects including physics. Additionally, local libraries often host workshops and study groups where you could find assistance if needed.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": null,
+        "answer_relevancy": 0.0,
+        "latency_ms": 4611,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "housing-eviction-notice",
+      "locale": "en",
+      "question": "Do landlords have to give written notice before eviction?",
+      "expected_doc_url": "fixture://corpus/tagged/en/housing-rights.md",
+      "retrieved_urls": [
+        "https://health.ri.gov/flooding",
+        "https://www.rils.org/",
+        "https://baysideobgyn.com/",
+        "https://health.ri.gov/flooding",
+        "https://www.womenandinfants.org/services/primary-care"
+      ],
+      "answer": "No, landlords generally do not need to provide written notice before evicting tenants unless there's a specific lease agreement stating otherwise. In most cases, they might simply serve formal notices via certified mail or another method allowed under law. However, this varies depending on local laws and regulations.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 4743,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "legal-aid-benefits",
+      "locale": "en",
+      "question": "Can eligible residents get help with benefits appeals?",
+      "expected_doc_url": "fixture://corpus/tagged/en/legal-aid-overview.md",
+      "retrieved_urls": [
+        "https://www.rils.org/",
+        "https://www.rils.org/",
+        "https://www.rifreeclinic.org/",
+        "https://www.butler.org/",
+        "https://www.rient.net/"
+      ],
+      "answer": "Yes, eligible residents who need help with benefit appeals can receive assistance from Rhode Island Legal Services (RILS). The organization offers public benefits group services specifically designed to aid individuals in navigating and resolving issues related to government benefits. This includes helping them understand eligibility requirements, appeal denials, and other administrative processes associated with receiving social security, Medicaid, food stamps, housing subsidies, and more. Their team of experienced attorneys and advocates works closely with these beneficiaries to ensure they are aware of their rights and options when dealing with complex benefit systems.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.5,
+        "latency_ms": 5432,
+        "custom_scores": null
+      }
+    },
+    {
+      "case_id": "legal-aid-housing",
+      "locale": "en",
+      "question": "Can I get free legal help with a housing dispute?",
+      "expected_doc_url": "fixture://corpus/tagged/en/legal-aid-overview.md",
+      "retrieved_urls": [
+        "https://www.rils.org/",
+        "https://www.rils.org/",
+        "https://www.butler.org/",
+        "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+        "https://www.womenandinfants.org/services/primary-care"
+      ],
+      "answer": "No, the provided information does not mention any specific legal aid available for housing disputes. The organization focuses primarily on providing legal representation to low-income people across various areas such as public benefits, foreclosure prevention, tax clinics, etc., but there's no direct indication they offer free legal help specifically for housing issues.",
+      "metrics": {
+        "retrieval_pass": false,
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "latency_ms": 3731,
+        "custom_scores": null
+      }
+    }
+  ],
+  "error_message": null
+}

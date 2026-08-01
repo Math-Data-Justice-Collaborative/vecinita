@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-07-30 (S017/EV-015 #167 — F41 corpus re-embed / re-chunk rebuild)
+> **Last updated**: 2026-08-01 (S019/EV-016 — F42 H7+P1 packing + multi-query retrieval)
 
 ## Summary
 
@@ -51,6 +51,7 @@
 | F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, `packages/llm-client`, all LLM consumers | S010/EV-011; ADR-037; follow-on RD-163–RD-172 |
 | F40 | ChatRAG cold-start wait UX (rotating fun facts + consent) | Planned | ChatRAG | chat-rag-frontend; optional `frontend-i18n` / `frontend-ui` | S016/EV-014 #87 |
 | F41 | Corpus re-embed / re-chunk rebuild (migration job) | Planned | Data Management | data-management-backend, internal-write-api, data-management-frontend, Modal | S017/EV-015 #167 |
+| F42 | Richer context packing + multi-query retrieval (H7+P1) | Planned | ChatRAG | packages/rag, chat-rag-backend; F36 eval sandbox join | S019/EV-016 #165; S019-D31/D37 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -796,6 +797,32 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   overlap values (#160); dual-write dim migration impl; retag-inside-rebuild; new % widget.
 - **Source**: S017 / EV-015; GitHub #167; ADR-040; intake 2026-07-30 (S017-D1–D17);
   02-verify-plan M1–M4 (2026-07-30).
+
+### F42: Richer context packing + multi-query retrieval (H7+P1)
+
+- **What it does**: Ships the EV-016 hybrid winner **Hy1 = H7+P1 on E0** (`BAAI/bge-small-en-v1.5`).
+  **P1** formats each retrieved chunk as `Source: {title}\nURL: {url}\n{text}`. **H7** runs a
+  thin multi-query fan-out (2–3 **cheap heuristic** rewrites — not LLM; Spanish-aware for `es`),
+  merges/dedupes by chunk id / score, then packs. Shared helpers in `packages/rag`; ChatRAG `_build_prompt` and F36 eval
+  sandbox use the same path. Optional **P3** (document dedupe + char budget) stays
+  **non-default** behind config.
+- **Inputs**: Query text + locale; existing retrieval (`top_k`, `min_retrieval_score`); optional
+  packer / H7 config flags.
+- **Outputs**: Packed context string for synthesis; same citation/source surfaces as today;
+  F36 Hy1 metrics on staging golden (ISS-008 fixture path required for promote smoke).
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | Shared P1 packer + thin H7 fan-out helpers |
+  | `apps/chat-rag-backend` | Wire `_build_prompt` / retrieve path through shared helpers |
+  | F36 eval sandbox | Same packing + H7 as ChatRAG (no parallel prompt assembly) |
+- **Out of scope (this cycle)**: Multilingual embed swap / #159 / E1 promote; R1 cheap rerank;
+  CE/#83; soft language filter #162; LangGraph / ADR-006 amend; answer cache (F43); model
+  upsizing; changing prod embed pin.
+- **Ship prereq**: ISS-008 write-api deploy so Admin `corpus_profile=staging` loads
+  `qa_pairs_staging.json` before promote-path smoke.
+- **Source**: S019 / EV-016; GitHub #165; harness H7; S019-D22/D31/D37; hybrid
+  `20260801T002819Z_hybrid-sweep.json`; E1 reject `20260801T130441Z_e1-shadow-f36.json`.
 
 ## Planned / Deferred (post-v1)
 

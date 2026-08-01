@@ -1,0 +1,530 @@
+{
+  "model_id": "qwen2.5:1.5b-instruct",
+  "fixture": "/Users/bigme/Documents/GitHub/vecinita/data/fixtures/eval/qa_pairs_staging.json",
+  "sample_rows": [
+    "community-free-clinic-hours/en",
+    "community-nuevas-voces/es"
+  ],
+  "samples": [
+    {
+      "experiment": "A0 / bare-ish P0+prompt",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P0",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointments. Call (401)-274-6347 ext. 311 to schedule with us. Thank you! *Open until\n\u2026\ntice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contact Us Volunteer Portal Toggle Navigation Home Who We Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COVID-19 Resources Patient Rights & Responsibilities Notice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contac\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3932,
+      "context_chars": 3500,
+      "answer": "Rhode Island Free Clinic has weekday hours from 8 AM to 5 PM on Mondays through Thursdays, and from 8 AM to 8 PM on Tuesdays and Wednesdays. They also provide services on Fridays from 8 AM to 12 PM.",
+      "latency_ms": 1632,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "A2 P1+prompt (Hy0)",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org/\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointmen\n\u2026\nWe Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COVID-19 Resources Patient Rights & Responsibilities Notice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contact Us Volunteer Portal Toggle Navigation Home Who We Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COV\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3932,
+      "context_chars": 3500,
+      "answer": "Monday & Wednesday: 8am-5pm*, Tuesday & Thursday: 8am-8pm, Friday: 8am-12pm, Saturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday.",
+      "latency_ms": 1567,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "A2 P3+prompt",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P3",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org/\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointmen\n\u2026\ners through the portal. You can also upload PDF paperwork for us to access. There is always an after hours provider on call for emergencies after hours. Call our main office (401-421-1710) and you will be directed to our call center. They will then reach out to the on call provider who will call you back. If you do call through the answering service, please keep your phone with you afterwards. Please reserve the use of this for emergencies only. Any general questions can be sent through the portal. Our Practitioners Kathleen C. Bowling M.D., FACOG Read Bio Ziad Fersan M.D. Read Bio Caroline M. Skudlarek D.O., FACOG, FACOO\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3932,
+      "context_chars": 3500,
+      "answer": "Monday & Wednesday: 8am-5pm*\nTuesday & Thursday: 8am-8pm  \nFriday: 8am-12pm  \nSaturday & Sunday: Closed",
+      "latency_ms": 1536,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "A4 R1+P1+prompt",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Women's Care Services | Women & Infants Hospital in Rhode Is",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org/\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointmen\n\u2026\ncal Nutrition Students Dermatology Residents Gynecology Residents Health Services Administrators Medical Assistant Students Nurse Practitioner Students Occupational Therapy Assistants Pharmacy Students Physical Therapist Students Physician Assistant Students Psychiatry Residents Public Health Students Social Work Students Getting Involved Donate Here To get involved you can volunteer, become a student trainee, or join our team. Additionally, you can place a donation. The Rhode Island Free Clinic depends on the generosity of our donors to support our mission by funding medical supplies and equipment. Here\u2019s the types of wa\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3932,
+      "context_chars": 3500,
+      "answer": "Monday & Wednesday: 8am-5pm*, Tuesday & Thursday: 8am-8pm, Friday: 8am-12pm, Saturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday.",
+      "latency_ms": 1597,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "Hy1 H7+P1+prompt",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org/\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointmen\n\u2026\nWe Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COVID-19 Resources Patient Rights & Responsibilities Notice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contact Us Volunteer Portal Toggle Navigation Home Who We Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COV\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3932,
+      "context_chars": 3500,
+      "answer": "Monday & Wednesday: 8am-5pm*, Tuesday & Thursday: 8am-8pm, Friday: 8am-12pm, Saturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday.",
+      "latency_ms": 1561,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "HyLang0 L0+P1+prompt",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org/\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointmen\n\u2026\nWe Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COVID-19 Resources Patient Rights & Responsibilities Notice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contact Us Volunteer Portal Toggle Navigation Home Who We Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COV\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3932,
+      "context_chars": 3500,
+      "answer": "Monday & Wednesday: 8am-5pm*, Tuesday & Thursday: 8am-8pm, Friday: 8am-12pm, Saturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday.",
+      "latency_ms": 1620,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "D32 bare_p0 (no prompt)",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "none",
+      "pack": "P0",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Context:\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointments. Call (401)-274-6347 ext. 311 to schedule with us. Thank you! *Open until 8pm every 4th Monday and every 2nd Wednesday \u00a9 2023 The Rhode Island Free Clinic. All Rights Reserved. Powered by Trailblaze Marketing Terms of Use | Privacy Policy | Sitemap Page load link Go to Top\n\nwho have no health insurance and cannot afford those services; and to serve as an educational training site for aspiring health care professionals. Le\n\u2026\ntice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contact Us Volunteer Portal Toggle Navigation Home Who We Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COVID-19 Resources Patient Rights & Responsibilities Notice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contac\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3580,
+      "context_chars": 3500,
+      "answer": "Rhode Island Free Clinic has the following weekday operating hours:\n\nMonday - Friday: \n- 8 am - 5 pm  \n- Closed Saturdays and Sundays  \n\nPlease note that they also provide urgent care through their CVS Minute Clinics located throughout the state. For specific times at these clinics, visit their website or call directly.",
+      "latency_ms": 1838,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "D32 bare_p1 (no prompt)",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "none",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Context:\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org/\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointments. Call (401)-274-6347 ext. 311 to schedule with us. Thank you! *Open until 8pm every 4th Monday and every 2nd Wednesday \u00a9 2023 The Rhode Island Free Clinic. All Rights Reserved. Powered by Trailblaze Marketing Terms of Use | Privacy Policy | Sitemap Page load link Go to Top\n\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org\n\u2026\nWe Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COVID-19 Resources Patient Rights & Responsibilities Notice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contact Us Volunteer Portal Toggle Navigation Home Who We Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COV\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3580,
+      "context_chars": 3500,
+      "answer": "Rhode Island Free Clinic operates during weekdays from 8 AM to 5 PM on Mondays through Thursdays, and from 8 AM to 8 PM on Tuesdays and Wednesdays. They also provide services from 8 AM to 12 PM on Fridays. For current patient appointments, they recommend scheduling online via their website at CVCS Minute Clinic locations.",
+      "latency_ms": 1992,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "D32 prompt_h7p1",
+      "row_id": "community-free-clinic-hours",
+      "locale": "en",
+      "question": "What are Rhode Island Free Clinic's weekday hours?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "en",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Home \ufeff- Rhode Island Free Clinic",
+        "Rhode Island Legal Services",
+        "Bayside OBGYN | Compassionate OBGYN Care in Rhode Island"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Home \ufeff- Rhode Island Free Clinic\nURL: https://www.rifreeclinic.org/\nCONNECTED 655 Broad Street, Providence, RI 02907 (401) 274-6347 \u2022 info@RiFreeClinic.org RI Free Clinic Who We Are About Us Services Offered News & Events Contact Us Become a\u2026 Patient Volunteer Trainee Donor Clinic Sponsor Clinic Hours Monday & Wednesday: 8am-5pm* Tuesday & Thursday: 8am-8pm Friday: 8am-12pm Saturday & Sunday: Current patients, please make an appointment online at RI CVS Minute Clinic locations. Please Note: We do not accept walk-in appointmen\n\u2026\nWe Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COVID-19 Resources Patient Rights & Responsibilities Notice of Privacy Practices Get Involved Volunteer Opportunities Career Training Join Our Team Donate & Give News & Events Friends Of The Free Clinic RIFC In The Community Contact Us Volunteer Portal Toggle Navigation Home Who We Are About Us Board of Directors Staff Members AmeriCorps VISTA Team Our Volunteers Our Partners Our Donors Patients Become a Patient Services Offered Community Resources COV\n\nQuestion: What are Rhode Island Free Clinic's weekday hours?\n\nAnswer:",
+      "call_chars": 3932,
+      "context_chars": 3500,
+      "answer": "Monday & Wednesday: 8am-5pm*, Tuesday & Thursday: 8am-8pm, Friday: 8am-12pm, Saturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday.",
+      "latency_ms": 1731,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "A0 / bare-ish P0+prompt",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P0",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "en",
+        "es"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "About TAPA",
+        "Community Action - Woonasquatucket River Watershed Council",
+        "VECINA"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our different programs, please contact our department coordinator: Nicole Wright . LEARN MORE Nuevas Voces Nuevas Voces (otherwis\n\u2026\nensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 desarrollando en los l\u00edderes de Nuevas Voces, Campeones del Cambio Clim\u00e1tico ya que los involucramos a una cierta especializaci\u00f3n en la ciencia e ingenier\u00eda del cambio clim\u00e1tico para mitigar \n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3903,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es nuestro 10-mensual programa biling\u00fce (ingl\u00e9s y espa\u00f1ol) centrado en la educaci\u00f3n ambiental y la participaci\u00f3n comunitaria. Se dedica a capacitar a vecinos de nuestra comunidad Providence en habilidades de liderazgo local mediante una combinaci\u00f3n de clases te\u00f3ricas con visitas pr\u00e1cticas. Ofrecemos apoyos econ\u00f3micos, alimenticios gratuitos y servicios educativos para familias trabajadoras. Desde su inicio en 2020, hemos formado m\u00e1s de 50 residentes, muchos de quienes ahora desempe\u00f1",
+      "latency_ms": 2655,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "A2 P1+prompt (Hy0)",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "en",
+        "es"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "About TAPA",
+        "Community Action - Woonasquatucket River Watershed Council",
+        "VECINA"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Community Action - Woonasquatucket River Watershed Council\nURL: https://wrwc.org/what-we-do/community-action/\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our differe\n\u2026\n. Los estudiantes de Nuevas Voces, han participado de presentaciones en aula y excursiones alrededor de la Cuenca del R\u00edo Woonasquatucket y han aprendido sobre resiliencia clim\u00e1tica y la defensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 d\n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3903,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es nuestro 10-mensual programa biling\u00fce (ingles y espa\u00f1ol) dirigido a los residentes de nuestra comunidad de Providence para convertirse en l\u00edderes locales. Se centra en fomentar una comprensi\u00f3n profunda de ciencias ambientales y la lucha contra las pol\u00edticas p\u00fablicas mediante clases te\u00f3ricas y visitas pr\u00e1cticas. Adem\u00e1s, ofrece apoyos econ\u00f3micos, comidas gratuitas y servicios educativos para familias trabajadoras.",
+      "latency_ms": 2523,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "A2 P3+prompt",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P3",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "en",
+        "es"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "About TAPA",
+        "Community Action - Woonasquatucket River Watershed Council",
+        "VECINA"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Community Action - Woonasquatucket River Watershed Council\nURL: https://wrwc.org/what-we-do/community-action/\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our differe\n\u2026\n. Los estudiantes de Nuevas Voces, han participado de presentaciones en aula y excursiones alrededor de la Cuenca del R\u00edo Woonasquatucket y han aprendido sobre resiliencia clim\u00e1tica y la defensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 d\n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3903,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es nuestro 10-mensual programa biling\u00fce (ingles y espa\u00f1ol) dirigido a los residentes de nuestra comunidad de Providence para convertirse en l\u00edderes locales. Se centra en fomentar una comprensi\u00f3n profunda de ciencias ambientales y la lucha contra las pol\u00edticas p\u00fablicas mediante clases te\u00f3ricas y visitas pr\u00e1cticas. Adem\u00e1s, ofrece apoyos econ\u00f3micos, comidas gratuitas y servicios educativos para familias trabajadoras.",
+      "latency_ms": 2665,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "A4 R1+P1+prompt",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "es",
+        "en"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "About TAPA",
+        "VECINA",
+        "Olneyville Resilience Hub Launch Event - Woonasquatucket Riv"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Community Action - Woonasquatucket River Watershed Council\nURL: https://wrwc.org/what-we-do/community-action/\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our differe\n\u2026\n. Los estudiantes de Nuevas Voces, han participado de presentaciones en aula y excursiones alrededor de la Cuenca del R\u00edo Woonasquatucket y han aprendido sobre resiliencia clim\u00e1tica y la defensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 d\n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3903,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es nuestro 10-mensual programa biling\u00fce (ingles y espa\u00f1ol) dirigido a los residentes de nuestra comunidad de Providence para convertirse en l\u00edderes locales. Se centra en fomentar una comprensi\u00f3n profunda de ciencias ambientales y la lucha contra las pol\u00edticas p\u00fablicas mediante clases te\u00f3ricas y visitas pr\u00e1cticas. Adem\u00e1s, ofrece apoyos econ\u00f3micos, comidas gratuitas y servicios educativos para familias trabajadoras.",
+      "latency_ms": 2782,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "Hy1 H7+P1+prompt",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "City of Providence Providence Emergency Management Agency - ",
+        "Olneyville Resilience Hub Launch Event - Woonasquatucket Riv",
+        "Olneyville Resilience Hub Launch Event - Woonasquatucket Riv"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Community Action - Woonasquatucket River Watershed Council\nURL: https://wrwc.org/what-we-do/community-action/\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our differe\n\u2026\n. Los estudiantes de Nuevas Voces, han participado de presentaciones en aula y excursiones alrededor de la Cuenca del R\u00edo Woonasquatucket y han aprendido sobre resiliencia clim\u00e1tica y la defensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 d\n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3903,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es nuestro 10-mensual programa biling\u00fce (ingles y espa\u00f1ol) dirigido a los residentes de nuestra comunidad de Providence para convertirse en l\u00edderes locales. Se centra en fomentar una comprensi\u00f3n profunda de ciencias ambientales y la lucha contra las pol\u00edticas p\u00fablicas mediante clases te\u00f3ricas y visitas pr\u00e1cticas. Adem\u00e1s, ofrece apoyos econ\u00f3micos, comidas gratuitas y servicios educativos para familias trabajadoras.",
+      "latency_ms": 2588,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "HyLang0 L0+P1+prompt",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 4,
+      "chunk_languages": [
+        "es",
+        "es",
+        "es",
+        "es"
+      ],
+      "chunk_titles": [
+        "Empod\u00e9rate \u2013 VECINA",
+        "VECINA",
+        "Empod\u00e9rate \u2013 VECINA",
+        "Empod\u00e9rate \u2013 VECINA"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Empod\u00e9rate \u2013 VECINA\nURL: https://vecina.wrwc.org/es/empoderate/\nSkip to content VECINA Inicio Recursos Educaci\u00f3n Salud Apoyo Inundaciones Con\u00f3cenos Empod\u00e9rate VECINA EN ES Apoyo Con\u00f3cenos Educaci\u00f3n Empod\u00e9rate Gracias al Equipo Inicio Inundaciones Recursos Salud Empod\u00e9rate Nuevas Voces Campeones Presentadores Resiliencia de Olneyville Programas de la comunidad Nuevas Voces Nuevas Voces es una programa biling\u00fce (ingl\u00e9s y espa\u00f1ol) que ayuda a miembros de la comunidad a transformarse en l\u00edderes locales, abierto a todos nuestros v\n\u2026\nones Colaboradoras Proudly powered by WordPress Copyright \u00a9 2026 VECINA | Powered by Astra WordPress Theme Scroll to Top Espa\u00f1ol English\n\nSource: Empod\u00e9rate \u2013 VECINA\nURL: https://vecina.wrwc.org/es/empoderate/\nque \u00e9stos llevan consigo adem\u00e1s de ser resilientes ante cualquier diversidad del clima. Este primer programa empez\u00f3 en marzo del 2023 y la base educativa de estos l\u00edderes est\u00e1 basada en la infraestructura verde y proyectos de restauraci\u00f3n de \u00e1reas que est\u00e1n vulnerables a la erosi\u00f3n, inundaci\u00f3n y contaminaci\u00f3n terrestre, que pueda afectar a nuestra cuenca del r\u00edo Woonasquatucket. Los campeones, han participado en proyectos existentes en nuestra \n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3903,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es un programa biling\u00fce (ingles y espa\u00f1ol) dirigido a miembros de la comunidad de Providence, Rhode Island, especialmente aquellos que son nativos hablando espa\u00f1ol o tienen dificultades para comunicarse en ingl\u00e9s. El objetivo principal de este programa es ayudar a estas personas a convertirse en l\u00edderes locales, abiertos a todos sus vecinos, independientemente de su situaci\u00f3n migratoria o habilidades ling\u00fc\u00edsticas. Durante aproximadamente ocho a diez meses, los estudiantes asisten a sesiones donde interact\u00faan con oradores expertos en temas como investigaci\u00f3n del",
+      "latency_ms": 3026,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "D32 bare_p0 (no prompt)",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "none",
+      "pack": "P0",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "en",
+        "es"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "About TAPA",
+        "Community Action - Woonasquatucket River Watershed Council",
+        "VECINA"
+      ],
+      "call_preview": "Context:\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our different programs, please contact our department coordinator: Nicole Wright . LEARN MORE Nuevas Voces Nuevas Voces (otherwise known as \u2018New Voices\u2019 in English) is our 10-month bilingual advocacy program focused on empowering neighbors within our Providence community to become local leaders by fostering a deep understanding of environmental science and community advocacy. By combining classroom learning with hands-on site visits, students learn about a range of issues rela\n\u2026\nensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 desarrollando en los l\u00edderes de Nuevas Voces, Campeones del Cambio Clim\u00e1tico ya que los involucramos a una cierta especializaci\u00f3n en la ciencia e ingenier\u00eda del cambio clim\u00e1tico para mitigar \n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3551,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es un 10-meses programa biling\u00fce (ingles/espa\u00f1ol) dirigido a apoyar a vecinos de la comunidad Providence en Rhode Island. Fomenta la comprensi\u00f3n de temas ambientales y comunitarios mediante clases te\u00f3ricas y visitas pr\u00e1cticas. Ofrece subsidios para las matr\u00edculas, comida gratuita y servicios de cuidado infantil. Algunos de sus egresados act\u00faan como liderazgos locales y voluntarios en proyectos, pol\u00edticas y programas que afectan directamente a sus comunidades.",
+      "latency_ms": 3141,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "D32 bare_p1 (no prompt)",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "none",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "en",
+        "es"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "About TAPA",
+        "Community Action - Woonasquatucket River Watershed Council",
+        "VECINA"
+      ],
+      "call_preview": "Context:\nSource: Community Action - Woonasquatucket River Watershed Council\nURL: https://wrwc.org/what-we-do/community-action/\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our different programs, please contact our department coordinator: Nicole Wright . LEARN MORE Nuevas Voces Nuevas Voces (otherwise known as \u2018New Voices\u2019 in English) is our 10-month bilingual advocacy program focused on empowering neighbors within our Providence community to become local leaders by fostering a deep understanding of environmental science and comm\n\u2026\n. Los estudiantes de Nuevas Voces, han participado de presentaciones en aula y excursiones alrededor de la Cuenca del R\u00edo Woonasquatucket y han aprendido sobre resiliencia clim\u00e1tica y la defensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 d\n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3551,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es un 10-meses programa biling\u00fce (ingles y espa\u00f1ol) dirigido a los residentes de la comunidad de Providence para fomentar la comprensi\u00f3n de las ciencias ambientales y la lucha contra el cambio clim\u00e1tico. El programa combina clases te\u00f3ricas con visitas pr\u00e1cticas en sitios relevantes, proporcionando apoyos econ\u00f3micos, alimenticios y de cuidado infantil a sus participantes. Adem\u00e1s, ofrece sesiones durante horas laborables y fines de semana para facilitar la participaci\u00f3n de familias trabajadoras. Desde su inicio en 2",
+      "latency_ms": 2957,
+      "model_id": "qwen2.5:1.5b-instruct"
+    },
+    {
+      "experiment": "D32 prompt_h7p1",
+      "row_id": "community-nuevas-voces",
+      "locale": "es",
+      "question": "\u00bfQu\u00e9 es Nuevas Voces?",
+      "system_prompt_mode": "default_eval",
+      "pack": "P1",
+      "n_chunks": 5,
+      "chunk_languages": [
+        "en",
+        "es",
+        "en",
+        "en",
+        "en"
+      ],
+      "chunk_titles": [
+        "Community Action - Woonasquatucket River Watershed Council",
+        "Empod\u00e9rate \u2013 VECINA",
+        "City of Providence Providence Emergency Management Agency - ",
+        "Olneyville Resilience Hub Launch Event - Woonasquatucket Riv",
+        "Olneyville Resilience Hub Launch Event - Woonasquatucket Riv"
+      ],
+      "call_preview": "Answer community questions using only the context below. Be concise. If the context does not answer the question, say you do not have that information. Never invent personal phone numbers, email addresses, street addresses, or private contact details. When multiple programs appear in the context, answer only about the program named in the question.\n\nContext:\nSource: Community Action - Woonasquatucket River Watershed Council\nURL: https://wrwc.org/what-we-do/community-action/\nWe believe that every decision \u2014 big or small \u2014 affecting the Woonasquatucket River should be transparent and guided by the voices of those who live, work, and play throughout the watershed. In partnership with the Olneyville Resilience Hub and community partners, we\u2019re excited to create spaces for learning, collaboration, and collective advocacy! To learn more about the Community Action Department and all our differe\n\u2026\n. Los estudiantes de Nuevas Voces, han participado de presentaciones en aula y excursiones alrededor de la Cuenca del R\u00edo Woonasquatucket y han aprendido sobre resiliencia clim\u00e1tica y la defensa del medio ambiente mientras se permiten desarrollar relaciones inter-personales e inter-comunitarias. Conoce m\u00e1s sobre Nuevas Voces Programas de la comunidad Campeones del Combate Clim\u00e1tico. Campeones del Combate Clim\u00e1tico o Climate Champions es un programa conformado por un grupo reducido de ocho estudiantes del programa de Nuevas Voces graduados en diferentes a\u00f1os, desde la primera graduaci\u00f3n en el 2021 hasta la \u00faltima que fue el 2023. Este programa, est\u00e1 d\n\nQuestion: \u00bfQu\u00e9 es Nuevas Voces?\n\nAnswer:",
+      "call_chars": 3903,
+      "context_chars": 3500,
+      "answer": "Nuevas Voces es nuestro 10-mensual programa biling\u00fce (ingles y espa\u00f1ol) dirigido a los residentes de nuestra comunidad de Providence para convertirse en l\u00edderes locales. Se centra en fomentar una comprensi\u00f3n profunda de ciencias ambientales y la lucha contra las pol\u00edticas p\u00fablicas mediante clases te\u00f3ricas y visitas pr\u00e1cticas. Adem\u00e1s, ofrece apoyos econ\u00f3micos, comidas gratuitas y servicios educativos para familias trabajadoras.",
+      "latency_ms": 2595,
+      "model_id": "qwen2.5:1.5b-instruct"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-30 (S017/EV-015 #167 — TC-161–169 corpus rebuild + document store)  
+> **Last updated**: 2026-08-01 (S019/EV-016 F42 — TC-170–175 H7+P1 packing + Hy1 staging gate)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -74,6 +74,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-052 Cold-start wait fun facts | Vitest (no API change) | TC-156, TC-157, TC-158, TC-159 | `tests/ui/chat/uj052-cold-start-wait.spec.ts` (TC-160) |
 | UJ-053 Corpus rebuild enqueue | `tests/e2e/test_uj053_corpus_rebuild.py` | TC-161, TC-162, TC-163, TC-166 | `tests/ui/admin/uj053-corpus-rebuild.spec.ts` (TC-167) |
 | UJ-054 Shadow dry-run → promote | `tests/e2e/test_uj054_rebuild_shadow_promote.py` | TC-164, TC-165, TC-168 | `tests/ui/admin/uj054-rebuild-promote.spec.ts` (TC-169) |
+| UJ-055 H7+P1 packed ask | `tests/e2e/test_uj055_h7_p1_ask.py` | TC-170, TC-171, TC-172, TC-173 | — (no UI change) |
+| UJ-056 F42 staging Hy1 eval gate | unit + eval harness (ISS-008 fixture) | TC-174, TC-175 | — |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -1035,12 +1037,50 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: `tests/ui/admin/uj054-rebuild-promote.spec.ts`.
 - **Expected**: Promote control visible after dry-run success; confirm invokes promote API; live stamp updates.
 
+### TC-170: P1 packer emits Source/URL headers (UJ-055, F42)
+
+- **Objective**: Shared packer formats each chunk as `Source: {title}\nURL: {url}\n{text}`.
+- **Input**: Unit fixtures with title, url, text (and missing-title edge).
+- **Expected**: Packed string includes `Source:` and `URL:` lines; not bare text concat (AC-RQ1).
+
+### TC-171: H7 merge/dedupe keeps top_k (UJ-055, F42)
+
+- **Objective**: Multi-query fan-out merges hits by chunk id / score and returns ≤ `top_k`.
+- **Input**: Overlapping retrieve results from 2–3 rewrite queries.
+- **Expected**: Deduped list length ≤ `top_k`; highest scores retained (AC-RQ2).
+
+### TC-172: H7 Spanish-aware rewrites (UJ-055, F42)
+
+- **Objective**: For `locale=es`, rewrite variants are Spanish-aware (not EN-only paraphrases).
+- **Input**: Spanish query + locale `es`.
+- **Expected**: Rewrite helper produces es-oriented variants; EN path unchanged (AC-RQ3).
+
+### TC-173: Ask path uses shared packer+H7 (UJ-055, F42)
+
+- **Objective**: ChatRAG ask/stream builds prompts via `packages/rag` helpers (no parallel assembly).
+- **Input**: `tests/e2e/test_uj055_h7_p1_ask.py` with mocked retrieve/LLM.
+- **Expected**: Prompt context contains Source/URL headers; H7 invoked by default; response shape unchanged (AC-RQ4).
+
+### TC-174: Staging fixture + shared eval helpers (UJ-056, F42)
+
+- **Objective**: Admin staging eval loads `qa_pairs_staging.json` (ISS-008) and uses same packer+H7 as ChatRAG.
+- **Input**: `corpus_profile=staging` fixture path unit/e2e; eval sandbox join.
+- **Expected**: Staging path ≠ prod `qa_pairs.json`; eval packing matches ChatRAG helpers (AC-RQ5).
+
+### TC-175: Hy1 staging gate for F42 ship (UJ-056, F42)
+
+- **Objective**: Staging golden Hy1 (H7+P1 on E0) meets ship floor before promote smoke.
+- **Input**: Staging F36/eval run after F42 + ISS-008 deploy.
+- **Expected**: Aggregate answer relevancy ≥ **0.28**, faithfulness ≥ **0.91** (E0 Hy1 measured floor);
+  CI floors remain ≥0.60/0.60. EN/ES breakdown recorded when present (AC-RQ6).
+
 ## Test Data
 
 | Asset | Location | Used by |
 |-------|----------|---------|
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
-| Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness, TC-168 |
+| Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness, TC-168, TC-174–175 |
+| Staging eval Q&A | `data/fixtures/eval/qa_pairs_staging.json` | TC-174–175 (ISS-008 / F42 Hy1) |
 | URL ingest fixture | `data/fixtures/ingest/` | TC-010, TC-163 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |
@@ -1060,6 +1100,8 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | Eval retrieval relevance (golden) | ≥ 80% on `hit` + `any_of` rows | `tests/eval/`; F36 |
 | Eval faithfulness (golden) | ≥ 0.60 aggregate (CI) | LlamaIndex + Modal LLM judge |
 | Eval answer relevancy (golden) | ≥ 0.60 aggregate (CI) | LlamaIndex + Modal LLM judge |
+| F42 Hy1 staging relevancy (ship) | ≥ 0.28 aggregate | Staging golden; TC-175 / AC-RQ6 |
+| F42 Hy1 staging faithfulness (ship) | ≥ 0.91 aggregate | Staging golden; TC-175 / AC-RQ6 |
 | Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
 
 ### F31 coverage gate — gated components
