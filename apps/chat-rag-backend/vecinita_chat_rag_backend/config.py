@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode
 from vecinita_shared_schemas.eval_config import (
     DEFAULT_EVAL_MAX_TOKENS,
     DEFAULT_EVAL_MIN_RETRIEVAL_SCORE,
@@ -13,6 +14,10 @@ from vecinita_shared_schemas.eval_config import (
     DEFAULT_EVAL_TEMPERATURE,
     DEFAULT_EVAL_TOP_K,
 )
+
+_MIN_MULTI_QUERY_COUNT = 1
+_MAX_MULTI_QUERY_COUNT = 5
+_MIN_CONTEXT_MAX_CHARS = 256
 
 
 def _int_env(name: str, default: int) -> int:
@@ -49,6 +54,39 @@ def _normalize_database_url(url: str) -> str:
     return url
 
 
+def _rag_packer_env(name: str, default: PackerMode) -> PackerMode:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    value = raw.strip().lower()
+    if value == "p1":
+        return "p1"
+    if value == "p3":
+        return "p3"
+    msg = f"{name} must be 'p1' or 'p3' (got {raw!r})"
+    raise ValueError(msg)
+
+
+def _validate_f42_rag_knobs(
+    *,
+    rag_multi_query_count: int,
+    rag_packer: PackerMode,
+    rag_context_max_chars: int,
+) -> None:
+    if not (_MIN_MULTI_QUERY_COUNT <= rag_multi_query_count <= _MAX_MULTI_QUERY_COUNT):
+        msg = (
+            "VECINITA_RAG_MULTI_QUERY_COUNT must be between "
+            f"{_MIN_MULTI_QUERY_COUNT} and {_MAX_MULTI_QUERY_COUNT}"
+        )
+        raise ValueError(msg)
+    if rag_packer not in ("p1", "p3"):
+        msg = f"VECINITA_RAG_PACKER must be 'p1' or 'p3' (got {rag_packer!r})"
+        raise ValueError(msg)
+    if rag_context_max_chars < _MIN_CONTEXT_MAX_CHARS:
+        msg = f"VECINITA_RAG_CONTEXT_MAX_CHARS must be >= {_MIN_CONTEXT_MAX_CHARS}"
+        raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class ChatRagSettings:
     """Runtime settings for retrieval, embedding, and LLM upstreams."""
@@ -71,6 +109,10 @@ class ChatRagSettings:
     fallback_max_tokens: int = DEFAULT_EVAL_MAX_TOKENS
     fallback_temperature: float = DEFAULT_EVAL_TEMPERATURE
     fallback_model_id: str = DEFAULT_EVAL_MODEL_ID
+    rag_multi_query: bool = True
+    rag_multi_query_count: int = 3
+    rag_packer: PackerMode = "p1"
+    rag_context_max_chars: int = DEFAULT_CONTEXT_MAX_CHARS
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -79,6 +121,17 @@ class ChatRagSettings:
         if not database_url:
             msg = "DATABASE_URL is required for ChatRAG backend"
             raise RuntimeError(msg)
+        rag_multi_query_count = _int_env("VECINITA_RAG_MULTI_QUERY_COUNT", 3)
+        rag_packer: PackerMode = _rag_packer_env("VECINITA_RAG_PACKER", "p1")
+        rag_context_max_chars = _int_env(
+            "VECINITA_RAG_CONTEXT_MAX_CHARS",
+            DEFAULT_CONTEXT_MAX_CHARS,
+        )
+        _validate_f42_rag_knobs(
+            rag_multi_query_count=rag_multi_query_count,
+            rag_packer=rag_packer,
+            rag_context_max_chars=rag_context_max_chars,
+        )
         return cls(
             database_url=_normalize_database_url(database_url),
             top_k=_int_env("VECINITA_TOP_K", 5),
@@ -114,4 +167,8 @@ class ChatRagSettings:
                 "VECINITA_RAG_CONFIG_FALLBACK_MODEL_ID",
                 DEFAULT_EVAL_MODEL_ID,
             ),
+            rag_multi_query=_bool_env("VECINITA_RAG_MULTI_QUERY", default=True),
+            rag_multi_query_count=rag_multi_query_count,
+            rag_packer=rag_packer,
+            rag_context_max_chars=rag_context_max_chars,
         )
