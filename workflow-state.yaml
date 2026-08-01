@@ -926,11 +926,12 @@ project:
       - docs/dependency-inventory.md
       - docs/sessions/S017-corpus-reembed-migration/reports/runbook-corpus-rebuild-outline.md
     07-build:
-      status: in_progress
+      status: completed
       started_at: '2026-08-01T13:55:27Z'
+      completed_at: '2026-08-01T14:17:17Z'
       ready_at: '2026-08-01'
       partial_rerun_at: '2026-08-01'
-      partial_rerun_note: 'S019/EV-016 Phase B approved — ready to start T91.1 (M91); prior S017/EV-015 COMPLETE nested under s017_baseline'
+      partial_rerun_note: 'S019/EV-016 Phase 21 (M91–M93 / F42) COMPLETE after 08-verify-build PASS; prior S017/EV-015 COMPLETE nested under s017_baseline'
       session_id: S019-retrieval-quality
       branch: evolve/EV-016-retrieval-quality
       evolve_cycle_id: EV-016
@@ -942,13 +943,14 @@ project:
       phase: Phase 21 (M91-M93)
       milestone: M93
       milestone_status: COMPLETE
-      phase_status: tasks_complete
+      phase_status: complete
       phase21_tasks_complete: true
       current_task: none
-      current_action: phase21_complete_handoff_08_verify_build
-      next_action: invoke_08_verify_build_after_commits
-      commits_status: pending_user
-      note: 'S019/EV-016 07-build Phase 21 (M91–M93 / F42) implementation COMPLETE 2026-08-01T14:05:32Z — phase21_tasks_complete=true; status remains in_progress until 08-verify-build at milestone boundary; commits NOT landed (user has not asked); current_action=phase21_complete_handoff_08_verify_build; next → AskQuestion commit then handoff 08-verify-build; prior S017 COMPLETE under s017_baseline'
+      current_action: completed
+      next_action: phase_c_checkpoint
+      commits_status: landed
+      commits_head: 640cd25
+      note: 'S019/EV-016 07-build COMPLETE 2026-08-01T14:17:17Z — Phase 21 (M91–M93 / F42) closed after 08-verify-build PASS; HEAD 640cd25; left uncommitted (out of F42 Phase 21 scope): infra/modal/llm_app.py, infra/modal/llm_playground_app.py, playground_hf_registry (+ tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py; prior S017 COMPLETE under s017_baseline'
       substeps:
         current_task: none
         task_status: phase21_tasks_complete
@@ -958,7 +960,8 @@ project:
         - M91
         - M92
         - M93
-        next_action: invoke_08_verify_build_after_commits
+        next_action: await_08_verify_build
+        commits_status: landed
       s017_baseline:
         status: completed
         started_at: '2026-07-30'
@@ -1457,15 +1460,39 @@ project:
           - M85
     08-verify-build:
       status: completed
-      started_at: '2026-07-30'
-      partial_rerun_at: '2026-07-30'
-      partial_rerun_note: EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline
-      session_id: S017-corpus-reembed-migration
-      branch: evolve/EV-015-corpus-reembed-migration
-      evolve_cycle_id: EV-015
-      mode: delta
-      feature: F41
-      note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
+      started_at: '2026-08-01T14:12:45Z'
+      completed_at: '2026-08-01T14:17:17Z'
+      partial_rerun_at: '2026-08-01'
+      partial_rerun_note: 'S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline'
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F42
+      feature: F42
+      phase: Phase 21 (M91-M93)
+      overall_result: PASS
+      result_scope: delta
+      current_action: completed
+      next_action: phase_c_checkpoint
+      commits_status: landed
+      commits_head: 640cd25
+      report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+      note: 'S019/EV-016 08-verify-build COMPLETE 2026-08-01T14:17:17Z — Phase 21 (M91–M93 / F42) verification PASS (delta); HEAD 640cd25 (lint-fix [T92.5] fix: replace magic ES hit floor with named constant); report docs/sessions/S019-retrieval-quality/reports/verification-report.md; full test_eval_service SKIPPED locally (no Docker/Postgres); AC-RQ6 deferred to deploy path (hy1-ship-gate); checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry, _tmp_proxy_key_check.py, AWQ test; prior S017 COMPLETE under s017_baseline'
+      s017_baseline:
+        status: completed
+        started_at: '2026-07-30'
+        completed_at: '2026-07-30'
+        partial_rerun_at: '2026-07-30'
+        partial_rerun_note: EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline
+        session_id: S017-corpus-reembed-migration
+        branch: evolve/EV-015-corpus-reembed-migration
+        evolve_cycle_id: EV-015
+        mode: delta
+        feature: F41
+        note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
       s016_baseline:
         status: completed
         started_at: '2026-07-29'
@@ -1606,27 +1633,32 @@ project:
           session_id: S003-persistent-chat-history
           overall_result: PASS
           session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
-      completed_at: '2026-07-30'
       overall: pass
       overall_result: PASS
-      result_scope: EV-015_scoped
-      report: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+      result_scope: delta
+      report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
       substeps:
         result: PASS
-        result_scope: EV-015_scoped
-        integration_db: SKIPPED
-        integration_db_reason: no local Postgres/Docker
-        playwright_uj053_054: PASS
-        h0c: PASS
-        make_audit: PASS
-        dm_vitest: 688/688
-        ci_collection_fix: committed
-        ci_collection_fix_commit: a9c7eeb
-        ci_collection_fix_note: removed pytest_plugins from UJ-054; fixtures moved to tests/e2e/conftest.py
-        phase_c: passed
-        gate_c_to_d: passed
-        pending_commit: false
-      next_action: run 12-verify-deploy
+        result_scope: delta
+        phase: Phase 21 (M91-M93)
+        feature: F42
+        ruff: PASS
+        ruff_format: PASS
+        basedpyright: PASS
+        unit_packing_h7_chatrag: PASS
+        unit_eval_sandbox_f42: PASS
+        unit_staging_es_fixture: PASS
+        e2e_uj055: PASS
+        cors_unit: PASS
+        full_eval_service: SKIPPED
+        full_eval_service_reason: no local Postgres/Docker
+        ac_rq6: deferred_deploy_path
+        phase_c: pending_user
+        gate_c_to_d: pending_user
+        lint_fix_commit: 640cd25
+        commits_head: 640cd25
+      next_action: phase_c_checkpoint
+      s017_completion_trail_note: 'Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS 2026-08-01T14:17:17Z'
     09-qa:
       status: completed
       started_at: '2026-07-30'
@@ -2685,7 +2717,7 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-016
   artifacts_dir: docs/sessions/S019-retrieval-quality/
-  current_stage: 07-build
+  current_stage: 08-verify-build
   started_at: '2026-07-31'
   routing_plan_status: approved
   routing_preset: standard
@@ -2839,12 +2871,26 @@ active_session:
   s019_d45_decision_recorded: true
   s019_d45_note: 'Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1'
   phase21_tasks_complete: true
-  commits_status: pending_user
-  current_action: phase21_complete_handoff_08_verify_build
-  next_action: 'AskQuestion commit Phase 21 work, then invoke 08-verify-build (milestone boundary; 07-build status remains in_progress until verify)'
+  commits_status: landed
+  commits_head: 640cd25
+  current_action: phase_c_checkpoint
+  next_action: 'AskQuestion Phase C checkpoint — approve Gate C→D (08 PASS) then start 09-qa + 10-e2e'
+  checkpoints_phase_c: pending_user
+  gates_c_to_d: pending_user
+  verify_08_result: PASS
+  verify_08_report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+  verify_08_completed_at: '2026-08-01T14:17:17Z'
+  out_of_scope_uncommitted:
+  - infra/modal/llm_app.py
+  - infra/modal/llm_playground_app.py
+  - packages/shared-schemas/vecinita_shared_schemas/playground_hf_registry.py
+  - tests/unit/modal/test_llm_volume_manifest.py
+  - tests/unit/shared_schemas/test_playground_hf_registry.py
+  - scripts/deploy/_tmp_proxy_key_check.py
+  - tests/unit/modal/test_llm_engine_awq_kwargs.py
   feature_ids_note: 'F42 = H7+P1 (Hy1) on E0 per S019-D31/D37; E1 rejected; #159 open outside F42; F43 not allocated'
   phase0_notes: 'phase0_approved=true (S019-D37). E1 F36 done — do NOT ship E1; F41 rebuild 1fa1dec9-f5a0-4670-afa2-a71fe039d479 not promoted; artifact 20260801T130441Z_e1-shadow-f36.json. F42=H7+P1 on E0; handoff → 01-requirements.'
-  note: 'S019/EV-016 — Phase 21 (M91–M93 / F42) implementation COMPLETE 2026-08-01T14:05:32Z; current_stage=07-build; phase21_tasks_complete=true; current_action=phase21_complete_handoff_08_verify_build; commits NOT landed (pending_user); 08-verify-build ready after commits; mode=evolve delta_only=true feature_ids=[F42]; ISS-008 deploy remains ship prereq'
+  note: 'S019/EV-016 — 08-verify-build COMPLETE PASS (delta) 2026-08-01T14:17:17Z; HEAD 640cd25; current_action=phase_c_checkpoint; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; out of F42 scope left uncommitted (modal llm/playground, playground_hf_registry, _tmp_proxy_key_check.py, AWQ test); mode=evolve delta_only=true feature_ids=[F42]; ISS-008 deploy remains ship prereq; do NOT start 09/10 until Phase C approved'
   blocking_note: 'ISS-008 deploy remains ship path prereq (not Phase A entry blocker); prod embed pin BAAI/bge-small-en-v1.5 unchanged; ADR-006 amend deferred'
   a0_status: staging_complete
   a1_status: complete_no_retrieval_lift
@@ -2932,7 +2978,7 @@ active_session:
   - 'S019-D35 embed sweep complete — 20260801T020331Z_embed-sweep.json; E0/E1 hit@5=1.0; E2=0.87 reject; no offline F42 fold-in'
   - 'S019-D37 phase0_approved — reject E1 for F42; F42=H7+P1 on E0; Hy1 E0 relevancy 0.28 EN 0.36 ES 0.14 retrieval 0.88 vs E1 shadow relevancy 0.11 EN 0.09 ES 0.14 retrieval 0.94; rebuild 1fa1dec9 not promoted; #159 open outside F42; ISS-008 deploy ship prereq (not Phase A entry blocker)'
   model_sweep_pattern_note: 'ALL models including Tiny, AWQ 27B, fp16 27B, FP8 35B MoE → relevancy 0.23 under R0+P1 — sweep closed S019-D21 lock 1.5b; skip M1+'
-  next: phase21_complete_handoff_08_verify_build
+  next: phase_c_checkpoint
   skipped_stages_note: '03-plan-tooling, 05-verify-tech, 06-tech-tooling skipped per Standard; 15-service-health optional at close'
   linked_issues:
   - 158
@@ -2985,6 +3031,7 @@ active_session:
   - packages/rag/vecinita_rag/multi_query.py
   - tests/e2e/test_uj055_h7_p1_ask.py
   - docs/sessions/S019-retrieval-quality/reports/hy1-ship-gate.md
+  - docs/sessions/S019-retrieval-quality/reports/verification-report.md
   routing_plan:
   - stage: 00-context
     required: true
@@ -3079,8 +3126,9 @@ active_session:
     note: 'COMPLETE — options 3+1: Accept M91–M93 AND ADR-041; Phase 21; tech-plan-delta.md; S019-D43/D44; Phase B approved; gate B→C passed; handoff → 07-build T91.1'
   - stage: 07-build
     required: true
-    status: in_progress
+    status: completed
     started_at: '2026-08-01T13:55:27Z'
+    completed_at: '2026-08-01T14:17:17Z'
     skip_rationale:
     mode: evolve
     delta_only: true
@@ -3091,15 +3139,30 @@ active_session:
     milestone_status: COMPLETE
     phase21_tasks_complete: true
     current_task: none
-    current_action: phase21_complete_handoff_08_verify_build
-    next_action: invoke_08_verify_build_after_commits
-    commits_status: pending_user
-    note: 'Phase 21 (M91–M93 / F42) implementation COMPLETE — phase21_tasks_complete=true; status in_progress pending 08-verify-build + commits (not landed)'
+    current_action: completed
+    next_action: phase_c_checkpoint
+    commits_status: landed
+    commits_head: 640cd25
+    note: 'COMPLETE — Phase 21 (M91–M93 / F42) closed after 08-verify-build PASS; HEAD 640cd25'
   - stage: 08-verify-build
     required: true
-    status: pending
+    status: completed
+    started_at: '2026-08-01T14:12:45Z'
+    completed_at: '2026-08-01T14:17:17Z'
     skip_rationale:
-    ready_note: 'Ready after Phase 21 commits — milestone-boundary verify for M91–M93 / F42'
+    mode: evolve
+    delta_only: true
+    feature_ids:
+    - F42
+    phase: Phase 21 (M91-M93)
+    overall_result: PASS
+    result_scope: delta
+    current_action: completed
+    next_action: phase_c_checkpoint
+    commits_status: landed
+    commits_head: 640cd25
+    report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+    note: 'COMPLETE PASS (delta) — Phase 21 M91–M93 / F42; HEAD 640cd25; phase_c pending_user'
   - stage: 09-qa
     required: true
     status: pending
@@ -6840,11 +6903,12 @@ stages:
     - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: in_progress
+    status: completed
     started_at: '2026-08-01T13:55:27Z'
+    completed_at: '2026-08-01T14:17:17Z'
     ready_at: '2026-08-01'
     partial_rerun_at: '2026-08-01'
-    partial_rerun_note: 'S019/EV-016 Phase B approved — ready to start T91.1 (M91); prior S017/EV-015 COMPLETE nested under s017_baseline'
+    partial_rerun_note: 'S019/EV-016 Phase 21 (M91–M93 / F42) COMPLETE after 08-verify-build PASS; prior S017/EV-015 COMPLETE nested under s017_baseline'
     session_id: S019-retrieval-quality
     branch: evolve/EV-016-retrieval-quality
     evolve_cycle_id: EV-016
@@ -6856,13 +6920,14 @@ stages:
     phase: Phase 21 (M91-M93)
     milestone: M93
     milestone_status: COMPLETE
-    phase_status: tasks_complete
+    phase_status: complete
     phase21_tasks_complete: true
     current_task: none
-    current_action: phase21_complete_handoff_08_verify_build
-    next_action: invoke_08_verify_build_after_commits
-    commits_status: pending_user
-    note: 'S019/EV-016 07-build Phase 21 (M91–M93 / F42) implementation COMPLETE 2026-08-01T14:05:32Z — phase21_tasks_complete=true; status remains in_progress until 08-verify-build at milestone boundary; commits NOT landed (user has not asked); current_action=phase21_complete_handoff_08_verify_build; next → AskQuestion commit then handoff 08-verify-build; prior S017 COMPLETE under s017_baseline'
+    current_action: completed
+    next_action: phase_c_checkpoint
+    commits_status: landed
+    commits_head: 640cd25
+    note: 'S019/EV-016 07-build COMPLETE 2026-08-01T14:17:17Z — Phase 21 closed after 08-verify-build PASS; HEAD 640cd25; prior S017 COMPLETE under s017_baseline'
     substeps:
       current_task: none
       task_status: phase21_tasks_complete
@@ -6872,7 +6937,8 @@ stages:
       - M91
       - M92
       - M93
-      next_action: invoke_08_verify_build_after_commits
+      next_action: await_08_verify_build
+      commits_status: landed
     s017_baseline:
       status: completed
       started_at: '2026-07-30'
@@ -7290,15 +7356,39 @@ stages:
         - M85
   08-verify-build:
     status: completed
-    started_at: '2026-07-30'
-    partial_rerun_at: '2026-07-30'
-    partial_rerun_note: EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline
-    session_id: S017-corpus-reembed-migration
-    branch: evolve/EV-015-corpus-reembed-migration
-    evolve_cycle_id: EV-015
-    mode: delta
-    feature: F41
-    note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
+    started_at: '2026-08-01T14:12:45Z'
+    completed_at: '2026-08-01T14:17:17Z'
+    partial_rerun_at: '2026-08-01'
+    partial_rerun_note: 'S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline'
+    session_id: S019-retrieval-quality
+    branch: evolve/EV-016-retrieval-quality
+    evolve_cycle_id: EV-016
+    mode: evolve
+    delta_only: true
+    feature_ids:
+    - F42
+    feature: F42
+    phase: Phase 21 (M91-M93)
+    overall_result: PASS
+    result_scope: delta
+    current_action: completed
+    next_action: phase_c_checkpoint
+    commits_status: landed
+    commits_head: 640cd25
+    report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+    note: 'S019/EV-016 08-verify-build COMPLETE 2026-08-01T14:17:17Z — Phase 21 (M91–M93 / F42) verification PASS (delta); HEAD 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; prior S017 COMPLETE under s017_baseline'
+    s017_baseline:
+      status: completed
+      started_at: '2026-07-30'
+      completed_at: '2026-07-30'
+      partial_rerun_at: '2026-07-30'
+      partial_rerun_note: EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline
+      session_id: S017-corpus-reembed-migration
+      branch: evolve/EV-015-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      mode: delta
+      feature: F41
+      note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
     s016_baseline:
       status: completed
       started_at: '2026-07-29'
@@ -7443,27 +7533,32 @@ stages:
         - DM FE branch coverage 94.18% < 95%
         green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
         note: S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck, format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30 FAIL; cleared for Phase 12 gate.
-    completed_at: '2026-07-30'
     overall: pass
     overall_result: PASS
-    result_scope: EV-015_scoped
-    report: docs/sessions/S017-corpus-reembed-migration/reports/verification-report.md
+    result_scope: delta
+    report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
     substeps:
       result: PASS
-      result_scope: EV-015_scoped
-      integration_db: SKIPPED
-      integration_db_reason: no local Postgres/Docker
-      playwright_uj053_054: PASS
-      h0c: PASS
-      make_audit: PASS
-      dm_vitest: 688/688
-      ci_collection_fix: committed
-      ci_collection_fix_commit: a9c7eeb
-      ci_collection_fix_note: removed pytest_plugins from UJ-054; fixtures moved to tests/e2e/conftest.py
-      phase_c: passed
-      gate_c_to_d: passed
-      pending_commit: false
-    next_action: run 12-verify-deploy
+      result_scope: delta
+      phase: Phase 21 (M91-M93)
+      feature: F42
+      ruff: PASS
+      ruff_format: PASS
+      basedpyright: PASS
+      unit_packing_h7_chatrag: PASS
+      unit_eval_sandbox_f42: PASS
+      unit_staging_es_fixture: PASS
+      e2e_uj055: PASS
+      cors_unit: PASS
+      full_eval_service: SKIPPED
+      full_eval_service_reason: no local Postgres/Docker
+      ac_rq6: deferred_deploy_path
+      phase_c: pending_user
+      gate_c_to_d: pending_user
+      lint_fix_commit: 640cd25
+      commits_head: 640cd25
+    next_action: phase_c_checkpoint
+    s017_completion_trail_note: 'Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS 2026-08-01T14:17:17Z'
   09-qa:
     status: completed
     started_at: '2026-07-30'
@@ -12668,8 +12763,8 @@ evolve_cycles:
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/161
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/165
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
-  current_stage: 07-build
-  current_stage_note: '07-build Phase 21 (M91–M93 / F42) tasks COMPLETE 2026-08-01T14:05:32Z — phase21_tasks_complete=true; status in_progress pending 08-verify-build; 08-verify-build ready after commits; commits NOT landed'
+  current_stage: 08-verify-build
+  current_stage_note: '08-verify-build COMPLETE PASS (delta) 2026-08-01T14:17:17Z; Phase 21 M91–M93 / F42; HEAD 640cd25; current_action=phase_c_checkpoint; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; do NOT start 09/10 until Phase C approved'
   mode: evolve
   delta_only: true
   branch: evolve/EV-016-retrieval-quality
@@ -12818,9 +12913,13 @@ evolve_cycles:
   s019_d45_decision_recorded: true
   s019_d45_note: 'Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1'
   phase21_tasks_complete: true
-  commits_status: pending_user
-  current_action: phase21_complete_handoff_08_verify_build
-  next_action: 'AskQuestion commit Phase 21 work, then invoke 08-verify-build (M91–M93 done; 07 remains in_progress until verify)'
+  commits_status: landed
+  commits_head: 640cd25
+  current_action: phase_c_checkpoint
+  next_action: 'AskQuestion Phase C checkpoint — approve Gate C→D then start 09-qa + 10-e2e'
+  verify_08_result: PASS
+  verify_08_report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+  verify_08_completed_at: '2026-08-01T14:17:17Z'
   hybrid_spike_status: complete
   hybrid_thesis: 'Winner F42=H7+P1 (Hy1); drop R1; P3 not default; L3=H1/H9 cache as F43 later; reject R3/H2/#162/model; es_rel=0 n=2 follow-on'
   hybrid_recommended_option: A
@@ -12842,7 +12941,7 @@ evolve_cycles:
   hybrid_sweep_artifact: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260801T002819Z_hybrid-sweep.json
   hybrid_sweep_metrics: 'Hy0 0.23/0.91, Hy1 0.31/0.91 (winner), Hy2 0.19/0.91, Hy3 0.31/0.82, HyLang0 0.23/0.91 retrieval 0.91; lang_match 1.0 all cells; es_rel 0.0 (n=2 follow-on)'
   blocking_note: 'ISS-008 deploy remains ship path prereq (not Phase A entry blocker); prod embed pin BAAI/bge-small-en-v1.5 unchanged; ADR-006 amend deferred'
-  next: phase21_complete_handoff_08_verify_build
+  next: phase_c_checkpoint
   scope_summary: |
     Investigate #158/#161/#165/#162 on F36; pick winners; allocate F42; ship at most one
     change on packages/rag + ChatRAG. Cheap rerank OK if wins (#83 parent). Out: #82/#84/#76.
@@ -12856,6 +12955,8 @@ evolve_cycles:
     Hybrid iterate (2026-08-01): L1=P1/P3 packing (F42); L2=H7 fan-out (measure); L2b=optional R1; L3=H1/H9 cache as F43; reject R3/H2/#162/model. S019-D29 option A locked; S019-D31 winner F42=H7+P1 (Hy1).
     Phase 0 expansion path 2+3+4 (S019-D33–D37): ISS-008 deploy pending; ES A+B complete; offline + E1 F41+F36 complete — reject E1; F42=H7+P1 on E0; phase0_approved=true; handoff → 01-requirements (F42=H7+P1 on E0).
   notes: |
+    2026-08-01T14:17:17Z: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42; HEAD 640cd25 (lint-fix [T92.5] fix: replace magic ES hit floor with named constant); report docs/sessions/S019-retrieval-quality/reports/verification-report.md; 07-build COMPLETE; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; next → AskQuestion Gate C→D then 09+10; do NOT start 09/10 until approved.
+    2026-08-01T14:12:45Z: Phase 21 commits LANDED @ 58c79da (f561598…58c79da); commits_status=landed; current_stage→08-verify-build; current_action=verify_phase21_m91_m93; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry, _tmp_proxy_key_check.py, AWQ test.
     2026-08-01T14:05:32Z: Phase 21 (M91–M93 / F42) implementation COMPLETE — phase21_tasks_complete=true; 07-build status remains in_progress (08-verify-build next at milestone boundary); current_action=phase21_complete_handoff_08_verify_build; commits NOT landed (pending_user); S019-D45 already recorded; next → AskQuestion commit then 08-verify-build.
     2026-08-01T13:55:27Z: 07-build STARTED at T91.1 (M91) — status=in_progress; current_action=t91_1; mode=evolve delta_only=true feature_ids=[F42]; next → t91_1_p1_packer_test.
     2026-08-01: Phase B checkpoint approved (option 1 / S019-D45) — checkpoints.phase_b=passed; gates.b_to_c=passed; current_stage=07-build; current_action=start_07_build_t91_1; handoff → 07-build T91.1 (M91) for F42 H7+P1.
@@ -12910,7 +13011,7 @@ evolve_cycles:
     playground_gpu_redeployed_at: '2026-07-31T23:45:10Z'
     playground_gpu_note: 'S019-D26 done — playground T4 deployed (was A100-80GB via S019-D20)'
     hybrid_spike_status: complete
-    next: 'Phase 21 build tasks complete — handoff 08-verify-build after commits'
+    next: 'Phase 21 verify PASS — Phase C checkpoint pending_user (Gate C→D)'
     next_decision: S019-D37
     next_decision_status: recorded
     recommendation: 'phase0_approved — F42=H7+P1 on E0; E1 rejected (S019-D37); ISS-008 deploy ship prereq; #159 open outside F42'
@@ -12919,16 +13020,17 @@ evolve_cycles:
   checkpoints:
     phase_a: passed
     phase_b: passed
-    phase_c: pending
+    phase_c: pending_user
     phase_d: pending
     deploy: pending
   checkpoint_notes:
     phase_a: 'Passed 2026-08-01 — user approved option 1: gate A→B → start 04-tech-plan for F42=H7+P1 on E0'
     phase_b: 'Passed 2026-08-01 — user approved option 1: Yes — gate B→C → start 07-build at T91.1 (S019-D45)'
+    phase_c: 'PENDING_USER 2026-08-01T14:17:17Z — 08-verify-build PASS (delta) for Phase 21 M91–M93 / F42; HEAD 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; awaiting AskQuestion approval for Gate C→D before 09-qa + 10-e2e'
   gates:
     a_to_b: passed
     b_to_c: passed
-    c_to_d: pending
+    c_to_d: pending_user
     deploy: pending
   routing_plan:
     required_stages:
@@ -13051,9 +13153,11 @@ evolve_cycles:
       dep_data_mgmt_changes: false
       note: 'COMPLETE — options 3+1: Accept M91–M93 AND ADR-041; Phase 21; tech-plan-delta.md; S019-D43/D44; Phase B approved; gate B→C passed; handoff → 07-build T91.1'
     07-build:
-      status: in_progress
+      status: completed
       started: '2026-08-01'
       started_at: '2026-08-01T13:55:27Z'
+      completed: '2026-08-01'
+      completed_at: '2026-08-01T14:17:17Z'
       ready_at: '2026-08-01'
       mode: evolve
       delta_only: true
@@ -13063,26 +13167,45 @@ evolve_cycles:
       phase: Phase 21 (M91-M93)
       milestone: M93
       milestone_status: COMPLETE
-      phase_status: tasks_complete
+      phase_status: complete
       phase21_tasks_complete: true
       current_task: none
-      current_action: phase21_complete_handoff_08_verify_build
-      next_action: invoke_08_verify_build_after_commits
-      commits_status: pending_user
-      note: 'Phase 21 (M91–M93 / F42) implementation COMPLETE 2026-08-01T14:05:32Z — phase21_tasks_complete=true; status in_progress pending 08-verify-build; commits NOT landed'
+      current_action: completed
+      next_action: phase_c_checkpoint
+      commits_status: landed
+      commits_head: 640cd25
+      note: 'COMPLETE 2026-08-01T14:17:17Z — Phase 21 (M91–M93 / F42) closed after 08-verify-build PASS; HEAD 640cd25'
       substeps:
         current_task: none
-        task_status: phase21_tasks_complete
+        task_status: phase21_complete
         in_progress_tasks: []
         blocked_tasks: []
         completed_tasks_recent:
         - M91
         - M92
         - M93
-        next_action: invoke_08_verify_build_after_commits
+        next_action: phase_c_checkpoint
+        commits_status: landed
     08-verify-build:
-      status: pending
-      ready_note: 'Ready after Phase 21 commits — milestone-boundary verify for M91–M93 / F42'
+      status: completed
+      started: '2026-08-01'
+      started_at: '2026-08-01T14:12:45Z'
+      completed: '2026-08-01'
+      completed_at: '2026-08-01T14:17:17Z'
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F42
+      feature: F42
+      phase: Phase 21 (M91-M93)
+      overall_result: PASS
+      result_scope: delta
+      current_action: completed
+      next_action: phase_c_checkpoint
+      commits_status: landed
+      commits_head: 640cd25
+      report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+      note: 'COMPLETE PASS (delta) 2026-08-01T14:17:17Z — Phase 21 M91–M93 / F42; HEAD 640cd25; lint-fix [T92.5] fix: replace magic ES hit floor with named constant; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user'
     09-qa:
       status: pending
     10-e2e:
@@ -13102,6 +13225,7 @@ evolve_cycles:
   - packages/rag/vecinita_rag/multi_query.py
   - tests/e2e/test_uj055_h7_p1_ask.py
   - docs/sessions/S019-retrieval-quality/reports/hy1-ship-gate.md
+  - docs/sessions/S019-retrieval-quality/reports/verification-report.md
   - docs/sessions/S019-retrieval-quality/reports/tech-plan-delta.md
   - docs/adr/ADR-041-heuristic-multi-query-context-packing.md
   - docs/sessions/S000-internal-docs-archive/execution-plan.md
@@ -14457,6 +14581,11 @@ issue_log:
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
 - date: '2026-08-01'
+  session_id: S019-retrieval-quality
+  evolve_cycle_id: EV-016
+  stage: 08-verify-build
+  decision: 'Phase 21 commits landed on evolve/EV-016-retrieval-quality (HEAD 58c79da); commits_status=landed; 08-verify-build started with current_action=verify_phase21_m91_m93; left uncommitted out of F42 Phase 21 scope: modal llm_app/playground, playground_hf_registry, _tmp_proxy_key_check.py, AWQ test'
+- date: '2026-08-01'
   skill: 07-build
   session_id: S019-retrieval-quality
   evolve_cycle_id: EV-016
@@ -15809,6 +15938,7 @@ decisions_log:
 - 'S019/EV-016 01-requirements: Config Spec F42 accepted (option 1) — env knobs; interviews.completed=5; current_template=acceptance-criteria; current_action=interview_acceptance_criteria; next_action=Acceptance Criteria batch for F42 (AC-RQ1–RQ6)'
 - 'S019/EV-016 01-requirements COMPLETE → 02-verify-plan: AC-RQ1–RQ7 accepted (option 1; S019-D38–D41); interviews.completed=6; acceptance_criteria_accepted=true; report=docs/sessions/S019-retrieval-quality/reports/requirements-delta.md; 02 status=in_progress current_action=consistency_audit_f42; next_action=present medium/low confidence F42 statements for verdicts'
 - 'S019/EV-016 Phase B checkpoint approved (option 1 / S019-D45) — gates.b_to_c=passed; checkpoints.phase_b=passed; current_stage=07-build; current_action=start_07_build_t91_1; handoff → 07-build T91.1'
+- 'S019/EV-016 08-verify-build COMPLETE PASS (delta) 2026-08-01T14:17:17Z — Phase 21 M91–M93 / F42; HEAD 640cd25 ([T92.5] fix: replace magic ES hit floor with named constant); report docs/sessions/S019-retrieval-quality/reports/verification-report.md; 07-build COMPLETE; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; next → AskQuestion Gate C→D; do NOT start 09-qa/10-e2e until Phase C approved'
 - 'S019/EV-016 07-build Phase 21 (M91–M93 / F42) implementation COMPLETE — phase21_tasks_complete=true; status in_progress pending 08-verify-build; commits NOT landed (pending_user); current_action=phase21_complete_handoff_08_verify_build; S019-D45 already recorded; next → AskQuestion commit then 08-verify-build'
 - 'S019/EV-016 02-verify-plan COMPLETE → phase-a-checkpoint: M1–M3 approved (option 1; S019-D42); no contradictions; Gate A→B ready; gates.a_to_b=pending_user; checkpoints.phase_a=pending; report=docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md; next_action=askquestion_phase_a_checkpoint; do NOT start 04-tech-plan until Phase A approved'
 artifacts:
@@ -15840,6 +15970,13 @@ artifacts:
   evolve_cycle_id: EV-016
   recorded_at: '2026-08-01T14:05:32Z'
   note: 'Hy1 ship gate report — Phase 21; commits pending_user'
+- path: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+  kind: verification-report
+  session_id: S019-retrieval-quality
+  stage: 08-verify-build
+  evolve_cycle_id: EV-016
+  recorded_at: '2026-08-01T14:17:17Z'
+  note: 'Phase 21 (M91–M93 / F42) 08-verify-build PASS (delta); phase_c pending_user'
 - path: docs/sessions/S019-retrieval-quality/reports/tech-plan-delta.md
   kind: tech_plan_delta
   session_id: S019-retrieval-quality
@@ -17133,7 +17270,8 @@ git_history:
     session_id: S019-retrieval-quality
     evolve_cycle_id: EV-016
     exists_on_disk: true
-    note: Branch confirmed on disk; S019-D35 embed sweep complete; ready AskQuestion phase0_approved; phase0_approved=false
+    head_sha: 640cd2550df6adb1ff38ea4d64b82bdd7073e8d7
+    note: '08-verify-build PASS (delta) Phase 21; HEAD 640cd25; phase_c pending_user; out-of-scope dirty tree left uncommitted'
   - name: fix/S018-job-dispatch-prevention
     purpose: Phase 5 prevention (registry + husky + checklist + rule)
     base: main
@@ -18898,6 +19036,138 @@ git_history:
     evolve_cycle_id: EV-015
     timestamp: '2026-07-31T01:12:00Z'
     note: Archive-state commit after closeout docs @ 1af649c; H0ci PASS on main @ c2858d3; active_session=null; pipeline idle; next_action=none
+  - sha: f5615981b0dc9922ed75f39e6d1d2ecd26c0c9ec
+    short: 'f561598'
+    branch: evolve/EV-016-retrieval-quality
+    message: 'docs: record EV-016 F42 specs, ADR-041, and S019 spike artifacts'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 75
+    timestamp: '2026-08-01T14:12:14Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: 18a41705fedc205a22e4666b1daa7bbf80d99eaa
+    short: '18a4170'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T91.1] feat: add P1 pack_chunks helper and TC-170 tests'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 2
+    timestamp: '2026-08-01T14:12:19Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: b8750678cbffc6208bbc3e8ec503b5ba1ac53722
+    short: 'b875067'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T91.2] feat: add H7 multi-query helpers and TC-171/172 tests'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 2
+    timestamp: '2026-08-01T14:12:19Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: 4462787b5d5087734aafed53a0487351981828a4
+    short: '4462787'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T91.5] feat: export F42 packer and H7 helpers from packages/rag'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 1
+    timestamp: '2026-08-01T14:12:19Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: 0dd4a4dc3b8b9017d9d2cb0e06b7af66f0fba646
+    short: '0dd4a4d'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T92.1] feat: parse and validate VECINITA_RAG_* ChatRAG settings'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 2
+    timestamp: '2026-08-01T14:12:24Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: bf7ebcb3a83feeeb0bd17ab5b5c75d7e8cdb7a72
+    short: 'bf7ebcb'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T92.3] feat: wire ChatRAG ask path through packer and H7'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 2
+    timestamp: '2026-08-01T14:12:24Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: 3236ad8c1af242996538b6e45b1ef408c920e18d
+    short: '3236ad8'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T92.4] feat: share F42 packer and H7 with F36 eval sandbox'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 4
+    timestamp: '2026-08-01T14:12:24Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: df8d40d96c38c4a9108434f6613eec6ee191f2b0
+    short: 'df8d40d'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T92.5] fix: map staging corpus_profile to qa_pairs_staging.json'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 4
+    timestamp: '2026-08-01T14:12:24Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: ee44ec09e5131466df94a6336b030e86dd6d9ad2
+    short: 'ee44ec0'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T92.2] test: add UJ-055 e2e for H7+P1 ask path'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 1
+    timestamp: '2026-08-01T14:12:24Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: d156de15c11b56101f50a08b3a8dec1b36e4e18d
+    short: 'd156de1'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T93.2] docs: add Hy1 ship-gate runbook for F42'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 1
+    timestamp: '2026-08-01T14:12:28Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: 05856d9cfb8c3e4caa27ca85bd2fe55a2579629e
+    short: '05856d9'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T93.3] docs: mark Phase 21 M91-M93 complete in execution plan'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 1
+    timestamp: '2026-08-01T14:12:28Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: 58c79dacc0c698255e281843c0c4a379ae20f91c
+    short: '58c79da'
+    branch: evolve/EV-016-retrieval-quality
+    message: 'chore: sync workflow-state for EV-016 Phase 21 build complete'
+    stage: 07-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 1
+    timestamp: '2026-08-01T14:12:28Z'
+    note: Phase 21 / F42 on evolve/EV-016-retrieval-quality
+  - sha: 640cd2550df6adb1ff38ea4d64b82bdd7073e8d7
+    short: '640cd25'
+    branch: evolve/EV-016-retrieval-quality
+    message: '[T92.5] fix: replace magic ES hit floor with named constant'
+    stage: 08-verify-build
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 1
+    timestamp: '2026-08-01T14:16:56Z'
+    note: 'Lint-fix during Phase 21 08-verify-build (ES hit floor named constant)'
+  - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
+  - '2026-08-01 S019/EV-016: Phase 21 commits LANDED on evolve/EV-016-retrieval-quality (f561598…58c79da HEAD); commits_status=landed; 08-verify-build started (verify_phase21_m91_m93); left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
   notes:
   - '2026-07-30 S017/EV-015: 13-deploy-smoke Path A staging PASS @ 180ad14 — Alembic 20260730_0010; DO pins ACTIVE evolve; Modal DM redeployed; H1–H5 PASS; shadow→F36→promote 60/2; report deploy-smoke.md; checkpoints.deploy=pending_user_checkpoint; cycle NOT completed; do not commit scripts/deploy/_tmp_proxy_key_check.py.'
   - '2026-07-30 S017/EV-015: 12-verify-deploy post-commit @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41); HEAD refs → 180ad14; phase_d=pending_user_checkpoint (presenting AskQuestion now); left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit).'
@@ -19002,6 +19272,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: watch main CI + deploy-preflight, then await user approval for dual deploy (DO write-api + Modal data-management)
+next_action: run 08-verify-build (verify_phase21_m91_m93) on evolve/EV-016-retrieval-quality @ 58c79da
 pipeline_idle: false
-pipeline_idle_note: '2026-07-31 — S018 PR #169 MERGED @ a6c39e5; watch main CI + deploy-preflight; then await dual-deploy approval'
+pipeline_idle_note: '2026-08-01 — S019/EV-016 Phase 21 commits landed @ 58c79da; 08-verify-build in_progress'
