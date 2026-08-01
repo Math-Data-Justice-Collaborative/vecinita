@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -10,6 +11,8 @@ from typing import TYPE_CHECKING, cast
 
 from vecinita_rag.engine import answer_without_context, synthesize_with_llm
 from vecinita_rag.language import detect_query_language
+from vecinita_rag.multi_query import multi_query_retrieve
+from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode, pack_chunks
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.eval_config import EvalConfig
@@ -85,12 +88,14 @@ def _aggregate_optional(values: list[float | None]) -> float | None:
     return sum(present) / len(present)
 
 
-def _answer_for_row(
+def _answer_for_row(  # noqa: PLR0913 — row synthesis needs chunks/llm/prompt + F42 packer knobs
     *,
     row: GoldenRow,
     chunks: list[RetrievedChunk],
     llm: LLM | None,
     system_prompt: str | None = None,
+    packer: PackerMode = "p1",
+    context_max_chars: int = DEFAULT_CONTEXT_MAX_CHARS,
 ) -> RagAnswer:
     if not chunks:
         return answer_without_context(row.question)
@@ -102,6 +107,8 @@ def _answer_for_row(
             chunks,
             llm,
             system_prompt=system_prompt,
+            packer=packer,
+            context_max_chars=context_max_chars,
         )
     return synthesize_with_llm(row.question, chunks, llm)
 
@@ -115,6 +122,40 @@ def _adhoc_golden_row(question: str) -> GoldenRow:
         question=question,
         retrieval_expectation="hit",
         required_facts=("adhoc",),
+    )
+
+
+def _env_bool(name: str, default: bool) -> bool:  # noqa: FBT001
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
+def _f42_rag_knobs() -> tuple[bool, int, PackerMode, int]:
+    """Shared ChatRAG/F36 knobs from ``VECINITA_RAG_*`` (ADR-041)."""
+    count_raw = os.environ.get("VECINITA_RAG_MULTI_QUERY_COUNT", "3")
+    try:
+        count = int(count_raw)
+    except ValueError:
+        count = 3
+    count = max(1, min(5, count))
+    packer_raw = os.environ.get("VECINITA_RAG_PACKER", "p1").strip().lower()
+    packer: PackerMode = "p3" if packer_raw == "p3" else "p1"
+    max_chars_raw = os.environ.get(
+        "VECINITA_RAG_CONTEXT_MAX_CHARS",
+        str(DEFAULT_CONTEXT_MAX_CHARS),
+    )
+    try:
+        max_chars = int(max_chars_raw)
+    except ValueError:
+        max_chars = DEFAULT_CONTEXT_MAX_CHARS
+    max_chars = max(256, max_chars)
+    return (
+        _env_bool("VECINITA_RAG_MULTI_QUERY", default=True),
+        count,
+        packer,
+        max_chars,
     )
 
 
@@ -173,19 +214,34 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
     retrieval_passes: dict[tuple[str, str], bool] = {}
     latencies: list[int] = []
     custom_per_row: list[dict[str, float]] = []
+    multi_query, multi_count, packer, context_max_chars = _f42_rag_knobs()
 
     for row in rows:
         start = time.monotonic()
-        chunks = retriever.retrieve_chunks(row.question, rebuild_run_id=rebuild_run_id)
+        locale = row.locale if row.locale in {"en", "es"} else detect_query_language(row.question)
+
+        def _retrieve_once(question: str) -> list[RetrievedChunk]:
+            return retriever.retrieve_chunks(question, rebuild_run_id=rebuild_run_id)
+
+        chunks = multi_query_retrieve(
+            row.question,
+            locale=locale,
+            top_k=retriever_top_k,
+            retrieve_fn=_retrieve_once,
+            enabled=multi_query,
+            count=multi_count,
+        )
         retrieved_urls = [chunk.url for chunk in chunks if chunk.url]
         rag_answer = _answer_for_row(
             row=row,
             chunks=chunks,
             llm=llm,
             system_prompt=system_prompt,
+            packer=packer,
+            context_max_chars=context_max_chars,
         )
         answer = rag_answer.answer
-        context = "\n\n".join(chunk.text for chunk in chunks)
+        context = pack_chunks(chunks, mode=packer, max_chars=context_max_chars)
 
         if adhoc:
             retrieval_pass = bool(retrieved_urls)

@@ -31,7 +31,7 @@ def test_truncate_synthesis_context_long_caps_at_max() -> None:
 
 
 def test_synthesize_with_system_prompt_truncates_context() -> None:
-    """Sandbox synthesis truncates joined chunk text before calling the LLM."""
+    """Sandbox synthesis P1-packs then truncates before calling the LLM (F42)."""
     long_chunk = "c" * (DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS + 1000)
     captured: dict[str, str] = {}
 
@@ -58,8 +58,14 @@ def test_synthesize_with_system_prompt_truncates_context() -> None:
     )
     assert answer.answer == "Weekly."
     prompt = captured["prompt"]
-    assert ("c" * DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS) in prompt
-    assert ("c" * (DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS + 1)) not in prompt
+    assert "Source: Hours" in prompt
+    assert "URL: https://example.com/a" in prompt
+    # Packed + truncated context stays within the synthesis budget.
+    context_start = prompt.index("Context:\n") + len("Context:\n")
+    context_end = prompt.index("\n\nQuestion:")
+    packed_context = prompt[context_start:context_end]
+    assert len(packed_context) <= DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS
+    assert long_chunk not in prompt
 
 
 def test_synthesize_with_system_prompt_empty_chunks_abstains() -> None:
