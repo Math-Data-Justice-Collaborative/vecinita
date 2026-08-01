@@ -433,6 +433,7 @@ def test_fixture_path_honors_env_override(
     )
 
     assert _fixture_path() == fixture
+    assert _fixture_path(corpus_profile="staging") == fixture
 
 
 def test_fixture_path_falls_back_to_repo_root_when_missing(
@@ -446,6 +447,20 @@ def test_fixture_path_falls_back_to_repo_root_when_missing(
 
     path = _fixture_path()
     assert path.as_posix().endswith("data/fixtures/eval/missing.json")
+
+
+def test_fixture_path_staging_defaults_to_qa_pairs_staging(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """ISS-008: staging corpus_profile defaults to qa_pairs_staging.json."""
+    monkeypatch.delenv("VECINITA_EVAL_FIXTURE_PATH", raising=False)
+    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        _fixture_path,  # pyright: ignore[reportPrivateUsage]
+    )
+
+    path = _fixture_path(corpus_profile="staging")
+    assert path.name == "qa_pairs_staging.json"
+    assert "data/fixtures/eval" in path.as_posix()
 
 
 def test_get_eval_run_invalid_status_raises(engine: Engine, eval_run_id: UUID) -> None:
@@ -546,16 +561,17 @@ def test_get_eval_run_defaults_latency_when_missing(
     assert detail.items[0].metrics.latency_ms == 0
 
 
-def test_execute_eval_run_staging_profile_omits_fixture_path(
+def test_execute_eval_run_staging_profile_uses_staging_golden(
     engine: Engine,
     eval_run_id: UUID,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Staging corpus_profile does not pass a golden fixture path to the harness."""
+    """ISS-008: staging corpus_profile passes qa_pairs_staging.json to the harness."""
     monkeypatch.setenv(
         "DATABASE_URL",
         "postgresql://vecinita:vecinita@localhost:5432/vecinita",
     )
+    monkeypatch.delenv("VECINITA_EVAL_FIXTURE_PATH", raising=False)
     with engine.begin() as conn:
         conn.execute(
             text("UPDATE eval_runs SET corpus_profile = 'staging' WHERE id = :id"),
@@ -570,7 +586,9 @@ def test_execute_eval_run_staging_profile_omits_fixture_path(
             run_id=eval_run_id,
             embed_fn=eval_embed_fn,
         )
-    assert mock_run.call_args.kwargs["fixture_path"] is None
+    fixture_path = mock_run.call_args.kwargs["fixture_path"]
+    assert isinstance(fixture_path, Path)
+    assert fixture_path.name == "qa_pairs_staging.json"
     assert mock_run.call_args.kwargs["config"] is not None
 
 

@@ -45,7 +45,20 @@
     "retrieval_expectation": "hit",
     "required_facts": [
       "Es un programa bilingüe (inglés y español)",
-      "Ayuda a miembros de la comunidad a convertirse en líderes locales"
+      "Ayuda a miembros de la comunidad a transformarse en líderes locales",
+      "Se desarrolla en el transcurso de entre ocho a diez meses"
+    ]
+  },
+  {
+    "id": "community-resilience-hub-es",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Qué son los Centros de Resiliencia de Olneyville?",
+    "expected_doc_url": "https://vecina.wrwc.org/es/empoderate/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Son espacios comunitarios compartidos y recursos para residentes",
+      "Ofrecen refugio, servicios y provisiones en tiempos de emergencia"
     ]
   },
   {
@@ -84,6 +97,30 @@
     ]
   },
   {
+    "id": "community-vecinita-history",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Cómo comenzó VECINA?",
+    "expected_doc_url": "https://vecina.wrwc.org/es/conocenos/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "En el verano de 2022 un grupo se unió en ICERM en Providence",
+      "El equipo conectó con Woonasquatucket River Watershed Council (WRWC)"
+    ]
+  },
+  {
+    "id": "community-school-choice",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Cómo me inscribo a una escuela pública en Providence?",
+    "expected_doc_url": "https://vecina.wrwc.org/es/education/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Todos los estudiantes deben estar registrados en las Escuelas Públicas de Providence",
+      "La inscripción hace elegible al estudiante para postularse y entrar en los sorteos"
+    ]
+  },
+  {
     "id": "housing-flood-insurance-wait",
     "locale": "en",
     "domain": "housing",
@@ -92,6 +129,30 @@
     "retrieval_expectation": "hit",
     "required_facts": [
       "Up to 30 days for a flood insurance policy to go into effect"
+    ]
+  },
+  {
+    "id": "housing-flood-vs-home",
+    "locale": "es",
+    "domain": "housing",
+    "question": "¿Cubre el seguro de hogar estándar los daños por inundación?",
+    "expected_doc_url": "https://vecina.wrwc.org/es/inundaciones/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "No — los seguros estándar suelen cubrir solo daños por agua en el interior",
+      "Para inundaciones externas se requiere una póliza independiente"
+    ]
+  },
+  {
+    "id": "community-healthsource-ri",
+    "locale": "es",
+    "domain": "community",
+    "question": "¿Cómo aplico para obtener un seguro médico en Rhode Island?",
+    "expected_doc_url": "https://vecina.wrwc.org/es/salud/",
+    "retrieval_expectation": "hit",
+    "required_facts": [
+      "Llama a HealthSourceRI 1-855-840-4774 de lunes a viernes, 8 AM a 6 PM",
+      "Visite https://healthsourceri.com/es/"
     ]
   },
   {
