@@ -10,6 +10,8 @@ from vecinita_embedding_client import EmbeddingClient
 from vecinita_llm_client import LlmClient, format_instruct_prompt
 from vecinita_rag.engine import answer_from_chunks
 from vecinita_rag.language import detect_query_language, no_context_message
+from vecinita_rag.multi_query import multi_query_retrieve
+from vecinita_rag.packing import PackerMode, pack_chunks
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
 from vecinita_rag.types import RagAnswer, RetrievedChunk
@@ -33,9 +35,11 @@ def _build_prompt(
     chunks: list[RetrievedChunk],
     *,
     system_prompt: str,
+    packer: PackerMode = "p1",
+    context_max_chars: int = 3500,
 ) -> str:
-    """Build instruct prompt via shared HF chat-template helper (RD-167 / TC-145)."""
-    context = "\n\n".join(chunk.text for chunk in chunks)
+    """Build instruct prompt via shared HF chat-template helper (RD-167 / TC-145 / F42)."""
+    context = pack_chunks(chunks, mode=packer, max_chars=context_max_chars)
     user = f"Context:\n{context}\n\nQuestion: {question}"
     return format_instruct_prompt(system=system_prompt, user=user)
 
@@ -134,6 +138,17 @@ class ChatRagService:
             return EvalConfig()
         return load_active_rag_config(self._config_engine, self._settings)
 
+    def _rag_packing(self) -> tuple[bool, int, PackerMode, int]:
+        """Return (multi_query, count, packer, max_chars) from settings or defaults."""
+        if self._settings is None:
+            return True, 3, "p1", 3500
+        return (
+            self._settings.rag_multi_query,
+            self._settings.rag_multi_query_count,
+            self._settings.rag_packer,
+            self._settings.rag_context_max_chars,
+        )
+
     def _retrieve(
         self,
         request: AskRequest,
@@ -143,27 +158,40 @@ class ChatRagService:
     ) -> list[RetrievedChunk]:
         language = self._effective_language(request)
         tag_slugs = self._retrieval_tags(request)
-        chunks = self._retriever.retrieve_chunks(
-            request.question,
-            tag_slugs=tag_slugs,
-            language=language,
-            top_k=top_k,
-            score_threshold=min_retrieval_score,
-        )
-        if not chunks and tag_slugs:
+        multi_query, multi_count, _, _ = self._rag_packing()
+
+        def _retrieve_once(question: str) -> list[RetrievedChunk]:
             chunks = self._retriever.retrieve_chunks(
-                request.question,
-                tag_slugs=None,
+                question,
+                tag_slugs=tag_slugs,
                 language=language,
                 top_k=top_k,
                 score_threshold=min_retrieval_score,
             )
-        return chunks
+            if not chunks and tag_slugs:
+                chunks = self._retriever.retrieve_chunks(
+                    question,
+                    tag_slugs=None,
+                    language=language,
+                    top_k=top_k,
+                    score_threshold=min_retrieval_score,
+                )
+            return chunks
+
+        return multi_query_retrieve(
+            request.question,
+            locale=language,
+            top_k=top_k,
+            retrieve_fn=_retrieve_once,
+            enabled=multi_query,
+            count=multi_count,
+        )
 
     def ask(self, request: AskRequest) -> AskResponse:
         """Retrieve context and generate a non-streaming answer."""
         production = self._production_config()
         language = self._effective_language(request)
+        _, _, packer, max_chars = self._rag_packing()
         chunks = self._retrieve(
             request,
             top_k=production.top_k,
@@ -181,6 +209,8 @@ class ChatRagService:
             request.question,
             chunks,
             system_prompt=production.system_prompt,
+            packer=packer,
+            context_max_chars=max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         answer_text = self._llm.generate(
@@ -200,6 +230,7 @@ class ChatRagService:
         """Stream LLM tokens for a question after retrieval."""
         production = self._production_config()
         language = self._effective_language(request)
+        _, _, packer, max_chars = self._rag_packing()
         chunks = self._retrieve(
             request,
             top_k=production.top_k,
@@ -212,6 +243,8 @@ class ChatRagService:
             request.question,
             chunks,
             system_prompt=production.system_prompt,
+            packer=packer,
+            context_max_chars=max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         yield from self._llm.generate_stream(
