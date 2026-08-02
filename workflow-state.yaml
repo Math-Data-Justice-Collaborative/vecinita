@@ -1244,8 +1244,8 @@ project:
       partial_rerun_at: '2026-08-02'
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
@@ -1264,8 +1264,8 @@ project:
       m99_completed_at: '2026-08-02'
       phase_status: in_progress
       current_task: null
-      current_action: 07_complete_08_pending
-      next_action: run 08-verify-build
+      current_action: 08_in_progress
+      next_action: run 08-verify-build checks
       t99_4_status: completed
       t99_4_blocker: null
       t99_4_waiver: S021-D23
@@ -1278,8 +1278,8 @@ project:
       s021_d19_decision_recorded: true
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
       substeps:
         current_task: null
         task_status: completed
@@ -1295,7 +1295,7 @@ project:
         - T100.2
         - T100.3
         - T100.4
-        next_action: run 08-verify-build
+        next_action: run 08-verify-build checks
         t100_1_status: completed
         t100_1_ship_gate_pass: true
         t100_1_ce_p1_relevancy: 0.7778
@@ -1357,8 +1357,8 @@ project:
           script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
-          commits_pending: true
-          commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+          commits_pending: false
+          commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -2215,13 +2215,13 @@ project:
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: true
-        commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+        commits_pending: false
+        commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
-      commits_pending: true
-      commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+      commits_pending: false
+      commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
     08-verify-build:
       status: completed
       started_at: '2026-08-02'
@@ -4115,11 +4115,11 @@ active_session:
   evolve_cycle_id: EV-018
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
   current_stage: 08-verify-build
-  current_action: 07_complete_08_pending
+  current_action: 08_in_progress
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-    S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+    S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4203,7 +4203,7 @@ active_session:
     skip_rationale: null
     started_at: '2026-08-02'
     completed_at: '2026-08-02'
-    current_action: 07_complete_08_pending
+    current_action: 08_in_progress
     current_task: null
     m99_status: completed
     m100_status: completed
@@ -4211,8 +4211,8 @@ active_session:
     report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
     s021_d20_decision: S021-D20
     s021_d21_decision: S021-D21
     s021_d21_choice: option_2_investigate_promote_history
@@ -4221,7 +4221,7 @@ active_session:
     path_b_approved: true
     path_b_approved_at: '2026-08-02'
     s021_d22_decision: S021-D22
-    next_action: run 08-verify-build
+    next_action: run 08-verify-build checks
     path_b_completed: true
     t99_3_status: completed
     t99_4_status: completed
@@ -4234,9 +4234,11 @@ active_session:
     t100_1_status: completed
   - stage: 08-verify-build
     required: true
-    status: pending
+    status: in_progress
     skip_rationale: null
-    note: Ready — 07-build M99-M100 COMPLETE; S021-D24 AC-BB9 PASS; next_action=run 08-verify-build
+    started_at: '2026-08-02'
+    current_action: 08_in_progress
+    note: Started — 07-build M99-M100 COMPLETE; S021-D24 AC-BB9 PASS; next_action=run 08-verify-build checks
   - stage: 09-qa
     required: true
     status: pending
@@ -4328,7 +4330,7 @@ active_session:
   s021_d24_decision_recorded: true
   s021_d24: AC-BB9 PASS; ship_gate_pass=true; CE+P1 relevancy=0.7778 faith=0.9375; keep VECINITA_RAG_RERANK_CE false until 12/13
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: run 08-verify-build
+  next_action: run 08-verify-build checks
   t99_4_status: completed
   t99_4_blocker: null
   t99_4_waiver: S021-D23
@@ -4365,13 +4367,13 @@ active_session:
     script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
-    commits_pending: true
-    commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+    commits_pending: false
+    commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: true
-  commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+  commits_pending: false
+  commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
 sessions:
 - id: S020-retrieval-batch-b
   type: feature
@@ -9694,8 +9696,8 @@ stages:
     partial_rerun_at: '2026-08-02'
     partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
     session_id: S021-retrieval-follow-on
     branch: evolve/EV-018-retrieval-follow-on
     evolve_cycle_id: EV-018
@@ -9714,15 +9716,15 @@ stages:
     m99_completed_at: '2026-08-02'
     phase_status: in_progress
     current_task: null
-    current_action: 07_complete_08_pending
-    next_action: run 08-verify-build
+    current_action: 08_in_progress
+    next_action: run 08-verify-build checks
     report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
     s021_d19_decision: S021-D19
     s021_d19_decision_recorded: true
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
     substeps:
       current_task: null
       task_status: completed
@@ -9738,7 +9740,7 @@ stages:
       - T100.2
       - T100.3
       - T100.4
-      next_action: run 08-verify-build
+      next_action: run 08-verify-build checks
       t100_1_status: completed
       t100_1_ship_gate_pass: true
       s021_d24_decision: S021-D24
@@ -9786,8 +9788,8 @@ stages:
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: true
-        commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+        commits_pending: false
+        commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
     s020_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -10641,13 +10643,13 @@ stages:
       script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
       completed_at: '2026-08-02'
       completed_at_ts: '2026-08-02T18:17:00Z'
-      commits_pending: true
-      commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+      commits_pending: false
+      commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
     rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
     s021_d22_executed: true
     t99_3_status: completed
-    commits_pending: true
-    commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+    commits_pending: false
+    commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
   08-verify-build:
     status: completed
     started_at: '2026-08-02'
@@ -19313,11 +19315,11 @@ evolve_cycles:
 
     '
   current_stage: 08-verify-build
-  current_action: 07_complete_08_pending
+  current_action: 08_in_progress
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-    S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+    S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -19441,8 +19443,8 @@ evolve_cycles:
       m99_completed_at: '2026-08-02'
       phase_status: in_progress
       current_task: null
-      current_action: 07_complete_08_pending
-      next_action: run 08-verify-build
+      current_action: 08_in_progress
+      next_action: run 08-verify-build checks
       t99_4_status: completed
       t99_4_blocker: null
       t99_4_waiver: S021-D23
@@ -19454,8 +19456,8 @@ evolve_cycles:
       s021_d19_decision: S021-D19
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
       substeps:
         current_task: null
         task_status: completed
@@ -19471,7 +19473,7 @@ evolve_cycles:
         - T100.2
         - T100.3
         - T100.4
-        next_action: run 08-verify-build
+        next_action: run 08-verify-build checks
         t100_1_status: completed
         t100_1_ship_gate_pass: true
         t100_1_ce_p1_relevancy: 0.7778
@@ -19533,13 +19535,13 @@ evolve_cycles:
           script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
-          commits_pending: true
-          commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+          commits_pending: false
+          commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
       partial_rerun_at: '2026-08-02'
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
-        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=08_in_progress;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=08_in_progress; next_action=run 08-verify-build; commits_pending=false
       s021_d20_decision: S021-D20
       s021_d20_decision_recorded: true
       root_cause: embed↔corpus pin drift
@@ -19576,15 +19578,21 @@ evolve_cycles:
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: true
-        commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+        commits_pending: false
+        commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
-      commits_pending: true
-      commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+      commits_pending: false
+      commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
     08-verify-build:
-      status: pending
+      status: in_progress
+      started: '2026-08-02'
+      started_at: '2026-08-02'
+      current_action: 08_in_progress
+      session_id: S021-retrieval-follow-on
+      evolve_cycle_id: EV-018
+      note: Started after 07-build M99-M100 COMPLETE @ e4aa5fe
     09-qa:
       status: pending
     10-e2e:
@@ -19836,7 +19844,7 @@ evolve_cycles:
   s021_d22_decision: S021-D22
   s021_d22_decision_recorded: true
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: run 08-verify-build
+  next_action: run 08-verify-build checks
   t99_4_status: completed
   t99_4_blocker: null
   t99_4_waiver: S021-D23
@@ -19871,13 +19879,13 @@ evolve_cycles:
     script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
-    commits_pending: true
-    commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+    commits_pending: false
+    commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: true
-  commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
+  commits_pending: false
+  commits_note: M100 close @ e4aa5fe; commits_pending=false; 08-verify-build in_progress
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -20975,6 +20983,13 @@ issue_log:
     interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
 - date: '2026-08-02'
+  skill: 08-verify-build
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: Recorded e4aa5fe; start 08-verify-build after M99-M100 COMPLETE
+  recorded_at: '2026-08-02T18:56:00Z'
+  note: current_action=08_in_progress; next_action=run 08-verify-build checks; commits_pending=false
+- date: '2026-08-02'
   skill: 07-build
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
@@ -20982,14 +20997,14 @@ decisions_log:
     keep VECINITA_RAG_RERANK_CE false until 12/13 deploy approval; T100.1–T100.4 complete; M100 complete
   recorded_at: '2026-08-02T18:55:06Z'
   note: JSON spike-f45-ce-ship-gate.json; reports t100-1/ce-ship-gate/phase23-gate/t100-4; 07-build complete → 08-verify-build;
-    commits_pending=true
+    commits_pending=false
 - date: '2026-08-02'
   skill: 07-build
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
   decision: User Proceed — start T100.1 CE spike harness (bge-reranker-v2-m3 Modal T4) after UJ-061
   recorded_at: '2026-08-02T18:49:00Z'
-  note: current_action=07_complete_08_pending; M100 in_progress; do not mark complete until spike results recorded
+  note: current_action=08_in_progress; M100 in_progress; do not mark complete until spike results recorded
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
@@ -20998,7 +21013,7 @@ decisions_log:
     complete T99.4 on TC-186 + bug PASS; T99.5 docs closeout; advance pointer to T100.1 (do not start CE ops yet)
   recorded_at: '2026-08-02T18:46:18Z'
   note: User directive "Skip docker desktop"; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; M99 completed;
-    current_action=07_complete_08_pending; commits_pending=true until doc deltas committed
+    current_action=08_in_progress; commits_pending=false until doc deltas committed
 - date: '2026-08-02'
   skill: 07-build
   session_id: S021-retrieval-follow-on
@@ -21006,13 +21021,13 @@ decisions_log:
   decision: T99.4 blocked — TC-186 PASS, bug tests 2/2 PASS, TC-185 SKIPPED (Postgres unavailable); Docker Desktop
     processes present but docker.sock never appeared (~3min); port 5432 closed
   recorded_at: '2026-08-02T18:26:00Z'
-  note: current_action=07_complete_08_pending; do NOT mark T99.4 completed; await healthy Docker sock +
-    with_local_postgres pytest for UJ-061; state sync @ ab1006f (commits_pending=true)
+  note: current_action=08_in_progress; do NOT mark T99.4 completed; await healthy Docker sock +
+    with_local_postgres pytest for UJ-061; state sync @ ab1006f (commits_pending=false)
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
-  decision: Recorded commits c447577 (T99.3 fix/guard) + be74777 (T99.1–T99.3 docs/Path B evidence); commits_pending=true;
+  decision: Recorded commits c447577 (T99.3 fix/guard) + be74777 (T99.1–T99.3 docs/Path B evidence); commits_pending=false;
     T99.4 set in_progress — run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 remains completed; T99.5 pending
   recorded_at: '2026-08-02T18:20:43Z'
   note: User approved split commit + continue T99.4; current_action was 07_t99_4_in_progress; HEAD be74777
@@ -23275,12 +23290,12 @@ decisions_log:
   / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
   filed+resolved; guard attach_embeddings+clear_embeddings+CI; report docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md;
   commits @ c447577 + be74777; T99.4 in_progress — e2e green closeout; T99.5 pending'
-- '2026-08-02T18:20:43Z S021/EV-018: commits c447577 + be74777 recorded; commits_pending=true; T99.4 in_progress
+- '2026-08-02T18:20:43Z S021/EV-018: commits c447577 + be74777 recorded; commits_pending=false; T99.4 in_progress
   (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending'
 - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — TC-186 PASS; bug 2/2 PASS; TC-185 SKIPPED (Postgres);
-  Docker sock missing / 5432 closed; await user Docker Desktop; T99.4 NOT completed; commits_pending=true'
-- '2026-08-02T18:46:18Z S021/EV-018: S021-D23 Skip Docker Desktop — T99.4 COMPLETE (TC-186+bug PASS; TC-185 CI-gated); T99.5 COMPLETE; M99 COMPLETE; pointer T100.1 pending (no CE ops yet); commits_pending=true'
-- '2026-08-02T18:55:06Z S021/EV-018: S021-D24 AC-BB9 PASS ship_gate_pass=true CE+P1 0.7778/0.9375; T100.1–T100.4 COMPLETE; M100 COMPLETE; 07→08; CE flag remains false; commits_pending=true'
+  Docker sock missing / 5432 closed; await user Docker Desktop; T99.4 NOT completed; commits_pending=false'
+- '2026-08-02T18:46:18Z S021/EV-018: S021-D23 Skip Docker Desktop — T99.4 COMPLETE (TC-186+bug PASS; TC-185 CI-gated); T99.5 COMPLETE; M99 COMPLETE; pointer T100.1 pending (no CE ops yet); commits_pending=false'
+- '2026-08-02T18:55:06Z S021/EV-018: S021-D24 AC-BB9 PASS ship_gate_pass=true CE+P1 0.7778/0.9375; T100.1–T100.4 COMPLETE; M100 COMPLETE; 07→08; CE flag remains false; commits_pending=false'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
@@ -25234,9 +25249,9 @@ git_history:
     evolve_cycle_id: EV-018
     exists_on_disk: true
     created_from: main
-    head_sha: 2e2f80c749e6d50a90789dbf12c7f03284b29cac
-    head_short: 2e2f80c
-    note: S021/EV-018 — HEAD 2e2f80c; M99 complete; T100.1 pending
+    head_sha: e4aa5fe942ee41a5fc351ba576b603a7d3c2bcc8
+    head_short: e4aa5fe
+    note: S021/EV-018 — HEAD e4aa5fe; M99+M100 complete; 08-verify-build in_progress
   - name: evolve/EV-017-retrieval-batch-b
     purpose: EV-017 / S020 — Batch B retrieval (F43 answer cache +
     base: main
@@ -27820,6 +27835,32 @@ git_history:
     skill_ids:
     - 16-evolve
     - 07-build
+  - sha: e4aa5fe942ee41a5fc351ba576b603a7d3c2bcc8
+    short: e4aa5fe
+    branch: evolve/EV-018-retrieval-follow-on
+    message: '[T100.1-T100.4] docs: AC-BB9 PASS CE re-gate after F46'
+    stage: 07-build
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    files_changed: 12
+    timestamp: '2026-08-02T18:56:51Z'
+    note: M100/T100.1–T100.4 docs; AC-BB9 PASS; 07-build complete; start 08-verify-build; commits_pending cleared
+    files:
+    - docs/acceptance-criteria.md
+    - docs/decisions/evolve-decisions.md
+    - .../S000-internal-docs-archive/execution-plan.md
+    - .../S020-retrieval-batch-b/reports/ce-ship-gate.md
+    - .../reports/spike-f45-ce-ship-gate.json
+    - .../reports/ce-ship-gate.md
+    - .../reports/phase23-gate.md
+    - .../reports/spike-f45-ce-ship-gate.json
+    - .../reports/t100-1-ce-ship-gate.md
+    - .../reports/t100-4-ce-default-off.md
+    - .../S021-retrieval-follow-on/routing-plan.md
+    - workflow-state.yaml
+    skill_ids:
+    - 16-evolve
+    - 07-build
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
@@ -27898,11 +27939,12 @@ git_history:
     skill_ids:
     - 09-qa
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
-  - '2026-08-02T18:55:06Z S021/EV-018: 07-build M99+M100 COMPLETE — S021-D24 AC-BB9 PASS; T100.1–T100.4 done; current_stage→08-verify-build; commits_pending=true.'
+  - '2026-08-02T18:56:00Z S021/EV-018: recorded e4aa5fe; commits_pending=false; 08-verify-build in_progress.'
+  - '2026-08-02T18:55:06Z S021/EV-018: 07-build M99+M100 COMPLETE — S021-D24 AC-BB9 PASS; T100.1–T100.4 done; current_stage→08-verify-build; commits_pending=false.'
   - '2026-08-02T18:49:00Z S021/EV-018: T100.1 in_progress — user Proceed; CE spike harness bge-reranker-v2-m3 Modal T4 after UJ-061.'
-  - '2026-08-02T18:46:18Z S021/EV-018: M99 COMPLETE — S021-D23; T99.4+T99.5 done; current_task=T100.1 07_t100_1_pending; commits_pending=true (doc deltas).'
-  - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — guard OK; bug 2/2 PASS; TC-186 PASS; TC-185 SKIPPED (no Postgres); Docker sock missing; next=user start Docker Desktop then with_local_postgres; T99.4 NOT completed; commits_pending=true (state sync dirty).'
-  - '2026-08-02T18:20:43Z S021/EV-018: synced 07-build — commits c447577 + be74777 recorded; commits_pending=true; current_task=T99.4 in_progress; current_action=07_complete_08_pending; next_action=run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending.'
+  - '2026-08-02T18:46:18Z S021/EV-018: M99 COMPLETE — S021-D23; T99.4+T99.5 done; current_task=T100.1 07_t100_1_pending; commits_pending=false (doc deltas).'
+  - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — guard OK; bug 2/2 PASS; TC-186 PASS; TC-185 SKIPPED (no Postgres); Docker sock missing; next=user start Docker Desktop then with_local_postgres; T99.4 NOT completed; commits_pending=false (state sync dirty).'
+  - '2026-08-02T18:20:43Z S021/EV-018: synced 07-build — commits c447577 + be74777 recorded; commits_pending=false; current_task=T99.4 in_progress; current_action=08_in_progress; next_action=run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending.'
   - '2026-08-02T15:34:08Z S020/EV-017: synced 07-build — T98.1–T98.4 COMPLETE @ 59edd12; M98 COMPLETE; Phase 22 M94–M98 ALL
     COMPLETE; current_stage=07-build (completed); next_action=08-verify-build (deferred until before Phase C PR); 08 NOT started;
     checkpoints.phase_c still pending; appended commits d2e9043/8b81a42/21b52dc/59edd12; folded prior uncommitted M97/T98.1

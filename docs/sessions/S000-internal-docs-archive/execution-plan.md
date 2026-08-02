@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 23: EV-018 — Retrieval follow-on (F46 + F45 re-gate) |
-| **Active milestone** | M100 — complete; next 08-verify-build |
-| **Active task** | 08-verify-build (M99–M100 done) |
+| **Active milestone** | M99–M100 complete; Phase D next |
+| **Active task** | 09-qa (08-verify-build PASS) |
 | **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98; Phase 23: T99.1–T100.4 (M99–M100) |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-018 — Standard; S021-D19/D23/D24; AC-BB9 PASS; CE flag still default-off |
 | **Git branch** | `evolve/EV-018-retrieval-follow-on` |
-| **Active session** | S021-retrieval-follow-on — 07-build complete → 08-verify-build |
+| **Active session** | S021-retrieval-follow-on — 08 PASS → Phase D (09-qa) |
 | **Scope addition** | 2026-08-02 — F46 non-empty retrieve + F45 CE re-gate; S021-D17–D19; TP1–TP6. |
 
 ## Template
