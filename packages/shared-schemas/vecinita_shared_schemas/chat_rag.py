@@ -34,6 +34,7 @@ class AskResponse(BaseModel):
     answer: str
     language: Literal["en", "es"]
     sources: list[Source]
+    cache_hit: Literal["none", "exact", "semantic", "retrieve"] = "none"
 
 
 class TagSummary(BaseModel):

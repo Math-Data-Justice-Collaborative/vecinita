@@ -16,6 +16,7 @@ from vecinita_chat_rag_backend.app import (
     create_app,
 )
 from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_chat_rag_backend.service import AskStreamSession
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
 from vecinita_shared_schemas.json_types import (
@@ -91,10 +92,18 @@ class StubChatRagService:
         _ = request
         return list(_SOURCES)
 
+    def stream_ask(self, request: AskRequest) -> AskStreamSession:
+        """Return a minimal SSE session compatible with create_app."""
+        _ = request
+        return AskStreamSession(
+            sources=list(_SOURCES),
+            cache_hit="none",
+            tokens=iter(("streamed answer",)),
+        )
+
     def ask_stream(self, request: AskRequest) -> Iterator[str]:
         """Yield a single streamed answer chunk, ignoring the request."""
-        _ = request
-        yield "streamed answer"
+        yield from self.stream_ask(request).tokens
 
 
 @pytest.fixture

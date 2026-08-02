@@ -13,6 +13,7 @@ from sqlalchemy import (
     text,
 )
 from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_chat_rag_backend.service import AskStreamSession
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
 from vecinita_shared_schemas.db_mapping import (
@@ -153,7 +154,23 @@ class StubChatRagService:
             raise self.retrieve_error
         return list(self.sources)
 
+    def stream_ask(self, request: AskRequest) -> AskStreamSession:
+        """Return SSE session; empty sources fall back to ask answer (legacy path)."""
+        if self.retrieve_error is not None:
+            raise self.retrieve_error
+        if not self.sources:
+            result = self.ask(request)
+            return AskStreamSession(
+                sources=[],
+                cache_hit=result.cache_hit,
+                tokens=iter((result.answer,)),
+            )
+        return AskStreamSession(
+            sources=list(self.sources),
+            cache_hit="none",
+            tokens=iter(self.stream_tokens),
+        )
+
     def ask_stream(self, request: AskRequest) -> Iterator[str]:
         """Yield the configured stream tokens, ignoring the request."""
-        _ = request
-        yield from self.stream_tokens
+        yield from self.stream_ask(request).tokens

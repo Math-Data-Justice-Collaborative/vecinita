@@ -195,7 +195,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         body = await parse_ask_body(request)
         try:
             service = get_service()
-            sources = service.retrieve_sources(body)
+            session = service.stream_ask(body)
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -203,16 +203,10 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             ) from exc
 
         def event_stream() -> Iterator[str]:
-            if not sources:
-                result = service.ask(body)
-                yield f"data: {json.dumps({'token': result.answer})}\n\n"
-                yield f"data: {json.dumps({'sources': []})}\n\n"
-                yield f"data: {json.dumps({'done': True})}\n\n"
-                return
-            for token in service.ask_stream(body):
+            for token in session.tokens:
                 yield f"data: {json.dumps({'token': token})}\n\n"
-            yield f"data: {json.dumps({'sources': _source_payload(sources)})}\n\n"
-            yield f"data: {json.dumps({'done': True})}\n\n"
+            yield f"data: {json.dumps({'sources': _source_payload(session.sources)})}\n\n"
+            yield f"data: {json.dumps({'done': True, 'cache_hit': session.cache_hit})}\n\n"
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 
