@@ -9,9 +9,9 @@
 | 04-tech-plan | yes | completed | delta | TP1–TP6 / S021-D18; Phase 23 M99–M100 |
 | 07-build | yes | completed | — | M99–M100 done; AC-BB9 PASS (S021-D24); CE flag still off |
 | 08-verify-build | yes | completed | — | PASS — `reports/verification-report.md` |
-| 09-qa | yes | pending | — | |
-| 10-e2e | yes | pending | — | |
-| 11-verify-impl | yes | pending | — | |
+| 09-qa | yes | completed | — | pass_with_advisories — `reports/qa-report.md` |
+| 10-e2e | yes | completed | — | PASS — `reports/e2e-report.md` |
+| 11-verify-impl | yes | in_progress | — | awaiting user — `reports/verify-impl.md` |
 | 12-verify-deploy | yes | pending | — | |
 | 13-deploy-smoke | yes | pending | — | |
 
