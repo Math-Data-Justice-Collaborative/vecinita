@@ -29,7 +29,13 @@ class JobOptions(BaseModel):
     eval_run_id: UUID | None = None
     question: str | None = Field(default=None, min_length=1, max_length=2000)
     mode: RebuildMode | None = None
-    force: bool = False
+    force: bool = Field(
+        default=False,
+        description=(
+            "Bypass content_hash skip on ingest (F47) and rebuild (F41). "
+            "When true, re-chunk and re-embed even if scraped hash matches stored hash."
+        ),
+    )
     dry_run: bool = False
     document_ids: list[UUID] | None = None
     backfill: bool = False

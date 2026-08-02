@@ -50,6 +50,15 @@ def _raise_no_chunks(url: str) -> None:
     raise ValueError(msg)
 
 
+def _lookup_stored_content_hash(write_client: object, url: str) -> str | None:
+    """Return stored content_hash when the write client supports F47 lookup."""
+    getter = getattr(write_client, "get_content_hash_by_url", None)
+    if not callable(getter):
+        return None
+    result: object = getter(url)
+    return result if isinstance(result, str) else None
+
+
 class DocumentFetcher(Protocol):
     """Callable that fetches a URL and returns normalized page text."""
 
@@ -97,6 +106,8 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
     vocabulary = tag_vocabulary if tag_vocabulary is not None else load_seed_vocabulary()
     slug_vocab = vocabulary_slugs(vocabulary)
 
+    force = _option_bool(record.options, "force")
+
     try:
         documents: list[DocumentUpsert] = []
         for url in record.urls:
@@ -105,6 +116,29 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
             title = scraped.title or ""
             source_url = scraped.url
             language = detect_document_language(text)
+            digest = sha256(text.encode("utf-8")).hexdigest()
+
+            stored_hash = _lookup_stored_content_hash(write_client, source_url)
+            if stored_hash is None and source_url != url:
+                stored_hash = _lookup_stored_content_hash(write_client, url)
+
+            # F47 / #163: refresh metadata; skip chunk delete + re-embed when hash matches.
+            if stored_hash is not None and stored_hash == digest and not force:
+                documents.append(
+                    DocumentUpsert(
+                        url=HttpUrl(source_url),
+                        title=scraped.title,
+                        content_hash=digest,
+                        language=language,
+                        body_text=text,
+                        embedding_model_id=_embedding_model_id(),
+                        embedding_dim=EMBEDDING_DIMENSION,
+                        chunk_size_tokens=chunk_size,
+                        chunks=[],
+                        tags=None,
+                    )
+                )
+                continue
 
             chunks = chunk_text(text, chunk_size_tokens=chunk_size)
             if not chunks:
@@ -146,7 +180,7 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
                 DocumentUpsert(
                     url=HttpUrl(source_url),
                     title=scraped.title,
-                    content_hash=sha256(text.encode("utf-8")).hexdigest(),
+                    content_hash=digest,
                     language=language,
                     body_text=text,
                     embedding_model_id=_embedding_model_id(),

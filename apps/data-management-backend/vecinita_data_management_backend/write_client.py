@@ -16,6 +16,7 @@ from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
     CreateRebuildRunResponse,
+    DocumentContentHashResponse,
     DocumentDetail,
     DocumentListPage,
     EvalRunListResponse,
@@ -99,6 +100,19 @@ class InternalWriteClient:
             msg = f"upsert_batch failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return BatchUpsertResponse.model_validate(response.json())
+
+    def get_content_hash_by_url(self, url: str) -> str | None:
+        """Lookup stored content_hash for ingest skip (F47 / #163)."""
+        response = self._client.get(
+            "/internal/v1/documents/content-hash",
+            params={"url": url},
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"get_content_hash_by_url failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        parsed = DocumentContentHashResponse.model_validate(response.json())
+        return parsed.content_hash
 
     def create_rebuild_run(self, body: dict[str, object]) -> UUID:
         """Create a rebuild_runs row for dry-run / live rebuild tracking (TP-S017-02)."""

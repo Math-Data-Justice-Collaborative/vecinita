@@ -227,11 +227,19 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 ```
 
 - **Ingest JobOptions (EV-019 / F47–F49):**
-  - **`force`:** bool, default `false` — bypass `content_hash` skip (F47 / #163); same flag as rebuild.
+  - **`force`:** bool, default `false` — bypass `content_hash` skip on **ingest** (F47 / #163)
+    and rebuild (F41). When true, re-chunk and re-embed even if scraped hash matches.
   - **`chunk_size_tokens`:** int, optional — override env default (256).
   - **`chunk_overlap_tokens`:** int, optional — override env default (**32**, ADR-044).
   - On completed jobs, result/metrics SHOULD expose skip/embed counts when available
-    (e.g. `skipped_unchanged`, `urls_failed_embed`) — exact schema finalized in 04/OpenAPI.
+    (e.g. `skipped_unchanged`, `urls_failed_embed`) — exact schema finalized in OpenAPI (M104).
+
+### GET `/internal/v1/documents/content-hash?url=`
+
+- **Purpose**: Lookup stored `content_hash` by URL for ingest skip (F47 / #163).
+- **Auth**: Service key (Modal → write API).
+- **Response** `200`: `{"url": "...", "content_hash": "…" | null, "document_id": uuid | null}`
+  (`content_hash` null when URL unknown).
 
 - **Response** `202`:
 

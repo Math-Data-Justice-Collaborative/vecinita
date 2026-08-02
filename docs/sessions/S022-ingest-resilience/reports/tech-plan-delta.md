@@ -1,7 +1,7 @@
 # 04-tech-plan delta — EV-019 / F47–F49
 
 > **Session:** S022 · **Cycle:** EV-019 · **Date:** 2026-08-02  
-> **Status:** TP1–TP6 approved; awaiting Gate B→C
+> **Status:** completed — Gate B→C PASS (S022-D22); 07-build started
 
 ## Approvals
 
@@ -44,4 +44,4 @@
 
 ## Next
 
-Gate B→C AskQuestion → on pass: `07-build` (05/06 skipped) starting at T101.1.
+`07-build` (05/06 skipped) @ T101.1 — F47 content_hash skip.

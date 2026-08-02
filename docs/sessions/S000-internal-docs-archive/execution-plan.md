@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 24: EV-019 — Ingest resilience (F47–F49) |
-| **Active milestone** | M101 (F47 hash skip) — first pending |
-| **Active task** | T101.1 (awaiting Gate B→C) |
-| **Tasks completed** | Phase 21–23 complete; Phase 24 pending |
+| **Active milestone** | M102 (F48 embed retry) |
+| **Active task** | T102.1 (pending) |
+| **Tasks completed** | Phase 21–23 complete; Phase 24 M101 (T101.1–T101.4) |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-019 — Standard; S022-D20/D21; TP1–TP6; skip 05/06 |
 | **Git branch** | `evolve/EV-019-ingest-resilience` |
@@ -2035,10 +2035,10 @@ OpenAPI/`JobOptions` ingest `force` prose (AC-IR1/IR2).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T101.1 | Test: unit/pipeline red — same-hash skip + force re-embed (TC-187/188 scaffolding) | Test | pending | AC-IR1/IR2, F47, #163 | — | — | S022 | F47 |
-| T101.2 | Config: OpenAPI + `JobOptions` — clarify `force` for ingest (shared with rebuild) | Config | pending | api-contract, M3, TP3 | — | — | S022 | F47 |
-| T101.3 | Code: Hash compare short-circuit on ingest/write path; metadata refresh; honor `force` | Code | pending | feature-list F47, RD-221 | T101.1, T101.2 | — | S022 | F47 |
-| T101.4 | Test: unit/pipeline green for skip + force | Test | pending | AC-IR1/IR2 | T101.3 | — | S022 | F47 |
+| T101.1 | Test: unit/pipeline red — same-hash skip + force re-embed (TC-187/188 scaffolding) | Test | completed | AC-IR1/IR2, F47, #163 | — | 2026-08-02 | S022 | F47 |
+| T101.2 | Config: OpenAPI + `JobOptions` — clarify `force` for ingest (shared with rebuild) | Config | completed | api-contract, M3, TP3 | — | 2026-08-02 | S022 | F47 |
+| T101.3 | Code: Hash compare short-circuit on ingest/write path; metadata refresh; honor `force` | Code | completed | feature-list F47, RD-221 | T101.1, T101.2 | 2026-08-02 | S022 | F47 |
+| T101.4 | Test: unit/pipeline green for skip + force | Test | completed | AC-IR1/IR2 | T101.3 | 2026-08-02 | S022 | F47 |
 
 #### M102: F48 — embed sub-batch + retry
 
@@ -2820,10 +2820,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T98.2 | M98 | 22 | Test | completed | T97.3 | 2026-08-02 | S020 | F45 | — |
 | T98.3 | M98 | 22 | Docs | completed | T97.5 | 2026-08-02 | S020 | F45 | — |
 | T98.4 | M98 | 22 | Docs | completed | T96.4, T98.1–T98.3 | 2026-08-02 | S020 | F43–F45 | — |
-| T101.1 | M101 | 24 | Test | pending | — | — | S022 | F47 | — |
-| T101.2 | M101 | 24 | Config | pending | — | — | S022 | F47 | — |
-| T101.3 | M101 | 24 | Code | pending | T101.1, T101.2 | — | S022 | F47 | — |
-| T101.4 | M101 | 24 | Test | pending | T101.3 | — | S022 | F47 | — |
+| T101.1 | M101 | 24 | Test | completed | — | 2026-08-02 | S022 | F47 | — |
+| T101.2 | M101 | 24 | Config | completed | — | 2026-08-02 | S022 | F47 | — |
+| T101.3 | M101 | 24 | Code | completed | T101.1, T101.2 | 2026-08-02 | S022 | F47 | — |
+| T101.4 | M101 | 24 | Test | completed | T101.3 | 2026-08-02 | S022 | F47 | — |
 | T102.1 | M102 | 24 | Test | pending | T101.4 | — | S022 | F48 | — |
 | T102.2 | M102 | 24 | Config | pending | — | — | S022 | F48 | — |
 | T102.3 | M102 | 24 | Code | pending | T102.1, T102.2 | — | S022 | F48 | — |

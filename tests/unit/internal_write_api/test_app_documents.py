@@ -75,6 +75,58 @@ def test_get_document_returns_404_for_unknown(write_client: TestClient) -> None:
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
+def test_get_document_content_hash_by_url(write_client: TestClient) -> None:
+    """F47: lookup returns stored content_hash; unknown URL yields null hash."""
+    from hashlib import sha256  # noqa: PLC0415
+
+    url = f"https://hash-lookup-{uuid.uuid4().hex[:8]}.example.com/doc"
+    body_text = "Hash lookup body for ingest skip"
+    digest = sha256(body_text.encode("utf-8")).hexdigest()
+    upsert = write_client.post(
+        "/internal/v1/documents/batch",
+        headers=auth_headers(),
+        json={
+            "documents": [
+                {
+                    "url": url,
+                    "title": "Hash lookup",
+                    "content_hash": digest,
+                    "body_text": body_text,
+                    "chunks": [
+                        {
+                            "chunk_index": 0,
+                            "text": body_text,
+                            "embedding": [0.01] * 384,
+                        }
+                    ],
+                }
+            ]
+        },
+    )
+    assert upsert.status_code == HTTPStatus.OK
+
+    found = write_client.get(
+        "/internal/v1/documents/content-hash",
+        params={"url": url},
+        headers=auth_headers(),
+    )
+    assert found.status_code == HTTPStatus.OK
+    found_body = response_json_object(found)
+    assert found_body["url"] == url
+    assert found_body["content_hash"] == digest
+    assert found_body["document_id"] is not None
+
+    missing = write_client.get(
+        "/internal/v1/documents/content-hash",
+        params={"url": f"https://missing-{uuid.uuid4().hex[:8]}.example.com"},
+        headers=auth_headers(),
+    )
+    assert missing.status_code == HTTPStatus.OK
+    missing_body = response_json_object(missing)
+    assert missing_body["content_hash"] is None
+    assert missing_body["document_id"] is None
+
+
 def test_list_documents_includes_seeded_doc(
     write_client: TestClient,
     seeded_document: UUID,
