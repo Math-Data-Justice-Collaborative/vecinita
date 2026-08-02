@@ -4389,8 +4389,8 @@ project:
       evolve_cycle_id: EV-018
       retrospective_cycle_id: RET-001
       predecessor_evolve_cycle_id: EV-018
-      current_action: 17_complete_awaiting_session_close
-      next_action: AskQuestion close S021 / open PR for skill patches
+      current_action: 17_open_pr_then_close_session
+      next_action: create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021
       current_phase: 7
       phase3_status: completed
       phase4_status: completed
@@ -4398,12 +4398,15 @@ project:
       phase6_status: completed
       phase7_status: completed
       skill_workshop: completed
-      commits_pending: true
+      commits_pending: false
+      commits_note: 'ab994c6 pushed to origin — commits_pending=false'
+      user_close_choice: option_1_open_pr_then_close_session
+      user_close_option: 1
       follow_up_retro: after_next_evolve_hotfix
       last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
       evidence_summary: 'Phase 1–2 digest → docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md'
       decision: S021-D28
-      note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
+      note: 'RET-001 COMPLETE 2026-08-02 — user option_1 open PR for skill patches then close S021; ADR-043 accepted; RA-001–RA-007 done; skill_workshop=completed; current_phase=7; current_action=17_open_pr_then_close_session; next_action=create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021; commits_pending=false (ab994c6 pushed to origin/evolve/EV-018-retrieval-follow-on); follow_up_retro=after_next_evolve_hotfix; session NOT closed (await PR merge)'
 session_counter: 21
 active_session:
   id: S021-retrieval-follow-on
@@ -4423,14 +4426,17 @@ active_session:
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
   current_stage: 17-retrospective
   current_stage_parallel:
-  current_action: 17_complete_awaiting_session_close
-  next_action: AskQuestion close S021 / open PR for skill patches
-  commits_pending: true
+  current_action: 17_open_pr_then_close_session
+  next_action: create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021
+  commits_pending: false
+  commits_note: 'ab994c6 pushed to origin/evolve/EV-018-retrieval-follow-on — commits_pending=false'
+  user_close_choice: option_1_open_pr_then_close_session
+  user_close_option: 1
   follow_up_retro: after_next_evolve_hotfix
-  current_stage_note: 'S021/RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 + Phase 7 done; ADR-043 accepted;
-    RA-001–RA-007 done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close;
-    next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
-  commits_head: 7938ce7
+  current_stage_note: 'S021/RET-001 COMPLETE 2026-08-02 — user option_1 open PR then close S021; ADR-043 accepted;
+    RA-001–RA-007 done; skill_workshop=completed; current_phase=7; current_action=17_open_pr_then_close_session;
+    next_action=create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021; commits_pending=false (ab994c6 on origin); follow_up_retro=after_next_evolve_hotfix; session NOT closed (await PR merge)'
+  commits_head: ab994c6
   pr_plan_id: PR-57
   pr_number: 174
   pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174
@@ -4673,9 +4679,9 @@ active_session:
     added_at: '2026-08-02'
     started_at: '2026-08-02'
     completed_at: '2026-08-02'
-    note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
-    current_action: 17_complete_awaiting_session_close
-    next_action: AskQuestion close S021 / open PR for skill patches
+    note: 'RET-001 COMPLETE 2026-08-02 — user option_1 open PR for skill patches then close S021; ADR-043 accepted; RA-001–RA-007 done; skill_workshop=completed; current_phase=7; current_action=17_open_pr_then_close_session; next_action=create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021; commits_pending=false (ab994c6 pushed to origin/evolve/EV-018-retrieval-follow-on); follow_up_retro=after_next_evolve_hotfix; session NOT closed (await PR merge)'
+    current_action: 17_open_pr_then_close_session
+    next_action: create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021
     current_phase: 7
     phase3_status: completed
     phase4_status: completed
@@ -4683,7 +4689,10 @@ active_session:
     phase6_status: completed
     phase7_status: completed
     skill_workshop: completed
-    commits_pending: true
+    commits_pending: false
+    commits_note: 'ab994c6 pushed to origin — commits_pending=false'
+    user_close_choice: option_1_open_pr_then_close_session
+    user_close_option: 1
     follow_up_retro: after_next_evolve_hotfix
     last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
     report: docs/sessions/S021-retrieval-follow-on/reports/retrospective.md
@@ -13184,8 +13193,8 @@ stages:
     evolve_cycle_id: EV-018
     retrospective_cycle_id: RET-001
     predecessor_evolve_cycle_id: EV-018
-    current_action: 17_complete_awaiting_session_close
-    next_action: AskQuestion close S021 / open PR for skill patches
+    current_action: 17_open_pr_then_close_session
+    next_action: create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021
     current_phase: 7
     phase3_status: completed
     phase4_status: completed
@@ -13193,12 +13202,15 @@ stages:
     phase6_status: completed
     phase7_status: completed
     skill_workshop: completed
-    commits_pending: true
+    commits_pending: false
+    commits_note: 'ab994c6 pushed to origin — commits_pending=false'
+    user_close_choice: option_1_open_pr_then_close_session
+    user_close_option: 1
     follow_up_retro: after_next_evolve_hotfix
     last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
     evidence_summary: 'Phase 1–2 digest → docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md'
     decision: S021-D28
-    note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
+    note: 'RET-001 COMPLETE 2026-08-02 — user option_1 open PR for skill patches then close S021; ADR-043 accepted; RA-001–RA-007 done; skill_workshop=completed; current_phase=7; current_action=17_open_pr_then_close_session; next_action=create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021; commits_pending=false (ab994c6 pushed to origin/evolve/EV-018-retrieval-follow-on); follow_up_retro=after_next_evolve_hotfix; session NOT closed (await PR merge)'
   18-pr-review:
     status: completed
     started: '2026-06-30'
@@ -21000,9 +21012,12 @@ retrospective_cycles:
   depth: deep
   transcript_consent: full
   current_phase: 7
-  current_action: 17_complete_awaiting_session_close
-  next_action: AskQuestion close S021 / open PR for skill patches
-  commits_pending: true
+  current_action: 17_open_pr_then_close_session
+  next_action: create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021
+  commits_pending: false
+  commits_note: 'ab994c6 pushed to origin — commits_pending=false'
+  user_close_choice: option_1_open_pr_then_close_session
+  user_close_option: 1
   follow_up_retro: after_next_evolve_hotfix
   last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
   phase3_status: completed
@@ -21261,7 +21276,7 @@ retrospective_cycles:
   - path: docs/retrospective-actions.md
     status: written
     note: Phase 7 — standing retrospective actions backlog (RA-001–RA-007)
-  note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
+  note: 'RET-001 COMPLETE 2026-08-02 — user option_1 open PR for skill patches then close S021; ADR-043 accepted; RA-001–RA-007 done; skill_workshop=completed; current_phase=7; current_action=17_open_pr_then_close_session; next_action=create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021; commits_pending=false (ab994c6 pushed to origin/evolve/EV-018-retrieval-follow-on); follow_up_retro=after_next_evolve_hotfix; session NOT closed (await PR merge)'
 pr_review_cycles:
 - id: PRR-001
   pr_number: 60
@@ -24789,6 +24804,7 @@ decisions_log:
 - '2026-08-02T20:31:58Z S021/RET-001: Phase 4 COMPLETE / Phase 5 STARTED — brainstorm choices session_sprawl=b fewer_chats_batch_stages; handoff=c digest+HANDOFF.md; state_noise=c batch_updates+no_solo_workflow_state_commits; secondary=c CE_messaging+BUG/14/07 workshop; actions seeded RA-001–RA-007 (P1: RA-001–004; P2: RA-005–007); phase4_status=completed; current_phase=5; current_action=17_phase5_action_routing; next_action=AskQuestion Phase 5 routing gate; commits_pending=true'
 - '2026-08-02T20:40:49Z S021/RET-001: Phase 6 Batch 1 APPLIED (user option 1) — ADR-043 written; patches applied to 16-evolve/SKILL.md, 00-context/SKILL.md, sessions-reference.md; HANDOFF.md written for S021; RA-001/RA-002/RA-003 status=done; skill_patches=[those three paths] applied; skill_workshop=in_progress; phase5_status=completed; current_phase=6; current_action=17_phase6_batch2_ra004_007; next_action=AskQuestion Batch 2 patches (RA-004–RA-007); commits_pending=true'
 - '2026-08-02T20:50:00Z S021/RET-001: COMPLETE — Phase 6 Batch 2 APPLIED (RA-004 workflow-state-agent-protocol; RA-005 atomic-commits.mdc; RA-006 12-verify-deploy+13-deploy-smoke; RA-007 14-hotfix+07-build+bug-investigation); Phase 7 artifacts written (retrospective report completed, session retrospective.md, docs/retrospective-actions.md, ADR-043 accepted, HANDOFF.md); RA-001–RA-007 all done; skill_workshop=completed; status=completed completed=2026-08-02 current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; active_session S021 remains open (close_session NOT run)'
+- '2026-08-02T20:49:46Z S021/RET-001: user option_1 — open PR for skill patches then close S021; current_action=17_open_pr_then_close_session; next_action=create PR from evolve/EV-018 tip (RET-001 patches) → merge → close_session S021; commits_pending=false (ab994c6 on origin/evolve/EV-018-retrieval-follow-on); close_session NOT run (parent will call after PR merged)'
 artifacts:
 - path: docs/retrospective-actions.md
   kind: retrospective-actions
@@ -26827,7 +26843,7 @@ artifacts:
   note: evolve-decisions.md has S021-D26
   recorded_at: '2026-08-02T19:17:09Z'
 git_history:
-  current_branch: main
+  current_branch: evolve/EV-018-retrieval-follow-on
   branches:
   - name: evolve/EV-018-retrieval-follow-on
     purpose: 'EV-018 / S021 — empty retrieve pools + CE re-gate (AC-BB9 / UJ-060 / #83)'
@@ -26838,8 +26854,10 @@ git_history:
     evolve_cycle_id: EV-018
     exists_on_disk: true
     created_from: main
-    head_sha: dd92615
-    head_short: dd92615
+    head_sha: ab994c6
+    head_short: ab994c6
+    tip_sha: ab994c6c83429d24cf820be14b97e03608b1bd43
+    tip_note: 'RET-001 skill patches tip on origin; open PR then close S021 (option_1)'
     pr_number: 174
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174
     pr_title: '[EV-018] Retrieval follow-on — F46 empty retrieve + F45 CE re-gate'
@@ -29609,6 +29627,45 @@ git_history:
     - 13-deploy-smoke
     - workflow-state-manager
   notes:
+  - sha: 8eb71a93f06c974c389e924c2f06a150d718adc6
+    short: 8eb71a9
+    branch: evolve/EV-018-retrieval-follow-on
+    message: 'docs: RET-001 Phase 1–2 evidence digest for EV-018'
+    stage: 17-retrospective
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    retrospective_cycle_id: RET-001
+    files_changed: 2
+    timestamp: '2026-08-02T20:10:00Z'
+    note: RET-001 Phase 1–2 evidence digest
+    skill_ids:
+    - 17-retrospective
+  - sha: e6f5d1055f3246da93f7025de94905823db6a52f
+    short: e6f5d10
+    branch: evolve/EV-018-retrieval-follow-on
+    message: 'docs: RET-001 Phase 3–4 interview + RA-001–007 draft'
+    stage: 17-retrospective
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    retrospective_cycle_id: RET-001
+    files_changed: 2
+    timestamp: '2026-08-02T20:31:58Z'
+    note: RET-001 Phase 3–4 interview + RA draft
+    skill_ids:
+    - 17-retrospective
+  - sha: ab994c6c83429d24cf820be14b97e03608b1bd43
+    short: ab994c6
+    branch: evolve/EV-018-retrieval-follow-on
+    message: 'chore(skills): RET-001 RA-001–007 + ADR-043 session handoff'
+    stage: 17-retrospective
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    retrospective_cycle_id: RET-001
+    files_changed: 16
+    timestamp: '2026-08-02T20:46:35Z'
+    note: RET-001 skill patches + ADR-043 + Phase 7 artifacts; pushed to origin; commits_pending=false
+    skill_ids:
+    - 17-retrospective
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
     branch: evolve/EV-017-retrieval-batch-b
