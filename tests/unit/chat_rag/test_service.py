@@ -12,25 +12,32 @@ from vecinita_chat_rag_backend.service import (
     _build_prompt,  # pyright: ignore[reportPrivateUsage]
     _to_ask_response,  # pyright: ignore[reportPrivateUsage]
 )
+from vecinita_rag.rerank import CallableCrossEncoderScorer
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
 from vecinita_shared_schemas.eval_config import EvalConfig
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
 
 _EXPECTED_RETRIEVER_CALLS = 2
 _CHUNK_SCORE = 0.88
+_CE_TOP_K = 2
 
 
-def _chunk(*, language: str = "en") -> RetrievedChunk:
+def _chunk(
+    *,
+    language: str = "en",
+    text: str = "The clinic is open Monday through Friday.",
+    title: str = "Community guide",
+) -> RetrievedChunk:
     """Chunk."""
     return RetrievedChunk(
         chunk_id=uuid4(),
         document_id=uuid4(),
-        title="Community guide",
+        title=title,
         url="https://example.com/guide",
-        text="The clinic is open Monday through Friday.",
+        text=text,
         score=0.88,
         language=language,
     )
@@ -309,6 +316,75 @@ def test_retrieve_soft_language_default_off_skips_unfiltered_retry() -> None:
     assert sources == []
     assert None not in retriever.languages
     assert retriever.languages == ["en"]
+
+
+def test_retrieve_ce_flag_off_skips_scorer() -> None:
+    """T97.3 / TC-183: default CE flag off never calls the mockable scorer."""
+    calls: list[str] = []
+
+    def _score(query: str, passages: Sequence[str]) -> list[float]:
+        calls.append(query)
+        return [0.9 for _ in passages]
+
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=_CE_TOP_K,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_rerank_ce=False,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=StubRetriever(  # type: ignore[arg-type]
+            [
+                _chunk(text="a", title="a"),
+                _chunk(text="b", title="b"),
+                _chunk(text="c", title="c"),
+            ]
+        ),
+        llm_client=StubLlm(),  # type: ignore[arg-type]
+        settings=settings,
+        ce_scorer=CallableCrossEncoderScorer(_score),
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=_CE_TOP_K)):
+        sources = service.retrieve_sources(AskRequest(question="clinic hours", language="en"))
+    assert len(sources) == _CE_TOP_K
+    assert calls == []
+
+
+def test_retrieve_ce_flag_on_reranks_with_scorer() -> None:
+    """T97.3 / TC-182: flag on + mock scorer keeps ≤ top_k by CE score."""
+    low = _chunk(text="low", title="low")
+    high = _chunk(text="high", title="high")
+    mid = _chunk(text="mid", title="mid")
+
+    def _score(_query: str, passages: Sequence[str]) -> list[float]:
+        weights = {"high": 0.95, "mid": 0.5, "low": 0.1}
+        return [weights.get(text, 0.0) for text in passages]
+
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=_CE_TOP_K,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_rerank_ce=True,
+        rag_rerank_ce_top_n=3,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=StubRetriever([low, mid, high]),  # type: ignore[arg-type]
+        llm_client=StubLlm(),  # type: ignore[arg-type]
+        settings=settings,
+        ce_scorer=CallableCrossEncoderScorer(_score),
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=_CE_TOP_K)):
+        sources = service.retrieve_sources(AskRequest(question="clinic hours", language="en"))
+    assert len(sources) == _CE_TOP_K
+    assert [source.title for source in sources] == ["high", "mid"]
 
 
 def test_from_settings_embed_and_tag_infer_fns() -> None:

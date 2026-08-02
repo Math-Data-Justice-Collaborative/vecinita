@@ -32,6 +32,14 @@ from vecinita_rag.multi_query import (
     multi_query_retrieve,
 )
 from vecinita_rag.packing import pack_chunks, pack_p1
+from vecinita_rag.rerank import (
+    DEFAULT_CE_MODEL_ID,
+    DEFAULT_CE_TOP_N,
+    CallableCrossEncoderScorer,
+    CrossEncoderScorer,
+    merge_ce_rerank,
+    rerank_with_scorer,
+)
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.soft_language import SoftLanguageResult, soft_language_retrieve
 from vecinita_rag.types import RagAnswer, RetrievedChunk
@@ -41,6 +49,8 @@ __version__ = "0.1.0"
 __all__ = [
     "DEFAULT_CACHE_MAX_ENTRIES",
     "DEFAULT_CACHE_TTL_S",
+    "DEFAULT_CE_MODEL_ID",
+    "DEFAULT_CE_TOP_N",
     "DEFAULT_SEMANTIC_THRESHOLD",
     "DEFAULT_TOP_K",
     "EMBEDDING_DIMENSION",
@@ -49,8 +59,10 @@ __all__ = [
     "AnswerCache",
     "CacheHitKind",
     "CachedAnswer",
+    "CallableCrossEncoderScorer",
     "CascadeRequest",
     "CorpusPgvectorRetriever",
+    "CrossEncoderScorer",
     "RagAnswer",
     "RetrievedChunk",
     "SoftLanguageResult",
@@ -62,12 +74,14 @@ __all__ = [
     "content_hash",
     "detect_query_language",
     "heuristic_rewrites",
+    "merge_ce_rerank",
     "merge_multi_query_hits",
     "multi_query_retrieve",
     "no_context_message",
     "normalize_query",
     "pack_chunks",
     "pack_p1",
+    "rerank_with_scorer",
     "soft_language_retrieve",
     "synthesize_with_llm",
 ]

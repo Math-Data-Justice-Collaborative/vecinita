@@ -20,6 +20,7 @@ from vecinita_rag.engine import answer_from_chunks
 from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.multi_query import multi_query_retrieve
 from vecinita_rag.packing import PackerMode, pack_chunks
+from vecinita_rag.rerank import CrossEncoderScorer, rerank_with_scorer
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.soft_language import soft_language_retrieve
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
@@ -133,6 +134,7 @@ class ChatRagService:
         settings: ChatRagSettings | None = None,
         config_engine: Engine | None = None,
         answer_cache: AnswerCache | None = None,
+        ce_scorer: CrossEncoderScorer | None = None,
     ) -> None:
         """Wire retrieval, LLM, and optional tag inference for ask flows."""
         self._retriever = retriever
@@ -143,6 +145,7 @@ class ChatRagService:
         self._settings = settings
         self._config_engine = config_engine
         self._answer_cache = answer_cache
+        self._ce_scorer = ce_scorer
         if self._answer_cache is None and settings is not None and settings.rag_cache:
             self._answer_cache = AnswerCache(
                 ttl_s=settings.rag_cache_ttl_s,
@@ -246,13 +249,21 @@ class ChatRagService:
         soft_fallback = (
             self._settings.rag_soft_language_fallback if self._settings is not None else False
         )
+        ce_enabled = (
+            self._settings is not None
+            and self._settings.rag_rerank_ce
+            and self._ce_scorer is not None
+        )
+        retrieve_k = top_k
+        if ce_enabled and self._settings is not None:
+            retrieve_k = max(top_k, self._settings.rag_rerank_ce_top_n)
 
         def _retrieve_lang(question: str, lang: str | None) -> list[RetrievedChunk]:
             chunks = self._retriever.retrieve_chunks(
                 question,
                 tag_slugs=tag_slugs,
                 language=lang,
-                top_k=top_k,
+                top_k=retrieve_k,
                 score_threshold=min_retrieval_score,
             )
             if not chunks and tag_slugs:
@@ -260,7 +271,7 @@ class ChatRagService:
                     question,
                     tag_slugs=None,
                     language=lang,
-                    top_k=top_k,
+                    top_k=retrieve_k,
                     score_threshold=min_retrieval_score,
                 )
             return chunks
@@ -273,14 +284,22 @@ class ChatRagService:
                 enabled=soft_fallback,
             ).chunks
 
-        return multi_query_retrieve(
+        chunks = multi_query_retrieve(
             request.question,
             locale=language,
-            top_k=top_k,
+            top_k=retrieve_k,
             retrieve_fn=_retrieve_once,
             enabled=multi_query,
             count=multi_count,
         )
+        if ce_enabled and self._ce_scorer is not None:
+            return rerank_with_scorer(
+                request.question,
+                chunks,
+                top_k=top_k,
+                scorer=self._ce_scorer,
+            )
+        return chunks
 
     def _synthesize(
         self,

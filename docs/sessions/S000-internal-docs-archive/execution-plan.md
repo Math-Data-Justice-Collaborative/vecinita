@@ -11,12 +11,12 @@
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
 | **Active milestone** | M97 — F45 CE Modal T4 spike + mockable client |
-| **Active task** | T97.3 — mockable CE client + ChatRAG flag-gated hook — next |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M96; M97: T97.1–T97.2 |
+| **Active task** | T97.4 — ephemeral Modal T4 CE spike app/script — next |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M96; M97: T97.1–T97.3 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
-| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T97.3 |
+| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T97.4 |
 | **Scope addition** | 2026-08-02 — F43 H1 cache + F44 soft L1 + F45 CE spike/gate; ADR-042; S020-D15–D18. |
 
 ## Template
@@ -1941,7 +1941,7 @@ unit tests TC-170–172.
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T97.1 | Test: unit — CE merge keeps ≤ top_k (TC-182) with mock CE — red | Test | completed | AC-BB7, TC-182, UJ-059 | T94.4 | 2026-08-02 | S020 | F45 |
 | T97.2 | Test: unit/e2e — `VECINITA_RAG_RERANK_CE` default off (TC-183) — red | Test | completed | AC-BB8, TC-183 | — | 2026-08-02 | S020 | F45 |
-| T97.3 | Code: mockable CE client in `packages/rag` + ChatRAG flag-gated hook | Code | pending | feature-list F45, M3 | T97.1, T97.2 | — | S020 | F45 |
+| T97.3 | Code: mockable CE client in `packages/rag` + ChatRAG flag-gated hook | Code | completed | feature-list F45, M3 | T97.1, T97.2 | 2026-08-02 | S020 | F45 |
 | T97.4 | Config: ephemeral Modal T4 CE spike app/script (S019 pattern; no playground URL) | Config | pending | RD-204, S020-D11/D15 | T97.3 | — | S020 | F45 |
 | T97.5 | Docs: spike runbook + metrics capture path for ship gate | Docs | pending | TC-184, UJ-060 | T97.4 | — | S020 | F45 |
 
