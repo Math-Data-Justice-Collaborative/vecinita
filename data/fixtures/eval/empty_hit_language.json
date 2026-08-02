@@ -1,0 +1,13 @@
+[
+  {
+    "id": "f44-empty-hit-en-query-es-only",
+    "locale": "en",
+    "domain": "edge",
+    "question": "When does the monolingual pantry publish hours?",
+    "expected_doc_url": "fixture://corpus/es/empty-hit-pantry.md",
+    "retrieval_expectation": "empty",
+    "required_facts": [
+      "El banco monolingüe publica horarios cada lunes"
+    ]
+  }
+]

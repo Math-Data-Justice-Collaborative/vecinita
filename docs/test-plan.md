@@ -1139,7 +1139,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
 | Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness, TC-168, TC-174–175 |
 | Staging eval Q&A | `data/fixtures/eval/qa_pairs_staging.json` | TC-174–175, TC-184 (ISS-008 / F42 Hy1 / F45 gate) |
-| Empty-hit language fixture | `data/fixtures/eval/` (empty same-lang case; add in 07) | TC-180–181 |
+| Empty-hit language fixture | `data/fixtures/eval/empty_hit_language.json` | TC-180–181 |
 | URL ingest fixture | `data/fixtures/ingest/` | TC-010, TC-163 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |
