@@ -11,12 +11,12 @@
 |-------|-------|
 | **Active phase** | Phase 23: EV-018 — Retrieval follow-on (F46 + F45 re-gate) |
 | **Active milestone** | M99 — F46 diagnose + fix + e2e |
-| **Active task** | T99.4 — e2e green + unit helpers after Path B |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98 (T94.1–T98.4) |
+| **Active task** | T99.4 — e2e green closeout (**blocked**: Docker/Postgres for TC-185) |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98 (T94.1–T98.4); Phase 23: T99.1–T99.3 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-018 (F46 + F45 re-gate) — Standard; skip 03/05/06; Gate B→C passed (S021-D19) |
 | **Git branch** | `evolve/EV-018-retrieval-follow-on` |
-| **Active session** | S021-retrieval-follow-on — 07-build M99 T99.1 |
+| **Active session** | S021-retrieval-follow-on — 07-build M99 T99.4 blocked_docker |
 | **Scope addition** | 2026-08-02 — F46 non-empty retrieve + F45 CE re-gate; S021-D17–D19; TP1–TP6. |
 
 ## Template
@@ -1990,7 +1990,7 @@ unit tests TC-170–172.
 | T99.1 | Test: API e2e `tests/e2e/test_uj061_retrieve_nonempty.py` red (TC-185/186) | Test | completed | AC-FO1/FO2, UJ-061, TC-185/186 | — | 2026-08-02 | S021 | F46 |
 | T99.2 | Ops/Code: Diagnose per TP3 order (pin → fixture URLs → `min_retrieval_score`/filters → code) | Code | completed | feature-list F46, S021-D13 | T99.1 | 2026-08-02 | S021 | F46 |
 | T99.3 | Code/Config/Ops: Minimal fix for diagnosed class (Path A; Path B if corpus rebuild) | Code | completed | RD-215, S021-D11, S021-D22 | T99.2 | 2026-08-02 | S021 | F46 |
-| T99.4 | Test: e2e green; unit helpers as needed; optional `BUG-*` if code repro (S021-D14) | Test | pending | e2e-coverage, AC-FO1/FO2 | T99.3 | — | S021 | F46 |
+| T99.4 | Test: e2e green; unit helpers as needed; optional `BUG-*` if code repro (S021-D14) | Test | blocked | e2e-coverage, AC-FO1/FO2 | T99.3 | — | S021 | F46 |
 | T99.5 | Docs: session diagnose note + root-cause class; staging UJ-061 evidence path | Docs | pending | UJ-061, AC-FO1 | T99.4 | — | S021 | F46 |
 
 #### M100: F45 — CE re-gate after F46 + ship-gate docs

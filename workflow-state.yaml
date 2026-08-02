@@ -1244,8 +1244,8 @@ project:
       partial_rerun_at: '2026-08-02'
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-        T99.4 next; commits not yet made (user has not requested commit)
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
@@ -1260,25 +1260,36 @@ project:
       milestone_status: in_progress
       phase_status: in_progress
       current_task: T99.4
-      current_action: 07_t99_4_pending
-      next_action: start T99.4 (next M99 task after Path B complete)
+      current_action: 07_t99_4_blocked_docker
+      next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
+      t99_4_status: blocked
+      t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
       report: docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md
       s021_d19_decision: S021-D19
       s021_d19_decision_recorded: true
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-        T99.4 next; commits not yet made (user has not requested commit)
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
       substeps:
         current_task: T99.4
-        task_status: pending
+        task_status: blocked
         in_progress_tasks: []
-        blocked_tasks: []
+        blocked_tasks:
+        - T99.4
         completed_tasks_recent:
         - T99.1
         - T99.2
         - T99.3
-        next_action: start T99.4 (next M99 task after Path B complete)
+        next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
+        t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
+        t99_4_progress:
+          check_corpus_reset_guard: ok
+          bug_tests: passed_2
+          tc186_cold_ask_sources: passed
+          tc185_seeded_retrieve: skipped_postgres_unavailable
+          docker_sock: missing_after_~3min
+          port_5432: closed
         t99_1_note: e2e test_uj061_retrieve_nonempty.py; TC-186 pass; TC-185 skip without local Postgres
         t99_2_note: COMPLETED — root cause embed↔corpus pin drift (S021-D20); staging probe done; ISS-009 resolved
         t99_3_note: COMPLETED — Path B full E0 rebuild + BUG + guard (S021-D22); run a0e8f32d-7e2e-4012-960c-2e956ceeba87;
@@ -1294,7 +1305,7 @@ project:
         path_b_completed: true
         path_b_completed_at: '2026-08-02'
         t99_3_status: completed
-        t99_4_note: pending — next after Path B COMPLETE
+        t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared; local Docker/Postgres compose required; T99.3 completed; T99.5 pending
         rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
         path_b_results:
           rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
@@ -1313,7 +1324,7 @@ project:
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
           commits_pending: true
-          commits_note: commits not yet made (user has not requested commit)
+          commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -2171,12 +2182,12 @@ project:
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
         commits_pending: true
-        commits_note: commits not yet made (user has not requested commit)
+        commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
       commits_pending: true
-      commits_note: commits not yet made (user has not requested commit)
+      commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
     08-verify-build:
       status: completed
       started_at: '2026-08-02'
@@ -4070,11 +4081,11 @@ active_session:
   evolve_cycle_id: EV-018
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
   current_stage: 07-build
-  current_action: 07_t99_4_pending
+  current_action: 07_t99_4_blocked_docker
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-    T99.4 next; commits not yet made (user has not requested commit)
+    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+    T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4157,13 +4168,13 @@ active_session:
     status: in_progress
     skip_rationale: null
     started_at: '2026-08-02'
-    current_action: 07_t99_4_pending
+    current_action: 07_t99_4_blocked_docker
     current_task: T99.4
     report: docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-      T99.4 next; commits not yet made (user has not requested commit)
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
     s021_d20_decision: S021-D20
     s021_d21_decision: S021-D21
     s021_d21_choice: option_2_investigate_promote_history
@@ -4172,9 +4183,11 @@ active_session:
     path_b_approved: true
     path_b_approved_at: '2026-08-02'
     s021_d22_decision: S021-D22
-    next_action: start T99.4 (next M99 task after Path B complete)
+    next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
     path_b_completed: true
     t99_3_status: completed
+    t99_4_status: blocked
+    t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
   - stage: 08-verify-build
     required: true
     status: pending
@@ -4261,7 +4274,17 @@ active_session:
   s021_d22_decision: S021-D22
   s021_d22_decision_recorded: true
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: start T99.4 (next M99 task after Path B complete)
+  next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
+  t99_4_status: blocked
+  t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
+  t99_4_progress:
+    check_corpus_reset_guard: ok
+    bug_tests: passed_2
+    tc186_cold_ask_sources: passed
+    tc185_seeded_retrieve: skipped_postgres_unavailable
+    docker_attempt: open -a Docker + with_local_postgres.sh
+    docker_sock: /Users/bigme/.docker/run/docker.sock missing (~3min)
+    port_5432: closed
   path_b_completed: true
   path_b_completed_at: '2026-08-02'
   path_b_completed_at_ts: '2026-08-02T18:17:00Z'
@@ -4282,12 +4305,12 @@ active_session:
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
     commits_pending: true
-    commits_note: commits not yet made (user has not requested commit)
+    commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
   commits_pending: true
-  commits_note: commits not yet made (user has not requested commit)
+  commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
 sessions:
 - id: S020-retrieval-batch-b
   type: feature
@@ -9610,8 +9633,8 @@ stages:
     partial_rerun_at: '2026-08-02'
     partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-      T99.4 next; commits not yet made (user has not requested commit)
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
     session_id: S021-retrieval-follow-on
     branch: evolve/EV-018-retrieval-follow-on
     evolve_cycle_id: EV-018
@@ -9626,25 +9649,27 @@ stages:
     milestone_status: in_progress
     phase_status: in_progress
     current_task: T99.4
-    current_action: 07_t99_4_pending
-    next_action: start T99.4 (next M99 task after Path B complete)
+    current_action: 07_t99_4_blocked_docker
+    next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
     report: docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md
     s021_d19_decision: S021-D19
     s021_d19_decision_recorded: true
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-      T99.4 next; commits not yet made (user has not requested commit)
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
     substeps:
       current_task: T99.4
-      task_status: pending
+      task_status: blocked
       in_progress_tasks: []
-      blocked_tasks: []
+      blocked_tasks:
+      - T99.4
       completed_tasks_recent:
       - T99.1
       - T99.2
       - T99.3
-      next_action: start T99.4 (next M99 task after Path B complete)
+      next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
+      t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
       t99_1_note: e2e test_uj061_retrieve_nonempty.py; TC-186 pass; TC-185 skip without local Postgres
       t99_2_note: COMPLETED — root cause embed↔corpus pin drift (S021-D20); staging probe done; ISS-009 resolved
       t99_3_note: COMPLETED — Path B full E0 rebuild + BUG + guard (S021-D22); run a0e8f32d-7e2e-4012-960c-2e956ceeba87; 49
@@ -9660,7 +9685,7 @@ stages:
       path_b_completed: true
       path_b_completed_at: '2026-08-02'
       t99_3_status: completed
-      t99_4_note: pending — next after Path B COMPLETE
+      t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared; local Docker/Postgres compose required; T99.3 completed; T99.5 pending
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       path_b_results:
         rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
@@ -9679,7 +9704,7 @@ stages:
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
         commits_pending: true
-        commits_note: commits not yet made (user has not requested commit)
+        commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
     s020_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -10534,12 +10559,12 @@ stages:
       completed_at: '2026-08-02'
       completed_at_ts: '2026-08-02T18:17:00Z'
       commits_pending: true
-      commits_note: commits not yet made (user has not requested commit)
+      commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
     rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
     s021_d22_executed: true
     t99_3_status: completed
     commits_pending: true
-    commits_note: commits not yet made (user has not requested commit)
+    commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
   08-verify-build:
     status: completed
     started_at: '2026-08-02'
@@ -19205,11 +19230,11 @@ evolve_cycles:
 
     '
   current_stage: 07-build
-  current_action: 07_t99_4_pending
+  current_action: 07_t99_4_blocked_docker
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-    T99.4 next; commits not yet made (user has not requested commit)
+    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+    T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -19329,24 +19354,35 @@ evolve_cycles:
       milestone_status: in_progress
       phase_status: in_progress
       current_task: T99.4
-      current_action: 07_t99_4_pending
-      next_action: start T99.4 (next M99 task after Path B complete)
+      current_action: 07_t99_4_blocked_docker
+      next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
+      t99_4_status: blocked
+      t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
       report: docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md
       s021_d19_decision: S021-D19
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-        T99.4 next; commits not yet made (user has not requested commit)
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
       substeps:
         current_task: T99.4
-        task_status: pending
+        task_status: blocked
         in_progress_tasks: []
-        blocked_tasks: []
+        blocked_tasks:
+        - T99.4
         completed_tasks_recent:
         - T99.1
         - T99.2
         - T99.3
-        next_action: start T99.4 (next M99 task after Path B complete)
+        next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
+        t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
+        t99_4_progress:
+          check_corpus_reset_guard: ok
+          bug_tests: passed_2
+          tc186_cold_ask_sources: passed
+          tc185_seeded_retrieve: skipped_postgres_unavailable
+          docker_sock: missing_after_~3min
+          port_5432: closed
         t99_1_note: e2e test_uj061_retrieve_nonempty.py; TC-186 pass; TC-185 skip without local Postgres
         t99_2_note: COMPLETED — root cause embed↔corpus pin drift (S021-D20); staging probe done; ISS-009 resolved
         t99_3_note: COMPLETED — Path B full E0 rebuild + BUG + guard (S021-D22); run a0e8f32d-7e2e-4012-960c-2e956ceeba87;
@@ -19362,7 +19398,7 @@ evolve_cycles:
         path_b_completed: true
         path_b_completed_at: '2026-08-02'
         t99_3_status: completed
-        t99_4_note: pending — next after Path B COMPLETE
+        t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared; local Docker/Postgres compose required; T99.3 completed; T99.5 pending
         rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
         path_b_results:
           rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
@@ -19381,12 +19417,12 @@ evolve_cycles:
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
           commits_pending: true
-          commits_note: commits not yet made (user has not requested commit)
+          commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
       partial_rerun_at: '2026-08-02'
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_pending;
-        T99.4 next; commits not yet made (user has not requested commit)
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
       s021_d20_decision: S021-D20
       s021_d20_decision_recorded: true
       root_cause: embed↔corpus pin drift
@@ -19424,12 +19460,12 @@ evolve_cycles:
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
         commits_pending: true
-        commits_note: commits not yet made (user has not requested commit)
+        commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
       commits_pending: true
-      commits_note: commits not yet made (user has not requested commit)
+      commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
     08-verify-build:
       status: pending
     09-qa:
@@ -19683,7 +19719,17 @@ evolve_cycles:
   s021_d22_decision: S021-D22
   s021_d22_decision_recorded: true
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: start T99.4 (next M99 task after Path B complete)
+  next_action: user starts Docker Desktop (healthy sock) then re-run with_local_postgres pytest for UJ-061 + bug tests; then complete T99.4
+  t99_4_status: blocked
+  t99_4_blocker: local Docker daemon / Postgres compose required for fixture-backed TC-185 green closeout
+  t99_4_progress:
+    check_corpus_reset_guard: ok
+    bug_tests: passed_2
+    tc186_cold_ask_sources: passed
+    tc185_seeded_retrieve: skipped_postgres_unavailable
+    docker_attempt: open -a Docker + with_local_postgres.sh
+    docker_sock: /Users/bigme/.docker/run/docker.sock missing (~3min)
+    port_5432: closed
   path_b_completed: true
   path_b_completed_at: '2026-08-02'
   path_b_completed_at_ts: '2026-08-02T18:17:00Z'
@@ -19704,12 +19750,12 @@ evolve_cycles:
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
     commits_pending: true
-    commits_note: commits not yet made (user has not requested commit)
+    commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
   commits_pending: true
-  commits_note: commits not yet made (user has not requested commit)
+  commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -20806,6 +20852,23 @@ issue_log:
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress;
     interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 07-build
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: T99.4 blocked — TC-186 PASS, bug tests 2/2 PASS, TC-185 SKIPPED (Postgres unavailable); Docker Desktop
+    processes present but docker.sock never appeared (~3min); port 5432 closed
+  recorded_at: '2026-08-02T18:26:00Z'
+  note: current_action=07_t99_4_blocked_docker; do NOT mark T99.4 completed; await healthy Docker sock +
+    with_local_postgres pytest for UJ-061; state sync dirty (commits_pending=true)
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: Recorded commits c447577 (T99.3 fix/guard) + be74777 (T99.1–T99.3 docs/Path B evidence); commits_pending=false;
+    T99.4 set in_progress — run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 remains completed; T99.5 pending
+  recorded_at: '2026-08-02T18:20:43Z'
+  note: User approved split commit + continue T99.4; current_action was 07_t99_4_in_progress; HEAD be74777
 - date: '2026-08-02'
   skill: 07-build
   session_id: S021-retrieval-follow-on
@@ -23064,7 +23127,11 @@ decisions_log:
 - 'S021-D22 executed / EV-018 T99.3 Path B COMPLETE: rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87; promoted 49 docs
   / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
   filed+resolved; guard attach_embeddings+clear_embeddings+CI; report docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md;
-  next T99.4; commits not yet made (user has not requested commit)'
+  commits @ c447577 + be74777; T99.4 in_progress — e2e green closeout; T99.5 pending'
+- '2026-08-02T18:20:43Z S021/EV-018: commits c447577 + be74777 recorded; commits_pending=false; T99.4 in_progress
+  (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending'
+- '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — TC-186 PASS; bug 2/2 PASS; TC-185 SKIPPED (Postgres);
+  Docker sock missing / 5432 closed; await user Docker Desktop; T99.4 NOT completed; commits_pending=true'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
@@ -24929,9 +24996,12 @@ git_history:
     status: open
     created_at: '2026-08-02'
     session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
     exists_on_disk: true
     created_from: main
-    note: S021 follow-on after EV-017 merge — investigate staging empty retrieve pools; re-run AC-BB9/UJ-060/#83 ship gate
+    head_sha: be747772c6e952d8259912918d8b7a5485045bf9
+    head_short: be74777
+    note: S021/EV-018 — T99.1–T99.3 committed (c447577 + be74777); T99.4 in_progress
   - name: evolve/EV-017-retrieval-batch-b
     purpose: EV-017 / S020 — Batch B retrieval (F43 answer cache +
     base: main
@@ -27427,6 +27497,56 @@ git_history:
     files_changed: null
     timestamp: '2026-08-02T16:17:45Z'
     note: CI success run 30756009099; recorded on 11-verify-impl start sync
+  - sha: c4475771a5e9fdedae404b80e9a2d372687100bb
+    short: c447577
+    branch: evolve/EV-018-retrieval-follow-on
+    message: '[T99.3] fix: guard attach_embeddings against staging basis_vector wipe'
+    stage: 07-build
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    files_changed: 11
+    timestamp: '2026-08-02T18:20:27Z'
+    note: T99.3 Path B BUG/guard + UJ-061 e2e + corpus-db-safety; user-approved commit; continue T99.4
+    files:
+    - .cursor/rules/corpus-db-safety.mdc
+    - .cursor/skills/corpus-db-safety/SKILL.md
+    - docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
+    - scripts/check_corpus_reset_guard.sh
+    - tests/bugs/test_bug_2026_08_02_staging_basis_vector_wipe.py
+    - tests/e2e/test_uj012_tag_filtered_ask.py
+    - tests/e2e/test_uj061_retrieve_nonempty.py
+    - tests/helpers/corpus_db_guard.py
+    - tests/unit/rag/conftest.py
+    - tests/unit/rag/test_tag_filtered_retrieval.py
+    - tests/unit/test_corpus_db_guard.py
+    skill_ids:
+    - 16-evolve
+    - 07-build
+  - sha: be747772c6e952d8259912918d8b7a5485045bf9
+    short: be74777
+    branch: evolve/EV-018-retrieval-follow-on
+    message: '[T99.1-T99.3] docs: Path B E0 rebuild evidence and F46 session deltas'
+    stage: 07-build
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    files_changed: 26
+    timestamp: '2026-08-02T18:20:30Z'
+    note: Path B rebuild evidence + F46 standing/session deltas; user-approved split commit; continue T99.4
+    files:
+    - docs/acceptance-criteria.md
+    - docs/decisions.md
+    - docs/decisions/evolve-decisions.md
+    - docs/feature-list.md
+    - docs/sessions/README.md
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S021-retrieval-follow-on/
+    - docs/spec.md
+    - docs/test-plan.md
+    - docs/user-journeys.md
+    - workflow-state.yaml
+    skill_ids:
+    - 16-evolve
+    - 07-build
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
@@ -27505,6 +27625,8 @@ git_history:
     skill_ids:
     - 09-qa
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
+  - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — guard OK; bug 2/2 PASS; TC-186 PASS; TC-185 SKIPPED (no Postgres); Docker sock missing; next=user start Docker Desktop then with_local_postgres; T99.4 NOT completed; commits_pending=true (state sync dirty).'
+  - '2026-08-02T18:20:43Z S021/EV-018: synced 07-build — commits c447577 + be74777 recorded; commits_pending=false; current_task=T99.4 in_progress; current_action=07_t99_4_blocked_docker; next_action=run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending.'
   - '2026-08-02T15:34:08Z S020/EV-017: synced 07-build — T98.1–T98.4 COMPLETE @ 59edd12; M98 COMPLETE; Phase 22 M94–M98 ALL
     COMPLETE; current_stage=07-build (completed); next_action=08-verify-build (deferred until before Phase C PR); 08 NOT started;
     checkpoints.phase_c still pending; appended commits d2e9043/8b81a42/21b52dc/59edd12; folded prior uncommitted M97/T98.1
