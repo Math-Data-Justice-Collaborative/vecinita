@@ -1,4 +1,4 @@
-overall_status: completed
+overall_status: in_progress
 project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
@@ -7,12 +7,15 @@ project:
     00-context:
       status: completed
       started_at: '2026-07-08'
-      completed_at: '2026-07-10'
-      partial_rerun_at: '2026-07-31'
-      partial_rerun_note: EV-016/S019-retrieval-quality — phase0_approved=true (S019-D37); F42=H7+P1 on E0; E1 rejected; handoff → 01-requirements
-      session_id: S019-retrieval-quality
-      branch: evolve/EV-016-retrieval-quality
-      evolve_cycle_id: EV-016
+      completed_at: '2026-08-02'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: EV-017/S020-retrieval-batch-b — 00-context COMPLETE; session artifacts written; handoff_seed set; handoff → 16-evolve Phase 0 intake
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+      s020_00_started_at: '2026-08-02'
+      s020_00_completed_at: '2026-08-02'
       s019_00_completed_at: '2026-07-31'
       s014_00_completed_at: '2026-07-29'
       s016_00_completed_at: '2026-07-29'
@@ -31,7 +34,14 @@ project:
         branch: evolve/EV-014-chat-cold-start-ux
         evolve_cycle_id: EV-014
         note: S016 00-context COMPLETE 2026-07-29 — Lean+build; EV-014/F40; session closed after deploy
-      note: S019 00-context COMPLETE 2026-07-31 — Standard approved; EV-016; Phase 0 complete phase0_approved=true (S019-D37); handoff → 01-requirements
+      note: S020 00-context COMPLETE 2026-08-02 — Standard approved; session artifacts + seed written; EV-017 Phase 0 intake next; 01-requirements NOT started
+      s019_baseline:
+        status: completed
+        completed_at: '2026-07-31'
+        session_id: S019-retrieval-quality
+        branch: evolve/EV-016-retrieval-quality
+        evolve_cycle_id: EV-016
+        note: S019 00-context COMPLETE 2026-07-31 — Standard approved; EV-016; phase0_approved=true (S019-D37); F42 shipped; session closed S019-D53
       s009_baseline:
         status: paused
         paused_at: '2026-07-08'
@@ -2943,8 +2953,106 @@ project:
       session_closed_at: '2026-07-31'
       close_decision: option_2_close_push_prevention_pause_batch_a
       summary: 'S018 eval job dispatch hotfix complete. PR #169 merged and prod verified. Phase 5 prevention on fix/S018-job-dispatch-prevention @ 8a8cd48 (registry + husky pre-commit + checklist + job-terminal-state rule). Bug BUG-2026-07-31-eval-job-dispatch resolved. User paused before Batch A retrieval evolve.'
-session_counter: 19
-active_session: null
+session_counter: 20
+active_session:
+  id: S020-retrieval-batch-b
+  type: feature
+  slug: retrieval-batch-b
+  intent: "Batch B retrieval — F43 answer cache + #83/#161 CE spike + #162 soft language filter (continues S019)"
+  status: in_progress
+  branch: evolve/EV-017-retrieval-batch-b
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-017
+  artifacts_dir: docs/sessions/S020-retrieval-batch-b/
+  current_stage: 16-evolve
+  current_action: phase_0_intake
+  current_stage_note: "00-context COMPLETE 2026-08-02; handoff → 16-evolve Phase 0 intake (F43 tiers, CE gate, #162 shape); 01-requirements NOT started"
+  started_at: '2026-08-02'
+  routing_plan_status: approved
+  routing_preset: standard
+  routing_preset_choice: standard
+  routing_preset_status: approved
+  routing_approval: "user-approved Standard via 00-context (01→02→04→07→08→09→10→11→12→13; skip 03/05/06; 15 optional at close)"
+  mode: evolve
+  predecessor_session_id: S019-retrieval-quality
+  predecessor_evolve_cycle_id: EV-016
+  continues: S019-retrieval-quality
+  scope_summary: "All three in one cycle — F43 answer cache ship + #83/#161 CE spike track + #162 soft language filter; Fn allocation beyond F43 in Phase 1"
+  feature_ids:
+  - F43
+  feature_ids_note: "F43 placeholder for answer cache; #83/#161/#162 also in cycle — additional Fn allocation in Phase 1 (01-requirements)"
+  github_issues:
+  - 83
+  - 161
+  - 162
+  routing_plan:
+  - stage: 00-context
+    required: true
+    status: completed
+    skip_rationale:
+    started_at: '2026-08-02'
+    completed_at: '2026-08-02'
+    note: Session open — Standard approved; EV-017 stub allocated; handoff → 16-evolve Phase 0
+  - stage: 01-requirements
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 02-verify-plan
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 03-plan-tooling
+    required: false
+    status: skipped
+    skip_rationale: No new tooling expected
+  - stage: 04-tech-plan
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 05-verify-tech
+    required: false
+    status: skipped
+    skip_rationale: Fold into 02 / 08
+  - stage: 06-tech-tooling
+    required: false
+    status: skipped
+    skip_rationale: N/A
+  - stage: 07-build
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 08-verify-build
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 09-qa
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 10-e2e
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 11-verify-impl
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 12-verify-deploy
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 13-deploy-smoke
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 15-service-health
+    required: false
+    status: skipped
+    skip_rationale: Optional at close
+  context_briefs:
+  - docs/sessions/S020-retrieval-batch-b/context-brief.md
+  handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+  next_action: '16-evolve Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape)'
 sessions:
 - id: S019-retrieval-quality
   type: feature
@@ -3649,6 +3757,9 @@ sessions:
   s019_d53_decision_recorded: true
   s019_d53_note: Close session now; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone
   summary: 'S019/EV-016 CLOSED — F42 H7+P1 on E0 shipped via PR #172 @ b08ec30; DO pins main; H0ci PASS; 15 skipped (S019-D53); evolve-summary + evolve-report-EV-016 recorded.'
+  successor_session_id: S020-retrieval-batch-b
+  successor_evolve_cycle_id: EV-017
+  successor_note: 'Batch B continues retrieval work — S020/EV-017 (F43 answer cache + #83/#161 CE spike + #162 soft language filter)'
 - id: S018-eval-job-dispatch
   type: hotfix
   intent: Fix Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError. Wire run_job to eval worker (path A). Also address/document secondary top_k=5 vs vLLM max_model_len=2048 issue in same hotfix if straightforward.
@@ -6484,14 +6595,22 @@ stages:
   00-context:
     status: completed
     started_at: '2026-07-08'
-    completed_at: '2026-07-10'
-    partial_rerun_at: '2026-07-30'
-    partial_rerun_note: 'EV-015/S017-corpus-reembed-migration — #167 corpus re-embed/re-chunk migration; 00-context COMPLETE; Standard+build approved; session artifacts written; handoff → 16-evolve Phase 0 intake (EV-015 not allocated yet)'
-    session_id: S017-corpus-reembed-migration
-    branch: evolve/EV-015-corpus-reembed-migration
-    evolve_cycle_id:
+    completed_at: '2026-08-02'
+    partial_rerun_at: '2026-08-02'
+    partial_rerun_note: EV-017/S020-retrieval-batch-b — 00-context COMPLETE; session artifacts written; handoff_seed set; handoff → 16-evolve Phase 0 intake
+    session_id: S020-retrieval-batch-b
+    branch: evolve/EV-017-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+    s020_00_started_at: '2026-08-02'
+    s020_00_completed_at: '2026-08-02'
     s017_00_completed_at: '2026-07-30'
     artifacts:
+    - docs/sessions/S020-retrieval-batch-b/session-brief.md
+    - docs/sessions/S020-retrieval-batch-b/routing-plan.md
+    - docs/sessions/S020-retrieval-batch-b/context-brief.md
+    - docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+    - docs/decisions/evolve-decisions.md
     - docs/sessions/S017-corpus-reembed-migration/session-brief.md
     - docs/sessions/S017-corpus-reembed-migration/routing-plan.md
     - docs/sessions/S014-admin-ui-polish-148/session-brief.md
@@ -6541,7 +6660,7 @@ stages:
       branch: feat/S008-eval-ux-playground
       evolve_cycle_id: EV-009
       note: S008/EV-009 parked 2026-07-05 — coverage gate QA-S008-B05 open; S009 opened for F38 playground model download.
-    note: S017 00-context COMPLETE 2026-07-30 — Standard+build; session-brief + routing-plan written; branch open; handoff → 16-evolve Phase 0 intake (EV-015 not allocated yet)
+    note: S020 00-context COMPLETE 2026-08-02 — Standard approved; session artifacts + seed written; EV-017 Phase 0 intake next; 01-requirements NOT started
     batch1_decisions:
     - R-S010-00-1-client
     - R-S010-00-2-streaming
@@ -14552,6 +14671,130 @@ evolve_cycles:
   eleven_start_policy: completed — F42 Phase 3 approved; Phase D + deploy passed; session closed (S019-D53)
   feature_inspection: *id001
   pr_closeout_note: PR #172 merged; DO pins write-api+chat-rag reset to main ACTIVE; H0ci CI+deploy-preflight PASS on main @ b08ec30
+  successor_session_id: S020-retrieval-batch-b
+  successor_evolve_cycle_id: EV-017
+  successor_note: 'Batch B continues retrieval — S020/EV-017 (F43 + #83/#161 + #162)'
+- id: EV-017
+  cycle_type: feature
+  feature_ids:
+  - F43
+  feature_ids_note: 'F43 = answer cache ship (placeholder from S019 L3/H1/H9); #83/#161 CE spike track + #162 soft language filter also in cycle — additional Fn allocation in Phase 1 (01-requirements)'
+  feature_ids_pending_note: 'F43 allocated as cache ship placeholder; CE spike (#83/#161) and soft language filter (#162) may allocate F44+ in Phase 1'
+  title: Batch B — Retrieval (F43 cache + CE spike + soft language filter)
+  status: in_progress
+  started: '2026-08-02'
+  started_at: '2026-08-02'
+  session_id: S020-retrieval-batch-b
+  predecessor_session_id: S019-retrieval-quality
+  predecessor_evolve_cycle_id: EV-016
+  continues: S019-retrieval-quality / EV-016
+  github_issues:
+  - 83
+  - 161
+  - 162
+  source_issues:
+  - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/83
+  - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/161
+  - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
+  scope_summary: |
+    Batch B retrieval (continues S019/EV-016): ship F43 answer cache; CE spike track for #83/#161;
+    soft language filter #162. All three in one cycle. Standard routing. Fn allocation beyond F43 in Phase 1.
+  current_stage: phase_0_intake
+  current_stage_note: '00-context COMPLETE 2026-08-02; Phase 0 intake in_progress — AskQuestion (F43 tiers, CE gate, #162 shape); 01-requirements NOT started'
+  mode: evolve
+  delta_only: true
+  branch: evolve/EV-017-retrieval-batch-b
+  routing_preset: standard
+  routing_preset_choice: standard
+  routing_preset_status: approved
+  routing_plan_status: approved
+  phase0_approved: false
+  phase_0_status: in_progress
+  routing_plan:
+    required_stages:
+    - 00-context
+    - 01-requirements
+    - 02-verify-plan
+    - 04-tech-plan
+    - 07-build
+    - 08-verify-build
+    - 09-qa
+    - 10-e2e
+    - 11-verify-impl
+    - 12-verify-deploy
+    - 13-deploy-smoke
+    skipped_stages:
+    - 03-plan-tooling
+    - 05-verify-tech
+    - 06-tech-tooling
+    - 15-service-health
+    skip_rationale:
+      03-plan-tooling: No new tooling expected
+      05-verify-tech: Fold into 02 / 08
+      06-tech-tooling: N/A
+      15-service-health: Optional at close
+  stages:
+    00-context:
+      status: completed
+      started: '2026-08-02'
+      completed: '2026-08-02'
+      completed_at: '2026-08-02'
+      handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+      note: S020 00-context COMPLETE — session artifacts + seed; handoff → 16-evolve Phase 0
+    16-evolve:
+      status: in_progress
+      started: '2026-08-02'
+      current_action: phase_0_intake
+      note: Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape); 01-requirements NOT started
+    01-requirements:
+      status: pending
+    02-verify-plan:
+      status: pending
+    04-tech-plan:
+      status: pending
+    07-build:
+      status: pending
+    08-verify-build:
+      status: pending
+    09-qa:
+      status: pending
+    10-e2e:
+      status: pending
+    11-verify-impl:
+      status: pending
+    12-verify-deploy:
+      status: pending
+    13-deploy-smoke:
+      status: pending
+  gates:
+    a_to_b: pending
+    b_to_c: pending
+    c_to_d: pending
+    deploy: pending
+  checkpoints:
+    phase_a: pending
+    phase_b: pending
+    phase_c: pending
+    phase_d: pending
+    deploy: pending
+  intake_decisions:
+  - id: S020-D1
+    topic: open_session
+    choice: open_S020_retrieval_batch_b
+    note: Open feature session S020-retrieval-batch-b (continues S019); Standard routing; all three tracks in one cycle
+    status: recorded
+  - id: S020-D2
+    topic: routing
+    choice: standard
+    note: Standard routing (01→02→04→07→08→09→10→11→12→13; skip 03/05/06; 15 optional at close)
+    status: recorded
+  - id: S020-D3
+    topic: scope
+    choice: all_three_one_cycle
+    note: F43 answer cache ship + #83/#161 CE spike + #162 soft language filter in one cycle
+    status: recorded
+  note: 'EV-017 Phase 0 intake in_progress 2026-08-02 — 00-context COMPLETE; predecessor EV-016/S019 (F42 shipped); 01-requirements NOT started'
+  next_action: '16-evolve Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape)'
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -15596,6 +15839,27 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 00-context
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D3 — Scope = all three in one cycle — F43 answer cache ship + #83/#161 CE spike + #162 soft language filter'
+  recorded_at: '2026-08-02'
+  note: open_session scope decision; additional Fn allocation beyond F43 deferred to Phase 1 (01-requirements)
+- date: '2026-08-02'
+  skill: 00-context
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D2 — Routing = Standard (01→02→04→07→08→09→10→11→12→13; skip 03/05/06; 15 optional at close)'
+  recorded_at: '2026-08-02'
+  note: routing_plan approved at 00-context; 16-evolve Phase 0 intake next
+- date: '2026-08-02'
+  skill: 00-context
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D1 — Open feature session S020-retrieval-batch-b (Batch B retrieval); Standard routing; scope = F43 answer cache + #83/#161 CE spike + #162 soft language filter in one cycle; continues S019/EV-016; EV-017 stub allocated; branch evolve/EV-017-retrieval-batch-b planned'
+  recorded_at: '2026-08-02'
+  note: open_session COMPLETE — active_session set; session_counter=20; artifacts_dir=docs/sessions/S020-retrieval-batch-b/; 00-context COMPLETE; next → 16-evolve Phase 0
 - date: '2026-08-01'
   skill: 16-evolve
   session_id: S019-retrieval-quality
@@ -17040,6 +17304,46 @@ decisions_log:
 - S019/EV-016 09-qa COMPLETE — overall=fail; blockers QA-S019-B01..B03 (ruff spike tests, basedpyright, nltk CVEs); F42 surfaces green; report=docs/sessions/S019-retrieval-quality/reports/qa-report.md
 - 'S019/EV-016 12-verify-deploy COMPLETE 2026-08-01 — deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
 artifacts:
+- path: docs/sessions/S020-retrieval-batch-b/session-brief.md
+  kind: session-brief
+  session_id: S020-retrieval-batch-b
+  stage: 00-context
+  skill_id: 00-context
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: S020 00-context COMPLETE — session brief; handoff → 16-evolve Phase 0 intake
+- path: docs/sessions/S020-retrieval-batch-b/routing-plan.md
+  kind: routing-plan
+  session_id: S020-retrieval-batch-b
+  stage: 00-context
+  skill_id: 00-context
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: Standard routing plan approved
+- path: docs/sessions/S020-retrieval-batch-b/context-brief.md
+  kind: context-brief
+  session_id: S020-retrieval-batch-b
+  stage: 00-context
+  skill_id: 00-context
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: S020 context brief for EV-017 Batch B retrieval
+- path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+  kind: handoff-seed
+  session_id: S020-retrieval-batch-b
+  stage: 00-context
+  skill_id: 00-context
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: 01-requirements seed for Phase 0 → Phase 1; 01-requirements NOT started
+- path: docs/decisions/evolve-decisions.md
+  kind: decisions
+  session_id: S020-retrieval-batch-b
+  stage: 00-context
+  skill_id: 00-context
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: §EV-017 — S020-D1/D2/D3 recorded at session open
 - path: docs/sessions/S019-retrieval-quality/reports/evolve-summary.md
   kind: evolve-summary
   session_id: S019-retrieval-quality
@@ -18441,8 +18745,18 @@ artifacts:
   overall: fail
   recorded_at: '2026-08-02T00:59:54Z'
 git_history:
-  current_branch: main
+  current_branch: evolve/EV-017-retrieval-batch-b
   branches:
+  - name: evolve/EV-017-retrieval-batch-b
+    purpose: EV-017 / S020 — Batch B retrieval (F43 answer cache + #83/#161 CE spike + #162 soft language filter); continues S019/EV-016
+    base: main
+    status: active
+    created_at: '2026-08-02'
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    exists_on_disk: true
+    created_from: main
+    note: Branch created from main at S020 00-context complete; Phase 0 intake next
   - name: evolve/EV-016-retrieval-quality
     purpose: EV-016 / S019 — Batch A retrieval quality (investigate
     base: main
@@ -20527,6 +20841,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: S019/EV-016 — optional 15-service-health or close_session (PR #172 merged @ b08ec30)
+next_action: '16-evolve Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape)'
 pipeline_idle: false
-pipeline_idle_note: '2026-08-01 — S019/EV-016 PR #172 MERGED @ b08ec30; F42 LIVE; DO pins main ACTIVE; H0ci PASS; EV-016 completed; optional 15-service-health pending'
+pipeline_idle_note: '2026-08-02 — S020 00-context COMPLETE; EV-017 phase_0_intake in_progress; 01-requirements NOT started; next=16-evolve Phase 0 AskQuestion'

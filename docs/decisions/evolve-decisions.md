@@ -307,3 +307,29 @@ Plan: session `reports/spike-hybrid-plan.md` · runners `spike_hybrid_sweep.py`,
 | S019-D53 | Session close | **Close now** (option 1) — skip optional 15-service-health; write evolve-summary + evolve-report-EV-016; archive S019; leave out-of-scope Modal/LLM dirty files alone |
 
 **Closeout:** PR [#172](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172) merged @ `b08ec30` (2026-08-02). Session `S019-retrieval-quality` archived; cycle EV-016 completed.
+
+## Cycle EV-017 — Scope (S020 / Retrieval Batch B)
+
+**Approved (session open):** 2026-08-02  
+**Session:** S020-retrieval-batch-b  
+**Predecessor:** S019 / EV-016 (F42 LIVE)  
+**Issues:** #83, #161 (CE spike), #162 (soft language); **F43** answer/retrieval cache  
+**Branch:** `evolve/EV-017-retrieval-batch-b`
+
+### Scope summary
+
+**Batch B — multi-track:** Ship **F43** answer/retrieval cache (H1/H9 cost win; no LangGraph).
+Keep **#83 / #161** CE rerank as spike-gated track (prior R3 failed lift). Include **#162**
+soft language filter in the same cycle (optional / empty-hit; not proven on staging golden).
+
+### Decisions (session open)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D1 | Session | Open **S020-retrieval-batch-b** (do not reopen S019) |
+| S020-D2 | Scope | **All three** tracks in one cycle (F43 + CE spike + #162) |
+| S020-D3 | Routing | **Standard** (`01→02→04→07→08→09→10→11→12→13`; skip 03, 05, 06, 15) |
+
+### Phase 0 status
+
+Intake in progress — cache tiers, CE ship gate, #162 ship shape.
