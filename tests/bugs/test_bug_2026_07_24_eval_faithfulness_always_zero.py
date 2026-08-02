@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 from vecinita_eval.eval_parsers import parse_answer_relevancy_output, parse_faithfulness_output
-from vecinita_eval.judges import score_faithfulness
+from vecinita_eval.judges import score_answer_relevancy, score_faithfulness
 from vecinita_llm_client import LlmClientError
 
 pytestmark = pytest.mark.unit
@@ -41,6 +41,24 @@ def test_score_faithfulness_uses_direct_yes_no_complete() -> None:
         question="What services are offered?",
         answer="Dental and ophthalmology.",
         context="Clinic offers dental and ophthalmology services.",
+    )
+    assert score == pytest.approx(1.0)
+
+
+def test_score_answer_relevancy_uses_direct_yes_no_complete() -> None:
+    """Answer relevancy must use direct YES/NO (LlamaIndex path false-zeros ES/EN)."""
+
+    class _FakeLlm:
+        def complete(self, prompt: str, **_kwargs: object) -> SimpleNamespace:
+            assert "relevancy" in prompt.lower() or "YES" in prompt
+            assert "¿Cómo" in prompt or "How" in prompt
+            return SimpleNamespace(text="YES")
+
+    score = score_answer_relevancy(
+        llm=_FakeLlm(),
+        question="¿Cómo me inscribo a una escuela pública en Providence?",
+        answer="Regístrese en las Escuelas Públicas de Providence antes de mayo.",
+        context="unused",
     )
     assert score == pytest.approx(1.0)
 

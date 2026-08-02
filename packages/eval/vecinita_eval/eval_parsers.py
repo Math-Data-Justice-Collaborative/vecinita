@@ -18,6 +18,8 @@ def parse_answer_relevancy_output(output_str: str) -> tuple[float | None, str | 
         r"\[SCORE\]\s*:?\s*(\d+(?:\.\d+)?)",
         r"\[RESULT\]\s*:?\s*(\d+(?:\.\d+)?)",
         r"\[RELEVANCE SCORE\]\s*:?\s*(\d+(?:\.\d+)?)",
+        # Qwen 1.5B often wraps the digit: "Final Result: [0]"
+        r"Final Result:\s*\[(\d+(?:\.\d+)?)\]",
         r"Final Result:\s*(\d+(?:\.\d+)?)",
     )
     for fallback in fallback_patterns:

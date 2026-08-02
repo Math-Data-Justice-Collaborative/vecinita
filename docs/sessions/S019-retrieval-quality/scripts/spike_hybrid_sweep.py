@@ -49,6 +49,7 @@ from vecinita_eval.sandbox import (
 from vecinita_eval.sweep import parse_csv_strs
 from vecinita_llm_client import LlmClient
 from vecinita_rag.language import detect_query_language
+from vecinita_rag.multi_query import heuristic_rewrites, multi_query_retrieve
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_SYSTEM_PROMPT
@@ -116,10 +117,6 @@ def _tokens(text: str) -> set[str]:
     return {m.group(0).lower() for m in _TOKEN_RE.finditer(text)}
 
 
-def _norm_query(q: str) -> str:
-    return re.sub(r"\s+", " ", q.strip().lower())
-
-
 def pack_p1(chunks: list[RetrievedChunk]) -> str:
     """Title + URL header per chunk."""
     parts: list[str] = []
@@ -169,32 +166,8 @@ def answer_lang_match(*, answer: str, locale: str) -> bool:
 
 
 def hybrid_rewrites(question: str, *, locale: str) -> list[str]:
-    """Cheap multi-query variants; Spanish-aware for es locale."""
-    q = question.strip()
-    variants = [q]
-    if locale == "es":
-        lowered = q.lower()
-        if "cómo" in lowered or "como" in lowered:
-            variants.append(
-                q.replace("Cómo", "Qué").replace("cómo", "qué").replace("Como", "Qué").replace(
-                    "como", "qué"
-                )
-            )
-        if "?" in q or "¿" in q:
-            variants.append(q.rstrip("?").rstrip("¿") + " en Providence RI?")
-    else:
-        if "how" in q.lower():
-            variants.append(q.replace("How", "What").replace("how", "what"))
-        if "?" in q:
-            variants.append(q.rstrip("?") + " in Providence RI?")
-    seen: set[str] = set()
-    out: list[str] = []
-    for variant in variants:
-        key = _norm_query(variant)
-        if key not in seen:
-            seen.add(key)
-            out.append(variant)
-    return out[:3]
+    """Delegate to shared F42 H7 helper (packages/rag) — keep spike/prod parity."""
+    return heuristic_rewrites(question, locale=locale)
 
 
 def rerank_r1(question: str, chunks: list[RetrievedChunk], top_k: int) -> list[RetrievedChunk]:
@@ -210,18 +183,6 @@ def rerank_r1(question: str, chunks: list[RetrievedChunk], top_k: int) -> list[R
         scored.append((chunk.score * (1.0 + overlap) * diversity, chunk))
     scored.sort(key=lambda item: item[0], reverse=True)
     return [chunk for _, chunk in scored[:top_k]]
-
-
-def _merge_chunks(groups: list[list[RetrievedChunk]], *, top_k: int) -> list[RetrievedChunk]:
-    best: dict[str, RetrievedChunk] = {}
-    for group in groups:
-        for chunk in group:
-            key = str(chunk.chunk_id)
-            prev = best.get(key)
-            if prev is None or chunk.score > prev.score:
-                best[key] = chunk
-    ranked = sorted(best.values(), key=lambda c: c.score, reverse=True)
-    return ranked[:top_k]
 
 
 def _avg(values: list[float | None]) -> float | None:
@@ -333,14 +294,22 @@ def _chunks_for_cell(
     rewrites = [row.question]
     if spec.use_h7:
         rewrites = hybrid_rewrites(row.question, locale=row.locale)
-        groups: list[list[RetrievedChunk]] = []
-        for rw in rewrites:
-            if rw == row.question:
-                groups.append(pool[: spec.pool_n])
-            else:
-                lang = detect_query_language(rw) if spec.language_mode == "l0" else None
-                groups.append(retriever.retrieve_chunks(rw, language=lang)[: spec.pool_n])
-        merged = _merge_chunks(groups, top_k=spec.pool_n)
+
+        def retrieve_fn(query: str) -> list[RetrievedChunk]:
+            if query == row.question:
+                return pool[: spec.pool_n]
+            lang = detect_query_language(query) if spec.language_mode == "l0" else None
+            return retriever.retrieve_chunks(query, language=lang)[: spec.pool_n]
+
+        # Shared merge + same-locale soft boost (AC-RQ6).
+        merged = multi_query_retrieve(
+            row.question,
+            locale=row.locale,
+            top_k=spec.pool_n,
+            retrieve_fn=retrieve_fn,
+            enabled=True,
+            count=max(len(rewrites), 1),
+        )
     else:
         merged = pool[: spec.pool_n]
     if spec.use_r1:
