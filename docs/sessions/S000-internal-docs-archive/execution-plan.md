@@ -11,12 +11,12 @@
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
 | **Active milestone** | M96 — F44 Soft language L1 + empty-hit fixture |
-| **Active task** | T96.1 — unit L1 empty same-lang first pass (TC-180) — next |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94, M95 (T94.1–T95.5) |
+| **Active task** | T96.2 — unit/e2e flag default off L0-strict (TC-181) — next |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94, M95; M96: T96.1 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
-| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T95.1 |
+| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T96.2 |
 | **Scope addition** | 2026-08-02 — F43 H1 cache + F44 soft L1 + F45 CE spike/gate; ADR-042; S020-D15–D18. |
 
 ## Template
@@ -1928,7 +1928,7 @@ unit tests TC-170–172.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T96.1 | Test: unit — L1 fires only on empty same-lang first pass (TC-180) — red | Test | pending | AC-BB5, TC-180, #162 | T94.4 | — | S020 | F44 |
+| T96.1 | Test: unit — L1 fires only on empty same-lang first pass (TC-180) — red | Test | completed | AC-BB5, TC-180, #162 | T94.4 | 2026-08-02 | S020 | F44 |
 | T96.2 | Test: unit/e2e — flag default off keeps L0-strict (TC-181) — red | Test | pending | AC-BB6, TC-181, UJ-058 | — | — | S020 | F44 |
 | T96.3 | Code: `packages/rag` soft-language retrieve helper + ChatRAG flag wire | Code | pending | spec.md F44, config-spec | T96.1, T96.2 | — | S020 | F44 |
 | T96.4 | Test: empty-hit fixture + `tests/e2e/test_uj058_soft_language.py` green | Test | pending | UJ-058, e2e-coverage | T96.3 | — | S020 | F44 |
@@ -2676,7 +2676,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T95.3 | M95 | 22 | Code | completed | T95.1, T95.2 | — | S020 | F43 | — |
 | T95.4 | M95 | 22 | Config | completed | T95.3 | — | S020 | F43 | — |
 | T95.5 | M95 | 22 | Code | completed | T95.3 | — | S020 | F43 | — |
-| T96.1 | M96 | 22 | Test | pending | T94.4 | — | S020 | F44 | — |
+| T96.1 | M96 | 22 | Test | completed | T94.4 | — | S020 | F44 | — |
 | T96.2 | M96 | 22 | Test | pending | — | — | S020 | F44 | — |
 | T96.3 | M96 | 22 | Code | pending | T96.1, T96.2 | — | S020 | F44 | — |
 | T96.4 | M96 | 22 | Test | pending | T96.3 | — | S020 | F44 | — |
