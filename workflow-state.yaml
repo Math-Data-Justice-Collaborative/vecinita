@@ -133,9 +133,11 @@ project:
       session_closed: true
       session_closed_at: '2026-08-02'
     01-requirements:
-      status: pending
+      status: completed
+      started_at: '2026-08-02'
+      completed_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S022/EV-019 — 01-requirements pending; F47–F49; investigate→ship
+      partial_rerun_note: S022/EV-019 — 01-requirements COMPLETE; F47–F49; RD-219–228; ADR-044
       session_id: S022-ingest-resilience
       branch: evolve/EV-019-ingest-resilience
       evolve_cycle_id: EV-019
@@ -145,8 +147,10 @@ project:
       - F47
       - F48
       - F49
-      current_action: pending
-      note: 'S022/EV-019 01-requirements pending — F47 content_hash skip (#163), F48 embed retry (#166), F49 chunk overlap (#160)'
+      current_action: completed
+      next_action: start 02-verify-plan delta audit
+      report: docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md
+      note: 'S022/EV-019 01-requirements COMPLETE 2026-08-02 — F47 content_hash skip (#163), F48 embed retry (#166), F49 chunk overlap (#160); RD-219–228; ADR-044'
       s021_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -363,28 +367,43 @@ project:
       session_closed: true
       session_closed_at: '2026-08-02'
     02-verify-plan:
-      status: completed
-      started_at: '2026-08-02'
-      completed_at: '2026-08-02'
-      completed_at_ts: '2026-08-02T17:46:52Z'
+      status: pending
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S021/EV-018 — 02-verify-plan COMPLETE; M1–M4 approved (S021-D17); Gate A→B PASS; 
-        checkpoints.phase_a=passed; gates.a_to_b=passed; handoff → 04-tech-plan
-      session_id: S021-retrieval-follow-on
-      branch: evolve/EV-018-retrieval-follow-on
-      evolve_cycle_id: EV-018
+      partial_rerun_note: S022/EV-019 — 02-verify-plan pending; F47–F49 delta audit
+      session_id: S022-ingest-resilience
+      branch: evolve/EV-019-ingest-resilience
+      evolve_cycle_id: EV-019
       mode: evolve
       delta_only: true
       feature_ids:
-      - F46
-      - F45
-      report: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
-      current_action: completed
-      gate_a_to_b: passed
-      s021_d17_decision: S021-D17
-      note: 'S021/EV-018 02-verify-plan COMPLETE 2026-08-02 — M1–M4 approved (S021-D17); Gate A→B PASS; checkpoints.phase_a=passed;
-        gates.a_to_b=passed; handoff → 04-tech-plan in_progress S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d;
-        follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+      - F47
+      - F48
+      - F49
+      current_action: ready_for_02_verify_plan
+      note: 'S022/EV-019 02-verify-plan pending — handoff from 01-requirements COMPLETE 2026-08-02'
+      s021_baseline:
+        status: completed
+        started_at: '2026-08-02'
+        completed_at: '2026-08-02'
+        completed_at_ts: '2026-08-02T17:46:52Z'
+        partial_rerun_at: '2026-08-02'
+        partial_rerun_note: S021/EV-018 — 02-verify-plan COMPLETE; M1–M4 approved (S021-D17); Gate A→B PASS;
+          checkpoints.phase_a=passed; gates.a_to_b=passed; handoff → 04-tech-plan
+        session_id: S021-retrieval-follow-on
+        branch: evolve/EV-018-retrieval-follow-on
+        evolve_cycle_id: EV-018
+        mode: evolve
+        delta_only: true
+        feature_ids:
+        - F46
+        - F45
+        report: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
+        current_action: completed
+        gate_a_to_b: passed
+        s021_d17_decision: S021-D17
+        note: 'S021/EV-018 02-verify-plan COMPLETE 2026-08-02 — M1–M4 approved (S021-D17); Gate A→B PASS; checkpoints.phase_a=passed;
+          gates.a_to_b=passed; handoff → 04-tech-plan in_progress S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d;
+          follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -4463,8 +4482,9 @@ active_session:
   - stage: 01-requirements
     required: true
     mode: delta
-    status: pending
+    status: completed
     skip_rationale:
+    completed_at: '2026-08-02'
   - stage: 02-verify-plan
     required: true
     mode: delta
@@ -4510,8 +4530,8 @@ active_session:
     mode: delta
     status: pending
     skip_rationale:
-  current_stage: 01-requirements
-  current_action: phase0_complete_start_01
+  current_stage: 02-verify-plan
+  current_action: ready_for_02_verify_plan
   started_at: '2026-08-02'
   mode: evolve
   delta_only: true
@@ -9253,19 +9273,32 @@ stages:
     started_at: '2026-08-02'
     completed_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S021/EV-018 — 01-requirements delta COMPLETE; F46 + extend F45; S021-D13–D16; RD-209–RD-218
-    session_id: S021-retrieval-follow-on
-    branch: evolve/EV-018-retrieval-follow-on
-    evolve_cycle_id: EV-018
+    partial_rerun_note: S022/EV-019 — 01-requirements COMPLETE; F47–F49; RD-219–228; ADR-044
+    session_id: S022-ingest-resilience
+    branch: evolve/EV-019-ingest-resilience
+    evolve_cycle_id: EV-019
     mode: evolve
     delta_only: true
     feature_ids:
-    - F46
-    - F45
-    report: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
+    - F47
+    - F48
+    - F49
     current_action: completed
-    note: S021/EV-018 01-requirements COMPLETE 2026-08-02 — F46 + extend F45; S021-D13–D16; RD-209–RD-218; handoff → 
-      02-verify-plan
+    next_action: start 02-verify-plan delta audit
+    report: docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md
+    note: 'S022/EV-019 01-requirements COMPLETE 2026-08-02 — F47 content_hash skip (#163), F48 embed retry (#166), F49 chunk overlap (#160); RD-219–228; ADR-044'
+    s021_baseline:
+      status: completed
+      started_at: '2026-08-02'
+      completed_at: '2026-08-02'
+      session_id: S021-retrieval-follow-on
+      branch: evolve/EV-018-retrieval-follow-on
+      evolve_cycle_id: EV-018
+      feature_ids:
+      - F46
+      - F45
+      report: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
+      note: S021/EV-018 01-requirements COMPLETE 2026-08-02
     s020_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -9603,27 +9636,42 @@ stages:
       s020_d9_d14_decision_recorded: true
       s020_d9_d14_decision_recorded_in: docs/decisions/evolve-decisions.md
   02-verify-plan:
-    status: completed
-    started_at: '2026-08-02'
-    completed_at: '2026-08-02'
-    completed_at_ts: '2026-08-02T17:46:52Z'
+    status: pending
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S021/EV-018 — 02-verify-plan COMPLETE; M1–M4 approved (S021-D17); Gate A→B PASS; 
-      checkpoints.phase_a=passed; gates.a_to_b=passed; handoff → 04-tech-plan
-    session_id: S021-retrieval-follow-on
-    branch: evolve/EV-018-retrieval-follow-on
-    evolve_cycle_id: EV-018
+    partial_rerun_note: S022/EV-019 — 02-verify-plan pending; F47–F49 delta audit
+    session_id: S022-ingest-resilience
+    branch: evolve/EV-019-ingest-resilience
+    evolve_cycle_id: EV-019
     mode: evolve
     delta_only: true
     feature_ids:
-    - F46
-    - F45
-    report: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
-    current_action: completed
-    gate_a_to_b: passed
-    s021_d17_decision: S021-D17
-    note: S021/EV-018 02-verify-plan COMPLETE 2026-08-02 — M1–M4 approved (S021-D17); Gate A→B PASS; 
-      checkpoints.phase_a=passed; gates.a_to_b=passed; handoff → 04-tech-plan in_progress
+    - F47
+    - F48
+    - F49
+    current_action: ready_for_02_verify_plan
+    note: 'S022/EV-019 02-verify-plan pending — handoff from 01-requirements COMPLETE 2026-08-02'
+    s021_baseline:
+      status: completed
+      started_at: '2026-08-02'
+      completed_at: '2026-08-02'
+      completed_at_ts: '2026-08-02T17:46:52Z'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: S021/EV-018 — 02-verify-plan COMPLETE; M1–M4 approved (S021-D17); Gate A→B PASS;
+        checkpoints.phase_a=passed; gates.a_to_b=passed; handoff → 04-tech-plan
+      session_id: S021-retrieval-follow-on
+      branch: evolve/EV-018-retrieval-follow-on
+      evolve_cycle_id: EV-018
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F46
+      - F45
+      report: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
+      current_action: completed
+      gate_a_to_b: passed
+      s021_d17_decision: S021-D17
+      note: S021/EV-018 02-verify-plan COMPLETE 2026-08-02 — M1–M4 approved (S021-D17); Gate A→B PASS;
+        checkpoints.phase_a=passed; gates.a_to_b=passed; handoff → 04-tech-plan in_progress
     s020_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -21065,7 +21113,7 @@ evolve_cycles:
     (F49) on shared write/embed path.
 
     '
-  current_stage: 01-requirements
+  current_stage: 02-verify-plan
   mode: evolve
   delta_only: true
   branch: evolve/EV-019-ingest-resilience
@@ -21097,9 +21145,25 @@ evolve_cycles:
       current_action: phase0_complete
       note: Phase 0 complete — S022-D1–D13 approved; handoff → 01-requirements
     01-requirements:
+      status: completed
+      started: '2026-08-02'
+      completed: '2026-08-02'
+      report: docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md
+      current_action: completed
+      next_action: handoff_02_verify_plan
+      note: S022/EV-019 01-requirements COMPLETE — F47–F49; RD-219–228; ADR-044
+      artifacts_updated:
+      - docs/feature-list.md
+      - docs/spec.md
+      - docs/config-spec.md
+      - docs/api-contract.md
+      - docs/user-journeys.md
+      - docs/test-plan.md
+      - docs/acceptance-criteria.md
+      - docs/adr/ADR-044-ingest-chunk-tokenizer-overlap.md
+      - docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md
+    02-verify-plan:
       status: pending
-      started: null
-      completed: null
   gates:
     a_to_b: pending
     b_to_c: pending
@@ -21119,9 +21183,13 @@ evolve_cycles:
   - path: docs/sessions/S022-ingest-resilience/checkpoints/01-requirements-seed.md
     status: completed
   - path: docs/feature-list.md
-    status: in_progress
+    status: completed
   - path: docs/decisions/evolve-decisions.md
     status: in_progress
+  - path: docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md
+    status: completed
+  - path: docs/adr/ADR-044-ingest-chunk-tokenizer-overlap.md
+    status: completed
   - path: docs/sessions/S022-ingest-resilience/reports/evolve-summary.md
     status: pending
 retrospective_cycles:
@@ -22301,6 +22369,13 @@ issue_log:
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains
     in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 01-requirements
+  session_id: S022-ingest-resilience
+  evolve_cycle_id: EV-019
+  decision: 'S022/EV-019 Phase 0C 1,1,1,2,2,1 — RD-219–228; ADR-044; overlap default 32; HF tokenizer; UJ-062'
+  recorded_at: '2026-08-02T21:45:00Z'
+  note: 01-requirements COMPLETE; handoff → 02-verify-plan
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S022-ingest-resilience
@@ -24730,6 +24805,18 @@ decisions_log:
 - '2026-08-02 RET-001 COMPLETE: Phase 7; RA-001–007 applied via PR #177; ADR-043; artifacts docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
   + docs/retrospective-actions.md'
 artifacts:
+- path: docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md
+  status: completed
+  session_id: S022-ingest-resilience
+  stage: 01-requirements
+  evolve_cycle_id: EV-019
+  recorded_at: '2026-08-02T21:45:00Z'
+- path: docs/adr/ADR-044-ingest-chunk-tokenizer-overlap.md
+  status: completed
+  session_id: S022-ingest-resilience
+  stage: 01-requirements
+  evolve_cycle_id: EV-019
+  recorded_at: '2026-08-02T21:45:00Z'
 - path: docs/sessions/S022-ingest-resilience/session-brief.md
   kind: session-brief
   session_id: S022-ingest-resilience
@@ -29500,6 +29587,21 @@ git_history:
     skill_ids:
     - 13-deploy-smoke
     - workflow-state-manager
+  - sha: e4471f5
+    branch: evolve/EV-019-ingest-resilience
+    message: '[S022/EV-019] docs: 01-requirements ingest resilience (F47–F49)'
+    stage: 01-requirements
+    session_id: S022-ingest-resilience
+    evolve_cycle_id: EV-019
+    files_changed: 17
+    timestamp: '2026-08-02T21:45:00Z'
+  - sha: fd08885
+    branch: evolve/EV-019-ingest-resilience
+    message: '[S022/EV-019] docs: open ingest resilience session (F47–F49)'
+    stage: 00-context
+    session_id: S022-ingest-resilience
+    files_changed: 9
+    timestamp: '2026-08-02T21:20:00Z'
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
