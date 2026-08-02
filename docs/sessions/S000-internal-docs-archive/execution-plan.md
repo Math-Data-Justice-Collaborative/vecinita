@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
 | **Active milestone** | M98 — E2E + ship-gate docs + Phase 22 close |
-| **Active task** | T98.1 — UJ-057 answer cache e2e — next |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M97; M98: — |
+| **Active task** | T98.2 — UJ-059 CE path e2e — next |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M97; M98: T98.1 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
@@ -1951,7 +1951,7 @@ unit tests TC-170–172.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T98.1 | Test: finish/green `tests/e2e/test_uj057_answer_cache.py` (TC-176–179) | Test | pending | UJ-057, e2e-coverage | T95.3, T95.4 | — | S020 | F43 |
+| T98.1 | Test: finish/green `tests/e2e/test_uj057_answer_cache.py` (TC-176–179) | Test | completed | UJ-057, e2e-coverage | T95.3, T95.4 | 2026-08-02 | S020 | F43 |
 | T98.2 | Test: CE path e2e with mock (UJ-059) when flag on | Test | pending | UJ-059, TC-182–183 | T97.3 | — | S020 | F45 |
 | T98.3 | Docs: CE ship-gate report template (relevancy ≥0.28 / faith ≥0.91) — Path A | Docs | pending | AC-BB9, TC-184, RD-205/206 | T97.5 | — | S020 | F45 |
 | T98.4 | Docs: Phase 22 gate checklist + ADR-042 cross-links; execution-plan Current State | Docs | pending | Phase 22 gate | T96.4, T98.1–T98.3 | — | S020 | F43–F45 |
@@ -2685,7 +2685,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T97.3 | M97 | 22 | Code | completed | T97.1, T97.2 | — | S020 | F45 | — |
 | T97.4 | M97 | 22 | Config | completed | T97.3 | 2026-08-02 | S020 | F45 | — |
 | T97.5 | M97 | 22 | Docs | completed | T97.4 | 2026-08-02 | S020 | F45 | — |
-| T98.1 | M98 | 22 | Test | pending | T95.3, T95.4 | — | S020 | F43 | — |
+| T98.1 | M98 | 22 | Test | completed | T95.3, T95.4 | 2026-08-02 | S020 | F43 | — |
 | T98.2 | M98 | 22 | Test | pending | T97.3 | — | S020 | F45 | — |
 | T98.3 | M98 | 22 | Docs | pending | T97.5 | — | S020 | F45 | — |
 | T98.4 | M98 | 22 | Docs | pending | T96.4, T98.1–T98.3 | — | S020 | F43–F45 | — |
