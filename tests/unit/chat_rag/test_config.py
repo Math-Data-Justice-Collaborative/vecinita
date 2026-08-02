@@ -139,6 +139,14 @@ def test_from_env_parses_f42_rag_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.rag_context_max_chars == _PARSED_CONTEXT_MAX_CHARS
 
 
+def test_from_env_accepts_explicit_p1_packer(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Explicit VECINITA_RAG_PACKER=p1 parses (not only the default path)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_PACKER", "p1")
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_packer == "p1"
+
+
 @pytest.mark.parametrize(
     ("name", "value"),
     [

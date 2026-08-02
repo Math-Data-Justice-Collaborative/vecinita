@@ -12,6 +12,7 @@ from vecinita_chat_rag_backend.service import (
     _build_prompt,  # pyright: ignore[reportPrivateUsage]
     _to_ask_response,  # pyright: ignore[reportPrivateUsage]
 )
+from vecinita_rag.cache import AnswerCache, CachedAnswer
 from vecinita_rag.rerank import CallableCrossEncoderScorer
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
@@ -385,6 +386,208 @@ def test_retrieve_ce_flag_on_reranks_with_scorer() -> None:
         sources = service.retrieve_sources(AskRequest(question="clinic hours", language="en"))
     assert len(sources) == _CE_TOP_K
     assert [source.title for source in sources] == ["high", "mid"]
+
+
+def _cache_settings(*, semantic: bool = False) -> ChatRagSettings:
+    """ChatRAG settings with F43 cache on and H7 off for focused cache tests."""
+    return ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=5,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_cache=True,
+        rag_cache_semantic=semantic,
+        rag_multi_query=False,
+    )
+
+
+def test_ask_cache_exact_hit_skips_llm() -> None:
+    """F43 ask: exact cache hit returns cached answer without calling LLM."""
+    cache = AnswerCache()
+    chunk = _chunk()
+    cache.store_answer(
+        "clinic hours",
+        "en",
+        CachedAnswer(
+            answer="Cached clinic hours",
+            language="en",
+            sources=(chunk,),
+            query_embedding=None,
+        ),
+    )
+    llm = StubLlm(answer="should-not-run")
+    service = ChatRagService(
+        retriever=StubRetriever([chunk]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        response = service.ask(AskRequest(question="clinic hours", language="en"))
+    assert response.answer == "Cached clinic hours"
+    assert response.cache_hit == "exact"
+    assert llm.prompts == []
+
+
+def test_ask_cache_retrieve_tier_synthesizes_and_stores_answer() -> None:
+    """F43 ask: retrieve-tier hit synthesizes from cached chunks then stores answer."""
+    cache = AnswerCache()
+    chunk = _chunk(text="cached retrieve body")
+    cache.store_retrieve("clinic hours", "en", (chunk,))
+    llm = StubLlm(answer="Synthesized from retrieve cache")
+    service = ChatRagService(
+        retriever=StubRetriever([]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        response = service.ask(AskRequest(question="clinic hours", language="en"))
+    assert response.answer == "Synthesized from retrieve cache"
+    assert response.cache_hit == "retrieve"
+    assert llm.prompts  # generate was called
+    # Warm exact hit on second ask
+    llm.prompts.clear()
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        warm = service.ask(AskRequest(question="clinic hours", language="en"))
+    assert warm.cache_hit == "exact"
+    assert llm.prompts == []
+
+
+def test_stream_ask_cache_exact_hit_yields_cached_tokens() -> None:
+    """F43 stream_ask: exact hit returns single-token iterator without LLM stream."""
+    cache = AnswerCache()
+    chunk = _chunk()
+    cache.store_answer(
+        "clinic hours",
+        "en",
+        CachedAnswer(
+            answer="Stream cached",
+            language="en",
+            sources=(chunk,),
+        ),
+    )
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([chunk]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        session = service.stream_ask(AskRequest(question="clinic hours", language="en"))
+    assert session.cache_hit == "exact"
+    assert list(session.tokens) == ["Stream cached"]
+    assert llm.prompts == []
+
+
+def test_stream_ask_cache_miss_stores_after_token_stream() -> None:
+    """F43 stream_ask: miss retrieves, streams tokens, then stores answer."""
+    cache = AnswerCache()
+    chunk = _chunk()
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([chunk]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        session = service.stream_ask(AskRequest(question="clinic hours", language="en"))
+    assert session.cache_hit == "none"
+    assert "".join(session.tokens) == "Streamed"
+    assert llm.prompts
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        warm = service.stream_ask(AskRequest(question="clinic hours", language="en"))
+    assert warm.cache_hit == "exact"
+
+
+def test_stream_ask_cache_empty_retrieve_returns_no_context() -> None:
+    """F43 stream_ask: empty retrieve stores no-context message and yields it."""
+    cache = AnswerCache()
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        session = service.stream_ask(AskRequest(question="no hits here", language="en"))
+    tokens = list(session.tokens)
+    assert len(tokens) == 1
+    assert "context" in tokens[0].lower()
+    assert llm.prompts == []
+
+
+def test_stream_ask_retrieve_tier_hit_streams_from_cached_chunks() -> None:
+    """F43 stream_ask: retrieve-tier hit uses cached chunks (cache_hit=retrieve)."""
+    cache = AnswerCache()
+    chunk = _chunk(text="stream retrieve body")
+    cache.store_retrieve("clinic hours", "en", (chunk,))
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        session = service.stream_ask(AskRequest(question="clinic hours", language="en"))
+    assert session.cache_hit == "retrieve"
+    assert "".join(session.tokens) == "Streamed"
+    assert llm.prompts
+
+
+def test_ask_cache_miss_empty_retrieve_returns_no_context_none_hit() -> None:
+    """F43 ask: cache enabled + empty retrieve yields no-context with cache_hit=none."""
+    cache = AnswerCache()
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        response = service.ask(AskRequest(question="no hits here", language="en"))
+    assert "context" in response.answer.lower()
+    assert response.cache_hit == "none"
+    assert llm.prompts == []
+
+
+def test_ask_with_semantic_cache_uses_retriever_embed_fn() -> None:
+    """F43: semantic-on ask embeds via retriever.embed_fn for cascade lookup."""
+
+    class _EmbedRetriever(StubRetriever):
+        def embed_fn(self, question: str) -> list[float]:
+            return [1.0, 0.0] if question else [0.0, 0.0]
+
+    cache = AnswerCache(semantic_threshold=0.5)
+    chunk = _chunk()
+    cache.store_answer(
+        "warm clinic",
+        "en",
+        CachedAnswer(
+            answer="Semantic cached",
+            language="en",
+            sources=(chunk,),
+            query_embedding=(1.0, 0.0),
+        ),
+    )
+    llm = StubLlm(answer="should-not-run")
+    service = ChatRagService(
+        retriever=_EmbedRetriever([chunk]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        settings=_cache_settings(semantic=True),
+        answer_cache=cache,
+    )
+    with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
+        response = service.ask(AskRequest(question="near clinic", language="en"))
+    assert response.cache_hit == "semantic"
+    assert response.answer == "Semantic cached"
+    assert llm.prompts == []
 
 
 def test_from_settings_embed_and_tag_infer_fns() -> None:

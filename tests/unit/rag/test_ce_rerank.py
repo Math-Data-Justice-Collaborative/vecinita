@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
-from vecinita_rag.rerank import merge_ce_rerank
+from vecinita_rag.rerank import CallableCrossEncoderScorer, merge_ce_rerank, rerank_with_scorer
 from vecinita_rag.types import RetrievedChunk
 
 if TYPE_CHECKING:
@@ -68,3 +68,49 @@ def test_merge_ce_rerank_empty_input() -> None:
         return [0.0 for _ in passages]
 
     assert merge_ce_rerank(_QUERY, [], top_k=_TOP_K, score_fn=score_fn) == []
+
+
+def test_merge_ce_rerank_top_k_non_positive_returns_empty() -> None:
+    """top_k <= 0 short-circuits without calling score_fn meaningfully."""
+    called = False
+
+    def score_fn(_query: str, passages: Sequence[RetrievedChunk]) -> list[float]:
+        nonlocal called
+        called = True
+        return [0.0 for _ in passages]
+
+    assert merge_ce_rerank(_QUERY, [_chunk(text="a")], top_k=0, score_fn=score_fn) == []
+    assert called is False
+
+
+def test_merge_ce_rerank_score_length_mismatch_raises() -> None:
+    """CE score_fn must return one score per chunk."""
+
+    def score_fn(_query: str, _passages: Sequence[RetrievedChunk]) -> list[float]:
+        return [0.5]
+
+    with pytest.raises(ValueError, match="scores for"):
+        merge_ce_rerank(
+            _QUERY,
+            [_chunk(text="a"), _chunk(text="b")],
+            top_k=_TOP_K,
+            score_fn=score_fn,
+        )
+
+
+def test_rerank_with_scorer_uses_passage_text() -> None:
+    """rerank_with_scorer adapts CrossEncoderScorer over chunk.text."""
+    a = _chunk(text="alpha")
+    b = _chunk(text="beta")
+
+    def _score(_query: str, passages: Sequence[str]) -> list[float]:
+        return [0.1 if text == "alpha" else 0.9 for text in passages]
+
+    ranked = rerank_with_scorer(
+        _QUERY,
+        [a, b],
+        top_k=1,
+        scorer=CallableCrossEncoderScorer(_score),
+    )
+    assert len(ranked) == 1
+    assert ranked[0].text == "beta"

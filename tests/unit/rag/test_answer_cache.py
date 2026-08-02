@@ -14,6 +14,7 @@ from vecinita_rag.cache import (
     CacheHitKind,
     CascadeRequest,
     cascade_lookup,
+    cosine_similarity,
 )
 from vecinita_rag.types import RetrievedChunk
 
@@ -223,3 +224,94 @@ def test_retrieve_tier_hit_skips_retrieve_callback() -> None:
     assert cached is not None
     assert cached[0].text == "cached"
     assert retrieve_calls == 0
+
+
+def test_cosine_similarity_mismatched_or_zero_vectors() -> None:
+    """cosine_similarity returns 0.0 for length mismatch or zero-magnitude vectors."""
+    assert cosine_similarity((1.0, 0.0), (1.0,)) == 0.0
+    assert cosine_similarity((), (1.0,)) == 0.0
+    assert cosine_similarity((0.0, 0.0), (1.0, 0.0)) == 0.0
+    assert cosine_similarity((1.0, 0.0), (0.0, 0.0)) == 0.0
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"ttl_s": 0}, "ttl_s"),
+        ({"max_entries": 0}, "max_entries"),
+        ({"semantic_threshold": 1.5}, "semantic_threshold"),
+    ],
+)
+def test_answer_cache_rejects_invalid_constructor_knobs(
+    kwargs: dict[str, float | int],
+    match: str,
+) -> None:
+    """AnswerCache validates ttl, max_entries, and semantic threshold."""
+    with pytest.raises(ValueError, match=match):
+        AnswerCache(corpus_version=_CORPUS_V1, **kwargs)  # type: ignore[arg-type]
+
+
+def test_semantic_lookup_skips_entries_without_embedding_or_wrong_locale() -> None:
+    """Semantic tier ignores answers missing embeddings or other locales."""
+    cache = AnswerCache(corpus_version=_CORPUS_V1, semantic_threshold=0.5)
+    cache.store_answer("q-en", "en", _cached_answer(embedding=None))
+    es_chunk = RetrievedChunk(
+        chunk_id=uuid4(),
+        document_id=uuid4(),
+        text="Madrid body",
+        score=0.9,
+        title="Title",
+        url="https://example.org/doc",
+        language="es",
+    )
+    cache.store_answer(
+        "q-es",
+        "es",
+        CachedAnswer(
+            answer="Madrid",
+            language="es",
+            sources=(es_chunk,),
+            query_embedding=(1.0, 0.0),
+        ),
+    )
+    # retrieve-only entry (answer is None) should also be skipped
+    cache.store_retrieve("q-ret", "en", (_chunk(),))
+
+    hit, answer, _chunks = cascade_lookup(
+        cache,
+        CascadeRequest(
+            query="unrelated",
+            locale="en",
+            query_embedding=(1.0, 0.0),
+        ),
+    )
+
+    assert hit != CacheHitKind.SEMANTIC
+    assert answer is None
+
+
+def test_cascade_retrieve_miss_stores_chunks_without_generate() -> None:
+    """On retrieve miss with no generate, cascade stores chunks and returns NONE."""
+    cache = AnswerCache(corpus_version=_CORPUS_V1)
+    fresh = (_chunk(text="fresh-miss"),)
+
+    hit, answer, chunks = cascade_lookup(
+        cache,
+        CascadeRequest(
+            query=_QUERY,
+            locale=_LOCALE,
+            retrieve=lambda: fresh,
+        ),
+    )
+
+    assert hit == CacheHitKind.NONE
+    assert answer is None
+    assert chunks is not None
+    assert chunks[0].text == "fresh-miss"
+    # Second lookup should hit retrieve tier
+    hit2, _, cached = cascade_lookup(
+        cache,
+        CascadeRequest(query=_QUERY, locale=_LOCALE),
+    )
+    assert hit2 == CacheHitKind.RETRIEVE
+    assert cached is not None
