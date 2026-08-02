@@ -3740,9 +3740,9 @@ project:
       - F49
       feature: F47-F49
       phase: Phase 24 (M101-M104)
-      commits_head: abe4608
+      commits_head: 97cb6a3
       current_action: completed
-      next_action: await_continue_to_13
+      next_action: none_13_started
       standing_checklist: docs/deploy-checklist.md
       prior_checklist: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
       report: docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
@@ -3764,8 +3764,8 @@ project:
         deploy_path: C2_path_a_and_path_b_rechunk_at_13
       decision: S022 Phase 12 A1 B1 C2
       user_choice: A1_B1_C2
-      commits_pending: true
-      commits_note: commits_pending=true until parent commits deploy-checklist.md
+      commits_pending: false
+      commits_note: 12-verify-deploy APPROVED committed; commits_pending cleared; tip 97cb6a3
       note: S022/EV-019 12-verify-deploy COMPLETE APPROVED 2026-08-02 — Phase 2/3 A1 B1 C2; deploy-checklist approved; Path
         A + Path B rechunk at 13; checkpoints.phase_d=passed; handoff → 13-deploy-smoke (current_action=await_continue_to_13);
         commits_pending until checklist commit
@@ -3977,12 +3977,15 @@ project:
           - UJ-060 carry / AC-BB9 staging-gated
         session_closed: true
         session_closed_at: '2026-08-02'
+      checklist_commit: 97cb6a3
     13-deploy-smoke:
-      status: pending
+      status: in_progress
       ready: true
+      started_at: '2026-08-02'
+      started: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S022/EV-019 — 13-deploy-smoke READY after 12 COMPLETE (A1 B1 C2); prior S021 COMPLETE nested under
-        s021_baseline; await_continue_to_13
+      partial_rerun_note: S022/EV-019 — 13-deploy-smoke STARTED (user continue); Path A then Path B rechunk (C2); prior S021
+        COMPLETE nested under s021_baseline
       session_id: S022-ingest-resilience
       branch: evolve/EV-019-ingest-resilience
       evolve_cycle_id: EV-019
@@ -3994,16 +3997,19 @@ project:
       - F49
       feature: F47-F49
       phase: Phase 24 (M101-M104)
-      commits_head: abe4608
-      current_action: await_continue_to_13
-      next_action: start 13-deploy-smoke — Path A then Path B rechunk
+      commits_head: 97cb6a3
+      current_action: path_a_pr_deploy_then_path_b
+      next_action: create_or_open_PR then Path A Modal DM redeploy; Path B rechunk after Path A smokes
       deploy_path: A_and_B
-      path_a: scheduled
-      path_b_rechunk: scheduled_at_13
+      path_a: in_progress
+      path_b_rechunk: scheduled_after_path_a
       deploy_ready: true
+      ship_plan: path_a_and_path_b_c2
+      pr_exists: false
+      pr_url: null
       report: docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
-      note: S022/EV-019 13-deploy-smoke READY 2026-08-02 — awaiting continue after 12 APPROVED (A1 B1 C2); Path A + Path B
-        rechunk; staging still @ 9d1f10b (EV-018)
+      note: S022/EV-019 13-deploy-smoke IN_PROGRESS 2026-08-02 — user continue recommended; current_action=path_a_pr_deploy_then_path_b;
+        tip 97cb6a3; no PR yet for evolve/EV-019-ingest-resilience; staging still @ 9d1f10b (EV-018)
       s021_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -4898,18 +4904,19 @@ active_session:
   - stage: 13-deploy-smoke
     required: true
     mode: delta
-    status: pending
+    status: in_progress
     skip_rationale: null
     ready: true
-    note: READY — await_continue_to_13; Path A + Path B rechunk (C2)
+    started_at: '2026-08-02'
+    note: IN_PROGRESS — path_a_pr_deploy_then_path_b; Path A + Path B rechunk (C2); no PR yet
   current_stage: 13-deploy-smoke
-  current_action: await_continue_to_13
-  next_action: start 13-deploy-smoke — Path A then Path B rechunk
-  current_stage_note: 12-verify-deploy COMPLETE APPROVED 2026-08-02 (A1 B1 C2); checkpoints.phase_d=passed; current_stage=13-deploy-smoke;
-    current_action=await_continue_to_13; Path B rechunk scheduled at 13; commits_pending until parent commits checklist
-  commits_pending: true
-  commits_note: commits_pending=true until parent commits docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
-  commits_head: abe4608
+  current_action: path_a_pr_deploy_then_path_b
+  next_action: push branch if needed → create PR → merge/pin → Modal DM redeploy → smokes → Path B rechunk
+  current_stage_note: 13-deploy-smoke IN_PROGRESS 2026-08-02 — user continue recommended (Path A + Path B C2); current_action=path_a_pr_deploy_then_path_b;
+    tip 97cb6a3; no PR for evolve/EV-019-ingest-resilience; staging still @ 9d1f10b (EV-018); phase_d=passed
+  commits_pending: false
+  commits_note: tip 97cb6a3 on evolve/EV-019-ingest-resilience; PR not opened yet
+  commits_head: 97cb6a3
   started_at: '2026-08-02'
   mode: evolve
   delta_only: true
@@ -4935,6 +4942,7 @@ active_session:
   - S022 continue to 12-verify-deploy 2026-08-02 — user selected recommended → start 12 (delta EV-019); Path A default S022-D10;
     Path B rechunk optional RD-227
   - S022 Phase 12 A1 B1 C2 — Path B rechunk scheduled at 13 (2026-08-02)
+  - S022 continue to 13-deploy-smoke 2026-08-02 — user selected recommended → start 13 (Path A + Path B C2); current_action=path_a_pr_deploy_then_path_b
 sessions:
 - id: S021-retrieval-follow-on
   type: feature
@@ -13130,9 +13138,9 @@ stages:
     - F49
     feature: F47-F49
     phase: Phase 24 (M101-M104)
-    commits_head: abe4608
+    commits_head: 97cb6a3
     current_action: completed
-    next_action: await_continue_to_13
+    next_action: none_13_started
     standing_checklist: docs/deploy-checklist.md
     prior_checklist: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
     report: docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
@@ -13154,8 +13162,8 @@ stages:
       deploy_path: C2_path_a_and_path_b_rechunk_at_13
     decision: S022 Phase 12 A1 B1 C2
     user_choice: A1_B1_C2
-    commits_pending: true
-    commits_note: commits_pending=true until parent commits deploy-checklist.md
+    commits_pending: false
+    commits_note: 12-verify-deploy APPROVED committed; commits_pending cleared; tip 97cb6a3
     note: S022/EV-019 12-verify-deploy COMPLETE APPROVED 2026-08-02 — Phase 2/3 A1 B1 C2; deploy-checklist approved; Path
       A + Path B rechunk at 13; checkpoints.phase_d=passed; handoff → 13-deploy-smoke (current_action=await_continue_to_13);
       commits_pending until checklist commit
@@ -13374,12 +13382,15 @@ stages:
         - deployment-integration §EV-017 added
         advisories_remaining:
         - UJ-060 carry / AC-BB9 staging-gated
+    checklist_commit: 97cb6a3
   13-deploy-smoke:
-    status: pending
+    status: in_progress
     ready: true
+    started_at: '2026-08-02'
+    started: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S022/EV-019 — 13-deploy-smoke READY after 12 COMPLETE (A1 B1 C2); prior S021 COMPLETE nested under
-      s021_baseline; await_continue_to_13
+    partial_rerun_note: S022/EV-019 — 13-deploy-smoke STARTED (user continue); Path A then Path B rechunk (C2); prior S021
+      COMPLETE nested under s021_baseline
     session_id: S022-ingest-resilience
     branch: evolve/EV-019-ingest-resilience
     evolve_cycle_id: EV-019
@@ -13391,16 +13402,19 @@ stages:
     - F49
     feature: F47-F49
     phase: Phase 24 (M101-M104)
-    commits_head: abe4608
-    current_action: await_continue_to_13
-    next_action: start 13-deploy-smoke — Path A then Path B rechunk
+    commits_head: 97cb6a3
+    current_action: path_a_pr_deploy_then_path_b
+    next_action: create_or_open_PR then Path A Modal DM redeploy; Path B rechunk after Path A smokes
     deploy_path: A_and_B
-    path_a: scheduled
-    path_b_rechunk: scheduled_at_13
+    path_a: in_progress
+    path_b_rechunk: scheduled_after_path_a
     deploy_ready: true
+    ship_plan: path_a_and_path_b_c2
+    pr_exists: false
+    pr_url: null
     report: docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
-    note: S022/EV-019 13-deploy-smoke READY 2026-08-02 — awaiting continue after 12 APPROVED (A1 B1 C2); Path A + Path B rechunk;
-      staging still @ 9d1f10b (EV-018)
+    note: S022/EV-019 13-deploy-smoke IN_PROGRESS 2026-08-02 — user continue recommended; current_action=path_a_pr_deploy_then_path_b;
+      tip 97cb6a3; no PR yet for evolve/EV-019-ingest-resilience; staging still @ 9d1f10b (EV-018)
     s021_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -14406,6 +14420,8 @@ deployment:
       hy1_ship_gate: pass
       hy1_evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
     notes:
+    - 'S022/EV-019 2026-08-02 13-deploy-smoke STARTED — tip evolve/EV-019-ingest-resilience @ 97cb6a3 not yet on staging; staging
+      still main @ 9d1f10b (EV-018); Path A+B C2; no PR opened yet; current_action=path_a_pr_deploy_then_path_b'
     - 'S021/EV-018 2026-08-02 Path A PASS @ 9d1f10b — PR #174 MERGED; ChatRAG deployment ACTIVE ade67338-06bf-40ba-aa21-2c29e08f9b9c;
       CE NOT_IN_SPEC→false (hold); do_verify PASS; H1 PASS; H2 SKIP (no DATABASE_URL); H3 PASS; H0c+H4+H5 PASS; UJ-061 sample
       PASS (5 sources); S021-D27; CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043;
@@ -21927,10 +21943,10 @@ evolve_cycles:
 
     '
   current_stage: 13-deploy-smoke
-  current_action: await_continue_to_13
-  next_action: start 13-deploy-smoke — Path A then Path B rechunk
-  commits_pending: true
-  commits_note: commits_pending=true until parent commits deploy-checklist.md
+  current_action: path_a_pr_deploy_then_path_b
+  next_action: push/create PR → Path A Modal DM redeploy + smokes → Path B rechunk (C2)
+  commits_pending: false
+  commits_note: tip 97cb6a3; no PR yet for evolve/EV-019-ingest-resilience
   mode: evolve
   delta_only: true
   branch: evolve/EV-019-ingest-resilience
@@ -22180,9 +22196,9 @@ evolve_cycles:
       - F47
       - F48
       - F49
-      commits_head: abe4608
+      commits_head: 97cb6a3
       current_action: completed
-      next_action: await_continue_to_13
+      next_action: none_13_started
       report: docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
       report_status: approved
       overall: approved
@@ -22199,12 +22215,15 @@ evolve_cycles:
         rollback_plan: B1_approved
         deploy_path: C2_path_a_and_path_b_rechunk_at_13
       decision: S022 Phase 12 A1 B1 C2
-      commits_pending: true
+      commits_pending: false
       note: S022/EV-019 12-verify-deploy COMPLETE APPROVED 2026-08-02 — A1 B1 C2; deploy-checklist approved; Path A + Path
         B rechunk at 13; checkpoints.phase_d=passed; handoff → 13
+      checklist_commit: 97cb6a3
     13-deploy-smoke:
-      status: pending
+      status: in_progress
       ready: true
+      started: '2026-08-02'
+      started_at: '2026-08-02'
       session_id: S022-ingest-resilience
       branch: evolve/EV-019-ingest-resilience
       mode: delta
@@ -22213,12 +22232,18 @@ evolve_cycles:
       - F47
       - F48
       - F49
-      current_action: await_continue_to_13
-      next_action: start 13-deploy-smoke — Path A then Path B rechunk
+      commits_head: 97cb6a3
+      current_action: path_a_pr_deploy_then_path_b
+      next_action: create_or_open_PR then Path A Modal DM redeploy; Path B rechunk after Path A smokes
       deploy_path: A_and_B
-      path_b_rechunk: scheduled_at_13
+      path_a: in_progress
+      path_b_rechunk: scheduled_after_path_a
+      ship_plan: path_a_and_path_b_c2
       deploy_ready: true
-      note: S022/EV-019 13-deploy-smoke READY after 12 COMPLETE (A1 B1 C2); await_continue_to_13
+      pr_exists: false
+      pr_url: null
+      note: S022/EV-019 13-deploy-smoke IN_PROGRESS 2026-08-02 — path_a_pr_deploy_then_path_b; tip 97cb6a3; no PR yet; staging
+        @ 9d1f10b (EV-018)
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -22246,7 +22271,7 @@ evolve_cycles:
     status: completed
   - path: docs/sessions/S022-ingest-resilience/HANDOFF.md
     status: updated
-    note: 12 COMPLETE → 13 await_continue_to_13; phase_d=passed
+    note: 13 IN_PROGRESS — path_a_pr_deploy_then_path_b; phase_d=passed; deploy checkpoint pending
   - path: docs/sessions/S022-ingest-resilience/routing-plan.md
     status: completed
     note: Phase D started — 09-qa + 10-e2e in_progress (parallel); Gate C→D approved
@@ -22267,7 +22292,7 @@ evolve_cycles:
     note: Phase 24 M101–M104 synced
   - path: docs/sessions/S000-internal-docs-archive/execution-plan.md
     status: completed
-    note: Phase 24 M101–M104 COMPLETE; 08–12 COMPLETE; phase_d=passed; 13 pending/ready
+    note: Phase 24 M101–M104 COMPLETE; 08–12 COMPLETE; phase_d=passed; 13 in_progress
   - path: docs/sessions/S022-ingest-resilience/reports/phase24-gate-checklist.md
     status: completed
     note: Phase 24 gate checklist after M104 @ a837f21
@@ -22286,6 +22311,7 @@ evolve_cycles:
   - path: docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
     status: completed
     note: 12 COMPLETE APPROVED — A1 B1 C2; Path B rechunk at 13
+  commits_head: 97cb6a3
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -23459,6 +23485,14 @@ issue_log:
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress;
     interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 13-deploy-smoke
+  session_id: S022-ingest-resilience
+  evolve_cycle_id: EV-019
+  decision: S022 continue to 13-deploy-smoke — Path A + Path B rechunk (C2); current_action=path_a_pr_deploy_then_path_b
+  note: User selected recommended → start 13; tip 97cb6a3; no PR yet for evolve/EV-019-ingest-resilience; staging still @
+    9d1f10b (EV-018); ship Path A (merge/redeploy Modal DM + related) then Path B rechunk
+  recorded_at: '2026-08-02T23:12:07Z'
 - date: '2026-08-02'
   skill: 12-verify-deploy
   session_id: S022-ingest-resilience
@@ -28394,6 +28428,22 @@ git_history:
     created_at: '2026-06-25'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
   commits:
+  - sha: 97cb6a3
+    sha_full: 97cb6a37ab78e678d2b74fedd59ce0b58e1fc180
+    short: 97cb6a3
+    branch: evolve/EV-019-ingest-resilience
+    message: '[S022/EV-019] docs: 12-verify-deploy APPROVED; Path B rechunk at 13'
+    stage: 12-verify-deploy
+    skill_id: 12-verify-deploy
+    session_id: S022-ingest-resilience
+    evolve_cycle_id: EV-019
+    files_changed: 3
+    files:
+    - docs/sessions/S022-ingest-resilience/HANDOFF.md
+    - docs/sessions/S022-ingest-resilience/reports/deploy-checklist.md
+    - workflow-state.yaml
+    timestamp: '2026-08-02T23:09:37Z'
+    note: 12-verify-deploy APPROVED committed; commits_pending cleared; tip 97cb6a3
   - sha: abe4608
     sha_full: abe46087369a4f73f82972ee746d2f17d70287ec
     short: abe4608
