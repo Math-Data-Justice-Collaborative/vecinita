@@ -3615,8 +3615,9 @@ project:
       - F46
       - F45
       phase: Phase 23 (M99-M100)
-      current_action: 13_complete_awaiting_cycle_close
-      next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+      current_action: completed_cycle_closed
+      next_action: invoke 17-retrospective
+      cycle_close_decision: S021-D28
       deploy_path: A
       prod_ce: false
       path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate 
@@ -3639,7 +3640,7 @@ project:
         sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239;
         main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404;
         Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322;
-        gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=false; docs closeout PR #175 MERGED @ 7938ce7; EV-018 remains in_progress awaiting cycle-close AskQuestion'
+        gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=false; docs closeout PR #175 MERGED @ 7938ce7; CYCLE CLOSED 2026-08-02 S021-D28 option_4 → 17-retrospective'
       s020_baseline:
         status: in_progress
         started_at: '2026-08-02'
@@ -4377,6 +4378,22 @@ project:
       summary: 'S018 eval job dispatch hotfix complete. PR #169 merged and prod verified. Phase 5 prevention on fix/S018-job-dispatch-prevention
         @ 8a8cd48 (registry + husky pre-commit + checklist + job-terminal-state rule). Bug BUG-2026-07-31-eval-job-dispatch
         resolved. User paused before Batch A retrieval evolve.'
+    17-retrospective:
+      status: in_progress
+      started: '2026-08-02'
+      started_at: '2026-08-02'
+      completed:
+      session_id: S021-retrieval-follow-on
+      branch: evolve/EV-018-retrieval-follow-on
+      evolve_cycle_id: EV-018
+      retrospective_cycle_id: RET-001
+      predecessor_evolve_cycle_id: EV-018
+      current_action: 17_phase1_evidence_digest
+      next_action: 17_phase1_evidence_digest
+      current_phase: 1
+      decision: S021-D28
+      note: RET-001 opened 2026-08-02 — Phase 0 intake complete (evolve_hotfix / this_session_ev018 / deep / full);
+        current_phase=1 evidence digest
 session_counter: 21
 active_session:
   id: S021-retrieval-follow-on
@@ -4386,17 +4403,21 @@ active_session:
     re-run AC-BB9/UJ-060/#83 ship gate
   status: in_progress
   branch: evolve/EV-018-retrieval-follow-on
-  orchestrator: 16-evolve
+  orchestrator: 17-retrospective
   evolve_cycle_id: EV-018
+  evolve_cycle_status: completed
+  retrospective_cycle_id: RET-001
+  handoff_from_evolve_cycle_id: EV-018
+  close_decision: S021-D28
+  s021_d28_decision: S021-D28
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
-  current_stage: 13-deploy-smoke
+  current_stage: 17-retrospective
   current_stage_parallel:
-  current_action: 13_complete_awaiting_cycle_close
-  next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+  current_action: 17_phase1_evidence_digest
+  next_action: 17_phase1_evidence_digest
   commits_pending: false
-  current_stage_note: 'S021/EV-018 13 COMPLETE 2026-08-02 — Path A PASS; PR #174 MERGED @ 9d1f10b; docs closeout PR #175 MERGED
-    @ 7938ce7 (deploy-smoke PASS + CHANGELOG + decisions); current_action=13_complete_awaiting_cycle_close; commits_pending=false;
-    EV-018 in_progress awaiting cycle-close AskQuestion'
+  current_stage_note: 'S021/RET-001 Phase 0 intake COMPLETE 2026-08-02 — scope=evolve_hotfix; time_window=this_session_ev018;
+    depth=deep; transcript_consent=full; current_phase=1 → evidence digest'
   commits_head: 7938ce7
   pr_plan_id: PR-57
   pr_number: 174
@@ -4600,13 +4621,13 @@ active_session:
     started_at: '2026-08-02'
     started: '2026-08-02'
     mode: delta
-    current_action: 13_complete_awaiting_cycle_close
+    current_action: completed_cycle_closed
     deploy_path: A
     prod_ce: false
     decision: S021-D27
-    note: 'COMPLETE — Path A PASS; PR #174 MERGED @ 9d1f10b; docs closeout PR #175 MERGED @ 7938ce7; ChatRAG ACTIVE; deploy gate passed; CE false hold; awaiting cycle-close
-      AskQuestion'
-    next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+    cycle_close_decision: S021-D28
+    note: 'COMPLETE — Path A PASS; PR #174 MERGED @ 9d1f10b; docs closeout PR #175 MERGED @ 7938ce7; cycle closed S021-D28 → 17-retrospective'
+    next_action: invoke 17-retrospective
     phase_1_5: completed
     h0c: pass
     report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
@@ -4631,6 +4652,20 @@ active_session:
     docs_closeout_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
     docs_closeout_merge_sha: 7938ce7
     commits_pending: false
+  - stage: 17-retrospective
+    required: true
+    mode: process
+    status: in_progress
+    skip_rationale:
+    added_by: S021-D28
+    added_at: '2026-08-02'
+    started_at: '2026-08-02'
+    note: RET-001 Phase 0 intake recorded 2026-08-02 — moving to Phase 1 evidence digest
+    current_action: 17_phase1_evidence_digest
+    next_action: 17_phase1_evidence_digest
+    retrospective_cycle_id: RET-001
+    decision: S021-D28
+    predecessor_evolve_cycle_id: EV-018
   context_briefs:
   - docs/sessions/S021-retrieval-follow-on/context-brief.md
   decisions:
@@ -4660,6 +4695,8 @@ active_session:
   - S021-D24
   - S021-D25
   - S021-D26
+  - S021-D27
+  - S021-D28
   report_01_requirements: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
   report_02_verify_plan: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
   report_02_verify_plan_status: completed
@@ -12347,8 +12384,9 @@ stages:
     feature: F46+F45
     feature_ids: *id003
     phase: Phase 23 (M99-M100)
-    current_action: 13_complete_awaiting_cycle_close
-    next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+    current_action: completed_cycle_closed
+    next_action: invoke 17-retrospective
+    cycle_close_decision: S021-D28
     deploy_path: A
     prod_ce: false
     path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate 
@@ -12371,7 +12409,7 @@ stages:
       sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239;
       main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404;
       Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322;
-      gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=false; docs closeout PR #175 MERGED @ 7938ce7; EV-018 remains in_progress awaiting cycle-close AskQuestion'
+      gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=false; docs closeout PR #175 MERGED @ 7938ce7; CYCLE CLOSED 2026-08-02 S021-D28 option_4 → 17-retrospective'
     s020_baseline:
       status: in_progress
       started_at: '2026-08-02'
@@ -13111,7 +13149,21 @@ stages:
     waived_at: '2026-07-29'
     waived_for: github_issue_87_feature_session
   17-retrospective:
-    status: pending
+    status: in_progress
+    started: '2026-08-02'
+    started_at: '2026-08-02'
+    completed:
+    session_id: S021-retrieval-follow-on
+    branch: evolve/EV-018-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    retrospective_cycle_id: RET-001
+    predecessor_evolve_cycle_id: EV-018
+    current_action: 17_phase1_evidence_digest
+    next_action: 17_phase1_evidence_digest
+    current_phase: 1
+    decision: S021-D28
+    note: RET-001 opened 2026-08-02 — Phase 0 intake complete (evolve_hotfix / this_session_ev018 / deep / full);
+      current_phase=1 evidence digest
   18-pr-review:
     status: completed
     started: '2026-06-30'
@@ -19917,10 +19969,25 @@ evolve_cycles:
   - F46
   - F45
   title: Retrieval follow-on — F46 empty retrieve + F45 CE re-gate
-  status: in_progress
+  status: completed
   started: '2026-08-02'
   started_at: '2026-08-02'
-  completed:
+  completed: '2026-08-02'
+  completed_at: '2026-08-02'
+  closed_at: '2026-08-02'
+  close_decision: S021-D28
+  s021_d28_decision: S021-D28
+  s021_d28_decision_recorded: true
+  close_choice: option_4_17_retrospective
+  close_note: User option 4 — close EV-018; invoke 17-retrospective in S021. CE flag flip deferred; 15-service-health
+    skipped.
+  post_close_handoff:
+    skill: 17-retrospective
+    session_id: S021-retrieval-follow-on
+    current_action: handoff_17_retrospective
+    next_action: invoke 17-retrospective
+    decision: S021-D28
+    note: Keep S021 open; amend routing_plan with 17-retrospective; 17 opens RET cycle on intake
   session_id: S021-retrieval-follow-on
   predecessor_session_id: S020-retrieval-batch-b
   predecessor_evolve_cycle_id: EV-017
@@ -19934,14 +20001,13 @@ evolve_cycles:
     Prod VECINITA_RAG_RERANK_CE stays false until re-gate passes. Predecessor EV-017 @ f24a620.
 
     '
-  current_stage: 13-deploy-smoke
+  current_stage: 17-retrospective
   current_stage_parallel:
-  current_action: 13_complete_awaiting_cycle_close
-  next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+  current_action: handoff_17_retrospective
+  next_action: invoke 17-retrospective
   commits_pending: false
-  current_stage_note: 'S021/EV-018 13 COMPLETE 2026-08-02 — Path A PASS; PR #174 MERGED @ 9d1f10b; docs closeout PR #175 MERGED
-    @ 7938ce7 (deploy-smoke PASS + CHANGELOG + decisions); current_action=13_complete_awaiting_cycle_close; commits_pending=false;
-    EV-018 in_progress awaiting cycle-close AskQuestion'
+  current_stage_note: 'S021/EV-018 CLOSED 2026-08-02 — S021-D28 option_4_17_retrospective; status=completed; handoff →
+    17-retrospective (active_session S021 remains open); commits_pending=false'
   commits_head: 7938ce7
   pr_plan_id: PR-57
   pr_number: 174
@@ -20002,7 +20068,10 @@ evolve_cycles:
       started: '2026-08-02'
       completed: '2026-08-02'
       current_action: phase0_complete
-      note: Phase 0 complete — S021-D9–D12 approved; handoff → 01-requirements
+      phase_4_close: completed
+      close_decision: S021-D28
+      next_action: invoke 17-retrospective
+      note: Phase 0 complete — S021-D9–D12 approved; Phase 4 close S021-D28 → 17-retrospective
     01-requirements:
       status: completed
       started: '2026-08-02'
@@ -20332,8 +20401,9 @@ evolve_cycles:
       mode: delta
       session_id: S021-retrieval-follow-on
       evolve_cycle_id: EV-018
-      current_action: 13_complete_awaiting_cycle_close
-      next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+      current_action: completed_cycle_closed
+      next_action: invoke 17-retrospective
+      cycle_close_decision: S021-D28
       deploy_path: A
       prod_ce: false
       decision: S021-D27
@@ -20628,6 +20698,18 @@ evolve_cycles:
         deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404
         deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655
         deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322
+  - id: S021-D28
+    topic: cycle_close
+    choice: option_4_17_retrospective
+    ask_option: 4
+    note: Cycle close AskQuestion option 4 — close EV-018 and hand off to 17-retrospective (same session S021). CE
+      flag flip remains a separate future decision; 15-service-health skipped.
+    status: approved
+    recorded_at: '2026-08-02T20:00:00Z'
+    stage: 16-evolve
+    close_path: 17-retrospective
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
   rd_allocated:
     range: RD-209..RD-218
     decisions:
@@ -20863,7 +20945,40 @@ evolve_cycles:
   s021_d27_decision_recorded: true
   path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate decision
     after Path A
-retrospective_cycles: []
+  s021_d28_decision: S021-D28
+  s021_d28_close_choice: option_4_17_retrospective
+  current_action: handoff_17_retrospective
+  next_action: invoke 17-retrospective
+retrospective_cycles:
+- id: RET-001
+  title: S021/EV-018 evolve_hotfix retrospective
+  status: in_progress
+  started: '2026-08-02'
+  completed:
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  scope:
+    mode: evolve_hotfix
+    stages: []
+  time_window: this_session_ev018
+  since_date:
+  depth: deep
+  transcript_consent: full
+  current_phase: 1
+  phase0_intake:
+    scope_choice: c_evolve_hotfix_only
+    time_window_choice: c_this_session_ev018_only
+    depth_choice: a_deep_per_stage_interview
+    transcript_consent_choice: a_full
+    recorded_at: '2026-08-02'
+  evidence_summary:
+  interview:
+    stages_completed: []
+    themes_confirmed: []
+  skill_workshop: not_started
+  actions: []
+  skill_patches: []
+  artifacts: []
 pr_review_cycles:
 - id: PRR-001
   pr_number: 60
@@ -24381,6 +24496,8 @@ decisions_log:
   completed; current_action=13_complete_awaiting_cycle_close; next_action=AskQuestion cycle close — done / 15-service-health
   / CE flag flip separate / 17-retrospective; EV-018 remains in_progress; commits_pending=true'
 - '2026-08-02T19:52:05Z S021/EV-018: docs closeout PR #175 MERGED @ 7938ce7 (7938ce73a774f1eb6342a27d8da02fd0d25c1779) — deploy-smoke PASS report + CHANGELOG + decisions; commits_pending=false; current_action=13_complete_awaiting_cycle_close; next_action=AskQuestion cycle close; EV-018 remains in_progress'
+- '2026-08-02T20:00:00Z S021/EV-018: S021-D28 cycle close option_4_17_retrospective — EV-018 status=completed (completed=2026-08-02); current_action=handoff_17_retrospective; next_action=invoke 17-retrospective; active_session S021-retrieval-follow-on remains open; routing_plan amended with 17-retrospective (pending); CE flag flip deferred; 15-service-health skipped'
+- '2026-08-02T20:05:00Z S021/RET-001: Phase 0 intake — scope=evolve_hotfix (c); time_window=this_session_ev018 (c); depth=deep (a); transcript_consent=full (a); current_phase=1; current_action=17_phase1_evidence_digest; project.stages.17-retrospective=in_progress; routing_plan 17=in_progress'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
