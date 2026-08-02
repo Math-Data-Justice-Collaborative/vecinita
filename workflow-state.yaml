@@ -1368,7 +1368,7 @@ project:
       status: in_progress
       started_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S022/EV-019 — 07-build in_progress; M101 COMPLETE (T101.1–T101.4); handoff → T102.1 TDD
+      partial_rerun_note: S022/EV-019 — 07-build in_progress; M103 (F49) COMPLETE (T103.1–T103.4); T104.1 pending; commit sha pending parent follow-up
       session_id: S022-ingest-resilience
       branch: evolve/EV-019-ingest-resilience
       evolve_cycle_id: EV-019
@@ -1379,29 +1379,44 @@ project:
       - F48
       - F49
       phase: Phase 24 (M101-M104)
-      milestone: M102
-      milestone_status: pending
+      milestone: M104
+      milestone_status: in_progress
       m101_status: completed
       m101_completed_at: '2026-08-02'
-      current_task: T102.1
-      current_action: start_t102_1
-      next_action: run T102.1 TDD
+      m102_status: completed
+      m102_completed_at: '2026-08-02'
+      m103_status: completed
+      m103_completed_at: '2026-08-02'
+      m103_commit_sha: pending_parent_follow_up
+      m104_status: in_progress
+      current_task: T104.1
+      current_action: start_t104_1
+      next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
       gate_b_to_c: passed
       s022_d21_decision: S022-D21
       s022_d22_decision: S022-D22
       s022_d22_decision_recorded: true
       s022_d22_decision_recorded_in: docs/decisions/evolve-decisions.md
-      note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); handoff → T102.1 TDD (M102/F48
-        embed retry)
+      note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); M102 COMPLETE (T102.1–T102.4
+        @ 41ac0df); M103 COMPLETE (T103.1–T103.4, F49; commit sha pending parent follow-up); current_task T104.1 pending
+        (start_t104_1)
       substeps:
-        current_task: T102.1
+        current_task: T104.1
         task_status: pending
-        next_action: run T102.1 TDD
+        next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
         completed_tasks_recent:
         - T101.1
         - T101.2
         - T101.3
         - T101.4
+        - T102.1
+        - T102.2
+        - T102.3
+        - T102.4
+        - T103.1
+        - T103.2
+        - T103.3
+        - T103.4
       s021_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -4580,7 +4595,7 @@ active_session:
     status: in_progress
     skip_rationale: null
     started_at: '2026-08-02'
-    note: M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); start T102.1 TDD (M102/F48 embed retry)
+    note: M101–M103 COMPLETE (M103 F49 T103.1–T103.4; sha pending); T104.1 pending (start_t104_1)
   - stage: 08-verify-build
     required: true
     mode: delta
@@ -4612,9 +4627,10 @@ active_session:
     status: pending
     skip_rationale: null
   current_stage: 07-build
-  current_action: start_t102_1
-  next_action: run T102.1 TDD
-  commits_pending: false
+  current_action: start_t104_1
+  next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
+  commits_pending: true
+  commits_note: M103 (T103.1–T103.4) implemented; git_history tip / commit sha pending parent follow-up after artifact commit lands
   started_at: '2026-08-02'
   mode: evolve
   delta_only: true
@@ -4631,7 +4647,7 @@ active_session:
   decisions:
   - S022-D1 through S022-D13 approved 2026-08-02 (user answers 1,1,1,1)
   - S022-D20 approved 2026-08-02 — Gate A→B PASS; M1–M6 all approved (option 1)
-  - S022-D21 approved 2026-08-02 — TP1–TP6 all approved; Phase 24 M101–M104 drafted; awaiting Gate B→C
+  - S022-D21 approved 2026-08-02 — TP1–TP6 all approved; Phase 24 M101–M104 drafted; Gate B→C PASS (S022-D22)
   - S022-D22 approved 2026-08-02 — Gate B→C PASS; complete 04-tech-plan; handoff → 07-build T101.1 (option 1)
 sessions:
 - id: S021-retrieval-follow-on
@@ -10478,7 +10494,7 @@ stages:
     status: in_progress
     started_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S022/EV-019 — 07-build in_progress; M101 COMPLETE (T101.1–T101.4); handoff → T102.1 TDD
+    partial_rerun_note: S022/EV-019 — 07-build in_progress; M103 (F49) COMPLETE (T103.1–T103.4); T104.1 pending; commit sha pending parent follow-up
     session_id: S022-ingest-resilience
     branch: evolve/EV-019-ingest-resilience
     evolve_cycle_id: EV-019
@@ -10489,29 +10505,44 @@ stages:
     - F48
     - F49
     phase: Phase 24 (M101-M104)
-    milestone: M102
-    milestone_status: pending
+    milestone: M104
+    milestone_status: in_progress
     m101_status: completed
     m101_completed_at: '2026-08-02'
-    current_task: T102.1
-    current_action: start_t102_1
-    next_action: run T102.1 TDD
+    m102_status: completed
+    m102_completed_at: '2026-08-02'
+    m103_status: completed
+    m103_completed_at: '2026-08-02'
+    m103_commit_sha: pending_parent_follow_up
+    m104_status: in_progress
+    current_task: T104.1
+    current_action: start_t104_1
+    next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
     gate_b_to_c: passed
     s022_d21_decision: S022-D21
     s022_d22_decision: S022-D22
     s022_d22_decision_recorded: true
     s022_d22_decision_recorded_in: docs/decisions/evolve-decisions.md
-    note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); handoff → T102.1 TDD (M102/F48
-      embed retry)
+    note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); M102 COMPLETE (T102.1–T102.4
+      @ 41ac0df); M103 COMPLETE (T103.1–T103.4, F49; commit sha pending parent follow-up); current_task T104.1 pending
+      (start_t104_1)
     substeps:
-      current_task: T102.1
+      current_task: T104.1
       task_status: pending
-      next_action: run T102.1 TDD
+      next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
       completed_tasks_recent:
       - T101.1
       - T101.2
       - T101.3
       - T101.4
+      - T102.1
+      - T102.2
+      - T102.3
+      - T102.4
+      - T103.1
+      - T103.2
+      - T103.3
+      - T103.4
     s021_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -21209,9 +21240,10 @@ evolve_cycles:
 
     '
   current_stage: 07-build
-  current_action: start_t102_1
-  next_action: run T102.1 TDD
-  commits_pending: false
+  current_action: start_t104_1
+  next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
+  commits_pending: true
+  commits_note: M103 (T103.1–T103.4) implemented; git_history tip / commit sha pending parent follow-up after artifact commit lands
   mode: evolve
   delta_only: true
   branch: evolve/EV-019-ingest-resilience
@@ -21313,20 +21345,37 @@ evolve_cycles:
       status: in_progress
       started: '2026-08-02'
       started_at: '2026-08-02'
-      current_action: start_t102_1
-      next_action: run T102.1 TDD
-      current_task: T102.1
-      milestone: M102
+      current_action: start_t104_1
+      next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
+      current_task: T104.1
+      task_status: pending
+      milestone: M104
+      milestone_status: in_progress
       m101_status: completed
       m101_completed_at: '2026-08-02'
+      m102_status: completed
+      m102_completed_at: '2026-08-02'
+      m103_status: completed
+      m103_completed_at: '2026-08-02'
+      m103_commit_sha: pending_parent_follow_up
+      m104_status: in_progress
       phase: Phase 24 (M101-M104)
       s022_d22_decision: S022-D22
-      note: S022/EV-019 07-build in_progress — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); handoff → T102.1 TDD (M102/F48 embed retry)
+      note: S022/EV-019 07-build in_progress — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); M102 COMPLETE (T102.1–T102.4 @ 41ac0df);
+        M103 COMPLETE (T103.1–T103.4, F49; commit sha pending parent follow-up); current_task T104.1 pending (start_t104_1)
       completed_tasks:
       - T101.1
       - T101.2
       - T101.3
       - T101.4
+      - T102.1
+      - T102.2
+      - T102.3
+      - T102.4
+      - T103.1
+      - T103.2
+      - T103.3
+      - T103.4
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -21354,10 +21403,10 @@ evolve_cycles:
     status: completed
   - path: docs/sessions/S022-ingest-resilience/HANDOFF.md
     status: completed
-    note: M101 done → T102.1; Gate B→C PASS (S022-D22)
+    note: M103 done → T104.1; Gate B→C PASS (S022-D22)
   - path: docs/sessions/S022-ingest-resilience/routing-plan.md
     status: completed
-    note: M101 done; 07-build in_progress @ T102.1
+    note: T104.1 pending (start_t104_1); 07-build @ M104; M103 COMPLETE
   - path: docs/decisions.md
     status: completed
     note: EV019-M1–M6 verdicts (S022-D20)
@@ -21375,7 +21424,7 @@ evolve_cycles:
     note: Phase 24 M101–M104 synced
   - path: docs/sessions/S000-internal-docs-archive/execution-plan.md
     status: completed
-    note: Phase 24 M101–M104 drafted
+    note: Phase 24 M101–M104; M103 COMPLETE; T104.1 pending
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -27048,12 +27097,12 @@ artifacts:
   note: Gate A→B PASS; M1–M6 approved
 - path: docs/sessions/S022-ingest-resilience/HANDOFF.md
   session_id: S022-ingest-resilience
-  stage: 04-tech-plan
-  skill_id: 16-evolve
+  stage: 07-build
+  skill_id: 07-build
   evolve_cycle_id: EV-019
   status: completed
-  recorded_at: '2026-08-02T23:30:00Z'
-  note: M101 done → T102.1; Gate B→C PASS (S022-D22)
+  recorded_at: '2026-08-02T22:17:48Z'
+  note: M103 done → T104.1; Gate B→C PASS (S022-D22); m103_commit_sha pending_parent_follow_up
 - path: docs/sessions/S022-ingest-resilience/routing-plan.md
   session_id: S022-ingest-resilience
   stage: 02-verify-plan
@@ -27370,6 +27419,15 @@ git_history:
     created_at: '2026-06-25'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
   commits:
+  - sha: 41ac0df
+    sha_full: 41ac0df5f35d0ea3e609d89d929de9c7f15d9f43
+    branch: evolve/EV-019-ingest-resilience
+    message: '[T102.1-T102.4] feat: F48 embed sub-batch and retry'
+    stage: 07-build
+    files_changed: 5
+    timestamp: '2026-08-02T22:17:48Z'
+    session_id: S022-ingest-resilience
+    evolve_cycle_id: EV-019
   - sha: 7bee3e1
     sha_full: 7bee3e1a59cd7454e66ecd75401ec819f7c75e99
     branch: evolve/EV-019-ingest-resilience

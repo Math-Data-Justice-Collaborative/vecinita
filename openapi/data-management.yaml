@@ -609,6 +609,14 @@ components:
           type: integer
           minimum: 64
           maximum: 2048
+        chunk_overlap_tokens:
+          type: integer
+          minimum: 0
+          maximum: 2047
+          description: >
+            Overlap between consecutive chunks in HF tokenizer tokens (F49 / ADR-044).
+            Default when omitted is 32 (VECINITA_CHUNK_OVERLAP_TOKENS). Must be less
+            than chunk_size_tokens.
         job_type:
           type: string
           enum:

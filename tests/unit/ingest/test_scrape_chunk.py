@@ -10,14 +10,11 @@ import pytest
 from vecinita_ingest import (
     MIN_CHUNK_SIZE_TOKENS,
     chunk_text,
-    estimate_tokens,
+    count_tokens,
     fetch_url,
     parse_html,
 )
-from vecinita_ingest.chunk import (
-    MAX_CHUNK_SIZE_TOKENS,
-    _split_oversized_paragraph,  # pyright: ignore[reportPrivateUsage]
-)
+from vecinita_ingest.chunk import MAX_CHUNK_SIZE_TOKENS
 from vecinita_ingest.scrape import (
     _TextExtractor,  # pyright: ignore[reportPrivateUsage]
 )
@@ -69,12 +66,12 @@ def test_parse_html_joins_multipart_title_text() -> None:
 
 
 def test_chunk_text_respects_token_budget() -> None:
-    """Test chunk text respects token budget."""
+    """Test chunk text respects HF token budget."""
     html = _FIXTURE.read_text(encoding="utf-8")
     doc = parse_html(html, url="fixture://ingest/sample-page.html")
-    chunks = chunk_text(doc.text, chunk_size_tokens=_CHUNK_SIZE_TOKENS)
+    chunks = chunk_text(doc.text, chunk_size_tokens=_CHUNK_SIZE_TOKENS, chunk_overlap_tokens=0)
     assert len(chunks) >= 1
-    assert all(estimate_tokens(c) <= _CHUNK_SIZE_TOKENS for c in chunks)
+    assert all(count_tokens(c) <= _CHUNK_SIZE_TOKENS for c in chunks)
 
 
 def test_chunk_text_rejects_small_chunk_size() -> None:
@@ -94,25 +91,28 @@ def test_chunk_text_returns_empty_list_for_blank_input() -> None:
     assert chunk_text("   \n\n\t") == []
 
 
-def test_chunk_text_splits_oversized_paragraph_by_words() -> None:
-    """Test chunk text splits oversized paragraph by words."""
+def test_chunk_text_splits_oversized_paragraph_by_tokens() -> None:
+    """Test chunk text splits oversized input into multiple HF-sized windows."""
     paragraph = " ".join(f"word{i}" for i in range(_WORD_COUNT))
 
-    chunks = chunk_text(paragraph, chunk_size_tokens=_CHUNK_SIZE_TOKENS)
+    chunks = chunk_text(
+        paragraph,
+        chunk_size_tokens=_CHUNK_SIZE_TOKENS,
+        chunk_overlap_tokens=0,
+    )
 
     assert len(chunks) > 1
-    assert sum(estimate_tokens(chunk) for chunk in chunks) == _WORD_COUNT
     assert "word0" in chunks[0]
     assert "word119" in chunks[-1]
 
 
-def test_chunk_text_flushes_buffer_when_next_paragraph_overflows() -> None:
-    """Test chunk text flushes buffer when next paragraph overflows."""
+def test_chunk_text_covers_both_paragraphs() -> None:
+    """Test chunk text includes content from multiple paragraphs."""
     first = " ".join(["alpha"] * 50)
     second = " ".join(["beta"] * 50)
     text = f"{first}\n\n{second}"
 
-    chunks = chunk_text(text, chunk_size_tokens=_CHUNK_SIZE_TOKENS)
+    chunks = chunk_text(text, chunk_size_tokens=_CHUNK_SIZE_TOKENS, chunk_overlap_tokens=0)
 
     assert len(chunks) >= _MIN_MULTI_CHUNK_COUNT
     assert "alpha" in chunks[0]
@@ -183,13 +183,6 @@ def test_chunk_text_advances_when_inner_window_stays_empty() -> None:
     """Test chunk text advances when inner window stays empty."""
     paragraph = "solo"
 
-    chunks = chunk_text(paragraph, chunk_size_tokens=64)
+    chunks = chunk_text(paragraph, chunk_size_tokens=64, chunk_overlap_tokens=0)
 
     assert chunks == ["solo"]
-
-
-def test_split_oversized_paragraph_advances_on_nonpositive_budget() -> None:
-    """A non-positive token budget still forces one-word forward progress (no infinite loop)."""
-    chunks = _split_oversized_paragraph("alpha beta gamma", -1)
-
-    assert chunks == ["alpha", "beta", "gamma"]

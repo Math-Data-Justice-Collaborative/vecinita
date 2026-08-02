@@ -101,8 +101,8 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
 
     store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
-    raw_chunk_size = record.options.get("chunk_size_tokens", 256)
-    chunk_size = int(raw_chunk_size) if isinstance(raw_chunk_size, (int, str)) else 256
+    chunk_size = _chunk_size_from_options(record.options)
+    chunk_overlap = _chunk_overlap_from_options(record.options)
     vocabulary = tag_vocabulary if tag_vocabulary is not None else load_seed_vocabulary()
     slug_vocab = vocabulary_slugs(vocabulary)
 
@@ -140,7 +140,11 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
                 )
                 continue
 
-            chunks = chunk_text(text, chunk_size_tokens=chunk_size)
+            chunks = chunk_text(
+                text,
+                chunk_size_tokens=chunk_size,
+                chunk_overlap_tokens=chunk_overlap,
+            )
             if not chunks:
                 _raise_no_chunks(url)
 
@@ -273,6 +277,12 @@ def _chunk_size_from_options(options: dict[str, object]) -> int:
     return int(raw) if isinstance(raw, (int, str)) else 256
 
 
+def _chunk_overlap_from_options(options: dict[str, object]) -> int:
+    """Resolve chunk overlap (F49 / ADR-044); default 32."""
+    raw = options.get("chunk_overlap_tokens", 32)
+    return int(raw) if isinstance(raw, (int, str)) else 32
+
+
 def _document_ids_from_options(options: dict[str, object]) -> list[UUID] | None:
     raw = options.get("document_ids")
     if raw is None:
@@ -395,12 +405,17 @@ def _document_upsert_from_rebuild(  # noqa: PLR0913  # stamped upsert needs chun
     language: str,
     body: str,
     chunk_size: int,
+    chunk_overlap: int,
     model_id: str,
     rebuild_run_id: UUID | None,
     embed_client: EmbeddingClient,
 ) -> DocumentUpsert:
     """Chunk, embed, and stamp one rebuild DocumentUpsert (ADR-040 §4)."""
-    chunks = chunk_text(body, chunk_size_tokens=chunk_size)
+    chunks = chunk_text(
+        body,
+        chunk_size_tokens=chunk_size,
+        chunk_overlap_tokens=chunk_overlap,
+    )
     if not chunks:
         _raise_no_chunks(url)
     embeddings = embed_client.embed_batch(chunks)
@@ -445,6 +460,7 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
     fetcher: DocumentFetcher,
     embed_client: EmbeddingClient,
     chunk_size: int,
+    chunk_overlap: int,
     model_id: str,
     rebuild_run_id: UUID | None,
 ) -> list[DocumentUpsert]:
@@ -468,6 +484,7 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
                 language=resolved_language,
                 body=body,
                 chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
                 model_id=model_id,
                 rebuild_run_id=rebuild_run_id,
                 embed_client=embed_client,
@@ -496,6 +513,7 @@ def run_rebuild_job(
     dry_run = _option_bool(record.options, "dry_run")
     force = _option_bool(record.options, "force")
     chunk_size = _chunk_size_from_options(record.options)
+    chunk_overlap = _chunk_overlap_from_options(record.options)
     model_id = _embedding_model_id()
 
     store.update_job(job_id, status="running")
@@ -525,6 +543,7 @@ def run_rebuild_job(
             fetcher=fetcher,
             embed_client=embed_client,
             chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
             model_id=model_id,
             rebuild_run_id=rebuild_run_id,
         )

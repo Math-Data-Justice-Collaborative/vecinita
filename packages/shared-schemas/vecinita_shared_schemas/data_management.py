@@ -24,6 +24,12 @@ class JobOptions(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     chunk_size_tokens: int | None = Field(default=None, ge=64, le=2048)
+    chunk_overlap_tokens: int | None = Field(
+        default=None,
+        ge=0,
+        le=2047,
+        description="Overlap between consecutive chunks; must be < chunk_size (F49 / ADR-044).",
+    )
     job_type: JobType = "ingest"
     document_id: UUID | None = None
     eval_run_id: UUID | None = None
@@ -55,6 +61,11 @@ class JobOptions(BaseModel):
         ):
             msg = "ack_reconstruct_from_chunks required when backfill_source is from_chunks"
             raise ValueError(msg)
+        if self.chunk_overlap_tokens is not None:
+            effective_size = self.chunk_size_tokens if self.chunk_size_tokens is not None else 256
+            if self.chunk_overlap_tokens >= effective_size:
+                msg = "chunk_overlap_tokens must be < chunk_size_tokens"
+                raise ValueError(msg)
         return self
 
 

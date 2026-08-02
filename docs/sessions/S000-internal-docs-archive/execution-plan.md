@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 24: EV-019 — Ingest resilience (F47–F49) |
-| **Active milestone** | M103 (F49 HF+overlap) |
-| **Active task** | T103.1 (pending) |
-| **Tasks completed** | Phase 21–23 complete; Phase 24 M101–M102 |
+| **Active milestone** | M104 (UJ-062 e2e + metrics) |
+| **Active task** | T104.1 (pending) |
+| **Tasks completed** | Phase 21–23 complete; Phase 24 M101–M103 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-019 — Standard; S022-D20/D21; TP1–TP6; skip 05/06 |
 | **Git branch** | `evolve/EV-019-ingest-resilience` |
-| **Active session** | S022-ingest-resilience — 04 drafted → Gate B→C |
+| **Active session** | S022-ingest-resilience — 07-build T104.1 (after M103) |
 | **Scope addition** | 2026-08-02 — F47 content_hash skip + F48 embed retry + F49 overlap/HF (ADR-044). |
 
 ## Template
@@ -2059,10 +2059,10 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T103.1 | Test: chunk unit red — HF sizing, overlap 32, reject overlap ≥ size (TC-191/192) | Test | pending | AC-IR5/IR6, ADR-044, F49 | T102.4 | — | S022 | F49 |
-| T103.2 | Config: Add `chunk_overlap_tokens` to OpenAPI + `JobOptions`; env default 32 | Config | pending | api-contract, M3, TP3 | — | — | S022 | F49 |
-| T103.3 | Code: `packages/ingest` chunker — HF tokenizer + overlap; pipeline/job options | Code | pending | ADR-044, RD-223/224 | T103.1, T103.2 | — | S022 | F49 |
-| T103.4 | Test: chunk unit green; rebuild `rechunk` note if live corpus migration needed | Test | pending | AC-IR5/IR6, RD-227 | T103.3 | — | S022 | F49 |
+| T103.1 | Test: chunk unit red — HF sizing, overlap 32, reject overlap ≥ size (TC-191/192) | Test | completed | AC-IR5/IR6, ADR-044, F49 | T102.4 | 2026-08-02 | S022 | F49 |
+| T103.2 | Config: Add `chunk_overlap_tokens` to OpenAPI + `JobOptions`; env default 32 | Config | completed | api-contract, M3, TP3 | — | 2026-08-02 | S022 | F49 |
+| T103.3 | Code: `packages/ingest` chunker — HF tokenizer + overlap; pipeline/job options | Code | completed | ADR-044, RD-223/224 | T103.1, T103.2 | 2026-08-02 | S022 | F49 |
+| T103.4 | Test: chunk unit green; rebuild `rechunk` note if live corpus migration needed | Test | completed | AC-IR5/IR6, RD-227 | T103.3 | 2026-08-02 | S022 | F49 |
 
 #### M104: UJ-062 e2e + job metrics + phase gate
 
@@ -2828,10 +2828,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T102.2 | M102 | 24 | Config | completed | — | 2026-08-02 | S022 | F48 | — |
 | T102.3 | M102 | 24 | Code | completed | T102.1, T102.2 | 2026-08-02 | S022 | F48 | — |
 | T102.4 | M102 | 24 | Test | completed | T102.3 | 2026-08-02 | S022 | F48 | — |
-| T103.1 | M103 | 24 | Test | pending | T102.4 | — | S022 | F49 | — |
-| T103.2 | M103 | 24 | Config | pending | — | — | S022 | F49 | — |
-| T103.3 | M103 | 24 | Code | pending | T103.1, T103.2 | — | S022 | F49 | — |
-| T103.4 | M103 | 24 | Test | pending | T103.3 | — | S022 | F49 | — |
+| T103.1 | M103 | 24 | Test | completed | T102.4 | — | S022 | F49 | — |
+| T103.2 | M103 | 24 | Config | completed | — | — | S022 | F49 | — |
+| T103.3 | M103 | 24 | Code | completed | T103.1, T103.2 | — | S022 | F49 | — |
+| T103.4 | M103 | 24 | Test | completed | T103.3 | — | S022 | F49 | — |
 | T104.1 | M104 | 24 | Test | pending | T103.4 | — | S022 | F47–F49 | — |
 | T104.2 | M104 | 24 | Config | pending | T101.3, T102.3 | — | S022 | F47–F48 | — |
 | T104.3 | M104 | 24 | Docs | pending | T104.1, T104.2 | — | S022 | F47–F49 | — |
