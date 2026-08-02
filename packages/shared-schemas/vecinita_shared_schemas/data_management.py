@@ -100,6 +100,15 @@ class CreateJobResponse(BaseModel):
     status: Literal["pending"]
 
 
+class JobMetrics(BaseModel):
+    """Optional ingest resilience counters on completed/failed jobs (F47-F48 / M104)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    skipped_unchanged: int = Field(default=0, ge=0)
+    urls_failed_embed: int = Field(default=0, ge=0)
+
+
 class Job(BaseModel):
     """GET /jobs/{job_id} job status snapshot."""
 
@@ -113,6 +122,7 @@ class Job(BaseModel):
     dashboard_url: str | None = None
     error_code: str | None = None
     error_message: str | None = None
+    metrics: JobMetrics | None = None
     created_at: datetime
     updated_at: datetime
     initiated_by_user_id: UUID | None = None

@@ -1368,7 +1368,7 @@ project:
       status: in_progress
       started_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S022/EV-019 — 07-build in_progress; M103 (F49) COMPLETE (T103.1–T103.4); T104.1 pending; commit sha pending parent follow-up
+      partial_rerun_note: S022/EV-019 — 07-build in_progress; M103 (F49) COMPLETE (T103.1–T103.4 @ b8dcaf1); T104.1 pending (start_t104_1)
       session_id: S022-ingest-resilience
       branch: evolve/EV-019-ingest-resilience
       evolve_cycle_id: EV-019
@@ -1387,7 +1387,7 @@ project:
       m102_completed_at: '2026-08-02'
       m103_status: completed
       m103_completed_at: '2026-08-02'
-      m103_commit_sha: pending_parent_follow_up
+      m103_commit_sha: b8dcaf1
       m104_status: in_progress
       current_task: T104.1
       current_action: start_t104_1
@@ -1398,7 +1398,7 @@ project:
       s022_d22_decision_recorded: true
       s022_d22_decision_recorded_in: docs/decisions/evolve-decisions.md
       note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); M102 COMPLETE (T102.1–T102.4
-        @ 41ac0df); M103 COMPLETE (T103.1–T103.4, F49; commit sha pending parent follow-up); current_task T104.1 pending
+        @ 41ac0df); M103 COMPLETE (T103.1–T103.4, F49 @ b8dcaf1); current_task T104.1 pending
         (start_t104_1)
       substeps:
         current_task: T104.1
@@ -4595,7 +4595,7 @@ active_session:
     status: in_progress
     skip_rationale: null
     started_at: '2026-08-02'
-    note: M101–M103 COMPLETE (M103 F49 T103.1–T103.4; sha pending); T104.1 pending (start_t104_1)
+    note: M101–M103 COMPLETE (M103 F49 T103.1–T103.4 @ b8dcaf1); T104.1 pending (start_t104_1)
   - stage: 08-verify-build
     required: true
     mode: delta
@@ -4629,8 +4629,8 @@ active_session:
   current_stage: 07-build
   current_action: start_t104_1
   next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
-  commits_pending: true
-  commits_note: M103 (T103.1–T103.4) implemented; git_history tip / commit sha pending parent follow-up after artifact commit lands
+  commits_pending: false
+  commits_note: null
   started_at: '2026-08-02'
   mode: evolve
   delta_only: true
@@ -10494,7 +10494,7 @@ stages:
     status: in_progress
     started_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S022/EV-019 — 07-build in_progress; M103 (F49) COMPLETE (T103.1–T103.4); T104.1 pending; commit sha pending parent follow-up
+    partial_rerun_note: S022/EV-019 — 07-build in_progress; M103 (F49) COMPLETE (T103.1–T103.4 @ b8dcaf1); T104.1 pending (start_t104_1)
     session_id: S022-ingest-resilience
     branch: evolve/EV-019-ingest-resilience
     evolve_cycle_id: EV-019
@@ -10513,7 +10513,7 @@ stages:
     m102_completed_at: '2026-08-02'
     m103_status: completed
     m103_completed_at: '2026-08-02'
-    m103_commit_sha: pending_parent_follow_up
+    m103_commit_sha: b8dcaf1
     m104_status: in_progress
     current_task: T104.1
     current_action: start_t104_1
@@ -10524,7 +10524,7 @@ stages:
     s022_d22_decision_recorded: true
     s022_d22_decision_recorded_in: docs/decisions/evolve-decisions.md
     note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); M102 COMPLETE (T102.1–T102.4
-      @ 41ac0df); M103 COMPLETE (T103.1–T103.4, F49; commit sha pending parent follow-up); current_task T104.1 pending
+      @ 41ac0df); M103 COMPLETE (T103.1–T103.4, F49 @ b8dcaf1); current_task T104.1 pending
       (start_t104_1)
     substeps:
       current_task: T104.1
@@ -21242,8 +21242,8 @@ evolve_cycles:
   current_stage: 07-build
   current_action: start_t104_1
   next_action: run T104.1 TDD — API e2e UJ-062 (TC-187–190)
-  commits_pending: true
-  commits_note: M103 (T103.1–T103.4) implemented; git_history tip / commit sha pending parent follow-up after artifact commit lands
+  commits_pending: false
+  commits_note: null
   mode: evolve
   delta_only: true
   branch: evolve/EV-019-ingest-resilience
@@ -21357,12 +21357,12 @@ evolve_cycles:
       m102_completed_at: '2026-08-02'
       m103_status: completed
       m103_completed_at: '2026-08-02'
-      m103_commit_sha: pending_parent_follow_up
+      m103_commit_sha: b8dcaf1
       m104_status: in_progress
       phase: Phase 24 (M101-M104)
       s022_d22_decision: S022-D22
       note: S022/EV-019 07-build in_progress — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); M102 COMPLETE (T102.1–T102.4 @ 41ac0df);
-        M103 COMPLETE (T103.1–T103.4, F49; commit sha pending parent follow-up); current_task T104.1 pending (start_t104_1)
+        M103 COMPLETE (T103.1–T103.4, F49 @ b8dcaf1); current_task T104.1 pending (start_t104_1)
       completed_tasks:
       - T101.1
       - T101.2
@@ -27102,7 +27102,7 @@ artifacts:
   evolve_cycle_id: EV-019
   status: completed
   recorded_at: '2026-08-02T22:17:48Z'
-  note: M103 done → T104.1; Gate B→C PASS (S022-D22); m103_commit_sha pending_parent_follow_up
+  note: M103 done → T104.1; Gate B→C PASS (S022-D22); m103_commit_sha b8dcaf1
 - path: docs/sessions/S022-ingest-resilience/routing-plan.md
   session_id: S022-ingest-resilience
   stage: 02-verify-plan
@@ -27419,6 +27419,32 @@ git_history:
     created_at: '2026-06-25'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
   commits:
+  - sha: b8dcaf1
+    sha_full: b8dcaf18b087f9e6595e43ec83e179ad65e3e66d
+    branch: evolve/EV-019-ingest-resilience
+    message: '[T103.1-T103.4] feat: F49 HF tokenizer and chunk overlap'
+    stage: 07-build
+    files_changed: 16
+    timestamp: '2026-08-02T22:27:14Z'
+    session_id: S022-ingest-resilience
+    evolve_cycle_id: EV-019
+    files:
+    - apps/data-management-backend/vecinita_data_management_backend/app.py
+    - apps/data-management-backend/vecinita_data_management_backend/pipeline.py
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S022-ingest-resilience/HANDOFF.md
+    - infra/modal/data_management_app.py
+    - openapi/data-management.yaml
+    - packages/ingest/pyproject.toml
+    - packages/ingest/vecinita_ingest/__init__.py
+    - packages/ingest/vecinita_ingest/chunk.py
+    - packages/shared-schemas/vecinita_shared_schemas/data_management.py
+    - tests/unit/data_management/test_openapi_job_chunk_overlap.py
+    - tests/unit/ingest/test_chunk_hf_overlap.py
+    - tests/unit/ingest/test_scrape_chunk.py
+    - tests/unit/shared_schemas/test_job_options_chunk_overlap.py
+    - uv.lock
+    - workflow-state.yaml
   - sha: 41ac0df
     sha_full: 41ac0df5f35d0ea3e609d89d929de9c7f15d9f43
     branch: evolve/EV-019-ingest-resilience

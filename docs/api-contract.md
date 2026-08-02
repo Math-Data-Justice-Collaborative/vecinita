@@ -231,8 +231,8 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
     and rebuild (F41). When true, re-chunk and re-embed even if scraped hash matches.
   - **`chunk_size_tokens`:** int, optional — override env default (256).
   - **`chunk_overlap_tokens`:** int, optional — override env default (**32**, ADR-044).
-  - On completed jobs, result/metrics SHOULD expose skip/embed counts when available
-    (e.g. `skipped_unchanged`, `urls_failed_embed`) — exact schema finalized in OpenAPI (M104).
+  - On completed/failed ingest jobs, `metrics` MAY include `skipped_unchanged` and
+    `urls_failed_embed` (OpenAPI `JobMetrics`; F47–F48 / M104).
 
 ### GET `/internal/v1/documents/content-hash?url=`
 

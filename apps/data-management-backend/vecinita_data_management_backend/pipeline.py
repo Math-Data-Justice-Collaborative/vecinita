@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Protocol, cast
 from uuid import UUID
 
 from pydantic import HttpUrl
-from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClientError
 from vecinita_ingest import chunk_text, fetch_url
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.scrape import parse_html
@@ -83,7 +83,7 @@ class TagInferrer(Protocol):
         ...
 
 
-def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dependencies
+def run_ingest_job(  # noqa: C901, PLR0913, PLR0915  # ingest stages + F47/F48 metrics branches
     job_id: UUID,
     *,
     store: JobStore,
@@ -107,6 +107,8 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
     slug_vocab = vocabulary_slugs(vocabulary)
 
     force = _option_bool(record.options, "force")
+    skipped_unchanged = 0
+    urls_failed_embed = 0
 
     try:
         documents: list[DocumentUpsert] = []
@@ -124,6 +126,7 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
 
             # F47 / #163: refresh metadata; skip chunk delete + re-embed when hash matches.
             if stored_hash is not None and stored_hash == digest and not force:
+                skipped_unchanged += 1
                 documents.append(
                     DocumentUpsert(
                         url=HttpUrl(source_url),
@@ -175,7 +178,21 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
                         source="llm",
                     )
 
-            embeddings = embed_client.embed_batch(chunks)
+            try:
+                embeddings = embed_client.embed_batch(chunks)
+            except EmbeddingClientError:
+                urls_failed_embed += 1
+                store.update_job(
+                    job_id,
+                    status="failed",
+                    error_code="EmbeddingClientError",
+                    error_message=f"embed failed for {url}"[:500],
+                    metrics={
+                        "skipped_unchanged": skipped_unchanged,
+                        "urls_failed_embed": urls_failed_embed,
+                    },
+                )
+                raise
             chunk_models = [
                 ChunkUpsert(chunk_index=index, text=chunk, embedding=vector)
                 for index, (chunk, vector) in enumerate(zip(chunks, embeddings, strict=True))
@@ -197,13 +214,26 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
 
         body = BatchUpsertRequest(documents=documents)
         write_client.upsert_batch(body)
-        store.update_job(job_id, status="completed")
+        store.update_job(
+            job_id,
+            status="completed",
+            metrics={
+                "skipped_unchanged": skipped_unchanged,
+                "urls_failed_embed": urls_failed_embed,
+            },
+        )
+    except EmbeddingClientError:
+        raise
     except Exception as exc:
         store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
             error_message=str(exc)[:500],
+            metrics={
+                "skipped_unchanged": skipped_unchanged,
+                "urls_failed_embed": urls_failed_embed,
+            },
         )
         raise
 

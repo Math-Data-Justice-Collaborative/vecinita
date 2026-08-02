@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 24: EV-019 — Ingest resilience (F47–F49) |
-| **Active milestone** | M104 (UJ-062 e2e + metrics) |
-| **Active task** | T104.1 (pending) |
-| **Tasks completed** | Phase 21–23 complete; Phase 24 M101–M103 |
+| **Active milestone** | M104 complete — next 08-verify-build |
+| **Active task** | — (Phase 24 build tasks done) |
+| **Tasks completed** | Phase 21–23 complete; Phase 24 M101–M104 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-019 — Standard; S022-D20/D21; TP1–TP6; skip 05/06 |
 | **Git branch** | `evolve/EV-019-ingest-resilience` |
-| **Active session** | S022-ingest-resilience — 07-build T104.1 (after M103) |
+| **Active session** | S022-ingest-resilience — 07-build done → 08-verify-build |
 | **Scope addition** | 2026-08-02 — F47 content_hash skip + F48 embed retry + F49 overlap/HF (ADR-044). |
 
 ## Template
@@ -2070,10 +2070,10 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T104.1 | Test: API e2e `tests/e2e/test_uj062_ingest_resilience.py` (TC-187–190) | Test | pending | UJ-062, e2e-coverage, AC-IR1–IR4 | T103.4 | — | S022 | F47–F49 |
-| T104.2 | Config/Code: Job result metrics — `skipped_unchanged`, `urls_failed_embed` (M2/TP3) | Config | pending | api-contract SHOULD, M2 | T101.3, T102.3 | — | S022 | F47–F48 |
-| T104.3 | Docs: Phase 24 gate checklist + execution-plan Current State; Path A/B rebuild notes | Docs | pending | Phase 24 gate, RD-227 | T104.1, T104.2 | — | S022 | F47–F49 |
-| T104.4 | Test: Confirm AC-IR7 out-of-scope held; no Playwright unless FE knobs ship (M5) | Test | pending | AC-IR7, M5, TP4/TP6 | T104.1 | — | S022 | F47–F49 |
+| T104.1 | Test: API e2e `tests/e2e/test_uj062_ingest_resilience.py` (TC-187–190) | Test | completed | UJ-062, e2e-coverage, AC-IR1–IR4 | T103.4 | 2026-08-02 | S022 | F47–F49 |
+| T104.2 | Config/Code: Job result metrics — `skipped_unchanged`, `urls_failed_embed` (M2/TP3) | Config | completed | api-contract SHOULD, M2 | T101.3, T102.3 | 2026-08-02 | S022 | F47–F48 |
+| T104.3 | Docs: Phase 24 gate checklist + execution-plan Current State; Path A/B rebuild notes | Docs | completed | Phase 24 gate, RD-227 | T104.1, T104.2 | 2026-08-02 | S022 | F47–F49 |
+| T104.4 | Test: Confirm AC-IR7 out-of-scope held; no Playwright unless FE knobs ship (M5) | Test | completed | AC-IR7, M5, TP4/TP6 | T104.1 | 2026-08-02 | S022 | F47–F49 |
 
 #### Phase 24 Gate Check
 
@@ -2832,10 +2832,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T103.2 | M103 | 24 | Config | completed | — | — | S022 | F49 | — |
 | T103.3 | M103 | 24 | Code | completed | T103.1, T103.2 | — | S022 | F49 | — |
 | T103.4 | M103 | 24 | Test | completed | T103.3 | — | S022 | F49 | — |
-| T104.1 | M104 | 24 | Test | pending | T103.4 | — | S022 | F47–F49 | — |
-| T104.2 | M104 | 24 | Config | pending | T101.3, T102.3 | — | S022 | F47–F48 | — |
-| T104.3 | M104 | 24 | Docs | pending | T104.1, T104.2 | — | S022 | F47–F49 | — |
-| T104.4 | M104 | 24 | Test | pending | T104.1 | — | S022 | F47–F49 | — |
+| T104.1 | M104 | 24 | Test | completed | T103.4 | — | S022 | F47–F49 | — |
+| T104.2 | M104 | 24 | Config | completed | T101.3, T102.3 | — | S022 | F47–F48 | — |
+| T104.3 | M104 | 24 | Docs | completed | T104.1, T104.2 | — | S022 | F47–F49 | — |
+| T104.4 | M104 | 24 | Test | completed | T104.1 | — | S022 | F47–F49 | — |
 
 ## Phase Gate Log
 

@@ -754,12 +754,33 @@ components:
         error_message:
           type: string
           nullable: true
+        metrics:
+          nullable: true
+          description: >
+            Ingest resilience counters (F47–F48 / EV-019). Present when the runner
+            records skip/embed-failure tallies (skipped_unchanged, urls_failed_embed).
+          allOf:
+            - $ref: "#/components/schemas/JobMetrics"
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
+    JobMetrics:
+      type: object
+      additionalProperties: false
+      properties:
+        skipped_unchanged:
+          type: integer
+          minimum: 0
+          default: 0
+          description: URLs skipped because content_hash matched (F47)
+        urls_failed_embed:
+          type: integer
+          minimum: 0
+          default: 0
+          description: URLs that failed after embed retry exhaust (F48)
     JobList:
       type: object
       required:

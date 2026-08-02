@@ -269,6 +269,7 @@ def test_run_ingest_job_skips_embed_when_content_hash_unchanged() -> None:
     assert doc.chunks == []
     assert doc.body_text is not None
     assert doc.title == scraped.title
+    assert updated.metrics == {"skipped_unchanged": 1, "urls_failed_embed": 0}
 
 
 def test_run_ingest_job_force_bypasses_content_hash_skip() -> None:
