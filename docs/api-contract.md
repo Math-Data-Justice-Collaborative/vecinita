@@ -219,10 +219,19 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 {
   "urls": ["https://example.com/page"],
   "options": {
-    "chunk_size_tokens": 256
+    "chunk_size_tokens": 256,
+    "chunk_overlap_tokens": 32,
+    "force": false
   }
 }
 ```
+
+- **Ingest JobOptions (EV-019 / F47–F49):**
+  - **`force`:** bool, default `false` — bypass `content_hash` skip (F47 / #163); same flag as rebuild.
+  - **`chunk_size_tokens`:** int, optional — override env default (256).
+  - **`chunk_overlap_tokens`:** int, optional — override env default (**32**, ADR-044).
+  - On completed jobs, result/metrics SHOULD expose skip/embed counts when available
+    (e.g. `skipped_unchanged`, `urls_failed_embed`) — exact schema finalized in 04/OpenAPI.
 
 - **Response** `202`:
 

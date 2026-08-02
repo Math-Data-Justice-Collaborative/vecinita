@@ -487,3 +487,18 @@ and add configurable chunk overlap with sizing clarity.
 ### Phase 0 status
 
 EV-019 **in_progress**. Next: **01-requirements** (delta; load 01-requirements-seed).
+
+### Decisions (01 Phase 0C — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S022-D14 | Phase 0C answers | Q0–Q5 = `1,1,1,2,2,1` — approve locked; metadata refresh on skip; fail URL on embed exhaust; **overlap default 32**; **HF tokenizer**; extend UJ + TC |
+| S022-D15 | F49 overlap | Prod default **`chunk_overlap_tokens=32`** (overrides seed rec. default 0) |
+| S022-D16 | F49 tokenizer | **HF tokenizer** for `BAAI/bge-small-en-v1.5` (ADR-044) |
+| S022-D17 | Tests / journeys | Extend UJ-002; add **UJ-062**; TC-187–192; AC-IR1–IR7 |
+| S022-D18 | RD range | RD-219–RD-228 recorded in `docs/decisions.md` |
+| S022-D19 | 01 complete | Spec deltas + session report → **02-verify-plan** |
+
+### Phase A status
+
+01-requirements **completed** 2026-08-02. Next: **02-verify-plan** (delta).

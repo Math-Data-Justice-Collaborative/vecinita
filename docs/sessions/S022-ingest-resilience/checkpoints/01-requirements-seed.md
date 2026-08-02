@@ -52,15 +52,16 @@ Generated from 00-context + 16-evolve Phase 0 (2026-08-02). Locked decisions are
 | Apps | data-management-backend, internal-write-api, packages/ingest, embedding-client, Modal embed; optional admin FE |
 | Breaking | Prefer compatible job options; default skip-on + force; overlap default may stay 0 until opted in |
 
-## Open questions for 01 (interview)
+## Open questions — resolved (01 Phase 0C — 2026-08-02)
 
-| ID | Question | Recommendation |
-|----|----------|----------------|
-| Q1 | F47 skip: still update document metadata (tags/lang/scraped_at) when hash unchanged? | **Yes** — skip chunks+embed only; refresh metadata unless `force` |
-| Q2 | F48 on exhausted retries: fail whole URL job vs partial chunk success? | **Fail URL job** after retries (avoid silent corpus holes); job-level retry already exists |
-| Q3 | F49 default `chunk_overlap`: ship default **0** (opt-in) or non-zero? | **Default 0**; document recommended 32–64 for new corpora / rebuild |
-| Q4 | F49 tokenizer: keep word-count estimate or add HF tokenizer? | **Keep word≈token** + document; tokenizer align only if eval proves need |
-| Q5 | Journeys: new UJ vs extend existing ingest UJ? | **Extend** ingest re-run journey + add TC for skip + embed retry |
+| ID | Resolution |
+|----|------------|
+| Q0 | Approve locked L1–L11 (S022-D14) |
+| Q1 | Refresh metadata; skip chunks+embed (RD-221) |
+| Q2 | Fail URL after retry exhaust (RD-222) |
+| Q3 | **Default overlap 32** (RD-223; overrides seed rec. 0) |
+| Q4 | **HF tokenizer** for embed pin (RD-224 / ADR-044; overrides seed rec. word≈token) |
+| Q5 | Extend UJ-002 + **UJ-062**; TC-187–192; AC-IR1–7 (RD-225) |
 
 ## Explicitly out of interview scope
 

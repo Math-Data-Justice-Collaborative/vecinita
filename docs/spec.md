@@ -109,11 +109,17 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
   1. ASGI enqueues scrape job on Modal queue.
   2. Worker fetches URL, normalizes HTML/text.
   3. **Persist normalized body** to Postgres document store via internal-write (F41 / ADR-040).
-  4. Chunk text.
-  5. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20).
-  6. Call FastEmbed on Modal.
-  7. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
-  8. Update job status via job store on Modal.
+  4. **Content-hash skip (F47 / #163):** if `content_hash` matches stored document and
+     `force` is false → refresh metadata (title/language/timestamps; tags if retagged) but
+     **skip** re-chunk, delete-chunks, and re-embed; record skip in job metrics. If `force`
+     or hash differs → continue.
+  5. **Chunk** text with HF tokenizer for embed pin + `chunk_overlap_tokens` (F49 / ADR-044).
+  6. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20)
+     — fail-open per ADR-023.
+  7. Call FastEmbed on Modal via **sub-batched embed client with retries** (F48 / #166). On
+     exhausted retries or dim mismatch → **fail that URL** (not silent partial corpus).
+  8. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
+  9. Update job status via job store on Modal.
 - **Algorithm** (rebuild — F41):
   1. Operator enqueues `job_type=rebuild` with `mode` (`reembed`|`rechunk`|`rescrape`), optional
      `document_ids`, `force`, `dry_run` (Admin Jobs UI).
@@ -219,10 +225,11 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 |-------|--------|----------------|--------|-------|
 | 1. Submit scrape job | URL list | Admin UI → Modal ASGI `POST /jobs` | job_id | Infra auth only |
 | 2. Scrape | job_id, URLs | Modal worker fetches HTML | raw text | No PII stored |
-| 3. Chunk | raw text | Split per config `chunk_size` | chunk records | — |
-| 4. LLM tag | chunks + seed vocab | Modal LLM | document/chunk tags (`llm`) | Max 10/5 tags |
-| 5. Embed | chunks | Modal FastEmbed | 384-dim vectors | — |
-| 6. Persist | chunks + vectors + tags | Modal → **DO internal write API** | Postgres rows | **No Modal DATABASE_URL** |
+| 3. Hash gate | body + stored hash | Skip chunks/embed if unchanged (unless `force`) | skip or continue | F47 |
+| 4. Chunk | raw text | HF tokenizer + `chunk_size` / `chunk_overlap` | chunk records | F49 / ADR-044 |
+| 5. LLM tag | chunks + seed vocab | Modal LLM | document/chunk tags (`llm`) | Max 10/5 tags; ADR-023 |
+| 6. Embed | chunks | Modal FastEmbed (sub-batch + retry) | 384-dim vectors | F48 |
+| 7. Persist | chunks + vectors + tags | Modal → **DO internal write API** | Postgres rows | **No Modal DATABASE_URL** |
 | 7. Browse | tag/search filters | ChatRAG GET APIs | document list | Public |
 | 8. Query | user question + optional tags | ChatRAG Backend | — | Stateless |
 | 9. Resolve tags | tags[] or question | User tags OR LLM infer | tag filter set | User tags win if set |
@@ -334,6 +341,7 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | S019 / EV-016 (F42) | 2026-08-01 | H7+P1 on E0: heuristic multi-query + Source/URL packing in `packages/rag` (ADR-041); ChatRAG + F36 share helpers; P3 config-gated off; no LangGraph / no embed swap. |
 | S020 / EV-017 (F43–F45) | 2026-08-02 | H1 cache cascade (F43); config-gated L1 soft language (F44); CE spike+gate with `bge-reranker-v2-m3` (F45); no LangGraph / ADR-006 amend. |
 | S021 / EV-018 (F46 + F45) | 2026-08-02 | Staging retrieve reliability (F46 non-empty pools); F45 CE re-gate only after F46; prod CE stays off until AC-BB9. |
+| S022 / EV-019 (F47–F49) | 2026-08-02 | Ingest resilience: content_hash skip + metadata refresh (F47); embed sub-batch/retry fail-URL (F48); HF tokenizer + overlap default 32 (F49 / ADR-044). |
 
 ## References
 

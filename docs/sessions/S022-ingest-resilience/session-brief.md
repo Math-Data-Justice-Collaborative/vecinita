@@ -84,6 +84,12 @@ Tickets are labeled investigate-first; this cycle **investigates then ships** in
 | S022-D11 | Shared write/embed path only — no ChatRAG redesign |
 | S022-D12 | Tagging stays ADR-023 fail-open; embeds get explicit retry (not silent fail-open) |
 | S022-D13 | Phase 0 proceed — create EV-019 + start 01-requirements |
+| S022-D14 | Phase 0C `1,1,1,2,2,1` — metadata refresh; fail URL; overlap 32; HF tokenizer; extend UJ |
+| S022-D15 | F49 overlap default **32** |
+| S022-D16 | F49 HF tokenizer (ADR-044) |
+| S022-D17 | UJ-062 + TC-187–192 + AC-IR1–7 |
+| S022-D18 | RD-219–RD-228 |
+| S022-D19 | 01 complete → 02-verify-plan |
 
 ## Links
 

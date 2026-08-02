@@ -645,6 +645,27 @@ Predecessor EV-017 @ `f24a620` (F43/F44 LIVE; F45 spike-only). Standard routing.
 Artifacts: feature-list F46 + F45 EV-018 note; UJ-061; TC-185–186; AC-FO1–5;
 `docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md`.
 
+### EV-019 requirements decisions (2026-08-02) — RD-219–RD-228
+
+S022 / Ingest resilience — **F47** content_hash skip, **F48** embed sub-batch/retry,
+**F49** chunk overlap + HF tokenizer. Investigate→ship. Standard routing.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-219 | Fn scope | **F47** (#163), **F48** (#166), **F49** (#160) | S022-D8 |
+| RD-220 | Ordering | F47+F48 first, then F49 | S022-D9 |
+| RD-221 | F47 skip | Refresh metadata; skip chunks+embed unless `force` | S022-D14 / Q1 |
+| RD-222 | F48 fail policy | Fail URL after retry exhaust; dim mismatch hard-fail | S022-D14 / Q2 |
+| RD-223 | F49 overlap default | **`chunk_overlap_tokens=32`** in prod | S022-D15 / Q3 |
+| RD-224 | F49 tokenizer | HF tokenizer for `BAAI/bge-small-en-v1.5` (ADR-044) | S022-D16 / Q4 |
+| RD-225 | Tests | Extend UJ-002; **UJ-062**; TC-187–192; AC-IR1–IR7 | S022-D14 / Q5 |
+| RD-226 | Embed knobs | `VECINITA_EMBED_BATCH_SIZE=32`, `MAX_RETRIES=3`, backoff | 01 delta |
+| RD-227 | Deploy | Staging **Path A**; rebuild notes if migrating live chunks | S022-D10 |
+| RD-228 | Out of scope | #159 embeds; #165 packing; CE flag; ADR-023 tag fail-open change | S022-D11 |
+
+Artifacts: feature-list F47–F49; ADR-044; UJ-062; TC-187–192; AC-IR1–7;
+`docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md`.
+
 ### EV-018 tech-plan decisions (2026-08-02) — TP1–TP6
 
 S021 / Phase 23 — F46 retrieve reliability + F45 CE re-gate (Standard; skip 05/06).

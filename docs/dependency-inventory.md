@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-30 (S017/EV-015 F41 — no new required deps; TP-S017-09 allows minor in 07)
+> **Last updated**: 2026-08-02 (S022/EV-019 F49 — HF tokenizer on ingest path; ADR-044)
 
 ## Runtime dependencies (Python — planned)
 
@@ -19,7 +19,7 @@
 | httpx | TBD | Modal HTTP clients | BSD | |
 | modal | >=1.2,<2 | Workers + ASGI | Apache-2.0 | Template registry |
 | **vllm** | **0.8.5.x** (Modal image only; AWQ + sleep mode, S010/ADR-037) | **Primary** LLM on Modal **T4**; Qwen2.5 default + playground tags (e.g. `qwen3:8b` → AWQ) | Apache-2.0 | ADR-009, ADR-037, infra/modal/llm_app.py |
-| **transformers** | **4.51.3** (Modal image; also needed by `llm-client` chat-template helper at Slice C) | Qwen3 `model_type` + HF `apply_chat_template` | Apache-2.0 | S010 T76.7 / TP-S010-24 |
+| **transformers** | **4.51.3** (Modal image; also needed by `llm-client` chat-template helper at Slice C; **ingest chunker F49**) | Qwen3 `model_type` + HF `apply_chat_template`; chunk HF tokenizer (`BAAI/bge-small-en-v1.5`) | Apache-2.0 | S010 T76.7 / TP-S010-24; S022 ADR-044 |
 | **vecinita-llm-client** | workspace | Unified HTTP client to Modal LLM (`httpx`); depends on **vecinita-shared-schemas** | — | T9.3; Phase 18 M77/M81 |
 | **vecinita-shared-schemas** | workspace | Shared schemas + LLM HTTP config resolver (URL/proxy/timeout) | — | TP-S010-20 |
 | **vecinita-tagging** (`packages/tagging`) | workspace | LLM tag prompts, vocabulary merge, caps; reuses vLLM HTTP | — | EV-001 F20/F22; no new Modal deployable |

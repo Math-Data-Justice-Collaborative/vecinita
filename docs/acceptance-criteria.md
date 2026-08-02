@@ -237,6 +237,16 @@
 - [x] **AC-FO4**: Prod `VECINITA_RAG_RERANK_CE` remains **false** until AC-BB9 pass + deploy approval (S021-D7). *(PASS metrics; flag still off)*
 - [ ] **AC-FO5**: Out of EV-018 without unlock: LangGraph/ADR-006; #159 multilingual embeds; synthesizer upsizing; changing F43/F44 defaults.
 
+### EV-019 — Ingest resilience (F47–F49) — S022
+
+- [ ] **AC-IR1**: Unchanged `content_hash` + `force=false` skips chunk delete + re-embed; metadata may refresh (TC-187, UJ-062, F47 / #163).
+- [ ] **AC-IR2**: `force=true` bypasses hash skip on ingest (TC-188; completes ingest-path for AC-RB4 / #163).
+- [ ] **AC-IR3**: Embed client sub-batches and retries transient Modal/HTTP failures; job completes when retries succeed (TC-189, F48 / #166).
+- [ ] **AC-IR4**: Exhausted retries or dim mismatch **fails the URL** — no silent partial corpus (TC-190; contrast ADR-023 tags).
+- [ ] **AC-IR5**: Chunks sized with HF tokenizer for `BAAI/bge-small-en-v1.5`; default `chunk_overlap_tokens=32` (TC-191, F49 / ADR-044).
+- [ ] **AC-IR6**: Validation rejects `chunk_overlap_tokens` ≥ `chunk_size_tokens` (TC-192).
+- [ ] **AC-IR7**: Out of EV-019 without unlock: #159 multilingual embeds; ChatRAG packing (#165); CE flag flip; changing ADR-023 tag fail-open.
+
 
 ## Quantitative benchmarks
 

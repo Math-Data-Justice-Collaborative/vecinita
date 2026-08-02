@@ -220,7 +220,12 @@ corpus DB stays PII-free.
 |----------|------|---------|----------|-------------|
 | `VECINITA_INTERNAL_WRITE_URL` | string | — | Yes | DO internal write API base URL <!-- 12-verify-deploy: code uses this name, not VECINITA_DO_WRITE_API_URL --> |
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes | Matches DO secret |
-| `VECINITA_CHUNK_SIZE_TOKENS` | int | `256` | No | Ingest chunk target (tokenizer-based) |
+| `VECINITA_CHUNK_SIZE_TOKENS` | int | `256` | No | Ingest chunk target (HF tokenizer for embed pin; F49 / ADR-044) |
+| `VECINITA_CHUNK_OVERLAP_TOKENS` | int | `32` | No | Overlap between consecutive chunks; must be `&lt; chunk_size` (F49 / ADR-044) |
+| `VECINITA_CHUNK_TOKENIZER_ID` | string | `BAAI/bge-small-en-v1.5` | No | HF tokenizer id; default = pinned embed model (ADR-044) |
+| `VECINITA_EMBED_BATCH_SIZE` | int | `32` | No | Max texts per `/embed/batch` sub-call (F48 / #166) |
+| `VECINITA_EMBED_MAX_RETRIES` | int | `3` | No | Retries for transient embed HTTP failures (F48) |
+| `VECINITA_EMBED_RETRY_BACKOFF_S` | float | `0.5` | No | Base backoff seconds (exponential) between embed retries (F48) |
 | `VECINITA_SCRAPE_TIMEOUT_S` | int | `30` | No | Per-URL fetch timeout |
 | `VECINITA_LLM_TAG_MAX_TOKENS` | int | `128` | No | Max tokens for LLM tagging completion per document |
 | `VECINITA_REBUILD_SHADOW_ENABLED` | bool | `true` | No | **Planned/unused (TP-S017-12-A):** not read in code; `dry_run` shadow dual-write is always available for rebuild (F41) |
@@ -283,6 +288,8 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 |-----------|-------|-----------|
 | `VECINITA_TOP_K` | 5 | RD interview |
 | `VECINITA_CHUNK_SIZE_TOKENS` | 256 | RD interview |
+| `VECINITA_CHUNK_OVERLAP_TOKENS` | 32 | S022 / RD-223 / ADR-044 |
+| `VECINITA_EMBED_BATCH_SIZE` | 32 | S022 / RD-222 |
 | Embedding dimension | 384 | FastEmbed / pgvector |
 | `VECINITA_LLM_BACKEND` | `vllm` | ADR-009, RD-021 |
 
@@ -306,6 +313,10 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_RAG_RERANK_CE_TOP_N` ≥ `top_k` and ≤ 50 | Config module at startup (F45) |
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
+| `VECINITA_CHUNK_OVERLAP_TOKENS` ≥ 0 and &lt; `VECINITA_CHUNK_SIZE_TOKENS` | Ingest validation (F49) |
+| `VECINITA_EMBED_BATCH_SIZE` ≥ 1 and ≤ 256 | Config / embed client (F48) |
+| `VECINITA_EMBED_MAX_RETRIES` ≥ 0 and ≤ 10 | Config / embed client (F48) |
+| `VECINITA_EMBED_RETRY_BACKOFF_S` ≥ 0 and ≤ 30 | Config / embed client (F48) |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` ≥ 1 and ≤ 20 | Config module |
 | `VECINITA_MAX_TAGS_PER_CHUNK` ≥ 1 and ≤ 10 | Config module |
 | `VECINITA_BROWSE_PAGE_SIZE` ≥ 1 and ≤ 100 | Config module |
@@ -349,6 +360,10 @@ chat_rag:
   rag_rerank_ce_top_n: 20
 ingest:
   chunk_size_tokens: 256
+  chunk_overlap_tokens: 32
+  chunk_tokenizer_id: BAAI/bge-small-en-v1.5
+  embed_batch_size: 32
+  embed_max_retries: 3
   scrape_timeout_s: 30
 ```
 
