@@ -5,10 +5,12 @@ from __future__ import annotations
 from uuid import UUID, uuid4
 
 import pytest
-from vecinita_rag.packing import pack_chunks
+from vecinita_rag.packing import pack_chunks, truncate_context
 from vecinita_rag.types import RetrievedChunk
 
 pytestmark = pytest.mark.unit
+
+_LARGE_BUDGET = 5000
 
 
 def _chunk(
@@ -98,3 +100,39 @@ def test_pack_chunks_p3_dedupes_by_document_and_caps_chars() -> None:
     assert "Source: Keep" in packed
     assert "Source: Drop" not in packed
     assert len(packed) <= max_chars
+
+
+def test_pack_chunks_p3_keeps_first_when_later_score_not_higher() -> None:
+    """Dedupe keeps the first chunk when a later same-doc score is not higher."""
+    doc = uuid4()
+    first = _chunk(text="first", title="First", score=0.9, document_id=doc)
+    second = _chunk(text="second", title="Second", score=0.5, document_id=doc)
+    packed = pack_chunks([first, second], mode="p3", max_chars=500)
+    assert "Source: First" in packed
+    assert "Source: Second" not in packed
+
+
+def test_pack_chunks_p1_blank_title_and_url_use_placeholders() -> None:
+    """Whitespace-only title/url collapse to placeholders."""
+    packed = pack_chunks([_chunk(title="  ", url="  ")], mode="p1")
+    assert "Source: (untitled)" in packed
+    assert "URL: (no-url)" in packed
+
+
+def test_pack_chunks_p3_short_context_skips_truncate() -> None:
+    """Under-budget P3 context is returned unchanged."""
+    packed = pack_chunks([_chunk(text="short")], mode="p3", max_chars=_LARGE_BUDGET)
+    assert "short" in packed
+    assert len(packed) < _LARGE_BUDGET
+
+
+def test_truncate_context_rejects_non_positive_max_chars() -> None:
+    """max_chars < 1 raises ValueError."""
+    with pytest.raises(ValueError, match="max_chars"):
+        truncate_context("abc", max_chars=0)
+
+
+def test_pack_chunks_rejects_unsupported_mode() -> None:
+    """Unknown packer mode raises ValueError."""
+    with pytest.raises(ValueError, match="unsupported packer mode"):
+        pack_chunks([_chunk()], mode="p2")  # type: ignore[arg-type]

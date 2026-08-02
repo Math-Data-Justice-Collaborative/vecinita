@@ -25,7 +25,7 @@ def _chunk(
     chunk_id: UUID | None = None,
     score: float = 0.5,
     text: str = "body",
-    language: str = "en",
+    language: str | None = "en",
 ) -> RetrievedChunk:
     """Build a RetrievedChunk with optional fixed chunk_id."""
     return RetrievedChunk(
@@ -218,3 +218,46 @@ def test_multi_query_retrieve_empty_locale_skips_boost() -> None:
         count=3,
     )
     assert hits[0].score == pytest.approx(0.9)
+
+
+def test_multi_query_retrieve_empty_hits() -> None:
+    """Empty retrieve results stay empty."""
+
+    def retrieve_fn(_q: str) -> list[RetrievedChunk]:
+        return []
+
+    assert (
+        multi_query_retrieve(
+            "q",
+            locale="es",
+            top_k=3,
+            retrieve_fn=retrieve_fn,
+            enabled=True,
+            count=2,
+        )
+        == []
+    )
+
+
+def test_multi_query_retrieve_none_language_does_not_get_locale_boost() -> None:
+    """Chunks with language=None do not receive the same-locale boost."""
+    unknown = _chunk(score=0.80, language=None)
+    es_chunk = _chunk(score=0.79, language="es")
+
+    def retrieve_fn(_q: str) -> list[RetrievedChunk]:
+        return [unknown, es_chunk]
+
+    hits = multi_query_retrieve(
+        "¿Qué es VECINA?",
+        locale="es",
+        top_k=2,
+        retrieve_fn=retrieve_fn,
+        enabled=False,
+        count=3,
+    )
+    assert hits[0].language == "es"
+
+
+def test_heuristic_rewrites_skips_blank_after_normalize() -> None:
+    """Whitespace-only input yields no variants."""
+    assert heuristic_rewrites("   ", locale="en") == []
