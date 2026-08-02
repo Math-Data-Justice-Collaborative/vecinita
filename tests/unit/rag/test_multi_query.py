@@ -5,7 +5,11 @@ from __future__ import annotations
 from uuid import UUID, uuid4
 
 import pytest
-from vecinita_rag.multi_query import heuristic_rewrites, merge_multi_query_hits
+from vecinita_rag.multi_query import (
+    heuristic_rewrites,
+    merge_multi_query_hits,
+    multi_query_retrieve,
+)
 from vecinita_rag.types import RetrievedChunk
 
 pytestmark = pytest.mark.unit
@@ -21,6 +25,7 @@ def _chunk(
     chunk_id: UUID | None = None,
     score: float = 0.5,
     text: str = "body",
+    language: str = "en",
 ) -> RetrievedChunk:
     """Build a RetrievedChunk with optional fixed chunk_id."""
     return RetrievedChunk(
@@ -30,7 +35,7 @@ def _chunk(
         score=score,
         title="Title",
         url="https://example.org/doc",
-        language="en",
+        language=language,
     )
 
 
@@ -72,7 +77,38 @@ def test_heuristic_rewrites_spanish_aware_for_es_locale() -> None:
     assert len(variants) >= _MIN_REWRITE_VARIANTS
     assert len(variants) <= _MAX_REWRITE_VARIANTS
     joined = " ".join(variants).lower()
-    assert "qué" in joined or "en providence" in joined
+    assert "en providence" in joined or "solicito snap" in joined
+
+
+def test_heuristic_rewrites_spanish_does_not_mangle_como_verbs() -> None:
+    """AC-RQ6 fix: cómo→qué must not produce ungrammatical ES (e.g. Qué me / Qué aplico)."""
+    variants = heuristic_rewrites(
+        "¿Cómo me inscribo a una escuela pública en Providence?",
+        locale="es",
+    )
+    joined = " ".join(variants).lower()
+    assert "qué me inscribo" not in joined
+    assert "que me inscribo" not in joined
+    assert any("providence" in v.lower() or "inscribo" in v.lower() for v in variants[1:])
+
+
+def test_multi_query_retrieve_prefers_matching_locale_on_close_scores() -> None:
+    """ES queries soft-boost same-locale chunks after merge (AC-RQ6 ES retrieval)."""
+    en_chunk = _chunk(score=0.80, text="en body", language="en")
+    es_chunk = _chunk(score=0.79, text="es body", language="es")
+
+    def retrieve_fn(_q: str) -> list[RetrievedChunk]:
+        return [en_chunk, es_chunk]
+
+    hits = multi_query_retrieve(
+        "¿Qué es VECINA?",
+        locale="es",
+        top_k=2,
+        retrieve_fn=retrieve_fn,
+        enabled=True,
+        count=2,
+    )
+    assert hits[0].language == "es"
 
 
 def test_heuristic_rewrites_english_path_unchanged_family() -> None:
