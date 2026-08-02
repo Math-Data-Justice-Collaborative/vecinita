@@ -12,7 +12,7 @@
 | ADR-044 reused (no new ADR) | yes | ADR-044 |
 | No #159 / #165 / CE flip / tag fail-open change | yes | AC-IR7 + decisions |
 | Admin FE / Playwright skipped | yes | TP4 / M5 |
-| ruff / basedpyright / UJ-062 pytest | pending 08-verify-build | — |
+| ruff / basedpyright / UJ-062 pytest | **PASS** (08 + 09/10) | verification-report; qa-report; e2e-report |
 
 **Path A:** ship code with default overlap 32 for **new** ingest.  
 **Path B:** operator `rechunk` rebuild when live corpus must match HF+overlap chunks (RD-227).
