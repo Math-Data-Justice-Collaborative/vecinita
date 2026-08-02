@@ -86,8 +86,61 @@ Scope for interview (`evolve_hotfix`): **16-evolve**, **14-hotfix**, **pipeline*
 
 ## Interview responses (Phase 3)
 
-_(filled as user answers)_
+### 16-evolve (2026-08-02)
+
+| Prompt | User choice |
+|--------|-------------|
+| Went well | **A** Continue-from-recommended / resume via workflow-state; **B** Multi-Fn in one cycle (F46 → F45) |
+| Improve | **D** workflow-state sync commit / `commits_pending` thrash; **C** CE ship_gate PASS vs flag-still-off messaging |
+| Friction | **B** Some friction — mainly **number and length of sessions**; unsure how to address overall |
+
+**Notes:** Session sprawl is a cross-cutting theme for Phase 4 (not only 16-evolve skill text).
+
+### 14-hotfix (2026-08-02)
+
+| Prompt | User choice |
+|--------|-------------|
+| Went well | **C** 16 vs 14 routing clear at S021-D10; **A** keeping wipe fix in 07/evolve was right |
+| Improve | **B** corpus wipe/promote checklist even when evolve owns fix; **D** unclear BUG-report vs 14 vs 07 ownership |
+| Friction | **A** Smooth (skipping 14 was fine) |
+
+**Clarification given:** S021-D10 = keep mid-cycle incident as evolve/07 Fn work unless trivial one-liner → nested 14.
+
+### pipeline (handoffs) (2026-08-02)
+
+| Prompt | User choice |
+|--------|-------------|
+| Went well | **A** continue-with-recommended resume; **B** workflow-state + reports enough to pick up; **C** child stages sequenced without full pipeline re-run |
+| Improve | **A** fewer/longer turns; **D** auto-handoff template on new chat; **E** cap subagent/state-sync noise; **B** explicit safe-stop/new-chat checkpoints; **C** rolling session digest card *(listed beyond “up to 2” — all retained)* |
+| Friction | **B** Some friction |
+
+### Cross-cutting (2026-08-02)
+
+| Prompt | User choice |
+|--------|-------------|
+| Overall went well | **a** Resume/continue-with-recommended; **b** Multi-Fn evolve (F46→F45) |
+| Overall improve | **a** Session sprawl (fewer chats + safe-stops); **b** Auto-handoff / digest on new chat; **c** Cut workflow-state sync / subagent noise |
+| Biggest surprise | **a** How many Cursor chats EV-018 took; **b** Staging basis_vector wipe mid-build |
 
 ## Brainstorm / actions
 
-_(Phases 4–6)_
+### Phase 4 — user choices (2026-08-02)
+
+| Theme | Choice |
+|-------|--------|
+| Session sprawl | **b** Prefer fewer chats — batch more stages when user says continue-with-recommended |
+| Auto-handoff / digest | **c** Both — one-screen digest on resume **and** `HANDOFF.md` at safe-stops |
+| State / subagent noise | **c** Both — batch workflow-state updates **and** no solo `workflow-state.yaml` commits except gate/stage close |
+| Secondary themes | **c** Bring CE flag messaging + BUG/14/07 ownership into workshop this session |
+
+### Phase 5 — proposed actions
+
+| ID | Action | Target | Priority |
+|----|--------|--------|----------|
+| RA-001 | Batch stages on “continue with recommended” (fewer chats) | `.cursor/skills/16-evolve/SKILL.md` | P1 |
+| RA-002 | Emit one-screen digest on mid-cycle resume | `00-context` + `16-evolve` SKILL.md | P1 |
+| RA-003 | Regenerate `docs/sessions/{id}/HANDOFF.md` at safe-stops | `16-evolve` + sessions-reference | P1 |
+| RA-004 | One workflow-state-manager `update` per user-visible step | `workflow-state-agent-protocol` / 16-evolve | P1 |
+| RA-005 | No solo `workflow-state.yaml` commit unless gate/stage close | `atomic-commits.mdc` or 16-evolve | P2 |
+| RA-006 | CE metrics PASS ≠ flag enable — checklist language | `12-verify-deploy` / `13-deploy-smoke` | P2 |
+| RA-007 | BUG vs 14 vs 07 ownership + corpus wipe checklist | `14-hotfix` + `07-build` + bug-investigation | P2 |
