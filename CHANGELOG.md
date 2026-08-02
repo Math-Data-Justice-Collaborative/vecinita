@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### EV-018: Retrieval follow-on (F46 + F45 re-gate) — S021 / #83
+
+- **F46**: Corpus DB guard against staging `basis_vector` wipe; Path B E0 restore on staging; UJ-061 non-empty retrieve
+- **F45**: AC-BB9 CE ship gate **PASS** after F46; prod `VECINITA_RAG_RERANK_CE` remains **false** until separate approval
+- **Deploy:** PR [#174](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174) → `main` @ `9d1f10b` (Path A; H1–H5 PASS)
+
 ### EV-014: ChatRAG cold-start wait UX (F40) — S016 / #87
 
 - Rotating bilingual fun-fact/info messages during cold-start / slow first token

@@ -434,7 +434,13 @@ only if floors pass; otherwise keep spike-only.
 | S021-D25 | 11-verify-impl | **Approve F46 + F45** → 12-verify-deploy (user option 1, 2026-08-02) |
 | S021-D26 | 12 Phase 2+3 | **Approve both** failure mitigations + rollback → 13 Path A with `VECINITA_RAG_RERANK_CE=false` (user option 1, 2026-08-02) |
 
-### Phase 0–B / 07 status
+### Decisions (13-deploy-smoke — 2026-08-02)
 
-Phase 0–D **in progress**. 12-verify-deploy **completed** (S021-D26). CE floors PASS; flag still default-off.
-Next: **13-deploy-smoke** Path A (merge/redeploy ChatRAG; CE stays false).
+| ID | Topic | Choice |
+|----|-------|--------|
+| S021-D27 | Path A execute | **Full Path A** — push/PR/merge/redeploy/H1–H5; CE stays false (user option 1) |
+
+### Phase 0–D / deploy status
+
+Phase D **deploy Path A complete**. PR [#174](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174) merged @ `9d1f10b`; ChatRAG ACTIVE; H1–H5 + UJ-061 PASS; CE flag still default-off.
+Next: optional 15-service-health / cycle close / separate CE flag-flip approval.
