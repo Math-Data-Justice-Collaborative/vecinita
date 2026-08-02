@@ -1,4 +1,4 @@
-"""Vecinita RAG package - LlamaIndex + pgvector (F4, F5, F42, F43)."""
+"""Vecinita RAG package - LlamaIndex + pgvector (F4, F5, F42-F44)."""
 
 from vecinita_rag.cache import (
     DEFAULT_CACHE_MAX_ENTRIES,
@@ -33,6 +33,7 @@ from vecinita_rag.multi_query import (
 )
 from vecinita_rag.packing import pack_chunks, pack_p1
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_rag.soft_language import SoftLanguageResult, soft_language_retrieve
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 
 __version__ = "0.1.0"
@@ -52,6 +53,7 @@ __all__ = [
     "CorpusPgvectorRetriever",
     "RagAnswer",
     "RetrievedChunk",
+    "SoftLanguageResult",
     "answer_from_chunks",
     "answer_without_context",
     "build_query_engine",
@@ -66,5 +68,6 @@ __all__ = [
     "normalize_query",
     "pack_chunks",
     "pack_p1",
+    "soft_language_retrieve",
     "synthesize_with_llm",
 ]

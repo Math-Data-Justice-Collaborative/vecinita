@@ -42,14 +42,14 @@ class StubRetriever:
     def __init__(self, chunks: list[RetrievedChunk]) -> None:
         """Init  ."""
         self.chunks = chunks
-        self.calls: list[tuple[str, list[str] | None, str]] = []
+        self.calls: list[tuple[str, list[str] | None, str | None]] = []
 
     def retrieve_chunks(
         self,
         question: str,
         *,
         tag_slugs: list[str] | None = None,
-        language: str = "en",
+        language: str | None = "en",
         top_k: int | None = None,
         score_threshold: float | None = None,
     ) -> list[RetrievedChunk]:
@@ -59,6 +59,31 @@ class StubRetriever:
         if tag_slugs and not self.chunks:
             return []
         return self.chunks
+
+
+class EmptySameLangStubRetriever:
+    """Return empty for same-lang filter; cross-lang chunk when unfiltered."""
+
+    def __init__(self, *, fallback: RetrievedChunk) -> None:
+        """Init with the unfiltered fallback chunk."""
+        self.fallback = fallback
+        self.languages: list[str | None] = []
+
+    def retrieve_chunks(
+        self,
+        question: str,
+        *,
+        tag_slugs: list[str] | None = None,
+        language: str | None = "en",
+        top_k: int | None = None,
+        score_threshold: float | None = None,
+    ) -> list[RetrievedChunk]:
+        """Retrieve chunks with language-aware empty-hit behavior."""
+        _ = (question, tag_slugs, top_k, score_threshold)
+        self.languages.append(language)
+        if language is None:
+            return [self.fallback]
+        return []
 
 
 class StubLlm:
@@ -188,7 +213,7 @@ def test_ask_retries_without_tags_when_tag_filter_empty() -> None:
             question: str,
             *,
             tag_slugs: list[str] | None = None,
-            language: str = "en",
+            language: str | None = "en",
             top_k: int | None = None,
             score_threshold: float | None = None,
         ) -> list[RetrievedChunk]:
@@ -230,6 +255,60 @@ def test_retrieve_sources_maps_chunks() -> None:
     sources = service.retrieve_sources(AskRequest(question="clinic"))
     assert len(sources) == 1
     assert sources[0].score == _CHUNK_SCORE
+
+
+def test_retrieve_soft_language_fallback_when_flag_on() -> None:
+    """T96.3: flag on + empty same-lang first pass retries unfiltered (AC-BB5)."""
+    fallback = _chunk(language="es")
+    retriever = EmptySameLangStubRetriever(fallback=fallback)
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=5,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_soft_language_fallback=True,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=retriever,  # type: ignore[arg-type]
+        llm_client=StubLlm(),  # type: ignore[arg-type]
+        settings=settings,
+    )
+    sources = service.retrieve_sources(
+        AskRequest(question="When does the food pantry open?", language="en"),
+    )
+    assert len(sources) == 1
+    assert "en" in retriever.languages
+    assert None in retriever.languages
+
+
+def test_retrieve_soft_language_default_off_skips_unfiltered_retry() -> None:
+    """T96.3 / TC-181: default flag off keeps L0-strict (no language=None pass)."""
+    fallback = _chunk(language="es")
+    retriever = EmptySameLangStubRetriever(fallback=fallback)
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=5,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_soft_language_fallback=False,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=retriever,  # type: ignore[arg-type]
+        llm_client=StubLlm(),  # type: ignore[arg-type]
+        settings=settings,
+    )
+    sources = service.retrieve_sources(
+        AskRequest(question="When does the food pantry open?", language="en"),
+    )
+    assert sources == []
+    assert None not in retriever.languages
+    assert retriever.languages == ["en"]
 
 
 def test_from_settings_embed_and_tag_infer_fns() -> None:

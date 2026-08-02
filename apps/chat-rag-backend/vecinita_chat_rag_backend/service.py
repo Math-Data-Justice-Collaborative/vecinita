@@ -21,6 +21,7 @@ from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.multi_query import multi_query_retrieve
 from vecinita_rag.packing import PackerMode, pack_chunks
 from vecinita_rag.retriever import CorpusPgvectorRetriever
+from vecinita_rag.soft_language import soft_language_retrieve
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
@@ -242,12 +243,15 @@ class ChatRagService:
         language = self._effective_language(request)
         tag_slugs = self._retrieval_tags(request)
         multi_query, multi_count, _, _ = self._rag_packing()
+        soft_fallback = (
+            self._settings.rag_soft_language_fallback if self._settings is not None else False
+        )
 
-        def _retrieve_once(question: str) -> list[RetrievedChunk]:
+        def _retrieve_lang(question: str, lang: str | None) -> list[RetrievedChunk]:
             chunks = self._retriever.retrieve_chunks(
                 question,
                 tag_slugs=tag_slugs,
-                language=language,
+                language=lang,
                 top_k=top_k,
                 score_threshold=min_retrieval_score,
             )
@@ -255,11 +259,19 @@ class ChatRagService:
                 chunks = self._retriever.retrieve_chunks(
                     question,
                     tag_slugs=None,
-                    language=language,
+                    language=lang,
                     top_k=top_k,
                     score_threshold=min_retrieval_score,
                 )
             return chunks
+
+        def _retrieve_once(question: str) -> list[RetrievedChunk]:
+            return soft_language_retrieve(
+                question,
+                language=language,
+                retrieve_fn=_retrieve_lang,
+                enabled=soft_fallback,
+            ).chunks
 
         return multi_query_retrieve(
             request.question,

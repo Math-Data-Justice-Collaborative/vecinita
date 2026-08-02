@@ -11,12 +11,12 @@
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
 | **Active milestone** | M96 — F44 Soft language L1 + empty-hit fixture |
-| **Active task** | T96.3 — soft-language retrieve helper + ChatRAG flag wire — next |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94, M95; M96: T96.1–T96.2 |
+| **Active task** | T96.4 — empty-hit fixture + UJ-058 e2e green — next |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94, M95; M96: T96.1–T96.3 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
-| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T96.3 |
+| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T96.4 |
 | **Scope addition** | 2026-08-02 — F43 H1 cache + F44 soft L1 + F45 CE spike/gate; ADR-042; S020-D15–D18. |
 
 ## Template
@@ -1930,7 +1930,7 @@ unit tests TC-170–172.
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T96.1 | Test: unit — L1 fires only on empty same-lang first pass (TC-180) — red | Test | completed | AC-BB5, TC-180, #162 | T94.4 | 2026-08-02 | S020 | F44 |
 | T96.2 | Test: unit/e2e — flag default off keeps L0-strict (TC-181) — red | Test | completed | AC-BB6, TC-181, UJ-058 | — | 2026-08-02 | S020 | F44 |
-| T96.3 | Code: `packages/rag` soft-language retrieve helper + ChatRAG flag wire | Code | pending | spec.md F44, config-spec | T96.1, T96.2 | — | S020 | F44 |
+| T96.3 | Code: `packages/rag` soft-language retrieve helper + ChatRAG flag wire | Code | completed | spec.md F44, config-spec | T96.1, T96.2 | 2026-08-02 | S020 | F44 |
 | T96.4 | Test: empty-hit fixture + `tests/e2e/test_uj058_soft_language.py` green | Test | pending | UJ-058, e2e-coverage | T96.3 | — | S020 | F44 |
 
 #### M97: F45 — CE Modal T4 spike + mockable client
