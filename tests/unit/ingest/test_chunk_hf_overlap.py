@@ -112,3 +112,52 @@ def test_chunk_text_rejects_negative_overlap() -> None:
     """Overlap must be >= 0."""
     with pytest.raises(ValueError, match="overlap"):
         chunk_text("hello world", chunk_size_tokens=64, chunk_overlap_tokens=-1)
+
+
+class _EmptyIdsTokenizer:
+    """Tokenizer stub that yields no content tokens."""
+
+    def encode_ids(self, text: str) -> list[int]:
+        _ = text
+        return []
+
+    def encode_with_offsets(self, text: str) -> tuple[list[int], list[tuple[int, int]]]:
+        _ = text
+        return [], []
+
+
+class _SpaceOnlySpanTokenizer:
+    """Tokenizer stub whose sole token span is a single space (strip → drop)."""
+
+    def encode_ids(self, text: str) -> list[int]:
+        return self.encode_with_offsets(text)[0]
+
+    def encode_with_offsets(self, text: str) -> tuple[list[int], list[tuple[int, int]]]:
+        idx = text.find(" ")
+        if idx < 0:
+            return [1], [(0, max(len(text), 1))]
+        return [1], [(idx, idx + 1)]
+
+
+def test_chunk_text_empty_ids_returns_empty_list() -> None:
+    """No content tokens → no chunks (branch after encode_with_offsets)."""
+    assert (
+        chunk_text(
+            "visible text",
+            chunk_size_tokens=64,
+            chunk_overlap_tokens=0,
+            tokenizer=_EmptyIdsTokenizer(),
+        )
+        == []
+    )
+
+
+def test_chunk_text_drops_whitespace_only_window() -> None:
+    """Windows that strip to empty are omitted from the chunk list."""
+    chunks = chunk_text(
+        "hello world",
+        chunk_size_tokens=64,
+        chunk_overlap_tokens=0,
+        tokenizer=_SpaceOnlySpanTokenizer(),
+    )
+    assert chunks == []

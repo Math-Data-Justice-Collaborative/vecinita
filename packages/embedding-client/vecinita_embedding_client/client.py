@@ -157,10 +157,9 @@ class EmbeddingClient:
             msg = f"{path.lstrip('/')} failed with status {response.status_code}: {response.text}"
             raise EmbeddingClientError(msg)
 
-        if last_error is not None:
-            raise last_error
+        # Loop always returns or raises; keep exhaustiveness checkers happy.
         msg = f"{path} failed after {attempts} attempts"
-        raise EmbeddingClientError(msg)
+        raise EmbeddingClientError(msg)  # pragma: no cover
 
     def _backoff(self, attempt: int) -> None:
         """Sleep exponential backoff for the given zero-based attempt index."""

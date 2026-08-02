@@ -21,6 +21,9 @@ _EXPECTED_BATCH_COUNT = 2
 _RETRY_ATTEMPTS_WITH_MAX_2 = 3
 _TRANSIENT_THEN_OK_CALLS = 3
 _SUB_BATCH_TOTAL = 5
+_DEFAULT_BATCH_SIZE = 32
+_TEXTS_ABOVE_DEFAULT_BATCH = 40
+_TRANSPORT_RETRY_SUCCESS_CALLS = 2
 
 
 def _no_sleep(_seconds: float) -> None:
@@ -326,3 +329,128 @@ def test_embedding_client_does_not_close_injected_http_client() -> None:
     client.close()
 
     assert closed == []
+
+
+def test_embed_batch_empty_returns_empty_list() -> None:
+    """Empty input short-circuits without calling the embed service."""
+    calls = {"n": 0}
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        return httpx.Response(200, json={"embeddings": []})
+
+    transport = httpx.MockTransport(handler)
+    client = EmbeddingClient(
+        "http://embed.test",
+        http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
+    )
+    assert client.embed_batch([]) == []
+    assert calls["n"] == 0
+    client.close()
+
+
+def test_env_batch_size_invalid_falls_back_to_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-integer VECINITA_EMBED_BATCH_SIZE uses the default (32)."""
+    monkeypatch.setenv("VECINITA_EMBED_BATCH_SIZE", "not-an-int")
+    monkeypatch.setenv("VECINITA_EMBED_MAX_RETRIES", "0")
+    seen_sizes: list[int] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = as_json_object(cast("object", json.loads(request.content.decode())))
+        texts_obj = payload["texts"]
+        assert isinstance(texts_obj, list)
+        seen_sizes.append(len(cast("list[object]", texts_obj)))
+        return httpx.Response(
+            200,
+            json={"embeddings": [_SAMPLE for _ in cast("list[object]", texts_obj)]},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = EmbeddingClient(
+        "http://embed.test",
+        http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
+    )
+    texts = [f"t{i}" for i in range(_TEXTS_ABOVE_DEFAULT_BATCH)]
+    assert len(client.embed_batch(texts)) == _TEXTS_ABOVE_DEFAULT_BATCH
+    assert seen_sizes == [_DEFAULT_BATCH_SIZE, 8]
+    client.close()
+
+
+def test_env_retry_backoff_invalid_falls_back_to_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-float VECINITA_EMBED_RETRY_BACKOFF_S uses the default without crashing."""
+    monkeypatch.setenv("VECINITA_EMBED_RETRY_BACKOFF_S", "bad-float")
+    monkeypatch.setenv("VECINITA_EMBED_MAX_RETRIES", "1")
+    sleeps: list[float] = []
+
+    def capture_sleep(seconds: float) -> None:
+        sleeps.append(seconds)
+
+    monkeypatch.setattr("vecinita_embedding_client.client.time.sleep", capture_sleep)
+    calls = {"n": 0}
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return httpx.Response(503, json={})
+        return httpx.Response(200, json={"embeddings": [_SAMPLE]})
+
+    transport = httpx.MockTransport(handler)
+    client = EmbeddingClient(
+        "http://embed.test",
+        http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
+    )
+    assert len(client.embed_batch(["a"])) == 1
+    assert sleeps == [0.5]
+    client.close()
+
+
+def test_embed_batch_retries_transport_error_then_succeeds(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Transport errors retry with backoff then succeed (F48)."""
+    monkeypatch.setenv("VECINITA_EMBED_MAX_RETRIES", "2")
+    monkeypatch.setenv("VECINITA_EMBED_RETRY_BACKOFF_S", "0")
+    monkeypatch.setattr("vecinita_embedding_client.client.time.sleep", _no_sleep)
+    calls = {"n": 0}
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            msg = "connection refused"
+            raise httpx.ConnectError(msg)
+        return httpx.Response(200, json={"embeddings": [_SAMPLE]})
+
+    transport = httpx.MockTransport(handler)
+    client = EmbeddingClient(
+        "http://embed.test",
+        http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
+    )
+    assert len(client.embed_batch(["a"])) == 1
+    assert calls["n"] == _TRANSPORT_RETRY_SUCCESS_CALLS
+    client.close()
+
+
+def test_embed_batch_transport_error_exhausts_retries(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Exhausted transport retries raise EmbeddingClientError."""
+    monkeypatch.setenv("VECINITA_EMBED_MAX_RETRIES", "1")
+    monkeypatch.setenv("VECINITA_EMBED_RETRY_BACKOFF_S", "0")
+    monkeypatch.setattr("vecinita_embedding_client.client.time.sleep", _no_sleep)
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        msg = "timed out"
+        raise httpx.ReadTimeout(msg)
+
+    transport = httpx.MockTransport(handler)
+    client = EmbeddingClient(
+        "http://embed.test",
+        http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
+    )
+    with pytest.raises(EmbeddingClientError, match="transport error"):
+        client.embed_batch(["a"])
+    client.close()

@@ -13,6 +13,7 @@ from vecinita_data_management_backend.pipeline import (
     run_retag_job,
 )
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_embedding_client import EmbeddingClientError
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
@@ -270,6 +271,70 @@ def test_run_ingest_job_skips_embed_when_content_hash_unchanged() -> None:
     assert doc.body_text is not None
     assert doc.title == scraped.title
     assert updated.metrics == {"skipped_unchanged": 1, "urls_failed_embed": 0}
+
+
+def test_run_ingest_job_without_hash_lookup_still_embeds() -> None:
+    """Write clients without get_content_hash_by_url skip F47 lookup (no AttributeError)."""
+
+    class _NoHashWriteClient:
+        def __init__(self) -> None:
+            self.last_batch: BatchUpsertRequest | None = None
+
+        def upsert_batch(self, body: BatchUpsertRequest) -> None:
+            self.last_batch = body
+
+    store = InMemoryJobStore()
+    embed_client = _StubEmbedClient()
+    write_client = _NoHashWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64"},
+    )
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=embed_client,  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
+        tag_vocabulary=_VOCAB,
+    )
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+    assert embed_client.batch_calls == 1
+    assert write_client.last_batch is not None
+    assert write_client.last_batch.documents[0].chunks
+
+
+def test_run_ingest_job_embed_failure_records_urls_failed_embed() -> None:
+    """AC-IR4: EmbeddingClientError marks job failed and increments urls_failed_embed."""
+
+    class _FailingEmbedClient:
+        def embed_batch(self, texts: list[str]) -> list[list[float]]:
+            _ = texts
+            msg = "embed down"
+            raise EmbeddingClientError(msg)
+
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64"},
+    )
+    with pytest.raises(EmbeddingClientError, match="embed down"):
+        run_ingest_job(
+            record.job_id,
+            store=store,
+            embed_client=_FailingEmbedClient(),  # type: ignore[arg-type]
+            write_client=write_client,  # type: ignore[arg-type]
+            fetch_document=_fetch_fixture,
+            tag_vocabulary=_VOCAB,
+        )
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "failed"
+    assert updated.error_code == "EmbeddingClientError"
+    assert updated.metrics == {"skipped_unchanged": 0, "urls_failed_embed": 1}
 
 
 def test_run_ingest_job_force_bypasses_content_hash_skip() -> None:
