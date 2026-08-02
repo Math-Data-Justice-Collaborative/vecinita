@@ -56,9 +56,9 @@
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
 | F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S021/EV-018 re-gate; S020-D5/D7 |
 | F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
-| F47 | Skip re-ingest when content_hash unchanged (#163) | Planned | Data Management | data-management-backend, internal-write-api, packages/ingest | S022/EV-019 #163; S022-D8 |
-| F48 | Embedding sub-batch + retry for ingest (#166) | Planned | Data Management | packages/embedding-client, data-management-backend, Modal embed | S022/EV-019 #166; S022-D8 |
-| F49 | Chunk overlap + sizing clarity (#160) | Planned | Data Management | packages/ingest, config-spec; optional admin FE | S022/EV-019 #160; S022-D8 |
+| F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
+| F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
+| F49 | Chunk overlap + sizing clarity (#160) | Implemented | Data Management | packages/ingest, config-spec; optional admin FE | 11-verify-impl S022 2026-08-02; EV-019 #160 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
