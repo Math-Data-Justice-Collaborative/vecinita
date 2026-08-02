@@ -1,0 +1,630 @@
+{
+  "started_at": "2026-08-01T02:01:33.916734+00:00",
+  "top_k": 5,
+  "fixture": "/Users/bigme/Documents/GitHub/vecinita/data/fixtures/eval/qa_pairs_staging.json",
+  "corpus_chunks": 211,
+  "golden_hits": 15,
+  "cells": {
+    "E0": {
+      "summary": {
+        "n": 15,
+        "hit_rate": 1.0,
+        "en_n": 8,
+        "en_hit": 1.0,
+        "es_n": 7,
+        "es_hit": 1.0
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rifreeclinic.org/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rient.net/"
+          ]
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rifreeclinic.org/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rient.net/",
+            "https://health.ri.gov/flooding"
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://wrwc.org/what-we-do/community-action/",
+          "retrieved": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/empoderate/",
+          "retrieved": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ]
+        },
+        {
+          "id": "community-resilience-hub-es",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/empoderate/",
+          "retrieved": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ]
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://wrwc.org/what-we-do/community-action/",
+          "retrieved": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://www.3crs.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/"
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/",
+          "retrieved": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/salud/"
+          ]
+        },
+        {
+          "id": "community-vecinita-history",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/conocenos/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ]
+        },
+        {
+          "id": "community-school-choice",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/education/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://www.providenceri.gov/pema/",
+            "https://www.tapaprovidence.org/"
+          ]
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://health.ri.gov/flooding",
+          "retrieved": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC1118941/"
+          ]
+        },
+        {
+          "id": "housing-flood-vs-home",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/inundaciones/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/salud/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/education/"
+          ]
+        },
+        {
+          "id": "community-healthsource-ri",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/salud/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/salud/",
+            "https://www.rifreeclinic.org/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://www.rient.net/"
+          ]
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rils.org/",
+          "retrieved": [
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.thelearningcommunity.com/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ]
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rils.org/",
+          "retrieved": [
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ]
+        }
+      ]
+    },
+    "E1": {
+      "summary": {
+        "n": 15,
+        "hit_rate": 1.0,
+        "en_n": 8,
+        "en_hit": 1.0,
+        "es_n": 7,
+        "es_hit": 1.0
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rifreeclinic.org/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group"
+          ]
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rifreeclinic.org/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rient.net/"
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://wrwc.org/what-we-do/community-action/",
+          "retrieved": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/",
+            "https://vecina.wrwc.org/es/conocenos/"
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/empoderate/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ]
+        },
+        {
+          "id": "community-resilience-hub-es",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/empoderate/",
+          "retrieved": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ]
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://wrwc.org/what-we-do/community-action/",
+          "retrieved": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/"
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/",
+          "retrieved": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/"
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ]
+        },
+        {
+          "id": "community-vecinita-history",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/conocenos/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ]
+        },
+        {
+          "id": "community-school-choice",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/education/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/education/",
+            "https://www.tapaprovidence.org/",
+            "https://www.providenceschools.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.achievementfirst.org/school/achievement-first-promesa-mayoral-academy-elementary/?utm_source=google&utm_medium=listing&utm_campaign=promesa_elementary"
+          ]
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://health.ri.gov/flooding",
+          "retrieved": [
+            "https://health.ri.gov/flooding",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC1118941/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/"
+          ]
+        },
+        {
+          "id": "housing-flood-vs-home",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/inundaciones/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/salud/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ]
+        },
+        {
+          "id": "community-healthsource-ri",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/salud/",
+          "retrieved": [
+            "https://vecina.wrwc.org/es/salud/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/es/education/"
+          ]
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rils.org/",
+          "retrieved": [
+            "https://www.rils.org/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.thelearningcommunity.com/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ]
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rils.org/",
+          "retrieved": [
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://health.ri.gov/flooding"
+          ]
+        }
+      ]
+    },
+    "E2": {
+      "summary": {
+        "n": 15,
+        "hit_rate": 0.8666666666666667,
+        "en_n": 8,
+        "en_hit": 0.875,
+        "es_n": 7,
+        "es_hit": 0.8571428571428571
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rifreeclinic.org/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rient.net/"
+          ]
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rifreeclinic.org/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rient.net/",
+            "https://baysideobgyn.com/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://wrwc.org/what-we-do/community-action/",
+          "retrieved": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.butler.org/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ]
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/empoderate/",
+          "retrieved": [
+            "https://aventure.providenceschools.org/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.achievementfirst.org/school/achievement-first-envision-elementary-school/"
+          ]
+        },
+        {
+          "id": "community-resilience-hub-es",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/empoderate/",
+          "retrieved": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.3crs.org/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC11688187/"
+          ]
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://wrwc.org/what-we-do/community-action/",
+          "retrieved": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://www.3crs.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/",
+          "retrieved": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://www.3crs.org/"
+          ]
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/",
+          "retrieved": [
+            "https://vecina.wrwc.org/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://www.3crs.org/"
+          ]
+        },
+        {
+          "id": "community-vecinita-history",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/conocenos/",
+          "retrieved": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/salud/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/"
+          ]
+        },
+        {
+          "id": "community-school-choice",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/education/",
+          "retrieved": [
+            "https://www.achievementfirst.org/school/achievement-first-envision-elementary-school/",
+            "https://www.providenceschools.org/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vgonline.org/",
+            "https://www.providenceri.gov/pema/"
+          ]
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://health.ri.gov/flooding",
+          "retrieved": [
+            "https://health.ri.gov/flooding",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC1118941/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC11688187/"
+          ]
+        },
+        {
+          "id": "housing-flood-vs-home",
+          "locale": "es",
+          "hit": true,
+          "expected": "https://vecina.wrwc.org/es/inundaciones/",
+          "retrieved": [
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC1118941/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC11688187/"
+          ]
+        },
+        {
+          "id": "community-healthsource-ri",
+          "locale": "es",
+          "hit": false,
+          "expected": "https://vecina.wrwc.org/es/salud/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rient.net/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group"
+          ]
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "hit": false,
+          "expected": "https://www.rils.org/",
+          "retrieved": [
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://aventure.providenceschools.org/"
+          ]
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "hit": true,
+          "expected": "https://www.rils.org/",
+          "retrieved": [
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://baysideobgyn.com/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,2501 @@
+{
+  "fixture": "/Users/bigme/Documents/GitHub/vecinita/data/fixtures/eval/qa_pairs_staging.json",
+  "decision": "S019-D28",
+  "note": "Graph-shaped TypedDict workflows (LangGraph-schema-compatible); langgraph package not added until ADR-006 amend",
+  "fixed_cell": {
+    "pack": "P1",
+    "rerank": "R0",
+    "top_k": 5,
+    "min_retrieval_score": 0.2,
+    "model_id": "qwen2.5:1.5b-instruct"
+  },
+  "playground_url": "https://vecinita--vecinita-llm-playground-fastapi-app.modal.run",
+  "scored_rows": 11,
+  "cells": [
+    {
+      "cell_id": "H0",
+      "schema": "S0",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 1406,
+      "latency_p95_ms": 2302,
+      "llm_calls_total": 13,
+      "llm_calls_per_row": 1.0,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {},
+      "answer_class_counts": {},
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1814,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1486,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2622,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2302,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 905,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1213,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 860,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 892,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1669,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1192,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1406,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1359,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "2f647bee1cf7"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 2001,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S0",
+          "extras": {},
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 56347
+    },
+    {
+      "cell_id": "H1",
+      "schema": "S1",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 0,
+      "latency_p95_ms": 0,
+      "llm_calls_total": 0,
+      "llm_calls_per_row": 0.0,
+      "cache_hit_rate": 1.0,
+      "intent_counts": {},
+      "answer_class_counts": {},
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "what free medical services does rhode island free clinic offer?"
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "what are rhode island free clinic's weekday hours?"
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "what is nuevas voces at wrwc?"
+          },
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "\u00bfqu\u00e9 es nuevas voces?"
+          },
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "where is the olneyville resilience hub located?"
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "what does vecina help neighbors do?"
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "\u00bfqu\u00e9 ayuda vecina a los vecinos a obtener?"
+          },
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "how long can it take for a flood insurance policy to go into effect?"
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "what is rhode island legal services' mission?"
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "does rhode island legal services work on safe affordable housing?"
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "what is the mayor's personal phone number?"
+          },
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "housing"
+          },
+          "answer_sha1": "2f647bee1cf7"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S1",
+          "extras": {
+            "norm_query": "where can i get quantum physics tutoring?"
+          },
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 55611
+    },
+    {
+      "cell_id": "H2",
+      "schema": "S2",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.8181818181818182,
+      "answer_relevancy": 0.0,
+      "latency_p50_ms": 1573,
+      "latency_p95_ms": 2697,
+      "llm_calls_total": 13,
+      "llm_calls_per_row": 1.0,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {},
+      "answer_class_counts": {},
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2739,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "21a7e5b5e47c"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2100,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "c5fae77eef28"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2326,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "76097dbdcf56"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2697,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "7a50e5fc32ec"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1079,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "1d047e8e092d"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 991,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "69496c4c15cc"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 847,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "b55ad29ef6e2"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 915,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "848da913597b"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1501,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "ea56d9f0e80b"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1112,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "971fda41b350"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1573,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "619da492956a"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1876,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "e1b8d9c7eacf"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 1613,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S2",
+          "extras": {
+            "pack": "P1_prefix_stable"
+          },
+          "answer_sha1": "cf80956452c0"
+        }
+      ],
+      "wall_ms": 56734
+    },
+    {
+      "cell_id": "H3",
+      "schema": "S3",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 0.9090909090909091,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 1390,
+      "latency_p95_ms": 2341,
+      "llm_calls_total": 12,
+      "llm_calls_per_row": 0.9230769230769231,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {
+        "faq_lookup": 11,
+        "corpus_qa": 1,
+        "clarify_needed": 1
+      },
+      "answer_class_counts": {},
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1773,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1452,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2720,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2341,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 939,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1234,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 882,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 893,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "corpus_qa",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1667,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1182,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1390,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "none",
+          "intent": "clarify_needed",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "clarify"
+          },
+          "answer_sha1": "144cd2b1ba20"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 2011,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3",
+          "extras": {
+            "route": "faq"
+          },
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 54085
+    },
+    {
+      "cell_id": "H4",
+      "schema": "S4",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 1414,
+      "latency_p95_ms": 2321,
+      "llm_calls_total": 13,
+      "llm_calls_per_row": 1.0,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {},
+      "answer_class_counts": {
+        "grounded": 13
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1790,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1452,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2601,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2321,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 901,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1250,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 875,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 885,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1656,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1165,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1414,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1341,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "2f647bee1cf7"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 2016,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S4",
+          "extras": {
+            "retries": 0
+          },
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 56207
+    },
+    {
+      "cell_id": "H5",
+      "schema": "S5",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 1401,
+      "latency_p95_ms": 2332,
+      "llm_calls_total": 13,
+      "llm_calls_per_row": 1.0,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {},
+      "answer_class_counts": {},
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1799,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1466,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2624,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2332,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 923,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1230,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 885,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 914,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1663,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1183,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1401,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1335,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "2f647bee1cf7"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 2018,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S5",
+          "extras": {
+            "retrieve_notes": "retriever_agent: returned 5 chunks"
+          },
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 55960
+    },
+    {
+      "cell_id": "H6",
+      "schema": "S6",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 1389,
+      "latency_p95_ms": 2326,
+      "llm_calls_total": 13,
+      "llm_calls_per_row": 1.0,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {},
+      "answer_class_counts": {
+        "grounded": 13
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1783,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1465,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2613,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2326,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 926,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1230,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 875,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 904,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1709,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1152,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1389,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1359,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "2f647bee1cf7"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 2034,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": "grounded",
+          "schema": "S6",
+          "extras": {
+            "supervisor_plan": "retrieve\u2192synth\u2192critic",
+            "critique": "",
+            "loops": 0
+          },
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 56250
+    },
+    {
+      "cell_id": "H7",
+      "schema": "S7",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.3076923076923077,
+      "latency_p50_ms": 2027,
+      "latency_p95_ms": 2658,
+      "llm_calls_total": 13,
+      "llm_calls_per_row": 1.0,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {},
+      "answer_class_counts": {},
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 2658,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "What free medical services does Rhode Island Free Clinic offer?",
+              "What free medical services does Rhode Island Free Clinic offer in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2027,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "What are Rhode Island Free Clinic's weekday hours?",
+              "What are Rhode Island Free Clinic's weekday hours in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 2300,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "What is Nuevas Voces at WRWC?",
+              "What is Nuevas Voces at WRWC in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "1e06c480a908"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 3285,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "\u00bfQu\u00e9 es Nuevas Voces?",
+              "\u00bfQu\u00e9 es Nuevas Voces in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "1f99acf18302"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1615,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "Where is the Olneyville Resilience Hub located?",
+              "Where is the Olneyville Resilience Hub located in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1807,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "What does VECINA help neighbors do?",
+              "What does VECINA help neighbors do in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2137,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?",
+              "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "022809e8144b"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2057,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "How long can it take for a flood insurance policy to go into effect?",
+              "What long can it take for a flood insurance policy to go into effect?",
+              "How long can it take for a flood insurance policy to go into effect in Providence RI?"
+            ],
+            "n_rewrites": 3
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 2304,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "What is Rhode Island Legal Services' mission?",
+              "What is Rhode Island Legal Services' mission in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1788,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "Does Rhode Island Legal Services work on safe affordable housing?",
+              "Does Rhode Island Legal Services work on safe affordable housing in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1589,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "What is the mayor's personal phone number?",
+              "What is the mayor's personal phone number in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "9491ae693e89"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1349,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "housing"
+            ],
+            "n_rewrites": 1
+          },
+          "answer_sha1": "2f647bee1cf7"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 1834,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": null,
+          "answer_class": null,
+          "schema": "S7",
+          "extras": {
+            "rewrites": [
+              "Where can I get quantum physics tutoring?",
+              "Where can I get quantum physics tutoring in Providence RI?"
+            ],
+            "n_rewrites": 2
+          },
+          "answer_sha1": "6a875492217f"
+        }
+      ],
+      "wall_ms": 60870
+    },
+    {
+      "cell_id": "H8",
+      "schema": "S8",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 0.9090909090909091,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 1401,
+      "latency_p95_ms": 2380,
+      "llm_calls_total": 12,
+      "llm_calls_per_row": 0.9230769230769231,
+      "cache_hit_rate": 0.0,
+      "intent_counts": {
+        "faq_lookup": 11,
+        "corpus_qa": 1,
+        "clarify_needed": 1
+      },
+      "answer_class_counts": {
+        "grounded": 12,
+        "clarify": 1
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1782,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1462,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2601,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 2380,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 904,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1247,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 883,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 916,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "corpus_qa",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1705,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 1207,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 1401,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "none",
+          "intent": "clarify_needed",
+          "answer_class": "clarify",
+          "schema": "S8",
+          "extras": {
+            "route": "clarify"
+          },
+          "answer_sha1": "144cd2b1ba20"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 2119,
+          "llm_calls": 1,
+          "cache_hit": "none",
+          "intent": "faq_lookup",
+          "answer_class": "grounded",
+          "schema": "S8",
+          "extras": {
+            "route": "rag"
+          },
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 54297
+    },
+    {
+      "cell_id": "H9",
+      "schema": "S3+S1",
+      "status": "complete",
+      "n_rows": 13,
+      "retrieval_relevance": 0.9090909090909091,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p50_ms": 0,
+      "latency_p95_ms": 0,
+      "llm_calls_total": 0,
+      "llm_calls_per_row": 0.0,
+      "cache_hit_rate": 0.9230769230769231,
+      "intent_counts": {
+        "faq_lookup": 11,
+        "corpus_qa": 1,
+        "clarify_needed": 1
+      },
+      "answer_class_counts": {},
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "c795bb762a9f"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "bf336e38b04c"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "82cfb7fdfacd"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "1c14ba1ddfb1"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "2385a6ef8864"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "70c0a5e511a8"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "b3f0c6d19e89"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "corpus_qa",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "4c456def45c1"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "7e463601129e"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "9bc892faaf99"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": true,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "df8c94f154eb"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "none",
+          "intent": "clarify_needed",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "clarify",
+            "stacked": true
+          },
+          "answer_sha1": "144cd2b1ba20"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "retrieval_pass": false,
+          "latency_ms": 0,
+          "llm_calls": 0,
+          "cache_hit": "exact",
+          "intent": "faq_lookup",
+          "answer_class": null,
+          "schema": "S3+S1",
+          "extras": {
+            "route": "cache_cascade",
+            "stacked": true
+          },
+          "answer_sha1": "e94845942a1f"
+        }
+      ],
+      "wall_ms": 53362
+    }
+  ],
+  "report": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S019-retrieval-quality/reports/spike-harness-cache.md"
+}

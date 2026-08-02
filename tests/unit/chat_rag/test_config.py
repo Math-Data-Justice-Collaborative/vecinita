@@ -17,6 +17,10 @@ _DEFAULT_FLOAT = 0.5
 _PARSED_FLOAT = 0.75
 _ENV_TOP_K = 3
 _ENV_MIN_SCORE = 0.3
+_DEFAULT_MULTI_QUERY_COUNT = 3
+_DEFAULT_CONTEXT_MAX_CHARS = 3500
+_PARSED_MULTI_QUERY_COUNT = 2
+_PARSED_CONTEXT_MAX_CHARS = 2048
 
 
 def test_int_env_returns_default_when_missing() -> None:
@@ -96,3 +100,52 @@ def test_str_env_parses_value(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setenv("VECINITA_TEST_STR", "custom-model")
     assert _str_env("VECINITA_TEST_STR", "default-model") == "custom-model"
+
+
+def test_from_env_defaults_f42_rag_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
+    """T92.1: F42 VECINITA_RAG_* defaults are H7 on, count=3, packer=p1."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_RAG_MULTI_QUERY", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_MULTI_QUERY_COUNT", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_PACKER", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_CONTEXT_MAX_CHARS", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_multi_query is True
+    assert settings.rag_multi_query_count == _DEFAULT_MULTI_QUERY_COUNT
+    assert settings.rag_packer == "p1"
+    assert settings.rag_context_max_chars == _DEFAULT_CONTEXT_MAX_CHARS
+
+
+def test_from_env_parses_f42_rag_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
+    """T92.1: F42 VECINITA_RAG_* knobs parse from env (config-spec)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_MULTI_QUERY", "false")
+    monkeypatch.setenv("VECINITA_RAG_MULTI_QUERY_COUNT", "2")
+    monkeypatch.setenv("VECINITA_RAG_PACKER", "p3")
+    monkeypatch.setenv("VECINITA_RAG_CONTEXT_MAX_CHARS", "2048")
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_multi_query is False
+    assert settings.rag_multi_query_count == _PARSED_MULTI_QUERY_COUNT
+    assert settings.rag_packer == "p3"
+    assert settings.rag_context_max_chars == _PARSED_CONTEXT_MAX_CHARS
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [
+        ("VECINITA_RAG_MULTI_QUERY_COUNT", "0"),
+        ("VECINITA_RAG_MULTI_QUERY_COUNT", "6"),
+        ("VECINITA_RAG_PACKER", "p2"),
+        ("VECINITA_RAG_CONTEXT_MAX_CHARS", "100"),
+    ],
+)
+def test_from_env_rejects_invalid_f42_rag_knobs(
+    name: str,
+    value: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """T92.1: invalid VECINITA_RAG_* values raise at startup."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv(name, value)
+    with pytest.raises(ValueError, match="VECINITA_RAG_"):
+        ChatRagSettings.from_env()

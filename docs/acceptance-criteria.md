@@ -206,6 +206,16 @@
 - [x] **AC-RB9**: Version stamps (`embedding_model_id`, dim, chunk settings, `rebuild_run_id`) queryable (RD-193). *(11-verify-impl S017 2026-07-30)*
 - [x] **AC-RB10**: Admin Jobs UI enqueues rebuild; progress via Jobs SSE/detail only (TC-167, UJ-053); retag remains separate; writes via internal-write only (ADR-007); prod live rebuild not required in EV-015. *(11-verify-impl S017 2026-07-30)*
 
+### EV-016 — Retrieval quality H7+P1 (#165, F42) — S019
+
+- [ ] **AC-RQ1**: P1 packer emits `Source: {title}` / `URL: {url}` headers per chunk (TC-170).
+- [ ] **AC-RQ2**: H7 multi-query merge/dedupe by chunk id keeps ≤ `top_k` (TC-171).
+- [ ] **AC-RQ3**: H7 Spanish-aware rewrites when query locale is `es` (TC-172).
+- [ ] **AC-RQ4**: ChatRAG ask/stream uses shared `packages/rag` packer+H7 helpers; defaults H7 on + packer `p1` (TC-173, UJ-055).
+- [ ] **AC-RQ5**: F36 staging eval shares the same helpers; Admin `corpus_profile=staging` loads `qa_pairs_staging.json` (ISS-008 / TC-174, UJ-056).
+- [ ] **AC-RQ6**: Staging Hy1 ship gate (H7+P1 on E0): answer relevancy ≥ **0.28**, faithfulness ≥ **0.91**; CI floors remain ≥0.60/0.60 (TC-175).
+- [ ] **AC-RQ7**: Out of F42 ship: E1/#159 embed swap, R1, CE/#83, #162, LangGraph/ADR-006, answer cache (F43).
+
 
 ## Quantitative benchmarks
 
@@ -214,6 +224,8 @@
 | Retrieval quality | Manual review | ≥80% "relevant" on eval fixture (`hit` + `any_of` rows) | `data/fixtures/eval/` | test-plan TC-111 |
 | Eval faithfulness | LlamaIndex judge | ≥0.60 aggregate (CI); display highlight &lt;0.70 | `data/fixtures/eval/` | test-plan TC-112 |
 | Eval answer relevancy | LlamaIndex judge | ≥0.60 aggregate (CI); display highlight &lt;0.70 | `data/fixtures/eval/` | test-plan TC-112 |
+| F42 Hy1 staging relevancy | LlamaIndex judge | ≥0.28 aggregate (ship floor) | `qa_pairs_staging.json` | test-plan TC-175 / AC-RQ6 |
+| F42 Hy1 staging faithfulness | LlamaIndex judge | ≥0.91 aggregate (ship floor) | `qa_pairs_staging.json` | test-plan TC-175 / AC-RQ6 |
 | Eval latency p95 | Wall-clock per question | Informational (30s reference) | Golden run | test-plan TC-116 |
 | Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |

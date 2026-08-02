@@ -1,0 +1,1639 @@
+{
+  "started_at": "2026-08-01T12:57:55.570662+00:00",
+  "decision": "S019-D36",
+  "e1_model": "intfloat/multilingual-e5-small",
+  "rebuild_run_id": "1fa1dec9-f5a0-4670-afa2-a71fe039d479",
+  "fixture": "/Users/bigme/Documents/GitHub/vecinita/data/fixtures/eval/qa_pairs_staging.json",
+  "model": "qwen2.5:1.5b-instruct",
+  "cells": {
+    "E0_Hy0": {
+      "summary": {
+        "cell_id": "E0_Hy0",
+        "rebuild_run_id": null,
+        "embedding": "E0",
+        "retrieval_relevance": 1.0,
+        "faithfulness": 0.9375,
+        "answer_relevancy": 0.05555555555555555,
+        "answer_lang_match_rate": 1.0,
+        "mean_cross_lang_share": 0.20000000000000004,
+        "by_locale": {
+          "en": {
+            "n": 11,
+            "retrieval_relevance": 1.0,
+            "faithfulness": 0.8888888888888888,
+            "answer_relevancy": 0.09090909090909091,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.14545454545454545
+          },
+          "es": {
+            "n": 7,
+            "retrieval_relevance": 1.0,
+            "faithfulness": 1.0,
+            "answer_relevancy": 0.0,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.2857142857142857
+          }
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 8117,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "answer_preview": "Rhode Island Free Clinic offers various free medical services including dental health, ophthalmology labs & diagnostic imaging, wellness & education services, prescriptions, behavioral health services, physical therapy, podiatry, gynecology"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4781,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "answer_preview": "Monday & Wednesday: 8am-5pm*\nTuesday & Thursday: 8am-8pm  \nFriday: 8am-12pm  \nSaturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.6,
+          "latency_ms": 7973,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "answer_preview": "Nuevas Voces is a 10-month bilingual advocacy program offered by the Woonasquatucket River Watershed Council (WRWC). The program aims to empower neighborhood residents in Providence to become local leaders through environmental science and "
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 7575,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ],
+          "answer_preview": "Nuevas Voces es un 10-mensual programa de apoyo lingüístico y educativo dirigido hacia vecinos de la comunidad de Olneyville en Rhode Island. Este programa combina clases impartidas en español con visitas prácticas en sitios relevantes para"
+        },
+        {
+          "id": "community-resilience-hub-es",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.8,
+          "latency_ms": 5215,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "answer_preview": "Los Centros de Resiliencia de Olneyville son espacios y recursos comunitarios compartidos donde los residentes pueden reunirse en tiempo de emergencia para buscar refugio, servicios y provisiones, así como durante todo el año para aprender "
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 2987,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer_preview": "The Olneyville Resilience Hub is located at 17 Hyat Street in Providence."
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.8,
+          "latency_ms": 4852,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ],
+          "answer_preview": "VECINA helps neighbors find resources related to K-12 education and healthcare. Specifically:\n\n- It provides a neighborhood map highlighting details of each public school in Providence.\n- For healthcare, it shows local medical facilities al"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3825,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/salud/"
+          ],
+          "answer_preview": "VECINA proporciona recursos, salud y educación a sus vecinos."
+        },
+        {
+          "id": "community-vecinita-history",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 6317,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer_preview": "VECINA es conocida como el nombre del equipo formado por investigadores y líderes comunitarios después de que un grupo de científicos, matemáticos y informáticos realizara una investigación en las ciencias de datos con enfoque en justicia s"
+        },
+        {
+          "id": "community-school-choice",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 7998,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer_preview": "Para inscribir a un estudiante en una escuela pública de Providence:\n\nPaso 1: Regístrese en las Escuelas Públicas de Providence antes de mayo.\nSi el niño tiene 5 años cumplidos el 1 de septiembre o antes para el Jardín de Infantes.\nAntes de"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3836,
+          "retrieved_urls": [
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://health.ri.gov/flooding"
+          ],
+          "answer_preview": "It typically takes approximately 30 days for a flood insurance policy to go into effect once purchased."
+        },
+        {
+          "id": "housing-flood-vs-home",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 6361,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/salud/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ],
+          "answer_preview": "No. Los seguros estándar para propietarios o inquilinos suelen cubrir únicamente los daños causados por el agua en el interior de la vivienda."
+        },
+        {
+          "id": "community-healthsource-ri",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 6901,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/salud/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/education/"
+          ],
+          "answer_preview": "Llámanos al número 1-855-840-4774 de lunes a viernes de 8 AM a 6 PM para solicitar información sobre cómo obtener un seguro médico en Rhode Island. También puedes visitar nuestra página web en inglés (https://healthsourceri.com/es/) donde p"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4430,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ],
+          "answer_preview": "Rhode Island Legal Services' mission is to provide legal representation to low-income people for the purpose of improving their economic and human condition by protecting and enforcing legal rights; stabilizing the family unit; promoting se"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4085,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding"
+          ],
+          "answer_preview": "Yes, Rhode Island Legal Services works on safe affordable housing as part of its programs aimed at ensuring stable living conditions for low-income families. Their \"Safe Family\" project focuses specifically on providing legal assistance rel"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": false,
+          "retrieval_expectation": "abstain",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3794,
+          "retrieved_urls": [
+            "https://www.providenceschools.org/",
+            "https://www.providenceri.gov/pema/",
+            "https://health.ri.gov/flooding",
+            "https://baysideobgyn.com/",
+            "https://www.thelearningcommunity.com/"
+          ],
+          "answer_preview": "I do not have access to specific personal phone numbers from public records. Please check official city directories or contact the mayor's office directly for their contact information."
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "any_of",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 3070,
+          "retrieved_urls": [
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "answer_preview": "I don't have enough specific information from the provided sources to directly address \"housing\" as requested. The available data focuses more broadly on organizations providing legal assistance, outreach calendars, resources related to env"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "scored_retrieval": false,
+          "retrieval_expectation": "empty",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4241,
+          "retrieved_urls": [
+            "https://www.providenceschools.org/",
+            "https://aventure.providenceschools.org/",
+            "https://www.thelearningcommunity.com/",
+            "https://www.providenceschools.org/",
+            "https://vgonline.org/"
+          ],
+          "answer_preview": "I cannot provide specific answers for quantum physics tutoring as it is beyond my capabilities. However, if you're looking for general resources on quantum physics, websites like Wikipedia are good starting points. For more personalized ass"
+        }
+      ]
+    },
+    "E0_Hy1": {
+      "summary": {
+        "cell_id": "E0_Hy1",
+        "rebuild_run_id": null,
+        "embedding": "E0",
+        "retrieval_relevance": 0.875,
+        "faithfulness": 0.875,
+        "answer_relevancy": 0.2777777777777778,
+        "answer_lang_match_rate": 1.0,
+        "mean_cross_lang_share": 0.18888888888888888,
+        "by_locale": {
+          "en": {
+            "n": 11,
+            "retrieval_relevance": 1.0,
+            "faithfulness": 0.8888888888888888,
+            "answer_relevancy": 0.36363636363636365,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.10909090909090909
+          },
+          "es": {
+            "n": 7,
+            "retrieval_relevance": 0.7142857142857143,
+            "faithfulness": 0.8571428571428571,
+            "answer_relevancy": 0.14285714285714285,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.3142857142857142
+          }
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5516,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://baysideobgyn.com/",
+            "https://www.rils.org/"
+          ],
+          "answer_preview": "Rhode Island Free Clinic offers various free medical services including dental health, ophthalmology labs & diagnostic imaging, wellness & education services, prescriptions, behavioral health services, physical therapy, podiatry, gynecology"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5249,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://baysideobgyn.com/"
+          ],
+          "answer_preview": "Monday & Wednesday: 8am-5pm*\nTuesday & Thursday: 8am-8pm  \nFriday: 8am-12pm  \nSaturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 7165,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer_preview": "Nuevas Voces at WRWC is a 10-month bilingual advocacy program aimed at empowering neighborhood residents in Providence through education and hands-on experiences. The program focuses on various environmental and social issues such as public"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 8421,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://www.providenceri.gov/pema/"
+          ],
+          "answer_preview": "Nuevas Voces es un programa de 10 meses que combina aprendizaje en clase y visitas prácticas para enseñar sobre temas relacionados con salud pública, ciencia ambiental, inundaciones, transporte, exposiciones tóxicas, tratamiento de aguas re"
+        },
+        {
+          "id": "community-resilience-hub-es",
+          "locale": "es",
+          "retrieval_pass": false,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 1.0,
+          "latency_ms": 8036,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer_preview": "Los Centros de Resiliencia de Olneyville son espacios y recursos comunitarios compartidos diseñados para apoyar a los residentes cuando se enfrenten a situaciones de emergencia o desastres naturales. Estos centros proporcionan refugio, serv"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5482,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer_preview": "The Olneyville Resilience Hub is located at 17 Hyat Street in Providence."
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.6,
+          "latency_ms": 5373,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer_preview": "VECINA helps neighbors navigate resources related to K-12 education and healthcare. Specifically:\n\nFor K-12 education:\n- Access to a neighborhood map highlighting details like dual language programming, test scores, and enrollment processes"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4282,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "answer_preview": "VECINA proporciona recursos, salud y educación a sus vecinos."
+        },
+        {
+          "id": "community-vecinita-history",
+          "locale": "es",
+          "retrieval_pass": false,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 6534,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ],
+          "answer_preview": "VECINA inició operando en español en 2026."
+        },
+        {
+          "id": "community-school-choice",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 0.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 9611,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer_preview": "Para inscribir a un estudiante en una escuela pública de Providence:\n\n1. **Regístrese en las Escuelas Públicas de Providence**:\n   - Antes de mayo.\n   - Presente el formulario de inscripción en persona en 325 Ocean Street, Providence, RI.\n\n"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5730,
+          "retrieved_urls": [
+            "https://health.ri.gov/flooding",
+            "https://health.ri.gov/flooding",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://pmc.ncbi.nlm.nih.gov/articles/PMC4201531/"
+          ],
+          "answer_preview": "It typically takes 30 days for a flood insurance policy to go into effect once purchased."
+        },
+        {
+          "id": "housing-flood-vs-home",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4644,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/salud/"
+          ],
+          "answer_preview": "No. Los seguros estándar para propietarios o inquilinos suelen cubrir únicamente los daños causados por el agua en el interior de la vivienda."
+        },
+        {
+          "id": "community-healthsource-ri",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 6384,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/salud/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/education/"
+          ],
+          "answer_preview": "Llámanos al número de teléfono proporcionado: 401-270-0101 para recibir ayuda con Medicaid, cobertura de HealthSourceRI, o atención benéfica hospitalaria. También puedes visitar la página web del Departamento de Servicios Sociales de Rhode "
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5566,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ],
+          "answer_preview": "Rhode Island Legal Services' mission is to provide legal representation to low-income people for the purpose of improving their economic and human condition by protecting and enforcing legal rights; stabilizing the family unit; promoting se"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5607,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://health.ri.gov/flooding"
+          ],
+          "answer_preview": "Yes, Rhode Island Legal Services works on safe affordable housing as part of its mission to protect and enforce legal rights, stabilize the family unit, promote self-reliance, end domestic violence, prevent homelessness, afford dignity to a"
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": false,
+          "retrieval_expectation": "abstain",
+          "faithfulness": null,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3864,
+          "retrieved_urls": [
+            "https://www.providenceri.gov/pema/",
+            "https://health.ri.gov/flooding",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.providenceri.gov/pema/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "answer_preview": "(401) 680-8000 (non-emergency)"
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "any_of",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 3627,
+          "retrieved_urls": [
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://www.rils.org/",
+            "https://vecina.wrwc.org/",
+            "https://drive.google.com/file/d/12Qi62AnsK2qAtegyBKkl_PObMZACQ7OI/view"
+          ],
+          "answer_preview": "I don't have enough specific information from the provided sources to directly address \"housing\" as requested. The available resources focus more broadly on legal services, outreach calendars, educational materials, and advocacy efforts rat"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "scored_retrieval": false,
+          "retrieval_expectation": "empty",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5280,
+          "retrieved_urls": [
+            "https://www.providenceschools.org/",
+            "https://www.rifreeclinic.org/",
+            "https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?Search=1&Zip=02907&Miles=20&DistrictType=1&DistrictType=2&DistrictType=3&DistrictType=4&DistrictType=5&DistrictType=6&DistrictType=7&NumOfStudentsRange=more&NumOfSchoolsRange=more&SchoolPageNum=2&ID=440090000328",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://vgonline.org/"
+          ],
+          "answer_preview": "I'm sorry, but the provided text does not contain any information related to finding quantum physics tutoring services."
+        }
+      ]
+    },
+    "E1_Hy0": {
+      "summary": {
+        "cell_id": "E1_Hy0",
+        "rebuild_run_id": "1fa1dec9-f5a0-4670-afa2-a71fe039d479",
+        "embedding": "E1",
+        "retrieval_relevance": 0.9375,
+        "faithfulness": 0.9375,
+        "answer_relevancy": 0.05555555555555555,
+        "answer_lang_match_rate": 1.0,
+        "mean_cross_lang_share": 0.1888888888888889,
+        "by_locale": {
+          "en": {
+            "n": 11,
+            "retrieval_relevance": 0.8888888888888888,
+            "faithfulness": 0.8888888888888888,
+            "answer_relevancy": 0.09090909090909091,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.10909090909090911
+          },
+          "es": {
+            "n": 7,
+            "retrieval_relevance": 1.0,
+            "faithfulness": 1.0,
+            "answer_relevancy": 0.0,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.31428571428571433
+          }
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 22846,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "answer_preview": "The Rhode Island Free Clinic offers several free medical services including dental health, ophthalmology, labs & diagnostic imaging, wellness & education services, prescriptions, behavioral health services, physical therapy, podiatry, gynec"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4822,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group"
+          ],
+          "answer_preview": "Monday & Wednesday: 8am-5pm*, Tuesday & Thursday: 8am-8pm, Friday: 8am-12pm, Saturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday."
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 4346,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer_preview": "Nuevas Voces at WRWC is a 10-month bilingual advocacy program aimed at empowering neighborhood leaders in Providence, Rhode Island. The program focuses on various environmental topics such as public health, environmental science, flooding, "
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 7441,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/"
+          ],
+          "answer_preview": "Nuevas Voces es un 10-mensual programa bilingüe (inglés y español) dirigido por la organización VECINA en Providence, RI. Este programa tiene como objetivo empoderar a los vecinos de la comunidad Providence para convertirse en líderes local"
+        },
+        {
+          "id": "community-resilience-hub-es",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.6,
+          "latency_ms": 4515,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer_preview": "Los Centros de Resiliencia de Olneyville son espacios y recursos comunitarios compartidos donde los residentes pueden reunirse en tiempo de emergencia para buscar refugio, servicios y provisiones, así como durante todo el año para aprender "
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 2904,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer_preview": "The Olneyville Resilience Hub is located at 17 Hyat Street in Providence."
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.8,
+          "latency_ms": 3324,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/"
+          ],
+          "answer_preview": "VECINA helps neighbors find and connect with relevant resources including health care and educational opportunities within their communities."
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4330,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ],
+          "answer_preview": "VECINA proporciona recursos, salud y educación a sus vecinos."
+        },
+        {
+          "id": "community-vecinita-history",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 6544,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ],
+          "answer_preview": "VECINA inició cuando un grupo de matemáticos, científicos de datos, y informáticos se unió en el Instituto para la Computación y la Innovación Matemática en Rhode Island para realizar una investigación en las ciencias de datos enfocada en j"
+        },
+        {
+          "id": "community-school-choice",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 9430,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://www.tapaprovidence.org/",
+            "https://www.providenceschools.org/"
+          ],
+          "answer_preview": "Para inscribir a tu hijo/a en una escuela pública en Providence:\n\nPaso 1: Registra a tu hijo/a en las Escuelas Públicas de Providence antes de la primera semana de mayo.\nSi tu hijo/a ya es estudiante de estas escuelas, puedes omitir este pa"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3745,
+          "retrieved_urls": [
+            "https://health.ri.gov/flooding",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents"
+          ],
+          "answer_preview": "It typically takes 30 days for a flood insurance policy to go into effect after purchasing it."
+        },
+        {
+          "id": "housing-flood-vs-home",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4951,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/salud/"
+          ],
+          "answer_preview": "No. Los seguros estándar para propietarios o inquilinos suelen cubrir únicamente los daños causados por el agua en el interior de la vivienda."
+        },
+        {
+          "id": "community-healthsource-ri",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.8,
+          "latency_ms": 6454,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/salud/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health",
+            "https://www.rils.org/"
+          ],
+          "answer_preview": "Llámanos a HealthSourceRI al número 1-855-840-4774 (de lunes a viernes, de 8 AM a 6 PM). También puedes visitar nuestra ubicación física en 401 Wampanoag Trail, Riverside, RI 02915, donde estarán disponibles empleados dispuestos a ayudarte."
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4252,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.thelearningcommunity.com/who-are-we",
+            "https://www.thelearningcommunity.com/",
+            "https://www.rifreeclinic.org/"
+          ],
+          "answer_preview": "Rhode Island Legal Services' mission is to provide legal representation to low-income people for the purpose of improving their economic and human condition by protecting and enforcing legal rights; stabilizing the family unit; promoting se"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3760,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.thelearningcommunity.com/who-are-we"
+          ],
+          "answer_preview": "Yes, Rhode Island Legal Services works on safe affordable housing as part of its mission to protect and enforce legal rights while also stabilizing the family unit and communities where clients live."
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": false,
+          "retrieval_expectation": "abstain",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3985,
+          "retrieved_urls": [
+            "https://www.providenceri.gov/pema/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://wrwc.org/"
+          ],
+          "answer_preview": "I do not have access to specific personal contact information such as a mayor's personal phone number. For accurate and up-to-date contact information for any official entity including mayors, it would be best to check their public records "
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": false,
+          "scored_retrieval": true,
+          "retrieval_expectation": "any_of",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5040,
+          "retrieved_urls": [
+            "https://www.providenceri.gov/pema/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view"
+          ],
+          "answer_preview": "I do not have enough specific information to directly address \"housing\" as it relates to the provided list and links. The content appears to be related to city services, emergency management, health resources, and educational materials rath"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "scored_retrieval": false,
+          "retrieval_expectation": "empty",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 2603,
+          "retrieved_urls": [
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://vgonline.org/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ],
+          "answer_preview": "I do not have enough specific information to provide an accurate response regarding where one might find quantum physics tutoring. Please consult educational resources or professional tutors specializing in this field if needed."
+        }
+      ]
+    },
+    "E1_Hy1": {
+      "summary": {
+        "cell_id": "E1_Hy1",
+        "rebuild_run_id": "1fa1dec9-f5a0-4670-afa2-a71fe039d479",
+        "embedding": "E1",
+        "retrieval_relevance": 0.9375,
+        "faithfulness": 0.9375,
+        "answer_relevancy": 0.1111111111111111,
+        "answer_lang_match_rate": 1.0,
+        "mean_cross_lang_share": 0.16666666666666666,
+        "by_locale": {
+          "en": {
+            "n": 11,
+            "retrieval_relevance": 0.8888888888888888,
+            "faithfulness": 0.8888888888888888,
+            "answer_relevancy": 0.09090909090909091,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.10909090909090911
+          },
+          "es": {
+            "n": 7,
+            "retrieval_relevance": 1.0,
+            "faithfulness": 1.0,
+            "answer_relevancy": 0.14285714285714285,
+            "answer_lang_match_rate": 1.0,
+            "mean_cross_lang_share": 0.2571428571428571
+          }
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 6390,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens"
+          ],
+          "answer_preview": "The Rhode Island Free Clinic provides various free medical services including dental health, ophthalmology labs & diagnostic imaging, wellness & education services, prescriptions, behavioral health services, physical therapy, podiatry, gyne"
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 6051,
+          "retrieved_urls": [
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://www.brownhealth.org/centers-services/brown-health-medical-group"
+          ],
+          "answer_preview": "Monday & Wednesday: 8am-5pm*, Tuesday & Thursday: 8am-8pm, Friday: 8am-12pm, Saturday & Sunday: Open until 8pm every 4th Monday and every 2nd Wednesday."
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 4568,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer_preview": "Nuevas Voces at WRWC is a 10-month bilingual advocacy program aimed at empowering neighborhood leaders within the Providence area. It focuses on educating participants about various environmental and public health issues such as water quali"
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 6567,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/recursos/"
+          ],
+          "answer_preview": "Nuevas Voces es un 10-mensual programa bilingüe (ingles y español) dirigido hacia las comunidades dentro de Providence, con el objetivo de convertir a sus miembros en líderes locales mediante la comprensión profunda de la ciencia ambiental "
+        },
+        {
+          "id": "community-resilience-hub-es",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.6,
+          "latency_ms": 8609,
+          "retrieved_urls": [
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "answer_preview": "Los Centros de Resiliencia de Olneyville son espacios y recursos comunitarios compartidos donde los residentes pueden reunirse en tiempo de emergencia para buscar refugio, servicios y provisiones. Durante todo el año también sirven como lug"
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.2,
+          "latency_ms": 2864,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+          ],
+          "answer_preview": "The Olneyville Resilience Hub is located at 17 Hyat Street in Providence."
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.8,
+          "latency_ms": 3866,
+          "retrieved_urls": [
+            "https://wrwc.org/what-we-do/community-action/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/apoyo/",
+            "https://vecina.wrwc.org/es/conocenos/"
+          ],
+          "answer_preview": "VECINA helps neighbors find educational and health care resources through its neighborhood maps highlighting schools' dual-language programming, test scores, and enrollment processes; and local medical facilities offering healthcare service"
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4472,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/apoyo/"
+          ],
+          "answer_preview": "VECINA proporciona apoyo a sus vecinos para mejorar su accesibilidad a recursos."
+        },
+        {
+          "id": "community-vecinita-history",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 8696,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/",
+            "https://vecina.wrwc.org/es/conocenos/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/empoderate/"
+          ],
+          "answer_preview": "VECINA inició su trabajo cuando un grupo de matemáticos, científicos de datos, y informáticos se unió en el Instituto para Computación y Investigación Experimental en Matemáticas (ICERM) en Providence, Rhode Island, durante el verano de 202"
+        },
+        {
+          "id": "community-school-choice",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 9260,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://www.tapaprovidence.org/",
+            "https://www.providenceschools.org/"
+          ],
+          "answer_preview": "Para inscribir a un estudiante en una escuela pública de Providence:\n\nPaso 1: Registrar a su hijo en las Escuelas Públicas de Providence antes de la primera semana de mayo.\nSi su hijo ya es estudiante de estas escuelas, puede omitir este pa"
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3645,
+          "retrieved_urls": [
+            "https://health.ri.gov/flooding",
+            "https://agents.floodsmart.gov/articles/demystifying-flood-insurance-beginners-guide-insurance-agents",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://agents.floodsmart.gov/flood-maps-and-data/flood-insurance-data",
+            "https://health.ri.gov/flooding"
+          ],
+          "answer_preview": "It typically takes approximately 30 days for a flood insurance policy to go into effect after purchase."
+        },
+        {
+          "id": "housing-flood-vs-home",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3132,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/recursos/",
+            "https://vecina.wrwc.org/es/inundaciones/",
+            "https://vecina.wrwc.org/es/empoderate/",
+            "https://vecina.wrwc.org/es/salud/"
+          ],
+          "answer_preview": "No. Los seguros estándar para propietarios o inquilinos suelen cubrir únicamente los daños causados por el agua en el interior de la vivienda."
+        },
+        {
+          "id": "community-healthsource-ri",
+          "locale": "es",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.4,
+          "latency_ms": 6445,
+          "retrieved_urls": [
+            "https://vecina.wrwc.org/es/salud/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://vecina.wrwc.org/es/education/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rils.org/"
+          ],
+          "answer_preview": "Llámanos al número 1-855-840-4774 de lunes a viernes de 8 AM a 6 PM para obtener información sobre cómo aplicar para obtener un seguro médico en Rhode Island. También puedes visitar nuestra página web en 401 Wampanoag Trail, Riverside, RI 0"
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 5607,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.achievementfirst.org/school/achievement-first-envision-elementary-school/",
+            "https://www.providenceschools.org/"
+          ],
+          "answer_preview": "Rhode Island Legal Services' mission is to provide legal representation to low-income people for the purpose of improving their economic and human condition by protecting and enforcing legal rights; stabilizing the family unit; promoting se"
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": true,
+          "retrieval_expectation": "hit",
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4648,
+          "retrieved_urls": [
+            "https://www.rils.org/",
+            "https://www.rils.org/",
+            "https://www.providenceri.gov/pema/",
+            "https://www.rifreeclinic.org/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ],
+          "answer_preview": "Yes, Rhode Island Legal Services works on safe affordable housing as part of its mission to protect and enforce legal rights while stabilizing the family unit and ensuring dignified living conditions for low-income individuals and families."
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "retrieval_pass": true,
+          "scored_retrieval": false,
+          "retrieval_expectation": "abstain",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 3739,
+          "retrieved_urls": [
+            "https://www.providenceri.gov/pema/",
+            "https://www.providenceri.gov/pema/",
+            "https://www.providenceschools.org/",
+            "https://www.providenceschools.org/",
+            "https://www.brownhealth.org/centers-services/emergency-medicine-brown-university-health"
+          ],
+          "answer_preview": "I do not have enough specific information to provide an accurate telephone number related to the mayor."
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "retrieval_pass": false,
+          "scored_retrieval": true,
+          "retrieval_expectation": "any_of",
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 4504,
+          "retrieved_urls": [
+            "https://www.providenceri.gov/pema/",
+            "https://math-data-justice-collaborative.github.io/medico-pvd/",
+            "https://math-data-justice-collaborative.github.io/apoyo-pvd/",
+            "https://www.brownhealth.org/locations/hasbro-childrens",
+            "https://drive.google.com/file/d/1O8o7cwi7JTHhJTLT4m0S__sdaNk3xoLV/view"
+          ],
+          "answer_preview": "I do not have enough specific information to provide a detailed response on \"housing\" without additional context related to the city of Providence and its emergency management agency. However, I can confirm that there is no direct mention o"
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "retrieval_pass": false,
+          "scored_retrieval": false,
+          "retrieval_expectation": "empty",
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "cross_lang_share": 0.0,
+          "latency_ms": 2878,
+          "retrieved_urls": [
+            "https://www.providenceschools.org/",
+            "https://www.providenceschools.org/",
+            "https://www.rifreeclinic.org/",
+            "https://www.rifreeclinic.org/",
+            "https://wrwc.org/what-we-do/community-action/"
+          ],
+          "answer_preview": "I do not have enough information to provide specific guidance on finding quantum physics tutoring. The provided sources are primarily related to educational institutions and healthcare organizations rather than academic resources focused on"
+        }
+      ]
+    }
+  },
+  "compare_hy1": {
+    "overall_relevancy_delta": -0.16666666666666669,
+    "es_relevancy_delta": 0.0,
+    "en_relevancy_delta": -0.2727272727272727,
+    "e0_hy1": {
+      "cell_id": "E0_Hy1",
+      "rebuild_run_id": null,
+      "embedding": "E0",
+      "retrieval_relevance": 0.875,
+      "faithfulness": 0.875,
+      "answer_relevancy": 0.2777777777777778,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.18888888888888888,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.36363636363636365,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.10909090909090909
+        },
+        "es": {
+          "n": 7,
+          "retrieval_relevance": 0.7142857142857143,
+          "faithfulness": 0.8571428571428571,
+          "answer_relevancy": 0.14285714285714285,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.3142857142857142
+        }
+      }
+    },
+    "e1_hy1": {
+      "cell_id": "E1_Hy1",
+      "rebuild_run_id": "1fa1dec9-f5a0-4670-afa2-a71fe039d479",
+      "embedding": "E1",
+      "retrieval_relevance": 0.9375,
+      "faithfulness": 0.9375,
+      "answer_relevancy": 0.1111111111111111,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.16666666666666666,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 0.8888888888888888,
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.09090909090909091,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.10909090909090911
+        },
+        "es": {
+          "n": 7,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.14285714285714285,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.2571428571428571
+        }
+      }
+    }
+  }
+}

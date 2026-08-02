@@ -6,13 +6,9 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from llama_index.core.evaluation import AnswerRelevancyEvaluator
 from vecinita_llm_client import LlmClientError
 
-from vecinita_eval.eval_parsers import (
-    parse_answer_relevancy_output,
-    parse_faithfulness_output,
-)
+from vecinita_eval.eval_parsers import parse_faithfulness_output
 
 if TYPE_CHECKING:
     from llama_index.core.llms import LLM
@@ -32,6 +28,19 @@ Do not explain.
 
 CONTEXT:
 {context}
+
+QUESTION:
+{question}
+
+ANSWER:
+{answer}
+"""
+
+_ANSWER_RELEVANCY_PROMPT = """\
+You are an answer-relevancy judge for a bilingual (EN/ES) community RAG assistant.
+Reply with exactly YES if ANSWER addresses QUESTION (even partially; English or Spanish OK).
+Reply with exactly NO if ANSWER is off-topic, empty, or ignores the question.
+Do not explain.
 
 QUESTION:
 {question}
@@ -126,13 +135,9 @@ class LlamaIndexJudgeClient:
         )
 
     def answer_relevancy(self, *, question: str, answer: str, context: str) -> float:
-        """Score answer relevancy via AnswerRelevancyEvaluator."""
-        _ = context
+        """Score answer relevancy via a direct YES/NO Modal LLM prompt."""
         return score_answer_relevancy(
-            judge=AnswerRelevancyEvaluator(
-                llm=self.llm,
-                parser_function=parse_answer_relevancy_output,
-            ),
+            llm=self.llm,
             question=question,
             answer=answer,
             context=context,
@@ -189,24 +194,30 @@ def score_faithfulness(
 
 def score_answer_relevancy(
     *,
-    judge: object,
+    llm: CompletingLlm,
     question: str,
     answer: str,
     context: str,
 ) -> float:
-    """Score answer relevancy using a LlamaIndex AnswerRelevancyEvaluator instance."""
+    """Score answer relevancy with a direct YES/NO judge prompt.
+
+    LlamaIndex ``AnswerRelevancyEvaluator`` with qwen2.5:1.5b often emits
+    ``Final Result: [0]`` (score=None after parse) even for on-topic EN/ES
+    answers — collapsing Hy1 relevancy (AC-RQ6). Mirror the faithfulness fix.
+    """
     _ = context
-    evaluator = judge
+    prompt = _ANSWER_RELEVANCY_PROMPT.format(
+        question=question,
+        answer=answer,
+    )
     try:
-        result = evaluator.evaluate(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType, reportAttributeAccessIssue]
-            query=question,
-            response=answer,
-            contexts=[context],
-        )
+        completion = llm.complete(prompt)
     except (LlmClientError, RuntimeError, OSError, ValueError) as exc:
         logger.warning("answer_relevancy judge failed: %s", exc)
         return 0.0
-    return normalize_eval_score(
-        result.score,  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-        threshold=1.0,
-    )
+    raw = _completion_text(completion)
+    parsed = parse_faithfulness_output(raw)
+    if parsed is None:
+        logger.warning("answer_relevancy judge unparseable reply: %r", raw[:200])
+        return 0.0
+    return parsed

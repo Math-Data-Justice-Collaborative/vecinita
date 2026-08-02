@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; **S017 Phase 20 delta 2026-07-30**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; **S019 Phase 21 delta 2026-08-01**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**040**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**041**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 20: EV-015 — Corpus document store + rebuild (F41 / #167) — **COMPLETE** |
-| **Active milestone** | M90 COMPLETE — next: 08-verify-build |
-| **Active task** | Phase 20 complete; handoff → **08-verify-build** |
-| **Tasks completed** | Phase 19 historical; Phase 20: T86.1–T90.5 (M86–M90 COMPLETE) |
-| **Last updated** | 2026-07-30 |
-| **Evolve cycle** | EV-015 (F41) — **07-build** Phase 20; Standard+build (skip 05/06) |
-| **Git branch** | `evolve/EV-015-corpus-reembed-migration` |
-| **Active session** | S017-corpus-reembed-migration — Gate B→C passed; 07-build in progress |
-| **Scope addition** | 2026-07-30 — F41 document store + rebuild + shadow/promote + backfill (RD-188–196, TP-S017-01–09, ADR-040). |
+| **Active phase** | Phase 21: EV-016 — Retrieval quality H7+P1 (F42 / #165) |
+| **Active milestone** | M91–M93 code complete — handoff → **08-verify-build** |
+| **Active task** | Phase 21 tasks done; next **08-verify-build** (gate C→D after 08) |
+| **Tasks completed** | Phase 20 historical (M86–M90); Phase 21: M91–M93 (T91.1–T93.3) |
+| **Last updated** | 2026-08-01 |
+| **Evolve cycle** | EV-016 (F42) — Standard; skip 03/05/06; **07-build** Phase 21 complete |
+| **Git branch** | `evolve/EV-016-retrieval-quality` |
+| **Active session** | S019-retrieval-quality — 07-build M91–M93 done; ISS-008 deploy = ship prereq |
+| **Scope addition** | 2026-08-01 — F42 H7+P1 on E0; ADR-041; ISS-008 deploy = ship prereq (S019-D37–D45). |
 
 ## Template
 
@@ -1832,6 +1832,61 @@ runbook ops (live equivalence + shadow→F36→promote); Phase 20 gate.
 
 **Gate pointer:** `docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md` (T90.5)  
 **Gate log:** PASS 2026-07-30 — see phase20-gate.md; proceed to 08-verify-build (TP-S017-05 single PR).
+
+---
+
+## Phase 21: EV-016 — Retrieval quality H7+P1 (F42)
+
+> **Session:** S019 · **Cycle:** EV-016 · **Branch:** `evolve/EV-016-retrieval-quality`  
+> **ADR:** ADR-041 · **Ship prereq:** ISS-008 write-api deploy (staging golden fixture) before promote smoke  
+> **Out of scope:** E1/#159, R1, CE/#83, #162, LangGraph, F43 cache
+
+#### M91: Shared packer + heuristic H7 (`packages/rag`)
+
+**Goal:** P1/P3 packing helpers + cheap heuristic multi-query rewrite/merge (ADR-041);
+unit tests TC-170–172.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T91.1 | Test: unit — P1 packer Source/URL headers (TC-170) — red | Test | completed | AC-RQ1, TC-170, ADR-041 | — | 2026-08-01 | S019 | F42 |
+| T91.2 | Test: unit — H7 merge/dedupe keeps top_k (TC-171) — red | Test | completed | AC-RQ2, TC-171 | — | 2026-08-01 | S019 | F42 |
+| T91.3 | Test: unit — H7 Spanish-aware heuristic rewrites (TC-172) — red | Test | completed | AC-RQ3, TC-172, S019-D42 | — | 2026-08-01 | S019 | F42 |
+| T91.4 | Code: `pack_chunks` (p1/p3) + `heuristic_rewrites` + `multi_query_retrieve` merge | Code | completed | ADR-041, config-spec | T91.1–T91.3 | 2026-08-01 | S019 | F42 |
+| T91.5 | Docs: export helpers from `packages/rag`; module docstrings | Docs | completed | feature-list F42 | T91.4 | 2026-08-01 | S019 | F42 |
+
+#### M92: ChatRAG + F36 eval wire-up
+
+**Goal:** Config knobs `VECINITA_RAG_*`; ChatRAG ask/stream + F36 sandbox use shared helpers
+(TC-173–174).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T92.1 | Test: unit — ChatRAG settings parse `VECINITA_RAG_*` validation — red | Test | completed | config-spec F42 | T91.4 | 2026-08-01 | S019 | F42 |
+| T92.2 | Test: API e2e — ask path uses packer+H7 not bare concat (TC-173) — red | Test | completed | UJ-055, TC-173, AC-RQ4 | T91.4 | 2026-08-01 | S019 | F42 |
+| T92.3 | Code: ChatRAG config + `_build_prompt` / retrieve path → shared helpers | Code | completed | spec.md F42, ADR-041 | T92.1, T92.2 | 2026-08-01 | S019 | F42 |
+| T92.4 | Code: F36 eval sandbox shares same packer+H7 (TC-174) | Code | completed | AC-RQ5, UJ-056 | T92.3 | 2026-08-01 | S019 | F42 |
+| T92.5 | Test: unit — staging fixture path ISS-008 still mapped (TC-174) | Test | completed | ISS-008, AC-RQ5 | T92.4 | 2026-08-01 | S019 | F42 |
+
+#### M93: E2E + ship-gate docs
+
+**Goal:** UJ-055 e2e module complete; Hy1 staging gate checklist; deploy note for ISS-008.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T93.1 | Test: finish/green `tests/e2e/test_uj055_h7_p1_ask.py` (TC-173) | Test | completed | UJ-055, e2e-coverage | T92.3 | 2026-08-01 | S019 | F42 |
+| T93.2 | Docs: staging Hy1 gate runbook note (TC-175 / AC-RQ6); ISS-008 deploy before promote smoke | Docs | completed | AC-RQ6, S019-D37 | T92.5 | 2026-08-01 | S019 | F42 |
+| T93.3 | Docs: Phase 21 gate checklist + ADR-041 cross-links; execution-plan Current State | Docs | completed | Phase 21 gate | T93.1, T93.2 | 2026-08-01 | S019 | F42 |
+
+#### Phase 21 Gate Check
+
+- [x] All M91–M93 tasks completed
+- [x] TC-170–TC-174 green at T2 (TC-175 / Hy1 staging metrics at 12/13 after ISS-008 deploy)
+- [x] AC-RQ1–AC-RQ5, AC-RQ7 at T2 (AC-RQ6 staging evidence at deploy — see `hy1-ship-gate.md`)
+- [x] ChatRAG + F36 share `packages/rag` helpers; no LangGraph
+- [x] Prod embed pin unchanged (E0); E1 not promoted
+- [x] ruff / basedpyright clean; pytest e2e UJ-055 green
+
+**Ship-gate doc:** `docs/sessions/S019-retrieval-quality/reports/hy1-ship-gate.md` (ADR-041)
 
 ---
 

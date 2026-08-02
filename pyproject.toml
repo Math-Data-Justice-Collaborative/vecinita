@@ -43,6 +43,9 @@ override-dependencies = [
     "pillow>=12.3.0",
     # setuptools PYSEC-2026-3447; fix in 83.0.0.
     "setuptools>=83.0.0",
+    # Hold nltk at 3.9.x: 3.10+ inisec false-positive blocks regex import when
+    # `.venv` lives under the repo root (see audit/pip-audit-ignore.txt).
+    "nltk>=3.9.4,<3.10",
 ]
 
 [tool.uv.workspace]

@@ -104,10 +104,18 @@ def _database_url() -> str:
     return _normalize_database_url(url)
 
 
-def _fixture_path() -> Path:
+def _default_fixture_relpath(*, corpus_profile: str) -> str:
+    """Map corpus_profile to the golden JSON used for Admin / promote-path eval."""
+    if corpus_profile == "staging":
+        return "data/fixtures/eval/qa_pairs_staging.json"
+    return "data/fixtures/eval/qa_pairs.json"
+
+
+def _fixture_path(*, corpus_profile: str = "fixture") -> Path:
+    """Resolve golden fixture path (ISS-008: staging → qa_pairs_staging.json)."""
     configured = os.environ.get(
         "VECINITA_EVAL_FIXTURE_PATH",
-        "data/fixtures/eval/qa_pairs.json",
+        _default_fixture_relpath(corpus_profile=corpus_profile),
     )
     path = Path(configured)
     if path.is_file():
@@ -378,7 +386,7 @@ def execute_eval_run(  # noqa: PLR0913
                 config=config,
             )
         else:
-            fixture_path = _fixture_path() if loaded.corpus_profile == "fixture" else None
+            fixture_path = _fixture_path(corpus_profile=loaded.corpus_profile)
             results, summary = run_golden_eval(
                 embed_fn=embed,
                 database_url=database_url,

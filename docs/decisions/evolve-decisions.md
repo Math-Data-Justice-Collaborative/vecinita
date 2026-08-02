@@ -160,3 +160,144 @@ internal-write → Postgres (ADR-007).
 
 feature-list (F41), user-journeys (UJ-053–054), test-plan (TC-161–169), acceptance-criteria
 (AC-RB*), spec/api-contract/config-spec delta, ADR-040, runbook outline, decisions RD-188+.
+
+## Cycle EV-016 — Scope (S019 / Batch A retrieval)
+
+**Approved (session open):** 2026-07-31  
+**Session:** S019-retrieval-quality  
+**Issues:** #158, #161, #165, #162 (investigation); #83 parent if rerank ships  
+**Feature:** F42 (deferred until F36 spike picks winner)
+
+### Scope summary
+
+**Investigate → ship:** Run F36 ablations across top_k (#158), rerank (#161→#83), context
+packing (#165), and soft language filter (#162). Pick winners; allocate **one Fn (F42)**;
+ship **at most one** change on `packages/rag` + ChatRAG prompt assembly. If rerank wins,
+ship a **cheap** slice only; leave full #83 open. Do not pull #82 / #84 / full #76.
+
+### Decisions (session open)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D1 | Session type | `feature` → 16-evolve |
+| S019-D2 | Routing | **Standard** (`01→02→04→07→08→09→10→11→12→13`; skip 03, 05, 06) |
+| S019-D3 | #162 | Include in investigation set |
+| S019-D4 | Shape | Spike F36 first → recommend → allocate F42 → build |
+| S019-D5 | Rerank win | Cheap slice this cycle; #83 remains parent |
+
+### Decisions (Phase 0 intake lock — 2026-07-31)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D6 | Success | F36 golden lift vs dense-only baseline + **Admin playground promote-path smoke** |
+| S019-D7 | Spike env | Local / unit+eval fixtures first; staging F36 job only if local lift unclear |
+| S019-D8 | Cost/latency | Prefer config/prompt/heuristic; new models self-hosted (ADR-009) + Modal cost in report; **cross-encoder on Modal OK if F36 lift clear** (A+C) |
+| S019-D9 | Lock scope → spike plan → F36 baseline |
+| S019-D10 | Unblock A0 via **staging** F36 / staging corpus (option B; local Docker deferred) |
+| S019-D11 | Next = A2 packing now; ISS-008 Admin staging fixture = F42 ship prereq |
+| S019-D12 | Continue spike — A4 cheap rerank (R1/R2); F42 deferred (relevancy still low; P1 > P3) |
+
+### Phase 0 status
+
+A0–A4(+R3) + A3 complete. R3 rejected. F42 still deferred. **Model sweep:** Tiny + S1/S2
+AWQ all tied @ relevancy 0.23; **S019-D20** playground **A100-80GB** for non-AWQ / larger
+MoE (S3+). ISS-008 remains open (F42 ship prereq).
+See session `model-sweep-plan.md` / `model-sweep-tracker.md`.
+
+### Model sweep extension (2026-07-31)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D15 | Extend Phase 0 | Add ordered open-LLM ladder (Tiny→Large); track in session; **F42 not allocated** until ship lock |
+| S019-D16 | Fixed RAG cell (Gate A=1) | Staging golden + **R0** + **P1** packing + control **`qwen2.5:1.5b-instruct`** |
+| S019-D17 | Hosting policy (Gate B=4) | Self-host everything in order via Modal; fail/skip per model with cost logged (**no API**). Playground **T4** today — Tiny first; larger models attempt then skip on OOM/pull failure |
+| S019-D18 | Queue confirm (Gate C=1) | Approve deduplicated queue **T1→L4** as in `model-sweep-tracker` |
+| S019-D19 | Playground GPU + AWQ (Option B / ask 3) | Playground-only **A10** (~$1.10/hr) + **AWQ 4-bit** for Small+; S1 re-verify tag **`qwen3.6:27b-awq`** → `QuantTrio/Qwen3.6-27B-AWQ`; prod `vecinita-llm` stays **T4**; prior S1 T4 metrics **invalid**; F42 not allocated. **Risk:** image pins `vllm>=0.8.5,<0.9`; QuantTrio recommends ≥0.19 for Qwen3.6 — warm may fail → bump playground image or fall back to A100-80 |
+| S019-D20 | Playground GPU upsize (ask C) | After S1/S2 AWQ ties: playground → **A100-80GB** (~$2.50/hr) for **non-AWQ** dense 27B + larger MoE (S3+); prod stays T4; F42 still not allocated. Note: BF16 35B-A3B ~70GB — may need FP8/AWQ even on A100-80 |
+
+### Phase 0 extension — batch 1 lock (2026-07-31)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D21 | Model lock | Keep synthesizer **`qwen2.5:1.5b-instruct`** (prod pin); **stop model sweep** — skip M1+ (all Tiny–S3 tied @ relevancy 0.23) |
+| S019-D22 | F42 allocation | **F42 = P1 packing** (#165) now; Standard build path for packing ship |
+| S019-D23 | Harness timing | Caching / LangGraph harness = **separate Phase 0 spike** (may become F43 later); does not block F42 packing allocation |
+| S019-D24 | LangGraph intent | **Intend to ship LangGraph into ChatRAG** — requires **ADR-006 amendment** (+ ADR-004 check for checkpoints). Spike first under eval/playground; ship only after amend + Phase A specs |
+| S019-D25 | Caching spike primary | Test **A** (retrieval/embed cache + prompt/KV reuse) **and B** (ephemeral LangGraph checkpoint / short-term memory, sessionless) **plus pre-cached answers**; run **≥6 named configs** in harness matrix (see `spike-harness-cache.md`) |
+| S019-D26 | Playground GPU | Drop playground back to **T4** (enough for 1.5B lock); prod stays T4 |
+| S019-D27 | ADR-006 path | **Spike H0–H9 first** (eval-only); **defer ADR-006 amend** until data justifies LangGraph ship (softens rush on D24) |
+| S019-D28 | Harness matrix expand | Bump to **10 configs (H0–H9)**; add intent classification, sub-agents, answer classification; **distinct LangGraph state schemas S0–S8** (see `spike-harness-cache.md` idea catalog + matrix) |
+
+### Phase 0 status (post D21–D28)
+
+Model sweep **closed**. **F42 = P1 packing** allocated (ISS-008 gates promote smoke). Harness spike expanded to **H0–H9** (cache + intent/answer class + sub-agent workflows, schemas S0–S8) — eval-only; ADR amend deferred (D27). Playground → T4.
+
+### Phase 0 hybrid iterate (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D29 | Hybrid option | **A — Measure then ship**: run Hy0–Hy4 (+ HyLang0 L0+P1, HyK8 top_k=8+P1); freeze F42 after results; F43 cache later unless dual approved |
+| S019-D30 | Hybrid metrics | Add **EN/ES locale breakdown**, **answer_lang_match_rate**, **mean_cross_lang_share**, context chars / docs; Spanish-aware H7 rewrites |
+| S019-D31 | Hybrid result → F42 | Sweep `20260801T002819Z`: **F42 = H7+P1** (relevancy 0.31 / faith 0.91); drop R1; P3 not default; HyK8 no lift; es_rel=0 (n=2) follow-on; `phase0_approved` still pending AskQuestion |
+| S019-D32 | No-prompt baselines | Re-open Phase 0 measure: per-model **bare** (empty system prompt) vs pack/prompt/H7 lifts; default models = control + Tiny (T4); judges pinned 1.5B; `phase0_approved` still false |
+
+Plan: session `reports/spike-hybrid-plan.md` · runners `spike_hybrid_sweep.py`, `spike_model_prompt_baseline.py`.
+
+### Phase 0 expansion — path 2+3+4 (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D33 | Phase 0 expand before `phase0_approved` | **2+3+4**: (2) fix **ISS-008** Admin staging golden; (3) expand **Spanish golden + judge** coverage; (4) spike **#159 multilingual embeddings** + staging re-embed via F41. `phase0_approved` stays false until 2–4 land evidence. F42 = H7+P1 still the ship candidate; embed swap may amend F42 / add Fn if lift clears. |
+
+**Order:** ISS-008 → ES golden/judge → #159 embed spike (prefer **384-d** FastEmbed candidates to avoid dim migration) → re-AskQuestion `phase0_approved`.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D34 | ES + embed spike params | **A+B**: ingest more `vecina.wrwc.org/es/*` into staging, then expand ES golden (≥6 scored). **E0+E1+E2**: measure `bge-small-en-v1.5` vs `multilingual-e5-small` vs `paraphrase-multilingual-MiniLM-L12-v2` (all 384-d); defer bge-m3 / dim change. |
+| S019-D35 | #159 spike result | Offline hit@5: E0=E1=1.00, E2=0.87 (reject E2). E1 better rank@1 (0.73 vs 0.60). **Do not fold embed swap into F42**; keep F42=H7+P1 on E0. Keep #159 open for optional F41 shadow + F36 LLM on E1. ES A+B ingest+golden **keep**. |
+| S019-D36 | E1 F36 before Phase A | User chose path **2**: run **E1 F41 shadow + Hy1 F36 LLM** vs E0 live **before** `phase0_approved`. F42 default stays H7+P1/E0 unless E1 clears relevancy lift without EN regression. |
+| S019-D37 | E1 F36 result + `phase0_approved` | Shadow `1fa1dec9…` + `20260801T130441Z_e1-shadow-f36.json`: E1_Hy1 relevancy **0.11** vs E0_Hy1 **0.28** (EN −0.27, ES flat). ES retrieval ↑ but **no ship**. F42 remains **H7+P1 on E0**; #159 stays open (not F42). **User approved Phase 0 (option 1)** → Phase A `01-requirements`; ISS-008 deploy remains ship-path prereq. |
+
+### Phase 0 closed — Phase A entry (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D37 (lock) | `phase0_approved` | **Yes** → `01-requirements` for **F42 = H7+P1 on E0**. Do **not** ship E1/F41. Rebuild `1fa1dec9…` not promoted. Prod embed pin `BAAI/bge-small-en-v1.5` unchanged. |
+
+**Ship scope (locked):** P1 context packing (#165) + thin H7 multi-query fan-out; no LangGraph / ADR-006; R1/CE/#162/cache out of F42.
+
+### Phase A — 01-requirements (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D38 | Document Manifest | Mandatory + Config Spec + Acceptance Criteria; skip API Contract |
+| S019-D39 | F42 Feature List / Spec | H7 default on; P3 non-default (`p3` packer); E0 embed; shared `packages/rag` |
+| S019-D40 | Journeys / tests / AC | UJ-055/056; TC-170–175; AC-RQ1–RQ7; Hy1 ship floor 0.28/0.91 |
+| S019-D41 | Config knobs | `VECINITA_RAG_MULTI_QUERY` (+ count), `VECINITA_RAG_PACKER`, `VECINITA_RAG_CONTEXT_MAX_CHARS` |
+| S019-D42 | 02 M1–M3 | H7 = cheap heuristic rewrites (not LLM); Hy1 0.28/0.91 staging ship gate; p95 &lt;15s unchanged |
+
+### Phase B — 04-tech-plan (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D43 | Tech plan shape | Phase 21 **M91–M93**; skip dep inventory / data-mgmt / new deploy topology |
+| S019-D44 | ADR-041 | Heuristic H7 + P1 packing; no LangGraph / ADR-006 amend; E0 pin unchanged |
+
+### Phase D — 12-verify-deploy (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D48 | 12 failure mitigations | **Approve all** (option 1) — build/CI, Modal URL verify, ISS-008-before-Hy1, H7 kill switch, H4–H5, hold on Hy1 miss |
+| S019-D49 | 12 rollback plan | **Approve** (option 1) — `VECINITA_RAG_MULTI_QUERY=false` and/or redeploy prior DO SHA (`a6c39e5`); no embed rollback |
+
+**12 complete:** checklist **ready** → `docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md`. Next: **13-deploy-smoke** (ISS-008 + Hy1 AC-RQ6).
+
+### Phase D — 13-deploy-smoke AC-RQ6 (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D50 | AC-RQ6 disposition | **Investigate/fix** (option 1) — not waive / not rollback |
+| S019-D51 | Hy1 false zeros | Direct YES/NO answer-relevancy judge (mirror faithfulness); H7 ES rewrite + spike→`packages/rag` parity |
+| S019-D52 | Hy1 re-gate | **PASS** — relevancy **0.833** / faith **0.938** (`20260802T022836Z`); Path A @ `5693422` |
+
+**13 status:** Path A + H1–H5 + AC-RQ6 PASS — awaiting user closeout (PR → merge → pins → `main`).

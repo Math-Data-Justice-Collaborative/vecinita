@@ -1,0 +1,142 @@
+{
+  "docs": [
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/",
+      "title": "VECINA",
+      "chunks": 1
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/",
+      "title": "ES – VECINA",
+      "chunks": 1
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/apoyo/",
+      "title": "Apoyo – VECINA",
+      "chunks": 1
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/conocenos/",
+      "title": "Conócenos – VECINA",
+      "chunks": 2
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/education/",
+      "title": "Educación – VECINA",
+      "chunks": 3
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/empoderate/",
+      "title": "Empodérate – VECINA",
+      "chunks": 3
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/inundaciones/",
+      "title": "Inundaciones – VECINA",
+      "chunks": 3
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/recursos/",
+      "title": "Recursos – VECINA",
+      "chunks": 1
+    },
+    {
+      "language": "es",
+      "url": "https://vecina.wrwc.org/es/salud/",
+      "title": "Salud – VECINA",
+      "chunks": 1
+    }
+  ],
+  "samples": {
+    "https://vecina.wrwc.org/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Conócenos Empodérate VECINA Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud VECINA Visualizing Environmental and Community Information for Neighborhood Advocacy Explora Bienvenido a VECINA Visualización Ambiental e Información Comunitaria para Abogación de Vecinadarios, nombrada según siglas en I"
+      }
+    ],
+    "https://vecina.wrwc.org/es/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud ES Copyright © 2026 VECINA | Powered by Astra WordPress Theme Scroll to Top Español English"
+      }
+    ],
+    "https://vecina.wrwc.org/es/apoyo/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud Apoyo Recursos ¿Qué puedo encontrar en esta página? Esta pagina busca proveer a los residentes de informacion reciente sobre recursos, salud, y educacion. Buscamos apoyar y empoderar a nuestra comunidad"
+      }
+    ],
+    "https://vecina.wrwc.org/es/conocenos/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud Conoce nuestra historia En el verano de 2022, un grupo de matemáticos, científicos de data, e informáticos se unieron en el Institute for Computational and Experimental Research in Mathematics (ICERM) e"
+      },
+      {
+        "i": 1,
+        "text": "WordPress Theme Scroll to Top Español English"
+      }
+    ],
+    "https://vecina.wrwc.org/es/education/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud Educación Inscripciones Encuentra una escuela FAQs Referencias para elegir escuela ¿ Qué puedo encontrar en esta página? Aquí podrás encontrar el proceso de como inscribir a tu hijo/a en una escuela de "
+      },
+      {
+        "i": 1,
+        "text": "mi hijo en Classical High School? Tenga en cuenta que Classical High School tampoco forma parte del sistema de sorteo y requiere un examen de ingreso. Los estudiantes deben tomar el examen de ingreso en octubre de su año de octavo grado. Las fechas del examen de ingreso se enumeran en este sitio web. La fecha y hora del examen se anuncian en The Providence Journal Bulletin aproximadamente dos sema"
+      },
+      {
+        "i": 2,
+        "text": "de transferencia por correo electrónico a inforeg@ppsd.org , por fax al 401-278-0553, o por mensaje de texto al 401-420-7189. Puede enviar su solicitud en persona en la escuela asignada a su hijo o en el Centro de Inscripción en 325 Ocean Street, Providence, RI. Aquí está el enlace al formulario de solicitud de transferencia . Aquí está el formulario de solicitud de transferencia en español . Debe"
+      }
+    ],
+    "https://vecina.wrwc.org/es/empoderate/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud Empodérate Nuevas Voces Campeones Presentadores Resiliencia de Olneyville Programas de la comunidad Nuevas Voces Nuevas Voces es una programa bilingüe (inglés y español) que ayuda a miembros de la comun"
+      },
+      {
+        "i": 1,
+        "text": "que éstos llevan consigo además de ser resilientes ante cualquier diversidad del clima. Este primer programa empezó en marzo del 2023 y la base educativa de estos líderes está basada en la infraestructura verde y proyectos de restauración de áreas que están vulnerables a la erosión, inundación y contaminación terrestre, que pueda afectar a nuestra cuenca del río Woonasquatucket. Los campeones, han"
+      },
+      {
+        "i": 2,
+        "text": "junto a Manton Pond. Incluirá zanjas, jardineras desde el techo hasta el suelo (cajas de lluvia), una mejora en el área de bioretención y la eliminación del pavimento del estacionamiento. Los Campeones están ayudando a los River Rangers de WRWC a construir cajas de lluvia. Retrofit del estacionamiento Acorn y Kinsley en Providence: Este estacionamiento recoge aguas pluviales que se escurren direct"
+      }
+    ],
+    "https://vecina.wrwc.org/es/inundaciones/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud Inundaciones Contrate un seguro contra Inundaciones Reporta una Inundación ¿ Qué es un seguro contra inundación? El seguro contra inundaciones es la cobertura de seguro específica que se ofrece para cub"
+      },
+      {
+        "i": 1,
+        "text": "1 Haz clic en “Solicitar cotización” 2 Ingrese la información de la propiedad (dirección, tipo de propiedad) 3 Introduzca la información del edificio (tipo de cimientos; localice el certificado del edificio si es necesario) 4 Introduzca los montos de cobertura (fecha de vigencia, montos de cobertura) 5 Revisa y elige una franquicia 6 Consulte el presupuesto y siga los siguientes pasos para protege"
+      },
+      {
+        "i": 2,
+        "text": "están dentro de tu casa. Seguros privados vs seguros públicos : los seguros públicos cuentan con el respaldo del gobierno y son los más habituales. Los seguros privados son ofrecidos por empresas privadas y pueden tener diferentes precios y opciones de cobertura. Póliza de seguro : Una póliza de seguro es un contrato legalmente vinculante (a menudo denominado “contrato de adhesión”) entre una pers"
+      }
+    ],
+    "https://vecina.wrwc.org/es/recursos/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud Recursos Salud Apoyo Educación Ubicación Woonasquatucket River Watershed Council. 45 Eagle Street, Suite 202, Providence, RI 02909 Organizaciones Colaboradoras Proudly powered by WordPress Copyright © 2"
+      }
+    ],
+    "https://vecina.wrwc.org/es/salud/": [
+      {
+        "i": 0,
+        "text": "Skip to content VECINA Inicio Recursos Educación Salud Apoyo Inundaciones Conócenos Empodérate VECINA EN ES Apoyo Conócenos Educación Empodérate Gracias al Equipo Inicio Inundaciones Recursos Salud Salud Seguro médico Encuentra un hospital Cómo usar el mapa Cómo aplicar para obtener un seguro médico Llama a HealthSourceRI 1-855-840-4774 de Lunes a Viernes, 8 AM a 6 PM Presiona 2 para español, lueg"
+      }
+    ]
+  }
+}

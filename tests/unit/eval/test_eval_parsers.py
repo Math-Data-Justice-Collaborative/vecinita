@@ -33,6 +33,16 @@ def test_parse_answer_relevancy_output_accepts_final_result_brackets() -> None:
     assert score == pytest.approx(3.0)
 
 
+def test_parse_answer_relevancy_output_accepts_final_result_colon_brackets() -> None:
+    """Qwen 1.5B often emits ``Final Result: [0]`` (AC-RQ6 / Hy1 false zeros)."""
+    score, _feedback = parse_answer_relevancy_output(
+        "The response does not address the query.\nFinal Result: [0]\n\nExplanation: ..."
+    )
+    assert score == pytest.approx(0.0)
+    score_ok, _ = parse_answer_relevancy_output("Final Result: [2]")
+    assert score_ok == pytest.approx(2.0)
+
+
 def test_normalize_eval_score_treats_none_as_zero() -> None:
     """Invalid evaluator scores must not crash the eval runner."""
     assert normalize_eval_score(None) == pytest.approx(0.0)

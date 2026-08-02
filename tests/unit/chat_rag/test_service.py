@@ -14,6 +14,7 @@ from vecinita_chat_rag_backend.service import (
 )
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
+from vecinita_shared_schemas.eval_config import EvalConfig
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -121,7 +122,7 @@ def _service(
 
 
 def test_build_prompt_includes_question_and_context() -> None:
-    """Test build prompt includes question and context."""
+    """Test build prompt includes question and P1 Source/URL packed context (F42)."""
     chunk = _chunk()
     prompt = _build_prompt(
         "When is the clinic open?",
@@ -130,6 +131,8 @@ def test_build_prompt_includes_question_and_context() -> None:
     )
     assert "When is the clinic open?" in prompt
     assert chunk.text in prompt
+    assert "Source: Community guide" in prompt
+    assert "URL: https://example.com/guide" in prompt
     assert "<|im_start|>assistant" in prompt
 
 
@@ -310,6 +313,11 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
         patch("vecinita_chat_rag_backend.service.LlmTagClient", _TagClient),
         patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
         patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=["housing"]),
+        patch("vecinita_chat_rag_backend.service.create_engine"),
+        patch(
+            "vecinita_chat_rag_backend.service.load_active_rag_config",
+            return_value=EvalConfig(),
+        ),
         patch("vecinita_chat_rag_backend.service.CorpusPgvectorRetriever") as mock_retriever,
     ):
         embed_fn_holder: dict[str, object] = {}

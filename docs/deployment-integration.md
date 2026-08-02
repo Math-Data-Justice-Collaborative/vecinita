@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-30 (S017/EV-015 F41 — corpus store + rebuild / shadow promote)
+> **Last updated**: 2026-08-01 (S019/EV-016 F42 — H7+P1 retrieval quality on E0)
 
 ## Overview
 
@@ -278,6 +278,58 @@ is deferred this cycle (TP-S017-12-B); promote + DM Jobs OpenAPI are the operato
 - Keep prior live chunks/embeddings until promote; promote is transactional.
 - Rollback after promote: re-promote prior `rebuild_run_id` if retained, or restore from
   `document_revisions` checklist (runbook). Never TRUNCATE without corpus-db-safety guards.
+
+## EV-016 — Retrieval quality H7+P1 (F42 / #158)
+
+**ADR:** ADR-041 · **Tech:** Phase 21 M91–M93 · **Session:** S019 · **Ship gate:**
+`docs/sessions/S019-retrieval-quality/reports/hy1-ship-gate.md`
+
+**Ship candidate:** Hy1 = heuristic multi-query (H7) + P1 context packing on embed pin **E0**
+(`BAAI/bge-small-en-v1.5`). No Modal redeploy; no Alembic; no frontend code change.
+
+### Deploy units touched
+
+| Unit | Change |
+|------|--------|
+| `packages/rag` | Library — `multi_query_retrieve` + `pack_p1` (no separate deploy) |
+| DO chat-rag-backend | Ask / askStream use shared H7+P1 helpers (code defaults) |
+| DO internal-write-api | F36 eval sandbox shares same knobs; **ISS-008** staging fixture path |
+| Modal (embed / LLM / DM) | **No redeploy** for F42 |
+| Frontends | **No redeploy** required (Admin `/evaluation` unchanged) |
+
+### Secrets / config
+
+| Variable | Where | Default | Notes |
+|----------|-------|---------|-------|
+| `VECINITA_RAG_MULTI_QUERY` | chat-rag-backend (+ write-api eval) | `true` | H7 on/off |
+| `VECINITA_RAG_MULTI_QUERY_COUNT` | same | `3` | Clamp 1–5 |
+| `VECINITA_RAG_PACKER` | same | `p1` | `p1` or `p3` |
+| `VECINITA_RAG_CONTEXT_MAX_CHARS` | same | `3500` | P3 only |
+| Modal embed / LLM URLs | Unchanged | — | E0 pin; no new secrets |
+
+Optional knobs are **not** required in `infra/do/*.yaml` when shipping Hy1 defaults.
+Override on DO only when staging needs a non-default packer/H7 setting. No new CORS
+origins or `VITE_*` keys.
+
+### Redeploy order (staging)
+
+1. `sync-all-secrets` (Modal URL parity — skip if URLs unchanged)
+2. **internal-write-api** — ISS-008 (`corpus_profile=staging` → `qa_pairs_staging.json`) + F36 H7/P1
+3. **chat-rag-backend** — F42 ask path
+4. Live verify: `do_verify_required_secrets.sh` → `staging_smoke.sh` (H1) →
+   `verify_connectivity.sh` (H4–H5)
+5. **Hy1 ship gate (AC-RQ6 / TC-175):** Admin F36 staging golden — relevancy ≥ **0.28**,
+   faithfulness ≥ **0.91** (`hy1-ship-gate.md`)
+
+CD chain unchanged: `main` → CI → deploy-preflight → Modal → DigitalOcean (write-api before
+chat-rag in `deploy-digitalocean.yml`).
+
+### Rollback
+
+- Disable H7 without redeploy: set `VECINITA_RAG_MULTI_QUERY=false` on chat-rag-backend
+  (and write-api if eval must match).
+- Or redeploy prior DO app deployment / git SHA known-good before F42 merge.
+- Embed pin stays E0 — no corpus rollback for this ship.
 
 ## Open questions
 

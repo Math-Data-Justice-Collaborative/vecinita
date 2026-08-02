@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-24 (S010/EV-011 F39 M81 — Ollama fallbacks removed, RD-170)
+> **Last updated**: 2026-08-01 (S019/EV-016 F42 — H7+P1 packer / multi-query env knobs)
 
 ## Precedence
 
@@ -24,6 +24,10 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 |----------|------|---------|----------|-------------|
 | `VECINITA_TOP_K` | int | `5` | No | Retrieval chunk count |
 | `VECINITA_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Minimum pgvector similarity (`1 - distance`); chunks below are dropped |
+| `VECINITA_RAG_MULTI_QUERY` | string | `true` | No | F42 H7 fan-out on/off (`true`/`false`); ChatRAG + F36 eval sandbox |
+| `VECINITA_RAG_MULTI_QUERY_COUNT` | int | `3` | No | H7 rewrite count (clamped 1–5); Spanish-aware when query locale is `es` |
+| `VECINITA_RAG_PACKER` | string | `p1` | No | F42 packer: `p1` (Source/URL headers) or `p3` (P1 + doc dedupe + char budget) |
+| `VECINITA_RAG_CONTEXT_MAX_CHARS` | int | `3500` | No | Packed-context budget when `VECINITA_RAG_PACKER=p3` |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (prod) | Modal FastEmbed base URL |
 | `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal **`vecinita-llm`** base URL — ChatRAG / prod inference + warm (ADR-037) |
@@ -279,6 +283,10 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 |------|-------------|
 | `VECINITA_TOP_K` ≥ 1 and ≤ 50 | Config module at startup |
 | `VECINITA_MIN_RETRIEVAL_SCORE` ≥ 0 and < 1 | Config module at startup |
+| `VECINITA_RAG_MULTI_QUERY` in `true`, `false` | Config module at startup (F42) |
+| `VECINITA_RAG_MULTI_QUERY_COUNT` ≥ 1 and ≤ 5 | Config module at startup (F42) |
+| `VECINITA_RAG_PACKER` in `p1`, `p3` | Config module at startup (F42) |
+| `VECINITA_RAG_CONTEXT_MAX_CHARS` ≥ 256 | Config module at startup (F42; used when packer=`p3`) |
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` ≥ 1 and ≤ 20 | Config module |
@@ -309,6 +317,10 @@ env: development
 chat_rag:
   top_k: 5
   request_timeout_s: 60
+  rag_multi_query: true
+  rag_multi_query_count: 3
+  rag_packer: p1
+  rag_context_max_chars: 3500
 ingest:
   chunk_size_tokens: 256
   scrape_timeout_s: 30

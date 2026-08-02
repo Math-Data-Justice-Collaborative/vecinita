@@ -1,0 +1,2983 @@
+{
+  "run_id": "20260801T002819Z",
+  "fixture": "/Users/bigme/Documents/GitHub/vecinita/data/fixtures/eval/qa_pairs_staging.json",
+  "model": "qwen2.5:1.5b-instruct",
+  "scored_rows": 11,
+  "decision": "S019-D29",
+  "option": "A",
+  "cells": [
+    {
+      "cell": "Hy0",
+      "pack": "P1",
+      "use_h7": false,
+      "use_r1": false,
+      "top_k": 5,
+      "language_mode": "none",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p95_ms": 5804,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.15384615384615385,
+      "mean_context_chars": 7710.538461538462,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.2727272727272727,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.10909090909090909
+        },
+        "es": {
+          "n": 2,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.4
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8213,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What free medical services does Rhode Island Free Clinic offer?"
+          ],
+          "latency_ms": 8375
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8180,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What are Rhode Island Free Clinic's weekday hours?"
+          ],
+          "latency_ms": 4890
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "en",
+            "en",
+            "es",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 9142,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is Nuevas Voces at WRWC?"
+          ],
+          "latency_ms": 5756
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.6,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "es"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 7677,
+          "n_rewrites": 1,
+          "rewrites": [
+            "\u00bfQu\u00e9 es Nuevas Voces?"
+          ],
+          "latency_ms": 5804
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 9421,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Where is the Olneyville Resilience Hub located?"
+          ],
+          "latency_ms": 3080
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.6,
+          "chunk_languages": [
+            "en",
+            "es",
+            "es",
+            "en",
+            "es"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8195,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What does VECINA help neighbors do?"
+          ],
+          "latency_ms": 3900
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "es",
+            "es",
+            "en",
+            "es",
+            "es"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 7983,
+          "n_rewrites": 1,
+          "rewrites": [
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?"
+          ],
+          "latency_ms": 4553
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8003,
+          "n_rewrites": 1,
+          "rewrites": [
+            "How long can it take for a flood insurance policy to go into effect?"
+          ],
+          "latency_ms": 4057
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 7807,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is Rhode Island Legal Services' mission?"
+          ],
+          "latency_ms": 5029
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8491,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Does Rhode Island Legal Services work on safe affordable housing?"
+          ],
+          "latency_ms": 3258
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "abstain",
+          "scored_retrieval": false,
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 7346,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is the mayor's personal phone number?"
+          ],
+          "latency_ms": 4195
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "any_of",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3080,
+          "n_rewrites": 1,
+          "rewrites": [
+            "housing"
+          ],
+          "latency_ms": 4321
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "empty",
+          "scored_retrieval": false,
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 6699,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Where can I get quantum physics tutoring?"
+          ],
+          "latency_ms": 4813
+        }
+      ]
+    },
+    {
+      "cell": "Hy1",
+      "pack": "P1",
+      "use_h7": true,
+      "use_r1": false,
+      "top_k": 5,
+      "language_mode": "none",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.3076923076923077,
+      "latency_p95_ms": 5010,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.15384615384615383,
+      "mean_context_chars": 7380.7692307692305,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.36363636363636365,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.07272727272727274
+        },
+        "es": {
+          "n": 2,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.6000000000000001
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8213,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What free medical services does Rhode Island Free Clinic offer?",
+            "What free medical services does Rhode Island Free Clinic offer in Providence RI?"
+          ],
+          "latency_ms": 4099
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8180,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What are Rhode Island Free Clinic's weekday hours?",
+            "What are Rhode Island Free Clinic's weekday hours in Providence RI?"
+          ],
+          "latency_ms": 4783
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 7932,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Nuevas Voces at WRWC?",
+            "What is Nuevas Voces at WRWC in Providence RI?"
+          ],
+          "latency_ms": 4491
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.8,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 7473,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 es Nuevas Voces?",
+            "\u00bfQu\u00e9 es Nuevas Voces en Providence RI?"
+          ],
+          "latency_ms": 5769
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 9421,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where is the Olneyville Resilience Hub located?",
+            "Where is the Olneyville Resilience Hub located in Providence RI?"
+          ],
+          "latency_ms": 3088
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "en",
+            "es",
+            "es",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 7953,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What does VECINA help neighbors do?",
+            "What does VECINA help neighbors do in Providence RI?"
+          ],
+          "latency_ms": 3594
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "es",
+            "es",
+            "en",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 8075,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?",
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener en Providence RI?"
+          ],
+          "latency_ms": 4296
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8058,
+          "n_rewrites": 3,
+          "rewrites": [
+            "How long can it take for a flood insurance policy to go into effect?",
+            "What long can it take for a flood insurance policy to go into effect?",
+            "How long can it take for a flood insurance policy to go into effect in Providence RI?"
+          ],
+          "latency_ms": 4530
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 7807,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Rhode Island Legal Services' mission?",
+            "What is Rhode Island Legal Services' mission in Providence RI?"
+          ],
+          "latency_ms": 5010
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8491,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Does Rhode Island Legal Services work on safe affordable housing?",
+            "Does Rhode Island Legal Services work on safe affordable housing in Providence RI?"
+          ],
+          "latency_ms": 3316
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "abstain",
+          "scored_retrieval": false,
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 4922,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is the mayor's personal phone number?",
+            "What is the mayor's personal phone number in Providence RI?"
+          ],
+          "latency_ms": 3188
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "any_of",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3080,
+          "n_rewrites": 1,
+          "rewrites": [
+            "housing"
+          ],
+          "latency_ms": 3919
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "empty",
+          "scored_retrieval": false,
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 6345,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where can I get quantum physics tutoring?",
+            "Where can I get quantum physics tutoring in Providence RI?"
+          ],
+          "latency_ms": 4051
+        }
+      ]
+    },
+    {
+      "cell": "Hy2",
+      "pack": "P3",
+      "use_h7": true,
+      "use_r1": false,
+      "top_k": 5,
+      "language_mode": "none",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.19230769230769232,
+      "latency_p95_ms": 5446,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.15384615384615383,
+      "mean_context_chars": 3467.6923076923076,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.22727272727272727,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.07272727272727274
+        },
+        "es": {
+          "n": 2,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.6000000000000001
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What free medical services does Rhode Island Free Clinic offer?",
+            "What free medical services does Rhode Island Free Clinic offer in Providence RI?"
+          ],
+          "latency_ms": 3599
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What are Rhode Island Free Clinic's weekday hours?",
+            "What are Rhode Island Free Clinic's weekday hours in Providence RI?"
+          ],
+          "latency_ms": 4306
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Nuevas Voces at WRWC?",
+            "What is Nuevas Voces at WRWC in Providence RI?"
+          ],
+          "latency_ms": 4108
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.8,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 es Nuevas Voces?",
+            "\u00bfQu\u00e9 es Nuevas Voces en Providence RI?"
+          ],
+          "latency_ms": 5446
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where is the Olneyville Resilience Hub located?",
+            "Where is the Olneyville Resilience Hub located in Providence RI?"
+          ],
+          "latency_ms": 2570
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "en",
+            "es",
+            "es",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What does VECINA help neighbors do?",
+            "What does VECINA help neighbors do in Providence RI?"
+          ],
+          "latency_ms": 3323
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "es",
+            "es",
+            "en",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?",
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener en Providence RI?"
+          ],
+          "latency_ms": 3915
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 3,
+          "rewrites": [
+            "How long can it take for a flood insurance policy to go into effect?",
+            "What long can it take for a flood insurance policy to go into effect?",
+            "How long can it take for a flood insurance policy to go into effect in Providence RI?"
+          ],
+          "latency_ms": 3693
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Rhode Island Legal Services' mission?",
+            "What is Rhode Island Legal Services' mission in Providence RI?"
+          ],
+          "latency_ms": 5571
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Does Rhode Island Legal Services work on safe affordable housing?",
+            "Does Rhode Island Legal Services work on safe affordable housing in Providence RI?"
+          ],
+          "latency_ms": 3521
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "abstain",
+          "scored_retrieval": false,
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is the mayor's personal phone number?",
+            "What is the mayor's personal phone number in Providence RI?"
+          ],
+          "latency_ms": 2735
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "any_of",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3080,
+          "n_rewrites": 1,
+          "rewrites": [
+            "housing"
+          ],
+          "latency_ms": 3960
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "empty",
+          "scored_retrieval": false,
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where can I get quantum physics tutoring?",
+            "Where can I get quantum physics tutoring in Providence RI?"
+          ],
+          "latency_ms": 3544
+        }
+      ]
+    },
+    {
+      "cell": "Hy3",
+      "pack": "P1",
+      "use_h7": true,
+      "use_r1": true,
+      "top_k": 5,
+      "language_mode": "none",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.8181818181818182,
+      "answer_relevancy": 0.3076923076923077,
+      "latency_p95_ms": 4731,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.15384615384615383,
+      "mean_context_chars": 7399.461538461538,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.7777777777777778,
+          "answer_relevancy": 0.36363636363636365,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.07272727272727274
+        },
+        "es": {
+          "n": 2,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.6000000000000001
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8213,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What free medical services does Rhode Island Free Clinic offer?",
+            "What free medical services does Rhode Island Free Clinic offer in Providence RI?"
+          ],
+          "latency_ms": 3828
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 7585,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What are Rhode Island Free Clinic's weekday hours?",
+            "What are Rhode Island Free Clinic's weekday hours in Providence RI?"
+          ],
+          "latency_ms": 4570
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 7418,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Nuevas Voces at WRWC?",
+            "What is Nuevas Voces at WRWC in Providence RI?"
+          ],
+          "latency_ms": 4263
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.8,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 6448,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 es Nuevas Voces?",
+            "\u00bfQu\u00e9 es Nuevas Voces en Providence RI?"
+          ],
+          "latency_ms": 5513
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 9301,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where is the Olneyville Resilience Hub located?",
+            "Where is the Olneyville Resilience Hub located in Providence RI?"
+          ],
+          "latency_ms": 2623
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "es",
+            "en",
+            "es",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 7898,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What does VECINA help neighbors do?",
+            "What does VECINA help neighbors do in Providence RI?"
+          ],
+          "latency_ms": 3336
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "es",
+            "es",
+            "en",
+            "en",
+            "es"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 8075,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?",
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener en Providence RI?"
+          ],
+          "latency_ms": 4089
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 8442,
+          "n_rewrites": 3,
+          "rewrites": [
+            "How long can it take for a flood insurance policy to go into effect?",
+            "What long can it take for a flood insurance policy to go into effect?",
+            "How long can it take for a flood insurance policy to go into effect in Providence RI?"
+          ],
+          "latency_ms": 4717
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8945,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Rhode Island Legal Services' mission?",
+            "What is Rhode Island Legal Services' mission in Providence RI?"
+          ],
+          "latency_ms": 4731
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8945,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Does Rhode Island Legal Services work on safe affordable housing?",
+            "Does Rhode Island Legal Services work on safe affordable housing in Providence RI?"
+          ],
+          "latency_ms": 2907
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "abstain",
+          "scored_retrieval": false,
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 5498,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is the mayor's personal phone number?",
+            "What is the mayor's personal phone number in Providence RI?"
+          ],
+          "latency_ms": 2851
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "any_of",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3080,
+          "n_rewrites": 1,
+          "rewrites": [
+            "housing"
+          ],
+          "latency_ms": 4144
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "empty",
+          "scored_retrieval": false,
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 6345,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where can I get quantum physics tutoring?",
+            "Where can I get quantum physics tutoring in Providence RI?"
+          ],
+          "latency_ms": 3671
+        }
+      ]
+    },
+    {
+      "cell": "Hy4",
+      "pack": "P3",
+      "use_h7": true,
+      "use_r1": true,
+      "top_k": 5,
+      "language_mode": "none",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.8181818181818182,
+      "answer_relevancy": 0.19230769230769232,
+      "latency_p95_ms": 5378,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.15384615384615383,
+      "mean_context_chars": 3467.6923076923076,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.7777777777777778,
+          "answer_relevancy": 0.22727272727272727,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.07272727272727274
+        },
+        "es": {
+          "n": 2,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.6000000000000001
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What free medical services does Rhode Island Free Clinic offer?",
+            "What free medical services does Rhode Island Free Clinic offer in Providence RI?"
+          ],
+          "latency_ms": 3682
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What are Rhode Island Free Clinic's weekday hours?",
+            "What are Rhode Island Free Clinic's weekday hours in Providence RI?"
+          ],
+          "latency_ms": 4456
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Nuevas Voces at WRWC?",
+            "What is Nuevas Voces at WRWC in Providence RI?"
+          ],
+          "latency_ms": 4016
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.8,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 es Nuevas Voces?",
+            "\u00bfQu\u00e9 es Nuevas Voces en Providence RI?"
+          ],
+          "latency_ms": 5378
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where is the Olneyville Resilience Hub located?",
+            "Where is the Olneyville Resilience Hub located in Providence RI?"
+          ],
+          "latency_ms": 2541
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "es",
+            "en",
+            "es",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What does VECINA help neighbors do?",
+            "What does VECINA help neighbors do in Providence RI?"
+          ],
+          "latency_ms": 3271
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.4,
+          "chunk_languages": [
+            "es",
+            "es",
+            "en",
+            "en",
+            "es"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?",
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener en Providence RI?"
+          ],
+          "latency_ms": 4011
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 3500,
+          "n_rewrites": 3,
+          "rewrites": [
+            "How long can it take for a flood insurance policy to go into effect?",
+            "What long can it take for a flood insurance policy to go into effect?",
+            "How long can it take for a flood insurance policy to go into effect in Providence RI?"
+          ],
+          "latency_ms": 4536
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is Rhode Island Legal Services' mission?",
+            "What is Rhode Island Legal Services' mission in Providence RI?"
+          ],
+          "latency_ms": 5520
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.5,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Does Rhode Island Legal Services work on safe affordable housing?",
+            "Does Rhode Island Legal Services work on safe affordable housing in Providence RI?"
+          ],
+          "latency_ms": 3734
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "abstain",
+          "scored_retrieval": false,
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "What is the mayor's personal phone number?",
+            "What is the mayor's personal phone number in Providence RI?"
+          ],
+          "latency_ms": 2750
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "any_of",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.2,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "es",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3080,
+          "n_rewrites": 1,
+          "rewrites": [
+            "housing"
+          ],
+          "latency_ms": 3929
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "empty",
+          "scored_retrieval": false,
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 3500,
+          "n_rewrites": 2,
+          "rewrites": [
+            "Where can I get quantum physics tutoring?",
+            "Where can I get quantum physics tutoring in Providence RI?"
+          ],
+          "latency_ms": 3605
+        }
+      ]
+    },
+    {
+      "cell": "HyLang0",
+      "pack": "P1",
+      "use_h7": false,
+      "use_r1": false,
+      "top_k": 5,
+      "language_mode": "l0",
+      "retrieval_relevance": 0.9090909090909091,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p95_ms": 5054,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.0,
+      "mean_context_chars": 7423.153846153846,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 0.8888888888888888,
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.2727272727272727,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.0
+        },
+        "es": {
+          "n": 2,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.0
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8213,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What free medical services does Rhode Island Free Clinic offer?"
+          ],
+          "latency_ms": 3748
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8180,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What are Rhode Island Free Clinic's weekday hours?"
+          ],
+          "latency_ms": 4888
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 8110,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is Nuevas Voces at WRWC?"
+          ],
+          "latency_ms": 5326
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "es",
+            "es",
+            "es",
+            "es"
+          ],
+          "n_chunks": 4,
+          "n_docs": 2,
+          "context_chars": 6427,
+          "n_rewrites": 1,
+          "rewrites": [
+            "\u00bfQu\u00e9 es Nuevas Voces?"
+          ],
+          "latency_ms": 5054
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 9421,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Where is the Olneyville Resilience Hub located?"
+          ],
+          "latency_ms": 2659
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": false,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 2,
+          "context_chars": 9287,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What does VECINA help neighbors do?"
+          ],
+          "latency_ms": 4017
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "es",
+            "es",
+            "es",
+            "es"
+          ],
+          "n_chunks": 4,
+          "n_docs": 2,
+          "context_chars": 6427,
+          "n_rewrites": 1,
+          "rewrites": [
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?"
+          ],
+          "latency_ms": 3990
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8003,
+          "n_rewrites": 1,
+          "rewrites": [
+            "How long can it take for a flood insurance policy to go into effect?"
+          ],
+          "latency_ms": 3732
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 7807,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is Rhode Island Legal Services' mission?"
+          ],
+          "latency_ms": 4665
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 3,
+          "context_chars": 8491,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Does Rhode Island Legal Services work on safe affordable housing?"
+          ],
+          "latency_ms": 2949
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "abstain",
+          "scored_retrieval": false,
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 7346,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is the mayor's personal phone number?"
+          ],
+          "latency_ms": 4049
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "any_of",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 5,
+          "context_chars": 2090,
+          "n_rewrites": 1,
+          "rewrites": [
+            "housing"
+          ],
+          "latency_ms": 2849
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "empty",
+          "scored_retrieval": false,
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 5,
+          "n_docs": 4,
+          "context_chars": 6699,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Where can I get quantum physics tutoring?"
+          ],
+          "latency_ms": 4510
+        }
+      ]
+    },
+    {
+      "cell": "HyK8",
+      "pack": "P1",
+      "use_h7": false,
+      "use_r1": false,
+      "top_k": 8,
+      "language_mode": "none",
+      "retrieval_relevance": 1.0,
+      "faithfulness": 0.9090909090909091,
+      "answer_relevancy": 0.23076923076923078,
+      "latency_p95_ms": 5182,
+      "answer_lang_match_rate": 1.0,
+      "mean_cross_lang_share": 0.15384615384615385,
+      "mean_context_chars": 12263.846153846154,
+      "by_locale": {
+        "en": {
+          "n": 11,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 0.8888888888888888,
+          "answer_relevancy": 0.2727272727272727,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.06818181818181818
+        },
+        "es": {
+          "n": 2,
+          "retrieval_relevance": 1.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match_rate": 1.0,
+          "mean_cross_lang_share": 0.625
+        }
+      },
+      "rows": [
+        {
+          "id": "community-free-clinic-services",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 6,
+          "context_chars": 13963,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What free medical services does Rhode Island Free Clinic offer?"
+          ],
+          "latency_ms": 3735
+        },
+        {
+          "id": "community-free-clinic-hours",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 6,
+          "context_chars": 13244,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What are Rhode Island Free Clinic's weekday hours?"
+          ],
+          "latency_ms": 4556
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.25,
+          "chunk_languages": [
+            "en",
+            "en",
+            "es",
+            "es",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 4,
+          "context_chars": 12427,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is Nuevas Voces at WRWC?"
+          ],
+          "latency_ms": 5182
+        },
+        {
+          "id": "community-nuevas-voces",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.75,
+          "chunk_languages": [
+            "en",
+            "es",
+            "en",
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 6,
+          "context_chars": 11405,
+          "n_rewrites": 1,
+          "rewrites": [
+            "\u00bfQu\u00e9 es Nuevas Voces?"
+          ],
+          "latency_ms": 5433
+        },
+        {
+          "id": "community-resilience-hub-location",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 3,
+          "context_chars": 15107,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Where is the Olneyville Resilience Hub located?"
+          ],
+          "latency_ms": 2629
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.375,
+          "chunk_languages": [
+            "en",
+            "es",
+            "es",
+            "en",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 4,
+          "context_chars": 14058,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What does VECINA help neighbors do?"
+          ],
+          "latency_ms": 3359
+        },
+        {
+          "id": "community-vecinita-intro",
+          "locale": "es",
+          "query_language": "es",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "es",
+          "cross_lang_share": 0.5,
+          "chunk_languages": [
+            "es",
+            "es",
+            "en",
+            "es",
+            "es",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 5,
+          "context_chars": 12380,
+          "n_rewrites": 1,
+          "rewrites": [
+            "\u00bfQu\u00e9 ayuda VECINA a los vecinos a obtener?"
+          ],
+          "latency_ms": 4028
+        },
+        {
+          "id": "housing-flood-insurance-wait",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 3,
+          "context_chars": 13591,
+          "n_rewrites": 1,
+          "rewrites": [
+            "How long can it take for a flood insurance policy to go into effect?"
+          ],
+          "latency_ms": 3731
+        },
+        {
+          "id": "legal-aid-rils-mission",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 5,
+          "context_chars": 13615,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is Rhode Island Legal Services' mission?"
+          ],
+          "latency_ms": 4602
+        },
+        {
+          "id": "legal-aid-rils-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "hit",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 1.0,
+          "answer_relevancy": 1.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 5,
+          "context_chars": 12822,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Does Rhode Island Legal Services work on safe affordable housing?"
+          ],
+          "latency_ms": 2941
+        },
+        {
+          "id": "edge-abstain-mayor-phone",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "abstain",
+          "scored_retrieval": false,
+          "retrieval_pass": true,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 8,
+          "context_chars": 8995,
+          "n_rewrites": 1,
+          "rewrites": [
+            "What is the mayor's personal phone number?"
+          ],
+          "latency_ms": 3974
+        },
+        {
+          "id": "edge-ambiguous-housing",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "any_of",
+          "scored_retrieval": true,
+          "retrieval_pass": true,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.125,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "es",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 7,
+          "context_chars": 7039,
+          "n_rewrites": 1,
+          "rewrites": [
+            "housing"
+          ],
+          "latency_ms": 3255
+        },
+        {
+          "id": "edge-empty-quantum",
+          "locale": "en",
+          "query_language": "en",
+          "locale_query_lang_match": true,
+          "retrieval_expectation": "empty",
+          "scored_retrieval": false,
+          "retrieval_pass": false,
+          "faithfulness": null,
+          "answer_relevancy": 0.0,
+          "answer_lang_match": true,
+          "answer_language": "en",
+          "cross_lang_share": 0.0,
+          "chunk_languages": [
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en",
+            "en"
+          ],
+          "n_chunks": 8,
+          "n_docs": 5,
+          "context_chars": 10784,
+          "n_rewrites": 1,
+          "rewrites": [
+            "Where can I get quantum physics tutoring?"
+          ],
+          "latency_ms": 4742
+        }
+      ]
+    }
+  ]
+}
