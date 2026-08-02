@@ -20409,6 +20409,16 @@ git_history:
     files_changed: 9
     timestamp: '2026-08-02T02:37:03Z'
     note: 13-deploy-smoke closeout docs + eval artifacts committed; PR #172 opened to main; watching CI then merge + DO pin reset
+  - sha: 96a0db9af681d64bb8f97c03f63f4287a76a7a3f
+    short: 96a0db9
+    branch: main
+    message: 'docs: close EV-016 / S019 retrieval quality session'
+    stage: 16-evolve
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 6
+    timestamp: '2026-08-02T03:09:27Z'
+    note: Session closeout on main after EV-016/S019 close; recording this git_history append dirties workflow-state.yaml — tiny follow-up commit needed (do not amend 96a0db9)
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
