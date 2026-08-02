@@ -445,3 +445,45 @@ only if floors pass; otherwise keep spike-only.
 
 EV-018 **completed** 2026-08-02. PR [#174](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174) @ `9d1f10b`; Path A PASS; CE flag still default-off.
 Next: **17-retrospective** (S021-D28). CE flag flip remains a separate approval.
+
+## Cycle EV-019 — Scope (S022 / Ingest resilience)
+
+**Approved (session open + Phase 0 Fn lock):** 2026-08-02  
+**Session:** S022-ingest-resilience  
+**Predecessor:** S021 / EV-018 (completed; pipeline idle on `main`)  
+**Issues:** #163 (content_hash skip), #166 (embed sub-batch/retry), #160 (chunk overlap)  
+**Features:** **F47**, **F48**, **F49**  
+**Branch:** `evolve/EV-019-ingest-resilience`
+
+### Scope summary
+
+Investigate then ship ingest resilience on the shared write/embed path: skip no-op
+re-embeds when `content_hash` is unchanged, sub-batch + retry transient embed failures,
+and add configurable chunk overlap with sizing clarity.
+
+### Decisions (session open — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S022-D1 | Session | Open **S022-ingest-resilience** |
+| S022-D2 | Scope | Bundle A: **#163 + #166 + #160** |
+| S022-D3 | Routing | **Standard** (skip 03, 05, 06, 15) |
+| S022-D4 | 00-context | **Scoped** |
+| S022-D5 | Posture | **Investigate → ship** in one cycle |
+| S022-D6 | #160 | **Include** this cycle |
+| S022-D7 | Continue | Open → Phase 0 → **01-requirements** |
+
+### Decisions (Phase 0 Fn allocation — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S022-D8 | Fn ids | **F47** (#163), **F48** (#166), **F49** (#160) |
+| S022-D9 | Ordering | **F47 + F48** first, then **F49** |
+| S022-D10 | Deploy | Staging **Path A** default |
+| S022-D11 | Boundary | Shared write/embed path only — no ChatRAG redesign |
+| S022-D12 | Embed vs tags | Tags ADR-023 fail-open; embeds **retry then fail job** (no silent holes) |
+| S022-D13 | Proceed gate | Create EV-019 + impact → start **01-requirements** (user `1,1,1,1`) |
+
+### Phase 0 status
+
+EV-019 **in_progress**. Next: **01-requirements** (delta; load 01-requirements-seed).

@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-02 (S021/EV-018 — F46 empty retrieve + F45 CE re-gate; prior S020/EV-017 F43–F45)
+> **Last updated**: 2026-08-02 (S022/EV-019 — F47–F49 ingest resilience; prior S021/EV-018 F46 + F45)
 
 ## Summary
 
@@ -56,6 +56,9 @@
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
 | F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S021/EV-018 re-gate; S020-D5/D7 |
 | F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
+| F47 | Skip re-ingest when content_hash unchanged (#163) | Planned | Data Management | data-management-backend, internal-write-api, packages/ingest | S022/EV-019 #163; S022-D8 |
+| F48 | Embedding sub-batch + retry for ingest (#166) | Planned | Data Management | packages/embedding-client, data-management-backend, Modal embed | S022/EV-019 #166; S022-D8 |
+| F49 | Chunk overlap + sizing clarity (#160) | Planned | Data Management | packages/ingest, config-spec; optional admin FE | S022/EV-019 #160; S022-D8 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -916,6 +919,62 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   changing F43/F44 defaults; closing #83 without F45 re-gate.
 - **Success**: Staging golden + sample H3 asks show non-empty pools; unblocks F45 re-gate.
 - **Source**: S021 / EV-018; S020 ce-ship-gate / evolve-summary follow-ups; S021-D8.
+
+### F47: Skip re-ingest when content_hash unchanged (#163)
+
+- **What it does**: When a URL’s scraped `content_hash` matches the stored document hash,
+  skip chunk delete + re-embed (and preferably skip re-chunk). Operators can bypass with a
+  job `force` (or equivalent) option. Cuts no-op re-ingest cost and latency.
+- **Inputs**: Scraped text → `content_hash`; existing document row hash; job options.
+- **Outputs**: Job result/metrics indicating skip; unchanged chunk vectors when skipped;
+  metadata refresh policy as decided in 01 (recommended: update metadata, skip embed).
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | Ingest pipeline / write API upsert | Hash compare short-circuit before delete-chunks |
+  | Admin job options | `force` / refresh flags |
+  | tests / e2e | Same-hash skip + force re-embed assertions |
+- **Out of scope (EV-019)**: Changing scrape normalization solely for hash stability beyond
+  documented whitespace rules; ChatRAG retrieve path.
+- **Success**: Unchanged corpus re-run skips embeds; forced re-run still rewrites chunks.
+- **Source**: S022 / EV-019; GitHub #163; S022-D8.
+
+### F48: Embedding sub-batch + retry for ingest (#166)
+
+- **What it does**: Makes ingest embedding calls resilient: split large chunk lists into
+  sub-batches and retry transient Modal/HTTP failures with backoff. Contrasts with ADR-023
+  tag fail-open — embeds must not silently leave holes without an explicit product policy
+  (recommended: fail URL job after exhausted retries).
+- **Inputs**: Chunk texts; embed client; Modal `/embed/batch` limits.
+- **Outputs**: Successful embeddings under transient faults; clear error when hard-fail
+  (dim mismatch, exhausted retries).
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/embedding-client` | Sub-batch + retry |
+  | Ingest pipeline | Uses resilient client; job failure semantics |
+  | Modal embed app | Align batch limits if needed |
+  | tests / e2e | Simulated 5xx/timeout recovery; hard-fail cases |
+- **Out of scope (EV-019)**: Multi-provider embed ABC; changing tag fail-open.
+- **Success**: Transient embed blips no longer fail whole URL jobs; dim errors still fail fast.
+- **Source**: S022 / EV-019; GitHub #166; S022-D8 / S022-D12.
+
+### F49: Chunk overlap + sizing clarity (#160)
+
+- **What it does**: Adds configurable **chunk overlap** during ingest and documents
+  word≈token sizing (or adopts a real tokenizer if 01 chooses). Improves recall at
+  paragraph boundaries; may increase storage/embed cost.
+- **Inputs**: Chunk size / overlap config; source text.
+- **Outputs**: Overlapping chunks; config-spec knobs; re-ingest guidance for existing corpus.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/ingest` chunker | Overlap (+ optional tokenizer) |
+  | config-spec / job options | `chunk_overlap` (name TBD in 01) |
+  | F41 rebuild / admin | Notes when corpus must be rebuilt |
+- **Out of scope (EV-019)**: Context packing (#165); changing default chunk size unless required.
+- **Success**: Overlap configurable; defaults/docs clear; tests cover overlap boundaries.
+- **Source**: S022 / EV-019; GitHub #160; S022-D6 / S022-D8.
 
 ## Planned / Deferred (post-v1)
 

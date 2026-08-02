@@ -38,6 +38,7 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S019 | feature | completed | Batch A retrieval quality (F42 H7+P1) | `evolve/EV-016-retrieval-quality` (merged #172) | 2026-07-31 | 2026-08-01 |
 | S020 | feature | completed | Retrieval Batch B (F43 cache + #83/#161 + #162) | `evolve/EV-017-retrieval-batch-b` (merged #173) | 2026-08-02 | 2026-08-02 |
 | S021 | feature | completed | Empty retrieve + CE re-gate follow-on (#83 / AC-BB9); RET-001 via #177 | `evolve/EV-018-retrieval-follow-on` (merged #174); RET #177 @ 6e3207d | 2026-08-02 | 2026-08-02 |
+| S022 | feature | in_progress | Ingest resilience (#163/#166/#160 → F47–F49) | `evolve/EV-019-ingest-resilience` | 2026-08-02 | — |
 
 ## Active session
 

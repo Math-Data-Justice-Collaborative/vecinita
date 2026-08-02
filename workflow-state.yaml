@@ -10,12 +10,20 @@ project:
       started_at: '2026-08-02'
       completed_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S021/EV-018 — 00-context COMPLETE; EV-018 Phase 0 approved; handoff → 01-requirements
-      session_id: S021-retrieval-follow-on
-      branch: evolve/EV-018-retrieval-follow-on
-      evolve_cycle_id: EV-018
-      note: 'S021 00-context COMPLETE 2026-08-02 — EV-018 Phase 0 approved; 01-requirements COMPLETE; handoff → 02-verify-plan
-        S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+      partial_rerun_note: S022/EV-019 — 00-context COMPLETE; EV-019 Phase 0 approved; handoff → 01-requirements
+      session_id: S022-ingest-resilience
+      branch: evolve/EV-019-ingest-resilience
+      evolve_cycle_id: EV-019
+      note: 'S022 00-context COMPLETE 2026-08-02 — EV-019 Phase 0 approved; handoff → 01-requirements'
+      next_action: run_01_requirements
+      session_closed: false
+      s021_baseline:
+        status: completed
+        completed_at: '2026-08-02'
+        session_id: S021-retrieval-follow-on
+        branch: evolve/EV-018-retrieval-follow-on
+        evolve_cycle_id: EV-018
+        note: S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix
       s020_baseline:
         status: completed
         started_at: '2026-07-08'
@@ -125,23 +133,32 @@ project:
       session_closed: true
       session_closed_at: '2026-08-02'
     01-requirements:
-      status: completed
-      started_at: '2026-08-02'
-      completed_at: '2026-08-02'
+      status: pending
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S021/EV-018 — 01-requirements delta COMPLETE; F46 + extend F45; S021-D13–D16; RD-209–RD-218
-      session_id: S021-retrieval-follow-on
-      branch: evolve/EV-018-retrieval-follow-on
-      evolve_cycle_id: EV-018
+      partial_rerun_note: S022/EV-019 — 01-requirements pending; F47–F49; investigate→ship
+      session_id: S022-ingest-resilience
+      branch: evolve/EV-019-ingest-resilience
+      evolve_cycle_id: EV-019
       mode: evolve
       delta_only: true
       feature_ids:
-      - F46
-      - F45
-      report: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
-      current_action: completed
-      note: 'S021/EV-018 01-requirements COMPLETE 2026-08-02 — F46 + extend F45; S021-D13–D16; RD-209–RD-218; handoff → 02-verify-plan
-        S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+      - F47
+      - F48
+      - F49
+      current_action: pending
+      note: 'S022/EV-019 01-requirements pending — F47 content_hash skip (#163), F48 embed retry (#166), F49 chunk overlap (#160)'
+      s021_baseline:
+        status: completed
+        started_at: '2026-08-02'
+        completed_at: '2026-08-02'
+        session_id: S021-retrieval-follow-on
+        branch: evolve/EV-018-retrieval-follow-on
+        evolve_cycle_id: EV-018
+        feature_ids:
+        - F46
+        - F45
+        report: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
+        note: S021/EV-018 01-requirements COMPLETE 2026-08-02
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -4422,8 +4439,94 @@ project:
       follow_up_retro: after_next_evolve_hotfix
       close_choice: option_1_open_pr_then_close_session
       note: 'RET-001 COMPLETE 2026-08-02 — PR #177 MERGED @ 6e3207d; S021 archived; follow_up_retro=after_next_evolve_hotfix'
-session_counter: 21
-active_session: null
+session_counter: 22
+active_session:
+  id: S022-ingest-resilience
+  type: feature
+  slug: ingest-resilience
+  intent: 'Ingest resilience — content_hash skip (#163), embed sub-batch/retry (#166), chunk overlap (#160); investigate→ship
+    on shared write/embed path'
+  status: in_progress
+  branch: evolve/EV-019-ingest-resilience
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-019
+  artifacts_dir: docs/sessions/S022-ingest-resilience/
+  routing_plan:
+  - stage: 00-context
+    required: true
+    mode: scoped
+    status: completed
+    skip_rationale:
+    started_at: '2026-08-02'
+    completed_at: '2026-08-02'
+    note: S022-D1–D13 approved; session artifacts written; EV-019 Phase 0 approved; handoff → 01-requirements
+  - stage: 01-requirements
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 02-verify-plan
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 04-tech-plan
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 07-build
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 08-verify-build
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 09-qa
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 10-e2e
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 11-verify-impl
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 12-verify-deploy
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  - stage: 13-deploy-smoke
+    required: true
+    mode: delta
+    status: pending
+    skip_rationale:
+  current_stage: 01-requirements
+  current_action: phase0_complete_start_01
+  started_at: '2026-08-02'
+  mode: evolve
+  delta_only: true
+  phase0_approved: true
+  phase_0_status: approved
+  routing_preset: standard
+  routing_plan_status: approved
+  github_issues:
+  - 163
+  - 166
+  - 160
+  predecessor_evolve_cycle_id: EV-018
+  predecessor_session_id: S021-retrieval-follow-on
+  decisions:
+  - S022-D1 through S022-D13 approved 2026-08-02 (user answers 1,1,1,1)
 sessions:
 - id: S021-retrieval-follow-on
   type: feature
@@ -9042,12 +9145,18 @@ stages:
     started_at: '2026-08-02'
     completed_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S021/EV-018 — 00-context COMPLETE; EV-018 Phase 0 approved; handoff → 01-requirements
-    session_id: S021-retrieval-follow-on
-    branch: evolve/EV-018-retrieval-follow-on
-    evolve_cycle_id: EV-018
-    note: S021 00-context COMPLETE 2026-08-02 — EV-018 Phase 0 approved; 01-requirements COMPLETE; handoff → 
-      02-verify-plan
+    partial_rerun_note: S022/EV-019 — 00-context COMPLETE; EV-019 Phase 0 approved; handoff → 01-requirements
+    session_id: S022-ingest-resilience
+    branch: evolve/EV-019-ingest-resilience
+    evolve_cycle_id: EV-019
+    note: S022 00-context COMPLETE 2026-08-02 — EV-019 Phase 0 approved; handoff → 01-requirements
+    s021_baseline:
+      status: completed
+      completed_at: '2026-08-02'
+      session_id: S021-retrieval-follow-on
+      branch: evolve/EV-018-retrieval-follow-on
+      evolve_cycle_id: EV-018
+      note: S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d
     s020_baseline:
       status: completed
       started_at: '2026-07-08'
@@ -20935,6 +21044,86 @@ evolve_cycles:
   summary: 'S021/EV-018 CLOSED — F46 empty retrieve + F45 CE re-gate Path A PASS via PR #174 @ 9d1f10b; RET-001 Phase 7 COMPLETE
     with skill patches + ADR-043 via PR #177 @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; VECINITA_RAG_RERANK_CE remains
     false.'
+- id: EV-019
+  cycle_type: feature
+  feature_ids:
+  - F47
+  - F48
+  - F49
+  title: Ingest resilience — content_hash skip + embed retry + chunk overlap
+  status: in_progress
+  started: '2026-08-02'
+  completed: null
+  session_id: S022-ingest-resilience
+  predecessor_evolve_cycle_id: EV-018
+  predecessor_session_id: S021-retrieval-follow-on
+  github_issues:
+  - 163
+  - 166
+  - 160
+  scope_summary: 'Investigate then ship: #163 content_hash skip (F47), #166 embed sub-batch/retry (F48), #160 chunk overlap
+    (F49) on shared write/embed path.
+
+    '
+  current_stage: 01-requirements
+  mode: evolve
+  delta_only: true
+  branch: evolve/EV-019-ingest-resilience
+  routing_preset: standard
+  phase0_approved: true
+  phase_0_status: approved
+  routing_plan:
+    required_stages:
+    - 01-requirements
+    - 02-verify-plan
+    - 04-tech-plan
+    - 07-build
+    - 08-verify-build
+    - 09-qa
+    - 10-e2e
+    - 11-verify-impl
+    - 12-verify-deploy
+    - 13-deploy-smoke
+    skipped_stages:
+    - 03-plan-tooling
+    - 05-verify-tech
+    - 06-tech-tooling
+    - 15-service-health
+  stages:
+    16-evolve:
+      status: completed
+      started: '2026-08-02'
+      completed: '2026-08-02'
+      current_action: phase0_complete
+      note: Phase 0 complete — S022-D1–D13 approved; handoff → 01-requirements
+    01-requirements:
+      status: pending
+      started: null
+      completed: null
+  gates:
+    a_to_b: pending
+    b_to_c: pending
+    c_to_d: pending
+    deploy: pending
+  checkpoints:
+    phase_a: pending
+    phase_b: pending
+    phase_c: pending
+    phase_d: pending
+    deploy: pending
+  artifacts:
+  - path: docs/sessions/S022-ingest-resilience/session-brief.md
+    status: completed
+  - path: docs/sessions/S022-ingest-resilience/routing-plan.md
+    status: completed
+  - path: docs/sessions/S022-ingest-resilience/checkpoints/01-requirements-seed.md
+    status: completed
+  - path: docs/feature-list.md
+    status: in_progress
+  - path: docs/decisions/evolve-decisions.md
+    status: in_progress
+  - path: docs/sessions/S022-ingest-resilience/reports/evolve-summary.md
+    status: pending
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -22112,6 +22301,13 @@ issue_log:
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains
     in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S022-ingest-resilience
+  evolve_cycle_id: EV-019
+  decision: 'S022/EV-019: user approved 1,1,1,1 — Standard routing, include #160, investigate→ship, continue; Fn F47/F48/F49'
+  recorded_at: '2026-08-02T21:19:00Z'
+  note: Phase 0 complete; S022 opened; EV-019 in_progress; handoff → 01-requirements
 - date: '2026-08-02'
   skill: 12-verify-deploy
   session_id: S021-retrieval-follow-on
@@ -24534,6 +24730,24 @@ decisions_log:
 - '2026-08-02 RET-001 COMPLETE: Phase 7; RA-001–007 applied via PR #177; ADR-043; artifacts docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
   + docs/retrospective-actions.md'
 artifacts:
+- path: docs/sessions/S022-ingest-resilience/session-brief.md
+  kind: session-brief
+  session_id: S022-ingest-resilience
+  stage: 00-context
+  evolve_cycle_id: EV-019
+  recorded_at: '2026-08-02'
+- path: docs/sessions/S022-ingest-resilience/routing-plan.md
+  kind: routing-plan
+  session_id: S022-ingest-resilience
+  stage: 00-context
+  evolve_cycle_id: EV-019
+  recorded_at: '2026-08-02'
+- path: docs/sessions/S022-ingest-resilience/checkpoints/01-requirements-seed.md
+  kind: checkpoint
+  session_id: S022-ingest-resilience
+  stage: 00-context
+  evolve_cycle_id: EV-019
+  recorded_at: '2026-08-02'
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
   session_id: S021-retrieval-follow-on
@@ -26541,8 +26755,15 @@ artifacts:
   stage: 17-retrospective
   note: S021 close / RET-001
 git_history:
-  current_branch: main
+  current_branch: evolve/EV-019-ingest-resilience
   branches:
+  - name: evolve/EV-019-ingest-resilience
+    purpose: EV-019 ingest resilience F47-F49
+    base: main
+    status: open
+    created_at: '2026-08-02'
+    session_id: S022-ingest-resilience
+    evolve_cycle_id: EV-019
   - name: chore/RET-001-session-handoff
     purpose: RET-001 skill patches RA-001–007 + ADR-043 session handoff
     base: main
