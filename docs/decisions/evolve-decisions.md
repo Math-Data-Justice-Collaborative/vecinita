@@ -300,4 +300,72 @@ Plan: session `reports/spike-hybrid-plan.md` · runners `spike_hybrid_sweep.py`,
 | S019-D51 | Hy1 false zeros | Direct YES/NO answer-relevancy judge (mirror faithfulness); H7 ES rewrite + spike→`packages/rag` parity |
 | S019-D52 | Hy1 re-gate | **PASS** — relevancy **0.833** / faith **0.938** (`20260802T022836Z`); Path A @ `5693422` |
 
-**13 status:** Path A + H1–H5 + AC-RQ6 PASS — awaiting user closeout (PR → merge → pins → `main`).
+**13 status:** Path A + H1–H5 + AC-RQ6 PASS — **closed**.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D53 | Session close | **Close now** (option 1) — skip optional 15-service-health; write evolve-summary + evolve-report-EV-016; archive S019; leave out-of-scope Modal/LLM dirty files alone |
+
+**Closeout:** PR [#172](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172) merged @ `b08ec30` (2026-08-02). Session `S019-retrieval-quality` archived; cycle EV-016 completed.
+
+## Cycle EV-017 — Scope (S020 / Retrieval Batch B)
+
+**Approved (session open):** 2026-08-02  
+**Session:** S020-retrieval-batch-b  
+**Predecessor:** S019 / EV-016 (F42 LIVE)  
+**Issues:** #83, #161 (CE spike), #162 (soft language); **F43** answer/retrieval cache  
+**Branch:** `evolve/EV-017-retrieval-batch-b`
+
+### Scope summary
+
+**Batch B — multi-track:** Ship **F43** answer/retrieval cache (H1/H9 cost win; no LangGraph).
+Keep **#83 / #161** CE rerank as spike-gated track (prior R3 failed lift). Include **#162**
+soft language filter in the same cycle (optional / empty-hit; not proven on staging golden).
+
+### Decisions (session open)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D1 | Session | Open **S020-retrieval-batch-b** (do not reopen S019) |
+| S020-D2 | Scope | **All three** tracks in one cycle (F43 + CE spike + #162) |
+| S020-D3 | Routing | **Standard** (`01→02→04→07→08→09→10→11→12→13`; skip 03, 05, 06, 15) |
+
+### Decisions (Phase 0 intake batch 1 — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D4 | F43 cache tiers | **Full H1 cascade** — exact → semantic answer → retrieve-result → generate |
+| S020-D5 | #83 / #161 CE | **Spike + ship gate** — no prod CE unless gate passes |
+| S020-D6 | #162 soft language | **Config-gated L1** (default off) + empty-hit fixture |
+| S020-D7 | Fn ids | **Pre-allocate F43** (cache) + **F44** (#162) + **F45** (CE) as Planned |
+
+| S020-D8 | Proceed gate | **Allocate F43–F45 + finalize impact + start 01-requirements** |
+
+### Decisions (01 Phase 0C — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D9 | Locked L1–L12 | **Approve all** |
+| S020-D10 | Semantic cache | **Conservative** cosine; miss → retrieve; log hits; quality ≥ H0 |
+| S020-D11 | CE spike model | **`BAAI/bge-reranker-v2-m3`** on Modal T4 |
+| S020-D12 | CE ship floors | Relevancy ≥ **0.28** and faith ≥ **0.91** (Hy1 staging floors) |
+| S020-D13 | Deploy | Staging **Path A** (write-api + chat-rag) |
+| S020-D14 | Cache lifecycle | **TTL + size cap**; bust on corpus version / F41 rebuild |
+
+### Decisions (02-verify-plan medium closeout — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D15 | Medium M1–M4 | **Approve all** — semantic threshold **0.92**; cache TTL=**3600s** / max_entries=**1024**; CE spike ephemeral Modal T4 (ChatRAG never playground URL); OpenAPI `cache_hit` in **07-build** |
+
+### Decisions (Phase A checkpoint + 04-tech-plan — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D16 | Phase A checkpoint | **Continue to Phase B** / start 04-tech-plan |
+| S020-D17 | Tech plan TP1–TP7 | **Approve all** — Phase 22 M94–M98; ADR-042; reuse query embed; CE ephemeral T4 + mock CI; F43→F44→F45; no new ChatRAG deps; skip topology rewrite |
+
+### Phase A / B status
+
+Phase 0 **approved**. 01 locked (D9–D14). 02 **completed** (D15). Gate A→B **passed** (D16).  
+04-tech-plan artifacts drafted (D17). Next: **Gate B→C** → 07-build.

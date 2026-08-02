@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-01 (S019/EV-016 — F42 H7+P1 packing + multi-query retrieval)
+> **Last updated**: 2026-08-02 (S020/EV-017 — F43–F45 Retrieval Batch B: cache, soft language, CE)
 
 ## Summary
 
@@ -51,7 +51,10 @@
 | F39 | Unified LLM Modal service (deprecate `vecinita-ollama`) | Planned | Cross-cutting | `infra/modal/llm_app.py`, `packages/llm-client`, all LLM consumers | S010/EV-011; ADR-037; follow-on RD-163–RD-172 |
 | F40 | ChatRAG cold-start wait UX (rotating fun facts + consent) | Planned | ChatRAG | chat-rag-frontend; optional `frontend-i18n` / `frontend-ui` | S016/EV-014 #87 |
 | F41 | Corpus re-embed / re-chunk rebuild (migration job) | Planned | Data Management | data-management-backend, internal-write-api, data-management-frontend, Modal | S017/EV-015 #167 |
-| F42 | Richer context packing + multi-query retrieval (H7+P1) | Planned | ChatRAG | packages/rag, chat-rag-backend; F36 eval sandbox join | S019/EV-016 #165; S019-D31/D37 |
+| F42 | Richer context packing + multi-query retrieval (H7+P1) | Implemented | ChatRAG | packages/rag, chat-rag-backend; F36 eval sandbox join | S019/EV-016 #165; PR #172 |
+| F43 | Answer / retrieval cache (H1 cascade) | Planned | ChatRAG | packages/rag, chat-rag-backend; F36 harness | S020/EV-017; S020-D4/D7 |
+| F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
+| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S020-D5/D7 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -816,13 +819,76 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `packages/rag` | Shared P1 packer + thin H7 fan-out helpers |
   | `apps/chat-rag-backend` | Wire `_build_prompt` / retrieve path through shared helpers |
   | F36 eval sandbox | Same packing + H7 as ChatRAG (no parallel prompt assembly) |
-- **Out of scope (this cycle)**: Multilingual embed swap / #159 / E1 promote; R1 cheap rerank;
-  CE/#83; soft language filter #162; LangGraph / ADR-006 amend; answer cache (F43); model
-  upsizing; changing prod embed pin.
+- **Out of scope (EV-016)**: Multilingual embed swap / #159 / E1 promote; R1 cheap rerank;
+  CE/#83; soft language filter #162; LangGraph / ADR-006 amend; answer cache (→ F43 in EV-017);
+  model upsizing; changing prod embed pin.
 - **Ship prereq**: ISS-008 write-api deploy so Admin `corpus_profile=staging` loads
   `qa_pairs_staging.json` before promote-path smoke.
 - **Source**: S019 / EV-016; GitHub #165; harness H7; S019-D22/D31/D37; hybrid
-  `20260801T002819Z_hybrid-sweep.json`; E1 reject `20260801T130441Z_e1-shadow-f36.json`.
+  `20260801T002819Z_hybrid-sweep.json`; E1 reject `20260801T130441Z_e1-shadow-f36.json`;
+  PR #172 @ `b08ec30`.
+
+### F43: Answer / retrieval cache (H1 cascade)
+
+- **What it does**: Cuts LLM cost/latency on repeat asks via a **full H1 cascade** (S020-D4):
+  (1) exact answer cache on normalized query+locale → (2) semantic answer cache (cosine
+  threshold) → (3) retrieve-result cache → (4) generate + store. Shared helper in
+  `packages/rag`; ChatRAG ask/stream wires the cascade. **No LangGraph** (ADR-006 unchanged).
+  Keys are content-hash only (ADR-004 — no identity/session keys).
+- **Inputs**: Normalized query + locale; optional cache config (TTL, max entries, semantic
+  threshold); corpus/version stamp for invalidation.
+- **Outputs**: Cached or freshly generated answer + sources; observability for
+  `cache_hit` ∈ {none, exact, semantic, retrieve}; F36/harness cost + hit-rate cells.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | Normalize + cascade lookup/store helpers |
+  | `apps/chat-rag-backend` | Wire ask/stream through cascade before/after retrieve+synth |
+  | F36 / eval harness | Warm/cold cost + quality ≥ H0 gates |
+- **Out of scope (this cycle)**: Modal volume durable cache (unless 01 unlocks); LangGraph;
+  identity-keyed memory; changing synthesizer pin.
+- **Source**: S020 / EV-017; S019 harness H1/H9; S020-D4/D7/D8.
+
+### F44: Soft language filter / empty-hit fallback (#162)
+
+- **What it does**: When same-language retrieve returns **empty** (above min_score), optionally
+  retry without language filter (**L1**). Shipped **config-gated, default off** (S020-D6) so
+  prod behavior stays L0-strict until enabled. Includes an **empty-hit fixture** so the path
+  is testable (staging golden alone never fired soft fallbacks).
+- **Inputs**: Query + detected locale; flag e.g. `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK`;
+  existing `min_retrieval_score` / `top_k`.
+- **Outputs**: Chunks from same-lang pass or fallback pass; metrics for fallback fired /
+  empty_final; no change to answer schema.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | L1 retrieve helper (same-lang then optional unfiltered retry) |
+  | `apps/chat-rag-backend` | Flag-gated wire on retrieve path |
+  | tests / fixtures | Empty-hit fixture + unit/e2e coverage |
+- **Out of scope (this cycle)**: L2 opposite-language-only; changing default-on without evidence;
+  #159 embed swap.
+- **Source**: S020 / EV-017; GitHub #162; S019 A3 spike; S020-D6/D7/D8.
+
+### F45: Cross-encoder rerank spike + gated ship (#83/#161)
+
+- **What it does**: Renews the **cross-encoder rerank** track for smart retrieval. Runs a
+  documented spike (Modal T4 or playground) with a **hard ship gate**; **no production CE**
+  unless the gate passes (S020-D5). Prior R3 (`bge-reranker-base`) failed relevancy lift —
+  spike may retry or try an alternate model (01 open Q). If gate fails, F45 stays spike/docs
+  only and #83 remains open.
+- **Inputs**: Retrieved top-N passages; CE model id; keep_k; packing (P1) fixed as F42.
+- **Outputs**: Reranked top_k for synthesis when enabled; spike report + gate metrics; optional
+  prod flag only after gate pass.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | Session spike scripts / Modal CE | Score pairs; measure relevancy/faith/cost |
+  | `packages/rag` (if ship) | CE client + rerank merge |
+  | `apps/chat-rag-backend` (if ship) | Flag-gated post-retrieve CE |
+- **Out of scope unless gate passes**: Default-on CE; cheap R1 heuristic (already rejected on faith).
+- **Ship gate (proposed — confirm in 01)**: Staging golden relevancy ≥ F42 Hy1 floor **and**
+  faith ≥ 0.91; else spike-only.
+- **Source**: S020 / EV-017; GitHub #83/#161; S019 R3 spike; S020-D5/D7/D8.
 
 ## Planned / Deferred (post-v1)
 

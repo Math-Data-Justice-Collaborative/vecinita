@@ -35,10 +35,12 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S012 | hotfix | completed | Admin UI #112 pagination + #105 ES sidebar | `fix/S012-hotfix-admin-ui-112-105` | 2026-07-28 | 2026-07-28 |
 | S013 | feature | completed | Unified job monitoring (#116) | `evolve/EV-012-unified-job-monitoring` | 2026-07-29 | 2026-07-29 |
 | S014 | feature | completed | Admin Corpus & dashboard UI/UX polish (#148) | `main` (merged #154) | 2026-07-29 | 2026-07-29 |
+| S019 | feature | completed | Batch A retrieval quality (F42 H7+P1) | `evolve/EV-016-retrieval-quality` (merged #172) | 2026-07-31 | 2026-08-01 |
+| S020 | feature | in_progress | Retrieval Batch B (F43 cache + #83/#161 + #162) | `evolve/EV-017-retrieval-batch-b` | 2026-08-02 | — |
 
 ## Active session
 
-None — S014/EV-013 closed 2026-07-29 after PR #154 merge. See `workflow-state.yaml` §`active_session` (null) and `docs/sessions/S014-admin-ui-polish-148/`.
+**S020-retrieval-batch-b** — feature / EV-017 Retrieval Batch B (F43 cache + #83/#161 CE spike + #162). Branch `evolve/EV-017-retrieval-batch-b`. Predecessor S019/EV-016 (F42 LIVE).
 
 ## Folder layout
 

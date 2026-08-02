@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-01 (S019/EV-016 F42 — H7+P1 retrieval quality on E0)
+> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — answer cache, soft language, CE gated)
 
 ## Overview
 
@@ -330,6 +330,63 @@ chat-rag in `deploy-digitalocean.yml`).
   (and write-api if eval must match).
 - Or redeploy prior DO app deployment / git SHA known-good before F42 merge.
 - Embed pin stays E0 — no corpus rollback for this ship.
+
+## EV-017 — Retrieval Batch B (F43–F45)
+
+**ADR:** ADR-042 (cache) · **Session:** S020 · **Ship gate:**
+`docs/sessions/S020-retrieval-batch-b/reports/ce-ship-gate.md` (AC-BB9 / UJ-060)
+
+**Ship candidate:** F43 H1 answer/retrieve cache (default on) + F44 soft-language L1
+(default **off**) + F45 CE merge path (default **off**, spike-gated). No Alembic; no
+frontend code change; no prod CE until UJ-060 floors pass.
+
+### Deploy units touched
+
+| Unit | Change |
+|------|--------|
+| `packages/rag` | Library — answer cache cascade, soft-language retrieve, CE merge helpers |
+| DO chat-rag-backend | Ask / askStream wire F43–F45; OpenAPI `cache_hit` on `AskResponse` / stream `done` |
+| DO internal-write-api | Only if eval harness needs matching knobs (not required for T0 ask path) |
+| Modal (embed / LLM / DM) | **No prod redeploy** for F43–F44; CE spike = ephemeral Modal T4 only |
+| Frontends | **No redeploy** required |
+
+### Secrets / config
+
+| Variable | Where | Default | Notes |
+|----------|-------|---------|-------|
+| `VECINITA_RAG_CACHE` | chat-rag-backend | `true` | H1 cascade on/off |
+| `VECINITA_RAG_CACHE_TTL_SECONDS` | same | `3600` | Optional |
+| `VECINITA_RAG_CACHE_MAX_ENTRIES` | same | `1024` | Optional |
+| `VECINITA_RAG_CACHE_SEMANTIC` | same | `true` | Semantic tier |
+| `VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD` | same | `0.92` | Conservative |
+| `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK` | same | `false` | L1 only when on |
+| `VECINITA_RAG_RERANK_CE` | same | `false` | **Must stay off** until AC-BB9 |
+| `VECINITA_RAG_RERANK_CE_MODEL` / `_TOP_N` | same | optional | CE path only |
+| Modal embed / LLM URLs | Unchanged | — | No new secrets |
+
+Optional knobs need not appear in `infra/do/*.yaml` when shipping code defaults.
+Override on DO only for staged UJ-058 (soft language) or post-gate CE enable.
+No new CORS origins or `VITE_*` keys.
+
+### Redeploy order (staging)
+
+1. `sync-all-secrets` (Modal URL parity — skip if URLs unchanged)
+2. **chat-rag-backend** — F43–F45 ask path (primary)
+3. Live verify: `do_verify_required_secrets.sh` → `staging_smoke.sh` (H1) →
+   `verify_connectivity.sh` (H4–H5 carry) → confirm live `openapi.json` has `cache_hit`
+4. **UJ-060 / AC-BB9:** CE spike per `spike-f45-ce-runbook.md` — relevancy ≥ **0.28**,
+   faith ≥ **0.91**; do **not** set `VECINITA_RAG_RERANK_CE=true` unless gate passes
+
+CD chain unchanged: `main` → CI → deploy-preflight → Modal → DigitalOcean.
+
+### Rollback
+
+- Soft language / CE kill switches without full redeploy: keep or set
+  `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK=false` and `VECINITA_RAG_RERANK_CE=false`.
+- Cache kill switch: `VECINITA_RAG_CACHE=false` (or redeploy prior DO deployment /
+  git SHA known-good — staging pre-Batch B: `b08ec30`).
+- In-process cache — no volume/corpus rollback.
+- Stop ephemeral CE spike app if Path A was started (`vecinita-spike-f45-rerank`).
 
 ## Open questions
 

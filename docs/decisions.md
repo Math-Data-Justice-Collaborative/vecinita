@@ -596,6 +596,47 @@ Artifacts: feature-list F41; UJ-053–054; TC-161–169; AC-RB1–10; ADR-040;
 `docs/sessions/S017-corpus-reembed-migration/reports/01-requirements-corpus-rebuild.md`;
 02 audit M1–M4 applied 2026-07-30.
 
+### EV-017 requirements decisions (2026-08-02) — RD-197–RD-208
+
+S020 / Retrieval Batch B — F43 answer cache, F44 soft language (#162), F45 CE spike+gate
+(#83/#161). Standard routing. Predecessor EV-016/F42 LIVE.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-197 | Fn scope | Allocate **F43** (cache), **F44** (#162), **F45** (CE) | S020-D7/D8 |
+| RD-198 | F43 cascade | Full H1: exact → semantic → retrieve → generate | S020-D4 |
+| RD-199 | Semantic policy | Conservative cosine (default **0.92**); miss → continue; log hits; warm quality ≥ H0 | S020-D10 |
+| RD-200 | Cache keys / lifecycle | Content-hash of normalized query+locale; **TTL + size cap**; bust on corpus version / F41 rebuild; no identity keys (ADR-004) | S020-D14 |
+| RD-201 | Cache observability | `cache_hit` ∈ {none,exact,semantic,retrieve} on `/ask` + stream `done` | 01 contract |
+| RD-202 | F44 soft language | Config-gated L1 (**default off**) + empty-hit fixture | S020-D6 |
+| RD-203 | F45 CE process | Spike + ship gate; **no prod CE** until gate passes | S020-D5 |
+| RD-204 | CE model | Spike/ship candidate **`BAAI/bge-reranker-v2-m3`** on Modal T4 | S020-D11 |
+| RD-205 | CE ship floors | Relevancy ≥ **0.28** and faith ≥ **0.91** on staging golden | S020-D12 |
+| RD-206 | Deploy | Staging Path A (write-api + chat-rag) | S020-D13 |
+| RD-207 | Out of scope | LangGraph / ADR-006 amend; Modal volume durable cache; default-on CE or soft language | S019-D27; S020-D9 |
+| RD-208 | Tests | UJ-057–060; TC-176–184; AC-BB1–BB10; API e2e for cache/soft/CE (mock CE in CI) | 01 Phase 0C |
+
+Artifacts: feature-list F43–F45; UJ-057–060; TC-176–184; AC-BB1–10;
+`docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md`.
+
+### EV-017 tech-plan decisions (2026-08-02) — TP1–TP7
+
+S020 / Phase 22 (M94–M98). S020-D17.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| TP1 | Milestones | M94 rag cache → M95 ChatRAG/OpenAPI → M96 soft → M97 CE spike → M98 e2e/docs |
+| TP2 | ADR | **ADR-042** in-process H1 cascade |
+| TP3 | Semantic embed | Reuse existing query embed (Modal) |
+| TP4 | CE packaging | Ephemeral Modal T4; mock CE in CI; no playground URL |
+| TP5 | Build order | F43 → F44 → F45 (M96/M97 after M94) |
+| TP6 | Dependencies | No new ChatRAG runtime deps; CE via Modal HTTP |
+| TP7 | Deploy docs | Skip topology rewrite; Path A + CE ship-gate runbook |
+
+Artifacts: `execution-plan.md` Phase 22; ADR-042;
+`docs/sessions/S020-retrieval-batch-b/reports/tech-plan-delta.md`;
+`docs/sessions/S020-retrieval-batch-b/roadmap.md`.
+
 ### EV-015 tech-plan decisions (2026-07-30) — TP-S017-01–09
 
 01-requirements locked RD-188–196. 04-tech-plan locks schema, promote, ops, and Phase 20:

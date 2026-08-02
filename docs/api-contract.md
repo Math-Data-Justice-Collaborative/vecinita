@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-07-30 (S017/EV-015 F41 — JobOptions rebuild locked to OpenAPI)  
+> **Last updated**: 2026-08-02 (S020/EV-017 F43 — optional `cache_hit` on ask responses)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -136,6 +136,7 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
 {
   "answer": "string",
   "language": "en | es",
+  "cache_hit": "none | exact | semantic | retrieve",
   "sources": [
     {
       "chunk_id": "uuid",
@@ -148,6 +149,9 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
 }
 ```
 
+`cache_hit` (F43 / EV-017): optional for older clients; **required in OpenAPI** after F43 ships.
+`none` = full generate path; `exact` / `semantic` skip LLM; `retrieve` reuses cached chunks then may still synthesize.
+
 - **Errors**: `400` validation / forbidden fields; `503` upstream Modal unavailable.
 
 ### POST `/api/v1/ask/stream`
@@ -156,6 +160,7 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
 - **Auth**: None.
 - **Request**: Same as `/ask`.
 - **Response**: `text/event-stream` — events: `token`, `sources`, `done`.
+  `done` payload may include `cache_hit` (same enum as `/ask`) when F43 is enabled.
 - **Errors**: Same as `/ask`.
 
 ### GET `/api/v1/documents`
