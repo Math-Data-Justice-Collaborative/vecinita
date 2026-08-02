@@ -124,3 +124,35 @@ Artifact: `eval-experiments/20260801T002819Z_hybrid-sweep.json`
 2. Enter Phase A `01-requirements`  
 3. Fix ISS-008 on ship path  
 4. Optional follow-on: Spanish relevancy / es golden expansion (not F42 blocker)
+
+## Hybrid sweep results (20260802T020137Z)
+
+| Cell | stack | retrieval | faith | relevancy | lang_match | cross_lang | en_rel | es_rel | p95_ms |
+|------|-------|-----------|-------|-----------|------------|------------|--------|--------|--------|
+| Hy1 | H7+P1 | 0.875 | 0.9375 | 0.16666666666666666 | 1.0 | 0.18888888888888888 | 0.2727272727272727 | 0.0 | 7559 |
+
+Artifact: `eval-experiments/20260802T020137Z_hybrid-sweep.json`
+
+## Hybrid sweep results (20260802T022041Z)
+
+| Cell | stack | retrieval | faith | relevancy | lang_match | cross_lang | en_rel | es_rel | p95_ms |
+|------|-------|-----------|-------|-----------|------------|------------|--------|--------|--------|
+| Hy1 | H7+P1 | 0.875 | 0.9375 | 0.16666666666666666 | 1.0 | 0.18888888888888888 | 0.2727272727272727 | 0.0 | 7401 |
+
+Artifact: `eval-experiments/20260802T022041Z_hybrid-sweep.json`
+
+## Hybrid sweep results (20260802T022407Z)
+
+| Cell | stack | retrieval | faith | relevancy | lang_match | cross_lang | en_rel | es_rel | p95_ms |
+|------|-------|-----------|-------|-----------|------------|------------|--------|--------|--------|
+| Hy1 | H7+P1 | 0.9375 | 0.9375 | 0.16666666666666666 | 1.0 | 0.13333333333333336 | 0.2727272727272727 | 0.0 | 8793 |
+
+Artifact: `eval-experiments/20260802T022407Z_hybrid-sweep.json`
+
+## Hybrid sweep results (20260802T022836Z)
+
+| Cell | stack | retrieval | faith | relevancy | lang_match | cross_lang | en_rel | es_rel | p95_ms |
+|------|-------|-----------|-------|-----------|------------|------------|--------|--------|--------|
+| Hy1 | H7+P1 | 0.9375 | 0.9375 | 0.8333333333333334 | 1.0 | 0.13333333333333336 | 0.8181818181818182 | 0.8571428571428571 | 7469 |
+
+Artifact: `eval-experiments/20260802T022836Z_hybrid-sweep.json`

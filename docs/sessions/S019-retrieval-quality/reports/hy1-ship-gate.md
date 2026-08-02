@@ -44,7 +44,7 @@ Evidence spike baseline: `20260801T002819Z_hybrid-sweep.json` (Hy1 ~0.31 / 0.91)
 
 ## Checklist
 
-- [ ] ISS-008 deployed to staging write-api
-- [ ] Staging Hy1 F36 run meets relevancy ≥ 0.28 / faith ≥ 0.91
-- [ ] Promote smoke uses staging golden path (not prod `qa_pairs.json` only)
-- [ ] Prod embed pin unchanged (E0)
+- [x] ISS-008 deployed to staging write-api (evolve pin @ `5693422`)
+- [x] Staging Hy1 F36 run meets relevancy ≥ 0.28 / faith ≥ 0.91 — `20260802T022836Z` (0.833 / 0.938)
+- [x] Promote smoke uses staging golden path (not prod `qa_pairs.json` only) — 18-item staging run
+- [x] Prod embed pin unchanged (E0)

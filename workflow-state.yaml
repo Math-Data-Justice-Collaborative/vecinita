@@ -2325,10 +2325,11 @@ project:
           TP-S017-12-A: option_1_accept_always_on_shadow
           TP-S017-12-B: option_1_accept_openapi_gap_this_cycle
     13-deploy-smoke:
-      status: in_progress
+      status: completed
       started_at: '2026-08-01'
-      partial_rerun_at: '2026-08-01'
-      partial_rerun_note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+      completed_at: '2026-08-01'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; user approved closeout option 1 — opening PR to main
       session_id: S019-retrieval-quality
       branch: evolve/EV-016-retrieval-quality
       evolve_cycle_id: EV-016
@@ -2337,10 +2338,32 @@ project:
       feature: F42
       feature_ids:
       - F42
-      commits_head: 5530b46
-      current_action: phase15_t1_predeploy
+      commits_head: 5693422
+      commit_deployed: 5693422
+      current_action: completed_awaiting_pr_merge
+      next_action: open PR to main; await merge; reset DO pins after merge
+      ac_rq6_disposition: investigate_fix_option_1_resolved
+      merge_gate: pending_merge
       deploy_path: A
-      note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+      path_a_staging_result: PASS
+      overall_result: path_a_pass_ac_rq6_pass
+      report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+      iss008_staging_run: confirmed_18_items
+      ac_rq6:
+        status: pass
+        relevancy: 0.833
+        relevancy_floor: 0.28
+        faith: 0.938
+        faith_floor: 0.91
+        disposition: investigate_fix_option_1_resolved
+        fix: judge+H7 fix (S019-D51)
+        evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+      hy1_gate:
+        status: pass
+        evidence: 20260802T022836Z_hybrid-sweep.json
+        relevancy: 0.833
+        faith: 0.938
+      note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
       s017_baseline:
         mode: evolve
         delta_only: true
@@ -3073,7 +3096,7 @@ active_session:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: 5530b46
+  commits_head: 5693422
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -3081,9 +3104,20 @@ active_session:
   s019_d47_decision_recorded: true
   s019_d47_note: Fix in place QA-S019-B01/B02/B03 COMPLETE; 09 pass_with_advisories; ready for 11-verify-impl
   s019_d47_choice: option_1_fix_in_place_b01_b03
-  current_action: running_13_deploy_smoke
+  s019_d50_decision: S019-D50
+  s019_d50_decision_recorded: true
+  s019_d50_note: User chose option 1 investigate/fix AC-RQ6 (ES relevancy 0 diluting mean)
+  s019_d51_decision: S019-D51
+  s019_d51_decision_recorded: true
+  s019_d51_note: Judge+H7 fix applied — ES relevancy scoring corrected
+  s019_d52_decision: S019-D52
+  s019_d52_decision_recorded: true
+  s019_d52_note: Hy1 PASS — relevancy 0.833 faith 0.938 (20260802T022836Z_hybrid-sweep.json)
+  current_action: opening_pr_to_main
   preparing_11: false
-  next_action: run 13-deploy-smoke
+  next_action: open PR to main; await merge; reset DO pins after merge
+  ac_rq6_disposition: investigate_fix_option_1_resolved
+  merge_gate: pending_merge
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
@@ -3143,7 +3177,7 @@ active_session:
   - tests/unit/modal/test_llm_engine_awq_kwargs.py
   feature_ids_note: 'F42 = H7+P1 (Hy1) on E0 per S019-D31/D37; E1 rejected; #159 open outside F42; F43 not allocated'
   phase0_notes: phase0_approved=true (S019-D37). E1 F36 done — do NOT ship E1; F41 rebuild 1fa1dec9-f5a0-4670-afa2-a71fe039d479 not promoted; artifact 20260801T130441Z_e1-shadow-f36.json. F42=H7+P1 on E0; handoff → 01-requirements.
-  note: 'S019/EV-016 — 2026-08-01: 12-verify-deploy COMPLETE; deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; gates.deploy pending until 13; current_action=ready_for_13_deploy_smoke; HEAD 5530b46'
+  note: 'S019/EV-016 — 2026-08-01: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; DO pins stay on evolve until post-merge reset; gates.deploy=passed_pending_merge'
   blocking_note: ISS-008 deploy remains ship path prereq (not Phase A entry blocker); prod embed pin BAAI/bge-small-en-v1.5 unchanged; ADR-006 amend deferred
   a0_status: staging_complete
   a1_status: complete_no_retrieval_lift
@@ -3288,6 +3322,8 @@ active_session:
   - docs/sessions/S019-retrieval-quality/reports/qa-report.md
   - docs/sessions/S019-retrieval-quality/reports/e2e-report.md
   - docs/sessions/S019-retrieval-quality/reports/verify-impl.md
+  - docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+  - docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T020137Z_hybrid-sweep.json
   - docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
   - docs/deployment-integration.md
   - docs/deploy-checklist.md
@@ -3531,12 +3567,17 @@ active_session:
       phase5_summary: completed
   - stage: 13-deploy-smoke
     required: true
-    status: in_progress
+    status: completed
     started_at: '2026-08-01'
+    completed_at: '2026-08-01'
     skip_rationale:
-    current_action: phase15_t1_predeploy
-    next_action: phase15_t1_predeploy
-    note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+    current_action: completed_awaiting_pr_merge
+    next_action: open PR to main; await merge; reset DO pins after merge
+    ac_rq6_disposition: investigate_fix_option_1_resolved
+    merge_gate: pending_merge
+    report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+    overall_result: path_a_pass_ac_rq6_pass
+    note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
   - stage: 15-service-health
     required: false
     status: pending
@@ -8538,10 +8579,11 @@ stages:
     phase4_checklist: *id023
     user_approvals: *id024
   13-deploy-smoke:
-    status: in_progress
+    status: completed
     started_at: '2026-08-01'
-    partial_rerun_at: '2026-08-01'
-    partial_rerun_note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+    completed_at: '2026-08-01'
+    partial_rerun_at: '2026-08-02'
+    partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; user approved closeout option 1 — opening PR to main
     session_id: S019-retrieval-quality
     branch: evolve/EV-016-retrieval-quality
     evolve_cycle_id: EV-016
@@ -8550,10 +8592,32 @@ stages:
     feature: F42
     feature_ids:
     - F42
-    commits_head: 5530b46
-    current_action: phase15_t1_predeploy
+    commits_head: 5693422
+    commit_deployed: 5693422
+    current_action: completed_awaiting_pr_merge
+    next_action: open PR to main; await merge; reset DO pins after merge
+    ac_rq6_disposition: investigate_fix_option_1_resolved
+    merge_gate: pending_merge
     deploy_path: A
-    note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+    path_a_staging_result: PASS
+    overall_result: path_a_pass_ac_rq6_pass
+    report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+    iss008_staging_run: confirmed_18_items
+    ac_rq6:
+      status: pass
+      relevancy: 0.833
+      relevancy_floor: 0.28
+      faith: 0.938
+      faith_floor: 0.91
+      disposition: investigate_fix_option_1_resolved
+      fix: judge+H7 fix (S019-D51)
+      evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+    hy1_gate:
+      status: pass
+      evidence: 20260802T022836Z_hybrid-sweep.json
+      relevancy: 0.833
+      faith: 0.938
+    note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
     s017_baseline:
       mode: evolve
       delta_only: true
@@ -9202,12 +9266,13 @@ deployment:
     t0_note: F42 delta T0 PASS UJ-055 2/2; full e2e suite infra-blocked (no Docker/Postgres)
   staging:
     status: deployed
-    last_verified: '2026-07-31'
-    commit_deployed: a6c39e5
-    commit_head: a6c39e5
-    drift: false
-    branch: main
-    commit_deployed_note: 'S018 post-merge CD — Modal DM + DO write-api redeployed for eval job dispatch hotfix @ a6c39e5 (PR #169); drift=false; Admin Evaluation live smoke PASS'
+    last_verified: '2026-08-02'
+    commit_deployed: 5693422
+    commit_head: 5693422
+    drift: true
+    branch: evolve/EV-016-retrieval-quality
+    commit_deployed_note: 'S019/EV-016 Path A PASS @ 5693422 — DO write-api + chat-rag pinned evolve; H1–H5 PASS; ISS-008 18-item confirmed; AC-RQ6 PASS relevancy 0.833 vs floor 0.28 (faith 0.938); 13 closeout approved — opening PR; pins reset after merge'
+    staging_note: DO pins on evolve for write-api + chat-rag until PR merge; AC-RQ6/Hy1 PASS; opening PR to main
     modal_data_management:
       redeployed_at: '2026-07-31'
       commit: a6c39e57e856e75d149b1ac1af82d6e92243af19
@@ -9227,33 +9292,43 @@ deployment:
         session_id: S015-hotfix-jobs-sse-cors
         note: S015 Jobs SSE CORS hotfix — live OPTIONS /jobs/events PASS after redeploy
     evolve_pin:
-      cycle: EV-015
-      session: S017-corpus-reembed-migration
-      branch: evolve/EV-015-corpus-reembed-migration
-      commit: c7cda84
-      status: cleared
-      cleared_at: '2026-07-30'
+      cycle: EV-016
+      session: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      commit: 5693422
+      status: pinned_active
       apps:
         vecinita-internal-write-api: ACTIVE
-        vecinita-admin-frontend: ACTIVE
-      note: 'EV-015 evolve pin cleared after PR #168 merge @ c7cda84; DO apps reset github.branch=main ACTIVE'
-      prior_pinned:
+        vecinita-chat-rag-backend: ACTIVE
+      note: 'EV-016 Path A — DO write-api + chat-rag pinned ACTIVE on evolve @ 5693422; 13 closeout approved; opening PR to main; pins reset after merge'
+      prior_cleared:
         cycle: EV-015
         session: S017-corpus-reembed-migration
         branch: evolve/EV-015-corpus-reembed-migration
-        commit: 180ad14
-        status: pinned_active
+        commit: c7cda84
+        status: cleared
+        cleared_at: '2026-07-30'
         apps:
           vecinita-internal-write-api: ACTIVE
           vecinita-admin-frontend: ACTIVE
-        note: EV-015 Path A — DO write-api + admin FE pinned ACTIVE on evolve until merge; drift=true vs main
-        prior_cleared:
-          cycle: EV-013
-          session: S014-admin-ui-polish-148
-          pr_number: 154
-          status: cleared
-          cleared_at: '2026-07-29'
-          note: 'Evolve pin cleared after PR #154 merge; admin FE on main'
+        note: 'EV-015 evolve pin cleared after PR #168 merge @ c7cda84; DO apps reset github.branch=main ACTIVE'
+        prior_pinned:
+          cycle: EV-015
+          session: S017-corpus-reembed-migration
+          branch: evolve/EV-015-corpus-reembed-migration
+          commit: 180ad14
+          status: pinned_active
+          apps:
+            vecinita-internal-write-api: ACTIVE
+            vecinita-admin-frontend: ACTIVE
+          note: EV-015 Path A — DO write-api + admin FE pinned ACTIVE on evolve until merge; drift=true vs main
+          prior_cleared:
+            cycle: EV-013
+            session: S014-admin-ui-polish-148
+            pr_number: 154
+            status: cleared
+            cleared_at: '2026-07-29'
+            note: 'Evolve pin cleared after PR #154 merge; admin FE on main'
     main_transition:
       merge_commit: c7cda84181da7dddd43c4e1fe813d7f4e8e7c412
       pr_number: 168
@@ -9294,7 +9369,15 @@ deployment:
       h5_frontend_bundle: pass
       h6_browser_uj: waived_v1
       h0c: pass
+      ac_rq6: pass
+      ac_rq6_relevancy: 0.833
+      ac_rq6_relevancy_floor: 0.28
+      ac_rq6_faith: 0.938
+      ac_rq6_faith_floor: 0.91
+      hy1_ship_gate: pass
+      hy1_evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
     notes:
+    - 'S019/EV-016 2026-08-02 Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52) relevancy 0.833 faith 0.938; H1–H5 PASS; awaiting user closeout/PR'
     - 'S018 2026-07-31 CLOSED — user option 2: close session + push/PR prevention only; pause before Batch A. active_session=null; S018 archived. Prevention @ 8a8cd48 on fix/S018-job-dispatch-prevention (push/PR pending). PR #169 merged + prod verified; BUG-2026-07-31 resolved.'
     - 'S018 2026-07-31: Prevention committed 8a8cd48 on fix/S018-job-dispatch-prevention. Awaiting user close + push/PR decision. Phase 5.6 AskQuestion close_session; then Batch A via 00-context. Session remains open.'
     - 'S018 2026-07-31: BUG-2026-07-31 resolved. Prevention implemented (registry + husky + checklist + rule). Prevention commit pending on fix/S018-job-dispatch-prevention. Phase 5.6 AskQuestion close_session next; do not close_session yet.'
@@ -13290,7 +13373,7 @@ evolve_cycles:
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/165
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
   current_stage: 13-deploy-smoke
-  current_stage_note: '2026-08-01 — 13-deploy-smoke STARTED; T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope; HEAD 5530b46'
+  current_stage_note: '2026-08-01 — User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; DO pins stay on evolve until post-merge reset; gates.deploy=passed_pending_merge'
   mode: evolve
   delta_only: true
   branch: evolve/EV-016-retrieval-quality
@@ -13440,7 +13523,7 @@ evolve_cycles:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: 5530b46
+  commits_head: 5693422
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -13450,7 +13533,7 @@ evolve_cycles:
   s019_d47_choice: option_1_fix_in_place_b01_b03
   current_action: running_13_deploy_smoke
   preparing_11: false
-  next_action: phase15_t1_predeploy
+  next_action: pushing_branch_then_path_a_pin
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
@@ -13652,17 +13735,20 @@ evolve_cycles:
     phase_b: passed
     phase_c: passed
     phase_d: passed
-    deploy: pending
+    deploy: passed
   checkpoint_notes:
     phase_a: 'Passed 2026-08-01 — user approved option 1: gate A→B → start 04-tech-plan for F42=H7+P1 on E0'
     phase_b: 'Passed 2026-08-01 — user approved option 1: Yes — gate B→C → start 07-build at T91.1 (S019-D45)'
     phase_c: 'Passed 2026-08-01T20:49:00Z — user approved option 1 (S019-D46): gate C→D → start 09-qa + 10-e2e; HEAD 257486f; 08-verify PASS (delta) Phase 21 M91–M93 / F42; AC-RQ6/ISS-008 ship-path deferred'
     phase_d: 'Passed 2026-08-01 — user approved Phase 2 failure mitigations (option 1) and Phase 3 rollback (option 1); 12-verify-deploy COMPLETE; deploy-checklist READY; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
+    deploy: 'Passed 2026-08-01 — user approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; DO pins reset after merge'
   gates:
     a_to_b: passed
     b_to_c: passed
     c_to_d: passed
-    deploy: pending
+    deploy: passed_pending_merge
+    deploy_blocker: null
+    deploy_blocker_note: 13-deploy-smoke PASS — opening PR to main; DO pins stay on evolve until post-merge reset
   routing_plan:
     required_stages:
     - 00-context
@@ -13954,12 +14040,31 @@ evolve_cycles:
       - live_staging_inspection
       note: S019/EV-016 12-verify-deploy COMPLETE — checklist ready; failure mitigations + rollback approved (option 1 each); handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13
     13-deploy-smoke:
-      status: in_progress
+      status: completed
       started_at: '2026-08-01'
-      current_action: phase15_t1_predeploy
-      next_action: phase15_t1_predeploy
+      completed_at: '2026-08-01'
+      current_action: completed_awaiting_pr_merge
+      next_action: open PR to main; await merge; reset DO pins after merge
+      ac_rq6_disposition: investigate_fix_option_1_resolved
+      merge_gate: pending_merge
       deploy_path: A
-      note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+      commits_head: 5693422
+      commit_deployed: 5693422
+      overall_result: path_a_pass_ac_rq6_pass
+      report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+      iss008_staging_run: confirmed_18_items
+      ac_rq6:
+        status: pass
+        relevancy: 0.833
+        relevancy_floor: 0.28
+        faith: 0.938
+        disposition: investigate_fix_option_1_resolved
+        fix: judge+H7 fix (S019-D51)
+        evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+      hy1_gate:
+        status: pass
+        evidence: 20260802T022836Z_hybrid-sweep.json
+      note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
     phase-0:
       status: completed
       completed: '2026-08-01'
@@ -13973,6 +14078,8 @@ evolve_cycles:
   - docs/sessions/S019-retrieval-quality/reports/qa-report.md
   - docs/sessions/S019-retrieval-quality/reports/e2e-report.md
   - docs/sessions/S019-retrieval-quality/reports/verify-impl.md
+  - docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+  - docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T020137Z_hybrid-sweep.json
   - docs/sessions/S019-retrieval-quality/reports/tech-plan-delta.md
   - docs/adr/ADR-041-heuristic-multi-query-context-packing.md
   - docs/sessions/S000-internal-docs-archive/execution-plan.md
@@ -15351,6 +15458,27 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 13-deploy-smoke
+  session_id: S019-retrieval-quality
+  evolve_cycle_id: EV-016
+  decision: 'S019-D52 — Hy1 PASS after judge+H7 fix; relevancy 0.833 faith 0.938; evidence 20260802T022836Z_hybrid-sweep.json; gates.deploy=pending_user_closeout'
+  recorded_at: '2026-08-02T02:28:36Z'
+  note: AC-RQ6/Hy1 ship gate PASS; H1-H5 PASS; awaiting user approve closeout/PR
+- date: '2026-08-02'
+  skill: 13-deploy-smoke
+  session_id: S019-retrieval-quality
+  evolve_cycle_id: EV-016
+  decision: 'S019-D51 — Judge+H7 fix applied for ES relevancy scoring (AC-RQ6 investigate/fix path)'
+  recorded_at: '2026-08-02T02:20:00Z'
+  note: Fix-in-place after S019-D50 investigate disposition; re-run Hy1 pending
+- date: '2026-08-02'
+  skill: 13-deploy-smoke
+  session_id: S019-retrieval-quality
+  evolve_cycle_id: EV-016
+  decision: 'S019-D50 — User AC-RQ6 disposition = investigate/fix (option 1) — ES relevancy 0 diluting mean'
+  recorded_at: '2026-08-02T02:08:00Z'
+  note: User chose option 1 — investigate/fix-in-place AC-RQ6; led to S019-D51 judge fix and S019-D52 Hy1 PASS
 - date: '2026-08-01'
   skill: 12-verify-deploy
   session_id: S019-retrieval-quality
@@ -16796,6 +16924,28 @@ artifacts:
   recorded_at: '2026-08-02T01:31:00Z'
   committed: false
   note: F42 Phase 3 signoff approved; report may be uncommitted — do not invent sha; HEAD ffd7abd
+- path: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+  kind: deploy-smoke
+  session_id: S019-retrieval-quality
+  stage: 13-deploy-smoke
+  evolve_cycle_id: EV-016
+  recorded_at: '2026-08-02T02:28:36Z'
+  overall_result: path_a_pass_ac_rq6_pass
+  note: Path A PASS @ 5693422 — AC-RQ6/Hy1 PASS after judge+H7 fix; H1-H5 PASS; awaiting user closeout/PR
+- path: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+  kind: eval-experiment
+  session_id: S019-retrieval-quality
+  stage: 13-deploy-smoke
+  evolve_cycle_id: EV-016
+  recorded_at: '2026-08-02T02:28:36Z'
+  note: Staging Hy1 ship-gate eval after judge+H7 fix @ 5693422 — AC-RQ6 PASS relevancy 0.833 vs floor 0.28; faith 0.938
+- path: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T020137Z_hybrid-sweep.json
+  kind: eval-experiment
+  session_id: S019-retrieval-quality
+  stage: 13-deploy-smoke
+  evolve_cycle_id: EV-016
+  recorded_at: '2026-08-02T02:01:37Z'
+  note: Staging Hy1 ship-gate eval after Path A pin @ 5025bb8 — AC-RQ6 relevancy 0.167 vs floor 0.28; faith 0.938
 - path: packages/rag/vecinita_rag/packing.py
   kind: implementation
   session_id: S019-retrieval-quality
@@ -18138,8 +18288,8 @@ git_history:
     session_id: S019-retrieval-quality
     evolve_cycle_id: EV-016
     exists_on_disk: true
-    head_sha: 5530b46af9c226e5f357c3690f897c2646b1a7ce
-    note: 12-verify-deploy STARTED after 11-verify-impl sync @ 5530b46; F42 H7+P1; deferred AC-RQ6/ISS-008/staging inspect in scope; advisories A01–A06
+    head_sha: 5025bb81d043de68d711aef02552e81913debf45
+    note: 13-deploy-smoke pushing branch then Path A pin @ 5025bb8; F42 H7+P1; ISS-008 + Hy1 gate in scope
   - name: fix/S018-job-dispatch-prevention
     purpose: Phase 5 prevention (registry + husky + checklist + rule)
     base: main
@@ -20065,6 +20215,16 @@ git_history:
     files_changed: 2
     timestamp: '2026-08-02T01:32:34Z'
     note: verify-impl.md committed; 11-verify-impl COMPLETE; next 12-verify-deploy
+  - sha: 5025bb81d043de68d711aef02552e81913debf45
+    short: 5025bb8
+    branch: evolve/EV-016-retrieval-quality
+    message: '[S019] docs: complete 12-verify-deploy for F42 Path A'
+    stage: 13-deploy-smoke
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 5
+    timestamp: '2026-08-02T01:44:44Z'
+    note: 12-verify-deploy docs committed; 13-deploy-smoke pushing branch then Path A pin
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
@@ -20173,6 +20333,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: S019/EV-016 13-deploy-smoke in_progress — phase15_t1_predeploy (Path A write-api then chat-rag)
+next_action: S019/EV-016 13-deploy-smoke — awaiting user approve closeout/PR (AC-RQ6/Hy1 PASS @ 5693422)
 pipeline_idle: false
-pipeline_idle_note: '2026-08-01 — S019/EV-016 13-deploy-smoke STARTED @ 5530b46; T1 pre-deploy Path A'
+pipeline_idle_note: '2026-08-01 — S019/EV-016 13-deploy-smoke COMPLETE — user approved closeout option 1; Path A PASS @ 5693422; opening PR to main; gates.deploy=passed_pending_merge'

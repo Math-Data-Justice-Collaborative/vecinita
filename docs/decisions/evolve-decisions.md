@@ -291,3 +291,13 @@ Plan: session `reports/spike-hybrid-plan.md` · runners `spike_hybrid_sweep.py`,
 | S019-D49 | 12 rollback plan | **Approve** (option 1) — `VECINITA_RAG_MULTI_QUERY=false` and/or redeploy prior DO SHA (`a6c39e5`); no embed rollback |
 
 **12 complete:** checklist **ready** → `docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md`. Next: **13-deploy-smoke** (ISS-008 + Hy1 AC-RQ6).
+
+### Phase D — 13-deploy-smoke AC-RQ6 (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D50 | AC-RQ6 disposition | **Investigate/fix** (option 1) — not waive / not rollback |
+| S019-D51 | Hy1 false zeros | Direct YES/NO answer-relevancy judge (mirror faithfulness); H7 ES rewrite + spike→`packages/rag` parity |
+| S019-D52 | Hy1 re-gate | **PASS** — relevancy **0.833** / faith **0.938** (`20260802T022836Z`); Path A @ `5693422` |
+
+**13 status:** Path A + H1–H5 + AC-RQ6 PASS — awaiting user closeout (PR → merge → pins → `main`).
