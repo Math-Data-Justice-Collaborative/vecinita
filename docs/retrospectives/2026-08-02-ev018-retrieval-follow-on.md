@@ -4,7 +4,8 @@
 > **Date:** 2026-08-02  
 > **Session:** S021-retrieval-follow-on  
 > **Cycle:** EV-018 (F46 + F45 re-gate)  
-> **Status:** Phase 3 interview in progress  
+> **Status:** **completed** (Phase 7)  
+
 > **Intake:** scope=`evolve_hotfix` · window=`this_session_ev018` · depth=`deep` · transcripts=`full`
 
 ## Intake (Phase 0)
@@ -144,3 +145,24 @@ Scope for interview (`evolve_hotfix`): **16-evolve**, **14-hotfix**, **pipeline*
 | RA-005 | No solo `workflow-state.yaml` commit unless gate/stage close | `atomic-commits.mdc` or 16-evolve | P2 |
 | RA-006 | CE metrics PASS ≠ flag enable — checklist language | `12-verify-deploy` / `13-deploy-smoke` | P2 |
 | RA-007 | BUG vs 14 vs 07 ownership + corpus wipe checklist | `14-hotfix` + `07-build` + bug-investigation | P2 |
+
+### Phase 5 routing (2026-08-02)
+
+| Prompt | Choice |
+|--------|--------|
+| Workshop | **a** All P1+P2 (RA-001–007) |
+| ADR | **a** Yes — ADR-043 session handoff / safe-stops |
+| Follow-up retro | **a** After next evolve/hotfix milestone |
+
+### Phase 6 skill patches
+
+| Batch | RAs | Status |
+|-------|-----|--------|
+| 1 | RA-001–003 + ADR-043 | **applied** — `16-evolve`, `00-context`, `sessions-reference`, ADR-043 |
+| 2 | RA-004–007 | **applied** — protocol, atomic-commits, 12/13, 14/07/bug-investigation |
+
+### Phase 7 — close
+
+- Rolling backlog: `docs/retrospective-actions.md`
+- Follow-up RET: after next evolve/hotfix milestone
+- Session S021: ready to archive after user confirms close

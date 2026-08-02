@@ -317,6 +317,10 @@ If the user requests a rollback:
 6. **Rollback documented**: Every deployment has a rollback command.
 7. **State persists**: Deploy state survives session boundaries.
 8. **Changelog**: Aggregate commits into structured changelog at deploy time.
+9. **Metrics PASS ≠ flag enable** (RET-001 RA-006): Do not set kill-switch envs (e.g.
+   `VECINITA_RAG_RERANK_CE=true`) during Path A solely because a ship-gate metric passed.
+   Require an explicit flag-flip AskQuestion / decision. Prefer waiting for CD over parallel
+   manual `do_apps.py deploy` that races and cancels.
 
 ## Continue
 

@@ -35,7 +35,12 @@ artifacts and writes `docs/` context — it does **not** write product/feature s
 
 Run **before** context gathering when user intent implies bounded work (almost always).
 
-1. If `active_session` exists: AskQuestion — resume / close and start new / abandon.
+1. If `active_session` exists:
+   - Emit a **one-screen mid-cycle digest** (ADR-043): session id, stage/action, branch+SHA,
+     next AskQuestion/stage, material flags, link to `HANDOFF.md` + latest report.
+   - Refresh `docs/sessions/{id}/HANDOFF.md`.
+   - Then AskQuestion — resume / close and start new / abandon — unless the user already said
+     continue-with-recommended (then resume immediately).
 2. Classify **session type** per [sessions-reference.md](../sessions-reference.md) §11.
 3. Propose the routing plan from default presets (§12); document skip rationale per omitted stage.
 4. **AskQuestion** — user approves or edits the routing plan.

@@ -94,17 +94,44 @@ On invocation:
 1. Invoke **workflow-state-manager** `read_context` with `skill_id: 16-evolve` and `user_intent`.
 2. Verify `active_session.type` is `feature` or `new_service`; else block → **00-context**.
 3. Set `active_session.orchestrator: 16-evolve`; link `evolve_cycles[].session_id` to `active_session.id`.
-4. If an evolve cycle is `in_progress`, report position; AskQuestion: resume / abandon / start new.
+4. If an evolve cycle is `in_progress`, report position with a **one-screen digest** (ADR-043);
+   AskQuestion: resume / abandon / start new — unless the user already said continue-with-recommended.
 5. If none in progress, start **Phase 0 — Change / feature intake**.
 
-After every substep: agent `update` on the active cycle (status, `current_stage`, artifacts, ADRs,
-checkpoints, `git_history`).
+After every **user-visible** substep: agent `update` on the active cycle (status, `current_stage`,
+artifacts, ADRs, checkpoints, `git_history`). Prefer **one** update per user-facing step — not
+after every internal subagent (ADR-043 / RET-001 RA-004).
+
+### Continue-with-recommended (fewer chats) — ADR-043
+
+When the user selects or pastes **continue with recommended** (or equivalent) and gates for the
+next routed stage are already satisfied:
+
+1. Complete current-stage bookkeeping in this turn.
+2. **Start the next stage in the same turn** — do not stop solely to force a new Cursor chat.
+3. Still honor blocking AskQuestion / phase checkpoints / deploy approval — those remain stops.
+
+### Mid-cycle resume digest (ADR-043)
+
+On resume (including a new chat mid-cycle), print before other work:
+
+| Line | Content |
+|------|---------|
+| Session / cycle | `active_session.id` · `evolve_cycle_id` · `current_stage` / `current_action` |
+| Git | branch + short tip SHA |
+| Next | next AskQuestion or next stage |
+| Flags | material env holds (e.g. CE off) |
+| Links | `HANDOFF.md` + latest report under `artifacts_dir/reports/` |
+
+Regenerate `docs/sessions/{id}/HANDOFF.md` at each safe-stop and on resume.
 
 ### Git branch and commit-as-you-go
 
 Each evolve cycle works on `evolve/{cycle-id}-{slug}`. Record branch via agent on creation.
 Commit deltas as you go; agent `update` appends `git_history.commits` with `stage: "16-evolve"`.
 When complete, create a PR from the evolve branch to main.
+Do **not** create a commit that only touches `workflow-state.yaml` unless closing a gate or stage
+(RET-001 RA-005).
 
 ## Delta / feature-addition mode
 
@@ -217,20 +244,26 @@ Same as pipeline — never re-run entire phases for verification failures.
 
 ## Safe stopping points
 
+Intentional chat ends (ADR-043). At each, regenerate `HANDOFF.md`:
+
 - After Phase 0–1 (Fn + routing approved; no code)
 - After Phase A (specs + 03 guardrails)
 - After Phase B (execution plan approved)
 - After Phase C (implemented, not deployed)
-- After 11-verify-impl (verified; deploy optional)
+- After Phase D checkpoint / 11-verify-impl (verified; deploy optional)
+- After 13-deploy-smoke (cycle close / health / retro)
+- When a blocking AskQuestion is unanswered
 
 ## Output rules
 
-1. **One routed stage at a time** (except 09+10).
+1. **One routed stage at a time** (except 09+10) — but **batch into the same chat turn** when the
+   user continues with recommended and gates allow (ADR-043).
 2. **Delta by default** — full regeneration only with user approval.
 3. **Multi-Fn in one cycle** unless user splits via AskQuestion.
 4. **Checkpoints mandatory** between phases A–D and deploy.
 5. **Child skills own detail** — 16-evolve orchestrates; read child SKILL.md when invoking.
 6. **State via agent only** — never edit `workflow-state.yaml` directly.
+7. **Resume digest + HANDOFF.md** — ADR-043; do not rely on long narrative alone.
 
 ## Additional resources
 

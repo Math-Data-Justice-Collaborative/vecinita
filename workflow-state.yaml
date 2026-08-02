@@ -4379,25 +4379,31 @@ project:
         @ 8a8cd48 (registry + husky pre-commit + checklist + job-terminal-state rule). Bug BUG-2026-07-31-eval-job-dispatch
         resolved. User paused before Batch A retrieval evolve.'
     17-retrospective:
-      status: in_progress
+      status: completed
       started: '2026-08-02'
       started_at: '2026-08-02'
-      completed:
+      completed: '2026-08-02'
+      completed_at: '2026-08-02'
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
       retrospective_cycle_id: RET-001
       predecessor_evolve_cycle_id: EV-018
-      current_action: 17_phase5_action_routing
-      next_action: AskQuestion Phase 5 routing gate
-      current_phase: 5
+      current_action: 17_complete_awaiting_session_close
+      next_action: AskQuestion close S021 / open PR for skill patches
+      current_phase: 7
       phase3_status: completed
       phase4_status: completed
+      phase5_status: completed
+      phase6_status: completed
+      phase7_status: completed
+      skill_workshop: completed
       commits_pending: true
+      follow_up_retro: after_next_evolve_hotfix
+      last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
       evidence_summary: 'Phase 1–2 digest → docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md'
       decision: S021-D28
-      note: 'RET-001 Phase 4 COMPLETE 2026-08-02 — brainstorm recorded; actions RA-001–RA-007 seeded;
-        current_phase=5; current_action=17_phase5_action_routing; next_action=AskQuestion Phase 5 routing gate; commits_pending=true'
+      note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
 session_counter: 21
 active_session:
   id: S021-retrieval-follow-on
@@ -4417,11 +4423,13 @@ active_session:
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
   current_stage: 17-retrospective
   current_stage_parallel:
-  current_action: 17_phase5_action_routing
-  next_action: AskQuestion Phase 5 routing gate
+  current_action: 17_complete_awaiting_session_close
+  next_action: AskQuestion close S021 / open PR for skill patches
   commits_pending: true
-  current_stage_note: 'S021/RET-001 Phase 4 COMPLETE 2026-08-02 — brainstorm (b/c/c/c); actions RA-001–RA-007 seeded;
-    current_phase=5; current_action=17_phase5_action_routing; next_action=AskQuestion Phase 5 routing gate; commits_pending=true'
+  follow_up_retro: after_next_evolve_hotfix
+  current_stage_note: 'S021/RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 + Phase 7 done; ADR-043 accepted;
+    RA-001–RA-007 done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close;
+    next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
   commits_head: 7938ce7
   pr_plan_id: PR-57
   pr_number: 174
@@ -4659,19 +4667,26 @@ active_session:
   - stage: 17-retrospective
     required: true
     mode: process
-    status: in_progress
+    status: completed
     skip_rationale:
     added_by: S021-D28
     added_at: '2026-08-02'
     started_at: '2026-08-02'
-    note: 'RET-001 Phase 4 COMPLETE 2026-08-02 — brainstorm recorded; actions RA-001–RA-007 seeded;
-      current_phase=5; current_action=17_phase5_action_routing; next_action=AskQuestion Phase 5 routing gate; commits_pending=true'
-    current_action: 17_phase5_action_routing
-    next_action: AskQuestion Phase 5 routing gate
-    current_phase: 5
+    completed_at: '2026-08-02'
+    note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
+    current_action: 17_complete_awaiting_session_close
+    next_action: AskQuestion close S021 / open PR for skill patches
+    current_phase: 7
     phase3_status: completed
     phase4_status: completed
+    phase5_status: completed
+    phase6_status: completed
+    phase7_status: completed
+    skill_workshop: completed
     commits_pending: true
+    follow_up_retro: after_next_evolve_hotfix
+    last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+    report: docs/sessions/S021-retrieval-follow-on/reports/retrospective.md
     evidence_summary: 'Phase 1–2 digest → docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md'
     retrospective_cycle_id: RET-001
     decision: S021-D28
@@ -13159,25 +13174,31 @@ stages:
     waived_at: '2026-07-29'
     waived_for: github_issue_87_feature_session
   17-retrospective:
-    status: in_progress
+    status: completed
     started: '2026-08-02'
     started_at: '2026-08-02'
-    completed:
+    completed: '2026-08-02'
+    completed_at: '2026-08-02'
     session_id: S021-retrieval-follow-on
     branch: evolve/EV-018-retrieval-follow-on
     evolve_cycle_id: EV-018
     retrospective_cycle_id: RET-001
     predecessor_evolve_cycle_id: EV-018
-    current_action: 17_phase5_action_routing
-    next_action: AskQuestion Phase 5 routing gate
-    current_phase: 5
+    current_action: 17_complete_awaiting_session_close
+    next_action: AskQuestion close S021 / open PR for skill patches
+    current_phase: 7
     phase3_status: completed
     phase4_status: completed
+    phase5_status: completed
+    phase6_status: completed
+    phase7_status: completed
+    skill_workshop: completed
     commits_pending: true
+    follow_up_retro: after_next_evolve_hotfix
+    last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
     evidence_summary: 'Phase 1–2 digest → docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md'
     decision: S021-D28
-    note: 'RET-001 Phase 4 COMPLETE 2026-08-02 — brainstorm recorded; actions RA-001–RA-007 seeded;
-      current_phase=5; current_action=17_phase5_action_routing; next_action=AskQuestion Phase 5 routing gate; commits_pending=true'
+    note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
   18-pr-review:
     status: completed
     started: '2026-06-30'
@@ -20966,9 +20987,9 @@ evolve_cycles:
 retrospective_cycles:
 - id: RET-001
   title: S021/EV-018 evolve_hotfix retrospective
-  status: in_progress
+  status: completed
   started: '2026-08-02'
-  completed:
+  completed: '2026-08-02'
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
   scope:
@@ -20978,14 +20999,23 @@ retrospective_cycles:
   since_date:
   depth: deep
   transcript_consent: full
-  current_phase: 5
-  current_action: 17_phase5_action_routing
-  next_action: AskQuestion Phase 5 routing gate
+  current_phase: 7
+  current_action: 17_complete_awaiting_session_close
+  next_action: AskQuestion close S021 / open PR for skill patches
   commits_pending: true
+  follow_up_retro: after_next_evolve_hotfix
+  last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
   phase3_status: completed
   phase3_completed_at: '2026-08-02T20:28:04Z'
   phase4_status: completed
   phase4_completed_at: '2026-08-02T20:31:58Z'
+  phase5_status: completed
+  phase5_completed_at: '2026-08-02T20:40:49Z'
+  phase6_status: completed
+  phase6_batch1_completed_at: '2026-08-02T20:40:49Z'
+  phase6_batch2_completed_at: '2026-08-02T20:50:00Z'
+  phase7_status: completed
+  phase7_completed_at: '2026-08-02T20:50:00Z'
   phase0_intake:
     scope_choice: c_evolve_hotfix_only
     time_window_choice: c_this_session_ev018_only
@@ -21076,54 +21106,67 @@ retrospective_cycles:
       secondary_choice: c
       recorded_at: '2026-08-02T20:31:58Z'
       phase4_complete: true
-  skill_workshop: not_started
+  skill_workshop: completed
   actions:
   - id: RA-001
     description: batch stages on continue-with-recommended
     target: .cursor/skills/16-evolve/SKILL.md
     priority: P1
-    status: open
+    status: done
     theme: session_sprawl
+    applied_at: '2026-08-02T20:40:49Z'
+    note: Phase 6 Batch 1 — user option 1 Apply as proposed
   - id: RA-002
     description: one-screen digest on resume
     target: .cursor/skills/00-context/SKILL.md
     companion_targets:
     - .cursor/skills/16-evolve/SKILL.md
     priority: P1
-    status: open
+    status: done
     theme: handoff
+    applied_at: '2026-08-02T20:40:49Z'
+    note: Phase 6 Batch 1 — user option 1 Apply as proposed
   - id: RA-003
     description: HANDOFF.md at safe-stops
     target: .cursor/skills/16-evolve/SKILL.md
     companion_targets:
     - .cursor/skills/sessions-reference.md
     priority: P1
-    status: open
+    status: done
     theme: handoff
+    applied_at: '2026-08-02T20:40:49Z'
+    note: Phase 6 Batch 1 — ADR-043 + HANDOFF.md written for S021; user option 1
   - id: RA-004
     description: one state update per user-visible step
     target: .cursor/skills/workflow-state-agent-protocol.md
     companion_targets:
     - .cursor/skills/16-evolve/SKILL.md
     priority: P1
-    status: open
+    status: done
     theme: state_noise
+    applied_at: '2026-08-02T20:50:00Z'
+    note: Phase 6 Batch 2 — applied; Phase 7 complete
   - id: RA-005
     description: no solo workflow-state.yaml commit except gate/stage close
-    target: .cursor/skills/workflow-state-agent-protocol.md
+    target: .cursor/rules/atomic-commits.mdc
     companion_targets:
+    - .cursor/skills/workflow-state-agent-protocol.md
     - .cursor/skills/16-evolve/SKILL.md
     priority: P2
-    status: open
+    status: done
     theme: state_noise
+    applied_at: '2026-08-02T20:50:00Z'
+    note: Phase 6 Batch 2 — applied; Phase 7 complete
   - id: RA-006
     description: CE PASS ≠ flag enable checklist language
     target: .cursor/skills/12-verify-deploy/SKILL.md
     companion_targets:
     - .cursor/skills/13-deploy-smoke/SKILL.md
     priority: P2
-    status: open
+    status: done
     theme: ce_flag_messaging
+    applied_at: '2026-08-02T20:50:00Z'
+    note: Phase 6 Batch 2 — applied; Phase 7 complete
   - id: RA-007
     description: BUG vs 14 vs 07 + corpus wipe checklist
     target: .cursor/skills/14-hotfix/SKILL.md
@@ -21131,18 +21174,94 @@ retrospective_cycles:
     - .cursor/skills/07-build/SKILL.md
     - .cursor/skills/bug-investigation/SKILL.md
     priority: P2
-    status: open
+    status: done
     theme: bug_vs_14_vs_07_ownership
-  skill_patches: []
+    applied_at: '2026-08-02T20:50:00Z'
+    note: Phase 6 Batch 2 — applied; Phase 7 complete
+  skill_patches:
+  - path: .cursor/skills/16-evolve/SKILL.md
+    summary: Batch stages on continue-with-recommended; HANDOFF.md at safe-stops (RA-001, RA-003)
+    status: applied
+    actions:
+    - RA-001
+    - RA-003
+    applied_at: '2026-08-02T20:40:49Z'
+  - path: .cursor/skills/00-context/SKILL.md
+    summary: One-screen digest on resume (RA-002)
+    status: applied
+    actions:
+    - RA-002
+    applied_at: '2026-08-02T20:40:49Z'
+  - path: .cursor/skills/sessions-reference.md
+    summary: HANDOFF.md at safe-stops companion (RA-003)
+    status: applied
+    actions:
+    - RA-003
+    applied_at: '2026-08-02T20:40:49Z'
+  - path: .cursor/skills/workflow-state-agent-protocol.md
+    summary: One state update per user-visible step (RA-004)
+    status: applied
+    actions:
+    - RA-004
+    applied_at: '2026-08-02T20:50:00Z'
+  - path: .cursor/rules/atomic-commits.mdc
+    summary: No solo workflow-state.yaml commit except gate/stage close (RA-005)
+    status: applied
+    actions:
+    - RA-005
+    applied_at: '2026-08-02T20:50:00Z'
+  - path: .cursor/skills/12-verify-deploy/SKILL.md
+    summary: CE PASS ≠ flag enable checklist language (RA-006)
+    status: applied
+    actions:
+    - RA-006
+    applied_at: '2026-08-02T20:50:00Z'
+    companion_paths:
+    - .cursor/skills/13-deploy-smoke/SKILL.md
+  - path: .cursor/skills/13-deploy-smoke/SKILL.md
+    summary: CE PASS ≠ flag enable companion (RA-006)
+    status: applied
+    actions:
+    - RA-006
+    applied_at: '2026-08-02T20:50:00Z'
+  - path: .cursor/skills/14-hotfix/SKILL.md
+    summary: BUG vs 14 vs 07 + corpus wipe checklist (RA-007)
+    status: applied
+    actions:
+    - RA-007
+    applied_at: '2026-08-02T20:50:00Z'
+    companion_paths:
+    - .cursor/skills/07-build/SKILL.md
+    - .cursor/skills/bug-investigation/SKILL.md
+  - path: .cursor/skills/07-build/SKILL.md
+    summary: BUG vs 14 vs 07 companion (RA-007)
+    status: applied
+    actions:
+    - RA-007
+    applied_at: '2026-08-02T20:50:00Z'
+  - path: .cursor/skills/bug-investigation/SKILL.md
+    summary: BUG vs 14 vs 07 companion (RA-007)
+    status: applied
+    actions:
+    - RA-007
+    applied_at: '2026-08-02T20:50:00Z'
   artifacts:
   - path: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
-    status: written
+    status: completed
+    note: Phase 7 — retrospective report completed
   - path: docs/sessions/S021-retrieval-follow-on/reports/retrospective.md
-    status: in_progress
-  note: 'RET-001 Phase 4 COMPLETE 2026-08-02 — brainstorm recorded (session_sprawl=b fewer_chats_batch_stages;
-    handoff=c digest+HANDOFF.md; state_noise=c batch+no solo ws commits; secondary=c CE+BUG/14/07 workshop);
-    actions seeded RA-001–RA-007; phase4_status=completed; current_phase=5; current_action=17_phase5_action_routing;
-    next_action=AskQuestion Phase 5 routing gate; commits_pending=true'
+    status: completed
+    note: Phase 7 — session retrospective report completed
+  - path: docs/adr/ADR-043-session-handoff-safe-stops.md
+    status: accepted
+    note: ADR-043 accepted — session handoff / safe-stops (RA-003)
+  - path: docs/sessions/S021-retrieval-follow-on/HANDOFF.md
+    status: written
+    note: S021 HANDOFF.md at safe-stop (RA-003); retained for session close
+  - path: docs/retrospective-actions.md
+    status: written
+    note: Phase 7 — standing retrospective actions backlog (RA-001–RA-007)
+  note: 'RET-001 COMPLETE 2026-08-02 — Phase 6 Batch 2 APPLIED (RA-004–RA-007) + Phase 7 artifacts written; ADR-043 accepted; RA-001–RA-007 all done; skill_workshop=completed; current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; session NOT closed'
 pr_review_cycles:
 - id: PRR-001
   pr_number: 60
@@ -24668,7 +24787,18 @@ decisions_log:
 - '2026-08-02T20:24:00Z S021/RET-001: Phase 3 interview pipeline COMPLETE — went_well=[continue_recommended_resume, workflow_state_reports_pickup, child_stages_no_full_rerun]; improve=[fewer_longer_turns, auto_handoff_new_chat, cap_subagent_state_sync_noise, safe_stop_new_chat_checkpoints, rolling_session_digest_card]; friction=some; note=user listed 5 improve items (over up to 2) all retained; interview.stages_completed=[16-evolve,14-hotfix,pipeline]; themes_confirmed+=[fewer_longer_turns, auto_handoff, digest_card, safe_stop_checkpoints, cap_state_sync_noise]; current_action=17_phase3_interview_cross_cutting; next_action=AskQuestion cross-cutting batch; commits_pending=true'
 - '2026-08-02T20:28:04Z S021/RET-001: Phase 3 COMPLETE / Phase 4 STARTED — interview.cross_cutting recorded (went_well=[resume_continue_recommended, multi_fn_evolve]; improve=[session_sprawl_safe_stops, auto_handoff_digest, cut_state_sync_subagent_noise]; surprise=[chat_count, staging_basis_vector_wipe]); stages_completed=[16-evolve,14-hotfix,pipeline]; phase3_status=completed; current_phase=4; themes_primary_phase4=[session_sprawl_safe_stops, auto_handoff_digest, cut_state_sync_subagent_noise]; current_action=17_phase4_brainstorm; next_action=AskQuestion brainstorm for top 3 improve themes; commits_pending=true'
 - '2026-08-02T20:31:58Z S021/RET-001: Phase 4 COMPLETE / Phase 5 STARTED — brainstorm choices session_sprawl=b fewer_chats_batch_stages; handoff=c digest+HANDOFF.md; state_noise=c batch_updates+no_solo_workflow_state_commits; secondary=c CE_messaging+BUG/14/07 workshop; actions seeded RA-001–RA-007 (P1: RA-001–004; P2: RA-005–007); phase4_status=completed; current_phase=5; current_action=17_phase5_action_routing; next_action=AskQuestion Phase 5 routing gate; commits_pending=true'
+- '2026-08-02T20:40:49Z S021/RET-001: Phase 6 Batch 1 APPLIED (user option 1) — ADR-043 written; patches applied to 16-evolve/SKILL.md, 00-context/SKILL.md, sessions-reference.md; HANDOFF.md written for S021; RA-001/RA-002/RA-003 status=done; skill_patches=[those three paths] applied; skill_workshop=in_progress; phase5_status=completed; current_phase=6; current_action=17_phase6_batch2_ra004_007; next_action=AskQuestion Batch 2 patches (RA-004–RA-007); commits_pending=true'
+- '2026-08-02T20:50:00Z S021/RET-001: COMPLETE — Phase 6 Batch 2 APPLIED (RA-004 workflow-state-agent-protocol; RA-005 atomic-commits.mdc; RA-006 12-verify-deploy+13-deploy-smoke; RA-007 14-hotfix+07-build+bug-investigation); Phase 7 artifacts written (retrospective report completed, session retrospective.md, docs/retrospective-actions.md, ADR-043 accepted, HANDOFF.md); RA-001–RA-007 all done; skill_workshop=completed; status=completed completed=2026-08-02 current_phase=7; current_action=17_complete_awaiting_session_close; next_action=AskQuestion close S021 / open PR for skill patches; commits_pending=true; follow_up_retro=after_next_evolve_hotfix; active_session S021 remains open (close_session NOT run)'
 artifacts:
+- path: docs/retrospective-actions.md
+  kind: retrospective-actions
+  session_id: S021-retrieval-follow-on
+  stage: 17-retrospective
+  skill_id: 17-retrospective
+  retrospective_cycle_id: RET-001
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T20:50:00Z'
+  note: RET-001 Phase 7 — standing actions backlog (RA-001–RA-007 done)
 - path: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
   kind: retrospective-report
   session_id: S021-retrieval-follow-on
@@ -24676,8 +24806,8 @@ artifacts:
   skill_id: 17-retrospective
   retrospective_cycle_id: RET-001
   evolve_cycle_id: EV-018
-  recorded_at: '2026-08-02T20:10:00Z'
-  note: RET-001 Phase 1–2 evidence digest (pointer for Phase 3 interview)
+  recorded_at: '2026-08-02T20:50:00Z'
+  note: RET-001 Phase 7 — retrospective report COMPLETED
 - path: docs/sessions/S021-retrieval-follow-on/reports/retrospective.md
   kind: session-report
   session_id: S021-retrieval-follow-on
@@ -24685,8 +24815,27 @@ artifacts:
   skill_id: 17-retrospective
   retrospective_cycle_id: RET-001
   evolve_cycle_id: EV-018
-  recorded_at: '2026-08-02T20:10:00Z'
-  note: RET-001 session retrospective report (in progress; commits_pending)
+  recorded_at: '2026-08-02T20:50:00Z'
+  note: RET-001 Phase 7 — session retrospective report COMPLETED
+- path: docs/adr/ADR-043-session-handoff-safe-stops.md
+  kind: adr
+  session_id: S021-retrieval-follow-on
+  stage: 17-retrospective
+  skill_id: 17-retrospective
+  retrospective_cycle_id: RET-001
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T20:50:00Z'
+  status: accepted
+  note: RET-001 Phase 7 — ADR-043 accepted (session handoff / safe-stops)
+- path: docs/sessions/S021-retrieval-follow-on/HANDOFF.md
+  kind: session-handoff
+  session_id: S021-retrieval-follow-on
+  stage: 17-retrospective
+  skill_id: 17-retrospective
+  retrospective_cycle_id: RET-001
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T20:40:49Z'
+  note: RET-001 Phase 6 Batch 1 — S021 HANDOFF.md at safe-stop (RA-003); retained for session close
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
   session_id: S021-retrieval-follow-on
