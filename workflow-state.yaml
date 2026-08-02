@@ -2009,14 +2009,15 @@ project:
       - F42
       feature: F42
       preparing: false
-      head_sha: ffd7abd
-      commits_head: ffd7abd
+      head_sha: 3e780b6
+      commits_head: 3e780b6
       result: approved
       overall: approved
       overall_result: approved
       report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
-      report_committed: false
-      report_commit_note: verify-impl.md may be uncommitted; do not invent sha; HEAD ffd7abd
+      report_committed: true
+      report_commit_sha: 3e780b6
+      report_commit_note: verify-impl.md committed @ 3e780b6; HEAD 3e780b6
       user_approved: true
       user_approved_at: '2026-08-02T01:31:00Z'
       user_approval_choice: option_1_approve
@@ -2034,7 +2035,7 @@ project:
           note: live Hy1/AC-RQ6 deferred to 12/13
           confirmed_at: '2026-08-02T01:31:00Z'
       next_action: run 12-verify-deploy
-      note: S019/EV-016 11-verify-impl COMPLETE 2026-08-02T01:31:00Z — user Phase 3 signoff option 1 Approve F42; result=approved; AC-RQ6 and staging inspect deferred to 12/13; feature_inspection.result=deferred_to_12_13 waiver recorded; UJ-055/UJ-056 approved; report docs/sessions/S019-retrieval-quality/reports/verify-impl.md (may be uncommitted — no invent sha); HEAD ffd7abd; checkpoints.phase_d pending until 12 (or after 11+12 per plan); gates.deploy pending; next → 12-verify-deploy
+      note: S019/EV-016 11-verify-impl COMPLETE 2026-08-02T01:31:00Z — user Phase 3 signoff option 1 Approve F42; result=approved; AC-RQ6 and staging inspect deferred to 12/13; feature_inspection.result=deferred_to_12_13 waiver recorded; UJ-055/UJ-056 approved; report docs/sessions/S019-retrieval-quality/reports/verify-impl.md committed @ 3e780b6; HEAD 3e780b6; checkpoints.phase_d pending until 12 (or after 11+12 per plan); gates.deploy pending; next → 12-verify-deploy
       substeps:
         phase1_collect: completed
         phase2_completeness: completed
@@ -3018,7 +3019,7 @@ active_session:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: ffd7abd
+  commits_head: 3e780b6
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -3032,7 +3033,7 @@ active_session:
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
-  verify_11_report_committed: false
+  verify_11_report_committed: true
   f42_feature_signoff: approved
   f42_feature_signoff_at: '2026-08-02T01:31:00Z'
   f42_feature_signoff_choice: option_1_approve
@@ -3079,7 +3080,7 @@ active_session:
   - tests/unit/modal/test_llm_engine_awq_kwargs.py
   feature_ids_note: 'F42 = H7+P1 (Hy1) on E0 per S019-D31/D37; E1 rejected; #159 open outside F42; F43 not allocated'
   phase0_notes: phase0_approved=true (S019-D37). E1 F36 done — do NOT ship E1; F41 rebuild 1fa1dec9-f5a0-4670-afa2-a71fe039d479 not promoted; artifact 20260801T130441Z_e1-shadow-f36.json. F42=H7+P1 on E0; handoff → 01-requirements.
-  note: 'S019/EV-016 — 2026-08-02T01:31:00Z: 11-verify-impl COMPLETE — F42 Phase 3 signoff option 1 Approve; result=approved; UJ-055/UJ-056 confirmed; feature_inspection deferred_to_12_13; AC-RQ6/staging inspect deferred to 12/13; report docs/sessions/S019-retrieval-quality/reports/verify-impl.md (uncommitted — no invent sha); current_stage=12-verify-deploy; current_action=ready_for_12_verify_deploy; checkpoints.phase_d pending; gates.deploy pending; HEAD ffd7abd'
+  note: 'S019/EV-016 — 2026-08-02T01:32:34Z: 11-verify-impl report committed @ 3e780b6 ([S019] docs: complete 11-verify-impl for F42); F42 Phase 3 signoff approved; UJ-055/UJ-056 confirmed; feature_inspection deferred_to_12_13; AC-RQ6/staging inspect deferred to 12/13; current_stage=12-verify-deploy; current_action=ready_for_12_verify_deploy; checkpoints.phase_d pending; gates.deploy pending; HEAD 3e780b6'
   blocking_note: ISS-008 deploy remains ship path prereq (not Phase A entry blocker); prod embed pin BAAI/bge-small-en-v1.5 unchanged; ADR-006 amend deferred
   a0_status: staging_complete
   a1_status: complete_no_retrieval_lift
@@ -3412,10 +3413,11 @@ active_session:
     completed: '2026-08-02'
     skip_rationale:
     preparing: false
-    head_sha: ffd7abd
+    head_sha: 3e780b6
     result: approved
     report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
-    report_committed: false
+    report_committed: true
+    report_commit_sha: 3e780b6
     current_action: completed
     journey_signoffs:
       UJ-055:
@@ -3429,7 +3431,7 @@ active_session:
         user_choice: option_1_approve_local_path
         note: live Hy1/AC-RQ6 deferred to 12/13
         confirmed_at: '2026-08-02T01:31:00Z'
-    note: COMPLETE 2026-08-02T01:31:00Z — F42 Phase 3 approved (option 1); AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; report may be uncommitted
+    note: COMPLETE 2026-08-02T01:31:00Z — F42 Phase 3 approved (option 1); AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; report committed @ 3e780b6
     feature_inspection: *id001
     manual_inspection: *id027
     features:
@@ -8172,14 +8174,15 @@ stages:
     - F42
     feature: F42
     preparing: false
-    head_sha: ffd7abd
-    commits_head: ffd7abd
+    head_sha: 3e780b6
+    commits_head: 3e780b6
     result: approved
     overall: approved
     overall_result: approved
     report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
-    report_committed: false
-    report_commit_note: verify-impl.md may be uncommitted; do not invent sha; HEAD ffd7abd
+    report_committed: true
+    report_commit_sha: 3e780b6
+    report_commit_note: verify-impl.md committed @ 3e780b6; HEAD 3e780b6
     user_approved: true
     user_approved_at: '2026-08-02T01:31:00Z'
     user_approval_choice: option_1_approve
@@ -8197,7 +8200,7 @@ stages:
         note: live Hy1/AC-RQ6 deferred to 12/13
         confirmed_at: '2026-08-02T01:31:00Z'
     next_action: run 12-verify-deploy
-    note: S019/EV-016 11-verify-impl COMPLETE 2026-08-02T01:31:00Z — user Phase 3 signoff option 1 Approve F42; result=approved; AC-RQ6 and staging inspect deferred to 12/13; feature_inspection.result=deferred_to_12_13 waiver recorded; UJ-055/UJ-056 approved; report docs/sessions/S019-retrieval-quality/reports/verify-impl.md (may be uncommitted — no invent sha); HEAD ffd7abd; checkpoints.phase_d pending until 12 (or after 11+12 per plan); gates.deploy pending; next → 12-verify-deploy
+    note: S019/EV-016 11-verify-impl COMPLETE 2026-08-02T01:31:00Z — user Phase 3 signoff option 1 Approve F42; result=approved; AC-RQ6 and staging inspect deferred to 12/13; feature_inspection.result=deferred_to_12_13 waiver recorded; UJ-055/UJ-056 approved; report docs/sessions/S019-retrieval-quality/reports/verify-impl.md committed @ 3e780b6; HEAD 3e780b6; checkpoints.phase_d pending until 12 (or after 11+12 per plan); gates.deploy pending; next → 12-verify-deploy
     substeps:
       phase1_collect: completed
       phase2_completeness: completed
@@ -13149,7 +13152,7 @@ evolve_cycles:
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/165
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
   current_stage: 12-verify-deploy
-  current_stage_note: '2026-08-02T01:31:00Z — 11-verify-impl COMPLETE; F42 Phase 3 approved (option 1); result=approved; AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; UJ-055/UJ-056 confirmed; report docs/sessions/S019-retrieval-quality/reports/verify-impl.md (uncommitted); current_action=ready_for_12_verify_deploy; checkpoints.phase_d=pending until 12; gates.deploy pending'
+  current_stage_note: '2026-08-02T01:32:34Z — 11-verify-impl COMPLETE; verify-impl.md committed @ 3e780b6; F42 Phase 3 approved (option 1); result=approved; AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; UJ-055/UJ-056 confirmed; current_action=ready_for_12_verify_deploy; checkpoints.phase_d=pending until 12; gates.deploy pending'
   mode: evolve
   delta_only: true
   branch: evolve/EV-016-retrieval-quality
@@ -13299,7 +13302,7 @@ evolve_cycles:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: ffd7abd
+  commits_head: 3e780b6
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -13313,7 +13316,7 @@ evolve_cycles:
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
-  verify_11_report_committed: false
+  verify_11_report_committed: true
   f42_feature_signoff: approved
   f42_feature_signoff_at: '2026-08-02T01:31:00Z'
   f42_feature_signoff_choice: option_1_approve
@@ -13741,11 +13744,12 @@ evolve_cycles:
       completed_at: '2026-08-02T01:31:00Z'
       completed: '2026-08-02'
       preparing: false
-      head_sha: ffd7abd
+      head_sha: 3e780b6
       result: approved
       report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
-      report_committed: false
-      report_commit_note: verify-impl.md may be uncommitted; do not invent sha; HEAD ffd7abd
+      report_committed: true
+      report_commit_sha: 3e780b6
+      report_commit_note: verify-impl.md committed @ 3e780b6; HEAD 3e780b6
       current_action: completed
       journey_signoffs:
         UJ-055:
@@ -13770,7 +13774,7 @@ evolve_cycles:
           - live_staging_inspection
           - ISS-008_deploy_verify
       next_action: run 12-verify-deploy
-      note: COMPLETE 2026-08-02T01:31:00Z — F42 Phase 3 approved (option 1); AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; report may be uncommitted
+      note: COMPLETE 2026-08-02T01:31:00Z — F42 Phase 3 approved (option 1); AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; report committed @ 3e780b6
       feature_inspection: *id001
       manual_inspection: *id027
     12-verify-deploy:
@@ -17916,8 +17920,8 @@ git_history:
     session_id: S019-retrieval-quality
     evolve_cycle_id: EV-016
     exists_on_disk: true
-    head_sha: ffd7abd2652b6632cf0b790654e78cf5bee30713
-    note: S019-D47 remediation landed @ ffd7abd; 11-verify-impl COMPLETE (F42 approved); verify-impl.md may be uncommitted (no invent sha); next 12-verify-deploy; advisories A01–A06
+    head_sha: 3e780b61e735c427aec7fdfc898e01434d9ea88d
+    note: 11-verify-impl report committed @ 3e780b6; F42 approved; next 12-verify-deploy; advisories A01–A06
   - name: fix/S018-job-dispatch-prevention
     purpose: Phase 5 prevention (registry + husky + checklist + rule)
     base: main
@@ -19823,6 +19827,16 @@ git_history:
     files_changed: 13
     timestamp: '2026-08-02T01:21:14Z'
     note: S019-D47 QA remediation landed — B01–B03 cleared; start 11-verify-impl (advisories A01–A06)
+  - sha: 3e780b61e735c427aec7fdfc898e01434d9ea88d
+    short: 3e780b6
+    branch: evolve/EV-016-retrieval-quality
+    message: '[S019] docs: complete 11-verify-impl for F42'
+    stage: 11-verify-impl
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 2
+    timestamp: '2026-08-02T01:32:34Z'
+    note: verify-impl.md committed; 11-verify-impl COMPLETE; next 12-verify-deploy
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
