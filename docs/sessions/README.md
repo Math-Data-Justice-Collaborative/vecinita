@@ -37,11 +37,11 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S014 | feature | completed | Admin Corpus & dashboard UI/UX polish (#148) | `main` (merged #154) | 2026-07-29 | 2026-07-29 |
 | S019 | feature | completed | Batch A retrieval quality (F42 H7+P1) | `evolve/EV-016-retrieval-quality` (merged #172) | 2026-07-31 | 2026-08-01 |
 | S020 | feature | completed | Retrieval Batch B (F43 cache + #83/#161 + #162) | `evolve/EV-017-retrieval-batch-b` (merged #173) | 2026-08-02 | 2026-08-02 |
-| S021 | feature | in_progress | Empty retrieve + CE re-gate follow-on (#83 / AC-BB9) | `evolve/EV-018-retrieval-follow-on` | 2026-08-02 | — |
+| S021 | feature | completed | Empty retrieve + CE re-gate follow-on (#83 / AC-BB9); RET-001 via #177 | `evolve/EV-018-retrieval-follow-on` (merged #174); RET #177 @ 6e3207d | 2026-08-02 | 2026-08-02 |
 
 ## Active session
 
-**S021-retrieval-follow-on** — feature / planned EV-018. Empty retrieve investigation + CE re-gate (AC-BB9 / UJ-060 / #83). Branch `evolve/EV-018-retrieval-follow-on` @ `f24a620`. Predecessor S020/EV-017 (F43/F44 LIVE; F45 spike-only).
+None — pipeline idle. S021/EV-018 closed 2026-08-02 after RET-001 PR [#177](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177) @ `6e3207d` (`follow_up_retro=after_next_evolve_hotfix`). Open next work with `@00-context`.
 
 ## Folder layout
 

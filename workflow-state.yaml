@@ -14,8 +14,8 @@ project:
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
-      note: S021 00-context COMPLETE 2026-08-02 — EV-018 Phase 0 approved; 01-requirements COMPLETE; handoff → 
-        02-verify-plan
+      note: 'S021 00-context COMPLETE 2026-08-02 — EV-018 Phase 0 approved; 01-requirements COMPLETE; handoff → 02-verify-plan
+        S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-07-08'
@@ -121,6 +121,9 @@ project:
           current_task: T80.7
           task_status: blocked
           milestone: M80
+      next_action: none_session_closed
+      session_closed: true
+      session_closed_at: '2026-08-02'
     01-requirements:
       status: completed
       started_at: '2026-08-02'
@@ -137,8 +140,8 @@ project:
       - F45
       report: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
       current_action: completed
-      note: S021/EV-018 01-requirements COMPLETE 2026-08-02 — F46 + extend F45; S021-D13–D16; RD-209–RD-218; handoff → 
-        02-verify-plan
+      note: 'S021/EV-018 01-requirements COMPLETE 2026-08-02 — F46 + extend F45; S021-D13–D16; RD-209–RD-218; handoff → 02-verify-plan
+        S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -339,6 +342,9 @@ project:
         - S020-D14
         s020_d9_d14_decision_recorded: true
         s020_d9_d14_decision_recorded_in: docs/decisions/evolve-decisions.md
+      next_action: none_session_closed
+      session_closed: true
+      session_closed_at: '2026-08-02'
     02-verify-plan:
       status: completed
       started_at: '2026-08-02'
@@ -359,8 +365,9 @@ project:
       current_action: completed
       gate_a_to_b: passed
       s021_d17_decision: S021-D17
-      note: S021/EV-018 02-verify-plan COMPLETE 2026-08-02 — M1–M4 approved (S021-D17); Gate A→B PASS; 
-        checkpoints.phase_a=passed; gates.a_to_b=passed; handoff → 04-tech-plan in_progress
+      note: 'S021/EV-018 02-verify-plan COMPLETE 2026-08-02 — M1–M4 approved (S021-D17); Gate A→B PASS; checkpoints.phase_a=passed;
+        gates.a_to_b=passed; handoff → 04-tech-plan in_progress S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d;
+        follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -804,6 +811,9 @@ project:
                 M4: 'approve: one-time backfill in F41'
                 M5: 'deferred: deployment-integration + data-flow F41 delta → 04-tech-plan'
                 M6: 'approved: rebuild promote auth = admin (enqueue parity)'
+      next_action: none_session_closed
+      session_closed: true
+      session_closed_at: '2026-08-02'
     04-tech-plan:
       status: completed
       started_at: '2026-08-02'
@@ -821,7 +831,7 @@ project:
       - F46
       - F45
       current_action: completed
-      next_action: 07-build in_progress — T99.1
+      next_action: none_session_closed
       gate_a_to_b: passed
       gate_b_to_c: passed
       report: docs/sessions/S021-retrieval-follow-on/reports/tech-plan-delta.md
@@ -838,8 +848,9 @@ project:
       s021_d19_decision_recorded: true
       phase_b_checkpoint_accepted: true
       phase_b_checkpoint_choice: option_1_pass_gate_b_to_c_start_07_t99_1
-      note: S021/EV-018 04-tech-plan COMPLETE 2026-08-02 — TP1–TP6 approved (S021-D18); Gate B→C PASS (S021-D19); 
-        checkpoints.phase_b=passed; gates.b_to_c=passed; handoff → 07-build T99.1
+      note: 'S021/EV-018 04-tech-plan COMPLETE 2026-08-02 — TP1–TP6 approved (S021-D18); Gate B→C PASS (S021-D19); checkpoints.phase_b=passed;
+        gates.b_to_c=passed; handoff → 07-build T99.1 S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix;
+        active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -1249,6 +1260,8 @@ project:
         - docs/decisions/evolve-decisions.md
         - docs/sessions/S020-retrieval-batch-b/routing-plan.md
         - docs/sessions/S020-retrieval-batch-b/session-brief.md
+      session_closed: true
+      session_closed_at: '2026-08-02'
     07-build:
       status: completed
       started_at: '2026-08-02'
@@ -1279,7 +1292,7 @@ project:
       phase_status: completed
       current_task:
       current_action: completed
-      next_action: run 09-qa + 10-e2e for EV-018 delta
+      next_action: none_session_closed
       t99_4_status: completed
       t99_4_blocker:
       t99_4_waiver: S021-D23
@@ -1289,13 +1302,13 @@ project:
       report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       s021_d19_decision: S021-D19
       s021_d19_decision_recorded: true
-      note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); 
-        rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87; promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe
-        empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe filed+resolved; 
-        guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; 
-        current_action=09_10_in_progress; S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE 
-        ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; 
-        T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+      note: 'S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
+        promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
+        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+        S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+        08-verify-build; commits_pending=true S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix;
+        active_session=null.'
       substeps:
         current_task:
         task_status: completed
@@ -2249,6 +2262,8 @@ project:
       commits_pending: true
       commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — 
         commits_pending=true
+      session_closed: true
+      session_closed_at: '2026-08-02'
     08-verify-build:
       status: completed
       started_at: '2026-08-02'
@@ -2273,17 +2288,18 @@ project:
       result_scope: scoped
       overall: pass
       current_action: completed
-      next_action: Present Phase C digest + AskQuestion (approve Gate C→D + open Phase C PR / hold / explain)
+      next_action: none_session_closed
       commits_head: ccc82df
       report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
       results_note: Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); 
         Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 
         blockers
-      note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 
-        skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still 
-        pending staging spike JSON; personas 3 advisory / 0 blockers; report 
-        docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion 
-        before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
+      note: 'S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped
+        Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging
+        spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md;
+        awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d
+        still pending S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix;
+        active_session=null.'
       phase_c_status: passed
       gate_c_to_d: passed
       phase_c_decision: S020-D19
@@ -2506,6 +2522,8 @@ project:
       s017_completion_trail_note: Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS
         2026-08-01T14:17:17Z
       m94_boundary: deferred_continue_batch
+      session_closed: true
+      session_closed_at: '2026-08-02'
     09-qa:
       status: completed
       started_at: '2026-08-02'
@@ -2527,8 +2545,8 @@ project:
       overall_result: PASS_WITH_ADVISORIES
       parallel_with: 10-e2e
       report: docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
-      note: S021/EV-018 09-qa COMPLETE 2026-08-02 — pass_with_advisories; report 
-        docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
+      note: 'S021/EV-018 09-qa COMPLETE 2026-08-02 — pass_with_advisories; report docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
+        S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -2777,6 +2795,9 @@ project:
                 Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142
                 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the
                 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+      next_action: none_session_closed
+      session_closed: true
+      session_closed_at: '2026-08-02'
     10-e2e:
       status: completed
       started_at: '2026-08-02'
@@ -2798,8 +2819,8 @@ project:
       overall_result: PASS
       parallel_with: 09-qa
       report: docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md
-      note: S021/EV-018 10-e2e COMPLETE 2026-08-02 — PASS 11 passed / 1 skipped; UJ-060 PASS; report 
-        docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md
+      note: 'S021/EV-018 10-e2e COMPLETE 2026-08-02 — PASS 11 passed / 1 skipped; UJ-060 PASS; report docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md
+        S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -2994,6 +3015,9 @@ project:
           overall_result: PASS
           result_scope: delta
           parallel_09_qa: completed
+      next_action: none_session_closed
+      session_closed: true
+      session_closed_at: '2026-08-02'
     11-verify-impl:
       status: completed
       started_at: '2026-08-02'
@@ -3016,7 +3040,8 @@ project:
       decision: S021-D25
       user_choice: option_1_approve_f46_f45
       report: docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md
-      note: S021/EV-018 11-verify-impl COMPLETE 2026-08-02 — S021-D25 Approve F46+F45; continue → 12
+      note: 'S021/EV-018 11-verify-impl COMPLETE 2026-08-02 — S021-D25 Approve F46+F45; continue → 12 S021 CLOSED 2026-08-02
+        after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -3393,6 +3418,9 @@ project:
             ac_bb9_met: false
             uj060: deferred_12_13
             prod_ce: 'off'
+      next_action: none_session_closed
+      session_closed: true
+      session_closed_at: '2026-08-02'
     12-verify-deploy:
       status: completed
       started_at: '2026-08-02'
@@ -3410,7 +3438,7 @@ project:
       feature: F46+F45
       phase: Phase 23 (M99-M100)
       current_action: completed
-      next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+      next_action: none_session_closed
       phase_1: pass
       phase_2: approved
       phase_3: approved
@@ -3429,8 +3457,9 @@ project:
       user_approvals: &id002
         failure_mitigations: option_1_approved
         rollback_plan: option_1_approved
-      note: S021/EV-018 12-verify-deploy COMPLETE 2026-08-02 — S021-D26 option_1_approve_mitigations_and_rollback; 
-        deploy-checklist approved; CE false; handoff → 13 Phase 1.5
+      note: 'S021/EV-018 12-verify-deploy COMPLETE 2026-08-02 — S021-D26 option_1_approve_mitigations_and_rollback; deploy-checklist
+        approved; CE false; handoff → 13 Phase 1.5 S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix;
+        active_session=null.'
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -3600,6 +3629,8 @@ project:
         - deployment-integration §EV-017 added
         advisories_remaining:
         - UJ-060 carry / AC-BB9 staging-gated
+      session_closed: true
+      session_closed_at: '2026-08-02'
     13-deploy-smoke:
       status: completed
       started_at: '2026-08-02'
@@ -3616,7 +3647,7 @@ project:
       - F45
       phase: Phase 23 (M99-M100)
       current_action: 13_complete_awaiting_cycle_close
-      next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+      next_action: 'none_session_closed'
       deploy_path: A
       prod_ce: false
       path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate 
@@ -3640,7 +3671,8 @@ project:
         main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404;
         Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322;
         gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true
-        (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion'
+        (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion S021 CLOSED 2026-08-02 after RET-001
+        PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
       s020_baseline:
         status: in_progress
         started_at: '2026-08-02'
@@ -4040,6 +4072,8 @@ project:
         uj_061_sample: pass_5_sources
       do_verify: PASS
       s021_d27_decision: S021-D27
+      session_closed: true
+      session_closed_at: '2026-08-02'
     15-service-health:
       status: skipped
       started_at: '2026-07-29'
@@ -4373,26 +4407,41 @@ project:
       summary: 'S018 eval job dispatch hotfix complete. PR #169 merged and prod verified. Phase 5 prevention on fix/S018-job-dispatch-prevention
         @ 8a8cd48 (registry + husky pre-commit + checklist + job-terminal-state rule). Bug BUG-2026-07-31-eval-job-dispatch
         resolved. User paused before Batch A retrieval evolve.'
+    17-retrospective:
+      status: completed
+      started_at: '2026-08-02'
+      completed_at: '2026-08-02'
+      session_id: S021-retrieval-follow-on
+      evolve_cycle_id: EV-018
+      retrospective_cycle_id: RET-001
+      report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+      pr_number: 177
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
+      merge_sha: 6e3207d
+      merge_sha_full: 6e3207d06ba22898080e6d5da73b946d87fbcabb
+      follow_up_retro: after_next_evolve_hotfix
+      close_choice: option_1_open_pr_then_close_session
+      note: 'RET-001 COMPLETE 2026-08-02 — PR #177 MERGED @ 6e3207d; S021 archived; follow_up_retro=after_next_evolve_hotfix'
 session_counter: 21
-active_session:
-  id: S021-retrieval-follow-on
+active_session: null
+sessions:
+- id: S021-retrieval-follow-on
   type: feature
   slug: retrieval-follow-on
   intent: Empty retrieve + CE re-gate follow-on after EV-017 (F45 spike-only); fix staging empty retrieve pools then 
     re-run AC-BB9/UJ-060/#83 ship gate
-  status: in_progress
+  status: completed
   branch: evolve/EV-018-retrieval-follow-on
   orchestrator: 16-evolve
   evolve_cycle_id: EV-018
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
-  current_stage: 13-deploy-smoke
+  current_stage: completed
   current_stage_parallel:
-  current_action: 13_complete_awaiting_cycle_close
-  next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+  current_action: closed_after_ret001_pr
+  next_action: 'none_session_closed'
   commits_pending: false
-  current_stage_note: 'S021/EV-018 Phase D/13 2026-08-02 — PR #174 open ([EV-018] Retrieval follow-on — F46 empty retrieve
-    + F45 CE re-gate) @ c972f07; current_action=13_awaiting_ci_then_merge; await CI then merge; redeploy ChatRAG CE false;
-    H1–H5; deploy checkpoint/gates.deploy remain pending; commits_pending=false'
+  current_stage_note: 'CLOSED 2026-08-02 — EV-018 Path A @ 9d1f10b; RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix;
+    active_session=null'
   commits_head: c972f07
   pr_plan_id: PR-57
   pr_number: 174
@@ -4400,7 +4449,7 @@ active_session:
   pr_title: '[EV-018] Retrieval follow-on — F46 empty retrieve + F45 CE re-gate'
   pr_branch: evolve/EV-018-retrieval-follow-on
   pr_base: main
-  pr_status: open
+  pr_status: merged
   pr_opened_at: '2026-08-02'
   pr_head_sha: c972f07
   pr_stage: 13-deploy-smoke
@@ -4647,6 +4696,8 @@ active_session:
   - S021-D24
   - S021-D25
   - S021-D26
+  - S021-D27
+  - S021-D28
   report_01_requirements: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
   report_02_verify_plan: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
   report_02_verify_plan_status: completed
@@ -4740,7 +4791,53 @@ active_session:
   s021_d22_executed: true
   t99_3_status: completed
   commits_note: 'recorded c972f07 (sync workflow-state after S021-D26 Path A start) — commits_pending=false; PR #174 open'
-sessions:
+  completed_at: '2026-08-02'
+  completed: '2026-08-02'
+  closed_at: '2026-08-02'
+  archived_at: '2026-08-02'
+  session_closed: true
+  session_closed_at: '2026-08-02'
+  close_decision: option_1_open_pr_then_close_session
+  user_close_choice: option_1_open_pr_then_close_session
+  user_close_option: 1
+  close_note: 'User option_1_open_pr_then_close_session — open RET-001 skill/ADR PR then close S021. PR #177 MERGED @ 6e3207d
+    (chore/RET-001-session-handoff → main); PR #176 CLOSED (superseded). RET-001 completed; follow_up_retro=after_next_evolve_hotfix;
+    EV-018 completed; active_session=null; pipeline idle. CE flag remains false (separate decision).'
+  summary: 'S021/EV-018 CLOSED — F46 empty retrieve + F45 CE re-gate Path A PASS via PR #174 @ 9d1f10b; RET-001 Phase 7 COMPLETE
+    with skill patches + ADR-043 via PR #177 @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; VECINITA_RAG_RERANK_CE remains
+    false.'
+  pr_merge_sha: 9d1f10b
+  ret001:
+    id: RET-001
+    status: completed
+    completed: '2026-08-02'
+    completed_at: '2026-08-02'
+    follow_up_retro: after_next_evolve_hotfix
+    pr_176:
+      number: 176
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/176
+      status: closed_superseded
+      closed_at: '2026-08-02'
+      note: 'Superseded by PR #177'
+    pr_177:
+      number: 177
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
+      status: merged
+      merged_at: '2026-08-02'
+      merge_sha: 6e3207d
+      merge_sha_full: 6e3207d06ba22898080e6d5da73b946d87fbcabb
+      branch: chore/RET-001-session-handoff
+      base: main
+      title: 'chore(skills): RET-001 session handoff + RA-001–007'
+      note: RET-001 skill patches RA-001–007 + ADR-043
+    artifacts:
+    - docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+    - docs/retrospective-actions.md
+    - docs/adr/ADR-043-session-handoff-safe-stops.md
+    - docs/sessions/S021-retrieval-follow-on/HANDOFF.md
+  follow_up_retro: after_next_evolve_hotfix
+  handoff: docs/sessions/S021-retrieval-follow-on/HANDOFF.md
+  handoff_note: 'Session closed 2026-08-02 after RET-001 PR #177 merge'
 - id: S020-retrieval-batch-b
   type: feature
   slug: retrieval-batch-b
@@ -12335,7 +12432,7 @@ stages:
     feature_ids: *id003
     phase: Phase 23 (M99-M100)
     current_action: 13_complete_awaiting_cycle_close
-    next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
+    next_action: 'none_session_closed'
     deploy_path: A
     prod_ce: false
     path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate 
@@ -12359,7 +12456,8 @@ stages:
       main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404;
       Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322;
       gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true
-      (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion'
+      (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion S021 CLOSED 2026-08-02 after RET-001 PR
+      #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
     s020_baseline:
       status: in_progress
       started_at: '2026-08-02'
@@ -12755,6 +12853,8 @@ stages:
       uj_061_sample: pass_5_sources
     do_verify: PASS
     s021_d27_decision: S021-D27
+    session_closed: true
+    session_closed_at: '2026-08-02'
   14-hotfix:
     status: completed
     started_at: '2026-07-31'
@@ -13094,7 +13194,17 @@ stages:
     waived_at: '2026-07-29'
     waived_for: github_issue_87_feature_session
   17-retrospective:
-    status: pending
+    status: completed
+    started: '2026-08-02'
+    completed: '2026-08-02'
+    last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+    cycles_completed: 1
+    session_id: S021-retrieval-follow-on
+    retrospective_cycle_id: RET-001
+    pr_number: 177
+    merge_sha: 6e3207d
+    follow_up_retro: after_next_evolve_hotfix
+    note: 'RET-001 COMPLETE; PR #177 MERGED @ 6e3207d; S021 closed'
   18-pr-review:
     status: completed
     started: '2026-06-30'
@@ -19900,10 +20010,10 @@ evolve_cycles:
   - F46
   - F45
   title: Retrieval follow-on — F46 empty retrieve + F45 CE re-gate
-  status: in_progress
+  status: completed
   started: '2026-08-02'
   started_at: '2026-08-02'
-  completed:
+  completed: '2026-08-02'
   session_id: S021-retrieval-follow-on
   predecessor_session_id: S020-retrieval-batch-b
   predecessor_evolve_cycle_id: EV-017
@@ -19917,14 +20027,12 @@ evolve_cycles:
     Prod VECINITA_RAG_RERANK_CE stays false until re-gate passes. Predecessor EV-017 @ f24a620.
 
     '
-  current_stage: 13-deploy-smoke
+  current_stage: completed
   current_stage_parallel:
-  current_action: 13_complete_awaiting_cycle_close
-  next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
-  commits_pending: true
-  current_stage_note: 'S021/EV-018 Phase D/13 2026-08-02 — PR #174 open ([EV-018] Retrieval follow-on — F46 empty retrieve
-    + F45 CE re-gate) @ c972f07; current_action=13_awaiting_ci_then_merge; await CI then merge; redeploy ChatRAG CE false;
-    H1–H5; deploy checkpoint/gates.deploy remain pending; commits_pending=false'
+  current_action: cycle_closed
+  next_action: 'none_session_closed'
+  commits_pending: false
+  current_stage_note: 'EV-018 COMPLETE 2026-08-02 — Path A PR #174 @ 9d1f10b; RET-001 PR #177 @ 6e3207d; S021 archived; follow_up_retro=after_next_evolve_hotfix'
   commits_head: 9d1f10b
   pr_plan_id: PR-57
   pr_number: 174
@@ -20401,6 +20509,17 @@ evolve_cycles:
         staging_smoke: *id006
         verify_connectivity: *id007
         uj_061_sample: pass_5_sources
+    17-retrospective:
+      status: completed
+      started: '2026-08-02'
+      completed: '2026-08-02'
+      cycle_id: RET-001
+      report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+      pr_number: 177
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
+      merge_sha: 6e3207d
+      follow_up_retro: after_next_evolve_hotfix
+      note: 'RET-001 COMPLETE; PR #177 MERGED @ 6e3207d; S021 closed'
   gates:
     phase_0: passed
     a_to_b: passed
@@ -20802,7 +20921,98 @@ evolve_cycles:
   s021_d27_decision_recorded: true
   path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate decision
     after Path A
-retrospective_cycles: []
+  completed_at: '2026-08-02'
+  session_closed: true
+  session_closed_at: '2026-08-02'
+  close_decision: option_1_open_pr_then_close_session
+  follow_up_retro: after_next_evolve_hotfix
+  ret001_id: RET-001
+  ret001_status: completed
+  ret001_pr: 177
+  ret001_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
+  ret001_merge_sha: 6e3207d
+  ret001_merge_sha_full: 6e3207d06ba22898080e6d5da73b946d87fbcabb
+  summary: 'S021/EV-018 CLOSED — F46 empty retrieve + F45 CE re-gate Path A PASS via PR #174 @ 9d1f10b; RET-001 Phase 7 COMPLETE
+    with skill patches + ADR-043 via PR #177 @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; VECINITA_RAG_RERANK_CE remains
+    false.'
+retrospective_cycles:
+- id: RET-001
+  title: EV-018 / S021 retrieval follow-on retrospective
+  status: completed
+  started: '2026-08-02'
+  completed: '2026-08-02'
+  completed_at: '2026-08-02'
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  scope:
+    mode: evolve_hotfix
+    stages: []
+  time_window: session_only
+  since_date:
+  depth: deep
+  transcript_consent: full
+  current_phase: 7
+  follow_up_retro: after_next_evolve_hotfix
+  close_choice: option_1_open_pr_then_close_session
+  skill_workshop: completed
+  actions:
+  - id: RA-001
+    priority: P1
+    status: done
+  - id: RA-002
+    priority: P1
+    status: done
+  - id: RA-003
+    priority: P1
+    status: done
+  - id: RA-004
+    priority: P1
+    status: done
+  - id: RA-005
+    priority: P2
+    status: done
+  - id: RA-006
+    priority: P2
+    status: done
+  - id: RA-007
+    priority: P2
+    status: done
+  skill_patches:
+  - summary: RA-001–007 + ADR-043 session handoff / safe-stops
+    status: applied
+    pr_number: 177
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
+    merge_sha: 6e3207d
+    merge_sha_full: 6e3207d06ba22898080e6d5da73b946d87fbcabb
+    branch: chore/RET-001-session-handoff
+  prs:
+    '176':
+      number: 176
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/176
+      status: closed_superseded
+      note: 'Superseded by #177'
+    '177':
+      number: 177
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
+      status: merged
+      merged_at: '2026-08-02T21:03:45Z'
+      merge_sha: 6e3207d
+      merge_sha_full: 6e3207d06ba22898080e6d5da73b946d87fbcabb
+      branch: chore/RET-001-session-handoff
+      base: main
+      title: 'chore(skills): RET-001 session handoff + RA-001–007'
+  artifacts:
+  - path: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+    status: completed
+  - path: docs/retrospective-actions.md
+    status: completed
+  - path: docs/adr/ADR-043-session-handoff-safe-stops.md
+    status: completed
+  - path: docs/sessions/S021-retrieval-follow-on/HANDOFF.md
+    status: completed
+    note: 'Session closed after PR #177 merge'
+  note: 'RET-001 COMPLETE — Phase 7; PR #177 MERGED @ 6e3207d; PR #176 closed superseded; follow_up_retro=after_next_evolve_hotfix;
+    S021 archived'
 pr_review_cycles:
 - id: PRR-001
   pr_number: 60
@@ -24319,6 +24529,10 @@ decisions_log:
   / H2 SKIP / H3 PASS; H0c+H4+H5 PASS; UJ-061 sample PASS (5 sources); gates.deploy=passed; checkpoints.deploy=passed; 13-deploy-smoke
   completed; current_action=13_complete_awaiting_cycle_close; next_action=AskQuestion cycle close — done / 15-service-health
   / CE flag flip separate / 17-retrospective; EV-018 remains in_progress; commits_pending=true'
+- '2026-08-02 S021 close: option_1_open_pr_then_close_session — RET-001 PR #177 MERGED @ 6e3207d (6e3207d06ba22898080e6d5da73b946d87fbcabb);
+  PR #176 CLOSED superseded; follow_up_retro=after_next_evolve_hotfix; EV-018 completed; S021 archived; active_session=null'
+- '2026-08-02 RET-001 COMPLETE: Phase 7; RA-001–007 applied via PR #177; ADR-043; artifacts docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+  + docs/retrospective-actions.md'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
@@ -26310,9 +26524,39 @@ artifacts:
   decision: S021-D26
   note: evolve-decisions.md has S021-D26
   recorded_at: '2026-08-02T19:17:09Z'
+- path: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+  session_id: S021-retrieval-follow-on
+  stage: 17-retrospective
+  note: S021 close / RET-001
+- path: docs/retrospective-actions.md
+  session_id: S021-retrieval-follow-on
+  stage: 17-retrospective
+  note: S021 close / RET-001
+- path: docs/adr/ADR-043-session-handoff-safe-stops.md
+  session_id: S021-retrieval-follow-on
+  stage: 17-retrospective
+  note: S021 close / RET-001
+- path: docs/sessions/S021-retrieval-follow-on/HANDOFF.md
+  session_id: S021-retrieval-follow-on
+  stage: 17-retrospective
+  note: S021 close / RET-001
 git_history:
   current_branch: main
   branches:
+  - name: chore/RET-001-session-handoff
+    purpose: RET-001 skill patches RA-001–007 + ADR-043 session handoff
+    base: main
+    status: merged
+    created_at: '2026-08-02'
+    session_id: S021-retrieval-follow-on
+    retrospective_cycle_id: RET-001
+    pr_number: 177
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
+    pr_status: merged
+    merged_at: '2026-08-02'
+    merge_sha: 6e3207d
+    merge_sha_full: 6e3207d06ba22898080e6d5da73b946d87fbcabb
+    note: 'PR #177 MERGED @ 6e3207d; PR #176 superseded; S021 closed'
   - name: evolve/EV-018-retrieval-follow-on
     purpose: 'EV-018 / S021 — empty retrieve pools + CE re-gate (AC-BB9 / UJ-060 / #83)'
     base: main
@@ -26331,7 +26575,7 @@ git_history:
     pr_status: merged
     pr_plan_id: PR-57
     pr_opened_at: '2026-08-02'
-    note: 'S021/EV-018 — PR #174 MERGED @ 9d1f10b; tip pre-merge dd92615; 13 Path A PASS; awaiting cycle close'
+    note: 'S021/EV-018 CLOSED — PR #174 @ 9d1f10b; RET-001 PR #177 @ 6e3207d; session archived'
     note_prev: S021/EV-018 — HEAD b188f97; 12 Phase 2+3 approved (S021-D26); 13 Path A start
     merged_at: '2026-08-02'
     merge_sha: 9d1f10b
