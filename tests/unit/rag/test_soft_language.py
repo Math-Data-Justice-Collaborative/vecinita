@@ -75,3 +75,23 @@ def test_soft_language_l1_skips_fallback_when_same_lang_nonempty() -> None:
     assert result.fallback_triggered is False
     assert result.chunks == [same_lang]
     assert calls == [_LOCALE]
+
+
+def test_soft_language_default_off_keeps_l0_strict_on_empty_first_pass() -> None:
+    """TC-181: default enabled=False never retries unfiltered (AC-BB6)."""
+    calls: list[str | None] = []
+
+    def retrieve_fn(_question: str, language: str | None) -> list[RetrievedChunk]:
+        calls.append(language)
+        return []
+
+    result = soft_language_retrieve(
+        _QUERY,
+        language=_LOCALE,
+        retrieve_fn=retrieve_fn,
+    )
+
+    assert result.first_pass_empty is True
+    assert result.fallback_triggered is False
+    assert result.chunks == []
+    assert calls == [_LOCALE]

@@ -105,10 +105,7 @@ def _validate_f43_rag_cache_knobs(
     rag_cache_semantic_threshold: float,
 ) -> None:
     if not (_MIN_CACHE_TTL_S <= rag_cache_ttl_s <= _MAX_CACHE_TTL_S):
-        msg = (
-            "VECINITA_RAG_CACHE_TTL_S must be between "
-            f"{_MIN_CACHE_TTL_S} and {_MAX_CACHE_TTL_S}"
-        )
+        msg = f"VECINITA_RAG_CACHE_TTL_S must be between {_MIN_CACHE_TTL_S} and {_MAX_CACHE_TTL_S}"
         raise ValueError(msg)
     if not (_MIN_CACHE_MAX_ENTRIES <= rag_cache_max_entries <= _MAX_CACHE_MAX_ENTRIES):
         msg = (
@@ -159,6 +156,7 @@ class ChatRagSettings:
     rag_cache_max_entries: int = DEFAULT_CACHE_MAX_ENTRIES
     rag_cache_semantic: bool = True
     rag_cache_semantic_threshold: float = DEFAULT_SEMANTIC_THRESHOLD
+    rag_soft_language_fallback: bool = False
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -236,4 +234,8 @@ class ChatRagSettings:
             rag_cache_max_entries=rag_cache_max_entries,
             rag_cache_semantic=_bool_env("VECINITA_RAG_CACHE_SEMANTIC", default=True),
             rag_cache_semantic_threshold=rag_cache_semantic_threshold,
+            rag_soft_language_fallback=_bool_env(
+                "VECINITA_RAG_SOFT_LANGUAGE_FALLBACK",
+                default=False,
+            ),
         )

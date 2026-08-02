@@ -210,3 +210,26 @@ def test_from_env_rejects_invalid_f43_rag_cache_knobs(
     monkeypatch.setenv(name, value)
     with pytest.raises(ValueError, match="VECINITA_RAG_CACHE"):
         ChatRagSettings.from_env()
+
+
+def test_from_env_defaults_f44_soft_language_fallback_off(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-181 / AC-BB6: VECINITA_RAG_SOFT_LANGUAGE_FALLBACK defaults false (L0-strict)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_RAG_SOFT_LANGUAGE_FALLBACK", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_soft_language_fallback is False
+
+
+def test_from_env_parses_f44_soft_language_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """T96.2: VECINITA_RAG_SOFT_LANGUAGE_FALLBACK parses true/false (config-spec)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_SOFT_LANGUAGE_FALLBACK", "true")
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_soft_language_fallback is True
+    monkeypatch.setenv("VECINITA_RAG_SOFT_LANGUAGE_FALLBACK", "false")
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_soft_language_fallback is False
