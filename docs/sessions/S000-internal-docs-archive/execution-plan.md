@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 24: EV-019 — Ingest resilience (F47–F49) |
-| **Active milestone** | M102 (F48 embed retry) |
-| **Active task** | T102.1 (pending) |
-| **Tasks completed** | Phase 21–23 complete; Phase 24 M101 (T101.1–T101.4) |
+| **Active milestone** | M103 (F49 HF+overlap) |
+| **Active task** | T103.1 (pending) |
+| **Tasks completed** | Phase 21–23 complete; Phase 24 M101–M102 |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-019 — Standard; S022-D20/D21; TP1–TP6; skip 05/06 |
 | **Git branch** | `evolve/EV-019-ingest-resilience` |
@@ -2047,10 +2047,10 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T102.1 | Test: embedding-client red — sub-batch, transient retry, exhaust fail, dim hard-fail | Test | pending | AC-IR3/IR4, TC-189/190, F48 | T101.4 | — | S022 | F48 |
-| T102.2 | Config: Wire embed knobs from config-spec into client/env defaults (RD-226 / M1) | Config | pending | config-spec, RD-226 | — | — | S022 | F48 |
-| T102.3 | Code: `packages/embedding-client` sub-batch + exponential backoff retry; pipeline fail-URL | Code | pending | feature-list F48, RD-222 | T102.1, T102.2 | — | S022 | F48 |
-| T102.4 | Test: client + pipeline green (mocked Modal 5xx/timeout) | Test | pending | AC-IR3/IR4 | T102.3 | — | S022 | F48 |
+| T102.1 | Test: embedding-client red — sub-batch, transient retry, exhaust fail, dim hard-fail | Test | completed | AC-IR3/IR4, TC-189/190, F48 | T101.4 | 2026-08-02 | S022 | F48 |
+| T102.2 | Config: Wire embed knobs from config-spec into client/env defaults (RD-226 / M1) | Config | completed | config-spec, RD-226 | — | 2026-08-02 | S022 | F48 |
+| T102.3 | Code: `packages/embedding-client` sub-batch + exponential backoff retry; pipeline fail-URL | Code | completed | feature-list F48, RD-222 | T102.1, T102.2 | 2026-08-02 | S022 | F48 |
+| T102.4 | Test: client + pipeline green (mocked Modal 5xx/timeout) | Test | completed | AC-IR3/IR4 | T102.3 | 2026-08-02 | S022 | F48 |
 
 #### M103: F49 — HF tokenizer + chunk overlap
 
@@ -2824,10 +2824,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T101.2 | M101 | 24 | Config | completed | — | 2026-08-02 | S022 | F47 | — |
 | T101.3 | M101 | 24 | Code | completed | T101.1, T101.2 | 2026-08-02 | S022 | F47 | — |
 | T101.4 | M101 | 24 | Test | completed | T101.3 | 2026-08-02 | S022 | F47 | — |
-| T102.1 | M102 | 24 | Test | pending | T101.4 | — | S022 | F48 | — |
-| T102.2 | M102 | 24 | Config | pending | — | — | S022 | F48 | — |
-| T102.3 | M102 | 24 | Code | pending | T102.1, T102.2 | — | S022 | F48 | — |
-| T102.4 | M102 | 24 | Test | pending | T102.3 | — | S022 | F48 | — |
+| T102.1 | M102 | 24 | Test | completed | T101.4 | 2026-08-02 | S022 | F48 | — |
+| T102.2 | M102 | 24 | Config | completed | — | 2026-08-02 | S022 | F48 | — |
+| T102.3 | M102 | 24 | Code | completed | T102.1, T102.2 | 2026-08-02 | S022 | F48 | — |
+| T102.4 | M102 | 24 | Test | completed | T102.3 | 2026-08-02 | S022 | F48 | — |
 | T103.1 | M103 | 24 | Test | pending | T102.4 | — | S022 | F49 | — |
 | T103.2 | M103 | 24 | Config | pending | — | — | S022 | F49 | — |
 | T103.3 | M103 | 24 | Code | pending | T103.1, T103.2 | — | S022 | F49 | — |

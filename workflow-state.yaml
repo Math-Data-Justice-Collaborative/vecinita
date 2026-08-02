@@ -1368,7 +1368,7 @@ project:
       status: in_progress
       started_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S022/EV-019 — 07-build in_progress; Gate B→C PASS (S022-D22); handoff → T101.1 TDD
+      partial_rerun_note: S022/EV-019 — 07-build in_progress; M101 COMPLETE (T101.1–T101.4); handoff → T102.1 TDD
       session_id: S022-ingest-resilience
       branch: evolve/EV-019-ingest-resilience
       evolve_cycle_id: EV-019
@@ -1379,22 +1379,29 @@ project:
       - F48
       - F49
       phase: Phase 24 (M101-M104)
-      milestone: M101
+      milestone: M102
       milestone_status: pending
-      current_task: T101.1
-      current_action: start_t101_1
-      next_action: run T101.1 TDD
+      m101_status: completed
+      m101_completed_at: '2026-08-02'
+      current_task: T102.1
+      current_action: start_t102_1
+      next_action: run T102.1 TDD
       gate_b_to_c: passed
       s022_d21_decision: S022-D21
       s022_d22_decision: S022-D22
       s022_d22_decision_recorded: true
       s022_d22_decision_recorded_in: docs/decisions/evolve-decisions.md
-      note: S022/EV-019 07-build in_progress 2026-08-02 — Gate B→C PASS (S022-D22); handoff → T101.1 TDD (M101 content_hash
-        skip / F47)
+      note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); handoff → T102.1 TDD (M102/F48
+        embed retry)
       substeps:
-        current_task: T101.1
+        current_task: T102.1
         task_status: pending
-        next_action: run T101.1 TDD
+        next_action: run T102.1 TDD
+        completed_tasks_recent:
+        - T101.1
+        - T101.2
+        - T101.3
+        - T101.4
       s021_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -4573,7 +4580,7 @@ active_session:
     status: in_progress
     skip_rationale: null
     started_at: '2026-08-02'
-    note: Gate B→C PASS (S022-D22); start T101.1 TDD (M101/F47 content_hash skip)
+    note: M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); start T102.1 TDD (M102/F48 embed retry)
   - stage: 08-verify-build
     required: true
     mode: delta
@@ -4605,8 +4612,8 @@ active_session:
     status: pending
     skip_rationale: null
   current_stage: 07-build
-  current_action: start_t101_1
-  next_action: run T101.1 TDD
+  current_action: start_t102_1
+  next_action: run T102.1 TDD
   commits_pending: false
   started_at: '2026-08-02'
   mode: evolve
@@ -10471,7 +10478,7 @@ stages:
     status: in_progress
     started_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S022/EV-019 — 07-build in_progress; Gate B→C PASS (S022-D22); handoff → T101.1 TDD
+    partial_rerun_note: S022/EV-019 — 07-build in_progress; M101 COMPLETE (T101.1–T101.4); handoff → T102.1 TDD
     session_id: S022-ingest-resilience
     branch: evolve/EV-019-ingest-resilience
     evolve_cycle_id: EV-019
@@ -10482,22 +10489,29 @@ stages:
     - F48
     - F49
     phase: Phase 24 (M101-M104)
-    milestone: M101
+    milestone: M102
     milestone_status: pending
-    current_task: T101.1
-    current_action: start_t101_1
-    next_action: run T101.1 TDD
+    m101_status: completed
+    m101_completed_at: '2026-08-02'
+    current_task: T102.1
+    current_action: start_t102_1
+    next_action: run T102.1 TDD
     gate_b_to_c: passed
     s022_d21_decision: S022-D21
     s022_d22_decision: S022-D22
     s022_d22_decision_recorded: true
     s022_d22_decision_recorded_in: docs/decisions/evolve-decisions.md
-    note: S022/EV-019 07-build in_progress 2026-08-02 — Gate B→C PASS (S022-D22); handoff → T101.1 TDD (M101 content_hash
-      skip / F47)
+    note: S022/EV-019 07-build in_progress 2026-08-02 — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); handoff → T102.1 TDD (M102/F48
+      embed retry)
     substeps:
-      current_task: T101.1
+      current_task: T102.1
       task_status: pending
-      next_action: run T101.1 TDD
+      next_action: run T102.1 TDD
+      completed_tasks_recent:
+      - T101.1
+      - T101.2
+      - T101.3
+      - T101.4
     s021_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -21195,8 +21209,8 @@ evolve_cycles:
 
     '
   current_stage: 07-build
-  current_action: start_t101_1
-  next_action: run T101.1 TDD
+  current_action: start_t102_1
+  next_action: run T102.1 TDD
   commits_pending: false
   mode: evolve
   delta_only: true
@@ -21299,13 +21313,20 @@ evolve_cycles:
       status: in_progress
       started: '2026-08-02'
       started_at: '2026-08-02'
-      current_action: start_t101_1
-      next_action: run T101.1 TDD
-      current_task: T101.1
-      milestone: M101
+      current_action: start_t102_1
+      next_action: run T102.1 TDD
+      current_task: T102.1
+      milestone: M102
+      m101_status: completed
+      m101_completed_at: '2026-08-02'
       phase: Phase 24 (M101-M104)
       s022_d22_decision: S022-D22
-      note: S022/EV-019 07-build in_progress — T101.1 TDD (M101/F47 content_hash skip)
+      note: S022/EV-019 07-build in_progress — M101 COMPLETE (T101.1–T101.4 @ 7bee3e1); handoff → T102.1 TDD (M102/F48 embed retry)
+      completed_tasks:
+      - T101.1
+      - T101.2
+      - T101.3
+      - T101.4
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -21333,10 +21354,10 @@ evolve_cycles:
     status: completed
   - path: docs/sessions/S022-ingest-resilience/HANDOFF.md
     status: completed
-    note: 04 COMPLETE; Gate B→C PASS (S022-D22); handoff → 07-build T101.1
+    note: M101 done → T102.1; Gate B→C PASS (S022-D22)
   - path: docs/sessions/S022-ingest-resilience/routing-plan.md
     status: completed
-    note: 04 completed; 07-build in_progress @ T101.1
+    note: M101 done; 07-build in_progress @ T102.1
   - path: docs/decisions.md
     status: completed
     note: EV019-M1–M6 verdicts (S022-D20)
@@ -25005,7 +25026,7 @@ artifacts:
   stage: 00-context
   evolve_cycle_id: EV-019
   recorded_at: '2026-08-02'
-  note: 04 completed; 07-build in_progress @ T101.1
+  note: M101 done; 07-build in_progress @ T102.1
 - path: docs/sessions/S022-ingest-resilience/checkpoints/01-requirements-seed.md
   kind: checkpoint
   session_id: S022-ingest-resilience
@@ -27032,7 +27053,7 @@ artifacts:
   evolve_cycle_id: EV-019
   status: completed
   recorded_at: '2026-08-02T23:30:00Z'
-  note: Gate B→C PASS (S022-D22); handoff → 07-build T101.1
+  note: M101 done → T102.1; Gate B→C PASS (S022-D22)
 - path: docs/sessions/S022-ingest-resilience/routing-plan.md
   session_id: S022-ingest-resilience
   stage: 02-verify-plan
@@ -27349,6 +27370,15 @@ git_history:
     created_at: '2026-06-25'
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/66
   commits:
+  - sha: 7bee3e1
+    sha_full: 7bee3e1a59cd7454e66ecd75401ec819f7c75e99
+    branch: evolve/EV-019-ingest-resilience
+    message: '[T101.1-T101.4] feat: F47 content_hash skip on ingest'
+    stage: 07-build
+    files_changed: 17
+    timestamp: '2026-08-02T22:16:11Z'
+    session_id: S022-ingest-resilience
+    evolve_cycle_id: EV-019
   - sha: dbeb081
     sha_full: dbeb0819f88bd95eb4cfe91179197c1cddccaced
     branch: evolve/EV-019-ingest-resilience
