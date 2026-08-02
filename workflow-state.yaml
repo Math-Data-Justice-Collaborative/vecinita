@@ -3597,9 +3597,14 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: after CI green on PR #173, present Phase D digest / start 11-verify-impl per user
-  commits_head: d9c9f4a
-  head_note: 'HEAD d9c9f4a — docs: record EV-017 Phase C PR #173 (PR-56) and start Phase D; qa/e2e reports staged, commit pending separately'
+  next_action: present Phase D digest; AskQuestion to start 11-verify-impl
+  commits_head: c4e4585
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
+  ci_run_id: '30755836677'
+  ci_conclusion: success
+  workflow_state_sync_commit_needed: true
+  workflow_state_sync_commit_note: 'YAML updated after c4e4585 + CI green; sync commit may be needed'
+  head_note: 'HEAD c4e4585 — [T98.x] test: raise F43/F45 unit coverage for CI gate; CI green on PR #173; workflow-state sync commit may be needed'
   checkpoints_phase_d: pending
   verify_09_overall: pass_with_advisories
   verify_10_note: 'T0 PASS 11/11 UJ-057–059; UJ-060/AC-BB9 deferred'
@@ -3611,7 +3616,7 @@ active_session:
   pr_base: main
   pr_status: open
   pr_opened_at: '2026-08-02'
-  ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
+  ci_note: 'ci.yml SUCCESS on tip c4e4585 for PR #173 — https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677'
   parallel_stages: [09-qa, 10-e2e]
   report_09_qa: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
   report_10_e2e: docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md
@@ -15838,8 +15843,12 @@ evolve_cycles:
   pr_base: main
   pr_status: open
   pr_opened_at: '2026-08-02'
-  pr_head_sha: f655030
-  ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
+  pr_head_sha: c4e4585
+  commits_head: c4e4585
+  ci_note: 'ci.yml SUCCESS on tip c4e4585 for PR #173 — https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677'
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
+  ci_run_id: '30755836677'
+  ci_conclusion: success
   routing_preset: standard
   routing_preset_choice: standard
   routing_preset_status: approved
@@ -15883,7 +15892,7 @@ evolve_cycles:
       status: in_progress
       started: '2026-08-02'
       current_action: phase_d_await_11
-      note: 09-qa pass_with_advisories + 10-e2e PASS (UJ-057–059); Phase D await 11-verify-impl (not started); checkpoints.phase_d pending until 11+12; PR #173 CI watch
+      note: 09+10 COMPLETE; CI green on tip c4e4585 (PR #173); Phase D await 11 AskQuestion; workflow-state sync commit may be needed
     01-requirements:
       status: completed
       started: '2026-08-02'
@@ -16503,7 +16512,6 @@ evolve_cycles:
   t96_1_completed_at: '2026-08-02T15:01:17Z'
   t96_1_commit: fd585ce
   t96_2_started_at: '2026-08-02T15:01:17Z'
-  commits_head: 59edd12
   m98_status: completed
   m98_head: 59edd12
 retrospective_cycles: []
@@ -17550,6 +17558,13 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 09-qa
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: CI green on PR #173 tip c4e4585 after coverage fix; Phase D digest next / AskQuestion start 11; workflow-state sync may be needed
+  recorded_at: '2026-08-02'
+  note: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677'
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S020-retrieval-batch-b
@@ -20848,7 +20863,7 @@ git_history:
     evolve_cycle_id: EV-017
     exists_on_disk: true
     created_from: main
-    head_sha: d9c9f4a30517684cfa1b7a635c771311c135e030
+    head_sha: c4e45851e48bf9fd1fada1486b1a1727f9c1c32d
     pr_number: 173
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
     pr_title: '[EV-017] Phase 22 Retrieval Batch B (F43–F45)'
@@ -20856,7 +20871,10 @@ git_history:
     pr_status: open
     pr_plan_id: PR-56
     pr_opened_at: '2026-08-02'
-    note: EV-017 / S020 — 09+10 COMPLETE; Phase D await 11; HEAD d9c9f4a; reports commit pending; PR #173 open
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
+    ci_run_id: '30755836677'
+    ci_conclusion: success
+    note: EV-017 / S020 — CI green @ c4e4585 PR #173; Phase D await 11; workflow-state sync may be needed
   - name: evolve/EV-016-retrieval-quality
     purpose: EV-016 / S019 — Batch A retrieval quality (investigate
     base: main
@@ -23321,6 +23339,37 @@ git_history:
     note: Phase C PR #173 recorded; Phase D 09+10 started; HEAD moved from f655030; qa/e2e report commit still pending (staged)
     skill_ids:
     - 16-evolve
+  - sha: 607426de1fd95a2a306d962a1504729ddfe7ef93
+    short: 607426d
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: EV-017 09-qa and 10-e2e reports (Phase D)'
+    stage: 09-qa
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: qa-report.md, e2e-report.md, routing-plan.md, workflow-state.yaml
+    timestamp: '2026-08-02T15:58:14Z'
+    note: Phase D 09-qa + 10-e2e reports committed; 11 not started; watching GitHub CI on tip 607426d for PR #173
+    files:
+    - docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+    - docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md
+    - docs/sessions/S020-retrieval-batch-b/routing-plan.md
+    - workflow-state.yaml
+    skill_ids:
+    - 09-qa
+    - 10-e2e
+  - sha: c4e45851e48bf9fd1fada1486b1a1727f9c1c32d
+    short: c4e4585
+    branch: evolve/EV-017-retrieval-batch-b
+    message: '[T98.x] test: raise F43/F45 unit coverage for CI gate'
+    stage: 09-qa
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: F43/F45 unit coverage tests for CI gate
+    timestamp: '2026-08-02T16:05:17Z'
+    note: Coverage fix after CI fail on 607426d; ci.yml SUCCESS https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677; 11 not started
+    skill_ids:
+    - 09-qa
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
   - '2026-08-02T15:34:08Z S020/EV-017: synced 07-build — T98.1–T98.4 COMPLETE @ 59edd12; M98 COMPLETE; Phase 22 M94–M98 ALL COMPLETE; current_stage=07-build (completed); next_action=08-verify-build (deferred until before Phase C PR); 08 NOT started; checkpoints.phase_c still pending; appended commits d2e9043/8b81a42/21b52dc/59edd12; folded prior uncommitted M97/T98.1 dirty state.'
   - '2026-08-02T15:27:28Z S020/EV-017: synced 07-build — T97.5 COMPLETE @ d33cbec; M97 COMPLETE; current_action=T98.1 (UJ-057 answer cache e2e); M98 in_progress; 08-verify-build deferred until before Phase C PR; checkpoints.phase_c still pending; appended commit d33cbec; folded prior uncommitted T97.4 sync.'
   - '2026-08-02T15:23:35Z S020/EV-017: synced 07-build — T97.4 COMPLETE @ 94477d0; current_action=T97.5 (spike runbook + metrics capture path); M97 still in_progress; 08-verify-build deferred until before Phase C PR; checkpoints.phase_c still pending; appended commit 94477d0.'
