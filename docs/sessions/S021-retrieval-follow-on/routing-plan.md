@@ -11,8 +11,8 @@
 | 08-verify-build | yes | completed | — | PASS — `reports/verification-report.md` |
 | 09-qa | yes | completed | — | pass_with_advisories — `reports/qa-report.md` |
 | 10-e2e | yes | completed | — | PASS — `reports/e2e-report.md` |
-| 11-verify-impl | yes | in_progress | — | awaiting user — `reports/verify-impl.md` |
-| 12-verify-deploy | yes | pending | — | |
+| 11-verify-impl | yes | completed | — | approved S021-D25 — `reports/verify-impl.md` |
+| 12-verify-deploy | yes | in_progress | — | checklist drafted — Phase 2/3 sign-off |
 | 13-deploy-smoke | yes | pending | — | |
 
 ## Skipped

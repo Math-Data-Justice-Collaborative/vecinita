@@ -431,8 +431,9 @@ only if floors pass; otherwise keep spike-only.
 | S021-D22 | T99.3 fix path | **Path B** full E0 re-embed all docs + promote; file `BUG-2026-08-02-staging-basis-vector-wipe`; harden `attach_embeddings` / DELETE helpers with corpus DB guard (user approved 2026-08-02) |
 | S021-D23 | T99.4 local Docker | **Skip Docker Desktop** — waive local TC-185; fixture TC-185 remains CI-gated / skip-without-Postgres; local closeout = TC-186 + bug PASS + staging Path B AC-FO1 (user 2026-08-02) |
 | S021-D24 | T100.1 CE re-gate | AC-BB9 / TC-184 **PASS** (`ship_gate_pass=true`; CE+P1 relevancy 0.778 / faith 0.938). Keep prod `VECINITA_RAG_RERANK_CE` **false** until 12/13 Path A approval (AC-FO4); #83 open until flag flip |
+| S021-D25 | 11-verify-impl | **Approve F46 + F45** → 12-verify-deploy (user option 1, 2026-08-02) |
 
 ### Phase 0–B / 07 status
 
-Phase 0–B **passed**. **M99 + M100 complete** (T99.1–T100.4). CE ship floors cleared post–F46; flag stays default-off.
-Next: **08-verify-build** → Phase D (09–13).
+Phase 0–D **in progress**. M99–M100 + 08–11 done (11 approved S021-D25). CE floors PASS; flag still default-off.
+Next: **12 Phase 2/3 sign-off** → 13-deploy-smoke.

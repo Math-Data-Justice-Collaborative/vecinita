@@ -2,7 +2,7 @@
 
 > Generated: 2026-08-02  
 > Branch: `evolve/EV-018-retrieval-follow-on` @ `1b46507`  
-> Status: **awaiting user approval**  
+> Status: **approved** (S021-D25 — F46 + F45, 2026-08-02)  
 > UI preview: **N/A** (no browser UI delta)
 
 ## Inputs
@@ -40,6 +40,6 @@
 
 | Area | Approve? |
 |------|----------|
-| F46 empty-retrieve fix | _pending_ |
-| F45 CE ship-gate metrics | _pending_ |
-| Proceed to 12-verify-deploy | _pending_ |
+| F46 empty-retrieve fix | **approved** |
+| F45 CE ship-gate metrics | **approved** (flag remains off until Path A CE) |
+| Proceed to 12-verify-deploy | **approved** |
