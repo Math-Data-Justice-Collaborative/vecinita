@@ -129,3 +129,92 @@ def test_heuristic_rewrites_dedupes_and_caps_at_three() -> None:
     assert len(variants) <= _MAX_REWRITE_VARIANTS
     norms = {v.strip().lower() for v in variants}
     assert len(norms) == len(variants)
+
+
+def test_heuristic_rewrites_es_skips_location_when_providence_present() -> None:
+    """ES location append is skipped when Providence is already in the query."""
+    variants = heuristic_rewrites(
+        "¿Cómo me inscribo a una escuela pública en Providence?",
+        locale="es",
+    )
+    joined = " ".join(variants).lower()
+    assert "en providence ri" not in joined
+    assert any("inscribo" in v.lower() for v in variants[1:])
+
+
+def test_heuristic_rewrites_es_location_without_inverted_question_mark() -> None:
+    """ES location variant works without leading ¿."""
+    variants = heuristic_rewrites("Cómo solicito SNAP", locale="es")
+    assert any("en providence ri?" in v.lower() for v in variants)
+    assert any(not v.startswith("¿") and "providence" in v.lower() for v in variants)
+
+
+def test_heuristic_rewrites_es_content_echo_none_for_non_interrogative() -> None:
+    """Non-interrogative ES strings still return at least the original."""
+    variants = heuristic_rewrites("SNAP beneficios", locale="es")
+    assert variants[0] == "SNAP beneficios"
+    assert any("providence" in v.lower() for v in variants)
+
+
+def test_merge_multi_query_hits_rejects_non_positive_top_k() -> None:
+    """top_k < 1 raises ValueError."""
+    with pytest.raises(ValueError, match="top_k"):
+        merge_multi_query_hits([[_chunk()]], top_k=0)
+
+
+def test_multi_query_retrieve_disabled_still_applies_locale_boost() -> None:
+    """When H7 is off, single retrieve still soft-boosts matching locale."""
+    en_chunk = _chunk(score=0.80, language="en")
+    es_chunk = _chunk(score=0.79, language="es")
+
+    def retrieve_fn(_q: str) -> list[RetrievedChunk]:
+        return [en_chunk, es_chunk]
+
+    hits = multi_query_retrieve(
+        "¿Qué es VECINA?",
+        locale="es",
+        top_k=2,
+        retrieve_fn=retrieve_fn,
+        enabled=False,
+        count=3,
+    )
+    assert hits[0].language == "es"
+
+
+def test_multi_query_retrieve_count_one_skips_fanout() -> None:
+    """count<=1 skips rewrite fan-out."""
+    calls: list[str] = []
+
+    def retrieve_fn(q: str) -> list[RetrievedChunk]:
+        calls.append(q)
+        return [_chunk(score=0.9, language="en")]
+
+    hits = multi_query_retrieve(
+        "How do I apply?",
+        locale="en",
+        top_k=1,
+        retrieve_fn=retrieve_fn,
+        enabled=True,
+        count=1,
+    )
+    assert len(hits) == 1
+    assert calls == ["How do I apply?"]
+
+
+def test_multi_query_retrieve_empty_locale_skips_boost() -> None:
+    """Empty locale leaves score order unchanged."""
+    high = _chunk(score=0.9, language="en")
+    low = _chunk(score=0.5, language="es")
+
+    def retrieve_fn(_q: str) -> list[RetrievedChunk]:
+        return [high, low]
+
+    hits = multi_query_retrieve(
+        "q",
+        locale="",
+        top_k=2,
+        retrieve_fn=retrieve_fn,
+        enabled=False,
+        count=3,
+    )
+    assert hits[0].score == pytest.approx(0.9)
