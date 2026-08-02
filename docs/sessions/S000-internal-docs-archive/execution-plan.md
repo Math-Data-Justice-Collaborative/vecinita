@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
-| **Active milestone** | M94 — F43 `packages/rag` cache cascade |
-| **Active task** | T94.1 — unit: exact answer cache hit (in_progress) |
-| **Tasks completed** | Phase 21: M91–M93 (T91.1–T93.3); Phase 22: none yet |
+| **Active milestone** | M95 — F43 ChatRAG wire + OpenAPI (next) |
+| **Active task** | T95.1 — after M94 08-verify-build |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94 (T94.1–T94.5) |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
@@ -1905,10 +1905,10 @@ unit tests TC-170–172.
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T94.1 | Test: unit — exact answer hit skips generate (TC-176) — red | Test | completed | AC-BB1, TC-176, ADR-042 | — | 2026-08-02 | S020 | F43 |
-| T94.2 | Test: unit — semantic threshold 0.92 miss vs hit (TC-177) — red | Test | pending | AC-BB2, TC-177, S020-D15 | — | — | S020 | F43 |
-| T94.3 | Test: unit — TTL / max_entries / corpus bust (TC-178) — red | Test | pending | AC-BB3, TC-178, RD-200 | — | — | S020 | F43 |
-| T94.4 | Code: normalize + content-hash keys + LRU store + cascade lookup/store | Code | pending | ADR-042, config-spec | T94.1–T94.3 | — | S020 | F43 |
-| T94.5 | Docs: export cache helpers from `packages/rag`; module docstrings | Docs | pending | feature-list F43 | T94.4 | — | S020 | F43 |
+| T94.2 | Test: unit — semantic threshold 0.92 miss vs hit (TC-177) — red | Test | completed | AC-BB2, TC-177, S020-D15 | — | 2026-08-02 | S020 | F43 |
+| T94.3 | Test: unit — TTL / max_entries / corpus bust (TC-178) — red | Test | completed | AC-BB3, TC-178, RD-200 | — | 2026-08-02 | S020 | F43 |
+| T94.4 | Code: normalize + content-hash keys + LRU store + cascade lookup/store | Code | completed | ADR-042, config-spec | T94.1–T94.3 | 2026-08-02 | S020 | F43 |
+| T94.5 | Docs: export cache helpers from `packages/rag`; module docstrings | Docs | completed | feature-list F43 | T94.4 | 2026-08-02 | S020 | F43 |
 
 #### M95: F43 — ChatRAG wire + OpenAPI + F36 harness
 
@@ -2667,10 +2667,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T90.4 | M90 | 20 | Test | completed | T89.3 | 2026-07-30 | S017 | F41 | — |
 | T90.5 | M90 | 20 | Docs | completed | T90.1–T90.4 | 2026-07-30 | S017 | F41 | — |
 | T94.1 | M94 | 22 | Test | completed | — | 2026-08-02 | S020 | F43 | — |
-| T94.2 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
-| T94.3 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
-| T94.4 | M94 | 22 | Code | pending | T94.1–T94.3 | — | S020 | F43 | — |
-| T94.5 | M94 | 22 | Docs | pending | T94.4 | — | S020 | F43 | — |
+| T94.2 | M94 | 22 | Test | completed | — | 2026-08-02 | S020 | F43 | — |
+| T94.3 | M94 | 22 | Test | completed | — | 2026-08-02 | S020 | F43 | — |
+| T94.4 | M94 | 22 | Code | completed | T94.1–T94.3 | 2026-08-02 | S020 | F43 | — |
+| T94.5 | M94 | 22 | Docs | completed | T94.4 | 2026-08-02 | S020 | F43 | — |
 | T95.1 | M95 | 22 | Test | pending | T94.4 | — | S020 | F43 | — |
 | T95.2 | M95 | 22 | Test | pending | T94.4 | — | S020 | F43 | — |
 | T95.3 | M95 | 22 | Code | pending | T95.1, T95.2 | — | S020 | F43 | — |
