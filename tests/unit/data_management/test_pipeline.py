@@ -13,6 +13,7 @@ from vecinita_data_management_backend.pipeline import (
     run_retag_job,
 )
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_embedding_client import EmbeddingClientError
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
@@ -35,22 +36,32 @@ _VOCAB = [
 class _StubEmbedClient:
     """StubEmbedClient."""
 
+    def __init__(self) -> None:
+        """Track embed_batch invocations for F47 skip assertions."""
+        self.batch_calls = 0
+
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Embed batch."""
+        self.batch_calls += 1
         return [[0.01] * 384 for _ in texts]
 
 
 class _RecordingWriteClient:
     """RecordingWriteClient."""
 
-    def __init__(self) -> None:
-        """Init  ."""
+    def __init__(self, stored_hashes: dict[str, str] | None = None) -> None:
+        """Init with optional URL→content_hash map for F47 skip lookups."""
         self.last_batch: BatchUpsertRequest | None = None
         self.patched_tags: list[TagInput] | None = None
+        self._stored_hashes = stored_hashes or {}
 
     def upsert_batch(self, body: BatchUpsertRequest) -> None:
         """Upsert batch."""
         self.last_batch = body
+
+    def get_content_hash_by_url(self, url: str) -> str | None:
+        """Return stored content_hash for URL when present (F47 / #163)."""
+        return self._stored_hashes.get(url)
 
     def get_document_detail(self, document_id: UUID) -> DocumentDetail:
         """Get document detail."""
@@ -222,6 +233,142 @@ def test_run_ingest_job_ingests_without_tags_when_inference_fails() -> None:
     assert updated.status == "completed"
     assert write_client.last_batch is not None
     assert write_client.last_batch.documents[0].tags is None
+
+
+def test_run_ingest_job_skips_embed_when_content_hash_unchanged() -> None:
+    """AC-IR1 / TC-187: same content_hash skips chunk delete + re-embed (F47 / #163)."""
+    from hashlib import sha256  # noqa: PLC0415
+
+    scraped = _fetch_fixture("https://example.com/sample-page.html")
+    digest = sha256(scraped.text.encode("utf-8")).hexdigest()
+    store = InMemoryJobStore()
+    embed_client = _StubEmbedClient()
+    write_client = _RecordingWriteClient(
+        stored_hashes={"https://example.com/sample-page.html": digest},
+    )
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64", "force": False},
+    )
+
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=embed_client,  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
+        tag_vocabulary=_VOCAB,
+    )
+
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+    assert embed_client.batch_calls == 0
+    assert write_client.last_batch is not None
+    doc = write_client.last_batch.documents[0]
+    assert doc.content_hash == digest
+    assert doc.chunks == []
+    assert doc.body_text is not None
+    assert doc.title == scraped.title
+    assert updated.metrics == {"skipped_unchanged": 1, "urls_failed_embed": 0}
+
+
+def test_run_ingest_job_without_hash_lookup_still_embeds() -> None:
+    """Write clients without get_content_hash_by_url skip F47 lookup (no AttributeError)."""
+
+    class _NoHashWriteClient:
+        def __init__(self) -> None:
+            self.last_batch: BatchUpsertRequest | None = None
+
+        def upsert_batch(self, body: BatchUpsertRequest) -> None:
+            self.last_batch = body
+
+    store = InMemoryJobStore()
+    embed_client = _StubEmbedClient()
+    write_client = _NoHashWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64"},
+    )
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=embed_client,  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
+        tag_vocabulary=_VOCAB,
+    )
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+    assert embed_client.batch_calls == 1
+    assert write_client.last_batch is not None
+    assert write_client.last_batch.documents[0].chunks
+
+
+def test_run_ingest_job_embed_failure_records_urls_failed_embed() -> None:
+    """AC-IR4: EmbeddingClientError marks job failed and increments urls_failed_embed."""
+
+    class _FailingEmbedClient:
+        def embed_batch(self, texts: list[str]) -> list[list[float]]:
+            _ = texts
+            msg = "embed down"
+            raise EmbeddingClientError(msg)
+
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64"},
+    )
+    with pytest.raises(EmbeddingClientError, match="embed down"):
+        run_ingest_job(
+            record.job_id,
+            store=store,
+            embed_client=_FailingEmbedClient(),  # type: ignore[arg-type]
+            write_client=write_client,  # type: ignore[arg-type]
+            fetch_document=_fetch_fixture,
+            tag_vocabulary=_VOCAB,
+        )
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "failed"
+    assert updated.error_code == "EmbeddingClientError"
+    assert updated.metrics == {"skipped_unchanged": 0, "urls_failed_embed": 1}
+
+
+def test_run_ingest_job_force_bypasses_content_hash_skip() -> None:
+    """AC-IR2 / TC-188: force=true re-embeds even when content_hash matches (F47)."""
+    from hashlib import sha256  # noqa: PLC0415
+
+    scraped = _fetch_fixture("https://example.com/sample-page.html")
+    digest = sha256(scraped.text.encode("utf-8")).hexdigest()
+    store = InMemoryJobStore()
+    embed_client = _StubEmbedClient()
+    write_client = _RecordingWriteClient(
+        stored_hashes={"https://example.com/sample-page.html": digest},
+    )
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64", "force": True},
+    )
+
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=embed_client,  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
+        tag_vocabulary=_VOCAB,
+    )
+
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+    assert embed_client.batch_calls == 1
+    assert write_client.last_batch is not None
+    assert write_client.last_batch.documents[0].chunks
+    assert write_client.last_batch.documents[0].content_hash == digest
 
 
 def test_run_ingest_job_raises_when_job_missing() -> None:

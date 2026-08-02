@@ -609,6 +609,14 @@ components:
           type: integer
           minimum: 64
           maximum: 2048
+        chunk_overlap_tokens:
+          type: integer
+          minimum: 0
+          maximum: 2047
+          description: >
+            Overlap between consecutive chunks in HF tokenizer tokens (F49 / ADR-044).
+            Default when omitted is 32 (VECINITA_CHUNK_OVERLAP_TOKENS). Must be less
+            than chunk_size_tokens.
         job_type:
           type: string
           enum:
@@ -644,7 +652,9 @@ components:
         force:
           type: boolean
           default: false
-          description: Bypass content_hash skip on rebuild
+          description: >
+            Bypass content_hash skip on ingest (F47 / #163) and rebuild (F41).
+            When true, re-chunk and re-embed even if scraped hash matches stored hash.
         dry_run:
           type: boolean
           default: false
@@ -744,12 +754,33 @@ components:
         error_message:
           type: string
           nullable: true
+        metrics:
+          nullable: true
+          description: >
+            Ingest resilience counters (F47–F48 / EV-019). Present when the runner
+            records skip/embed-failure tallies (skipped_unchanged, urls_failed_embed).
+          allOf:
+            - $ref: "#/components/schemas/JobMetrics"
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
+    JobMetrics:
+      type: object
+      additionalProperties: false
+      properties:
+        skipped_unchanged:
+          type: integer
+          minimum: 0
+          default: 0
+          description: URLs skipped because content_hash matched (F47)
+        urls_failed_embed:
+          type: integer
+          minimum: 0
+          default: 0
+          description: URLs that failed after embed retry exhaust (F48)
     JobList:
       type: object
       required:

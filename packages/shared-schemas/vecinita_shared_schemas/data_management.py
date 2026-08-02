@@ -24,12 +24,24 @@ class JobOptions(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     chunk_size_tokens: int | None = Field(default=None, ge=64, le=2048)
+    chunk_overlap_tokens: int | None = Field(
+        default=None,
+        ge=0,
+        le=2047,
+        description="Overlap between consecutive chunks; must be < chunk_size (F49 / ADR-044).",
+    )
     job_type: JobType = "ingest"
     document_id: UUID | None = None
     eval_run_id: UUID | None = None
     question: str | None = Field(default=None, min_length=1, max_length=2000)
     mode: RebuildMode | None = None
-    force: bool = False
+    force: bool = Field(
+        default=False,
+        description=(
+            "Bypass content_hash skip on ingest (F47) and rebuild (F41). "
+            "When true, re-chunk and re-embed even if scraped hash matches stored hash."
+        ),
+    )
     dry_run: bool = False
     document_ids: list[UUID] | None = None
     backfill: bool = False
@@ -49,6 +61,11 @@ class JobOptions(BaseModel):
         ):
             msg = "ack_reconstruct_from_chunks required when backfill_source is from_chunks"
             raise ValueError(msg)
+        if self.chunk_overlap_tokens is not None:
+            effective_size = self.chunk_size_tokens if self.chunk_size_tokens is not None else 256
+            if self.chunk_overlap_tokens >= effective_size:
+                msg = "chunk_overlap_tokens must be < chunk_size_tokens"
+                raise ValueError(msg)
         return self
 
 
@@ -83,6 +100,15 @@ class CreateJobResponse(BaseModel):
     status: Literal["pending"]
 
 
+class JobMetrics(BaseModel):
+    """Optional ingest resilience counters on completed/failed jobs (F47-F48 / M104)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    skipped_unchanged: int = Field(default=0, ge=0)
+    urls_failed_embed: int = Field(default=0, ge=0)
+
+
 class Job(BaseModel):
     """GET /jobs/{job_id} job status snapshot."""
 
@@ -96,6 +122,7 @@ class Job(BaseModel):
     dashboard_url: str | None = None
     error_code: str | None = None
     error_message: str | None = None
+    metrics: JobMetrics | None = None
     created_at: datetime
     updated_at: datetime
     initiated_by_user_id: UUID | None = None

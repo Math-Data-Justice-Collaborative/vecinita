@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Protocol, cast
 from uuid import UUID
 
 from pydantic import HttpUrl
-from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClientError
 from vecinita_ingest import chunk_text, fetch_url
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.scrape import parse_html
@@ -50,6 +50,15 @@ def _raise_no_chunks(url: str) -> None:
     raise ValueError(msg)
 
 
+def _lookup_stored_content_hash(write_client: object, url: str) -> str | None:
+    """Return stored content_hash when the write client supports F47 lookup."""
+    getter = getattr(write_client, "get_content_hash_by_url", None)
+    if not callable(getter):
+        return None
+    result: object = getter(url)
+    return result if isinstance(result, str) else None
+
+
 class DocumentFetcher(Protocol):
     """Callable that fetches a URL and returns normalized page text."""
 
@@ -74,7 +83,7 @@ class TagInferrer(Protocol):
         ...
 
 
-def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dependencies
+def run_ingest_job(  # noqa: C901, PLR0913, PLR0915  # ingest stages + F47/F48 metrics branches
     job_id: UUID,
     *,
     store: JobStore,
@@ -92,10 +101,14 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
 
     store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
-    raw_chunk_size = record.options.get("chunk_size_tokens", 256)
-    chunk_size = int(raw_chunk_size) if isinstance(raw_chunk_size, (int, str)) else 256
+    chunk_size = _chunk_size_from_options(record.options)
+    chunk_overlap = _chunk_overlap_from_options(record.options)
     vocabulary = tag_vocabulary if tag_vocabulary is not None else load_seed_vocabulary()
     slug_vocab = vocabulary_slugs(vocabulary)
+
+    force = _option_bool(record.options, "force")
+    skipped_unchanged = 0
+    urls_failed_embed = 0
 
     try:
         documents: list[DocumentUpsert] = []
@@ -105,8 +118,36 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
             title = scraped.title or ""
             source_url = scraped.url
             language = detect_document_language(text)
+            digest = sha256(text.encode("utf-8")).hexdigest()
 
-            chunks = chunk_text(text, chunk_size_tokens=chunk_size)
+            stored_hash = _lookup_stored_content_hash(write_client, source_url)
+            if stored_hash is None and source_url != url:
+                stored_hash = _lookup_stored_content_hash(write_client, url)
+
+            # F47 / #163: refresh metadata; skip chunk delete + re-embed when hash matches.
+            if stored_hash is not None and stored_hash == digest and not force:
+                skipped_unchanged += 1
+                documents.append(
+                    DocumentUpsert(
+                        url=HttpUrl(source_url),
+                        title=scraped.title,
+                        content_hash=digest,
+                        language=language,
+                        body_text=text,
+                        embedding_model_id=_embedding_model_id(),
+                        embedding_dim=EMBEDDING_DIMENSION,
+                        chunk_size_tokens=chunk_size,
+                        chunks=[],
+                        tags=None,
+                    )
+                )
+                continue
+
+            chunks = chunk_text(
+                text,
+                chunk_size_tokens=chunk_size,
+                chunk_overlap_tokens=chunk_overlap,
+            )
             if not chunks:
                 _raise_no_chunks(url)
 
@@ -137,7 +178,21 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
                         source="llm",
                     )
 
-            embeddings = embed_client.embed_batch(chunks)
+            try:
+                embeddings = embed_client.embed_batch(chunks)
+            except EmbeddingClientError:
+                urls_failed_embed += 1
+                store.update_job(
+                    job_id,
+                    status="failed",
+                    error_code="EmbeddingClientError",
+                    error_message=f"embed failed for {url}"[:500],
+                    metrics={
+                        "skipped_unchanged": skipped_unchanged,
+                        "urls_failed_embed": urls_failed_embed,
+                    },
+                )
+                raise
             chunk_models = [
                 ChunkUpsert(chunk_index=index, text=chunk, embedding=vector)
                 for index, (chunk, vector) in enumerate(zip(chunks, embeddings, strict=True))
@@ -146,7 +201,7 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
                 DocumentUpsert(
                     url=HttpUrl(source_url),
                     title=scraped.title,
-                    content_hash=sha256(text.encode("utf-8")).hexdigest(),
+                    content_hash=digest,
                     language=language,
                     body_text=text,
                     embedding_model_id=_embedding_model_id(),
@@ -159,13 +214,26 @@ def run_ingest_job(  # noqa: PLR0913  # ingest pipeline needs explicit stage dep
 
         body = BatchUpsertRequest(documents=documents)
         write_client.upsert_batch(body)
-        store.update_job(job_id, status="completed")
+        store.update_job(
+            job_id,
+            status="completed",
+            metrics={
+                "skipped_unchanged": skipped_unchanged,
+                "urls_failed_embed": urls_failed_embed,
+            },
+        )
+    except EmbeddingClientError:
+        raise
     except Exception as exc:
         store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
             error_message=str(exc)[:500],
+            metrics={
+                "skipped_unchanged": skipped_unchanged,
+                "urls_failed_embed": urls_failed_embed,
+            },
         )
         raise
 
@@ -237,6 +305,12 @@ def _option_str(options: dict[str, object], key: str, default: str) -> str:
 def _chunk_size_from_options(options: dict[str, object]) -> int:
     raw = options.get("chunk_size_tokens", 256)
     return int(raw) if isinstance(raw, (int, str)) else 256
+
+
+def _chunk_overlap_from_options(options: dict[str, object]) -> int:
+    """Resolve chunk overlap (F49 / ADR-044); default 32."""
+    raw = options.get("chunk_overlap_tokens", 32)
+    return int(raw) if isinstance(raw, (int, str)) else 32
 
 
 def _document_ids_from_options(options: dict[str, object]) -> list[UUID] | None:
@@ -361,12 +435,17 @@ def _document_upsert_from_rebuild(  # noqa: PLR0913  # stamped upsert needs chun
     language: str,
     body: str,
     chunk_size: int,
+    chunk_overlap: int,
     model_id: str,
     rebuild_run_id: UUID | None,
     embed_client: EmbeddingClient,
 ) -> DocumentUpsert:
     """Chunk, embed, and stamp one rebuild DocumentUpsert (ADR-040 §4)."""
-    chunks = chunk_text(body, chunk_size_tokens=chunk_size)
+    chunks = chunk_text(
+        body,
+        chunk_size_tokens=chunk_size,
+        chunk_overlap_tokens=chunk_overlap,
+    )
     if not chunks:
         _raise_no_chunks(url)
     embeddings = embed_client.embed_batch(chunks)
@@ -411,6 +490,7 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
     fetcher: DocumentFetcher,
     embed_client: EmbeddingClient,
     chunk_size: int,
+    chunk_overlap: int,
     model_id: str,
     rebuild_run_id: UUID | None,
 ) -> list[DocumentUpsert]:
@@ -434,6 +514,7 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
                 language=resolved_language,
                 body=body,
                 chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
                 model_id=model_id,
                 rebuild_run_id=rebuild_run_id,
                 embed_client=embed_client,
@@ -462,6 +543,7 @@ def run_rebuild_job(
     dry_run = _option_bool(record.options, "dry_run")
     force = _option_bool(record.options, "force")
     chunk_size = _chunk_size_from_options(record.options)
+    chunk_overlap = _chunk_overlap_from_options(record.options)
     model_id = _embedding_model_id()
 
     store.update_job(job_id, status="running")
@@ -491,6 +573,7 @@ def run_rebuild_job(
             fetcher=fetcher,
             embed_client=embed_client,
             chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
             model_id=model_id,
             rebuild_run_id=rebuild_run_id,
         )

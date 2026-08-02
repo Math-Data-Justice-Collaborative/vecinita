@@ -108,6 +108,12 @@ Skipped (reference input): `docs/decisions.md#requirements-decisions-01-requirem
 
 See [decisions.md#Product decisions](decisions.md#product-decisions-02-verify-plan). Contradictions C1–C4 resolved 2026-05-19.
 
+### EV-019 delta (2026-08-02) — F47–F49
+
+Session audit: `docs/sessions/S022-ingest-resilience/reports/02-verify-plan-audit.md`.  
+12 high auto-approved; M1–M6 user-approved (S022-D20); Gate A→B **PASS**. Consistency clean
+after AC-RB4 + data-flow renumber fixes.
+
 ## Partial re-run (2026-05-19) — post-audit drift
 
 **Scope:** Re-checked all 13 audited product-plan docs (untracked in git; no file-level diff since initial audit). Cross-doc consistency + leftover stale text.

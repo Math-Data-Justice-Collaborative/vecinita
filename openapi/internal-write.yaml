@@ -77,6 +77,29 @@ paths:
                 $ref: "#/components/schemas/DocumentListPage"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /documents/content-hash:
+    get:
+      operationId: getDocumentContentHash
+      summary: Lookup stored content_hash by URL for ingest skip (F47 / #163)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Hash when document exists; content_hash null when URL unknown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentContentHashResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /documents/{document_id}:
     delete:
       operationId: deleteDocument
@@ -1281,6 +1304,21 @@ components:
         total:
           type: integer
           minimum: 0
+    DocumentContentHashResponse:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+        content_hash:
+          type: string
+          nullable: true
+          description: Stored hash when document exists; null when URL unknown
+        document_id:
+          type: string
+          format: uuid
+          nullable: true
     BulkDeleteRequest:
       type: object
       required:

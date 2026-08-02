@@ -130,6 +130,16 @@ class DocumentSummary(BaseModel):
     language: str | None = None
 
 
+class DocumentContentHashResponse(BaseModel):
+    """GET /internal/v1/documents/content-hash — stored hash for ingest skip (F47)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    url: str
+    content_hash: str | None = None
+    document_id: UUID | None = None
+
+
 class DocumentListPage(BaseModel):
     """Paginated GET /internal/v1/documents response (admin corpus list)."""
 

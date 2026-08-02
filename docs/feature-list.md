@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-02 (S021/EV-018 — F46 empty retrieve + F45 CE re-gate; prior S020/EV-017 F43–F45)
+> **Last updated**: 2026-08-02 (S022/EV-019 — F47–F49 ingest resilience; prior S021/EV-018 F46 + F45)
 
 ## Summary
 
@@ -56,6 +56,9 @@
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
 | F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S021/EV-018 re-gate; S020-D5/D7 |
 | F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
+| F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
+| F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
+| F49 | Chunk overlap + sizing clarity (#160) | Implemented | Data Management | packages/ingest, config-spec; optional admin FE | 11-verify-impl S022 2026-08-02; EV-019 #160 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -70,7 +73,8 @@
   | Parameter | Default | Range | Description |
   |-----------|---------|-------|-------------|
   | `top_k` | `5` (`VECINITA_TOP_K`) | 1–50 | Retrieved chunks per query |
-  | `chunk_size` | `256` tokens (`VECINITA_CHUNK_SIZE_TOKENS`) | ≥ 64 | Chunk size at ingest (see data-management) |
+  | `chunk_size` | `256` tokens (`VECINITA_CHUNK_SIZE_TOKENS`) | ≥ 64 | Chunk size at ingest (HF tokenizer; F49) |
+  | `chunk_overlap` | `32` tokens (`VECINITA_CHUNK_OVERLAP_TOKENS`) | 0 … &lt; size | Overlap between chunks (F49 / ADR-044) |
 - **Limitations**: No server-side conversation memory across requests (F3). Auto-detect query language and respond in the same language.
 - **Source**: User interview 01-requirements; context-brief §6 (bilingual worktree reference)
 
@@ -916,6 +920,65 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   changing F43/F44 defaults; closing #83 without F45 re-gate.
 - **Success**: Staging golden + sample H3 asks show non-empty pools; unblocks F45 re-gate.
 - **Source**: S021 / EV-018; S020 ce-ship-gate / evolve-summary follow-ups; S021-D8.
+
+### F47: Skip re-ingest when content_hash unchanged (#163)
+
+- **What it does**: When a URL’s scraped `content_hash` matches the stored document hash,
+  skip chunk delete + re-embed (and re-chunk). Still **refresh document metadata**
+  (title/language/timestamps/tags as applicable). Operators bypass with job `force=true`.
+  Completes ingest-path skip that AC-RB4 / rebuild `force` anticipated but pipeline did not
+  fully enforce on every re-ingest.
+- **Inputs**: Scraped text → `content_hash`; existing document row hash; job `force`.
+- **Outputs**: Job result/metrics (`skipped_unchanged` / equivalent); unchanged chunk vectors
+  when skipped; metadata updated.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | Ingest pipeline / write API upsert | Hash compare short-circuit before delete-chunks |
+  | Admin job options | `force` on ingest (align with rebuild) |
+  | tests / e2e | Same-hash skip + force re-embed (UJ-062, TC-187–188) |
+- **Out of scope (EV-019)**: Changing scrape normalization solely for hash stability beyond
+  documented whitespace rules; ChatRAG retrieve path.
+- **Success**: Unchanged corpus re-run skips embeds; forced re-run still rewrites chunks.
+- **Source**: S022 / EV-019; GitHub #163; S022-D8 / S022-D14.
+
+### F48: Embedding sub-batch + retry for ingest (#166)
+
+- **What it does**: Makes ingest embedding calls resilient: split large chunk lists into
+  sub-batches and retry transient Modal/HTTP failures with backoff. Contrasts with ADR-023
+  tag fail-open — after exhausted retries, **fail the URL job** (no silent corpus holes).
+  Dim mismatch / empty batch remain hard-fail without retry.
+- **Inputs**: Chunk texts; embed client; Modal `/embed/batch` limits; retry knobs.
+- **Outputs**: Successful embeddings under transient faults; clear job error when retries
+  exhausted or hard-fail.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/embedding-client` | Sub-batch + retry |
+  | Ingest pipeline | Uses resilient client; fail-URL on exhaust |
+  | Modal embed app | Align batch limits if needed |
+  | tests / e2e | Simulated 5xx/timeout recovery; hard-fail (TC-189–190) |
+- **Out of scope (EV-019)**: Multi-provider embed ABC; changing tag fail-open.
+- **Success**: Transient embed blips recovered; dim errors fail fast; exhaust → failed URL.
+- **Source**: S022 / EV-019; GitHub #166; S022-D8 / S022-D12 / S022-D14.
+
+### F49: Chunk overlap + HF tokenizer sizing (#160)
+
+- **What it does**: Adds configurable **chunk overlap** (default **32** tokens) and sizes
+  chunks with the HuggingFace tokenizer for pinned embed model `BAAI/bge-small-en-v1.5`
+  (ADR-044). Deprecates word-count estimate. Existing corpus may need `rechunk` rebuild.
+- **Inputs**: `chunk_size_tokens`, `chunk_overlap_tokens`; source text; tokenizer id.
+- **Outputs**: Overlapping tokenizer-sized chunks; config + job option overrides; rebuild notes.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/ingest` chunker | Overlap + HF tokenizer |
+  | config-spec / job options | `chunk_overlap_tokens` default 32 |
+  | F41 rebuild / admin | `rechunk` when migrating live corpus |
+  | dependency-inventory | transformers/tokenizers on ingest path |
+- **Out of scope (EV-019)**: Context packing (#165); changing default `chunk_size_tokens` (256).
+- **Success**: Overlap default 32; HF sizing; unit + e2e cover boundaries (TC-191–192).
+- **Source**: S022 / EV-019; GitHub #160; S022-D6 / S022-D8 / S022-D15–D16; ADR-044.
 
 ## Planned / Deferred (post-v1)
 

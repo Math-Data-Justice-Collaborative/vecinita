@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — TC-176–184 cache / soft language / CE)  
+> **Last updated**: 2026-08-02 (S022/EV-019 F47–F49 — TC-187–192 ingest resilience)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -28,6 +28,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 |---------|----------------------|--------|----------------|
 | UJ-001 Ask (stream) | `tests/e2e/test_uj001_ask_stream.py` | TC-001, TC-002 | `tests/ui/chat/uj001-ask-interaction.spec.ts` |
 | UJ-002 Ingest URLs | `tests/e2e/test_uj002_ingest_job.py` | TC-010, TC-047 |
+| UJ-062 Ingest resilience (skip/force/retry) | `tests/e2e/test_uj062_ingest_resilience.py` | TC-187, TC-188, TC-189, TC-190 |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1149,6 +1150,43 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
   seeded DB in CI; staging sample on Path A).
 - **Expected**: `sources` length ≥ 1; no false “empty corpus” when data exists (AC-FO2).
 
+### TC-187: Same content_hash skips re-embed (UJ-062, F47)
+
+- **Objective**: Re-ingest with unchanged body and `force=false` skips chunk delete + embed.
+- **Input**: Ingest URL → complete; re-`POST /jobs` same URL/body; mock embed records call count.
+- **Expected**: Job `completed`; embed not called (or zero new embeddings); metadata may update;
+  skip observable in job result/metrics (AC-IR1).
+
+### TC-188: force=true bypasses content_hash skip (UJ-062, F47)
+
+- **Objective**: `force=true` rewrites chunks even when hash matches.
+- **Input**: Same as TC-187 with `options.force=true`.
+- **Expected**: Chunks/embeddings rewritten; AC-IR2 (aligns AC-RB4 for ingest path).
+
+### TC-189: Transient embed failure retries then succeeds (UJ-062, F48)
+
+- **Objective**: Sub-batch + retry recovers from transient `/embed/batch` 5xx/timeout.
+- **Input**: Mock embed fails N&lt;max_retries then succeeds; chunk list &gt; batch size.
+- **Expected**: Job `completed`; all chunks embedded; AC-IR3.
+
+### TC-190: Exhausted embed retries fail URL (UJ-062, F48)
+
+- **Objective**: After max retries (or dim mismatch), URL fails — no silent partial hole.
+- **Input**: Mock embed always 503 (or wrong dim); `VECINITA_EMBED_MAX_RETRIES` exhausted.
+- **Expected**: Job/URL `failed` with clear error; AC-IR4.
+
+### TC-191: Chunk overlap uses HF tokenizer (unit, F49)
+
+- **Objective**: Chunker sizes with HF tokenizer for embed pin; overlap default 32.
+- **Input**: Fixture text; `chunk_size_tokens=64`, `chunk_overlap_tokens=32`.
+- **Expected**: Consecutive chunks overlap by ~32 tokenizer tokens; not word-split only (AC-IR5).
+
+### TC-192: Overlap validation rejects overlap ≥ size (unit, F49)
+
+- **Objective**: Config/job validation enforces `0 ≤ overlap < chunk_size`.
+- **Input**: `chunk_overlap_tokens=256`, `chunk_size_tokens=256`.
+- **Expected**: Validation error; AC-IR6.
+
 ## Test Data
 
 | Asset | Location | Used by |
@@ -1183,6 +1221,9 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | F45 CE ship faithfulness | ≥ 0.91 aggregate | Staging golden; TC-184 / AC-BB9; requires F46 |
 | F46 staging retrieve pools | Non-empty on representative golden rows | TC-185 / AC-FO1 |
 | F46 ask sources (in-corpus) | `sources` length ≥ 1 | TC-186 / AC-FO2 |
+| F47 hash skip | No re-embed on unchanged hash | TC-187 / AC-IR1 |
+| F48 embed retry | Transient 5xx recovered | TC-189 / AC-IR3 |
+| F49 overlap default | 32 tokenizer tokens | TC-191 / AC-IR5 |
 | Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
 
 ### F31 coverage gate — gated components

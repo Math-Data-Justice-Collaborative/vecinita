@@ -32,6 +32,7 @@ class JobRecord:
     modal_call_id: str | None = None
     dashboard_url: str | None = None
     eval_run_id: UUID | None = None
+    metrics: dict[str, int] | None = None
 
 
 class JobPayload(TypedDict):
@@ -52,6 +53,7 @@ class JobPayload(TypedDict):
     dashboard_url: NotRequired[str | None]
     eval_run_id: NotRequired[str | None]
     document_id: NotRequired[str | None]
+    metrics: NotRequired[dict[str, int] | None]
 
 
 def _document_id_from_options(options: dict[str, object]) -> str | None:
@@ -95,6 +97,7 @@ class JobStore:
         modal_call_id: str | None = None,
         dashboard_url: str | None = None,
         eval_run_id: UUID | None = None,
+        metrics: dict[str, int] | None = None,
     ) -> JobRecord:
         """Update job status and optional metadata fields."""
         raise NotImplementedError
@@ -117,6 +120,7 @@ def _apply_updates(  # noqa: PLR0913  # mirrors update_job keyword surface
     modal_call_id: str | None,
     dashboard_url: str | None,
     eval_run_id: UUID | None,
+    metrics: dict[str, int] | None,
 ) -> None:
     if status is not None:
         record.status = status
@@ -130,6 +134,8 @@ def _apply_updates(  # noqa: PLR0913  # mirrors update_job keyword surface
         record.dashboard_url = dashboard_url
     if eval_run_id is not None:
         record.eval_run_id = eval_run_id
+    if metrics is not None:
+        record.metrics = metrics
     record.updated_at = datetime.now(UTC)
 
 
@@ -149,6 +155,8 @@ def _record_to_payload(record: JobRecord) -> JobPayload:
         "eval_run_id": _eval_run_id_from_record(record),
         "document_id": _document_id_from_options(record.options),
     }
+    if record.metrics is not None:
+        payload["metrics"] = record.metrics
     if record.initiated_by_user_id is not None:
         payload["initiated_by_user_id"] = str(record.initiated_by_user_id)
     if record.initiated_by_role is not None:
@@ -159,6 +167,8 @@ def _record_to_payload(record: JobRecord) -> JobPayload:
 def _payload_to_record(payload: JobPayload) -> JobRecord:
     initiated_raw = payload.get("initiated_by_user_id")
     eval_raw = payload.get("eval_run_id")
+    metrics_raw = payload.get("metrics")
+    metrics = dict(metrics_raw) if metrics_raw is not None else None
     return JobRecord(
         job_id=UUID(str(payload["job_id"])),
         status=str(payload["status"]),
@@ -174,6 +184,7 @@ def _payload_to_record(payload: JobPayload) -> JobRecord:
         modal_call_id=payload.get("modal_call_id"),
         dashboard_url=payload.get("dashboard_url"),
         eval_run_id=UUID(str(eval_raw)) if eval_raw else None,
+        metrics=metrics,
     )
 
 
@@ -226,6 +237,7 @@ class DictJobStore(JobStore):
         modal_call_id: str | None = None,
         dashboard_url: str | None = None,
         eval_run_id: UUID | None = None,
+        metrics: dict[str, int] | None = None,
     ) -> JobRecord:
         """Apply status or metadata updates to a shared-mapping job."""
         key = str(job_id)
@@ -241,6 +253,7 @@ class DictJobStore(JobStore):
             modal_call_id=modal_call_id,
             dashboard_url=dashboard_url,
             eval_run_id=eval_run_id,
+            metrics=metrics,
         )
         self._jobs[key] = _record_to_payload(record)
         return record
@@ -305,6 +318,7 @@ class InMemoryJobStore(JobStore):
         modal_call_id: str | None = None,
         dashboard_url: str | None = None,
         eval_run_id: UUID | None = None,
+        metrics: dict[str, int] | None = None,
     ) -> JobRecord:
         """Update a job record held in memory."""
         with self._lock:
@@ -319,6 +333,7 @@ class InMemoryJobStore(JobStore):
                 modal_call_id=modal_call_id,
                 dashboard_url=dashboard_url,
                 eval_run_id=eval_run_id,
+                metrics=metrics,
             )
             return record
 

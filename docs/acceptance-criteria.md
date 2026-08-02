@@ -198,7 +198,7 @@
 - [x] **AC-RB1**: Ingest persists normalized body + revision in Postgres document store (TC-163, ADR-040); **one-time backfill** fills store for existing corpus docs (02 M4). *(11-verify-impl S017 2026-07-30)*
 - [x] **AC-RB2**: `job_type=rebuild` supports `mode ∈ {reembed, rechunk, rescrape}` (TC-161–162). *(11-verify-impl S017 2026-07-30)*
 - [x] **AC-RB3**: Store-backed `reembed`/`rechunk` do not scrape URLs (TC-161, RD-190). *(11-verify-impl S017 2026-07-30)*
-- [x] **AC-RB4**: `force=true` bypasses content_hash skip (TC-162, #163). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB4**: `force=true` bypasses content_hash skip on **rebuild** (TC-162, #163). *(11-verify-impl S017 2026-07-30 — flag wired; full ingest-path skip enforcement = EV-019 AC-IR1/IR2)*
 - [x] **AC-RB5**: Optional `document_ids` scopes rebuild; default whole corpus (TC-166). *(11-verify-impl S017 2026-07-30)*
 - [x] **AC-RB6**: `dry_run=true` writes shadow only; live retrieval unchanged until promote (TC-164). *(11-verify-impl S017 2026-07-30; live promote API local deferred to CI)*
 - [x] **AC-RB7**: Promote activates shadow revision; prior revision retained (TC-165); **Admin UI** promote control for **`admin`** role (TC-169, 02 M3/M6). *(11-verify-impl S017 2026-07-30)*
@@ -236,6 +236,16 @@
 - [x] **AC-FO3**: UJ-060 / AC-BB9 re-run only after AC-FO1; empty-pool CE runs are not ship evidence (S021-D9/D13).
 - [x] **AC-FO4**: Prod `VECINITA_RAG_RERANK_CE` remains **false** until AC-BB9 pass + deploy approval (S021-D7). *(PASS metrics; flag still off)*
 - [ ] **AC-FO5**: Out of EV-018 without unlock: LangGraph/ADR-006; #159 multilingual embeds; synthesizer upsizing; changing F43/F44 defaults.
+
+### EV-019 — Ingest resilience (F47–F49) — S022
+
+- [x] **AC-IR1**: Unchanged `content_hash` + `force=false` skips chunk delete + re-embed; metadata may refresh (TC-187, UJ-062, F47 / #163). *(11-verify-impl S022 2026-08-02)*
+- [x] **AC-IR2**: `force=true` bypasses hash skip on ingest (TC-188; completes ingest-path for AC-RB4 / #163). *(11-verify-impl S022 2026-08-02)*
+- [x] **AC-IR3**: Embed client sub-batches and retries transient Modal/HTTP failures; job completes when retries succeed (TC-189, F48 / #166). *(11-verify-impl S022 2026-08-02)*
+- [x] **AC-IR4**: Exhausted retries or dim mismatch **fails the URL** — no silent partial corpus (TC-190; contrast ADR-023 tags). *(11-verify-impl S022 2026-08-02)*
+- [x] **AC-IR5**: Chunks sized with HF tokenizer for `BAAI/bge-small-en-v1.5`; default `chunk_overlap_tokens=32` (TC-191, F49 / ADR-044). *(11-verify-impl S022 2026-08-02)*
+- [x] **AC-IR6**: Validation rejects `chunk_overlap_tokens` ≥ `chunk_size_tokens` (TC-192). *(11-verify-impl S022 2026-08-02)*
+- [x] **AC-IR7**: Out of EV-019 without unlock: #159 multilingual embeds; ChatRAG packing (#165); CE flag flip; changing ADR-023 tag fail-open. *(11-verify-impl S022 2026-08-02 — scope held)*
 
 
 ## Quantitative benchmarks

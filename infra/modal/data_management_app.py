@@ -59,10 +59,12 @@ image = (
     .pip_install(
         "fastapi>=0.115,<1",
         "httpx>=0.27,<1",
+        "huggingface-hub>=0.30,<1",
         "langdetect>=1.0.9",
         "pydantic>=2.7,<3",
         "PyJWT>=2.10,<3",
         "cryptography>=42,<45",
+        "tokenizers>=0.21,<1",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
     .add_local_dir(_REPO_ROOT / "packages" / "ingest", remote_path=f"{_PKG_ROOT}/packages/ingest")

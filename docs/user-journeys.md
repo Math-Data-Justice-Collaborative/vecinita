@@ -67,6 +67,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-059 | CE rerank gated ask (flag on after ship) | Community member | ChatRAG ask with F45 CE enabled | F45 EV-017 #83/#161 | local |
 | UJ-060 | Admin / spike validates F45 CE ship gate | Operator | Staging golden + CE spike harness | F45, F36 EV-017/EV-018 | local (+ staging) |
 | UJ-061 | Operator validates non-empty staging retrieve | Operator | Staging golden retrieve + ChatRAG sample ask | F46 EV-018 | local (+ staging) |
+| UJ-062 | Re-ingest resilience (hash skip, force, embed retry) | Admin operator | Admin ingest job re-run + force | F47–F49 EV-019 #163/#166/#160 | local |
 
 ## Visual journey maps
 
@@ -209,13 +210,19 @@ Packed context uses shared `packages/rag` helpers (not bare concat).
 **Steps**:
 
 1. Open Data Management admin UI (authenticated via deploy secret / platform gate).
-2. Paste one or more public URLs; submit ingest job.
+2. Paste one or more public URLs; submit ingest job (optional `chunk_size_tokens` /
+   `chunk_overlap_tokens`; default overlap **32**, HF tokenizer — F49).
 3. UI polls job status until `completed`.
 4. Optional: ask ChatRAG a question that only the new content can answer (smoke).
+5. **Re-run** (see UJ-062): unchanged body → hash skip (F47); transient embed faults
+   recover via sub-batch retry (F48).
 
-**Acceptance**: Job completes; chunks/embeddings present in Postgres via DO write API; retrieval returns new content.
+**Acceptance**: Job completes; chunks/embeddings present in Postgres via DO write API;
+retrieval returns new content; re-ingest of unchanged URLs does not blindly re-embed
+(unless `force`).
 
-**Automated tests**: `tests/e2e/test_uj002_ingest_job.py`
+**Automated tests**: `tests/e2e/test_uj002_ingest_job.py`;
+`tests/e2e/test_uj062_ingest_resilience.py` (TC-187–192).
 
 **Interview (11)**: "After ingest, does a targeted question retrieve the new URL's content?"
 
@@ -997,6 +1004,37 @@ evidence (EV-017 lesson).
 **Automated tests**: Spike harness + gate doc (TC-184); not a CI Modal live requirement.
 
 **E2E tier**: local (+ staging spike).
+
+---
+
+### UJ-062: Re-ingest resilience (hash skip, force, embed retry)
+
+**Actor**: Admin operator
+
+**Goal**: Re-run ingest safely — skip no-op embeds when content is unchanged, force rewrite
+when needed, and survive transient Modal embed failures without silent corpus holes.
+
+**Features**: F47 (#163), F48 (#166), F49 (#160) — EV-019
+
+**Preconditions**: Corpus has at least one previously ingested URL with stored
+`content_hash`; Modal embed / write path available (mocked in CI).
+
+**Steps**:
+
+1. Ingest URL A (baseline) — job `completed`; chunks present (UJ-002).
+2. Re-ingest same URL A with unchanged body and `force=false` → job completes with
+   **skip** (no chunk delete/re-embed); metadata may refresh.
+3. Re-ingest URL A with `force=true` → chunks rewritten even if hash matches.
+4. (CI) Simulate transient `/embed/batch` 5xx → sub-batch retry succeeds; job completes.
+5. (CI) Exhaust retries or dim mismatch → URL fails; no partial silent hole policy.
+
+**Acceptance**: AC-IR1–IR6; overlap default 32 on new chunks (F49).
+
+**Automated tests**: `tests/e2e/test_uj062_ingest_resilience.py` (TC-187–190);
+unit chunk overlap/tokenizer (TC-191–192). Optional Playwright only if admin FE exposes
+`force` / overlap controls with cross-component interaction.
+
+**E2E tier**: local (API TestClient + mocked embed).
 
 ---
 

@@ -71,6 +71,7 @@ from vecinita_shared_schemas.internal_write import (
     ChunkDetail,
     CreateRebuildRunRequest,
     CreateRebuildRunResponse,
+    DocumentContentHashResponse,
     DocumentDetail,
     DocumentHistoryResponse,
     DocumentListPage,
@@ -988,6 +989,40 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 )
                 successes += 1
         return BulkResultResponse(successes=successes, failures=failures)
+
+    @app.get(
+        "/internal/v1/documents/content-hash",
+        response_model=DocumentContentHashResponse,
+        dependencies=[Depends(require_service)],
+    )
+    def get_document_content_hash(  # pyright: ignore[reportUnusedFunction]
+        url: Annotated[str, Query(min_length=1)],
+    ) -> DocumentContentHashResponse:
+        """Return stored content_hash for ingest skip (F47 / #163)."""
+        with engine.connect() as conn:
+            row = (
+                conn.execute(
+                    text(
+                        """
+                        SELECT id, content_hash
+                        FROM documents
+                        WHERE url = :url
+                        LIMIT 1
+                        """
+                    ),
+                    {"url": url},
+                )
+                .mappings()
+                .first()
+            )
+        if row is None:
+            return DocumentContentHashResponse(url=url, content_hash=None, document_id=None)
+        mapped = mapping_row(row)
+        return DocumentContentHashResponse(
+            url=url,
+            content_hash=row_str_optional(mapped, "content_hash"),
+            document_id=row_uuid(mapped, "id"),
+        )
 
     @app.get(
         "/internal/v1/documents/{document_id}",

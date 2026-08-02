@@ -5,13 +5,20 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-08-02 (EV-018 F46 + F45 re-gate)
+> **Last updated**: 2026-08-02 (EV-019 F47–F49 Gate A→B)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-08-02 | EV019-H1–H12 | auto-approved | F47–F49 locked RD-219–228 / S022-D8–D19 |
+| 2026-08-02 | EV019-M1 | approved | Embed defaults batch 32 / retries 3 / backoff 0.5s (S022-D20) |
+| 2026-08-02 | EV019-M2 | approved | Job metric field names deferred to 04/OpenAPI (S022-D20) |
+| 2026-08-02 | EV019-M3 | approved | OpenAPI/`JobOptions` `chunk_overlap_tokens` + ingest `force` in 04/07 (S022-D20) |
+| 2026-08-02 | EV019-M4 | approved | AC-RB4 = rebuild force; ingest skip = AC-IR1/IR2 (S022-D20) |
+| 2026-08-02 | EV019-M5 | approved | Admin FE knobs optional; Playwright only if UI ships (S022-D20) |
+| 2026-08-02 | EV019-M6 | approved | Spec data-flow renumber applied (S022-D20) |
 | 2026-08-02 | EV018-H1–H14 | auto-approved | F46/F45 re-gate locked RD-209–218 / S021-D8–D16 |
 | 2026-08-02 | EV018-M1 | approved | AC-FO1 / TC-185 = representative non-empty pools (S021-D17) |
 | 2026-08-02 | EV018-M2 | approved (fix) | F46 feature-list → `min_retrieval_score` (S021-D17) |
@@ -644,6 +651,43 @@ Predecessor EV-017 @ `f24a620` (F43/F44 LIVE; F45 spike-only). Standard routing.
 
 Artifacts: feature-list F46 + F45 EV-018 note; UJ-061; TC-185–186; AC-FO1–5;
 `docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md`.
+
+### EV-019 requirements decisions (2026-08-02) — RD-219–RD-228
+
+S022 / Ingest resilience — **F47** content_hash skip, **F48** embed sub-batch/retry,
+**F49** chunk overlap + HF tokenizer. Investigate→ship. Standard routing.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-219 | Fn scope | **F47** (#163), **F48** (#166), **F49** (#160) | S022-D8 |
+| RD-220 | Ordering | F47+F48 first, then F49 | S022-D9 |
+| RD-221 | F47 skip | Refresh metadata; skip chunks+embed unless `force` | S022-D14 / Q1 |
+| RD-222 | F48 fail policy | Fail URL after retry exhaust; dim mismatch hard-fail | S022-D14 / Q2 |
+| RD-223 | F49 overlap default | **`chunk_overlap_tokens=32`** in prod | S022-D15 / Q3 |
+| RD-224 | F49 tokenizer | HF tokenizer for `BAAI/bge-small-en-v1.5` (ADR-044) | S022-D16 / Q4 |
+| RD-225 | Tests | Extend UJ-002; **UJ-062**; TC-187–192; AC-IR1–IR7 | S022-D14 / Q5 |
+| RD-226 | Embed knobs | `VECINITA_EMBED_BATCH_SIZE=32`, `MAX_RETRIES=3`, backoff | 01 delta |
+| RD-227 | Deploy | Staging **Path A**; rebuild notes if migrating live chunks | S022-D10 |
+| RD-228 | Out of scope | #159 embeds; #165 packing; CE flag; ADR-023 tag fail-open change | S022-D11 |
+
+Artifacts: feature-list F47–F49; ADR-044; UJ-062; TC-187–192; AC-IR1–7;
+`docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md`.
+
+### EV-019 tech-plan decisions (2026-08-02) — TP1–TP6
+
+S022 / Phase 24 — F47–F49 ingest resilience (Standard; skip 05/06).
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP1 | Phase / milestones | **Phase 24**: M101 (F47) → M102 (F48) → M103 (F49) → M104 (e2e) | S022-D21 |
+| TP2 | ADR | **None new** — reuse ADR-044 unless 07 finds architecture change | S022-D21 |
+| TP3 | Schema | OpenAPI/`JobOptions` `chunk_overlap_tokens` + ingest `force` in M101/M103; metrics in M104 | S022-D21 / M2–M3 |
+| TP4 | Tests | API e2e UJ-062 (TC-187–190); unit TC-191/192; no Playwright unless FE knobs | S022-D21 / M5 |
+| TP5 | Deploy / deps | Path A; Path B if F49 re-chunk; skip dep/topology churn | S022-D21 / RD-227 |
+| TP6 | Connectivity | No new CORS/UI — API e2e + staging Path A evidence | S022-D21 / TP6 |
+
+Artifacts: execution-plan Phase 24; `docs/sessions/S022-ingest-resilience/reports/tech-plan-delta.md`;
+`docs/sessions/S022-ingest-resilience/roadmap.md`.
 
 ### EV-018 tech-plan decisions (2026-08-02) — TP1–TP6
 

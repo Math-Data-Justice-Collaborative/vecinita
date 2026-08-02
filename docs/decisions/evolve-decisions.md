@@ -445,3 +445,69 @@ only if floors pass; otherwise keep spike-only.
 
 EV-018 **completed** 2026-08-02. PR [#174](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174) @ `9d1f10b`; Path A PASS; CE flag still default-off.
 Next: **17-retrospective** (S021-D28). CE flag flip remains a separate approval.
+
+## Cycle EV-019 — Scope (S022 / Ingest resilience)
+
+**Approved (session open + Phase 0 Fn lock):** 2026-08-02  
+**Session:** S022-ingest-resilience  
+**Predecessor:** S021 / EV-018 (completed; pipeline idle on `main`)  
+**Issues:** #163 (content_hash skip), #166 (embed sub-batch/retry), #160 (chunk overlap)  
+**Features:** **F47**, **F48**, **F49**  
+**Branch:** `evolve/EV-019-ingest-resilience`
+
+### Scope summary
+
+Investigate then ship ingest resilience on the shared write/embed path: skip no-op
+re-embeds when `content_hash` is unchanged, sub-batch + retry transient embed failures,
+and add configurable chunk overlap with sizing clarity.
+
+### Decisions (session open — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S022-D1 | Session | Open **S022-ingest-resilience** |
+| S022-D2 | Scope | Bundle A: **#163 + #166 + #160** |
+| S022-D3 | Routing | **Standard** (skip 03, 05, 06, 15) |
+| S022-D4 | 00-context | **Scoped** |
+| S022-D5 | Posture | **Investigate → ship** in one cycle |
+| S022-D6 | #160 | **Include** this cycle |
+| S022-D7 | Continue | Open → Phase 0 → **01-requirements** |
+
+### Decisions (Phase 0 Fn allocation — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S022-D8 | Fn ids | **F47** (#163), **F48** (#166), **F49** (#160) |
+| S022-D9 | Ordering | **F47 + F48** first, then **F49** |
+| S022-D10 | Deploy | Staging **Path A** default |
+| S022-D11 | Boundary | Shared write/embed path only — no ChatRAG redesign |
+| S022-D12 | Embed vs tags | Tags ADR-023 fail-open; embeds **retry then fail job** (no silent holes) |
+| S022-D13 | Proceed gate | Create EV-019 + impact → start **01-requirements** (user `1,1,1,1`) |
+
+### Phase 0 status
+
+EV-019 **in_progress**. Next: **01-requirements** (delta; load 01-requirements-seed).
+
+### Decisions (01 Phase 0C — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S022-D14 | Phase 0C answers | Q0–Q5 = `1,1,1,2,2,1` — approve locked; metadata refresh on skip; fail URL on embed exhaust; **overlap default 32**; **HF tokenizer**; extend UJ + TC |
+| S022-D15 | F49 overlap | Prod default **`chunk_overlap_tokens=32`** (overrides seed rec. default 0) |
+| S022-D16 | F49 tokenizer | **HF tokenizer** for `BAAI/bge-small-en-v1.5` (ADR-044) |
+| S022-D17 | Tests / journeys | Extend UJ-002; add **UJ-062**; TC-187–192; AC-IR1–IR7 |
+| S022-D18 | RD range | RD-219–RD-228 recorded in `docs/decisions.md` |
+| S022-D19 | 01 complete | Spec deltas + session report → **02-verify-plan** |
+| S022-D20 | Gate A→B / M1–M6 | **Approve all** — embed defaults; metrics→04; OpenAPI gaps→04/07; AC-RB4 rebuild vs IR; FE optional; data-flow renumber |
+| S022-D21 | 04 TP1–TP6 | **Approve all** — Phase 24 M101–M104; no new ADR; OpenAPI/metrics; API e2e; Path A; no new CORS/UI |
+| S022-D22 | Gate B→C | **PASS** — start 07-build at T101.1 (05/06 skipped) |
+
+### Phase A status
+
+01-requirements **completed** 2026-08-02.  
+02-verify-plan **completed** 2026-08-02 — Gate A→B **PASS** (S022-D20).
+
+### Phase B status
+
+04-tech-plan **completed** 2026-08-02 — TP1–TP6 (S022-D21); Gate B→C **PASS** (S022-D22).  
+Next: **07-build** Phase 24 @ T101.1.
