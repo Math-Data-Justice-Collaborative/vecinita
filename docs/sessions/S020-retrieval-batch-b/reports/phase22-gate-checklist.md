@@ -23,7 +23,7 @@
 
 | Criterion | Status | Notes |
 |-----------|--------|-------|
-| 08-verify-build | ⏳ deferred | Before Phase C PR (session lock) |
+| 08-verify-build | ✅ PASS (scoped) | [verification-report.md](./verification-report.md) @ `ccc82df`; DB suites → CI |
 | TC-184 / AC-BB9 CE ship metrics | ⏳ staging | Fill [ce-ship-gate.md](./ce-ship-gate.md) from spike JSON |
 | Path A deploy smoke (13) | ⏳ | After PR merge + deploy approval |
 

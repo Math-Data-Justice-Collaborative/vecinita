@@ -10,11 +10,11 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
-| **Active milestone** | M98 — completed; Phase 22 build complete |
+| **Active milestone** | M98 — completed; Phase C (08 PASS / Gate C→D) — Phase D 09+10 next |
 | **Active task** | 08-verify-build — deferred until before Phase C PR |
 | **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98 (T94.1–T98.4) |
 | **Last updated** | 2026-08-02 |
-| **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 done |
+| **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; Phase C passed (S020-D19); 09+10 next |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
 | **Active session** | S020-retrieval-batch-b — M94–M98 complete; next 08-verify-build → Phase C PR |
 | **Scope addition** | 2026-08-02 — F43 H1 cache + F44 soft L1 + F45 CE spike/gate; ADR-042; S020-D15–D18. |

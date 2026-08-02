@@ -7,8 +7,8 @@
 | 01-requirements | yes | completed | Delta specs F43–F45; RD-197–208; report `01-requirements-batch-b.md` |
 | 02-verify-plan | yes | completed | Consistency clean; M1–M4 via S020-D15 |
 | 04-tech-plan | yes | completed | Phase 22 M94–M98 + ADR-042; Gate B→C (S020-D18) |
-| 07-build | yes | in_progress | M94 T94.1 |
-| 08-verify-build | yes | pending | |
+| 07-build | yes | completed | Phase 22 M94–M98 @ `59edd12` / state sync `ccc82df` |
+| 08-verify-build | yes | completed | PASS scoped — `reports/verification-report.md` |
 | 09-qa | yes | pending | |
 | 10-e2e | yes | pending | |
 | 11-verify-impl | yes | pending | |

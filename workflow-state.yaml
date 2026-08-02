@@ -1121,15 +1121,15 @@ project:
       - M98
       current_task:
       current_action: completed
-      next_action: 08-verify-build (deferred until before Phase C PR)
+      next_action: phase_c_checkpoint_pending (08 PASS)
       s020_d18_decision: S020-D18
       s020_d18_decision_recorded: true
-      commits_head: 59edd12
+      commits_head: ccc82df
       verify_build_m94:
-        status: deferred
-        reason: continue_batch_throughput
-        note: Pending — deferred until before Phase C PR (batch throughput); Phase 22 M94–M98 COMPLETE @ 59edd12; run 08 before PR / Phase C gate
-      execution_plan_current_state_note: Phase 22 M94–M98 ALL COMPLETE @ 59edd12; Active task none; next → 08-verify-build (deferred until before Phase C PR); checkpoints.phase_c pending
+        status: superseded_by_phase_verify
+        reason: phase22_complete_running_08
+        note: Phase 22 M94–M98 COMPLETE; 08-verify-build now in_progress (was deferred until Phase C PR)
+      execution_plan_current_state_note: Phase 22 M94–M98 COMPLETE; 08-verify-build PASS (scoped); Phase C checkpoint pending; checkpoints.phase_c still pending
       note: S020/EV-017 07-build COMPLETE 2026-08-02 — Phase 22 M94–M98 ALL COMPLETE @ 59edd12 (T98.1–T98.4 / F43–F45 e2e + CE ship-gate + Phase 22 gate checklist); M97 COMPLETE @ d33cbec; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166; 08-verify-build DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c still pending; prior S019 COMPLETE under s019_baseline
       substeps:
         current_task:
@@ -1852,28 +1852,60 @@ project:
       t98_4_completed_at: '2026-08-02T15:33:56Z'
       t98_4_commit: 59edd12
     08-verify-build:
-      status: pending
-      started_at: '2026-08-01T14:12:45Z'
-      completed_at: '2026-08-01T14:17:17Z'
-      partial_rerun_at: '2026-08-01'
-      partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline
-      session_id: S019-retrieval-quality
-      branch: evolve/EV-016-retrieval-quality
-      evolve_cycle_id: EV-016
+      status: completed
+      started_at: '2026-08-02'
+      started: '2026-08-02'
+      completed_at: '2026-08-02'
+      completed: '2026-08-02'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: EV-017/S020-retrieval-batch-b — 08-verify-build COMPLETE PASS (scoped); Phase 22 M94–M98; prior S019/EV-016 COMPLETE nested under s019_baseline
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
       mode: evolve
       delta_only: true
       feature_ids:
-      - F42
-      feature: F42
-      phase: Phase 21 (M91-M93)
+      - F43
+      - F44
+      - F45
+      feature: F43-F45
+      phase: Phase 22 (M94-M98)
       overall_result: PASS
-      result_scope: delta
+      result_scope: scoped
+      overall: pass
       current_action: completed
-      next_action: start_09_qa_10_e2e
-      commits_status: landed
-      commits_head: 257486f
-      report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
-      note: 'Pending — deferred until before Phase C PR (batch throughput); Phase 22 M94–M98 COMPLETE @ 59edd12; run 08 before PR / Phase C gate'
+      next_action: Present Phase C digest + AskQuestion (approve Gate C→D + open Phase C PR / hold / explain)
+      commits_head: ccc82df
+      report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+      results_note: 'Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers'
+      note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
+      phase_c_status: passed
+      gate_c_to_d: passed
+      phase_c_decision: S020-D19
+      phase_c_approved_at: '2026-08-02'
+      s019_baseline:
+        status: completed
+        started_at: '2026-08-01T14:12:45Z'
+        completed_at: '2026-08-01T14:17:17Z'
+        partial_rerun_at: '2026-08-01'
+        partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline
+        session_id: S019-retrieval-quality
+        branch: evolve/EV-016-retrieval-quality
+        evolve_cycle_id: EV-016
+        mode: evolve
+        delta_only: true
+        feature_ids:
+        - F42
+        feature: F42
+        phase: Phase 21 (M91-M93)
+        overall_result: PASS
+        result_scope: delta
+        current_action: completed
+        next_action: start_09_qa_10_e2e
+        commits_status: landed
+        commits_head: 257486f
+        report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+        note: S019/EV-016 08-verify-build COMPLETE — Phase 21 PASS (delta) @ 257486f; nested for S020 Phase 22 verify
       s017_baseline:
         status: completed
         started_at: '2026-07-30'
@@ -3345,9 +3377,9 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
-  current_stage: 07-build
-  current_action: completed
-  current_stage_note: 07-build COMPLETE — Phase 22 M94–M98 ALL COMPLETE @ 59edd12 (T98.1–T98.4); M97 @ d33cbec; M96 @ 9b0fef9; M95 @ 79939f4; M94 @ 0baa166; 08-verify-build deferred until before Phase C PR (batch throughput); Gate B→C passed (S020-D18); checkpoints.phase_c still pending; 04 COMPLETE; 05/06 skipped
+  current_stage: 08-verify-build
+  current_action: preparing_phase_c_pr
+  current_stage_note: Phase C approved (option 1 / S020-D19) 2026-08-02 — Gate C→D passed; 08 PASS (scoped); preparing Phase C PR → main; then 09-qa + 10-e2e in parallel; 09/10 not started yet
   m94_status: completed
   m94_head: 0baa166
   verify_build_m94: deferred_until_phase_c_pr
@@ -3430,10 +3462,24 @@ active_session:
     completed_at: '2026-08-02'
   - stage: 08-verify-build
     required: true
-    status: pending
+    status: completed
     skip_rationale:
+    started_at: '2026-08-02'
+    started: '2026-08-02'
+    completed_at: '2026-08-02'
+    completed: '2026-08-02'
+    mode: evolve
+    delta_only: true
+    feature_ids:
+    - F43
+    - F44
+    - F45
+    phase: Phase 22 (M94-M98)
+    overall_result: PASS
+    result_scope: scoped
     m94_boundary: deferred_continue_batch
-    note: Pending — deferred until before Phase C PR (batch throughput); Phase 22 M94–M98 COMPLETE @ 59edd12; run 08 before PR / Phase C gate
+    report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+    note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
   - stage: 09-qa
     required: true
     status: pending
@@ -3461,10 +3507,22 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: 08_verify_build_deferred_until_phase_c_pr
+  next_action: commit 08 artifacts + push + open Phase C PR, then start 09-qa and 10-e2e in parallel
+  s020_d19_decision: S020-D19
+  s020_d19_decision_recorded: true
+  phase_c_checkpoint_accepted: true
+  phase_c_checkpoint_choice: option_1_approve_gate_c_to_d_open_pr_then_09_10
+  phase_c_approved_at: '2026-08-02'
+  phase_c_decision_note: 'User option 1 at Phase C checkpoint 2026-08-02 — Approve Gate C→D; commit 08 artifacts, push, open Phase C PR → main; then continue 09-qa + 10-e2e in parallel'
+  gates_c_to_d: passed
+  report_08_verify_build: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+  verify_08_overall_result: PASS
+  verify_08_result_scope: scoped
+  verify_08_results_note: 'Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers'
   report_01_requirements: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
   report_02_verify_plan: docs/sessions/S020-retrieval-batch-b/reports/verify-plan-audit.md
   parent_sync_pending:
+  - docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
   - docs/sessions/S020-retrieval-batch-b/reports/tech-plan-delta.md
   - docs/sessions/S020-retrieval-batch-b/routing-plan.md
   - docs/sessions/S020-retrieval-batch-b/session-brief.md
@@ -3499,7 +3557,7 @@ active_session:
   s020_d18_decision_recorded: true
   phase_b_checkpoint_accepted: true
   phase_b_checkpoint_choice: option_1_approve_all_pass_gate_b_to_c_start_07
-  execution_plan_current_state_note: Phase 22 M94–M98 ALL COMPLETE @ 59edd12; Active task none; next → 08-verify-build (deferred until before Phase C PR); checkpoints.phase_c pending
+  execution_plan_current_state_note: Phase 22 M94–M98 COMPLETE; 08 PASS (scoped); Phase C approved (S020-D19); Gate C→D passed; next commit+push+Phase C PR then 09+10 parallel
   adr_04: ADR-042
   m95_status: completed
   m95_completed_at: '2026-08-02'
@@ -3545,7 +3603,7 @@ active_session:
   m97_head: d33cbec
   t98_1_started_at: '2026-08-02T15:27:28Z'
   m98_status: completed
-  commits_head: 59edd12
+  commits_head: ccc82df
   m98_completed_at: '2026-08-02'
   m98_head: 59edd12
   t98_1_completed_at: '2026-08-02T15:30:29Z'
@@ -3565,7 +3623,7 @@ active_session:
   - M96
   - M97
   - M98
-  checkpoints_phase_c: pending
+  checkpoints_phase_c: passed
 sessions:
 - id: S019-retrieval-quality
   type: feature
@@ -8156,15 +8214,15 @@ stages:
     - M98
     current_task:
     current_action: completed
-    next_action: 08-verify-build (deferred until before Phase C PR)
+    next_action: phase_c_checkpoint_pending (08 PASS)
     s020_d18_decision: S020-D18
     s020_d18_decision_recorded: true
-    commits_head: 59edd12
+    commits_head: ccc82df
     verify_build_m94:
-      status: deferred
-      reason: continue_batch_throughput
-      note: Pending — deferred until before Phase C PR (batch throughput); Phase 22 M94–M98 COMPLETE @ 59edd12; run 08 before PR / Phase C gate
-    execution_plan_current_state_note: Phase 22 M94–M98 ALL COMPLETE @ 59edd12; Active task none; next → 08-verify-build (deferred until before Phase C PR); checkpoints.phase_c pending
+      status: superseded_by_phase_verify
+      reason: phase22_complete_running_08
+      note: Phase 22 M94–M98 COMPLETE; 08-verify-build now in_progress (was deferred until Phase C PR)
+    execution_plan_current_state_note: Phase 22 M94–M98 COMPLETE; 08-verify-build PASS (scoped); Phase C checkpoint pending; checkpoints.phase_c still pending
     note: S020/EV-017 07-build COMPLETE 2026-08-02 — Phase 22 M94–M98 ALL COMPLETE @ 59edd12 (T98.1–T98.4 / F43–F45 e2e + CE ship-gate + Phase 22 gate checklist); M97 COMPLETE @ d33cbec; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166; 08-verify-build DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c still pending; prior S019 COMPLETE under s019_baseline
     substeps:
       current_task:
@@ -8778,28 +8836,60 @@ stages:
     t98_4_completed_at: '2026-08-02T15:33:56Z'
     t98_4_commit: 59edd12
   08-verify-build:
-    status: pending
-    started_at: '2026-08-01T14:12:45Z'
-    completed_at: '2026-08-01T14:17:17Z'
-    partial_rerun_at: '2026-08-01'
-    partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline
-    session_id: S019-retrieval-quality
-    branch: evolve/EV-016-retrieval-quality
-    evolve_cycle_id: EV-016
+    status: completed
+    started_at: '2026-08-02'
+    started: '2026-08-02'
+    completed_at: '2026-08-02'
+    completed: '2026-08-02'
+    partial_rerun_at: '2026-08-02'
+    partial_rerun_note: EV-017/S020-retrieval-batch-b — 08-verify-build COMPLETE PASS (scoped); Phase 22 M94–M98; prior S019/EV-016 COMPLETE nested under s019_baseline
+    session_id: S020-retrieval-batch-b
+    branch: evolve/EV-017-retrieval-batch-b
+    evolve_cycle_id: EV-017
     mode: evolve
     delta_only: true
     feature_ids:
-    - F42
-    feature: F42
-    phase: Phase 21 (M91-M93)
+    - F43
+    - F44
+    - F45
+    feature: F43-F45
+    phase: Phase 22 (M94-M98)
     overall_result: PASS
-    result_scope: delta
+    result_scope: scoped
+    overall: pass
     current_action: completed
-    next_action: phase_c_checkpoint
-    commits_status: landed
-    commits_head: 257486f
-    report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
-    note: Pending — deferred until before Phase C PR (batch throughput); Phase 22 M94–M98 COMPLETE @ 59edd12; run 08 before PR / Phase C gate
+    next_action: Present Phase C digest + AskQuestion (approve Gate C→D + open Phase C PR / hold / explain)
+    commits_head: ccc82df
+    report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+    results_note: 'Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers'
+    note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
+    phase_c_status: passed
+    gate_c_to_d: passed
+    phase_c_decision: S020-D19
+    phase_c_approved_at: '2026-08-02'
+    s019_baseline:
+      status: completed
+      started_at: '2026-08-01T14:12:45Z'
+      completed_at: '2026-08-01T14:17:17Z'
+      partial_rerun_at: '2026-08-01'
+      partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F42
+      feature: F42
+      phase: Phase 21 (M91-M93)
+      overall_result: PASS
+      result_scope: delta
+      current_action: completed
+      next_action: phase_c_checkpoint
+      commits_status: landed
+      commits_head: 257486f
+      report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+      note: S019/EV-016 08-verify-build COMPLETE — Phase 21 PASS (delta) @ 257486f; nested for S020 Phase 22 verify
     s017_baseline:
       status: completed
       started_at: '2026-07-30'
@@ -15558,9 +15648,9 @@ evolve_cycles:
     F43+F44+F45 Planned. Standard routing. phase0_approved=true.
 
     '
-  current_stage: 07-build
-  current_action: completed
-  current_stage_note: 07-build COMPLETE — Phase 22 M94–M98 ALL COMPLETE @ 59edd12 (T98.1–T98.4); M97 @ d33cbec; M96 @ 9b0fef9; M95 @ 79939f4; M94 @ 0baa166; 08-verify-build deferred until before Phase C PR (batch throughput); Gate B→C passed (S020-D18); checkpoints.phase_b=passed; checkpoints.phase_c=pending; gates.b_to_c=passed; 05/06 skipped
+  current_stage: 08-verify-build
+  current_action: preparing_phase_c_pr
+  current_stage_note: Phase C approved (option 1 / S020-D19) 2026-08-02 — Gate C→D passed; 08 PASS (scoped); preparing Phase C PR → main; then 09-qa + 10-e2e in parallel; 09/10 not started yet
   m94_status: completed
   m94_head: 0baa166
   milestones_completed:
@@ -15615,8 +15705,8 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: completed_07_await_08
-      note: Phase 0–04 COMPLETE; Gate B→C PASS (S020-D18); 07-build COMPLETE — Phase 22 M94–M98 ALL COMPLETE @ 59edd12; 08-verify-build deferred until before Phase C PR (batch throughput); checkpoints.phase_c still pending; 05/06 skipped
+      current_action: preparing_phase_c_pr
+      note: Phase C approved (S020-D19) option 1 2026-08-02 — Gate C→D passed; preparing Phase C PR; then 09-qa + 10-e2e parallel (not started yet)
     01-requirements:
       status: completed
       started: '2026-08-02'
@@ -15743,20 +15833,20 @@ evolve_cycles:
       - M98
       current_task:
       current_action: completed
-      next_action: 08-verify-build (deferred until before Phase C PR)
+      next_action: phase_c_checkpoint_pending (08 PASS)
       s020_d18_decision: S020-D18
-      commits_head: 59edd12
+      commits_head: ccc82df
       verify_build_m94:
-        status: deferred
-        reason: continue_batch_throughput
-        note: Pending — deferred until before Phase C PR (batch throughput); Phase 22 M94–M98 COMPLETE @ 59edd12; run 08 before PR / Phase C gate
-      execution_plan_current_state_note: Phase 22 M94–M98 ALL COMPLETE @ 59edd12; Active task none; next → 08-verify-build (deferred until before Phase C PR); checkpoints.phase_c pending
+        status: superseded_by_phase_verify
+        reason: phase22_complete_running_08
+        note: Phase 22 M94–M98 COMPLETE; 08-verify-build now in_progress (was deferred until Phase C PR)
+      execution_plan_current_state_note: Phase 22 M94–M98 COMPLETE; 08-verify-build PASS (scoped); Phase C checkpoint pending; checkpoints.phase_c still pending
       note: S020/EV-017 07-build COMPLETE 2026-08-02 — Phase 22 M94–M98 ALL COMPLETE @ 59edd12 (T98.1–T98.4 / F43–F45 e2e + CE ship-gate + Phase 22 gate checklist); M97 COMPLETE @ d33cbec; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166; 08-verify-build DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c still pending; prior S019 COMPLETE under s019_baseline
       substeps:
         current_task:
         task_status: completed
         completed_tasks_recent: *id004
-        next_action: 08_verify_build_deferred_until_phase_c_pr
+        next_action: 08_verify_build_in_progress
         m94_completed: true
         in_progress_tasks: []
         t96_1_note: completed @ fd585ce — L1 soft language empty same-lang pass (TC-180)
@@ -15920,9 +16010,36 @@ evolve_cycles:
       t98_4_commit: 59edd12
       completed: '2026-08-02'
     08-verify-build:
-      status: pending
+      status: completed
+      started: '2026-08-02'
+      started_at: '2026-08-02'
+      completed: '2026-08-02'
+      completed_at: '2026-08-02'
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      phase: Phase 22 (M94-M98)
+      branch: evolve/EV-017-retrieval-batch-b
+      session_id: S020-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      commits_head: ccc82df
       m94_boundary: deferred_continue_batch
-      note: Pending — deferred until before Phase C PR (batch throughput); Phase 22 M94–M98 COMPLETE @ 59edd12; run 08 before PR / Phase C gate
+      overall_result: PASS
+      result_scope: scoped
+      overall: pass
+      report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+      current_action: completed
+      next_action: Present Phase C digest + AskQuestion (approve Gate C→D + open Phase C PR / hold / explain)
+      results_note: 'Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers'
+      note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
+      phase_c_status: passed
+      gate_c_to_d: passed
+      phase_c_decision: S020-D19
+      phase_c_approved_at: '2026-08-02'
+      next_action: commit 08 artifacts + push + open Phase C PR, then start 09-qa and 10-e2e in parallel
     09-qa:
       status: pending
     10-e2e:
@@ -15937,17 +16054,27 @@ evolve_cycles:
     phase_0: passed
     a_to_b: passed
     b_to_c: passed
-    c_to_d: pending
+    c_to_d: passed
     deploy: pending
   checkpoints:
     phase_0: passed
     phase_a: passed
     phase_b: passed
-    phase_c: pending
+    phase_c: passed
     phase_d: pending
     deploy: pending
   checkpoint_notes:
     phase_b: 'Passed 2026-08-02 — user approved option 1 (S020-D18): Approve all — pass Gate B→C, start 07-build; Phase 22 M94–M98 approved'
+    phase_c: 'Passed 2026-08-02 — User option 1 at Phase C checkpoint 2026-08-02 — Approve Gate C→D; commit 08 artifacts, push, open Phase C PR → main; then continue 09-qa + 10-e2e in parallel (S020-D19); gates.c_to_d=passed; next commit+push+Phase C PR then 09+10'
+  artifacts:
+  - path: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+    kind: verification-report
+    session_id: S020-retrieval-batch-b
+    stage: 08-verify-build
+    status: completed
+    recorded_at: '2026-08-02'
+    note: 'Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers'
+
   intake_decisions:
   - id: S020-D1
     topic: open_session
@@ -16070,6 +16197,13 @@ evolve_cycles:
     topic: gate_b_to_c_phase_b_checkpoint
     choice: option_1_approve_all_pass_gate_b_to_c_start_07
     note: 'User approved Gate B→C option 1: Approve all — pass Gate B→C, start 07-build; Phase 22 M94–M98 approved; checkpoints.phase_b=passed; gates.b_to_c=passed; current_stage=07-build; current_action=T94.1'
+    status: recorded
+    recorded_at: '2026-08-02'
+    stage: 16-evolve
+  - id: S020-D19
+    topic: phase_c_checkpoint
+    choice: option_1_approve_gate_c_to_d_open_pr_then_09_10
+    note: 'User option 1 at Phase C checkpoint 2026-08-02 — Approve Gate C→D; commit 08 artifacts, push, open Phase C PR → main; then continue 09-qa + 10-e2e in parallel'
     status: recorded
     recorded_at: '2026-08-02'
     stage: 16-evolve
@@ -17188,6 +17322,13 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: S020-D19 — Phase C checkpoint option 1; checkpoints.phase_c=passed; gates.c_to_d=passed; commit 08 artifacts + push + open Phase C PR → main; then 09-qa + 10-e2e in parallel
+  recorded_at: '2026-08-02'
+  note: 'User option 1 at Phase C checkpoint 2026-08-02 — Approve Gate C→D; commit 08 artifacts, push, open Phase C PR → main; then continue 09-qa + 10-e2e in parallel'
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S020-retrieval-batch-b
@@ -18752,6 +18893,14 @@ decisions_log:
 - '2026-08-02T15:01:17Z S020/EV-017: T96.1 COMPLETE @ fd585ce — L1 soft language fires only on empty same-lang pass; T96.2 in_progress (unit/e2e flag default off L0-strict TC-181); M96 in_progress (T96.2–T96.4 pending); 08-verify-build still deferred until before Phase C PR (batch throughput).'
 - '2026-08-02T15:02:00Z S020/EV-017: workflow-state reconstructed — restored T95.1–T95.5 + T96.1 bookkeeping after accidental checkout of HEAD (T95.1); advanced to T96.2; 08-verify-build still deferred.'
 artifacts:
+- path: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+  kind: verification-report
+  session_id: S020-retrieval-batch-b
+  stage: 08-verify-build
+  skill_id: 08-verify-build
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: 'Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; Phase C checkpoint pending'
 - path: docs/sessions/S020-retrieval-batch-b/reports/phase22-gate-checklist.md
   kind: gate-checklist
   session_id: S020-retrieval-batch-b
@@ -20448,8 +20597,8 @@ git_history:
     evolve_cycle_id: EV-017
     exists_on_disk: true
     created_from: main
-    head_sha: 59edd12940091d61eeefad5e06349998de760708
-    note: EV-017 / S020 — 07-build COMPLETE; Phase 22 M94–M98 ALL COMPLETE @ 59edd12; 08-verify-build deferred until Phase C PR; checkpoints.phase_c pending
+    head_sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
+    note: EV-017 / S020 — 08-verify-build in_progress @ ccc82df; Phase 22 M94–M98 build COMPLETE @ 59edd12; checkpoints.phase_c pending
   - name: evolve/EV-016-retrieval-quality
     purpose: EV-016 / S019 — Batch A retrieval quality (investigate
     base: main
@@ -22869,6 +23018,20 @@ git_history:
     - 16-evolve
     - 07-build
   notes:
+  - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
+    short: ccc82df
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: sync EV-017 workflow-state after Phase 22 M94-M98'
+    stage: 16-evolve
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 1
+    timestamp: '2026-08-02T15:38:25Z'
+    note: Sync workflow-state after Phase 22 M94–M98 COMPLETE; HEAD advanced before 08-verify-build start
+    files:
+    - workflow-state.yaml
+    skill_ids:
+    - 16-evolve
   - '2026-08-02T15:34:08Z S020/EV-017: synced 07-build — T98.1–T98.4 COMPLETE @ 59edd12; M98 COMPLETE; Phase 22 M94–M98 ALL COMPLETE; current_stage=07-build (completed); next_action=08-verify-build (deferred until before Phase C PR); 08 NOT started; checkpoints.phase_c still pending; appended commits d2e9043/8b81a42/21b52dc/59edd12; folded prior uncommitted M97/T98.1 dirty state.'
   - '2026-08-02T15:27:28Z S020/EV-017: synced 07-build — T97.5 COMPLETE @ d33cbec; M97 COMPLETE; current_action=T98.1 (UJ-057 answer cache e2e); M98 in_progress; 08-verify-build deferred until before Phase C PR; checkpoints.phase_c still pending; appended commit d33cbec; folded prior uncommitted T97.4 sync.'
   - '2026-08-02T15:23:35Z S020/EV-017: synced 07-build — T97.4 COMPLETE @ 94477d0; current_action=T97.5 (spike runbook + metrics capture path); M97 still in_progress; 08-verify-build deferred until before Phase C PR; checkpoints.phase_c still pending; appended commit 94477d0.'
