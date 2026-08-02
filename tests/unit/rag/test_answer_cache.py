@@ -26,6 +26,7 @@ _CORPUS_V1 = "corpus-v1"
 _CORPUS_V2 = "corpus-v2"
 _NEAR_THRESHOLD = 0.95
 _BELOW_THRESHOLD = 0.80
+_MIN_CACHE_MAX_ENTRIES = 16
 
 
 def _chunk(*, text: str = "body", score: float = 0.9) -> RetrievedChunk:
@@ -164,7 +165,7 @@ def test_cache_max_entries_evicts_lru() -> None:
         max_entries=2,
         ttl_s=DEFAULT_CACHE_TTL_S,
     )
-    assert DEFAULT_CACHE_MAX_ENTRIES >= 16
+    assert DEFAULT_CACHE_MAX_ENTRIES >= _MIN_CACHE_MAX_ENTRIES
     cache.store_answer("q1", _LOCALE, _cached_answer())
     cache.store_answer("q2", _LOCALE, _cached_answer())
     cache.store_answer("q3", _LOCALE, _cached_answer())
@@ -197,3 +198,28 @@ def test_cache_corpus_version_bust_clears_entries() -> None:
     assert hit == CacheHitKind.NONE
     assert answer is None
     assert cache.corpus_version == _CORPUS_V2
+
+
+def test_retrieve_tier_hit_skips_retrieve_callback() -> None:
+    """Cascade retrieve tier returns cached chunks without calling retrieve."""
+    cache = AnswerCache(corpus_version=_CORPUS_V1)
+    chunks = (_chunk(text="cached"),)
+    cache.store_retrieve(_QUERY, _LOCALE, chunks)
+
+    retrieve_calls = 0
+
+    def _retrieve() -> tuple[RetrievedChunk, ...]:
+        nonlocal retrieve_calls
+        retrieve_calls += 1
+        return (_chunk(text="fresh"),)
+
+    hit, answer, cached = cascade_lookup(
+        cache,
+        CascadeRequest(query=_QUERY, locale=_LOCALE, retrieve=_retrieve),
+    )
+
+    assert hit == CacheHitKind.RETRIEVE
+    assert answer is None
+    assert cached is not None
+    assert cached[0].text == "cached"
+    assert retrieve_calls == 0
