@@ -1155,8 +1155,9 @@ project:
       status: in_progress
       started_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build STARTED after Gate B→C PASS (S020-D18); Phase 22
-        M94–M98; T94.1 pending; prior S019/EV-016 COMPLETE nested under s019_baseline
+      partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build in_progress after M94 COMPLETE (T94.1–T94.5);
+        Phase 22 M95 next (T95.1); 08-verify-build deferred at M94 boundary to continue batch (pending before PR);
+        prior S019/EV-016 COMPLETE nested under s019_baseline
       session_id: S020-retrieval-batch-b
       branch: evolve/EV-017-retrieval-batch-b
       evolve_cycle_id: EV-017
@@ -1168,25 +1169,50 @@ project:
         - F45
       feature: F43-F45
       phase: Phase 22 (M94-M98)
-      milestone: M94
+      milestone: M95
       milestone_status: in_progress
       phase_status: in_progress
-      current_task: T94.1
-      current_action: T94.1
-      next_action: unit test exact answer cache hit (T94.1)
+      m94_status: completed
+      m94_completed_at: '2026-08-02'
+      m94_completed_tasks:
+        - T94.1
+        - T94.2
+        - T94.3
+        - T94.4
+        - T94.5
+      m94_head: 0baa166
+      milestones_completed:
+        - M94
+      current_task: T95.1
+      current_action: T95.1
+      next_action: T95.1 ChatRAG settings parse VECINITA_RAG_CACHE*
       s020_d18_decision: S020-D18
       s020_d18_decision_recorded: true
-      execution_plan_current_state_note: Active task T94.1 pending in execution-plan Current State (parent will
-        sync execution-plan.md)
-      note: S020/EV-017 07-build in_progress 2026-08-02 — Gate B→C passed (S020-D18); Phase 22 M94–M98; current_task=T94.1
-        (unit test exact answer cache hit); prior S019 COMPLETE under s019_baseline
+      commits_head: 0baa166
+      verify_build_m94:
+        status: deferred
+        reason: continue_batch_throughput
+        note: 08-verify-build at M94 boundary deferred so parent can continue to M95; run 08 (or equivalent)
+          before PR / Phase C gate
+      execution_plan_current_state_note: Active task T95.1 pending in execution-plan Current State after M94
+        (T94.1–T94.5) marked completed @ 0baa166
+      note: S020/EV-017 07-build in_progress 2026-08-02 — M94 (T94.1–T94.5) COMPLETE @ 0baa166; current_task=T95.1
+        (ChatRAG settings parse VECINITA_RAG_CACHE*); 08-verify-build at M94 boundary DEFERRED (continue batch /
+        pending before PR); prior S019 COMPLETE under s019_baseline
       substeps:
-        current_task: T94.1
+        current_task: T95.1
         task_status: pending
         in_progress_tasks: []
         blocked_tasks: []
-        completed_tasks_recent: []
-        next_action: start_T94_1_exact_answer_cache_hit_unit_test
+        completed_tasks_recent:
+          - T94.1
+          - T94.2
+          - T94.3
+          - T94.4
+          - T94.5
+          - M94
+        next_action: start_T95_1_chatrag_settings_parse_vecinita_rag_cache
+        m94_completed: true
       s019_baseline:
         status: completed
         started_at: '2026-08-01T13:55:27Z'
@@ -3369,9 +3395,13 @@ active_session:
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
   current_stage: 07-build
-  current_action: T94.1
-  current_stage_note: 07-build in_progress — Gate B→C passed (S020-D18); Phase 22 M94–M98 approved; current_task=T94.1
-    (unit test exact answer cache hit); 04 COMPLETE; 05/06 skipped
+  current_action: T95.1
+  current_stage_note: 07-build in_progress — M94 COMPLETE (T94.1–T94.5 @ 0baa166); Phase 22 advancing to M95/T95.1
+    (ChatRAG settings parse VECINITA_RAG_CACHE*); 08-verify-build at M94 boundary deferred to continue batch
+    (pending before PR); Gate B→C passed (S020-D18); 04 COMPLETE; 05/06 skipped
+  m94_status: completed
+  m94_head: 0baa166
+  verify_build_m94: deferred_continue_batch
   started_at: '2026-08-02'
   routing_plan_status: approved
   routing_preset: standard
@@ -3448,13 +3478,15 @@ active_session:
     status: in_progress
     skip_rationale: null
     started_at: '2026-08-02'
-    current_action: T94.1
-    note: in_progress — Gate B→C passed (S020-D18); Phase 22 M94–M98; current_task=T94.1 pending (unit test exact
-      answer cache hit); parent syncing execution-plan Current State
+    current_action: T95.1
+    note: in_progress — M94 COMPLETE (T94.1–T94.5 @ 0baa166); current_task=T95.1 (ChatRAG settings parse
+      VECINITA_RAG_CACHE*); 08-verify-build at M94 deferred to continue batch
   - stage: 08-verify-build
     required: true
     status: pending
     skip_rationale: null
+    m94_boundary: deferred_continue_batch
+    note: Pending — deferred at M94 boundary to continue batch (throughput); run before PR / Phase C
   - stage: 09-qa
     required: true
     status: pending
@@ -3482,7 +3514,7 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: start_T94_1_exact_answer_cache_hit_unit_test
+  next_action: start_T95_1_chatrag_settings_parse_vecinita_rag_cache
   report_01_requirements: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
   report_02_verify_plan: docs/sessions/S020-retrieval-batch-b/reports/verify-plan-audit.md
   parent_sync_pending:
@@ -3520,8 +3552,8 @@ active_session:
   s020_d18_decision_recorded: true
   phase_b_checkpoint_accepted: true
   phase_b_checkpoint_choice: option_1_approve_all_pass_gate_b_to_c_start_07
-  execution_plan_current_state_note: Active task T94.1 pending in execution-plan Current State (parent will sync
-    execution-plan.md)
+  execution_plan_current_state_note: Active task T95.1 pending in execution-plan Current State after M94
+    (T94.1–T94.5) marked completed @ 0baa166
   adr_04: ADR-042
 sessions:
 - id: S019-retrieval-quality
@@ -8300,8 +8332,9 @@ stages:
     status: in_progress
     started_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build STARTED after Gate B→C PASS (S020-D18); Phase 22
-      M94–M98; T94.1 pending; prior S019/EV-016 COMPLETE nested under s019_baseline
+    partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build in_progress after M94 COMPLETE (T94.1–T94.5);
+      Phase 22 M95 next (T95.1); 08-verify-build deferred at M94 boundary to continue batch (pending before PR);
+      prior S019/EV-016 COMPLETE nested under s019_baseline
     session_id: S020-retrieval-batch-b
     branch: evolve/EV-017-retrieval-batch-b
     evolve_cycle_id: EV-017
@@ -8313,25 +8346,50 @@ stages:
       - F45
     feature: F43-F45
     phase: Phase 22 (M94-M98)
-    milestone: M94
+    milestone: M95
     milestone_status: in_progress
     phase_status: in_progress
-    current_task: T94.1
-    current_action: T94.1
-    next_action: unit test exact answer cache hit (T94.1)
+    m94_status: completed
+    m94_completed_at: '2026-08-02'
+    m94_completed_tasks:
+      - T94.1
+      - T94.2
+      - T94.3
+      - T94.4
+      - T94.5
+    m94_head: 0baa166
+    milestones_completed:
+      - M94
+    current_task: T95.1
+    current_action: T95.1
+    next_action: T95.1 ChatRAG settings parse VECINITA_RAG_CACHE*
     s020_d18_decision: S020-D18
     s020_d18_decision_recorded: true
-    execution_plan_current_state_note: Active task T94.1 pending in execution-plan Current State (parent will
-      sync execution-plan.md)
-    note: S020/EV-017 07-build in_progress 2026-08-02 — Gate B→C passed (S020-D18); Phase 22 M94–M98; current_task=T94.1
-      (unit test exact answer cache hit); prior S019 COMPLETE under s019_baseline
+    commits_head: 0baa166
+    verify_build_m94:
+      status: deferred
+      reason: continue_batch_throughput
+      note: 08-verify-build at M94 boundary deferred so parent can continue to M95; run 08 (or equivalent)
+        before PR / Phase C gate
+    execution_plan_current_state_note: Active task T95.1 pending in execution-plan Current State after M94
+      (T94.1–T94.5) marked completed @ 0baa166
+    note: S020/EV-017 07-build in_progress 2026-08-02 — M94 (T94.1–T94.5) COMPLETE @ 0baa166; current_task=T95.1
+      (ChatRAG settings parse VECINITA_RAG_CACHE*); 08-verify-build at M94 boundary DEFERRED (continue batch /
+      pending before PR); prior S019 COMPLETE under s019_baseline
     substeps:
-      current_task: T94.1
+      current_task: T95.1
       task_status: pending
       in_progress_tasks: []
       blocked_tasks: []
-      completed_tasks_recent: []
-      next_action: start_T94_1_exact_answer_cache_hit_unit_test
+      completed_tasks_recent:
+        - T94.1
+        - T94.2
+        - T94.3
+        - T94.4
+        - T94.5
+        - M94
+      next_action: start_T95_1_chatrag_settings_parse_vecinita_rag_cache
+      m94_completed: true
     s019_baseline:
       status: completed
       started_at: '2026-08-01T13:55:27Z'
@@ -16064,9 +16122,15 @@ evolve_cycles:
 
     '
   current_stage: 07-build
-  current_action: T94.1
-  current_stage_note: 07-build in_progress — Gate B→C passed (S020-D18); checkpoints.phase_b=passed; gates.b_to_c=passed;
-    Phase 22 M94–M98 approved; current_task=T94.1; 05/06 skipped
+  current_action: T95.1
+  current_stage_note: 07-build in_progress — M94 COMPLETE (T94.1–T94.5 @ 0baa166); Phase 22 advancing to M95/T95.1
+    (ChatRAG settings parse VECINITA_RAG_CACHE*); 08-verify-build at M94 boundary deferred to continue batch
+    (pending before PR); Gate B→C passed (S020-D18); checkpoints.phase_b=passed; gates.b_to_c=passed; 05/06 skipped
+  m94_status: completed
+  m94_head: 0baa166
+  milestones_completed:
+  - M94
+  verify_build_m94: deferred_continue_batch
   mode: evolve
   delta_only: true
   branch: evolve/EV-017-retrieval-batch-b
@@ -16112,9 +16176,9 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: 07-build_in_progress_T94_1
-      note: Phase 0 COMPLETE; 01 COMPLETE; 02 COMPLETE; Phase A ACCEPTED (S020-D16); 04 COMPLETE; Gate B→C PASS (S020-D18);
-        checkpoints.phase_b=passed; gates.b_to_c=passed; 07-build in_progress at T94.1; 05/06 skipped
+      current_action: 07-build_in_progress_T95_1
+      note: Phase 0–04 COMPLETE; Gate B→C PASS (S020-D18); 07-build in_progress — M94 COMPLETE; current T95.1;
+        08-verify-build deferred at M94 to continue batch; 05/06 skipped
     01-requirements:
       status: completed
       started: '2026-08-02'
@@ -16226,21 +16290,47 @@ evolve_cycles:
       - F44
       - F45
       phase: Phase 22 (M94-M98)
-      milestone: M94
-      current_task: T94.1
-      current_action: T94.1
-      next_action: unit test exact answer cache hit (T94.1)
+      milestone: M95
+      m94_status: completed
+      m94_completed_tasks:
+      - T94.1
+      - T94.2
+      - T94.3
+      - T94.4
+      - T94.5
+      m94_head: 0baa166
+      milestones_completed:
+      - M94
+      current_task: T95.1
+      current_action: T95.1
+      next_action: T95.1 ChatRAG settings parse VECINITA_RAG_CACHE*
       s020_d18_decision: S020-D18
-      execution_plan_current_state_note: Active task T94.1 pending in execution-plan Current State (parent will sync
-        execution-plan.md)
-      note: S020/EV-017 07-build in_progress 2026-08-02 — Gate B→C passed (S020-D18); Phase 22 M94–M98; current_task=T94.1
-        (unit test exact answer cache hit); prior S019 COMPLETE under s019_baseline
+      commits_head: 0baa166
+      verify_build_m94:
+        status: deferred
+        reason: continue_batch_throughput
+        note: 08-verify-build at M94 boundary deferred; continue to M95; pending before PR / Phase C
+      execution_plan_current_state_note: Active task T95.1 pending in execution-plan Current State after M94
+        (T94.1–T94.5) marked completed @ 0baa166
+      note: S020/EV-017 07-build in_progress 2026-08-02 — M94 (T94.1–T94.5) COMPLETE @ 0baa166; current_task=T95.1
+        (ChatRAG settings parse VECINITA_RAG_CACHE*); 08-verify-build at M94 boundary DEFERRED (continue batch /
+        pending before PR); prior S019 COMPLETE under s019_baseline
       substeps:
-        current_task: T94.1
+        current_task: T95.1
         task_status: pending
-        next_action: start_T94_1_exact_answer_cache_hit_unit_test
+        completed_tasks_recent:
+        - T94.1
+        - T94.2
+        - T94.3
+        - T94.4
+        - T94.5
+        - M94
+        next_action: start_T95_1_chatrag_settings_parse_vecinita_rag_cache
+        m94_completed: true
     08-verify-build:
       status: pending
+      m94_boundary: deferred_continue_batch
+      note: Pending — M94 boundary verify deferred to continue Phase 22 batch (M95+); required before PR / Phase C
     09-qa:
       status: pending
     10-e2e:
@@ -16395,9 +16485,9 @@ evolve_cycles:
     status: recorded
     recorded_at: '2026-08-02'
     stage: 16-evolve
-  note: EV-017 Gate B→C PASS 2026-08-02 (S020-D18 option 1 Approve all); checkpoints.phase_b=passed; gates.b_to_c=passed;
-    04-tech-plan COMPLETE; 07-build in_progress at T94.1; Phase 22 M94–M98; ADR-042
-  next_action: start_T94_1_exact_answer_cache_hit_unit_test
+  note: EV-017 07-build in_progress — M94 COMPLETE (T94.1–T94.5 @ 0baa166); next T95.1; 08-verify-build at M94
+    deferred to continue batch; Gate B→C PASS (S020-D18); Phase 22 M94–M98; ADR-042
+  next_action: start_T95_1_chatrag_settings_parse_vecinita_rag_cache
   phase_b_checkpoint:
     status: passed
     accepted_at: '2026-08-02'
@@ -16406,7 +16496,8 @@ evolve_cycles:
     note: 'User approved Gate B→C option 1: Approve all — pass Gate B→C, start 07-build; Phase 22 M94–M98 approved'
   s020_d18_decision: S020-D18
   s020_d18_decision_recorded: true
-  execution_plan_current_state_note: Active task T94.1 pending in execution-plan Current State (parent will sync execution-plan.md)
+  execution_plan_current_state_note: Active task T95.1 pending in execution-plan Current State after M94
+    (T94.1–T94.5) marked completed @ 0baa166
   decisions_02:
   - S020-D15
   report_02_verify_plan: docs/sessions/S020-retrieval-batch-b/reports/verify-plan-audit.md
@@ -19663,6 +19754,9 @@ decisions_log:
   mode=evolve delta_only feature_ids=[F43,F44,F45]'
 - 'EV-017/S020: S020-D17 — TP1–TP7 approved; ADR-042 + Phase 22 M94–M98 + tech-plan-delta written; 04-tech-plan remains in_progress;
   Gate B→C / phase_b NOT passed (awaiting AskQuestion); 05/06 skipped; next after B→C → 07-build'
+- 'EV-017/S020: M94 COMPLETE (T94.1–T94.5) @ 0baa166 on evolve/EV-017-retrieval-batch-b; 07-build remains in_progress; next=T95.1
+  (ChatRAG settings parse VECINITA_RAG_CACHE*); 08-verify-build at M94 boundary deferred to continue batch (throughput); pending
+  before PR / Phase C'
 artifacts:
 - path: docs/sessions/S020-retrieval-batch-b/reports/verify-plan-audit.md
   kind: stage-report
@@ -21344,7 +21438,8 @@ git_history:
     evolve_cycle_id: EV-017
     exists_on_disk: true
     created_from: main
-    note: Branch created from main at S020 00-context complete; Phase 0 intake next
+    head_sha: 0baa1666c2a294e6e1e8788550d498eb9245d100
+    note: EV-017 / S020 — 07-build in_progress; M94 COMPLETE @ 0baa166; next T95.1
   - name: evolve/EV-016-retrieval-quality
     purpose: EV-016 / S019 — Batch A retrieval quality (investigate
     base: main
@@ -23413,6 +23508,66 @@ git_history:
     files_changed: 2
     timestamp: '2026-08-02T14:17:27Z'
     note: Draft verify-plan-audit.md; M1–M4 later approved as S020-D15
+  - sha: 78e7dba778c038bbe886b6d5aed63d2fdde3de3a
+    short: 78e7dba
+    branch: evolve/EV-017-retrieval-batch-b
+    message: '[T94.1] test: exact answer cache hit skips generate'
+    stage: 07-build
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 3
+    timestamp: '2026-08-02T14:32:12Z'
+    note: T94.1 — exact answer cache unit test + cache.py scaffold
+  - sha: 3022b2335de7605a48e95b1abd95a40c44e1ee48
+    short: 3022b23
+    branch: evolve/EV-017-retrieval-batch-b
+    message: '[T94.2] test: semantic cache conservative threshold'
+    stage: 07-build
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 1
+    timestamp: '2026-08-02T14:33:02Z'
+    note: T94.2 — semantic cache conservative threshold tests
+  - sha: 26d75877907dd66e61040bd83ca077f257dace00
+    short: 26d7587
+    branch: evolve/EV-017-retrieval-batch-b
+    message: '[T94.3] test: cache TTL max_entries and corpus bust'
+    stage: 07-build
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 1
+    timestamp: '2026-08-02T14:33:19Z'
+    note: T94.3 — TTL / max_entries / corpus bust tests
+  - sha: 659715017b368a944996c9b8df0e275ee216db02
+    short: '6597150'
+    branch: evolve/EV-017-retrieval-batch-b
+    message: '[T94.4] code: H1 cascade retrieve tier coverage'
+    stage: 07-build
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 1
+    timestamp: '2026-08-02T14:33:40Z'
+    note: T94.4 — H1 cascade retrieve tier coverage
+  - sha: 94e33c522494b2d4e0b2e12f4547af76064e3ba0
+    short: 94e33c5
+    branch: evolve/EV-017-retrieval-batch-b
+    message: '[T94.5] docs: export F43 cache helpers from packages/rag'
+    stage: 07-build
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 1
+    timestamp: '2026-08-02T14:33:40Z'
+    note: T94.5 — export F43 cache helpers; M94 tasks complete
+  - sha: 0baa1666c2a294e6e1e8788550d498eb9245d100
+    short: 0baa166
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: mark EV-017 M94 (T94.1-T94.5) completed'
+    stage: 07-build
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 1
+    timestamp: '2026-08-02T14:33:54Z'
+    note: execution-plan Current State — M94 completed; next T95.1
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI
     waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for
@@ -23424,6 +23579,9 @@ git_history:
     08-verify-build started (verify_phase21_m91_m93); left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry
     (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
   notes:
+  - '2026-08-02 S020/EV-017: M94 COMPLETE (T94.1–T94.5) @ 0baa166; 07-build remains in_progress; next=T95.1 ChatRAG
+    settings parse VECINITA_RAG_CACHE*; 08-verify-build at M94 boundary deferred to continue batch (pending before PR /
+    Phase C).'
   - '2026-07-30 S017/EV-015: 13-deploy-smoke Path A staging PASS @ 180ad14 — Alembic 20260730_0010; DO pins ACTIVE evolve;
     Modal DM redeployed; H1–H5 PASS; shadow→F36→promote 60/2; report deploy-smoke.md; checkpoints.deploy=pending_user_checkpoint;
     cycle NOT completed; do not commit scripts/deploy/_tmp_proxy_key_check.py.'
@@ -23647,7 +23805,7 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+next_action: start_T95_1_chatrag_settings_parse_vecinita_rag_cache
 pipeline_idle: false
-pipeline_idle_note: 2026-08-02 — S020/EV-017 01-requirements IN_PROGRESS; F43–F45 allocated @ 02c3b30; seed loaded; next=AskQuestion
-  confirm locked L1–L12 + resolve open Q1–Q5
+pipeline_idle_note: 2026-08-02 — S020/EV-017 07-build in_progress; M94 COMPLETE @ 0baa166; next=T95.1
+  (ChatRAG settings parse VECINITA_RAG_CACHE*); 08-verify-build deferred at M94 to continue batch
