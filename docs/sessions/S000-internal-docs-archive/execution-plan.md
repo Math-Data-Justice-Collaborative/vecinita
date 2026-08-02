@@ -2682,7 +2682,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T96.4 | M96 | 22 | Test | completed | T96.3 | — | S020 | F44 | — |
 | T97.1 | M97 | 22 | Test | completed | T94.4 | — | S020 | F45 | — |
 | T97.2 | M97 | 22 | Test | completed | — | — | S020 | F45 | — |
-| T97.3 | M97 | 22 | Code | pending | T97.1, T97.2 | — | S020 | F45 | — |
+| T97.3 | M97 | 22 | Code | completed | T97.1, T97.2 | — | S020 | F45 | — |
 | T97.4 | M97 | 22 | Config | pending | T97.3 | — | S020 | F45 | — |
 | T97.5 | M97 | 22 | Docs | pending | T97.4 | — | S020 | F45 | — |
 | T98.1 | M98 | 22 | Test | pending | T95.3, T95.4 | — | S020 | F43 | — |

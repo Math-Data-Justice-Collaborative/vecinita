@@ -1163,9 +1163,9 @@ project:
     07-build:
       status: in_progress
       started_at: '2026-08-02'
-      partial_rerun_at: '2026-08-02T15:11:00Z'
+      partial_rerun_at: '2026-08-02T15:16:46Z'
       partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build in_progress; M96 COMPLETE (T96.1–T96.4 @ 9b0fef9); 
-        M97 in_progress / T97.1 in_progress (F45 CE); M95 COMPLETE @ 79939f4; 08-verify-build deferred until before 
+        M97 in_progress / T97.4 in_progress (ephemeral Modal T4 CE spike); T97.1–T97.3 COMPLETE @ 1b99582; M95 COMPLETE @ 79939f4; 08-verify-build deferred until before 
         Phase C PR (batch throughput); prior S019/EV-016 COMPLETE nested under s019_baseline
       session_id: S020-retrieval-batch-b
       branch: evolve/EV-017-retrieval-batch-b
@@ -1194,28 +1194,28 @@ project:
         - M94
         - M95
         - M96
-      current_task: T97.1
-      current_action: T97.1
-      next_action: T97.1 in_progress — F45 CE
+      current_task: T97.4
+      current_action: T97.4
+      next_action: T97.4 in_progress — ephemeral Modal T4 CE spike
       s020_d18_decision: S020-D18
       s020_d18_decision_recorded: true
-      commits_head: 9b0fef9
+      commits_head: 1b99582
       verify_build_m94:
         status: deferred
         reason: continue_batch_throughput
         note: 08-verify-build deferred until before Phase C PR (batch throughput); M96 complete; M97 in_progress; run 08
           before PR / Phase C gate
-      execution_plan_current_state_note: Active milestone M97 / Active task T97.1 in_progress — F45 CE; M96 COMPLETE @ 
-        9b0fef9 (T96.1–T96.4); M95 COMPLETE @ 79939f4
-      note: S020/EV-017 07-build in_progress 2026-08-02 — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); 
-        advanced to M97 / T97.1 in_progress (F45 CE); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166; 08-verify-build 
-        DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c still pending; prior S019 COMPLETE 
-        under s019_baseline
+      execution_plan_current_state_note: Active milestone M97 / Active task T97.4 in_progress — ephemeral Modal T4 CE spike;
+        T97.1–T97.3 COMPLETE @ 1b99582; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4
+      note: S020/EV-017 07-build in_progress 2026-08-02 — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); M97
+        in_progress; T97.1–T97.3 COMPLETE @ 1b99582; current T97.4 (ephemeral Modal T4 CE spike); M95 COMPLETE @ 79939f4;
+        M94 COMPLETE @ 0baa166; 08-verify-build DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c
+        still pending; prior S019 COMPLETE under s019_baseline
       substeps:
-        current_task: T97.1
+        current_task: T97.4
         task_status: in_progress
         in_progress_tasks:
-          - T97.1
+          - T97.4
         blocked_tasks: []
         completed_tasks_recent: &id004
           - T94.1
@@ -1235,7 +1235,10 @@ project:
           - T96.3
           - T96.4
           - M96
-        next_action: T97.1_f45_ce
+          - T97.1
+          - T97.2
+          - T97.3
+        next_action: T97.4_ephemeral_modal_t4_ce_spike
         m94_completed: true
         t96_1_note: completed @ fd585ce — L1 soft language empty same-lang pass (TC-180)
         t96_1_started_at: '2026-08-02T14:59:45Z'
@@ -1265,8 +1268,21 @@ project:
         t96_4_started_at: '2026-08-02T15:08:00Z'
         t96_4_completed_at: '2026-08-02T15:09:36Z'
         t96_4_commit: 9b0fef9
-        t97_1_note: in_progress — F45 CE
+        t97_1_note: completed @ d06140d — CE merge keeps ≤ top_k with mock CE (TC-182)
         t97_1_started_at: '2026-08-02T15:11:00Z'
+        t97_1_completed_at: '2026-08-02T15:12:20Z'
+        t97_1_commit: d06140d
+        t97_2_note: completed @ 367d233 — VECINITA_RAG_RERANK_CE default off (TC-183)
+        t97_2_started_at: '2026-08-02T15:12:20Z'
+        t97_2_completed_at: '2026-08-02T15:13:16Z'
+        t97_2_commit: 367d233
+        t97_3_note: completed @ 1b99582 — mockable CE client + ChatRAG flag-gated hook
+        t97_3_started_at: '2026-08-02T15:13:16Z'
+        t97_3_completed_at: '2026-08-02T15:16:22Z'
+        t97_3_commit: 1b99582
+        t97_4_note: in_progress — ephemeral Modal T4 CE spike
+        t97_4_started_at: '2026-08-02T15:16:22Z'
+        m97_status: in_progress
       s019_baseline:
         status: completed
         started_at: '2026-08-01T13:55:27Z'
@@ -1894,6 +1910,16 @@ project:
       t96_4_completed_at: '2026-08-02T15:09:36Z'
       t96_4_commit: 9b0fef9
       t97_1_started_at: '2026-08-02T15:11:00Z'
+      t97_1_completed_at: '2026-08-02T15:12:20Z'
+      t97_1_commit: d06140d
+      t97_2_started_at: '2026-08-02T15:12:20Z'
+      t97_2_completed_at: '2026-08-02T15:13:16Z'
+      t97_2_commit: 367d233
+      t97_3_started_at: '2026-08-02T15:13:16Z'
+      t97_3_completed_at: '2026-08-02T15:16:22Z'
+      t97_3_commit: 1b99582
+      t97_4_started_at: '2026-08-02T15:16:22Z'
+      m97_status: in_progress
     08-verify-build:
       status: pending
       started_at: '2026-08-01T14:12:45Z'
@@ -3512,11 +3538,11 @@ active_session:
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
   current_stage: 07-build
-  current_action: T96.2
-  current_stage_note: 07-build in_progress — T96.1 COMPLETE @ fd585ce (F44 soft language (#162)); T96.2 in_progress 
-    (flag default off L0-strict TC-181); M96 in_progress (T96.2–T96.4 pending); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 
-    0baa166; 08-verify-build deferred until before Phase C PR (batch throughput); Gate B→C passed (S020-D18); 04 
-    COMPLETE; 05/06 skipped
+  current_action: T97.4
+  current_stage_note: 07-build in_progress — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44); M97 in_progress; T97.1–T97.3
+    COMPLETE @ 1b99582; current T97.4 (ephemeral Modal T4 CE spike); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166;
+    08-verify-build deferred until before Phase C PR (batch throughput); Gate B→C passed (S020-D18); checkpoints.phase_c
+    still pending; 04 COMPLETE; 05/06 skipped
   m94_status: completed
   m94_head: 0baa166
   verify_build_m94: deferred_until_phase_c_pr
@@ -3598,10 +3624,10 @@ active_session:
       status: in_progress
       skip_rationale:
       started_at: '2026-08-02'
-      current_action: T97.1
-      note: in_progress — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); M97 / T97.1 in_progress (F45 CE); 
-        M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166; 08-verify-build deferred until before Phase C PR (batch 
-        throughput)
+      current_action: T97.4
+      note: in_progress — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); M97 in_progress; T97.1–T97.3 COMPLETE
+        @ 1b99582; current T97.4 (ephemeral Modal T4 CE spike); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166;
+        08-verify-build deferred until before Phase C PR (batch throughput); checkpoints.phase_c still pending
     - stage: 08-verify-build
       required: true
       status: pending
@@ -3636,7 +3662,7 @@ active_session:
   context_briefs:
     - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: T96.2_flag_default_off_l0_strict
+  next_action: T97.4_ephemeral_modal_t4_ce_spike
   report_01_requirements: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
   report_02_verify_plan: docs/sessions/S020-retrieval-batch-b/reports/verify-plan-audit.md
   parent_sync_pending:
@@ -3674,8 +3700,8 @@ active_session:
   s020_d18_decision_recorded: true
   phase_b_checkpoint_accepted: true
   phase_b_checkpoint_choice: option_1_approve_all_pass_gate_b_to_c_start_07
-  execution_plan_current_state_note: Active milestone M96 / Active task T96.2 in_progress — F44 flag default off 
-    L0-strict (TC-181); T96.1 COMPLETE @ fd585ce; M95 COMPLETE @ 79939f4
+  execution_plan_current_state_note: Active milestone M97 / Active task T97.4 in_progress — ephemeral Modal T4 CE spike;
+    T97.1–T97.3 COMPLETE @ 1b99582; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4
   adr_04: ADR-042
   m95_status: completed
   m95_completed_at: '2026-08-02'
@@ -3695,7 +3721,24 @@ active_session:
   t96_1_completed_at: '2026-08-02T15:01:17Z'
   t96_1_commit: fd585ce
   t96_2_started_at: '2026-08-02T15:01:17Z'
-  commits_head: fd585ce
+  t96_2_completed_at: '2026-08-02T15:06:30Z'
+  t96_2_commit: c8a90b0
+  t96_3_completed_at: '2026-08-02T15:08:00Z'
+  t96_3_commit: 416a83c
+  t96_4_completed_at: '2026-08-02T15:09:36Z'
+  t96_4_commit: 9b0fef9
+  m96_status: completed
+  m96_head: 9b0fef9
+  t97_1_started_at: '2026-08-02T15:11:00Z'
+  t97_1_completed_at: '2026-08-02T15:12:20Z'
+  t97_1_commit: d06140d
+  t97_2_completed_at: '2026-08-02T15:13:16Z'
+  t97_2_commit: 367d233
+  t97_3_completed_at: '2026-08-02T15:16:22Z'
+  t97_3_commit: 1b99582
+  t97_4_started_at: '2026-08-02T15:16:22Z'
+  m97_status: in_progress
+  commits_head: 1b99582
 sessions:
   - id: S019-retrieval-quality
     type: feature
@@ -8517,9 +8560,9 @@ stages:
   07-build:
     status: in_progress
     started_at: '2026-08-02'
-    partial_rerun_at: '2026-08-02T15:11:00Z'
+    partial_rerun_at: '2026-08-02T15:16:46Z'
     partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build in_progress; M96 COMPLETE (T96.1–T96.4 @ 9b0fef9); M97 
-      in_progress / T97.1 in_progress (F45 CE); M95 COMPLETE @ 79939f4; 08-verify-build deferred until before Phase C PR
+      in_progress / T97.4 in_progress (ephemeral Modal T4 CE spike); T97.1–T97.3 COMPLETE @ 1b99582; M95 COMPLETE @ 79939f4; 08-verify-build deferred until before Phase C PR
       (batch throughput); prior S019/EV-016 COMPLETE nested under s019_baseline
     session_id: S020-retrieval-batch-b
     branch: evolve/EV-017-retrieval-batch-b
@@ -8548,31 +8591,31 @@ stages:
       - M94
       - M95
       - M96
-    current_task: T97.1
-    current_action: T97.1
-    next_action: T97.1 in_progress — F45 CE
+    current_task: T97.4
+    current_action: T97.4
+    next_action: T97.4 in_progress — ephemeral Modal T4 CE spike
     s020_d18_decision: S020-D18
     s020_d18_decision_recorded: true
-    commits_head: 9b0fef9
+    commits_head: 1b99582
     verify_build_m94:
       status: deferred
       reason: continue_batch_throughput
       note: 08-verify-build deferred until before Phase C PR (batch throughput); M96 complete; M97 in_progress; run 08 
         before PR / Phase C gate
-    execution_plan_current_state_note: Active milestone M97 / Active task T97.1 in_progress — F45 CE; M96 COMPLETE @ 
-      9b0fef9 (T96.1–T96.4); M95 COMPLETE @ 79939f4
-    note: S020/EV-017 07-build in_progress 2026-08-02 — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); 
-      advanced to M97 / T97.1 in_progress (F45 CE); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166; 08-verify-build 
-      DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c still pending; prior S019 COMPLETE under 
-      s019_baseline
+    execution_plan_current_state_note: Active milestone M97 / Active task T97.4 in_progress — ephemeral Modal T4 CE spike;
+      T97.1–T97.3 COMPLETE @ 1b99582; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4
+    note: S020/EV-017 07-build in_progress 2026-08-02 — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); M97
+      in_progress; T97.1–T97.3 COMPLETE @ 1b99582; current T97.4 (ephemeral Modal T4 CE spike); M95 COMPLETE @ 79939f4;
+      M94 COMPLETE @ 0baa166; 08-verify-build DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c
+      still pending; prior S019 COMPLETE under s019_baseline
     substeps:
-      current_task: T97.1
+      current_task: T97.4
       task_status: in_progress
       in_progress_tasks:
-        - T97.1
+        - T97.4
       blocked_tasks: []
       completed_tasks_recent: *id004
-      next_action: T97.1_f45_ce
+      next_action: T97.4_ephemeral_modal_t4_ce_spike
       m94_completed: true
       t96_1_note: completed @ fd585ce — L1 soft language empty same-lang pass (TC-180)
       t96_1_started_at: '2026-08-02T14:59:45Z'
@@ -8602,8 +8645,21 @@ stages:
       t96_4_started_at: '2026-08-02T15:08:00Z'
       t96_4_completed_at: '2026-08-02T15:09:36Z'
       t96_4_commit: 9b0fef9
-      t97_1_note: in_progress — F45 CE
+      t97_1_note: completed @ d06140d — CE merge keeps ≤ top_k with mock CE (TC-182)
       t97_1_started_at: '2026-08-02T15:11:00Z'
+      t97_1_completed_at: '2026-08-02T15:12:20Z'
+      t97_1_commit: d06140d
+      t97_2_note: completed @ 367d233 — VECINITA_RAG_RERANK_CE default off (TC-183)
+      t97_2_started_at: '2026-08-02T15:12:20Z'
+      t97_2_completed_at: '2026-08-02T15:13:16Z'
+      t97_2_commit: 367d233
+      t97_3_note: completed @ 1b99582 — mockable CE client + ChatRAG flag-gated hook
+      t97_3_started_at: '2026-08-02T15:13:16Z'
+      t97_3_completed_at: '2026-08-02T15:16:22Z'
+      t97_3_commit: 1b99582
+      t97_4_note: in_progress — ephemeral Modal T4 CE spike
+      t97_4_started_at: '2026-08-02T15:16:22Z'
+      m97_status: in_progress
     s019_baseline:
       status: completed
       started_at: '2026-08-01T13:55:27Z'
@@ -9137,6 +9193,16 @@ stages:
     t96_4_completed_at: '2026-08-02T15:09:36Z'
     t96_4_commit: 9b0fef9
     t97_1_started_at: '2026-08-02T15:11:00Z'
+    t97_1_completed_at: '2026-08-02T15:12:20Z'
+    t97_1_commit: d06140d
+    t97_2_started_at: '2026-08-02T15:12:20Z'
+    t97_2_completed_at: '2026-08-02T15:13:16Z'
+    t97_2_commit: 367d233
+    t97_3_started_at: '2026-08-02T15:13:16Z'
+    t97_3_completed_at: '2026-08-02T15:16:22Z'
+    t97_3_commit: 1b99582
+    t97_4_started_at: '2026-08-02T15:16:22Z'
+    m97_status: in_progress
   08-verify-build:
     status: pending
     started_at: '2026-08-01T14:12:45Z'
@@ -16452,16 +16518,17 @@ evolve_cycles:
 
       '
     current_stage: 07-build
-    current_action: T96.2
-    current_stage_note: 07-build in_progress — T96.1 COMPLETE @ fd585ce (F44 soft language (#162)); T96.2 in_progress 
-      (flag default off L0-strict TC-181); M96 in_progress (T96.2–T96.4 pending); M95 COMPLETE @ 79939f4; M94 COMPLETE @
-      0baa166; 08-verify-build deferred until before Phase C PR (batch throughput); Gate B→C passed (S020-D18); 
-      checkpoints.phase_b=passed; gates.b_to_c=passed; 05/06 skipped
+    current_action: T97.4
+    current_stage_note: 07-build in_progress — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44); M97 in_progress; T97.1–T97.3
+      COMPLETE @ 1b99582; current T97.4 (ephemeral Modal T4 CE spike); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166;
+      08-verify-build deferred until before Phase C PR (batch throughput); Gate B→C passed (S020-D18); checkpoints.phase_b=passed;
+      checkpoints.phase_c=pending; gates.b_to_c=passed; 05/06 skipped
     m94_status: completed
     m94_head: 0baa166
     milestones_completed:
       - M94
       - M95
+      - M96
     verify_build_m94: deferred_until_phase_c_pr
     mode: evolve
     delta_only: true
@@ -16508,10 +16575,10 @@ evolve_cycles:
       16-evolve:
         status: in_progress
         started: '2026-08-02'
-        current_action: T96.2
-        note: Phase 0–04 COMPLETE; Gate B→C PASS (S020-D18); 07-build in_progress — T96.1 COMPLETE @ fd585ce; T96.2 
-          in_progress (F44 flag default off L0-strict TC-181); M96 in_progress (T96.2–T96.4 pending); M95 COMPLETE @ 
-          79939f4; M94 COMPLETE; 08-verify-build deferred until before Phase C PR (batch throughput); 05/06 skipped
+        current_action: T97.4
+        note: Phase 0–04 COMPLETE; Gate B→C PASS (S020-D18); 07-build in_progress — M96 COMPLETE @ 9b0fef9; M97 in_progress;
+          T97.1–T97.3 COMPLETE @ 1b99582; current T97.4 (ephemeral Modal T4 CE spike); M95 COMPLETE @ 79939f4; M94 COMPLETE;
+          08-verify-build deferred until before Phase C PR (batch throughput); checkpoints.phase_c still pending; 05/06 skipped
       01-requirements:
         status: completed
         started: '2026-08-02'
@@ -16637,30 +16704,30 @@ evolve_cycles:
           - M94
           - M95
           - M96
-        current_task: T97.1
-        current_action: T97.1
-        next_action: T97.1 in_progress — F45 CE
+        current_task: T97.4
+        current_action: T97.4
+        next_action: T97.4 in_progress — ephemeral Modal T4 CE spike
         s020_d18_decision: S020-D18
-        commits_head: 9b0fef9
+        commits_head: 1b99582
         verify_build_m94:
           status: deferred
           reason: continue_batch_throughput
           note: 08-verify-build deferred until before Phase C PR (batch throughput); M96 complete; M97 in_progress; run 
             08 before PR / Phase C gate
-        execution_plan_current_state_note: Active milestone M97 / Active task T97.1 in_progress — F45 CE; M96 COMPLETE @
-          9b0fef9 (T96.1–T96.4); M95 COMPLETE @ 79939f4
-        note: S020/EV-017 07-build in_progress 2026-08-02 — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); 
-          advanced to M97 / T97.1 in_progress (F45 CE); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 0baa166; 08-verify-build 
-          DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c still pending; prior S019 COMPLETE 
-          under s019_baseline
+        execution_plan_current_state_note: Active milestone M97 / Active task T97.4 in_progress — ephemeral Modal T4 CE spike;
+          T97.1–T97.3 COMPLETE @ 1b99582; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4
+        note: S020/EV-017 07-build in_progress 2026-08-02 — M96 COMPLETE @ 9b0fef9 (T96.1–T96.4 / F44 soft language); M97
+          in_progress; T97.1–T97.3 COMPLETE @ 1b99582; current T97.4 (ephemeral Modal T4 CE spike); M95 COMPLETE @ 79939f4;
+          M94 COMPLETE @ 0baa166; 08-verify-build DEFERRED until before Phase C PR (batch throughput); checkpoints.phase_c
+          still pending; prior S019 COMPLETE under s019_baseline
         substeps:
-          current_task: T97.1
+          current_task: T97.4
           task_status: in_progress
           completed_tasks_recent: *id004
-          next_action: T97.1_f45_ce
+          next_action: T97.4_ephemeral_modal_t4_ce_spike
           m94_completed: true
           in_progress_tasks:
-            - T97.1
+            - T97.4
           t96_1_note: completed @ fd585ce — L1 soft language empty same-lang pass (TC-180)
           t96_1_started_at: '2026-08-02T14:59:45Z'
           t96_1_completed_at: '2026-08-02T15:01:17Z'
@@ -16690,11 +16757,23 @@ evolve_cycles:
           t96_4_started_at: '2026-08-02T15:08:00Z'
           t96_4_completed_at: '2026-08-02T15:09:36Z'
           t96_4_commit: 9b0fef9
-          t97_1_note: in_progress — F45 CE
+          t97_1_note: completed @ d06140d — CE merge keeps ≤ top_k with mock CE (TC-182)
           t97_1_started_at: '2026-08-02T15:11:00Z'
-        partial_rerun_at: '2026-08-02T15:11:00Z'
+          t97_1_completed_at: '2026-08-02T15:12:20Z'
+          t97_1_commit: d06140d
+          t97_2_note: completed @ 367d233 — VECINITA_RAG_RERANK_CE default off (TC-183)
+          t97_2_started_at: '2026-08-02T15:12:20Z'
+          t97_2_completed_at: '2026-08-02T15:13:16Z'
+          t97_2_commit: 367d233
+          t97_3_note: completed @ 1b99582 — mockable CE client + ChatRAG flag-gated hook
+          t97_3_started_at: '2026-08-02T15:13:16Z'
+          t97_3_completed_at: '2026-08-02T15:16:22Z'
+          t97_3_commit: 1b99582
+          t97_4_note: in_progress — ephemeral Modal T4 CE spike
+          t97_4_started_at: '2026-08-02T15:16:22Z'
+        partial_rerun_at: '2026-08-02T15:16:46Z'
         partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build in_progress; M96 COMPLETE (T96.1–T96.4 @ 9b0fef9); 
-          M97 in_progress / T97.1 in_progress (F45 CE); M95 COMPLETE @ 79939f4; 08-verify-build deferred until before 
+          M97 in_progress / T97.4 in_progress (ephemeral Modal T4 CE spike); T97.1–T97.3 COMPLETE @ 1b99582; M95 COMPLETE @ 79939f4; 08-verify-build deferred until before 
           Phase C PR (batch throughput); prior S019/EV-016 COMPLETE nested under s019_baseline
         milestone_status: in_progress
         m95_status: completed
@@ -16742,6 +16821,16 @@ evolve_cycles:
         t96_4_completed_at: '2026-08-02T15:09:36Z'
         t96_4_commit: 9b0fef9
         t97_1_started_at: '2026-08-02T15:11:00Z'
+        t97_1_completed_at: '2026-08-02T15:12:20Z'
+        t97_1_commit: d06140d
+        t97_2_started_at: '2026-08-02T15:12:20Z'
+        t97_2_completed_at: '2026-08-02T15:13:16Z'
+        t97_2_commit: 367d233
+        t97_3_started_at: '2026-08-02T15:13:16Z'
+        t97_3_completed_at: '2026-08-02T15:16:22Z'
+        t97_3_commit: 1b99582
+        t97_4_started_at: '2026-08-02T15:16:22Z'
+        m97_status: in_progress
       08-verify-build:
         status: pending
         m94_boundary: deferred_continue_batch
@@ -16906,7 +16995,7 @@ evolve_cycles:
       default off L0-strict TC-181); M96 in_progress (T96.2–T96.4 pending); M95 COMPLETE @ 79939f4; M94 COMPLETE @ 
       0baa166; 08-verify-build deferred until before Phase C PR (batch throughput); Gate B→C PASS (S020-D18); Phase 22 
       M94–M98; ADR-042
-    next_action: T96.2_flag_default_off_l0_strict
+    next_action: T97.4_ephemeral_modal_t4_ce_spike
     phase_b_checkpoint:
       status: passed
       accepted_at: '2026-08-02'
@@ -21933,9 +22022,9 @@ git_history:
       evolve_cycle_id: EV-017
       exists_on_disk: true
       created_from: main
-      head_sha: fd585ce1bc09825144cf53a5097922de373de754
-      note: EV-017 / S020 — 07-build in_progress; T96.1 COMPLETE @ fd585ce; T96.2 in_progress (F44 flag default off 
-        L0-strict TC-181); M96 in_progress; 08-verify-build deferred until Phase C PR
+      head_sha: 1b995826085f6a753218eb2cf63799f869161eb9
+      note: EV-017 / S020 — 07-build in_progress; M96 COMPLETE; M97 in_progress; T97.1–T97.3 COMPLETE @ 1b99582; current
+        T97.4 (ephemeral Modal T4 CE spike); 08-verify-build deferred until Phase C PR; checkpoints.phase_c pending
     - name: evolve/EV-016-retrieval-quality
       purpose: EV-016 / S019 — Batch A retrieval quality (investigate
       base: main
@@ -24227,7 +24316,79 @@ git_history:
       skill_ids:
         - 16-evolve
         - 07-build
+    - sha: 6ae32d4137758e890db30d2de2ba9dee1640bddb
+      short: 6ae32d4
+      branch: evolve/EV-017-retrieval-batch-b
+      message: 'docs: mark EV-017 M96 (T96.1-T96.4) completed'
+      stage: 07-build
+      session_id: S020-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      files_changed: 1
+      timestamp: '2026-08-02T15:11:37Z'
+      note: Docs mark M96 COMPLETE (T96.1–T96.4); parent continuing → M97 / T97.1
+      files:
+        - workflow-state.yaml
+      skill_ids:
+        - 16-evolve
+        - 07-build
+    - sha: d06140d2fea9fa9440f293238d23ac93a71a1c43
+      short: d06140d
+      branch: evolve/EV-017-retrieval-batch-b
+      message: '[T97.1] test: CE merge keeps top_k ordered by mock scores'
+      stage: 07-build
+      session_id: S020-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      files_changed: 3
+      timestamp: '2026-08-02T15:12:20Z'
+      note: T97.1 COMPLETE — CE merge keeps ≤ top_k with mock CE (TC-182); parent continuing M97 → T97.2
+      files:
+        - docs/sessions/S000-internal-docs-archive/execution-plan.md
+        - packages/rag/vecinita_rag/rerank.py
+        - tests/unit/rag/test_ce_rerank.py
+      skill_ids:
+        - 16-evolve
+        - 07-build
+    - sha: 367d23383b2aaf750788dec1f889b0bff62acd1b
+      short: 367d233
+      branch: evolve/EV-017-retrieval-batch-b
+      message: '[T97.2] test: CE rerank flag defaults off (TC-183)'
+      stage: 07-build
+      session_id: S020-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      files_changed: 3
+      timestamp: '2026-08-02T15:13:16Z'
+      note: T97.2 COMPLETE — VECINITA_RAG_RERANK_CE default off (TC-183); parent continuing M97 → T97.3
+      files:
+        - apps/chat-rag-backend/vecinita_chat_rag_backend/config.py
+        - docs/sessions/S000-internal-docs-archive/execution-plan.md
+        - tests/unit/chat_rag/test_config.py
+      skill_ids:
+        - 16-evolve
+        - 07-build
+    - sha: 1b995826085f6a753218eb2cf63799f869161eb9
+      short: 1b99582
+      branch: evolve/EV-017-retrieval-batch-b
+      message: '[T97.3] feat: mockable CE scorer and ChatRAG flag-gated rerank'
+      stage: 07-build
+      session_id: S020-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      files_changed: 5
+      timestamp: '2026-08-02T15:16:22Z'
+      note: T97.3 COMPLETE — mockable CE client + ChatRAG flag-gated hook; parent continuing M97 → T97.4 (ephemeral Modal
+        T4 CE spike); 08-verify-build still deferred; checkpoints.phase_c pending
+      files:
+        - apps/chat-rag-backend/vecinita_chat_rag_backend/service.py
+        - docs/sessions/S000-internal-docs-archive/execution-plan.md
+        - packages/rag/vecinita_rag/__init__.py
+        - packages/rag/vecinita_rag/rerank.py
+        - tests/unit/chat_rag/test_service.py
+      skill_ids:
+        - 16-evolve
+        - 07-build
   notes:
+    - '2026-08-02T15:16:46Z S020/EV-017: synced 07-build — M96 COMPLETE; T97.1–T97.3 COMPLETE @ 1b99582; current_action=T97.4
+      (ephemeral Modal T4 CE spike); M97 still in_progress; 08-verify-build deferred until before Phase C PR; checkpoints.phase_c
+      still pending; appended commits 6ae32d4/d06140d/367d233/1b99582.'
     - '2026-08-02T15:01:17Z S020/EV-017: T96.1 COMPLETE @ fd585ce — L1 soft language fires only on empty same-lang pass; T96.2
       in_progress (unit/e2e flag default off L0-strict TC-181); M96 in_progress (T96.2–T96.4 pending); 08-verify-build still
       deferred until before Phase C PR (batch throughput).'
