@@ -3361,13 +3361,19 @@ project:
       - F45
       feature: F46+F45
       phase: Phase 23 (M99-M100)
-      current_action: 12_in_progress
+      current_action: 12_awaiting_phase2_3
+      next_action: user approve mitigations+rollback then 13-deploy-smoke
+      phase_1: pass
+      phase_2: pending_user_approval
+      phase_3: pending_user_approval
       report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+      report_status: drafted
       standing_checklist: docs/deploy-checklist.md
       prior_checklist: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
       prod_ce: false
       path_a_ce_note: VECINITA_RAG_RERANK_CE must stay false until explicit Path A CE flag approval
-      note: S021/EV-018 12-verify-deploy in_progress — Path A; CE flag off until Path A CE approval
+      decision: S021-D25
+      note: S021/EV-018 12-verify-deploy — checklist drafted; Phase 1 PASS; awaiting Phase 2+3 user approval
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -4204,10 +4210,10 @@ active_session:
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
   current_stage: 12-verify-deploy
   current_stage_parallel: null
-  current_action: 12_in_progress
-  next_action: run 12-verify-deploy for EV-018 — write deploy-checklist; Path A plan; keep VECINITA_RAG_RERANK_CE false until explicit Path A CE approval
+  current_action: 12_awaiting_phase2_3
+  next_action: user approve mitigations+rollback then 13-deploy-smoke
   commits_pending: true
-  current_stage_note: S021/EV-018 Phase D 2026-08-02 — S021-D25 user option 1 Approve F46+F45; 11-verify-impl COMPLETE; 12-verify-deploy in_progress; HEAD 60664b7; prod_ce=false; phase_d in_progress; commits_pending=true
+  current_stage_note: S021/EV-018 Phase D 2026-08-02 — 12-verify-deploy checklist drafted; Phase 1 PASS; awaiting Phase 2 (mitigations) + Phase 3 (rollback) approval; current_action=12_awaiting_phase2_3; S021-D25 recorded; CE flag still false; commits_pending=true
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4373,9 +4379,14 @@ active_session:
     skip_rationale: null
     started_at: '2026-08-02'
     mode: delta
-    current_action: 12_in_progress
+    current_action: 12_awaiting_phase2_3
+    phase_1: pass
+    phase_2: pending_user_approval
+    phase_3: pending_user_approval
     report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
-    note: Path A deploy verify; VECINITA_RAG_RERANK_CE stays false until explicit Path A CE approval; standing checklist docs/deploy-checklist.md
+    report_status: drafted
+    decision: S021-D25
+    note: Checklist drafted; Phase 1 PASS; await Phase 2 failure mitigations + Phase 3 rollback approval before complete → 13; CE flag remains false
   - stage: 13-deploy-smoke
     required: true
     status: pending
@@ -19438,10 +19449,10 @@ evolve_cycles:
     '
   current_stage: 12-verify-deploy
   current_stage_parallel: null
-  current_action: 12_in_progress
-  next_action: run 12-verify-deploy for EV-018 — write deploy-checklist; Path A plan; keep VECINITA_RAG_RERANK_CE false until explicit Path A CE approval
+  current_action: 12_awaiting_phase2_3
+  next_action: user approve mitigations+rollback then 13-deploy-smoke
   commits_pending: true
-  current_stage_note: S021/EV-018 Phase D 2026-08-02 — S021-D25 Approve F46+F45; 11 COMPLETE; 12-verify-deploy in_progress; HEAD 60664b7; prod_ce=false; phase_d in_progress
+  current_stage_note: S021/EV-018 Phase D 2026-08-02 — 12 checklist drafted Phase 1 PASS; awaiting Phase 2+3 approval; current_action=12_awaiting_phase2_3; CE flag false; commits_pending=true
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -19769,13 +19780,19 @@ evolve_cycles:
       mode: delta
       session_id: S021-retrieval-follow-on
       evolve_cycle_id: EV-018
-      current_action: 12_in_progress
+      current_action: 12_awaiting_phase2_3
+      next_action: user approve mitigations+rollback then 13-deploy-smoke
+      phase_1: pass
+      phase_2: pending_user_approval
+      phase_3: pending_user_approval
       report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+      report_status: drafted
       standing_checklist: docs/deploy-checklist.md
       prior_checklist: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
       prod_ce: false
       path_a_ce_note: VECINITA_RAG_RERANK_CE must stay false until explicit Path A CE flag approval at 12/13 (S021-D7/D24/D25)
-      note: in_progress — write S021 deploy-checklist; Path A; CE flag off
+      decision: S021-D25
+      note: Checklist drafted; Phase 1 PASS; awaiting Phase 2 (failure mitigations) + Phase 3 (rollback) user approval; do not mark completed / start 13 yet
     13-deploy-smoke:
       status: pending
   gates:
@@ -19794,7 +19811,7 @@ evolve_cycles:
   checkpoint_notes:
     phase_b: 'Passed 2026-08-02 — user approved option 1 (S021-D19): Pass Gate B→C, start 07-build at T99.1; Phase 23 M99–M100'
     phase_c: 'Passed 2026-08-02 — 08-verify-build PASS (S021/EV-018); Phase D next (09-qa / 10-e2e)'
-    phase_d: 'In progress 2026-08-02 — S021-D25 Approve F46+F45; 11 COMPLETE; 12-verify-deploy in_progress; CE flag remains false until Path A CE approval'
+    phase_d: 'In progress 2026-08-02 — 12 checklist Phase 1 PASS; awaiting Phase 2+3 approval (12_awaiting_phase2_3); CE flag false'
   intake_decisions:
   - id: S021-D8
     topic: fn_allocation
@@ -20061,6 +20078,8 @@ evolve_cycles:
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
+  commits_pending: true
+  commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — commits_pending=trueed
   commits_pending: true
   commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — commits_pending=true
 retrospective_cycles: []
@@ -21159,6 +21178,13 @@ issue_log:
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress;
     interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 12-verify-deploy
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: 12-verify-deploy Phase 1 PASS — checklist drafted; awaiting Phase 2 (failure mitigations) + Phase 3 (rollback) approval
+  recorded_at: '2026-08-02T19:08:01Z'
+  note: report docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md; current_action=12_awaiting_phase2_3; next_action=user approve mitigations+rollback then 13-deploy-smoke; S021-D25 already recorded; CE flag remains false; do not mark 12 completed yet
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
@@ -28208,6 +28234,7 @@ git_history:
     skill_ids:
     - 09-qa
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
+  - '2026-08-02T19:08:01Z S021/EV-018: 12-verify-deploy checklist drafted Phase 1 PASS; awaiting Phase 2+3 (12_awaiting_phase2_3); S021-D25 present; CE flag false.'
   - '2026-08-02T19:06:54Z S021/EV-018: S021-D25 Approve F46+F45; recorded 60664b7; 11 COMPLETE; 12-verify-deploy in_progress; CE flag remains false until Path A CE approval.'
   - '2026-08-02T19:05:34Z S021/EV-018: 09-qa pass_with_advisories + 10-e2e PASS; 11-verify-impl in_progress (awaiting user approval); phase_d in_progress; commits_pending=true.'
   - '2026-08-02T19:01:41Z S021/EV-018: Phase D start — recorded 1f2930d + 1b46507; 09-qa + 10-e2e in_progress (parallel); next_action=run 09-qa + 10-e2e for EV-018 delta.'
