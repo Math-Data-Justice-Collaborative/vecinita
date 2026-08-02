@@ -46,7 +46,9 @@ paths:
               $ref: "#/components/schemas/AskRequest"
       responses:
         "200":
-          description: Server-sent events (`token`, `sources`, `done`)
+          description: >
+            Server-sent events (`token`, `sources`, `done`).
+            The `done` event may include `cache_hit` (`none` | `exact` | `semantic` | `retrieve`) when F43 is enabled.
           content:
             text/event-stream:
               schema:
@@ -281,6 +283,7 @@ components:
         - answer
         - language
         - sources
+        - cache_hit
       properties:
         answer:
           type: string
@@ -289,6 +292,18 @@ components:
           enum:
             - en
             - es
+        cache_hit:
+          type: string
+          description: >
+            F43 H1 answer/retrieve cache observability (EV-017 / ADR-042).
+            `none` = full generate path; `exact` / `semantic` skip LLM;
+            `retrieve` reuses cached chunks then may still synthesize.
+          enum:
+            - none
+            - exact
+            - semantic
+            - retrieve
+          default: none
         sources:
           type: array
           maxItems: 1000
