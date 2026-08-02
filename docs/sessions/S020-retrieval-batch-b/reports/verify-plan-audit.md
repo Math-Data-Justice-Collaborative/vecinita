@@ -1,7 +1,7 @@
 # 02-verify-plan audit — EV-017 / F43–F45
 
 > **Session:** S020 · **Cycle:** EV-017 · **Date:** 2026-08-02  
-> **Mode:** evolve delta · **Status:** awaiting medium verdicts
+> **Mode:** evolve delta · **Status:** completed (S020-D15 — M1–M4 approved)
 
 ## Inventory (delta)
 
@@ -42,14 +42,14 @@ From S020-D4–D14 / RD-197–208 (user-locked):
 - UJ-057–060 / TC-176–184 / AC-BB1–BB10 mapping
 - No identity-keyed cache; no ADR-006 amend this cycle
 
-### Medium — need user verdict
+### Medium — approved (S020-D15)
 
-| ID | Statement | Recommendation |
-|----|-----------|----------------|
-| M1 | Default `VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD` = **0.92** is the conservative cosine | Approve |
-| M2 | Default cache **TTL=3600s**, **max_entries=1024** (in-process LRU) | Approve |
-| M3 | CE spike uses **ephemeral Modal T4 app** (S019 pattern); prod CE (if gated) calls same model via ChatRAG-configured endpoint — no playground URL for ChatRAG | Approve |
-| M4 | `openapi/chat-rag.yaml` `cache_hit` update lands in **07-build** with contract check | Approve |
+| ID | Statement | Verdict |
+|----|-----------|---------|
+| M1 | Default `VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD` = **0.92** | **Approved** |
+| M2 | Default cache **TTL=3600s**, **max_entries=1024** (in-process LRU) | **Approved** |
+| M3 | CE spike = ephemeral Modal T4; ChatRAG never uses playground URL | **Approved** |
+| M4 | `openapi/chat-rag.yaml` `cache_hit` update in **07-build** | **Approved** |
 
 ### Low / contradictions
 
@@ -57,4 +57,4 @@ None found.
 
 ## Gate A→B
 
-Pending medium M1–M4 approval → then Phase B `04-tech-plan` (03/05/06 skipped).
+**Passed** (S020-D15). Phase A complete → Phase B `04-tech-plan` (03/05/06 skipped).

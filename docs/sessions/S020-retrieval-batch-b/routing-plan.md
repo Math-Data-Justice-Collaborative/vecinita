@@ -3,11 +3,11 @@
 | Stage | Required | Status | Notes |
 |-------|----------|--------|-------|
 | 00-context | yes | completed | Session open 2026-08-02; S020-D1–D3 |
-| 16-evolve | orchestrator | in_progress | EV-017 Phase A — 01-requirements |
+| 16-evolve | orchestrator | in_progress | EV-017 Phase B — Gate B→C then 07-build |
 | 01-requirements | yes | completed | Delta specs F43–F45; RD-197–208; report `01-requirements-batch-b.md` |
-| 02-verify-plan | yes | pending | Next |
-| 04-tech-plan | yes | pending | |
-| 07-build | yes | pending | |
+| 02-verify-plan | yes | completed | Consistency clean; M1–M4 via S020-D15 |
+| 04-tech-plan | yes | completed | Phase 22 M94–M98 + ADR-042; Gate B→C (S020-D18) |
+| 07-build | yes | in_progress | M94 T94.1 |
 | 08-verify-build | yes | pending | |
 | 09-qa | yes | pending | |
 | 10-e2e | yes | pending | |

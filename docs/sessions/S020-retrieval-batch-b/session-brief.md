@@ -83,6 +83,14 @@ spike-gated track, and include **#162** soft language filter in the same cycle
 
 See [routing-plan.md](./routing-plan.md). Preset: **Standard**.
 
+## Roadmap
+
+See [roadmap.md](./roadmap.md) — Phase 22 M94–M98; GH-S020-* issue map (create after approval).
+
+## Tech plan
+
+See [reports/tech-plan-delta.md](./reports/tech-plan-delta.md) · [ADR-042](../../adr/ADR-042-in-process-h1-answer-cache.md).
+
 ## Evolve
 
 - Cycle: **EV-017**

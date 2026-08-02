@@ -36,6 +36,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-039](ADR-039-chat-cold-start-fun-fact-consent.md) | ChatRAG cold-start fun-fact consent cookie | Accepted | 01-requirements (S016/EV-014) |
 | [ADR-040](ADR-040-corpus-document-store-rebuild.md) | Corpus document store + rebuild job + version stamps | Accepted | 01-requirements (S017/EV-015) |
 | [ADR-041](ADR-041-heuristic-multi-query-context-packing.md) | Heuristic multi-query (H7) + Source/URL packing (P1) | Accepted | 04-tech-plan (S019/EV-016 F42) |
+| [ADR-042](ADR-042-in-process-h1-answer-cache.md) | In-process H1 answer / retrieval cache cascade | Accepted | 04-tech-plan (S020/EV-017 F43) |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost

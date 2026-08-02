@@ -352,6 +352,20 @@ soft language filter in the same cycle (optional / empty-hit; not proven on stag
 | S020-D13 | Deploy | Staging **Path A** (write-api + chat-rag) |
 | S020-D14 | Cache lifecycle | **TTL + size cap**; bust on corpus version / F41 rebuild |
 
-### Phase 0 / 01 status
+### Decisions (02-verify-plan medium closeout — 2026-08-02)
 
-Phase 0 **approved**. 01 Phase 0C locked (D9–D14). Delta specs RD-197+; next **02-verify-plan**.
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D15 | Medium M1–M4 | **Approve all** — semantic threshold **0.92**; cache TTL=**3600s** / max_entries=**1024**; CE spike ephemeral Modal T4 (ChatRAG never playground URL); OpenAPI `cache_hit` in **07-build** |
+
+### Decisions (Phase A checkpoint + 04-tech-plan — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D16 | Phase A checkpoint | **Continue to Phase B** / start 04-tech-plan |
+| S020-D17 | Tech plan TP1–TP7 | **Approve all** — Phase 22 M94–M98; ADR-042; reuse query embed; CE ephemeral T4 + mock CI; F43→F44→F45; no new ChatRAG deps; skip topology rewrite |
+
+### Phase A / B status
+
+Phase 0 **approved**. 01 locked (D9–D14). 02 **completed** (D15). Gate A→B **passed** (D16).  
+04-tech-plan artifacts drafted (D17). Next: **Gate B→C** → 07-build.

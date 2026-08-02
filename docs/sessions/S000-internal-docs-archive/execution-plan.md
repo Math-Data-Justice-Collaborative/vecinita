@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; **S019 Phase 21 delta 2026-08-01**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; **S020 Phase 22 delta 2026-08-02**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**041**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**042**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 21: EV-016 — Retrieval quality H7+P1 (F42 / #165) |
-| **Active milestone** | M91–M93 code complete — handoff → **08-verify-build** |
-| **Active task** | Phase 21 tasks done; next **08-verify-build** (gate C→D after 08) |
-| **Tasks completed** | Phase 20 historical (M86–M90); Phase 21: M91–M93 (T91.1–T93.3) |
-| **Last updated** | 2026-08-01 |
-| **Evolve cycle** | EV-016 (F42) — Standard; skip 03/05/06; **07-build** Phase 21 complete |
-| **Git branch** | `evolve/EV-016-retrieval-quality` |
-| **Active session** | S019-retrieval-quality — 07-build M91–M93 done; ISS-008 deploy = ship prereq |
-| **Scope addition** | 2026-08-01 — F42 H7+P1 on E0; ADR-041; ISS-008 deploy = ship prereq (S019-D37–D45). |
+| **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
+| **Active milestone** | M94 — F43 `packages/rag` cache cascade |
+| **Active task** | T94.1 — unit: exact answer cache hit (in_progress) |
+| **Tasks completed** | Phase 21: M91–M93 (T91.1–T93.3); Phase 22: none yet |
+| **Last updated** | 2026-08-02 |
+| **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
+| **Git branch** | `evolve/EV-017-retrieval-batch-b` |
+| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T94.1 |
+| **Scope addition** | 2026-08-02 — F43 H1 cache + F44 soft L1 + F45 CE spike/gate; ADR-042; S020-D15–D18. |
 
 ## Template
 
@@ -1890,6 +1890,87 @@ unit tests TC-170–172.
 
 ---
 
+## Phase 22: EV-017 — Retrieval Batch B (F43–F45)
+
+> **Session:** S020 · **Cycle:** EV-017 · **Branch:** `evolve/EV-017-retrieval-batch-b`  
+> **ADR:** ADR-042 (F43 cache) · **Issues:** #83, #161 (CE), #162 (soft)  
+> **Decisions:** RD-197–208, S020-D4–D17, TP1–TP7, Gate A→B M1–M4  
+> **Out of scope:** LangGraph / ADR-006 amend; Modal volume durable cache; identity-keyed cache;
+> default-on CE or soft language; UI/Playwright (API e2e only); ChatRAG playground URL
+
+#### M94: F43 — `packages/rag` H1 cascade
+
+**Goal:** In-process exact → semantic → retrieve cascade helpers (ADR-042); unit tests TC-176–178.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T94.1 | Test: unit — exact answer hit skips generate (TC-176) — red | Test | pending | AC-BB1, TC-176, ADR-042 | — | — | S020 | F43 |
+| T94.2 | Test: unit — semantic threshold 0.92 miss vs hit (TC-177) — red | Test | pending | AC-BB2, TC-177, S020-D15 | — | — | S020 | F43 |
+| T94.3 | Test: unit — TTL / max_entries / corpus bust (TC-178) — red | Test | pending | AC-BB3, TC-178, RD-200 | — | — | S020 | F43 |
+| T94.4 | Code: normalize + content-hash keys + LRU store + cascade lookup/store | Code | pending | ADR-042, config-spec | T94.1–T94.3 | — | S020 | F43 |
+| T94.5 | Docs: export cache helpers from `packages/rag`; module docstrings | Docs | pending | feature-list F43 | T94.4 | — | S020 | F43 |
+
+#### M95: F43 — ChatRAG wire + OpenAPI + F36 harness
+
+**Goal:** Config knobs; ask/stream cascade; `cache_hit` in OpenAPI + responses; harness cost/hit cells.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T95.1 | Test: unit — ChatRAG settings parse `VECINITA_RAG_CACHE*` validation — red | Test | pending | config-spec F43 | T94.4 | — | S020 | F43 |
+| T95.2 | Test: API e2e — ask exposes `cache_hit` exact path (TC-179) — red | Test | pending | UJ-057, TC-179, AC-BB4 | T94.4 | — | S020 | F43 |
+| T95.3 | Code: ChatRAG ask/stream wire cascade; stream `done` includes `cache_hit` | Code | pending | spec.md F43, api-contract | T95.1, T95.2 | — | S020 | F43 |
+| T95.4 | Config: `openapi/chat-rag.yaml` + contract check for `cache_hit` (M4) | Config | pending | ADR-011, S020-D15 | T95.3 | — | S020 | F43 |
+| T95.5 | Code: F36 / harness warm/cold cost + hit-rate cells (quality ≥ H0) | Code | pending | AC-BB2, RD-199 | T95.3 | — | S020 | F43 |
+
+#### M96: F44 — Soft language L1 + empty-hit fixture
+
+**Goal:** Config-gated L1 (default off); empty-hit fixture; TC-180–181.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T96.1 | Test: unit — L1 fires only on empty same-lang first pass (TC-180) — red | Test | pending | AC-BB5, TC-180, #162 | T94.4 | — | S020 | F44 |
+| T96.2 | Test: unit/e2e — flag default off keeps L0-strict (TC-181) — red | Test | pending | AC-BB6, TC-181, UJ-058 | — | — | S020 | F44 |
+| T96.3 | Code: `packages/rag` soft-language retrieve helper + ChatRAG flag wire | Code | pending | spec.md F44, config-spec | T96.1, T96.2 | — | S020 | F44 |
+| T96.4 | Test: empty-hit fixture + `tests/e2e/test_uj058_soft_language.py` green | Test | pending | UJ-058, e2e-coverage | T96.3 | — | S020 | F44 |
+
+#### M97: F45 — CE Modal T4 spike + mockable client
+
+**Goal:** Ephemeral Modal T4 spike for `bge-reranker-v2-m3`; mockable CE client; flag default off.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T97.1 | Test: unit — CE merge keeps ≤ top_k (TC-182) with mock CE — red | Test | pending | AC-BB7, TC-182, UJ-059 | T94.4 | — | S020 | F45 |
+| T97.2 | Test: unit/e2e — `VECINITA_RAG_RERANK_CE` default off (TC-183) — red | Test | pending | AC-BB8, TC-183 | — | — | S020 | F45 |
+| T97.3 | Code: mockable CE client in `packages/rag` + ChatRAG flag-gated hook | Code | pending | feature-list F45, M3 | T97.1, T97.2 | — | S020 | F45 |
+| T97.4 | Config: ephemeral Modal T4 CE spike app/script (S019 pattern; no playground URL) | Config | pending | RD-204, S020-D11/D15 | T97.3 | — | S020 | F45 |
+| T97.5 | Docs: spike runbook + metrics capture path for ship gate | Docs | pending | TC-184, UJ-060 | T97.4 | — | S020 | F45 |
+
+#### M98: E2E + ship-gate docs + Phase 22 close
+
+**Goal:** UJ-057–060 e2e green at T2; CE ship-gate doc (AC-BB9); phase checklist.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T98.1 | Test: finish/green `tests/e2e/test_uj057_answer_cache.py` (TC-176–179) | Test | pending | UJ-057, e2e-coverage | T95.3, T95.4 | — | S020 | F43 |
+| T98.2 | Test: CE path e2e with mock (UJ-059) when flag on | Test | pending | UJ-059, TC-182–183 | T97.3 | — | S020 | F45 |
+| T98.3 | Docs: CE ship-gate report template (relevancy ≥0.28 / faith ≥0.91) — Path A | Docs | pending | AC-BB9, TC-184, RD-205/206 | T97.5 | — | S020 | F45 |
+| T98.4 | Docs: Phase 22 gate checklist + ADR-042 cross-links; execution-plan Current State | Docs | pending | Phase 22 gate | T96.4, T98.1–T98.3 | — | S020 | F43–F45 |
+
+#### Phase 22 Gate Check
+
+- [ ] All M94–M98 tasks completed (T94.1–T98.4)
+- [ ] TC-176–TC-183 green at T2 (TC-184 / CE ship metrics at 12/13 staging)
+- [ ] AC-BB1–AC-BB8, AC-BB10 at T2 (AC-BB9 staging evidence at deploy)
+- [ ] `cache_hit` in OpenAPI + ask/stream; OpenAPI check script green
+- [ ] Soft language + CE flags default **off**
+- [ ] CE spike uses ephemeral Modal T4; ChatRAG never playground URL
+- [ ] No LangGraph; no durable volume cache; content-hash keys only (ADR-042 / ADR-004)
+- [ ] ruff / basedpyright clean; pytest e2e UJ-057–059 green
+
+**Ship-gate doc (CE):** `docs/sessions/S020-retrieval-batch-b/reports/ce-ship-gate.md` (create in T98.3)
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -2585,6 +2666,29 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T90.3 | M90 | 20 | Test | completed | T89.6 | 2026-07-30 | S017 | F41 | — |
 | T90.4 | M90 | 20 | Test | completed | T89.3 | 2026-07-30 | S017 | F41 | — |
 | T90.5 | M90 | 20 | Docs | completed | T90.1–T90.4 | 2026-07-30 | S017 | F41 | — |
+| T94.1 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
+| T94.2 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
+| T94.3 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
+| T94.4 | M94 | 22 | Code | pending | T94.1–T94.3 | — | S020 | F43 | — |
+| T94.5 | M94 | 22 | Docs | pending | T94.4 | — | S020 | F43 | — |
+| T95.1 | M95 | 22 | Test | pending | T94.4 | — | S020 | F43 | — |
+| T95.2 | M95 | 22 | Test | pending | T94.4 | — | S020 | F43 | — |
+| T95.3 | M95 | 22 | Code | pending | T95.1, T95.2 | — | S020 | F43 | — |
+| T95.4 | M95 | 22 | Config | pending | T95.3 | — | S020 | F43 | — |
+| T95.5 | M95 | 22 | Code | pending | T95.3 | — | S020 | F43 | — |
+| T96.1 | M96 | 22 | Test | pending | T94.4 | — | S020 | F44 | — |
+| T96.2 | M96 | 22 | Test | pending | — | — | S020 | F44 | — |
+| T96.3 | M96 | 22 | Code | pending | T96.1, T96.2 | — | S020 | F44 | — |
+| T96.4 | M96 | 22 | Test | pending | T96.3 | — | S020 | F44 | — |
+| T97.1 | M97 | 22 | Test | pending | T94.4 | — | S020 | F45 | — |
+| T97.2 | M97 | 22 | Test | pending | — | — | S020 | F45 | — |
+| T97.3 | M97 | 22 | Code | pending | T97.1, T97.2 | — | S020 | F45 | — |
+| T97.4 | M97 | 22 | Config | pending | T97.3 | — | S020 | F45 | — |
+| T97.5 | M97 | 22 | Docs | pending | T97.4 | — | S020 | F45 | — |
+| T98.1 | M98 | 22 | Test | pending | T95.3, T95.4 | — | S020 | F43 | — |
+| T98.2 | M98 | 22 | Test | pending | T97.3 | — | S020 | F45 | — |
+| T98.3 | M98 | 22 | Docs | pending | T97.5 | — | S020 | F45 | — |
+| T98.4 | M98 | 22 | Docs | pending | T96.4, T98.1–T98.3 | — | S020 | F43–F45 | — |
 
 ## Phase Gate Log
 
@@ -2678,3 +2782,9 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-011 download — HF Hub into `llm-models`; not `ollama pull` (TP-S010-04, ADR-037 §R1)
 - [x] EV-011 eval routing — always `VECINITA_MODAL_LLM_URL` + `model_id` (TP-S010-08, RD-157)
 - [x] EV-011 de-deploy — `vecinita-ollama` removed from deploy; operator stop post-smoke (TP-S010-03, TP-S010-13)
+- [x] EV-017 Phase 22 — M94→M98 F43→F44→F45 (TP1)
+- [x] EV-017 ADR-042 in-process H1 cascade (TP2)
+- [x] EV-017 semantic cache reuses query embed (TP3)
+- [x] EV-017 CE spike ephemeral Modal T4; mock CE in CI (TP4)
+- [x] EV-017 no new ChatRAG runtime deps; CE via Modal HTTP (TP6)
+- [x] EV-017 skip deploy-topology / data-mgmt rewrite; Path A + CE runbook (TP7)

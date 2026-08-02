@@ -619,6 +619,24 @@ S020 / Retrieval Batch B — F43 answer cache, F44 soft language (#162), F45 CE 
 Artifacts: feature-list F43–F45; UJ-057–060; TC-176–184; AC-BB1–10;
 `docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md`.
 
+### EV-017 tech-plan decisions (2026-08-02) — TP1–TP7
+
+S020 / Phase 22 (M94–M98). S020-D17.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| TP1 | Milestones | M94 rag cache → M95 ChatRAG/OpenAPI → M96 soft → M97 CE spike → M98 e2e/docs |
+| TP2 | ADR | **ADR-042** in-process H1 cascade |
+| TP3 | Semantic embed | Reuse existing query embed (Modal) |
+| TP4 | CE packaging | Ephemeral Modal T4; mock CE in CI; no playground URL |
+| TP5 | Build order | F43 → F44 → F45 (M96/M97 after M94) |
+| TP6 | Dependencies | No new ChatRAG runtime deps; CE via Modal HTTP |
+| TP7 | Deploy docs | Skip topology rewrite; Path A + CE ship-gate runbook |
+
+Artifacts: `execution-plan.md` Phase 22; ADR-042;
+`docs/sessions/S020-retrieval-batch-b/reports/tech-plan-delta.md`;
+`docs/sessions/S020-retrieval-batch-b/roadmap.md`.
+
 ### EV-015 tech-plan decisions (2026-07-30) — TP-S017-01–09
 
 01-requirements locked RD-188–196. 04-tech-plan locks schema, promote, ops, and Phase 20:
