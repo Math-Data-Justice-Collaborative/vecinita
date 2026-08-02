@@ -5,8 +5,8 @@
 | 00-context | yes | completed | scoped | Session open 2026-08-02; S022-D1–D7 |
 | 16-evolve | orchestrator | in_progress | — | EV-019; F47–F49 |
 | 01-requirements | yes | completed | delta | Report: [reports/01-requirements-ingest-resilience.md](./reports/01-requirements-ingest-resilience.md) |
-| 02-verify-plan | yes | pending | delta | Consistency + changed-section audit |
-| 04-tech-plan | yes | pending | delta | Tasks / milestone(s) on shared write/embed path |
+| 02-verify-plan | yes | completed | delta | Gate A→B PASS (S022-D20); [02 audit](./reports/02-verify-plan-audit.md) |
+| 04-tech-plan | yes | in_progress | delta | Tasks / milestone(s) on shared write/embed path |
 | 07-build | yes | pending | — | Investigate→ship per Fn |
 | 08-verify-build | yes | pending | — | Milestone gate |
 | 09-qa | yes | pending | — | Full QA |

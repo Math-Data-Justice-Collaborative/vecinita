@@ -1,7 +1,7 @@
 # 02-verify-plan audit — EV-019 / F47–F49
 
 > **Session:** S022 · **Cycle:** EV-019 · **Date:** 2026-08-02  
-> **Mode:** evolve delta · **Status:** in_progress (awaiting medium verdicts / Gate A→B)
+> **Mode:** evolve delta · **Status:** completed — Gate A→B PASS
 
 ## Inventory (delta)
 
@@ -52,22 +52,22 @@ From S022-D8–D19 / RD-219–228 / Phase 0C `1,1,1,2,2,1`:
 
 **Count:** 12 high-confidence auto-approved.
 
-### Medium — pending user review
+### Medium — user-approved (option 1, all recommended)
 
-| ID | Statement | Source |
-|----|-----------|--------|
-| M1 | Embed defaults: `VECINITA_EMBED_BATCH_SIZE=32`, `MAX_RETRIES=3`, `RETRY_BACKOFF_S=0.5` | Inferred RD-226 |
-| M2 | Job metrics field names (`skipped_unchanged`, etc.) finalized in 04/OpenAPI — not Gate A blockers | api-contract SHOULD |
-| M3 | OpenAPI + `JobOptions` lack `chunk_overlap_tokens`; `force` description still rebuild-centric — update in 04/07 | ADR-011 lag |
-| M4 | AC-RB4 = rebuild force wiring; ingest skip = AC-IR1/IR2 (prose clarified) | Contradiction resolved |
-| M5 | Admin FE force/overlap knobs optional this cycle; Playwright only if UI ships | UJ-062 note |
-| M6 | Spec data-flow duplicate stage 7 → renumber Browse+ (applied) | Doc bug fix |
+| ID | Statement | Verdict |
+|----|-----------|---------|
+| M1 | Embed defaults: `VECINITA_EMBED_BATCH_SIZE=32`, `MAX_RETRIES=3`, `RETRY_BACKOFF_S=0.5` | **approved** |
+| M2 | Job metrics field names (`skipped_unchanged`, etc.) finalized in 04/OpenAPI — not Gate A blockers | **approved** |
+| M3 | OpenAPI + `JobOptions` lack `chunk_overlap_tokens`; `force` description still rebuild-centric — update in 04/07 | **approved** |
+| M4 | AC-RB4 = rebuild force wiring; ingest skip = AC-IR1/IR2 (prose clarified) | **approved** |
+| M5 | Admin FE force/overlap knobs optional this cycle; Playwright only if UI ships | **approved** |
+| M6 | Spec data-flow duplicate stage 7 → renumber Browse+ (applied) | **approved** |
 
 ### Low / open contradictions
 
 None remaining after M4/M6 surgical fixes.
 
-## Source updates (pre-verdict)
+## Source updates
 
 | File | Change |
 |------|--------|
@@ -76,4 +76,5 @@ None remaining after M4/M6 surgical fixes.
 
 ## Gate A→B
 
-**Pending** medium approvals (recommend approve all M1–M6) → then Phase B `04-tech-plan`.
+**PASS** — Fn in feature-list; delta specs; 02 complete; 03 skipped per EV-019 routing.  
+Next: Phase B `04-tech-plan` (delta).

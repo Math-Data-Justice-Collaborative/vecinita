@@ -498,7 +498,10 @@ EV-019 **in_progress**. Next: **01-requirements** (delta; load 01-requirements-s
 | S022-D17 | Tests / journeys | Extend UJ-002; add **UJ-062**; TC-187–192; AC-IR1–IR7 |
 | S022-D18 | RD range | RD-219–RD-228 recorded in `docs/decisions.md` |
 | S022-D19 | 01 complete | Spec deltas + session report → **02-verify-plan** |
+| S022-D20 | Gate A→B / M1–M6 | **Approve all** — embed defaults; metrics→04; OpenAPI gaps→04/07; AC-RB4 rebuild vs IR; FE optional; data-flow renumber |
 
 ### Phase A status
 
-01-requirements **completed** 2026-08-02. Next: **02-verify-plan** (delta).
+01-requirements **completed** 2026-08-02.  
+02-verify-plan **completed** 2026-08-02 — Gate A→B **PASS** (S022-D20).  
+Next: **04-tech-plan** (delta; 03 skipped).

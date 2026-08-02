@@ -5,13 +5,20 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-08-02 (EV-018 F46 + F45 re-gate)
+> **Last updated**: 2026-08-02 (EV-019 F47–F49 Gate A→B)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-08-02 | EV019-H1–H12 | auto-approved | F47–F49 locked RD-219–228 / S022-D8–D19 |
+| 2026-08-02 | EV019-M1 | approved | Embed defaults batch 32 / retries 3 / backoff 0.5s (S022-D20) |
+| 2026-08-02 | EV019-M2 | approved | Job metric field names deferred to 04/OpenAPI (S022-D20) |
+| 2026-08-02 | EV019-M3 | approved | OpenAPI/`JobOptions` `chunk_overlap_tokens` + ingest `force` in 04/07 (S022-D20) |
+| 2026-08-02 | EV019-M4 | approved | AC-RB4 = rebuild force; ingest skip = AC-IR1/IR2 (S022-D20) |
+| 2026-08-02 | EV019-M5 | approved | Admin FE knobs optional; Playwright only if UI ships (S022-D20) |
+| 2026-08-02 | EV019-M6 | approved | Spec data-flow renumber applied (S022-D20) |
 | 2026-08-02 | EV018-H1–H14 | auto-approved | F46/F45 re-gate locked RD-209–218 / S021-D8–D16 |
 | 2026-08-02 | EV018-M1 | approved | AC-FO1 / TC-185 = representative non-empty pools (S021-D17) |
 | 2026-08-02 | EV018-M2 | approved (fix) | F46 feature-list → `min_retrieval_score` (S021-D17) |
