@@ -282,3 +282,12 @@ Plan: session `reports/spike-hybrid-plan.md` · runners `spike_hybrid_sweep.py`,
 |----|-------|--------|
 | S019-D43 | Tech plan shape | Phase 21 **M91–M93**; skip dep inventory / data-mgmt / new deploy topology |
 | S019-D44 | ADR-041 | Heuristic H7 + P1 packing; no LangGraph / ADR-006 amend; E0 pin unchanged |
+
+### Phase D — 12-verify-deploy (2026-08-01)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D48 | 12 failure mitigations | **Approve all** (option 1) — build/CI, Modal URL verify, ISS-008-before-Hy1, H7 kill switch, H4–H5, hold on Hy1 miss |
+| S019-D49 | 12 rollback plan | **Approve** (option 1) — `VECINITA_RAG_MULTI_QUERY=false` and/or redeploy prior DO SHA (`a6c39e5`); no embed rollback |
+
+**12 complete:** checklist **ready** → `docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md`. Next: **13-deploy-smoke** (ISS-008 + Hy1 AC-RQ6).

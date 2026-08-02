@@ -2186,158 +2186,212 @@ project:
       feature_inspection_waiver_note: deferred_to_12_13 recorded (approve_on_t0_and_openapi_for_11)
     12-verify-deploy:
       status: completed
-      started_at: '2026-07-30'
-      partial_rerun_at: '2026-07-30'
-      partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B; prior historical 12 runs nested under legacy stages.12 s001/s002
-      session_id: S017-corpus-reembed-migration
-      branch: evolve/EV-015-corpus-reembed-migration
-      evolve_cycle_id: EV-015
+      started_at: '2026-08-01'
+      completed_at: '2026-08-01'
+      partial_rerun_at: '2026-08-01'
+      partial_rerun_note: S019/EV-016 12-verify-deploy STARTED — resume after 11-verify-impl approved; F42 H7+P1; deferred AC-RQ6 / ISS-008 / staging inspect in scope
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
       mode: evolve
       delta_only: true
-      feature: F41
+      feature: F42
       feature_ids:
-      - F41
-      report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
-      next_action: 13 COMPLETE — PR to main next
-      note: S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY @ 180ad14; Phase D PASSED; Path A staging executed in 13; left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit)
-      substeps: &id020
-        current: phase5_summary
+      - F42
+      commits_head: 5530b46
+      current_action: completed
+      next_action: run 13-deploy-smoke
+      report: docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
+      result: ready
+      deploy_ready: true
+      substeps:
         phase1_agents: completed
-        phase2_config_drift: completed
         phase2_failure_modes: completed
         phase3_rollback: completed
         phase4_checklist: completed
         phase5_summary: completed
-      phase2_config_drift:
-        status: decided
-        decided_at: '2026-07-30'
-        decisions:
-        - id: TP-S017-12-A
-          topic: VECINITA_REBUILD_SHADOW_ENABLED
-          option: 1
-          choice: accept_always_on_shadow
-          note: Accept always-on shadow; drop/clarify env as planned/unused; dry_run always available
-          status: recorded
-        - id: TP-S017-12-B
-          topic: openapi_internal_rebuild_create_patch_shadow
-          option: 1
-          choice: accept_openapi_gap_this_cycle
-          note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on
-          status: recorded
-        checklist_note: deploy-checklist.md will clarify shadow env and list OpenAPI advisory
-      phase1_results:
-        agent1_configuration:
-          result: FAIL
-          reason: completeness
-          accepted_as: advisory_this_cycle
-          notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED unwired — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id}, POST shadow/batch — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on); Playwright path name drift only'
-        agent2_secrets:
-          result: PASS
-          notes: no new secret names; modal secret list SKIPPED; stale URL risk elevated after DM redeploy
-        agent3_data_volumes:
-          result: PASS
-          notes: Alembic 20260730_0010 ready; DO Postgres; staging apply pending ops
-        agent4_resources:
-          result: PASS
-          notes: existing DM CPU worker timeout=600; no new GPU/min_containers
-        agent5_ci_cd:
-          result: PASS
-          notes: hybrid ci→preflight→modal→DO; template GPU cache N/A
-        agent6_connectivity:
-          result: PASS
-          notes: H0c pytest exit 0; promote CORS test present (DB-gated skip local OK); verify_connectivity.sh present
-        agent7_modal_do_parity:
-          result: PASS
-          notes: infra declares Modal URLs; 13 plan sync-all-secrets→redeploy→sync_github→H4/H5
-      completed_at: '2026-07-30'
-      result: ready
-      deploy_ready: true
-      head_ref_at_checklist_write: 180ad14
-      checklist_commit: 180ad14
-      untracked_left:
-      - scripts/deploy/_tmp_proxy_key_check.py
-      untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-      phase2_failure_modes: &id021
+      phase2_failure_modes:
         status: approved
-        approved_at: '2026-07-30'
+        approved_at: '2026-08-01'
         user_choice: option_1
-        mitigations: 1-6 approved
-        note: Failure mitigations 1–6 approved (all option 1)
-      phase3_rollback: &id022
+        note: Failure mitigations approved (option 1)
+      phase3_rollback:
         status: approved
-        approved_at: '2026-07-30'
+        approved_at: '2026-08-01'
         user_choice: option_1
         note: Rollback plan approved (option 1)
-      phase4_checklist: &id023
+      user_approvals:
+        failure_mitigations: option_1_approved
+        rollback_plan: option_1_approved
+      deferred_in_scope:
+      - AC-RQ6
+      - ISS-008_deploy_verify
+      - live_staging_inspection
+      note: S019/EV-016 12-verify-deploy COMPLETE — checklist ready; failure mitigations + rollback approved (option 1 each); handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13
+      s017_baseline:
         status: completed
+        started_at: '2026-07-30'
+        partial_rerun_at: '2026-07-30'
+        partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B; prior historical 12 runs nested under legacy stages.12 s001/s002
+        session_id: S017-corpus-reembed-migration
+        branch: evolve/EV-015-corpus-reembed-migration
+        evolve_cycle_id: EV-015
+        mode: evolve
+        delta_only: true
+        feature: F41
+        feature_ids:
+        - F41
+        report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
+        next_action: 13 COMPLETE — PR to main next
+        note: S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY @ 180ad14; Phase D PASSED; Path A staging executed in 13; left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit)
+        substeps: &id020
+          current: phase5_summary
+          phase1_agents: completed
+          phase2_config_drift: completed
+          phase2_failure_modes: completed
+          phase3_rollback: completed
+          phase4_checklist: completed
+          phase5_summary: completed
+        phase2_config_drift:
+          status: decided
+          decided_at: '2026-07-30'
+          decisions:
+          - id: TP-S017-12-A
+            topic: VECINITA_REBUILD_SHADOW_ENABLED
+            option: 1
+            choice: accept_always_on_shadow
+            note: Accept always-on shadow; drop/clarify env as planned/unused; dry_run always available
+            status: recorded
+          - id: TP-S017-12-B
+            topic: openapi_internal_rebuild_create_patch_shadow
+            option: 1
+            choice: accept_openapi_gap_this_cycle
+            note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on
+            status: recorded
+          checklist_note: deploy-checklist.md will clarify shadow env and list OpenAPI advisory
+        phase1_results:
+          agent1_configuration:
+            result: FAIL
+            reason: completeness
+            accepted_as: advisory_this_cycle
+            notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED unwired — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id}, POST shadow/batch — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on); Playwright path name drift only'
+          agent2_secrets:
+            result: PASS
+            notes: no new secret names; modal secret list SKIPPED; stale URL risk elevated after DM redeploy
+          agent3_data_volumes:
+            result: PASS
+            notes: Alembic 20260730_0010 ready; DO Postgres; staging apply pending ops
+          agent4_resources:
+            result: PASS
+            notes: existing DM CPU worker timeout=600; no new GPU/min_containers
+          agent5_ci_cd:
+            result: PASS
+            notes: hybrid ci→preflight→modal→DO; template GPU cache N/A
+          agent6_connectivity:
+            result: PASS
+            notes: H0c pytest exit 0; promote CORS test present (DB-gated skip local OK); verify_connectivity.sh present
+          agent7_modal_do_parity:
+            result: PASS
+            notes: infra declares Modal URLs; 13 plan sync-all-secrets→redeploy→sync_github→H4/H5
         completed_at: '2026-07-30'
         result: ready
-        path: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
-        head_ref_at_write: 180ad14
-        note: 'deploy-checklist READY; committed @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41)'
-      user_approvals: &id024
-        failure_mitigations_1_to_6: option_1_approved
-        rollback_plan: option_1_approved
-        TP-S017-12-A: option_1_accept_always_on_shadow
-        TP-S017-12-B: option_1_accept_openapi_gap_this_cycle
+        deploy_ready: true
+        head_ref_at_checklist_write: 180ad14
+        checklist_commit: 180ad14
+        untracked_left:
+        - scripts/deploy/_tmp_proxy_key_check.py
+        untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
+        phase2_failure_modes: &id021
+          status: approved
+          approved_at: '2026-07-30'
+          user_choice: option_1
+          mitigations: 1-6 approved
+          note: Failure mitigations 1–6 approved (all option 1)
+        phase3_rollback: &id022
+          status: approved
+          approved_at: '2026-07-30'
+          user_choice: option_1
+          note: Rollback plan approved (option 1)
+        phase4_checklist: &id023
+          status: completed
+          completed_at: '2026-07-30'
+          result: ready
+          path: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
+          head_ref_at_write: 180ad14
+          note: 'deploy-checklist READY; committed @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41)'
+        user_approvals: &id024
+          failure_mitigations_1_to_6: option_1_approved
+          rollback_plan: option_1_approved
+          TP-S017-12-A: option_1_accept_always_on_shadow
+          TP-S017-12-B: option_1_accept_openapi_gap_this_cycle
     13-deploy-smoke:
-      status: completed
-      started_at: '2026-07-30'
-      partial_rerun_at: '2026-07-30'
-      partial_rerun_note: EV-015/S017 Path A staging COMPLETE — deploy checkpoint APPROVED; preparing PR; prior S016/EV-014 COMPLETE nested under s016_baseline
-      session_id: S017-corpus-reembed-migration
-      branch: evolve/EV-015-corpus-reembed-migration
-      evolve_cycle_id: EV-015
+      status: in_progress
+      started_at: '2026-08-01'
+      partial_rerun_at: '2026-08-01'
+      partial_rerun_note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
       mode: evolve
       delta_only: true
-      feature: F41
+      feature: F42
       feature_ids:
-      - F41
+      - F42
+      commits_head: 5530b46
+      current_action: phase15_t1_predeploy
       deploy_path: A
-      deploy_approved: true
-      deploy_approved_at: '2026-07-30'
-      deploy_approval: phase_d_path_a_staging_sequence
-      path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
-      path_a_staging_result: PASS
-      head_sha: bbe9544
-      commit_deployed: 180ad14
-      alembic_revision: '20260730_0010'
-      alembic_from: '20260728_0009'
-      report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
-      untracked_left:
-      - scripts/deploy/_tmp_proxy_key_check.py
-      untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-      next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
-      overall_result: PASS
-      path_a_progress:
-        alembic: pass
+      note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+      s017_baseline:
+        mode: evolve
+        delta_only: true
+        feature: F41
+        feature_ids:
+        - F41
+        deploy_path: A
+        deploy_approved: true
+        deploy_approved_at: '2026-07-30'
+        deploy_approval: phase_d_path_a_staging_sequence
+        path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
+        path_a_staging_result: PASS
+        head_sha: bbe9544
+        commit_deployed: 180ad14
         alembic_revision: '20260730_0010'
-        do_pins:
-          write_api: ACTIVE_evolve
-          admin_frontend: ACTIVE_evolve
-        modal_dm_redeploy: pass
-        secret_sync: pass
-        do_verify: pass
-        h1_h5_pre_promote: pass
-        h1_h5_post_promote: pass
-        backfill_scoped: pass
-        live_equivalence: pass
-        shadow_dry_run: pass
-        rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
-        f36_eval:
-          status: completed
-          run_id: 01ca4019
-          note: operator-local execute_eval_run; top_k=2
-        promote:
-          chunks_promoted: 60
-          documents_promoted: 2
-      advisories:
-      - Modal eval job_type falls through to ingest
-      - F36 used top_k=2 + local execute_eval_run
-      - full backfill still pending
-      - DO pins on evolve until merge
-      - do not commit scripts/deploy/_tmp_proxy_key_check.py
-      note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
+        alembic_from: '20260728_0009'
+        report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
+        untracked_left:
+        - scripts/deploy/_tmp_proxy_key_check.py
+        untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
+        next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
+        overall_result: PASS
+        path_a_progress:
+          alembic: pass
+          alembic_revision: '20260730_0010'
+          do_pins:
+            write_api: ACTIVE_evolve
+            admin_frontend: ACTIVE_evolve
+          modal_dm_redeploy: pass
+          secret_sync: pass
+          do_verify: pass
+          h1_h5_pre_promote: pass
+          h1_h5_post_promote: pass
+          backfill_scoped: pass
+          live_equivalence: pass
+          shadow_dry_run: pass
+          rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
+          f36_eval:
+            status: completed
+            run_id: 01ca4019
+            note: operator-local execute_eval_run; top_k=2
+          promote:
+            chunks_promoted: 60
+            documents_promoted: 2
+        advisories:
+        - Modal eval job_type falls through to ingest
+        - F36 used top_k=2 + local execute_eval_run
+        - full backfill still pending
+        - DO pins on evolve until merge
+        - do not commit scripts/deploy/_tmp_proxy_key_check.py
+        note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
       s016_baseline:
         status: completed
         started_at: '2026-07-29'
@@ -2864,7 +2918,7 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-016
   artifacts_dir: docs/sessions/S019-retrieval-quality/
-  current_stage: 12-verify-deploy
+  current_stage: 13-deploy-smoke
   started_at: '2026-07-31'
   routing_plan_status: approved
   routing_preset: standard
@@ -3019,7 +3073,7 @@ active_session:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: 3e780b6
+  commits_head: 5530b46
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -3027,9 +3081,9 @@ active_session:
   s019_d47_decision_recorded: true
   s019_d47_note: Fix in place QA-S019-B01/B02/B03 COMPLETE; 09 pass_with_advisories; ready for 11-verify-impl
   s019_d47_choice: option_1_fix_in_place_b01_b03
-  current_action: ready_for_12_verify_deploy
+  current_action: running_13_deploy_smoke
   preparing_11: false
-  next_action: run 12-verify-deploy
+  next_action: run 13-deploy-smoke
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
@@ -3058,6 +3112,15 @@ active_session:
   s019_d47_remediation_completed_at: '2026-08-02T01:13:21Z'
   checkpoints_phase_c: passed
   gates_c_to_d: passed
+  checkpoints_phase_d: passed
+  s019_d48_decision: S019-D48
+  s019_d48_decision_recorded: true
+  s019_d48_decision_recorded_in: docs/decisions/evolve-decisions.md
+  s019_d48_note: Phase 2 failure mitigations approved (option 1) — 12-verify-deploy Phase D checkpoint passed 2026-08-01
+  s019_d49_decision: S019-D49
+  s019_d49_decision_recorded: true
+  s019_d49_decision_recorded_in: docs/decisions/evolve-decisions.md
+  s019_d49_note: Phase 3 rollback plan approved (option 1) — 2026-08-01
   verify_08_result: PASS
   verify_08_report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
   verify_08_completed_at: '2026-08-01T14:17:17Z'
@@ -3080,7 +3143,7 @@ active_session:
   - tests/unit/modal/test_llm_engine_awq_kwargs.py
   feature_ids_note: 'F42 = H7+P1 (Hy1) on E0 per S019-D31/D37; E1 rejected; #159 open outside F42; F43 not allocated'
   phase0_notes: phase0_approved=true (S019-D37). E1 F36 done — do NOT ship E1; F41 rebuild 1fa1dec9-f5a0-4670-afa2-a71fe039d479 not promoted; artifact 20260801T130441Z_e1-shadow-f36.json. F42=H7+P1 on E0; handoff → 01-requirements.
-  note: 'S019/EV-016 — 2026-08-02T01:32:34Z: 11-verify-impl report committed @ 3e780b6 ([S019] docs: complete 11-verify-impl for F42); F42 Phase 3 signoff approved; UJ-055/UJ-056 confirmed; feature_inspection deferred_to_12_13; AC-RQ6/staging inspect deferred to 12/13; current_stage=12-verify-deploy; current_action=ready_for_12_verify_deploy; checkpoints.phase_d pending; gates.deploy pending; HEAD 3e780b6'
+  note: 'S019/EV-016 — 2026-08-01: 12-verify-deploy COMPLETE; deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; gates.deploy pending until 13; current_action=ready_for_13_deploy_smoke; HEAD 5530b46'
   blocking_note: ISS-008 deploy remains ship path prereq (not Phase A entry blocker); prod embed pin BAAI/bge-small-en-v1.5 unchanged; ADR-006 amend deferred
   a0_status: staging_complete
   a1_status: complete_no_retrieval_lift
@@ -3168,7 +3231,7 @@ active_session:
   - S019-D35 embed sweep complete — 20260801T020331Z_embed-sweep.json; E0/E1 hit@5=1.0; E2=0.87 reject; no offline F42 fold-in
   - 'S019-D37 phase0_approved — reject E1 for F42; F42=H7+P1 on E0; Hy1 E0 relevancy 0.28 EN 0.36 ES 0.14 retrieval 0.88 vs E1 shadow relevancy 0.11 EN 0.09 ES 0.14 retrieval 0.94; rebuild 1fa1dec9 not promoted; #159 open outside F42; ISS-008 deploy ship prereq (not Phase A entry blocker)'
   model_sweep_pattern_note: ALL models including Tiny, AWQ 27B, fp16 27B, FP8 35B MoE → relevancy 0.23 under R0+P1 — sweep closed S019-D21 lock 1.5b; skip M1+
-  next: start_12_verify_deploy
+  next: start_13_deploy_smoke
   skipped_stages_note: 03-plan-tooling, 05-verify-tech, 06-tech-tooling skipped per Standard; 15-service-health optional at close
   linked_issues:
   - 158
@@ -3225,6 +3288,9 @@ active_session:
   - docs/sessions/S019-retrieval-quality/reports/qa-report.md
   - docs/sessions/S019-retrieval-quality/reports/e2e-report.md
   - docs/sessions/S019-retrieval-quality/reports/verify-impl.md
+  - docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
+  - docs/deployment-integration.md
+  - docs/deploy-checklist.md
   routing_plan:
   - stage: 00-context
     required: true
@@ -3447,12 +3513,30 @@ active_session:
     next_action: run 12-verify-deploy
   - stage: 12-verify-deploy
     required: true
-    status: pending
+    status: completed
+    started_at: '2026-08-01'
+    completed_at: '2026-08-01'
     skip_rationale:
+    report: docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
+    current_action: completed
+    next_action: run 13-deploy-smoke
+    result: ready
+    deploy_ready: true
+    note: S019/EV-016 12-verify-deploy COMPLETE — checklist ready; failure mitigations + rollback approved (option 1 each); handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13
+    substeps:
+      phase1_agents: completed
+      phase2_failure_modes: completed
+      phase3_rollback: completed
+      phase4_checklist: completed
+      phase5_summary: completed
   - stage: 13-deploy-smoke
     required: true
-    status: pending
+    status: in_progress
+    started_at: '2026-08-01'
     skip_rationale:
+    current_action: phase15_t1_predeploy
+    next_action: phase15_t1_predeploy
+    note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
   - stage: 15-service-health
     required: false
     status: pending
@@ -8311,62 +8395,106 @@ stages:
     feature_inspection_waiver_note: deferred_to_12_13 recorded (approve_on_t0_and_openapi_for_11)
   12-verify-deploy:
     status: completed
-    started_at: '2026-07-30'
-    partial_rerun_at: '2026-07-30'
-    partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B; prior historical 12 runs nested under legacy stages.12 s001/s002
-    session_id: S017-corpus-reembed-migration
-    branch: evolve/EV-015-corpus-reembed-migration
-    evolve_cycle_id: EV-015
+    started_at: '2026-08-01'
+    completed_at: '2026-08-01'
+    partial_rerun_at: '2026-08-01'
+    partial_rerun_note: S019/EV-016 12-verify-deploy STARTED — resume after 11-verify-impl approved; F42 H7+P1; deferred AC-RQ6 / ISS-008 / staging inspect in scope
+    session_id: S019-retrieval-quality
+    branch: evolve/EV-016-retrieval-quality
+    evolve_cycle_id: EV-016
     mode: evolve
     delta_only: true
-    feature: F41
+    feature: F42
     feature_ids:
-    - F41
-    report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
-    next_action: 13 COMPLETE — PR to main next
-    note: 'S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY; all failure mitigations + rollback approved; TP-S017-12-A/B; next → Phase D checkpoint then 13-deploy-smoke (staging: alembic → services → secret sync → H4/H5 → live equivalence + shadow→F36→promote)'
-    substeps: *id020
-    phase2_config_drift:
-      status: decided
-      decided_at: '2026-07-30'
-      decisions:
-      - id: TP-S017-12-A
-        topic: VECINITA_REBUILD_SHADOW_ENABLED
-        option: 1
-        choice: accept_always_on_shadow
-        note: Accept always-on shadow; drop/clarify env as planned/unused; dry_run always available
-        status: recorded
-      - id: TP-S017-12-B
-        topic: openapi_internal_rebuild_create_patch_shadow
-        option: 1
-        choice: accept_openapi_gap_this_cycle
-        note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on
-        status: recorded
-      checklist_note: deploy-checklist.md will clarify shadow env and list OpenAPI advisory
-    phase1_results:
-      agent1_configuration:
-        result: FAIL
-        reason: completeness
-        accepted_as: advisory_this_cycle
-        notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED unwired — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id}, POST shadow/batch — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on); Playwright path name drift only'
-      agent2_secrets:
-        result: PASS
-        notes: no new secret names; modal secret list SKIPPED; stale URL risk elevated after DM redeploy
-      agent3_data_volumes:
-        result: PASS
-        notes: Alembic 20260730_0010 ready; DO Postgres; staging apply pending ops
-      agent4_resources:
-        result: PASS
-        notes: existing DM CPU worker timeout=600; no new GPU/min_containers
-      agent5_ci_cd:
-        result: PASS
-        notes: hybrid ci→preflight→modal→DO; template GPU cache N/A
-      agent6_connectivity:
-        result: PASS
-        notes: H0c pytest exit 0; promote CORS test present (DB-gated skip local OK); verify_connectivity.sh present
-      agent7_modal_do_parity:
-        result: PASS
-        notes: infra declares Modal URLs; 13 plan sync-all-secrets→redeploy→sync_github→H4/H5
+    - F42
+    commits_head: 5530b46
+    current_action: completed
+    next_action: run 13-deploy-smoke
+    report: docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
+    result: ready
+    deploy_ready: true
+    substeps:
+      phase1_agents: completed
+      phase2_failure_modes: completed
+      phase3_rollback: completed
+      phase4_checklist: completed
+      phase5_summary: completed
+    phase2_failure_modes:
+      status: approved
+      approved_at: '2026-08-01'
+      user_choice: option_1
+      note: Failure mitigations approved (option 1)
+    phase3_rollback:
+      status: approved
+      approved_at: '2026-08-01'
+      user_choice: option_1
+      note: Rollback plan approved (option 1)
+    user_approvals:
+      failure_mitigations: option_1_approved
+      rollback_plan: option_1_approved
+    deferred_in_scope:
+    - AC-RQ6
+    - ISS-008_deploy_verify
+    - live_staging_inspection
+    note: S019/EV-016 12-verify-deploy COMPLETE — checklist ready; failure mitigations + rollback approved (option 1 each); handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13
+    s017_baseline:
+      status: completed
+      started_at: '2026-07-30'
+      partial_rerun_at: '2026-07-30'
+      partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B; prior historical 12 runs nested under legacy stages.12 s001/s002
+      session_id: S017-corpus-reembed-migration
+      branch: evolve/EV-015-corpus-reembed-migration
+      evolve_cycle_id: EV-015
+      mode: evolve
+      delta_only: true
+      feature: F41
+      feature_ids:
+      - F41
+      report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
+      next_action: 13 COMPLETE — PR to main next
+      note: 'S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY; all failure mitigations + rollback approved; TP-S017-12-A/B; next → Phase D checkpoint then 13-deploy-smoke (staging: alembic → services → secret sync → H4/H5 → live equivalence + shadow→F36→promote)'
+      substeps: *id020
+      phase2_config_drift:
+        status: decided
+        decided_at: '2026-07-30'
+        decisions:
+        - id: TP-S017-12-A
+          topic: VECINITA_REBUILD_SHADOW_ENABLED
+          option: 1
+          choice: accept_always_on_shadow
+          note: Accept always-on shadow; drop/clarify env as planned/unused; dry_run always available
+          status: recorded
+        - id: TP-S017-12-B
+          topic: openapi_internal_rebuild_create_patch_shadow
+          option: 1
+          choice: accept_openapi_gap_this_cycle
+          note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on
+          status: recorded
+        checklist_note: deploy-checklist.md will clarify shadow env and list OpenAPI advisory
+      phase1_results:
+        agent1_configuration:
+          result: FAIL
+          reason: completeness
+          accepted_as: advisory_this_cycle
+          notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED unwired — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id}, POST shadow/batch — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on); Playwright path name drift only'
+        agent2_secrets:
+          result: PASS
+          notes: no new secret names; modal secret list SKIPPED; stale URL risk elevated after DM redeploy
+        agent3_data_volumes:
+          result: PASS
+          notes: Alembic 20260730_0010 ready; DO Postgres; staging apply pending ops
+        agent4_resources:
+          result: PASS
+          notes: existing DM CPU worker timeout=600; no new GPU/min_containers
+        agent5_ci_cd:
+          result: PASS
+          notes: hybrid ci→preflight→modal→DO; template GPU cache N/A
+        agent6_connectivity:
+          result: PASS
+          notes: H0c pytest exit 0; promote CORS test present (DB-gated skip local OK); verify_connectivity.sh present
+        agent7_modal_do_parity:
+          result: PASS
+          notes: infra declares Modal URLs; 13 plan sync-all-secrets→redeploy→sync_github→H4/H5
     s002:
       status: completed
       started_at: '2026-05-27'
@@ -8410,63 +8538,73 @@ stages:
     phase4_checklist: *id023
     user_approvals: *id024
   13-deploy-smoke:
-    status: completed
-    started_at: '2026-07-30'
-    partial_rerun_at: '2026-07-30'
-    partial_rerun_note: EV-015/S017 Path A staging COMPLETE — deploy checkpoint APPROVED; preparing PR; prior S016/EV-014 COMPLETE nested under s016_baseline
-    session_id: S017-corpus-reembed-migration
-    branch: evolve/EV-015-corpus-reembed-migration
-    evolve_cycle_id: EV-015
+    status: in_progress
+    started_at: '2026-08-01'
+    partial_rerun_at: '2026-08-01'
+    partial_rerun_note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+    session_id: S019-retrieval-quality
+    branch: evolve/EV-016-retrieval-quality
+    evolve_cycle_id: EV-016
     mode: evolve
     delta_only: true
-    feature: F41
+    feature: F42
     feature_ids:
-    - F41
+    - F42
+    commits_head: 5530b46
+    current_action: phase15_t1_predeploy
     deploy_path: A
-    deploy_approved: true
-    deploy_approved_at: '2026-07-30'
-    deploy_approval: phase_d_path_a_staging_sequence
-    path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
-    path_a_staging_result: PASS
-    head_sha: bbe9544
-    commit_deployed: 180ad14
-    alembic_revision: '20260730_0010'
-    alembic_from: '20260728_0009'
-    report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
-    untracked_left:
-    - scripts/deploy/_tmp_proxy_key_check.py
-    untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-    next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
-    overall_result: PASS
-    path_a_progress:
-      alembic: pass
+    note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
+    s017_baseline:
+      mode: evolve
+      delta_only: true
+      feature: F41
+      feature_ids:
+      - F41
+      deploy_path: A
+      deploy_approved: true
+      deploy_approved_at: '2026-07-30'
+      deploy_approval: phase_d_path_a_staging_sequence
+      path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
+      path_a_staging_result: PASS
+      head_sha: bbe9544
+      commit_deployed: 180ad14
       alembic_revision: '20260730_0010'
-      do_pins:
-        write_api: ACTIVE_evolve
-        admin_frontend: ACTIVE_evolve
-      modal_dm_redeploy: pass
-      secret_sync: pass
-      do_verify: pass
-      h1_h5_pre_promote: pass
-      h1_h5_post_promote: pass
-      backfill_scoped: pass
-      live_equivalence: pass
-      shadow_dry_run: pass
-      rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
-      f36_eval:
-        status: completed
-        run_id: 01ca4019
-        note: operator-local execute_eval_run; top_k=2
-      promote:
-        chunks_promoted: 60
-        documents_promoted: 2
-    advisories:
-    - Modal eval job_type falls through to ingest
-    - F36 used top_k=2 + local execute_eval_run
-    - full backfill still pending
-    - DO pins on evolve until merge
-    - do not commit scripts/deploy/_tmp_proxy_key_check.py
-    note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
+      alembic_from: '20260728_0009'
+      report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
+      untracked_left:
+      - scripts/deploy/_tmp_proxy_key_check.py
+      untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
+      next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
+      overall_result: PASS
+      path_a_progress:
+        alembic: pass
+        alembic_revision: '20260730_0010'
+        do_pins:
+          write_api: ACTIVE_evolve
+          admin_frontend: ACTIVE_evolve
+        modal_dm_redeploy: pass
+        secret_sync: pass
+        do_verify: pass
+        h1_h5_pre_promote: pass
+        h1_h5_post_promote: pass
+        backfill_scoped: pass
+        live_equivalence: pass
+        shadow_dry_run: pass
+        rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
+        f36_eval:
+          status: completed
+          run_id: 01ca4019
+          note: operator-local execute_eval_run; top_k=2
+        promote:
+          chunks_promoted: 60
+          documents_promoted: 2
+      advisories:
+      - Modal eval job_type falls through to ingest
+      - F36 used top_k=2 + local execute_eval_run
+      - full backfill still pending
+      - DO pins on evolve until merge
+      - do not commit scripts/deploy/_tmp_proxy_key_check.py
+      note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
     s016_baseline:
       status: completed
       started_at: '2026-07-29'
@@ -9970,7 +10108,7 @@ evolve_cycles:
     phase_a: passed
     phase_b: pending
     phase_c: pending
-    phase_d: pending
+    phase_d: passed
     deploy: pending
   decisions:
   - 'R60 (2026-06-30, EV-007/S006): Keep Supabase-managed invite/recovery mail via Resend SMTP (not Resend REST API).'
@@ -13151,8 +13289,8 @@ evolve_cycles:
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/161
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/165
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
-  current_stage: 12-verify-deploy
-  current_stage_note: '2026-08-02T01:32:34Z — 11-verify-impl COMPLETE; verify-impl.md committed @ 3e780b6; F42 Phase 3 approved (option 1); result=approved; AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; UJ-055/UJ-056 confirmed; current_action=ready_for_12_verify_deploy; checkpoints.phase_d=pending until 12; gates.deploy pending'
+  current_stage: 13-deploy-smoke
+  current_stage_note: '2026-08-01 — 13-deploy-smoke STARTED; T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope; HEAD 5530b46'
   mode: evolve
   delta_only: true
   branch: evolve/EV-016-retrieval-quality
@@ -13302,7 +13440,7 @@ evolve_cycles:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: 3e780b6
+  commits_head: 5530b46
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -13310,9 +13448,9 @@ evolve_cycles:
   s019_d47_decision_recorded: true
   s019_d47_note: Fix in place QA-S019-B01/B02/B03 COMPLETE; 09 pass_with_advisories; ready for 11-verify-impl
   s019_d47_choice: option_1_fix_in_place_b01_b03
-  current_action: ready_for_12_verify_deploy
+  current_action: running_13_deploy_smoke
   preparing_11: false
-  next_action: run 12-verify-deploy
+  next_action: phase15_t1_predeploy
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
@@ -13513,13 +13651,13 @@ evolve_cycles:
     phase_a: passed
     phase_b: passed
     phase_c: passed
-    phase_d: pending
+    phase_d: passed
     deploy: pending
   checkpoint_notes:
     phase_a: 'Passed 2026-08-01 — user approved option 1: gate A→B → start 04-tech-plan for F42=H7+P1 on E0'
     phase_b: 'Passed 2026-08-01 — user approved option 1: Yes — gate B→C → start 07-build at T91.1 (S019-D45)'
     phase_c: 'Passed 2026-08-01T20:49:00Z — user approved option 1 (S019-D46): gate C→D → start 09-qa + 10-e2e; HEAD 257486f; 08-verify PASS (delta) Phase 21 M91–M93 / F42; AC-RQ6/ISS-008 ship-path deferred'
-    phase_d: 'Pending 2026-08-02T01:31:00Z — 11-verify-impl COMPLETE (F42 approved); Phase D checkpoint still pending until 12-verify-deploy (or after 11+12 per plan); gates.deploy pending'
+    phase_d: 'Passed 2026-08-01 — user approved Phase 2 failure mitigations (option 1) and Phase 3 rollback (option 1); 12-verify-deploy COMPLETE; deploy-checklist READY; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -13778,9 +13916,50 @@ evolve_cycles:
       feature_inspection: *id001
       manual_inspection: *id027
     12-verify-deploy:
-      status: pending
+      status: completed
+      started_at: '2026-08-01'
+      started: '2026-08-01'
+      completed_at: '2026-08-01'
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F42
+      feature: F42
+      commits_head: 5530b46
+      current_action: completed
+      next_action: run 13-deploy-smoke
+      report: docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
+      result: ready
+      deploy_ready: true
+      substeps:
+        phase1_agents: completed
+        phase2_failure_modes: completed
+        phase3_rollback: completed
+        phase4_checklist: completed
+        phase5_summary: completed
+      phase2_failure_modes:
+        status: approved
+        approved_at: '2026-08-01'
+        user_choice: option_1
+      phase3_rollback:
+        status: approved
+        approved_at: '2026-08-01'
+        user_choice: option_1
+      deferred_in_scope:
+      - AC-RQ6
+      - ISS-008_deploy_verify
+      - live_staging_inspection
+      note: S019/EV-016 12-verify-deploy COMPLETE — checklist ready; failure mitigations + rollback approved (option 1 each); handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13
     13-deploy-smoke:
-      status: pending
+      status: in_progress
+      started_at: '2026-08-01'
+      current_action: phase15_t1_predeploy
+      next_action: phase15_t1_predeploy
+      deploy_path: A
+      note: S019/EV-016 13-deploy-smoke STARTED — T1 pre-deploy; Path A write-api then chat-rag; ISS-008 + Hy1 gate in scope
     phase-0:
       status: completed
       completed: '2026-08-01'
@@ -13821,6 +14000,9 @@ evolve_cycles:
   - tests/unit/eval/test_qa_pairs_staging_es_coverage.py
   - docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260801T130441Z_e1-shadow-f36.json
   - docs/sessions/S019-retrieval-quality/reports/spike-e1-shadow-f36.md
+  - docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
+  - docs/deployment-integration.md
+  - docs/deploy-checklist.md
   phase0_expansion_artifact_notes:
   - S019-D35 embed sweep complete — 20260801T020331Z_embed-sweep.json; E0/E1 hit@5=1.0; E2=0.87 reject; no offline F42 fold-in
   - 'S019-D37 phase0_approved — reject E1 for F42; F42=H7+P1 on E0; Hy1 E0 relevancy 0.28 EN 0.36 ES 0.14 retrieval 0.88 vs E1 shadow relevancy 0.11 EN 0.09 ES 0.14 retrieval 0.94; rebuild 1fa1dec9 not promoted; #159 open outside F42; ISS-008 deploy ship prereq (not Phase A entry blocker)'
@@ -15169,6 +15351,20 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-01'
+  skill: 12-verify-deploy
+  session_id: S019-retrieval-quality
+  evolve_cycle_id: EV-016
+  decision: 'S019-D48/D49 — User approved Phase 2 failure mitigations (option 1) and Phase 3 rollback plan (option 1); 12-verify-deploy COMPLETE; deploy-checklist READY; checkpoints.phase_d=passed; gates.deploy pending until 13-deploy-smoke'
+  recorded_at: '2026-08-01T21:41:00Z'
+  note: 'Handoff → 13-deploy-smoke; Hy1/AC-RQ6 and ISS-008 deploy verify remain ops scope for 13; recorded_in=docs/decisions/evolve-decisions.md (pending parent write)'
+- date: '2026-08-01'
+  skill: 16-evolve
+  session_id: S019-retrieval-quality
+  evolve_cycle_id: EV-016
+  decision: 'Phase D checkpoint passed (12-verify-deploy approved) — checkpoints.phase_d=passed; current_stage=13-deploy-smoke; gates.deploy still pending until 13 completes'
+  recorded_at: '2026-08-01T21:41:00Z'
+  note: 'EV-016 F42 H7+P1 on E0; failure mitigations + rollback option 1 each'
 - date: '2026-08-02'
   skill: 11-verify-impl
   session_id: S019-retrieval-quality
@@ -16569,7 +16765,29 @@ decisions_log:
 - S019/EV-016 07-build Phase 21 (M91–M93 / F42) implementation COMPLETE — phase21_tasks_complete=true; status in_progress pending 08-verify-build; commits NOT landed (pending_user); current_action=phase21_complete_handoff_08_verify_build; S019-D45 already recorded; next → AskQuestion commit then 08-verify-build
 - 'S019/EV-016 02-verify-plan COMPLETE → phase-a-checkpoint: M1–M3 approved (option 1; S019-D42); no contradictions; Gate A→B ready; gates.a_to_b=pending_user; checkpoints.phase_a=pending; report=docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md; next_action=askquestion_phase_a_checkpoint; do NOT start 04-tech-plan until Phase A approved'
 - S019/EV-016 09-qa COMPLETE — overall=fail; blockers QA-S019-B01..B03 (ruff spike tests, basedpyright, nltk CVEs); F42 surfaces green; report=docs/sessions/S019-retrieval-quality/reports/qa-report.md
+- 'S019/EV-016 12-verify-deploy COMPLETE 2026-08-01 — deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
 artifacts:
+- path: docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
+  kind: deploy-checklist
+  session_id: S019-retrieval-quality
+  stage: 12-verify-deploy
+  evolve_cycle_id: EV-016
+  recorded_at: '2026-08-01T21:39:00-04:00'
+  note: Phase 1 agents complete; draft checklist pending user signoff on failure modes + rollback
+- path: docs/deployment-integration.md
+  kind: standing-doc-delta
+  session_id: S019-retrieval-quality
+  stage: 12-verify-deploy
+  evolve_cycle_id: EV-016
+  recorded_at: '2026-08-01T21:39:00-04:00'
+  note: EV-016 F42 H7+P1 deploy integration delta appended
+- path: docs/deploy-checklist.md
+  kind: deploy-checklist-pointer
+  session_id: S019-retrieval-quality
+  stage: 12-verify-deploy
+  evolve_cycle_id: EV-016
+  recorded_at: '2026-08-01T21:39:00-04:00'
+  note: Root pointer to session deploy-checklist; 12-verify-deploy COMPLETE 2026-08-01 — deploy_ready
 - path: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   kind: verify-impl-report
   session_id: S019-retrieval-quality
@@ -17920,8 +18138,8 @@ git_history:
     session_id: S019-retrieval-quality
     evolve_cycle_id: EV-016
     exists_on_disk: true
-    head_sha: 3e780b61e735c427aec7fdfc898e01434d9ea88d
-    note: 11-verify-impl report committed @ 3e780b6; F42 approved; next 12-verify-deploy; advisories A01–A06
+    head_sha: 5530b46af9c226e5f357c3690f897c2646b1a7ce
+    note: 12-verify-deploy STARTED after 11-verify-impl sync @ 5530b46; F42 H7+P1; deferred AC-RQ6/ISS-008/staging inspect in scope; advisories A01–A06
   - name: fix/S018-job-dispatch-prevention
     purpose: Phase 5 prevention (registry + husky + checklist + rule)
     base: main
@@ -19827,6 +20045,16 @@ git_history:
     files_changed: 13
     timestamp: '2026-08-02T01:21:14Z'
     note: S019-D47 QA remediation landed — B01–B03 cleared; start 11-verify-impl (advisories A01–A06)
+  - sha: 5530b46af9c226e5f357c3690f897c2646b1a7ce
+    short: 5530b46
+    branch: evolve/EV-016-retrieval-quality
+    message: 'chore: sync workflow-state after 11-verify-impl commit'
+    stage: 12-verify-deploy
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    files_changed: 1
+    timestamp: '2026-08-01T21:33:48-04:00'
+    note: workflow-state sync after 11-verify-impl; 12-verify-deploy STARTED
   - sha: 3e780b61e735c427aec7fdfc898e01434d9ea88d
     short: 3e780b6
     branch: evolve/EV-016-retrieval-quality
@@ -19945,6 +20173,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: run 11-verify-impl sign-off on evolve/EV-016-retrieval-quality @ ffd7abd (advisories A01–A06)
+next_action: S019/EV-016 13-deploy-smoke in_progress — phase15_t1_predeploy (Path A write-api then chat-rag)
 pipeline_idle: false
-pipeline_idle_note: '2026-08-02T01:21:33Z — S019/EV-016 S019-D47 landed @ ffd7abd; 11-verify-impl in_progress'
+pipeline_idle_note: '2026-08-01 — S019/EV-016 13-deploy-smoke STARTED @ 5530b46; T1 pre-deploy Path A'

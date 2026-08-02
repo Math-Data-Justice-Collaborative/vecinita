@@ -1,13 +1,13 @@
 # Deploy Checklist
 
-> **Generated**: 2026-07-30 (S017 / EV-015 delta)  
+> **Generated**: 2026-08-01 (S019 / EV-016 delta)  
 > **Status**: **ready**  
-> **Session**: S017-corpus-reembed-migration  
-> **Feature**: F41 corpus rebuild / shadow promote (#167)
+> **Session**: S019-retrieval-quality  
+> **Feature**: F42 H7+P1 retrieval quality (Hy1 on E0)
 
-Full checklist: [sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md](sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md)
+Full checklist: [sessions/S019-retrieval-quality/reports/deploy-checklist.md](sessions/S019-retrieval-quality/reports/deploy-checklist.md)
 
-Prior: [sessions/S002-admin-job-management/reports/deploy-checklist.md](sessions/S002-admin-job-management/reports/deploy-checklist.md)
+Prior: [sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md](sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md)
 
 ## Standing — Modal / DM job types (BUG-2026-07-31)
 
