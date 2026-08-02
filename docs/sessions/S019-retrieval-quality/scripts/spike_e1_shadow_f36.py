@@ -66,7 +66,6 @@ sys.path.insert(0, str(_HYBRID.parent))
 from spike_hybrid_sweep import (  # noqa: E402
     CellSpec,
     _avg,
-    _merge_chunks,
     _pack,
     _synthesize,
     cross_lang_share,
@@ -74,6 +73,7 @@ from spike_hybrid_sweep import (  # noqa: E402
     locale_breakdown,
     pack_p1,
 )
+from vecinita_rag.multi_query import merge_multi_query_hits
 
 _ = pack_p1  # re-export used via _pack
 
@@ -296,7 +296,7 @@ def _chunks_for_cell(
             groups.append(
                 retriever.retrieve_chunks(rw, rebuild_run_id=rebuild_run_id)[: spec.pool_n]
             )
-    return _merge_chunks(groups, top_k=spec.top_k)
+    return merge_multi_query_hits(groups, top_k=spec.top_k)
 
 
 def _run_cell(  # noqa: PLR0913
