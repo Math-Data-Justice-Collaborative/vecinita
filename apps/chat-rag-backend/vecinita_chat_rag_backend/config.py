@@ -5,6 +5,11 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from vecinita_rag.cache import (
+    DEFAULT_CACHE_MAX_ENTRIES,
+    DEFAULT_CACHE_TTL_S,
+    DEFAULT_SEMANTIC_THRESHOLD,
+)
 from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode
 from vecinita_shared_schemas.eval_config import (
     DEFAULT_EVAL_MAX_TOKENS,
@@ -18,6 +23,12 @@ from vecinita_shared_schemas.eval_config import (
 _MIN_MULTI_QUERY_COUNT = 1
 _MAX_MULTI_QUERY_COUNT = 5
 _MIN_CONTEXT_MAX_CHARS = 256
+_MIN_CACHE_TTL_S = 60
+_MAX_CACHE_TTL_S = 86400
+_MIN_CACHE_MAX_ENTRIES = 16
+_MAX_CACHE_MAX_ENTRIES = 100000
+_MIN_CACHE_SEMANTIC_THRESHOLD = 0.5
+_MAX_CACHE_SEMANTIC_THRESHOLD = 1.0
 
 
 def _int_env(name: str, default: int) -> int:
@@ -87,6 +98,36 @@ def _validate_f42_rag_knobs(
         raise ValueError(msg)
 
 
+def _validate_f43_rag_cache_knobs(
+    *,
+    rag_cache_ttl_s: int,
+    rag_cache_max_entries: int,
+    rag_cache_semantic_threshold: float,
+) -> None:
+    if not (_MIN_CACHE_TTL_S <= rag_cache_ttl_s <= _MAX_CACHE_TTL_S):
+        msg = (
+            "VECINITA_RAG_CACHE_TTL_S must be between "
+            f"{_MIN_CACHE_TTL_S} and {_MAX_CACHE_TTL_S}"
+        )
+        raise ValueError(msg)
+    if not (_MIN_CACHE_MAX_ENTRIES <= rag_cache_max_entries <= _MAX_CACHE_MAX_ENTRIES):
+        msg = (
+            "VECINITA_RAG_CACHE_MAX_ENTRIES must be between "
+            f"{_MIN_CACHE_MAX_ENTRIES} and {_MAX_CACHE_MAX_ENTRIES}"
+        )
+        raise ValueError(msg)
+    if not (
+        _MIN_CACHE_SEMANTIC_THRESHOLD
+        <= rag_cache_semantic_threshold
+        <= _MAX_CACHE_SEMANTIC_THRESHOLD
+    ):
+        msg = (
+            "VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD must be between "
+            f"{_MIN_CACHE_SEMANTIC_THRESHOLD} and {_MAX_CACHE_SEMANTIC_THRESHOLD}"
+        )
+        raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class ChatRagSettings:
     """Runtime settings for retrieval, embedding, and LLM upstreams."""
@@ -113,6 +154,11 @@ class ChatRagSettings:
     rag_multi_query_count: int = 3
     rag_packer: PackerMode = "p1"
     rag_context_max_chars: int = DEFAULT_CONTEXT_MAX_CHARS
+    rag_cache: bool = True
+    rag_cache_ttl_s: int = DEFAULT_CACHE_TTL_S
+    rag_cache_max_entries: int = DEFAULT_CACHE_MAX_ENTRIES
+    rag_cache_semantic: bool = True
+    rag_cache_semantic_threshold: float = DEFAULT_SEMANTIC_THRESHOLD
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -131,6 +177,20 @@ class ChatRagSettings:
             rag_multi_query_count=rag_multi_query_count,
             rag_packer=rag_packer,
             rag_context_max_chars=rag_context_max_chars,
+        )
+        rag_cache_ttl_s = _int_env("VECINITA_RAG_CACHE_TTL_S", DEFAULT_CACHE_TTL_S)
+        rag_cache_max_entries = _int_env(
+            "VECINITA_RAG_CACHE_MAX_ENTRIES",
+            DEFAULT_CACHE_MAX_ENTRIES,
+        )
+        rag_cache_semantic_threshold = _float_env(
+            "VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD",
+            DEFAULT_SEMANTIC_THRESHOLD,
+        )
+        _validate_f43_rag_cache_knobs(
+            rag_cache_ttl_s=rag_cache_ttl_s,
+            rag_cache_max_entries=rag_cache_max_entries,
+            rag_cache_semantic_threshold=rag_cache_semantic_threshold,
         )
         return cls(
             database_url=_normalize_database_url(database_url),
@@ -171,4 +231,9 @@ class ChatRagSettings:
             rag_multi_query_count=rag_multi_query_count,
             rag_packer=rag_packer,
             rag_context_max_chars=rag_context_max_chars,
+            rag_cache=_bool_env("VECINITA_RAG_CACHE", default=True),
+            rag_cache_ttl_s=rag_cache_ttl_s,
+            rag_cache_max_entries=rag_cache_max_entries,
+            rag_cache_semantic=_bool_env("VECINITA_RAG_CACHE_SEMANTIC", default=True),
+            rag_cache_semantic_threshold=rag_cache_semantic_threshold,
         )
