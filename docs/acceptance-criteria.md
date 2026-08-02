@@ -225,16 +225,16 @@
 - [ ] **AC-BB5**: Soft language L1 fires only on empty same-lang first pass when flag on (TC-180, UJ-058).
 - [ ] **AC-BB6**: Soft language flag defaults **off** (L0-strict) (TC-181).
 - [ ] **AC-BB7**: CE merge keeps ≤ `top_k` when enabled (TC-182, UJ-059).
-- [ ] **AC-BB8**: CE flag defaults **off** until ship gate (TC-183).
-- [ ] **AC-BB9**: CE ship gate: staging relevancy ≥ **0.28** and faith ≥ **0.91** with `bge-reranker-v2-m3`; else spike-only (TC-184, UJ-060). **EV-018:** valid only after AC-FO1 (non-empty pools).
+- [x] **AC-BB8**: CE flag defaults **off** until ship gate (TC-183). *(EV-018 T100.4 — still default-off after AC-BB9 PASS; deploy flip deferred)*
+- [x] **AC-BB9**: CE ship gate: staging relevancy ≥ **0.28** and faith ≥ **0.91** with `bge-reranker-v2-m3`; else spike-only (TC-184, UJ-060). **EV-018:** PASS after AC-FO1 (CE+P1 0.778 / 0.938; `ship_gate_pass=true`).
 - [ ] **AC-BB10**: Out of EV-017 ship without unlock: LangGraph/ADR-006 amend; Modal volume durable cache; identity-keyed cache; default-on CE or soft language.
 
 ### EV-018 — Retrieval follow-on (F46 + F45 re-gate) — S021
 
-- [ ] **AC-FO1**: Staging golden retrieve returns non-empty pools on representative rows (not universally `pool=0`) (TC-185, UJ-061, F46).
-- [ ] **AC-FO2**: Cold ChatRAG ask for in-corpus questions returns non-empty `sources[]` (TC-186, UJ-061, F46).
-- [ ] **AC-FO3**: UJ-060 / AC-BB9 re-run only after AC-FO1; empty-pool CE runs are not ship evidence (S021-D9/D13).
-- [ ] **AC-FO4**: Prod `VECINITA_RAG_RERANK_CE` remains **false** until AC-BB9 pass + deploy approval (S021-D7).
+- [x] **AC-FO1**: Staging golden retrieve returns non-empty pools on representative rows (not universally `pool=0`) (TC-185, UJ-061, F46). *(Path B + T100.1 pools=20)*
+- [x] **AC-FO2**: Cold ChatRAG ask for in-corpus questions returns non-empty `sources[]` (TC-186, UJ-061, F46).
+- [x] **AC-FO3**: UJ-060 / AC-BB9 re-run only after AC-FO1; empty-pool CE runs are not ship evidence (S021-D9/D13).
+- [x] **AC-FO4**: Prod `VECINITA_RAG_RERANK_CE` remains **false** until AC-BB9 pass + deploy approval (S021-D7). *(PASS metrics; flag still off)*
 - [ ] **AC-FO5**: Out of EV-018 without unlock: LangGraph/ADR-006; #159 multilingual embeds; synthesizer upsizing; changing F43/F44 defaults.
 
 

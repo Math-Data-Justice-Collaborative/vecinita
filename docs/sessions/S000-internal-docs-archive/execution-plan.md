@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 23: EV-018 — Retrieval follow-on (F46 + F45 re-gate) |
-| **Active milestone** | M100 — F45 CE re-gate after F46 |
-| **Active task** | T100.1 — Re-run CE spike harness after UJ-061 pass |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98; Phase 23: T99.1–T99.5 (M99) |
+| **Active milestone** | M100 — complete; next 08-verify-build |
+| **Active task** | 08-verify-build (M99–M100 done) |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98; Phase 23: T99.1–T100.4 (M99–M100) |
 | **Last updated** | 2026-08-02 |
-| **Evolve cycle** | EV-018 (F46 + F45 re-gate) — Standard; skip 03/05/06; Gate B→C passed (S021-D19); S021-D23 |
+| **Evolve cycle** | EV-018 — Standard; S021-D19/D23/D24; AC-BB9 PASS; CE flag still default-off |
 | **Git branch** | `evolve/EV-018-retrieval-follow-on` |
-| **Active session** | S021-retrieval-follow-on — 07-build M100 T100.1 |
+| **Active session** | S021-retrieval-follow-on — 07-build complete → 08-verify-build |
 | **Scope addition** | 2026-08-02 — F46 non-empty retrieve + F45 CE re-gate; S021-D17–D19; TP1–TP6. |
 
 ## Template
@@ -1999,21 +1999,21 @@ unit tests TC-170–172.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T100.1 | Ops: Re-run CE spike harness (`bge-reranker-v2-m3` Modal T4) after UJ-061 pass | Config | pending | UJ-060, TC-184, RD-213 | T99.5 | — | S021 | F45 |
-| T100.2 | Docs: Update CE ship-gate report (relevancy ≥0.28 / faith ≥0.91); #83 disposition | Docs | pending | AC-BB9, AC-FO3/FO4, RD-212/214 | T100.1 | — | S021 | F45 |
-| T100.3 | Docs: Phase 23 gate checklist + execution-plan Current State | Docs | pending | Phase 23 gate | T100.2 | — | S021 | F45 |
-| T100.4 | Test: Confirm TC-183 still default-off; no prod CE enable without AC-BB9 | Test | pending | AC-BB8, AC-FO4, TC-183 | T100.2 | — | S021 | F45 |
+| T100.1 | Ops: Re-run CE spike harness (`bge-reranker-v2-m3` Modal T4) after UJ-061 pass | Config | completed | UJ-060, TC-184, RD-213 | T99.5 | 2026-08-02 | S021 | F45 |
+| T100.2 | Docs: Update CE ship-gate report (relevancy ≥0.28 / faith ≥0.91); #83 disposition | Docs | completed | AC-BB9, AC-FO3/FO4, RD-212/214 | T100.1 | 2026-08-02 | S021 | F45 |
+| T100.3 | Docs: Phase 23 gate checklist + execution-plan Current State | Docs | completed | Phase 23 gate | T100.2 | 2026-08-02 | S021 | F45 |
+| T100.4 | Test: Confirm TC-183 still default-off; no prod CE enable without AC-BB9 | Test | completed | AC-BB8, AC-FO4, TC-183 | T100.2 | 2026-08-02 | S021 | F45 |
 
 #### Phase 23 Gate Check
 
-- [ ] All M99–M100 tasks completed (T99.1–T100.4)
-- [ ] TC-185/186 green at T2 (fixture-backed); staging UJ-061 evidence recorded for Path A
-- [ ] AC-FO1–FO2 met before any CE ship decision
-- [ ] AC-BB9 / TC-184 re-run only after AC-FO1; empty-pool runs invalid
-- [ ] Prod `VECINITA_RAG_RERANK_CE` remains **false** unless AC-BB9 pass + deploy approval
-- [ ] No new ADR unless architecture change discovered in 07
-- [ ] No LangGraph; no #159 embed swap; F43/F44 defaults unchanged
-- [ ] ruff / basedpyright clean; pytest e2e UJ-061 green
+- [x] All M99–M100 tasks completed (T99.1–T100.4)
+- [x] TC-185/186 green at T2 (fixture-backed); staging UJ-061 evidence recorded for Path A
+- [x] AC-FO1–FO2 met before any CE ship decision
+- [x] AC-BB9 / TC-184 re-run only after AC-FO1; empty-pool runs invalid
+- [x] Prod `VECINITA_RAG_RERANK_CE` remains **false** unless AC-BB9 pass + deploy approval
+- [x] No new ADR unless architecture change discovered in 07
+- [x] No LangGraph; no #159 embed swap; F43/F44 defaults unchanged
+- [ ] ruff / basedpyright clean; pytest e2e UJ-061 green — **08-verify-build**
 
 **Tech-plan delta:** `docs/sessions/S021-retrieval-follow-on/reports/tech-plan-delta.md`  
 **Predecessor CE gate:** `docs/sessions/S020-retrieval-batch-b/reports/ce-ship-gate.md`

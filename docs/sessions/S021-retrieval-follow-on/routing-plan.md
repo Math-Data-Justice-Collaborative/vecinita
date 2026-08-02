@@ -7,8 +7,8 @@
 | 01-requirements | yes | completed | delta | RD-209–218; report `01-requirements-follow-on.md` |
 | 02-verify-plan | yes | completed | delta | Gate A→B PASS (S021-D17); report `02-verify-plan-audit.md` |
 | 04-tech-plan | yes | completed | delta | TP1–TP6 / S021-D18; Phase 23 M99–M100 |
-| 07-build | yes | in_progress | — | M99 complete (S021-D23); next M100 CE re-gate |
-| 08-verify-build | yes | pending | — | |
+| 07-build | yes | completed | — | M99–M100 done; AC-BB9 PASS (S021-D24); CE flag still off |
+| 08-verify-build | yes | pending | — | next |
 | 09-qa | yes | pending | — | |
 | 10-e2e | yes | pending | — | |
 | 11-verify-impl | yes | pending | — | |

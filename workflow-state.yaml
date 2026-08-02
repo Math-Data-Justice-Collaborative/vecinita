@@ -1239,13 +1239,13 @@ project:
         - docs/sessions/S020-retrieval-batch-b/routing-plan.md
         - docs/sessions/S020-retrieval-batch-b/session-brief.md
     07-build:
-      status: in_progress
+      status: completed
       started_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-        S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
@@ -1257,30 +1257,32 @@ project:
       feature: F46+F45
       phase: Phase 23 (M99-M100)
       milestone: M100
-      milestone_status: pending
+      milestone_status: completed
       m99_status: completed
+      m100_status: completed
+      m100_completed_at: '2026-08-02'
       m99_completed_at: '2026-08-02'
       phase_status: in_progress
-      current_task: T100.1
-      current_action: 07_t100_1_pending
-      next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+      current_task: null
+      current_action: 07_complete_08_pending
+      next_action: run 08-verify-build
       t99_4_status: completed
       t99_4_blocker: null
       t99_4_waiver: S021-D23
       t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
       t99_5_status: completed
-      t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+      t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       m99_status: completed
-      report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+      report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       s021_d19_decision: S021-D19
       s021_d19_decision_recorded: true
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-        S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
       substeps:
-        current_task: T100.1
-        task_status: pending
+        current_task: null
+        task_status: completed
         in_progress_tasks: []
         blocked_tasks: []
         completed_tasks_recent:
@@ -1289,7 +1291,24 @@ project:
         - T99.3
         - T99.4
         - T99.5
-        next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+        - T100.1
+        - T100.2
+        - T100.3
+        - T100.4
+        next_action: run 08-verify-build
+        t100_1_status: completed
+        t100_1_ship_gate_pass: true
+        t100_1_ce_p1_relevancy: 0.7778
+        t100_1_ce_p1_faith: 0.9375
+        t100_1_r0_p1_relevancy: 0.722
+        t100_1_r0_p1_faith: 0.9375
+        t100_1_golden_rows: 18
+        t100_1_pool: 20
+        s021_d24_decision: S021-D24
+        t100_2_status: completed
+        t100_3_status: completed
+        t100_4_status: completed
+        m100_status: completed
         t99_4_status: completed
         t99_4_completed_at: '2026-08-02'
         t99_4_waiver: S021-D23
@@ -1297,7 +1316,7 @@ project:
         t99_4_note: COMPLETED — S021-D23 waive local TC-185 (CI-gated); TC-186 PASS; bug 2/2 PASS; report t99-4-e2e-closeout.md
         t99_5_status: completed
         t99_5_completed_at: '2026-08-02'
-        t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+        t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
         t99_5_note: COMPLETED — F46 diagnose/root-cause + staging UJ-061 evidence closeout
         t99_4_progress:
           check_corpus_reset_guard: ok
@@ -1333,13 +1352,13 @@ project:
           bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
           bug_status: filed_and_resolved
           guard: attach_embeddings + clear_embeddings + CI script
-          report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+          report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
           json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
           script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
-          commits_pending: false
-          commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+          commits_pending: true
+          commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -2191,18 +2210,18 @@ project:
         bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
         bug_status: filed_and_resolved
         guard: attach_embeddings + clear_embeddings + CI script
-        report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+        report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
         json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: false
-        commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+        commits_pending: true
+        commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
-      commits_pending: false
-      commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+      commits_pending: true
+      commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
     08-verify-build:
       status: completed
       started_at: '2026-08-02'
@@ -4095,12 +4114,12 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-018
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
-  current_stage: 07-build
-  current_action: 07_t100_1_pending
+  current_stage: 08-verify-build
+  current_action: 07_complete_08_pending
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-    S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+    S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4180,16 +4199,20 @@ active_session:
   - stage: 07-build
     required: true
     mode: delta
-    status: in_progress
+    status: completed
     skip_rationale: null
     started_at: '2026-08-02'
-    current_action: 07_t100_1_pending
-    current_task: T100.1
-    report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+    completed_at: '2026-08-02'
+    current_action: 07_complete_08_pending
+    current_task: null
+    m99_status: completed
+    m100_status: completed
+    s021_d24_decision: S021-D24
+    report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-      S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
     s021_d20_decision: S021-D20
     s021_d21_decision: S021-D21
     s021_d21_choice: option_2_investigate_promote_history
@@ -4198,7 +4221,7 @@ active_session:
     path_b_approved: true
     path_b_approved_at: '2026-08-02'
     s021_d22_decision: S021-D22
-    next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+    next_action: run 08-verify-build
     path_b_completed: true
     t99_3_status: completed
     t99_4_status: completed
@@ -4206,12 +4229,14 @@ active_session:
     t99_4_waiver: S021-D23
     t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
     t99_5_status: completed
-    t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+    t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
     m99_status: completed
+    t100_1_status: completed
   - stage: 08-verify-build
     required: true
     status: pending
     skip_rationale: null
+    note: Ready — 07-build M99-M100 COMPLETE; S021-D24 AC-BB9 PASS; next_action=run 08-verify-build
   - stage: 09-qa
     required: true
     status: pending
@@ -4258,6 +4283,7 @@ active_session:
   - S021-D21
   - S021-D22
   - S021-D23
+  - S021-D24
   report_01_requirements: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
   report_02_verify_plan: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
   report_02_verify_plan_status: completed
@@ -4271,8 +4297,9 @@ active_session:
   s021_d19_decision_recorded: true
   phase_b_checkpoint_accepted: true
   phase_b_checkpoint_choice: option_1_pass_gate_b_to_c_start_07_t99_1
-  current_task: T100.1
-  report_07_build: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+  current_task: null
+  m100_status: completed
+  report_07_build: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
   feature_ids:
   - F46
   - F45
@@ -4297,15 +4324,20 @@ active_session:
   s021_d23_decision: S021-D23
   s021_d23_decision_recorded: true
   s021_d23: Skip Docker Desktop — waive local TC-185 (CI-gated / skip-without-postgres)
+  s021_d24_decision: S021-D24
+  s021_d24_decision_recorded: true
+  s021_d24: AC-BB9 PASS; ship_gate_pass=true; CE+P1 relevancy=0.7778 faith=0.9375; keep VECINITA_RAG_RERANK_CE false until 12/13
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+  next_action: run 08-verify-build
   t99_4_status: completed
   t99_4_blocker: null
   t99_4_waiver: S021-D23
   t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
   t99_5_status: completed
-  t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+  t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
   m99_status: completed
+  t100_1_status: completed
+  t100_1_started_at: '2026-08-02'
   t99_4_progress:
     check_corpus_reset_guard: ok
     bug_tests: passed_2
@@ -4328,18 +4360,18 @@ active_session:
     bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
     bug_status: filed_and_resolved
     guard: attach_embeddings + clear_embeddings + CI script
-    report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+    report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
     json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
     script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
-    commits_pending: false
-    commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+    commits_pending: true
+    commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: false
-  commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+  commits_pending: true
+  commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
 sessions:
 - id: S020-retrieval-batch-b
   type: feature
@@ -9657,13 +9689,13 @@ stages:
     - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: in_progress
+    status: completed
     started_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
     partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-      S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
     session_id: S021-retrieval-follow-on
     branch: evolve/EV-018-retrieval-follow-on
     evolve_cycle_id: EV-018
@@ -9675,23 +9707,25 @@ stages:
     feature: F46+F45
     phase: Phase 23 (M99-M100)
     milestone: M100
-    milestone_status: pending
+    milestone_status: completed
     m99_status: completed
+    m100_status: completed
+    m100_completed_at: '2026-08-02'
     m99_completed_at: '2026-08-02'
     phase_status: in_progress
-    current_task: T100.1
-    current_action: 07_t100_1_pending
-    next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
-    report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+    current_task: null
+    current_action: 07_complete_08_pending
+    next_action: run 08-verify-build
+    report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
     s021_d19_decision: S021-D19
     s021_d19_decision_recorded: true
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-      S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+      filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+      S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
     substeps:
-      current_task: T100.1
-      task_status: pending
+      current_task: null
+      task_status: completed
       in_progress_tasks: []
       blocked_tasks: []
       completed_tasks_recent:
@@ -9700,12 +9734,23 @@ stages:
       - T99.3
       - T99.4
       - T99.5
-      next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+      - T100.1
+      - T100.2
+      - T100.3
+      - T100.4
+      next_action: run 08-verify-build
+      t100_1_status: completed
+      t100_1_ship_gate_pass: true
+      s021_d24_decision: S021-D24
+      t100_2_status: completed
+      t100_3_status: completed
+      t100_4_status: completed
+      m100_status: completed
       t99_4_status: completed
       t99_4_waiver: S021-D23
       t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
       t99_5_status: completed
-      t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+      t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       t99_4_blocker: null
       t99_4_note: COMPLETED — S021-D23 waive local TC-185; TC-186 + bug PASS
       t99_1_note: e2e test_uj061_retrieve_nonempty.py; TC-186 pass; TC-185 skip without local Postgres
@@ -9736,13 +9781,13 @@ stages:
         bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
         bug_status: filed_and_resolved
         guard: attach_embeddings + clear_embeddings + CI script
-        report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+        report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
         json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: false
-        commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+        commits_pending: true
+        commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
     s020_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -10591,18 +10636,18 @@ stages:
       bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
       bug_status: filed_and_resolved
       guard: attach_embeddings + clear_embeddings + CI script
-      report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+      report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
       script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
       completed_at: '2026-08-02'
       completed_at_ts: '2026-08-02T18:17:00Z'
-      commits_pending: false
-      commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+      commits_pending: true
+      commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
     rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
     s021_d22_executed: true
     t99_3_status: completed
-    commits_pending: false
-    commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+    commits_pending: true
+    commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
   08-verify-build:
     status: completed
     started_at: '2026-08-02'
@@ -19267,12 +19312,12 @@ evolve_cycles:
     Prod VECINITA_RAG_RERANK_CE stays false until re-gate passes. Predecessor EV-017 @ f24a620.
 
     '
-  current_stage: 07-build
-  current_action: 07_t100_1_pending
+  current_stage: 08-verify-build
+  current_action: 07_complete_08_pending
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-    S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+    filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+    S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -19376,7 +19421,7 @@ evolve_cycles:
       note: S021/EV-018 04-tech-plan COMPLETE 2026-08-02 — TP1–TP6 approved (S021-D18); Gate B→C PASS (S021-D19); handoff
         → 07-build T99.1
     07-build:
-      status: in_progress
+      status: completed
       started: '2026-08-02'
       started_at: '2026-08-02'
       session_id: S021-retrieval-follow-on
@@ -19389,29 +19434,31 @@ evolve_cycles:
       - F45
       phase: Phase 23 (M99-M100)
       milestone: M100
-      milestone_status: pending
+      milestone_status: completed
       m99_status: completed
+      m100_status: completed
+      m100_completed_at: '2026-08-02'
       m99_completed_at: '2026-08-02'
       phase_status: in_progress
-      current_task: T100.1
-      current_action: 07_t100_1_pending
-      next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+      current_task: null
+      current_action: 07_complete_08_pending
+      next_action: run 08-verify-build
       t99_4_status: completed
       t99_4_blocker: null
       t99_4_waiver: S021-D23
       t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
       t99_5_status: completed
-      t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+      t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       m99_status: completed
-      report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+      report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       s021_d19_decision: S021-D19
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-        S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
       substeps:
-        current_task: T100.1
-        task_status: pending
+        current_task: null
+        task_status: completed
         in_progress_tasks: []
         blocked_tasks: []
         completed_tasks_recent:
@@ -19420,7 +19467,24 @@ evolve_cycles:
         - T99.3
         - T99.4
         - T99.5
-        next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+        - T100.1
+        - T100.2
+        - T100.3
+        - T100.4
+        next_action: run 08-verify-build
+        t100_1_status: completed
+        t100_1_ship_gate_pass: true
+        t100_1_ce_p1_relevancy: 0.7778
+        t100_1_ce_p1_faith: 0.9375
+        t100_1_r0_p1_relevancy: 0.722
+        t100_1_r0_p1_faith: 0.9375
+        t100_1_golden_rows: 18
+        t100_1_pool: 20
+        s021_d24_decision: S021-D24
+        t100_2_status: completed
+        t100_3_status: completed
+        t100_4_status: completed
+        m100_status: completed
         t99_4_status: completed
         t99_4_completed_at: '2026-08-02'
         t99_4_waiver: S021-D23
@@ -19428,7 +19492,7 @@ evolve_cycles:
         t99_4_note: COMPLETED — S021-D23 waive local TC-185 (CI-gated); TC-186 PASS; bug 2/2 PASS; report t99-4-e2e-closeout.md
         t99_5_status: completed
         t99_5_completed_at: '2026-08-02'
-        t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+        t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
         t99_5_note: COMPLETED — F46 diagnose/root-cause + staging UJ-061 evidence closeout
         t99_4_progress:
           check_corpus_reset_guard: ok
@@ -19464,18 +19528,18 @@ evolve_cycles:
           bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
           bug_status: filed_and_resolved
           guard: attach_embeddings + clear_embeddings + CI script
-          report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+          report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
           json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
           script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
-          commits_pending: false
-          commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+          commits_pending: true
+          commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
       partial_rerun_at: '2026-08-02'
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
-        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t100_1_pending;
-        S021/EV-018 07-build 2026-08-02 — M99 COMPLETE (T99.4 @ S021-D23 waiver + T99.5 docs); current_task=T100.1; current_action=07_t100_1_pending; next_action=start T100.1 CE spike harness after UJ-061; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; commits_pending=false
+        filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_complete_08_pending;
+        S021/EV-018 07-build COMPLETE 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=07_complete_08_pending; next_action=run 08-verify-build; commits_pending=true
       s021_d20_decision: S021-D20
       s021_d20_decision_recorded: true
       root_cause: embed↔corpus pin drift
@@ -19507,18 +19571,18 @@ evolve_cycles:
         bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
         bug_status: filed_and_resolved
         guard: attach_embeddings + clear_embeddings + CI script
-        report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+        report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
         json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: false
-        commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+        commits_pending: true
+        commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
-      commits_pending: false
-      commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+      commits_pending: true
+      commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
     08-verify-build:
       status: pending
     09-qa:
@@ -19772,13 +19836,13 @@ evolve_cycles:
   s021_d22_decision: S021-D22
   s021_d22_decision_recorded: true
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: start T100.1 CE spike harness after UJ-061 (pointer only — do not execute ops yet)
+  next_action: run 08-verify-build
   t99_4_status: completed
   t99_4_blocker: null
   t99_4_waiver: S021-D23
   t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
   t99_5_status: completed
-  t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+  t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
   m99_status: completed
   t99_4_progress:
     check_corpus_reset_guard: ok
@@ -19802,18 +19866,18 @@ evolve_cycles:
     bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
     bug_status: filed_and_resolved
     guard: attach_embeddings + clear_embeddings + CI script
-    report: docs/sessions/S021-retrieval-follow-on/reports/t99-5-f46-closeout.md
+    report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
     json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
     script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
-    commits_pending: false
-    commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+    commits_pending: true
+    commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: false
-  commits_note: M99 close @ 2e2f80c; commits_pending=false; T100.1 remains pending
+  commits_pending: true
+  commits_note: M100/T100.1–T100.4 complete; CE ship-gate docs dirty — commits_pending=true
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -20911,6 +20975,22 @@ issue_log:
     interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
 - date: '2026-08-02'
+  skill: 07-build
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: S021-D24 — AC-BB9 PASS (ship_gate_pass=true; CE+P1 relevancy=0.7778 faith=0.9375);
+    keep VECINITA_RAG_RERANK_CE false until 12/13 deploy approval; T100.1–T100.4 complete; M100 complete
+  recorded_at: '2026-08-02T18:55:06Z'
+  note: JSON spike-f45-ce-ship-gate.json; reports t100-1/ce-ship-gate/phase23-gate/t100-4; 07-build complete → 08-verify-build;
+    commits_pending=true
+- date: '2026-08-02'
+  skill: 07-build
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: User Proceed — start T100.1 CE spike harness (bge-reranker-v2-m3 Modal T4) after UJ-061
+  recorded_at: '2026-08-02T18:49:00Z'
+  note: current_action=07_complete_08_pending; M100 in_progress; do not mark complete until spike results recorded
+- date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
@@ -20918,7 +20998,7 @@ decisions_log:
     complete T99.4 on TC-186 + bug PASS; T99.5 docs closeout; advance pointer to T100.1 (do not start CE ops yet)
   recorded_at: '2026-08-02T18:46:18Z'
   note: User directive "Skip docker desktop"; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; M99 completed;
-    current_action=07_t100_1_pending; commits_pending=false until doc deltas committed
+    current_action=07_complete_08_pending; commits_pending=true until doc deltas committed
 - date: '2026-08-02'
   skill: 07-build
   session_id: S021-retrieval-follow-on
@@ -20926,13 +21006,13 @@ decisions_log:
   decision: T99.4 blocked — TC-186 PASS, bug tests 2/2 PASS, TC-185 SKIPPED (Postgres unavailable); Docker Desktop
     processes present but docker.sock never appeared (~3min); port 5432 closed
   recorded_at: '2026-08-02T18:26:00Z'
-  note: current_action=07_t100_1_pending; do NOT mark T99.4 completed; await healthy Docker sock +
-    with_local_postgres pytest for UJ-061; state sync @ ab1006f (commits_pending=false)
+  note: current_action=07_complete_08_pending; do NOT mark T99.4 completed; await healthy Docker sock +
+    with_local_postgres pytest for UJ-061; state sync @ ab1006f (commits_pending=true)
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
-  decision: Recorded commits c447577 (T99.3 fix/guard) + be74777 (T99.1–T99.3 docs/Path B evidence); commits_pending=false;
+  decision: Recorded commits c447577 (T99.3 fix/guard) + be74777 (T99.1–T99.3 docs/Path B evidence); commits_pending=true;
     T99.4 set in_progress — run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 remains completed; T99.5 pending
   recorded_at: '2026-08-02T18:20:43Z'
   note: User approved split commit + continue T99.4; current_action was 07_t99_4_in_progress; HEAD be74777
@@ -23195,11 +23275,12 @@ decisions_log:
   / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
   filed+resolved; guard attach_embeddings+clear_embeddings+CI; report docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md;
   commits @ c447577 + be74777; T99.4 in_progress — e2e green closeout; T99.5 pending'
-- '2026-08-02T18:20:43Z S021/EV-018: commits c447577 + be74777 recorded; commits_pending=false; T99.4 in_progress
+- '2026-08-02T18:20:43Z S021/EV-018: commits c447577 + be74777 recorded; commits_pending=true; T99.4 in_progress
   (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending'
 - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — TC-186 PASS; bug 2/2 PASS; TC-185 SKIPPED (Postgres);
-  Docker sock missing / 5432 closed; await user Docker Desktop; T99.4 NOT completed; commits_pending=false'
-- '2026-08-02T18:46:18Z S021/EV-018: S021-D23 Skip Docker Desktop — T99.4 COMPLETE (TC-186+bug PASS; TC-185 CI-gated); T99.5 COMPLETE; M99 COMPLETE; pointer T100.1 pending (no CE ops yet); commits_pending=false'
+  Docker sock missing / 5432 closed; await user Docker Desktop; T99.4 NOT completed; commits_pending=true'
+- '2026-08-02T18:46:18Z S021/EV-018: S021-D23 Skip Docker Desktop — T99.4 COMPLETE (TC-186+bug PASS; TC-185 CI-gated); T99.5 COMPLETE; M99 COMPLETE; pointer T100.1 pending (no CE ops yet); commits_pending=true'
+- '2026-08-02T18:55:06Z S021/EV-018: S021-D24 AC-BB9 PASS ship_gate_pass=true CE+P1 0.7778/0.9375; T100.1–T100.4 COMPLETE; M100 COMPLETE; 07→08; CE flag remains false; commits_pending=true'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
@@ -25021,6 +25102,70 @@ artifacts:
   decision: S021-D22
   note: T99.3 Path B — BUG filed and resolved; staging basis_vector wipe + attach_embeddings guard
   task: T99.3
+- path: docs/sessions/S021-retrieval-follow-on/reports/t100-1-ce-ship-gate.md
+  kind: ship-gate-report
+  session_id: S021-retrieval-follow-on
+  stage: 07-build
+  skill_id: 07-build
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T18:55:06Z'
+  status: completed
+  decision: S021-D24
+  task: T100.1
+  note: T100.1 COMPLETE — ship_gate_pass=true; CE+P1 0.7778/0.9375
+- path: docs/sessions/S021-retrieval-follow-on/reports/ce-ship-gate.md
+  kind: ship-gate-report
+  session_id: S021-retrieval-follow-on
+  stage: 07-build
+  skill_id: 07-build
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T18:55:06Z'
+  status: completed
+  decision: S021-D24
+  task: T100.2
+  note: T100.2 COMPLETE — CE ship-gate report filled; AC-BB9 PASS; CE flag stays false
+- path: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
+  kind: phase-gate
+  session_id: S021-retrieval-follow-on
+  stage: 07-build
+  skill_id: 07-build
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T18:55:06Z'
+  status: completed
+  task: T100.3
+  note: T100.3 COMPLETE — Phase 23 gate checklist
+- path: docs/sessions/S021-retrieval-follow-on/reports/t100-4-ce-default-off.md
+  kind: test-closeout
+  session_id: S021-retrieval-follow-on
+  stage: 07-build
+  skill_id: 07-build
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T18:55:06Z'
+  status: completed
+  task: T100.4
+  note: T100.4 COMPLETE — TC-183 e2e + config default-off PASS
+- path: docs/sessions/S021-retrieval-follow-on/reports/spike-f45-ce-ship-gate.json
+  kind: ship-gate-json
+  session_id: S021-retrieval-follow-on
+  stage: 07-build
+  skill_id: 07-build
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T18:55:06Z'
+  status: completed
+  decision: S021-D24
+  task: T100.1
+  note: Live CE ship-gate JSON (S021 copy); also S020 path
+- path: docs/sessions/S020-retrieval-batch-b/reports/spike-f45-ce-ship-gate.json
+  kind: ship-gate-json
+  session_id: S021-retrieval-follow-on
+  stage: 07-build
+  skill_id: 07-build
+  evolve_cycle_id: EV-018
+  recorded_at: '2026-08-02T18:55:06Z'
+  status: completed
+  decision: S021-D24
+  task: T100.1
+  note: Live CE ship-gate JSON (S020 canonical path)
 - path: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
   kind: e2e-closeout
   session_id: S021-retrieval-follow-on
@@ -27753,9 +27898,11 @@ git_history:
     skill_ids:
     - 09-qa
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
-  - '2026-08-02T18:46:18Z S021/EV-018: M99 COMPLETE — S021-D23; T99.4+T99.5 done; current_task=T100.1 07_t100_1_pending; commits_pending=false (doc deltas).'
-  - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — guard OK; bug 2/2 PASS; TC-186 PASS; TC-185 SKIPPED (no Postgres); Docker sock missing; next=user start Docker Desktop then with_local_postgres; T99.4 NOT completed; commits_pending=false (state sync dirty).'
-  - '2026-08-02T18:20:43Z S021/EV-018: synced 07-build — commits c447577 + be74777 recorded; commits_pending=false; current_task=T99.4 in_progress; current_action=07_t100_1_pending; next_action=run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending.'
+  - '2026-08-02T18:55:06Z S021/EV-018: 07-build M99+M100 COMPLETE — S021-D24 AC-BB9 PASS; T100.1–T100.4 done; current_stage→08-verify-build; commits_pending=true.'
+  - '2026-08-02T18:49:00Z S021/EV-018: T100.1 in_progress — user Proceed; CE spike harness bge-reranker-v2-m3 Modal T4 after UJ-061.'
+  - '2026-08-02T18:46:18Z S021/EV-018: M99 COMPLETE — S021-D23; T99.4+T99.5 done; current_task=T100.1 07_t100_1_pending; commits_pending=true (doc deltas).'
+  - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — guard OK; bug 2/2 PASS; TC-186 PASS; TC-185 SKIPPED (no Postgres); Docker sock missing; next=user start Docker Desktop then with_local_postgres; T99.4 NOT completed; commits_pending=true (state sync dirty).'
+  - '2026-08-02T18:20:43Z S021/EV-018: synced 07-build — commits c447577 + be74777 recorded; commits_pending=true; current_task=T99.4 in_progress; current_action=07_complete_08_pending; next_action=run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending.'
   - '2026-08-02T15:34:08Z S020/EV-017: synced 07-build — T98.1–T98.4 COMPLETE @ 59edd12; M98 COMPLETE; Phase 22 M94–M98 ALL
     COMPLETE; current_stage=07-build (completed); next_action=08-verify-build (deferred until before Phase C PR); 08 NOT started;
     checkpoints.phase_c still pending; appended commits d2e9043/8b81a42/21b52dc/59edd12; folded prior uncommitted M97/T98.1
