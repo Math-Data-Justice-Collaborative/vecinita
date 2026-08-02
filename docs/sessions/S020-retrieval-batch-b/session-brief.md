@@ -94,8 +94,14 @@ See [reports/tech-plan-delta.md](./reports/tech-plan-delta.md) · [ADR-042](../.
 ## F45 CE spike
 
 - Runbook: [reports/spike-f45-ce-runbook.md](./reports/spike-f45-ce-runbook.md)
+- Ship-gate template: [reports/ce-ship-gate.md](./reports/ce-ship-gate.md)
 - Metrics JSON (after live run): `reports/spike-f45-ce-ship-gate.json`
 - Scripts: `scripts/spike_f45_ce_modal.py`, `scripts/spike_f45_ce_ship_gate.py`
+
+## Phase 22 gate
+
+- Checklist: [reports/phase22-gate-checklist.md](./reports/phase22-gate-checklist.md)
+- ADR: [ADR-042](../../adr/ADR-042-in-process-h1-answer-cache.md)
 
 ## Evolve
 

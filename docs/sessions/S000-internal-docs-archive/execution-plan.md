@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
-| **Active milestone** | M98 — E2E + ship-gate docs + Phase 22 close |
-| **Active task** | T98.4 — Phase 22 gate checklist — in_progress |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M97; M98: T98.1–T98.3 |
+| **Active milestone** | M98 — completed; Phase 22 build complete |
+| **Active task** | 08-verify-build — deferred until before Phase C PR |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98 (T94.1–T98.4) |
 | **Last updated** | 2026-08-02 |
-| **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
+| **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 done |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
-| **Active session** | S020-retrieval-batch-b — Gate B→C passed (S020-D18); 07-build at T98.1 (M97 complete) |
+| **Active session** | S020-retrieval-batch-b — M94–M98 complete; next 08-verify-build → Phase C PR |
 | **Scope addition** | 2026-08-02 — F43 H1 cache + F44 soft L1 + F45 CE spike/gate; ADR-042; S020-D15–D18. |
 
 ## Template
@@ -1954,20 +1954,22 @@ unit tests TC-170–172.
 | T98.1 | Test: finish/green `tests/e2e/test_uj057_answer_cache.py` (TC-176–179) | Test | completed | UJ-057, e2e-coverage | T95.3, T95.4 | 2026-08-02 | S020 | F43 |
 | T98.2 | Test: CE path e2e with mock (UJ-059) when flag on | Test | completed | UJ-059, TC-182–183 | T97.3 | 2026-08-02 | S020 | F45 |
 | T98.3 | Docs: CE ship-gate report template (relevancy ≥0.28 / faith ≥0.91) — Path A | Docs | completed | AC-BB9, TC-184, RD-205/206 | T97.5 | 2026-08-02 | S020 | F45 |
-| T98.4 | Docs: Phase 22 gate checklist + ADR-042 cross-links; execution-plan Current State | Docs | pending | Phase 22 gate | T96.4, T98.1–T98.3 | — | S020 | F43–F45 |
+| T98.4 | Docs: Phase 22 gate checklist + ADR-042 cross-links; execution-plan Current State | Docs | completed | Phase 22 gate | T96.4, T98.1–T98.3 | 2026-08-02 | S020 | F43–F45 |
 
 #### Phase 22 Gate Check
 
-- [ ] All M94–M98 tasks completed (T94.1–T98.4)
-- [ ] TC-176–TC-183 green at T2 (TC-184 / CE ship metrics at 12/13 staging)
-- [ ] AC-BB1–AC-BB8, AC-BB10 at T2 (AC-BB9 staging evidence at deploy)
-- [ ] `cache_hit` in OpenAPI + ask/stream; OpenAPI check script green
-- [ ] Soft language + CE flags default **off**
-- [ ] CE spike uses ephemeral Modal T4; ChatRAG never playground URL
-- [ ] No LangGraph; no durable volume cache; content-hash keys only (ADR-042 / ADR-004)
-- [ ] ruff / basedpyright clean; pytest e2e UJ-057–059 green
+- [x] All M94–M98 tasks completed (T94.1–T98.4)
+- [x] TC-176–TC-183 green at T2 (TC-184 / CE ship metrics at 12/13 staging)
+- [x] AC-BB1–AC-BB8, AC-BB10 at T2 (AC-BB9 staging evidence at deploy)
+- [x] `cache_hit` in OpenAPI + ask/stream; OpenAPI check script green
+- [x] Soft language + CE flags default **off**
+- [x] CE spike uses ephemeral Modal T4; ChatRAG never playground URL
+- [x] No LangGraph; no durable volume cache; content-hash keys only (ADR-042 / ADR-004)
+- [x] ruff / basedpyright clean; pytest e2e UJ-057–059 green
 
-**Ship-gate doc (CE):** `docs/sessions/S020-retrieval-batch-b/reports/ce-ship-gate.md` (create in T98.3)
+**Ship-gate doc (CE):** `docs/sessions/S020-retrieval-batch-b/reports/ce-ship-gate.md`  
+**Gate checklist:** `docs/sessions/S020-retrieval-batch-b/reports/phase22-gate-checklist.md`  
+**Note:** AC-BB9 / TC-184 staging metrics still open until spike JSON filled (12/13).
 
 ---
 
@@ -2688,7 +2690,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T98.1 | M98 | 22 | Test | completed | T95.3, T95.4 | 2026-08-02 | S020 | F43 | — |
 | T98.2 | M98 | 22 | Test | completed | T97.3 | 2026-08-02 | S020 | F45 | — |
 | T98.3 | M98 | 22 | Docs | completed | T97.5 | 2026-08-02 | S020 | F45 | — |
-| T98.4 | M98 | 22 | Docs | in_progress | T96.4, T98.1–T98.3 | — | S020 | F43–F45 | — |
+| T98.4 | M98 | 22 | Docs | completed | T96.4, T98.1–T98.3 | 2026-08-02 | S020 | F43–F45 | — |
 
 ## Phase Gate Log
 

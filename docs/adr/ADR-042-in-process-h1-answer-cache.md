@@ -69,3 +69,5 @@ Observability: `cache_hit` ∈ {`none`, `exact`, `semantic`, `retrieve`} on `/as
 - AC-BB1–BB4, AC-BB10; TC-176–179; UJ-057
 - ADR-004, ADR-006, ADR-040, ADR-041
 - S019 `spike-harness-cache.md`; RD-197–201, RD-207
+- S020 Phase 22 gate: `docs/sessions/S020-retrieval-batch-b/reports/phase22-gate-checklist.md`
+- S020 e2e: `tests/e2e/test_uj057_answer_cache.py` (F43); F44/F45 siblings UJ-058/UJ-059
