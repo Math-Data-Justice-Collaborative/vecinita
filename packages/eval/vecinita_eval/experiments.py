@@ -26,6 +26,8 @@ _DEFAULT_METRICS: tuple[str, ...] = (
     "wall_time_s",
     "latency_p95_ms",
     "spawn_wall_time_s",
+    "cache_hit_rate",
+    "relative_llm_cost",
 )
 
 

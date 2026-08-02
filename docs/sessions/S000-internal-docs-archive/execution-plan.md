@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
-| **Active milestone** | M95 — F43 ChatRAG wire + OpenAPI + F36 harness |
-| **Active task** | T95.5 — F36 / harness warm/cold cost + hit-rate cells — next |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94 (T94.1–T94.5) |
+| **Active milestone** | M96 — F44 Soft language L1 + empty-hit fixture |
+| **Active task** | T96.1 — unit L1 empty same-lang first pass (TC-180) — next |
+| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94, M95 (T94.1–T95.5) |
 | **Last updated** | 2026-08-02 |
 | **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; **07-build** Phase 22 |
 | **Git branch** | `evolve/EV-017-retrieval-batch-b` |
@@ -1920,7 +1920,7 @@ unit tests TC-170–172.
 | T95.2 | Test: API e2e — ask exposes `cache_hit` exact path (TC-179) — red | Test | completed | UJ-057, TC-179, AC-BB4 | T94.4 | 2026-08-02 | S020 | F43 |
 | T95.3 | Code: ChatRAG ask/stream wire cascade; stream `done` includes `cache_hit` | Code | completed | spec.md F43, api-contract | T95.1, T95.2 | 2026-08-02 | S020 | F43 |
 | T95.4 | Config: `openapi/chat-rag.yaml` + contract check for `cache_hit` (M4) | Config | completed | ADR-011, S020-D15 | T95.3 | 2026-08-02 | S020 | F43 |
-| T95.5 | Code: F36 / harness warm/cold cost + hit-rate cells (quality ≥ H0) | Code | pending | AC-BB2, RD-199 | T95.3 | — | S020 | F43 |
+| T95.5 | Code: F36 / harness warm/cold cost + hit-rate cells (quality ≥ H0) | Code | completed | AC-BB2, RD-199 | T95.3 | 2026-08-02 | S020 | F43 |
 
 #### M96: F44 — Soft language L1 + empty-hit fixture
 
@@ -2674,7 +2674,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T95.1 | M95 | 22 | Test | completed | T94.4 | — | S020 | F43 | — |
 | T95.2 | M95 | 22 | Test | completed | T94.4 | — | S020 | F43 | — |
 | T95.3 | M95 | 22 | Code | completed | T95.1, T95.2 | — | S020 | F43 | — |
-| T95.4 | M95 | 22 | Config | pending | T95.3 | — | S020 | F43 | — |
+| T95.4 | M95 | 22 | Config | completed | T95.3 | — | S020 | F43 | — |
 | T95.5 | M95 | 22 | Code | pending | T95.3 | — | S020 | F43 | — |
 | T96.1 | M96 | 22 | Test | pending | T94.4 | — | S020 | F44 | — |
 | T96.2 | M96 | 22 | Test | pending | — | — | S020 | F44 | — |
