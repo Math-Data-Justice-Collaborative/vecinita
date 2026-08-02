@@ -1,4 +1,4 @@
-overall_status: in_progress
+overall_status: completed
 project:
   name: Vecinita
   description: Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)
@@ -2329,7 +2329,7 @@ project:
       started_at: '2026-08-01'
       completed_at: '2026-08-01'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; user approved closeout option 1 — opening PR to main
+      partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; PR #172 opened after closeout option 1
       session_id: S019-retrieval-quality
       branch: evolve/EV-016-retrieval-quality
       evolve_cycle_id: EV-016
@@ -2338,12 +2338,19 @@ project:
       feature: F42
       feature_ids:
       - F42
-      commits_head: 5693422
+      commits_head: 73df939
       commit_deployed: 5693422
-      current_action: completed_awaiting_pr_merge
-      next_action: open PR to main; await merge; reset DO pins after merge
+      current_action: merged
+      next_action:
       ac_rq6_disposition: investigate_fix_option_1_resolved
-      merge_gate: pending_merge
+      merge_gate: merged
+      pr_number: 172
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+      pr_status: merged
+      pr_head_sha: 73df939
+      merge_sha: b08ec30
+      merge_commit: b08ec30
+      pr_merged_at: '2026-08-01'
       deploy_path: A
       path_a_staging_result: PASS
       overall_result: path_a_pass_ac_rq6_pass
@@ -2363,7 +2370,7 @@ project:
         evidence: 20260802T022836Z_hybrid-sweep.json
         relevancy: 0.833
         faith: 0.938
-      note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
+      note: PR #172 merged @ b08ec30 — DO pins main ACTIVE; H0ci PASS; S019 closed (S019-D53); 15 skipped; next_action=none
       s017_baseline:
         mode: evolve
         delta_only: true
@@ -2692,6 +2699,12 @@ project:
         advisories:
         - 'H1: transient modal_llm=error recovered'
       - status: skipped
+        completed_at: '2026-08-01'
+        session_id: S019-retrieval-quality
+        session_note: 'S019 waived optional 15 at close (S019-D53); user option 1; EV-016/F42 already live @ b08ec30'
+        overall: skipped
+        waiver: Optional at close — user chose skip (S019-D53)
+      - status: skipped
         completed_at: '2026-07-29'
         session_id: S015-hotfix-jobs-sse-cors
         session_note: 'S015 waived formal H0ci–H5; user Option 1 close for #87; live CORS OPTIONS /jobs/events PASS @ 15030fc (PR #155)'
@@ -2931,17 +2944,18 @@ project:
       close_decision: option_2_close_push_prevention_pause_batch_a
       summary: 'S018 eval job dispatch hotfix complete. PR #169 merged and prod verified. Phase 5 prevention on fix/S018-job-dispatch-prevention @ 8a8cd48 (registry + husky pre-commit + checklist + job-terminal-state rule). Bug BUG-2026-07-31-eval-job-dispatch resolved. User paused before Batch A retrieval evolve.'
 session_counter: 19
-active_session:
-  id: S019-retrieval-quality
+active_session: null
+sessions:
+- id: S019-retrieval-quality
   type: feature
   slug: retrieval-quality
   intent: 'Batch A retrieval quality: investigate #158 top_k, #161 rerank→#83, #165 context packing, #162 soft language filter on F36; pick winners; allocate one Fn (F42); ship at most one change. Full #83 parent if rerank wins. Out: #82/#84/#76.'
-  status: in_progress
+  status: completed
   branch: evolve/EV-016-retrieval-quality
   orchestrator: 16-evolve
   evolve_cycle_id: EV-016
   artifacts_dir: docs/sessions/S019-retrieval-quality/
-  current_stage: 13-deploy-smoke
+  current_stage: completed
   started_at: '2026-07-31'
   routing_plan_status: approved
   routing_preset: standard
@@ -3096,7 +3110,7 @@ active_session:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: 5693422
+  commits_head: 73df939
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -3113,11 +3127,18 @@ active_session:
   s019_d52_decision: S019-D52
   s019_d52_decision_recorded: true
   s019_d52_note: Hy1 PASS — relevancy 0.833 faith 0.938 (20260802T022836Z_hybrid-sweep.json)
-  current_action: opening_pr_to_main
+  current_action: closed
   preparing_11: false
-  next_action: open PR to main; await merge; reset DO pins after merge
+  next_action:
+  pr_number: 172
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+  pr_status: merged
+  pr_head_sha: 73df939
+  merge_sha: b08ec30
+  merge_commit: b08ec30
+  pr_merged_at: '2026-08-01'
   ac_rq6_disposition: investigate_fix_option_1_resolved
-  merge_gate: pending_merge
+  merge_gate: merged
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
@@ -3177,7 +3198,7 @@ active_session:
   - tests/unit/modal/test_llm_engine_awq_kwargs.py
   feature_ids_note: 'F42 = H7+P1 (Hy1) on E0 per S019-D31/D37; E1 rejected; #159 open outside F42; F43 not allocated'
   phase0_notes: phase0_approved=true (S019-D37). E1 F36 done — do NOT ship E1; F41 rebuild 1fa1dec9-f5a0-4670-afa2-a71fe039d479 not promoted; artifact 20260801T130441Z_e1-shadow-f36.json. F42=H7+P1 on E0; handoff → 01-requirements.
-  note: 'S019/EV-016 — 2026-08-01: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; DO pins stay on evolve until post-merge reset; gates.deploy=passed_pending_merge'
+  note: 'S019/EV-016 CLOSED 2026-08-01 — PR #172 MERGED @ b08ec30; F42 LIVE; DO pins main ACTIVE; H0ci PASS; 15-service-health skipped (S019-D53); session archived; next_action=none'
   blocking_note: ISS-008 deploy remains ship path prereq (not Phase A entry blocker); prod embed pin BAAI/bge-small-en-v1.5 unchanged; ADR-006 amend deferred
   a0_status: staging_complete
   a1_status: complete_no_retrieval_lift
@@ -3327,6 +3348,8 @@ active_session:
   - docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
   - docs/deployment-integration.md
   - docs/deploy-checklist.md
+  - docs/sessions/S019-retrieval-quality/reports/evolve-summary.md
+  - docs/evolve-report-EV-016.md
   routing_plan:
   - stage: 00-context
     required: true
@@ -3571,17 +3594,26 @@ active_session:
     started_at: '2026-08-01'
     completed_at: '2026-08-01'
     skip_rationale:
-    current_action: completed_awaiting_pr_merge
-    next_action: open PR to main; await merge; reset DO pins after merge
+    current_action: merged
+    next_action: none
     ac_rq6_disposition: investigate_fix_option_1_resolved
-    merge_gate: pending_merge
+    merge_gate: merged
+    pr_number: 172
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+    pr_status: merged
+    pr_head_sha: 73df939
+    merge_sha: b08ec30
+    merge_commit: b08ec30
+    pr_merged_at: '2026-08-01'
     report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
     overall_result: path_a_pass_ac_rq6_pass
-    note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
+    note: PR #172 merged @ b08ec30 — DO pins main ACTIVE; H0ci PASS; S019 closed (S019-D53); 15 skipped
   - stage: 15-service-health
     required: false
-    status: pending
-    skip_rationale: Optional at close — not required for Standard closeout
+    status: skipped
+    skip_rationale: Optional at close — user chose skip (S019-D53)
+    skipped_at: '2026-08-01'
+    note: Skipped — user chose option 1 close session; leave out-of-scope Modal/LLM dirty files alone
   context_briefs: []
   s019_d37_decision: S019-D37
   s019_d37_decision_status: recorded
@@ -3604,7 +3636,19 @@ active_session:
   manual_inspection: *id027
   f42_signoff_waiver: approve_on_t0_and_openapi_for_11
   staging_inspection_deferred_to: 12/13
-sessions:
+  completed_at: '2026-08-01'
+  closed_at: '2026-08-01'
+  archived_at: '2026-08-01'
+  session_closed: true
+  session_closed_at: '2026-08-01'
+  close_decision: S019-D53
+  close_note: 'User option 1 — Close session now; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone (S019-D53). PR #172 MERGED @ b08ec30; F42 LIVE; EV-016 remains completed; active_session=null; pipeline idle.'
+  user_close_choice: close_session_skip_15
+  user_close_option: 1
+  s019_d53_decision: S019-D53
+  s019_d53_decision_recorded: true
+  s019_d53_note: Close session now; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone
+  summary: 'S019/EV-016 CLOSED — F42 H7+P1 on E0 shipped via PR #172 @ b08ec30; DO pins main; H0ci PASS; 15 skipped (S019-D53); evolve-summary + evolve-report-EV-016 recorded.'
 - id: S018-eval-job-dispatch
   type: hotfix
   intent: Fix Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with BatchUpsertRequest ValidationError. Wire run_job to eval worker (path A). Also address/document secondary top_k=5 vs vLLM max_model_len=2048 issue in same hotfix if straightforward.
@@ -8583,7 +8627,7 @@ stages:
     started_at: '2026-08-01'
     completed_at: '2026-08-01'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; user approved closeout option 1 — opening PR to main
+    partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; PR #172 opened after closeout option 1
     session_id: S019-retrieval-quality
     branch: evolve/EV-016-retrieval-quality
     evolve_cycle_id: EV-016
@@ -8592,12 +8636,19 @@ stages:
     feature: F42
     feature_ids:
     - F42
-    commits_head: 5693422
+    commits_head: 73df939
     commit_deployed: 5693422
-    current_action: completed_awaiting_pr_merge
-    next_action: open PR to main; await merge; reset DO pins after merge
+    current_action: merged
+    next_action:
     ac_rq6_disposition: investigate_fix_option_1_resolved
-    merge_gate: pending_merge
+    merge_gate: merged
+    pr_number: 172
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+    pr_status: merged
+    pr_head_sha: 73df939
+    merge_sha: b08ec30
+    merge_commit: b08ec30
+    pr_merged_at: '2026-08-01'
     deploy_path: A
     path_a_staging_result: PASS
     overall_result: path_a_pass_ac_rq6_pass
@@ -8617,7 +8668,7 @@ stages:
       evidence: 20260802T022836Z_hybrid-sweep.json
       relevancy: 0.833
       faith: 0.938
-    note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
+    note: PR #172 opened after 13 closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; watching CI then merge; pins reset after merge
     s017_baseline:
       mode: evolve
       delta_only: true
@@ -9266,13 +9317,13 @@ deployment:
     t0_note: F42 delta T0 PASS UJ-055 2/2; full e2e suite infra-blocked (no Docker/Postgres)
   staging:
     status: deployed
-    last_verified: '2026-08-02'
-    commit_deployed: 5693422
-    commit_head: 5693422
-    drift: true
-    branch: evolve/EV-016-retrieval-quality
-    commit_deployed_note: 'S019/EV-016 Path A PASS @ 5693422 — DO write-api + chat-rag pinned evolve; H1–H5 PASS; ISS-008 18-item confirmed; AC-RQ6 PASS relevancy 0.833 vs floor 0.28 (faith 0.938); 13 closeout approved — opening PR; pins reset after merge'
-    staging_note: DO pins on evolve for write-api + chat-rag until PR merge; AC-RQ6/Hy1 PASS; opening PR to main
+    last_verified: '2026-08-01'
+    commit_deployed: b08ec30
+    commit_head: b08ec30
+    drift: false
+    branch: main
+    commit_deployed_note: 'S019/EV-016 PR #172 merged @ b08ec30 — DO write-api + chat-rag ACTIVE on main; H0ci CI+deploy-preflight PASS; F42 LIVE'
+    staging_note: EV-016 post-merge — DO pins reset to main ACTIVE @ b08ec30; drift=false
     modal_data_management:
       redeployed_at: '2026-07-31'
       commit: a6c39e57e856e75d149b1ac1af82d6e92243af19
@@ -9292,15 +9343,19 @@ deployment:
         session_id: S015-hotfix-jobs-sse-cors
         note: S015 Jobs SSE CORS hotfix — live OPTIONS /jobs/events PASS after redeploy
     evolve_pin:
-      cycle: EV-016
-      session: S019-retrieval-quality
-      branch: evolve/EV-016-retrieval-quality
-      commit: 5693422
-      status: pinned_active
-      apps:
-        vecinita-internal-write-api: ACTIVE
-        vecinita-chat-rag-backend: ACTIVE
-      note: 'EV-016 Path A — DO write-api + chat-rag pinned ACTIVE on evolve @ 5693422; 13 closeout approved; opening PR to main; pins reset after merge'
+      status: cleared
+      cleared_at: '2026-08-01'
+      note: 'EV-016 post-merge — evolve pin cleared after PR #172 @ b08ec30; DO write-api + chat-rag ACTIVE on main'
+      prior_pinned:
+        cycle: EV-016
+        session: S019-retrieval-quality
+        branch: evolve/EV-016-retrieval-quality
+        commit: 5693422
+        status: pinned_active
+        apps:
+          vecinita-internal-write-api: ACTIVE
+          vecinita-chat-rag-backend: ACTIVE
+        note: 'EV-016 Path A — DO write-api + chat-rag pinned ACTIVE on evolve @ 5693422 until PR #172 merge'
       prior_cleared:
         cycle: EV-015
         session: S017-corpus-reembed-migration
@@ -9347,6 +9402,23 @@ deployment:
       ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30594671225
       deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30594830511
       note: EV-015 post-merge — evolve pin cleared; DO write-api + admin FE ACTIVE on main @ c7cda84; H0ci PASS (ci.yml + deploy-preflight.yml)
+    ev016_main_transition:
+      merge_commit: b08ec30
+      pr_number: 172
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+      pins_reset_at: '2026-08-01'
+      apps:
+        vecinita-internal-write-api:
+          github_branch: main
+          status: ACTIVE
+          note: 'Reset to main after EV-016 / PR #172 merge'
+        vecinita-chat-rag-backend:
+          github_branch: main
+          status: ACTIVE
+          note: 'Reset to main after EV-016 / PR #172 merge'
+      status: deployments_active_on_main
+      h0ci: pass
+      note: EV-016 post-merge — evolve pin cleared; DO write-api + chat-rag ACTIVE on main @ b08ec30; H0ci PASS (ci.yml + deploy-preflight.yml)
     alembic_revision: '20260730_0010'
     alembic_prior: '202607280009'
     urls:
@@ -9377,7 +9449,9 @@ deployment:
       hy1_ship_gate: pass
       hy1_evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
     notes:
-    - 'S019/EV-016 2026-08-02 Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52) relevancy 0.833 faith 0.938; H1–H5 PASS; awaiting user closeout/PR'
+    - 'S019/EV-016 2026-08-01 CLOSED+ARCHIVED — user option 1 (S019-D53): close session; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone; S019 in sessions[]; active_session=null; EV-016 remains completed; DO pins main; drift=false @ b08ec30; H0ci PASS; F42 LIVE; next_action=none/idle'
+    - 'S019/EV-016 2026-08-01 PR #172 MERGED @ b08ec30 — DO pins main ACTIVE; H0ci PASS; F42 LIVE; session closed (S019-D53); 15 skipped'
+    - 'S019/EV-016 2026-08-02 Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52) relevancy 0.833 faith 0.938; H1–H5 PASS; PR #172 MERGED @ b08ec30; session closed (S019-D53)'
     - 'S018 2026-07-31 CLOSED — user option 2: close session + push/PR prevention only; pause before Batch A. active_session=null; S018 archived. Prevention @ 8a8cd48 on fix/S018-job-dispatch-prevention (push/PR pending). PR #169 merged + prod verified; BUG-2026-07-31 resolved.'
     - 'S018 2026-07-31: Prevention committed 8a8cd48 on fix/S018-job-dispatch-prevention. Awaiting user close + push/PR decision. Phase 5.6 AskQuestion close_session; then Batch A via 00-context. Session remains open.'
     - 'S018 2026-07-31: BUG-2026-07-31 resolved. Prevention implemented (registry + husky + checklist + rule). Prevention commit pending on fix/S018-job-dispatch-prevention. Phase 5.6 AskQuestion close_session next; do not close_session yet.'
@@ -9420,6 +9494,21 @@ deployment:
       deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560
       deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804
       deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533
+    s019_ev016:
+      cycle: EV-016
+      session: S019-retrieval-quality
+      pr_number: 172
+      merge_commit: b08ec30
+      commit_deployed: b08ec30
+      pins: main
+      h0ci: pass
+      f42: true
+      note: S019/EV-016 CLOSED+ARCHIVED 2026-08-01 — S019-D53 close_session; active_session=null; EV-016 completed; 15 skipped; next_action=none
+      status: closed_archived
+      session_archived: true
+      archived_at: '2026-08-01'
+      drift: false
+      next_action: none
     s017_ev015:
       cycle: EV-015
       session: S017-corpus-reembed-migration
@@ -13353,7 +13442,7 @@ evolve_cycles:
   feature_ids_note: 'F42 = H7+P1 (Hy1) on E0 per S019-D31/D37; E1 rejected; #159 open outside F42; F43 not allocated'
   feature_ids_pending_note: 'F42 = H7+P1 on E0 (S019-D31/S019-D37); E1 rejected; ISS-008 deploy ship prereq (not Phase A entry blocker); #159 open outside F42; F43 not allocated; phase0_approved=true'
   title: Batch A — Retrieval quality (investigate → ship)
-  status: in_progress
+  status: completed
   started: '2026-07-31'
   started_at: '2026-07-31'
   session_id: S019-retrieval-quality
@@ -13372,8 +13461,8 @@ evolve_cycles:
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/161
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/165
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
-  current_stage: 13-deploy-smoke
-  current_stage_note: '2026-08-01 — User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; DO pins stay on evolve until post-merge reset; gates.deploy=passed_pending_merge'
+  current_stage: completed
+  current_stage_note: '2026-08-01 — PR #172 MERGED @ b08ec30; F42 LIVE; DO pins main ACTIVE; H0ci PASS; session closed (S019-D53); 15 skipped; next_action=none'
   mode: evolve
   delta_only: true
   branch: evolve/EV-016-retrieval-quality
@@ -13523,7 +13612,7 @@ evolve_cycles:
   s019_d45_note: Phase B checkpoint approved (option 1) — gate B→C → start 07-build T91.1
   phase21_tasks_complete: true
   commits_status: landed
-  commits_head: 5693422
+  commits_head: 73df939
   s019_d46_decision: S019-D46
   s019_d46_decision_recorded: true
   s019_d46_note: Phase C checkpoint approved (option 1) — gate C→D → start 09-qa + 10-e2e
@@ -13531,9 +13620,26 @@ evolve_cycles:
   s019_d47_decision_recorded: true
   s019_d47_note: Fix in place QA-S019-B01/B02/B03 COMPLETE; 09 pass_with_advisories; ready for 11-verify-impl
   s019_d47_choice: option_1_fix_in_place_b01_b03
-  current_action: running_13_deploy_smoke
+  current_action: closed
   preparing_11: false
-  next_action: pushing_branch_then_path_a_pin
+  next_action:
+  pr_number: 172
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+  pr_status: merged
+  pr_head_sha: 73df939
+  merge_sha: b08ec30
+  merge_commit: b08ec30
+  pr_merged_at: '2026-08-01'
+  completed_at: '2026-08-01'
+  closed_at: '2026-08-01'
+  archived: true
+  archived_at: '2026-08-01'
+  session_archived: true
+  close_decision: S019-D53
+  close_note: 'User option 1 — Close S019; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone. Cycle status remains completed.'
+  s019_d53_decision: S019-D53
+  s019_d53_decision_recorded: true
+  s019_d53_note: Close session now; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone
   verify_11_result: approved
   verify_11_report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
   verify_11_completed_at: '2026-08-02T01:31:00Z'
@@ -13701,7 +13807,7 @@ evolve_cycles:
     Harness H0-H9 COMPLETE (H7 relevancy 0.31; H1/H9 cost win; H2 reject; no ADR-006 amend yet).
 
     '
-  note: 'Harness H0-H9 COMPLETE (H7 relevancy 0.31; H1/H9 cost win; H2 reject; no ADR-006 amend yet); artifact docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260801T000138Z_harness-workflows.json; playground T4 deployed;
+  note: 'EV-016 COMPLETED+SESSION CLOSED 2026-08-01 — PR #172 merged; DO pins write-api+chat-rag reset to main ACTIVE; H0ci CI+deploy-preflight PASS on main @ b08ec30; F42 LIVE; S019 archived; 15-service-health skipped (S019-D53); current_action=closed; next_action=none. Harness H0-H9 COMPLETE (H7 relevancy 0.31; H1/H9 cost win; H2 reject; no ADR-006 amend yet); artifact docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260801T000138Z_harness-workflows.json; playground T4 deployed;
 
     hybrid plan drafted; next AskQuestion hybrid option A/B/C/D (recommend A); optional F43 cache/H7.
 
@@ -13741,14 +13847,14 @@ evolve_cycles:
     phase_b: 'Passed 2026-08-01 — user approved option 1: Yes — gate B→C → start 07-build at T91.1 (S019-D45)'
     phase_c: 'Passed 2026-08-01T20:49:00Z — user approved option 1 (S019-D46): gate C→D → start 09-qa + 10-e2e; HEAD 257486f; 08-verify PASS (delta) Phase 21 M91–M93 / F42; AC-RQ6/ISS-008 ship-path deferred'
     phase_d: 'Passed 2026-08-01 — user approved Phase 2 failure mitigations (option 1) and Phase 3 rollback (option 1); 12-verify-deploy COMPLETE; deploy-checklist READY; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
-    deploy: 'Passed 2026-08-01 — user approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; DO pins reset after merge'
+    deploy: 'Passed 2026-08-01 — PR #172 merged @ b08ec30; DO pins reset to main ACTIVE; H0ci PASS'
   gates:
     a_to_b: passed
     b_to_c: passed
     c_to_d: passed
-    deploy: passed_pending_merge
+    deploy: passed
     deploy_blocker: null
-    deploy_blocker_note: 13-deploy-smoke PASS — opening PR to main; DO pins stay on evolve until post-merge reset
+    deploy_blocker_note: PR #172 merged @ b08ec30; DO pins main ACTIVE; H0ci PASS
   routing_plan:
     required_stages:
     - 00-context
@@ -14043,12 +14149,19 @@ evolve_cycles:
       status: completed
       started_at: '2026-08-01'
       completed_at: '2026-08-01'
-      current_action: completed_awaiting_pr_merge
-      next_action: open PR to main; await merge; reset DO pins after merge
+      current_action: merged
+      next_action:
       ac_rq6_disposition: investigate_fix_option_1_resolved
-      merge_gate: pending_merge
+      merge_gate: merged
+      pr_number: 172
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+      pr_status: merged
+      pr_head_sha: 73df939
+      merge_sha: b08ec30
+      merge_commit: b08ec30
+      pr_merged_at: '2026-08-01'
       deploy_path: A
-      commits_head: 5693422
+      commits_head: 73df939
       commit_deployed: 5693422
       overall_result: path_a_pass_ac_rq6_pass
       report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
@@ -14064,7 +14177,7 @@ evolve_cycles:
       hy1_gate:
         status: pass
         evidence: 20260802T022836Z_hybrid-sweep.json
-      note: User approved closeout option 1 — Path A + H1-H5 + AC-RQ6 PASS @ 5693422; opening PR to main; pins reset after merge
+      note: PR #172 merged @ b08ec30 — DO pins main ACTIVE; H0ci PASS; S019 closed (S019-D53); 15 skipped; next_action=none
     phase-0:
       status: completed
       completed: '2026-08-01'
@@ -14110,6 +14223,24 @@ evolve_cycles:
   - docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
   - docs/deployment-integration.md
   - docs/deploy-checklist.md
+  - path: docs/sessions/S019-retrieval-quality/reports/evolve-summary.md
+    kind: evolve-summary
+    session_id: S019-retrieval-quality
+    stage: 16-evolve
+    skill_id: 16-evolve
+    evolve_cycle_id: EV-016
+    status: completed
+    recorded_at: '2026-08-01'
+    note: Post-merge evolve summary for EV-016/S019 closeout
+  - path: docs/evolve-report-EV-016.md
+    kind: evolve-report
+    session_id: S019-retrieval-quality
+    stage: 16-evolve
+    skill_id: 16-evolve
+    evolve_cycle_id: EV-016
+    status: completed
+    recorded_at: '2026-08-01'
+    note: Standing evolve report EV-016
   phase0_expansion_artifact_notes:
   - S019-D35 embed sweep complete — 20260801T020331Z_embed-sweep.json; E0/E1 hit@5=1.0; E2=0.87 reject; no offline F42 fold-in
   - 'S019-D37 phase0_approved — reject E1 for F42; F42=H7+P1 on E0; Hy1 E0 relevancy 0.28 EN 0.36 ES 0.14 retrieval 0.88 vs E1 shadow relevancy 0.11 EN 0.09 ES 0.14 retrieval 0.94; rebuild 1fa1dec9 not promoted; #159 open outside F42; ISS-008 deploy ship prereq (not Phase A entry blocker)'
@@ -14357,6 +14488,12 @@ evolve_cycles:
     status: recorded
     pending_in: docs/decisions/evolve-decisions.md
     recorded_at: '2026-08-01T13:04:41Z'
+  - id: S019-D53
+    topic: close_session
+    choice: option_1_close_skip_15
+    note: Close session now; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone
+    status: recorded
+    recorded_at: '2026-08-01'
   issues:
   - id: ISS-007
     category: env_blocker
@@ -14409,11 +14546,12 @@ evolve_cycles:
   e2e_10_result: PASS
   e2e_10_report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
   e2e_10_completed_at: '2026-08-02T00:55:43Z'
-  phase_d_status: pending_after_11_complete_awaiting_12
+  phase_d_status: passed_closed
   eleven_complete_at: '2026-08-02T01:31:00Z'
   eleven_result: approved
-  eleven_start_policy: completed — F42 Phase 3 approved; Phase D checkpoint pending until 12-verify-deploy; gates.deploy pending
+  eleven_start_policy: completed — F42 Phase 3 approved; Phase D + deploy passed; session closed (S019-D53)
   feature_inspection: *id001
+  pr_closeout_note: PR #172 merged; DO pins write-api+chat-rag reset to main ACTIVE; H0ci CI+deploy-preflight PASS on main @ b08ec30
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -15458,13 +15596,20 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-01'
+  skill: 16-evolve
+  session_id: S019-retrieval-quality
+  evolve_cycle_id: EV-016
+  decision: 'S019-D53 — Close session now; skip optional 15-service-health; leave out-of-scope Modal/LLM dirty files alone (user option 1)'
+  recorded_at: '2026-08-01'
+  note: close_session COMPLETE — S019 archived to sessions[]; active_session=null; EV-016 status remains completed; overall_status=completed (idle); next_action=none
 - date: '2026-08-02'
   skill: 13-deploy-smoke
   session_id: S019-retrieval-quality
   evolve_cycle_id: EV-016
-  decision: 'S019-D52 — Hy1 PASS after judge+H7 fix; relevancy 0.833 faith 0.938; evidence 20260802T022836Z_hybrid-sweep.json; gates.deploy=pending_user_closeout'
+  decision: 'S019-D52 — Hy1 PASS after judge+H7 fix; relevancy 0.833 faith 0.938; evidence 20260802T022836Z_hybrid-sweep.json; gates.deploy=passed (later closed via S019-D53)'
   recorded_at: '2026-08-02T02:28:36Z'
-  note: AC-RQ6/Hy1 ship gate PASS; H1-H5 PASS; awaiting user approve closeout/PR
+  note: AC-RQ6/Hy1 ship gate PASS; H1-H5 PASS; PR #172 merged; session closed via S019-D53
 - date: '2026-08-02'
   skill: 13-deploy-smoke
   session_id: S019-retrieval-quality
@@ -16895,6 +17040,24 @@ decisions_log:
 - S019/EV-016 09-qa COMPLETE — overall=fail; blockers QA-S019-B01..B03 (ruff spike tests, basedpyright, nltk CVEs); F42 surfaces green; report=docs/sessions/S019-retrieval-quality/reports/qa-report.md
 - 'S019/EV-016 12-verify-deploy COMPLETE 2026-08-01 — deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
 artifacts:
+- path: docs/sessions/S019-retrieval-quality/reports/evolve-summary.md
+  kind: evolve-summary
+  session_id: S019-retrieval-quality
+  stage: 16-evolve
+  skill_id: 16-evolve
+  evolve_cycle_id: EV-016
+  status: completed
+  recorded_at: '2026-08-01'
+  note: Post-merge evolve summary for EV-016/S019 closeout
+- path: docs/evolve-report-EV-016.md
+  kind: evolve-report
+  session_id: S019-retrieval-quality
+  stage: 16-evolve
+  skill_id: 16-evolve
+  evolve_cycle_id: EV-016
+  status: completed
+  recorded_at: '2026-08-01'
+  note: Standing evolve report EV-016
 - path: docs/sessions/S019-retrieval-quality/reports/deploy-checklist.md
   kind: deploy-checklist
   session_id: S019-retrieval-quality
@@ -16931,7 +17094,7 @@ artifacts:
   evolve_cycle_id: EV-016
   recorded_at: '2026-08-02T02:28:36Z'
   overall_result: path_a_pass_ac_rq6_pass
-  note: Path A PASS @ 5693422 — AC-RQ6/Hy1 PASS after judge+H7 fix; H1-H5 PASS; awaiting user closeout/PR
+  note: Path A PASS @ 5693422 — AC-RQ6/Hy1 PASS after judge+H7 fix; H1-H5 PASS; PR #172 open; watching CI then merge
 - path: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
   kind: eval-experiment
   session_id: S019-retrieval-quality
@@ -18278,18 +18441,27 @@ artifacts:
   overall: fail
   recorded_at: '2026-08-02T00:59:54Z'
 git_history:
-  current_branch: evolve/EV-016-retrieval-quality
+  current_branch: main
   branches:
   - name: evolve/EV-016-retrieval-quality
     purpose: EV-016 / S019 — Batch A retrieval quality (investigate
     base: main
-    status: open
+    status: merged
     created_at: '2026-07-31'
+    merged_at: '2026-08-01'
     session_id: S019-retrieval-quality
     evolve_cycle_id: EV-016
     exists_on_disk: true
-    head_sha: 5025bb81d043de68d711aef02552e81913debf45
-    note: 13-deploy-smoke pushing branch then Path A pin @ 5025bb8; F42 H7+P1; ISS-008 + Hy1 gate in scope
+    head_sha: 73df939f09a653bd8060ff97c258c6d06cdaa2a6
+    pr_number: 172
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+    pr_status: merged
+    merge_sha: b08ec30
+    merge_commit: b08ec30
+    merge_approval: executed
+    ci_status: green
+    ci_note: H0ci PASS on main @ b08ec30 (ci.yml + deploy-preflight.yml)
+    note: PR #172 MERGED @ b08ec30; DO pins main ACTIVE; F42 LIVE; EV-016 completed
   - name: fix/S018-job-dispatch-prevention
     purpose: Phase 5 prevention (registry + husky + checklist + rule)
     base: main
@@ -20225,6 +20397,18 @@ git_history:
     files_changed: 5
     timestamp: '2026-08-02T01:44:44Z'
     note: 12-verify-deploy docs committed; 13-deploy-smoke pushing branch then Path A pin
+  - sha: 73df939f09a653bd8060ff97c258c6d06cdaa2a6
+    short: 73df939
+    branch: evolve/EV-016-retrieval-quality
+    message: '[S019] docs: complete 13-deploy-smoke Path A + AC-RQ6 PASS'
+    stage: 13-deploy-smoke
+    session_id: S019-retrieval-quality
+    evolve_cycle_id: EV-016
+    pr_number: 172
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
+    files_changed: 9
+    timestamp: '2026-08-02T02:37:03Z'
+    note: 13-deploy-smoke closeout docs + eval artifacts committed; PR #172 opened to main; watching CI then merge + DO pin reset
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
@@ -20333,6 +20517,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: S019/EV-016 13-deploy-smoke — awaiting user approve closeout/PR (AC-RQ6/Hy1 PASS @ 5693422)
+next_action: S019/EV-016 — optional 15-service-health or close_session (PR #172 merged @ b08ec30)
 pipeline_idle: false
-pipeline_idle_note: '2026-08-01 — S019/EV-016 13-deploy-smoke COMPLETE — user approved closeout option 1; Path A PASS @ 5693422; opening PR to main; gates.deploy=passed_pending_merge'
+pipeline_idle_note: '2026-08-01 — S019/EV-016 PR #172 MERGED @ b08ec30; F42 LIVE; DO pins main ACTIVE; H0ci PASS; EV-016 completed; optional 15-service-health pending'

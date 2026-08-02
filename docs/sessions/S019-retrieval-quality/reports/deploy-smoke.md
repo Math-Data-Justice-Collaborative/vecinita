@@ -4,8 +4,8 @@
 > **Session:** S019-retrieval-quality  
 > **Cycle:** EV-016  
 > **Stage:** 13-deploy-smoke  
-> **Status:** **deployed** — Path A PASS; H1–H5 PASS; **AC-RQ6 Hy1 PASS** (awaiting user closeout)  
-> **Branch:** `evolve/EV-016-retrieval-quality` @ `5693422`  
+> **Status:** **deployed + closed** — Path A PASS; H1–H5 PASS; **AC-RQ6 Hy1 PASS**; PR [#172](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172) merged @ `b08ec30`  
+> **Branch:** `evolve/EV-016-retrieval-quality` (merged) → `main` @ `b08ec30`  
 > **Operator env:** `.env` (no `prod.env` on this machine)
 
 ## Pre-Deploy
@@ -81,4 +81,4 @@ Evidence: `reports/eval-experiments/20260802T022836Z_hybrid-sweep.json`
 ## Gate / next
 
 - Path A + H1–H5 + AC-RQ6: **PASS**  
-- Awaiting user: approve 13 closeout → open PR → merge → reset DO pins to `main` → H0ci
+- Closeout (S019-D53): PR #172 merged @ `b08ec30`; session archived; optional 15 skipped.

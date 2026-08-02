@@ -300,4 +300,10 @@ Plan: session `reports/spike-hybrid-plan.md` · runners `spike_hybrid_sweep.py`,
 | S019-D51 | Hy1 false zeros | Direct YES/NO answer-relevancy judge (mirror faithfulness); H7 ES rewrite + spike→`packages/rag` parity |
 | S019-D52 | Hy1 re-gate | **PASS** — relevancy **0.833** / faith **0.938** (`20260802T022836Z`); Path A @ `5693422` |
 
-**13 status:** Path A + H1–H5 + AC-RQ6 PASS — awaiting user closeout (PR → merge → pins → `main`).
+**13 status:** Path A + H1–H5 + AC-RQ6 PASS — **closed**.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S019-D53 | Session close | **Close now** (option 1) — skip optional 15-service-health; write evolve-summary + evolve-report-EV-016; archive S019; leave out-of-scope Modal/LLM dirty files alone |
+
+**Closeout:** PR [#172](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172) merged @ `b08ec30` (2026-08-02). Session `S019-retrieval-quality` archived; cycle EV-016 completed.
