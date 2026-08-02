@@ -57,15 +57,16 @@ Phase 0 intake may append more locked rows before 01 starts.
 | Fn ids | **Locked D7** — F43 / F44 / F45 |
 | Success | F43: $/row or LLM-skip rate win with quality ≥ H0; F44/F45: gate or defer |
 
-## Open questions for 01 (after Phase 0 proceed)
+## Open questions — resolved (S020-D9–D14)
 
-| ID | Question | Recommended default |
-|----|----------|---------------------|
-| Q1 | Semantic answer cosine threshold + false-hit policy? | Conservative threshold; miss → retrieve; log semantic hits |
-| Q2 | CE model / host for renewed spike? | New candidate vs retry `bge-reranker-base`; Modal T4 playground |
-| Q3 | Exact CE ship numbers (relevancy/faith floors)? | Relevancy ≥ Hy1 staging floor; faith ≥ 0.91 |
-| Q4 | Deploy target | Staging Path A (write-api + chat-rag) like EV-016 |
-| Q5 | Cache TTL / max entries / invalidation on corpus rebuild? | TTL + size cap; bust on F41 rebuild / corpus version |
+| ID | Resolution |
+|----|------------|
+| Q1 | Conservative cosine; miss → retrieve; log semantic hits; quality ≥ H0 (D10) |
+| Q2 | Spike model **`BAAI/bge-reranker-v2-m3`** on Modal T4 (D11) |
+| Q3 | CE ship: relevancy ≥ **0.28**, faith ≥ **0.91** (D12) |
+| Q4 | Staging Path A (D13) |
+| Q5 | TTL + size cap; bust on corpus version / F41 rebuild (D14) |
+| Locked L1–L12 | Approved all (D9) |
 
 ## Explicitly out of interview scope
 

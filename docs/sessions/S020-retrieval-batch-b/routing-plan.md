@@ -4,8 +4,8 @@
 |-------|----------|--------|-------|
 | 00-context | yes | completed | Session open 2026-08-02; S020-D1–D3 |
 | 16-evolve | orchestrator | in_progress | EV-017 Phase A — 01-requirements |
-| 01-requirements | yes | in_progress | Seed loaded; confirm locked + open Qs |
-| 02-verify-plan | yes | pending | |
+| 01-requirements | yes | completed | Delta specs F43–F45; RD-197–208; report `01-requirements-batch-b.md` |
+| 02-verify-plan | yes | pending | Next |
 | 04-tech-plan | yes | pending | |
 | 07-build | yes | pending | |
 | 08-verify-build | yes | pending | |

@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-01 (S019/EV-016 F42 — H7+P1 packer / multi-query env knobs)
+> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — cache / soft language / CE knobs)
 
 ## Precedence
 
@@ -28,6 +28,15 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_RAG_MULTI_QUERY_COUNT` | int | `3` | No | H7 rewrite count (clamped 1–5); Spanish-aware when query locale is `es` |
 | `VECINITA_RAG_PACKER` | string | `p1` | No | F42 packer: `p1` (Source/URL headers) or `p3` (P1 + doc dedupe + char budget) |
 | `VECINITA_RAG_CONTEXT_MAX_CHARS` | int | `3500` | No | Packed-context budget when `VECINITA_RAG_PACKER=p3` |
+| `VECINITA_RAG_CACHE` | string | `true` | No | F43 H1 cascade on/off (`true`/`false`) |
+| `VECINITA_RAG_CACHE_TTL_S` | int | `3600` | No | F43 answer/retrieve cache TTL seconds |
+| `VECINITA_RAG_CACHE_MAX_ENTRIES` | int | `1024` | No | F43 in-process cache size cap (LRU) |
+| `VECINITA_RAG_CACHE_SEMANTIC` | string | `true` | No | F43 semantic answer tier on/off |
+| `VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD` | float | `0.92` | No | F43 conservative cosine for semantic hit (miss → retrieve) |
+| `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK` | string | `false` | No | F44 L1 empty-hit fallback (`true`/`false`); **default off** |
+| `VECINITA_RAG_RERANK_CE` | string | `false` | No | F45 CE rerank on/off; **default off** until ship gate |
+| `VECINITA_RAG_RERANK_CE_MODEL` | string | `BAAI/bge-reranker-v2-m3` | No | F45 CE model id (spike + gated prod) |
+| `VECINITA_RAG_RERANK_CE_TOP_N` | int | `20` | No | F45 retrieve-N before CE; keep `top_k` after |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (prod) | Modal FastEmbed base URL |
 | `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal **`vecinita-llm`** base URL — ChatRAG / prod inference + warm (ADR-037) |
@@ -287,6 +296,14 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_RAG_MULTI_QUERY_COUNT` ≥ 1 and ≤ 5 | Config module at startup (F42) |
 | `VECINITA_RAG_PACKER` in `p1`, `p3` | Config module at startup (F42) |
 | `VECINITA_RAG_CONTEXT_MAX_CHARS` ≥ 256 | Config module at startup (F42; used when packer=`p3`) |
+| `VECINITA_RAG_CACHE` in `true`, `false` | Config module at startup (F43) |
+| `VECINITA_RAG_CACHE_TTL_S` ≥ 60 and ≤ 86400 | Config module at startup (F43) |
+| `VECINITA_RAG_CACHE_MAX_ENTRIES` ≥ 16 and ≤ 100000 | Config module at startup (F43) |
+| `VECINITA_RAG_CACHE_SEMANTIC` in `true`, `false` | Config module at startup (F43) |
+| `VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD` ≥ 0.5 and ≤ 1.0 | Config module at startup (F43) |
+| `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK` in `true`, `false` | Config module at startup (F44) |
+| `VECINITA_RAG_RERANK_CE` in `true`, `false` | Config module at startup (F45) |
+| `VECINITA_RAG_RERANK_CE_TOP_N` ≥ `top_k` and ≤ 50 | Config module at startup (F45) |
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` ≥ 1 and ≤ 20 | Config module |
@@ -321,6 +338,15 @@ chat_rag:
   rag_multi_query_count: 3
   rag_packer: p1
   rag_context_max_chars: 3500
+  rag_cache: true
+  rag_cache_ttl_s: 3600
+  rag_cache_max_entries: 1024
+  rag_cache_semantic: true
+  rag_cache_semantic_threshold: 0.92
+  rag_soft_language_fallback: false
+  rag_rerank_ce: false
+  rag_rerank_ce_model: BAAI/bge-reranker-v2-m3
+  rag_rerank_ce_top_n: 20
 ingest:
   chunk_size_tokens: 256
   scrape_timeout_s: 30

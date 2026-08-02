@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-01 (S019/EV-016 F42 — TC-170–175 H7+P1 packing + Hy1 staging gate)  
+> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — TC-176–184 cache / soft language / CE)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -76,6 +76,10 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-054 Shadow dry-run → promote | `tests/e2e/test_uj054_rebuild_shadow_promote.py` | TC-164, TC-165, TC-168 | `tests/ui/admin/uj054-rebuild-promote.spec.ts` (TC-169) |
 | UJ-055 H7+P1 packed ask | `tests/e2e/test_uj055_h7_p1_ask.py` | TC-170, TC-171, TC-172, TC-173 | — (no UI change) |
 | UJ-056 F42 staging Hy1 eval gate | unit + eval harness (ISS-008 fixture) | TC-174, TC-175 | — |
+| UJ-057 Answer/retrieve cache | `tests/e2e/test_uj057_answer_cache.py` | TC-176, TC-177, TC-178, TC-179 | — (no UI change) |
+| UJ-058 Soft language L1 fallback | `tests/e2e/test_uj058_soft_language.py` | TC-180, TC-181 | — |
+| UJ-059 CE gated ask | `tests/e2e/test_uj059_ce_rerank.py` | TC-182, TC-183 | — |
+| UJ-060 CE ship gate spike | spike harness + report | TC-184 | — |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -1074,13 +1078,68 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Expected**: Aggregate answer relevancy ≥ **0.28**, faithfulness ≥ **0.91** (E0 Hy1 measured floor);
   CI floors remain ≥0.60/0.60. EN/ES breakdown recorded when present (AC-RQ6).
 
+### TC-176: Exact answer cache hit skips LLM (UJ-057, F43)
+
+- **Objective**: Exact H1 tier returns cached answer without LLM.
+- **Input**: Same normalized question+locale twice with cache enabled.
+- **Expected**: Second response `cache_hit=exact`; LLM not invoked (AC-BB1).
+
+### TC-177: Semantic cache conservative threshold (UJ-057, F43)
+
+- **Objective**: Semantic tier only hits above conservative cosine; quality holds.
+- **Input**: Near-paraphrase below vs above `VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD` (default 0.92).
+- **Expected**: Below → miss/continue; above → `cache_hit=semantic`; warm quality ≥ H0 (AC-BB2).
+
+### TC-178: Cache TTL, size cap, corpus bust (UJ-057, F43)
+
+- **Objective**: Lifecycle controls prevent stale or unbounded cache.
+- **Input**: Entry past TTL; >max entries; corpus version / rebuild stamp change.
+- **Expected**: Stale/evicted/busted entries miss; keys content-hash only (AC-BB3).
+
+### TC-179: Ask API exposes cache_hit (UJ-057, F43)
+
+- **Objective**: Contract includes cache observability.
+- **Input**: `POST /api/v1/ask` cold then warm (TestClient).
+- **Expected**: Response includes `cache_hit` enum; sources/answer schema unchanged (AC-BB4).
+
+### TC-180: Soft language L1 only on empty first pass (UJ-058, F44)
+
+- **Objective**: L1 fallback fires only when same-lang retrieve is empty.
+- **Input**: Empty-hit fixture with flag on; non-empty same-lang control with flag on.
+- **Expected**: Fallback fires only on empty first pass; control unchanged (AC-BB5).
+
+### TC-181: Soft language default off (UJ-058, F44)
+
+- **Objective**: Prod default remains L0-strict.
+- **Input**: Ask with default env (flag false) on empty-hit fixture.
+- **Expected**: No unfiltered retry (AC-BB6).
+
+### TC-182: CE merge keeps top_k (UJ-059, F45)
+
+- **Objective**: CE rerank output respects top_k.
+- **Input**: Mock CE scores over N passages; keep_k=`top_k`.
+- **Expected**: Output length ≤ top_k; order by CE score (AC-BB7).
+
+### TC-183: CE flag default off on ask path (UJ-059, F45)
+
+- **Objective**: No prod CE until enabled post-gate.
+- **Input**: Ask with default `VECINITA_RAG_RERANK_CE=false`.
+- **Expected**: No CE client call; path matches F42 H7+P1 (AC-BB8).
+
+### TC-184: CE ship gate floors (UJ-060, F45)
+
+- **Objective**: Spike must clear Hy1 staging floors before ship.
+- **Input**: Staging golden spike with `BAAI/bge-reranker-v2-m3`.
+- **Expected**: Ship only if relevancy ≥ **0.28** and faith ≥ **0.91**; else spike-only (AC-BB9).
+
 ## Test Data
 
 | Asset | Location | Used by |
 |-------|----------|---------|
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
 | Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness, TC-168, TC-174–175 |
-| Staging eval Q&A | `data/fixtures/eval/qa_pairs_staging.json` | TC-174–175 (ISS-008 / F42 Hy1) |
+| Staging eval Q&A | `data/fixtures/eval/qa_pairs_staging.json` | TC-174–175, TC-184 (ISS-008 / F42 Hy1 / F45 gate) |
+| Empty-hit language fixture | `data/fixtures/eval/` (empty same-lang case; add in 07) | TC-180–181 |
 | URL ingest fixture | `data/fixtures/ingest/` | TC-010, TC-163 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |
@@ -1102,6 +1161,9 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | Eval answer relevancy (golden) | ≥ 0.60 aggregate (CI) | LlamaIndex + Modal LLM judge |
 | F42 Hy1 staging relevancy (ship) | ≥ 0.28 aggregate | Staging golden; TC-175 / AC-RQ6 |
 | F42 Hy1 staging faithfulness (ship) | ≥ 0.91 aggregate | Staging golden; TC-175 / AC-RQ6 |
+| F43 warm cache quality | ≥ H0 cell (relevancy/faith) | Harness / TC-177 |
+| F45 CE ship relevancy | ≥ 0.28 aggregate | Staging golden; TC-184 / AC-BB9 |
+| F45 CE ship faithfulness | ≥ 0.91 aggregate | Staging golden; TC-184 / AC-BB9 |
 | Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
 
 ### F31 coverage gate — gated components

@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-07-30 (S017/EV-015 #167 — AC-RB1–AC-RB10 corpus rebuild)
+> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — AC-BB1–AC-BB9 Retrieval Batch B)
 
 ## Per-feature criteria
 
@@ -216,6 +216,19 @@
 - [ ] **AC-RQ6**: Staging Hy1 ship gate (H7+P1 on E0): answer relevancy ≥ **0.28**, faithfulness ≥ **0.91**; CI floors remain ≥0.60/0.60 (TC-175).
 - [ ] **AC-RQ7**: Out of F42 ship: E1/#159 embed swap, R1, CE/#83, #162, LangGraph/ADR-006, answer cache (F43).
 
+### EV-017 — Retrieval Batch B (F43–F45) — S020
+
+- [ ] **AC-BB1**: Exact answer cache hit skips LLM; `cache_hit=exact` (TC-176, UJ-057).
+- [ ] **AC-BB2**: Semantic tier uses conservative threshold (default 0.92); miss → continue; warm quality ≥ H0 (TC-177).
+- [ ] **AC-BB3**: Cache TTL + max entries + corpus-version/F41 bust; content-hash keys only (TC-178, ADR-004).
+- [ ] **AC-BB4**: `/ask` (+ stream `done`) expose `cache_hit` enum without breaking sources/answer (TC-179).
+- [ ] **AC-BB5**: Soft language L1 fires only on empty same-lang first pass when flag on (TC-180, UJ-058).
+- [ ] **AC-BB6**: Soft language flag defaults **off** (L0-strict) (TC-181).
+- [ ] **AC-BB7**: CE merge keeps ≤ `top_k` when enabled (TC-182, UJ-059).
+- [ ] **AC-BB8**: CE flag defaults **off** until ship gate (TC-183).
+- [ ] **AC-BB9**: CE ship gate: staging relevancy ≥ **0.28** and faith ≥ **0.91** with `bge-reranker-v2-m3`; else spike-only (TC-184, UJ-060).
+- [ ] **AC-BB10**: Out of EV-017 ship without unlock: LangGraph/ADR-006 amend; Modal volume durable cache; identity-keyed cache; default-on CE or soft language.
+
 
 ## Quantitative benchmarks
 
@@ -226,6 +239,8 @@
 | Eval answer relevancy | LlamaIndex judge | ≥0.60 aggregate (CI); display highlight &lt;0.70 | `data/fixtures/eval/` | test-plan TC-112 |
 | F42 Hy1 staging relevancy | LlamaIndex judge | ≥0.28 aggregate (ship floor) | `qa_pairs_staging.json` | test-plan TC-175 / AC-RQ6 |
 | F42 Hy1 staging faithfulness | LlamaIndex judge | ≥0.91 aggregate (ship floor) | `qa_pairs_staging.json` | test-plan TC-175 / AC-RQ6 |
+| F45 CE ship relevancy | LlamaIndex judge | ≥0.28 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 |
+| F45 CE ship faithfulness | LlamaIndex judge | ≥0.91 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 |
 | Eval latency p95 | Wall-clock per question | Informational (30s reference) | Golden run | test-plan TC-116 |
 | Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |

@@ -341,6 +341,17 @@ soft language filter in the same cycle (optional / empty-hit; not proven on stag
 
 | S020-D8 | Proceed gate | **Allocate F43–F45 + finalize impact + start 01-requirements** |
 
-### Phase 0 status
+### Decisions (01 Phase 0C — 2026-08-02)
 
-**Approved** (S020-D8). Feature-list F43–F45 written; F42 marked Implemented. Phase A `01-requirements` in progress.
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D9 | Locked L1–L12 | **Approve all** |
+| S020-D10 | Semantic cache | **Conservative** cosine; miss → retrieve; log hits; quality ≥ H0 |
+| S020-D11 | CE spike model | **`BAAI/bge-reranker-v2-m3`** on Modal T4 |
+| S020-D12 | CE ship floors | Relevancy ≥ **0.28** and faith ≥ **0.91** (Hy1 staging floors) |
+| S020-D13 | Deploy | Staging **Path A** (write-api + chat-rag) |
+| S020-D14 | Cache lifecycle | **TTL + size cap**; bust on corpus version / F41 rebuild |
+
+### Phase 0 / 01 status
+
+Phase 0 **approved**. 01 Phase 0C locked (D9–D14). Delta specs RD-197+; next **02-verify-plan**.

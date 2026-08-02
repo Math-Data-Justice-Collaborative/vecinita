@@ -53,7 +53,7 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 | Data Management Frontend | Jobs + corpus admin UI; **bilingual UI chrome** (EV-004 F31) | `apps/data-management-frontend` | Modal ASGI, internal-write API, `packages/frontend-*` |
 | Database app | Alembic, pgvector, seeds, privacy tests | `apps/database` | Postgres |
 | Internal write API | Upsert documents/chunks/embeddings; corpus CRUD | DO App Platform (**standalone** service) | Postgres only |
-| Shared RAG | LlamaIndex pipelines; **P1 packer + thin H7 fan-out** (F42) | `packages/rag` | LlamaIndex, pgvector client |
+| Shared RAG | LlamaIndex pipelines; **P1 packer + H7** (F42); **H1 cache** (F43); optional **L1 soft language** (F44); gated **CE rerank** (F45) | `packages/rag` | LlamaIndex, pgvector client |
 | Shared ingest | Scrape/chunk helpers | `packages/ingest` | — |
 | Embedding client | HTTP client to Modal FastEmbed | `packages/embedding-client` | Modal |
 | Shared tagging | LLM/human tag prompts, vocabulary merge, cap enforcement | `packages/tagging` | Modal LLM (vLLM), config-spec |
@@ -66,22 +66,25 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### ChatRAG Backend
 
-- **Purpose**: Stateless bilingual Q&A with retrieval and streaming generation; **public corpus read** (EV-001); **H7+P1 packing** on the shared RAG path (EV-016 F42).
+- **Purpose**: Stateless bilingual Q&A with retrieval and streaming generation; **public corpus read** (EV-001); **H7+P1 packing** (EV-016 F42); **H1 answer/retrieval cache** (EV-017 F43); optional **soft language fallback** (F44); gated **CE rerank** (F45).
 - **Inputs**: `POST /api/v1/ask`, `POST /api/v1/ask/stream` (JSON: question; optional `tags[]`); **GET** `/api/v1/documents`, `/api/v1/tags`, `/api/v1/documents/{id}` (public browse).
-- **Outputs**: Answer JSON or SSE token stream; source chunk references (IDs, not PII).
+- **Outputs**: Answer JSON or SSE token stream; source chunk references (IDs, not PII); optional `cache_hit` metadata (F43).
 - **Algorithm**:
   1. Auto-detect query language (en/es).
-  2. Embed query via Modal FastEmbed (HTTP) — prod pin **E0** `BAAI/bge-small-en-v1.5` (384-d); no F42 embed swap.
-  3. pgvector similarity search on DO Postgres; **optional tag filter** (user-selected or LLM-inferred).
-  4. **H7 (default on, F42):** thin multi-query fan-out — 2–3 **cheap heuristic** rewrites
+  2. **F43 H1 cascade (default on):** exact answer cache (normalized query+locale content-hash) → semantic answer cache (conservative cosine; miss → continue) → retrieve-result cache → else generate path below; store on miss. Keys never identity-keyed (ADR-004). TTL + size cap; bust on corpus version / F41 rebuild.
+  3. Embed query via Modal FastEmbed (HTTP) — prod pin **E0** `BAAI/bge-small-en-v1.5` (384-d).
+  4. pgvector similarity search on DO Postgres; **optional tag filter** (user-selected or LLM-inferred).
+  5. **F44 L1 (default off):** if same-lang retrieve is empty above `min_retrieval_score`, optionally retry without language filter.
+  6. **H7 (default on, F42):** thin multi-query fan-out — 2–3 **cheap heuristic** rewrites
      (locale-aware string variants, **not** LLM rewrites; Spanish-aware for `es`), retrieve per
      rewrite, merge/dedupe by chunk id / score, keep `top_k`.
-  5. **P1 pack (F42):** format each chunk as `Source: {title}\nURL: {url}\n{text}` via `packages/rag` helpers (not bare text concat). Optional **P3** (document dedupe + char budget) is **off by default**, config-gated.
-  6. Synthesize with packed context; stream or return completion via Modal LLM HTTP.
-- **Key parameters**: See `docs/config-spec.md`: `top_k`, H7/P3 flags, model names, timeouts.
+  7. **F45 CE (default off):** if enabled after ship gate, rerank top-N with `BAAI/bge-reranker-v2-m3`, keep `top_k`.
+  8. **P1 pack (F42):** format each chunk as `Source: {title}\nURL: {url}\n{text}` via `packages/rag` helpers. Optional **P3** off by default.
+  9. Synthesize with packed context; stream or return completion via Modal LLM HTTP; populate cascade stores on generate.
+- **Key parameters**: See `docs/config-spec.md`: `top_k`, H7/P3, cache, soft language, CE flags.
 - **Error handling**: 4xx for validation (including rejected identity fields); 5xx with request ID in logs (no raw prompt persistence).
-- **Latency**: Target **p95 < 15s** excluding cold start (RD-017); H7 adds rewrite+retrieve cost — measure on staging golden.
-- **Source**: feature-list F1–F6, F42; user interview 01-requirements; S019/EV-016
+- **Latency**: Target **p95 < 15s** excluding cold start (RD-017); cache hits should be ≪ generate path.
+- **Source**: feature-list F1–F6, F42–F45; S019/EV-016; S020/EV-017
 
 ### ChatRAG Frontend
 
@@ -227,11 +230,14 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 ### Query path (detail)
 
 ```
-Browser → DO ChatRAG Backend → Modal FastEmbed → DO pgvector read
-         → packages/rag (H7 merge + P1 pack) → Modal LLM (stream) → Browser
+Browser → DO ChatRAG Backend → (F43 cache hit? return)
+         → Modal FastEmbed → DO pgvector read
+         → packages/rag (F44 L1? → H7 merge → F45 CE? → P1 pack)
+         → Modal LLM (stream) → Browser (+ populate F43 stores)
 ```
 
 F36 eval sandbox must call the same `packages/rag` packer + H7 helpers (no parallel prompt assembly).
+F43 cache and F44/F45 flags apply on ChatRAG; harness measures cost/hit-rate and CE gate.
 
 ### Ingest path (detail)
 
@@ -321,6 +327,8 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | S004 / EV-005 (F34) | 2026-06-28 | Added admin Supabase Auth: §Component Details "Admin authentication"; H5 amended + H11 added; forbidden-schema EV-005 exception (`actor_id`/`actor_role`); API surface auth note. Supersedes ADR-004 admin auth clause (ADR-026). |
 | S017 / EV-015 (F41) | 2026-07-30 | Document store + rebuild job (`reembed`/`rechunk`/`rescrape`); shadow dry-run + promote; version stamps (ADR-040). |
 | S019 / EV-016 (F42) | 2026-08-01 | H7+P1 on E0: heuristic multi-query + Source/URL packing in `packages/rag` (ADR-041); ChatRAG + F36 share helpers; P3 config-gated off; no LangGraph / no embed swap. |
+| S020 / EV-017 (F43–F45) | 2026-08-02 | H1 cache cascade (F43); config-gated L1 soft language (F44); CE spike+gate with `bge-reranker-v2-m3` (F45); no LangGraph / ADR-006 amend. |
+| S020 / EV-017 (F43–F45) | 2026-08-02 | H1 cache cascade (F43); config-gated L1 soft language (F44); CE spike+gate with `bge-reranker-v2-m3` (F45); no LangGraph / ADR-006 amend. |
 
 ## References
 

@@ -102,10 +102,10 @@ project:
         task_status: blocked
         milestone: M80
     01-requirements:
-      status: in_progress
+      status: completed
       started_at: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: EV-017/S020-retrieval-batch-b — 01-requirements delta STARTED; F43–F45; seed loaded; phase_0c confirm locked L1–L12 + open Q1–Q5
+      partial_rerun_note: EV-017/S020-retrieval-batch-b — 01-requirements delta COMPLETE; F43–F45; S020-D9–D14; RD-197–RD-208
       session_id: S020-retrieval-batch-b
       branch: evolve/EV-017-retrieval-batch-b
       evolve_cycle_id: EV-017
@@ -117,9 +117,9 @@ project:
       - F45
       handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
       seed_path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-      current_action: phase_0c_confirm_locked_and_open_qs
-      next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
-      note: S020/EV-017 01-requirements IN_PROGRESS 2026-08-02 — seed loaded; F43–F45 allocated @ 02c3b30; confirm locked L1–L12 + resolve open Q1–Q5
+      current_action: completed
+      next_action: start 02-verify-plan delta audit
+      note: S020/EV-017 01-requirements COMPLETE 2026-08-02 — F43–F45; S020-D9–D14; RD-197–RD-208; report docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md; next → 02-verify-plan delta audit
       s019_baseline:
         status: completed
         completed_at: '2026-08-01'
@@ -185,9 +185,19 @@ project:
       substeps:
         seed_loaded: true
         handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-        current_phase: phase_0c_confirm_locked_and_open_qs
-        current_action: phase_0c_confirm_locked_and_open_qs
-        next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+        current_phase: completed
+        current_action: completed
+        next_action: start 02-verify-plan delta audit
+        locked_l1_l12_approved: true
+        open_q1_q5_resolved: true
+        decisions:
+        - S020-D9
+        - S020-D10
+        - S020-D11
+        - S020-D12
+        - S020-D13
+        - S020-D14
+        rd_range: RD-197..RD-208
       artifacts:
       - docs/feature-list.md
       - docs/sessions/S020-retrieval-batch-b/reports/phase0-impact.md
@@ -205,24 +215,28 @@ project:
       - docs/sessions/S017-corpus-reembed-migration/reports/runbook-corpus-rebuild-outline.md
       - docs/sessions/S017-corpus-reembed-migration/checkpoints/01-requirements-seed.md
       - docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
-      report:
-      seed_path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+      - docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
+      - docs/sessions/S020-retrieval-batch-b/session-brief.md
+      report: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
       rd_allocated:
         status: written
-        range: RD-188..RD-196
-        allocated_at: '2026-07-30'
-        written_at: '2026-07-30'
+        range: RD-197..RD-208
+        allocated_at: '2026-08-02'
+        written_at: '2026-08-02'
         decisions:
-        - RD-188
-        - RD-189
-        - RD-190
-        - RD-191
-        - RD-192
-        - RD-193
-        - RD-194
-        - RD-195
-        - RD-196
-        note: S017/EV-015 F41 corpus rebuild — RD-188–196; S016 RD-183–187 retained in s016_baseline
+        - RD-197
+        - RD-198
+        - RD-199
+        - RD-200
+        - RD-201
+        - RD-202
+        - RD-203
+        - RD-204
+        - RD-205
+        - RD-206
+        - RD-207
+        - RD-208
+        note: S020/EV-017 F43–F45 Batch B — RD-197–208; prior S017 RD-188–196 retained in s017_baseline
       s017_baseline:
         status: completed
         completed_at: '2026-07-30'
@@ -231,6 +245,22 @@ project:
         evolve_cycle_id: EV-015
         report: docs/sessions/S017-corpus-reembed-migration/reports/01-requirements-corpus-rebuild.md
         note: S017/EV-015 01-requirements COMPLETE 2026-07-30 — F41 corpus rebuild; RD-188–196; ADR-040; UJ-053/054; TC-161–168; AC-RB1–10; Phase A product specs done; next → 02-verify-plan then Phase A checkpoint AskQuestion before 04 (checkpoints.phase_a remains pending until 02 passes)
+        rd_allocated:
+          status: written
+          range: RD-188..RD-196
+          allocated_at: '2026-07-30'
+          written_at: '2026-07-30'
+          decisions:
+          - RD-188
+          - RD-189
+          - RD-190
+          - RD-191
+          - RD-192
+          - RD-193
+          - RD-194
+          - RD-195
+          - RD-196
+          note: S017/EV-015 F41 corpus rebuild — RD-188–196; S016 RD-183–187 retained in s016_baseline
       ui_preview:
         status: n_a
         note: UI preview N/A for Batch B start — confirm in 01 interviews
@@ -244,6 +274,25 @@ project:
       - S019-D41
       s019_d38_d41_decision_recorded: true
       s019_d38_d41_decision_recorded_in: docs/decisions/evolve-decisions.md
+      completed_at: '2026-08-02'
+      partial_rerun_completed_at: '2026-08-02'
+      feature_ids_note: S020-D7/D9–D14 — F43 (H1 cascade cache) + F44 (#162 soft language) + F45 (#83/#161 CE); RD-197–RD-208; feature-list Planned; 01-requirements COMPLETE
+      decisions:
+      - S020-D9
+      - S020-D10
+      - S020-D11
+      - S020-D12
+      - S020-D13
+      - S020-D14
+      s020_d9_d14_decisions:
+      - S020-D9
+      - S020-D10
+      - S020-D11
+      - S020-D12
+      - S020-D13
+      - S020-D14
+      s020_d9_d14_decision_recorded: true
+      s020_d9_d14_decision_recorded_in: docs/decisions/evolve-decisions.md
     02-verify-plan:
       status: completed
       started_at: '2026-07-30'
@@ -261,7 +310,7 @@ project:
       report: docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
       gate_a_to_b: passed
       current_action: completed
-      next_action: handoff_04_tech_plan
+      next_action: start 02-verify-plan delta audit
       note: S019/EV-016 02-verify-plan COMPLETE 2026-08-01 — M1–M3 approved (option 1); H7 heuristic clarified in spec/feature-list; S019-D42; no contradictions; Phase A approved (option 1); gates.a_to_b=passed; handoff → 04-tech-plan
       s017_baseline:
         status: completed
@@ -285,7 +334,7 @@ project:
           - M4
           - M5
           - M6
-          medium_verdicts: &id002
+          medium_verdicts: &id003
             M1: 'approve_fix: TC-166 under UJ-053'
             M2: 'lock: F36 against shadow before promote'
             M3: 'modify: Admin UI promote + full build this session; TC-169 added'
@@ -584,6 +633,8 @@ project:
       - docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
       - docs/sessions/S017-corpus-reembed-migration/reports/02-verify-plan-audit.md
       completed: '2026-08-01'
+      s020_pending_start: true
+      s020_pending_note: S020/EV-017 01-requirements COMPLETE 2026-08-02; 02-verify-plan pending start — delta audit next; S019 baseline remains completed above
     04-tech-plan:
       status: completed
       started_at: '2026-08-01'
@@ -1100,7 +1151,7 @@ project:
             completed_at: '2026-07-30'
             commit: 78e7a8c5f9e578ac71f3761ca4ad888f640937fe
             note: run_rebuild_job + dispatch @ 78e7a8c — TC-164 unit tests green; ADR-040/RD-190
-          T88.4: &id003
+          T88.4: &id004
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
@@ -1142,7 +1193,7 @@ project:
             status: completed
             started_at: '2026-07-29'
             completed_at: '2026-07-29'
-          T88.5: &id004
+          T88.5: &id005
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
@@ -1150,13 +1201,13 @@ project:
             depends_on:
             - T88.3
             note: 'Config OpenAPI JobOptions rebuild fields locked @ 6841672 ([T88.5] config: lock OpenAPI JobOptions rebuild fields)'
-          T88.6: &id005
+          T88.6: &id006
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 12b6689d84eef17b8214fad4d05af0adc0b0a7a3
             note: 'Docs api-contract EV-015 rebuild JobOptions locked to OpenAPI @ 12b6689 ([T88.6] docs: lock EV-015 rebuild JobOptions to OpenAPI)'
-          T89.1: &id006
+          T89.1: &id007
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
@@ -1164,7 +1215,7 @@ project:
             tdd: green
             greened_by: T89.3 @ 301c31a
             note: promote shadow-to-live unit coverage (TC-165) @ 0006c0d — was red ModuleNotFoundError rebuild_promote; greened by T89.3 @ 301c31a (import/unit tests green); Postgres promote API test still needs local DB
-          T89.2: &id007
+          T89.2: &id008
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
@@ -1172,61 +1223,61 @@ project:
             tdd: green
             greened_by: T89.4 @ 653452a
             note: eval rebuild_run_id shadow retrieval (TC-168) @ bb2148b — completed red; greened by T89.4 @ 653452a
-          T89.3: &id008
+          T89.3: &id009
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 301c31a2c5b790d436205172ff04e739b9a11bd0
             note: 'transactional promote shadow rebuild to live @ 301c31a ([T89.3] feat: transactional promote shadow rebuild to live); greens T89.1 import/unit tests'
-          T89.4: &id009
+          T89.4: &id010
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 653452a3ed15ae13ab45458ad518fb5dfc82f807
             note: 'eval rebuild_run_id and shadow retrieval path @ 653452a ([T89.4] feat: eval rebuild_run_id and shadow retrieval path); greens T89.2 TC-168; follow-on docs pointer HEAD=227f0ac'
-          T89.5: &id010
+          T89.5: &id011
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 5d3189fd8944ca4b49272e938f298014c3f570dc
             note: Vitest rebuild enqueue + promote controls (TC-167/169) @ 5d3189f
-          T89.6: &id011
+          T89.6: &id012
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: b4e349779e0bc5a5e58686c28684a0c7d7472367
             note: Admin rebuild enqueue and promote UI @ b4e3497
-          T89.7: &id012
+          T89.7: &id013
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 8f004f619fbdb765118e7644d77bcb58da1eefa4
             note: OpenAPI promote path and eval rebuild_run_id @ 8f004f6; M89 COMPLETE
-          T90.1: &id013
+          T90.1: &id014
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 4ea891d14aff2e575dd225c3fd2ae8529136873d
             note: API e2e corpus rebuild enqueue (UJ-053) @ 4ea891d
-          T90.2: &id014
+          T90.2: &id015
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 6e553acb17aea6c713024844efac5a1aab2f0c8c
             note: API e2e shadow dry-run promote (UJ-054) @ 6e553ac — Postgres-backed; local DB unavailable at write time (CI Postgres)
-          T90.3: &id015
+          T90.3: &id016
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: 0eaf1f8d09e9f2e3e2a104b13117d1184f295a85
             note: Playwright rebuild enqueue and promote UI (uj053/uj054) @ 0eaf1f8
-          T90.4: &id016
+          T90.4: &id017
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
             commit: db3148749345bf0e1603f6ced105362915958663
             note: CORS preflight for rebuild promote (H0c) @ db31487
-          T90.5: &id017
+          T90.5: &id018
             status: completed
             started_at: '2026-07-30'
             completed_at: '2026-07-30'
@@ -1847,7 +1898,7 @@ project:
       evolve_cycle_id: EV-016
       mode: evolve
       delta_only: true
-      feature_ids: &id018
+      feature_ids: &id019
       - F42
       feature: F42
       note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
@@ -1975,7 +2026,7 @@ project:
       completed_at: '2026-08-02T00:55:43Z'
       completed: '2026-08-02'
       report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
-      substeps: &id019
+      substeps: &id020
         t0_f42: PASS
         t0_uj055: PASS_2_of_2
         uj056: unit_eval_path
@@ -2151,7 +2202,7 @@ project:
         commit_deployed: a6c39e5
         commit_head: ffd7abd
         drift: true
-      manual_inspection: &id027
+      manual_inspection: &id002
         env: staging
         feature: F42
         result: deferred_to_12_13
@@ -2239,7 +2290,7 @@ project:
         report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
         next_action: 13 COMPLETE — PR to main next
         note: S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY @ 180ad14; Phase D PASSED; Path A staging executed in 13; left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit)
-        substeps: &id020
+        substeps: &id021
           current: phase5_summary
           phase1_agents: completed
           phase2_config_drift: completed
@@ -2296,25 +2347,25 @@ project:
         untracked_left:
         - scripts/deploy/_tmp_proxy_key_check.py
         untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-        phase2_failure_modes: &id021
+        phase2_failure_modes: &id024
           status: approved
           approved_at: '2026-07-30'
           user_choice: option_1
           mitigations: 1-6 approved
           note: Failure mitigations 1–6 approved (all option 1)
-        phase3_rollback: &id022
+        phase3_rollback: &id025
           status: approved
           approved_at: '2026-07-30'
           user_choice: option_1
           note: Rollback plan approved (option 1)
-        phase4_checklist: &id023
+        phase4_checklist: &id022
           status: completed
           completed_at: '2026-07-30'
           result: ready
           path: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
           head_ref_at_write: 180ad14
           note: 'deploy-checklist READY; committed @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41)'
-        user_approvals: &id024
+        user_approvals: &id026
           failure_mitigations_1_to_6: option_1_approved
           rollback_plan: option_1_approved
           TP-S017-12-A: option_1_accept_always_on_shadow
@@ -2612,12 +2663,8 @@ project:
             merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
             merged_at: '2026-07-29'
           next_action: none_cycle_closed
-      completed_at: '2026-07-30'
       deploy_checkpoint: approved
       deploy_checkpoint_at: '2026-07-30'
-      pr_number: 168
-      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
-      pr_status: open
       merge_approval: pending
       ci_head_sha: bbe9544
       ci_status: green
@@ -2949,9 +2996,9 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
-  current_stage: 01-requirements
-  current_action: phase_0c_confirm_locked_and_open_qs
-  current_stage_note: "01-requirements IN_PROGRESS — seed loaded; F43–F45 allocated @ 02c3b30; AskQuestion confirm locked L1–L12 + resolve open Q1–Q5"
+  current_stage: 02-verify-plan
+  current_action: pending_start
+  current_stage_note: "01-requirements COMPLETE — S020-D9–D14; RD-197–RD-208; next = 02-verify-plan delta audit (pending start)"
   started_at: '2026-08-02'
   routing_plan_status: approved
   routing_preset: standard
@@ -2965,12 +3012,12 @@ active_session:
   predecessor_session_id: S019-retrieval-quality
   predecessor_evolve_cycle_id: EV-016
   continues: S019-retrieval-quality
-  scope_summary: "F43 full H1 cascade (exact→semantic→retrieve→generate); #83/#161 spike+ship gate; #162 config-gated L1 default off + empty-hit fixture; F43+F44+F45 Planned (S020-D4–D8); Phase 0 approved"
+  scope_summary: "F43 full H1 cascade; F44 #162 config-gated L1 default off + empty-hit fixture; F45 #83/#161 CE spike+ship gate; S020-D4–D14; Phase 0 + 01 COMPLETE"
   feature_ids:
   - F43
   - F44
   - F45
-  feature_ids_note: "S020-D7/D8 — F43 (H1 cascade cache) + F44 (#83/#161 CE) + F45 (#162 soft language filter); feature-list allocated @ 02c3b30; 01-requirements in_progress"
+  feature_ids_note: "S020-D7/D9–D14 — F43 (H1 cascade cache) + F44 (#162 soft language) + F45 (#83/#161 CE); RD-197–RD-208; feature-list Planned; 01-requirements COMPLETE"
   github_issues:
   - 83
   - 161
@@ -2985,14 +3032,16 @@ active_session:
     note: Session open — Standard approved; EV-017 stub allocated; handoff → 16-evolve Phase 0
   - stage: 01-requirements
     required: true
-    status: in_progress
+    status: completed
     skip_rationale:
     started_at: '2026-08-02'
-    note: "IN_PROGRESS — seed loaded; F43–F45 @ 02c3b30; phase_0c confirm locked L1–L12 + open Q1–Q5"
+    note: "COMPLETE — S020-D9–D14; RD-197–RD-208; report 01-requirements-batch-b.md; handoff → 02-verify-plan"
+    completed_at: '2026-08-02'
   - stage: 02-verify-plan
     required: true
     status: pending
     skip_rationale:
+    note: Pending start — delta audit after 01 COMPLETE
   - stage: 03-plan-tooling
     required: false
     status: skipped
@@ -3044,7 +3093,8 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+  next_action: start 02-verify-plan delta audit
+  report_01_requirements: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
 sessions:
 - id: S019-retrieval-quality
   type: feature
@@ -3658,7 +3708,7 @@ sessions:
         confirmed_at: '2026-08-02T01:31:00Z'
     note: COMPLETE 2026-08-02T01:31:00Z — F42 Phase 3 approved (option 1); AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; report committed @ 3e780b6
     feature_inspection: *id001
-    manual_inspection: *id027
+    manual_inspection: *id002
     features:
       F42:
         approved: true
@@ -3733,7 +3783,7 @@ sessions:
   e2e_10_report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
   e2e_10_completed_at: '2026-08-02T00:55:43Z'
   feature_inspection: *id001
-  manual_inspection: *id027
+  manual_inspection: *id002
   f42_signoff_waiver: approve_on_t0_and_openapi_for_11
   staging_inspection_deferred_to: 12/13
   completed_at: '2026-08-01'
@@ -4257,7 +4307,7 @@ sessions:
     remind_at: 11-verify-impl or after 07-build
     note: User declined UI preview for now; remind at 11-verify-impl or after build
   completed_at: '2026-07-29'
-  merge: &id025
+  merge: &id023
     pr_number: 157
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157
     status: merged
@@ -6670,10 +6720,10 @@ stages:
     batch2_note: 'All nine consolidation decisions recorded (1-9) 2026-07-10. Proposed routing amendment PENDING user AskQuestion — do not apply yet: delta 01+04 then 07 slices A=(1)+(4), B=(2)+(3), C=(5)+(6), D=(7), E=(8); then 08→13; skip 02/03/05/06. 00-context in_progress until routing approved + context brief written.'
     routing_amendment_approved: true
   01-requirements:
-    status: in_progress
+    status: completed
     started_at: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: EV-017/S020-retrieval-batch-b — 01-requirements delta STARTED; F43–F45; seed loaded; phase_0c confirm locked L1–L12 + open Q1–Q5
+    partial_rerun_note: EV-017/S020-retrieval-batch-b — 01-requirements delta COMPLETE; F43–F45; S020-D9–D14; RD-197–RD-208
     session_id: S020-retrieval-batch-b
     branch: evolve/EV-017-retrieval-batch-b
     evolve_cycle_id: EV-017
@@ -6685,10 +6735,10 @@ stages:
     - F45
     handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
     seed_path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-    current_action: phase_0c_confirm_locked_and_open_qs
-    next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
-    report:
-    note: S020/EV-017 01-requirements IN_PROGRESS 2026-08-02 — seed loaded; F43–F45 allocated @ 02c3b30; confirm locked L1–L12 + resolve open Q1–Q5
+    current_action: completed
+    next_action: start 02-verify-plan delta audit
+    report: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
+    note: S020/EV-017 01-requirements COMPLETE 2026-08-02 — F43–F45; S020-D9–D14; RD-197–RD-208; report docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md; next → 02-verify-plan delta audit
     s019_baseline:
       status: completed
       completed_at: '2026-08-01'
@@ -6719,26 +6769,39 @@ stages:
       note: 01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; committed c8cfaa9
     rd_allocated:
       status: written
-      range: RD-188..RD-196
-      allocated_at: '2026-07-30'
-      written_at: '2026-07-30'
+      range: RD-197..RD-208
+      allocated_at: '2026-08-02'
+      written_at: '2026-08-02'
       decisions:
-      - RD-188
-      - RD-189
-      - RD-190
-      - RD-191
-      - RD-192
-      - RD-193
-      - RD-194
-      - RD-195
-      - RD-196
-      note: S017/EV-015 F41 corpus rebuild — RD-188–196; S016 RD-183–187 retained in s016_baseline
+      - RD-197
+      - RD-198
+      - RD-199
+      - RD-200
+      - RD-201
+      - RD-202
+      - RD-203
+      - RD-204
+      - RD-205
+      - RD-206
+      - RD-207
+      - RD-208
+      note: S020/EV-017 F43–F45 Batch B — RD-197–208; prior S017 RD-188–196 retained in s017_baseline
     substeps:
       seed_loaded: true
       handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-      current_phase: phase_0c_confirm_locked_and_open_qs
-      current_action: phase_0c_confirm_locked_and_open_qs
-      next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+      current_phase: completed
+      current_action: completed
+      next_action: start 02-verify-plan delta audit
+      locked_l1_l12_approved: true
+      open_q1_q5_resolved: true
+      decisions:
+      - S020-D9
+      - S020-D10
+      - S020-D11
+      - S020-D12
+      - S020-D13
+      - S020-D14
+      rd_range: RD-197..RD-208
     artifacts:
     - docs/feature-list.md
     - docs/sessions/S020-retrieval-batch-b/reports/phase0-impact.md
@@ -6756,6 +6819,8 @@ stages:
     - docs/sessions/S017-corpus-reembed-migration/reports/runbook-corpus-rebuild-outline.md
     - docs/sessions/S017-corpus-reembed-migration/checkpoints/01-requirements-seed.md
     - docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
+    - docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
+    - docs/sessions/S020-retrieval-batch-b/session-brief.md
     s013_requirements_delta_interview:
       recorded_at: '2026-07-28'
       resolved_at: '2026-07-28'
@@ -6897,16 +6962,12 @@ stages:
     prior_status: completed
     prior_completed_at: '2026-07-08'
     decisions:
-    - RD-163
-    - RD-164
-    - RD-165
-    - RD-166
-    - RD-167
-    - RD-168
-    - RD-169
-    - RD-170
-    - RD-171
-    - RD-172
+    - S020-D9
+    - S020-D10
+    - S020-D11
+    - S020-D12
+    - S020-D13
+    - S020-D14
     s016_baseline:
       status: completed
       completed_at: '2026-07-29'
@@ -6946,6 +7007,22 @@ stages:
       completed_at: '2026-07-30'
       session_id: S017-corpus-reembed-migration
       evolve_cycle_id: EV-015
+      rd_allocated:
+        status: written
+        range: RD-188..RD-196
+        allocated_at: '2026-07-30'
+        written_at: '2026-07-30'
+        decisions:
+        - RD-188
+        - RD-189
+        - RD-190
+        - RD-191
+        - RD-192
+        - RD-193
+        - RD-194
+        - RD-195
+        - RD-196
+        note: S017/EV-015 F41 corpus rebuild — RD-188–196; S016 RD-183–187 retained in s016_baseline
     ui_preview:
       status: n_a
       note: UI preview N/A for Batch B start — confirm in 01 interviews
@@ -6959,6 +7036,18 @@ stages:
     - S019-D41
     s019_d38_d41_decision_recorded: true
     s019_d38_d41_decision_recorded_in: docs/decisions/evolve-decisions.md
+    completed_at: '2026-08-02'
+    partial_rerun_completed_at: '2026-08-02'
+    feature_ids_note: S020-D7/D9–D14 — F43 (H1 cascade cache) + F44 (#162 soft language) + F45 (#83/#161 CE); RD-197–RD-208; feature-list Planned; 01-requirements COMPLETE
+    s020_d9_d14_decisions:
+    - S020-D9
+    - S020-D10
+    - S020-D11
+    - S020-D12
+    - S020-D13
+    - S020-D14
+    s020_d9_d14_decision_recorded: true
+    s020_d9_d14_decision_recorded_in: docs/decisions/evolve-decisions.md
   02-verify-plan:
     status: completed
     started_at: '2026-07-30'
@@ -6976,7 +7065,7 @@ stages:
     report: docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
     gate_a_to_b: passed
     current_action: completed
-    next_action: handoff_04_tech_plan
+    next_action: start 02-verify-plan delta audit
     note: S019/EV-016 02-verify-plan COMPLETE 2026-08-01 — M1–M3 approved (option 1); H7 heuristic clarified in spec/feature-list; S019-D42; no contradictions; Phase A approved (option 1); gates.a_to_b=passed; handoff → 04-tech-plan
     s017_baseline:
       status: completed
@@ -7000,7 +7089,7 @@ stages:
         - M4
         - M5
         - M6
-        medium_verdicts: *id002
+        medium_verdicts: *id003
     s013_baseline:
       status: completed
       completed_at: '2026-07-28'
@@ -7097,6 +7186,8 @@ stages:
     artifacts:
     - docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
     - docs/sessions/S017-corpus-reembed-migration/reports/02-verify-plan-audit.md
+    s020_pending_start: true
+    s020_pending_note: S020/EV-017 01-requirements COMPLETE 2026-08-02; 02-verify-plan pending start — delta audit next; S019 baseline remains completed above
   03-plan-tooling:
     status: completed
     started_at: '2026-05-19'
@@ -7624,7 +7715,7 @@ stages:
           completed_at: '2026-07-30'
           commit: 78e7a8c5f9e578ac71f3761ca4ad888f640937fe
           note: run_rebuild_job + dispatch @ 78e7a8c — TC-164 unit tests green; ADR-040/RD-190
-        T88.4: *id003
+        T88.4: *id004
         T85.1:
           status: completed
           started_at: '2026-07-29'
@@ -7661,20 +7752,20 @@ stages:
           status: completed
           started_at: '2026-07-29'
           completed_at: '2026-07-29'
-        T88.5: *id004
-        T88.6: *id005
-        T89.1: *id006
-        T89.2: *id007
-        T89.3: *id008
-        T89.4: *id009
-        T89.5: *id010
-        T89.6: *id011
-        T89.7: *id012
-        T90.1: *id013
-        T90.2: *id014
-        T90.3: *id015
-        T90.4: *id016
-        T90.5: *id017
+        T88.5: *id005
+        T88.6: *id006
+        T89.1: *id007
+        T89.2: *id008
+        T89.3: *id009
+        T89.4: *id010
+        T89.5: *id011
+        T89.6: *id012
+        T89.7: *id013
+        T90.1: *id014
+        T90.2: *id015
+        T90.3: *id016
+        T90.4: *id017
+        T90.5: *id018
       s010_baseline:
         status: in_progress
         started_at: '2026-07-10'
@@ -8293,7 +8384,7 @@ stages:
     evolve_cycle_id: EV-016
     mode: evolve
     delta_only: true
-    feature_ids: *id018
+    feature_ids: *id019
     feature: F42
     note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
     overall: pass
@@ -8420,7 +8511,7 @@ stages:
     completed_at: '2026-08-02T00:55:43Z'
     completed: '2026-08-02'
     report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
-    substeps: *id019
+    substeps: *id020
   11-verify-impl:
     status: completed
     started_at: '2026-08-02'
@@ -8556,7 +8647,7 @@ stages:
           partial_rerun_at: '2026-06-26'
           note: 'S002 partial rerun — user-amended into routing plan; in_progress pending user AskQuestion responses at S002 park. (EV-002 prior run: F23-F29 all journeys and features user-approved.)'
     feature_inspection: *id001
-    manual_inspection: *id027
+    manual_inspection: *id002
     features:
       F42:
         approved: true
@@ -8633,7 +8724,7 @@ stages:
       report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
       next_action: 13 COMPLETE — PR to main next
       note: 'S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY; all failure mitigations + rollback approved; TP-S017-12-A/B; next → Phase D checkpoint then 13-deploy-smoke (staging: alembic → services → secret sync → H4/H5 → live equivalence + shadow→F36→promote)'
-      substeps: *id020
+      substeps: *id021
       phase2_config_drift:
         status: decided
         decided_at: '2026-07-30'
@@ -8706,17 +8797,11 @@ stages:
         resources: pass
         template: pass
         connectivity: pass
-    completed_at: '2026-07-30'
-    result: ready
-    deploy_ready: true
     head_ref_at_checklist_write: 180ad14
     checklist_commit: 180ad14
     untracked_left:
     - scripts/deploy/_tmp_proxy_key_check.py
-    phase2_failure_modes: *id021
-    phase3_rollback: *id022
-    phase4_checklist: *id023
-    user_approvals: *id024
+    phase4_checklist: *id022
   13-deploy-smoke:
     status: completed
     started_at: '2026-08-01'
@@ -9025,12 +9110,8 @@ stages:
           merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
           merged_at: '2026-07-29'
         next_action: none_cycle_closed
-    completed_at: '2026-07-30'
     deploy_checkpoint: approved
     deploy_checkpoint_at: '2026-07-30'
-    pr_number: 168
-    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/168
-    pr_status: open
     merge_approval: pending
     ci_head_sha: bbe9544
     ci_status: green
@@ -12383,7 +12464,7 @@ evolve_cycles:
     remind_at: 11-verify-impl or after 07-build
     note: User declined UI preview for now; remind at 11-verify-impl or after build
   completed_at: '2026-07-29'
-  merge: *id025
+  merge: *id023
   docs_close_commit: 0144ee66631c78fe549745d5f5fe309196ccaa59
   close_out_commit:
     sha: 0144ee66631c78fe549745d5f5fe309196ccaa59
@@ -12626,7 +12707,7 @@ evolve_cycles:
       closeout_decision: merge_approved
       next_action: 'Merge PR #168 via gh; reset DO pins to main; watch CI on main; continue pr_closeout'
       ci_status: green
-      closeout_askquestion: &id026
+      closeout_askquestion: &id027
         status: decided
         topic: pr_168_merge_or_hold
         presented_at: '2026-07-30'
@@ -13186,7 +13267,7 @@ evolve_cycles:
       report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
       next_action: Phase D checkpoint AskQuestion then invoke 13-deploy-smoke
       note: 'S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY; all failure mitigations + rollback approved; TP-S017-12-A/B; next → Phase D checkpoint then 13-deploy-smoke (staging: alembic → services → secret sync → H4/H5 → live equivalence + shadow→F36→promote)'
-      substeps: *id020
+      substeps: *id021
       phase2_config_drift:
         status: decided
         decided_at: '2026-07-30'
@@ -13234,10 +13315,10 @@ evolve_cycles:
       checklist_commit: 180ad14
       untracked_left:
       - scripts/deploy/_tmp_proxy_key_check.py
-      phase2_failure_modes: *id021
-      phase3_rollback: *id022
-      phase4_checklist: *id023
-      user_approvals: *id024
+      phase2_failure_modes: *id024
+      phase3_rollback: *id025
+      phase4_checklist: *id022
+      user_approvals: *id026
     13-deploy-smoke:
       status: completed
       started_at: '2026-07-30'
@@ -13477,7 +13558,7 @@ evolve_cycles:
   closeout_decision: merge_executed
   ci_status: green
   ci_note: 'H0ci PASS on main @ c7cda84 after PR #168 merge — CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30594671225; deploy-preflight success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30594830511'
-  closeout_askquestion: *id026
+  closeout_askquestion: *id027
   completed_at: '2026-07-30'
   merge_commit: c7cda84181da7dddd43c4e1fe813d7f4e8e7c412
   merge_sha: c7cda84181da7dddd43c4e1fe813d7f4e8e7c412
@@ -13948,7 +14029,7 @@ evolve_cycles:
     b_to_c: passed
     c_to_d: passed
     deploy: passed
-    deploy_blocker: null
+    deploy_blocker:
     deploy_blocker_note: PR #172 merged @ b08ec30; DO pins main ACTIVE; H0ci PASS
   routing_plan:
     required_stages:
@@ -14161,7 +14242,7 @@ evolve_cycles:
       overall: pass
       overall_result: PASS
       result_scope: delta
-      substeps: *id019
+      substeps: *id020
     11-verify-impl:
       status: completed
       started_at: '2026-08-02'
@@ -14201,7 +14282,7 @@ evolve_cycles:
       next_action: run 12-verify-deploy
       note: COMPLETE 2026-08-02T01:31:00Z — F42 Phase 3 approved (option 1); AC-RQ6/staging inspect deferred to 12/13; feature_inspection deferred_to_12_13; report committed @ 3e780b6
       feature_inspection: *id001
-      manual_inspection: *id027
+      manual_inspection: *id002
     12-verify-deploy:
       status: completed
       started_at: '2026-08-01'
@@ -14656,8 +14737,8 @@ evolve_cycles:
   - F43
   - F44
   - F45
-  feature_ids_note: 'S020-D7/D8 — F43 (full H1 cascade cache) + F44 (#83/#161 CE spike+ship) + F45 (#162 soft language filter); feature-list allocated @ 02c3b30; 01-requirements in_progress'
-  feature_ids_pending_note: 'CLEARED — F43–F45 written to feature-list @ 02c3b30; phase0-impact.md finalized; 01-requirements in_progress'
+  feature_ids_note: 'S020-D7/D9–D14 — F43 (H1 cascade cache) + F44 (#162 soft language) + F45 (#83/#161 CE); RD-197–RD-208; feature-list Planned; 01-requirements COMPLETE'
+  feature_ids_pending_note: 'CLEARED — F43–F45 in feature-list; 01-requirements COMPLETE @ 2026-08-02'
   title: Batch B — Retrieval (F43 cache + CE spike + soft language filter)
   status: in_progress
   started: '2026-08-02'
@@ -14680,9 +14761,9 @@ evolve_cycles:
     F44 = #83/#161 CE spike + ship gate;
     F45 = #162 config-gated L1 default off + empty-hit fixture;
     F43+F44+F45 Planned. Standard routing. phase0_approved=true.
-  current_stage: 01-requirements
-  current_action: phase_0c_confirm_locked_and_open_qs
-  current_stage_note: '01-requirements IN_PROGRESS — seed loaded; F43–F45 allocated @ 02c3b30; AskQuestion confirm locked L1–L12 + resolve open Q1–Q5'
+  current_stage: 02-verify-plan
+  current_action: pending_start
+  current_stage_note: '02-verify-plan pending start — 01-requirements COMPLETE (S020-D9–D14; RD-197–RD-208)'
   mode: evolve
   delta_only: true
   branch: evolve/EV-017-retrieval-batch-b
@@ -14728,28 +14809,43 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: phase_0c_confirm_locked_and_open_qs
-      note: Phase 0 COMPLETE (S020-D8); Fn allocation + phase0-impact DONE @ 02c3b30; 01-requirements in_progress (delta_only)
+      current_action: handoff_02_verify_plan
+      note: Phase 0 COMPLETE (S020-D8); 01-requirements COMPLETE (S020-D9–D14; RD-197–RD-208); next → 02-verify-plan delta audit (pending start)
     01-requirements:
-      status: in_progress
+      status: completed
       started: '2026-08-02'
       started_at: '2026-08-02'
+      completed: '2026-08-02'
+      completed_at: '2026-08-02'
       mode: evolve
       delta_only: true
       feature_ids:
       - F43
       - F44
       - F45
+      decisions:
+      - S020-D9
+      - S020-D10
+      - S020-D11
+      - S020-D12
+      - S020-D13
+      - S020-D14
+      rd_range: RD-197..RD-208
+      report: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
       handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-      current_action: phase_0c_confirm_locked_and_open_qs
-      next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+      current_action: completed
+      next_action: start 02-verify-plan delta audit
       substeps:
         seed_loaded: true
         handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-        current_phase: phase_0c_confirm_locked_and_open_qs
-      note: IN_PROGRESS — seed loaded; F43–F45 allocated; confirm locked L1–L12 + resolve open Q1–Q5
+        current_phase: completed
+        locked_l1_l12_approved: true
+        open_q1_q5_resolved: true
+      note: S020/EV-017 01-requirements COMPLETE 2026-08-02 — F43–F45; S020-D9–D14; RD-197–RD-208; report docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md; next → 02-verify-plan delta audit
     02-verify-plan:
       status: pending
+      note: Pending start — delta audit after 01 COMPLETE
+      next_action: start 02-verify-plan delta audit
     04-tech-plan:
       status: pending
     07-build:
@@ -14821,8 +14917,59 @@ evolve_cycles:
     note: 'User option 1 — proceed: allocate F43–F45 + finalize impact + start 01-requirements'
     status: recorded
     recorded_at: '2026-08-02'
-  note: 'EV-017 01-requirements IN_PROGRESS 2026-08-02; Phase 0 approved (S020-D8); F43–F45 allocated @ 02c3b30; phase0-impact.md finalized; seed loaded; next = AskQuestion confirm locked L1–L12 + resolve open Q1–Q5'
-  next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+  - id: S020-D9
+    topic: locked_l1_l12
+    choice: approve_all
+    note: Approve all locked L1–L12 from seed
+    status: recorded
+    recorded_at: '2026-08-02'
+    stage: 01-requirements
+  - id: S020-D10
+    topic: semantic_cache
+    choice: conservative_cosine
+    note: Conservative cosine; miss → retrieve; log hits; quality ≥ H0
+    status: recorded
+    recorded_at: '2026-08-02'
+    stage: 01-requirements
+  - id: S020-D11
+    topic: ce_spike_model
+    choice: bge_reranker_v2_m3_modal_t4
+    note: BAAI/bge-reranker-v2-m3 on Modal T4
+    status: recorded
+    recorded_at: '2026-08-02'
+    stage: 01-requirements
+  - id: S020-D12
+    topic: ce_ship_floors
+    choice: relevancy_0_28_faith_0_91
+    note: Relevancy ≥ 0.28 and faith ≥ 0.91 (Hy1 staging floors)
+    status: recorded
+    recorded_at: '2026-08-02'
+    stage: 01-requirements
+  - id: S020-D13
+    topic: deploy_path
+    choice: staging_path_a
+    note: Staging Path A (write-api + chat-rag)
+    status: recorded
+    recorded_at: '2026-08-02'
+    stage: 01-requirements
+  - id: S020-D14
+    topic: cache_lifecycle
+    choice: ttl_plus_size_cap_bust_on_corpus
+    note: TTL + size cap; bust on corpus version / F41 rebuild
+    status: recorded
+    recorded_at: '2026-08-02'
+    stage: 01-requirements
+  note: 'EV-017 01-requirements COMPLETE 2026-08-02; S020-D9–D14; RD-197–RD-208; report docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md; next = start 02-verify-plan delta audit'
+  next_action: start 02-verify-plan delta audit
+  decisions_01:
+  - S020-D9
+  - S020-D10
+  - S020-D11
+  - S020-D12
+  - S020-D13
+  - S020-D14
+  rd_range_01: RD-197..RD-208
+  report_01_requirements: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -15867,6 +16014,49 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 01-requirements
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: S020-D14 — Cache lifecycle = TTL + size cap; bust on corpus version / F41 rebuild
+  recorded_at: '2026-08-02'
+  note: 01 Phase 0C open Q5 resolved (F43)
+- date: '2026-08-02'
+  skill: 01-requirements
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: S020-D13 — Deploy = Staging Path A (write-api + chat-rag)
+  recorded_at: '2026-08-02'
+  note: 01 Phase 0C open Q4 resolved
+- date: '2026-08-02'
+  skill: 01-requirements
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: S020-D12 — CE ship floors = relevancy ≥ 0.28 and faith ≥ 0.91 (Hy1 staging floors)
+  recorded_at: '2026-08-02'
+  note: 01 Phase 0C open Q3 resolved (F45 gate)
+- date: '2026-08-02'
+  skill: 01-requirements
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: S020-D11 — CE spike model = BAAI/bge-reranker-v2-m3 on Modal T4
+  recorded_at: '2026-08-02'
+  note: 01 Phase 0C open Q2 resolved (F45)
+- date: '2026-08-02'
+  skill: 01-requirements
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: S020-D10 — Semantic cache = Conservative cosine; miss → retrieve; log hits; quality ≥ H0
+  recorded_at: '2026-08-02'
+  note: 01 Phase 0C open Q1 resolved
+- date: '2026-08-02'
+  skill: 01-requirements
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: S020-D9 — Locked L1–L12 = Approve all
+  recorded_at: '2026-08-02'
+  note: 01 Phase 0C; seed locked items confirmed
+- 'S020/EV-017 01-requirements COMPLETE → 02-verify-plan: S020-D9–D14; RD-197–RD-208; F43–F45; report=docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md; 02 status=pending (pending start); next_action=start 02-verify-plan delta audit'
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S020-retrieval-batch-b
@@ -17367,6 +17557,102 @@ decisions_log:
 - S019/EV-016 09-qa COMPLETE — overall=fail; blockers QA-S019-B01..B03 (ruff spike tests, basedpyright, nltk CVEs); F42 surfaces green; report=docs/sessions/S019-retrieval-quality/reports/qa-report.md
 - 'S019/EV-016 12-verify-deploy COMPLETE 2026-08-01 — deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
 artifacts:
+- path: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
+  kind: stage-report
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: 01-requirements COMPLETE report; S020-D9–D14; RD-197–RD-208; F43–F45
+- path: docs/feature-list.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: F43–F45 Planned; Batch B delta (01 COMPLETE)
+- path: docs/spec.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: ChatRAG algorithm + query path + changelog (F43–F45)
+- path: docs/config-spec.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: Cache / soft language / CE env vars + validation
+- path: docs/api-contract.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: cache_hit on /ask + stream done
+- path: docs/user-journeys.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: UJ-057–060
+- path: docs/test-plan.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: TC-176–184 + UJ mapping + thresholds
+- path: docs/acceptance-criteria.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: AC-BB1–BB10 + CE benches
+- path: docs/decisions.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: RD-197–RD-208
+- path: docs/decisions/evolve-decisions.md
+  kind: standing-doc-delta
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: §EV-017 S020-D9–D14 recorded
+- path: docs/sessions/S020-retrieval-batch-b/session-brief.md
+  kind: session-brief
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: Session brief updated after 01-requirements COMPLETE
+- path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+  kind: handoff-seed
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: Seed consumed; L1–L12 approved (D9); Q1–Q5 resolved (D10–D14)
 - path: docs/feature-list.md
   kind: feature-list
   session_id: S020-retrieval-batch-b

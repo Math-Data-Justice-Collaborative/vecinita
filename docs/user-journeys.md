@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-01 (S019/EV-016 F42 — UJ-055/056 H7+P1 packing + staging eval gate)
+> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — UJ-057–060 cache / soft language / CE)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -62,6 +62,10 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-054 | Shadow dry-run rebuild → F36 → promote | Admin operator | Jobs detail + eval + Admin promote | F41 EV-015 #167 | local |
 | UJ-055 | Ask with H7+P1 packed multi-query retrieval | Community member | ChatRAG → `POST /api/v1/ask` / stream | F42 EV-016 #165 | local |
 | UJ-056 | Admin validates F42 via F36 staging golden (Hy1) | Admin operator | DM UI `/evaluation` → staging fixture | F36, F42 EV-016 | local (+ live promote smoke) |
+| UJ-057 | Repeat ask hits answer/retrieve cache | Community member | ChatRAG → `POST /api/v1/ask` (warm) | F43 EV-017 | local |
+| UJ-058 | Soft language fallback on empty same-lang hit | Community member | ChatRAG ask with F44 flag on + empty-hit fixture | F44 EV-017 #162 | local |
+| UJ-059 | CE rerank gated ask (flag on after ship) | Community member | ChatRAG ask with F45 CE enabled | F45 EV-017 #83/#161 | local |
+| UJ-060 | Admin / spike validates F45 CE ship gate | Operator | Staging golden + CE spike harness | F45, F36 EV-017 | local (+ staging) |
 
 ## Visual journey maps
 
@@ -887,6 +891,108 @@ before promote-path smoke.
 live promote smoke at 12/13 after write-api deploy.
 
 **E2E tier**: local (+ live promote smoke).
+
+---
+
+### UJ-057: Repeat ask hits answer/retrieve cache
+
+**Actor**: Community member (no account)
+
+**Goal**: On a repeated (or near-duplicate) question, get a fast answer via the F43 H1
+cascade without paying full LLM cost when exact/semantic hit.
+
+**Preconditions**: F43 enabled (`VECINITA_RAG_CACHE=true`); prior ask warmed exact or
+semantic store for the normalized query+locale.
+
+**Steps**:
+
+1. Call `POST /api/v1/ask` with a community question (cold) — observe `cache_hit: none`
+   (or generate path) and a normal answer + sources.
+2. Repeat the same question (exact) — observe `cache_hit: exact` and answer without LLM.
+3. Optionally ask a near-paraphrase above semantic threshold — `cache_hit: semantic`.
+4. Confirm response shape still includes `answer`, `language`, `sources`.
+
+**Acceptance**: Exact/semantic hits skip LLM; quality on warm golden ≥ H0; keys are
+content-hash only (no identity); TTL/size cap enforced; corpus version / F41 rebuild
+busts entries.
+
+**Automated tests**: Unit cascade (TC-176–178); API e2e `tests/e2e/test_uj057_answer_cache.py`
+(TC-179).
+
+**E2E tier**: local.
+
+---
+
+### UJ-058: Soft language fallback on empty same-lang hit
+
+**Actor**: Community member (no account)
+
+**Goal**: When same-language retrieve is empty, optionally retry without language filter
+(L1) so #54-class monolingual misses can recover.
+
+**Preconditions**: `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK=true`; empty-hit fixture (staging
+golden alone is insufficient — S019 A3).
+
+**Steps**:
+
+1. Ask a query that yields empty same-lang chunks above `min_retrieval_score`.
+2. Backend retries retrieve without language filter.
+3. Observe non-empty sources (or empty_final if still none) and normal answer schema.
+
+**Acceptance**: Default flag **off** preserves L0-strict prod; when on, fallback fires only
+on empty first pass; empty-hit fixture covers the path in CI.
+
+**Automated tests**: Unit L1 (TC-180); API e2e `tests/e2e/test_uj058_soft_language.py`
+(TC-181).
+
+**E2E tier**: local.
+
+---
+
+### UJ-059: CE rerank gated ask (flag on after ship)
+
+**Actor**: Community member (no account)
+
+**Goal**: When F45 CE is enabled post-gate, ask path retrieves top-N, reranks with
+`bge-reranker-v2-m3`, keeps `top_k`, then P1 packs + synthesizes.
+
+**Preconditions**: Ship gate passed (UJ-060); `VECINITA_RAG_RERANK_CE=true`.
+
+**Steps**:
+
+1. Call `POST /api/v1/ask` with CE enabled.
+2. Backend retrieves N≥top_k, CE-reranks, packs P1, synthesizes.
+3. Response shape unchanged vs UJ-001/UJ-055.
+
+**Acceptance**: Default CE **off**; when on, keep_k=`top_k`; no schema break.
+
+**Automated tests**: Unit CE merge (TC-182) when client lands; API e2e
+`tests/e2e/test_uj059_ce_rerank.py` (TC-183) — mock CE in CI.
+
+**E2E tier**: local.
+
+---
+
+### UJ-060: Admin / spike validates F45 CE ship gate
+
+**Actor**: Operator
+
+**Goal**: Run CE spike (`bge-reranker-v2-m3` on Modal T4) against staging golden; ship only
+if relevancy ≥ **0.28** and faith ≥ **0.91**.
+
+**Preconditions**: Staging golden + F42 Hy1 baseline path; Modal CE spike available.
+
+**Steps**:
+
+1. Run session CE spike script (top-N → CE → keep_k) with P1 packing.
+2. Compare aggregate relevancy/faith to floors.
+3. If pass → enable prod flag path (F45 ship); else keep spike-only / #83 open.
+
+**Acceptance**: Gate recorded; no prod CE without pass (S020-D5/D12).
+
+**Automated tests**: Spike harness + gate doc (TC-184); not a CI Modal live requirement.
+
+**E2E tier**: local (+ staging spike).
 
 ---
 

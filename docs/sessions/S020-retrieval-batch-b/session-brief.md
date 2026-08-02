@@ -72,6 +72,12 @@ spike-gated track, and include **#162** soft language filter in the same cycle
 | S020-D6 | #162 = **config-gated L1** (default off) + empty-hit fixture |
 | S020-D7 | Pre-allocate **F43** (cache) + **F44** (#162) + **F45** (CE) as Planned |
 | S020-D8 | Proceed → Fn rows + impact + start **01-requirements** |
+| S020-D9 | Confirm locked L1–L12 — **approve all** |
+| S020-D10 | Semantic cache — **conservative** cosine; miss → retrieve |
+| S020-D11 | CE spike — **`bge-reranker-v2-m3`** on Modal T4 |
+| S020-D12 | CE ship floors — relevancy ≥ **0.28**, faith ≥ **0.91** |
+| S020-D13 | Deploy — staging **Path A** |
+| S020-D14 | Cache — **TTL + size cap**; bust on corpus version / F41 rebuild |
 
 ## Routing plan
 
