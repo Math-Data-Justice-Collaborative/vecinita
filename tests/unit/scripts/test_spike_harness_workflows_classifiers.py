@@ -5,13 +5,10 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Protocol, cast
 from uuid import uuid4
 
 from vecinita_rag.types import RetrievedChunk
-
-if TYPE_CHECKING:
-    from types import ModuleType
 
 _SCRIPT = (
     Path(__file__).resolve().parents[3]
@@ -23,19 +20,25 @@ _SCRIPT = (
 )
 
 
-def _load() -> ModuleType:
+class _SpikeHarnessMod(Protocol):
+    def classify_intent(self, question: str) -> str: ...
+
+    def classify_answer(self, *, answer: str, chunks: list[RetrievedChunk]) -> str: ...
+
+
+def _load() -> _SpikeHarnessMod:
     """Load the session spike script as a module."""
     name = "spike_harness_workflows"
     existing = sys.modules.get(name)
     if existing is not None:
-        return existing
+        return cast("_SpikeHarnessMod", existing)
     spec = importlib.util.spec_from_file_location(name, _SCRIPT)
     assert spec is not None
     assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
-    return mod
+    return cast("_SpikeHarnessMod", mod)
 
 
 def test_classify_intent_chitchat() -> None:

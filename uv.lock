@@ -20,6 +20,7 @@ members = [
 overrides = [
     { name = "aiohttp", specifier = ">=3.14.1" },
     { name = "msgpack", specifier = ">=1.2.1" },
+    { name = "nltk", specifier = ">=3.9.4,<3.10" },
     { name = "pillow", specifier = ">=12.3.0" },
     { name = "pip", specifier = ">=26.1.2" },
     { name = "pypdf", specifier = ">=6.13.3" },

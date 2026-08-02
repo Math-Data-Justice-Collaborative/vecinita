@@ -586,10 +586,11 @@ def test_execute_eval_run_staging_profile_uses_staging_golden(
             run_id=eval_run_id,
             embed_fn=eval_embed_fn,
         )
-    fixture_path = mock_run.call_args.kwargs["fixture_path"]
-    assert isinstance(fixture_path, Path)
-    assert fixture_path.name == "qa_pairs_staging.json"
-    assert mock_run.call_args.kwargs["config"] is not None
+    run_kwargs = cast("dict[str, object]", mock_run.call_args.kwargs)
+    fixture_path_obj = run_kwargs["fixture_path"]
+    assert isinstance(fixture_path_obj, Path)
+    assert fixture_path_obj.name == "qa_pairs_staging.json"
+    assert run_kwargs["config"] is not None
 
 
 def test_list_eval_runs_parses_optional_timestamps(engine: Engine, eval_run_id: UUID) -> None:

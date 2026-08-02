@@ -22,5 +22,13 @@ CVE-2026-41168
 CVE-2026-41313
 CVE-2026-41312
 CVE-2026-41314
-# Transitive nltk 3.9.4 from llama-index; no PyPI fix yet (track nltk>=3.10).
+# Transitive nltk 3.9.4 from llama-index.
+# nltk>=3.10.0 fixes CVE-2026-12075/12061/12074 but its inisec finder treats
+# project-local `.venv/lib/.../site-packages/regex` as "cwd" and blocks import
+# when the working directory is the repo root (standard uv layout). Stay on
+# 3.9.4 until nltk scopes the cwd check to sys.path[''] / os.getcwd() only.
+# Track: https://github.com/nltk/nltk/issues (inisec + in-tree venv).
 PYSEC-2026-597
+CVE-2026-12075
+CVE-2026-12061
+CVE-2026-12074

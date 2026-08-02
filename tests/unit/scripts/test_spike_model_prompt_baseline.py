@@ -5,10 +5,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
-
-if TYPE_CHECKING:
-    from types import ModuleType
+from typing import Protocol, cast
 
 _SCRIPT = (
     Path(__file__).resolve().parents[3]
@@ -18,20 +15,47 @@ _SCRIPT = (
     / "scripts"
     / "spike_model_prompt_baseline.py"
 )
+_FLOAT_TOL = 1e-9
+_EXPECTED_PACK_LIFT = 0.05
+_EXPECTED_PROMPT_LIFT = 0.08
+_EXPECTED_HYBRID_LIFT = 0.08
+_EXPECTED_TOTAL_LIFT = 0.21
 
 
-def _load() -> ModuleType:
+class _ConditionSpec(Protocol):
+    condition_id: str
+    system_prompt: str
+
+
+class _SpikeModelPromptMod(Protocol):
+    CONDITION_SPECS: tuple[_ConditionSpec, ...]
+
+    def build_synth_prompt(
+        self,
+        *,
+        question: str,
+        context: str,
+        system_prompt: str,
+    ) -> str: ...
+
+    def compute_deltas(
+        self,
+        cells: dict[str, dict[str, object]],
+    ) -> dict[str, float | None]: ...
+
+
+def _load() -> _SpikeModelPromptMod:
     name = "spike_model_prompt_baseline"
     existing = sys.modules.get(name)
     if existing is not None:
-        return existing
+        return cast("_SpikeModelPromptMod", existing)
     spec = importlib.util.spec_from_file_location(name, _SCRIPT)
     assert spec is not None
     assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
-    return mod
+    return cast("_SpikeModelPromptMod", mod)
 
 
 def test_build_synth_prompt_bare_omits_system_instructions() -> None:
@@ -64,28 +88,31 @@ def test_build_synth_prompt_with_system_prefixes_instructions() -> None:
 def test_compute_deltas_prompt_and_hybrid_lifts() -> None:
     """Deltas compare bare→prompt and prompt→hybrid on relevancy/faith."""
     mod = _load()
-    cells = {
+    cells: dict[str, dict[str, object]] = {
         "bare_p0": {"answer_relevancy": 0.10, "faithfulness": 0.80},
         "bare_p1": {"answer_relevancy": 0.15, "faithfulness": 0.90},
         "prompt_p1": {"answer_relevancy": 0.23, "faithfulness": 0.91},
         "prompt_h7p1": {"answer_relevancy": 0.31, "faithfulness": 0.91},
     }
     deltas = mod.compute_deltas(cells)
-    assert abs(cast("float", deltas["pack_lift_relevancy"]) - 0.05) < 1e-9
-    assert abs(cast("float", deltas["prompt_lift_relevancy"]) - 0.08) < 1e-9
-    assert abs(cast("float", deltas["hybrid_lift_relevancy"]) - 0.08) < 1e-9
-    assert abs(cast("float", deltas["total_lift_vs_bare_p0_relevancy"]) - 0.21) < 1e-9
+    assert abs(cast("float", deltas["pack_lift_relevancy"]) - _EXPECTED_PACK_LIFT) < _FLOAT_TOL
+    assert abs(cast("float", deltas["prompt_lift_relevancy"]) - _EXPECTED_PROMPT_LIFT) < _FLOAT_TOL
+    assert abs(cast("float", deltas["hybrid_lift_relevancy"]) - _EXPECTED_HYBRID_LIFT) < _FLOAT_TOL
+    assert (
+        abs(cast("float", deltas["total_lift_vs_bare_p0_relevancy"]) - _EXPECTED_TOTAL_LIFT)
+        < _FLOAT_TOL
+    )
 
 
 def test_condition_specs_include_bare_and_improved() -> None:
     """Matrix always includes bare (no prompt) and improved prompt cells."""
     mod = _load()
-    ids = {c.condition_id for c in mod.CONDITION_SPECS}
+    ids = {spec.condition_id for spec in mod.CONDITION_SPECS}
     assert "bare_p0" in ids
     assert "bare_p1" in ids
     assert "prompt_p1" in ids
     assert "prompt_h7p1" in ids
-    bare = next(c for c in mod.CONDITION_SPECS if c.condition_id == "bare_p0")
+    bare = next(spec for spec in mod.CONDITION_SPECS if spec.condition_id == "bare_p0")
     assert bare.system_prompt == ""
-    prompt = next(c for c in mod.CONDITION_SPECS if c.condition_id == "prompt_p1")
+    prompt = next(spec for spec in mod.CONDITION_SPECS if spec.condition_id == "prompt_p1")
     assert "Answer community questions" in prompt.system_prompt

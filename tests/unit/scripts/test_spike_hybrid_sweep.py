@@ -5,13 +5,10 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Protocol, cast
 from uuid import uuid4
 
 from vecinita_rag.types import RetrievedChunk
-
-if TYPE_CHECKING:
-    from types import ModuleType
 
 _SCRIPT = (
     Path(__file__).resolve().parents[3]
@@ -21,21 +18,53 @@ _SCRIPT = (
     / "scripts"
     / "spike_hybrid_sweep.py"
 )
+_P3_MAX_CHARS = 80
+_MAX_HYBRID_REWRITES = 3
+_EXPECTED_EN_RELEVANCY = 0.5
+_EXPECTED_ES_CROSS_LANG = 0.5
 
 
-def _load() -> ModuleType:
+class _SpikeHybridSweepMod(Protocol):
+    def pack_p1(self, chunks: list[RetrievedChunk]) -> str: ...
+
+    def pack_p3(self, chunks: list[RetrievedChunk], *, max_chars: int) -> str: ...
+
+    def cross_lang_share(
+        self,
+        chunks: list[RetrievedChunk],
+        query_lang: str,
+    ) -> float | None: ...
+
+    def answer_lang_match(self, *, answer: str, locale: str) -> bool: ...
+
+    def hybrid_rewrites(self, question: str, *, locale: str) -> list[str]: ...
+
+    def locale_breakdown(
+        self,
+        rows: list[dict[str, object]],
+    ) -> dict[str, dict[str, object]]: ...
+
+    def rerank_r1(
+        self,
+        question: str,
+        chunks: list[RetrievedChunk],
+        top_k: int,
+    ) -> list[RetrievedChunk]: ...
+
+
+def _load() -> _SpikeHybridSweepMod:
     """Load the session hybrid spike script as a module."""
     name = "spike_hybrid_sweep"
     existing = sys.modules.get(name)
     if existing is not None:
-        return existing
+        return cast("_SpikeHybridSweepMod", existing)
     spec = importlib.util.spec_from_file_location(name, _SCRIPT)
     assert spec is not None
     assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
-    return mod
+    return cast("_SpikeHybridSweepMod", mod)
 
 
 def _chunk(*, text: str, language: str, score: float = 0.5) -> RetrievedChunk:
@@ -81,10 +110,10 @@ def test_pack_p3_dedupes_and_caps() -> None:
         url="https://example.org/a",
         language="en",
     )
-    packed = mod.pack_p3([low, high], max_chars=80)
+    packed = mod.pack_p3([low, high], max_chars=_P3_MAX_CHARS)
     assert "high-score" in packed
     assert "low-score" not in packed
-    assert len(packed) <= 80
+    assert len(packed) <= _P3_MAX_CHARS
 
 
 def test_cross_lang_share_counts_mismatches() -> None:
@@ -111,14 +140,14 @@ def test_hybrid_rewrites_spanish_locale() -> None:
     mod = _load()
     rewrites = mod.hybrid_rewrites("¿Qué es Nuevas Voces?", locale="es")
     assert rewrites[0] == "¿Qué es Nuevas Voces?"
-    assert any("Providence" in r for r in rewrites)
-    assert len(rewrites) <= 3
+    assert any("Providence" in rewrite for rewrite in rewrites)
+    assert len(rewrites) <= _MAX_HYBRID_REWRITES
 
 
 def test_locale_breakdown_aggregates_en_and_es() -> None:
     """Locale breakdown reports separate means for en and es rows."""
     mod = _load()
-    rows = [
+    rows: list[dict[str, object]] = [
         {
             "locale": "en",
             "retrieval_pass": True,
@@ -139,9 +168,9 @@ def test_locale_breakdown_aggregates_en_and_es() -> None:
     breakdown = mod.locale_breakdown(rows)
     assert breakdown["en"]["n"] == 1
     assert breakdown["es"]["n"] == 1
-    assert breakdown["en"]["answer_relevancy"] == 0.5
+    assert breakdown["en"]["answer_relevancy"] == _EXPECTED_EN_RELEVANCY
     assert breakdown["es"]["answer_lang_match_rate"] == 0.0
-    assert breakdown["es"]["mean_cross_lang_share"] == 0.5
+    assert breakdown["es"]["mean_cross_lang_share"] == _EXPECTED_ES_CROSS_LANG
 
 
 def test_rerank_r1_prefers_title_overlap() -> None:

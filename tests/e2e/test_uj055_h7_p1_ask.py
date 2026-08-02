@@ -15,6 +15,8 @@ from vecinita_chat_rag_backend.service import ChatRagService
 from vecinita_rag.multi_query import multi_query_retrieve
 from vecinita_rag.types import RetrievedChunk
 
+from tests.helpers.json_response import json_list, json_str, response_json_object
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
@@ -100,9 +102,9 @@ def test_uj055_ask_prompt_includes_source_url_headers(
         json={"question": "What are the food pantry hours?"},
     )
     assert response.status_code == HTTPStatus.OK
-    body = response.json()
-    assert body["answer"]
-    assert body["sources"]
+    body = response_json_object(response)
+    assert json_str(body, "answer")
+    assert json_list(body, "sources")
     assert llm.prompts
     prompt = llm.prompts[0]
     assert "Source: Community pantry" in prompt
