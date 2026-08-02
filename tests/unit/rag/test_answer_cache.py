@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pytest
 from vecinita_rag.cache import (
+    DEFAULT_SEMANTIC_THRESHOLD,
     AnswerCache,
     CachedAnswer,
     CacheHitKind,
@@ -20,6 +21,8 @@ _QUERY = "What is the capital of France?"
 _LOCALE = "en"
 _ANSWER = "Paris is the capital of France."
 _CORPUS_V1 = "corpus-v1"
+_NEAR_THRESHOLD = 0.95
+_BELOW_THRESHOLD = 0.80
 
 
 def _chunk(*, text: str = "body", score: float = 0.9) -> RetrievedChunk:
@@ -82,3 +85,50 @@ def test_exact_answer_cache_normalizes_whitespace_and_case() -> None:
     assert hit == CacheHitKind.EXACT
     assert answer is not None
     assert answer.answer == _ANSWER
+
+
+def test_semantic_cache_hits_above_threshold() -> None:
+    """TC-177: cosine >= 0.92 yields semantic hit (AC-BB2)."""
+    emb_a = (1.0, 0.0, 0.0)
+    emb_b = (_NEAR_THRESHOLD, (1.0 - _NEAR_THRESHOLD**2) ** 0.5, 0.0)
+    cache = AnswerCache(
+        corpus_version=_CORPUS_V1,
+        semantic_threshold=DEFAULT_SEMANTIC_THRESHOLD,
+    )
+    cache.store_answer(_QUERY, _LOCALE, _cached_answer(embedding=emb_a))
+
+    hit, answer, _chunks = cascade_lookup(
+        cache,
+        CascadeRequest(
+            query="Capital city of France?",
+            locale=_LOCALE,
+            query_embedding=emb_b,
+        ),
+    )
+
+    assert hit == CacheHitKind.SEMANTIC
+    assert answer is not None
+    assert answer.answer == _ANSWER
+
+
+def test_semantic_cache_misses_below_threshold() -> None:
+    """TC-177: cosine below threshold continues (miss -> not semantic)."""
+    emb_a = (1.0, 0.0, 0.0)
+    emb_b = (_BELOW_THRESHOLD, (1.0 - _BELOW_THRESHOLD**2) ** 0.5, 0.0)
+    cache = AnswerCache(
+        corpus_version=_CORPUS_V1,
+        semantic_threshold=DEFAULT_SEMANTIC_THRESHOLD,
+    )
+    cache.store_answer(_QUERY, _LOCALE, _cached_answer(embedding=emb_a))
+
+    hit, answer, _chunks = cascade_lookup(
+        cache,
+        CascadeRequest(
+            query="Unrelated question about weather",
+            locale=_LOCALE,
+            query_embedding=emb_b,
+        ),
+    )
+
+    assert hit != CacheHitKind.SEMANTIC
+    assert answer is None
