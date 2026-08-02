@@ -1245,7 +1245,7 @@ project:
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
@@ -1270,7 +1270,7 @@ project:
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
       substeps:
         current_task: T99.4
         task_status: blocked
@@ -1323,8 +1323,8 @@ project:
           script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
-          commits_pending: true
-          commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+          commits_pending: false
+          commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -2181,13 +2181,13 @@ project:
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: true
-        commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+        commits_pending: false
+        commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
-      commits_pending: true
-      commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+      commits_pending: false
+      commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
     08-verify-build:
       status: completed
       started_at: '2026-08-02'
@@ -4085,7 +4085,7 @@ active_session:
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
     filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-    T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+    T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4174,7 +4174,7 @@ active_session:
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
       filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
     s021_d20_decision: S021-D20
     s021_d21_decision: S021-D21
     s021_d21_choice: option_2_investigate_promote_history
@@ -4304,13 +4304,13 @@ active_session:
     script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
-    commits_pending: true
-    commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+    commits_pending: false
+    commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: true
-  commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+  commits_pending: false
+  commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
 sessions:
 - id: S020-retrieval-batch-b
   type: feature
@@ -9634,7 +9634,7 @@ stages:
     partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
       filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
     session_id: S021-retrieval-follow-on
     branch: evolve/EV-018-retrieval-follow-on
     evolve_cycle_id: EV-018
@@ -9657,7 +9657,7 @@ stages:
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
       filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+      T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
     substeps:
       current_task: T99.4
       task_status: blocked
@@ -9703,8 +9703,8 @@ stages:
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: true
-        commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+        commits_pending: false
+        commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
     s020_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -10558,13 +10558,13 @@ stages:
       script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
       completed_at: '2026-08-02'
       completed_at_ts: '2026-08-02T18:17:00Z'
-      commits_pending: true
-      commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+      commits_pending: false
+      commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
     rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
     s021_d22_executed: true
     t99_3_status: completed
-    commits_pending: true
-    commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+    commits_pending: false
+    commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
   08-verify-build:
     status: completed
     started_at: '2026-08-02'
@@ -19234,7 +19234,7 @@ evolve_cycles:
   current_stage_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
     promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
     filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-    T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+    T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -19363,7 +19363,7 @@ evolve_cycles:
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
       substeps:
         current_task: T99.4
         task_status: blocked
@@ -19416,13 +19416,13 @@ evolve_cycles:
           script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
           completed_at: '2026-08-02'
           completed_at_ts: '2026-08-02T18:17:00Z'
-          commits_pending: true
-          commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+          commits_pending: false
+          commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
       partial_rerun_at: '2026-08-02'
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=07_t99_4_blocked_docker;
-        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync dirty (commits_pending=true)
+        T99.4 blocked (Docker/Postgres for TC-185); commits @ c447577 + be74777; state sync @ ab1006f (commits_pending=false)
       s021_d20_decision: S021-D20
       s021_d20_decision_recorded: true
       root_cause: embed↔corpus pin drift
@@ -19459,13 +19459,13 @@ evolve_cycles:
         script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
         completed_at: '2026-08-02'
         completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: true
-        commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+        commits_pending: false
+        commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       s021_d22_executed: true
       t99_3_status: completed
-      commits_pending: true
-      commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+      commits_pending: false
+      commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
     08-verify-build:
       status: pending
     09-qa:
@@ -19749,13 +19749,13 @@ evolve_cycles:
     script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
     completed_at: '2026-08-02'
     completed_at_ts: '2026-08-02T18:17:00Z'
-    commits_pending: true
-    commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+    commits_pending: false
+    commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: true
-  commits_note: T99.1–T99.3 @ c447577 + be74777; workflow-state/execution-plan dirty after T99.4 blocked sync — user will commit state sync
+  commits_pending: false
+  commits_note: state sync @ ab1006f; commits_pending=false; T99.4 remains blocked_docker
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -20860,7 +20860,7 @@ decisions_log:
     processes present but docker.sock never appeared (~3min); port 5432 closed
   recorded_at: '2026-08-02T18:26:00Z'
   note: current_action=07_t99_4_blocked_docker; do NOT mark T99.4 completed; await healthy Docker sock +
-    with_local_postgres pytest for UJ-061; state sync dirty (commits_pending=true)
+    with_local_postgres pytest for UJ-061; state sync @ ab1006f (commits_pending=false)
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
@@ -24999,9 +24999,9 @@ git_history:
     evolve_cycle_id: EV-018
     exists_on_disk: true
     created_from: main
-    head_sha: be747772c6e952d8259912918d8b7a5485045bf9
-    head_short: be74777
-    note: S021/EV-018 — T99.1–T99.3 committed (c447577 + be74777); T99.4 in_progress
+    head_sha: ab1006fa11d5fc3c2e77d8bf9e5a326e7ab5f39b
+    head_short: ab1006f
+    note: S021/EV-018 — HEAD ab1006f; T99.4 blocked_docker (TC-185 needs Docker/Postgres)
   - name: evolve/EV-017-retrieval-batch-b
     purpose: EV-017 / S020 — Batch B retrieval (F43 answer cache +
     base: main
@@ -27543,6 +27543,22 @@ git_history:
     - docs/spec.md
     - docs/test-plan.md
     - docs/user-journeys.md
+    - workflow-state.yaml
+    skill_ids:
+    - 16-evolve
+    - 07-build
+  - sha: ab1006fa11d5fc3c2e77d8bf9e5a326e7ab5f39b
+    short: ab1006f
+    branch: evolve/EV-018-retrieval-follow-on
+    message: 'docs: sync EV-018 state — T99.4 blocked on Docker for TC-185'
+    stage: 07-build
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    files_changed: 2
+    timestamp: '2026-08-02T18:27:35Z'
+    note: State sync after T99.4 blocked_docker; T99.4 remains blocked; commits_pending cleared
+    files:
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
     - workflow-state.yaml
     skill_ids:
     - 16-evolve
