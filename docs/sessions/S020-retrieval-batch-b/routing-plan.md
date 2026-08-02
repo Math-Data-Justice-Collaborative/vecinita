@@ -34,10 +34,10 @@
 `@.cursor/skills/01-requirements/SKILL.md` — load
 [checkpoints/01-requirements-seed.md](./checkpoints/01-requirements-seed.md) first.
 
-## Ship targets (provisional — Phase 0)
+## Ship targets (Phase 0 batch 1 — S020-D4–D7)
 
-| Track | Target |
-|-------|--------|
-| F43 | Answer/retrieval cache — cost ship |
-| #83/#161 | CE spike with ship gate (default: no prod CE unless lift) |
-| #162 | Soft language — optional / empty-hit |
+| Fn | Track | Target |
+|----|-------|--------|
+| **F43** | Cache | Full H1 cascade (exact → semantic → retrieve → generate) |
+| **F44** | #162 | Config-gated L1 (default off) + empty-hit fixture |
+| **F45** | #83/#161 | CE spike + ship gate (no prod unless gate passes) |

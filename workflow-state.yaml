@@ -2965,8 +2965,8 @@ active_session:
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
   current_stage: 16-evolve
-  current_action: phase_0_intake
-  current_stage_note: "00-context COMPLETE 2026-08-02; handoff → 16-evolve Phase 0 intake (F43 tiers, CE gate, #162 shape); 01-requirements NOT started"
+  current_action: phase_0_proceed_gate
+  current_stage_note: "Phase 0 intake batch 1 recorded (S020-D4–D7); awaiting proceed gate before Fn allocation + impact analysis; phase0_approved=false; 01-requirements NOT started"
   started_at: '2026-08-02'
   routing_plan_status: approved
   routing_preset: standard
@@ -2977,10 +2977,12 @@ active_session:
   predecessor_session_id: S019-retrieval-quality
   predecessor_evolve_cycle_id: EV-016
   continues: S019-retrieval-quality
-  scope_summary: "All three in one cycle — F43 answer cache ship + #83/#161 CE spike track + #162 soft language filter; Fn allocation beyond F43 in Phase 1"
+  scope_summary: "F43 full H1 cascade (exact→semantic→retrieve→generate); #83/#161 spike+ship gate; #162 config-gated L1 default off + empty-hit fixture; pre-allocate F43+F44+F45 as Planned (S020-D4–D7)"
   feature_ids:
   - F43
-  feature_ids_note: "F43 placeholder for answer cache; #83/#161/#162 also in cycle — additional Fn allocation in Phase 1 (01-requirements)"
+  - F44
+  - F45
+  feature_ids_note: "S020-D7 — F43 (H1 cascade cache) + F44 (#83/#161 CE) + F45 (#162 soft language filter) pre-allocated as Planned; phase0_approved still false"
   github_issues:
   - 83
   - 161
@@ -3052,7 +3054,7 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: '16-evolve Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape)'
+  next_action: AskQuestion proceed to Fn allocation + impact analysis (Phase 1)
 sessions:
 - id: S019-retrieval-quality
   type: feature
@@ -14678,8 +14680,10 @@ evolve_cycles:
   cycle_type: feature
   feature_ids:
   - F43
-  feature_ids_note: 'F43 = answer cache ship (placeholder from S019 L3/H1/H9); #83/#161 CE spike track + #162 soft language filter also in cycle — additional Fn allocation in Phase 1 (01-requirements)'
-  feature_ids_pending_note: 'F43 allocated as cache ship placeholder; CE spike (#83/#161) and soft language filter (#162) may allocate F44+ in Phase 1'
+  - F44
+  - F45
+  feature_ids_note: 'S020-D7 — F43 (full H1 cascade cache) + F44 (#83/#161 CE spike+ship) + F45 (#162 soft language filter) pre-allocated as Planned'
+  feature_ids_pending_note: 'Pre-allocated Planned (S020-D7); formal Fn allocation + impact analysis at Phase 1 after proceed gate; phase0_approved=false'
   title: Batch B — Retrieval (F43 cache + CE spike + soft language filter)
   status: in_progress
   started: '2026-08-02'
@@ -14697,10 +14701,14 @@ evolve_cycles:
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/161
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
   scope_summary: |
-    Batch B retrieval (continues S019/EV-016): ship F43 answer cache; CE spike track for #83/#161;
-    soft language filter #162. All three in one cycle. Standard routing. Fn allocation beyond F43 in Phase 1.
-  current_stage: phase_0_intake
-  current_stage_note: '00-context COMPLETE 2026-08-02; Phase 0 intake in_progress — AskQuestion (F43 tiers, CE gate, #162 shape); 01-requirements NOT started'
+    Batch B retrieval (continues S019/EV-016), Phase 0 intake batch 1 (S020-D4–D7):
+    F43 = full H1 cascade (exact → semantic → retrieve → generate);
+    F44 = #83/#161 CE spike + ship gate;
+    F45 = #162 config-gated L1 default off + empty-hit fixture;
+    F43+F44+F45 pre-allocated as Planned. Standard routing. phase0_approved=false.
+  current_stage: phase_0_proceed_gate
+  current_action: phase_0_proceed_gate
+  current_stage_note: 'Phase 0 intake batch 1 recorded (S020-D4–D7); awaiting proceed gate; phase0_approved=false; 01-requirements NOT started'
   mode: evolve
   delta_only: true
   branch: evolve/EV-017-retrieval-batch-b
@@ -14709,7 +14717,7 @@ evolve_cycles:
   routing_preset_status: approved
   routing_plan_status: approved
   phase0_approved: false
-  phase_0_status: in_progress
+  phase_0_status: awaiting_proceed_gate
   routing_plan:
     required_stages:
     - 00-context
@@ -14744,8 +14752,8 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: phase_0_intake
-      note: Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape); 01-requirements NOT started
+      current_action: phase_0_proceed_gate
+      note: Phase 0 intake batch 1 (S020-D4–D7) recorded; awaiting proceed gate; phase0_approved=false; 01-requirements NOT started
     01-requirements:
       status: pending
     02-verify-plan:
@@ -14793,8 +14801,28 @@ evolve_cycles:
     choice: all_three_one_cycle
     note: F43 answer cache ship + #83/#161 CE spike + #162 soft language filter in one cycle
     status: recorded
-  note: 'EV-017 Phase 0 intake in_progress 2026-08-02 — 00-context COMPLETE; predecessor EV-016/S019 (F42 shipped); 01-requirements NOT started'
-  next_action: '16-evolve Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape)'
+  - id: S020-D4
+    topic: f43_cache_shape
+    choice: full_h1_cascade
+    note: F43 full H1 cascade (exact → semantic → retrieve → generate)
+    status: recorded
+  - id: S020-D5
+    topic: ce_spike_ship_gate
+    choice: spike_plus_ship_gate
+    note: '#83/#161 CE spike + ship gate'
+    status: recorded
+  - id: S020-D6
+    topic: soft_language_filter_162
+    choice: config_gated_l1_default_off
+    note: '#162 config-gated L1 default off + empty-hit fixture'
+    status: recorded
+  - id: S020-D7
+    topic: fn_preallocation
+    choice: f43_f44_f45_planned
+    note: Pre-allocate F43 + F44 + F45 as Planned
+    status: recorded
+  note: 'EV-017 Phase 0 intake batch 1 recorded 2026-08-02 (S020-D4–D7); phase_0_status=awaiting_proceed_gate; phase0_approved=false; feature_ids=[F43,F44,F45]; 01-requirements NOT started'
+  next_action: AskQuestion proceed to Fn allocation + impact analysis (Phase 1)
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -15839,6 +15867,34 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D7 — Pre-allocate F43 + F44 + F45 as Planned'
+  recorded_at: '2026-08-02'
+  note: 'Phase 0 intake batch 1; feature_ids=[F43,F44,F45]; phase0_approved remains false; proceed gate next'
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D6 — #162 config-gated L1 default off + empty-hit fixture'
+  recorded_at: '2026-08-02'
+  note: Phase 0 intake batch 1; soft language filter shape locked for F45
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D5 — #83/#161 spike + ship gate'
+  recorded_at: '2026-08-02'
+  note: Phase 0 intake batch 1; CE track for F44
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D4 — F43 full H1 cascade (exact → semantic → retrieve → generate)'
+  recorded_at: '2026-08-02'
+  note: Phase 0 intake batch 1; F43 cache cascade shape locked
 - date: '2026-08-02'
   skill: 00-context
   session_id: S020-retrieval-batch-b
@@ -17304,6 +17360,14 @@ decisions_log:
 - S019/EV-016 09-qa COMPLETE — overall=fail; blockers QA-S019-B01..B03 (ruff spike tests, basedpyright, nltk CVEs); F42 surfaces green; report=docs/sessions/S019-retrieval-quality/reports/qa-report.md
 - 'S019/EV-016 12-verify-deploy COMPLETE 2026-08-01 — deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
 artifacts:
+- path: docs/sessions/S020-retrieval-batch-b/reports/phase0-impact-draft.md
+  kind: phase0-impact-draft
+  session_id: S020-retrieval-batch-b
+  stage: 16-evolve
+  skill_id: 16-evolve
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: 'Phase 0 intake batch 1 impact draft (S020-D4–D7); awaiting proceed gate; phase0_approved=false'
 - path: docs/sessions/S020-retrieval-batch-b/session-brief.md
   kind: session-brief
   session_id: S020-retrieval-batch-b
@@ -20733,6 +20797,16 @@ git_history:
     files_changed: 6
     timestamp: '2026-08-02T03:09:27Z'
     note: Session closeout on main after EV-016/S019 close; recording this git_history append dirties workflow-state.yaml — tiny follow-up commit needed (do not amend 96a0db9)
+  - sha: 9defd2a63583e8c5c0349bce41498b49a59eea3b
+    short: 9defd2a
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: open S020 / EV-017 Retrieval Batch B session'
+    stage: 00-context
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: session artifacts + evolve-decisions + workflow-state + sessions README
+    timestamp: '2026-08-02'
+    note: S020 00-context session open commit; next remains 16-evolve Phase 0 intake AskQuestion
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'

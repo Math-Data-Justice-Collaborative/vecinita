@@ -23,12 +23,16 @@ Phase 0 intake may append more locked rows before 01 starts.
 | L6 | S019 spike | F43 motivated by H1/H9: warm cache_hit≈1, quality≈H0; cost win not quality win |
 | L7 | S019 R3 | Prior CE (`bge-reranker-base`) **failed** relevancy lift — do not ship from that evidence alone |
 | L8 | S019 A3 | #162 soft fallbacks unused on staging golden — empty-hit / #54-class only |
+| L9 | S020-D4 | F43 = full H1 cascade (exact → semantic answer → retrieve-result → generate) |
+| L10 | S020-D5 | CE = spike + ship gate; no prod CE unless gate passes |
+| L11 | S020-D6 | #162 = config-gated L1 default off + empty-hit fixture |
+| L12 | S020-D7 | Pre-allocate F43 (cache), F44 (#162), F45 (CE) as Planned |
 
 ## Document manifest (delta — after Phase 0 lock)
 
 | Document | Action |
 |----------|--------|
-| `docs/feature-list.md` | Add F43 (+ optional Fn if #162/CE ship) |
+| `docs/feature-list.md` | Add F43, F44, F45 (Planned) |
 | `docs/spec.md` | Cache + optional filter/rerank deltas |
 | `docs/config-spec.md` | Cache TTL/key/normalize; CE/filter flags if shipped |
 | `docs/api-contract.md` | Only if cache observability or new endpoints |
@@ -41,24 +45,27 @@ Phase 0 intake may append more locked rows before 01 starts.
 
 ## Pre-filled interview answers (confirm/modify)
 
-| Topic | Proposed default |
-|-------|------------------|
+| Topic | Locked / proposed |
+|-------|-------------------|
+| F43 tiers | **Locked D4** — full H1 cascade |
 | F43 surface | ChatRAG ask path + shared `packages/rag` helper; F36 harness can measure |
 | Cache keys | Content-hash of normalized query (+ locale); no identity-keyed store (ADR-004) |
-| Cache backend | In-process / ephemeral first; Modal volume only if Phase 0 requires |
-| CE ship bar | Staging golden relevancy ≥ F42 Hy1 floor **and** faith ≥ 0.91; else keep spike-only |
-| #162 default | Config-gated off; enable for empty same-lang retrieve only |
-| Success | F43: $/row or LLM-skip rate win with quality ≥ H0; CE/#162: evidence or explicit defer |
+| Cache backend | In-process / ephemeral first; Modal volume only if 01 unlocks |
+| Semantic threshold | Confirm in 01 (false-hit / faith risk) |
+| CE ship bar | Staging golden relevancy ≥ F42 Hy1 floor **and** faith ≥ 0.91; else spike-only |
+| #162 | **Locked D6** — config-gated L1 default off + empty-hit fixture |
+| Fn ids | **Locked D7** — F43 / F44 / F45 |
+| Success | F43: $/row or LLM-skip rate win with quality ≥ H0; F44/F45: gate or defer |
 
-## Open questions (Phase 0 → then 01)
+## Open questions for 01 (after Phase 0 proceed)
 
 | ID | Question | Recommended default |
 |----|----------|---------------------|
-| Q1 | F43 cache tiers this cycle? | **Exact + retrieve-result cache** (H1 lean); semantic answer cache optional behind threshold |
-| Q2 | #83/#161 this cycle: spike-only vs ship-if-gate? | **Spike + gate**; no prod CE unless gate passes |
-| Q3 | #162: ship config-gated L1, or spike-only with empty-hit fixture? | **Config-gated L1** behind flag (default off) + empty-hit fixture |
-| Q4 | Secondary Fn ids? | F43 only for cache; allocate F44 only if #162 or CE ships product surface |
-| Q5 | Deploy target | Staging Path A (write-api + chat-rag) like EV-016 |
+| Q1 | Semantic answer cosine threshold + false-hit policy? | Conservative threshold; miss → retrieve; log semantic hits |
+| Q2 | CE model / host for renewed spike? | New candidate vs retry `bge-reranker-base`; Modal T4 playground |
+| Q3 | Exact CE ship numbers (relevancy/faith floors)? | Relevancy ≥ Hy1 staging floor; faith ≥ 0.91 |
+| Q4 | Deploy target | Staging Path A (write-api + chat-rag) like EV-016 |
+| Q5 | Cache TTL / max entries / invalidation on corpus rebuild? | TTL + size cap; bust on F41 rebuild / corpus version |
 
 ## Explicitly out of interview scope
 

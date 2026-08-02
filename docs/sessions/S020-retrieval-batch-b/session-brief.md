@@ -67,6 +67,10 @@ spike-gated track, and include **#162** soft language filter in the same cycle
 | S020-D1 | Open new `feature` session **S020-retrieval-batch-b** (do not reopen S019) |
 | S020-D2 | Scope = **all three** in one cycle (F43 + CE spike + #162) |
 | S020-D3 | Routing = **Standard** (`01→02→04→07→08→09→10→11→12→13`; skip 03, 05, 06, 15) |
+| S020-D4 | F43 = **full H1 cascade** (exact → semantic → retrieve → generate) |
+| S020-D5 | #83/#161 = **spike + ship gate** (no prod CE unless gate passes) |
+| S020-D6 | #162 = **config-gated L1** (default off) + empty-hit fixture |
+| S020-D7 | Pre-allocate **F43** (cache) + **F44** (#162) + **F45** (CE) as Planned |
 
 ## Routing plan
 
@@ -75,7 +79,7 @@ See [routing-plan.md](./routing-plan.md). Preset: **Standard**.
 ## Evolve
 
 - Cycle: **EV-017**
-- Feature IDs: **F43** (+ possible secondary Fn if #162 / CE ship — Phase 1 allocation)
+- Feature IDs: **F43** (cache), **F44** (#162), **F45** (CE) — S020-D7
 - Branch: `evolve/EV-017-retrieval-batch-b`
 
 ## 01-requirements handoff

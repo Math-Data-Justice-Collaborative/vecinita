@@ -330,6 +330,15 @@ soft language filter in the same cycle (optional / empty-hit; not proven on stag
 | S020-D2 | Scope | **All three** tracks in one cycle (F43 + CE spike + #162) |
 | S020-D3 | Routing | **Standard** (`01→02→04→07→08→09→10→11→12→13`; skip 03, 05, 06, 15) |
 
+### Decisions (Phase 0 intake batch 1 — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S020-D4 | F43 cache tiers | **Full H1 cascade** — exact → semantic answer → retrieve-result → generate |
+| S020-D5 | #83 / #161 CE | **Spike + ship gate** — no prod CE unless gate passes |
+| S020-D6 | #162 soft language | **Config-gated L1** (default off) + empty-hit fixture |
+| S020-D7 | Fn ids | **Pre-allocate F43** (cache) + **F44** (#162) + **F45** (CE) as Planned |
+
 ### Phase 0 status
 
-Intake in progress — cache tiers, CE ship gate, #162 ship shape.
+Batch 1 locked (D4–D7). Awaiting proceed gate → Fn rows + impact analysis + Phase A `01-requirements`.
