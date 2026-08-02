@@ -10,26 +10,28 @@ description: >
 # Corpus DB safety (staging Postgres)
 
 The **corpus lives on DO Managed Postgres** (`vecinita-staging`), not Supabase.
-Test helpers that `TRUNCATE` corpus tables must **never** run against staging unless
-the operator explicitly opts in.
+Test helpers that `TRUNCATE`, `DELETE FROM embeddings`, or UPSERT synthetic
+`attach_embeddings` vectors must **never** run against staging unless the operator
+explicitly opts in.
 
-**Incident:** July 2026 — `seed_eval_corpus()` wiped ~40 ingested documents when pytest
-ran with `prod.env` sourced (`DATABASE_URL` → `.ondigitalocean.com`).
+**Incidents:** July 2026 — `seed_eval_corpus()` TRUNCATE wiped ~40 docs (BUG-2026-07-02).
+August 2026 — `attach_embeddings()` one-hot UPSERT contaminated live vectors
+(BUG-2026-08-02).
 
 ## Rules for agents
 
 | Do | Don't |
 |----|-------|
 | Run `pytest` / `make test-py` with **local** Postgres (`localhost`, `127.0.0.1`, `postgres`) | Source `prod.env` then run unit/integration tests that reset corpus |
-| Use `VECINITA_ALLOW_CORPUS_RESET=1` + ack only for **intentional** staging maintenance | Call `seed_eval_corpus()` or `reset_corpus_tables()` against staging |
-| Check `DATABASE_URL` host before any corpus TRUNCATE | Assume CI guard alone protects staging — env in shell matters |
+| Use `VECINITA_ALLOW_CORPUS_RESET=1` + ack only for **intentional** staging maintenance | Call `seed_eval_corpus()`, `reset_corpus_tables()`, `attach_embeddings()`, or `clear_embeddings()` against staging |
+| Check `DATABASE_URL` host before any corpus mutation | Assume CI guard alone protects staging — env in shell matters |
 
 ## Guard implementation
 
 | Artifact | Role |
 |----------|------|
 | `tests/helpers/corpus_db_guard.py` | `assert_corpus_reset_allowed()` — blocks `.ondigitalocean.com` / `.supabase.co` |
-| `tests/unit/rag/conftest.py` | Calls guard before corpus reset |
+| `tests/unit/rag/conftest.py` | Guard before reset, attach_embeddings, clear_embeddings |
 | `scripts/check_corpus_reset_guard.sh` | CI guard (`make ci-guards`) |
 
 ## Operator override (destructive)

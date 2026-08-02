@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
@@ -16,7 +15,7 @@ from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 
 from tests.helpers.json_response import json_object_list, json_str, response_json_object
-from tests.unit.rag.conftest import attach_embeddings, basis_vector
+from tests.unit.rag.conftest import attach_embeddings, basis_vector, clear_embeddings
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -55,9 +54,7 @@ def tag_ask_client() -> TestClient:
     url = _database_url()
     load_seed_tags(database_url=url)
     load_tagged_corpus(database_url=url)
-    engine = create_engine(url)
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM embeddings"))
+    clear_embeddings(database_url=url)
     attach_embeddings(
         database_url=url,
         match_substrings={"Housing Rights": 0, "Legal Aid": 1},

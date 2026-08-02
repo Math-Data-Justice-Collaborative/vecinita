@@ -34,7 +34,7 @@ def test_do_managed_postgres_is_blocked() -> None:
     host_name = corpus_database_host(url)
     assert is_blocked_managed_corpus_host(host_name)
     assert not is_local_corpus_database(url)
-    with pytest.raises(RuntimeError, match="Refusing corpus TRUNCATE on managed Postgres"):
+    with pytest.raises(RuntimeError, match="Refusing corpus TRUNCATE/mutation on managed Postgres"):
         assert_corpus_reset_allowed(url)
 
 

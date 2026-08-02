@@ -48,6 +48,8 @@ def _attach_embeddings_impl(
     match_substrings: dict[str, int],
     default_index: int = 1,
 ) -> int:
+    # BUG-2026-08-02: refuse synthetic one-hot UPSERTs on Managed Postgres.
+    assert_corpus_reset_allowed(database_url)
     engine = create_engine(database_url)
     written = 0
     try:
@@ -89,7 +91,8 @@ def attach_embeddings(
 ) -> int:
     """Assign basis vectors per chunk text match (for deterministic retrieval).
 
-    Returns the number of embedding rows written.
+    Refuses Managed Postgres hosts (BUG-2026-08-02). Returns the number of
+    embedding rows written.
     """
     with corpus_db_lock():
         return _attach_embeddings_impl(
@@ -97,6 +100,21 @@ def attach_embeddings(
             match_substrings=match_substrings,
             default_index=default_index,
         )
+
+
+def clear_embeddings(*, database_url: str) -> None:
+    """DELETE all embedding rows after the corpus DB guard allows it.
+
+    Prefer this over raw ``DELETE FROM embeddings`` in tests (BUG-2026-08-02).
+    """
+    assert_corpus_reset_allowed(database_url)
+    with corpus_db_lock():
+        engine = create_engine(database_url)
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("DELETE FROM embeddings"))
+        finally:
+            engine.dispose()
 
 
 def seed_corpus_with_embeddings(
@@ -195,6 +213,7 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
         engine = create_engine(database_url)
         try:
             with engine.begin() as conn:
+                # Guard already ran via _reset_corpus_tables_impl above.
                 conn.execute(text("DELETE FROM embeddings"))
                 conn.execute(
                     text(
@@ -247,12 +266,7 @@ def corpus_db() -> str:
     url = _database_url()
     with corpus_db_lock():
         load_corpus(database_url=url)
-        engine = create_engine(url)
-        try:
-            with engine.begin() as conn:
-                conn.execute(text("DELETE FROM embeddings"))
-        finally:
-            engine.dispose()
+    clear_embeddings(database_url=url)
     return url
 
 
