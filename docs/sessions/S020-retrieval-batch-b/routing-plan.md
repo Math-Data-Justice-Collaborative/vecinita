@@ -9,8 +9,8 @@
 | 04-tech-plan | yes | completed | Phase 22 M94–M98 + ADR-042; Gate B→C (S020-D18) |
 | 07-build | yes | completed | Phase 22 M94–M98 @ `59edd12` / state sync `ccc82df` |
 | 08-verify-build | yes | completed | PASS scoped — `reports/verification-report.md` |
-| 09-qa | yes | pending | |
-| 10-e2e | yes | pending | |
+| 09-qa | yes | completed | pass_with_advisories — `reports/qa-report.md` |
+| 10-e2e | yes | completed | PASS T0 UJ-057–059 — `reports/e2e-report.md` |
 | 11-verify-impl | yes | pending | |
 | 12-verify-deploy | yes | pending | |
 | 13-deploy-smoke | yes | pending | |
