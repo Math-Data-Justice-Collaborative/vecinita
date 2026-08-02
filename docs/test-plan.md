@@ -80,6 +80,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-058 Soft language L1 fallback | `tests/e2e/test_uj058_soft_language.py` | TC-180, TC-181 | — |
 | UJ-059 CE gated ask | `tests/e2e/test_uj059_ce_rerank.py` | TC-182, TC-183 | — |
 | UJ-060 CE ship gate spike | spike harness + report | TC-184 | — |
+| UJ-061 Non-empty staging retrieve | `tests/e2e/test_uj061_retrieve_nonempty.py` | TC-185, TC-186 | — (no UI change) |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
 | UJ-046 Eval run side-by-side compare | Vitest `test_evaluation_compare.test.tsx` | TC-130 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -1129,8 +1130,24 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 ### TC-184: CE ship gate floors (UJ-060, F45)
 
 - **Objective**: Spike must clear Hy1 staging floors before ship.
-- **Input**: Staging golden spike with `BAAI/bge-reranker-v2-m3`.
+- **Input**: Staging golden spike with `BAAI/bge-reranker-v2-m3` **after** TC-185/UJ-061
+  non-empty pools (F46). Empty-pool runs are invalid for ship (EV-017).
 - **Expected**: Ship only if relevancy ≥ **0.28** and faith ≥ **0.91**; else spike-only (AC-BB9).
+
+### TC-185: Staging golden retrieve non-empty pools (UJ-061, F46)
+
+- **Objective**: Golden retrieve cells return non-empty passage pools on staging (or
+  fixture-backed CI equivalent).
+- **Input**: `qa_pairs_staging.json` rows through retrieve path (same knobs as Hy1/CE).
+- **Expected**: Aggregate / representative rows have `pool > 0` (not universally empty);
+  documented in session report (AC-FO1).
+
+### TC-186: ChatRAG ask returns sources when corpus matches (UJ-061, F46)
+
+- **Objective**: Cold ask (cache miss) exposes non-empty `sources[]` for in-corpus questions.
+- **Input**: `POST /api/v1/ask` with a question known to match fixture/corpus (TestClient +
+  seeded DB in CI; staging sample on Path A).
+- **Expected**: `sources` length ≥ 1; no false “empty corpus” when data exists (AC-FO2).
 
 ## Test Data
 
@@ -1138,7 +1155,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 |-------|----------|---------|
 | Seed corpus (EN/ES) | `data/fixtures/corpus/` | TC-001, TC-011 |
 | Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness, TC-168, TC-174–175 |
-| Staging eval Q&A | `data/fixtures/eval/qa_pairs_staging.json` | TC-174–175, TC-184 (ISS-008 / F42 Hy1 / F45 gate) |
+| Staging eval Q&A | `data/fixtures/eval/qa_pairs_staging.json` | TC-174–175, TC-184–186 (ISS-008 / F42 Hy1 / F45/F46) |
 | Empty-hit language fixture | `data/fixtures/eval/empty_hit_language.json` | TC-180–181 |
 | URL ingest fixture | `data/fixtures/ingest/` | TC-010, TC-163 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
@@ -1162,8 +1179,10 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | F42 Hy1 staging relevancy (ship) | ≥ 0.28 aggregate | Staging golden; TC-175 / AC-RQ6 |
 | F42 Hy1 staging faithfulness (ship) | ≥ 0.91 aggregate | Staging golden; TC-175 / AC-RQ6 |
 | F43 warm cache quality | ≥ H0 cell (relevancy/faith) | Harness / TC-177 |
-| F45 CE ship relevancy | ≥ 0.28 aggregate | Staging golden; TC-184 / AC-BB9 |
-| F45 CE ship faithfulness | ≥ 0.91 aggregate | Staging golden; TC-184 / AC-BB9 |
+| F45 CE ship relevancy | ≥ 0.28 aggregate | Staging golden; TC-184 / AC-BB9; requires F46 |
+| F45 CE ship faithfulness | ≥ 0.91 aggregate | Staging golden; TC-184 / AC-BB9; requires F46 |
+| F46 staging retrieve pools | Non-empty on representative golden rows | TC-185 / AC-FO1 |
+| F46 ask sources (in-corpus) | `sources` length ≥ 1 | TC-186 / AC-FO2 |
 | Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
 
 ### F31 coverage gate — gated components

@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-02 (S020/EV-017 — F43–F45 Retrieval Batch B: cache, soft language, CE)
+> **Last updated**: 2026-08-02 (S021/EV-018 — F46 empty retrieve + F45 CE re-gate; prior S020/EV-017 F43–F45)
 
 ## Summary
 
@@ -54,7 +54,8 @@
 | F42 | Richer context packing + multi-query retrieval (H7+P1) | Implemented | ChatRAG | packages/rag, chat-rag-backend; F36 eval sandbox join | S019/EV-016 #165; PR #172 |
 | F43 | Answer / retrieval cache (H1 cascade) | Planned | ChatRAG | packages/rag, chat-rag-backend; F36 harness | S020/EV-017; S020-D4/D7 |
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
-| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S020-D5/D7 |
+| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S021/EV-018 re-gate; S020-D5/D7 |
+| F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -874,8 +875,12 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **What it does**: Renews the **cross-encoder rerank** track for smart retrieval. Runs a
   documented spike (Modal T4 or playground) with a **hard ship gate**; **no production CE**
   unless the gate passes (S020-D5). Prior R3 (`bge-reranker-base`) failed relevancy lift —
-  spike may retry or try an alternate model (01 open Q). If gate fails, F45 stays spike/docs
-  only and #83 remains open.
+  EV-018 re-gate keeps **`BAAI/bge-reranker-v2-m3`** on Modal T4 (RD-213). If gate fails,
+  F45 stays spike/docs only and #83 remains open.
+- **EV-017 outcome**: Path A ship gate **FAIL** (`ship_gate_pass=false`) — empty retrieve pools
+  made faith null and R0≈CE; disposition **spike-only**; prod flag stays off (S020-D21).
+- **EV-018 extension**: Re-run AC-BB9 / UJ-060 / TC-184 **only after F46** restores non-empty
+  staging pools. Same floors (relevancy ≥ 0.28, faith ≥ 0.91) unless Phase 0/01 changes them.
 - **Inputs**: Retrieved top-N passages; CE model id; keep_k; packing (P1) fixed as F42.
 - **Outputs**: Reranked top_k for synthesis when enabled; spike report + gate metrics; optional
   prod flag only after gate pass.
@@ -886,9 +891,31 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `packages/rag` (if ship) | CE client + rerank merge |
   | `apps/chat-rag-backend` (if ship) | Flag-gated post-retrieve CE |
 - **Out of scope unless gate passes**: Default-on CE; cheap R1 heuristic (already rejected on faith).
-- **Ship gate (proposed — confirm in 01)**: Staging golden relevancy ≥ F42 Hy1 floor **and**
-  faith ≥ 0.91; else spike-only.
-- **Source**: S020 / EV-017; GitHub #83/#161; S019 R3 spike; S020-D5/D7/D8.
+- **Ship gate**: Staging golden relevancy ≥ **0.28** and faith ≥ **0.91**; else spike-only.
+- **Depends on**: **F46** (non-empty retrieve) before re-gate is valid.
+- **Source**: S020 / EV-017; S021 / EV-018; GitHub #83/#161; S019 R3 spike; S020-D5/D7/D8/D21.
+
+### F46: Staging retrieve reliability (non-empty pools)
+
+- **What it does**: Restores **non-empty retrieve pools** on staging so golden eval and live
+  ChatRAG asks return `sources` / passages again. S020 Path A observed `pool=0` / empty
+  `sources` while F43 cache still worked — investigate embed↔corpus pin,
+  `min_retrieval_score`, fixture URLs, and retrieve path bugs; ship the minimal fix
+  (code, config, and/or corpus rebuild).
+- **Inputs**: Staging corpus + embed pin; retrieve knobs (`top_k`, `min_retrieval_score`,
+  language); golden fixture URLs; ChatRAG / F36 retrieve path.
+- **Outputs**: Non-empty pools on staging golden rows and sample live asks; diagnostics for
+  root cause; guard tests at the layer the emptiness was observed (API/e2e + optional staging).
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` / chat-rag retrieve | Bugfix or knob correction if code-side |
+  | Corpus / embed pin / F41 rebuild | Ops remediations if pin drift |
+  | tests / e2e | Non-empty retrieve assertions; bug repro if applicable |
+- **Out of scope (EV-018)**: Multilingual embed swap (#159); synthesizer upsizing; LangGraph;
+  changing F43/F44 defaults; closing #83 without F45 re-gate.
+- **Success**: Staging golden + sample H3 asks show non-empty pools; unblocks F45 re-gate.
+- **Source**: S021 / EV-018; S020 ce-ship-gate / evolve-summary follow-ups; S021-D8.
 
 ## Planned / Deferred (post-v1)
 

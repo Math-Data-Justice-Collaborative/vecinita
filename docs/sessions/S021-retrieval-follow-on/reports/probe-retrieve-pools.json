@@ -1,0 +1,84 @@
+{
+  "host": "vecinita-staging-restored-20260701-do-user-28418850-0.f.db.ondigitalocean.com",
+  "docs": 49,
+  "chunks": 213,
+  "embeddings": 213,
+  "corpus_embed_dim": 384,
+  "live_embed_dim": 384,
+  "dim_match": true,
+  "min_score": 0.2,
+  "retrieve_n": 20,
+  "sample_n": 8,
+  "missing_expected_urls": [],
+  "empty_rows_min_0_2": 0,
+  "empty_rows_min_0_0": 0,
+  "pool_size_histogram_min_0_2": {
+    "20": 8
+  },
+  "rows": [
+    {
+      "id": "community-free-clinic-services",
+      "locale": "en",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.8293484449386656,
+      "top_url": "https://www.rifreeclinic.org/"
+    },
+    {
+      "id": "community-free-clinic-hours",
+      "locale": "en",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.7821966176570501,
+      "top_url": "https://www.rifreeclinic.org/"
+    },
+    {
+      "id": "community-nuevas-voces",
+      "locale": "en",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.6983094215393066,
+      "top_url": "https://wrwc.org/what-we-do/community-action/"
+    },
+    {
+      "id": "community-nuevas-voces",
+      "locale": "es",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.6806575871297821,
+      "top_url": "fixture://corpus/es/recursos-comunitarios.md"
+    },
+    {
+      "id": "community-resilience-hub-es",
+      "locale": "es",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.8111983762743082,
+      "top_url": "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+    },
+    {
+      "id": "community-resilience-hub-location",
+      "locale": "en",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.8200447940879815,
+      "top_url": "https://wrwc.org/olneyville-resilience-hub-launch-event/"
+    },
+    {
+      "id": "community-vecinita-intro",
+      "locale": "en",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.7589011418492027,
+      "top_url": "https://wrwc.org/what-we-do/community-action/"
+    },
+    {
+      "id": "community-vecinita-intro",
+      "locale": "es",
+      "pool_min_0_2": 20,
+      "pool_min_0_0": 20,
+      "top_score": 0.7826576828956604,
+      "top_url": "https://vecina.wrwc.org/es/"
+    }
+  ]
+}

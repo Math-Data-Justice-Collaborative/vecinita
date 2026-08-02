@@ -369,3 +369,72 @@ soft language filter in the same cycle (optional / empty-hit; not proven on stag
 
 Phase 0 **approved**. 01 locked (D9–D14). 02 **completed** (D15). Gate A→B **passed** (D16).  
 04-tech-plan artifacts drafted (D17). Next: **Gate B→C** → 07-build.
+
+---
+
+## Cycle EV-018 — Scope (S021 / Retrieval follow-on)
+
+**Approved (session open + Phase 0 Fn lock):** 2026-08-02  
+**Session:** S021-retrieval-follow-on  
+**Predecessor:** S020 / EV-017 (F43/F44 LIVE; F45 spike-only @ `f24a620`)  
+**Issues:** empty retrieve pools (staging); #83 / #161 (CE re-gate); AC-BB9 / UJ-060 / TC-184  
+**Features:** **F46** (retrieve reliability) + **F45** (CE re-gate extension)  
+**Branch:** `evolve/EV-018-retrieval-follow-on`
+
+### Scope summary
+
+Fix staging **empty retrieve pools** (`pool=0` / empty `sources`) that invalidated the EV-017
+CE ship gate, then **re-run** AC-BB9 / UJ-060 with non-empty context. Ship #83 / enable prod CE
+only if floors pass; otherwise keep spike-only.
+
+### Decisions (session open — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S021-D1 | Session | Open **S021-retrieval-follow-on** (do not reopen S020) |
+| S021-D2 | Scope | **Empty retrieve + CE re-gate** in one cycle |
+| S021-D3 | Routing | **Standard** (skip 03, 05, 06, 15) |
+| S021-D4 | 00-context | **Scoped delta** |
+| S021-D5 | EV-018 | Allocated in Phase 0 (not at 00 open) |
+| S021-D6 | CE floors | Relevancy ≥ **0.28**, faith ≥ **0.91** (carry S020-D12) |
+| S021-D7 | Prod CE flag | Stay **false** until re-gate + deploy approval |
+
+### Decisions (Phase 0 Fn allocation — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S021-D8 | Fn ids | **F46** retrieve reliability + **extend F45** CE re-gate |
+| S021-D9 | Ordering | **F46 first**, then F45 re-gate (same cycle; two milestones) |
+| S021-D10 | Shape | Planned Fn work in evolve (not nested 14-hotfix) unless root cause is trivial one-liner |
+| S021-D11 | Deploy default | Staging **Path A**; escalate to Path B only if corpus rebuild required |
+| S021-D12 | Proceed gate | Create EV-018 + impact → start **01-requirements** after user confirm |
+
+### Decisions (01 Phase 0C — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S021-D13 | Root cause in specs | **Outcome-based** ACs; diagnose in 04/07 |
+| S021-D14 | Bug report | **Defer** BUG file until 07 code repro |
+| S021-D15 | Test IDs | **UJ-061** + **TC-185/186** + **AC-FO1–FO5**; amend UJ-060 prereq |
+| S021-D16 | Locked L1–L14 | **Approve all** |
+| S021-D9–D12 | Phase 0 proceed | **Approved** — start 01 (user option 1) |
+
+### Decisions (02-verify-plan — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S021-D17 | Gate A→B / M1–M4 | **Approve all** — M1 representative pools; M2 `min_retrieval_score`; M3 CE model lock prose; M4 root cause stays 04/07 |
+| S021-D18 | 04 TP1–TP6 | **Approve all** — Phase 23 M99→M100; no new ADR; diagnose order; Path A; no CORS churn |
+| S021-D19 | Gate B→C | **Pass** — start 07-build at T99.1 |
+| S021-D20 | F46 root cause (initial) | Live vectors uncorrelated with Modal E0; Path B recommended |
+| S021-D21 | Promote history | **Not a failed E0 promote of bad shadow** — shadow E0 still matches Modal (cos=1). Live wiped 2026-08-02 02:45 with test `basis_vector` one-hots; E0 promote only covered 2/49 docs |
+| S021-D22 | T99.3 fix path | **Path B** full E0 re-embed all docs + promote; file `BUG-2026-08-02-staging-basis-vector-wipe`; harden `attach_embeddings` / DELETE helpers with corpus DB guard (user approved 2026-08-02) |
+| S021-D23 | T99.4 local Docker | **Skip Docker Desktop** — waive local TC-185; fixture TC-185 remains CI-gated / skip-without-Postgres; local closeout = TC-186 + bug PASS + staging Path B AC-FO1 (user 2026-08-02) |
+| S021-D24 | T100.1 CE re-gate | AC-BB9 / TC-184 **PASS** (`ship_gate_pass=true`; CE+P1 relevancy 0.778 / faith 0.938). Keep prod `VECINITA_RAG_RERANK_CE` **false** until 12/13 Path A approval (AC-FO4); #83 open until flag flip |
+| S021-D25 | 11-verify-impl | **Approve F46 + F45** → 12-verify-deploy (user option 1, 2026-08-02) |
+| S021-D26 | 12 Phase 2+3 | **Approve both** failure mitigations + rollback → 13 Path A with `VECINITA_RAG_RERANK_CE=false` (user option 1, 2026-08-02) |
+
+### Phase 0–B / 07 status
+
+Phase 0–D **in progress**. 12-verify-deploy **completed** (S021-D26). CE floors PASS; flag still default-off.
+Next: **13-deploy-smoke** Path A (merge/redeploy ChatRAG; CE stays false).

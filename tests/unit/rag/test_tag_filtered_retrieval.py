@@ -27,6 +27,7 @@ from vecinita_shared_schemas.db_mapping import (
 from tests.unit.rag.conftest import (
     attach_embeddings,
     basis_vector,
+    clear_embeddings,
     reset_corpus_tables,
 )
 
@@ -53,9 +54,7 @@ def tagged_corpus_db() -> str:
     reset_corpus_tables(database_url=url)
     load_seed_tags(database_url=url)
     load_tagged_corpus(database_url=url)
-    engine = create_engine(url)
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM embeddings"))
+    clear_embeddings(database_url=url)
     attach_embeddings(
         database_url=url,
         match_substrings={

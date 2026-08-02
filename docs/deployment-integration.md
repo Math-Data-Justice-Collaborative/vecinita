@@ -388,6 +388,20 @@ CD chain unchanged: `main` → CI → deploy-preflight → Modal → DigitalOcea
 - In-process cache — no volume/corpus rollback.
 - Stop ephemeral CE spike app if Path A was started (`vecinita-spike-f45-rerank`).
 
+## EV-018 — Retrieval follow-on (F46 + F45 re-gate) — S021
+
+| Surface | Change |
+|---------|--------|
+| Staging corpus | Path B E0 promote **already applied** (`a0e8f32d-…`); not part of code deploy |
+| chat-rag-backend / tests | Corpus guard on `attach_embeddings` / `clear_embeddings` (BUG-2026-08-02) |
+| Modal / frontends | **No redeploy required** for F46/F45 metrics |
+| CE flag | AC-BB9 **PASS** at T100.1; `VECINITA_RAG_RERANK_CE` stays **`false`** until explicit Path A CE approval (AC-FO4) |
+
+Redeploy tip after merge for guard ship; smokes H1 + H4–H5; sample UJ-061 retrieve.
+CE enablement is a **separate** ops step — not the default Path A ship.
+
+Session checklist: `docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md`.
+
 ## Open questions
 
 - Budget alerts at 80%/100% of $50 — implement in T14.4 / 13-deploy-smoke
