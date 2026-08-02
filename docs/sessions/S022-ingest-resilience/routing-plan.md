@@ -6,8 +6,8 @@
 | 16-evolve | orchestrator | in_progress | — | EV-019; F47–F49 |
 | 01-requirements | yes | completed | delta | Report: [reports/01-requirements-ingest-resilience.md](./reports/01-requirements-ingest-resilience.md) |
 | 02-verify-plan | yes | completed | delta | Gate A→B PASS (S022-D20); [02 audit](./reports/02-verify-plan-audit.md) |
-| 04-tech-plan | yes | in_progress | delta | Tasks / milestone(s) on shared write/embed path |
-| 07-build | yes | pending | — | Investigate→ship per Fn |
+| 04-tech-plan | yes | in_progress | delta | TP1–TP6 approved; Phase 24 drafted — Gate B→C next |
+| 07-build | yes | pending | — | Investigate→ship per Fn; start T101.1 after Gate B→C |
 | 08-verify-build | yes | pending | — | Milestone gate |
 | 09-qa | yes | pending | — | Full QA |
 | 10-e2e | yes | pending | — | API + admin ingest journeys |

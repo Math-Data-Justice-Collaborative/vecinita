@@ -499,9 +499,14 @@ EV-019 **in_progress**. Next: **01-requirements** (delta; load 01-requirements-s
 | S022-D18 | RD range | RD-219–RD-228 recorded in `docs/decisions.md` |
 | S022-D19 | 01 complete | Spec deltas + session report → **02-verify-plan** |
 | S022-D20 | Gate A→B / M1–M6 | **Approve all** — embed defaults; metrics→04; OpenAPI gaps→04/07; AC-RB4 rebuild vs IR; FE optional; data-flow renumber |
+| S022-D21 | 04 TP1–TP6 | **Approve all** — Phase 24 M101–M104; no new ADR; OpenAPI/metrics; API e2e; Path A; no new CORS/UI |
 
 ### Phase A status
 
 01-requirements **completed** 2026-08-02.  
-02-verify-plan **completed** 2026-08-02 — Gate A→B **PASS** (S022-D20).  
-Next: **04-tech-plan** (delta; 03 skipped).
+02-verify-plan **completed** 2026-08-02 — Gate A→B **PASS** (S022-D20).
+
+### Phase B status
+
+04-tech-plan **drafted** 2026-08-02 — TP1–TP6 approved (S022-D21).  
+Next: Gate B→C AskQuestion → **07-build** (05/06 skipped).

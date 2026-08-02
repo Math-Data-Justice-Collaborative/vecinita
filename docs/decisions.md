@@ -673,6 +673,22 @@ S022 / Ingest resilience — **F47** content_hash skip, **F48** embed sub-batch/
 Artifacts: feature-list F47–F49; ADR-044; UJ-062; TC-187–192; AC-IR1–7;
 `docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md`.
 
+### EV-019 tech-plan decisions (2026-08-02) — TP1–TP6
+
+S022 / Phase 24 — F47–F49 ingest resilience (Standard; skip 05/06).
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP1 | Phase / milestones | **Phase 24**: M101 (F47) → M102 (F48) → M103 (F49) → M104 (e2e) | S022-D21 |
+| TP2 | ADR | **None new** — reuse ADR-044 unless 07 finds architecture change | S022-D21 |
+| TP3 | Schema | OpenAPI/`JobOptions` `chunk_overlap_tokens` + ingest `force` in M101/M103; metrics in M104 | S022-D21 / M2–M3 |
+| TP4 | Tests | API e2e UJ-062 (TC-187–190); unit TC-191/192; no Playwright unless FE knobs | S022-D21 / M5 |
+| TP5 | Deploy / deps | Path A; Path B if F49 re-chunk; skip dep/topology churn | S022-D21 / RD-227 |
+| TP6 | Connectivity | No new CORS/UI — API e2e + staging Path A evidence | S022-D21 / TP6 |
+
+Artifacts: execution-plan Phase 24; `docs/sessions/S022-ingest-resilience/reports/tech-plan-delta.md`;
+`docs/sessions/S022-ingest-resilience/roadmap.md`.
+
 ### EV-018 tech-plan decisions (2026-08-02) — TP1–TP6
 
 S021 / Phase 23 — F46 retrieve reliability + F45 CE re-gate (Standard; skip 05/06).

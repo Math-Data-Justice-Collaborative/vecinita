@@ -22,6 +22,8 @@ standing_docs_touched:
   - docs/acceptance-criteria.md
   - docs/api-contract.md
   - docs/decisions.md
+  - docs/sessions/S000-internal-docs-archive/execution-plan.md
+roadmap: ./roadmap.md
 ---
 
 # Session S022 — Ingest resilience

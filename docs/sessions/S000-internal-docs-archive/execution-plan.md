@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; **S021 Phase 23 delta 2026-08-02**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; **S022 Phase 24 delta 2026-08-02**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**042**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**044**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 23: EV-018 — Retrieval follow-on (F46 + F45 re-gate) |
-| **Active milestone** | M99–M100 complete; Phase D next |
-| **Active task** | 09-qa (08-verify-build PASS) |
-| **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98; Phase 23: T99.1–T100.4 (M99–M100) |
+| **Active phase** | Phase 24: EV-019 — Ingest resilience (F47–F49) |
+| **Active milestone** | M101 (F47 hash skip) — first pending |
+| **Active task** | T101.1 (awaiting Gate B→C) |
+| **Tasks completed** | Phase 21–23 complete; Phase 24 pending |
 | **Last updated** | 2026-08-02 |
-| **Evolve cycle** | EV-018 — Standard; S021-D19/D23/D24; AC-BB9 PASS; CE flag still default-off |
-| **Git branch** | `evolve/EV-018-retrieval-follow-on` |
-| **Active session** | S021-retrieval-follow-on — 08 PASS → Phase D (09-qa) |
-| **Scope addition** | 2026-08-02 — F46 non-empty retrieve + F45 CE re-gate; S021-D17–D19; TP1–TP6. |
+| **Evolve cycle** | EV-019 — Standard; S022-D20/D21; TP1–TP6; skip 05/06 |
+| **Git branch** | `evolve/EV-019-ingest-resilience` |
+| **Active session** | S022-ingest-resilience — 04 drafted → Gate B→C |
+| **Scope addition** | 2026-08-02 — F47 content_hash skip + F48 embed retry + F49 overlap/HF (ADR-044). |
 
 ## Template
 
@@ -2020,6 +2020,77 @@ unit tests TC-170–172.
 
 ---
 
+## Phase 24: EV-019 — Ingest resilience (F47–F49)
+
+> **Session:** S022 · **Cycle:** EV-019 · **Branch:** `evolve/EV-019-ingest-resilience`  
+> **Issues:** #163 (hash skip), #166 (embed retry), #160 (chunk overlap)  
+> **Decisions:** RD-219–228, S022-D8–D21, TP1–TP6, Gate A→B M1–M6  
+> **Out of scope:** #159 multilingual embeds; #165 packing; CE flag flip; ADR-023 tag fail-open
+> change; admin FE knobs / Playwright unless UI ships (M5); ChatRAG redesign
+
+#### M101: F47 — content_hash skip + ingest `force`
+
+**Goal:** Same scraped hash → refresh metadata, skip chunk delete + re-embed unless `force`;
+OpenAPI/`JobOptions` ingest `force` prose (AC-IR1/IR2).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T101.1 | Test: unit/pipeline red — same-hash skip + force re-embed (TC-187/188 scaffolding) | Test | pending | AC-IR1/IR2, F47, #163 | — | — | S022 | F47 |
+| T101.2 | Config: OpenAPI + `JobOptions` — clarify `force` for ingest (shared with rebuild) | Config | pending | api-contract, M3, TP3 | — | — | S022 | F47 |
+| T101.3 | Code: Hash compare short-circuit on ingest/write path; metadata refresh; honor `force` | Code | pending | feature-list F47, RD-221 | T101.1, T101.2 | — | S022 | F47 |
+| T101.4 | Test: unit/pipeline green for skip + force | Test | pending | AC-IR1/IR2 | T101.3 | — | S022 | F47 |
+
+#### M102: F48 — embed sub-batch + retry
+
+**Goal:** Sub-batch (`VECINITA_EMBED_BATCH_SIZE=32`), retry (`MAX_RETRIES=3`, backoff `0.5s`);
+fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T102.1 | Test: embedding-client red — sub-batch, transient retry, exhaust fail, dim hard-fail | Test | pending | AC-IR3/IR4, TC-189/190, F48 | T101.4 | — | S022 | F48 |
+| T102.2 | Config: Wire embed knobs from config-spec into client/env defaults (RD-226 / M1) | Config | pending | config-spec, RD-226 | — | — | S022 | F48 |
+| T102.3 | Code: `packages/embedding-client` sub-batch + exponential backoff retry; pipeline fail-URL | Code | pending | feature-list F48, RD-222 | T102.1, T102.2 | — | S022 | F48 |
+| T102.4 | Test: client + pipeline green (mocked Modal 5xx/timeout) | Test | pending | AC-IR3/IR4 | T102.3 | — | S022 | F48 |
+
+#### M103: F49 — HF tokenizer + chunk overlap
+
+**Goal:** HF tokenizer for `BAAI/bge-small-en-v1.5`; default `chunk_overlap_tokens=32`;
+`JobOptions` + OpenAPI field; validation overlap &lt; size (AC-IR5/IR6; ADR-044).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T103.1 | Test: chunk unit red — HF sizing, overlap 32, reject overlap ≥ size (TC-191/192) | Test | pending | AC-IR5/IR6, ADR-044, F49 | T102.4 | — | S022 | F49 |
+| T103.2 | Config: Add `chunk_overlap_tokens` to OpenAPI + `JobOptions`; env default 32 | Config | pending | api-contract, M3, TP3 | — | — | S022 | F49 |
+| T103.3 | Code: `packages/ingest` chunker — HF tokenizer + overlap; pipeline/job options | Code | pending | ADR-044, RD-223/224 | T103.1, T103.2 | — | S022 | F49 |
+| T103.4 | Test: chunk unit green; rebuild `rechunk` note if live corpus migration needed | Test | pending | AC-IR5/IR6, RD-227 | T103.3 | — | S022 | F49 |
+
+#### M104: UJ-062 e2e + job metrics + phase gate
+
+**Goal:** API e2e TC-187–190; finalize metrics field names; phase-gate docs (AC-IR1–IR6).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T104.1 | Test: API e2e `tests/e2e/test_uj062_ingest_resilience.py` (TC-187–190) | Test | pending | UJ-062, e2e-coverage, AC-IR1–IR4 | T103.4 | — | S022 | F47–F49 |
+| T104.2 | Config/Code: Job result metrics — `skipped_unchanged`, `urls_failed_embed` (M2/TP3) | Config | pending | api-contract SHOULD, M2 | T101.3, T102.3 | — | S022 | F47–F48 |
+| T104.3 | Docs: Phase 24 gate checklist + execution-plan Current State; Path A/B rebuild notes | Docs | pending | Phase 24 gate, RD-227 | T104.1, T104.2 | — | S022 | F47–F49 |
+| T104.4 | Test: Confirm AC-IR7 out-of-scope held; no Playwright unless FE knobs ship (M5) | Test | pending | AC-IR7, M5, TP4/TP6 | T104.1 | — | S022 | F47–F49 |
+
+#### Phase 24 Gate Check
+
+- [ ] All M101–M104 tasks completed (T101.1–T104.4)
+- [ ] AC-IR1–IR6 met at T2 (API e2e + unit); AC-IR7 scope held
+- [ ] OpenAPI/`JobOptions` include `chunk_overlap_tokens`; ingest `force` documented
+- [ ] Embed defaults: batch 32 / retries 3 / backoff 0.5s
+- [ ] No new ADR unless 07 discovers architecture change (reuse ADR-044)
+- [ ] No #159 embed swap; no #165 packing; no CE flag flip; tags remain ADR-023 fail-open
+- [ ] Admin FE / Playwright skipped unless knobs ship this cycle
+- [ ] ruff / basedpyright clean; pytest e2e UJ-062 green — **08-verify-build**
+
+**Tech-plan delta:** `docs/sessions/S022-ingest-resilience/reports/tech-plan-delta.md`  
+**ADR:** [ADR-044](../../../adr/ADR-044-ingest-chunk-tokenizer-overlap.md)
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -2137,6 +2208,11 @@ main
 | PR-54 | Major | Phase 19 / S013 (EV-012) | evolve/EV-012-unified-job-monitoring | main | pending — Unified Admin Jobs (#116) |
 | PR-55 | Major | Phase 20 / S017 (EV-015) | evolve/EV-015-corpus-reembed-migration | main | pending — Corpus document store + rebuild (#167 / F41) |
 | PR-56 | Major | Phase 22 / S020 (EV-017) | evolve/EV-017-retrieval-batch-b | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173 |
+| PR-57 | Major | Phase 24 / S022 (EV-019) | evolve/EV-019-ingest-resilience | main | pending — Ingest resilience F47–F49 (#163/#166/#160) |
+
+S022 (EV-019) is evolve Standard: M101–M104 land as atomic commits on the single
+`evolve/EV-019-ingest-resilience` branch (one PR to `main`, PR-57). Gate A→B passed
+(S022-D20); 05/06 skipped; Gate B→C after 04 TP1–TP6 approval (S022-D21).
 
 S020 (EV-017) is evolve Standard: M94–M98 land as atomic commits on the single
 `evolve/EV-017-retrieval-batch-b` branch (one PR to `main`, PR-56 / #173). Gate C→D passed
@@ -2744,6 +2820,22 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T98.2 | M98 | 22 | Test | completed | T97.3 | 2026-08-02 | S020 | F45 | — |
 | T98.3 | M98 | 22 | Docs | completed | T97.5 | 2026-08-02 | S020 | F45 | — |
 | T98.4 | M98 | 22 | Docs | completed | T96.4, T98.1–T98.3 | 2026-08-02 | S020 | F43–F45 | — |
+| T101.1 | M101 | 24 | Test | pending | — | — | S022 | F47 | — |
+| T101.2 | M101 | 24 | Config | pending | — | — | S022 | F47 | — |
+| T101.3 | M101 | 24 | Code | pending | T101.1, T101.2 | — | S022 | F47 | — |
+| T101.4 | M101 | 24 | Test | pending | T101.3 | — | S022 | F47 | — |
+| T102.1 | M102 | 24 | Test | pending | T101.4 | — | S022 | F48 | — |
+| T102.2 | M102 | 24 | Config | pending | — | — | S022 | F48 | — |
+| T102.3 | M102 | 24 | Code | pending | T102.1, T102.2 | — | S022 | F48 | — |
+| T102.4 | M102 | 24 | Test | pending | T102.3 | — | S022 | F48 | — |
+| T103.1 | M103 | 24 | Test | pending | T102.4 | — | S022 | F49 | — |
+| T103.2 | M103 | 24 | Config | pending | — | — | S022 | F49 | — |
+| T103.3 | M103 | 24 | Code | pending | T103.1, T103.2 | — | S022 | F49 | — |
+| T103.4 | M103 | 24 | Test | pending | T103.3 | — | S022 | F49 | — |
+| T104.1 | M104 | 24 | Test | pending | T103.4 | — | S022 | F47–F49 | — |
+| T104.2 | M104 | 24 | Config | pending | T101.3, T102.3 | — | S022 | F47–F48 | — |
+| T104.3 | M104 | 24 | Docs | pending | T104.1, T104.2 | — | S022 | F47–F49 | — |
+| T104.4 | M104 | 24 | Test | pending | T104.1 | — | S022 | F47–F49 | — |
 
 ## Phase Gate Log
 
@@ -2843,3 +2935,9 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-017 CE spike ephemeral Modal T4; mock CE in CI (TP4)
 - [x] EV-017 no new ChatRAG runtime deps; CE via Modal HTTP (TP6)
 - [x] EV-017 skip deploy-topology / data-mgmt rewrite; Path A + CE runbook (TP7)
+- [x] EV-019 Phase 24 — M101→M104 F47→F48→F49→e2e (TP1)
+- [x] EV-019 no new ADR unless 07 needs one; reuse ADR-044 (TP2)
+- [x] EV-019 OpenAPI/`JobOptions` + metrics in M101/M103/M104 (TP3)
+- [x] EV-019 API e2e UJ-062; no Playwright unless FE knobs (TP4)
+- [x] EV-019 Path A deploy; Path B only if F49 re-chunk; skip dep churn (TP5)
+- [x] EV-019 no new CORS/UI connectivity work (TP6)
