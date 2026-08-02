@@ -102,16 +102,36 @@ project:
         task_status: blocked
         milestone: M80
     01-requirements:
-      status: completed
-      started_at: '2026-07-30'
-      completed_at: '2026-08-01'
-      partial_rerun_at: '2026-08-01'
-      partial_rerun_note: S019/EV-016 phase0_approved — 01-requirements delta COMPLETE; F42=H7+P1 on E0 (S019-D37); AC-RQ1–RQ7 accepted (S019-D38–D41); prior S017/EV-015 F41 COMPLETE nested under s017_baseline
-      session_id: S019-retrieval-quality
-      branch: evolve/EV-016-retrieval-quality
-      evolve_cycle_id: EV-016
+      status: in_progress
+      started_at: '2026-08-02'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: EV-017/S020-retrieval-batch-b — 01-requirements delta STARTED; F43–F45; seed loaded; phase_0c confirm locked L1–L12 + open Q1–Q5
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
       mode: evolve
-      note: S019/EV-016 01-requirements COMPLETE 2026-08-01 — AC-RQ1–RQ7 accepted (option 1; S019-D38–D41); interviews.completed=6; report requirements-delta.md; handoff → 02-verify-plan
+      delta_only: true
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+      seed_path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+      current_action: phase_0c_confirm_locked_and_open_qs
+      next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+      note: S020/EV-017 01-requirements IN_PROGRESS 2026-08-02 — seed loaded; F43–F45 allocated @ 02c3b30; confirm locked L1–L12 + resolve open Q1–Q5
+      s019_baseline:
+        status: completed
+        completed_at: '2026-08-01'
+        session_id: S019-retrieval-quality
+        branch: evolve/EV-016-retrieval-quality
+        evolve_cycle_id: EV-016
+        mode: evolve
+        delta_only: true
+        feature_ids:
+        - F42
+        report: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
+        note: S019/EV-016 01-requirements COMPLETE 2026-08-01 — F42=H7+P1 on E0; AC-RQ1–RQ7 accepted (S019-D38–D41); prior S017 nested under s017_baseline
       s016_baseline:
         status: completed
         completed_at: '2026-07-29'
@@ -163,45 +183,15 @@ project:
         report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
         note: 01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; committed c8cfaa9
       substeps:
-        current_phase: completed
-        document_manifest:
-          status: approved
-          presentation: completed
-          option: 1
-          approved_docs:
-          - feature-list
-          - spec
-          - user-journeys
-          - test-plan
-          - config-spec
-          - acceptance-criteria
-          skipped:
-          - api-contract
-          excluded:
-          - data-management-plan
-          - dependency-inventory
-          - deployment-plan
-          note: User approved Document Manifest option 1 — mandatory FL/Spec/UJ/TP; recommended Config Spec + AC included; skip API Contract; excluded DMP/DepInv/Deploy; UI preview N/A
-        interviews:
-          current_template:
-          completed: 6
-          feature_list_accepted: true
-          feature_list_acceptance_note: F42 accepted as written (option 1) — P3 non-default; H7 included; E1 out
-          spec_accepted: true
-          spec_acceptance_note: Spec accepted — H7 default on; P3 off by default; E0 embed; shared packages/rag
-          user_journeys_accepted: true
-          user_journeys_acceptance_note: User Journeys option 1 — UJ-001 amend + UJ-055 + UJ-056
-          test_plan_accepted: true
-          test_plan_acceptance_note: Test Plan option 1 — TC-170–175
-          config_spec_accepted: true
-          config_spec_acceptance_note: Config Spec option 1 — env knobs; parent applying config-spec.md
-          acceptance_criteria_accepted: true
-          acceptance_criteria_acceptance_note: AC option 1 — AC-RQ1–RQ7 accepted; S019-D38–D41 recorded
-        ui_preview:
-          status: n_a
-          note: UI preview N/A — no new browser UI surface; backend/rag packing+H7 (F42=H7+P1 on E0)
+        seed_loaded: true
+        handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+        current_phase: phase_0c_confirm_locked_and_open_qs
+        current_action: phase_0c_confirm_locked_and_open_qs
+        next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
       artifacts:
       - docs/feature-list.md
+      - docs/sessions/S020-retrieval-batch-b/reports/phase0-impact.md
+      - docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
       - docs/user-journeys.md
       - docs/test-plan.md
       - docs/acceptance-criteria.md
@@ -215,8 +205,8 @@ project:
       - docs/sessions/S017-corpus-reembed-migration/reports/runbook-corpus-rebuild-outline.md
       - docs/sessions/S017-corpus-reembed-migration/checkpoints/01-requirements-seed.md
       - docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
-      report: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
-      seed_path: docs/sessions/S017-corpus-reembed-migration/checkpoints/01-requirements-seed.md
+      report:
+      seed_path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
       rd_allocated:
         status: written
         range: RD-188..RD-196
@@ -241,14 +231,9 @@ project:
         evolve_cycle_id: EV-015
         report: docs/sessions/S017-corpus-reembed-migration/reports/01-requirements-corpus-rebuild.md
         note: S017/EV-015 01-requirements COMPLETE 2026-07-30 — F41 corpus rebuild; RD-188–196; ADR-040; UJ-053/054; TC-161–168; AC-RB1–10; Phase A product specs done; next → 02-verify-plan then Phase A checkpoint AskQuestion before 04 (checkpoints.phase_a remains pending until 02 passes)
-      delta_only: true
-      feature_ids:
-      - F42
-      current_action: completed
-      next_action: handoff_02_verify_plan
       ui_preview:
         status: n_a
-        note: UI preview N/A — no new browser UI surface; backend/rag packing+H7
+        note: UI preview N/A for Batch B start — confirm in 01 interviews
       s019_d37_decision: S019-D37
       s019_d37_decision_recorded: true
       s019_d37_decision_recorded_in: docs/decisions/evolve-decisions.md
@@ -2964,9 +2949,9 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
-  current_stage: 16-evolve
-  current_action: phase_1_fn_allocation_then_01
-  current_stage_note: "S020-D8 Phase 0 proceed approved; phase0_approved=true; allocate F43–F45 + finalize impact, then start 01-requirements (delta_only); 01 NOT in_progress until Fn write"
+  current_stage: 01-requirements
+  current_action: phase_0c_confirm_locked_and_open_qs
+  current_stage_note: "01-requirements IN_PROGRESS — seed loaded; F43–F45 allocated @ 02c3b30; AskQuestion confirm locked L1–L12 + resolve open Q1–Q5"
   started_at: '2026-08-02'
   routing_plan_status: approved
   routing_preset: standard
@@ -2985,7 +2970,7 @@ active_session:
   - F43
   - F44
   - F45
-  feature_ids_note: "S020-D7/D8 — F43 (H1 cascade cache) + F44 (#83/#161 CE) + F45 (#162 soft language filter); phase0_approved=true; parent writes feature-list then 01 delta"
+  feature_ids_note: "S020-D7/D8 — F43 (H1 cascade cache) + F44 (#83/#161 CE) + F45 (#162 soft language filter); feature-list allocated @ 02c3b30; 01-requirements in_progress"
   github_issues:
   - 83
   - 161
@@ -3000,9 +2985,10 @@ active_session:
     note: Session open — Standard approved; EV-017 stub allocated; handoff → 16-evolve Phase 0
   - stage: 01-requirements
     required: true
-    status: pending
+    status: in_progress
     skip_rationale:
-    note: "Pending Fn write by parent; then in_progress as evolve/delta_only"
+    started_at: '2026-08-02'
+    note: "IN_PROGRESS — seed loaded; F43–F45 @ 02c3b30; phase_0c confirm locked L1–L12 + open Q1–Q5"
   - stage: 02-verify-plan
     required: true
     status: pending
@@ -3058,7 +3044,7 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: Parent writes feature-list F43–F45 + finalize impact; then start 01-requirements (mode=evolve, delta_only=true)
+  next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
 sessions:
 - id: S019-retrieval-quality
   type: feature
@@ -6684,17 +6670,37 @@ stages:
     batch2_note: 'All nine consolidation decisions recorded (1-9) 2026-07-10. Proposed routing amendment PENDING user AskQuestion — do not apply yet: delta 01+04 then 07 slices A=(1)+(4), B=(2)+(3), C=(5)+(6), D=(7), E=(8); then 08→13; skip 02/03/05/06. 00-context in_progress until routing approved + context brief written.'
     routing_amendment_approved: true
   01-requirements:
-    status: completed
-    started_at: '2026-07-30'
-    completed_at: '2026-08-01'
-    partial_rerun_at: '2026-08-01'
-    partial_rerun_note: S019/EV-016 01-requirements delta COMPLETE — F42=H7+P1 on E0; AC-RQ1–RQ7 accepted (S019-D38–D41); prior S017 nested under s017_baseline
-    session_id: S019-retrieval-quality
-    branch: evolve/EV-016-retrieval-quality
-    evolve_cycle_id: EV-016
+    status: in_progress
+    started_at: '2026-08-02'
+    partial_rerun_at: '2026-08-02'
+    partial_rerun_note: EV-017/S020-retrieval-batch-b — 01-requirements delta STARTED; F43–F45; seed loaded; phase_0c confirm locked L1–L12 + open Q1–Q5
+    session_id: S020-retrieval-batch-b
+    branch: evolve/EV-017-retrieval-batch-b
+    evolve_cycle_id: EV-017
     mode: evolve
-    report: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
-    seed_path: docs/sessions/S017-corpus-reembed-migration/checkpoints/01-requirements-seed.md
+    delta_only: true
+    feature_ids:
+    - F43
+    - F44
+    - F45
+    handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+    seed_path: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+    current_action: phase_0c_confirm_locked_and_open_qs
+    next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+    report:
+    note: S020/EV-017 01-requirements IN_PROGRESS 2026-08-02 — seed loaded; F43–F45 allocated @ 02c3b30; confirm locked L1–L12 + resolve open Q1–Q5
+    s019_baseline:
+      status: completed
+      completed_at: '2026-08-01'
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F42
+      report: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
+      note: S019/EV-016 01-requirements COMPLETE 2026-08-01 — F42=H7+P1 on E0; AC-RQ1–RQ7 accepted (S019-D38–D41)
     s014_baseline:
       status: completed
       completed_at: '2026-07-29'
@@ -6711,7 +6717,6 @@ stages:
       evolve_cycle_id: EV-012
       report: docs/sessions/S013-unified-job-monitoring/reports/01-requirements-unified-jobs.md
       note: 01-requirements delta COMPLETE — RD-173..178; F32/F36; UJ-023/044/050; TC-146–151; AC-J1–J10; ADR-038; api-contract EV-012; committed c8cfaa9
-    note: S019/EV-016 01-requirements COMPLETE 2026-08-01 — AC-RQ1–RQ7 accepted (option 1; S019-D38–D41); interviews.completed=6; report requirements-delta.md; handoff → 02-verify-plan
     rd_allocated:
       status: written
       range: RD-188..RD-196
@@ -6729,45 +6734,15 @@ stages:
       - RD-196
       note: S017/EV-015 F41 corpus rebuild — RD-188–196; S016 RD-183–187 retained in s016_baseline
     substeps:
-      current_phase: completed
-      document_manifest:
-        status: approved
-        presentation: completed
-        option: 1
-        approved_docs:
-        - feature-list
-        - spec
-        - user-journeys
-        - test-plan
-        - config-spec
-        - acceptance-criteria
-        skipped:
-        - api-contract
-        excluded:
-        - data-management-plan
-        - dependency-inventory
-        - deployment-plan
-        note: User approved Document Manifest option 1 — mandatory FL/Spec/UJ/TP; recommended Config Spec + AC included; skip API Contract; excluded DMP/DepInv/Deploy; UI preview N/A
-      interviews:
-        current_template:
-        completed: 6
-        feature_list_accepted: true
-        feature_list_acceptance_note: F42 accepted as written (option 1) — P3 non-default; H7 included; E1 out
-        spec_accepted: true
-        spec_acceptance_note: Spec accepted — H7 default on; P3 off by default; E0 embed; shared packages/rag
-        user_journeys_accepted: true
-        user_journeys_acceptance_note: User Journeys option 1 — UJ-001 amend + UJ-055 + UJ-056
-        test_plan_accepted: true
-        test_plan_acceptance_note: Test Plan option 1 — TC-170–175
-        config_spec_accepted: true
-        config_spec_acceptance_note: Config Spec option 1 — env knobs; parent applying config-spec.md
-        acceptance_criteria_accepted: true
-        acceptance_criteria_acceptance_note: AC option 1 — AC-RQ1–RQ7 accepted; S019-D38–D41 recorded
-      ui_preview:
-        status: n_a
-        note: UI preview N/A — no new browser UI surface; backend/rag packing+H7 (F42=H7+P1 on E0)
+      seed_loaded: true
+      handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+      current_phase: phase_0c_confirm_locked_and_open_qs
+      current_action: phase_0c_confirm_locked_and_open_qs
+      next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
     artifacts:
     - docs/feature-list.md
+    - docs/sessions/S020-retrieval-batch-b/reports/phase0-impact.md
+    - docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
     - docs/user-journeys.md
     - docs/test-plan.md
     - docs/acceptance-criteria.md
@@ -6971,14 +6946,9 @@ stages:
       completed_at: '2026-07-30'
       session_id: S017-corpus-reembed-migration
       evolve_cycle_id: EV-015
-    delta_only: true
-    feature_ids:
-    - F42
-    current_action: completed
-    next_action: handoff_02_verify_plan
     ui_preview:
       status: n_a
-      note: UI preview N/A — no new browser UI surface; backend/rag packing+H7
+      note: UI preview N/A for Batch B start — confirm in 01 interviews
     s019_d37_decision: S019-D37
     s019_d37_decision_recorded: true
     s019_d37_decision_recorded_in: docs/decisions/evolve-decisions.md
@@ -14686,8 +14656,8 @@ evolve_cycles:
   - F43
   - F44
   - F45
-  feature_ids_note: 'S020-D7/D8 — F43 (full H1 cascade cache) + F44 (#83/#161 CE spike+ship) + F45 (#162 soft language filter); phase0_approved=true; parent writes feature-list then 01 delta'
-  feature_ids_pending_note: 'Proceed gate passed (S020-D8); parent allocates F43–F45 in feature-list + finalizes impact; then start 01-requirements (delta_only)'
+  feature_ids_note: 'S020-D7/D8 — F43 (full H1 cascade cache) + F44 (#83/#161 CE spike+ship) + F45 (#162 soft language filter); feature-list allocated @ 02c3b30; 01-requirements in_progress'
+  feature_ids_pending_note: 'CLEARED — F43–F45 written to feature-list @ 02c3b30; phase0-impact.md finalized; 01-requirements in_progress'
   title: Batch B — Retrieval (F43 cache + CE spike + soft language filter)
   status: in_progress
   started: '2026-08-02'
@@ -14710,9 +14680,9 @@ evolve_cycles:
     F44 = #83/#161 CE spike + ship gate;
     F45 = #162 config-gated L1 default off + empty-hit fixture;
     F43+F44+F45 Planned. Standard routing. phase0_approved=true.
-  current_stage: phase_1_fn_allocation_then_01
-  current_action: phase_1_fn_allocation_then_01
-  current_stage_note: 'S020-D8 Phase 0 proceed approved; allocate F43–F45 + finalize impact, then start 01-requirements (delta_only); 01 NOT in_progress until Fn write'
+  current_stage: 01-requirements
+  current_action: phase_0c_confirm_locked_and_open_qs
+  current_stage_note: '01-requirements IN_PROGRESS — seed loaded; F43–F45 allocated @ 02c3b30; AskQuestion confirm locked L1–L12 + resolve open Q1–Q5'
   mode: evolve
   delta_only: true
   branch: evolve/EV-017-retrieval-batch-b
@@ -14758,13 +14728,26 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: phase_1_fn_allocation_then_01
-      note: Phase 0 COMPLETE (S020-D8); phase0_approved=true; Phase 1 = Fn allocation + impact then 01-requirements
+      current_action: phase_0c_confirm_locked_and_open_qs
+      note: Phase 0 COMPLETE (S020-D8); Fn allocation + phase0-impact DONE @ 02c3b30; 01-requirements in_progress (delta_only)
     01-requirements:
-      status: pending
+      status: in_progress
+      started: '2026-08-02'
+      started_at: '2026-08-02'
       mode: evolve
       delta_only: true
-      note: Pending parent feature-list write for F43–F45; then mark in_progress
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+      current_action: phase_0c_confirm_locked_and_open_qs
+      next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
+      substeps:
+        seed_loaded: true
+        handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
+        current_phase: phase_0c_confirm_locked_and_open_qs
+      note: IN_PROGRESS — seed loaded; F43–F45 allocated; confirm locked L1–L12 + resolve open Q1–Q5
     02-verify-plan:
       status: pending
     04-tech-plan:
@@ -14838,8 +14821,8 @@ evolve_cycles:
     note: 'User option 1 — proceed: allocate F43–F45 + finalize impact + start 01-requirements'
     status: recorded
     recorded_at: '2026-08-02'
-  note: 'EV-017 Phase 0 APPROVED 2026-08-02 (S020-D8); phase0_approved=true; phase_0_status=approved; gates.phase_0=passed; checkpoints.phase_0=passed; feature_ids=[F43,F44,F45]; next = parent Fn write + impact then 01-requirements (delta_only)'
-  next_action: Parent writes feature-list F43–F45 + finalize impact; then start 01-requirements (mode=evolve, delta_only=true)
+  note: 'EV-017 01-requirements IN_PROGRESS 2026-08-02; Phase 0 approved (S020-D8); F43–F45 allocated @ 02c3b30; phase0-impact.md finalized; seed loaded; next = AskQuestion confirm locked L1–L12 + resolve open Q1–Q5'
+  next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -17384,6 +17367,22 @@ decisions_log:
 - S019/EV-016 09-qa COMPLETE — overall=fail; blockers QA-S019-B01..B03 (ruff spike tests, basedpyright, nltk CVEs); F42 surfaces green; report=docs/sessions/S019-retrieval-quality/reports/qa-report.md
 - 'S019/EV-016 12-verify-deploy COMPLETE 2026-08-01 — deploy-checklist READY; Phase 2 mitigations + Phase 3 rollback approved (option 1 each); checkpoints.phase_d=passed; handoff → 13-deploy-smoke; Hy1/ISS-008 ops remain for 13'
 artifacts:
+- path: docs/feature-list.md
+  kind: feature-list
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: F43–F45 allocated (Planned) for EV-017 Batch B @ 02c3b30
+- path: docs/sessions/S020-retrieval-batch-b/reports/phase0-impact.md
+  kind: phase0-impact
+  session_id: S020-retrieval-batch-b
+  stage: 01-requirements
+  skill_id: 01-requirements
+  evolve_cycle_id: EV-017
+  recorded_at: '2026-08-02'
+  note: Phase 0 impact finalized for F43–F45; 01-requirements in_progress
 - path: docs/sessions/S020-retrieval-batch-b/reports/phase0-impact-draft.md
   kind: phase0-impact-draft
   session_id: S020-retrieval-batch-b
@@ -20841,6 +20840,16 @@ git_history:
     files_changed: 6
     timestamp: '2026-08-02'
     note: Phase 0 intake D4–D7 locked; next_action unchanged — AskQuestion proceed gate
+  - sha: 02c3b309469cfa9e7cfeb348dd43456c6f7905e7
+    short: 02c3b30
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: allocate F43–F45 for EV-017 Batch B'
+    stage: 01-requirements
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 6
+    timestamp: '2026-08-02T14:07:13Z'
+    note: F43–F45 allocated in feature-list + phase0-impact.md; 01-requirements marked in_progress
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
@@ -20949,6 +20958,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: '16-evolve Phase 0 intake AskQuestion (F43 tiers, CE gate, #162 shape)'
+next_action: AskQuestion confirm locked L1-L12 + resolve open Q1-Q5
 pipeline_idle: false
-pipeline_idle_note: '2026-08-02 — S020 00-context COMPLETE; EV-017 phase_0_intake in_progress; 01-requirements NOT started; next=16-evolve Phase 0 AskQuestion'
+pipeline_idle_note: '2026-08-02 — S020/EV-017 01-requirements IN_PROGRESS; F43–F45 allocated @ 02c3b30; seed loaded; next=AskQuestion confirm locked L1–L12 + resolve open Q1–Q5'
