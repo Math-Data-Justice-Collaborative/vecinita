@@ -198,7 +198,7 @@
 - [x] **AC-RB1**: Ingest persists normalized body + revision in Postgres document store (TC-163, ADR-040); **one-time backfill** fills store for existing corpus docs (02 M4). *(11-verify-impl S017 2026-07-30)*
 - [x] **AC-RB2**: `job_type=rebuild` supports `mode ∈ {reembed, rechunk, rescrape}` (TC-161–162). *(11-verify-impl S017 2026-07-30)*
 - [x] **AC-RB3**: Store-backed `reembed`/`rechunk` do not scrape URLs (TC-161, RD-190). *(11-verify-impl S017 2026-07-30)*
-- [x] **AC-RB4**: `force=true` bypasses content_hash skip (TC-162, #163). *(11-verify-impl S017 2026-07-30)*
+- [x] **AC-RB4**: `force=true` bypasses content_hash skip on **rebuild** (TC-162, #163). *(11-verify-impl S017 2026-07-30 — flag wired; full ingest-path skip enforcement = EV-019 AC-IR1/IR2)*
 - [x] **AC-RB5**: Optional `document_ids` scopes rebuild; default whole corpus (TC-166). *(11-verify-impl S017 2026-07-30)*
 - [x] **AC-RB6**: `dry_run=true` writes shadow only; live retrieval unchanged until promote (TC-164). *(11-verify-impl S017 2026-07-30; live promote API local deferred to CI)*
 - [x] **AC-RB7**: Promote activates shadow revision; prior revision retained (TC-165); **Admin UI** promote control for **`admin`** role (TC-169, 02 M3/M6). *(11-verify-impl S017 2026-07-30)*

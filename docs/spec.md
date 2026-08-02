@@ -230,14 +230,14 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 | 5. LLM tag | chunks + seed vocab | Modal LLM | document/chunk tags (`llm`) | Max 10/5 tags; ADR-023 |
 | 6. Embed | chunks | Modal FastEmbed (sub-batch + retry) | 384-dim vectors | F48 |
 | 7. Persist | chunks + vectors + tags | Modal → **DO internal write API** | Postgres rows | **No Modal DATABASE_URL** |
-| 7. Browse | tag/search filters | ChatRAG GET APIs | document list | Public |
-| 8. Query | user question + optional tags | ChatRAG Backend | — | Stateless |
-| 9. Resolve tags | tags[] or question | User tags OR LLM infer | tag filter set | User tags win if set |
-| 10. Embed query | question text | Modal FastEmbed | query vector | — |
-| 11. Retrieve | query vector + tags | pgvector + tag JOIN | top_k chunks | Union doc+chunk tags |
-| 12. Generate | context + question | Modal LLM | answer / stream | No server chat history |
-| 13. Record stats | response doc IDs | ChatRAG → internal write API `POST /stats/served` | serving counter++ | Async fire-and-forget (F28) |
-| 14. Emit audit | write operation | Internal write API middleware | audit_log row | Immutable, request_id only (F29) |
+| 8. Browse | tag/search filters | ChatRAG GET APIs | document list | Public |
+| 9. Query | user question + optional tags | ChatRAG Backend | — | Stateless |
+| 10. Resolve tags | tags[] or question | User tags OR LLM infer | tag filter set | User tags win if set |
+| 11. Embed query | question text | Modal FastEmbed | query vector | — |
+| 12. Retrieve | query vector + tags | pgvector + tag JOIN | top_k chunks | Union doc+chunk tags |
+| 13. Generate | context + question | Modal LLM | answer / stream | No server chat history |
+| 14. Record stats | response doc IDs | ChatRAG → internal write API `POST /stats/served` | serving counter++ | Async fire-and-forget (F28) |
+| 15. Emit audit | write operation | Internal write API middleware | audit_log row | Immutable, request_id only (F29) |
 
 ### Query path (detail)
 
