@@ -3639,8 +3639,7 @@ project:
         sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239;
         main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404;
         Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322;
-        gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true
-        (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion'
+        gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=false; docs closeout PR #175 MERGED @ 7938ce7; EV-018 remains in_progress awaiting cycle-close AskQuestion'
       s020_baseline:
         status: in_progress
         started_at: '2026-08-02'
@@ -3982,8 +3981,13 @@ project:
       report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
       report_status: pass
       deploy_gate: passed
-      commits_pending: true
-      commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
+      docs_closeout_pr_number: 175
+      docs_closeout_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+      docs_closeout_pr_status: merged
+      docs_closeout_merge_sha: 7938ce7
+      docs_closeout_merge_sha_full: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
+      commits_pending: false
+      commits_note: 'Docs closeout PR #175 MERGED @ 7938ce7 — deploy-smoke PASS + CHANGELOG + decisions; commits_pending=false'
       pr_merged_at: '2026-08-02'
       pr_merge_sha: 9d1f10b
       merge_sha: 9d1f10b
@@ -4390,20 +4394,26 @@ active_session:
   current_action: 13_complete_awaiting_cycle_close
   next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
   commits_pending: false
-  current_stage_note: 'S021/EV-018 Phase D/13 2026-08-02 — PR #174 open ([EV-018] Retrieval follow-on — F46 empty retrieve
-    + F45 CE re-gate) @ c972f07; current_action=13_awaiting_ci_then_merge; await CI then merge; redeploy ChatRAG CE false;
-    H1–H5; deploy checkpoint/gates.deploy remain pending; commits_pending=false'
-  commits_head: c972f07
+  current_stage_note: 'S021/EV-018 13 COMPLETE 2026-08-02 — Path A PASS; PR #174 MERGED @ 9d1f10b; docs closeout PR #175 MERGED
+    @ 7938ce7 (deploy-smoke PASS + CHANGELOG + decisions); current_action=13_complete_awaiting_cycle_close; commits_pending=false;
+    EV-018 in_progress awaiting cycle-close AskQuestion'
+  commits_head: 7938ce7
   pr_plan_id: PR-57
   pr_number: 174
   pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174
   pr_title: '[EV-018] Retrieval follow-on — F46 empty retrieve + F45 CE re-gate'
   pr_branch: evolve/EV-018-retrieval-follow-on
   pr_base: main
-  pr_status: open
+  pr_status: merged
   pr_opened_at: '2026-08-02'
-  pr_head_sha: c972f07
+  pr_head_sha: dd92615
   pr_stage: 13-deploy-smoke
+  docs_closeout_pr_number: 175
+  docs_closeout_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+  docs_closeout_pr_title: 'docs: EV-018 Path A deploy-smoke closeout'
+  docs_closeout_pr_status: merged
+  docs_closeout_merge_sha: 7938ce7
+  docs_closeout_merge_sha_full: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4594,7 +4604,7 @@ active_session:
     deploy_path: A
     prod_ce: false
     decision: S021-D27
-    note: 'COMPLETE — Path A PASS; PR #174 MERGED @ 9d1f10b; ChatRAG ACTIVE; deploy gate passed; CE false hold; awaiting cycle-close
+    note: 'COMPLETE — Path A PASS; PR #174 MERGED @ 9d1f10b; docs closeout PR #175 MERGED @ 7938ce7; ChatRAG ACTIVE; deploy gate passed; CE false hold; awaiting cycle-close
       AskQuestion'
     next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
     phase_1_5: completed
@@ -4617,7 +4627,10 @@ active_session:
     h5: pass
     uj_061_sample: pass_5_sources
     chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
-    commits_pending: true
+    docs_closeout_pr_number: 175
+    docs_closeout_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+    docs_closeout_merge_sha: 7938ce7
+    commits_pending: false
   context_briefs:
   - docs/sessions/S021-retrieval-follow-on/context-brief.md
   decisions:
@@ -4739,7 +4752,7 @@ active_session:
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_note: 'recorded c972f07 (sync workflow-state after S021-D26 Path A start) — commits_pending=false; PR #174 open'
+  commits_note: 'Docs closeout PR #175 MERGED @ 7938ce7 — deploy-smoke PASS + CHANGELOG + decisions; commits_pending=false'
 sessions:
 - id: S020-retrieval-batch-b
   type: feature
@@ -12358,8 +12371,7 @@ stages:
       sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239;
       main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404;
       Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322;
-      gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true
-      (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion'
+      gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=false; docs closeout PR #175 MERGED @ 7938ce7; EV-018 remains in_progress awaiting cycle-close AskQuestion'
     s020_baseline:
       status: in_progress
       started_at: '2026-08-02'
@@ -12703,8 +12715,13 @@ stages:
     report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
     report_status: pass
     deploy_gate: passed
-    commits_pending: true
-    commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
+    docs_closeout_pr_number: 175
+    docs_closeout_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+    docs_closeout_pr_status: merged
+    docs_closeout_merge_sha: 7938ce7
+    docs_closeout_merge_sha_full: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
+    commits_pending: false
+    commits_note: 'Docs closeout PR #175 MERGED @ 7938ce7 — deploy-smoke PASS + CHANGELOG + decisions; commits_pending=false'
     pr_merged_at: '2026-08-02'
     pr_merge_sha: 9d1f10b
     merge_sha: 9d1f10b
@@ -19921,11 +19938,11 @@ evolve_cycles:
   current_stage_parallel:
   current_action: 13_complete_awaiting_cycle_close
   next_action: 'AskQuestion cycle close — done / 15-service-health / CE flag flip separate / 17-retrospective'
-  commits_pending: true
-  current_stage_note: 'S021/EV-018 Phase D/13 2026-08-02 — PR #174 open ([EV-018] Retrieval follow-on — F46 empty retrieve
-    + F45 CE re-gate) @ c972f07; current_action=13_awaiting_ci_then_merge; await CI then merge; redeploy ChatRAG CE false;
-    H1–H5; deploy checkpoint/gates.deploy remain pending; commits_pending=false'
-  commits_head: 9d1f10b
+  commits_pending: false
+  current_stage_note: 'S021/EV-018 13 COMPLETE 2026-08-02 — Path A PASS; PR #174 MERGED @ 9d1f10b; docs closeout PR #175 MERGED
+    @ 7938ce7 (deploy-smoke PASS + CHANGELOG + decisions); current_action=13_complete_awaiting_cycle_close; commits_pending=false;
+    EV-018 in_progress awaiting cycle-close AskQuestion'
+  commits_head: 7938ce7
   pr_plan_id: PR-57
   pr_number: 174
   pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174
@@ -19936,6 +19953,16 @@ evolve_cycles:
   pr_opened_at: '2026-08-02'
   pr_head_sha: dd92615
   pr_stage: 13-deploy-smoke
+  docs_closeout_pr_number: 175
+  docs_closeout_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+  docs_closeout_pr_title: 'docs: EV-018 Path A deploy-smoke closeout'
+  docs_closeout_pr_branch: docs/EV-018-path-a-closeout
+  docs_closeout_pr_status: merged
+  docs_closeout_pr_merged_at: '2026-08-02T19:52:05Z'
+  docs_closeout_merge_sha: 7938ce7
+  docs_closeout_merge_sha_full: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
+  docs_closeout_head_sha: 3709a46
+  docs_closeout_note: 'PR #175 MERGED — deploy-smoke PASS report + CHANGELOG + decisions; commits_pending cleared'
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -20324,11 +20351,9 @@ evolve_cycles:
       note: 'S021/EV-018 13-deploy-smoke Path A PASS 2026-08-02 — PR #174 MERGED @ 9d1f10b (full 9d1f10baecf2cdef61b3174774e03b847086fe17);
         evolve tip pre-merge dd92615; ChatRAG ACTIVE ade67338-06bf-40ba-aa21-2c29e08f9b9c; CE NOT_IN_SPEC→default false (hold);
         do_verify PASS; staging_smoke H1 PASS / H2 SKIP (no DATABASE_URL) / H3 PASS; verify_connectivity H0c+H4+H5 PASS; UJ-061
-        sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239;
-        main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404;
-        Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322;
-        gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true
-        (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion'
+        sample PASS (5 sources); S021-D27 Full Path A execute; docs closeout PR #175 MERGED @ 7938ce7 (7938ce73a774f1eb6342a27d8da02fd0d25c1779);
+        gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=false;
+        EV-018 remains in_progress awaiting cycle-close AskQuestion'
       phase_1_5:
         status: completed
         started_at: '2026-08-02'
@@ -20359,8 +20384,13 @@ evolve_cycles:
       commit_deployed: 9d1f10b
       chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
       do_verify: PASS
-      commits_pending: true
-      commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
+      docs_closeout_pr_number: 175
+      docs_closeout_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+      docs_closeout_pr_status: merged
+      docs_closeout_merge_sha: 7938ce7
+      docs_closeout_merge_sha_full: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
+      commits_pending: false
+      commits_note: 'Docs closeout PR #175 MERGED @ 7938ce7 — deploy-smoke PASS + CHANGELOG + decisions; commits_pending=false'
       health_tiers:
         h0c: pass
         h0ci_github_main: pass
@@ -20419,7 +20449,7 @@ evolve_cycles:
     phase_c: Passed 2026-08-02 — 08-verify-build PASS (S021/EV-018); Phase D next (09-qa / 10-e2e)
     phase_d: Passed 2026-08-02 — 09–12 complete; S021-D26 Phase 2+3 approved; handoff 13-deploy-smoke Path A (CE false);
       deploy checkpoint still pending
-    deploy: 'Pending until PR #174 CI green → merge → redeploy ChatRAG CE false → H1–H5 pass (Phase 1.5 in progress)'
+    deploy: 'Passed 2026-08-02 — PR #174 Path A PASS @ 9d1f10b; docs closeout PR #175 MERGED @ 7938ce7; awaiting cycle-close AskQuestion'
   intake_decisions:
   - id: S021-D8
     topic: fn_allocation
@@ -20706,12 +20736,26 @@ evolve_cycles:
     evolve_cycle_id: EV-018
     recorded_at: '2026-08-02T19:17:09Z'
   - path: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
-    status: in_progress
+    status: pass
     stage: 13-deploy-smoke
-    note: deploy-smoke.md drafted (Phase 1.5); awaiting Path A execution approval
+    note: 'Path A PASS; docs closeout PR #175 MERGED @ 7938ce7'
     session_id: S021-retrieval-follow-on
     evolve_cycle_id: EV-018
-    recorded_at: '2026-08-02T19:17:09Z'
+    recorded_at: '2026-08-02T19:52:05Z'
+  - path: docs/CHANGELOG.md
+    status: updated
+    stage: 13-deploy-smoke
+    note: 'EV-018 Path A closeout via PR #175'
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    recorded_at: '2026-08-02T19:52:05Z'
+  - path: docs/decisions/evolve-decisions.md
+    status: updated
+    stage: 13-deploy-smoke
+    note: 'EV-018 closeout decisions via PR #175'
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    recorded_at: '2026-08-02T19:52:05Z'
   - path: docs/sessions/S021-retrieval-follow-on/evolve-decisions.md
     status: updated
     stage: 12-verify-deploy
@@ -20772,7 +20816,7 @@ evolve_cycles:
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
+  commits_note: 'Docs closeout PR #175 MERGED @ 7938ce7 — deploy-smoke PASS + CHANGELOG + decisions; commits_pending=false'
   pr_plan:
   - id: PR-57
     pr_number: 174
@@ -20786,7 +20830,24 @@ evolve_cycles:
     evolve_cycle_id: EV-018
     head_sha: dd92615
     opened_at: '2026-08-02'
+    merge_sha: 9d1f10b
     note: 'Path A major PR MERGED @ 9d1f10b; ChatRAG ACTIVE; deploy gate passed; awaiting cycle-close AskQuestion'
+  - id: PR-58
+    pr_number: 175
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+    title: 'docs: EV-018 Path A deploy-smoke closeout'
+    branch: docs/EV-018-path-a-closeout
+    base: main
+    status: merged
+    stage: 13-deploy-smoke
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    head_sha: 3709a46
+    opened_at: '2026-08-02'
+    merged_at: '2026-08-02T19:52:05Z'
+    merge_sha: 7938ce7
+    merge_sha_full: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
+    note: 'Docs closeout MERGED — deploy-smoke PASS report + CHANGELOG + decisions; commits_pending=false'
     pr_status: merged
     merged_at: '2026-08-02'
     merge_sha: 9d1f10b
@@ -24319,6 +24380,7 @@ decisions_log:
   / H2 SKIP / H3 PASS; H0c+H4+H5 PASS; UJ-061 sample PASS (5 sources); gates.deploy=passed; checkpoints.deploy=passed; 13-deploy-smoke
   completed; current_action=13_complete_awaiting_cycle_close; next_action=AskQuestion cycle close — done / 15-service-health
   / CE flag flip separate / 17-retrospective; EV-018 remains in_progress; commits_pending=true'
+- '2026-08-02T19:52:05Z S021/EV-018: docs closeout PR #175 MERGED @ 7938ce7 (7938ce73a774f1eb6342a27d8da02fd0d25c1779) — deploy-smoke PASS report + CHANGELOG + decisions; commits_pending=false; current_action=13_complete_awaiting_cycle_close; next_action=AskQuestion cycle close; EV-018 remains in_progress'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
@@ -26337,6 +26399,23 @@ git_history:
     merge_sha: 9d1f10b
     merge_sha_full: 9d1f10baecf2cdef61b3174774e03b847086fe17
     tip_before_merge: dd92615
+  - name: docs/EV-018-path-a-closeout
+    purpose: 'EV-018 / S021 — docs closeout (deploy-smoke PASS + CHANGELOG + decisions)'
+    base: main
+    status: merged
+    created_at: '2026-08-02'
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    head_sha: 3709a46
+    pr_number: 175
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/175
+    pr_title: 'docs: EV-018 Path A deploy-smoke closeout'
+    pr_base: main
+    pr_status: merged
+    merged_at: '2026-08-02T19:52:05Z'
+    merge_sha: 7938ce7
+    merge_sha_full: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
+    note: 'Docs closeout PR #175 MERGED @ 7938ce7; EV-018 awaiting cycle-close AskQuestion'
   - name: evolve/EV-017-retrieval-batch-b
     purpose: EV-017 / S020 — Batch B retrieval (F43 answer cache +
     base: main
@@ -29031,6 +29110,46 @@ git_history:
     timestamp: '2026-08-02T19:21:27Z'
     note: 'Sync workflow-state after S021-D26 Path A start; PR #174 recorded'
     files:
+    - workflow-state.yaml
+    skill_ids:
+    - 13-deploy-smoke
+    - workflow-state-manager
+  - sha: 3709a46ac33598e44d504cb2a2b5d726deacf30f
+    short: 3709a46
+    branch: docs/EV-018-path-a-closeout
+    message: 'docs: EV-018 Path A deploy-smoke PASS (PR #174 @ 9d1f10b)'
+    stage: 13-deploy-smoke
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    files_changed: 5
+    timestamp: '2026-08-02T19:50:00Z'
+    note: 'Docs closeout head before merge; PR #175'
+    files:
+    - CHANGELOG.md
+    - docs/decisions/evolve-decisions.md
+    - docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+    - docs/sessions/S021-retrieval-follow-on/routing-plan.md
+    - workflow-state.yaml
+    skill_ids:
+    - 13-deploy-smoke
+    - 16-evolve
+  - sha: 7938ce73a774f1eb6342a27d8da02fd0d25c1779
+    short: 7938ce7
+    branch: main
+    message: 'Merge pull request #175 from Math-Data-Justice-Collaborative/docs/EV-018-path-a-closeout'
+    stage: 13-deploy-smoke
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    files_changed: 5
+    timestamp: '2026-08-02T19:52:05Z'
+    note: 'Docs closeout PR #175 MERGED; commits_pending=false; awaiting cycle-close AskQuestion'
+    pr_number: 175
+    merge: true
+    files:
+    - CHANGELOG.md
+    - docs/decisions/evolve-decisions.md
+    - docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+    - docs/sessions/S021-retrieval-follow-on/routing-plan.md
     - workflow-state.yaml
     skill_ids:
     - 13-deploy-smoke
