@@ -429,8 +429,9 @@ only if floors pass; otherwise keep spike-only.
 | S021-D20 | F46 root cause (initial) | Live vectors uncorrelated with Modal E0; Path B recommended |
 | S021-D21 | Promote history | **Not a failed E0 promote of bad shadow** — shadow E0 still matches Modal (cos=1). Live wiped 2026-08-02 02:45 with test `basis_vector` one-hots; E0 promote only covered 2/49 docs |
 | S021-D22 | T99.3 fix path | **Path B** full E0 re-embed all docs + promote; file `BUG-2026-08-02-staging-basis-vector-wipe`; harden `attach_embeddings` / DELETE helpers with corpus DB guard (user approved 2026-08-02) |
+| S021-D23 | T99.4 local Docker | **Skip Docker Desktop** — waive local TC-185; fixture TC-185 remains CI-gated / skip-without-Postgres; local closeout = TC-186 + bug PASS + staging Path B AC-FO1 (user 2026-08-02) |
 
 ### Phase 0–B / 07 status
 
-Phase 0–B **passed**. T99.1–T99.3 done (Path B promote `a0e8f32d-…` — 49/213; probe empty@0.2=0/8).
-Next: **T99.4** e2e green + **T99.5** docs, then M100 CE re-gate.
+Phase 0–B **passed**. **M99 complete** (T99.1–T99.5): Path B `a0e8f32d-…`; T99.4 per S021-D23; evidence in `t99-5-f46-closeout.md`.
+Next: **M100** F45 CE re-gate (T100.1–T100.4).

@@ -51,6 +51,7 @@ Artifact: `probe-retrieve-pools.json` (rewritten).
 
 ## Next
 
-- **T99.4** — e2e green (TC-185/186); confirm bug tests green in CI  
-- **T99.5** — docs/evidence closeout  
-- Then **M100** F45 CE re-gate (AC-BB9) now that AC-FO1 pools are non-empty  
+- **T99.4** — completed (S021-D23; see `t99-4-e2e-closeout.md`)  
+- **T99.5** — completed (`t99-5-f46-closeout.md`)  
+- **M100** — F45 CE re-gate (AC-BB9) now that AC-FO1 pools are non-empty  
+

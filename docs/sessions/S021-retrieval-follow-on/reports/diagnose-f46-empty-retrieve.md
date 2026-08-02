@@ -2,7 +2,8 @@
 
 > **Session:** S021 · **Cycle:** EV-018 · **Date:** 2026-08-02  
 > **Status:** completed · **Root-cause class:** staging test-vector wipe + incomplete E0 promote  
-> **Promote follow-up:** `promote-history-investigation.md`
+> **Promote follow-up:** `promote-history-investigation.md`  
+> **Closeout:** Path B `t99-3-path-b-rebuild.md` · evidence `t99-5-f46-closeout.md`
 
 ## Probe (read-only staging)
 

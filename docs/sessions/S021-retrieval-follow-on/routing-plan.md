@@ -2,12 +2,12 @@
 
 | Stage | Required | Status | Mode | Notes |
 |-------|----------|--------|------|-------|
-| 00-context | yes | in_progress | scoped | Session open 2026-08-02; S021-D1–D4 |
-| 16-evolve | orchestrator | pending | — | EV-018 Phase 0 after 00 completes |
+| 00-context | yes | completed | scoped | Session open 2026-08-02; S021-D1–D4 |
+| 16-evolve | orchestrator | in_progress | — | EV-018; M99 done → M100 |
 | 01-requirements | yes | completed | delta | RD-209–218; report `01-requirements-follow-on.md` |
 | 02-verify-plan | yes | completed | delta | Gate A→B PASS (S021-D17); report `02-verify-plan-audit.md` |
 | 04-tech-plan | yes | completed | delta | TP1–TP6 / S021-D18; Phase 23 M99–M100 |
-| 07-build | yes | in_progress | — | Promote history done (D21); await Path B + BUG for T99.3 |
+| 07-build | yes | in_progress | — | M99 complete (S021-D23); next M100 CE re-gate |
 | 08-verify-build | yes | pending | — | |
 | 09-qa | yes | pending | — | |
 | 10-e2e | yes | pending | — | |
