@@ -13,7 +13,7 @@
 | 10-e2e | yes | completed | — | PASS — `reports/e2e-report.md` |
 | 11-verify-impl | yes | completed | — | approved S021-D25 — `reports/verify-impl.md` |
 | 12-verify-deploy | yes | completed | — | Phase 2+3 approved S021-D26 — `reports/deploy-checklist.md` |
-| 13-deploy-smoke | yes | in_progress | — | Path A; CE false; H0c PASS |
+| 13-deploy-smoke | yes | completed | — | Path A PASS — PR #174 @ `9d1f10b`; H1–H5 + UJ-061; CE false |
 
 ## Skipped
 
