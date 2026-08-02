@@ -234,6 +234,18 @@ user may accept as follow-up.
 **Not for**: New features (go back to 01/04), large refactors (new pipeline pass),
 or architectural changes (new ADR + plan update).
 
+### Ownership: BUG vs 14 vs 07 (RET-001 RA-007)
+
+| Situation | Own the fix in | Always write |
+|-----------|----------------|--------------|
+| Production / post-deploy defect (pipeline idle) | **14-hotfix** | `BUG-*` + `tests/bugs/` |
+| Mid-**07-build** / active evolve: staging data wipe, empty pools, promote/re-embed | Stay in **07** / **16-evolve** (S021-D10 pattern) unless trivial one-liner → optional nested 14 | `BUG-*` + guard/regression test in the evolve branch |
+| Failure caught in e2e/CI during build | Fix in **07** (or child stage); open **14** only if cycle already closed | `BUG-*` when production/staging data was harmed |
+| Unclear | AskQuestion: stay in 07 · open 14 · explain | Do not skip BUG report when staging corpus was mutated |
+
+Corpus wipe / promote ops: follow `.cursor/skills/corpus-db-safety/SKILL.md` and
+`scripts/check_corpus_reset_guard.sh` — never pytest against staging `DATABASE_URL`.
+
 ## Prerequisites
 
 1. **Deployed codebase**: Pipeline stages 07-build through 13-deploy-smoke have run

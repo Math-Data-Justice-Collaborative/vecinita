@@ -36,16 +36,18 @@ Every commit must be **atomic** — one logical change, codebase valid after eac
    do not commit until the task is done.
 
 6. **Commit-as-you-go**: Skills must commit before:
-   - Transitioning to the next pipeline stage
-   - Asking the user a blocking AskQuestion
-   - Running a gate check
-   - Ending a session/turn
-   Never leave uncommitted work across session boundaries.
+ - Transitioning to the next pipeline stage
+ - Asking the user a blocking AskQuestion
+ - Running a gate check
+ - Ending a session/turn
+ Never leave uncommitted work across session boundaries.
 
-7. **Record in workflow-state**: After every commit, append to
-   `workflow-state.yaml` §`git_history.commits` with sha, branch, message,
-   stage, files_changed, and timestamp. See
-   `.cursor/skills/workflow-state-reference.md` §Git history.
+7. **No solo `workflow-state.yaml` commits** (RET-001 RA-005): Do not create a commit whose
+ *only* change is `workflow-state.yaml` unless you are **closing a gate or stage** (or the
+ user explicitly asked for a state sync). Bundle state with the real artifact/code commit.
+ After every commit, append to `workflow-state.yaml` §`git_history.commits` with sha, branch,
+ message, stage, files_changed, and timestamp via workflow-state-manager (see
+ `.cursor/skills/workflow-state-reference.md` §Git history).
 
 ## Branches
 

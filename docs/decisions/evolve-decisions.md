@@ -439,8 +439,9 @@ only if floors pass; otherwise keep spike-only.
 | ID | Topic | Choice |
 |----|-------|--------|
 | S021-D27 | Path A execute | **Full Path A** — push/PR/merge/redeploy/H1–H5; CE stays false (user option 1) |
+| S021-D28 | Cycle close | **17-retrospective** (user option 4, 2026-08-02) |
 
 ### Phase 0–D / deploy status
 
-Phase D **deploy Path A complete**. PR [#174](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174) merged @ `9d1f10b`; ChatRAG ACTIVE; H1–H5 + UJ-061 PASS; CE flag still default-off.
-Next: optional 15-service-health / cycle close / separate CE flag-flip approval.
+EV-018 **completed** 2026-08-02. PR [#174](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174) @ `9d1f10b`; Path A PASS; CE flag still default-off.
+Next: **17-retrospective** (S021-D28). CE flag flip remains a separate approval.

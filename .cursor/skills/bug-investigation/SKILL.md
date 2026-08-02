@@ -14,6 +14,10 @@ Use this skill whenever a **failure** is caught or reported — in [14-hotfix](.
 CI, or ad-hoc user reports. Stage-specific skills add deploy/Modal context; **this skill owns
 the artifact layout and TDD loop.**
 
+**Who owns the fix session** (RET-001 RA-007): always write the `BUG-*` report here; route the
+*session* via [14-hotfix](../14-hotfix/SKILL.md) §Ownership (post-deploy → 14; mid-build staging
+wipe during evolve → stay in **07** / **16-evolve** by default).
+
 **Cross-cutting:** [considerations.md](../considerations.md) §1, §7, [connectivity-gates.md](../connectivity-gates.md).
 
 ## Connectivity classification

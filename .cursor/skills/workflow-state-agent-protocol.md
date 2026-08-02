@@ -35,7 +35,8 @@ that file directly.
 
 ## During work
 
-After **each substep** that changes stage progress, artifacts, gates, git history, sessions, or cycles:
+After each **user-visible** substep that changes stage progress, artifacts, gates, git history,
+sessions, or cycles (RET-001 RA-004 / ADR-043):
 
 ```yaml
 operation: update
@@ -44,7 +45,13 @@ session_id: <active_session.id when set>
 update_payload: { ... }
 ```
 
-Never buffer updates across substeps.
+**User-visible** = a step the user would notice (stage advance, gate flip, artifact path,
+decision id, commit recorded, AskQuestion outcome). Prefer **one** `update` per user-facing
+step. Do **not** call `update` after every internal subagent or partial YAML mirror unless
+that call is the consolidated end-of-step update.
+
+Do not buffer *across* user-visible substeps (still update before the next AskQuestion or
+stage transition).
 
 Session reports: write under `active_session.artifacts_dir/reports/`; append to `artifacts[]`
 with `session_id` tag.
