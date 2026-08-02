@@ -2675,7 +2675,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T95.2 | M95 | 22 | Test | completed | T94.4 | — | S020 | F43 | — |
 | T95.3 | M95 | 22 | Code | completed | T95.1, T95.2 | — | S020 | F43 | — |
 | T95.4 | M95 | 22 | Config | completed | T95.3 | — | S020 | F43 | — |
-| T95.5 | M95 | 22 | Code | pending | T95.3 | — | S020 | F43 | — |
+| T95.5 | M95 | 22 | Code | completed | T95.3 | — | S020 | F43 | — |
 | T96.1 | M96 | 22 | Test | pending | T94.4 | — | S020 | F44 | — |
 | T96.2 | M96 | 22 | Test | pending | — | — | S020 | F44 | — |
 | T96.3 | M96 | 22 | Code | pending | T96.1, T96.2 | — | S020 | F44 | — |
