@@ -11,6 +11,7 @@ from vecinita_rag.cache import (
     DEFAULT_SEMANTIC_THRESHOLD,
 )
 from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode
+from vecinita_rag.rerank import DEFAULT_CE_MODEL_ID, DEFAULT_CE_TOP_N
 from vecinita_shared_schemas.eval_config import (
     DEFAULT_EVAL_MAX_TOKENS,
     DEFAULT_EVAL_MIN_RETRIEVAL_SCORE,
@@ -29,6 +30,7 @@ _MIN_CACHE_MAX_ENTRIES = 16
 _MAX_CACHE_MAX_ENTRIES = 100000
 _MIN_CACHE_SEMANTIC_THRESHOLD = 0.5
 _MAX_CACHE_SEMANTIC_THRESHOLD = 1.0
+_MAX_CE_TOP_N = 50
 
 
 def _int_env(name: str, default: int) -> int:
@@ -125,6 +127,12 @@ def _validate_f43_rag_cache_knobs(
         raise ValueError(msg)
 
 
+def _validate_f45_rag_ce_knobs(*, top_k: int, rag_rerank_ce_top_n: int) -> None:
+    if not (top_k <= rag_rerank_ce_top_n <= _MAX_CE_TOP_N):
+        msg = f"VECINITA_RAG_RERANK_CE_TOP_N must be between top_k ({top_k}) and {_MAX_CE_TOP_N}"
+        raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class ChatRagSettings:
     """Runtime settings for retrieval, embedding, and LLM upstreams."""
@@ -157,6 +165,9 @@ class ChatRagSettings:
     rag_cache_semantic: bool = True
     rag_cache_semantic_threshold: float = DEFAULT_SEMANTIC_THRESHOLD
     rag_soft_language_fallback: bool = False
+    rag_rerank_ce: bool = False
+    rag_rerank_ce_model: str = DEFAULT_CE_MODEL_ID
+    rag_rerank_ce_top_n: int = DEFAULT_CE_TOP_N
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -165,6 +176,7 @@ class ChatRagSettings:
         if not database_url:
             msg = "DATABASE_URL is required for ChatRAG backend"
             raise RuntimeError(msg)
+        top_k = _int_env("VECINITA_TOP_K", 5)
         rag_multi_query_count = _int_env("VECINITA_RAG_MULTI_QUERY_COUNT", 3)
         rag_packer: PackerMode = _rag_packer_env("VECINITA_RAG_PACKER", "p1")
         rag_context_max_chars = _int_env(
@@ -190,9 +202,11 @@ class ChatRagSettings:
             rag_cache_max_entries=rag_cache_max_entries,
             rag_cache_semantic_threshold=rag_cache_semantic_threshold,
         )
+        rag_rerank_ce_top_n = _int_env("VECINITA_RAG_RERANK_CE_TOP_N", DEFAULT_CE_TOP_N)
+        _validate_f45_rag_ce_knobs(top_k=top_k, rag_rerank_ce_top_n=rag_rerank_ce_top_n)
         return cls(
             database_url=_normalize_database_url(database_url),
-            top_k=_int_env("VECINITA_TOP_K", 5),
+            top_k=top_k,
             min_retrieval_score=_float_env("VECINITA_MIN_RETRIEVAL_SCORE", 0.2),
             chat_max_tokens=_int_env("VECINITA_CHAT_MAX_TOKENS", 256),
             browse_page_size=_int_env("VECINITA_BROWSE_PAGE_SIZE", 20),
@@ -238,4 +252,10 @@ class ChatRagSettings:
                 "VECINITA_RAG_SOFT_LANGUAGE_FALLBACK",
                 default=False,
             ),
+            rag_rerank_ce=_bool_env("VECINITA_RAG_RERANK_CE", default=False),
+            rag_rerank_ce_model=_str_env(
+                "VECINITA_RAG_RERANK_CE_MODEL",
+                DEFAULT_CE_MODEL_ID,
+            ),
+            rag_rerank_ce_top_n=rag_rerank_ce_top_n,
         )

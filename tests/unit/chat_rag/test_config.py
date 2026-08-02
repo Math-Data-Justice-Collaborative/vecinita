@@ -27,6 +27,9 @@ _DEFAULT_CACHE_SEMANTIC_THRESHOLD = 0.92
 _PARSED_CACHE_TTL_S = 120
 _PARSED_CACHE_MAX_ENTRIES = 64
 _PARSED_CACHE_SEMANTIC_THRESHOLD = 0.95
+_DEFAULT_CE_TOP_N = 20
+_PARSED_CE_TOP_N = 15
+_DEFAULT_CE_MODEL = "BAAI/bge-reranker-v2-m3"
 
 
 def test_int_env_returns_default_when_missing() -> None:
@@ -233,3 +236,38 @@ def test_from_env_parses_f44_soft_language_fallback(
     monkeypatch.setenv("VECINITA_RAG_SOFT_LANGUAGE_FALLBACK", "false")
     settings = ChatRagSettings.from_env()
     assert settings.rag_soft_language_fallback is False
+
+
+def test_from_env_defaults_f45_rerank_ce_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    """TC-183 / AC-BB8: VECINITA_RAG_RERANK_CE defaults false until ship gate."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_RAG_RERANK_CE", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_RERANK_CE_MODEL", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_RERANK_CE_TOP_N", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_rerank_ce is False
+    assert settings.rag_rerank_ce_model == _DEFAULT_CE_MODEL
+    assert settings.rag_rerank_ce_top_n == _DEFAULT_CE_TOP_N
+
+
+def test_from_env_parses_f45_rerank_ce_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
+    """T97.2: VECINITA_RAG_RERANK_CE* knobs parse from env (config-spec)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_RERANK_CE", "true")
+    monkeypatch.setenv("VECINITA_RAG_RERANK_CE_MODEL", _DEFAULT_CE_MODEL)
+    monkeypatch.setenv("VECINITA_RAG_RERANK_CE_TOP_N", str(_PARSED_CE_TOP_N))
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_rerank_ce is True
+    assert settings.rag_rerank_ce_model == _DEFAULT_CE_MODEL
+    assert settings.rag_rerank_ce_top_n == _PARSED_CE_TOP_N
+
+
+def test_from_env_rejects_invalid_f45_rerank_ce_top_n(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """T97.2: VECINITA_RAG_RERANK_CE_TOP_N must be between top_k and 50."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_TOP_K", "5")
+    monkeypatch.setenv("VECINITA_RAG_RERANK_CE_TOP_N", "3")
+    with pytest.raises(ValueError, match="VECINITA_RAG_RERANK_CE_TOP_N"):
+        ChatRagSettings.from_env()
