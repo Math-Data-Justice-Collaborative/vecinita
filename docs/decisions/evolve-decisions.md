@@ -339,6 +339,8 @@ soft language filter in the same cycle (optional / empty-hit; not proven on stag
 | S020-D6 | #162 soft language | **Config-gated L1** (default off) + empty-hit fixture |
 | S020-D7 | Fn ids | **Pre-allocate F43** (cache) + **F44** (#162) + **F45** (CE) as Planned |
 
+| S020-D8 | Proceed gate | **Allocate F43–F45 + finalize impact + start 01-requirements** |
+
 ### Phase 0 status
 
-Batch 1 locked (D4–D7). Awaiting proceed gate → Fn rows + impact analysis + Phase A `01-requirements`.
+**Approved** (S020-D8). Feature-list F43–F45 written; F42 marked Implemented. Phase A `01-requirements` in progress.

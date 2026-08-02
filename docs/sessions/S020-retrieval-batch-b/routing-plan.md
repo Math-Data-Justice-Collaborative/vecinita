@@ -3,8 +3,8 @@
 | Stage | Required | Status | Notes |
 |-------|----------|--------|-------|
 | 00-context | yes | completed | Session open 2026-08-02; S020-D1–D3 |
-| 16-evolve | orchestrator | in_progress | EV-017 Phase 0 intake |
-| 01-requirements | yes | pending | After Phase 0 scope lock; load seed |
+| 16-evolve | orchestrator | in_progress | EV-017 Phase A — 01-requirements |
+| 01-requirements | yes | in_progress | Seed loaded; confirm locked + open Qs |
 | 02-verify-plan | yes | pending | |
 | 04-tech-plan | yes | pending | |
 | 07-build | yes | pending | |

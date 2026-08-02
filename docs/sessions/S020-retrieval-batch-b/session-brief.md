@@ -71,6 +71,7 @@ spike-gated track, and include **#162** soft language filter in the same cycle
 | S020-D5 | #83/#161 = **spike + ship gate** (no prod CE unless gate passes) |
 | S020-D6 | #162 = **config-gated L1** (default off) + empty-hit fixture |
 | S020-D7 | Pre-allocate **F43** (cache) + **F44** (#162) + **F45** (CE) as Planned |
+| S020-D8 | Proceed → Fn rows + impact + start **01-requirements** |
 
 ## Routing plan
 

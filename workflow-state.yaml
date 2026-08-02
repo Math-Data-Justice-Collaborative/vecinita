@@ -2965,8 +2965,8 @@ active_session:
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
   current_stage: 16-evolve
-  current_action: phase_0_proceed_gate
-  current_stage_note: "Phase 0 intake batch 1 recorded (S020-D4–D7); awaiting proceed gate before Fn allocation + impact analysis; phase0_approved=false; 01-requirements NOT started"
+  current_action: phase_1_fn_allocation_then_01
+  current_stage_note: "S020-D8 Phase 0 proceed approved; phase0_approved=true; allocate F43–F45 + finalize impact, then start 01-requirements (delta_only); 01 NOT in_progress until Fn write"
   started_at: '2026-08-02'
   routing_plan_status: approved
   routing_preset: standard
@@ -2974,15 +2974,18 @@ active_session:
   routing_preset_status: approved
   routing_approval: "user-approved Standard via 00-context (01→02→04→07→08→09→10→11→12→13; skip 03/05/06; 15 optional at close)"
   mode: evolve
+  delta_only: true
+  phase0_approved: true
+  phase_0_status: approved
   predecessor_session_id: S019-retrieval-quality
   predecessor_evolve_cycle_id: EV-016
   continues: S019-retrieval-quality
-  scope_summary: "F43 full H1 cascade (exact→semantic→retrieve→generate); #83/#161 spike+ship gate; #162 config-gated L1 default off + empty-hit fixture; pre-allocate F43+F44+F45 as Planned (S020-D4–D7)"
+  scope_summary: "F43 full H1 cascade (exact→semantic→retrieve→generate); #83/#161 spike+ship gate; #162 config-gated L1 default off + empty-hit fixture; F43+F44+F45 Planned (S020-D4–D8); Phase 0 approved"
   feature_ids:
   - F43
   - F44
   - F45
-  feature_ids_note: "S020-D7 — F43 (H1 cascade cache) + F44 (#83/#161 CE) + F45 (#162 soft language filter) pre-allocated as Planned; phase0_approved still false"
+  feature_ids_note: "S020-D7/D8 — F43 (H1 cascade cache) + F44 (#83/#161 CE) + F45 (#162 soft language filter); phase0_approved=true; parent writes feature-list then 01 delta"
   github_issues:
   - 83
   - 161
@@ -2999,6 +3002,7 @@ active_session:
     required: true
     status: pending
     skip_rationale:
+    note: "Pending Fn write by parent; then in_progress as evolve/delta_only"
   - stage: 02-verify-plan
     required: true
     status: pending
@@ -3054,7 +3058,7 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: AskQuestion proceed to Fn allocation + impact analysis (Phase 1)
+  next_action: Parent writes feature-list F43–F45 + finalize impact; then start 01-requirements (mode=evolve, delta_only=true)
 sessions:
 - id: S019-retrieval-quality
   type: feature
@@ -14682,8 +14686,8 @@ evolve_cycles:
   - F43
   - F44
   - F45
-  feature_ids_note: 'S020-D7 — F43 (full H1 cascade cache) + F44 (#83/#161 CE spike+ship) + F45 (#162 soft language filter) pre-allocated as Planned'
-  feature_ids_pending_note: 'Pre-allocated Planned (S020-D7); formal Fn allocation + impact analysis at Phase 1 after proceed gate; phase0_approved=false'
+  feature_ids_note: 'S020-D7/D8 — F43 (full H1 cascade cache) + F44 (#83/#161 CE spike+ship) + F45 (#162 soft language filter); phase0_approved=true; parent writes feature-list then 01 delta'
+  feature_ids_pending_note: 'Proceed gate passed (S020-D8); parent allocates F43–F45 in feature-list + finalizes impact; then start 01-requirements (delta_only)'
   title: Batch B — Retrieval (F43 cache + CE spike + soft language filter)
   status: in_progress
   started: '2026-08-02'
@@ -14701,14 +14705,14 @@ evolve_cycles:
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/161
   - https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/162
   scope_summary: |
-    Batch B retrieval (continues S019/EV-016), Phase 0 intake batch 1 (S020-D4–D7):
+    Batch B retrieval (continues S019/EV-016), Phase 0 approved (S020-D4–D8):
     F43 = full H1 cascade (exact → semantic → retrieve → generate);
     F44 = #83/#161 CE spike + ship gate;
     F45 = #162 config-gated L1 default off + empty-hit fixture;
-    F43+F44+F45 pre-allocated as Planned. Standard routing. phase0_approved=false.
-  current_stage: phase_0_proceed_gate
-  current_action: phase_0_proceed_gate
-  current_stage_note: 'Phase 0 intake batch 1 recorded (S020-D4–D7); awaiting proceed gate; phase0_approved=false; 01-requirements NOT started'
+    F43+F44+F45 Planned. Standard routing. phase0_approved=true.
+  current_stage: phase_1_fn_allocation_then_01
+  current_action: phase_1_fn_allocation_then_01
+  current_stage_note: 'S020-D8 Phase 0 proceed approved; allocate F43–F45 + finalize impact, then start 01-requirements (delta_only); 01 NOT in_progress until Fn write'
   mode: evolve
   delta_only: true
   branch: evolve/EV-017-retrieval-batch-b
@@ -14716,8 +14720,10 @@ evolve_cycles:
   routing_preset_choice: standard
   routing_preset_status: approved
   routing_plan_status: approved
-  phase0_approved: false
-  phase_0_status: awaiting_proceed_gate
+  phase0_approved: true
+  phase_0_status: approved
+  phase0_approved_at: '2026-08-02'
+  phase0_decision: S020-D8
   routing_plan:
     required_stages:
     - 00-context
@@ -14752,10 +14758,13 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: phase_0_proceed_gate
-      note: Phase 0 intake batch 1 (S020-D4–D7) recorded; awaiting proceed gate; phase0_approved=false; 01-requirements NOT started
+      current_action: phase_1_fn_allocation_then_01
+      note: Phase 0 COMPLETE (S020-D8); phase0_approved=true; Phase 1 = Fn allocation + impact then 01-requirements
     01-requirements:
       status: pending
+      mode: evolve
+      delta_only: true
+      note: Pending parent feature-list write for F43–F45; then mark in_progress
     02-verify-plan:
       status: pending
     04-tech-plan:
@@ -14775,11 +14784,13 @@ evolve_cycles:
     13-deploy-smoke:
       status: pending
   gates:
+    phase_0: passed
     a_to_b: pending
     b_to_c: pending
     c_to_d: pending
     deploy: pending
   checkpoints:
+    phase_0: passed
     phase_a: pending
     phase_b: pending
     phase_c: pending
@@ -14821,8 +14832,14 @@ evolve_cycles:
     choice: f43_f44_f45_planned
     note: Pre-allocate F43 + F44 + F45 as Planned
     status: recorded
-  note: 'EV-017 Phase 0 intake batch 1 recorded 2026-08-02 (S020-D4–D7); phase_0_status=awaiting_proceed_gate; phase0_approved=false; feature_ids=[F43,F44,F45]; 01-requirements NOT started'
-  next_action: AskQuestion proceed to Fn allocation + impact analysis (Phase 1)
+  - id: S020-D8
+    topic: phase0_proceed_gate
+    choice: allocate_fn_impact_start_01
+    note: 'User option 1 — proceed: allocate F43–F45 + finalize impact + start 01-requirements'
+    status: recorded
+    recorded_at: '2026-08-02'
+  note: 'EV-017 Phase 0 APPROVED 2026-08-02 (S020-D8); phase0_approved=true; phase_0_status=approved; gates.phase_0=passed; checkpoints.phase_0=passed; feature_ids=[F43,F44,F45]; next = parent Fn write + impact then 01-requirements (delta_only)'
+  next_action: Parent writes feature-list F43–F45 + finalize impact; then start 01-requirements (mode=evolve, delta_only=true)
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -15867,6 +15884,13 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: 'S020-D8 — Phase 0 proceed gate = allocate F43–F45 + finalize impact + start 01-requirements'
+  recorded_at: '2026-08-02'
+  note: 'User option 1; phase0_approved=true; phase_0_status=approved; gates/checkpoints.phase_0=passed; a_to_b/phase_a remain pending; child 01 mode=evolve delta_only=true; feature-list write is parent responsibility'
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S020-retrieval-batch-b
@@ -20807,6 +20831,16 @@ git_history:
     files_changed: session artifacts + evolve-decisions + workflow-state + sessions README
     timestamp: '2026-08-02'
     note: S020 00-context session open commit; next remains 16-evolve Phase 0 intake AskQuestion
+  - sha: 9d7c6cdcad7782c59253c4c15cbccfe148c2609e
+    short: 9d7c6cd
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: lock EV-017 Phase 0 intake D4–D7'
+    stage: 16-evolve
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 6
+    timestamp: '2026-08-02'
+    note: Phase 0 intake D4–D7 locked; next_action unchanged — AskQuestion proceed gate
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
