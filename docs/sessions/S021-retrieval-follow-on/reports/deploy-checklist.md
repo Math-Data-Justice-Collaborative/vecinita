@@ -1,9 +1,9 @@
 # Deploy Checklist — S021 / EV-018 Retrieval Follow-on (F46 + F45)
 
 > **Generated**: 2026-08-02  
-> **Status**: **ready** (pending user Phase 2/3 sign-off below)  
+> **Status**: **approved** — Phase 2/3 signed (S021-D26); handoff to 13-deploy-smoke  
 > **Mode**: DELTA — corpus guard + docs; Path B staging restore **already live**; CE metrics **PASS**  
-> **Branch tip**: `evolve/EV-018-retrieval-follow-on` @ `60664b7`  
+> **Branch tip**: `evolve/EV-018-retrieval-follow-on` @ `8f9de98` (+ workflow-state dirty for D26)  
 > **Staging now**: `main` (may lag tip until 13 merge/deploy)  
 > **Deployment plan**: `docs/deployment-integration.md` §EV-017 (flags) + S021 Path A  
 > **11-verify-impl**: [verify-impl.md](./verify-impl.md) — **approved** F46+F45 (S021-D25)  
@@ -41,11 +41,11 @@
 
 | # | Risk | Mitigation | Status |
 |---|------|------------|--------|
-| 1 | Tip not on staging — guard only in git | Merge/deploy tip; pytest + CI prove guard | _pending user_ |
-| 2 | Accidental CE flag on | Keep DO env `false`; TC-183; no YAML enable in this cycle | _pending user_ |
-| 3 | Staging corpus re-wipe via pytest | Corpus DB guard + skill; never source staging URL into pytest shell | _pending user_ |
-| 4 | Empty pools regress after unrelated promote | Probe script; Path B runbook retained | _pending user_ |
-| 5 | Auth/CORS / browser connectivity | H0c green; H4–H5 at 13 | _pending user_ |
+| 1 | Tip not on staging — guard only in git | Merge/deploy tip; pytest + CI prove guard | **approved** (S021-D26) |
+| 2 | Accidental CE flag on | Keep DO env `false`; TC-183; no YAML enable in this cycle | **approved** (S021-D26) |
+| 3 | Staging corpus re-wipe via pytest | Corpus DB guard + skill; never source staging URL into pytest shell | **approved** (S021-D26) |
+| 4 | Empty pools regress after unrelated promote | Probe script; Path B runbook retained | **approved** (S021-D26) |
+| 5 | Auth/CORS / browser connectivity | H0c green; H4–H5 at 13 | **approved** (S021-D26) |
 
 ## Rollback
 
@@ -56,6 +56,8 @@
 | Corpus | Do **not** TRUNCATE; restore from DO backup only if embeddings wiped again |
 | CE spike | Ephemeral app already finished; no durable CE deploy |
 
+**User approved rollback** — S021-D26 option 1, 2026-08-02.
+
 ## Pre-Deploy checklist
 
 - [x] Configuration complete (CE **OFF**)  
@@ -65,20 +67,21 @@
 - [x] Connectivity scripts present (`verify_connectivity.sh`, staging smoke tests)  
 - [x] Frontend `VITE_*` matrix — **N/A-delta**  
 - [x] Post-deploy H4–H5 command documented  
-- [ ] Failure modes approved (Phase 2)  
-- [ ] Rollback plan approved (Phase 3)  
+- [x] Failure modes approved (Phase 2) — S021-D26  
+- [x] Rollback plan approved (Phase 3) — S021-D26  
 
 ## Sign-Off
 
 - [x] User approved implementation (11-verify-impl) — S021-D25, 2026-08-02  
-- [ ] User approved failure mitigations (12 Phase 2)  
-- [ ] User approved rollback plan (12 Phase 3)  
-- [ ] Ready for 13-deploy-smoke  
+- [x] User approved failure mitigations (12 Phase 2) — S021-D26, 2026-08-02  
+- [x] User approved rollback plan (12 Phase 3) — S021-D26, 2026-08-02  
+- [x] Ready for 13-deploy-smoke  
 
-## Summary (pending Phase 2/3)
+## Summary
 
 ```
 Pre-deploy checks: PASS (CE flag hold)
 AC-BB9: PASS (already run)
-Next: user approve mitigations + rollback → 13-deploy-smoke
+12 Phase 2+3: APPROVED (S021-D26)
+Next: 13-deploy-smoke Path A — merge/redeploy ChatRAG; CE stays false
 ```

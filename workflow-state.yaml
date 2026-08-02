@@ -1245,7 +1245,9 @@ project:
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
-        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+        S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+        08-verify-build; commits_pending=true
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
@@ -1272,14 +1274,15 @@ project:
       t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
       t99_5_status: completed
       t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
-      m99_status: completed
       report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       s021_d19_decision: S021-D19
       s021_d19_decision_recorded: true
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
-        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+        S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+        08-verify-build; commits_pending=true
       substeps:
         current_task: null
         task_status: completed
@@ -1313,7 +1316,8 @@ project:
         t99_4_completed_at: '2026-08-02'
         t99_4_waiver: S021-D23
         t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
-        t99_4_note: COMPLETED — S021-D23 waive local TC-185 (CI-gated); TC-186 PASS; bug 2/2 PASS; report t99-4-e2e-closeout.md
+        t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared;
+          local Docker/Postgres compose required; T99.3 completed; T99.5 pending
         t99_5_status: completed
         t99_5_completed_at: '2026-08-02'
         t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
@@ -1339,7 +1343,6 @@ project:
         path_b_completed: true
         path_b_completed_at: '2026-08-02'
         t99_3_status: completed
-        t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared; local Docker/Postgres compose required; T99.3 completed; T99.5 pending
         rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
         path_b_results:
           rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
@@ -2604,8 +2607,8 @@ project:
             started_at: '2026-07-07'
             completed_at: '2026-07-07'
             partial_rerun_at: '2026-07-07'
-            partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 blockers
-              resolved
+            partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38
+              blockers resolved
             session_id: S009-playground-model-download
             branch: feat/S009-playground-model-download
             evolve_cycle_id: EV-010
@@ -2621,8 +2624,8 @@ project:
               evolve_cycle_id: EV-009
               report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
               overall: fail
-              note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL (internal-write-api
-                + chat-rag-backend below 95%); QA-S008-B05 blocking
+              note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage gate FAIL
+                (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking
             s007:
               status: completed
               started_at: '2026-07-01'
@@ -2732,12 +2735,12 @@ project:
                 FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE
                 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation
                 now supersedes the re-run.
-              note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive()
-                unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin
-                FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage
-                gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003
-                resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN
-                FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+              note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED
+                (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression
+                test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019).
+                Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142
+                PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the
+                2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
     10-e2e:
       status: completed
       started_at: '2026-08-02'
@@ -2797,7 +2800,8 @@ project:
           status: completed
           started_at: '2026-08-01'
           partial_rerun_at: '2026-08-01'
-          partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
+          partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under
+            s017_baseline
           session_id: S019-retrieval-quality
           branch: evolve/EV-016-retrieval-quality
           evolve_cycle_id: EV-016
@@ -2806,8 +2810,8 @@ project:
           feature_ids:
           - F42
           feature: F42
-          note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1
-            SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
+          note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path;
+            T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
           overall: pass
           overall_result: PASS
         s017_baseline:
@@ -2815,8 +2819,8 @@ project:
           started_at: '2026-07-30'
           completed_at: '2026-07-30'
           partial_rerun_at: '2026-07-30'
-          partial_rerun_note: EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres; T2/T3
-            deferred); prior S016/EV-014 COMPLETE nested under s016_baseline
+          partial_rerun_note: EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres;
+            T2/T3 deferred); prior S016/EV-014 COMPLETE nested under s016_baseline
           session_id: S017-corpus-reembed-migration
           branch: evolve/EV-015-corpus-reembed-migration
           evolve_cycle_id: EV-015
@@ -2860,8 +2864,8 @@ project:
             overall_result: PASS
             report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
             note: S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159
-              PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit
-              request; prior S014/S013 baselines preserved below
+              PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await
+              commit request; prior S014/S013 baselines preserved below
             tiers:
               t0: PASS
               t0_detail: Vitest TC-156–159 PASS (covered in 08)
@@ -2887,9 +2891,9 @@ project:
               scope: UJ-051 / TC-152–155 (#148 admin UI polish)
               overall_result: PASS
               report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
-              note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051
-                1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff
-                → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
+              note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright
+                uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips
+                11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
               tiers:
                 t0: PASS
                 t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
@@ -2936,8 +2940,8 @@ project:
                 session_id: S005-user-mgmt-auth
                 branch: feat/S005-user-mgmt-auth
                 report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
-                note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract;
-                  T3 deferred
+                note: S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase
+                  contract; T3 deferred
         substeps:
           t0_f42: PASS
           t0_uj055: PASS_2_of_2
@@ -3078,8 +3082,8 @@ project:
           report: docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md
           inspection_artifacts: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
           report_committed: false
-          report_commit_note: verify-impl.md / inspection artifacts may be uncommitted; do not invent sha; B01 remediation commit
-            ref 1c2e46e
+          report_commit_note: verify-impl.md / inspection artifacts may be uncommitted; do not invent sha; B01 remediation
+            commit ref 1c2e46e
           head_ref_b01: 1c2e46e
           features:
             F41:
@@ -3117,11 +3121,11 @@ project:
             current: completed
           next_action: run 12-verify-deploy
           note: 'S017/EV-015 11-verify-impl COMPLETE 2026-07-30 — user approved (option A) manual inspection (local Playwright
-            preview /corpus screenshots), UJ-053, UJ-054 (known deferrals: API promote CI/staging; F36 gate @ 12/13), F41 AC-RB1–10
-            (AC-RB8 staging drill deferred); report docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md; inspection
-            artifacts under docs/sessions/S017-corpus-reembed-migration/reports/inspection/; acceptance-criteria.md AC-RB1–10
-            marked [x]; report may be uncommitted (no invent sha); B01 HEAD ref 1c2e46e; 09-qa PASS; 10-e2e PASS w/ advisories;
-            checkpoints.phase_d remains pending until 12-verify-deploy also completes; next → 12-verify-deploy'
+            preview /corpus screenshots), UJ-053, UJ-054 (known deferrals: API promote CI/staging; F36 gate @ 12/13), F41
+            AC-RB1–10 (AC-RB8 staging drill deferred); report docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md;
+            inspection artifacts under docs/sessions/S017-corpus-reembed-migration/reports/inspection/; acceptance-criteria.md
+            AC-RB1–10 marked [x]; report may be uncommitted (no invent sha); B01 HEAD ref 1c2e46e; 09-qa PASS; 10-e2e PASS
+            w/ advisories; checkpoints.phase_d remains pending until 12-verify-deploy also completes; next → 12-verify-deploy'
           s007_baseline:
             status: completed
             completed_at: '2026-07-01'
@@ -3159,8 +3163,9 @@ project:
               branch: feat/S009-playground-model-download
               evolve_cycle_id: EV-010
               report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
-              note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for
-                admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
+              note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded
+                for admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy
+                stages
         s019_baseline:
           status: completed
           session_id: S019-retrieval-quality
@@ -3348,32 +3353,42 @@ project:
             uj060: deferred_12_13
             prod_ce: 'off'
     12-verify-deploy:
-      status: in_progress
+      status: completed
       started_at: '2026-08-02'
       started: '2026-08-02'
+      completed: '2026-08-02'
+      completed_at: '2026-08-02'
       session_id: S021-retrieval-follow-on
       branch: evolve/EV-018-retrieval-follow-on
       evolve_cycle_id: EV-018
       mode: evolve
       delta_only: true
-      feature_ids:
+      feature_ids: &id001
       - F46
       - F45
       feature: F46+F45
       phase: Phase 23 (M99-M100)
-      current_action: 12_awaiting_phase2_3
-      next_action: user approve mitigations+rollback then 13-deploy-smoke
+      current_action: completed
+      next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
       phase_1: pass
-      phase_2: pending_user_approval
-      phase_3: pending_user_approval
+      phase_2: approved
+      phase_3: approved
       report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
-      report_status: drafted
+      report_status: approved
       standing_checklist: docs/deploy-checklist.md
       prior_checklist: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
       prod_ce: false
-      path_a_ce_note: VECINITA_RAG_RERANK_CE must stay false until explicit Path A CE flag approval
-      decision: S021-D25
-      note: S021/EV-018 12-verify-deploy — checklist drafted; Phase 1 PASS; awaiting Phase 2+3 user approval
+      path_a_ce_note: VECINITA_RAG_RERANK_CE remains false (S021-D24 hold; AC-BB9 PASS ≠ enable); Path A ship with CE false
+      decision: S021-D26
+      user_choice: option_1_approve_mitigations_and_rollback
+      deploy_path: A
+      deploy_ready: true
+      overall: approved
+      user_approvals: &id002
+        failure_mitigations: option_1_approved
+        rollback_plan: option_1_approved
+      note: S021/EV-018 12-verify-deploy COMPLETE 2026-08-02 — S021-D26 option_1_approve_mitigations_and_rollback; deploy-checklist
+        approved; CE false; handoff → 13 Phase 1.5
       s020_baseline:
         status: completed
         started_at: '2026-08-02'
@@ -3425,8 +3440,8 @@ project:
           status: completed
           started_at: '2026-07-30'
           partial_rerun_at: '2026-07-30'
-          partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B;
-            prior historical 12 runs nested under legacy stages.12 s001/s002
+          partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved;
+            TP-S017-12-A/B; prior historical 12 runs nested under legacy stages.12 s001/s002
           session_id: S017-corpus-reembed-migration
           branch: evolve/EV-015-corpus-reembed-migration
           evolve_cycle_id: EV-015
@@ -3437,8 +3452,8 @@ project:
           - F41
           report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
           next_action: 13 COMPLETE — PR to main next
-          note: S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY @ 180ad14; Phase D PASSED; Path A
-            staging executed in 13; left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit)
+          note: S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY @ 180ad14; Phase D PASSED; Path
+            A staging executed in 13; left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit)
           substeps:
             current: phase5_summary
             phase1_agents: completed
@@ -3461,7 +3476,8 @@ project:
               topic: openapi_internal_rebuild_create_patch_shadow
               option: 1
               choice: accept_openapi_gap_this_cycle
-              note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on
+              note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as
+                follow-on
               status: recorded
             checklist_note: deploy-checklist.md will clarify shadow env and list OpenAPI advisory
           phase1_results:
@@ -3469,10 +3485,10 @@ project:
               result: FAIL
               reason: completeness
               accepted_as: advisory_this_cycle
-              notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED unwired
-                — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id}, POST shadow/batch
-                — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on);
-                Playwright path name drift only'
+              notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED
+                unwired — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id},
+                POST shadow/batch — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write
+                routes as follow-on); Playwright path name drift only'
             agent2_secrets:
               result: PASS
               notes: no new secret names; modal secret list SKIPPED; stale URL risk elevated after DM redeploy
@@ -3544,327 +3560,365 @@ project:
     13-deploy-smoke:
       status: in_progress
       started_at: '2026-08-02'
+      started: '2026-08-02'
       completed_at: null
-      partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1
-        PASS (S019-D52); H1–H5 PASS; PR
-      session_id: S020-retrieval-batch-b
-      branch: evolve/EV-017-retrieval-batch-b
-      evolve_cycle_id: EV-017
+      session_id: S021-retrieval-follow-on
+      branch: evolve/EV-018-retrieval-follow-on
+      evolve_cycle_id: EV-018
       mode: evolve
       delta_only: true
-      feature: F42
-      feature_ids:
-      - F43
-      - F44
+      feature: F46+F45
+      feature_ids: &id003
+      - F46
       - F45
-      commits_head: 73df939
-      commit_deployed: 5693422
-      current_action: 13_deploy_smoke_path_a_merge
-      next_action: 'Merge PR #173 then main CD + H1–H5'
-      ac_rq6_disposition: investigate_fix_option_1_resolved
-      merge_gate: merged
-      pr_number: 172
-      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
-      pr_status: merged
-      pr_head_sha: 73df939
-      merge_sha: b08ec30
-      merge_commit: b08ec30
-      pr_merged_at: '2026-08-01'
+      phase: Phase 23 (M99-M100)
+      current_action: 13_awaiting_deploy_execution_approval
+      next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
       deploy_path: A
-      path_a_staging_result: PASS
-      overall_result: path_a_pass_ac_rq6_pass
-      report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
-      iss008_staging_run: confirmed_18_items
-      ac_rq6:
-        status: pass
-        relevancy: 0.833
-        relevancy_floor: 0.28
-        faith: 0.938
-        faith_floor: 0.91
-        disposition: investigate_fix_option_1_resolved
-        fix: judge+H7 fix (S019-D51)
-        evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
-      hy1_gate:
-        status: pass
-        evidence: 20260802T022836Z_hybrid-sweep.json
-        relevancy: 0.833
-        faith: 0.938
-      note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
-      s017_baseline:
+      prod_ce: false
+      path_a_ce_note: VECINITA_RAG_RERANK_CE=false (S021-D24 hold; S021-D26 Path A with CE false)
+      decision: S021-D26
+      note: S021/EV-018 13-deploy-smoke Phase 1.5 STARTED 2026-08-02 — awaiting deploy execution approval; H0c PASS (pytest
+        tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending; commits_pending=true
+      s020_baseline:
+        status: in_progress
+        started_at: '2026-08-02'
+        completed_at: null
+        partial_rerun_at: '2026-08-02'
+        partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51);
+          Hy1 PASS (S019-D52); H1–H5 PASS; PR
+        session_id: S020-retrieval-batch-b
+        branch: evolve/EV-017-retrieval-batch-b
+        evolve_cycle_id: EV-017
         mode: evolve
         delta_only: true
-        feature: F41
+        feature: F42
         feature_ids:
-        - F41
-        deploy_path: A
-        deploy_approved: true
-        deploy_approved_at: '2026-07-30'
-        deploy_approval: phase_d_path_a_staging_sequence
-        path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
-        path_a_staging_result: PASS
-        head_sha: bbe9544
-        commit_deployed: 180ad14
-        alembic_revision: '20260730_0010'
-        alembic_from: '20260728_0009'
-        report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
-        untracked_left:
-        - scripts/deploy/_tmp_proxy_key_check.py
-        untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-        next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval
-          hotfix'
-        overall_result: PASS
-        path_a_progress:
-          alembic: pass
-          alembic_revision: '20260730_0010'
-          do_pins:
-            write_api: ACTIVE_evolve
-            admin_frontend: ACTIVE_evolve
-          modal_dm_redeploy: pass
-          secret_sync: pass
-          do_verify: pass
-          h1_h5_pre_promote: pass
-          h1_h5_post_promote: pass
-          backfill_scoped: pass
-          live_equivalence: pass
-          shadow_dry_run: pass
-          rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
-          f36_eval:
-            status: completed
-            run_id: 01ca4019
-            note: operator-local execute_eval_run; top_k=2
-          promote:
-            chunks_promoted: 60
-            documents_promoted: 2
-        advisories:
-        - Modal eval job_type falls through to ingest
-        - F36 used top_k=2 + local execute_eval_run
-        - full backfill still pending
-        - DO pins on evolve until merge
-        - do not commit scripts/deploy/_tmp_proxy_key_check.py
-        note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase
-          advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
-      s016_baseline:
-        status: completed
-        started_at: '2026-07-29'
-        completed_at: '2026-07-29'
-        partial_rerun_at: '2026-07-30'
-        partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG FE;
-          H0c+H4/H5 PASS; deploy-smoke PASS'
-        session_id: S016-chat-cold-start-ux
-        branch: main
-        evolve_cycle_id: EV-014
-        mode: evolve
-        delta_only: true
-        feature: F40
-        deploy_path: A
-        head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-        merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-        merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-        merged_at: '2026-07-30T01:15:04Z'
-        commit_deployed: 82ad84e
-        drift: false
-        deploy_approved: true
-        deploy_approved_at: '2026-07-29'
-        deploy_approval: user_approved_commit_preview_deploy
-        overall_result: PASS
-        report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
-        pr_number: 157
-        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157
+        - F43
+        - F44
+        - F45
+        commits_head: 73df939
+        commit_deployed: 5693422
+        current_action: 13_deploy_smoke_path_a_merge
+        next_action: 'Merge PR #173 then main CD + H1–H5'
+        ac_rq6_disposition: investigate_fix_option_1_resolved
+        merge_gate: merged
+        pr_number: 172
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
         pr_status: merged
-        merge_gate: smokes_pass_before_merge
-        merge_approval: executed
-        merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
-        local_preview: http://127.0.0.1:5173/
-        ci:
-          status: success
-          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
-          head_sha: 82ad84e
-        cd:
-          deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560
-          deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804
-          deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533
+        pr_head_sha: 73df939
+        merge_sha: b08ec30
+        merge_commit: b08ec30
+        pr_merged_at: '2026-08-01'
+        deploy_path: A
+        path_a_staging_result: PASS
+        overall_result: path_a_pass_ac_rq6_pass
+        report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+        iss008_staging_run: confirmed_18_items
+        ac_rq6:
           status: pass
-        path_a_progress:
-          push: done
-          ci: pass
-          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
-          deploy_preflight: pass
-          deploy_modal: pass
-          deploy_digitalocean: pass
-          pin_redeploy: pass_via_main_cd
-          do_apps:
-            chat_rag_frontend: live_on_main
-            url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
-            asset: index-Biqk9SBJ.js
-            f40_markers:
-            - coldStartDonateCta
-            - wrwc.org/donate
-          smokes: pass
-          smoke_tiers:
-            h0c: pass
-            h4: pass
-            h5: pass
-          merge_pr_157: merged
-          h0ci_main: pass
-          note: F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS
-            post-merge @ 82ad84e
-        health_tiers:
-          h0c: pass
-          h4: pass
-          h5: pass
-        f40_live:
-          url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
-          asset: index-Biqk9SBJ.js
-          markers:
-          - coldStartDonateCta
-          - wrwc.org/donate
-        next_askquestion: none_user_chose_done
-        next_action: none
-        note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c
-          (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302;
-          deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal
-          https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533;
-          F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app asset index-Biqk9SBJ.js; H0c+H4/H5 PASS; report
-          docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md;
-          prior S014/EV-013 Path A PASS nested under s014_baseline; user_close_choice=done (option 1) 2026-07-30; next_action=none'
-        s014_baseline:
+          relevancy: 0.833
+          relevancy_floor: 0.28
+          faith: 0.938
+          faith_floor: 0.91
+          disposition: investigate_fix_option_1_resolved
+          fix: judge+H7 fix (S019-D51)
+          evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+        hy1_gate:
+          status: pass
+          evidence: 20260802T022836Z_hybrid-sweep.json
+          relevancy: 0.833
+          faith: 0.938
+        note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
+        s017_baseline:
+          mode: evolve
+          delta_only: true
+          feature: F41
+          feature_ids:
+          - F41
+          deploy_path: A
+          deploy_approved: true
+          deploy_approved_at: '2026-07-30'
+          deploy_approval: phase_d_path_a_staging_sequence
+          path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
+          path_a_staging_result: PASS
+          head_sha: bbe9544
+          commit_deployed: 180ad14
+          alembic_revision: '20260730_0010'
+          alembic_from: '20260728_0009'
+          report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
+          untracked_left:
+          - scripts/deploy/_tmp_proxy_key_check.py
+          untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
+          next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal
+            eval hotfix'
+          overall_result: PASS
+          path_a_progress:
+            alembic: pass
+            alembic_revision: '20260730_0010'
+            do_pins:
+              write_api: ACTIVE_evolve
+              admin_frontend: ACTIVE_evolve
+            modal_dm_redeploy: pass
+            secret_sync: pass
+            do_verify: pass
+            h1_h5_pre_promote: pass
+            h1_h5_post_promote: pass
+            backfill_scoped: pass
+            live_equivalence: pass
+            shadow_dry_run: pass
+            rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
+            f36_eval:
+              status: completed
+              run_id: 01ca4019
+              note: operator-local execute_eval_run; top_k=2
+            promote:
+              chunks_promoted: 60
+              documents_promoted: 2
+          advisories:
+          - Modal eval job_type falls through to ingest
+          - F36 used top_k=2 + local execute_eval_run
+          - full backfill still pending
+          - DO pins on evolve until merge
+          - do not commit scripts/deploy/_tmp_proxy_key_check.py
+          note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase
+            advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
+        s016_baseline:
           status: completed
           started_at: '2026-07-29'
           completed_at: '2026-07-29'
-          partial_rerun_at: '2026-07-29'
-          partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
-          session_id: S014-admin-ui-polish-148
+          partial_rerun_at: '2026-07-30'
+          partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG
+            FE; H0c+H4/H5 PASS; deploy-smoke PASS'
+          session_id: S016-chat-cold-start-ux
           branch: main
-          evolve_cycle_id: EV-013
+          evolve_cycle_id: EV-014
           mode: evolve
           delta_only: true
+          feature: F40
           deploy_path: A
+          head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+          merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+          merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+          merged_at: '2026-07-30T01:15:04Z'
+          commit_deployed: 82ad84e
+          drift: false
           deploy_approved: true
           deploy_approved_at: '2026-07-29'
-          deploy_approval: choice_A_approve_13_deploy_smoke
-          head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-          docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
+          deploy_approval: user_approved_commit_preview_deploy
           overall_result: PASS
-          report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
-          commits_ahead_of_origin: 0
-          pushed_at: '2026-07-29'
-          pr_number: 154
-          pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154
+          report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
+          pr_number: 157
+          pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157
           pr_status: merged
           merge_gate: smokes_pass_before_merge
-          do_not_merge_pr: 154
           merge_approval: executed
+          merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
+          local_preview: http://127.0.0.1:5173/
           ci:
             status: success
-            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
-            head_sha: f85b6ab
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
+            head_sha: 82ad84e
+          cd:
+            deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560
+            deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804
+            deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533
+            status: pass
           path_a_progress:
             push: done
             ci: pass
-            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
-            coverage_fix: f85b6ab
-            pin_redeploy: pass
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
+            deploy_preflight: pass
+            deploy_modal: pass
+            deploy_digitalocean: pass
+            pin_redeploy: pass_via_main_cd
             do_apps:
-              admin_frontend: reset_to_main_active
-              internal_write_api: untouched_main
-              modal_data_management: untouched
+              chat_rag_frontend: live_on_main
+              url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
+              asset: index-Biqk9SBJ.js
+              f40_markers:
+              - coldStartDonateCta
+              - wrwc.org/donate
             smokes: pass
             smoke_tiers:
-              h1: pass
-              h2: pass
-              h3: pass
-              h3b: pass
+              h0c: pass
               h4: pass
               h5: pass
-            merge_pr_154: merged
+            merge_pr_157: merged
             h0ci_main: pass
-          next_askquestion: null
-          note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS
-            (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
-          s013_baseline:
+            note: F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS
+              post-merge @ 82ad84e
+          health_tiers:
+            h0c: pass
+            h4: pass
+            h5: pass
+          f40_live:
+            url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
+            asset: index-Biqk9SBJ.js
+            markers:
+            - coldStartDonateCta
+            - wrwc.org/donate
+          next_askquestion: none_user_chose_done
+          next_action: none
+          note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c
+            (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302;
+            deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy
+            Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533;
+            F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app asset index-Biqk9SBJ.js; H0c+H4/H5 PASS;
+            report docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md;
+            prior S014/EV-013 Path A PASS nested under s014_baseline; user_close_choice=done (option 1) 2026-07-30; next_action=none'
+          s014_baseline:
             status: completed
             started_at: '2026-07-29'
             completed_at: '2026-07-29'
             partial_rerun_at: '2026-07-29'
-            session_id: S013-unified-job-monitoring
-            branch: evolve/EV-012-unified-job-monitoring
-            evolve_cycle_id: EV-012
-            mode: delta
+            partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
+            session_id: S014-admin-ui-polish-148
+            branch: main
+            evolve_cycle_id: EV-013
+            mode: evolve
+            delta_only: true
             deploy_path: A
-            head_sha: 113589139659a3508eb68340be91d93e7814ae77
+            deploy_approved: true
+            deploy_approved_at: '2026-07-29'
+            deploy_approval: choice_A_approve_13_deploy_smoke
+            head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+            docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
             overall_result: PASS
-            report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+            report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
             commits_ahead_of_origin: 0
             pushed_at: '2026-07-29'
-            pr_number: 153
+            pr_number: 154
+            pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154
+            pr_status: merged
             merge_gate: smokes_pass_before_merge
-            do_not_merge_pr: 153
-            merge_approval: pending_user
-            dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
-            partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE
-              + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+            do_not_merge_pr: 154
+            merge_approval: executed
+            ci:
+              status: success
+              ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
+              head_sha: f85b6ab
             path_a_progress:
               push: done
-              ci_rewatch: pass
-              ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-              lint_coverage_fix: 746181b
-              iss004_branch_coverage_fix: 1135891
-              h0c_migration_check: pass
-              alembic_revision: 202607280009
+              ci: pass
+              ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
+              coverage_fix: f85b6ab
               pin_redeploy: pass
-              modal_data_management: redeployed_from_evolve_checkout
               do_apps:
-                internal_write_api: pinned_active
-                admin_frontend: pinned_active
+                admin_frontend: reset_to_main_active
+                internal_write_api: untouched_main
+                modal_data_management: untouched
               smokes: pass
               smoke_tiers:
-                h0c: pass
                 h1: pass
                 h2: pass
                 h3: pass
                 h3b: pass
-                t3_ev002: pass
                 h4: pass
                 h5: pass
-              jobs_live:
-              - list
-              - retag_detail
-              - eval_run_detail
-              - sse
-              merge_pr_153: awaiting_user_approval
-            next_askquestion: merge_pr_153_or_hold_or_reset_pins
-            note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned
-              ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit
-              user merge approval; checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
-            s001_baseline:
+              merge_pr_154: merged
+              h0ci_main: pass
+            next_askquestion: null
+            note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS
+              (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
+            s013_baseline:
               status: completed
-              started_at: '2026-06-26'
-              completed_at: '2026-06-26'
-              partial_rerun_at: '2026-06-26'
-              partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-              report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
-          merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-          merge:
-            status: merged
-            pr_number: 154
-            merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-            merged_at: '2026-07-29'
-          next_action: none_cycle_closed
-      deploy_checkpoint: approved
-      deploy_checkpoint_at: '2026-07-30'
-      merge_approval: pending
-      ci_head_sha: bbe9544
-      ci_status: green
-      ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
-      session_closed: true
-      session_closed_at: '2026-07-30'
-      active_session_cleared: true
-      started: '2026-08-02'
-      completed: null
-      ac_bb9_met: false
-      prod_ce: 'off'
-      deploy_path_choice: option_1_path_a
+              started_at: '2026-07-29'
+              completed_at: '2026-07-29'
+              partial_rerun_at: '2026-07-29'
+              session_id: S013-unified-job-monitoring
+              branch: evolve/EV-012-unified-job-monitoring
+              evolve_cycle_id: EV-012
+              mode: delta
+              deploy_path: A
+              head_sha: 113589139659a3508eb68340be91d93e7814ae77
+              overall_result: PASS
+              report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+              commits_ahead_of_origin: 0
+              pushed_at: '2026-07-29'
+              pr_number: 153
+              merge_gate: smokes_pass_before_merge
+              do_not_merge_pr: 153
+              merge_approval: pending_user
+              dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
+              partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin
+                FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+              path_a_progress:
+                push: done
+                ci_rewatch: pass
+                ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+                lint_coverage_fix: 746181b
+                iss004_branch_coverage_fix: 1135891
+                h0c_migration_check: pass
+                alembic_revision: 202607280009
+                pin_redeploy: pass
+                modal_data_management: redeployed_from_evolve_checkout
+                do_apps:
+                  internal_write_api: pinned_active
+                  admin_frontend: pinned_active
+                smokes: pass
+                smoke_tiers:
+                  h0c: pass
+                  h1: pass
+                  h2: pass
+                  h3: pass
+                  h3b: pass
+                  t3_ev002: pass
+                  h4: pass
+                  h5: pass
+                jobs_live:
+                - list
+                - retag_detail
+                - eval_run_detail
+                - sse
+                merge_pr_153: awaiting_user_approval
+              next_askquestion: merge_pr_153_or_hold_or_reset_pins
+              note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned
+                ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit
+                user merge approval; checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
+              s001_baseline:
+                status: completed
+                started_at: '2026-06-26'
+                completed_at: '2026-06-26'
+                partial_rerun_at: '2026-06-26'
+                partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+                report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+            merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+            merge:
+              status: merged
+              pr_number: 154
+              merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+              merged_at: '2026-07-29'
+            next_action: none_cycle_closed
+        deploy_checkpoint: approved
+        deploy_checkpoint_at: '2026-07-30'
+        merge_approval: pending
+        ci_head_sha: bbe9544
+        ci_status: green
+        ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
+        session_closed: true
+        session_closed_at: '2026-07-30'
+        active_session_cleared: true
+        started: '2026-08-02'
+        completed: null
+        ac_bb9_met: false
+        prod_ce: 'off'
+        deploy_path_choice: option_1_path_a
+      phase_1_5: &id004
+        status: in_progress
+        started_at: '2026-08-02'
+        note: Phase 1.5 — draft deploy-smoke + await Path A execution approval
+      h0c: &id005
+        status: pass
+        evidence: pytest tests/unit/test_cors_policy.py
+        verified_at: '2026-08-02'
+        note: H0c PASS — unit CORS policy suite green (local)
+      report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+      report_status: in_progress
+      deploy_gate: pending
+      commits_pending: true
+      commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent
+        commit SHAs
     15-service-health:
       status: skipped
       started_at: '2026-07-29'
@@ -4208,12 +4262,14 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-018
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
-  current_stage: 12-verify-deploy
+  current_stage: 13-deploy-smoke
   current_stage_parallel: null
-  current_action: 12_awaiting_phase2_3
-  next_action: user approve mitigations+rollback then 13-deploy-smoke
+  current_action: 13_awaiting_deploy_execution_approval
+  next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
   commits_pending: true
-  current_stage_note: S021/EV-018 Phase D 2026-08-02 — 12-verify-deploy checklist drafted; Phase 1 PASS; awaiting Phase 2 (mitigations) + Phase 3 (rollback) approval; current_action=12_awaiting_phase2_3; S021-D25 recorded; CE flag still false; commits_pending=true
+  current_stage_note: S021/EV-018 Phase D/13 2026-08-02 — 12-verify-deploy COMPLETE (S021-D26); 13-deploy-smoke in_progress
+    Phase 1.5 current_action=13_awaiting_deploy_execution_approval; H0c PASS (pytest tests/unit/test_cors_policy.py); deploy
+    checkpoint/gates.deploy remain pending; commits_pending=true
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4306,7 +4362,9 @@ active_session:
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
       filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
-      S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+      S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+      S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+      08-verify-build; commits_pending=true
     s021_d20_decision: S021-D20
     s021_d21_decision: S021-D21
     s021_d21_choice: option_2_investigate_promote_history
@@ -4324,7 +4382,6 @@ active_session:
     t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
     t99_5_status: completed
     t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
-    m99_status: completed
     t100_1_status: completed
   - stage: 08-verify-build
     required: true
@@ -4334,7 +4391,8 @@ active_session:
     completed_at: '2026-08-02'
     current_action: completed
     report: docs/sessions/S021-retrieval-follow-on/reports/verification-report.md
-    note: PASS — check-fast, format-check, corpus guard, scoped pytest; TC-185 local skip S021-D23; CE ship_gate S021-D24; Phase D next
+    note: PASS — check-fast, format-check, corpus guard, scoped pytest; TC-185 local skip S021-D23; CE ship_gate S021-D24;
+      Phase D next
   - stage: 09-qa
     required: true
     status: completed
@@ -4375,22 +4433,39 @@ active_session:
     note: COMPLETE — user option 1 Approve F46+F45 (S021-D25); continue → 12-verify-deploy
   - stage: 12-verify-deploy
     required: true
+    status: completed
+    skip_rationale: null
+    started_at: '2026-08-02'
+    completed_at: '2026-08-02'
+    mode: delta
+    current_action: completed
+    phase_1: pass
+    phase_2: approved
+    phase_3: approved
+    report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+    report_status: approved
+    decision: S021-D26
+    user_choice: option_1_approve_mitigations_and_rollback
+    note: COMPLETE — S021-D26; deploy-checklist approved; CE false; → 13 Phase 1.5
+    next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+  - stage: 13-deploy-smoke
+    required: true
     status: in_progress
     skip_rationale: null
     started_at: '2026-08-02'
+    started: '2026-08-02'
     mode: delta
-    current_action: 12_awaiting_phase2_3
-    phase_1: pass
-    phase_2: pending_user_approval
-    phase_3: pending_user_approval
-    report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
-    report_status: drafted
-    decision: S021-D25
-    note: Checklist drafted; Phase 1 PASS; await Phase 2 failure mitigations + Phase 3 rollback approval before complete → 13; CE flag remains false
-  - stage: 13-deploy-smoke
-    required: true
-    status: pending
-    skip_rationale: null
+    current_action: 13_awaiting_deploy_execution_approval
+    deploy_path: A
+    prod_ce: false
+    decision: S021-D26
+    note: Phase 1.5 — awaiting Path A execution approval; H0c PASS; deploy gate pending
+    next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+    phase_1_5: in_progress
+    h0c: pass
+    report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+    report_status: in_progress
+    deploy_gate: pending
   context_briefs:
   - docs/sessions/S021-retrieval-follow-on/context-brief.md
   decisions:
@@ -4419,6 +4494,7 @@ active_session:
   - S021-D23
   - S021-D24
   - S021-D25
+  - S021-D26
   report_01_requirements: docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md
   report_02_verify_plan: docs/sessions/S021-retrieval-follow-on/reports/02-verify-plan-audit.md
   report_02_verify_plan_status: completed
@@ -4461,9 +4537,14 @@ active_session:
   s021_d23: Skip Docker Desktop — waive local TC-185 (CI-gated / skip-without-postgres)
   s021_d24_decision: S021-D24
   s021_d24_decision_recorded: true
-  s021_d24: AC-BB9 PASS; ship_gate_pass=true; CE+P1 relevancy=0.7778 faith=0.9375; keep VECINITA_RAG_RERANK_CE false until 12/13
+  s021_d24: AC-BB9 PASS; ship_gate_pass=true; CE+P1 relevancy=0.7778 faith=0.9375; keep VECINITA_RAG_RERANK_CE false until
+    12/13
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: run 09-qa + 10-e2e for EV-018 delta
+  s021_d26_decision: S021-D26
+  s021_d26_decision_recorded: true
+  s021_d26: 12 Phase 2+3 approved — failure mitigations + rollback; Path A with CE false; start 13-deploy-smoke
+  checkpoints_phase_d: passed
+  prod_ce: false
   t99_4_status: completed
   t99_4_blocker: null
   t99_4_waiver: S021-D23
@@ -4505,8 +4586,8 @@ active_session:
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: true
-  commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — commits_pending=true
+  commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent commit
+    SHAs
 sessions:
 - id: S020-retrieval-batch-b
   type: feature
@@ -9830,7 +9911,9 @@ stages:
     partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
       filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
-      S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+      S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+      S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+      08-verify-build; commits_pending=true
     session_id: S021-retrieval-follow-on
     branch: evolve/EV-018-retrieval-follow-on
     evolve_cycle_id: EV-018
@@ -9857,7 +9940,9 @@ stages:
     note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
       filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
-      S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+      S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+      S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+      08-verify-build; commits_pending=true
     substeps:
       current_task: null
       task_status: completed
@@ -9887,7 +9972,8 @@ stages:
       t99_5_status: completed
       t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       t99_4_blocker: null
-      t99_4_note: COMPLETED — S021-D23 waive local TC-185; TC-186 + bug PASS
+      t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared;
+        local Docker/Postgres compose required; T99.3 completed; T99.5 pending
       t99_1_note: e2e test_uj061_retrieve_nonempty.py; TC-186 pass; TC-185 skip without local Postgres
       t99_2_note: COMPLETED — root cause embed↔corpus pin drift (S021-D20); staging probe done; ISS-009 resolved
       t99_3_note: COMPLETED — Path B full E0 rebuild + BUG + guard (S021-D22); run a0e8f32d-7e2e-4012-960c-2e956ceeba87; 49
@@ -9903,7 +9989,6 @@ stages:
       path_b_completed: true
       path_b_completed_at: '2026-08-02'
       t99_3_status: completed
-      t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared; local Docker/Postgres compose required; T99.3 completed; T99.5 pending
       rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
       path_b_results:
         rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
@@ -11817,519 +11902,579 @@ stages:
   12-verify-deploy:
     status: completed
     started_at: '2026-08-02'
-    completed_at: '2026-08-02'
-    partial_rerun_at: '2026-08-01'
-    partial_rerun_note: S019/EV-016 12-verify-deploy STARTED — resume after 11-verify-impl approved; F42 H7+P1; deferred AC-RQ6
-      / ISS-008 / staging inspect in scope
-    session_id: S020-retrieval-batch-b
-    branch: evolve/EV-017-retrieval-batch-b
-    evolve_cycle_id: EV-017
-    mode: evolve
-    delta_only: true
-    feature: F42
-    feature_ids:
-    - F43
-    - F44
-    - F45
-    commits_head: 5530b46
-    current_action: completed
-    next_action: run 13-deploy-smoke
-    report: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
-    result: ready
-    deploy_ready: true
-    substeps:
-      phase1_agents: completed
-      phase2_failure_modes: completed
-      phase3_rollback: completed
-      phase4_checklist: completed
-      phase5_summary: completed
-    phase2_failure_modes:
-      status: approved
-      approved_at: '2026-08-01'
-      user_choice: option_1
-      note: Failure mitigations approved (option 1)
-    phase3_rollback:
-      status: approved
-      approved_at: '2026-08-01'
-      user_choice: option_1
-      note: Rollback plan approved (option 1)
-    user_approvals:
-      failure_mitigations: option_1_approved
-      rollback_plan: option_1_approved
-    deferred_in_scope:
-    - AC-RQ6
-    - ISS-008_deploy_verify
-    - live_staging_inspection
-    note: S020/EV-017 12-verify-deploy COMPLETE — strategy signed off; phase_d passed; handoff 13-deploy-smoke
-    s017_baseline:
-      status: completed
-      started_at: '2026-07-30'
-      partial_rerun_at: '2026-07-30'
-      partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B;
-        prior historical 12 runs nested under legacy stages.12 s001/s002
-      session_id: S017-corpus-reembed-migration
-      branch: evolve/EV-015-corpus-reembed-migration
-      evolve_cycle_id: EV-015
-      mode: evolve
-      delta_only: true
-      feature: F41
-      feature_ids:
-      - F41
-      report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
-      next_action: 13 COMPLETE — PR to main next
-      note: 'S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY; all failure mitigations + rollback
-        approved; TP-S017-12-A/B; next → Phase D checkpoint then 13-deploy-smoke (staging: alembic → services → secret sync
-        → H4/H5 → live equivalence + shadow→F36→promote)'
-      substeps:
-        current: phase5_summary
-        phase1_agents: completed
-        phase2_config_drift: completed
-        phase2_failure_modes: completed
-        phase3_rollback: completed
-        phase4_checklist: completed
-        phase5_summary: completed
-      phase2_config_drift:
-        status: decided
-        decided_at: '2026-07-30'
-        decisions:
-        - id: TP-S017-12-A
-          topic: VECINITA_REBUILD_SHADOW_ENABLED
-          option: 1
-          choice: accept_always_on_shadow
-          note: Accept always-on shadow; drop/clarify env as planned/unused; dry_run always available
-          status: recorded
-        - id: TP-S017-12-B
-          topic: openapi_internal_rebuild_create_patch_shadow
-          option: 1
-          choice: accept_openapi_gap_this_cycle
-          note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on
-          status: recorded
-        checklist_note: deploy-checklist.md will clarify shadow env and list OpenAPI advisory
-      phase1_results:
-        agent1_configuration:
-          result: FAIL
-          reason: completeness
-          accepted_as: advisory_this_cycle
-          notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED unwired
-            — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id}, POST shadow/batch
-            — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on);
-            Playwright path name drift only'
-        agent2_secrets:
-          result: PASS
-          notes: no new secret names; modal secret list SKIPPED; stale URL risk elevated after DM redeploy
-        agent3_data_volumes:
-          result: PASS
-          notes: Alembic 20260730_0010 ready; DO Postgres; staging apply pending ops
-        agent4_resources:
-          result: PASS
-          notes: existing DM CPU worker timeout=600; no new GPU/min_containers
-        agent5_ci_cd:
-          result: PASS
-          notes: hybrid ci→preflight→modal→DO; template GPU cache N/A
-        agent6_connectivity:
-          result: PASS
-          notes: H0c pytest exit 0; promote CORS test present (DB-gated skip local OK); verify_connectivity.sh present
-        agent7_modal_do_parity:
-          result: PASS
-          notes: infra declares Modal URLs; 13 plan sync-all-secrets→redeploy→sync_github→H4/H5
-    s002:
-      status: completed
-      started_at: '2026-05-27'
-      completed_at: '2026-06-26'
-      partial_rerun_at: '2026-06-26'
-      partial_rerun_note: 'S002 — F32 Job Management pre-deploy checklist; deploy_ready=false; blockers: Modal redeploy (GET
-        /jobs 405) + typecheck (reportAny) fix'
-      report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
-      branch: feat/S002-admin-job-management
-      deploy_ready: false
-      blockers:
-      - Modal data-management redeploy required — GET /jobs returns 405 in production
-      - Typecheck (basedpyright reportAny) must be fixed before deploy
-    s001:
-      report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
-      branch: feat/S001-modal-cold-start-snapshot
-      commit: f766233
-      deploy_ready: true
-      deploy_ready_note: User signed off on all 7 failure mitigations + rollback plan 2026-06-25
-      substeps:
-        phase1_agents: completed
-        phase2_failure_modes: completed
-        phase3_rollback: completed
-        phase4_checklist: completed
-        phase5_summary: completed
-      results:
-        configuration: pass
-        secrets: pass
-        data_volumes: pass
-        resources: pass
-        template: pass
-        connectivity: pass
-    head_ref_at_checklist_write: 180ad14
-    checklist_commit: 180ad14
-    untracked_left:
-    - scripts/deploy/_tmp_proxy_key_check.py
-    phase4_checklist:
-      status: completed
-      completed_at: '2026-07-30'
-      result: ready
-      path: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
-      head_ref_at_write: 180ad14
-      note: 'deploy-checklist READY; committed @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41)'
     started: '2026-08-02'
     completed: '2026-08-02'
-    phase: '2_3'
-    ac_bb9_met: false
-    phase_1: pass_with_advisories
-    phase_1_report: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
-    phase_1_advisories:
-    - deployment-integration §EV-017 missing
-    - UJ-060 carry (staging-gated)
-    overall: approved
-    overall_result: approved
+    completed_at: '2026-08-02'
+    session_id: S021-retrieval-follow-on
+    branch: evolve/EV-018-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    mode: evolve
+    delta_only: true
+    feature_ids: *id001
+    feature: F46+F45
+    phase: Phase 23 (M99-M100)
+    current_action: completed
+    next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+    phase_1: pass
     phase_2: approved
     phase_3: approved
-    user_approval_choice: approve_and_proceed
-    signed_off_at: '2026-08-02'
-    advisories_cleared:
-    - deployment-integration §EV-017 added
-    advisories_remaining:
-    - UJ-060 carry / AC-BB9 staging-gated
+    report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+    report_status: approved
+    prod_ce: false
+    decision: S021-D26
+    user_choice: option_1_approve_mitigations_and_rollback
+    deploy_path: A
+    deploy_ready: true
+    overall: approved
+    user_approvals: *id002
+    note: S021/EV-018 12-verify-deploy COMPLETE 2026-08-02 — S021-D26 option_1_approve_mitigations_and_rollback; deploy-checklist
+      approved; CE false; handoff → 13 Phase 1.5
+    s020_baseline:
+      status: completed
+      started_at: '2026-08-02'
+      completed_at: '2026-08-02'
+      partial_rerun_at: '2026-08-01'
+      partial_rerun_note: S019/EV-016 12-verify-deploy STARTED — resume after 11-verify-impl approved; F42 H7+P1; deferred
+        AC-RQ6 / ISS-008 / staging inspect in scope
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      mode: evolve
+      delta_only: true
+      feature: F42
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      commits_head: 5530b46
+      current_action: completed
+      next_action: run 13-deploy-smoke
+      report: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
+      result: ready
+      deploy_ready: true
+      substeps:
+        phase1_agents: completed
+        phase2_failure_modes: completed
+        phase3_rollback: completed
+        phase4_checklist: completed
+        phase5_summary: completed
+      phase2_failure_modes:
+        status: approved
+        approved_at: '2026-08-01'
+        user_choice: option_1
+        note: Failure mitigations approved (option 1)
+      phase3_rollback:
+        status: approved
+        approved_at: '2026-08-01'
+        user_choice: option_1
+        note: Rollback plan approved (option 1)
+      user_approvals:
+        failure_mitigations: option_1_approved
+        rollback_plan: option_1_approved
+      deferred_in_scope:
+      - AC-RQ6
+      - ISS-008_deploy_verify
+      - live_staging_inspection
+      note: S020/EV-017 12-verify-deploy COMPLETE — strategy signed off; phase_d passed; handoff 13-deploy-smoke
+      s017_baseline:
+        status: completed
+        started_at: '2026-07-30'
+        partial_rerun_at: '2026-07-30'
+        partial_rerun_note: EV-015/S017 COMPLETE — 12-verify-deploy READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B;
+          prior historical 12 runs nested under legacy stages.12 s001/s002
+        session_id: S017-corpus-reembed-migration
+        branch: evolve/EV-015-corpus-reembed-migration
+        evolve_cycle_id: EV-015
+        mode: evolve
+        delta_only: true
+        feature: F41
+        feature_ids:
+        - F41
+        report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
+        next_action: 13 COMPLETE — PR to main next
+        note: 'S017/EV-015 12-verify-deploy COMPLETE 2026-07-30 — deploy-checklist READY; all failure mitigations + rollback
+          approved; TP-S017-12-A/B; next → Phase D checkpoint then 13-deploy-smoke (staging: alembic → services → secret sync
+          → H4/H5 → live equivalence + shadow→F36→promote)'
+        substeps:
+          current: phase5_summary
+          phase1_agents: completed
+          phase2_config_drift: completed
+          phase2_failure_modes: completed
+          phase3_rollback: completed
+          phase4_checklist: completed
+          phase5_summary: completed
+        phase2_config_drift:
+          status: decided
+          decided_at: '2026-07-30'
+          decisions:
+          - id: TP-S017-12-A
+            topic: VECINITA_REBUILD_SHADOW_ENABLED
+            option: 1
+            choice: accept_always_on_shadow
+            note: Accept always-on shadow; drop/clarify env as planned/unused; dry_run always available
+            status: recorded
+          - id: TP-S017-12-B
+            topic: openapi_internal_rebuild_create_patch_shadow
+            option: 1
+            choice: accept_openapi_gap_this_cycle
+            note: Accept for this cycle; promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on
+            status: recorded
+          checklist_note: deploy-checklist.md will clarify shadow env and list OpenAPI advisory
+        phase1_results:
+          agent1_configuration:
+            result: FAIL
+            reason: completeness
+            accepted_as: advisory_this_cycle
+            notes: 'FAIL completeness accepted as advisory this cycle (TP-S017-12-A/B): VECINITA_REBUILD_SHADOW_ENABLED unwired
+              — accept always-on shadow, drop/clarify env; OpenAPI missing POST /rebuild/runs, PATCH /rebuild/{id}, POST shadow/batch
+              — accept this cycle (promote + DM Jobs OpenAPI are operator surfaces; sync remaining write routes as follow-on);
+              Playwright path name drift only'
+          agent2_secrets:
+            result: PASS
+            notes: no new secret names; modal secret list SKIPPED; stale URL risk elevated after DM redeploy
+          agent3_data_volumes:
+            result: PASS
+            notes: Alembic 20260730_0010 ready; DO Postgres; staging apply pending ops
+          agent4_resources:
+            result: PASS
+            notes: existing DM CPU worker timeout=600; no new GPU/min_containers
+          agent5_ci_cd:
+            result: PASS
+            notes: hybrid ci→preflight→modal→DO; template GPU cache N/A
+          agent6_connectivity:
+            result: PASS
+            notes: H0c pytest exit 0; promote CORS test present (DB-gated skip local OK); verify_connectivity.sh present
+          agent7_modal_do_parity:
+            result: PASS
+            notes: infra declares Modal URLs; 13 plan sync-all-secrets→redeploy→sync_github→H4/H5
+      s002:
+        status: completed
+        started_at: '2026-05-27'
+        completed_at: '2026-06-26'
+        partial_rerun_at: '2026-06-26'
+        partial_rerun_note: 'S002 — F32 Job Management pre-deploy checklist; deploy_ready=false; blockers: Modal redeploy
+          (GET /jobs 405) + typecheck (reportAny) fix'
+        report: docs/sessions/S002-admin-job-management/reports/deploy-checklist.md
+        branch: feat/S002-admin-job-management
+        deploy_ready: false
+        blockers:
+        - Modal data-management redeploy required — GET /jobs returns 405 in production
+        - Typecheck (basedpyright reportAny) must be fixed before deploy
+      s001:
+        report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-checklist.md
+        branch: feat/S001-modal-cold-start-snapshot
+        commit: f766233
+        deploy_ready: true
+        deploy_ready_note: User signed off on all 7 failure mitigations + rollback plan 2026-06-25
+        substeps:
+          phase1_agents: completed
+          phase2_failure_modes: completed
+          phase3_rollback: completed
+          phase4_checklist: completed
+          phase5_summary: completed
+        results:
+          configuration: pass
+          secrets: pass
+          data_volumes: pass
+          resources: pass
+          template: pass
+          connectivity: pass
+      head_ref_at_checklist_write: 180ad14
+      checklist_commit: 180ad14
+      untracked_left:
+      - scripts/deploy/_tmp_proxy_key_check.py
+      phase4_checklist:
+        status: completed
+        completed_at: '2026-07-30'
+        result: ready
+        path: docs/sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md
+        head_ref_at_write: 180ad14
+        note: 'deploy-checklist READY; committed @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41)'
+      started: '2026-08-02'
+      completed: '2026-08-02'
+      phase: '2_3'
+      ac_bb9_met: false
+      phase_1: pass_with_advisories
+      phase_1_report: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
+      phase_1_advisories:
+      - deployment-integration §EV-017 missing
+      - UJ-060 carry (staging-gated)
+      overall: approved
+      overall_result: approved
+      phase_2: approved
+      phase_3: approved
+      user_approval_choice: approve_and_proceed
+      signed_off_at: '2026-08-02'
+      advisories_cleared:
+      - deployment-integration §EV-017 added
+      advisories_remaining:
+      - UJ-060 carry / AC-BB9 staging-gated
   13-deploy-smoke:
     status: in_progress
     started_at: '2026-08-02'
+    started: '2026-08-02'
     completed_at: null
-    partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1
-      PASS (S019-D52); H1–H5 PASS; PR
-    session_id: S020-retrieval-batch-b
-    branch: evolve/EV-017-retrieval-batch-b
-    evolve_cycle_id: EV-017
+    session_id: S021-retrieval-follow-on
+    branch: evolve/EV-018-retrieval-follow-on
+    evolve_cycle_id: EV-018
     mode: evolve
     delta_only: true
-    feature: F42
-    feature_ids:
-    - F43
-    - F44
-    - F45
-    commits_head: 73df939
-    commit_deployed: 5693422
-    current_action: 13_deploy_smoke_path_a_merge
-    next_action: 'Merge PR #173 then main CD + H1–H5'
-    ac_rq6_disposition: investigate_fix_option_1_resolved
-    merge_gate: merged
-    pr_number: 172
-    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
-    pr_status: merged
-    pr_head_sha: 73df939
-    merge_sha: b08ec30
-    merge_commit: b08ec30
-    pr_merged_at: '2026-08-01'
+    feature: F46+F45
+    feature_ids: *id003
+    phase: Phase 23 (M99-M100)
+    current_action: 13_awaiting_deploy_execution_approval
+    next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
     deploy_path: A
-    path_a_staging_result: PASS
-    overall_result: path_a_pass_ac_rq6_pass
-    report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
-    iss008_staging_run: confirmed_18_items
-    ac_rq6:
-      status: pass
-      relevancy: 0.833
-      relevancy_floor: 0.28
-      faith: 0.938
-      faith_floor: 0.91
-      disposition: investigate_fix_option_1_resolved
-      fix: judge+H7 fix (S019-D51)
-      evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
-    hy1_gate:
-      status: pass
-      evidence: 20260802T022836Z_hybrid-sweep.json
-      relevancy: 0.833
-      faith: 0.938
-    note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
-    s017_baseline:
+    prod_ce: false
+    path_a_ce_note: VECINITA_RAG_RERANK_CE=false (S021-D24 hold; S021-D26 Path A with CE false)
+    decision: S021-D26
+    note: S021/EV-018 13-deploy-smoke Phase 1.5 STARTED 2026-08-02 — awaiting deploy execution approval; H0c PASS (pytest
+      tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending; commits_pending=true
+    s020_baseline:
+      status: in_progress
+      started_at: '2026-08-02'
+      completed_at: null
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1
+        PASS (S019-D52); H1–H5 PASS; PR
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
       mode: evolve
       delta_only: true
-      feature: F41
+      feature: F42
       feature_ids:
-      - F41
-      deploy_path: A
-      deploy_approved: true
-      deploy_approved_at: '2026-07-30'
-      deploy_approval: phase_d_path_a_staging_sequence
-      path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
-      path_a_staging_result: PASS
-      head_sha: bbe9544
-      commit_deployed: 180ad14
-      alembic_revision: '20260730_0010'
-      alembic_from: '20260728_0009'
-      report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
-      untracked_left:
-      - scripts/deploy/_tmp_proxy_key_check.py
-      untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-      next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval
-        hotfix'
-      overall_result: PASS
-      path_a_progress:
-        alembic: pass
-        alembic_revision: '20260730_0010'
-        do_pins:
-          write_api: ACTIVE_evolve
-          admin_frontend: ACTIVE_evolve
-        modal_dm_redeploy: pass
-        secret_sync: pass
-        do_verify: pass
-        h1_h5_pre_promote: pass
-        h1_h5_post_promote: pass
-        backfill_scoped: pass
-        live_equivalence: pass
-        shadow_dry_run: pass
-        rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
-        f36_eval:
-          status: completed
-          run_id: 01ca4019
-          note: operator-local execute_eval_run; top_k=2
-        promote:
-          chunks_promoted: 60
-          documents_promoted: 2
-      advisories:
-      - Modal eval job_type falls through to ingest
-      - F36 used top_k=2 + local execute_eval_run
-      - full backfill still pending
-      - DO pins on evolve until merge
-      - do not commit scripts/deploy/_tmp_proxy_key_check.py
-      note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase
-        advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
-    s016_baseline:
-      status: completed
-      started_at: '2026-07-29'
-      completed_at: '2026-07-29'
-      partial_rerun_at: '2026-07-30'
-      partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG FE;
-        H0c+H4/H5 PASS; deploy-smoke PASS'
-      session_id: S016-chat-cold-start-ux
-      branch: main
-      evolve_cycle_id: EV-014
-      mode: evolve
-      delta_only: true
-      feature: F40
-      deploy_path: A
-      head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-      merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-      merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-      merged_at: '2026-07-30T01:15:04Z'
-      commit_deployed: 82ad84e
-      drift: false
-      deploy_approved: true
-      deploy_approved_at: '2026-07-29'
-      deploy_approval: user_approved_commit_preview_deploy
-      overall_result: PASS
-      report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
-      pr_number: 157
-      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157
+      - F43
+      - F44
+      - F45
+      commits_head: 73df939
+      commit_deployed: 5693422
+      current_action: 13_deploy_smoke_path_a_merge
+      next_action: 'Merge PR #173 then main CD + H1–H5'
+      ac_rq6_disposition: investigate_fix_option_1_resolved
+      merge_gate: merged
+      pr_number: 172
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172
       pr_status: merged
-      merge_gate: smokes_pass_before_merge
-      merge_approval: executed
-      merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
-      local_preview: http://127.0.0.1:5173/
-      ci:
-        status: success
-        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
-        head_sha: 82ad84e
-      cd:
-        deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560
-        deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804
-        deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533
+      pr_head_sha: 73df939
+      merge_sha: b08ec30
+      merge_commit: b08ec30
+      pr_merged_at: '2026-08-01'
+      deploy_path: A
+      path_a_staging_result: PASS
+      overall_result: path_a_pass_ac_rq6_pass
+      report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+      iss008_staging_run: confirmed_18_items
+      ac_rq6:
         status: pass
-      path_a_progress:
-        push: done
-        ci: pass
-        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
-        deploy_preflight: pass
-        deploy_modal: pass
-        deploy_digitalocean: pass
-        pin_redeploy: pass_via_main_cd
-        do_apps:
-          chat_rag_frontend: live_on_main
-          url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
-          asset: index-Biqk9SBJ.js
-          f40_markers:
-          - coldStartDonateCta
-          - wrwc.org/donate
-        smokes: pass
-        smoke_tiers:
-          h0c: pass
-          h4: pass
-          h5: pass
-        merge_pr_157: merged
-        h0ci_main: pass
-        note: F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS post-merge
-          @ 82ad84e
-      health_tiers:
-        h0c: pass
-        h4: pass
-        h5: pass
-      f40_live:
-        url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
-        asset: index-Biqk9SBJ.js
-        markers:
-        - coldStartDonateCta
-        - wrwc.org/donate
-      next_askquestion: none_user_chose_done
-      next_action: none
-      note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c
-        (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302; deploy-preflight
-        https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804;
-        Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533; F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
-        asset index-Biqk9SBJ.js; H0c+H4/H5 PASS; report docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary
-        docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md; prior S014/EV-013 Path A PASS nested under s014_baseline'
-      s014_baseline:
+        relevancy: 0.833
+        relevancy_floor: 0.28
+        faith: 0.938
+        faith_floor: 0.91
+        disposition: investigate_fix_option_1_resolved
+        fix: judge+H7 fix (S019-D51)
+        evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+      hy1_gate:
+        status: pass
+        evidence: 20260802T022836Z_hybrid-sweep.json
+        relevancy: 0.833
+        faith: 0.938
+      note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
+      s017_baseline:
+        mode: evolve
+        delta_only: true
+        feature: F41
+        feature_ids:
+        - F41
+        deploy_path: A
+        deploy_approved: true
+        deploy_approved_at: '2026-07-30'
+        deploy_approval: phase_d_path_a_staging_sequence
+        path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
+        path_a_staging_result: PASS
+        head_sha: bbe9544
+        commit_deployed: 180ad14
+        alembic_revision: '20260730_0010'
+        alembic_from: '20260728_0009'
+        report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
+        untracked_left:
+        - scripts/deploy/_tmp_proxy_key_check.py
+        untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
+        next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval
+          hotfix'
+        overall_result: PASS
+        path_a_progress:
+          alembic: pass
+          alembic_revision: '20260730_0010'
+          do_pins:
+            write_api: ACTIVE_evolve
+            admin_frontend: ACTIVE_evolve
+          modal_dm_redeploy: pass
+          secret_sync: pass
+          do_verify: pass
+          h1_h5_pre_promote: pass
+          h1_h5_post_promote: pass
+          backfill_scoped: pass
+          live_equivalence: pass
+          shadow_dry_run: pass
+          rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
+          f36_eval:
+            status: completed
+            run_id: 01ca4019
+            note: operator-local execute_eval_run; top_k=2
+          promote:
+            chunks_promoted: 60
+            documents_promoted: 2
+        advisories:
+        - Modal eval job_type falls through to ingest
+        - F36 used top_k=2 + local execute_eval_run
+        - full backfill still pending
+        - DO pins on evolve until merge
+        - do not commit scripts/deploy/_tmp_proxy_key_check.py
+        note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase
+          advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
+      s016_baseline:
         status: completed
         started_at: '2026-07-29'
         completed_at: '2026-07-29'
-        partial_rerun_at: '2026-07-29'
-        partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
-        session_id: S014-admin-ui-polish-148
+        partial_rerun_at: '2026-07-30'
+        partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG FE;
+          H0c+H4/H5 PASS; deploy-smoke PASS'
+        session_id: S016-chat-cold-start-ux
         branch: main
-        evolve_cycle_id: EV-013
+        evolve_cycle_id: EV-014
         mode: evolve
         delta_only: true
+        feature: F40
         deploy_path: A
+        head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+        merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+        merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+        merged_at: '2026-07-30T01:15:04Z'
+        commit_deployed: 82ad84e
+        drift: false
         deploy_approved: true
         deploy_approved_at: '2026-07-29'
-        deploy_approval: choice_A_approve_13_deploy_smoke
-        head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-        docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
+        deploy_approval: user_approved_commit_preview_deploy
         overall_result: PASS
-        report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
-        commits_ahead_of_origin: 0
-        pushed_at: '2026-07-29'
-        pr_number: 154
-        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154
+        report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
+        pr_number: 157
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157
         pr_status: merged
         merge_gate: smokes_pass_before_merge
-        do_not_merge_pr: 154
         merge_approval: executed
+        merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
+        local_preview: http://127.0.0.1:5173/
         ci:
           status: success
-          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
-          head_sha: f85b6ab
+          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
+          head_sha: 82ad84e
+        cd:
+          deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560
+          deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804
+          deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533
+          status: pass
         path_a_progress:
           push: done
           ci: pass
-          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
-          coverage_fix: f85b6ab
-          pin_redeploy: pass
+          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302
+          deploy_preflight: pass
+          deploy_modal: pass
+          deploy_digitalocean: pass
+          pin_redeploy: pass_via_main_cd
           do_apps:
-            admin_frontend: reset_to_main_active
-            internal_write_api: untouched_main
-            modal_data_management: untouched
+            chat_rag_frontend: live_on_main
+            url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
+            asset: index-Biqk9SBJ.js
+            f40_markers:
+            - coldStartDonateCta
+            - wrwc.org/donate
           smokes: pass
           smoke_tiers:
-            h1: pass
-            h2: pass
-            h3: pass
-            h3b: pass
+            h0c: pass
             h4: pass
             h5: pass
-          merge_pr_154: merged
+          merge_pr_157: merged
           h0ci_main: pass
-        next_askquestion: null
-        note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS
-          (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
-        s013_baseline:
+          note: F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS
+            post-merge @ 82ad84e
+        health_tiers:
+          h0c: pass
+          h4: pass
+          h5: pass
+        f40_live:
+          url: https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app
+          asset: index-Biqk9SBJ.js
+          markers:
+          - coldStartDonateCta
+          - wrwc.org/donate
+        next_askquestion: none_user_chose_done
+        next_action: none
+        note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c
+          (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302;
+          deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal
+          https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533;
+          F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app asset index-Biqk9SBJ.js; H0c+H4/H5 PASS; report
+          docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md;
+          prior S014/EV-013 Path A PASS nested under s014_baseline'
+        s014_baseline:
           status: completed
           started_at: '2026-07-29'
           completed_at: '2026-07-29'
           partial_rerun_at: '2026-07-29'
-          session_id: S013-unified-job-monitoring
-          branch: evolve/EV-012-unified-job-monitoring
-          evolve_cycle_id: EV-012
-          mode: delta
+          partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
+          session_id: S014-admin-ui-polish-148
+          branch: main
+          evolve_cycle_id: EV-013
+          mode: evolve
+          delta_only: true
           deploy_path: A
-          head_sha: 113589139659a3508eb68340be91d93e7814ae77
+          deploy_approved: true
+          deploy_approved_at: '2026-07-29'
+          deploy_approval: choice_A_approve_13_deploy_smoke
+          head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+          docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
           overall_result: PASS
-          report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+          report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
           commits_ahead_of_origin: 0
           pushed_at: '2026-07-29'
-          pr_number: 153
+          pr_number: 154
+          pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154
+          pr_status: merged
           merge_gate: smokes_pass_before_merge
-          do_not_merge_pr: 153
-          merge_approval: pending_user
-          dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
-          partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api
-            from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+          do_not_merge_pr: 154
+          merge_approval: executed
+          ci:
+            status: success
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
+            head_sha: f85b6ab
           path_a_progress:
             push: done
-            ci_rewatch: pass
-            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
-            lint_coverage_fix: 746181b
-            iss004_branch_coverage_fix: 1135891
-            h0c_migration_check: pass
-            alembic_revision: 202607280009
+            ci: pass
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250
+            coverage_fix: f85b6ab
             pin_redeploy: pass
-            modal_data_management: redeployed_from_evolve_checkout
             do_apps:
-              internal_write_api: pinned_active
-              admin_frontend: pinned_active
+              admin_frontend: reset_to_main_active
+              internal_write_api: untouched_main
+              modal_data_management: untouched
             smokes: pass
             smoke_tiers:
-              h0c: pass
               h1: pass
               h2: pass
               h3: pass
               h3b: pass
-              t3_ev002: pass
               h4: pass
               h5: pass
-            jobs_live:
-            - list
-            - retag_detail
-            - eval_run_detail
-            - sse
-            merge_pr_153: awaiting_user_approval
-          next_askquestion: merge_pr_153_or_hold_or_reset_pins
-          note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge
-            approval; prior EV-002/S001 H1–H5 results preserved below'
-          prior_completed_at: '2026-06-26'
-          prior_started_at: '2026-06-26'
-          prior_partial_rerun_at: '2026-06-26'
-          prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-          prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
-          chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
-          connectivity_validated_at: '2026-05-27'
-          prior_h0c: pass
-          prior_h1: pass
-          prior_h2: pass
-          prior_h3: pass
-          prior_h3b_browse: pass
-          prior_h3_ev002_t3: pass
-          prior_h4_do: pass
-          prior_h4_modal: waiver
-          prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
-          prior_h5: pass
-          cors_deployed: true
-          deploy_time_fixes:
-          - '98cc2ac: tag inference chat template + graceful fallback'
-          - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
-          prior_note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
-        merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-        merge:
-          status: merged
-          pr_number: 154
-          merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-          merged_at: '2026-07-29'
-        next_action: none_cycle_closed
-    deploy_checkpoint: approved
-    deploy_checkpoint_at: '2026-07-30'
-    merge_approval: pending
-    ci_head_sha: bbe9544
-    ci_status: green
-    ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
-    session_closed: true
-    session_closed_at: '2026-07-30'
-    started: '2026-08-02'
-    completed: null
-    ac_bb9_met: false
-    prod_ce: 'off'
-    deploy_path_choice: option_1_path_a
+            merge_pr_154: merged
+            h0ci_main: pass
+          next_askquestion: null
+          note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS
+            (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
+          s013_baseline:
+            status: completed
+            started_at: '2026-07-29'
+            completed_at: '2026-07-29'
+            partial_rerun_at: '2026-07-29'
+            session_id: S013-unified-job-monitoring
+            branch: evolve/EV-012-unified-job-monitoring
+            evolve_cycle_id: EV-012
+            mode: delta
+            deploy_path: A
+            head_sha: 113589139659a3508eb68340be91d93e7814ae77
+            overall_result: PASS
+            report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+            commits_ahead_of_origin: 0
+            pushed_at: '2026-07-29'
+            pr_number: 153
+            merge_gate: smokes_pass_before_merge
+            do_not_merge_pr: 153
+            merge_approval: pending_user
+            dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
+            partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api
+              from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+            path_a_progress:
+              push: done
+              ci_rewatch: pass
+              ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590
+              lint_coverage_fix: 746181b
+              iss004_branch_coverage_fix: 1135891
+              h0c_migration_check: pass
+              alembic_revision: 202607280009
+              pin_redeploy: pass
+              modal_data_management: redeployed_from_evolve_checkout
+              do_apps:
+                internal_write_api: pinned_active
+                admin_frontend: pinned_active
+              smokes: pass
+              smoke_tiers:
+                h0c: pass
+                h1: pass
+                h2: pass
+                h3: pass
+                h3b: pass
+                t3_ev002: pass
+                h4: pass
+                h5: pass
+              jobs_live:
+              - list
+              - retag_detail
+              - eval_run_detail
+              - sse
+              merge_pr_153: awaiting_user_approval
+            next_askquestion: merge_pr_153_or_hold_or_reset_pins
+            note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge
+              approval; prior EV-002/S001 H1–H5 results preserved below'
+            prior_completed_at: '2026-06-26'
+            prior_started_at: '2026-06-26'
+            prior_partial_rerun_at: '2026-06-26'
+            prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+            prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+            chat_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app
+            connectivity_validated_at: '2026-05-27'
+            prior_h0c: pass
+            prior_h1: pass
+            prior_h2: pass
+            prior_h3: pass
+            prior_h3b_browse: pass
+            prior_h3_ev002_t3: pass
+            prior_h4_do: pass
+            prior_h4_modal: waiver
+            prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
+            prior_h5: pass
+            cors_deployed: true
+            deploy_time_fixes:
+            - '98cc2ac: tag inference chat template + graceful fallback'
+            - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
+            prior_note: EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)
+          merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+          merge:
+            status: merged
+            pr_number: 154
+            merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+            merged_at: '2026-07-29'
+          next_action: none_cycle_closed
+      deploy_checkpoint: approved
+      deploy_checkpoint_at: '2026-07-30'
+      merge_approval: pending
+      ci_head_sha: bbe9544
+      ci_status: green
+      ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
+      session_closed: true
+      session_closed_at: '2026-07-30'
+      started: '2026-08-02'
+      completed: null
+      ac_bb9_met: false
+      prod_ce: 'off'
+      deploy_path_choice: option_1_path_a
+    phase_1_5: *id004
+    h0c: *id005
+    report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+    report_status: in_progress
+    deploy_gate: pending
+    commits_pending: true
+    commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent
+      commit SHAs
   14-hotfix:
     status: completed
     started_at: '2026-07-31'
@@ -19447,12 +19592,14 @@ evolve_cycles:
     Prod VECINITA_RAG_RERANK_CE stays false until re-gate passes. Predecessor EV-017 @ f24a620.
 
     '
-  current_stage: 12-verify-deploy
+  current_stage: 13-deploy-smoke
   current_stage_parallel: null
-  current_action: 12_awaiting_phase2_3
-  next_action: user approve mitigations+rollback then 13-deploy-smoke
+  current_action: 13_awaiting_deploy_execution_approval
+  next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
   commits_pending: true
-  current_stage_note: S021/EV-018 Phase D 2026-08-02 — 12 checklist drafted Phase 1 PASS; awaiting Phase 2+3 approval; current_action=12_awaiting_phase2_3; CE flag false; commits_pending=true
+  current_stage_note: S021/EV-018 Phase D/13 2026-08-02 — 12-verify-deploy COMPLETE (S021-D26); 13-deploy-smoke in_progress
+    Phase 1.5 current_action=13_awaiting_deploy_execution_approval; H0c PASS (pytest tests/unit/test_cors_policy.py); deploy
+    checkpoint/gates.deploy remain pending; commits_pending=true
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -19584,13 +19731,14 @@ evolve_cycles:
       t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
       t99_5_status: completed
       t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
-      m99_status: completed
       report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
       s021_d19_decision: S021-D19
       note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
-        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+        S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+        08-verify-build; commits_pending=true
       substeps:
         current_task: null
         task_status: completed
@@ -19624,7 +19772,8 @@ evolve_cycles:
         t99_4_completed_at: '2026-08-02'
         t99_4_waiver: S021-D23
         t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
-        t99_4_note: COMPLETED — S021-D23 waive local TC-185 (CI-gated); TC-186 PASS; bug 2/2 PASS; report t99-4-e2e-closeout.md
+        t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared;
+          local Docker/Postgres compose required; T99.3 completed; T99.5 pending
         t99_5_status: completed
         t99_5_completed_at: '2026-08-02'
         t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
@@ -19650,7 +19799,6 @@ evolve_cycles:
         path_b_completed: true
         path_b_completed_at: '2026-08-02'
         t99_3_status: completed
-        t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never appeared; local Docker/Postgres compose required; T99.3 completed; T99.5 pending
         rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
         path_b_results:
           rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
@@ -19674,7 +19822,9 @@ evolve_cycles:
       partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87;
         promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
         filed+resolved; guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; current_action=09_10_in_progress;
-        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
+        S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375);
+        S021-D24 AC-BB9 PASS keep CE flag false until 12/13; T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run
+        08-verify-build; commits_pending=true
       s021_d20_decision: S021-D20
       s021_d20_decision_recorded: true
       root_cause: embed↔corpus pin drift
@@ -19728,7 +19878,8 @@ evolve_cycles:
       session_id: S021-retrieval-follow-on
       evolve_cycle_id: EV-018
       report: docs/sessions/S021-retrieval-follow-on/reports/verification-report.md
-      note: PASS — check-fast, format-check, corpus guard, scoped pytest; TC-185 skip S021-D23; CE ship_gate S021-D24; Phase D next
+      note: PASS — check-fast, format-check, corpus guard, scoped pytest; TC-185 skip S021-D23; CE ship_gate S021-D24; Phase
+        D next
     09-qa:
       status: completed
       started: '2026-08-02'
@@ -19774,27 +19925,56 @@ evolve_cycles:
       report: docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md
       note: COMPLETE — S021-D25 user option 1 Approve F46+F45 → 12-verify-deploy
     12-verify-deploy:
+      status: completed
+      started: '2026-08-02'
+      started_at: '2026-08-02'
+      completed: '2026-08-02'
+      completed_at: '2026-08-02'
+      mode: delta
+      session_id: S021-retrieval-follow-on
+      evolve_cycle_id: EV-018
+      current_action: completed
+      next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+      phase_1: pass
+      phase_2: approved
+      phase_3: approved
+      report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+      report_status: approved
+      standing_checklist: docs/deploy-checklist.md
+      prior_checklist: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
+      prod_ce: false
+      path_a_ce_note: VECINITA_RAG_RERANK_CE remains false (S021-D24 hold; AC-BB9 PASS ≠ enable); Path A ship with CE false
+      decision: S021-D26
+      user_choice: option_1_approve_mitigations_and_rollback
+      deploy_path: A
+      deploy_ready: true
+      overall: approved
+      user_approvals:
+        failure_mitigations: option_1_approved
+        rollback_plan: option_1_approved
+      note: S021/EV-018 12-verify-deploy COMPLETE 2026-08-02 — S021-D26 option_1_approve_mitigations_and_rollback; deploy-checklist
+        approved; CE false; handoff → 13 Phase 1.5
+    13-deploy-smoke:
       status: in_progress
       started: '2026-08-02'
       started_at: '2026-08-02'
       mode: delta
       session_id: S021-retrieval-follow-on
       evolve_cycle_id: EV-018
-      current_action: 12_awaiting_phase2_3
-      next_action: user approve mitigations+rollback then 13-deploy-smoke
-      phase_1: pass
-      phase_2: pending_user_approval
-      phase_3: pending_user_approval
-      report: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
-      report_status: drafted
-      standing_checklist: docs/deploy-checklist.md
-      prior_checklist: docs/sessions/S020-retrieval-batch-b/reports/deploy-checklist.md
+      current_action: 13_awaiting_deploy_execution_approval
+      next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+      deploy_path: A
       prod_ce: false
-      path_a_ce_note: VECINITA_RAG_RERANK_CE must stay false until explicit Path A CE flag approval at 12/13 (S021-D7/D24/D25)
-      decision: S021-D25
-      note: Checklist drafted; Phase 1 PASS; awaiting Phase 2 (failure mitigations) + Phase 3 (rollback) user approval; do not mark completed / start 13 yet
-    13-deploy-smoke:
-      status: pending
+      decision: S021-D26
+      note: S021/EV-018 13-deploy-smoke Phase 1.5 STARTED 2026-08-02 — awaiting deploy execution approval; H0c PASS (pytest
+        tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending; commits_pending=true
+      phase_1_5: *id004
+      h0c: *id005
+      report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+      report_status: in_progress
+      path_a_ce_note: VECINITA_RAG_RERANK_CE=false (S021-D24 hold; S021-D26 Path A with CE false)
+      deploy_gate: pending
+      overall_result: null
   gates:
     phase_0: passed
     a_to_b: passed
@@ -19806,12 +19986,14 @@ evolve_cycles:
     phase_a: passed
     phase_b: passed
     phase_c: passed
-    phase_d: in_progress
+    phase_d: passed
     deploy: pending
   checkpoint_notes:
     phase_b: 'Passed 2026-08-02 — user approved option 1 (S021-D19): Pass Gate B→C, start 07-build at T99.1; Phase 23 M99–M100'
-    phase_c: 'Passed 2026-08-02 — 08-verify-build PASS (S021/EV-018); Phase D next (09-qa / 10-e2e)'
-    phase_d: 'In progress 2026-08-02 — 12 checklist Phase 1 PASS; awaiting Phase 2+3 approval (12_awaiting_phase2_3); CE flag false'
+    phase_c: Passed 2026-08-02 — 08-verify-build PASS (S021/EV-018); Phase D next (09-qa / 10-e2e)
+    phase_d: Passed 2026-08-02 — 09–12 complete; S021-D26 Phase 2+3 approved; handoff 13-deploy-smoke Path A (CE false); deploy
+      checkpoint still pending
+    deploy: Pending until 13-deploy-smoke Path A push/PR/merge/redeploy + H1–H5 pass (Phase 1.5 awaiting execution approval)
   intake_decisions:
   - id: S021-D8
     topic: fn_allocation
@@ -19882,6 +20064,14 @@ evolve_cycles:
       MCP unavailable this turn; user approved via chat: "Proceed with Path B full E0 rebuild + BUG/guard (recommended) —
       re-embed all docs; file BUG; harden attach_embeddings"'
     status: approved
+  - id: S021-D26
+    topic: 12_phase_2_3_mitigations_rollback
+    choice: option_1_approve_mitigations_and_rollback
+    note: Approve both failure mitigations (12 Phase 2) AND rollback plan (12 Phase 3); ready for 13-deploy-smoke Path A with
+      VECINITA_RAG_RERANK_CE=false (S021-D24 hold)
+    status: approved
+    recorded_at: '2026-08-02T19:14:04Z'
+    stage: 12-verify-deploy
   decisions:
   - S021-D1
   - S021-D2
@@ -19934,6 +20124,16 @@ evolve_cycles:
     execution_note: COMPLETED — Path B full E0 rebuild + BUG + guard (S021-D22); run a0e8f32d-7e2e-4012-960c-2e956ceeba87;
       49 docs / 213 chunks; probe empty@0.2=0/8; rifreeclinic cosine=1.0; onehot_like=0
     rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
+  - id: S021-D26
+    topic: 12_phase_2_3_mitigations_rollback
+    choice: option_1_approve_mitigations_and_rollback
+    note: 12 Phase 2+3 approved — failure mitigations + rollback; Path A with CE false; start 13-deploy-smoke
+    status: approved
+    recorded_at: '2026-08-02T19:14:04Z'
+    stage: 12-verify-deploy
+    user_choice: option_1_approve_mitigations_and_rollback
+    ship_path: A
+    prod_ce: false
   rd_allocated:
     range: RD-209..RD-218
     decisions:
@@ -19953,9 +20153,12 @@ evolve_cycles:
     stage: 02-verify-plan
     note: 02-verify-plan audit COMPLETE — M1–M4 approved (S021-D17); Gate A→B PASS
   - path: docs/sessions/S021-retrieval-follow-on/routing-plan.md
-    status: completed
-    stage: 04-tech-plan
-    note: 04-tech-plan TP delivery complete; Gate B→C PASS (S021-D19); 07-build started
+    status: updated
+    stage: 13-deploy-smoke
+    note: routing-plan.md updated for 13 Phase 1.5 / Path A CE false
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    recorded_at: '2026-08-02T19:17:09Z'
   - path: docs/sessions/S021-retrieval-follow-on/reports/tech-plan-delta.md
     status: completed
     stage: 04-tech-plan
@@ -20031,6 +20234,28 @@ evolve_cycles:
     decision: S021-D22
     task: T99.3
     note: Path B full E0 re-embed script used for T99.3
+  - path: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+    status: approved
+    stage: 12-verify-deploy
+    note: S021-D26 — deploy-checklist approved (12 closeout)
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    recorded_at: '2026-08-02T19:17:09Z'
+  - path: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+    status: in_progress
+    stage: 13-deploy-smoke
+    note: deploy-smoke.md drafted (Phase 1.5); awaiting Path A execution approval
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    recorded_at: '2026-08-02T19:17:09Z'
+  - path: docs/sessions/S021-retrieval-follow-on/evolve-decisions.md
+    status: updated
+    stage: 12-verify-deploy
+    note: evolve-decisions.md records S021-D26 (12 Phase 2+3)
+    decision: S021-D26
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    recorded_at: '2026-08-02T19:17:09Z'
   rebuild_started: true
   path_b_approved: true
   path_b_approved_at: '2026-08-02'
@@ -20038,7 +20263,11 @@ evolve_cycles:
   s021_d22_decision: S021-D22
   s021_d22_decision_recorded: true
   s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user approved)
-  next_action: run 09-qa + 10-e2e for EV-018 delta
+  s021_d26_decision: S021-D26
+  s021_d26_decision_recorded: true
+  s021_d26: 12 Phase 2+3 approved — failure mitigations + rollback; Path A with CE false; start 13-deploy-smoke
+  deploy_path: A
+  deploy_path_choice: option_1_path_a
   t99_4_status: completed
   t99_4_blocker: null
   t99_4_waiver: S021-D23
@@ -20078,10 +20307,8 @@ evolve_cycles:
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_pending: true
-  commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — commits_pending=trueed
-  commits_pending: true
-  commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — commits_pending=true
+  commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent commit
+    SHAs
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -21182,39 +21409,57 @@ decisions_log:
   skill: 12-verify-deploy
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
-  decision: 12-verify-deploy Phase 1 PASS — checklist drafted; awaiting Phase 2 (failure mitigations) + Phase 3 (rollback) approval
+  decision: S021-D26 — option_1_approve_mitigations_and_rollback; 12 Phase 2+3 approved; start 13-deploy-smoke Path A with
+    CE false
+  recorded_at: '2026-08-02T19:14:04Z'
+  note: report docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md; phase_2=approved; phase_3=approved; current_action=13_start_path_a;
+    VECINITA_RAG_RERANK_CE=false (S021-D24 hold); gates.deploy/checkpoints.deploy pending; parent should append S021-D26 to
+    docs/decisions/evolve-decisions.md §EV-018
+- date: '2026-08-02'
+  skill: 12-verify-deploy
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: 12-verify-deploy Phase 1 PASS — checklist drafted; awaiting Phase 2 (failure mitigations) + Phase 3 (rollback)
+    approval
   recorded_at: '2026-08-02T19:08:01Z'
-  note: report docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md; current_action=12_awaiting_phase2_3; next_action=user approve mitigations+rollback then 13-deploy-smoke; S021-D25 already recorded; CE flag remains false; do not mark 12 completed yet
+  note: report docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md; current_action=12_awaiting_phase2_3; next_action=user
+    approve mitigations+rollback then 13-deploy-smoke; S021-D25 already recorded; CE flag remains false; do not mark 12 completed
+    yet
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
   decision: S021-D25 — user option 1 Approve F46 + F45; 11-verify-impl COMPLETE; start 12-verify-deploy
   recorded_at: '2026-08-02T19:06:54Z'
-  note: report docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md; HEAD 60664b7; prod_ce=false / VECINITA_RAG_RERANK_CE stays off until explicit Path A CE approval; phase_d in_progress; commits_pending=true; next_action=run 12-verify-deploy checklist
+  note: report docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md; HEAD 60664b7; prod_ce=false / VECINITA_RAG_RERANK_CE
+    stays off until explicit Path A CE approval; phase_d in_progress; commits_pending=true; next_action=run 12-verify-deploy
+    checklist
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
   decision: Phase D 09-qa + 10-e2e COMPLETE; 11-verify-impl awaiting user F46/F45 approval
   recorded_at: '2026-08-02T19:05:34Z'
-  note: 09 pass_with_advisories (docs/sessions/S021-retrieval-follow-on/reports/qa-report.md); 10 PASS 11/1 skip UJ-060 PASS (docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md); current_action=11_awaiting_user_approval; phase_d in_progress; commits_pending=true
+  note: 09 pass_with_advisories (docs/sessions/S021-retrieval-follow-on/reports/qa-report.md); 10 PASS 11/1 skip UJ-060 PASS
+    (docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md); current_action=11_awaiting_user_approval; phase_d in_progress;
+    commits_pending=true
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
   decision: User Continue — Phase D parallel 09-qa + 10-e2e for EV-018 delta
   recorded_at: '2026-08-02T19:01:41Z'
-  note: current_action=09_10_in_progress; recorded commits 1f2930d + 1b46507; HEAD 1b46507; expected reports qa-report.md + e2e-report.md
+  note: current_action=09_10_in_progress; recorded commits 1f2930d + 1b46507; HEAD 1b46507; expected reports qa-report.md
+    + e2e-report.md
 - date: '2026-08-02'
   skill: 08-verify-build
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
-  decision: 08-verify-build PASS — make check-fast, ruff format --check, corpus guard, scoped pytest PASS;
-    TC-185 skip local per S021-D23; CE ship_gate already PASS (S021-D24)
+  decision: 08-verify-build PASS — make check-fast, ruff format --check, corpus guard, scoped pytest PASS; TC-185 skip local
+    per S021-D23; CE ship_gate already PASS (S021-D24)
   recorded_at: '2026-08-02T19:00:00Z'
-  note: report docs/sessions/S021-retrieval-follow-on/reports/verification-report.md; current_action=09_10_in_progress; next_action=Phase D start 09-qa (+10-e2e parallel when user continues);
-    checkpoints.phase_c=passed; commits_pending=true
+  note: report docs/sessions/S021-retrieval-follow-on/reports/verification-report.md; current_action=09_10_in_progress; next_action=Phase
+    D start 09-qa (+10-e2e parallel when user continues); checkpoints.phase_c=passed; commits_pending=true
 - date: '2026-08-02'
   skill: 08-verify-build
   session_id: S021-retrieval-follow-on
@@ -21226,8 +21471,8 @@ decisions_log:
   skill: 07-build
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
-  decision: S021-D24 — AC-BB9 PASS (ship_gate_pass=true; CE+P1 relevancy=0.7778 faith=0.9375);
-    keep VECINITA_RAG_RERANK_CE false until 12/13 deploy approval; T100.1–T100.4 complete; M100 complete
+  decision: S021-D24 — AC-BB9 PASS (ship_gate_pass=true; CE+P1 relevancy=0.7778 faith=0.9375); keep VECINITA_RAG_RERANK_CE
+    false until 12/13 deploy approval; T100.1–T100.4 complete; M100 complete
   recorded_at: '2026-08-02T18:55:06Z'
   note: JSON spike-f45-ce-ship-gate.json; reports t100-1/ce-ship-gate/phase23-gate/t100-4; 07-build complete → 08-verify-build;
     commits_pending=true
@@ -21242,20 +21487,20 @@ decisions_log:
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
-  decision: S021-D23 — Skip Docker Desktop; waive local TC-185 (CI-gated / skip-without-postgres);
-    complete T99.4 on TC-186 + bug PASS; T99.5 docs closeout; advance pointer to T100.1 (do not start CE ops yet)
+  decision: S021-D23 — Skip Docker Desktop; waive local TC-185 (CI-gated / skip-without-postgres); complete T99.4 on TC-186
+    + bug PASS; T99.5 docs closeout; advance pointer to T100.1 (do not start CE ops yet)
   recorded_at: '2026-08-02T18:46:18Z'
-  note: User directive "Skip docker desktop"; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; M99 completed;
-    current_action=09_10_in_progress; commits_pending=true until doc deltas committed
+  note: User directive "Skip docker desktop"; reports t99-4-e2e-closeout.md + t99-5-f46-closeout.md; M99 completed; current_action=09_10_in_progress;
+    commits_pending=true until doc deltas committed
 - date: '2026-08-02'
   skill: 07-build
   session_id: S021-retrieval-follow-on
   evolve_cycle_id: EV-018
-  decision: T99.4 blocked — TC-186 PASS, bug tests 2/2 PASS, TC-185 SKIPPED (Postgres unavailable); Docker Desktop
-    processes present but docker.sock never appeared (~3min); port 5432 closed
+  decision: T99.4 blocked — TC-186 PASS, bug tests 2/2 PASS, TC-185 SKIPPED (Postgres unavailable); Docker Desktop processes
+    present but docker.sock never appeared (~3min); port 5432 closed
   recorded_at: '2026-08-02T18:26:00Z'
-  note: current_action=09_10_in_progress; do NOT mark T99.4 completed; await healthy Docker sock +
-    with_local_postgres pytest for UJ-061; state sync @ ab1006f (commits_pending=true)
+  note: current_action=09_10_in_progress; do NOT mark T99.4 completed; await healthy Docker sock + with_local_postgres pytest
+    for UJ-061; state sync @ ab1006f (commits_pending=true)
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S021-retrieval-follow-on
@@ -23523,12 +23768,18 @@ decisions_log:
   / 213 chunks BAAI/bge-small-en-v1.5; probe empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe
   filed+resolved; guard attach_embeddings+clear_embeddings+CI; report docs/sessions/S021-retrieval-follow-on/reports/t99-3-path-b-rebuild.md;
   commits @ c447577 + be74777; T99.4 in_progress — e2e green closeout; T99.5 pending'
-- '2026-08-02T18:20:43Z S021/EV-018: commits c447577 + be74777 recorded; commits_pending=true; T99.4 in_progress
-  (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending'
-- '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — TC-186 PASS; bug 2/2 PASS; TC-185 SKIPPED (Postgres);
-  Docker sock missing / 5432 closed; await user Docker Desktop; T99.4 NOT completed; commits_pending=true'
-- '2026-08-02T18:46:18Z S021/EV-018: S021-D23 Skip Docker Desktop — T99.4 COMPLETE (TC-186+bug PASS; TC-185 CI-gated); T99.5 COMPLETE; M99 COMPLETE; pointer T100.1 pending (no CE ops yet); commits_pending=true'
-- '2026-08-02T18:55:06Z S021/EV-018: S021-D24 AC-BB9 PASS ship_gate_pass=true CE+P1 0.7778/0.9375; T100.1–T100.4 COMPLETE; M100 COMPLETE; 07→08; CE flag remains false; commits_pending=true'
+- '2026-08-02T18:20:43Z S021/EV-018: commits c447577 + be74777 recorded; commits_pending=true; T99.4 in_progress (TC-185/186
+  UJ-061 + bug regression); T99.3 completed; T99.5 pending'
+- '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — TC-186 PASS; bug 2/2 PASS; TC-185 SKIPPED (Postgres); Docker sock
+  missing / 5432 closed; await user Docker Desktop; T99.4 NOT completed; commits_pending=true'
+- '2026-08-02T18:46:18Z S021/EV-018: S021-D23 Skip Docker Desktop — T99.4 COMPLETE (TC-186+bug PASS; TC-185 CI-gated); T99.5
+  COMPLETE; M99 COMPLETE; pointer T100.1 pending (no CE ops yet); commits_pending=true'
+- '2026-08-02T18:55:06Z S021/EV-018: S021-D24 AC-BB9 PASS ship_gate_pass=true CE+P1 0.7778/0.9375; T100.1–T100.4 COMPLETE;
+  M100 COMPLETE; 07→08; CE flag remains false; commits_pending=true'
+- '2026-08-02T19:17:09Z S021/EV-018: 12 closeout docs refreshed (deploy-checklist approved; evolve-decisions S021-D26; routing-plan
+  updated); 13 Phase 1.5 start — current_action=13_awaiting_deploy_execution_approval; H0c PASS (pytest tests/unit/test_cors_policy.py);
+  next_action=AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5; gates.deploy/checkpoints.deploy
+  remain pending; commits_pending=true (no invented SHAs)'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
@@ -25479,6 +25730,44 @@ artifacts:
   decision: S021-D22
   task: T99.3
   note: Path B full E0 re-embed script used for T99.3
+- path: docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+  kind: deploy-checklist
+  status: approved
+  stage: 12-verify-deploy
+  skill_id: 12-verify-deploy
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: S021-D26
+  note: S021-D26 — deploy-checklist approved (12 closeout)
+  recorded_at: '2026-08-02T19:17:09Z'
+- path: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+  kind: deploy-smoke-report
+  status: in_progress
+  stage: 13-deploy-smoke
+  skill_id: 13-deploy-smoke
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  note: deploy-smoke.md drafted (Phase 1.5); awaiting Path A execution approval
+  recorded_at: '2026-08-02T19:17:09Z'
+- path: docs/sessions/S021-retrieval-follow-on/routing-plan.md
+  kind: routing-plan
+  status: updated
+  stage: 13-deploy-smoke
+  skill_id: 13-deploy-smoke
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  note: routing-plan.md updated for 13 Phase 1.5
+  recorded_at: '2026-08-02T19:17:09Z'
+- path: docs/sessions/S021-retrieval-follow-on/evolve-decisions.md
+  kind: evolve-decisions
+  status: updated
+  stage: 12-verify-deploy
+  skill_id: 12-verify-deploy
+  session_id: S021-retrieval-follow-on
+  evolve_cycle_id: EV-018
+  decision: S021-D26
+  note: evolve-decisions.md has S021-D26
+  recorded_at: '2026-08-02T19:17:09Z'
 git_history:
   current_branch: evolve/EV-018-retrieval-follow-on
   branches:
@@ -28091,15 +28380,15 @@ git_history:
     files:
     - docs/acceptance-criteria.md
     - docs/decisions/evolve-decisions.md
-    - .../S000-internal-docs-archive/execution-plan.md
-    - .../S020-retrieval-batch-b/reports/ce-ship-gate.md
-    - .../reports/spike-f45-ce-ship-gate.json
-    - .../reports/ce-ship-gate.md
-    - .../reports/phase23-gate.md
-    - .../reports/spike-f45-ce-ship-gate.json
-    - .../reports/t100-1-ce-ship-gate.md
-    - .../reports/t100-4-ce-default-off.md
-    - .../S021-retrieval-follow-on/routing-plan.md
+    - '.../S000-internal-docs-archive/execution-plan.md'
+    - '.../S020-retrieval-batch-b/reports/ce-ship-gate.md'
+    - '.../reports/spike-f45-ce-ship-gate.json'
+    - '.../reports/ce-ship-gate.md'
+    - '.../reports/phase23-gate.md'
+    - '.../reports/spike-f45-ce-ship-gate.json'
+    - '.../reports/t100-1-ce-ship-gate.md'
+    - '.../reports/t100-4-ce-default-off.md'
+    - '.../S021-retrieval-follow-on/routing-plan.md'
     - workflow-state.yaml
     skill_ids:
     - 16-evolve
@@ -28115,9 +28404,9 @@ git_history:
     timestamp: '2026-08-02T19:01:05Z'
     note: 08-verify-build PASS docs; Phase C complete
     files:
-    - .../S000-internal-docs-archive/execution-plan.md
-    - .../reports/verification-report.md
-    - .../S021-retrieval-follow-on/routing-plan.md
+    - '.../S000-internal-docs-archive/execution-plan.md'
+    - '.../reports/verification-report.md'
+    - '.../S021-retrieval-follow-on/routing-plan.md'
     - workflow-state.yaml
     skill_ids:
     - 16-evolve
@@ -28148,10 +28437,10 @@ git_history:
     timestamp: '2026-08-02T19:04:55Z'
     note: Phase D 09+10 PASS docs; start 11-verify-impl; S021-D25 follows user approve → 12
     files:
-    - .../S021-retrieval-follow-on/reports/e2e-report.md
-    - .../S021-retrieval-follow-on/reports/qa-report.md
-    - .../reports/verify-impl.md
-    - .../S021-retrieval-follow-on/routing-plan.md
+    - '.../S021-retrieval-follow-on/reports/e2e-report.md'
+    - '.../S021-retrieval-follow-on/reports/qa-report.md'
+    - '.../reports/verify-impl.md'
+    - '.../S021-retrieval-follow-on/routing-plan.md'
     - workflow-state.yaml
     skill_ids:
     - 16-evolve
@@ -28234,17 +28523,29 @@ git_history:
     skill_ids:
     - 09-qa
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30755836677
-  - '2026-08-02T19:08:01Z S021/EV-018: 12-verify-deploy checklist drafted Phase 1 PASS; awaiting Phase 2+3 (12_awaiting_phase2_3); S021-D25 present; CE flag false.'
-  - '2026-08-02T19:06:54Z S021/EV-018: S021-D25 Approve F46+F45; recorded 60664b7; 11 COMPLETE; 12-verify-deploy in_progress; CE flag remains false until Path A CE approval.'
-  - '2026-08-02T19:05:34Z S021/EV-018: 09-qa pass_with_advisories + 10-e2e PASS; 11-verify-impl in_progress (awaiting user approval); phase_d in_progress; commits_pending=true.'
-  - '2026-08-02T19:01:41Z S021/EV-018: Phase D start — recorded 1f2930d + 1b46507; 09-qa + 10-e2e in_progress (parallel); next_action=run 09-qa + 10-e2e for EV-018 delta.'
-  - '2026-08-02T19:00:00Z S021/EV-018: 08-verify-build PASS — report verification-report.md; phase_c=passed; next Phase D 09-qa (+10-e2e); commits_pending=true.'
+  - '2026-08-02T19:08:01Z S021/EV-018: 12-verify-deploy checklist drafted Phase 1 PASS; awaiting Phase 2+3 (12_awaiting_phase2_3);
+    S021-D25 present; CE flag false.'
+  - '2026-08-02T19:06:54Z S021/EV-018: S021-D25 Approve F46+F45; recorded 60664b7; 11 COMPLETE; 12-verify-deploy in_progress;
+    CE flag remains false until Path A CE approval.'
+  - '2026-08-02T19:05:34Z S021/EV-018: 09-qa pass_with_advisories + 10-e2e PASS; 11-verify-impl in_progress (awaiting user
+    approval); phase_d in_progress; commits_pending=true.'
+  - '2026-08-02T19:01:41Z S021/EV-018: Phase D start — recorded 1f2930d + 1b46507; 09-qa + 10-e2e in_progress (parallel);
+    next_action=run 09-qa + 10-e2e for EV-018 delta.'
+  - '2026-08-02T19:00:00Z S021/EV-018: 08-verify-build PASS — report verification-report.md; phase_c=passed; next Phase D
+    09-qa (+10-e2e); commits_pending=true.'
   - '2026-08-02T18:56:00Z S021/EV-018: recorded e4aa5fe; commits_pending=true; 08-verify-build in_progress.'
-  - '2026-08-02T18:55:06Z S021/EV-018: 07-build M99+M100 COMPLETE — S021-D24 AC-BB9 PASS; T100.1–T100.4 done; current_stage→08-verify-build; commits_pending=true.'
-  - '2026-08-02T18:49:00Z S021/EV-018: T100.1 in_progress — user Proceed; CE spike harness bge-reranker-v2-m3 Modal T4 after UJ-061.'
-  - '2026-08-02T18:46:18Z S021/EV-018: M99 COMPLETE — S021-D23; T99.4+T99.5 done; current_task=T100.1 07_t100_1_pending; commits_pending=true (doc deltas).'
-  - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — guard OK; bug 2/2 PASS; TC-186 PASS; TC-185 SKIPPED (no Postgres); Docker sock missing; next=user start Docker Desktop then with_local_postgres; T99.4 NOT completed; commits_pending=true (state sync dirty).'
-  - '2026-08-02T18:20:43Z S021/EV-018: synced 07-build — commits c447577 + be74777 recorded; commits_pending=true; current_task=T99.4 in_progress; current_action=09_10_in_progress; next_action=run e2e green closeout (TC-185/186 UJ-061 + bug regression); T99.3 completed; T99.5 pending.'
+  - '2026-08-02T18:55:06Z S021/EV-018: 07-build M99+M100 COMPLETE — S021-D24 AC-BB9 PASS; T100.1–T100.4 done; current_stage→08-verify-build;
+    commits_pending=true.'
+  - '2026-08-02T18:49:00Z S021/EV-018: T100.1 in_progress — user Proceed; CE spike harness bge-reranker-v2-m3 Modal T4 after
+    UJ-061.'
+  - '2026-08-02T18:46:18Z S021/EV-018: M99 COMPLETE — S021-D23; T99.4+T99.5 done; current_task=T100.1 07_t100_1_pending; commits_pending=true
+    (doc deltas).'
+  - '2026-08-02T18:26:00Z S021/EV-018: T99.4 blocked_docker — guard OK; bug 2/2 PASS; TC-186 PASS; TC-185 SKIPPED (no Postgres);
+    Docker sock missing; next=user start Docker Desktop then with_local_postgres; T99.4 NOT completed; commits_pending=true
+    (state sync dirty).'
+  - '2026-08-02T18:20:43Z S021/EV-018: synced 07-build — commits c447577 + be74777 recorded; commits_pending=true; current_task=T99.4
+    in_progress; current_action=09_10_in_progress; next_action=run e2e green closeout (TC-185/186 UJ-061 + bug regression);
+    T99.3 completed; T99.5 pending.'
   - '2026-08-02T15:34:08Z S020/EV-017: synced 07-build — T98.1–T98.4 COMPLETE @ 59edd12; M98 COMPLETE; Phase 22 M94–M98 ALL
     COMPLETE; current_stage=07-build (completed); next_action=08-verify-build (deferred until before Phase C PR); 08 NOT started;
     checkpoints.phase_c still pending; appended commits d2e9043/8b81a42/21b52dc/59edd12; folded prior uncommitted M97/T98.1

@@ -12,8 +12,8 @@
 | 09-qa | yes | completed | — | pass_with_advisories — `reports/qa-report.md` |
 | 10-e2e | yes | completed | — | PASS — `reports/e2e-report.md` |
 | 11-verify-impl | yes | completed | — | approved S021-D25 — `reports/verify-impl.md` |
-| 12-verify-deploy | yes | in_progress | — | checklist drafted — Phase 2/3 sign-off |
-| 13-deploy-smoke | yes | pending | — | |
+| 12-verify-deploy | yes | completed | — | Phase 2+3 approved S021-D26 — `reports/deploy-checklist.md` |
+| 13-deploy-smoke | yes | in_progress | — | Path A; CE false; H0c PASS |
 
 ## Skipped
 
