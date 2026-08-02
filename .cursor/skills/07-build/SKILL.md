@@ -95,6 +95,19 @@ Execution State:
 - Support multiple Fn in one branch (`evolve/{cycle-id}-{slug}`).
 - PR title/body references evolve cycle and feature IDs.
 
+### Mid-build staging / corpus incidents (RET-001 RA-007)
+
+If build discovers a **staging data** incident (wiped embeddings, empty retrieve pools, bad
+promote):
+
+1. File `docs/bug-reports/BUG-YYYY-MM-DD-[slug].md` + repro under `tests/bugs/` (always).
+2. **Default:** keep the fix in this evolve/07 branch (Path B rebuild, guards) — do **not**
+   open a nested **14-hotfix** session unless the user asks or the fix is a trivial one-liner
+   after cycle close (see [14-hotfix](../14-hotfix/SKILL.md) §Ownership).
+3. Checklist: corpus-db-safety skill · never source staging `DATABASE_URL` into pytest ·
+   prefer read-only probes · full re-embed/promote only with explicit approval.
+4. Record the decision id (e.g. S021-D22) in evolve-decisions.
+
 ## Workflow
 
 ### Phase 1 Scaffold (Template Projects)
@@ -283,6 +296,7 @@ repeat post-deploy surprises (RET-001).
 6. **State always current**: Execution plan reflects true progress at all times
 7. **Verify before PR**: Always invoke 08-verify-build at boundaries
 8. **Maximize per pass**: Complete many tasks and milestones per invocation
+9. **Corpus incidents**: BUG report + stay in 07 by default (RA-007); see Delta § above
 
 ## Continue
 

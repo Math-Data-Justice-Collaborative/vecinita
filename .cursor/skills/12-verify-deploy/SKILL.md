@@ -256,6 +256,10 @@ Next step: 13-deploy-smoke
 3. **Rollback is required**: Every deployment must have a documented rollback procedure.
 4. **User approves risks**: Every accepted risk requires explicit user acknowledgment.
 5. **Checklist persists**: The deploy checklist is a reusable artifact for future deploys.
+6. **Metrics PASS ≠ flag enable** (RET-001 RA-006): Acceptance / ship-gate metrics (e.g. AC-BB9
+   CE floors) do **not** authorize flipping a kill-switch env (e.g. `VECINITA_RAG_RERANK_CE`).
+   Checklist and AskQuestion must keep **evidence PASS** separate from **explicit Path A flag
+   approval**. Default ship may keep the flag off.
 
 ## Continue
 

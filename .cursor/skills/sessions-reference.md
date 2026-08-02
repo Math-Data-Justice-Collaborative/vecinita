@@ -50,6 +50,7 @@ docs/sessions/
   S042-live-e2e/
     session-brief.md                # intent, type, scope, branch, links
     routing-plan.md                 # approved stage list + skip rationale
+    HANDOFF.md                      # rolling mid-cycle digest (ADR-043) — overwrite at safe-stops
     context-brief.md                # 00-context output (when 00 ran)
     roadmap.md                      # GitHub issue decomposition + dependency diagrams (after 04-tech-plan)
     reports/                        # stage outputs for this session
@@ -61,6 +62,10 @@ docs/sessions/
     checkpoints/                    # phase gate digests + stage handoffs
       01-requirements-seed.md       # mandatory 00→01 bridge when 01 is in routing plan
 ```
+
+**`HANDOFF.md` (ADR-043 / RET-001):** Short rolling status for new-chat resume. Overwrite at
+safe-stops and on 00/16 resume. Suggested sections: Current stage/action · Branch/SHA · Next
+AskQuestion or stage · Material flags · Links to latest reports. Keep under ~40 lines.
 
 **00→01 handoff:** When the routing plan includes `01-requirements`, **00-context Phase 4.5**
 writes `checkpoints/01-requirements-seed.md` and links it from `session-brief.md` +
