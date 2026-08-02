@@ -1904,7 +1904,7 @@ unit tests TC-170–172.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T94.1 | Test: unit — exact answer hit skips generate (TC-176) — red | Test | pending | AC-BB1, TC-176, ADR-042 | — | — | S020 | F43 |
+| T94.1 | Test: unit — exact answer hit skips generate (TC-176) — red | Test | completed | AC-BB1, TC-176, ADR-042 | — | 2026-08-02 | S020 | F43 |
 | T94.2 | Test: unit — semantic threshold 0.92 miss vs hit (TC-177) — red | Test | pending | AC-BB2, TC-177, S020-D15 | — | — | S020 | F43 |
 | T94.3 | Test: unit — TTL / max_entries / corpus bust (TC-178) — red | Test | pending | AC-BB3, TC-178, RD-200 | — | — | S020 | F43 |
 | T94.4 | Code: normalize + content-hash keys + LRU store + cascade lookup/store | Code | pending | ADR-042, config-spec | T94.1–T94.3 | — | S020 | F43 |
@@ -2666,7 +2666,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T90.3 | M90 | 20 | Test | completed | T89.6 | 2026-07-30 | S017 | F41 | — |
 | T90.4 | M90 | 20 | Test | completed | T89.3 | 2026-07-30 | S017 | F41 | — |
 | T90.5 | M90 | 20 | Docs | completed | T90.1–T90.4 | 2026-07-30 | S017 | F41 | — |
-| T94.1 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
+| T94.1 | M94 | 22 | Test | completed | — | 2026-08-02 | S020 | F43 | — |
 | T94.2 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
 | T94.3 | M94 | 22 | Test | pending | — | — | S020 | F43 | — |
 | T94.4 | M94 | 22 | Code | pending | T94.1–T94.3 | — | S020 | F43 | — |
