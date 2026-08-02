@@ -1,29 +1,27 @@
 # HANDOFF — S022-ingest-resilience
 
 > ADR-043 rolling digest · overwrite at safe-stops  
-> **Updated:** 2026-08-02 — Phase 24 M101–M104 build complete; next 08-verify-build
+> **Updated:** 2026-08-02 — Phase C verify PASS; await checkpoint → 09+10
 
 | Field | Value |
 |-------|--------|
 | Session | `S022-ingest-resilience` **in_progress** |
 | Evolve | `EV-019` **in_progress** — F47–F49 |
-| Branch | `evolve/EV-019-ingest-resilience` |
-| Stage / action | **07-build** done → **08-verify-build** (Gate C→D) |
-| Key locks | Hash skip + force; overlap **32**; HF (ADR-044); embed 32/3/0.5s; JobMetrics |
-| Next | `@.cursor/skills/08-verify-build/SKILL.md` then Phase C checkpoint |
-| Links | [phase24-gate-checklist](./reports/phase24-gate-checklist.md) · [tech-plan-delta](./reports/tech-plan-delta.md) |
+| Branch | `evolve/EV-019-ingest-resilience` @ `a837f21` |
+| Stage / action | **08-verify-build** done · **phase_c_checkpoint** |
+| Key locks | Hash skip + force; overlap **32**; HF; embed 32/3/0.5s; JobMetrics |
+| Next | Phase C approval → 09-qa + 10-e2e (parallel) |
+| Links | [verification-report](./reports/verification-report.md) · [phase24-gate](./reports/phase24-gate-checklist.md) |
 
 ## Gates
 
 | Gate | Status |
 |------|--------|
-| A→B | **PASS** (S022-D20) |
-| B→C | **PASS** (S022-D22) |
-| C→D | pending 08-verify-build |
+| A→B | **PASS** |
+| B→C | **PASS** |
+| C→D | **PASS** (08 green; Phase C checkpoint pending user) |
 
-## Shipped
+## Shipped (Phase C)
 
-- **M101**: content_hash skip + `force`; content-hash lookup route
-- **M102**: embed sub-batch (32) + retry (3 / 0.5s backoff); dim hard-fail
-- **M103**: HF tokenizer + `chunk_overlap_tokens` default 32 (`b8dcaf1`)
-- **M104**: UJ-062 e2e TC-187–190; `JobMetrics`; phase-gate checklist; AC-IR7 scope test
+- M101–M104 on branch; commits `7bee3e1` … `a837f21`
+- 08-verify-build PASS (`make check-fast` + scoped pytest including H0c + UJ-062)
