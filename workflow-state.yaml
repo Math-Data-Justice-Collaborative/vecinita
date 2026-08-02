@@ -3572,14 +3572,15 @@ project:
       - F46
       - F45
       phase: Phase 23 (M99-M100)
-      current_action: 13_awaiting_deploy_execution_approval
-      next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+      current_action: 13_path_a_push_pr_merge
+      next_action: Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
       deploy_path: A
       prod_ce: false
       path_a_ce_note: VECINITA_RAG_RERANK_CE=false (S021-D24 hold; S021-D26 Path A with CE false)
       decision: S021-D26
-      note: S021/EV-018 13-deploy-smoke Phase 1.5 STARTED 2026-08-02 — awaiting deploy execution approval; H0c PASS (pytest
-        tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending; commits_pending=true
+      note: S021/EV-018 13-deploy-smoke Path A 2026-08-02 — S021-D26 @ b188f97; current_action=13_path_a_push_pr_merge; H0c PASS
+        (pytest tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending;
+        commits_pending=false
       s020_baseline:
         status: in_progress
         started_at: '2026-08-02'
@@ -3907,7 +3908,7 @@ project:
       phase_1_5: &id004
         status: in_progress
         started_at: '2026-08-02'
-        note: Phase 1.5 — draft deploy-smoke + await Path A execution approval
+        note: Phase 1.5 — Path A push/PR/merge in progress (S021-D26 @ b188f97)
       h0c: &id005
         status: pass
         evidence: pytest tests/unit/test_cors_policy.py
@@ -3916,9 +3917,8 @@ project:
       report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
       report_status: in_progress
       deploy_gate: pending
-      commits_pending: true
-      commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent
-        commit SHAs
+      commits_pending: false
+      commits_note: recorded b188f97 (12 Phase 2+3 / start 13 Path A) — commits_pending=false; may become true if more docs dirty
     15-service-health:
       status: skipped
       started_at: '2026-07-29'
@@ -4264,12 +4264,11 @@ active_session:
   artifacts_dir: docs/sessions/S021-retrieval-follow-on/
   current_stage: 13-deploy-smoke
   current_stage_parallel: null
-  current_action: 13_awaiting_deploy_execution_approval
-  next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
-  commits_pending: true
-  current_stage_note: S021/EV-018 Phase D/13 2026-08-02 — 12-verify-deploy COMPLETE (S021-D26); 13-deploy-smoke in_progress
-    Phase 1.5 current_action=13_awaiting_deploy_execution_approval; H0c PASS (pytest tests/unit/test_cors_policy.py); deploy
-    checkpoint/gates.deploy remain pending; commits_pending=true
+  current_action: 13_path_a_push_pr_merge
+  next_action: Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+  commits_pending: false
+  current_stage_note: S021/EV-018 Phase D/13 2026-08-02 — 12 Phase 2+3 approved (S021-D26) @ b188f97; current_action=13_path_a_push_pr_merge;
+    H0c PASS; deploy checkpoint/gates.deploy remain pending; commits_pending=false (may become true if more docs dirty)
   handoff_seed: docs/sessions/S021-retrieval-follow-on/checkpoints/01-requirements-seed.md
   phase0_approved: true
   phase_0_status: approved
@@ -4455,12 +4454,12 @@ active_session:
     started_at: '2026-08-02'
     started: '2026-08-02'
     mode: delta
-    current_action: 13_awaiting_deploy_execution_approval
+    current_action: 13_path_a_push_pr_merge
     deploy_path: A
     prod_ce: false
     decision: S021-D26
-    note: Phase 1.5 — awaiting Path A execution approval; H0c PASS; deploy gate pending
-    next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+    note: Path A — push/PR/merge @ b188f97; H0c PASS; deploy gate pending; commits_pending=false
+    next_action: Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
     phase_1_5: in_progress
     h0c: pass
     report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
@@ -4586,8 +4585,7 @@ active_session:
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent commit
-    SHAs
+  commits_note: recorded b188f97 (12 Phase 2+3 / start 13 Path A) — commits_pending=false; may become true if more docs dirty
 sessions:
 - id: S020-retrieval-batch-b
   type: feature
@@ -12122,14 +12120,15 @@ stages:
     feature: F46+F45
     feature_ids: *id003
     phase: Phase 23 (M99-M100)
-    current_action: 13_awaiting_deploy_execution_approval
-    next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+    current_action: 13_path_a_push_pr_merge
+    next_action: Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
     deploy_path: A
     prod_ce: false
     path_a_ce_note: VECINITA_RAG_RERANK_CE=false (S021-D24 hold; S021-D26 Path A with CE false)
     decision: S021-D26
-    note: S021/EV-018 13-deploy-smoke Phase 1.5 STARTED 2026-08-02 — awaiting deploy execution approval; H0c PASS (pytest
-      tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending; commits_pending=true
+    note: S021/EV-018 13-deploy-smoke Path A 2026-08-02 — S021-D26 @ b188f97; current_action=13_path_a_push_pr_merge; H0c PASS
+      (pytest tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending;
+      commits_pending=false
     s020_baseline:
       status: in_progress
       started_at: '2026-08-02'
@@ -12472,9 +12471,8 @@ stages:
     report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
     report_status: in_progress
     deploy_gate: pending
-    commits_pending: true
-    commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent
-      commit SHAs
+    commits_pending: false
+    commits_note: recorded b188f97 (12 Phase 2+3 / start 13 Path A) — commits_pending=false; may become true if more docs dirty
   14-hotfix:
     status: completed
     started_at: '2026-07-31'
@@ -19594,12 +19592,11 @@ evolve_cycles:
     '
   current_stage: 13-deploy-smoke
   current_stage_parallel: null
-  current_action: 13_awaiting_deploy_execution_approval
-  next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
-  commits_pending: true
-  current_stage_note: S021/EV-018 Phase D/13 2026-08-02 — 12-verify-deploy COMPLETE (S021-D26); 13-deploy-smoke in_progress
-    Phase 1.5 current_action=13_awaiting_deploy_execution_approval; H0c PASS (pytest tests/unit/test_cors_policy.py); deploy
-    checkpoint/gates.deploy remain pending; commits_pending=true
+  current_action: 13_path_a_push_pr_merge
+  next_action: Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+  commits_pending: false
+  current_stage_note: S021/EV-018 Phase D/13 2026-08-02 — 12 Phase 2+3 approved (S021-D26) @ b188f97; current_action=13_path_a_push_pr_merge;
+    H0c PASS; deploy checkpoint/gates.deploy remain pending; commits_pending=false (may become true if more docs dirty)
   mode: evolve
   delta_only: true
   branch: evolve/EV-018-retrieval-follow-on
@@ -19961,13 +19958,14 @@ evolve_cycles:
       mode: delta
       session_id: S021-retrieval-follow-on
       evolve_cycle_id: EV-018
-      current_action: 13_awaiting_deploy_execution_approval
-      next_action: AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
+      current_action: 13_path_a_push_pr_merge
+      next_action: Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5
       deploy_path: A
       prod_ce: false
       decision: S021-D26
-      note: S021/EV-018 13-deploy-smoke Phase 1.5 STARTED 2026-08-02 — awaiting deploy execution approval; H0c PASS (pytest
-        tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending; commits_pending=true
+      note: S021/EV-018 13-deploy-smoke Path A 2026-08-02 — S021-D26 @ b188f97; current_action=13_path_a_push_pr_merge; H0c PASS
+        (pytest tests/unit/test_cors_policy.py, 2026-08-02); Path A ChatRAG CE false then H1–H5; deploy gate remains pending;
+        commits_pending=false
       phase_1_5: *id004
       h0c: *id005
       report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
@@ -20307,8 +20305,7 @@ evolve_cycles:
   rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
   s021_d22_executed: true
   t99_3_status: completed
-  commits_note: docs + workflow-state dirty after 12 closeout / 13 Phase 1.5 start — commits_pending=true; do not invent commit
-    SHAs
+  commits_note: recorded b188f97 (12 Phase 2+3 / start 13 Path A) — commits_pending=false; may become true if more docs dirty
 retrospective_cycles: []
 pr_review_cycles:
 - id: PRR-001
@@ -23780,6 +23777,8 @@ decisions_log:
   updated); 13 Phase 1.5 start — current_action=13_awaiting_deploy_execution_approval; H0c PASS (pytest tests/unit/test_cors_policy.py);
   next_action=AskQuestion Path A — push/PR/merge/redeploy ChatRAG with CE false then H1–H5; gates.deploy/checkpoints.deploy
   remain pending; commits_pending=true (no invented SHAs)'
+- '2026-08-02 S021/EV-018: recorded commit b188f97 (docs: EV-018 12 Phase 2+3 approved (S021-D26); start 13 Path A); branch
+  head → b188f97; current_action=13_path_a_push_pr_merge; commits_pending=false (may become true if more docs dirty)'
 artifacts:
 - path: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
   kind: diagnose-report
@@ -25780,10 +25779,10 @@ git_history:
     evolve_cycle_id: EV-018
     exists_on_disk: true
     created_from: main
-    head_sha: 60664b7d57e77c1e74b9544eaea3fbbd6ea6ed42
-    head_short: 60664b7
-    note: S021/EV-018 — HEAD 60664b7; 11 complete (S021-D25); 12-verify-deploy in_progress
-    note_prev: S021/EV-018 — HEAD 1b46507; M99+M100 complete; 08-verify-build in_progress
+    head_sha: b188f97fe7a688a33cf753ae1b96202af8f9b88e
+    head_short: b188f97
+    note: S021/EV-018 — HEAD b188f97; 12 Phase 2+3 approved (S021-D26); 13 Path A start
+    note_prev: S021/EV-018 — HEAD 60664b7; 11 complete (S021-D25); 12-verify-deploy in_progress
   - name: evolve/EV-017-retrieval-batch-b
     purpose: EV-017 / S020 — Batch B retrieval (F43 answer cache +
     base: main
@@ -28445,6 +28444,25 @@ git_history:
     skill_ids:
     - 16-evolve
     - 11-verify-impl
+  - sha: b188f97fe7a688a33cf753ae1b96202af8f9b88e
+    short: b188f97
+    branch: evolve/EV-018-retrieval-follow-on
+    message: 'docs: EV-018 12 Phase 2+3 approved (S021-D26); start 13 Path A'
+    stage: 13-deploy-smoke
+    session_id: S021-retrieval-follow-on
+    evolve_cycle_id: EV-018
+    files_changed: 5
+    timestamp: '2026-08-02'
+    note: S021-D26 Phase 2+3 approved; start 13 Path A; commits_pending=false after record
+    files:
+    - docs/decisions/evolve-decisions.md
+    - docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md
+    - docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+    - docs/sessions/S021-retrieval-follow-on/routing-plan.md
+    - workflow-state.yaml
+    skill_ids:
+    - 13-deploy-smoke
+    - 16-evolve
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
