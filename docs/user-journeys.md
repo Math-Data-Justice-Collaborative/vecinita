@@ -65,7 +65,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-057 | Repeat ask hits answer/retrieve cache | Community member | ChatRAG → `POST /api/v1/ask` (warm) | F43 EV-017 | local |
 | UJ-058 | Soft language fallback on empty same-lang hit | Community member | ChatRAG ask with F44 flag on + empty-hit fixture | F44 EV-017 #162 | local |
 | UJ-059 | CE rerank gated ask (flag on after ship) | Community member | ChatRAG ask with F45 CE enabled | F45 EV-017 #83/#161 | local |
-| UJ-060 | Admin / spike validates F45 CE ship gate | Operator | Staging golden + CE spike harness | F45, F36 EV-017 | local (+ staging) |
+| UJ-060 | Admin / spike validates F45 CE ship gate | Operator | Staging golden + CE spike harness | F45, F36 EV-017/EV-018 | local (+ staging) |
+| UJ-061 | Operator validates non-empty staging retrieve | Operator | Staging golden retrieve + ChatRAG sample ask | F46 EV-018 | local (+ staging) |
 
 ## Visual journey maps
 
@@ -980,19 +981,54 @@ on empty first pass; empty-hit fixture covers the path in CI.
 **Goal**: Run CE spike (`bge-reranker-v2-m3` on Modal T4) against staging golden; ship only
 if relevancy ≥ **0.28** and faith ≥ **0.91**.
 
-**Preconditions**: Staging golden + F42 Hy1 baseline path; Modal CE spike available.
+**Preconditions**: **F46 / UJ-061 pass** (non-empty retrieve pools on staging golden); F42 Hy1
+baseline path; Modal CE spike available. Do **not** treat empty-pool runs as CE quality
+evidence (EV-017 lesson).
 
 **Steps**:
 
-1. Run session CE spike script (top-N → CE → keep_k) with P1 packing.
-2. Compare aggregate relevancy/faith to floors.
-3. If pass → enable prod flag path (F45 ship); else keep spike-only / #83 open.
+1. Confirm UJ-061 (non-empty pools) before starting CE.
+2. Run session CE spike script (top-N → CE → keep_k) with P1 packing.
+3. Compare aggregate relevancy/faith to floors.
+4. If pass → enable prod flag path (F45 ship); else keep spike-only / #83 open.
 
-**Acceptance**: Gate recorded; no prod CE without pass (S020-D5/D12).
+**Acceptance**: Gate recorded; no prod CE without pass (S020-D5/D12; S021-D6/D7).
 
 **Automated tests**: Spike harness + gate doc (TC-184); not a CI Modal live requirement.
 
 **E2E tier**: local (+ staging spike).
+
+---
+
+### UJ-061: Operator validates non-empty staging retrieve
+
+**Actor**: Operator
+
+**Goal**: Prove staging retrieve returns **non-empty pools / sources** so CE re-gate (UJ-060)
+and faith scoring are valid. Addresses EV-017 Path A `pool=0` / empty `sources`.
+
+**Preconditions**: Staging corpus + embed pin current; ChatRAG / retrieve path deployed;
+staging golden fixture available.
+
+**Steps**:
+
+1. Run staging golden retrieve (or F36 / spike harness retrieve cell) for representative rows.
+2. Assert `pool > 0` / non-empty passage lists (not all rows empty).
+3. Sample live ChatRAG `POST /api/v1/ask` (cold path, cache miss) and assert non-empty
+   `sources[]` when corpus should match the question.
+4. Record root-cause class found in 04/07 (pin / min_score / fixtures / code) — outcome ACs
+   do not require locking the cause in product specs (S021-D13).
+
+**Acceptance**: AC-FO1 + AC-FO2; unblocks UJ-060. Empty pools → F46 fail (do not proceed to
+CE ship decision).
+
+**Automated tests**: Unit/integration for retrieve path as needed; API e2e
+`tests/e2e/test_uj061_retrieve_nonempty.py` (TC-185/186) with fixtures; staging evidence in
+session report for Path A.
+
+**E2E tier**: local (+ staging verify).
+
+**UI E2E**: None — no browser surface change (API / operator harness only).
 
 ---
 

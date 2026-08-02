@@ -36,11 +36,12 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S013 | feature | completed | Unified job monitoring (#116) | `evolve/EV-012-unified-job-monitoring` | 2026-07-29 | 2026-07-29 |
 | S014 | feature | completed | Admin Corpus & dashboard UI/UX polish (#148) | `main` (merged #154) | 2026-07-29 | 2026-07-29 |
 | S019 | feature | completed | Batch A retrieval quality (F42 H7+P1) | `evolve/EV-016-retrieval-quality` (merged #172) | 2026-07-31 | 2026-08-01 |
-| S020 | feature | in_progress | Retrieval Batch B (F43 cache + #83/#161 + #162) | `evolve/EV-017-retrieval-batch-b` | 2026-08-02 | — |
+| S020 | feature | completed | Retrieval Batch B (F43 cache + #83/#161 + #162) | `evolve/EV-017-retrieval-batch-b` (merged #173) | 2026-08-02 | 2026-08-02 |
+| S021 | feature | in_progress | Empty retrieve + CE re-gate follow-on (#83 / AC-BB9) | `evolve/EV-018-retrieval-follow-on` | 2026-08-02 | — |
 
 ## Active session
 
-**S020-retrieval-batch-b** — feature / EV-017 Retrieval Batch B (F43 cache + #83/#161 CE spike + #162). Branch `evolve/EV-017-retrieval-batch-b`. Predecessor S019/EV-016 (F42 LIVE).
+**S021-retrieval-follow-on** — feature / planned EV-018. Empty retrieve investigation + CE re-gate (AC-BB9 / UJ-060 / #83). Branch `evolve/EV-018-retrieval-follow-on` @ `f24a620`. Predecessor S020/EV-017 (F43/F44 LIVE; F45 spike-only).
 
 ## Folder layout
 

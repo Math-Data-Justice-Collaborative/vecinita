@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — AC-BB1–AC-BB9 Retrieval Batch B)
+> **Last updated**: 2026-08-02 (S021/EV-018 F46 + F45 re-gate — AC-FO1/FO2; AC-BB9 prereq)
 
 ## Per-feature criteria
 
@@ -226,8 +226,16 @@
 - [ ] **AC-BB6**: Soft language flag defaults **off** (L0-strict) (TC-181).
 - [ ] **AC-BB7**: CE merge keeps ≤ `top_k` when enabled (TC-182, UJ-059).
 - [ ] **AC-BB8**: CE flag defaults **off** until ship gate (TC-183).
-- [ ] **AC-BB9**: CE ship gate: staging relevancy ≥ **0.28** and faith ≥ **0.91** with `bge-reranker-v2-m3`; else spike-only (TC-184, UJ-060).
+- [ ] **AC-BB9**: CE ship gate: staging relevancy ≥ **0.28** and faith ≥ **0.91** with `bge-reranker-v2-m3`; else spike-only (TC-184, UJ-060). **EV-018:** valid only after AC-FO1 (non-empty pools).
 - [ ] **AC-BB10**: Out of EV-017 ship without unlock: LangGraph/ADR-006 amend; Modal volume durable cache; identity-keyed cache; default-on CE or soft language.
+
+### EV-018 — Retrieval follow-on (F46 + F45 re-gate) — S021
+
+- [ ] **AC-FO1**: Staging golden retrieve returns non-empty pools on representative rows (not universally `pool=0`) (TC-185, UJ-061, F46).
+- [ ] **AC-FO2**: Cold ChatRAG ask for in-corpus questions returns non-empty `sources[]` (TC-186, UJ-061, F46).
+- [ ] **AC-FO3**: UJ-060 / AC-BB9 re-run only after AC-FO1; empty-pool CE runs are not ship evidence (S021-D9/D13).
+- [ ] **AC-FO4**: Prod `VECINITA_RAG_RERANK_CE` remains **false** until AC-BB9 pass + deploy approval (S021-D7).
+- [ ] **AC-FO5**: Out of EV-018 without unlock: LangGraph/ADR-006; #159 multilingual embeds; synthesizer upsizing; changing F43/F44 defaults.
 
 
 ## Quantitative benchmarks
@@ -239,8 +247,10 @@
 | Eval answer relevancy | LlamaIndex judge | ≥0.60 aggregate (CI); display highlight &lt;0.70 | `data/fixtures/eval/` | test-plan TC-112 |
 | F42 Hy1 staging relevancy | LlamaIndex judge | ≥0.28 aggregate (ship floor) | `qa_pairs_staging.json` | test-plan TC-175 / AC-RQ6 |
 | F42 Hy1 staging faithfulness | LlamaIndex judge | ≥0.91 aggregate (ship floor) | `qa_pairs_staging.json` | test-plan TC-175 / AC-RQ6 |
-| F45 CE ship relevancy | LlamaIndex judge | ≥0.28 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 |
-| F45 CE ship faithfulness | LlamaIndex judge | ≥0.91 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 |
+| F45 CE ship relevancy | LlamaIndex judge | ≥0.28 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 (after F46) |
+| F45 CE ship faithfulness | LlamaIndex judge | ≥0.91 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 (after F46) |
+| F46 staging retrieve pools | Non-empty representative rows | `pool > 0` | staging golden / fixtures | test-plan TC-185 / AC-FO1 |
+| F46 ask sources | Non-empty `sources[]` | length ≥ 1 | in-corpus ask | test-plan TC-186 / AC-FO2 |
 | Eval latency p95 | Wall-clock per question | Informational (30s reference) | Golden run | test-plan TC-116 |
 | Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |

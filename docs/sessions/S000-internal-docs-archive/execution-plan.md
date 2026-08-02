@@ -1,7 +1,7 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; **S020 Phase 22 delta 2026-08-02**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; **S021 Phase 23 delta 2026-08-02**)  
 > **Skill**: 04-tech-plan  
 > **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**042**
 
@@ -9,15 +9,15 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 22: EV-017 — Retrieval Batch B (F43–F45) |
-| **Active milestone** | M98 — completed; Phase C (08 PASS / Gate C→D) — Phase D 09+10 next |
-| **Active task** | 08-verify-build — deferred until before Phase C PR |
+| **Active phase** | Phase 23: EV-018 — Retrieval follow-on (F46 + F45 re-gate) |
+| **Active milestone** | M99 — F46 diagnose + fix + e2e |
+| **Active task** | T99.4 — e2e green + unit helpers after Path B |
 | **Tasks completed** | Phase 21: M91–M93; Phase 22: M94–M98 (T94.1–T98.4) |
 | **Last updated** | 2026-08-02 |
-| **Evolve cycle** | EV-017 (F43–F45) — Standard; skip 03/05/06; Phase C passed (S020-D19); 09+10 next |
-| **Git branch** | `evolve/EV-017-retrieval-batch-b` |
-| **Active session** | S020-retrieval-batch-b — M94–M98 complete; next 08-verify-build → Phase C PR |
-| **Scope addition** | 2026-08-02 — F43 H1 cache + F44 soft L1 + F45 CE spike/gate; ADR-042; S020-D15–D18. |
+| **Evolve cycle** | EV-018 (F46 + F45 re-gate) — Standard; skip 03/05/06; Gate B→C passed (S021-D19) |
+| **Git branch** | `evolve/EV-018-retrieval-follow-on` |
+| **Active session** | S021-retrieval-follow-on — 07-build M99 T99.1 |
+| **Scope addition** | 2026-08-02 — F46 non-empty retrieve + F45 CE re-gate; S021-D17–D19; TP1–TP6. |
 
 ## Template
 
@@ -1970,6 +1970,53 @@ unit tests TC-170–172.
 **Ship-gate doc (CE):** `docs/sessions/S020-retrieval-batch-b/reports/ce-ship-gate.md`  
 **Gate checklist:** `docs/sessions/S020-retrieval-batch-b/reports/phase22-gate-checklist.md`  
 **Note:** AC-BB9 / TC-184 staging metrics still open until spike JSON filled (12/13).
+
+---
+
+## Phase 23: EV-018 — Retrieval follow-on (F46 + F45 re-gate)
+
+> **Session:** S021 · **Cycle:** EV-018 · **Branch:** `evolve/EV-018-retrieval-follow-on`  
+> **Issues:** empty retrieve pools (staging); #83 / #161 (CE re-gate)  
+> **Decisions:** RD-209–218, S021-D8–D17, TP1–TP6, Gate A→B M1–M4  
+> **Out of scope:** LangGraph / ADR-006 amend; #159 multilingual embeds; synthesizer upsizing;
+> F43/F44 redesign; prod CE without AC-BB9; new UI/Playwright; ChatRAG playground URL
+
+#### M99: F46 — Diagnose empty pools + minimal fix + UJ-061 e2e
+
+**Goal:** Restore non-empty staging retrieve pools / ask `sources`; TC-185/186; unblock F45.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T99.1 | Test: API e2e `tests/e2e/test_uj061_retrieve_nonempty.py` red (TC-185/186) | Test | completed | AC-FO1/FO2, UJ-061, TC-185/186 | — | 2026-08-02 | S021 | F46 |
+| T99.2 | Ops/Code: Diagnose per TP3 order (pin → fixture URLs → `min_retrieval_score`/filters → code) | Code | completed | feature-list F46, S021-D13 | T99.1 | 2026-08-02 | S021 | F46 |
+| T99.3 | Code/Config/Ops: Minimal fix for diagnosed class (Path A; Path B if corpus rebuild) | Code | completed | RD-215, S021-D11, S021-D22 | T99.2 | 2026-08-02 | S021 | F46 |
+| T99.4 | Test: e2e green; unit helpers as needed; optional `BUG-*` if code repro (S021-D14) | Test | pending | e2e-coverage, AC-FO1/FO2 | T99.3 | — | S021 | F46 |
+| T99.5 | Docs: session diagnose note + root-cause class; staging UJ-061 evidence path | Docs | pending | UJ-061, AC-FO1 | T99.4 | — | S021 | F46 |
+
+#### M100: F45 — CE re-gate after F46 + ship-gate docs
+
+**Goal:** Re-run AC-BB9 / UJ-060 / TC-184 only after AC-FO1; record pass/fail; prod CE stays off unless pass.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T100.1 | Ops: Re-run CE spike harness (`bge-reranker-v2-m3` Modal T4) after UJ-061 pass | Config | pending | UJ-060, TC-184, RD-213 | T99.5 | — | S021 | F45 |
+| T100.2 | Docs: Update CE ship-gate report (relevancy ≥0.28 / faith ≥0.91); #83 disposition | Docs | pending | AC-BB9, AC-FO3/FO4, RD-212/214 | T100.1 | — | S021 | F45 |
+| T100.3 | Docs: Phase 23 gate checklist + execution-plan Current State | Docs | pending | Phase 23 gate | T100.2 | — | S021 | F45 |
+| T100.4 | Test: Confirm TC-183 still default-off; no prod CE enable without AC-BB9 | Test | pending | AC-BB8, AC-FO4, TC-183 | T100.2 | — | S021 | F45 |
+
+#### Phase 23 Gate Check
+
+- [ ] All M99–M100 tasks completed (T99.1–T100.4)
+- [ ] TC-185/186 green at T2 (fixture-backed); staging UJ-061 evidence recorded for Path A
+- [ ] AC-FO1–FO2 met before any CE ship decision
+- [ ] AC-BB9 / TC-184 re-run only after AC-FO1; empty-pool runs invalid
+- [ ] Prod `VECINITA_RAG_RERANK_CE` remains **false** unless AC-BB9 pass + deploy approval
+- [ ] No new ADR unless architecture change discovered in 07
+- [ ] No LangGraph; no #159 embed swap; F43/F44 defaults unchanged
+- [ ] ruff / basedpyright clean; pytest e2e UJ-061 green
+
+**Tech-plan delta:** `docs/sessions/S021-retrieval-follow-on/reports/tech-plan-delta.md`  
+**Predecessor CE gate:** `docs/sessions/S020-retrieval-batch-b/reports/ce-ship-gate.md`
 
 ---
 

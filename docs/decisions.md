@@ -5,13 +5,18 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-07-30 (EV-015 F41 delta)
+> **Last updated**: 2026-08-02 (EV-018 F46 + F45 re-gate)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-08-02 | EV018-H1–H14 | auto-approved | F46/F45 re-gate locked RD-209–218 / S021-D8–D16 |
+| 2026-08-02 | EV018-M1 | approved | AC-FO1 / TC-185 = representative non-empty pools (S021-D17) |
+| 2026-08-02 | EV018-M2 | approved (fix) | F46 feature-list → `min_retrieval_score` (S021-D17) |
+| 2026-08-02 | EV018-M3 | approved (fix) | F45 CE model prose locked to RD-213 (S021-D17) |
+| 2026-08-02 | EV018-M4 | approved | Root cause / BUG deferred to 04/07 (S021-D17) |
 | 2026-07-30 | EV015-H1–H14 | auto-approved | F41 locked RD-188–196 / ADR-040 (see S017 02 audit) |
 | 2026-07-30 | EV015-M1 | approved (fix) | TC-166 under UJ-053 in journey↔test matrix |
 | 2026-07-30 | EV015-M2 | approved (lock) | F36 against shadow **before** promote; TC-168/UJ-054/runbook fixed |
@@ -618,6 +623,43 @@ S020 / Retrieval Batch B — F43 answer cache, F44 soft language (#162), F45 CE 
 
 Artifacts: feature-list F43–F45; UJ-057–060; TC-176–184; AC-BB1–10;
 `docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md`.
+
+### EV-018 requirements decisions (2026-08-02) — RD-209–RD-218
+
+S021 / Retrieval follow-on — **F46** staging retrieve reliability + **F45** CE re-gate.
+Predecessor EV-017 @ `f24a620` (F43/F44 LIVE; F45 spike-only). Standard routing.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-209 | Fn scope | Allocate **F46** (retrieve reliability) + extend **F45** (CE re-gate) | S021-D8 |
+| RD-210 | Ordering | **F46 first**, then F45 re-gate (same cycle, two milestones) | S021-D9 |
+| RD-211 | Spec style | Outcome-based ACs (non-empty pools); root cause classified in 04/07 | S021-D13 |
+| RD-212 | CE floors | Unchanged: relevancy ≥ **0.28**, faith ≥ **0.91** | S021-D6 / S020-D12 |
+| RD-213 | CE model | Keep **`BAAI/bge-reranker-v2-m3`** on Modal T4 | S021 seed L10 |
+| RD-214 | Prod CE flag | Stay **false** until AC-BB9 + deploy approval | S021-D7 |
+| RD-215 | Deploy | Staging **Path A**; Path B only if corpus rebuild required | S021-D11 |
+| RD-216 | Tests | UJ-061; TC-185–186; AC-FO1–FO5; amend UJ-060/TC-184 prereq F46 | 01 Phase 0C |
+| RD-217 | Bug report | Defer `BUG-*` until 07 has a code repro; F46 remains Planned Fn | S021-D14 |
+| RD-218 | Out of scope | LangGraph/ADR-006; #159 embeds; synthesizer upsizing; F43/F44 redesign | S021-D2 / AC-FO5 |
+
+Artifacts: feature-list F46 + F45 EV-018 note; UJ-061; TC-185–186; AC-FO1–5;
+`docs/sessions/S021-retrieval-follow-on/reports/01-requirements-follow-on.md`.
+
+### EV-018 tech-plan decisions (2026-08-02) — TP1–TP6
+
+S021 / Phase 23 — F46 retrieve reliability + F45 CE re-gate (Standard; skip 05/06).
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP1 | Phase / milestones | **Phase 23**: M99 (F46) → M100 (F45 re-gate) | S021-D18 |
+| TP2 | ADR | **None new** unless 07 finds architecture change | S021-D18 |
+| TP3 | Diagnose order | pin → fixture URLs → `min_retrieval_score`/filters → code/BUG | S021-D18 |
+| TP4 | Tests | API e2e UJ-061 first (TC-185/186); reuse CE spike for TC-184 | S021-D18 |
+| TP5 | Deploy / deps | Path A; Path B if rebuild; skip dep/topology churn | S021-D18 |
+| TP6 | Connectivity | No new CORS/UI — API e2e + staging evidence only | S021-D18 |
+
+Artifacts: execution-plan Phase 23; `docs/sessions/S021-retrieval-follow-on/reports/tech-plan-delta.md`;
+`docs/sessions/S021-retrieval-follow-on/roadmap.md`.
 
 ### EV-017 tech-plan decisions (2026-08-02) — TP1–TP7
 
