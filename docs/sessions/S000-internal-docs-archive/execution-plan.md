@@ -2089,6 +2089,12 @@ main
 | PR-53 | Major | Phase 17+18 / S010 (EV-011) | feat/S010-unify-llm-service | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/144 |
 | PR-54 | Major | Phase 19 / S013 (EV-012) | evolve/EV-012-unified-job-monitoring | main | pending — Unified Admin Jobs (#116) |
 | PR-55 | Major | Phase 20 / S017 (EV-015) | evolve/EV-015-corpus-reembed-migration | main | pending — Corpus document store + rebuild (#167 / F41) |
+| PR-56 | Major | Phase 22 / S020 (EV-017) | evolve/EV-017-retrieval-batch-b | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173 |
+
+S020 (EV-017) is evolve Standard: M94–M98 land as atomic commits on the single
+`evolve/EV-017-retrieval-batch-b` branch (one PR to `main`, PR-56 / #173). Gate C→D passed
+(S020-D19); Phase D is 09-qa + 10-e2e → 11 → 12 → 13. AC-BB9 / TC-184 CE ship metrics remain
+staging-gated.
 
 S017 (EV-015) is evolve Standard+build: M86–M90 land as atomic commits on the single
 `evolve/EV-015-corpus-reembed-migration` branch (one PR to `main`, PR-55), per TP-S017-05.

@@ -2084,28 +2084,53 @@ project:
       s017_completion_trail_note: Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS 2026-08-01T14:17:17Z
       m94_boundary: deferred_continue_batch
     09-qa:
-      status: completed
-      started_at: '2026-08-01'
-      completed_at: '2026-08-02T01:13:21Z'
+      status: in_progress
+      started_at: '2026-08-02'
+      started: '2026-08-02'
       partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall pass_with_advisories; prior fail nested
-      session_id: S019-retrieval-quality
-      branch: evolve/EV-016-retrieval-quality
-      evolve_cycle_id: EV-016
+      partial_rerun_note: EV-017/S020 — 09-qa STARTED parallel with 10-e2e; Phase C PR #173 (PR-56); prior S019 COMPLETE nested under s019_baseline
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
       mode: evolve
       delta_only: true
       feature_ids:
-      - F42
-      feature: F42
-      overall: pass_with_advisories
-      overall_result: PASS_WITH_ADVISORIES
-      report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
-      remediation: completed
-      remediation_decision: S019-D47
-      remediation_started_at: '2026-08-02T01:08:35Z'
-      remediation_completed_at: '2026-08-02T01:13:21Z'
-      remediation_note: 'B01 spike ruff cleared; B02 basedpyright cleared (Protocols + UJ-055/ISS-008 typing); B03 nltk held <3.10 with documented CVE ignores. Re-check: full ruff PASS, basedpyright 0 errors, make audit PASS, spike+UJ-055+F42 tests PASS. Advisories A01–A06 remain for 11. Remediation files uncommitted (user has not asked to commit).'
-      note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after fix-in-place B01–B03; 10-e2e PASS; ready for 11-verify-impl; AC-RQ6/ISS-008 ship-path deferred; advisories A01–A06 for 11
+      - F43
+      - F44
+      - F45
+      feature: F43-F45
+      phase: Phase 22 (M94-M98)
+      current_action: in_progress
+      parallel_with: 10-e2e
+      report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+      pr_number: 173
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+      pr_plan_id: PR-56
+      ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
+      note: STARTED 2026-08-02 — delta 09-qa F43–F45; Phase C PR #173 open; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
+      s019_baseline:
+        status: completed
+        started_at: '2026-08-01'
+        completed_at: '2026-08-02T01:13:21Z'
+        partial_rerun_at: '2026-08-02'
+        partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall pass_with_advisories; prior fail nested
+        session_id: S019-retrieval-quality
+        branch: evolve/EV-016-retrieval-quality
+        evolve_cycle_id: EV-016
+        mode: evolve
+        delta_only: true
+        feature_ids:
+        - F42
+        feature: F42
+        overall: pass_with_advisories
+        overall_result: PASS_WITH_ADVISORIES
+        report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
+        remediation: completed
+        remediation_decision: S019-D47
+        remediation_started_at: '2026-08-02T01:08:35Z'
+        remediation_completed_at: '2026-08-02T01:13:21Z'
+        remediation_note: 'B01 spike ruff cleared; B02 basedpyright cleared (Protocols + UJ-055/ISS-008 typing); B03 nltk held <3.10 with documented CVE ignores. Re-check: full ruff PASS, basedpyright 0 errors, make audit PASS, spike+UJ-055+F42 tests PASS. Advisories A01–A06 remain for 11. Remediation files uncommitted (user has not asked to commit).'
+        note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after fix-in-place B01–B03; 10-e2e PASS; ready for 11-verify-impl; AC-RQ6/ISS-008 ship-path deferred; advisories A01–A06 for 11
       s017_baseline:
         status: completed
         started_at: '2026-07-30'
@@ -2270,21 +2295,47 @@ project:
             prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
             note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
     10-e2e:
-      status: completed
-      started_at: '2026-08-01'
-      partial_rerun_at: '2026-08-01'
-      partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
-      session_id: S019-retrieval-quality
-      branch: evolve/EV-016-retrieval-quality
-      evolve_cycle_id: EV-016
+      status: in_progress
+      started_at: '2026-08-02'
+      started: '2026-08-02'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: EV-017/S020 — 10-e2e STARTED parallel with 09-qa; Phase C PR #173 (PR-56); prior S019 COMPLETE nested under s019_baseline
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
       mode: evolve
       delta_only: true
-      feature_ids: &id020
-      - F42
-      feature: F42
-      note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
-      overall: pass
-      overall_result: PASS
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      feature: F43-F45
+      phase: Phase 22 (M94-M98)
+      current_action: in_progress
+      parallel_with: 09-qa
+      journeys: [UJ-057, UJ-058, UJ-059]
+      report: docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md
+      pr_number: 173
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+      pr_plan_id: PR-56
+      ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
+      note: STARTED 2026-08-02 — delta 10-e2e F43–F45; Phase C PR #173 open; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
+      s019_baseline:
+        status: completed
+        started_at: '2026-08-01'
+        partial_rerun_at: '2026-08-01'
+        partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
+        session_id: S019-retrieval-quality
+        branch: evolve/EV-016-retrieval-quality
+        evolve_cycle_id: EV-016
+        mode: evolve
+        delta_only: true
+        feature_ids: &id020
+        - F42
+        feature: F42
+        note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
+        overall: pass
+        overall_result: PASS
       s017_baseline:
         status: completed
         started_at: '2026-07-30'
@@ -3377,9 +3428,9 @@ active_session:
   orchestrator: 16-evolve
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
-  current_stage: 08-verify-build
-  current_action: preparing_phase_c_pr
-  current_stage_note: Phase C approved (option 1 / S020-D19) 2026-08-02 — Gate C→D passed; 08 PASS (scoped); preparing Phase C PR → main; then 09-qa + 10-e2e in parallel; 09/10 not started yet
+  current_stage: 09-qa+10-e2e
+  current_action: phase_d_09_10_starting
+  current_stage_note: Phase C PR #173 (PR-56) open → main; 09-qa + 10-e2e in_progress in parallel (delta F43–F45 / UJ-057–059); local make ci-push skipped (Docker down); watching GitHub CI on branch
   m94_status: completed
   m94_head: 0baa166
   verify_build_m94: deferred_until_phase_c_pr
@@ -3482,12 +3533,35 @@ active_session:
     note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
   - stage: 09-qa
     required: true
-    status: pending
+    status: in_progress
     skip_rationale:
+    started_at: '2026-08-02'
+    started: '2026-08-02'
+    mode: evolve
+    delta_only: true
+    feature_ids:
+    - F43
+    - F44
+    - F45
+    report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+    parallel_with: 10-e2e
+    note: STARTED 2026-08-02 — delta QA F43–F45; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
   - stage: 10-e2e
     required: true
-    status: pending
+    status: in_progress
     skip_rationale:
+    started_at: '2026-08-02'
+    started: '2026-08-02'
+    mode: evolve
+    delta_only: true
+    feature_ids:
+    - F43
+    - F44
+    - F45
+    report: docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md
+    parallel_with: 09-qa
+    journeys: [UJ-057, UJ-058, UJ-059]
+    note: STARTED 2026-08-02 — delta e2e UJ-057–059 / F43–F45; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
   - stage: 11-verify-impl
     required: true
     status: pending
@@ -3507,7 +3581,21 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: commit 08 artifacts + push + open Phase C PR, then start 09-qa and 10-e2e in parallel
+  next_action: run 09-qa and 10-e2e in parallel (delta for F43–F45 / UJ-057–059); write qa-report.md and e2e-report.md
+  pr_plan_id: PR-56
+  pr_number: 173
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+  pr_title: '[EV-017] Phase 22 Retrieval Batch B (F43–F45)'
+  pr_branch: evolve/EV-017-retrieval-batch-b
+  pr_base: main
+  pr_status: open
+  pr_opened_at: '2026-08-02'
+  ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
+  parallel_stages: [09-qa, 10-e2e]
+  report_09_qa: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+  report_10_e2e: docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md
+  commits_head: f655030
+  phase_c_commit_sha: f655030565f0242ec0781a277b7f17d43c16ae97
   s020_d19_decision: S020-D19
   s020_d19_decision_recorded: true
   phase_c_checkpoint_accepted: true
@@ -3603,7 +3691,6 @@ active_session:
   m97_head: d33cbec
   t98_1_started_at: '2026-08-02T15:27:28Z'
   m98_status: completed
-  commits_head: ccc82df
   m98_completed_at: '2026-08-02'
   m98_head: 59edd12
   t98_1_completed_at: '2026-08-02T15:30:29Z'
@@ -9072,27 +9159,52 @@ stages:
     s017_completion_trail_note: Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS 2026-08-01T14:17:17Z
     m94_boundary: deferred_continue_batch
   09-qa:
-    status: completed
-    started_at: '2026-08-01'
-    completed_at: '2026-08-02T01:13:21Z'
+    status: in_progress
+    started_at: '2026-08-02'
+    started: '2026-08-02'
     partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall pass_with_advisories; prior fail nested
-    session_id: S019-retrieval-quality
-    branch: evolve/EV-016-retrieval-quality
-    evolve_cycle_id: EV-016
+    partial_rerun_note: EV-017/S020 — 09-qa STARTED parallel with 10-e2e; Phase C PR #173 (PR-56); prior S019 COMPLETE nested under s019_baseline
+    session_id: S020-retrieval-batch-b
+    branch: evolve/EV-017-retrieval-batch-b
+    evolve_cycle_id: EV-017
     mode: evolve
     delta_only: true
     feature_ids:
-    - F42
-    feature: F42
-    overall: pass_with_advisories
-    overall_result: PASS_WITH_ADVISORIES
-    report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
-    remediation: completed
-    remediation_decision: S019-D47
-    remediation_started_at: '2026-08-02T01:08:35Z'
-    remediation_completed_at: '2026-08-02T01:13:21Z'
-    note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after fix-in-place B01–B03; ready for 11
+    - F43
+    - F44
+    - F45
+    feature: F43-F45
+    phase: Phase 22 (M94-M98)
+    current_action: in_progress
+    parallel_with: 10-e2e
+    report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+    pr_number: 173
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+    pr_plan_id: PR-56
+    ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
+    note: STARTED 2026-08-02 — delta 09-qa F43–F45; Phase C PR #173 open; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
+    s019_baseline:
+      status: completed
+      started_at: '2026-08-01'
+      completed_at: '2026-08-02T01:13:21Z'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall pass_with_advisories; prior fail nested
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F42
+      feature: F42
+      overall: pass_with_advisories
+      overall_result: PASS_WITH_ADVISORIES
+      report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
+      remediation: completed
+      remediation_decision: S019-D47
+      remediation_started_at: '2026-08-02T01:08:35Z'
+      remediation_completed_at: '2026-08-02T01:13:21Z'
+      note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after fix-in-place B01–B03; ready for 11
     s017_baseline:
       status: completed
       started_at: '2026-07-30'
@@ -9257,20 +9369,46 @@ stages:
           prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
           note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019). Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
   10-e2e:
-    status: completed
-    started_at: '2026-08-01'
-    partial_rerun_at: '2026-08-01'
-    partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
-    session_id: S019-retrieval-quality
-    branch: evolve/EV-016-retrieval-quality
-    evolve_cycle_id: EV-016
+    status: in_progress
+    started_at: '2026-08-02'
+    started: '2026-08-02'
+    partial_rerun_at: '2026-08-02'
+    partial_rerun_note: EV-017/S020 — 10-e2e STARTED parallel with 09-qa; Phase C PR #173 (PR-56); prior S019 COMPLETE nested under s019_baseline
+    session_id: S020-retrieval-batch-b
+    branch: evolve/EV-017-retrieval-batch-b
+    evolve_cycle_id: EV-017
     mode: evolve
     delta_only: true
-    feature_ids: *id020
-    feature: F42
-    note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
-    overall: pass
-    overall_result: PASS
+    feature_ids:
+    - F43
+    - F44
+    - F45
+    feature: F43-F45
+    phase: Phase 22 (M94-M98)
+    current_action: in_progress
+    parallel_with: 09-qa
+    journeys: [UJ-057, UJ-058, UJ-059]
+    report: docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md
+    pr_number: 173
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+    pr_plan_id: PR-56
+    ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
+    note: STARTED 2026-08-02 — delta 10-e2e F43–F45; Phase C PR #173 open; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
+    s019_baseline:
+      status: completed
+      started_at: '2026-08-01'
+      partial_rerun_at: '2026-08-01'
+      partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
+      mode: evolve
+      delta_only: true
+      feature_ids: *id020
+      feature: F42
+      note: S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories
+      overall: pass
+      overall_result: PASS
     s017_baseline:
       status: completed
       started_at: '2026-07-30'
@@ -15648,8 +15786,8 @@ evolve_cycles:
     F43+F44+F45 Planned. Standard routing. phase0_approved=true.
 
     '
-  current_stage: 08-verify-build
-  current_action: preparing_phase_c_pr
+  current_stage: 09-qa+10-e2e
+  current_action: phase_d_09_10_starting
   current_stage_note: Phase C approved (option 1 / S020-D19) 2026-08-02 — Gate C→D passed; 08 PASS (scoped); preparing Phase C PR → main; then 09-qa + 10-e2e in parallel; 09/10 not started yet
   m94_status: completed
   m94_head: 0baa166
@@ -15663,6 +15801,15 @@ evolve_cycles:
   mode: evolve
   delta_only: true
   branch: evolve/EV-017-retrieval-batch-b
+  pr_plan_id: PR-56
+  pr_number: 173
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+  pr_title: '[EV-017] Phase 22 Retrieval Batch B (F43–F45)'
+  pr_base: main
+  pr_status: open
+  pr_opened_at: '2026-08-02'
+  pr_head_sha: f655030
+  ci_note: 'local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b'
   routing_preset: standard
   routing_preset_choice: standard
   routing_preset_status: approved
@@ -15705,8 +15852,8 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: preparing_phase_c_pr
-      note: Phase C approved (S020-D19) option 1 2026-08-02 — Gate C→D passed; preparing Phase C PR; then 09-qa + 10-e2e parallel (not started yet)
+      current_action: phase_d_09_10_starting
+      note: Phase C PR #173 (PR-56) open; 09-qa + 10-e2e in_progress parallel (F43–F45 / UJ-057–059); local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
     01-requirements:
       status: completed
       started: '2026-08-02'
@@ -16025,7 +16172,7 @@ evolve_cycles:
       branch: evolve/EV-017-retrieval-batch-b
       session_id: S020-retrieval-batch-b
       evolve_cycle_id: EV-017
-      commits_head: ccc82df
+      commits_head: f655030
       m94_boundary: deferred_continue_batch
       overall_result: PASS
       result_scope: scoped
@@ -16041,9 +16188,38 @@ evolve_cycles:
       phase_c_approved_at: '2026-08-02'
       next_action: commit 08 artifacts + push + open Phase C PR, then start 09-qa and 10-e2e in parallel
     09-qa:
-      status: pending
+      status: in_progress
+      started: '2026-08-02'
+      started_at: '2026-08-02'
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      branch: evolve/EV-017-retrieval-batch-b
+      session_id: S020-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+      parallel_with: 10-e2e
+      note: STARTED 2026-08-02 — delta QA F43–F45; Phase C PR #173; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
     10-e2e:
-      status: pending
+      status: in_progress
+      started: '2026-08-02'
+      started_at: '2026-08-02'
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      branch: evolve/EV-017-retrieval-batch-b
+      session_id: S020-retrieval-batch-b
+      evolve_cycle_id: EV-017
+      report: docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md
+      parallel_with: 09-qa
+      journeys: [UJ-057, UJ-058, UJ-059]
+      note: STARTED 2026-08-02 — delta e2e UJ-057–059; Phase C PR #173; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
     11-verify-impl:
       status: pending
     12-verify-deploy:
@@ -17322,6 +17498,13 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-02'
+  skill: 16-evolve
+  session_id: S020-retrieval-batch-b
+  evolve_cycle_id: EV-017
+  decision: Phase C PR #173 (PR-56) opened — [EV-017] Phase 22 Retrieval Batch B (F43–F45); 09-qa + 10-e2e started in parallel; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
+  recorded_at: '2026-08-02'
+  note: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173'
 - date: '2026-08-02'
   skill: 16-evolve
   session_id: S020-retrieval-batch-b
@@ -20591,14 +20774,21 @@ git_history:
   - name: evolve/EV-017-retrieval-batch-b
     purpose: EV-017 / S020 — Batch B retrieval (F43 answer cache +
     base: main
-    status: active
+    status: open
     created_at: '2026-08-02'
     session_id: S020-retrieval-batch-b
     evolve_cycle_id: EV-017
     exists_on_disk: true
     created_from: main
-    head_sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
-    note: EV-017 / S020 — 08-verify-build in_progress @ ccc82df; Phase 22 M94–M98 build COMPLETE @ 59edd12; checkpoints.phase_c pending
+    head_sha: f655030565f0242ec0781a277b7f17d43c16ae97
+    pr_number: 173
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+    pr_title: '[EV-017] Phase 22 Retrieval Batch B (F43–F45)'
+    pr_base: main
+    pr_status: open
+    pr_plan_id: PR-56
+    pr_opened_at: '2026-08-02'
+    note: EV-017 / S020 — Phase C PR #173 (PR-56) open @ f655030; 09+10 in_progress; local make ci-push skipped (Docker down); watching GitHub CI on evolve/EV-017-retrieval-batch-b
   - name: evolve/EV-016-retrieval-quality
     purpose: EV-016 / S019 — Batch A retrieval quality (investigate
     base: main
@@ -23031,6 +23221,25 @@ git_history:
     files:
     - workflow-state.yaml
     skill_ids:
+    - 16-evolve
+  - sha: f655030565f0242ec0781a277b7f17d43c16ae97
+    short: f655030
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: EV-017 08-verify-build PASS and Phase C gate (S020-D19)'
+    stage: 08-verify-build
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 5
+    timestamp: '2026-08-02T15:53:33Z'
+    note: 08-verify-build PASS + Phase C gate S020-D19; next open Phase C PR → main then 09+10
+    files:
+    - docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+    - docs/sessions/S020-retrieval-batch-b/reports/phase22-gate-checklist.md
+    - docs/sessions/S020-retrieval-batch-b/routing-plan.md
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - workflow-state.yaml
+    skill_ids:
+    - 08-verify-build
     - 16-evolve
   - '2026-08-02T15:34:08Z S020/EV-017: synced 07-build — T98.1–T98.4 COMPLETE @ 59edd12; M98 COMPLETE; Phase 22 M94–M98 ALL COMPLETE; current_stage=07-build (completed); next_action=08-verify-build (deferred until before Phase C PR); 08 NOT started; checkpoints.phase_c still pending; appended commits d2e9043/8b81a42/21b52dc/59edd12; folded prior uncommitted M97/T98.1 dirty state.'
   - '2026-08-02T15:27:28Z S020/EV-017: synced 07-build — T97.5 COMPLETE @ d33cbec; M97 COMPLETE; current_action=T98.1 (UJ-057 answer cache e2e); M98 in_progress; 08-verify-build deferred until before Phase C PR; checkpoints.phase_c still pending; appended commit d33cbec; folded prior uncommitted T97.4 sync.'
