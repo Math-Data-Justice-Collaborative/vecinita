@@ -294,24 +294,22 @@ project:
       s020_d9_d14_decision_recorded: true
       s020_d9_d14_decision_recorded_in: docs/decisions/evolve-decisions.md
     02-verify-plan:
-      status: completed
-      started_at: '2026-07-30'
-      completed_at: '2026-07-30'
-      partial_rerun_at: '2026-08-01'
-      partial_rerun_completed_at: '2026-08-01'
-      partial_rerun_note: S019/EV-016 delta COMPLETE — M1–M3 approved; no contradictions; Gate A→B ready; prior S017/EV-015 COMPLETE nested under s017_baseline
-      session_id: S019-retrieval-quality
-      branch: evolve/EV-016-retrieval-quality
-      evolve_cycle_id: EV-016
+      status: in_progress
+      started_at: '2026-08-02'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: EV-017/S020-retrieval-batch-b — 02-verify-plan delta IN_PROGRESS; F43–F45; delta consistency + statement audit; prior S019/EV-016 COMPLETE nested under s019_baseline
+      session_id: S020-retrieval-batch-b
+      branch: evolve/EV-017-retrieval-batch-b
+      evolve_cycle_id: EV-017
       mode: evolve
       delta_only: true
       feature_ids:
-      - F42
-      report: docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
-      gate_a_to_b: passed
-      current_action: completed
-      next_action: start 02-verify-plan delta audit
-      note: S019/EV-016 02-verify-plan COMPLETE 2026-08-01 — M1–M3 approved (option 1); H7 heuristic clarified in spec/feature-list; S019-D42; no contradictions; Phase A approved (option 1); gates.a_to_b=passed; handoff → 04-tech-plan
+      - F43
+      - F44
+      - F45
+      current_action: delta_consistency_statement_audit
+      next_action: delta consistency + statement audit
+      note: S020/EV-017 02-verify-plan IN_PROGRESS 2026-08-02 — F43–F45; delta consistency + statement audit; prior S019 nested under s019_baseline
       s017_baseline:
         status: completed
         completed_at: '2026-07-30'
@@ -350,23 +348,11 @@ project:
         report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
         note: 02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28)
       substeps:
-        current_phase: completed
+        current_phase: in_progress
         seed_loaded: true
-        handoff_seed: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
-        medium_low_pending: []
-        medium_verdicts_applied:
-        - M1
-        - M2
-        - M3
-        medium_verdicts:
-          M1: 'approved: H7 rewrites are cheap heuristics, not LLM (spec/feature-list clarified)'
-          M2: 'approved: Hy1 0.28/0.91 staging ship gate; CI floors 0.60/0.60'
-          M3: 'approved: p95 latency target remains <15s; no new latency AC'
-        auto_approved_high: 18
-        contradictions: 0
-        s019_d42_decision: S019-D42
-        s019_d42_decision_recorded: true
-        s019_d42_decision_recorded_in: docs/decisions/evolve-decisions.md
+        handoff_seed: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
+        current_action: delta_consistency_statement_audit
+        next_action: delta consistency + statement audit
       rd_allocated:
         status: written
         range: RD-173..RD-178
@@ -632,9 +618,73 @@ project:
       artifacts:
       - docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
       - docs/sessions/S017-corpus-reembed-migration/reports/02-verify-plan-audit.md
-      completed: '2026-08-01'
-      s020_pending_start: true
-      s020_pending_note: S020/EV-017 01-requirements COMPLETE 2026-08-02; 02-verify-plan pending start — delta audit next; S019 baseline remains completed above
+      s019_baseline:
+        status: completed
+        started_at: '2026-07-30'
+        completed_at: '2026-07-30'
+        partial_rerun_at: '2026-08-01'
+        partial_rerun_completed_at: '2026-08-01'
+        partial_rerun_note: S019/EV-016 delta COMPLETE — M1–M3 approved; no contradictions; Gate A→B ready; prior S017/EV-015 COMPLETE nested under s017_baseline
+        session_id: S019-retrieval-quality
+        branch: evolve/EV-016-retrieval-quality
+        evolve_cycle_id: EV-016
+        mode: evolve
+        delta_only: true
+        feature_ids:
+        - F42
+        report: docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
+        gate_a_to_b: passed
+        current_action: completed
+        next_action: start 02-verify-plan delta audit
+        note: S019/EV-016 02-verify-plan COMPLETE 2026-08-01 — M1–M3 approved (option 1); H7 heuristic clarified in spec/feature-list; S019-D42; no contradictions; Phase A approved (option 1); gates.a_to_b=passed; handoff → 04-tech-plan
+        substeps:
+          current_phase: completed
+          seed_loaded: true
+          handoff_seed: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
+          medium_low_pending: []
+          medium_verdicts_applied:
+          - M1
+          - M2
+          - M3
+          medium_verdicts:
+            M1: 'approved: H7 rewrites are cheap heuristics, not LLM (spec/feature-list clarified)'
+            M2: 'approved: Hy1 0.28/0.91 staging ship gate; CI floors 0.60/0.60'
+            M3: 'approved: p95 latency target remains <15s; no new latency AC'
+          auto_approved_high: 18
+          contradictions: 0
+          s019_d42_decision: S019-D42
+          s019_d42_decision_recorded: true
+          s019_d42_decision_recorded_in: docs/decisions/evolve-decisions.md
+        completed: '2026-08-01'
+        s017_baseline:
+          status: completed
+          completed_at: '2026-07-30'
+          session_id: S017-corpus-reembed-migration
+          branch: evolve/EV-015-corpus-reembed-migration
+          evolve_cycle_id: EV-015
+          mode: delta
+          report: docs/sessions/S017-corpus-reembed-migration/reports/02-verify-plan-audit.md
+          note: S017/EV-015 02-verify-plan COMPLETE 2026-07-30 — Gate A→B PASS; M1–M6; checkpoints.phase_a was pending at close
+          substeps:
+            current_phase: completed
+            seed_loaded: true
+            handoff_seed: docs/sessions/S017-corpus-reembed-migration/checkpoints/01-requirements-seed.md
+            auto_approved_high: 14
+            medium_low_pending: []
+            medium_verdicts_applied:
+            - M1
+            - M2
+            - M3
+            - M4
+            - M5
+            - M6
+            medium_verdicts:
+              M1: 'approve_fix: TC-166 under UJ-053'
+              M2: 'lock: F36 against shadow before promote'
+              M3: 'modify: Admin UI promote + full build this session; TC-169 added'
+              M4: 'approve: one-time backfill in F41'
+              M5: 'deferred: deployment-integration + data-flow F41 delta → 04-tech-plan'
+              M6: 'approved: rebuild promote auth = admin (enqueue parity)'
     04-tech-plan:
       status: completed
       started_at: '2026-08-01'
@@ -2997,8 +3047,8 @@ active_session:
   evolve_cycle_id: EV-017
   artifacts_dir: docs/sessions/S020-retrieval-batch-b/
   current_stage: 02-verify-plan
-  current_action: pending_start
-  current_stage_note: "01-requirements COMPLETE — S020-D9–D14; RD-197–RD-208; next = 02-verify-plan delta audit (pending start)"
+  current_action: delta_consistency_statement_audit
+  current_stage_note: "02-verify-plan IN_PROGRESS — F43–F45; delta consistency + statement audit"
   started_at: '2026-08-02'
   routing_plan_status: approved
   routing_preset: standard
@@ -3039,9 +3089,10 @@ active_session:
     completed_at: '2026-08-02'
   - stage: 02-verify-plan
     required: true
-    status: pending
+    status: in_progress
     skip_rationale:
-    note: Pending start — delta audit after 01 COMPLETE
+    note: IN_PROGRESS — delta consistency + statement audit; F43–F45
+    started_at: '2026-08-02'
   - stage: 03-plan-tooling
     required: false
     status: skipped
@@ -3093,7 +3144,7 @@ active_session:
   context_briefs:
   - docs/sessions/S020-retrieval-batch-b/context-brief.md
   handoff_seed: docs/sessions/S020-retrieval-batch-b/checkpoints/01-requirements-seed.md
-  next_action: start 02-verify-plan delta audit
+  next_action: delta consistency + statement audit
   report_01_requirements: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
 sessions:
 - id: S019-retrieval-quality
@@ -7049,24 +7100,22 @@ stages:
     s020_d9_d14_decision_recorded: true
     s020_d9_d14_decision_recorded_in: docs/decisions/evolve-decisions.md
   02-verify-plan:
-    status: completed
-    started_at: '2026-07-30'
-    completed_at: '2026-07-30'
-    partial_rerun_at: '2026-08-01'
-    partial_rerun_completed_at: '2026-08-01'
-    partial_rerun_note: S019/EV-016 delta COMPLETE — M1–M3 approved; no contradictions; Gate A→B ready; prior S017/EV-015 COMPLETE nested under s017_baseline
-    session_id: S019-retrieval-quality
-    branch: evolve/EV-016-retrieval-quality
-    evolve_cycle_id: EV-016
+    status: in_progress
+    started_at: '2026-08-02'
+    partial_rerun_at: '2026-08-02'
+    partial_rerun_note: EV-017/S020-retrieval-batch-b — 02-verify-plan delta IN_PROGRESS; F43–F45; delta consistency + statement audit; prior S019/EV-016 COMPLETE nested under s019_baseline
+    session_id: S020-retrieval-batch-b
+    branch: evolve/EV-017-retrieval-batch-b
+    evolve_cycle_id: EV-017
     mode: evolve
     delta_only: true
     feature_ids:
-    - F42
-    report: docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
-    gate_a_to_b: passed
-    current_action: completed
-    next_action: start 02-verify-plan delta audit
-    note: S019/EV-016 02-verify-plan COMPLETE 2026-08-01 — M1–M3 approved (option 1); H7 heuristic clarified in spec/feature-list; S019-D42; no contradictions; Phase A approved (option 1); gates.a_to_b=passed; handoff → 04-tech-plan
+    - F43
+    - F44
+    - F45
+    current_action: delta_consistency_statement_audit
+    next_action: delta consistency + statement audit
+    note: S020/EV-017 02-verify-plan IN_PROGRESS 2026-08-02 — F43–F45; delta consistency + statement audit; prior S019 nested under s019_baseline
     s017_baseline:
       status: completed
       completed_at: '2026-07-30'
@@ -7099,23 +7148,11 @@ stages:
       report: docs/sessions/S013-unified-job-monitoring/reports/02-verify-plan-audit.md
       note: 02-verify-plan delta COMPLETE — M1–M3 resolved (2026-07-28); gates.a_to_b passed; handoff → 04-tech-plan (Lean+build skips 03)
     substeps:
-      current_phase: completed
+      current_phase: in_progress
       seed_loaded: true
-      handoff_seed: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
-      medium_low_pending: []
-      medium_verdicts_applied:
-      - M1
-      - M2
-      - M3
-      medium_verdicts:
-        M1: 'approved: H7 rewrites are cheap heuristics, not LLM (spec/feature-list clarified)'
-        M2: 'approved: Hy1 0.28/0.91 staging ship gate; CI floors 0.60/0.60'
-        M3: 'approved: p95 latency target remains <15s; no new latency AC'
-      auto_approved_high: 18
-      contradictions: 0
-      s019_d42_decision: S019-D42
-      s019_d42_decision_recorded: true
-      s019_d42_decision_recorded_in: docs/decisions/evolve-decisions.md
+      handoff_seed: docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md
+      current_action: delta_consistency_statement_audit
+      next_action: delta consistency + statement audit
     ev004_baseline:
       status: completed
       started_at: '2026-05-24'
@@ -7186,8 +7223,72 @@ stages:
     artifacts:
     - docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
     - docs/sessions/S017-corpus-reembed-migration/reports/02-verify-plan-audit.md
-    s020_pending_start: true
-    s020_pending_note: S020/EV-017 01-requirements COMPLETE 2026-08-02; 02-verify-plan pending start — delta audit next; S019 baseline remains completed above
+    s019_baseline:
+      status: completed
+      started_at: '2026-07-30'
+      completed_at: '2026-07-30'
+      partial_rerun_at: '2026-08-01'
+      partial_rerun_completed_at: '2026-08-01'
+      partial_rerun_note: S019/EV-016 delta COMPLETE — M1–M3 approved; no contradictions; Gate A→B ready; prior S017/EV-015 COMPLETE nested under s017_baseline
+      session_id: S019-retrieval-quality
+      branch: evolve/EV-016-retrieval-quality
+      evolve_cycle_id: EV-016
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F42
+      report: docs/sessions/S019-retrieval-quality/reports/verify-plan-audit.md
+      gate_a_to_b: passed
+      current_action: completed
+      next_action: start 02-verify-plan delta audit
+      note: S019/EV-016 02-verify-plan COMPLETE 2026-08-01 — M1–M3 approved (option 1); H7 heuristic clarified in spec/feature-list; S019-D42; no contradictions; Phase A approved (option 1); gates.a_to_b=passed; handoff → 04-tech-plan
+      substeps:
+        current_phase: completed
+        seed_loaded: true
+        handoff_seed: docs/sessions/S019-retrieval-quality/reports/requirements-delta.md
+        medium_low_pending: []
+        medium_verdicts_applied:
+        - M1
+        - M2
+        - M3
+        medium_verdicts:
+          M1: 'approved: H7 rewrites are cheap heuristics, not LLM (spec/feature-list clarified)'
+          M2: 'approved: Hy1 0.28/0.91 staging ship gate; CI floors 0.60/0.60'
+          M3: 'approved: p95 latency target remains <15s; no new latency AC'
+        auto_approved_high: 18
+        contradictions: 0
+        s019_d42_decision: S019-D42
+        s019_d42_decision_recorded: true
+        s019_d42_decision_recorded_in: docs/decisions/evolve-decisions.md
+      s017_baseline:
+        status: completed
+        completed_at: '2026-07-30'
+        session_id: S017-corpus-reembed-migration
+        branch: evolve/EV-015-corpus-reembed-migration
+        evolve_cycle_id: EV-015
+        mode: delta
+        report: docs/sessions/S017-corpus-reembed-migration/reports/02-verify-plan-audit.md
+        note: S017/EV-015 02-verify-plan COMPLETE 2026-07-30 — Gate A→B PASS; M1–M6; checkpoints.phase_a was pending at close
+        substeps:
+          current_phase: completed
+          seed_loaded: true
+          handoff_seed: docs/sessions/S017-corpus-reembed-migration/checkpoints/01-requirements-seed.md
+          auto_approved_high: 14
+          medium_low_pending: []
+          medium_verdicts_applied:
+          - M1
+          - M2
+          - M3
+          - M4
+          - M5
+          - M6
+          medium_verdicts:
+            M1: 'approve_fix: TC-166 under UJ-053'
+            M2: 'lock: F36 against shadow before promote'
+            M3: 'modify: Admin UI promote + full build this session; TC-169 added'
+            M4: 'approve: one-time backfill in F41'
+            M5: 'deferred: deployment-integration + data-flow F41 delta → 04-tech-plan'
+            M6: 'approved: rebuild promote auth = admin (enqueue parity)'
   03-plan-tooling:
     status: completed
     started_at: '2026-05-19'
@@ -14762,8 +14863,8 @@ evolve_cycles:
     F45 = #162 config-gated L1 default off + empty-hit fixture;
     F43+F44+F45 Planned. Standard routing. phase0_approved=true.
   current_stage: 02-verify-plan
-  current_action: pending_start
-  current_stage_note: '02-verify-plan pending start — 01-requirements COMPLETE (S020-D9–D14; RD-197–RD-208)'
+  current_action: delta_consistency_statement_audit
+  current_stage_note: '02-verify-plan IN_PROGRESS — F43–F45; delta consistency + statement audit'
   mode: evolve
   delta_only: true
   branch: evolve/EV-017-retrieval-batch-b
@@ -14809,8 +14910,8 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-02'
-      current_action: handoff_02_verify_plan
-      note: Phase 0 COMPLETE (S020-D8); 01-requirements COMPLETE (S020-D9–D14; RD-197–RD-208); next → 02-verify-plan delta audit (pending start)
+      current_action: handoff_02_verify_plan_in_progress
+      note: Phase 0 COMPLETE (S020-D8); 01-requirements COMPLETE; 02-verify-plan IN_PROGRESS (delta consistency + statement audit)
     01-requirements:
       status: completed
       started: '2026-08-02'
@@ -14843,9 +14944,18 @@ evolve_cycles:
         open_q1_q5_resolved: true
       note: S020/EV-017 01-requirements COMPLETE 2026-08-02 — F43–F45; S020-D9–D14; RD-197–RD-208; report docs/sessions/S020-retrieval-batch-b/reports/01-requirements-batch-b.md; next → 02-verify-plan delta audit
     02-verify-plan:
-      status: pending
-      note: Pending start — delta audit after 01 COMPLETE
-      next_action: start 02-verify-plan delta audit
+      status: in_progress
+      started: '2026-08-02'
+      started_at: '2026-08-02'
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F43
+      - F44
+      - F45
+      current_action: delta_consistency_statement_audit
+      next_action: delta consistency + statement audit
+      note: S020/EV-017 02-verify-plan IN_PROGRESS — delta consistency + statement audit
     04-tech-plan:
       status: pending
     07-build:
@@ -21136,6 +21246,16 @@ git_history:
     files_changed: 6
     timestamp: '2026-08-02T14:07:13Z'
     note: F43–F45 allocated in feature-list + phase0-impact.md; 01-requirements marked in_progress
+  - sha: 08a330aed47d7ac3036c306113a2e1280bdcf11d
+    short: 08a330a
+    branch: evolve/EV-017-retrieval-batch-b
+    message: 'docs: EV-017 01-requirements delta for F43–F45'
+    stage: 01-requirements
+    session_id: S020-retrieval-batch-b
+    evolve_cycle_id: EV-017
+    files_changed: 13
+    timestamp: '2026-08-02T14:16:16Z'
+    note: 01-requirements COMPLETE; recorded at 02-verify-plan start
   - '2026-08-02T02:00:00Z S019/EV-016: 11-verify-impl — user option 1 defer staging inspection to 12/13; F42 approved T0+OpenAPI waiver; staging @ a6c39e5 vs HEAD ffd7abd; current_action=feature_signoff_F42; 11 NOT completed.'
   - '2026-08-02T01:21:33Z S019/EV-016: S019-D47 remediation LANDED @ ffd7abd ([S019-D47] fix: clear QA blockers B01–B03 for F42); preparing_11=false; 11-verify-impl in_progress; advisories A01–A06.'
   - '2026-08-01 S019/EV-016: 08-verify-build PASS (delta) Phase 21 M91–M93 / F42 @ 640cd25; report docs/sessions/S019-retrieval-quality/reports/verification-report.md; checkpoints.phase_c=pending_user; gates.c_to_d=pending_user; current_action=phase_c_checkpoint; left uncommitted out of F42 scope: modal llm_app/playground, playground_hf_registry (+tests), scripts/deploy/_tmp_proxy_key_check.py, tests/unit/modal/test_llm_engine_awq_kwargs.py.'
