@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — UJ-057–060 cache / soft language / CE)
+> **Last updated**: 2026-08-03 (S025/EV-023 F62–F63 — UJ-067–068 Husky/release; prior S024 UJ-064–066)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -72,6 +72,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-064 | Robust scrape (HTML/JS/PDF) single URL | Admin operator | Admin ingest job | F59 EV-022 #69 | local |
 | UJ-065 | Crawl seed → multi-page site | Admin operator | Admin JobForm crawl → Jobs detail | F60 EV-022 #71 | local |
 | UJ-066 | Browse corpus as tree (nesting) | Admin operator | Admin Corpus tree toggle + bulk | F61 EV-022 #70 | local |
+| UJ-067 | Lean local push (Husky) | Developer | `git push` → Husky pre-push | F62 EV-023 #182 | local |
+| UJ-068 | Auto release tag after main CD | Maintainer / CD | DO deploy workflow → release job | F63 EV-023 #103 | local |
 
 ## Visual journey maps
 
@@ -993,6 +995,64 @@ Playwright `tests/ui/admin/uj066-corpus-tree.spec.ts` for tree ↔ bulk dialog i
 (TC-207).
 
 **E2E tier**: local (T0-ui + Vitest); T3-ui optional after deploy.
+
+---
+
+### UJ-067: Lean local push (Husky gates)
+
+**Actor**: Developer
+
+**Goal**: Everyday `git push` stays fast (lint + scoped unit tests) while heavier local
+gates (typecheck, security-scan) run on `git commit` via Husky pre-commit, without dropping
+the job_type dispatch regression guard.
+
+**Preconditions**: Husky installed; repo root; no skip env vars unless testing skips.
+
+**Steps**:
+
+1. Stage a normal code change and `git commit`.
+2. Pre-commit runs: typecheck + security-scan + job_type dispatch guard (BUG-2026-07-31).
+3. `git push` (default): pre-push runs lint + `make test-fast` only — **not** typecheck or
+   security-scan.
+4. Optional: `VECINITA_MEDIUM_PRE_PUSH=1` / `VECINITA_FULL_PRE_PUSH=1` for heavier push;
+   `VECINITA_SKIP_PRE_COMMIT=1` / `VECINITA_SKIP_PRE_PUSH=1` skip hooks.
+5. Before opening a PR: `make ci-push` (unchanged GitHub merge gate).
+
+**Acceptance**: Default push path = lint + units only (AC-CI1–CI3); docs/rules match
+(AC-CI4); format-check not on commit (S025-D5).
+
+**Automated tests**: Unit/script tests for hook entrypoints and Makefile targets
+(TC-208–211); no browser UI; no product API e2e.
+
+**E2E tier**: local (developer tooling — pytest/script smoke at the hook layer).
+
+---
+
+### UJ-068: Auto release tag after successful main CD
+
+**Actor**: Maintainer / GitHub Actions CD
+
+**Goal**: Every successful production deploy on `main` gets an immutable semver tag and
+GitHub Release for traceability.
+
+**Preconditions**: CI + deploy-preflight + Modal + DigitalOcean workflows green on `main`;
+HEAD not already tagged (or idempotent skip); commit message lacks `[skip release]`.
+
+**Steps**:
+
+1. Merge to `main` triggers CI → deploy-preflight → Deploy Modal → Deploy DigitalOcean.
+2. On DO deploy **success**, release workflow/job runs.
+3. Compute next **patch** semver from latest `v*` tag (or bootstrap from CHANGELOG baseline).
+4. Create annotated tag `vX.Y.Z` + GitHub Release with SHA + CI/CD run URLs.
+5. If HEAD already tagged or `[skip release]` present → no-op (no duplicate / no tag).
+
+**Acceptance**: Tag after DO CD (AC-REL1); patch bump + Release notes (AC-REL2–3); skip +
+idempotent (AC-REL4); no floating tags / no semantic-release (S025-D6).
+
+**Automated tests**: Unit tests for bump/skip/idempotent helpers (TC-212–215); workflow YAML
+lint/structure assertions; live tag creation verified on first green main merge (T3/ops).
+
+**E2E tier**: local (unit) + live verify after merge (13-deploy-smoke).
 
 ---
 

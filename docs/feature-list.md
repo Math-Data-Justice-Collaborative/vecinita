@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-03 (S024/EV-022 — F59–F61 scrape/crawl/tree; prior S023/EV-020 F50–F51)
+> **Last updated**: 2026-08-03 (S025/EV-023 — F62–F63 CI/release; prior S024/EV-022 F59–F61)
 
 ## Summary
 
@@ -64,6 +64,8 @@
 | F59 | Robust scrape (main-content, politeness, JS-render, PDF text) (#69) | Planned | Data Management | packages/ingest, data-management-backend, Modal | S024/EV-022 #69 |
 | F60 | Website crawl from seed URL (#71) | Planned | Data Management | packages/ingest, data-management-backend, DM frontend, Modal | S024/EV-022 #71 |
 | F61 | Corpus tree UI + nested source metadata (#70) | Planned | Data Management (+ ChatRAG backend meta) | data-management-frontend, DM backend, write API, chat-rag-backend | S024/EV-022 #70 |
+| F62 | Husky lean pre-push + expanded pre-commit (#182) | Planned | Cross-cutting (infra) | `.husky/`, `scripts/ci/`, Makefile, LOCAL_DEV, ci-local-parity | S025/EV-023 #182 |
+| F63 | Automate release tagging after main CD (#103) | Planned | Cross-cutting (infra) | `.github/workflows/`, deploy docs, CHANGELOG alignment | S025/EV-023 #103 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -1087,6 +1089,48 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   tree selection wiring.
 - **Ship order**: After F60 (uses crawl graph / path metadata).
 - **Source**: S024 / EV-022; GitHub #70; S024-D9/D12/D17/D18.
+
+### F62: Husky lean pre-push + expanded pre-commit (#182)
+
+- **What it does**: Restructures local Husky gates so **pre-push** runs **lint + unit tests
+  only** and **pre-commit** runs the heavier local gates that previously bloated push
+  (typecheck + security-scan) while keeping the BUG-2026-07-31 job_type dispatch guard.
+- **Inputs**: Developer `git commit` / `git push`; env skip knobs.
+- **Outputs**: Faster default pushes; documented tier table matching hooks.
+- **Key parameters**:
+  | Parameter | Default | Description |
+  |-----------|---------|-------------|
+  | `VECINITA_SKIP_PRE_PUSH` | unset | Skip pre-push entirely |
+  | `VECINITA_SKIP_PRE_COMMIT` | unset | Skip pre-commit entirely |
+  | `VECINITA_FULL_PRE_PUSH` / `VECINITA_MEDIUM_PRE_PUSH` | unset | Opt-in heavier push tiers |
+  | `SEC_SKIP_SUPABASE_ADVISORS` | unset/auto | Token-gated advisors (unchanged) |
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `.husky/pre-push` → `scripts/ci/pre_push.sh` | Lint + `test-fast` only (default) |
+  | `.husky/pre-commit` | Typecheck + security-scan + job-dispatch |
+  | Makefile / docs / rules | Tier table + skip knobs |
+- **Locks (S025-D5)**: format-check stays PR/`make ci-push` only; agent stop hooks **keep**
+  typecheck (advisory); no lint-staged in this cycle.
+- **Out of scope**: Replacing GitHub CI; full `ci-push` on every commit; #181 perf gate.
+- **Source**: S025 / EV-023; GitHub #182 / #194.
+
+### F63: Automate release tagging after main CD (#103)
+
+- **What it does**: After successful production CD on `main`, create an immutable semver
+  Git tag and GitHub Release so every deploy has a traceable marker.
+- **Inputs**: Successful DigitalOcean deploy workflow (end of CI → preflight → Modal → DO chain).
+- **Outputs**: Annotated tag `vX.Y.Z` + GitHub Release notes (SHA + CI/CD run URLs).
+- **Key parameters**:
+  | Parameter | Default | Description |
+  |-----------|---------|-------------|
+  | Bump policy | **patch** from last `v*` tag | Minimal automation (no semantic-release) |
+  | Escape hatch | `[skip release]` in commit message | Skip tagging for docs-only / redeploy |
+  | Idempotency | Skip if HEAD already tagged | No duplicate tags |
+- **Locks (S025-D6)**: Trigger after **DO CD success**; annotated tag + GitHub Release; **no**
+  floating `v1`/`v1.2` tags; **no** full conventional-commits semantic-release yet.
+- **Out of scope**: CHANGELOG auto-rewrite beyond release notes body; tagging before Modal/DO.
+- **Source**: S025 / EV-023; GitHub #103 / #194.
 
 ## Planned / Deferred (post-v1)
 
