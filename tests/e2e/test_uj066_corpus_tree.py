@@ -1,4 +1,8 @@
-"""UJ-066 / TC-204: corpus tree nesting + nested source fields (F61) — red until T110.2."""
+"""UJ-066 / TC-204: corpus tree nesting + nested source fields (F61).
+
+Local Docker/Postgres waived for T111.3 closeout (S024-D41) — same pattern as S021-D23 /
+UJ-061: skip-without-Postgres; CI compose provides DATABASE_URL.
+"""
 
 from __future__ import annotations
 
@@ -9,9 +13,12 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
 from vecinita_internal_write_api.app import create_app
 from vecinita_shared_schemas.json_types import as_json_object
 
+from tests.helpers.corpus_db_guard import is_local_corpus_database
 from tests.helpers.json_response import json_list, json_str, response_json_object
 
 pytestmark = pytest.mark.e2e
@@ -28,11 +35,33 @@ def _database_url() -> str:
     )
 
 
+def _postgres_reachable(url: str) -> bool:
+    """Return True when local/CI Postgres accepts connections."""
+    engine = create_engine(url)
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except (OperationalError, OSError):
+        return False
+    finally:
+        engine.dispose()
+    return True
+
+
 @pytest.fixture
 def write_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    """Internal-write TestClient with local DB + API key."""
+    """Internal-write TestClient with local DB + API key (skip without Postgres)."""
+    url = _database_url()
+    if not is_local_corpus_database(url):
+        pytest.skip(
+            "TC-204 seeds local Postgres only — unset staging DATABASE_URL (BUG-2026-08-02 guard)"
+        )
+    if not _postgres_reachable(url):
+        pytest.skip(
+            "Postgres unavailable for TC-204 / UJ-066 (start compose postgres / make db-ready)"
+        )
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
-    monkeypatch.setenv("DATABASE_URL", _database_url())
+    monkeypatch.setenv("DATABASE_URL", url)
     return TestClient(create_app())
 
 

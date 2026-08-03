@@ -632,6 +632,8 @@ only (no ChatRAG UI — licensing research tracked).
 | S024-D36 | Phase 26 | M108 F59 → M109 F60 → M110 F61 → M111 e2e/OpenAPI; PR-59 / #69→#71→#70 |
 | S024-D37 | Gate B→C | **PASS** — Phase 26 approved; start 07-build T108.1 |
 | S024-D38 | T110.2 verify | Unit tests only; TC-204 e2e deferred until Docker/Postgres (option 2) |
+| S024-D40 | T111.3 block | Docker daemon not running; cannot `make db-ready` |
+| S024-D41 | T111.3 waive | **Skip local Docker** — TC-204 CI-gated + skip-without-Postgres; local closeout = unit tree + Playwright UJ-066 (user 2026-08-03) |
 
 ### Impact analysis (docs / code)
 
@@ -673,5 +675,5 @@ EV-022 **in_progress**. Phase 0 **approved** (user option 1 — allocate F59–F
 
 | Stage | Status |
 |-------|--------|
-| 07-build | **in_progress** — T108.1 (TC-196) |
-| 08-verify-build | pending |
+| 07-build | **M108–M111 complete** (T111.3 S024-D41 waive local Docker) |
+| 08-verify-build | **next** — Gate C→D |
