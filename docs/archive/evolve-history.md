@@ -2,6 +2,15 @@
 
 Archived evolve cycle reports.
 
+## EV-019 — Ingest resilience (F47–F49)
+
+**Cycle:** EV-019  
+**Completed:** 2026-08-02  
+**Session:** S022-ingest-resilience  
+**PR:** [#179](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179) @ `bd6bb00`  
+**Report:** [evolve-summary](../sessions/S022-ingest-resilience/reports/evolve-summary.md) · [deploy-smoke](../sessions/S022-ingest-resilience/reports/deploy-smoke.md)  
+**Notes:** Path A ship PASS; Path B store-backed `mode=rechunk` waived to follow-up (S022-D-path-b-waive).
+
 ## EV-012 — Unified Admin Jobs (F32/F36)
 
 **Cycle:** EV-012  

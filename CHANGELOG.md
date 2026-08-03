@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### EV-019: Ingest resilience (F47–F49) — S022 / #163 #166 #160
+
+- **F47**: `content_hash` skip on unchanged URL re-ingest (`force` bypass)
+- **F48**: Embed sub-batch + retry on transient Modal embed failures
+- **F49**: HF tokenizer chunk overlap (default 32); ADR-044
+- **Deploy:** PR [#179](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179) → `main` @ `bd6bb00` (Path A H1–H5 PASS; Path B rechunk waived → follow-up)
+
 ### EV-018: Retrieval follow-on (F46 + F45 re-gate) — S021 / #83
 
 - **F46**: Corpus DB guard against staging `basis_vector` wipe; Path B E0 restore on staging; UJ-061 non-empty retrieve

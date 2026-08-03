@@ -673,6 +673,25 @@ S022 / Ingest resilience — **F47** content_hash skip, **F48** embed sub-batch/
 Artifacts: feature-list F47–F49; ADR-044; UJ-062; TC-187–192; AC-IR1–7;
 `docs/sessions/S022-ingest-resilience/reports/01-requirements-ingest-resilience.md`.
 
+### EV-020 requirements decisions (2026-08-02) — RD-229–RD-236
+
+S023 / Residual retrieval ship — **F50** top_k=8 (#158), **F51** default P3 packing (#165).
+Standard routing. Reuse S019 spikes; not full re-investigation.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-229 | Fn scope | **F50** (#158), **F51** (#165) | S023-D6 |
+| RD-230 | F50 top_k | Prod default **`top_k=8`** (code + DO `VECINITA_TOP_K`) | S023-D6 |
+| RD-231 | F50 sources | Sources shown = retrieve `top_k` (no separate FE cap) | S023-D6 |
+| RD-232 | F51 packer | Default **`VECINITA_RAG_PACKER=p3`**; `CONTEXT_MAX_CHARS=3500` unchanged | S023-D6 |
+| RD-233 | Tests | **UJ-063**; TC-193–195; AC-RQ8–RQ10; extend UJ-055 notes | 01 delta |
+| RD-234 | Deploy | Staging Path A — DO ChatRAG env + code defaults | Phase 0 |
+| RD-235 | Issues | Close #158/#165 after ship | S023-D6 |
+| RD-236 | Out of scope | Adaptive top_k; CE enable; token budget; Path B rechunk; #159 embeds | S023-D6 |
+
+Artifacts: feature-list F50–F51; UJ-063; TC-193–195; AC-RQ8–10;
+`docs/sessions/S023-retrieval-topk-packing/reports/01-requirements-topk-packing.md`.
+
 ### EV-019 tech-plan decisions (2026-08-02) — TP1–TP6
 
 S022 / Phase 24 — F47–F49 ingest resilience (Standard; skip 05/06).

@@ -16,6 +16,8 @@ _PARSED_INT = 12
 _DEFAULT_FLOAT = 0.5
 _PARSED_FLOAT = 0.75
 _ENV_TOP_K = 3
+_DEFAULT_TOP_K = 8
+_DEFAULT_PACKER = "p3"
 _ENV_MIN_SCORE = 0.3
 _DEFAULT_MULTI_QUERY_COUNT = 3
 _DEFAULT_CONTEXT_MAX_CHARS = 3500
@@ -94,6 +96,16 @@ def test_from_env_builds_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.database_url.startswith("postgresql+psycopg://")
 
 
+def test_from_env_defaults_top_k_to_eight_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-193 / F50: ChatRAG top_k defaults to 8 when VECINITA_TOP_K is unset."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_TOP_K", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.top_k == _DEFAULT_TOP_K
+
+
 def test_from_env_requires_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test from env requires database url."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
@@ -112,7 +124,7 @@ def test_str_env_parses_value(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_from_env_defaults_f42_rag_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
-    """T92.1: F42 VECINITA_RAG_* defaults are H7 on, count=3, packer=p1."""
+    """T92.1: F42 VECINITA_RAG_* defaults are H7 on, count=3; packer default covered by TC-194."""
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
     monkeypatch.delenv("VECINITA_RAG_MULTI_QUERY", raising=False)
     monkeypatch.delenv("VECINITA_RAG_MULTI_QUERY_COUNT", raising=False)
@@ -121,8 +133,17 @@ def test_from_env_defaults_f42_rag_knobs(monkeypatch: pytest.MonkeyPatch) -> Non
     settings = ChatRagSettings.from_env()
     assert settings.rag_multi_query is True
     assert settings.rag_multi_query_count == _DEFAULT_MULTI_QUERY_COUNT
-    assert settings.rag_packer == "p1"
     assert settings.rag_context_max_chars == _DEFAULT_CONTEXT_MAX_CHARS
+
+
+def test_from_env_defaults_packer_to_p3_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-194 / F51: ChatRAG rag_packer defaults to p3 when VECINITA_RAG_PACKER unset."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_RAG_PACKER", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_packer == _DEFAULT_PACKER
 
 
 def test_from_env_parses_f42_rag_knobs(monkeypatch: pytest.MonkeyPatch) -> None:

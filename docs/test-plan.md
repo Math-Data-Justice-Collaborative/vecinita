@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-02 (S022/EV-019 F47–F49 — TC-187–192 ingest resilience)  
+> **Last updated**: 2026-08-02 (S023/EV-020 F50–F51 — TC-193–195 top_k=8 + default P3)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -29,6 +29,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-001 Ask (stream) | `tests/e2e/test_uj001_ask_stream.py` | TC-001, TC-002 | `tests/ui/chat/uj001-ask-interaction.spec.ts` |
 | UJ-002 Ingest URLs | `tests/e2e/test_uj002_ingest_job.py` | TC-010, TC-047 |
 | UJ-062 Ingest resilience (skip/force/retry) | `tests/e2e/test_uj062_ingest_resilience.py` | TC-187, TC-188, TC-189, TC-190 |
+| UJ-063 Ask top_k=8 + P3 defaults | `tests/e2e/test_uj063_topk_p3_ask.py` | TC-193, TC-194, TC-195 |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1187,6 +1188,26 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: `chunk_overlap_tokens=256`, `chunk_size_tokens=256`.
 - **Expected**: Validation error; AC-IR6.
 
+### TC-193: Default top_k is 8 (unit, F50)
+
+- **Objective**: Code/settings default retrieval `top_k` is **8**.
+- **Input**: Construct ChatRAG settings / `DEFAULT_TOP_K` with env unset.
+- **Expected**: `top_k == 8`; AC-RQ8.
+
+### TC-194: Default packer is p3 (unit, F51)
+
+- **Objective**: Default `VECINITA_RAG_PACKER` / settings `rag_packer` is **`p3`**;
+  `pack_chunks(mode="p3")` dedupes by `document_id` then truncates to `max_chars`.
+- **Input**: Env unset; multi-chunk same `document_id` + long text.
+- **Expected**: Mode `p3`; ≤1 chunk per doc in packed string; length ≤ budget; AC-RQ9.
+
+### TC-195: Ask returns ≤8 sources with P3 default (UJ-063, F50–F51)
+
+- **Objective**: API e2e ask/stream uses defaults — up to 8 sources; P3 packing on shared path.
+- **Input**: `POST /api/v1/ask` with fixture corpus yielding ≥8 hits; no top_k/packer overrides.
+- **Expected**: `len(sources) ≤ 8`; job/ask completes; packer path is p3 (assert via settings or
+  prompt/context helper spy); AC-RQ8/RQ9; UJ-063.
+
 ## Test Data
 
 | Asset | Location | Used by |
@@ -1224,6 +1245,8 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | F47 hash skip | No re-embed on unchanged hash | TC-187 / AC-IR1 |
 | F48 embed retry | Transient 5xx recovered | TC-189 / AC-IR3 |
 | F49 overlap default | 32 tokenizer tokens | TC-191 / AC-IR5 |
+| F50 top_k default | 8 | TC-193 / AC-RQ8 |
+| F51 packer default | p3 | TC-194 / AC-RQ9 |
 | Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
 
 ### F31 coverage gate — gated components

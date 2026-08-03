@@ -53,7 +53,7 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 | Data Management Frontend | Jobs + corpus admin UI; **bilingual UI chrome** (EV-004 F31) | `apps/data-management-frontend` | Modal ASGI, internal-write API, `packages/frontend-*` |
 | Database app | Alembic, pgvector, seeds, privacy tests | `apps/database` | Postgres |
 | Internal write API | Upsert documents/chunks/embeddings; corpus CRUD | DO App Platform (**standalone** service) | Postgres only |
-| Shared RAG | LlamaIndex pipelines; **P1 packer + H7** (F42); **H1 cache** (F43); optional **L1 soft language** (F44); gated **CE rerank** (F45); **retrieve reliability** (F46) | `packages/rag` | LlamaIndex, pgvector client |
+| Shared RAG | LlamaIndex pipelines; **P3 packer + H7** (F42/F51); **top_k=8** (F50); **H1 cache** (F43); optional **L1 soft language** (F44); gated **CE rerank** (F45); **retrieve reliability** (F46) | `packages/rag` | LlamaIndex, pgvector client |
 | Shared ingest | Scrape/chunk helpers | `packages/ingest` | — |
 | Embedding client | HTTP client to Modal FastEmbed | `packages/embedding-client` | Modal |
 | Shared tagging | LLM/human tag prompts, vocabulary merge, cap enforcement | `packages/tagging` | Modal LLM (vLLM), config-spec |
@@ -83,9 +83,11 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
      rewrite, merge/dedupe by chunk id / score, keep `top_k`.
   7. **F45 CE (default off):** if enabled after ship gate, rerank top-N with `BAAI/bge-reranker-v2-m3`, keep `top_k`.
      **Re-gate (EV-018):** run AC-BB9 / UJ-060 only after F46 non-empty pools (AC-FO1).
-  8. **P1 pack (F42):** format each chunk as `Source: {title}\nURL: {url}\n{text}` via `packages/rag` helpers. Optional **P3** off by default.
+  8. **P3 pack (F42 + F51):** format each chunk as `Source: {title}\nURL: {url}\n{text}` via
+     `packages/rag` helpers, then **document_id dedupe + char budget** (prod default; was P1-only
+     in EV-016). `p1` remains available via `VECINITA_RAG_PACKER=p1`.
   9. Synthesize with packed context; stream or return completion via Modal LLM HTTP; populate cascade stores on generate.
-- **Key parameters**: See `docs/config-spec.md`: `top_k`, H7/P3, cache, soft language, CE flags.
+- **Key parameters**: See `docs/config-spec.md`: `top_k` (default **8**, F50), H7/P3, cache, soft language, CE flags.
   F46 may adjust retrieve knobs or corpus pin ops without new product env vars unless 04 unlocks.
 - **Error handling**: 4xx for validation (including rejected identity fields); 5xx with request ID in logs (no raw prompt persistence).
 - **Latency**: Target **p95 < 15s** excluding cold start (RD-017); cache hits should be ≪ generate path.
@@ -339,6 +341,7 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | S004 / EV-005 (F34) | 2026-06-28 | Added admin Supabase Auth: §Component Details "Admin authentication"; H5 amended + H11 added; forbidden-schema EV-005 exception (`actor_id`/`actor_role`); API surface auth note. Supersedes ADR-004 admin auth clause (ADR-026). |
 | S017 / EV-015 (F41) | 2026-07-30 | Document store + rebuild job (`reembed`/`rechunk`/`rescrape`); shadow dry-run + promote; version stamps (ADR-040). |
 | S019 / EV-016 (F42) | 2026-08-01 | H7+P1 on E0: heuristic multi-query + Source/URL packing in `packages/rag` (ADR-041); ChatRAG + F36 share helpers; P3 config-gated off; no LangGraph / no embed swap. |
+| S023 / EV-020 (F50–F51) | 2026-08-02 | Prod defaults: `top_k=8` (F50/#158); packer `p3` (F51/#165); sources shown = retrieve count; no adaptive top_k / no CE enable. |
 | S020 / EV-017 (F43–F45) | 2026-08-02 | H1 cache cascade (F43); config-gated L1 soft language (F44); CE spike+gate with `bge-reranker-v2-m3` (F45); no LangGraph / ADR-006 amend. |
 | S021 / EV-018 (F46 + F45) | 2026-08-02 | Staging retrieve reliability (F46 non-empty pools); F45 CE re-gate only after F46; prod CE stays off until AC-BB9. |
 | S022 / EV-019 (F47–F49) | 2026-08-02 | Ingest resilience: content_hash skip + metadata refresh (F47); embed sub-batch/retry fail-URL (F48); HF tokenizer + overlap default 32 (F49 / ADR-044). |

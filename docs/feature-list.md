@@ -59,6 +59,8 @@
 | F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
 | F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
 | F49 | Chunk overlap + sizing clarity (#160) | Implemented | Data Management | packages/ingest, config-spec; optional admin FE | 11-verify-impl S022 2026-08-02; EV-019 #160 |
+| F50 | Promote prod top_k to 8 (#158) | Implemented | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #158 |
+| F51 | Default P3 context packing (#165) | Implemented | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #165 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -72,7 +74,7 @@
 - **Key parameters**:
   | Parameter | Default | Range | Description |
   |-----------|---------|-------|-------------|
-  | `top_k` | `5` (`VECINITA_TOP_K`) | 1–50 | Retrieved chunks per query |
+  | `top_k` | `8` (`VECINITA_TOP_K`) | 1–50 | Retrieved chunks per query (F50; was 5) |
   | `chunk_size` | `256` tokens (`VECINITA_CHUNK_SIZE_TOKENS`) | ≥ 64 | Chunk size at ingest (HF tokenizer; F49) |
   | `chunk_overlap` | `32` tokens (`VECINITA_CHUNK_OVERLAP_TOKENS`) | 0 … &lt; size | Overlap between chunks (F49 / ADR-044) |
 - **Limitations**: No server-side conversation memory across requests (F3). Auto-detect query language and respond in the same language.
@@ -812,8 +814,8 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   **P1** formats each retrieved chunk as `Source: {title}\nURL: {url}\n{text}`. **H7** runs a
   thin multi-query fan-out (2–3 **cheap heuristic** rewrites — not LLM; Spanish-aware for `es`),
   merges/dedupes by chunk id / score, then packs. Shared helpers in `packages/rag`; ChatRAG `_build_prompt` and F36 eval
-  sandbox use the same path. Optional **P3** (document dedupe + char budget) stays
-  **non-default** behind config.
+  sandbox use the same path. Optional **P3** (document dedupe + char budget) shipped
+  config-gated in EV-016; **F51 (EV-020)** promotes P3 to the prod default.
 - **Inputs**: Query text + locale; existing retrieval (`top_k`, `min_retrieval_score`); optional
   packer / H7 config flags.
 - **Outputs**: Packed context string for synthesis; same citation/source surfaces as today;
@@ -832,6 +834,44 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Source**: S019 / EV-016; GitHub #165; harness H7; S019-D22/D31/D37; hybrid
   `20260801T002819Z_hybrid-sweep.json`; E1 reject `20260801T130441Z_e1-shadow-f36.json`;
   PR #172 @ `b08ec30`.
+- **Follow-on**: F50 (`top_k=8`) + F51 (default P3) in EV-020 / S023.
+
+### F50: Promote prod top_k to 8 (#158)
+
+- **What it does**: Changes the production retrieval default from **`top_k=5` → `8`** so ChatRAG
+  returns up to eight sources per ask (retrieve count = sources shown; no separate FE cap).
+  Aligns code default (`DEFAULT_TOP_K` / settings), `infra/vecinita.yaml`, config-spec, and
+  DO `VECINITA_TOP_K` (deploy Path A). Reuses S019 A1 spike evidence; not a new investigation.
+- **Inputs**: Existing ask/stream path; `VECINITA_TOP_K` / settings `top_k`.
+- **Outputs**: Up to 8 `sources[]` when corpus has enough hits above `min_retrieval_score`.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | `DEFAULT_TOP_K = 8` |
+  | `apps/chat-rag-backend` | Settings default `VECINITA_TOP_K=8` |
+  | `infra/do/chat-rag-backend.yaml` + DO app env | `VECINITA_TOP_K=8` |
+  | `infra/vecinita.yaml` / config-spec | Document default 8 |
+- **Out of scope (EV-020)**: Adaptive top_k; retrieve-N-show-K UI truncation; CE enable (#83).
+- **Source**: S023 / EV-020; GitHub #158; S019 A1; S023-D6.
+
+### F51: Default P3 context packing (#165)
+
+- **What it does**: Promotes **`VECINITA_RAG_PACKER` default from `p1` → `p3`** so prod packing
+  runs document_id dedupe + char budget (`VECINITA_RAG_CONTEXT_MAX_CHARS=3500` unchanged)
+  after P1 Source/URL headers. Code path already exists (`pack_chunks(mode="p3")`); this cycle
+  flips defaults + tests + DO env. Closes the residual of #165 after F42 shipped P1.
+- **Inputs**: Retrieved chunks; packer mode + max_chars settings.
+- **Outputs**: Packed prompt context with ≤1 chunk per `document_id` (highest score) and
+  prefix-truncated to budget; same ask response shape.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/chat-rag-backend` | Default `rag_packer="p3"` |
+  | `infra/do` / DO ChatRAG env | `VECINITA_RAG_PACKER=p3` (add if absent) |
+  | config-spec / vecinita.yaml | Default `p3` |
+  | F36 eval sandbox | Inherit same default via shared settings helpers |
+- **Out of scope (EV-020)**: Token-accurate budget (char budget stays); new packer modes; H7 redesign.
+- **Source**: S023 / EV-020; GitHub #165; S019 A2 / F42; S023-D6.
 
 ### F43: Answer / retrieval cache (H1 cascade)
 

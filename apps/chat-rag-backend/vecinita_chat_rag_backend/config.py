@@ -157,7 +157,7 @@ class ChatRagSettings:
     fallback_model_id: str = DEFAULT_EVAL_MODEL_ID
     rag_multi_query: bool = True
     rag_multi_query_count: int = 3
-    rag_packer: PackerMode = "p1"
+    rag_packer: PackerMode = "p3"
     rag_context_max_chars: int = DEFAULT_CONTEXT_MAX_CHARS
     rag_cache: bool = True
     rag_cache_ttl_s: int = DEFAULT_CACHE_TTL_S
@@ -176,9 +176,9 @@ class ChatRagSettings:
         if not database_url:
             msg = "DATABASE_URL is required for ChatRAG backend"
             raise RuntimeError(msg)
-        top_k = _int_env("VECINITA_TOP_K", 5)
+        top_k = _int_env("VECINITA_TOP_K", 8)
         rag_multi_query_count = _int_env("VECINITA_RAG_MULTI_QUERY_COUNT", 3)
-        rag_packer: PackerMode = _rag_packer_env("VECINITA_RAG_PACKER", "p1")
+        rag_packer: PackerMode = _rag_packer_env("VECINITA_RAG_PACKER", "p3")
         rag_context_max_chars = _int_env(
             "VECINITA_RAG_CONTEXT_MAX_CHARS",
             DEFAULT_CONTEXT_MAX_CHARS,

@@ -4,7 +4,9 @@
 env: development
 
 chat_rag:
-  top_k: 5
+  top_k: 8
+  rag_packer: p3
+  rag_context_max_chars: 3500
   request_timeout_s: 60
 
 ingest:

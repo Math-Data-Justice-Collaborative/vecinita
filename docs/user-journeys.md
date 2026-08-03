@@ -60,7 +60,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-052 | Cold-start / long-wait fun facts + consent | Community member | ChatRAG Frontend wait UX (retry or >8s) | F40 EV-014 #87 | local |
 | UJ-053 | Enqueue corpus rebuild (store-backed) | Admin operator | Admin Jobs → Modal `rebuild` job | F41 EV-015 #167 | local |
 | UJ-054 | Shadow dry-run rebuild → F36 → promote | Admin operator | Jobs detail + eval + Admin promote | F41 EV-015 #167 | local |
-| UJ-055 | Ask with H7+P1 packed multi-query retrieval | Community member | ChatRAG → `POST /api/v1/ask` / stream | F42 EV-016 #165 | local |
+| UJ-055 | Ask with H7+P1 packed multi-query retrieval | Community member | ChatRAG → `POST /api/v1/ask` / stream | F42 EV-016 #165; **defaults → F51 P3** | local |
 | UJ-056 | Admin validates F42 via F36 staging golden (Hy1) | Admin operator | DM UI `/evaluation` → staging fixture | F36, F42 EV-016 | local (+ live promote smoke) |
 | UJ-057 | Repeat ask hits answer/retrieve cache | Community member | ChatRAG → `POST /api/v1/ask` (warm) | F43 EV-017 | local |
 | UJ-058 | Soft language fallback on empty same-lang hit | Community member | ChatRAG ask with F44 flag on + empty-hit fixture | F44 EV-017 #162 | local |
@@ -68,6 +68,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-060 | Admin / spike validates F45 CE ship gate | Operator | Staging golden + CE spike harness | F45, F36 EV-017/EV-018 | local (+ staging) |
 | UJ-061 | Operator validates non-empty staging retrieve | Operator | Staging golden retrieve + ChatRAG sample ask | F46 EV-018 | local (+ staging) |
 | UJ-062 | Re-ingest resilience (hash skip, force, embed retry) | Admin operator | Admin ingest job re-run + force | F47–F49 EV-019 #163/#166/#160 | local |
+| UJ-063 | Ask with default top_k=8 + P3 packing | Community member | ChatRAG → `POST /api/v1/ask` / stream | F50–F51 EV-020 #158/#165 | local |
 
 ## Visual journey maps
 
@@ -866,10 +867,40 @@ fan-out) for English and Spanish questions, without any new UI surface.
 4. Observe answer language match and source references (same response shape as UJ-001).
 
 **Acceptance**: Prompt assembly uses P1 headers (not bare concat); H7 runs by default;
-`answer_lang_match` for en/es; no new request fields required; P3 remains off unless configured.
+`answer_lang_match` for en/es; no new request fields required. **EV-020 / F51:** prod default
+packer is **P3** (dedupe + budget); UJ-055 still covers H7 + shared helpers — see **UJ-063**
+for default top_k=8 + P3 assertions.
 
 **Automated tests**: Unit packer/H7 (TC-170–172); API e2e `tests/e2e/test_uj055_h7_p1_ask.py`
-(TC-173).
+(TC-173); extend/adjust for P3 default in TC-193–195 / UJ-063.
+
+**E2E tier**: local.
+
+---
+
+### UJ-063: Ask with default top_k=8 + P3 packing
+
+**Actor**: Community member (no account)
+
+**Goal**: Receive an answer with up to **8** sources and **P3**-packed context (doc dedupe +
+char budget) using production defaults — no request overrides.
+
+**Preconditions**: ChatRAG defaults `VECINITA_TOP_K=8`, `VECINITA_RAG_PACKER=p3`,
+`VECINITA_RAG_CONTEXT_MAX_CHARS=3500`; H7 remains on (F42); CE remains off.
+
+**Steps**:
+
+1. Call `POST /api/v1/ask` (or stream) with a community question that has ≥8 distinct corpus hits.
+2. Observe `sources[]` length ≤ 8 and equals retrieve `top_k` (no separate FE truncation).
+3. Confirm synthesis path uses P3 packing (unit/e2e via packer mode or observable dedupe when
+   multiple chunks share a `document_id`).
+4. Repeat for a Spanish question (language match still holds).
+
+**Acceptance**: Defaults are 8 + p3 without client overrides; sources count ≤ 8; P3 dedupe keeps
+≤1 chunk per document_id before budget truncate; response shape unchanged (UJ-001 / UJ-055).
+
+**Automated tests**: Unit defaults + P3 (TC-193–194); API e2e
+`tests/e2e/test_uj063_topk_p3_ask.py` (TC-195). No new Playwright (no UI change).
 
 **E2E tier**: local.
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 EMBEDDING_DIMENSION = 384
-DEFAULT_TOP_K = 5
+DEFAULT_TOP_K = 8
 MIN_TOP_K = 1
 MAX_TOP_K = 50
 

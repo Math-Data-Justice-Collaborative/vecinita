@@ -11,6 +11,7 @@ from llama_index.core.response_synthesizers import (
     get_response_synthesizer,  # pyright: ignore[reportUnknownVariableType]  # llama_index is partially typed
 )
 
+from vecinita_rag.constants import DEFAULT_TOP_K
 from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.retriever import CorpusPgvectorRetriever, chunks_to_nodes
 from vecinita_rag.types import RagAnswer, RetrievedChunk
@@ -27,7 +28,7 @@ def build_retriever(
     embed_fn: EmbedFn,
     *,
     database_url: str | None = None,
-    top_k: int = 5,
+    top_k: int = DEFAULT_TOP_K,
     score_threshold: float | None = None,
 ) -> CorpusPgvectorRetriever:
     """Construct a pgvector retriever wired to the given embed function."""
@@ -44,7 +45,7 @@ def build_query_engine(
     llm: LLM,
     *,
     database_url: str | None = None,
-    top_k: int = 5,
+    top_k: int = DEFAULT_TOP_K,
     score_threshold: float | None = None,
 ) -> RetrieverQueryEngine:
     """Assemble a LlamaIndex query engine with corpus retrieval and LLM synthesis."""

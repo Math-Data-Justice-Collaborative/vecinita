@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
 
-_DEFAULT_TOP_K = 5
+_DEFAULT_TOP_K = 8
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]

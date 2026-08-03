@@ -15,7 +15,7 @@ from vecinita_rag.multi_query import multi_query_retrieve
 from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode, pack_chunks
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.types import RagAnswer, RetrievedChunk
-from vecinita_shared_schemas.eval_config import EvalConfig
+from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_TOP_K, EvalConfig
 
 from vecinita_eval.criteria import (
     EvalCriterionDef,
@@ -94,7 +94,7 @@ def _answer_for_row(  # noqa: PLR0913 — row synthesis needs chunks/llm/prompt 
     chunks: list[RetrievedChunk],
     llm: LLM | None,
     system_prompt: str | None = None,
-    packer: PackerMode = "p1",
+    packer: PackerMode = "p3",
     context_max_chars: int = DEFAULT_CONTEXT_MAX_CHARS,
 ) -> RagAnswer:
     if not chunks:
@@ -140,7 +140,7 @@ def _f42_rag_knobs() -> tuple[bool, int, PackerMode, int]:
     except ValueError:
         count = 3
     count = max(1, min(5, count))
-    packer_raw = os.environ.get("VECINITA_RAG_PACKER", "p1").strip().lower()
+    packer_raw = os.environ.get("VECINITA_RAG_PACKER", "p3").strip().lower()
     packer: PackerMode = "p3" if packer_raw == "p3" else "p1"
     max_chars_raw = os.environ.get(
         "VECINITA_RAG_CONTEXT_MAX_CHARS",
@@ -325,7 +325,7 @@ def run_golden_eval(  # noqa: PLR0913
     groundedness: GroundednessScorer | None = None,
     llm: LLM | None = None,
     fixture_path: str | Path | None = None,
-    top_k: int = 5,
+    top_k: int = DEFAULT_EVAL_TOP_K,
     criteria: list[EvalCriterionDef] | None = None,
     config: EvalConfig | None = None,
 ) -> tuple[list[RowResult], EvalSummary]:

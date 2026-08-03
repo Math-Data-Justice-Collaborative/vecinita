@@ -22,7 +22,7 @@ _FIXTURE_PATH = Path(__file__).resolve().parents[3] / "data/fixtures/eval/qa_pai
 _UNUSED_DB = "postgresql+psycopg://unused"
 _OVERRIDE_TOP_K = 3
 _OVERRIDE_MIN_SCORE = 0.75
-_DEFAULT_TOP_K = 5
+_DEFAULT_TOP_K = 8
 _DEFAULT_SCORE_THRESHOLD = 0.5
 
 

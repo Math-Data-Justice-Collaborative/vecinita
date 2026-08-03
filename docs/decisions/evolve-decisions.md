@@ -511,3 +511,62 @@ EV-019 **in_progress**. Next: **01-requirements** (delta; load 01-requirements-s
 
 04-tech-plan **completed** 2026-08-02 — TP1–TP6 (S022-D21); Gate B→C **PASS** (S022-D22).  
 Next: **07-build** Phase 24 @ T101.1.
+
+---
+
+## Cycle EV-020 — Scope (S023 / #158 #165)
+
+**Approved (Phase 0):** 2026-08-02  
+**Session:** S023-retrieval-topk-packing  
+**Predecessor:** S022 / EV-019 (Path A PASS @ `bd6bb00`; Path B waived)  
+**Issues:** #158 (top_k), #165 (P3 packing residual)  
+**Features:** **F50**, **F51**  
+**Branch:** `evolve/EV-020-retrieval-topk-packing`
+
+### Scope summary
+
+Residual retrieval ship after F42: promote prod **`top_k` 5→8** and default packer
+**`p1`→`p3`**. Reuse S019 A1/A2 evidence; close #158/#165 after ship.
+
+### Decisions (session open + Phase 0 — 2026-08-02)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S023-D1 | Session | Open **S023-retrieval-topk-packing** after S022 close |
+| S023-D2 | Routing | **Standard** (skip 03, 05, 06, 15) |
+| S023-D3 | Issues | **#158 + #165** residual ship |
+| S023-D4 | S022 close | Path A PASS; Path B rechunk waived |
+| S023-D5 | Branch | `evolve/EV-020-retrieval-topk-packing` from `main` |
+| S023-D6 | Fn + targets | **F50** top_k=**8**; **F51** default **P3**; close issues after ship |
+| S023-D7 | Sources UX | Retrieve count = sources shown (no FE cap) |
+| S023-D8 | 01 complete | Spec deltas + RD-229–236 → **02-verify-plan** |
+
+### Phase 0 status
+
+EV-020 **in_progress**. Phase 0 **approved** (user option 1).
+
+### Decisions (Phase A–C — 2026-08-02 / 2026-08-03)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S023-D9 | 02 verify | Product plan audit PASS |
+| S023-D10 | Gate A→B | **PASS** |
+| S023-D11 | 04 drafted | Phase 25 M105–M107; TP1–TP6 recommended |
+| S023-D12 | Gate B→C / TP1–TP6 | **Approve all** → **07-build @ T105.1** |
+| S023-D13 | Phase C build | M105–M107 complete; Gate C→D pending |
+
+### Phase A status
+
+01-requirements **completed**.  
+02-verify-plan **completed** — Gate A→B **PASS** (S023-D10).
+
+### Phase B status
+
+04-tech-plan **completed** 2026-08-03 — TP1–TP6 (S023-D12); Gate B→C **PASS**.
+
+### Phase C status
+
+07-build **completed** 2026-08-03 — M105–M107 (T105.1–T107.3).  
+Verification: [verification-report.md](../sessions/S023-retrieval-topk-packing/reports/verification-report.md).  
+Next: **Gate C→D** → 09-qa + 10-e2e.
+

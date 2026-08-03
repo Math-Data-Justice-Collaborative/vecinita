@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-02 (S020/EV-017 F43–F45 — cache / soft language / CE knobs)
+> **Last updated**: 2026-08-02 (S023/EV-020 F50–F51 — top_k=8 + default P3 packer)
 
 ## Precedence
 
@@ -22,11 +22,11 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 
 | Variable | Type | Default | Required | Description |
 |----------|------|---------|----------|-------------|
-| `VECINITA_TOP_K` | int | `5` | No | Retrieval chunk count |
+| `VECINITA_TOP_K` | int | `8` | No | Retrieval chunk count (F50; was 5) |
 | `VECINITA_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Minimum pgvector similarity (`1 - distance`); chunks below are dropped |
 | `VECINITA_RAG_MULTI_QUERY` | string | `true` | No | F42 H7 fan-out on/off (`true`/`false`); ChatRAG + F36 eval sandbox |
 | `VECINITA_RAG_MULTI_QUERY_COUNT` | int | `3` | No | H7 rewrite count (clamped 1–5); Spanish-aware when query locale is `es` |
-| `VECINITA_RAG_PACKER` | string | `p1` | No | F42 packer: `p1` (Source/URL headers) or `p3` (P1 + doc dedupe + char budget) |
+| `VECINITA_RAG_PACKER` | string | `p3` | No | F42/F51 packer: `p1` (headers only) or `p3` (P1 + doc dedupe + char budget); **default p3** (F51) |
 | `VECINITA_RAG_CONTEXT_MAX_CHARS` | int | `3500` | No | Packed-context budget when `VECINITA_RAG_PACKER=p3` |
 | `VECINITA_RAG_CACHE` | string | `true` | No | F43 H1 cascade on/off (`true`/`false`) |
 | `VECINITA_RAG_CACHE_TTL_S` | int | `3600` | No | F43 answer/retrieve cache TTL seconds |
@@ -109,7 +109,7 @@ defaults (RD-137), not live production DB config until user loads a preset.
 
 | Field | Type | Bounds | Default |
 |-------|------|--------|---------|
-| `top_k` | int | 1–50 | 5 |
+| `top_k` | int | 1–50 | 8 |
 | `min_retrieval_score` | float | 0.0–1.0 | 0.2 |
 | `system_prompt` | string | 1–8000 chars | built-in ChatRAG default |
 | `max_tokens` | int | 1–1024 | 256 |
@@ -286,7 +286,8 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 
 | Parameter | Value | Reference |
 |-----------|-------|-----------|
-| `VECINITA_TOP_K` | 5 | RD interview |
+| `VECINITA_TOP_K` | 8 | S023 / RD-230 (was 5) |
+| `VECINITA_RAG_PACKER` | p3 | S023 / RD-232 (was p1) |
 | `VECINITA_CHUNK_SIZE_TOKENS` | 256 | RD interview |
 | `VECINITA_CHUNK_OVERLAP_TOKENS` | 32 | S022 / RD-223 / ADR-044 |
 | `VECINITA_EMBED_BATCH_SIZE` | 32 | S022 / RD-222 |
@@ -343,11 +344,11 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 # Example (non-secret defaults only)
 env: development
 chat_rag:
-  top_k: 5
+  top_k: 8
   request_timeout_s: 60
   rag_multi_query: true
   rag_multi_query_count: 3
-  rag_packer: p1
+  rag_packer: p3
   rag_context_max_chars: 3500
   rag_cache: true
   rag_cache_ttl_s: 3600
