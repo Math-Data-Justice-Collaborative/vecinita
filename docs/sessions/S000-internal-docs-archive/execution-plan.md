@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
 | **Active milestone** | M110 — F61 corpus tree API + Admin tree UI |
-| **Active task** | T110.4 — ChatRAG backend nested source metadata |
-| **Tasks completed** | Phase 21–25 complete; M108–M109 done; T110.1–T110.3 done |
+| **Active task** | T110.5 — Vitest/Playwright tree tests |
+| **Tasks completed** | Phase 21–25 complete; M108–M109 done; T110.1–T110.4 done |
 | **Last updated** | 2026-08-03 |
 | **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M110 in progress |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
@@ -2200,8 +2200,8 @@ expand/collapse + bulk selection; ChatRAG backend nested source fields only — 
 | T110.1 | Test: API e2e red — corpus tree nesting + nested source fields (TC-204) | Test | completed | AC-SC8/SC11, UJ-066 | T109.6 | 2026-08-03 | S024 | F61 |
 | T110.2 | Code: write API / DM `GET /corpus/tree`; persist nested source columns | Code | completed | api-contract, ADR-045, F61 | T110.1 | 2026-08-03 | S024 | F61 |
 | T110.3 | Code: Admin Corpus tree UI (toggle flat, expand/collapse, status, bulk) | Code | completed | AC-SC9/SC10, #70 | T110.2 | 2026-08-03 | S024 | F61 |
-| T110.4 | Code: ChatRAG backend nested source metadata read (optional assert); **no FE** | Code | in_progress | AC-SC11, S024-D17/D30 | T110.2 | — | S024 | F61 |
-| T110.5 | Test: Vitest tree expand/selection (TC-205–206); Playwright UJ-066 (TC-207) | Test | pending | TP4, EV022-M2 | T110.3 | — | S024 | F61 |
+| T110.4 | Code: ChatRAG backend nested source metadata read (optional assert); **no FE** | Code | completed | AC-SC11, S024-D17/D30 | T110.2 | 2026-08-03 | S024 | F61 |
+| T110.5 | Test: Vitest tree expand/selection (TC-205–206); Playwright UJ-066 (TC-207) | Test | in_progress | TP4, EV022-M2 | T110.3 | — | S024 | F61 |
 
 #### M111: UJ e2e suite + OpenAPI mirror + phase gate
 
@@ -3017,8 +3017,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T110.1 | M110 | 26 | Test | completed | T109.6 | 2026-08-03 | S024 | F61 | — |
 | T110.2 | M110 | 26 | Code | completed | T110.1 | 2026-08-03 | S024 | F61 | — |
 | T110.3 | M110 | 26 | Code | completed | T110.2 | 2026-08-03 | S024 | F61 | — |
-| T110.4 | M110 | 26 | Code | in_progress | T110.2 | — | S024 | F61 | — |
-| T110.5 | M110 | 26 | Test | pending | T110.3 | — | S024 | F61 | — |
+| T110.4 | M110 | 26 | Code | completed | T110.2 | 2026-08-03 | S024 | F61 | — |
+| T110.5 | M110 | 26 | Test | in_progress | T110.3 | — | S024 | F61 | — |
 | T111.1 | M111 | 26 | Test | pending | T108.6 | — | S024 | F59 | — |
 | T111.2 | M111 | 26 | Test | pending | T109.6 | — | S024 | F60 | — |
 | T111.3 | M111 | 26 | Test | pending | T110.5 | — | S024 | F61 | — |

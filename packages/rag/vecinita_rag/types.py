@@ -20,6 +20,10 @@ class RetrievedChunk:
     title: str | None
     url: str | None
     language: str | None
+    source_domain: str | None = None
+    source_path: str | None = None
+    parent_url: str | None = None
+    canonical_url: str | None = None
 
 
 @dataclass(frozen=True)

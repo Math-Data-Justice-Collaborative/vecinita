@@ -35,6 +35,10 @@ _BASE_SELECT_SQL = """
                 d.title,
                 d.url,
                 d.language,
+                d.source_domain,
+                d.source_path,
+                d.parent_url,
+                d.canonical_url,
                 1 - (e.embedding <=> CAST(:query_embedding AS vector)) AS score
             FROM embeddings e
             JOIN chunks c ON c.id = e.chunk_id
@@ -50,6 +54,10 @@ _SHADOW_SELECT_SQL = """
                 d.title,
                 d.url,
                 d.language,
+                d.source_domain,
+                d.source_path,
+                d.parent_url,
+                d.canonical_url,
                 1 - (se.embedding <=> CAST(:query_embedding AS vector)) AS score
             FROM shadow_embeddings se
             JOIN shadow_chunks sc ON sc.id = se.shadow_chunk_id
@@ -205,6 +213,10 @@ class CorpusPgvectorRetriever(BaseRetriever):
                     title=row_str_optional(row, "title"),
                     url=row_str_optional(row, "url"),
                     language=row_str(row, "language"),
+                    source_domain=row_str_optional(row, "source_domain"),
+                    source_path=row_str_optional(row, "source_path"),
+                    parent_url=row_str_optional(row, "parent_url"),
+                    canonical_url=row_str_optional(row, "canonical_url"),
                 )
             )
         return chunks
@@ -221,6 +233,10 @@ class CorpusPgvectorRetriever(BaseRetriever):
                     "title": chunk.title,
                     "url": chunk.url,
                     "language": chunk.language,
+                    "source_domain": chunk.source_domain,
+                    "source_path": chunk.source_path,
+                    "parent_url": chunk.parent_url,
+                    "canonical_url": chunk.canonical_url,
                 },
             )
             nodes.append(NodeWithScore(node=node, score=chunk.score))

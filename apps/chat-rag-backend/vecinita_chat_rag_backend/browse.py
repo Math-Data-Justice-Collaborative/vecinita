@@ -93,7 +93,8 @@ def list_documents(
     )
     list_sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
         f"""
-        SELECT d.id, d.title, d.url, d.language
+        SELECT d.id, d.title, d.url, d.language,
+               d.source_domain, d.source_path, d.parent_url, d.canonical_url
         FROM documents d
         {where_clause}
         ORDER BY d.created_at DESC, d.url
@@ -119,6 +120,10 @@ def list_documents(
                     url=row_str(row, "url"),
                     language=row_str_optional(row, "language"),
                     tags=_tag_summaries(conn, doc_id),
+                    source_domain=row_str_optional(row, "source_domain"),
+                    source_path=row_str_optional(row, "source_path"),
+                    parent_url=row_str_optional(row, "parent_url"),
+                    canonical_url=row_str_optional(row, "canonical_url"),
                 )
             )
 
@@ -134,7 +139,8 @@ def get_document(engine: Engine, document_id: UUID) -> DocumentBrowseDetail | No
     """Fetch one document for public browse detail."""
     doc_sql = text(
         """
-        SELECT id, title, url, language
+        SELECT id, title, url, language,
+               source_domain, source_path, parent_url, canonical_url
         FROM documents
         WHERE id = :document_id
         """
@@ -150,6 +156,10 @@ def get_document(engine: Engine, document_id: UUID) -> DocumentBrowseDetail | No
             url=row_str(row, "url"),
             language=row_str_optional(row, "language"),
             tags=_tag_summaries(conn, document_id),
+            source_domain=row_str_optional(row, "source_domain"),
+            source_path=row_str_optional(row, "source_path"),
+            parent_url=row_str_optional(row, "parent_url"),
+            canonical_url=row_str_optional(row, "canonical_url"),
         )
 
 
