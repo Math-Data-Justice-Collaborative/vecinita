@@ -16,6 +16,7 @@ _PARSED_INT = 12
 _DEFAULT_FLOAT = 0.5
 _PARSED_FLOAT = 0.75
 _ENV_TOP_K = 3
+_DEFAULT_TOP_K = 8
 _ENV_MIN_SCORE = 0.3
 _DEFAULT_MULTI_QUERY_COUNT = 3
 _DEFAULT_CONTEXT_MAX_CHARS = 3500
@@ -92,6 +93,16 @@ def test_from_env_builds_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.min_retrieval_score == _ENV_MIN_SCORE
     assert settings.stats_enabled is False
     assert settings.database_url.startswith("postgresql+psycopg://")
+
+
+def test_from_env_defaults_top_k_to_eight_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-193 / F50: ChatRAG top_k defaults to 8 when VECINITA_TOP_K is unset."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_TOP_K", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.top_k == _DEFAULT_TOP_K
 
 
 def test_from_env_requires_database_url(monkeypatch: pytest.MonkeyPatch) -> None:
