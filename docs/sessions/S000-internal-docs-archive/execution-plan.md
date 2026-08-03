@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
 | **Active milestone** | M111 — UJ e2e suite + OpenAPI mirror + phase gate |
-| **Active task** | T111.3 — API e2e UJ-066 corpus tree |
+| **Active task** | T111.3 — API e2e UJ-066 corpus tree (**blocked**: local Docker/Postgres) |
 | **Tasks completed** | Phase 21–25 complete; M108–M110 done; T111.1–T111.2 done |
 | **Last updated** | 2026-08-03 |
 | **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M111 in progress |
@@ -2211,7 +2211,7 @@ expand/collapse + bulk selection; ChatRAG backend nested source fields only — 
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T111.1 | Test: API e2e `test_uj064_robust_scrape.py` (TC-199) | Test | completed | UJ-064, e2e-coverage | T108.6 | 2026-08-03 | S024 | F59 |
 | T111.2 | Test: API e2e `test_uj065_website_crawl.py` (TC-202); optional Playwright UJ-065 | Test | completed | UJ-065, TP4 | T109.6 | 2026-08-03 | S024 | F60 |
-| T111.3 | Test: API e2e `test_uj066_corpus_tree.py` (TC-204) green with T110 | Test | in_progress | UJ-066, AC-SC8/SC11 | T110.5 | — | S024 | F61 |
+| T111.3 | Test: API e2e `test_uj066_corpus_tree.py` (TC-204) green with T110 | Test | blocked | UJ-066, AC-SC8/SC11 | T110.5 | — | S024 | F61 |
 | T111.4 | Docs/Config: OpenAPI mirror check; Phase 26 gate + Current State; issue closeout #69/#71/#70/#185 | Docs | pending | TP3, Phase 26 gate | T111.1–T111.3 | — | S024 | F59–F61 |
 
 #### Phase 26 Gate Check
@@ -3021,7 +3021,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T110.5 | M110 | 26 | Test | completed | T110.3 | 2026-08-03 | S024 | F61 | — |
 | T111.1 | M111 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F59 | — |
 | T111.2 | M111 | 26 | Test | completed | T109.6 | 2026-08-03 | S024 | F60 | — |
-| T111.3 | M111 | 26 | Test | in_progress | T110.5 | — | S024 | F61 | — |
+| T111.3 | M111 | 26 | Test | blocked | T110.5 | — | S024 | F61 | Docker/Postgres (S024-D38) |
 | T111.4 | M111 | 26 | Docs | pending | T111.1–T111.3 | — | S024 | F59–F61 | — |
 
 ## Phase Gate Log
