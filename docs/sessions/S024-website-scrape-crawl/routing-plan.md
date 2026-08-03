@@ -13,7 +13,7 @@
 | 10-e2e | yes | completed | — | T0 PASS; TC-204 CI-gated |
 | 11-verify-impl | yes | completed | — | S024-D46 Approve all — verify-impl.md |
 | 12-verify-deploy | yes | completed | — | S024-D47 approved — deploy-checklist.md |
-| 13-deploy-smoke | yes | in_progress | — | Path A redeploy + H1–H5 |
+| 13-deploy-smoke | yes | completed | — | Path A CD + H1/H3/H4/H5; report deploy-smoke.md |
 
 ## Skipped
 
