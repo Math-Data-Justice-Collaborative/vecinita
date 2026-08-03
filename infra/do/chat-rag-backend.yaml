@@ -40,7 +40,7 @@ services:
         type: SECRET
       - key: VECINITA_TOP_K
         scope: RUN_TIME
-        value: "5"
+        value: "8"
       - key: VECINITA_ENV
         scope: RUN_TIME
         value: staging

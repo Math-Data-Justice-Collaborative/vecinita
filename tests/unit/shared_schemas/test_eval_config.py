@@ -17,6 +17,8 @@ from vecinita_shared_schemas.eval_config import (
 )
 from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
 
+_EXPECTED_DEFAULT_EVAL_TOP_K = 8
+
 
 def test_eval_config_defaults_match_config_spec() -> None:
     """Playground defaults match config-spec / ADR-035 form defaults."""
@@ -30,6 +32,7 @@ def test_eval_config_defaults_match_config_spec() -> None:
     )
 
     config = EvalConfig()
+    assert DEFAULT_EVAL_TOP_K == _EXPECTED_DEFAULT_EVAL_TOP_K
     assert config.top_k == DEFAULT_EVAL_TOP_K
     assert config.min_retrieval_score == DEFAULT_EVAL_MIN_RETRIEVAL_SCORE
     assert config.system_prompt == DEFAULT_EVAL_SYSTEM_PROMPT
