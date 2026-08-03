@@ -2862,16 +2862,16 @@ project:
       mode: evolve
       delta_only: true
       feature_ids:
-        - F59
-        - F60
-        - F61
+      - F59
+      - F60
+      - F61
       feature: F59+F60+F61
       phase: Phase 26 (M108-M111)
       deploy_path: A
       deploy_path_default: A
       current_action: 13_complete_awaiting_cycle_close
       next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
-      askquestion_pending: true
+      askquestion_pending: false
       askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
       s024_d47_decision: S024-D47
       js_render_decision: A_ship_static_js_render_follow_up
@@ -3790,7 +3790,7 @@ project:
       close_choice: option_1_open_pr_then_close_session
       note: 'RET-001 COMPLETE 2026-08-02 — PR #177 MERGED @ 6e3207d; S021 archived; follow_up_retro=after_next_evolve_hotfix'
     16-evolve:
-      status: in_progress
+      status: completed
       session_id: S024-website-scrape-crawl
       evolve_cycle_id: EV-022
       started_at: '2026-08-03'
@@ -3812,6 +3812,7 @@ project:
       - F59
       - F60
       - F61
+      askquestion_pending: false
     03-plan-tooling:
       status: skipped
       session_id: S024-website-scrape-crawl
@@ -3839,13 +3840,122 @@ project:
         session_id: S023-retrieval-topk-packing
         evolve_cycle_id: EV-020
         note: S023 CLOSED 2026-08-03 — EV-020 cycle closed (done)
-session_counter: 24
+session_counter: 25
 active_session:
-  id: S024-website-scrape-crawl
+  id: S025-ci-release-automation
+  type: feature
+  slug: ci-release-automation
+  intent: 'GitHub #194 — CI / local quality + release automation epic (children #182 Husky gates, #103 release tagging). Minimal changes; Lean+build preset.'
+  status: in_progress
+  branch: evolve/EV-023-ci-release-automation
+  session_branch: feat/S025-ci-release-automation
+  orchestrator: 16-evolve
+  evolve_cycle_id: EV-023
+  artifacts_dir: docs/sessions/S025-ci-release-automation/
+  github_issues:
+  - 194
+  - 182
+  - 103
+  routing_plan:
+  - stage: 00-context
+    required: true
+    status: completed
+    mode: scoped
+    skip_rationale:
+    started_at: '2026-08-03'
+    completed_at: '2026-08-03'
+    note: 'S025 opened after S024/EV-022 close — Lean+build routing for #194'
+  - stage: 16-evolve
+    required: true
+    status: in_progress
+    mode: orchestrator
+    skip_rationale:
+    started_at: '2026-08-03'
+    current_action: phase0_intake
+    current_stage: 16-evolve Phase 0 intake
+    note: EV-023 Phase 0 intake — feature_ids pending allocation
+  - stage: 01-requirements
+    required: true
+    status: pending
+    mode: delta
+    skip_rationale:
+  - stage: 02-verify-plan
+    required: true
+    status: pending
+    mode: delta
+    skip_rationale:
+  - stage: 03-plan-tooling
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — no new plan-tooling expected
+  - stage: 04-tech-plan
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — execution plan delta deferred unless Phase 0 requires
+  - stage: 05-verify-tech
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — folded into 02/08
+  - stage: 06-tech-tooling
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — no new tooling install expected
+  - stage: 07-build
+    required: true
+    status: pending
+    mode: delta
+    skip_rationale:
+  - stage: 08-verify-build
+    required: true
+    status: pending
+    skip_rationale:
+  - stage: 09-qa
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — QA folded into verify-build/e2e
+  - stage: 10-e2e
+    required: true
+    status: pending
+    mode: delta
+    skip_rationale:
+  - stage: 11-verify-impl
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — infra/tooling cycle; no prod deploy signoff path
+  - stage: 12-verify-deploy
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — no deploy checklist gate for CI/tooling
+  - stage: 13-deploy-smoke
+    required: true
+    status: pending
+    mode: delta
+    skip_rationale:
+  - stage: 15-service-health
+    required: false
+    status: skipped
+    skip_rationale: Lean+build preset — optional at close
+  current_stage: 16-evolve
+  current_action: phase0_intake
+  next_action: 16-evolve Phase 0 intake for EV-023 (#194)
+  started_at: '2026-08-03'
+  context_briefs: []
+  routing_preset: lean_build
+  predecessor_session_id: S024-website-scrape-crawl
+  predecessor_evolve_cycle_id: EV-022
+  feature_ids: []
+  phase0_approved: false
+  askquestion_pending: false
+  decisions:
+  - 'S025-D1: Session type feature → 16-evolve orchestrator'
+  - 'S025-D2: Routing = Lean+build (01→02→07→08→10→13; skip 03–06, 09, 11–12, 15)'
+  - 'S025-D3: Closed S024/EV-022 without 15/17 to start #194'
+sessions:
+- id: S024-website-scrape-crawl
   type: feature
   slug: website-scrape-crawl
   intent: 'Epic #185 — Website scrape & crawl pipeline: robust scrape (#69) → multi-page crawl (#71) → admin tree UI (#70); independently shippable PRs'
-  status: in_progress
+  status: completed
   branch: evolve/EV-022-website-scrape-crawl
   session_branch: feat/S024-website-scrape-crawl
   orchestrator: 16-evolve
@@ -4102,9 +4212,9 @@ active_session:
     started_at: '2026-08-03T21:29:58Z'
     completed_at: '2026-08-03T22:18:30Z'
     mode: delta
-    current_action: 13_complete_awaiting_cycle_close
-    next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
-    askquestion_pending: true
+    current_action: completed
+    next_action: none
+    askquestion_pending: false
     s024_d47_decision: S024-D47
     pr_number: 190
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
@@ -4125,15 +4235,15 @@ active_session:
     skip_rationale: Optional at close
   - stage: 16-evolve
     required: true
-    status: in_progress
+    status: completed
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: 13_complete_awaiting_cycle_close
-    note: 'S024/EV-022 Path A PASS @ cc2750c — 13 completed; awaiting Phase 4 cycle-close AskQuestion (do not auto-close)'
-    askquestion_pending: true
+    current_action: cycle_closed
+    note: 'S024/EV-022 CLOSED 2026-08-03 — user option 1 (done); skip 15/17; Path A PASS @ cc2750c (PR #190); evolve-summary recorded (S024-D48)'
+    askquestion_pending: false
     current_stage: 13-deploy-smoke
-    next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+    next_action: none
     s024_d42_decision: S024-D42
     s024_d43_decision: S024-D43
     s024_d44_decision: S024-D44
@@ -4142,9 +4252,10 @@ active_session:
     checkpoints_phase_d: passed
     checkpoints_deploy: passed
     gates_deploy: passed
-  current_stage: 13-deploy-smoke
-  current_action: 13_complete_awaiting_cycle_close
-  next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+    completed_at: '2026-08-03'
+  current_stage: completed
+  current_action: cycle_closed
+  next_action: none_session_closed
   started_at: '2026-08-03'
   context_briefs: []
   feature_ids:
@@ -4157,7 +4268,7 @@ active_session:
   report: docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
   report_status: completed
   note: 'S024/EV-022 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS @ cc2750c (PR #190 MERGED); Modal CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172 success; DO CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636 success; Alembic 20260803_0011 applied via DO CD; H1/H3/H3b/H4/H5 PASS; H2 SKIP (no DATABASE_URL locally); live OpenAPI has /internal/v1/corpus/tree after write ACTIVE; report=docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; checkpoints.deploy=passed; gates.deploy=passed; EV-022 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
-  askquestion_pending: true
+  askquestion_pending: false
   s024_d46_decision: S024-D46
   ui_preview: yes_local_non_deployed
   local_preview_port: 5174
@@ -4199,7 +4310,14 @@ active_session:
   s024_d42_decision: S024-D42
   s024_d43_decision: S024-D43
   s024_d47_decision: S024-D47
-sessions:
+  completed_at: '2026-08-03'
+  user_close_choice: close_session_skip_15_17
+  user_close_option: 1
+  close_decision: S024-D48
+  s024_d48_decision: S024-D48
+  close_note: 'Closed 2026-08-03 — EV-022 Phase 4 done (user option 1: no 15/17). Path A PASS @ cc2750c (PR #190). Cleared for S025 / EV-023 CI release automation (#194).'
+  successor_session_id: S025-ci-release-automation
+  successor_evolve_cycle_id: EV-023
 - id: S023-retrieval-topk-packing
   type: feature
   slug: retrieval-topk-packing
@@ -12692,9 +12810,9 @@ stages:
     mode: evolve
     delta_only: true
     feature_ids:
-      - F59
-      - F60
-      - F61
+    - F59
+    - F60
+    - F61
     feature: F59+F60+F61
     phase: Phase 26 (M108-M111)
     deploy_path: A
@@ -22054,9 +22172,9 @@ evolve_cycles:
     summary: domain→path→doc→chunks + ChatRAG backend nested metadata (no ChatRAG UI)
     status: allocated
   title: 'Website scrape & crawl pipeline (epic #185)'
-  status: in_progress
+  status: completed
   started: '2026-08-03'
-  completed:
+  completed: '2026-08-03'
   predecessor_evolve_cycle_id: EV-020
   predecessor_session_id: S023-retrieval-topk-packing
   github_issues:
@@ -22101,9 +22219,9 @@ evolve_cycles:
     - 05-verify-tech
     - 06-tech-tooling
     - 15-service-health
-  current_stage: 13-deploy-smoke
-  current_action: 13_complete_awaiting_cycle_close
-  next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+  current_stage: completed
+  current_action: cycle_closed
+  next_action: none
   active_task:
   active_milestone: M111
   mode: evolve
@@ -22111,12 +22229,11 @@ evolve_cycles:
   branch: main
   evolve_branch: evolve/EV-022-website-scrape-crawl
   commit_deployed: cc2750c
-  merge_sha: cc2750c
   routing_preset: standard
   phase0_approved: true
   phase_0_status: approved
   phase_0_batch: completed
-  askquestion_pending: true
+  askquestion_pending: false
   ui_preview: yes_local_non_deployed
   local_preview_port: 5174
   local_preview_required: false
@@ -22308,14 +22425,14 @@ evolve_cycles:
       completed: '2026-08-03'
       note: S024 00-context COMPLETE 2026-08-03 — scoped artifacts written; Phase 0 intake started
     16-evolve:
-      status: in_progress
+      status: completed
       started: '2026-08-03'
-      current_action: 13_complete_awaiting_cycle_close
+      current_action: cycle_closed
       next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
       note: 'S024/EV-022 Path A PASS @ cc2750c — 13-deploy-smoke completed; awaiting Phase 4 cycle-close AskQuestion'
       current_stage: 13-deploy-smoke
       active_task:
-      askquestion_pending: true
+      askquestion_pending: false
       gate_b_to_c: passed
       gate_c_to_d: passed
       gates_deploy: passed
@@ -22324,6 +22441,7 @@ evolve_cycles:
       checkpoints_deploy: passed
       s024_d42_decision: S024-D42
       s024_d43_decision: S024-D43
+      completed: '2026-08-03'
     01-requirements:
       status: completed
       note: 'S024/EV-022 01-requirements COMPLETE 2026-08-03 — user confirmed complete 01 → start 02; approved locks: PDF best-effort soft-fail; nested corpus/tree + jobs/{id}/tree; UJ-064–066 · TC-196–207 · AC-SC1–12; OpenAPI deferred to 04/07 (RD-252–263); await_user_confirm / S024-D32 cleared'
@@ -22779,7 +22897,7 @@ evolve_cycles:
       deploy_path: A
       current_action: 13_complete_awaiting_cycle_close
       next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
-      askquestion_pending: true
+      askquestion_pending: false
       askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
       s024_d47_decision: S024-D47
       js_render_decision: A_ship_static_js_render_follow_up
@@ -22829,7 +22947,7 @@ evolve_cycles:
         write_api: ACTIVE
     15-service-health:
       status: skipped
-      skip_rationale: Optional at close
+      skip_rationale: User option 1 — close without 15-service-health (S024-D48)
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -22881,7 +22999,11 @@ evolve_cycles:
     recorded_at: '2026-08-03'
     note: Phase 0/1 Fn allocation + impact analysis (S024-D25)
   - path: docs/sessions/S024-website-scrape-crawl/reports/evolve-summary.md
-    status: pending
+    status: completed
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    recorded_at: '2026-08-03'
+    kind: evolve-summary
   - path: docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
     status: completed
     session_id: S024-website-scrape-crawl
@@ -23435,6 +23557,92 @@ evolve_cycles:
   s024_d42_decision: S024-D42
   s024_d43_decision: S024-D43
   s024_d47_decision: S024-D47
+  user_close_choice: close_session_skip_15_17
+  user_close_option: 1
+  close_decision: S024-D48
+  s024_d48_decision: S024-D48
+  close_note: 'Closed 2026-08-03 — EV-022 Phase 4 done (user option 1: no 15/17). Path A PASS @ cc2750c (PR #190). Cleared for S025 / EV-023 CI release automation (#194).'
+  successor_session_id: S025-ci-release-automation
+  successor_evolve_cycle_id: EV-023
+- id: EV-023
+  session_id: S025-ci-release-automation
+  cycle_type: general
+  feature_ids: []
+  title: CI / local quality + release automation (#194)
+  status: in_progress
+  started: '2026-08-03'
+  completed:
+  predecessor_evolve_cycle_id: EV-022
+  predecessor_session_id: S024-website-scrape-crawl
+  github_issues:
+  - 194
+  - 182
+  - 103
+  scope_summary: 'GitHub #194 — CI / local quality + release automation epic. Children #182 (Husky gates) and #103 (release tagging). Minimal changes; Lean+build routing preset. Phase 0 feature allocation pending.'
+  routing_plan:
+    required_stages:
+    - 01-requirements
+    - 02-verify-plan
+    - 07-build
+    - 08-verify-build
+    - 10-e2e
+    - 13-deploy-smoke
+    skipped_stages:
+    - 03-plan-tooling
+    - 04-tech-plan
+    - 05-verify-tech
+    - 06-tech-tooling
+    - 09-qa
+    - 11-verify-impl
+    - 12-verify-deploy
+    - 15-service-health
+  routing_preset: lean_build
+  current_stage: 16-evolve Phase 0 intake
+  current_action: phase0_intake
+  next_action: 'Phase 0 intake — allocate feature_ids for #194/#182/#103'
+  branch: evolve/EV-023-ci-release-automation
+  evolve_branch: evolve/EV-023-ci-release-automation
+  mode: evolve
+  delta_only: true
+  phase0_approved: false
+  phase_0_status: pending
+  askquestion_pending: false
+  checkpoints:
+    phase_a: pending
+    phase_b: pending
+    phase_c: pending
+    phase_d: pending
+    deploy: pending
+  gates:
+    a_to_b: pending
+    b_to_c: pending
+    c_to_d: pending
+    deploy: pending
+  stages:
+    00-context:
+      status: completed
+      started: '2026-08-03'
+      completed: '2026-08-03'
+    16-evolve:
+      status: in_progress
+      started: '2026-08-03'
+      current_action: phase0_intake
+  artifacts: []
+  issues: []
+  decisions:
+  - id: S025-D1
+    decision: Session type feature → 16-evolve orchestrator
+    recorded_at: '2026-08-03T23:00:00Z'
+    status: confirmed
+  - id: S025-D2
+    decision: Routing = Lean+build (01→02→07→08→10→13; skip 03–06, 09, 11–12, 15)
+    recorded_at: '2026-08-03T23:00:00Z'
+    status: confirmed
+  - id: S025-D3
+    decision: 'Closed S024/EV-022 without 15/17 to start #194'
+    recorded_at: '2026-08-03T23:00:00Z'
+    status: confirmed
+  note: EV-023 opened 2026-08-03 after S024/EV-022 close (S024-D48); Lean+build preset
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -24577,6 +24785,50 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-03'
+  id: S025-D3
+  skill: 00-context
+  skill_id: 00-context
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  decision: 'Closed S024/EV-022 without 15/17 to start #194'
+  recorded_at: '2026-08-03T23:00:00Z'
+  status: confirmed
+- date: '2026-08-03'
+  id: S025-D2
+  skill: 00-context
+  skill_id: 00-context
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  decision: Routing = Lean+build (01→02→07→08→10→13; skip 03–06, 09, 11–12, 15)
+  recorded_at: '2026-08-03T23:00:00Z'
+  status: confirmed
+- date: '2026-08-03'
+  id: S025-D1
+  skill: 00-context
+  skill_id: 00-context
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  decision: Session type feature → 16-evolve orchestrator
+  recorded_at: '2026-08-03T23:00:00Z'
+  status: confirmed
+- date: '2026-08-03'
+  id: S024-D48
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S024-website-scrape-crawl
+  evolve_cycle_id: EV-022
+  decision: 'S024-D48: Close EV-022 / S024 as done (option 1); skip 15-service-health and 17-retrospective; evolve-summary recorded'
+  option: 1
+  choice: close_cycle_skip_15_17
+  user_close_choice: close_session_skip_15_17
+  recorded_at: '2026-08-03T23:00:00Z'
+  approved: '2026-08-03'
+  approved_at: '2026-08-03T23:00:00Z'
+  askquestion_pending: false
+  status: confirmed
+  report: docs/sessions/S024-website-scrape-crawl/reports/evolve-summary.md
+  note: 'Closed 2026-08-03 — EV-022 Phase 4 done (user option 1: no 15/17). Path A PASS @ cc2750c (PR #190). Cleared for S025 / EV-023 CI release automation (#194).'
 - date: '2026-08-03'
   skill: 12-verify-deploy
   skill_id: 12-verify-deploy
@@ -29787,9 +30039,22 @@ artifacts:
   evolve_cycle_id: EV-022
   recorded_at: '2026-08-03T22:18:30Z'
   note: 'Path A PASS @ cc2750c; PR #190 MERGED; Modal+DO CD success; H1/H3/H3b/H4/H5 PASS; H2 SKIP'
+- path: docs/sessions/S024-website-scrape-crawl/reports/evolve-summary.md
+  kind: evolve-summary
+  status: completed
+  session_id: S024-website-scrape-crawl
+  evolve_cycle_id: EV-022
+  recorded_at: '2026-08-03'
 git_history:
-  current_branch: docs/S024-EV-022-deploy-smoke-closeout
+  current_branch: evolve/EV-023-ci-release-automation
   branches:
+  - name: evolve/EV-023-ci-release-automation
+    purpose: EV-023 CI / local quality + release automation (#194)
+    base: main
+    status: open
+    created_at: '2026-08-03'
+    session_id: S025-ci-release-automation
+    evolve_cycle_id: EV-023
   - name: docs/S024-EV-022-deploy-smoke-closeout
     purpose: 'S024/EV-022 Path A deploy-smoke closeout docs (13 report + routing/HANDOFF)'
     base: main
