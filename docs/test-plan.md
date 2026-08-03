@@ -1312,8 +1312,9 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 ### TC-212: Patch bump from last semver tag (UJ-068, F63)
 
-- **Objective**: Next version helper returns patch+1 from latest `vX.Y.Z`.
-- **Input**: Fixture tags e.g. `v0.3.0` → `v0.3.1`.
+- **Objective**: Next version helper returns patch+1 from latest **strict** `vX.Y.Z`
+  (regex `^v[0-9]+\.[0-9]+\.[0-9]+$` — ignore `v0.2.0-deploy`, `v1.0-stable-verified`).
+- **Input**: Fixture tags e.g. `v0.3.0` → `v0.3.1`; real tip today `v0.4.0` → `v0.4.1`.
 - **Expected**: AC-REL2.
 
 ### TC-213: Skip release when commit has `[skip release]` (UJ-068, F63)
@@ -1332,7 +1333,8 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: Workflow YAML uses `workflow_run` (or equivalent) on DigitalOcean deploy success; not raw main push.
 - **Input**: `.github/workflows/release*.yml` structure.
-- **Expected**: Trigger after DO; permissions contents:write; AC-REL1/REL3.
+- **Expected**: Trigger after workflow named **Deploy DigitalOcean** succeeds on `main`;
+  permissions `contents: write`; Release body includes SHA + CI/CD URLs; AC-REL1 + AC-REL3.
 
 ## Test Data
 
