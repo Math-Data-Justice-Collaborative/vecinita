@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-08-02 (S023/EV-020 F50–F51 — AC-RQ8/RQ9 top_k=8 + default P3)
+> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — AC-SC1–SC12)
 
 ## Per-feature criteria
 
@@ -253,6 +253,23 @@
 - [x] **AC-IR5**: Chunks sized with HF tokenizer for `BAAI/bge-small-en-v1.5`; default `chunk_overlap_tokens=32` (TC-191, F49 / ADR-044). *(11-verify-impl S022 2026-08-02)*
 - [x] **AC-IR6**: Validation rejects `chunk_overlap_tokens` ≥ `chunk_size_tokens` (TC-192). *(11-verify-impl S022 2026-08-02)*
 - [x] **AC-IR7**: Out of EV-019 without unlock: #159 multilingual embeds; ChatRAG packing (#165); CE flag flip; changing ADR-023 tag fail-open. *(11-verify-impl S022 2026-08-02 — scope held)*
+
+### EV-022 — Website scrape & crawl (F59–F61) — S024 / epic #185
+
+- [ ] **AC-SC1**: Main-content extraction strips nav/footer boilerplate; keeps headings/lists/tables (TC-196, TC-199, UJ-064, F59 / #69).
+- [ ] **AC-SC2**: robots.txt respected; configurable rate limit + descriptive UA (TC-197, F59).
+- [ ] **AC-SC3**: PDF best-effort text extract; empty/no-text PDF soft-fails with recorded error — no silent empty doc (TC-198, S024-D29, F59).
+- [ ] **AC-SC4**: Crawl same-site scope + URL normalize/dedup/no cycles (TC-200, F60 / #71).
+- [ ] **AC-SC5**: Crawl honors `max_depth` / `max_pages` defaults (~2 / ~25) (TC-201, S024-D22, F60).
+- [ ] **AC-SC6**: Per-page soft fail; job can complete with partial success + tree payload (TC-202, UJ-065, F60).
+- [ ] **AC-SC7**: JobForm posts additive crawl options; `crawl=false` preserves single-URL ingest (TC-203, S024-D11, F60).
+- [ ] **AC-SC8**: `GET /internal/v1/corpus/tree` returns domain→path→document→chunks nesting (TC-204, UJ-066, F61 / #70).
+- [ ] **AC-SC9**: Admin Corpus tree expand/collapse + status/counts; flat toggle preserved (TC-205, TC-207, F61).
+- [ ] **AC-SC10**: Tree selection works with existing bulk dialogs (TC-206, TC-207, F61).
+- [ ] **AC-SC11**: Documents store path/parent nested source fields (asserted via TC-204);
+  ChatRAG backend may read — **no ChatRAG UI** (S024-D17/D30, F61). ChatRAG read coverage
+  may add a unit/integration case in 04/07 if needed.
+- [ ] **AC-SC12**: Out of EV-022 without unlock: ChatRAG tree UI; #94 curation; full OCR product; provider ABC; auth-walled crawl.
 
 
 ## Quantitative benchmarks

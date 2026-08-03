@@ -38,11 +38,13 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S019 | feature | completed | Batch A retrieval quality (F42 H7+P1) | `evolve/EV-016-retrieval-quality` (merged #172) | 2026-07-31 | 2026-08-01 |
 | S020 | feature | completed | Retrieval Batch B (F43 cache + #83/#161 + #162) | `evolve/EV-017-retrieval-batch-b` (merged #173) | 2026-08-02 | 2026-08-02 |
 | S021 | feature | completed | Empty retrieve + CE re-gate follow-on (#83 / AC-BB9); RET-001 via #177 | `evolve/EV-018-retrieval-follow-on` (merged #174); RET #177 @ 6e3207d | 2026-08-02 | 2026-08-02 |
-| S022 | feature | in_progress | Ingest resilience (#163/#166/#160 → F47–F49) | `evolve/EV-019-ingest-resilience` | 2026-08-02 | — |
+| S022 | feature | completed | Ingest resilience (#163/#166/#160 → F47–F49) | `evolve/EV-019-ingest-resilience` | 2026-08-02 | 2026-08-02 |
+| S023 | feature | completed | Residual top_k=8 + default P3 packing (F50/F51) | `evolve/EV-020-retrieval-topk-packing` | 2026-08-02 | 2026-08-03 |
+| S024 | feature | in_progress | Website scrape & crawl pipeline (epic #185 → #69/#71/#70) | `evolve/EV-022-website-scrape-crawl` | 2026-08-03 | — |
 
 ## Active session
 
-None — pipeline idle. S021/EV-018 closed 2026-08-02 after RET-001 PR [#177](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177) @ `6e3207d` (`follow_up_retro=after_next_evolve_hotfix`). Open next work with `@00-context`.
+**S024-website-scrape-crawl** / **EV-022** — epic [#185](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/185) (scrape → crawl → tree UI). Branch `evolve/EV-022-website-scrape-crawl`. Predecessor S023/EV-020 closed 2026-08-03.
 
 ## Folder layout
 

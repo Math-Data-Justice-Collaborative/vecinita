@@ -22,7 +22,8 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 | D1 | Seed corpus EN | corpus_fixture | `data/fixtures/corpus/en/` | none | TC-001, UJ-001 |
 | D2 | Seed corpus ES | corpus_fixture | `data/fixtures/corpus/es/` | none | TC-011 |
 | D3 | Eval Q&A pairs | eval_set | `data/fixtures/eval/` | none | Acceptance benchmarks |
-| D4 | Ingest HTML fixture | corpus_fixture | `data/fixtures/ingest/` | none | TC-010 |
+| D4 | Ingest HTML fixture | corpus_fixture | `data/fixtures/ingest/` | none | TC-010, TC-196–202 |
+| D4b | Scrape/crawl/PDF fixtures (EV-022) | corpus_fixture | `data/fixtures/ingest/` (extend in 07) | none | TC-196–207 |
 | D5 | Alembic migrations | migration | `apps/database/alembic/` | none | All DB tests |
 | D6 | FastEmbed model weights | model_weights | Hugging Face → Modal volume | HF token if gated | Modal embed |
 | D8 | Seed tag vocabulary | config_fixture | `data/fixtures/tags/seed_tags.json` | none | TC-041, F20 |

@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-02 (S022/EV-019 F49 — HF tokenizer on ingest path; ADR-044)
+> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — trafilatura + Playwright worker + pypdf; ADR-045)
 
 ## Runtime dependencies (Python — planned)
 
@@ -26,6 +26,18 @@
 | fastembed | TBD | 384-dim embeddings (Modal) | MIT | |
 | langdetect or equivalent | TBD | Bilingual auto-detect | | |
 | pytest / httpx | dev | Tests | | |
+
+### EV-022 — Website scrape & crawl (F59–F61, ADR-045)
+
+| Component | Package | New dep? | Notes |
+|-----------|---------|----------|-------|
+| Main-content extract | **`trafilatura`** | **Yes** | Prefer over readability-lxml; pin in root + Modal DM image (M108) |
+| PDF text | **`pypdf`** (already in root) | No | Best-effort; soft-fail empty (S024-D29) |
+| JS-render | **Playwright** (Python) in Modal DM worker | **Yes (worker image)** | `VECINITA_SCRAPE_JS_RENDER=auto\|always`; not heuristic-only |
+| UI E2E | `@playwright/test` (existing) | No | UJ-066 required; UJ-065 optional |
+
+**Explicitly not added EV-022:** external render SaaS; full OCR libs; scraper provider ABC;
+`readability-lxml` unless trafilatura spike fails (record waiver in 07).
 
 ### LlamaIndex evaluation (RD-023)
 

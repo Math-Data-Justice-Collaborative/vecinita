@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-02 (S023/EV-020 F50–F51 — top_k=8 + default P3 packer)
+> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — scrape/crawl/tree config)
 
 ## Precedence
 
@@ -227,6 +227,13 @@ corpus DB stays PII-free.
 | `VECINITA_EMBED_MAX_RETRIES` | int | `3` | No | Retries for transient embed HTTP failures (F48) |
 | `VECINITA_EMBED_RETRY_BACKOFF_S` | float | `0.5` | No | Base backoff seconds (exponential) between embed retries (F48) |
 | `VECINITA_SCRAPE_TIMEOUT_S` | int | `30` | No | Per-URL fetch timeout |
+| `VECINITA_SCRAPE_USER_AGENT` | string | `VecinitaBot/1.0 (+https://github.com/Math-Data-Justice-Collaborative/vecinita)` | No | Descriptive UA (F59) |
+| `VECINITA_SCRAPE_RATE_LIMIT_RPS` | float | `0.5` | No | Max requests/sec per host (F59/F60 politeness) |
+| `VECINITA_SCRAPE_RESPECT_ROBOTS` | string | `true` | No | Honor robots.txt (`true`/`false`) (F59) |
+| `VECINITA_CRAWL_MAX_DEPTH` | int | `2` | No | Default crawl depth when `crawl=true` (F60) |
+| `VECINITA_CRAWL_MAX_PAGES` | int | `25` | No | Default crawl page cap (F60) |
+| `VECINITA_SCRAPE_JS_RENDER` | string | `auto` | No | `off` \| `auto` \| `always` — JS-render policy; **Playwright in Modal DM worker** (ADR-045 / S024-D35) |
+| `VECINITA_SCRAPE_PDF_ENABLED` | string | `true` | No | Best-effort PDF text extract; soft-fail if empty (F59 / S024-D29) |
 | `VECINITA_LLM_TAG_MAX_TOKENS` | int | `128` | No | Max tokens for LLM tagging completion per document |
 | `VECINITA_REBUILD_SHADOW_ENABLED` | bool | `true` | No | **Planned/unused (TP-S017-12-A):** not read in code; `dry_run` shadow dual-write is always available for rebuild (F41) |
 | `VECINITA_EMBEDDING_MODEL_ID` | string | FastEmbed default pin | No | Version stamp on revisions/embeddings (F41; #159 may change) |
@@ -315,6 +322,11 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
 | `VECINITA_CHUNK_OVERLAP_TOKENS` ≥ 0 and &lt; `VECINITA_CHUNK_SIZE_TOKENS` | Ingest validation (F49) |
+| `VECINITA_CRAWL_MAX_DEPTH` ≥ 0 and ≤ 10 | Config + job options (F60) |
+| `VECINITA_CRAWL_MAX_PAGES` ≥ 1 and ≤ 500 | Config + job options (F60) |
+| `VECINITA_SCRAPE_RATE_LIMIT_RPS` &gt; 0 and ≤ 10 | Config module (F59) |
+| `VECINITA_SCRAPE_JS_RENDER` in `off`, `auto`, `always` | Config module (F59) |
+| `VECINITA_SCRAPE_PDF_ENABLED` / `VECINITA_SCRAPE_RESPECT_ROBOTS` in `true`, `false` | Config module (F59) |
 | `VECINITA_EMBED_BATCH_SIZE` ≥ 1 and ≤ 256 | Config / embed client (F48) |
 | `VECINITA_EMBED_MAX_RETRIES` ≥ 0 and ≤ 10 | Config / embed client (F48) |
 | `VECINITA_EMBED_RETRY_BACKOFF_S` ≥ 0 and ≤ 30 | Config / embed client (F48) |
@@ -366,6 +378,13 @@ ingest:
   embed_batch_size: 32
   embed_max_retries: 3
   scrape_timeout_s: 30
+  scrape_user_agent: "VecinitaBot/1.0 (+https://github.com/Math-Data-Justice-Collaborative/vecinita)"
+  scrape_rate_limit_rps: 0.5
+  scrape_respect_robots: true
+  crawl_max_depth: 2
+  crawl_max_pages: 25
+  scrape_js_render: auto
+  scrape_pdf_enabled: true
 ```
 
 Precedence: CLI flags > environment variables > `vecinita.yaml` > table defaults above.

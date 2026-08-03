@@ -5,13 +5,21 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-08-02 (EV-019 F47–F49 Gate A→B)
+> **Last updated**: 2026-08-03 (EV-022 F59–F61 RD-252–263)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-08-03 | EV022-H1–H9 | auto-approved | F59–F61 locked RD-252–263 / S024-D27–D33 |
+| 2026-08-03 | EV022-L1 | approved (fix) | Move POST `/jobs` 202 under POST; was orphaned under content-hash |
+| 2026-08-03 | EV022-M1 | approved (fix) | POST `/jobs` Auth → Supabase JWT + Modal proxy |
+| 2026-08-03 | EV022-M2 | approved | UJ-065 Playwright optional; UJ-066 Playwright required |
+| 2026-08-03 | EV022-M3 | approved (fix) | AC-SC11 via TC-204 nested fields; ChatRAG read optional in 04/07 |
+| 2026-08-03 | EV022-M4 | approved | OpenAPI crawl/tree deferred 04/07 |
+| 2026-08-03 | EV022-M5 | approved | `infra/vecinita.yaml` scrape/crawl keys in 04 |
+| 2026-08-03 | EV022-TP1–TP6 | approved | Phase 26 + ADR-045 + nested schema + tests + Path A deps + no new CORS; Playwright worker; trafilatura |
 | 2026-08-02 | EV019-H1–H12 | auto-approved | F47–F49 locked RD-219–228 / S022-D8–D19 |
 | 2026-08-02 | EV019-M1 | approved | Embed defaults batch 32 / retries 3 / backoff 0.5s (S022-D20) |
 | 2026-08-02 | EV019-M2 | approved | Job metric field names deferred to 04/OpenAPI (S022-D20) |
@@ -691,6 +699,32 @@ Standard routing. Reuse S019 spikes; not full re-investigation.
 
 Artifacts: feature-list F50–F51; UJ-063; TC-193–195; AC-RQ8–10;
 `docs/sessions/S023-retrieval-topk-packing/reports/01-requirements-topk-packing.md`.
+
+### EV-022 requirements decisions (2026-08-03) — RD-252–RD-263
+
+S024 / Website scrape & crawl — **F59** robust scrape (#69), **F60** website crawl (#71),
+**F61** corpus tree + nested meta (#70). Epic #185. Standard routing.
+
+> **Numbering note:** RD-237–RD-251 reserved for cancelled EV-021 (#149) references in
+> standing rules; EV-022 starts at **RD-252**.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-252 | Fn scope | **F59** (#69), **F60** (#71), **F61** (#70) | S024-D25 |
+| RD-253 | Ship order | Independent PRs **#69 → #71 → #70** | S024-D3 |
+| RD-254 | Scrape | Main-content + robots/rate-limit/UA; **JS-render in v1**; PDF **best-effort** soft-fail | S024-D7/D14/D29 |
+| RD-255 | Crawl API | Additive `POST /jobs` options (`crawl`, `max_depth`, `max_pages`, `crawl_scope`) | S024-D11/D15 |
+| RD-256 | Crawl defaults | max_depth≈**2**, max_pages≈**25**, polite RPS | S024-D22 |
+| RD-257 | Soft fail | Per-page fail continues crawl; partial metrics | S024-D13 |
+| RD-258 | Tree hierarchy | Domain → path → document → chunks; nested JSON APIs | S024-D12/D28 |
+| RD-259 | Apps | ingest + DM + Modal + write/OpenAPI + ChatRAG **backend** nested meta | S024-D18/D30 |
+| RD-260 | ChatRAG UI | Deferred; licensing research track only | S024-D17 |
+| RD-261 | JS-render runtime | **Playwright in Modal DM worker** (`off`/`auto`/`always`); not heuristic-only (S024-D35 / ADR-045) | S024-D21/D35 |
+| RD-262 | Tests | UJ-064–066; TC-196–207; AC-SC1–SC12; T0/T2 + T3 crawl smoke | S024-D23/D24/D31 |
+| RD-263 | Out of scope | #94; full OCR; provider ABC; auth crawl; ChatRAG tree UI | S024-D14 |
+
+Artifacts: feature-list F59–F61; UJ-064–066; TC-196–207; AC-SC1–12;
+`docs/sessions/S024-website-scrape-crawl/reports/01-requirements-scrape-crawl.md`.
 
 ### EV-019 tech-plan decisions (2026-08-02) — TP1–TP6
 
