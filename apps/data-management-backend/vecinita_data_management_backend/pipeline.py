@@ -9,10 +9,13 @@ from hashlib import sha256
 from typing import TYPE_CHECKING, Protocol, cast
 from uuid import UUID
 
+import httpx
 from pydantic import HttpUrl
 from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClientError
 from vecinita_ingest import chunk_text, fetch_url
+from vecinita_ingest.crawl import CrawlPlan, discover_crawl_urls
 from vecinita_ingest.models import ScrapedDocument
+from vecinita_ingest.nested_source import derive_nested_source
 from vecinita_ingest.scrape import parse_html
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
@@ -30,6 +33,8 @@ from vecinita_tagging.vocabulary import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from vecinita_embedding_client import EmbeddingClient
 
     from vecinita_data_management_backend.store import JobRecord, JobStore
@@ -38,6 +43,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _DEFAULT_EMBEDDING_MODEL_ID = "BAAI/bge-small-en-v1.5"
+_DEFAULT_MAX_DEPTH = 2
+_DEFAULT_MAX_PAGES = 25
 
 
 def _embedding_model_id() -> str:
@@ -47,6 +54,11 @@ def _embedding_model_id() -> str:
 
 def _raise_no_chunks(url: str) -> None:
     msg = f"no chunks produced for {url}"
+    raise ValueError(msg)
+
+
+def _raise_no_documents() -> None:
+    msg = "no documents produced"
     raise ValueError(msg)
 
 
@@ -83,13 +95,146 @@ class TagInferrer(Protocol):
         ...
 
 
-def run_ingest_job(  # noqa: C901, PLR0913, PLR0915  # ingest stages + F47/F48 metrics branches
+def _default_fetch_html(url: str) -> str:
+    """Fetch raw HTML for crawl link discovery."""
+    with httpx.Client(timeout=30.0, follow_redirects=True) as http:
+        response = http.get(url)
+        response.raise_for_status()
+        return response.text
+
+
+def _resolve_crawl_urls(
+    record: JobRecord,
+    *,
+    fetch_html: Callable[[str], str],
+) -> tuple[list[str], str | None]:
+    """Expand seed URL via BFS when ``crawl=true``; else return job URLs unchanged."""
+    if not _option_bool(record.options, "crawl") or not record.urls:
+        return list(record.urls), None
+    max_depth = _option_int(record.options, "max_depth", _DEFAULT_MAX_DEPTH)
+    max_pages = _option_int(record.options, "max_pages", _DEFAULT_MAX_PAGES)
+    result = discover_crawl_urls(
+        CrawlPlan(seed_url=record.urls[0], max_depth=max_depth, max_pages=max_pages),
+        fetch_html=fetch_html,
+    )
+    return list(result.urls), result.crawl_stopped_reason
+
+
+def _ingest_one_url(  # noqa: PLR0913  # mirrors run_ingest_job stage branches
+    url: str,
+    *,
+    fetcher: DocumentFetcher,
+    write_client: InternalWriteClient,
+    embed_client: EmbeddingClient,
+    chunk_size: int,
+    chunk_overlap: int,
+    force: bool,
+    tag_client: TagInferrer | None,
+    vocabulary: list[SeedTag],
+    slug_vocab: list[str],
+    max_document_tags: int,
+) -> tuple[DocumentUpsert, bool]:
+    """Scrape → chunk → tag → embed one URL. Returns (doc, skipped_unchanged)."""
+    scraped = fetcher(url)
+    text = scraped.text
+    title = scraped.title or ""
+    source_url = scraped.url
+    language = detect_document_language(text)
+    digest = sha256(text.encode("utf-8")).hexdigest()
+    nested = derive_nested_source(source_url)
+
+    stored_hash = _lookup_stored_content_hash(write_client, source_url)
+    if stored_hash is None and source_url != url:
+        stored_hash = _lookup_stored_content_hash(write_client, url)
+
+    if stored_hash is not None and stored_hash == digest and not force:
+        return (
+            DocumentUpsert(
+                url=HttpUrl(source_url),
+                title=scraped.title,
+                content_hash=digest,
+                language=language,
+                body_text=text,
+                embedding_model_id=_embedding_model_id(),
+                embedding_dim=EMBEDDING_DIMENSION,
+                chunk_size_tokens=chunk_size,
+                source_domain=nested.source_domain,
+                source_path=nested.source_path,
+                parent_url=nested.parent_url,
+                canonical_url=nested.canonical_url,
+                chunks=[],
+                tags=None,
+            ),
+            True,
+        )
+
+    chunks = chunk_text(
+        text,
+        chunk_size_tokens=chunk_size,
+        chunk_overlap_tokens=chunk_overlap,
+    )
+    if not chunks:
+        _raise_no_chunks(url)
+
+    tag_models: list[TagInput] | None = None
+    if tag_client is not None and slug_vocab:
+        try:
+            inferred = tag_client.infer_document_tags(
+                title=title,
+                text=text[:4000],
+                language=language,
+                vocabulary=slug_vocab,
+                max_tags=max_document_tags,
+            )
+        except LlmTagClientError as exc:
+            logger.warning(
+                "tag inference failed for %s; ingesting without LLM tags: %s",
+                url,
+                exc,
+            )
+            inferred = []
+        if inferred:
+            tag_models = tag_inputs_for_slugs(
+                inferred,
+                vocabulary,
+                language=language,
+                source="llm",
+            )
+
+    embeddings = embed_client.embed_batch(chunks)
+    chunk_models = [
+        ChunkUpsert(chunk_index=index, text=chunk, embedding=vector)
+        for index, (chunk, vector) in enumerate(zip(chunks, embeddings, strict=True))
+    ]
+    return (
+        DocumentUpsert(
+            url=HttpUrl(source_url),
+            title=scraped.title,
+            content_hash=digest,
+            language=language,
+            body_text=text,
+            embedding_model_id=_embedding_model_id(),
+            embedding_dim=EMBEDDING_DIMENSION,
+            chunk_size_tokens=chunk_size,
+            source_domain=nested.source_domain,
+            source_path=nested.source_path,
+            parent_url=nested.parent_url,
+            canonical_url=nested.canonical_url,
+            chunks=chunk_models,
+            tags=tag_models,
+        ),
+        False,
+    )
+
+
+def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + crawl/F47/F48 branches
     job_id: UUID,
     *,
     store: JobStore,
     embed_client: EmbeddingClient,
     write_client: InternalWriteClient,
     fetch_document: DocumentFetcher | None = None,
+    fetch_html: Callable[[str], str] | None = None,
     tag_client: TagInferrer | None = None,
     tag_vocabulary: list[SeedTag] | None = None,
     max_document_tags: int = 10,
@@ -101,87 +246,47 @@ def run_ingest_job(  # noqa: C901, PLR0913, PLR0915  # ingest stages + F47/F48 m
 
     store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
+    html_fetcher = fetch_html or _default_fetch_html
     chunk_size = _chunk_size_from_options(record.options)
     chunk_overlap = _chunk_overlap_from_options(record.options)
     vocabulary = tag_vocabulary if tag_vocabulary is not None else load_seed_vocabulary()
     slug_vocab = vocabulary_slugs(vocabulary)
 
     force = _option_bool(record.options, "force")
+    crawl_enabled = _option_bool(record.options, "crawl")
     skipped_unchanged = 0
     urls_failed_embed = 0
+    pages_fetched = 0
+    pages_failed = 0
+    crawl_stopped_reason: str | None = None
 
     try:
+        urls, crawl_stopped_reason = _resolve_crawl_urls(record, fetch_html=html_fetcher)
+        if crawl_enabled:
+            store.update_job(job_id, urls=urls)
+
         documents: list[DocumentUpsert] = []
-        for url in record.urls:
-            scraped = fetcher(url)
-            text = scraped.text
-            title = scraped.title or ""
-            source_url = scraped.url
-            language = detect_document_language(text)
-            digest = sha256(text.encode("utf-8")).hexdigest()
-
-            stored_hash = _lookup_stored_content_hash(write_client, source_url)
-            if stored_hash is None and source_url != url:
-                stored_hash = _lookup_stored_content_hash(write_client, url)
-
-            # F47 / #163: refresh metadata; skip chunk delete + re-embed when hash matches.
-            if stored_hash is not None and stored_hash == digest and not force:
-                skipped_unchanged += 1
-                documents.append(
-                    DocumentUpsert(
-                        url=HttpUrl(source_url),
-                        title=scraped.title,
-                        content_hash=digest,
-                        language=language,
-                        body_text=text,
-                        embedding_model_id=_embedding_model_id(),
-                        embedding_dim=EMBEDDING_DIMENSION,
-                        chunk_size_tokens=chunk_size,
-                        chunks=[],
-                        tags=None,
-                    )
-                )
-                continue
-
-            chunks = chunk_text(
-                text,
-                chunk_size_tokens=chunk_size,
-                chunk_overlap_tokens=chunk_overlap,
-            )
-            if not chunks:
-                _raise_no_chunks(url)
-
-            tag_models: list[TagInput] | None = None
-            if tag_client is not None and slug_vocab:
-                # Tagging is best-effort: a tag-inference failure (empty / non-JSON LLM
-                # completion, transient client error) must not fail the ingest job (#88).
-                try:
-                    inferred = tag_client.infer_document_tags(
-                        title=title,
-                        text=text[:4000],
-                        language=language,
-                        vocabulary=slug_vocab,
-                        max_tags=max_document_tags,
-                    )
-                except LlmTagClientError as exc:
-                    logger.warning(
-                        "tag inference failed for %s; ingesting without LLM tags: %s",
-                        url,
-                        exc,
-                    )
-                    inferred = []
-                if inferred:
-                    tag_models = tag_inputs_for_slugs(
-                        inferred,
-                        vocabulary,
-                        language=language,
-                        source="llm",
-                    )
-
+        for url in urls:
             try:
-                embeddings = embed_client.embed_batch(chunks)
+                doc, skipped = _ingest_one_url(
+                    url,
+                    fetcher=fetcher,
+                    write_client=write_client,
+                    embed_client=embed_client,
+                    chunk_size=chunk_size,
+                    chunk_overlap=chunk_overlap,
+                    force=force,
+                    tag_client=tag_client,
+                    vocabulary=vocabulary,
+                    slug_vocab=slug_vocab,
+                    max_document_tags=max_document_tags,
+                )
             except EmbeddingClientError:
                 urls_failed_embed += 1
+                if crawl_enabled:
+                    pages_failed += 1
+                    logger.warning("embed failed for crawl page %s; continuing", url)
+                    continue
                 store.update_job(
                     job_id,
                     status="failed",
@@ -193,47 +298,55 @@ def run_ingest_job(  # noqa: C901, PLR0913, PLR0915  # ingest stages + F47/F48 m
                     },
                 )
                 raise
-            chunk_models = [
-                ChunkUpsert(chunk_index=index, text=chunk, embedding=vector)
-                for index, (chunk, vector) in enumerate(zip(chunks, embeddings, strict=True))
-            ]
-            documents.append(
-                DocumentUpsert(
-                    url=HttpUrl(source_url),
-                    title=scraped.title,
-                    content_hash=digest,
-                    language=language,
-                    body_text=text,
-                    embedding_model_id=_embedding_model_id(),
-                    embedding_dim=EMBEDDING_DIMENSION,
-                    chunk_size_tokens=chunk_size,
-                    chunks=chunk_models,
-                    tags=tag_models,
-                )
-            )
+            except Exception:
+                if crawl_enabled:
+                    pages_failed += 1
+                    logger.warning(
+                        "page soft-fail for %s; continuing crawl job", url, exc_info=True
+                    )
+                    continue
+                raise
 
-        body = BatchUpsertRequest(documents=documents)
-        write_client.upsert_batch(body)
-        store.update_job(
-            job_id,
-            status="completed",
-            metrics={
-                "skipped_unchanged": skipped_unchanged,
-                "urls_failed_embed": urls_failed_embed,
-            },
-        )
+            if skipped:
+                skipped_unchanged += 1
+            pages_fetched += 1
+            documents.append(doc)
+
+        if documents:
+            write_client.upsert_batch(BatchUpsertRequest(documents=documents))
+        elif not crawl_enabled:
+            _raise_no_documents()
+
+        metrics: dict[str, object] = {
+            "skipped_unchanged": skipped_unchanged,
+            "urls_failed_embed": urls_failed_embed,
+        }
+        if crawl_enabled:
+            metrics["pages_fetched"] = pages_fetched
+            metrics["pages_failed"] = pages_failed
+            metrics["pages_skipped_robots"] = 0
+            if crawl_stopped_reason is not None:
+                metrics["crawl_stopped_reason"] = crawl_stopped_reason
+        store.update_job(job_id, status="completed", metrics=metrics)
     except EmbeddingClientError:
         raise
     except Exception as exc:
+        fail_metrics: dict[str, object] = {
+            "skipped_unchanged": skipped_unchanged,
+            "urls_failed_embed": urls_failed_embed,
+        }
+        if crawl_enabled:
+            fail_metrics["pages_fetched"] = pages_fetched
+            fail_metrics["pages_failed"] = pages_failed
+            fail_metrics["pages_skipped_robots"] = 0
+            if crawl_stopped_reason is not None:
+                fail_metrics["crawl_stopped_reason"] = crawl_stopped_reason
         store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
             error_message=str(exc)[:500],
-            metrics={
-                "skipped_unchanged": skipped_unchanged,
-                "urls_failed_embed": urls_failed_embed,
-            },
+            metrics=fail_metrics,
         )
         raise
 
@@ -295,6 +408,17 @@ def run_retag_job(  # noqa: PLR0913  # retag pipeline needs explicit stage depen
 def _option_bool(options: dict[str, object], key: str) -> bool:
     value = options.get(key)
     return value is True or value == "true"
+
+
+def _option_int(options: dict[str, object], key: str, default: int) -> int:
+    value = options.get(key, default)
+    if isinstance(value, bool):
+        return default
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        return int(value)
+    return default
 
 
 def _option_str(options: dict[str, object], key: str, default: str) -> str:
