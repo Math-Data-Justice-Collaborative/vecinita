@@ -41,6 +41,9 @@ services:
       - key: VECINITA_TOP_K
         scope: RUN_TIME
         value: "8"
+      - key: VECINITA_RAG_PACKER
+        scope: RUN_TIME
+        value: "p3"
       - key: VECINITA_ENV
         scope: RUN_TIME
         value: staging
