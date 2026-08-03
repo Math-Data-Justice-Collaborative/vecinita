@@ -3,9 +3,9 @@
 | Stage | Required | Status | Mode | Notes |
 |-------|----------|--------|------|-------|
 | 00-context | yes | completed | scoped | Session open 2026-08-02; S022 closed first |
-| 16-evolve | orchestrator | pending | — | EV-020 Phase 0 → Fn allocate |
+| 16-evolve | orchestrator | in_progress | — | EV-020 Phase C done; await Gate C→D |
 | 01-requirements | yes | completed | delta | Report: [01-requirements-topk-packing.md](./reports/01-requirements-topk-packing.md) |
-| 02-verify-plan | yes | pending | delta | Gate A→B |
+| 02-verify-plan | yes | completed | delta | Gate A→B PASS (S023-D10) |
 | 04-tech-plan | yes | completed | delta | Gate B→C PASS (S023-D12) |
 | 07-build | yes | completed | — | M105–M107 done 2026-08-03 |
 | 08-verify-build | yes | completed | — | Milestone/phase verification report |

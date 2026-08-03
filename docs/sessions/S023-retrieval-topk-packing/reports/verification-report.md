@@ -24,9 +24,12 @@
 | No Playwright / no new CORS/UI | PASS (AC-RQ10) |
 | `make check-fast` (M105 boundary) | PASS |
 
-## AC-RQ10 scope held
+## AC-RQ10 scope held (T107.3)
 
 No adaptive top_k · no CE enable · no Path B rechunk · no FE source truncation · no Playwright.
+
+Explicit `rag_packer="p1"` remains only in UJ-055 / UJ-059 fixtures (intentional journey coverage).
+Default hardcodes updated: `top_k` 5→8; packer `p1`→`p3` (code + DO + EvalConfig + UJ-004 yaml assert).
 
 ## Next
 
