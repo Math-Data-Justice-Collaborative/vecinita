@@ -1,24 +1,24 @@
 # HANDOFF — S023-retrieval-topk-packing
 
 > ADR-043 rolling digest · overwrite at safe-stops  
-> **Updated:** 2026-08-03 — **13-deploy-smoke** blocked: no `prod.env` / no `doctl`
+> **Updated:** 2026-08-03 — **13 Path A PASS**; EV-020 ready to close
 
 | Field | Value |
 |-------|--------|
-| Session | `S023-retrieval-topk-packing` **in_progress** |
-| Evolve | `EV-020` — F50 top_k=8 · F51 default P3 |
-| Branch | `evolve/EV-020-retrieval-topk-packing` @ `267af20` (+ uncommitted 11/12 docs) |
-| Draft PR | https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180 (CI green, MERGEABLE) |
-| Stage / action | **13-deploy-smoke** · awaiting deploy-path choice |
-| Links | [deploy-smoke](./reports/deploy-smoke.md) · [deploy-checklist](./reports/deploy-checklist.md) |
+| Session | `S023-retrieval-topk-packing` **in_progress** (close pending user) |
+| Evolve | `EV-020` — F50/F51 **shipped** |
+| Main | `726e7fc` (merge #180) |
+| Staging | ChatRAG live ask **8** sources |
+| Stage / action | **13-deploy-smoke** PASS — await cycle close AskQuestion |
+| Links | [deploy-smoke](./reports/deploy-smoke.md) · [evolve-summary](./reports/evolve-summary.md) |
 
 ## Gates
 
 | Gate | Status |
 |------|--------|
-| Phase D | **PASS** (S023-D21) |
-| Deploy | **blocked** — no `prod.env`, no `doctl` |
+| Phase D | **PASS** |
+| Deploy | **PASS** (Path A) |
 
 ## Next
 
-User: choose Path A deploy path (merge+CD / provide credentials / defer) + whether to commit session artifacts.
+User: close cycle / 15-service-health / 17-retrospective.
