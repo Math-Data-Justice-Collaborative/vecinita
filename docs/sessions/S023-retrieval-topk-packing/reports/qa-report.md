@@ -99,9 +99,9 @@ User chose option 2: address advisories before 11-verify-impl.
 
 | ID | Action | Result |
 |----|--------|--------|
-| QA-S023-A01 / A02 | Push branch · watch `ci.yml` | In progress (this commit + push) |
+| QA-S023-A01 / A02 | Draft PR #180 · watch `ci.yml` | **PASS** — [run 30813399911](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30813399911) @ `9da8f1b` (evolve push alone does not trigger CI) |
 | QA-S023-A04 | Confirm DO env in infra | **CONFIRMED** — `infra/do/chat-rag-backend.yaml` has `VECINITA_TOP_K=8`, `VECINITA_RAG_PACKER=p3` (plain RUN_TIME values, not secrets) |
-| Live DO app read | `doctl` / `prod.env` | **BLOCKED locally** — no `prod.env` / `DIGITALOCEAN_TOKEN` in this environment; live apply remains 12/13 |
+| Live DO app read | `doctl` / `prod.env` | **BLOCKED locally** — no `prod.env` / `DIGITALOCEAN_TOKEN`; live apply remains 12/13 |
 | QA-S023-A03 | nltk holds | No change (intentional) |
 
 ## Cross-links

@@ -3102,7 +3102,7 @@ active_session:
     status: pending
     mode: delta
     skip_rationale:
-    note: Deferred (S023-D16) — CI push + DO env confirm before 11
+    note: Ready (S023-D17) — advisories cleared; await 11-verify-impl
   - stage: 12-verify-deploy
     required: true
     status: pending
@@ -3129,10 +3129,10 @@ active_session:
     required: false
     status: skipped
     skip_rationale: Optional at close
-  current_stage: advisory-remediation
-  current_action: ci_push_and_do_env_confirm
-  next_action: push_watch_ci_confirm_do_env_then_11
-  current_stage_note: S023/EV-020 S023-D16 — defer 11 until advisory remediation (CI push + DO VECINITA_TOP_K=8 / VECINITA_RAG_PACKER=p3)
+  current_stage: 11-verify-impl
+  current_action: await_11_after_advisory_remediation
+  next_action: run_11_verify_impl
+  current_stage_note: S023/EV-020 S023-D17 — advisory remediation PASS; CI green PR #180 @ 9da8f1b; DO TOP_K=8/PACKER=p3 confirmed; ready for 11-verify-impl
   started_at: '2026-08-02'
   mode: evolve
   delta_only: true
@@ -3158,10 +3158,11 @@ active_session:
   - S023-D11 — 04 drafted Phase 25 M105–M107; TP1–TP6 recommended; await Gate B→C
   - S023-D15 — 09-qa pass_with_advisories + 10-e2e T0 PASS; next → 11-verify-impl
   - S023-D16 — Defer 11-verify-impl until advisory remediation: push branch for CI green + confirm DO VECINITA_TOP_K=8 / VECINITA_RAG_PACKER=p3
+  - S023-D17 — Advisory remediation PASS — CI green on draft PR #180 (run 30813399911); DO infra env confirmed; proceed to 11 when user approves
   active_task:
   active_milestone:
   phase_c_status: passed
-  notes: 'User selected option 2 — address QA/E2E advisories (CI + DO env) before 11'
+  notes: 'S023-D16 complete: CI PASS @ 9da8f1b (PR #180); DO infra TOP_K=8/PACKER=p3 confirmed; live DO at 12/13'
   gate_c_to_d: passed
   checkpoints_phase_c: passed
 sessions:
@@ -19009,9 +19010,11 @@ evolve_cycles:
   - 158
   - 165
   scope_summary: "F50: Promote prod top_k from 5 to 8 (code default + DO VECINITA_TOP_K + config-spec/vecinita.yaml).\nF51: Default VECINITA_RAG_PACKER p1→p3 (doc dedupe + char budget; CONTEXT_MAX_CHARS remains 3500).\nClose GitHub #158 and #165 after ship. Reuse S019 spike evidence; not full re-investigation.\nOut of scope: CE enable, multilingual embed, Path B rechunk, adaptive top_k.\n"
-  current_stage: 09-qa+10-e2e-advisory-remediation
-  current_action: 'Address advisories: CI push + DO env confirm before 11-verify-impl'
-  next_action: push_watch_ci_confirm_do_env_then_11
+  current_stage: 11-verify-impl
+  current_action: 'Advisories addressed (CI green + DO infra confirmed); ready for 11-verify-impl'
+  next_action: run_11_verify_impl
+  draft_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30813399911
   mode: evolve
   delta_only: true
   branch: evolve/EV-020-retrieval-topk-packing
@@ -19185,7 +19188,7 @@ evolve_cycles:
       note: S023/EV-020 10-e2e COMPLETE 2026-08-03 — T0 PASS; ready for 11-verify-impl
     11-verify-impl:
       status: pending
-      note: Deferred (S023-D16) — address advisories first (CI push + DO env confirm) before 11
+      note: Ready (S023-D17) — CI green PR #180 @ 9da8f1b; DO TOP_K=8/PACKER=p3 confirmed; await run_11_verify_impl
     12-verify-deploy:
       status: pending
     13-deploy-smoke:
@@ -19289,6 +19292,15 @@ evolve_cycles:
     recorded_at: '2026-08-03T12:10:48Z'
     kind: handoff
     note: Updated after 09+10 complete; next 11-verify-impl
+  - path: docs/sessions/S023-retrieval-topk-packing/HANDOFF.md
+    status: updated
+    session_id: S023-retrieval-topk-packing
+    stage: 11-verify-impl
+    skill_id: 16-evolve
+    evolve_cycle_id: EV-020
+    recorded_at: '2026-08-03T12:28:54Z'
+    kind: handoff
+    note: Advisory remediation complete (S023-D17); ready for 11-verify-impl
   decisions:
   - EV-020 stub opened 2026-08-02 with S023; Phase 0 intake pending
   - S023 00-context COMPLETE 2026-08-02 — session artifacts recorded; handoff → Phase 0 await_scope_fn_approval
@@ -19363,6 +19375,19 @@ evolve_cycles:
     skill_id: 16-evolve
     next_action: push_watch_ci_confirm_do_env_then_11
   - S023-D16 2026-08-03 option 2 — Defer 11 until CI push green + DO env confirm (VECINITA_TOP_K=8 / VECINITA_RAG_PACKER=p3)
+  - id: S023-D17
+    decision: Advisory remediation PASS — CI green on draft PR #180 (run 30813399911); DO infra env confirmed; proceed to 11 when user approves
+    summary: Advisory remediation PASS — CI green on draft PR #180 (run 30813399911); DO infra env confirmed; proceed to 11 when user approves
+    approved: '2026-08-03'
+    recorded_at: '2026-08-03T12:28:54Z'
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    skill_id: 16-evolve
+    draft_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30813399911
+    head: 9da8f1b
+    next_action: run_11_verify_impl
+  - S023-D17 2026-08-03 — Advisory remediation PASS — CI green on draft PR #180 (run 30813399911); DO infra env confirmed; proceed to 11 when user approves
   active_task:
   active_milestone:
   phase_c_build_complete: true
@@ -22428,6 +22453,19 @@ decisions_log:
   skill_id: 16-evolve
   next_action: push_watch_ci_confirm_do_env_then_11
 - S023-D16 2026-08-03 option 2 — Defer 11 until CI push green + DO env confirm (VECINITA_TOP_K=8 / VECINITA_RAG_PACKER=p3)
+- id: S023-D17
+  decision: Advisory remediation PASS — CI green on draft PR #180 (run 30813399911); DO infra env confirmed; proceed to 11 when user approves
+  summary: Advisory remediation PASS — CI green on draft PR #180 (run 30813399911); DO infra env confirmed; proceed to 11 when user approves
+  approved: '2026-08-03'
+  recorded_at: '2026-08-03T12:28:54Z'
+  session_id: S023-retrieval-topk-packing
+  evolve_cycle_id: EV-020
+  skill_id: 16-evolve
+  draft_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30813399911
+  head: 9da8f1b
+  next_action: run_11_verify_impl
+- S023-D17 2026-08-03 — Advisory remediation PASS — CI green on draft PR #180 (run 30813399911); DO infra env confirmed; proceed to 11 when user approves
 artifacts:
 - path: docs/sessions/S023-retrieval-topk-packing/session-brief.md
   session_id: S023-retrieval-topk-packing
@@ -24678,6 +24716,15 @@ artifacts:
   recorded_at: '2026-08-03T12:10:48Z'
   kind: handoff
   note: Updated after 09+10 complete; next 11-verify-impl
+- path: docs/sessions/S023-retrieval-topk-packing/HANDOFF.md
+  status: updated
+  session_id: S023-retrieval-topk-packing
+  stage: 11-verify-impl
+  skill_id: 16-evolve
+  evolve_cycle_id: EV-020
+  recorded_at: '2026-08-03T12:28:54Z'
+  kind: handoff
+  note: Advisory remediation complete (S023-D17); ready for 11-verify-impl
 git_history:
   current_branch: evolve/EV-020-retrieval-topk-packing
   branches:
@@ -27723,6 +27770,17 @@ git_history:
     files_changed: 1
     timestamp: '2026-08-03T12:07:00Z'
     note: Live HEAD tip note — Phase C docs; Gate C→D then 09+10
+  - sha: 9da8f1b
+    full_sha: 9da8f1ba7e9f246d800470855daf40e03805c2b1
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: 'docs(S023/EV-020): record 09-qa + 10-e2e; start advisory CI push'
+    stage: 09-qa+10-e2e
+    skill_id: 16-evolve
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    files_changed: 3
+    timestamp: '2026-08-03T12:17:46Z'
+    note: Advisory CI push tip; PR #180; CI run 30813399911 green
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
