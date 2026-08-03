@@ -176,3 +176,37 @@ def test_job_record_to_schema_maps_fields() -> None:
     assert schema.job_id == record.job_id
     assert schema.status == "pending"
     assert str(schema.urls[0]) == record.urls[0]
+
+
+def test_dict_job_store_persists_urls_metrics_and_actor() -> None:
+    """DictJobStore round-trips urls updates, metrics, and initiator fields."""
+    actor_id = uuid4()
+    backing: dict[str, JobPayload] = {}
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", backing))
+    record = store.create_job(
+        urls=["https://example.com/seed"],
+        initiated_by_user_id=actor_id,
+        initiated_by_role="admin",
+    )
+    updated = store.update_job(
+        record.job_id,
+        urls=["https://example.com/seed", "https://example.com/child"],
+        metrics={"pages_fetched": 2},
+        status="completed",
+    )
+    assert updated.urls == ["https://example.com/seed", "https://example.com/child"]
+    assert updated.metrics == {"pages_fetched": 2}
+    assert updated.initiated_by_user_id == actor_id
+    assert updated.initiated_by_role == "admin"
+
+    fetched = store.get_job(record.job_id)
+    assert fetched is not None
+    assert fetched.metrics == {"pages_fetched": 2}
+    assert fetched.initiated_by_user_id == actor_id
+
+
+def test_job_store_delete_job_base_raises() -> None:
+    """JobStore.delete_job is abstract and raises NotImplementedError."""
+    store = JobStore()
+    with pytest.raises(NotImplementedError):
+        store.delete_job(uuid4())

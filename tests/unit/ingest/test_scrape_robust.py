@@ -6,10 +6,11 @@ import time
 from pathlib import Path
 
 import pytest
-from vecinita_ingest.js_render import JsRenderMode, should_js_render
+import vecinita_ingest.scrape as scrape_mod
+from vecinita_ingest.js_render import JsRenderMode, parse_js_render_mode, should_js_render
 from vecinita_ingest.pdf import PdfExtractError, extract_pdf_text
 from vecinita_ingest.politeness import RateLimiter, robots_allows
-from vecinita_ingest.scrape import parse_html
+from vecinita_ingest.scrape import extract_main_content, parse_html
 
 _FIXTURES = Path(__file__).resolve().parents[3] / "data" / "fixtures" / "ingest"
 _BOILERPLATE = _FIXTURES / "boilerplate.html"
@@ -79,3 +80,57 @@ def test_should_js_render_auto_escalates_on_sparse_static_text() -> None:
     assert should_js_render(mode=JsRenderMode.ALWAYS, static_text=_LONG_STATIC)
     assert should_js_render(mode=JsRenderMode.AUTO, static_text="short")
     assert not should_js_render(mode=JsRenderMode.AUTO, static_text=_LONG_STATIC)
+
+
+def test_parse_js_render_mode_accepts_known_and_rejects_unknown() -> None:
+    """parse_js_render_mode maps off|auto|always and rejects unknown values."""
+    assert parse_js_render_mode(" auto ") is JsRenderMode.AUTO
+    assert parse_js_render_mode("OFF") is JsRenderMode.OFF
+    assert parse_js_render_mode("always") is JsRenderMode.ALWAYS
+    with pytest.raises(ValueError, match="VECINITA_SCRAPE_JS_RENDER"):
+        parse_js_render_mode("bogus")
+
+
+def test_extract_main_content_falls_back_when_trafilatura_returns_empty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When trafilatura yields nothing, visible-text fallback keeps body copy."""
+
+    def _empty_extract(*_args: object, **_kwargs: object) -> str:
+        return ""
+
+    monkeypatch.setattr(scrape_mod.trafilatura, "extract", _empty_extract)
+    html = "<html><body><p>Fallback body copy</p></body></html>"
+    text = extract_main_content(html)
+    assert "Fallback body copy" in text
+
+
+def test_rate_limiter_rejects_non_positive_rps() -> None:
+    """RateLimiter requires a positive RPS."""
+    with pytest.raises(ValueError, match="rate_limit_rps"):
+        RateLimiter(rate_limit_rps=0)
+    with pytest.raises(ValueError, match="rate_limit_rps"):
+        RateLimiter(rate_limit_rps=-1.0)
+
+
+def test_rate_limiter_skips_sleep_when_interval_already_elapsed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When enough wall time has passed, wait() returns without sleeping."""
+    clock = {"t": 100.0}
+    slept: list[float] = []
+
+    def _monotonic() -> float:
+        return clock["t"]
+
+    def _sleep(seconds: float) -> None:
+        slept.append(seconds)
+
+    monkeypatch.setattr(time, "monotonic", _monotonic)
+    monkeypatch.setattr(time, "sleep", _sleep)
+
+    limiter = RateLimiter(rate_limit_rps=_RATE_LIMIT_RPS)
+    assert limiter.wait() == 0.0
+    clock["t"] = 100.5  # > min interval
+    assert limiter.wait() == 0.0
+    assert slept == []

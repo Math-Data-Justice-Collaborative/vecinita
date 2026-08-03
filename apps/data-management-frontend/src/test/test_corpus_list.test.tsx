@@ -521,20 +521,36 @@ describe("CorpusList", () => {
         },
       ],
     };
+    const treeUrls: string[] = [];
+    const requestUrl = (input: RequestInfo | URL): string => {
+      if (typeof input === "string") {
+        return input;
+      }
+      if (input instanceof URL) {
+        return input.href;
+      }
+      return input.url;
+    };
     const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          items: MOCK_DOCS,
-          page: 1,
-          page_size: 50,
-          total: MOCK_DOCS.length,
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => tree,
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockImplementation(async (input) => {
+        const url = requestUrl(input);
+        if (url.includes("/corpus/tree")) {
+          treeUrls.push(url);
+          return {
+            ok: true,
+            json: async () => tree,
+          } as Response;
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            items: MOCK_DOCS,
+            page: 1,
+            page_size: 50,
+            total: MOCK_DOCS.length,
+          }),
+        } as Response;
       });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -547,11 +563,7 @@ describe("CorpusList", () => {
     await waitFor(() => {
       expect(screen.getByText("tree.example.com")).toBeInTheDocument();
     });
-    expect(
-      fetchMock.mock.calls.some(([url]) =>
-        String(url).includes("/corpus/tree"),
-      ),
-    ).toBe(true);
+    expect(treeUrls.length).toBeGreaterThan(0);
   });
 
   it("shows tree load error and refreshes tree view", async () => {
@@ -709,38 +721,46 @@ describe("CorpusList", () => {
         },
       ],
     };
-    const fetchMock = vi.fn().mockImplementation(async (input: RequestInfo) => {
-      const url = String(input);
-      if (url.includes("/corpus/tree")) {
-        return {
-          ok: true,
-          json: async () =>
-            fetchMock.mock.calls.filter(([u]) =>
-              String(u).includes("/corpus/tree"),
-            ).length > 1
-              ? treeAfter
-              : treeWithDoc,
-        };
+    let treeFetchCount = 0;
+    const requestUrl = (input: RequestInfo | URL): string => {
+      if (typeof input === "string") {
+        return input;
       }
-      if (url.includes("/documents/bulk")) {
+      if (input instanceof URL) {
+        return input.href;
+      }
+      return input.url;
+    };
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockImplementation(async (input) => {
+        const url = requestUrl(input);
+        if (url.includes("/corpus/tree")) {
+          treeFetchCount += 1;
+          return {
+            ok: true,
+            json: async () => (treeFetchCount > 1 ? treeAfter : treeWithDoc),
+          } as Response;
+        }
+        if (url.includes("/documents/bulk")) {
+          return {
+            ok: true,
+            json: async () => ({
+              successes: ["aaa-111"],
+              failures: [],
+            }),
+          } as Response;
+        }
         return {
           ok: true,
           json: async () => ({
-            successes: ["aaa-111"],
-            failures: [],
+            items: MOCK_DOCS,
+            page: 1,
+            page_size: 50,
+            total: MOCK_DOCS.length,
           }),
-        };
-      }
-      return {
-        ok: true,
-        json: async () => ({
-          items: MOCK_DOCS,
-          page: 1,
-          page_size: 50,
-          total: MOCK_DOCS.length,
-        }),
-      };
-    });
+        } as Response;
+      });
     vi.stubGlobal("fetch", fetchMock);
 
     renderCorpus();
@@ -761,10 +781,7 @@ describe("CorpusList", () => {
     fireEvent.click(screen.getByTestId("bulk-delete-btn"));
     fireEvent.click(screen.getByRole("button", { name: /confirm delete/i }));
     await waitFor(() => {
-      const treeCalls = fetchMock.mock.calls.filter(([u]) =>
-        String(u).includes("/corpus/tree"),
-      );
-      expect(treeCalls.length).toBeGreaterThanOrEqual(2);
+      expect(treeFetchCount).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -807,5 +824,4 @@ describe("CorpusList", () => {
       setTimeout(resolve, 50);
     });
   });
-
 });

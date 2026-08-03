@@ -556,3 +556,37 @@ def test_execute_eval_run_raises_on_http_error() -> None:
     with pytest.raises(InternalWriteClientError, match="execute_eval_run"):
         client.execute_eval_run(run_id, question="x")
     client.close()
+
+
+def test_list_eval_runs_returns_parsed_response() -> None:
+    """list_eval_runs GETs /internal/v1/eval/runs and validates the payload."""
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(
+            HTTPStatus.OK,
+            json={"items": [], "page": 1, "page_size": 100, "total_count": 0},
+        )
+    )
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    result = client.list_eval_runs(page=1, page_size=100)
+    assert result.total_count == 0
+    assert result.items == []
+    client.close()
+
+
+def test_list_eval_runs_raises_on_http_error() -> None:
+    """list_eval_runs raises InternalWriteClientError on non-2xx."""
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(HTTPStatus.BAD_GATEWAY, text="down")
+    )
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="list_eval_runs"):
+        client.list_eval_runs()
+    client.close()

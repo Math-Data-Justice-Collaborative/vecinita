@@ -110,3 +110,51 @@ def test_build_corpus_tree_root_filter() -> None:
     # smoke that children serialize
     roots = json_list(as_json_object({"roots": [r.model_dump() for r in tree.roots]}), "roots")
     assert roots
+
+
+def test_build_corpus_tree_root_url_document_label_and_empty_path() -> None:
+    """Root URL documents use '/' label and attach directly under the domain."""
+    doc_id = uuid4()
+    tree = build_corpus_tree(
+        [{"id": str(doc_id), "url": "https://root.example.com/", "source_path": "/"}],
+    )
+    assert len(tree.roots) == 1
+    domain = tree.roots[0]
+    assert domain.label == "root.example.com"
+    assert domain.children is not None
+    assert len(domain.children) == 1
+    doc = domain.children[0]
+    assert doc.kind == "document"
+    assert doc.label == "/"
+    assert doc.id == str(doc_id)
+
+
+def test_build_corpus_tree_root_prefix_keeps_matching_domain() -> None:
+    """Root filter keeps domains that start with the root prefix."""
+    rows: list[JsonObject] = [
+        {"id": uuid4(), "url": "https://docs.keep.example.com/a.html"},
+        {"id": uuid4(), "url": "https://other.example.org/b.html"},
+    ]
+    tree = build_corpus_tree(rows, root="docs.keep.example.com")
+    labels = {root.label for root in tree.roots}
+    assert labels == {"docs.keep.example.com"}
+
+
+def test_build_corpus_tree_ignores_non_string_optional_fields() -> None:
+    """Non-string nested-source columns fall back to URL derivation."""
+    tree = build_corpus_tree(
+        [
+            {
+                "id": uuid4(),
+                "url": "https://cast.example.com/path/doc.html",
+                "source_domain": 123,
+                "source_path": False,
+                "parent_url": 1.5,
+                "canonical_url": None,
+            }
+        ],
+    )
+    assert tree.roots[0].label == "cast.example.com"
+    path = tree.roots[0].children[0]
+    assert path.kind == "path"
+    assert path.label == "path"
