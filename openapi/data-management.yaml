@@ -885,6 +885,20 @@ components:
           additionalProperties:
             type: integer
           nullable: true
+        source_domain:
+          type: string
+          nullable: true
+          description: Nested source domain (F61)
+        source_path:
+          type: string
+          nullable: true
+          description: Nested URL path directory (F61)
+        parent_url:
+          type: string
+          nullable: true
+        canonical_url:
+          type: string
+          nullable: true
         children:
           type: array
           items:
@@ -900,6 +914,16 @@ components:
         job_id:
           type: string
           format: uuid
+        roots:
+          type: array
+          items:
+            $ref: "#/components/schemas/TreeNode"
+    CorpusTreeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - roots
+      properties:
         roots:
           type: array
           items:

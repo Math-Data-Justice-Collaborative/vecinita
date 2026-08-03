@@ -15,6 +15,7 @@ import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import create_engine, text
+from vecinita_ingest.nested_source import derive_nested_source
 from vecinita_llm_client import LlmClient, LlmClientError
 from vecinita_shared_schemas.audit_headers import (
     AUDIT_ACTOR_ID_HEADER,
@@ -30,6 +31,7 @@ from vecinita_shared_schemas.auth import (
     require_super_admin,
 )
 from vecinita_shared_schemas.cors import configure_cors
+from vecinita_shared_schemas.data_management import CorpusTreeResponse
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
     row_int,
@@ -128,6 +130,7 @@ from vecinita_internal_write_api.audit import (
     create_document_version,
     emit_audit_event,
 )
+from vecinita_internal_write_api.corpus_tree import build_corpus_tree
 from vecinita_internal_write_api.eval_config_presets_service import (
     EvalConfigPresetAccessError,
     clone_eval_config_preset,
@@ -424,19 +427,36 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
             for document in body.documents:
+                nested = derive_nested_source(
+                    str(document.url),
+                    parent_url=document.parent_url,
+                    source_domain=document.source_domain,
+                    source_path=document.source_path,
+                    canonical_url=document.canonical_url,
+                )
                 doc_id = scalar_uuid(
                     cast(
                         "object",
                         conn.execute(
                             text(
                                 """
-                        INSERT INTO documents (url, title, content_hash, language, body_text)
-                        VALUES (:url, :title, :content_hash, :language, :body_text)
+                        INSERT INTO documents (
+                            url, title, content_hash, language, body_text,
+                            source_domain, source_path, parent_url, canonical_url
+                        )
+                        VALUES (
+                            :url, :title, :content_hash, :language, :body_text,
+                            :source_domain, :source_path, :parent_url, :canonical_url
+                        )
                         ON CONFLICT (url) DO UPDATE
                         SET title = EXCLUDED.title,
                             content_hash = EXCLUDED.content_hash,
                             language = EXCLUDED.language,
                             body_text = COALESCE(EXCLUDED.body_text, documents.body_text),
+                            source_domain = EXCLUDED.source_domain,
+                            source_path = EXCLUDED.source_path,
+                            parent_url = EXCLUDED.parent_url,
+                            canonical_url = EXCLUDED.canonical_url,
                             updated_at = now()
                         RETURNING id
                         """
@@ -447,6 +467,10 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 "content_hash": document.content_hash,
                                 "language": document.language,
                                 "body_text": document.body_text,
+                                "source_domain": nested.source_domain,
+                                "source_path": nested.source_path,
+                                "parent_url": nested.parent_url,
+                                "canonical_url": nested.canonical_url,
                             },
                         ).scalar_one(),
                     )
@@ -1357,7 +1381,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         )
         list_sql = (
             """
-            SELECT id, url, title, language
+            SELECT id, url, title, language,
+                   source_domain, source_path, parent_url, canonical_url
             FROM documents
             WHERE body_text IS NULL OR btrim(body_text) = ''
             ORDER BY created_at DESC
@@ -1365,7 +1390,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             """
             if missing_body
             else """
-            SELECT id, url, title, language
+            SELECT id, url, title, language,
+                   source_domain, source_path, parent_url, canonical_url
             FROM documents
             ORDER BY created_at DESC
             LIMIT :limit OFFSET :offset
@@ -1388,12 +1414,49 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     url=row_str(mapping_row(row), "url"),
                     title=row_str_optional(mapping_row(row), "title"),
                     language=row_str_optional(mapping_row(row), "language"),
+                    source_domain=row_str_optional(mapping_row(row), "source_domain"),
+                    source_path=row_str_optional(mapping_row(row), "source_path"),
+                    parent_url=row_str_optional(mapping_row(row), "parent_url"),
+                    canonical_url=row_str_optional(mapping_row(row), "canonical_url"),
                 )
                 for row in rows
             ],
             page=page,
             page_size=page_size,
             total=total,
+        )
+
+    @app.get(
+        "/internal/v1/corpus/tree",
+        response_model=CorpusTreeResponse,
+        dependencies=[Depends(require_authenticated)],
+    )
+    def get_corpus_tree(  # pyright: ignore[reportUnusedFunction]
+        root: Annotated[str | None, Query()] = None,
+        job_id: Annotated[UUID | None, Query()] = None,
+        expand_depth: Annotated[int, Query(ge=0, le=10)] = 1,
+    ) -> CorpusTreeResponse:
+        """Nested domain → path → document tree for Admin Corpus (F61)."""
+        _ = expand_depth  # reserved for lazy chunk expansion
+        _ = job_id  # reserved — job-scoped filter when job↔doc link exists
+        with engine.connect() as conn:
+            rows = (
+                conn.execute(
+                    text(
+                        """
+                        SELECT id, url, title, language,
+                               source_domain, source_path, parent_url, canonical_url
+                        FROM documents
+                        ORDER BY source_domain NULLS LAST, source_path NULLS LAST, url
+                        """
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        return build_corpus_tree(
+            [as_json_object(dict(mapping_row(row))) for row in rows],
+            root=root,
         )
 
     @app.delete(

@@ -13,6 +13,7 @@ from vecinita_ingest.chunk import (
 from vecinita_ingest.crawl import CrawlPlan, CrawlResult, discover_crawl_urls, normalize_url
 from vecinita_ingest.js_render import JsRenderMode, parse_js_render_mode, should_js_render
 from vecinita_ingest.models import ScrapedDocument
+from vecinita_ingest.nested_source import NestedSourceFields, derive_nested_source
 from vecinita_ingest.pdf import PdfExtractError, extract_pdf_text
 from vecinita_ingest.politeness import RateLimiter, robots_allows
 from vecinita_ingest.scrape import extract_main_content, fetch_url, parse_html
@@ -27,11 +28,13 @@ __all__ = [
     "CrawlPlan",
     "CrawlResult",
     "JsRenderMode",
+    "NestedSourceFields",
     "PdfExtractError",
     "RateLimiter",
     "ScrapedDocument",
     "chunk_text",
     "count_tokens",
+    "derive_nested_source",
     "discover_crawl_urls",
     "encode_token_ids",
     "estimate_tokens",

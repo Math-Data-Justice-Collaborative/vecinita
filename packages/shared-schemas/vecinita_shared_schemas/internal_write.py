@@ -56,6 +56,10 @@ class DocumentUpsert(BaseModel):
     embedding_dim: int | None = Field(default=None, ge=1)
     chunk_size_tokens: int | None = Field(default=None, ge=1)
     rebuild_run_id: UUID | None = None
+    source_domain: str | None = None
+    source_path: str | None = None
+    parent_url: str | None = None
+    canonical_url: str | None = None
     chunks: list[ChunkUpsert] = Field(default_factory=list)
     tags: list[TagInput] | None = Field(default=None, max_length=10)
 
@@ -128,6 +132,10 @@ class DocumentSummary(BaseModel):
     url: str
     title: str | None = None
     language: str | None = None
+    source_domain: str | None = None
+    source_path: str | None = None
+    parent_url: str | None = None
+    canonical_url: str | None = None
 
 
 class DocumentContentHashResponse(BaseModel):

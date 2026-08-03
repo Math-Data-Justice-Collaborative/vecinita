@@ -11,10 +11,10 @@
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
 | **Active milestone** | M110 — F61 corpus tree API + Admin tree UI |
-| **Active task** | T110.1 — Corpus tree API red test |
-| **Tasks completed** | Phase 21–25 complete; M108–M109 done |
+| **Active task** | T110.3 — Admin Corpus tree UI |
+| **Tasks completed** | Phase 21–25 complete; M108–M109 done; T110.1–T110.2 done |
 | **Last updated** | 2026-08-03 |
-| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M108 done |
+| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M110 in progress |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
 | **Active session** | S024-website-scrape-crawl — 07-build |
 | **Scope addition** | 2026-08-03 — F59 scrape + F60 crawl + F61 tree (#185/#69/#71/#70). |
@@ -2197,9 +2197,9 @@ expand/collapse + bulk selection; ChatRAG backend nested source fields only — 
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T110.1 | Test: API e2e red — corpus tree nesting + nested source fields (TC-204) | Test | in_progress | AC-SC8/SC11, UJ-066 | T109.6 | — | S024 | F61 |
-| T110.2 | Code: write API / DM `GET /corpus/tree`; persist nested source columns | Code | pending | api-contract, ADR-045, F61 | T110.1 | — | S024 | F61 |
-| T110.3 | Code: Admin Corpus tree UI (toggle flat, expand/collapse, status, bulk) | Code | pending | AC-SC9/SC10, #70 | T110.2 | — | S024 | F61 |
+| T110.1 | Test: API e2e red — corpus tree nesting + nested source fields (TC-204) | Test | completed | AC-SC8/SC11, UJ-066 | T109.6 | 2026-08-03 | S024 | F61 |
+| T110.2 | Code: write API / DM `GET /corpus/tree`; persist nested source columns | Code | completed | api-contract, ADR-045, F61 | T110.1 | 2026-08-03 | S024 | F61 |
+| T110.3 | Code: Admin Corpus tree UI (toggle flat, expand/collapse, status, bulk) | Code | in_progress | AC-SC9/SC10, #70 | T110.2 | — | S024 | F61 |
 | T110.4 | Code: ChatRAG backend nested source metadata read (optional assert); **no FE** | Code | pending | AC-SC11, S024-D17/D30 | T110.2 | — | S024 | F61 |
 | T110.5 | Test: Vitest tree expand/selection (TC-205–206); Playwright UJ-066 (TC-207) | Test | pending | TP4, EV022-M2 | T110.3 | — | S024 | F61 |
 
@@ -3014,9 +3014,9 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T109.4 | M109 | 26 | Code | completed | T109.3 | 2026-08-03 | S024 | F60 | — |
 | T109.5 | M109 | 26 | Code | completed | T109.4 | 2026-08-03 | S024 | F60 | — |
 | T109.6 | M109 | 26 | Test | completed | T109.5 | 2026-08-03 | S024 | F60 | — |
-| T110.1 | M110 | 26 | Test | in_progress | T109.6 | — | S024 | F61 | — |
-| T110.2 | M110 | 26 | Code | pending | T110.1 | — | S024 | F61 | — |
-| T110.3 | M110 | 26 | Code | pending | T110.2 | — | S024 | F61 | — |
+| T110.1 | M110 | 26 | Test | completed | T109.6 | 2026-08-03 | S024 | F61 | — |
+| T110.2 | M110 | 26 | Code | completed | T110.1 | 2026-08-03 | S024 | F61 | — |
+| T110.3 | M110 | 26 | Code | in_progress | T110.2 | — | S024 | F61 | — |
 | T110.4 | M110 | 26 | Code | pending | T110.2 | — | S024 | F61 | — |
 | T110.5 | M110 | 26 | Test | pending | T110.3 | — | S024 | F61 | — |
 | T111.1 | M111 | 26 | Test | pending | T108.6 | — | S024 | F59 | — |

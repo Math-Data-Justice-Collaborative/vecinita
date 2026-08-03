@@ -164,6 +164,10 @@ class TreeNode(BaseModel):
     url: str | None = None
     status: str | None = None
     counts: dict[str, int] | None = None
+    source_domain: str | None = None
+    source_path: str | None = None
+    parent_url: str | None = None
+    canonical_url: str | None = None
     children: list[TreeNode] = Field(default_factory=list)
 
 
@@ -171,6 +175,12 @@ class JobTreeResponse(BaseModel):
     """GET /jobs/{job_id}/tree response."""
 
     job_id: UUID
+    roots: list[TreeNode]
+
+
+class CorpusTreeResponse(BaseModel):
+    """GET /internal/v1/corpus/tree response (F61)."""
+
     roots: list[TreeNode]
 
 

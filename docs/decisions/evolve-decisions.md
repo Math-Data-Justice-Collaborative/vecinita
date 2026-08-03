@@ -631,6 +631,7 @@ only (no ChatRAG UI — licensing research tracked).
 | S024-D35 | 04 TP locks | **TP1–TP6 all recommended**; JS-render **A** (Playwright in Modal worker); extract **`trafilatura`**; PDF **`pypdf`**; **ADR-045** |
 | S024-D36 | Phase 26 | M108 F59 → M109 F60 → M110 F61 → M111 e2e/OpenAPI; PR-59 / #69→#71→#70 |
 | S024-D37 | Gate B→C | **PASS** — Phase 26 approved; start 07-build T108.1 |
+| S024-D38 | T110.2 verify | Unit tests only; TC-204 e2e deferred until Docker/Postgres (option 2) |
 
 ### Impact analysis (docs / code)
 

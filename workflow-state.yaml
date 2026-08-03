@@ -1148,7 +1148,7 @@ project:
           pdf: pypdf
           updated_at: '2026-08-03T18:34:29Z'
           decision: S024-D35
-      askquestion_pending: true
+      askquestion_pending: false
     07-build:
       status: in_progress
       started: '2026-08-03'
@@ -1157,12 +1157,21 @@ project:
       evolve_cycle_id: EV-022
       branch: evolve/EV-022-website-scrape-crawl
       phase: 26
-      active_task: T110.1
+      active_task: T110.3
       active_milestone: M110
-      current_action: T110.1 — Corpus tree API red test
+      current_action: T110.3 in_progress — Admin Corpus tree UI
       gate_b_to_c: passed
       s024_d37_decision: S024-D37
-      note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
+      note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
+      askquestion_pending: false
+      t110_2_status: completed
+      t110_2_impl_written_uncommitted: false
+      t110_2_verification: unit_verified_e2e_deferred
+      t110_2_e2e_deferred: true
+      t110_2_e2e_note: TC-204 e2e still red until Docker/Postgres available; T111.3 will re-verify
+      s024_d38_decision: S024-D38
+      commit_pending: true
+      commit_pending_message: '[T110.2] feat: corpus tree API + nested source columns'
       prior_completed:
         status: completed
         completed: '2026-08-03'
@@ -1170,7 +1179,7 @@ project:
         evolve_cycle_id: EV-020
         head: bb4c400
         note: Phase 25 M105–M107 T105.1–T107.3 complete
-      next_action: T110.1 — Corpus tree API red test
+      next_action: Implement T110.3 Admin Corpus tree UI
       milestones_completed:
       - M108
       - M109
@@ -1187,11 +1196,13 @@ project:
       - T109.4
       - T109.5
       - T109.6
+      - T110.1
+      - T110.2
       substeps:
-        current_task: T110.1
+        current_task: T110.3
         current_milestone: M110
         phase: 26
-        task_status: pending
+        task_status: in_progress
         m108_status: completed
         m109_status: completed
         m110_status: in_progress
@@ -3660,12 +3671,22 @@ active_session:
     skip_rationale:
     mode: delta
     started_at: '2026-08-03'
-    current_action: T110.1 — Corpus tree API red test
-    active_task: T110.1
+    current_action: T110.3 in_progress — Admin Corpus tree UI
+    next_action: Implement T110.3 Admin Corpus tree UI
+    active_task: T110.3
     active_milestone: M110
     gate_b_to_c: passed
     s024_d37_decision: S024-D37
-    note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
+    note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
+    askquestion_pending: false
+    t110_2_status: completed
+    t110_2_impl_written_uncommitted: false
+    t110_2_verification: unit_verified_e2e_deferred
+    t110_2_e2e_deferred: true
+    t110_2_e2e_note: TC-204 e2e still red until Docker/Postgres available; T111.3 will re-verify
+    s024_d38_decision: S024-D38
+    commit_pending: true
+    commit_pending_message: '[T110.2] feat: corpus tree API + nested source columns'
     milestones_completed:
     - M108
     - M109
@@ -3682,6 +3703,8 @@ active_session:
     - T109.4
     - T109.5
     - T109.6
+    - T110.1
+    - T110.2
   - stage: 08-verify-build
     required: true
     status: pending
@@ -3716,11 +3739,12 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: T110.1 — Corpus tree API red test
-    note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
+    current_action: T110.3 in_progress — Admin Corpus tree UI
+    note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
     askquestion_pending: false
   current_stage: 07-build
-  current_action: T110.1 — Corpus tree API red test
+  current_action: T110.3 in_progress — Admin Corpus tree UI
+  next_action: Implement T110.3 Admin Corpus tree UI
   started_at: '2026-08-03'
   context_briefs: []
   feature_ids:
@@ -3732,8 +3756,16 @@ active_session:
   phase1_complete: true
   report: docs/sessions/S024-website-scrape-crawl/reports/tech-plan-delta.md
   report_status: completed
-  note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
+  note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
   askquestion_pending: false
+  t110_2_status: completed
+  t110_2_impl_written_uncommitted: false
+  t110_2_verification: unit_verified_e2e_deferred
+  t110_2_e2e_deferred: true
+  t110_2_e2e_note: TC-204 e2e still red until Docker/Postgres available; T111.3 will re-verify
+  s024_d38_decision: S024-D38
+  commit_pending: true
+  commit_pending_message: '[T110.2] feat: corpus tree API + nested source columns'
   s024_d35_decision: S024-D35
   s024_d36_decision: S024-D36
   s024_d37_decision: S024-D37
@@ -10136,10 +10168,19 @@ stages:
     - F59
     - F60
     - F61
-    current_action: T110.1 — Corpus tree API red test
-    next_action: T110.1 — Corpus tree API red test
-    active_task: T110.1
+    current_action: T110.3 in_progress — Admin Corpus tree UI
+    next_action: Implement T110.3 Admin Corpus tree UI
+    active_task: T110.3
     active_milestone: M110
+    askquestion_pending: false
+    t110_2_status: completed
+    t110_2_impl_written_uncommitted: false
+    t110_2_verification: unit_verified_e2e_deferred
+    t110_2_e2e_deferred: true
+    t110_2_e2e_note: TC-204 e2e still red until Docker/Postgres available; T111.3 will re-verify
+    s024_d38_decision: S024-D38
+    commit_pending: true
+    commit_pending_message: '[T110.2] feat: corpus tree API + nested source columns'
     phase: 26
     milestones:
     - M108
@@ -10162,14 +10203,16 @@ stages:
     - T109.4
     - T109.5
     - T109.6
+    - T110.1
+    - T110.2
     gate_b_to_c: passed
     s024_d37_decision: S024-D37
-    note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
+    note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
     substeps:
-      current_task: T110.1
+      current_task: T110.3
       current_milestone: M110
       phase: 26
-      task_status: pending
+      task_status: in_progress
       all_tasks_completed: false
       m108_status: completed
       m109_status: completed
@@ -21448,8 +21491,9 @@ evolve_cycles:
     - 06-tech-tooling
     - 15-service-health
   current_stage: 07-build
-  current_action: T110.1 — Corpus tree API red test
-  active_task: T110.1
+  current_action: T110.3 in_progress — Admin Corpus tree UI
+  next_action: Implement T110.3 Admin Corpus tree UI
+  active_task: T110.3
   active_milestone: M110
   mode: evolve
   delta_only: true
@@ -21459,6 +21503,14 @@ evolve_cycles:
   phase_0_status: approved
   phase_0_batch: completed
   askquestion_pending: false
+  t110_2_status: completed
+  t110_2_impl_written_uncommitted: false
+  t110_2_verification: unit_verified_e2e_deferred
+  t110_2_e2e_deferred: true
+  t110_2_e2e_note: TC-204 e2e still red until Docker/Postgres available; T111.3 will re-verify
+  s024_d38_decision: S024-D38
+  commit_pending: true
+  commit_pending_message: '[T110.2] feat: corpus tree API + nested source columns'
   phase_0_intake:
     status: completed
     current_batch: completed
@@ -21634,9 +21686,11 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-03'
-      current_action: start T108.1 unit test red (TC-196 main-content extract)
-      note: S024/EV-022 Gate B→C PASS (S024-D37) 2026-08-03 — user confirmed option 1; checkpoints.phase_b=passed; gates.b_to_c=passed; handoff → 07-build T108.1 (TC-196 main-content extract unit test red)
+      current_action: T110.3 in_progress — Admin Corpus tree UI
+      next_action: Implement T110.3 Admin Corpus tree UI
+      note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
       current_stage: 07-build
+      active_task: T110.3
       askquestion_pending: false
       gate_b_to_c: passed
     01-requirements:
@@ -21848,18 +21902,27 @@ evolve_cycles:
       - M109
       - M110
       - M111
-      current_action: T110.1 — Corpus tree API red test
-      active_task: T110.1
+      current_action: T110.3 in_progress — Admin Corpus tree UI
+      active_task: T110.3
       active_milestone: M110
-      next_action: T110.1 — Corpus tree API red test
+      next_action: Implement T110.3 Admin Corpus tree UI
+      askquestion_pending: false
+      t110_2_status: completed
+      t110_2_impl_written_uncommitted: false
+      t110_2_verification: unit_verified_e2e_deferred
+      t110_2_e2e_deferred: true
+      t110_2_e2e_note: TC-204 e2e still red until Docker/Postgres available; T111.3 will re-verify
+      s024_d38_decision: S024-D38
+      commit_pending: true
+      commit_pending_message: '[T110.2] feat: corpus tree API + nested source columns'
       gate_b_to_c: passed
       s024_d37_decision: S024-D37
       substeps:
-        current_task: T110.1
+        current_task: T110.3
         current_milestone: M110
         phase: 26
-        task_status: pending
-        next_action: Corpus tree API red test
+        task_status: in_progress
+        next_action: Implement T110.3 Admin Corpus tree UI
         m108_status: completed
         m109_status: completed
         m110_status: in_progress
@@ -21877,7 +21940,10 @@ evolve_cycles:
         - T109.4
         - T109.5
         - T109.6
-      note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
+        completed_tasks_m110:
+        - T110.1
+        - T110.2
+      note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
       milestones_completed:
       - M108
       - M109
@@ -21894,6 +21960,8 @@ evolve_cycles:
       - T109.4
       - T109.5
       - T109.6
+      - T110.1
+      - T110.2
     08-verify-build:
       status: pending
     09-qa:
@@ -22258,7 +22326,24 @@ evolve_cycles:
     - askquestion_pending
     - gate_b_to_c_pending
     note: S024/EV-022 Gate B→C PASS (S024-D37) 2026-08-03 — user confirmed option 1; checkpoints.phase_b=passed; gates.b_to_c=passed; handoff → 07-build T108.1 (TC-196 main-content extract unit test red)
-  next_action: T110.1 — Corpus tree API red test
+  - id: S024-D38
+    decision: T110.2 complete on unit tests only; TC-204 e2e deferred until Docker/Postgres up (option 2); T111.3 will re-verify
+    recorded_at: '2026-08-03T19:25:04Z'
+    skill: 07-build
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    status: confirmed
+    option: 2
+    choice: unit_only_e2e_deferred
+    askquestion_pending: false
+    approved: '2026-08-03'
+    approved_at: '2026-08-03T19:25:04Z'
+    clears:
+    - askquestion_pending
+    - docker_blocker
+    - t110_2_blocker
+    note: S024/EV-022 S024-D38 2026-08-03 — user chose option 2; T110.2 unit-verified complete; TC-204 e2e deferred until Docker/Postgres; T111.3 will re-verify; commit imminent (sha pending); active_task=T110.3
+  next_action: Implement T110.3 Admin Corpus tree UI
   tp_locks:
     playwright_js_render: true
     js_render: A_playwright_modal_worker
@@ -22331,7 +22416,7 @@ evolve_cycles:
   s024_d37_status: confirmed
   s024_d37_confirmed_at: '2026-08-03T18:37:34Z'
   gate_b_to_c: passed
-  note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
+  note: 'S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T110.1 completed (TC-204 red @ e108387); T110.2 completed (unit-verified; TC-204 e2e deferred per S024-D38 until Docker/Postgres; T111.3 will re-verify); commit imminent `[T110.2] feat: corpus tree API + nested source columns` (sha pending parent commit); active_task=T110.3 in_progress (Admin Corpus tree UI); active_milestone=M110; askquestion_pending=false; Docker blocker cleared'
   milestones_completed:
   - M108
   - M109
@@ -22348,6 +22433,8 @@ evolve_cycles:
   - T109.4
   - T109.5
   - T109.6
+  - T110.1
+  - T110.2
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -25878,6 +25965,24 @@ decisions_log:
   approved_at: '2026-08-03T18:37:34Z'
   askquestion_pending: false
 - date: '2026-08-03'
+  skill: 07-build
+  session_id: S024-website-scrape-crawl
+  evolve_cycle_id: EV-022
+  id: S024-D38
+  decision: 'S024-D38: T110.2 complete on unit tests only; TC-204 e2e deferred until Docker/Postgres up (option 2); T111.3 will re-verify'
+  recorded_at: '2026-08-03T19:25:04Z'
+  note: S024/EV-022 S024-D38 e2e deferral waiver — user chose option 2; unit-verified T110.2; TC-204 e2e still red until Docker/Postgres; T111.3 will re-verify; Docker askquestion cleared; active_task=T110.3
+  status: confirmed
+  option: 2
+  choice: unit_only_e2e_deferred
+  approved: '2026-08-03'
+  approved_at: '2026-08-03T19:25:04Z'
+  askquestion_pending: false
+  clears:
+  - askquestion_pending
+  - docker_blocker
+  - t110_2_blocker
+- date: '2026-08-03'
   skill: 04-tech-plan
   session_id: S024-website-scrape-crawl
   evolve_cycle_id: EV-022
@@ -25890,6 +25995,7 @@ decisions_log:
   recorded_at: '2026-08-03T18:34:29Z'
   note: Updates Phase 0 D21 deferral; locked in 04-tech-plan
 - S024-D37 2026-08-03 — Gate B→C PASS (option 1); Phase 26 / ADR-045 approved; checkpoints.phase_b=passed; gates.b_to_c=passed; 07-build in_progress @ T108.1 (TC-196 main-content extract)
+- S024-D38 2026-08-03 — T110.2 unit-verified complete (option 2); TC-204 e2e deferred until Docker/Postgres; T111.3 will re-verify; active_task=T110.3 Admin Corpus tree UI
 artifacts:
 - path: docs/feature-list.md
   kind: standing-doc
@@ -31638,6 +31744,18 @@ git_history:
     files_changed: 6
     timestamp: '2026-08-03T18:57:53Z'
     note: JobForm crawl toggle + max depth/pages; i18n; CreateJobOptions crawl fields; TC-203 Vitest; M109 complete; next T110.1
+  - sha: e108387
+    full_sha: e108387e378af886b0a0c68d6c706735d6d13bee
+    branch: evolve/EV-022-website-scrape-crawl
+    message: '[T110.1] test: add TC-204 corpus tree nesting e2e (red)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    task_id: T110.1
+    files_changed: 3
+    timestamp: '2026-08-03T18:59:06Z'
+    note: T110.1 COMPLETE — TC-204 corpus tree nesting e2e red; next T110.2 write API corpus/tree + nested source columns
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
