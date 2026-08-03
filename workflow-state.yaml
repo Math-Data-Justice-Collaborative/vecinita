@@ -2085,6 +2085,9 @@ project:
         overall: pass
         overall_result: PASS
         report: docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md
+      commit: b626dfd
+      commit_full: b626dfd7256d31a9566e91546edda9407b53601e
+      commits_head: b626dfd
     11-verify-impl:
       status: completed
       started_at: '2026-08-03'
@@ -4059,10 +4062,13 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: phase0_complete
+    current_action: awaiting_merge_for_13
     current_stage: 16-evolve Phase 0 approved
-    note: EV-023 Phase 0 APPROVED (S025-D4–D8); F62+F63 allocated; handoff → 01-requirements
-    askquestion_pending: false
+    note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
+    askquestion_pending: true
+    next_action: User approve merge; then 13-deploy-smoke
+    pr_number: 195
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
   - stage: 01-requirements
     required: true
     status: completed
@@ -4151,14 +4157,16 @@ active_session:
     completed_at: '2026-08-03T23:25:00Z'
     completed_ts: '2026-08-03T23:25:00Z'
     current_action: completed
-    next_action: Open PR then 13-deploy-smoke
+    next_action: User approve merge; then 13-deploy-smoke
     askquestion_pending: false
     result: pass
     overall_result: PASS
     report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
     gate_c_to_d: passed
     s025_d14_decision: S025-D14
-    note: S025/EV-023 10-e2e COMPLETE PASS @ 2026-08-03T23:25:00Z — UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; no product API/UI e2e (waived); phase_d pending until PR/13; next → Open PR then 13-deploy-smoke
+    note: 'S025/EV-023 10-e2e COMPLETE PASS @ 2026-08-03T23:25:00Z — UJ-067/068 T0 PASS 8/8; PR #195 OPEN; phase_d pending until merge/13; next → User approve merge; then 13-deploy-smoke'
+    commit: b626dfd
+    commit_full: b626dfd7256d31a9566e91546edda9407b53601e
   - stage: 11-verify-impl
     required: false
     status: skipped
@@ -4172,13 +4180,15 @@ active_session:
     status: pending
     mode: delta
     skip_rationale:
+    blocked_on: merge_pr_195
+    note: 'Awaiting user merge approval for PR #195 before 13-deploy-smoke'
   - stage: 15-service-health
     required: false
     status: skipped
     skip_rationale: Lean+build preset — optional at close
-  current_stage: 10-e2e
-  current_action: pr_then_13
-  next_action: Open PR then 13-deploy-smoke
+  current_stage: 16-evolve
+  current_action: awaiting_merge_for_13
+  next_action: User approve merge; then 13-deploy-smoke
   started_at: '2026-08-03'
   context_briefs: []
   routing_preset: lean_build
@@ -4188,7 +4198,7 @@ active_session:
   - F62
   - F63
   phase0_approved: true
-  askquestion_pending: false
+  askquestion_pending: true
   decisions:
   - 'S025-D1: Session type feature → 16-evolve orchestrator'
   - 'S025-D2: Routing = Lean+build (01→02→07→08→10→13; skip 03–06, 09, 11–12, 15)'
@@ -4213,7 +4223,7 @@ active_session:
   e2e_result: pass
   verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
   rd_range: RD-264..RD-271
-  commits_head: 23f9f71
+  commits_head: b626dfd
   s025_d9_decision: S025-D9
   gate_a_to_b: passed
   s025_d13_decision: S025-D13
@@ -4229,6 +4239,19 @@ active_session:
   checkpoints_phase_d: pending
   s025_d14_decision: S025-D14
   phase_d_started_at: '2026-08-03T23:19:16Z'
+  pr_number: 195
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+  pr_title: '[EV-023] CI release automation (F62/F63)'
+  pr_branch: evolve/EV-023-ci-release-automation
+  pr_base: main
+  pr_status: open
+  pr_opened_at: '2026-08-03'
+  pr_opened_ts: '2026-08-03T23:25:00Z'
+  pr_merged: false
+  pr_head_sha: b626dfd
+  pr_head_full: b626dfd7256d31a9566e91546edda9407b53601e
+  askquestion_pending_topic: merge_approve_then_13_deploy_smoke
+  note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
 sessions:
 - id: S024-website-scrape-crawl
   type: feature
@@ -12298,6 +12321,9 @@ stages:
       overall: pass
       overall_result: PASS
       report: docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md
+    commit: b626dfd
+    commit_full: b626dfd7256d31a9566e91546edda9407b53601e
+    commits_head: b626dfd
   11-verify-impl:
     status: completed
     started_at: '2026-08-03'
@@ -24064,16 +24090,16 @@ evolve_cycles:
     - 12-verify-deploy
     - 15-service-health
   routing_preset: lean_build
-  current_stage: 10-e2e
-  current_action: pr_then_13
-  next_action: Open PR then 13-deploy-smoke
+  current_stage: 16-evolve
+  current_action: awaiting_merge_for_13
+  next_action: User approve merge; then 13-deploy-smoke
   branch: evolve/EV-023-ci-release-automation
   evolve_branch: evolve/EV-023-ci-release-automation
   mode: evolve
   delta_only: true
   phase0_approved: true
   phase_0_status: approved
-  askquestion_pending: false
+  askquestion_pending: true
   checkpoints:
     phase_a: passed
     phase_b: waived
@@ -24093,9 +24119,12 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-03'
-      current_action: phase0_complete
-      askquestion_pending: false
-      note: Phase 0 APPROVED S025-D4–D8; F62+F63 allocated
+      current_action: awaiting_merge_for_13
+      askquestion_pending: true
+      note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
+      next_action: User approve merge; then 13-deploy-smoke
+      pr_number: 195
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
     01-requirements:
       status: completed
       started: '2026-08-03'
@@ -24205,7 +24234,7 @@ evolve_cycles:
       completed_at: '2026-08-03T23:25:00Z'
       completed_ts: '2026-08-03T23:25:00Z'
       current_action: completed
-      next_action: Open PR then 13-deploy-smoke
+      next_action: User approve merge; then 13-deploy-smoke
       askquestion_pending: false
       result: pass
       overall: pass
@@ -24213,7 +24242,7 @@ evolve_cycles:
       report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
       gate_c_to_d: passed
       s025_d14_decision: S025-D14
-      note: S025/EV-023 10-e2e COMPLETE PASS @ 2026-08-03T23:25:00Z — UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; no product API/UI e2e (waived); phase_d pending until PR/13; next → Open PR then 13-deploy-smoke
+      note: 'S025/EV-023 10-e2e COMPLETE PASS — UJ-067/068 T0 8/8; PR #195 OPEN @ b626dfd; phase_d pending until merge/13'
       t0:
         result: pass
         uj: UJ-067/068
@@ -24221,6 +24250,9 @@ evolve_cycles:
         tests_total: 8
       t2_t3: deferred_to_13
       product_api_ui_e2e: waived
+      commit: b626dfd
+      commit_full: b626dfd7256d31a9566e91546edda9407b53601e
+      commits_head: b626dfd
   artifacts:
   - path: docs/sessions/S025-ci-release-automation/reports/01-requirements-ci-release.md
     status: completed
@@ -24236,6 +24268,7 @@ evolve_cycles:
     status: completed
     result: pass
     session_id: S025-ci-release-automation
+    commit: b626dfd
   issues: []
   decisions:
   - id: S025-D14
@@ -24295,7 +24328,7 @@ evolve_cycles:
     decision: 'Closed S024/EV-022 without 15/17 to start #194'
     recorded_at: '2026-08-03T23:00:00Z'
     status: confirmed
-  note: EV-023 10-e2e COMPLETE PASS 2026-08-03T23:25:00Z — UJ-067/068 T0 8/8; T2/T3→13; API/UI e2e waived; phase_d still pending (PR/13 not done); next pr_then_13
+  note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
   phase0_approved_at: '2026-08-03T23:09:09Z'
   proposed_feature_ids: []
   proposed_features:
@@ -24332,7 +24365,7 @@ evolve_cycles:
   e2e_result: pass
   verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
   rd_range: RD-264..RD-271
-  commits_head: 23f9f71
+  commits_head: b626dfd
   s025_d9_decision: S025-D9
   gate_a_to_b: passed
   s025_d13_decision: S025-D13
@@ -24342,6 +24375,33 @@ evolve_cycles:
   gate_c_to_d: passed
   gate_b_to_c: waived
   phase_d_started_at: '2026-08-03T23:19:16Z'
+  pr_number: 195
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+  pr_title: '[EV-023] CI release automation (F62/F63)'
+  pr_branch: evolve/EV-023-ci-release-automation
+  pr_base: main
+  pr_status: open
+  pr_opened_at: '2026-08-03'
+  pr_opened_ts: '2026-08-03T23:25:00Z'
+  pr_merged: false
+  pr_head_sha: b626dfd
+  pr_head_full: b626dfd7256d31a9566e91546edda9407b53601e
+  askquestion_pending_topic: merge_approve_then_13_deploy_smoke
+  prs:
+    '195':
+      number: 195
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+      title: '[EV-023] CI release automation (F62/F63)'
+      branch: evolve/EV-023-ci-release-automation
+      base: main
+      status: open
+      head_sha: b626dfd
+      head_sha_full: b626dfd7256d31a9566e91546edda9407b53601e
+      opened_at: '2026-08-03'
+      opened_ts: '2026-08-03T23:25:00Z'
+      session_id: S025-ci-release-automation
+      evolve_cycle_id: EV-023
+      note: Local workflow-state may have uncommitted git_history append after b626dfd
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -30950,6 +31010,7 @@ artifacts:
   recorded_at: '2026-08-03T23:25:00Z'
   result: pass
   note: UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; product API/UI e2e waived
+  commit: b626dfd
 git_history:
   current_branch: evolve/EV-023-ci-release-automation
   branches:
@@ -30960,6 +31021,16 @@ git_history:
     created_at: '2026-08-03'
     session_id: S025-ci-release-automation
     evolve_cycle_id: EV-023
+    pr_number: 195
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+    pr_title: '[EV-023] CI release automation (F62/F63)'
+    pr_base: main
+    pr_status: open
+    pr_opened_at: '2026-08-03'
+    pr_opened_ts: '2026-08-03T23:25:00Z'
+    head_sha: b626dfd7256d31a9566e91546edda9407b53601e
+    head_short: b626dfd
+    note: 'PR #195 OPEN — await merge then 13-deploy-smoke; phase_d/deploy pending; local workflow-state may have uncommitted git_history append after b626dfd'
   - name: docs/S024-EV-022-deploy-smoke-closeout
     purpose: 'S024/EV-022 Path A deploy-smoke closeout docs (13 report + routing/HANDOFF)'
     base: main
@@ -31306,6 +31377,28 @@ git_history:
     evolve_cycle_id: EV-020
     head: bb4c400
   commits:
+  - sha: b626dfd
+    full_sha: b626dfd7256d31a9566e91546edda9407b53601e
+    sha_full: b626dfd7256d31a9566e91546edda9407b53601e
+    short: b626dfd
+    branch: evolve/EV-023-ci-release-automation
+    message: '[S025] docs: 10-e2e PASS for UJ-067/068 (F62/F63)'
+    stage: 10-e2e
+    skill_id: 10-e2e
+    session_id: S025-ci-release-automation
+    evolve_cycle_id: EV-023
+    files_changed: 3
+    timestamp: '2026-08-03T23:23:47Z'
+    note: 10-e2e PASS report committed @ b626dfd; UJ-067/068 T0 8/8; askquestion_pending left false (PR/13 gate AskQuestion to follow)
+    files:
+    - docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+    - docs/sessions/S025-ci-release-automation/HANDOFF.md
+    - workflow-state.yaml
+    feature_ids:
+    - F62
+    - F63
+    rd_range: RD-264..RD-271
+    result: pass
   - sha: 23f9f71
     full_sha: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
     sha_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
@@ -34622,6 +34715,22 @@ git_history:
   - '2026-07-30 S017/EV-015: QA-S017-B01 coverage fix IMPLEMENTED LOCALLY (test_rebuild_form.test.tsx + test_backfill_form.test.tsx); make test-coverage-fe FE_APP=data-management-frontend PASS — lines 100% (2814/2814), branches 98.11% (1817/1852); blocker status=resolved_pending_report; 09-qa overall still fail pending qa-report amend; uncommitted; current_stage remains 11-verify-impl; next → commit B01 fix → amend report → 11-verify-impl sign-off.'
   - '2026-07-30 S017/EV-015: 12-verify-deploy COMPLETE — deploy-checklist READY; failure mitigations 1–6 + rollback approved; TP-S017-12-A/B; HEAD ref at checklist write 1c2e46e (commit may follow); current_stage→13-deploy-smoke; phase_d=pending_user_checkpoint; next=Phase D checkpoint AskQuestion then invoke 13-deploy-smoke.'
   - '2026-07-30 S017/EV-015: 12-verify-deploy post-commit @ 180ad14 ([EV-015] docs: 12-verify-deploy checklist ready for F41); HEAD refs → 180ad14; phase_d remains pending_user_checkpoint (presenting AskQuestion now); left untracked scripts/deploy/_tmp_proxy_key_check.py (do not commit).'
+  pull_requests:
+    '195':
+      number: 195
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+      title: '[EV-023] CI release automation (F62/F63)'
+      branch: evolve/EV-023-ci-release-automation
+      base: main
+      status: open
+      head_sha: b626dfd
+      head_sha_full: b626dfd7256d31a9566e91546edda9407b53601e
+      opened_at: '2026-08-03'
+      opened_ts: '2026-08-03T23:25:00Z'
+      session_id: S025-ci-release-automation
+      evolve_cycle_id: EV-023
+      skill_id: 16-evolve
+      note: Awaiting merge approval → 13-deploy-smoke; workflow-state may have uncommitted git_history append after b626dfd
 constraints:
   cost:
     target_usd_per_month: 25
@@ -34634,6 +34743,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+next_action: User approve merge; then 13-deploy-smoke
 pipeline_idle: false
-pipeline_idle_note: '2026-08-02 — S020/EV-017 07-build in_progress; M97 COMPLETE @ d33cbec (T97.1–T97.5); M98 in_progress / T98.1 in_progress (UJ-057 answer cache e2e); 08-verify-build deferred until before Phase C PR (batch throughput)'
+pipeline_idle_note: '2026-08-03 — S025/EV-023 PR #195 open @ b626dfd; askquestion_pending=true (merge approve → 13-deploy-smoke); phase_d/deploy pending; EV-023 still in_progress'
