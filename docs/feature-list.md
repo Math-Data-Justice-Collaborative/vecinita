@@ -59,8 +59,8 @@
 | F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
 | F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
 | F49 | Chunk overlap + sizing clarity (#160) | Implemented | Data Management | packages/ingest, config-spec; optional admin FE | 11-verify-impl S022 2026-08-02; EV-019 #160 |
-| F50 | Promote prod top_k to 8 (#158) | Planned | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #158 |
-| F51 | Default P3 context packing (#165) | Planned | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #165 |
+| F50 | Promote prod top_k to 8 (#158) | Implemented | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #158 |
+| F51 | Default P3 context packing (#165) | Implemented | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #165 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 

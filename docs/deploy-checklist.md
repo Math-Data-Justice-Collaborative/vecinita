@@ -1,13 +1,13 @@
 # Deploy Checklist
 
-> **Generated**: 2026-08-01 (S019 / EV-016 delta)  
-> **Status**: **ready**  
-> **Session**: S019-retrieval-quality  
-> **Feature**: F42 H7+P1 retrieval quality (Hy1 on E0)
+> **Generated**: 2026-08-03 (S023 / EV-020 delta)  
+> **Status**: **ready** (12 signed S023-D21)  
+> **Session**: S023-retrieval-topk-packing  
+> **Features**: F50 top_k=8 · F51 default P3
 
-Full checklist: [sessions/S019-retrieval-quality/reports/deploy-checklist.md](sessions/S019-retrieval-quality/reports/deploy-checklist.md)
+Full checklist: [sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md](sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md)
 
-Prior: [sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md](sessions/S017-corpus-reembed-migration/reports/deploy-checklist.md)
+Prior: [sessions/S022-ingest-resilience/reports/deploy-checklist.md](sessions/S022-ingest-resilience/reports/deploy-checklist.md)
 
 ## Standing — Modal / DM job types (BUG-2026-07-31)
 
