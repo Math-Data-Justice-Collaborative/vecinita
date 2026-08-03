@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — AC-SC1–SC12)
+> **Last updated**: 2026-08-03 (S025/EV-023 F62–F63 — AC-CI1–CI5, AC-REL1–REL5)
 
 ## Per-feature criteria
 
@@ -270,6 +270,19 @@
   ChatRAG backend may read — **no ChatRAG UI** (S024-D17/D30, F61). ChatRAG read coverage
   may add a unit/integration case in 04/07 if needed.
 - [ ] **AC-SC12**: Out of EV-022 without unlock: ChatRAG tree UI; #94 curation; full OCR product; provider ABC; auth-walled crawl.
+
+### EV-023 — CI / local quality + release automation (F62–F63) — S025 / epic #194
+
+- [ ] **AC-CI1**: Default Husky pre-push runs **only** linting + unit tests (`test-fast` or equivalent) — no typecheck, security-scan, format-check, audit, coverage, or FE production builds (TC-208, UJ-067, F62 / #182).
+- [ ] **AC-CI2**: Husky pre-commit runs typecheck + security-scan + BUG-2026-07-31 job_type dispatch guard (TC-209, F62).
+- [ ] **AC-CI3**: `VECINITA_SKIP_PRE_COMMIT` and `VECINITA_SKIP_PRE_PUSH` (and existing medium/full push opt-ins) work and are documented (TC-210, F62).
+- [ ] **AC-CI4**: `docs/LOCAL_DEV.md` and `.cursor/rules/ci-local-parity.mdc` match the new tier table (TC-211, F62).
+- [ ] **AC-CI5**: Out of EV-023 without unlock: lint-staged scoped typecheck; format-check on commit; #181 ChatRAG perf gate; replacing GitHub CI.
+- [ ] **AC-REL1**: Release job runs only after successful DigitalOcean deploy on `main` (end of CD chain) (TC-215, UJ-068, F63 / #103).
+- [ ] **AC-REL2**: Creates next **patch** semver annotated tag from latest `v*` (TC-212, F63).
+- [ ] **AC-REL3**: Creates GitHub Release with commit SHA + CI/CD run URLs (TC-215, F63).
+- [ ] **AC-REL4**: Idempotent if HEAD already tagged; skips on `[skip release]` (TC-213, TC-214, F63).
+- [ ] **AC-REL5**: Out of EV-023 without unlock: full semantic-release / conventional-commits analyzer; floating major/minor tags; tagging before Modal/DO complete.
 
 
 ## Quantitative benchmarks

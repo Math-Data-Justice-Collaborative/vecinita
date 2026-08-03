@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — TC-196–207 scrape/crawl/tree)  
+> **Last updated**: 2026-08-03 (S025/EV-023 F62–F63 — TC-208–215 Husky/release)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -33,6 +33,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-064 Robust scrape | `tests/e2e/test_uj064_robust_scrape.py` | TC-196, TC-197, TC-198, TC-199 |
 | UJ-065 Website crawl | `tests/e2e/test_uj065_website_crawl.py` | TC-200, TC-201, TC-202, TC-203 | `tests/ui/admin/uj065-crawl-job.spec.ts` (opt) |
 | UJ-066 Corpus tree nesting | `tests/e2e/test_uj066_corpus_tree.py` | TC-204, TC-205, TC-206, TC-207 | `tests/ui/admin/uj066-corpus-tree.spec.ts` |
+| UJ-067 Lean Husky push | `tests/unit/ci/test_husky_tiers.py` (07) | TC-208, TC-209, TC-210, TC-211 | — (no UI) |
+| UJ-068 Auto release tag | `tests/unit/ci/test_release_tagging.py` (07) | TC-212, TC-213, TC-214, TC-215 | — (no UI) |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1283,6 +1285,56 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Playwright: toggle tree/flat; nest visible; bulk from tree.
 - **Input**: Admin Corpus with mocks.
 - **Expected**: Nesting visible; flat restored; AC-SC9/SC10; UJ-066.
+
+### TC-208: Default pre-push is lint + test-fast only (UJ-067, F62)
+
+- **Objective**: Default `scripts/ci/pre_push.sh` path does not invoke typecheck or security-scan.
+- **Input**: Parse/invoke pre_push with skip/full/medium unset (unit or dry-run contract).
+- **Expected**: Only lint + `test-fast` targets; AC-CI1.
+
+### TC-209: Pre-commit runs typecheck + security-scan + job-dispatch (UJ-067, F62)
+
+- **Objective**: Expanded pre-commit aggregates offloaded gates + BUG-2026-07-31 guard.
+- **Input**: `scripts/ci/pre_commit*.sh` / husky pre-commit entry.
+- **Expected**: Typecheck + security-scan + job_dispatch present; AC-CI2.
+
+### TC-210: Skip env knobs for both hooks (UJ-067, F62)
+
+- **Objective**: `VECINITA_SKIP_PRE_COMMIT=1` and `VECINITA_SKIP_PRE_PUSH=1` exit 0 without work.
+- **Input**: Env set; run hook scripts.
+- **Expected**: Skip messages; AC-CI3.
+
+### TC-211: Docs/rules tier table matches hooks (UJ-067, F62)
+
+- **Objective**: `docs/LOCAL_DEV.md` + `ci-local-parity.mdc` describe push=lint+units, commit=typecheck+security-scan.
+- **Input**: Doc/rule text assertions or checklist in 08.
+- **Expected**: No contradiction with scripts; AC-CI4.
+
+### TC-212: Patch bump from last semver tag (UJ-068, F63)
+
+- **Objective**: Next version helper returns patch+1 from latest **strict** `vX.Y.Z`
+  (regex `^v[0-9]+\.[0-9]+\.[0-9]+$` — ignore `v0.2.0-deploy`, `v1.0-stable-verified`).
+- **Input**: Fixture tags e.g. `v0.3.0` → `v0.3.1`; real tip today `v0.4.0` → `v0.4.1`.
+- **Expected**: AC-REL2.
+
+### TC-213: Skip release when commit has `[skip release]` (UJ-068, F63)
+
+- **Objective**: Escape hatch prevents tagging.
+- **Input**: Commit message containing `[skip release]`.
+- **Expected**: No tag action; AC-REL4.
+
+### TC-214: Idempotent when HEAD already tagged (UJ-068, F63)
+
+- **Objective**: Second run on same SHA is no-op.
+- **Input**: HEAD has annotated tag already.
+- **Expected**: Skip duplicate; AC-REL4.
+
+### TC-215: Release workflow triggers after DO CD success (UJ-068, F63)
+
+- **Objective**: Workflow YAML uses `workflow_run` (or equivalent) on DigitalOcean deploy success; not raw main push.
+- **Input**: `.github/workflows/release*.yml` structure.
+- **Expected**: Trigger after workflow named **Deploy DigitalOcean** succeeds on `main`;
+  permissions `contents: write`; Release body includes SHA + CI/CD URLs; AC-REL1 + AC-REL3.
 
 ## Test Data
 

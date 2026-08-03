@@ -1,7 +1,8 @@
-"""Security gap fixes — load Supabase credentials for pre-push / advisors.
+"""Security gap fixes — load Supabase credentials for pre-commit / advisors.
 
-Covers: pre-push must load SUPABASE_ACCESS_TOKEN from .env before soft-skipping
-advisors; shared helper must parse-only (never source) .env / prod.env.
+Covers: pre-commit must load SUPABASE_ACCESS_TOKEN from .env before soft-skipping
+advisors (F62 moved security-scan off pre-push); shared helper must parse-only
+(never source) .env / prod.env.
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[3]
 HELPER = REPO_ROOT / "scripts" / "security" / "load_supabase_credentials.sh"
 PRE_PUSH = REPO_ROOT / "scripts" / "ci" / "pre_push.sh"
+PRE_COMMIT = REPO_ROOT / "scripts" / "ci" / "pre_commit.sh"
 REMEDIATE = REPO_ROOT / "scripts" / "security" / "remediate-supabase-advisors.sh"
 APPLY_AUTH = REPO_ROOT / "scripts" / "supabase" / "apply_auth_config_from_toml.sh"
 CONFIG_TOML = REPO_ROOT / "supabase" / "config.toml"
@@ -24,7 +26,7 @@ ENV_EXAMPLE = REPO_ROOT / "supabase" / ".env.example"
 
 
 def test_load_supabase_credentials_helper_exists() -> None:
-    """Shared parse-only credential loader must exist for pre-push parity."""
+    """Shared parse-only credential loader must exist for pre-commit parity."""
     assert HELPER.is_file(), f"missing helper: {HELPER}"
 
 
@@ -103,13 +105,25 @@ def test_load_supabase_credentials_prefers_existing_process_env(
     assert "SUPABASE_PROJECT_REF=from_process" in result.stdout
 
 
-def test_pre_push_loads_credentials_before_advisor_skip() -> None:
-    """pre_push must load .env credentials before deciding to skip advisors."""
-    text = PRE_PUSH.read_text(encoding="utf-8")
+def test_pre_commit_loads_credentials_before_advisor_skip() -> None:
+    """pre_commit must load .env credentials before deciding to skip advisors (F62)."""
+    text = PRE_COMMIT.read_text(encoding="utf-8")
     assert "load_supabase_credentials.sh" in text
     skip_pos = text.index("SEC_SKIP_SUPABASE_ADVISORS=1")
     load_pos = text.index("load_supabase_credentials.sh")
     assert load_pos < skip_pos, "credentials must load before soft-skip"
+    # Lean pre-push must not own security-scan / advisor credential loading.
+    push = PRE_PUSH.read_text(encoding="utf-8")
+    assert "load_supabase_credentials.sh" not in push
+    assert "make security-scan" not in push
+
+
+def test_lean_pre_push_has_no_security_scan() -> None:
+    """F62 / TC-208: default pre-push is lint + test-fast only."""
+    push = PRE_PUSH.read_text(encoding="utf-8")
+    assert "make lint" in push
+    assert "make test-fast" in push
+    assert "make security-scan" not in push
 
 
 def test_remediator_and_apply_auth_pin_auth_db_pool_percent() -> None:
@@ -128,10 +142,11 @@ def test_config_toml_documents_auth_pool_management_api_pin() -> None:
     assert "percent" in text
 
 
-def test_static_analysis_docs_cover_prepush_env_and_kics_medium() -> None:
-    """Docs must describe .env pre-push loading, OpenGrep GHA noise, KICS MEDIUM."""
+def test_static_analysis_docs_cover_precommit_env_and_kics_medium() -> None:
+    """Docs must describe .env pre-commit loading, OpenGrep GHA noise, KICS MEDIUM."""
     static = STATIC_ANALYSIS_DOC.read_text(encoding="utf-8")
-    assert "pre-push" in static.lower() or "pre_push" in static
+    assert "pre-commit" in static.lower() or "pre_commit" in static
+    assert "load_supabase_credentials" in static
     assert ".env" in static
     assert "MEDIUM" in static
     assert "OpenGrep" in static
@@ -150,7 +165,7 @@ def test_supabase_env_example_documents_project_ref_alias() -> None:
 
 @pytest.mark.parametrize(
     ("path"),
-    [HELPER, PRE_PUSH, REMEDIATE, APPLY_AUTH],
+    [HELPER, PRE_PUSH, PRE_COMMIT, REMEDIATE, APPLY_AUTH],
 )
 def test_gap_scripts_are_executable_or_bash(path: Path) -> None:
     """Gap-related scripts exist and are bash."""

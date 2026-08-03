@@ -6,7 +6,7 @@ Hard-fail suite for SAST, secrets, IaC, SBOM, and vulnerability scanning.
 
 ```bash
 make security-scan-install   # once (or after SEC_FORCE=1)
-make security-scan           # hard-fail; also on husky pre-push + make ci / ci-push
+make security-scan           # hard-fail; also on husky pre-commit + make ci / ci-push
 ```
 
 Reports land in `.security-reports/` (gitignored). Binaries in `.tools/security/` (gitignored).
@@ -53,13 +53,13 @@ PyPI commercial/OSS review until upstream includes UvLock in the SPDX document.
 
 Set `SEC_SBOM_FETCH_LICENSES=0` / `SEC_SBOM_ENRICH_LICENSES=0` only when offline.
 
-## Pre-push + `.env`
+## Pre-commit + `.env` (F62)
 
-Husky `scripts/ci/pre_push.sh` runs `make security-scan`. Before deciding whether to skip
-Supabase advisors, it loads credentials via
+Husky `scripts/ci/pre_commit.sh` runs `make security-scan` (moved off lean pre-push).
+Before deciding whether to skip Supabase advisors, it loads credentials via
 `scripts/security/load_supabase_credentials.sh` (parse-only from `.env` / `prod.env`, plus
 `supabase/config.toml` `project_id`). Set `SUPABASE_ACCESS_TOKEN` in `.env` (and optionally
-`SUPABASE_PROJECT_REF`) so local pushes hard-fail on advisor WARN/ERROR the same way CI does.
+`SUPABASE_PROJECT_REF`) so local commits hard-fail on advisor WARN/ERROR the same way CI does.
 
 Waive with `SEC_SKIP_SUPABASE_ADVISORS=1` only when intentionally offline.
 

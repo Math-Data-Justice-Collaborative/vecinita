@@ -1,12 +1,13 @@
 ---
-description: Local CI parity — fast agent hooks vs medium pre-push vs full PR-ready
+description: Local CI parity — lean pre-push, heavier pre-commit, full PR-ready
 alwaysApply: true
 ---
 
 # Local CI Parity
 
-Three tiers for day-to-day work; **full CI parity only before opening a PR**. GitHub Actions
-remains the merge gate.
+Husky splits local gates (F62 / #182): **pre-push stays lean** (lint + unit tests);
+**pre-commit** runs typecheck + security-scan + job_type dispatch. **Full CI parity only
+before opening a PR**. GitHub Actions remains the merge gate.
 
 ## When to run what
 
@@ -14,8 +15,9 @@ remains the merge gate.
 |------|---------|------|
 | While editing | Hooks (auto) | `format` + `lint-fix` + scoped typecheck on edited file |
 | Agent stop | `make check-fast` + `make test-fast` | Lint + typecheck; scoped unit tests |
-| Before commit | `make check` | Lint + format-check + typecheck (manual) |
-| **git push** (Husky) | `make check-fast` + `make test-fast` | Fast tier — lint + typecheck + scoped unit tests |
+| **git commit** (Husky) | `scripts/ci/pre_commit.sh` | Typecheck + security-scan + job-dispatch |
+| **git push** (Husky) | `make lint` + `make test-fast` | Lint + scoped unit tests only |
+| Before commit (manual) | `make check` | Lint + format-check + typecheck |
 | **Before opening PR** | `make ci-push` or `make ci-pr-ready` | Full CI parity locally |
 
 Hook scripts: `.cursor/hooks/make_format_lint_fix.py`, `.cursor/hooks/typecheck.py`,
@@ -23,25 +25,32 @@ Hook scripts: `.cursor/hooks/make_format_lint_fix.py`, `.cursor/hooks/typecheck.
 
 Stop-hook failures are **advisory** (do not block ending the session).
 
-## Tier 1 — Fast (agent edit + stop hook)
+## Tier 1 — Lean push + agent stop
 
 | When | Command | What |
 |------|---------|------|
 | After save | Hooks | `format` + `lint-fix` + scoped `typecheck` on edited file |
 | Agent stop | `make check-fast` + `make test-fast` | Lint + typecheck; unit tests for changed components only |
+| git push | `make lint` + `make test-fast` | **No** typecheck / security-scan on push |
 
-## Tier 2 — Medium (before commit; optional on push)
+## Tier 2 — Pre-commit (Husky) + optional medium push
 
 ```bash
-make check          # lint + format-check + typecheck
+# Husky pre-commit (default on every commit):
+make typecheck
+make security-scan
+# + scripts/ci/pre_commit_job_dispatch.sh
+
+make check          # manual: lint + format-check + typecheck
 make test-fast      # scoped unit tests
-make test-coverage-fe FE_APP=data-management-frontend  # one app's coverage loop
 ```
 
-Husky `.husky/pre-push` runs **Tier 1** (`make check-fast` + `make test-fast`) — not full CI.
-Format-check, audit, full pytest, coverage gate, and frontend production builds run in GitHub CI.
+Format-check, audit, full pytest, coverage gate, and frontend production builds stay on
+`make ci-push` / GitHub CI — not on pre-commit by default.
 
-Opt-in medium pre-push: `VECINITA_MEDIUM_PRE_PUSH=1 git push` (adds format-check).
+Opt-in medium pre-push: `VECINITA_MEDIUM_PRE_PUSH=1 git push` (adds format-check via `make check`).
+
+Skip hooks: `VECINITA_SKIP_PRE_COMMIT=1`, `VECINITA_SKIP_PRE_PUSH=1`.
 
 ## Tier 3 — Full (before PR; optional on push)
 
@@ -67,4 +76,5 @@ Issues hooks cannot auto-fix: type errors, non-auto-fixable lint, test failures,
 ## Reference
 
 Full GitHub parity: `.github/workflows/ci.yml` (+ `deploy-preflight.yml` on `main` push).
+Release tags after DO CD: `.github/workflows/release.yml` (F63 / #103).
 Human-readable guide: `docs/LOCAL_DEV.md` §Fast checks vs full CI.

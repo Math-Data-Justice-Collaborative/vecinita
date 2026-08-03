@@ -33,7 +33,8 @@ CI on `main`: `.github/workflows/ci.yml` must pass first. Then
 `.github/workflows/deploy-preflight.yml` runs via `workflow_run` (needs GitHub `MODAL_TOKEN_*`
 for secrets job).
 
-**CD chain on `main`:** CI → Deploy preflight → Deploy Modal → Deploy DigitalOcean. Each step
+**CD chain on `main`:** CI → Deploy preflight → Deploy Modal → Deploy DigitalOcean →
+**Release** (semver tag + GitHub Release; F63 / #103). Each step
 uses `workflow_run` and checks out the CI-tested commit (`head_sha`).
 
 **Modal CD on `main`:** `.github/workflows/deploy-modal.yml` runs after **Deploy preflight**
@@ -46,6 +47,10 @@ Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` and `SUPABASE_ACCE
 DO apps after **Deploy Modal** succeeds on `main` (EV-007 order: Supabase → Modal → DO).
 `deploy_on_push` is **disabled** in `infra/do/*.yaml` so deploys are CI-gated. Requires repo
 secret `DIGITALOCEAN_TOKEN`.
+
+**Release on `main`:** `.github/workflows/release.yml` runs after **Deploy DigitalOcean**
+succeeds. Creates the next strict `vX.Y.Z` patch tag + GitHub Release (skips on
+`[skip release]` or if HEAD is already tagged).
 
 **Supabase on `main`:** `.github/workflows/supabase.yml` path-filters on `supabase/**` for
 offline validate on PRs and feature branches. Production auth config, email templates, and

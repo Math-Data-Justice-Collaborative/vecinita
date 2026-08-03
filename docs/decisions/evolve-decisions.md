@@ -694,4 +694,55 @@ EV-022 **in_progress**. Phase 0 **approved** (user option 1 — allocate F59–F
 | Phase D checkpoint | **PASS** (S024-D43) |
 | 11-verify-impl | **completed** (S024-D46) — `reports/verify-impl.md` |
 | 12-verify-deploy | **completed** (S024-D47) — `reports/deploy-checklist.md` |
-| 13-deploy-smoke | **in_progress** |
+| 13-deploy-smoke | **completed** (Path A PASS @ `cc2750c`) |
+| Close | **S024-D48** — closed without 15/17; cleared for S025/#194 |
+
+---
+
+## Cycle EV-023 — Scope (S025 / #194)
+
+**Approved:** 2026-08-03  
+**Session:** S025-ci-release-automation  
+**Issues:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/194  
+(children [#182](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/182),
+[#103](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/103))  
+**Features:** F62, F63  
+**Preset:** Lean+build
+
+### Scope summary
+
+Minimal DX + release automation: lean Husky push (#182) and post-CD semver tagging (#103).
+No product UI/API. #181 stays under retrieval epic #83.
+
+### Decisions (intake + Phase 0)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S025-D1 | Session type | `feature` → 16-evolve |
+| S025-D2 | Routing | Lean+build (`01→02→07→08→10→13`) |
+| S025-D3 | Prior session | Closed S024/EV-022 without 15/17 |
+| S025-D4 | Scope | Both #182 + #103 in EV-023 |
+| S025-D5 | Husky | Pre-commit = typecheck + security-scan + job-dispatch; format-check PR-only; stop hooks keep typecheck |
+| S025-D6 | Release | After DO CD; patch bump; annotated tag + GitHub Release; `[skip release]`; no floating tags; no semantic-release |
+| S025-D7 | Fn | Allocate **F62**, **F63** |
+| S025-D8 | Phase 0 | Approved → 01-requirements |
+
+### Docs / artifacts
+
+| Area | Paths |
+|------|-------|
+| Product | `feature-list.md` F62–F63; UJ-067–068; TC-208–215; AC-CI*/AC-REL* |
+| Decisions | RD-264–RD-271; this section |
+| Code (07) | `.husky/`, `scripts/ci/`, `.github/workflows/release*.yml`, LOCAL_DEV, rules |
+
+### Phase 0 status
+
+EV-023 **in_progress**. Phase 0 **approved** (user `1,1,1,1`).
+
+### Phase A status
+
+| Gate | Status |
+|------|--------|
+| 01-requirements | **in_progress** |
+| 02-verify-plan | pending |
+| 03-plan-tooling | skipped |

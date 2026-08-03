@@ -117,22 +117,28 @@ Requires Node 24 and a one-time Chromium install (`npx playwright install chromi
 
 | Tier | When | Command |
 |------|------|---------|
-| Fast | Agent stop hook; **git push** (Husky) | `make check-fast` + `make test-fast` |
-| Medium | Before commit (optional) | `make check` + `make test-fast` |
+| Agent stop | After agent turn | `make check-fast` + `make test-fast` (lint **+ typecheck** + units) |
+| **git commit** (Husky pre-commit) | Every commit | `make typecheck` + `make security-scan` + job_type dispatch |
+| **git push** (Husky pre-push) | Everyday push | `make lint` + `make test-fast` only |
+| Medium (opt-in push) | `VECINITA_MEDIUM_PRE_PUSH=1` | `make check` + `make test-fast` |
 | Full | **Before opening a PR** | `make ci-push` (alias: `make ci-pr-ready`) |
 
 ```bash
-make check-fast    # lint + typecheck (no format-check)
+make lint          # ruff + ESLint (pre-push default)
+make check-fast    # lint + typecheck (no format-check; agent stop)
 make test-fast     # unit tests for locally changed apps/packages only
-make test-coverage-fe FE_APP=data-management-frontend  # one frontend coverage loop
 make ci-push       # full CI parity — run before marking a PR ready
 make ci-pr-ready   # alias for ci-push
 ```
 
-Husky installs on `npm ci` (`prepare` script). Pre-push runs **fast tier** only; GitHub
-CI is the merge gate for format-check, audit, full tests, coverage, and production builds.
+Husky installs on `npm ci` (`prepare` script). **Pre-push is lean** (lint + units);
+heavier local gates run on **pre-commit**. GitHub CI remains the merge gate for
+format-check, audit, full tests, coverage, and production builds. (F62 / #182)
 
 ```bash
+# Skip pre-commit (emergencies only):
+VECINITA_SKIP_PRE_COMMIT=1 git commit
+
 # Opt-in medium tier on push (adds format-check):
 VECINITA_MEDIUM_PRE_PUSH=1 git push
 

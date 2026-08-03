@@ -726,6 +726,25 @@ S024 / Website scrape & crawl — **F59** robust scrape (#69), **F60** website c
 Artifacts: feature-list F59–F61; UJ-064–066; TC-196–207; AC-SC1–12;
 `docs/sessions/S024-website-scrape-crawl/reports/01-requirements-scrape-crawl.md`.
 
+### EV-023 requirements decisions (2026-08-03) — RD-264–RD-271
+
+S025 / CI & release automation — **F62** Husky gates (#182), **F63** release tagging (#103).
+Epic #194. Lean+build routing.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-264 | Fn scope | **F62** (#182), **F63** (#103) | S025-D7 |
+| RD-265 | Preset | Lean+build (`01→02→07→08→10→13`) | S025-D2 |
+| RD-266 | Pre-push | Lint + `test-fast` only by default | S025-D5 / #182 |
+| RD-267 | Pre-commit | Typecheck + security-scan + job-dispatch; format-check stays PR/`ci-push` | S025-D5 |
+| RD-268 | Stop hooks | Keep typecheck on agent stop (advisory); push stays lean | S025-D5 |
+| RD-269 | Release trigger | After **DigitalOcean** deploy success (CD end) | S025-D6 / #103 |
+| RD-270 | Versioning | Auto **patch** bump from last `v*`; annotated tag + GitHub Release; `[skip release]`; idempotent | S025-D6 |
+| RD-271 | Out of scope | semantic-release; floating tags; #181; lint-staged; replace GH CI | S025-D4–D6 |
+
+Artifacts: feature-list F62–F63; UJ-067–068; TC-208–215; AC-CI1–5 / AC-REL1–5;
+`docs/sessions/S025-ci-release-automation/reports/01-requirements-ci-release.md`.
+
 ### EV-019 tech-plan decisions (2026-08-02) — TP1–TP6
 
 S022 / Phase 24 — F47–F49 ingest resilience (Standard; skip 05/06).
