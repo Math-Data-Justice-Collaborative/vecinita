@@ -69,6 +69,30 @@ export interface DocumentSummary {
   title: string | null;
   language: string | null;
   tags?: TagInput[];
+  source_domain?: string | null;
+  source_path?: string | null;
+  parent_url?: string | null;
+  canonical_url?: string | null;
+}
+
+export type TreeNodeKind = "domain" | "path" | "document" | "chunk";
+
+export interface TreeNode {
+  id: string;
+  kind: TreeNodeKind;
+  label: string;
+  url?: string | null;
+  status?: string | null;
+  counts?: Record<string, number> | null;
+  source_domain?: string | null;
+  source_path?: string | null;
+  parent_url?: string | null;
+  canonical_url?: string | null;
+  children?: TreeNode[];
+}
+
+export interface CorpusTreeResponse {
+  roots: TreeNode[];
 }
 
 export interface TagInput {

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   deleteDocument,
+  fetchCorpusTree,
   listDocumentChunks,
   listDocumentTags,
   listDocuments,
@@ -230,5 +231,22 @@ describe("corpus api", () => {
     await expect(deleteDocument(options, "doc-1")).rejects.toThrow(
       "Delete failed (500)",
     );
+  });
+
+  it("fetchCorpusTree returns nested roots", async () => {
+    const tree = {
+      roots: [
+        {
+          id: "domain:example.com",
+          kind: "domain",
+          label: "example.com",
+          children: [],
+        },
+      ],
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(tree)));
+
+    await expect(fetchCorpusTree(options)).resolves.toEqual(tree);
+    expect(mockFetchUrl(0)).toContain("/internal/v1/corpus/tree");
   });
 });

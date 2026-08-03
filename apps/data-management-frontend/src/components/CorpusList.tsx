@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PaginationControls } from "vecinita-frontend-ui";
 
-import { deleteDocument, listDocuments } from "../api/corpus";
-import type { DocumentSummary } from "../api/types";
+import { deleteDocument, fetchCorpusTree, listDocuments } from "../api/corpus";
+import type { DocumentSummary, TreeNode } from "../api/types";
 import { requireCorpusConfig } from "../config";
 import { DocumentAdmin } from "./DocumentAdmin";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BulkDeleteDialog } from "@/components/BulkDeleteDialog";
 import { BulkTagDialog } from "@/components/BulkTagDialog";
 import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
+import { CorpusTree } from "@/components/CorpusTree";
 import { TruncatedText } from "@/components/TruncatedText";
 import { BoundedTagList } from "@/components/BoundedTagList";
 import { Trash2, Tags, FileEdit } from "lucide-react";
@@ -27,6 +28,8 @@ import { useIsAdmin } from "@/auth/auth-context";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_PAGE_SIZE = 50;
+
+type CorpusViewMode = "flat" | "tree";
 
 export function CorpusList() {
   const tr = useAdminT();
@@ -39,6 +42,8 @@ export function CorpusList() {
     trRef.current = tr;
   }, [tr]);
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
+  const [treeRoots, setTreeRoots] = useState<TreeNode[]>([]);
+  const [viewMode, setViewMode] = useState<CorpusViewMode>("flat");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -87,13 +92,44 @@ export function CorpusList() {
     }
   }, []);
 
+  const refreshTree = useCallback(async (isActive: () => boolean) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const client = requireCorpusConfig();
+      const result = await fetchCorpusTree(client);
+      if (!isActive()) {
+        return;
+      }
+      setTreeRoots(result.roots);
+      setSelectedIds(new Set());
+    } catch (err) {
+      if (!isActive()) {
+        return;
+      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : trRef.current("admin.corpusList.loadFailed"),
+      );
+    } finally {
+      if (isActive()) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
-    void refresh(() => !cancelled, page);
+    if (viewMode === "tree") {
+      void refreshTree(() => !cancelled);
+    } else {
+      void refresh(() => !cancelled, page);
+    }
     return () => {
       cancelled = true;
     };
-  }, [refresh, page]);
+  }, [refresh, refreshTree, page, viewMode]);
 
   const handleDelete = async (doc: DocumentSummary) => {
     const label = doc.title ?? doc.url;
@@ -105,7 +141,11 @@ export function CorpusList() {
     try {
       const client = requireCorpusConfig();
       await deleteDocument(client, doc.document_id);
-      await refresh(() => true, page);
+      if (viewMode === "tree") {
+        await refreshTree(() => true);
+      } else {
+        await refresh(() => true, page);
+      }
     } catch (err) {
       setError(
         err instanceof Error
@@ -140,18 +180,56 @@ export function CorpusList() {
 
   const selectionArray = Array.from(selectedIds);
 
+  const handleRefreshClick = () => {
+    if (viewMode === "tree") {
+      void refreshTree(() => true);
+    } else {
+      void refresh(() => true, page);
+    }
+  };
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between gap-2">
         <CardTitle>{tr("admin.corpusList.title")}</CardTitle>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => void refresh(() => true, page)}
-          disabled={loading}
-        >
-          {tr("shared.refresh")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <div
+            className="flex rounded-md border border-border p-0.5"
+            role="group"
+            aria-label={tr("admin.corpusTree.ariaLabel")}
+          >
+            <Button
+              type="button"
+              variant={viewMode === "flat" ? "secondary" : "ghost"}
+              size="sm"
+              data-testid="corpus-view-flat"
+              onClick={() => {
+                setViewMode("flat");
+              }}
+            >
+              {tr("admin.corpusTree.viewFlat")}
+            </Button>
+            <Button
+              type="button"
+              variant={viewMode === "tree" ? "secondary" : "ghost"}
+              size="sm"
+              data-testid="corpus-view-tree"
+              onClick={() => {
+                setViewMode("tree");
+              }}
+            >
+              {tr("admin.corpusTree.viewTree")}
+            </Button>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshClick}
+            disabled={loading}
+          >
+            {tr("shared.refresh")}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {selected ? (
@@ -218,6 +296,12 @@ export function CorpusList() {
               <p className="text-sm text-muted-foreground">
                 {tr("shared.loading")}
               </p>
+            ) : viewMode === "tree" ? (
+              <CorpusTree
+                roots={treeRoots}
+                selectedIds={selectedIds}
+                onToggleSelect={toggleId}
+              />
             ) : documents.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {tr("admin.corpusList.empty")}
@@ -353,7 +437,7 @@ export function CorpusList() {
               </Table>
             )}
 
-            {!loading && total > 0 ? (
+            {!loading && viewMode === "flat" && total > 0 ? (
               <div className="mt-4">
                 <PaginationControls
                   page={page}

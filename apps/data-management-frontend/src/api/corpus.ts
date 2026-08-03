@@ -1,4 +1,9 @@
-import type { ChunkDetail, DocumentSummary, TagInput } from "./types";
+import type {
+  ChunkDetail,
+  CorpusTreeResponse,
+  DocumentSummary,
+  TagInput,
+} from "./types";
 
 export interface CorpusClientOptions {
   baseUrl: string;
@@ -51,6 +56,21 @@ export async function listDocuments(
     );
   }
   return response.json() as Promise<DocumentListPage>;
+}
+
+export async function fetchCorpusTree(
+  options: CorpusClientOptions,
+): Promise<CorpusTreeResponse> {
+  const response = await fetch(`${options.baseUrl}/internal/v1/corpus/tree`, {
+    headers: authHeaders(options),
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(
+      detail || `Fetch corpus tree failed (${String(response.status)})`,
+    );
+  }
+  return response.json() as Promise<CorpusTreeResponse>;
 }
 
 export async function listDocumentChunks(
