@@ -1,7 +1,7 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; **S022 Phase 24 delta 2026-08-02**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; **S023 Phase 25 delta 2026-08-03**)  
 > **Skill**: 04-tech-plan  
 > **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**044**
 
@@ -9,15 +9,15 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 24: EV-019 — Ingest resilience (F47–F49) |
-| **Active milestone** | M104 complete — next 08-verify-build |
-| **Active task** | — (Phase 24 build tasks done) |
-| **Tasks completed** | Phase 21–23 complete; Phase 24 M101–M104 |
-| **Last updated** | 2026-08-02 |
-| **Evolve cycle** | EV-019 — Standard; S022-D20/D21; TP1–TP6; skip 05/06 |
-| **Git branch** | `evolve/EV-019-ingest-resilience` |
-| **Active session** | S022-ingest-resilience — 07-build done → 08-verify-build |
-| **Scope addition** | 2026-08-02 — F47 content_hash skip + F48 embed retry + F49 overlap/HF (ADR-044). |
+| **Active phase** | Phase 25: EV-020 — Residual top_k + P3 (F50–F51) |
+| **Active milestone** | M105 — F50 top_k=8 (T105.1 in_progress) |
+| **Active task** | — (await Gate B→C) |
+| **Tasks completed** | Phase 21–24 complete; Phase 25 draft M105–M107 |
+| **Last updated** | 2026-08-03 |
+| **Evolve cycle** | EV-020 — Standard; S023-D6/D10; TP1–TP6 pending approval; skip 05/06 |
+| **Git branch** | `evolve/EV-020-retrieval-topk-packing` |
+| **Active session** | S023-retrieval-topk-packing — 04-tech-plan |
+| **Scope addition** | 2026-08-03 — F50 top_k=8 + F51 default P3 (#158/#165). |
 
 ## Template
 
@@ -2091,6 +2091,62 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 ---
 
+## Phase 25: EV-020 — Residual top_k + default P3 (F50–F51)
+
+> **Session:** S023 · **Cycle:** EV-020 · **Branch:** `evolve/EV-020-retrieval-topk-packing`  
+> **Issues:** #158 (top_k), #165 (P3 packing residual)  
+> **Decisions:** RD-229–236, S023-D6–D10, TP1–TP6 (pending Gate B→C), Gate A→B PASS  
+> **Out of scope:** Adaptive top_k; FE source truncation; CE enable; token-accurate budget;
+> Path B rechunk; #159 embeds; Playwright (no UI change)
+
+#### M105: F50 — promote prod top_k to 8
+
+**Goal:** Code + DO defaults `top_k` / `VECINITA_TOP_K` **5→8**; sources shown = retrieve count
+(AC-RQ8; TC-193).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T105.1 | Test: unit red — `DEFAULT_TOP_K` / ChatRAG settings default is 8 when env unset (TC-193) | Test | in_progress | AC-RQ8, F50, #158 | — | — | S023 | F50 |
+| T105.2 | Config: `infra/do/chat-rag-backend.yaml` `VECINITA_TOP_K=8`; align any shared-schema EvalConfig default | Config | pending | config-spec, RD-230, RD-234 | — | — | S023 | F50 |
+| T105.3 | Code: `packages/rag` `DEFAULT_TOP_K=8`; ChatRAG settings `_int_env("VECINITA_TOP_K", 8)`; engine defaults | Code | pending | feature-list F50, RD-230 | T105.1, T105.2 | — | S023 | F50 |
+| T105.4 | Test: unit green for top_k default 8 | Test | pending | AC-RQ8, TC-193 | T105.3 | — | S023 | F50 |
+
+#### M106: F51 — default P3 context packing
+
+**Goal:** Default `VECINITA_RAG_PACKER` / settings `rag_packer` **`p1`→`p3`**; DO env add/set
+`p3`; `CONTEXT_MAX_CHARS=3500` unchanged (AC-RQ9; TC-194).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T106.1 | Test: unit red — default packer is `p3`; P3 dedupe+budget behavior still holds (TC-194) | Test | pending | AC-RQ9, F51, #165 | T105.4 | — | S023 | F51 |
+| T106.2 | Config: DO ChatRAG `VECINITA_RAG_PACKER=p3` (add if missing); yaml/docs already default p3 | Config | pending | config-spec, RD-232, RD-234 | — | — | S023 | F51 |
+| T106.3 | Code: ChatRAG settings default `rag_packer="p3"`; eval sandbox inherits same default | Code | pending | feature-list F51, RD-232 | T106.1, T106.2 | — | S023 | F51 |
+| T106.4 | Test: unit green for default p3; existing UJ-055 tests tolerate p3 default or assert packer | Test | pending | AC-RQ9, TC-194, UJ-055 | T106.3 | — | S023 | F51 |
+
+#### M107: UJ-063 e2e + phase gate
+
+**Goal:** API e2e TC-195; phase-gate docs; confirm AC-RQ10 out-of-scope held.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T107.1 | Test: API e2e `tests/e2e/test_uj063_topk_p3_ask.py` (TC-195) — ≤8 sources, p3 default | Test | pending | UJ-063, e2e-coverage, AC-RQ8/RQ9 | T106.4 | — | S023 | F50–F51 |
+| T107.2 | Docs: Phase 25 gate checklist + execution-plan Current State; issue closeout notes #158/#165 | Docs | pending | Phase 25 gate, RD-235 | T107.1 | — | S023 | F50–F51 |
+| T107.3 | Test/Docs: Confirm AC-RQ10 held; no Playwright; update any tests hardcoding top_k=5 / packer=p1 defaults | Test | pending | AC-RQ10, TP4/TP6 | T107.1 | — | S023 | F50–F51 |
+
+#### Phase 25 Gate Check
+
+- [ ] All M105–M107 tasks completed (T105.1–T107.3)
+- [ ] AC-RQ8–RQ9 met at T2 (unit + API e2e); AC-RQ10 scope held
+- [ ] DO yaml: `VECINITA_TOP_K=8`; `VECINITA_RAG_PACKER=p3`
+- [ ] No new ADR (reuse ADR-041)
+- [ ] No adaptive top_k; no CE enable; no Path B rechunk; no Playwright
+- [ ] ruff / basedpyright clean; pytest e2e UJ-063 green — **08-verify-build**
+
+**Tech-plan delta:** `docs/sessions/S023-retrieval-topk-packing/reports/tech-plan-delta.md`  
+**ADR:** reuse [ADR-041](../../../adr/) (F42 packing) — no new ADR
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -2208,7 +2264,12 @@ main
 | PR-54 | Major | Phase 19 / S013 (EV-012) | evolve/EV-012-unified-job-monitoring | main | pending — Unified Admin Jobs (#116) |
 | PR-55 | Major | Phase 20 / S017 (EV-015) | evolve/EV-015-corpus-reembed-migration | main | pending — Corpus document store + rebuild (#167 / F41) |
 | PR-56 | Major | Phase 22 / S020 (EV-017) | evolve/EV-017-retrieval-batch-b | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173 |
-| PR-57 | Major | Phase 24 / S022 (EV-019) | evolve/EV-019-ingest-resilience | main | pending — Ingest resilience F47–F49 (#163/#166/#160) |
+| PR-57 | Major | Phase 24 / S022 (EV-019) | evolve/EV-019-ingest-resilience | main | merged ([#179](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179)) @ `bd6bb00` |
+| PR-58 | Major | Phase 25 / S023 (EV-020) | evolve/EV-020-retrieval-topk-packing | main | pending — Residual top_k=8 + default P3 (#158/#165) |
+
+S023 (EV-020) is evolve Standard: M105–M107 land as atomic commits on the single
+`evolve/EV-020-retrieval-topk-packing` branch (one PR to `main`, PR-58). Gate A→B passed
+(S023-D10); 05/06 skipped; Gate B→C after 04 TP1–TP6 approval.
 
 S022 (EV-019) is evolve Standard: M101–M104 land as atomic commits on the single
 `evolve/EV-019-ingest-resilience` branch (one PR to `main`, PR-57). Gate A→B passed
@@ -2836,6 +2897,17 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T104.2 | M104 | 24 | Config | completed | T101.3, T102.3 | — | S022 | F47–F48 | — |
 | T104.3 | M104 | 24 | Docs | completed | T104.1, T104.2 | — | S022 | F47–F49 | — |
 | T104.4 | M104 | 24 | Test | completed | T104.1 | — | S022 | F47–F49 | — |
+| T105.1 | M105 | 25 | Test | pending | — | — | S023 | F50 | — |
+| T105.2 | M105 | 25 | Config | pending | — | — | S023 | F50 | — |
+| T105.3 | M105 | 25 | Code | pending | T105.1, T105.2 | — | S023 | F50 | — |
+| T105.4 | M105 | 25 | Test | pending | T105.3 | — | S023 | F50 | — |
+| T106.1 | M106 | 25 | Test | pending | T105.4 | — | S023 | F51 | — |
+| T106.2 | M106 | 25 | Config | pending | — | — | S023 | F51 | — |
+| T106.3 | M106 | 25 | Code | pending | T106.1, T106.2 | — | S023 | F51 | — |
+| T106.4 | M106 | 25 | Test | pending | T106.3 | — | S023 | F51 | — |
+| T107.1 | M107 | 25 | Test | pending | T106.4 | — | S023 | F50–F51 | — |
+| T107.2 | M107 | 25 | Docs | pending | T107.1 | — | S023 | F50–F51 | — |
+| T107.3 | M107 | 25 | Test | pending | T107.1 | — | S023 | F50–F51 | — |
 
 ## Phase Gate Log
 
@@ -2941,3 +3013,9 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [x] EV-019 API e2e UJ-062; no Playwright unless FE knobs (TP4)
 - [x] EV-019 Path A deploy; Path B only if F49 re-chunk; skip dep churn (TP5)
 - [x] EV-019 no new CORS/UI connectivity work (TP6)
+- [ ] EV-020 Phase 25 — M105→M107 F50→F51→e2e (TP1)
+- [ ] EV-020 no new ADR; reuse ADR-041 (TP2)
+- [ ] EV-020 DO yaml TOP_K=8 + RAG_PACKER=p3; EvalConfig default 8 (TP3)
+- [ ] EV-020 API e2e UJ-063; no Playwright (TP4)
+- [ ] EV-020 Path A ChatRAG redeploy; skip dep/topology churn (TP5)
+- [ ] EV-020 no new CORS/UI (TP6)

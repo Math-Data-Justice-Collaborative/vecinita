@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-08-02 (S021/EV-018 F46 + F45 re-gate — AC-FO1/FO2; AC-BB9 prereq)
+> **Last updated**: 2026-08-02 (S023/EV-020 F50–F51 — AC-RQ8/RQ9 top_k=8 + default P3)
 
 ## Per-feature criteria
 
@@ -211,10 +211,17 @@
 - [ ] **AC-RQ1**: P1 packer emits `Source: {title}` / `URL: {url}` headers per chunk (TC-170).
 - [ ] **AC-RQ2**: H7 multi-query merge/dedupe by chunk id keeps ≤ `top_k` (TC-171).
 - [ ] **AC-RQ3**: H7 Spanish-aware rewrites when query locale is `es` (TC-172).
-- [ ] **AC-RQ4**: ChatRAG ask/stream uses shared `packages/rag` packer+H7 helpers; defaults H7 on + packer `p1` (TC-173, UJ-055).
+- [ ] **AC-RQ4**: ChatRAG ask/stream uses shared `packages/rag` packer+H7 helpers; defaults H7 on.
+  Packer default was `p1` at F42 ship; **F51** changes default to `p3` (TC-173, UJ-055; TC-194).
 - [ ] **AC-RQ5**: F36 staging eval shares the same helpers; Admin `corpus_profile=staging` loads `qa_pairs_staging.json` (ISS-008 / TC-174, UJ-056).
 - [ ] **AC-RQ6**: Staging Hy1 ship gate (H7+P1 on E0): answer relevancy ≥ **0.28**, faithfulness ≥ **0.91**; CI floors remain ≥0.60/0.60 (TC-175).
 - [ ] **AC-RQ7**: Out of F42 ship: E1/#159 embed swap, R1, CE/#83, #162, LangGraph/ADR-006, answer cache (F43).
+
+### EV-020 — Residual top_k + default P3 (F50–F51) — S023
+
+- [ ] **AC-RQ8**: Prod default `top_k` / `VECINITA_TOP_K` is **8**; ask returns ≤8 sources with no client override (TC-193, TC-195, UJ-063, F50 / #158).
+- [ ] **AC-RQ9**: Prod default packer is **`p3`** (doc dedupe + `CONTEXT_MAX_CHARS=3500`); `p1` still selectable (TC-194, TC-195, UJ-063, F51 / #165).
+- [ ] **AC-RQ10**: Out of EV-020 without unlock: adaptive top_k; FE-only source truncation; CE enable; token-accurate (non-char) budget; Path B rechunk.
 
 ### EV-017 — Retrieval Batch B (F43–F45) — S020
 

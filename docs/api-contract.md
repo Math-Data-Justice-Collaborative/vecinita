@@ -874,7 +874,7 @@ Base path: `/internal/v1/eval` and `/internal/v1/rag/config` (admin JWT; promote
   "mode": "golden | adhoc",
   "question": "string (required when mode=adhoc)",
   "config": {
-    "top_k": 5,
+    "top_k": 8,
     "min_retrieval_score": 0.2,
     "system_prompt": "string",
     "max_tokens": 256,
