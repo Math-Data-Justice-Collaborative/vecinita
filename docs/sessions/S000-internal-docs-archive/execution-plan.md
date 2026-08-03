@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
 | **Active milestone** | M109 — F60 website crawl |
-| **Active task** | T109.4 — OpenAPI JobOptions crawl + `/jobs/{id}/tree` |
-| **Tasks completed** | Phase 21–25 complete; M108 done; M109 T109.1–T109.3 done |
+| **Active task** | T109.5 — Admin JobForm crawl controls |
+| **Tasks completed** | Phase 21–25 complete; M108 done; M109 T109.1–T109.4 done |
 | **Last updated** | 2026-08-03 |
 | **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M108 done |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
@@ -2185,7 +2185,7 @@ best-effort soft-fail; Playwright in Modal worker for `VECINITA_SCRAPE_JS_RENDER
 | T109.1 | Test: unit red — crawl scope + URL normalize/dedup/no cycles (TC-200) | Test | completed | AC-SC4, F60, #71 | T108.6 | 2026-08-03 | S024 | F60 |
 | T109.2 | Test: unit red — max_depth/max_pages caps + stop reason (TC-201) | Test | completed | AC-SC5, S024-D22 | T108.6 | 2026-08-03 | S024 | F60 |
 | T109.3 | Code: crawl BFS module + job options wiring + nested source fields on write | Code | completed | feature-list F60, api-contract, ADR-045 | T109.1, T109.2 | 2026-08-03 | S024 | F60 |
-| T109.4 | Code/Config: OpenAPI JobOptions crawl fields; `GET /jobs/{id}/tree` route | Code | pending | TP3, api-contract | T109.3 | — | S024 | F60 |
+| T109.4 | Code/Config: OpenAPI JobOptions crawl fields; `GET /jobs/{id}/tree` route | Code | completed | TP3, api-contract | T109.3 | 2026-08-03 | S024 | F60 |
 | T109.5 | Code: Admin JobForm crawl controls (additive; `crawl=false` preserves single-URL) | Code | pending | AC-SC7, UJ-065 | T109.4 | — | S024 | F60 |
 | T109.6 | Test: Vitest JobForm crawl fields (TC-203); unit green TC-200–201 | Test | pending | TC-200–203 | T109.5 | — | S024 | F60 |
 
@@ -3011,7 +3011,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T109.1 | M109 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F60 | — |
 | T109.2 | M109 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F60 | — |
 | T109.3 | M109 | 26 | Code | completed | T109.1, T109.2 | 2026-08-03 | S024 | F60 | — |
-| T109.4 | M109 | 26 | Code | pending | T109.3 | — | S024 | F60 | — |
+| T109.4 | M109 | 26 | Code | completed | T109.3 | 2026-08-03 | S024 | F60 | — |
 | T109.5 | M109 | 26 | Code | pending | T109.4 | — | S024 | F60 | — |
 | T109.6 | M109 | 26 | Test | pending | T109.5 | — | S024 | F60 | — |
 | T110.1 | M110 | 26 | Test | pending | T109.6 | — | S024 | F61 | — |

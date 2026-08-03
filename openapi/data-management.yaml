@@ -112,6 +112,34 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+  /jobs/{job_id}/tree:
+    get:
+      operationId: getJobTree
+      summary: Nested job result tree (domain → path → document)
+      description: >
+        Hierarchical result nodes for a crawl/ingest job (F60/F61 / ADR-045).
+        Auth matches other /jobs* routes (Supabase JWT + proxy).
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job tree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobTreeResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /jobs/events:
     get:
       operationId: streamJobEvents
@@ -682,6 +710,29 @@ components:
           type: boolean
           default: false
           description: Operator ack required when backfill_source=from_chunks
+        crawl:
+          type: boolean
+          default: false
+          description: >
+            When true, treat urls[0] as seed and discover same-site pages (F60 / #71).
+            Single-URL ingest unchanged when false.
+        max_depth:
+          type: integer
+          minimum: 0
+          default: 2
+          description: Max link depth from seed (F60)
+        max_pages:
+          type: integer
+          minimum: 1
+          default: 25
+          description: Hard cap on pages fetched (F60)
+        crawl_scope:
+          type: string
+          enum:
+            - same_domain
+            - path_prefix
+          default: same_domain
+          description: same_domain | path_prefix (path_prefix stays under seed path)
     CreateJobResponse:
       type: object
       required:
@@ -781,6 +832,78 @@ components:
           minimum: 0
           default: 0
           description: URLs that failed after embed retry exhaust (F48)
+        pages_fetched:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Pages fetched during crawl (F60)
+        pages_failed:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Per-page soft failures (F60)
+        pages_skipped_robots:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Pages skipped due to robots.txt (F60)
+        crawl_stopped_reason:
+          type: string
+          nullable: true
+          enum:
+            - max_pages
+            - max_depth
+            - complete
+          description: Why crawl stopped (F60)
+    TreeNode:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - kind
+        - label
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum:
+            - domain
+            - path
+            - document
+            - chunk
+        label:
+          type: string
+        url:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/TreeNode"
+          default: []
+    JobTreeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - job_id
+        - roots
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        roots:
+          type: array
+          items:
+            $ref: "#/components/schemas/TreeNode"
     JobList:
       type: object
       required:
