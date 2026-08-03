@@ -676,4 +676,5 @@ EV-022 **in_progress**. Phase 0 **approved** (user option 1 — allocate F59–F
 | Stage | Status |
 |-------|--------|
 | 07-build | **M108–M111 complete** (T111.3 S024-D41 waive local Docker) |
-| 08-verify-build | **next** — Gate C→D |
+| 08-verify-build | **PASS** — see `reports/verification-report.md` |
+| Gate C→D | **pending** user checkpoint |

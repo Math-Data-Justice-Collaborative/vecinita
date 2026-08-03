@@ -1239,14 +1239,18 @@ project:
       t111_2_commit: 95543a9
       t111_2_artifact: tests/e2e/test_uj065_website_crawl.py
       t111_3_status: completed
+      t111_3_commit: 1f51786
+      t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
       t111_4_status: completed
+      t111_4_commit: ac12278
+      t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
       milestones:
       - M108
       - M109
       - M110
       - M111
     08-verify-build:
-      status: in_progress
+      status: completed
       started: '2026-08-03'
       started_at: '2026-08-03T20:15:45Z'
       session_id: S024-website-scrape-crawl
@@ -1258,11 +1262,11 @@ project:
       - F59
       - F60
       - F61
-      current_action: M111 complete; start 08-verify-build / Gate C→D
-      next_action: Invoke 08-verify-build on evolve/EV-022-website-scrape-crawl
-      askquestion_pending: false
+      current_action: await Gate C→D checkpoint
+      next_action: On Gate C→D PASS start Phase D 09-qa + 10-e2e
+      askquestion_pending: true
       s024_d41_decision: S024-D41
-      note: S024/EV-022 starting 08-verify-build / Gate C→D after M111 COMPLETE (S024-D41)
+      note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
       s023_baseline:
         status: completed
         completed: '2026-08-03'
@@ -1276,6 +1280,15 @@ project:
         phase_c_status: passed
         current_action: completed
         next_action: 11-verify-impl
+      result: pass
+      completed: '2026-08-03'
+      completed_at: '2026-08-03'
+      report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+      gate_c_to_d: pending
+      checkpoints_phase_c: pending
+      phase_c_status: pending
+      phase: Phase 26 (M108-M111)
+      feature: F59+F60+F61
     09-qa:
       status: completed
       started_at: '2026-08-03'
@@ -3774,18 +3787,27 @@ active_session:
     t111_1_status: completed
     t111_2_status: completed
     t111_3_status: completed
+    t111_3_commit: 1f51786
+    t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
     t111_4_status: completed
+    t111_4_commit: ac12278
+    t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
     s024_d41_decision: S024-D41
     s024_d40_decision: S024-D40
   - stage: 08-verify-build
     required: true
-    status: in_progress
+    status: completed
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: M111 complete; start 08-verify-build / Gate C→D
-    next_action: Invoke 08-verify-build on evolve/EV-022-website-scrape-crawl
+    current_action: await Gate C→D checkpoint
+    next_action: On Gate C→D PASS start Phase D 09-qa + 10-e2e
     s024_d41_decision: S024-D41
-    askquestion_pending: false
+    askquestion_pending: true
+    completed_at: '2026-08-03'
+    report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+    result: pass
+    note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
+    gate_c_to_d: pending
   - stage: 09-qa
     required: true
     status: pending
@@ -3816,12 +3838,12 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: M111 complete; start 08-verify-build / Gate C→D
-    note: S024/EV-022 07-build COMPLETE 2026-08-03 — M108–M111 done; T111.3 completed (S024-D41 waive local Docker/Postgres, CI-gated, same pattern S021-D23/S024-D38); T111.4 completed; handoff → 08-verify-build / Gate C→D
-    askquestion_pending: false
+    current_action: await Gate C→D checkpoint
+    note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
+    askquestion_pending: true
   current_stage: 08-verify-build
-  current_action: M111 complete; start 08-verify-build / Gate C→D
-  next_action: Invoke 08-verify-build on evolve/EV-022-website-scrape-crawl
+  current_action: await Gate C→D checkpoint
+  next_action: On Gate C→D PASS start Phase D 09-qa + 10-e2e
   started_at: '2026-08-03'
   context_briefs: []
   feature_ids:
@@ -3831,10 +3853,10 @@ active_session:
   phase0_approved: true
   phase_0_status: approved
   phase1_complete: true
-  report: docs/sessions/S024-website-scrape-crawl/reports/tech-plan-delta.md
+  report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
   report_status: completed
-  note: S024/EV-022 07-build COMPLETE 2026-08-03 — M108–M111 done; T111.3 completed (S024-D41 waive local Docker/Postgres, CI-gated, same pattern S021-D23/S024-D38); T111.4 completed; handoff → 08-verify-build / Gate C→D
-  askquestion_pending: false
+  note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
+  askquestion_pending: true
   t110_2_status: completed
   t110_2_impl_written_uncommitted: false
   t110_2_verification: unit_verified_e2e_deferred
@@ -3856,7 +3878,11 @@ active_session:
   t111_2_status: completed
   t111_2_commit: 95543a9
   t111_3_status: completed
+  t111_3_commit: 1f51786
+  t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
   t111_4_status: completed
+  t111_4_commit: ac12278
+  t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
   s024_d40_decision: S024-D40
   s024_d41_decision: S024-D41
 sessions:
@@ -10442,9 +10468,13 @@ stages:
     t111_2_commit: 95543a9
     t111_2_artifact: tests/e2e/test_uj065_website_crawl.py
     t111_3_status: completed
+    t111_3_commit: 1f51786
+    t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
     t111_4_status: completed
+    t111_4_commit: ac12278
+    t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
   08-verify-build:
-    status: in_progress
+    status: completed
     started: '2026-08-03'
     started_at: '2026-08-03T20:15:45Z'
     session_id: S024-website-scrape-crawl
@@ -10456,11 +10486,11 @@ stages:
     - F59
     - F60
     - F61
-    current_action: M111 complete; start 08-verify-build / Gate C→D
-    next_action: Invoke 08-verify-build on evolve/EV-022-website-scrape-crawl
-    askquestion_pending: false
+    current_action: await Gate C→D checkpoint
+    next_action: On Gate C→D PASS start Phase D 09-qa + 10-e2e
+    askquestion_pending: true
     s024_d41_decision: S024-D41
-    note: S024/EV-022 starting 08-verify-build / Gate C→D after M111 COMPLETE (S024-D41)
+    note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
     s023_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -10760,6 +10790,15 @@ stages:
         phase_c_checkpoint_choice: option_1_approve_gate_c_to_d_continue_09_10
         session_closed: true
         session_closed_at: '2026-08-02'
+    result: pass
+    completed: '2026-08-03'
+    completed_at: '2026-08-03'
+    report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+    gate_c_to_d: pending
+    checkpoints_phase_c: pending
+    phase_c_status: pending
+    phase: Phase 26 (M108-M111)
+    feature: F59+F60+F61
   09-qa:
     status: completed
     started_at: '2026-08-03'
@@ -21405,8 +21444,8 @@ evolve_cycles:
     - 06-tech-tooling
     - 15-service-health
   current_stage: 08-verify-build
-  current_action: M111 complete; start 08-verify-build / Gate C→D
-  next_action: Invoke 08-verify-build on evolve/EV-022-website-scrape-crawl
+  current_action: await Gate C→D checkpoint
+  next_action: On Gate C→D PASS start Phase D 09-qa + 10-e2e
   active_task:
   active_milestone: M111
   mode: evolve
@@ -21416,7 +21455,7 @@ evolve_cycles:
   phase0_approved: true
   phase_0_status: approved
   phase_0_batch: completed
-  askquestion_pending: false
+  askquestion_pending: true
   t110_2_status: completed
   t110_2_impl_written_uncommitted: false
   t110_2_verification: unit_verified_e2e_deferred
@@ -21885,9 +21924,13 @@ evolve_cycles:
       t111_2_commit: 95543a9
       t111_2_artifact: tests/e2e/test_uj065_website_crawl.py
       t111_3_status: completed
+      t111_3_commit: 1f51786
+      t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
       t111_4_status: completed
+      t111_4_commit: ac12278
+      t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
     08-verify-build:
-      status: in_progress
+      status: completed
       started: '2026-08-03'
       started_at: '2026-08-03T20:15:45Z'
       session_id: S024-website-scrape-crawl
@@ -21899,11 +21942,20 @@ evolve_cycles:
       - F59
       - F60
       - F61
-      current_action: M111 complete; start 08-verify-build / Gate C→D
-      next_action: Invoke 08-verify-build on evolve/EV-022-website-scrape-crawl
-      askquestion_pending: false
+      current_action: await Gate C→D checkpoint
+      next_action: On Gate C→D PASS start Phase D 09-qa + 10-e2e
+      askquestion_pending: true
       s024_d41_decision: S024-D41
-      note: S024/EV-022 starting 08-verify-build / Gate C→D after M111 COMPLETE (S024-D41)
+      note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
+      result: pass
+      completed: '2026-08-03'
+      completed_at: '2026-08-03'
+      report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+      gate_c_to_d: pending
+      checkpoints_phase_c: pending
+      phase_c_status: pending
+      phase: Phase 26 (M108-M111)
+      feature: F59+F60+F61
     09-qa:
       status: pending
     10-e2e:
@@ -22334,7 +22386,11 @@ evolve_cycles:
     active_task:
     active_milestone: M111
     t111_3_status: completed
+    t111_3_commit: 1f51786
+    t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
     t111_4_status: completed
+    t111_4_commit: ac12278
+    t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
     clears:
     - t111_3_blocker
     - docker_daemon_not_running
@@ -22416,7 +22472,7 @@ evolve_cycles:
   s024_d37_status: confirmed
   s024_d37_confirmed_at: '2026-08-03T18:37:34Z'
   gate_b_to_c: passed
-  note: S024/EV-022 07-build COMPLETE 2026-08-03 — M108–M111 done; T111.3 completed (S024-D41 waive local Docker/Postgres, CI-gated, same pattern S021-D23/S024-D38); T111.4 completed; handoff → 08-verify-build / Gate C→D
+  note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
   milestones_completed:
   - M108
   - M109
@@ -22451,7 +22507,11 @@ evolve_cycles:
   t111_2_commit: 95543a9
   t111_2_artifact: tests/e2e/test_uj065_website_crawl.py
   t111_3_status: completed
+  t111_3_commit: 1f51786
+  t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
   t111_4_status: completed
+  t111_4_commit: ac12278
+  t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
   s024_d40_decision: S024-D40
   s024_d41_decision: S024-D41
 retrospective_cycles:
@@ -26031,7 +26091,11 @@ decisions_log:
   active_task:
   active_milestone: M111
   t111_3_status: completed
+  t111_3_commit: 1f51786
+  t111_3_artifact: tests/e2e/test_uj066_corpus_tree.py
   t111_4_status: completed
+  t111_4_commit: ac12278
+  t111_4_artifact: docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
   clears:
   - t111_3_blocker
   - docker_daemon_not_running
@@ -28645,6 +28709,15 @@ artifacts:
   recorded_at: '2026-08-03T20:15:45Z'
   kind: report
   note: T111.4 OpenAPI phase gate closeout — M111 complete
+- path: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+  status: completed
+  session_id: S024-website-scrape-crawl
+  stage: 08-verify-build
+  skill_id: 08-verify-build
+  evolve_cycle_id: EV-022
+  recorded_at: '2026-08-03T20:29:11Z'
+  kind: report
+  note: 08 PASS 2026-08-03 scoped Phase 26; Gate C→D pending
 git_history:
   current_branch: evolve/EV-022-website-scrape-crawl
   branches:
@@ -31814,7 +31887,54 @@ git_history:
     files_changed: 3
     timestamp: '2026-08-03T18:59:06Z'
     note: T110.1 COMPLETE — TC-204 corpus tree nesting e2e red; next T110.2 write API corpus/tree + nested source columns
+  - sha: 568b68e
+    full_sha: 568b68edd06d7357844e10f61c95154fde165b51
+    branch: evolve/EV-022-website-scrape-crawl
+    message: 'chore: add Brewfile with pinned local Homebrew deps'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    files_changed: 1
+    timestamp: '2026-08-03T20:14:56Z'
+    note: Incidental (not a task commit) — created during Docker-block recovery for local Homebrew deps; recorded for git_history completeness
+    files:
+    - Brewfile
+  - sha: 1f51786
+    full_sha: 1f51786a5ffae78b36f9bb6296b971a952f25945
+    branch: evolve/EV-022-website-scrape-crawl
+    message: '[T111.3] test: waive local Docker; skip-without-Postgres for UJ-066'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    task_id: T111.3
+    files_changed: 3
+    timestamp: '2026-08-03T20:23:21Z'
+    note: T111.3 COMPLETE — S024-D41 waive local Docker/Postgres; UJ-066 skip-without-Postgres; CI-gated
+    files:
+    - docs/decisions/evolve-decisions.md
+    - docs/sessions/S024-website-scrape-crawl/reports/t111-3-e2e-closeout.md
+    - tests/e2e/test_uj066_corpus_tree.py
+  - sha: ac12278
+    full_sha: ac122787b7ab8de21361aacb5dafd98af494f5b6
+    branch: evolve/EV-022-website-scrape-crawl
+    message: '[T111.4] docs: OpenAPI mirror check and Phase 26 gate closeout'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    task_id: T111.4
+    files_changed: 4
+    timestamp: '2026-08-03T20:23:24Z'
+    note: T111.4 COMPLETE — OpenAPI mirror check + Phase 26 gate closeout; M111 done; handoff → 08-verify-build
+    files:
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S024-website-scrape-crawl/HANDOFF.md
+    - docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md
+    - workflow-state.yaml
   notes:
+  - '2026-08-03T20:23:45Z S024/EV-022: recorded commits 568b68e (incidental Brewfile / Docker-block recovery), 1f51786 (T111.3), ac12278 (T111.4); 07-build COMPLETE; current_stage=08-verify-build in_progress; Gate C→D pending.'
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
     branch: evolve/EV-017-retrieval-batch-b

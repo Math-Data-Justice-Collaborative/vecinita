@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
-| **Active milestone** | M111 — **completed** (T111.1–T111.4) |
-| **Active task** | — (next: **08-verify-build** / Gate C→D) |
+| **Active milestone** | M111 — **completed**; 08-verify-build **PASS** |
+| **Active task** | — (next: Gate **C→D** → Phase D 09+10) |
 | **Tasks completed** | Phase 21–25 complete; M108–M111 done (T111.3 local Docker waived S024-D41) |
 | **Last updated** | 2026-08-03 |
-| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M111 complete → 08 |
+| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 08 PASS; awaiting Gate C→D |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
-| **Active session** | S024-website-scrape-crawl — 07-build → 08-verify-build |
+| **Active session** | S024-website-scrape-crawl — 08-verify-build complete |
 | **Scope addition** | 2026-08-03 — F59 scrape + F60 crawl + F61 tree (#185/#69/#71/#70). |
 
 ## Template
@@ -2217,11 +2217,11 @@ expand/collapse + bulk selection; ChatRAG backend nested source fields only — 
 #### Phase 26 Gate Check
 
 - [x] All M108–M111 tasks completed (T108.1–T111.4)
-- [ ] AC-SC1–SC11 met at T2 (unit + API e2e + Vitest + Playwright UJ-066); AC-SC12 scope held — **08-verify-build / 09–11**
+- [x] AC-SC1–SC11 met at T2 (unit + API e2e + Vitest + Playwright UJ-066); AC-SC12 scope held — **08-verify-build PASS** (TC-204 live DB CI-gated / S024-D41)
 - [x] ADR-045: Playwright in Modal worker; trafilatura + pypdf; nested trees + soft-fail
 - [x] OpenAPI JobOptions crawl + tree paths; `infra/vecinita.yaml` scrape/crawl keys (T111.4)
 - [x] No new CORS origins; ChatRAG UI unchanged
-- [ ] ruff / basedpyright clean; pytest + Vitest + `make test-ui` UJ-066 — **08-verify-build**
+- [x] ruff / basedpyright clean; pytest (scoped) + Vitest 702 + `make test-ui` UJ-066 — **08-verify-build PASS**
 
 **Issue closeout notes (after deploy / PR merge):**
 - **#69** — closed by F59/M108: main-content, politeness, PDF soft-fail, JS-render.
