@@ -298,3 +298,90 @@ def test_run_job_marks_failed_when_pipeline_raises(
     assert updated is not None
     assert updated.status == "failed"
     assert updated.error_code == "ValueError"
+
+
+def test_run_job_rejects_unknown_job_type() -> None:
+    """Unknown job_type raises ValueError from the dispatcher."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/page"], job_type="ingest")
+    store.update_job(record.job_id, status="queued")
+    # Bypass create_job validation by mutating the in-memory record.
+    mutated = store.get_job(record.job_id)
+    assert mutated is not None
+    mutated.job_type = "not-a-real-type"
+
+    with pytest.raises(ValueError, match="unknown job_type"):
+        run_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+        )
+
+
+def test_run_job_audit_emit_failure_is_swallowed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Audit emit exceptions must not fail a successful job."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/page"])
+
+    def _ok(_job_id: UUID, **_kwargs: object) -> None:
+        store.update_job(_job_id, status="completed")
+
+    class _AuditFailWrite(_StubWriteClient):
+        def post_audit_event(self, event: object) -> None:
+            _ = event
+            msg = "audit down"
+            raise RuntimeError(msg)
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_ingest_job",
+        _ok,
+    )
+    run_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_AuditFailWrite(),  # type: ignore[arg-type]
+    )
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "completed"
+
+
+def test_run_job_emits_failed_audit_when_pipeline_already_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When the pipeline already marked failed, run_job audits without re-updating."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/page"])
+    events: list[str] = []
+
+    def _fail_marked(_job_id: UUID, **_kwargs: object) -> Never:
+        store.update_job(
+            _job_id,
+            status="failed",
+            error_code="Boom",
+            error_message="already failed",
+        )
+        msg = "already failed"
+        raise RuntimeError(msg)
+
+    class _AuditWrite(_StubWriteClient):
+        def post_audit_event(self, event: object) -> None:
+            payload = getattr(event, "event_type", None)
+            events.append(str(payload))
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_ingest_job",
+        _fail_marked,
+    )
+    with pytest.raises(RuntimeError, match="already failed"):
+        run_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_AuditWrite(),  # type: ignore[arg-type]
+        )
+    assert "job.failed" in events

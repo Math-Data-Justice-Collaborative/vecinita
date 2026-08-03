@@ -168,7 +168,9 @@ describe("BackfillForm (T87.5 / TP-S017-08)", () => {
     vi.stubGlobal(
       "fetch",
       vi
-        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .fn<
+          (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+        >()
         .mockRejectedValueOnce(new Error("backfill enqueue boom")),
     );
 
@@ -188,7 +190,9 @@ describe("BackfillForm (T87.5 / TP-S017-08)", () => {
     vi.stubGlobal(
       "fetch",
       vi
-        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .fn<
+          (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+        >()
         .mockRejectedValueOnce("not-an-error"),
     );
 

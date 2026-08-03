@@ -570,3 +570,128 @@ EV-020 **in_progress**. Phase 0 **approved** (user option 1).
 Verification: [verification-report.md](../sessions/S023-retrieval-topk-packing/reports/verification-report.md).  
 Next: **Gate C→D** → 09-qa + 10-e2e.
 
+---
+
+## Cycle EV-022 — Scope (S024 / epic #185)
+
+**Approved (Phase 0):** 2026-08-03  
+**Session:** S024-website-scrape-crawl  
+**Predecessor:** S023 / EV-020 (completed 2026-08-03)  
+**Issues:** [#185](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/185) (epic),
+[#69](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/69),
+[#71](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/71),
+[#70](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/70)  
+**Features:** **F59**, **F60**, **F61**  
+**Branch:** `evolve/EV-022-website-scrape-crawl`  
+**Routing:** Standard (skip 03, 05, 06, 15)
+
+### Scope summary
+
+Website **scrape → crawl → tree UI** for multi-page ingest. Independent PRs in order
+**#69 → #71 → #70**. Admin/ops Data Management primary; ChatRAG **backend** nested metadata
+only (no ChatRAG UI — licensing research tracked).
+
+### Decisions (session open + Phase 0 — 2026-08-03)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S024-D1 | Session | Open **S024-website-scrape-crawl** after S023/EV-020 close |
+| S024-D2 | Routing | **Standard**; skip 03, 05, 06, 15 |
+| S024-D3 | Issues | Epic #185; order **#69 → #71 → #70**; independent PRs |
+| S024-D4 | Cycle | **EV-022** |
+| S024-D5 | 00 artifacts | Session brief/routing/HANDOFF/01-seed written |
+| S024-D6 | Personas | Admin/ops DM only; ChatRAG UI deferred (licensing) |
+| S024-D7 | #69 JS-render | **Required in v1** |
+| S024-D8 | #71 crawl | Seed→N, limits, link graph, soft per-page fail |
+| S024-D9 | #70 tree | Full tree + flat toggle; strong nesting UX in corpus |
+| S024-D10 | Flow | Job form → job → Jobs detail → Corpus tree |
+| S024-D11 | API shape | Additive `POST /jobs` crawl options (not `/jobs/crawl`) |
+| S024-D12 | Hierarchy | Domain → path segments → document → chunks |
+| S024-D13 | Errors | Soft per-page fail; partial metrics; failed tree nodes |
+| S024-D14 | Boundaries | Out: ChatRAG UI, #94, full OCR, provider ABC; **In:** JS-render + basic PDF text |
+| S024-D15 | Compatibility | Additive API only |
+| S024-D16 | Safety | Public URLs; robots/rate-limit/UA; no auth crawl; no body PII logs |
+| S024-D17 | ChatRAG license | Research track item only (no UI ship) |
+| S024-D18 | Apps | ingest + DM + Modal + write/OpenAPI + **ChatRAG backend meta** |
+| S024-D19 | Config/secrets | Defaults preferred; no scrape auth secrets |
+| S024-D20 | Connectivity | Same Admin SPA; no new CORS/VITE origins |
+| S024-D21 | JS-render runtime | Lock in **04** via short spike |
+| S024-D22 | Defaults | max_pages≈25, max_depth≈2, polite; conditional JS-render |
+| S024-D23 | Tests | Per-slice AC + UJ/TC; unit + API e2e + Vitest tree |
+| S024-D24 | E2E tier | T0/T2 required; T3 live crawl smoke post-deploy |
+| S024-D25 | Fn allocation | **F59** (#69), **F60** (#71), **F61** (#70) |
+| S024-D27 | 01 seed | Confirm L1–L16 |
+| S024-D28 | Hierarchy API | Nested JSON `corpus/tree` + `jobs/{id}/tree` |
+| S024-D29 | PDF | Best-effort extract; soft-fail if no text |
+| S024-D30 | ChatRAG meta | Path/parent on documents; no FE |
+| S024-D31 | Test ids | UJ-064–066; TC-196–207; AC-SC* |
+| S024-D32 | 01→02 | User confirm complete 01 → start 02 |
+| S024-D33 | Start 02 | 02-verify-plan in_progress |
+| S024-D34 | Gate A→B | **PASS** — approve L1–M5; surgical api-contract + TC-204/AC-SC11 |
+| S024-D35 | 04 TP locks | **TP1–TP6 all recommended**; JS-render **A** (Playwright in Modal worker); extract **`trafilatura`**; PDF **`pypdf`**; **ADR-045** |
+| S024-D36 | Phase 26 | M108 F59 → M109 F60 → M110 F61 → M111 e2e/OpenAPI; PR-59 / #69→#71→#70 |
+| S024-D37 | Gate B→C | **PASS** — Phase 26 approved; start 07-build T108.1 |
+| S024-D38 | T110.2 verify | Unit tests only; TC-204 e2e deferred until Docker/Postgres (option 2) |
+| S024-D40 | T111.3 block | Docker daemon not running; cannot `make db-ready` |
+| S024-D41 | T111.3 waive | **Skip local Docker** — TC-204 CI-gated + skip-without-Postgres; local closeout = unit tree + Playwright UJ-066 (user 2026-08-03) |
+| S024-D42 | Gate C→D | **PASS** — Phase C approved; start Phase D (09-qa + 10-e2e) |
+| S024-D43 | Phase D | **PASS** — 09+10 accepted; start 11-verify-impl |
+| S024-D44 | 11 inspect | UI preview **Yes** (local); inspection env **staging** |
+| S024-D45 | 11 inspect | **Skip live browser** — approve from T0 + OpenAPI; staging visuals post-deploy |
+| S024-D46 | 11 signoff | **Approve all** — UJ-064–066 + F59–F61; close 11 → start 12-verify-deploy (user 2026-08-03) |
+| S024-D47 | 12 deploy gate | **Approve mitigations + rollback + Decision A** — ship static scrape/crawl/tree; JS-render browser path follow-up; close 12 → 13 (user 2026-08-03) |
+
+### Impact analysis (docs / code)
+
+| Area | Paths |
+|------|-------|
+| Product specs | `feature-list.md`, `spec.md`, `user-journeys.md`, `test-plan.md`, `acceptance-criteria.md` |
+| Contracts | `api-contract.md`, `openapi/data-management.yaml`, optional ChatRAG OpenAPI for meta |
+| Config / ops | `config-spec.md`, `data-management-plan.md`, `dependency-inventory.md` |
+| Architecture | **ADR-045** (scrape/crawl/tree + soft-fail + Playwright worker) |
+| Code | `packages/ingest`, DM backend/Modal, DM frontend (JobForm + Corpus tree), write API, chat-rag-backend meta |
+| Research | ChatRAG nesting UI licensing note (issue comment / session report) |
+
+### Phase 0 status
+
+EV-022 **in_progress**. Phase 0 **approved** (user option 1 — allocate F59–F61).
+
+### Phase A status
+
+| Gate | Status |
+|------|--------|
+| 01-requirements | **completed** (S024-D32/D33) |
+| 02-verify-plan | **completed** — Gate A→B **PASS** (S024-D34) |
+| 03-plan-tooling | skipped |
+
+### Phase B status
+
+| Gate | Status |
+|------|--------|
+| 04-tech-plan | **TP1–TP6 locked** (S024-D35); Phase 26 + ADR-045 drafted |
+| 05-verify-tech | skipped |
+| 06-tech-tooling | skipped |
+| Gate B→C | **PASS** (S024-D37) — 07-build started |
+
+**Tech artifacts:** [tech-plan-delta](../sessions/S024-website-scrape-crawl/reports/tech-plan-delta.md),
+[roadmap](../sessions/S024-website-scrape-crawl/roadmap.md),
+[ADR-045](../adr/ADR-045-website-scrape-crawl-tree.md), execution-plan Phase 26.
+
+### Phase C status
+
+| Stage | Status |
+|-------|--------|
+| 07-build | **M108–M111 complete** (T111.3 S024-D41 waive local Docker) |
+| 08-verify-build | **PASS** — see `reports/verification-report.md` |
+| Gate C→D | **PASS** (S024-D42) |
+
+### Phase D status
+
+| Stage | Status |
+|-------|--------|
+| 09-qa | **completed** — `pass_with_advisories` (`reports/qa-report.md`) |
+| 10-e2e | **completed** — T0 PASS; TC-204 CI-gated (`reports/e2e-report.md`) |
+| Phase D checkpoint | **PASS** (S024-D43) |
+| 11-verify-impl | **completed** (S024-D46) — `reports/verify-impl.md` |
+| 12-verify-deploy | **completed** (S024-D47) — `reports/deploy-checklist.md` |
+| 13-deploy-smoke | **in_progress** |

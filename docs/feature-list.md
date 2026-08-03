@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-02 (S022/EV-019 — F47–F49 ingest resilience; prior S021/EV-018 F46 + F45)
+> **Last updated**: 2026-08-03 (S024/EV-022 — F59–F61 scrape/crawl/tree; prior S023/EV-020 F50–F51)
 
 ## Summary
 
@@ -61,6 +61,9 @@
 | F49 | Chunk overlap + sizing clarity (#160) | Implemented | Data Management | packages/ingest, config-spec; optional admin FE | 11-verify-impl S022 2026-08-02; EV-019 #160 |
 | F50 | Promote prod top_k to 8 (#158) | Implemented | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #158 |
 | F51 | Default P3 context packing (#165) | Implemented | ChatRAG | packages/rag, chat-rag-backend, config-spec, DO env | S023/EV-020 #165 |
+| F59 | Robust scrape (main-content, politeness, JS-render, PDF text) (#69) | Planned | Data Management | packages/ingest, data-management-backend, Modal | S024/EV-022 #69 |
+| F60 | Website crawl from seed URL (#71) | Planned | Data Management | packages/ingest, data-management-backend, DM frontend, Modal | S024/EV-022 #71 |
+| F61 | Corpus tree UI + nested source metadata (#70) | Planned | Data Management (+ ChatRAG backend meta) | data-management-frontend, DM backend, write API, chat-rag-backend | S024/EV-022 #70 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -1020,15 +1023,81 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Success**: Overlap default 32; HF sizing; unit + e2e cover boundaries (TC-191–192).
 - **Source**: S022 / EV-019; GitHub #160; S022-D6 / S022-D8 / S022-D15–D16; ADR-044.
 
+### F59: Robust scrape — main-content, politeness, JS-render, PDF text (#69)
+
+- **What it does**: Upgrades the ingest scrape layer beyond minimal HTMLParser extraction:
+  main-content / boilerplate stripping; redirects, charset, content-type, timeouts/retries;
+  robots.txt + rate limiting + descriptive User-Agent; **JS-rendered pages via Playwright in
+  the Modal DM worker** (`VECINITA_SCRAPE_JS_RENDER=off|auto|always`, ADR-045); **basic PDF
+  text extract** via `pypdf` (not full OCR); main-content via **`trafilatura`**. Richer
+  `ScrapedDocument` metadata and structured per-fetch errors for jobs.
+- **Inputs**: Public URL; scrape/politeness config; optional render path when HTML is sparse.
+- **Outputs**: Cleaner title/body text; metadata (canonical URL, fetched-at, content-type,
+  status); job-visible fetch errors.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/ingest` scrape/models | Extraction, politeness, PDF/JS paths |
+  | DM pipeline / Modal worker | Consume upgraded scrape |
+  | tests | HTML/PDF fixtures + failure modes |
+- **Out of scope (EV-022)**: Full OCR product; auth-walled sites; multi-scraper provider ABC;
+  ChatRAG UI.
+- **Ship order**: First slice of epic #185 (before F60/F61).
+- **Source**: S024 / EV-022; GitHub #69; S024-D7/D14/D16/D21/D22.
+
+### F60: Website crawl from seed URL (#71)
+
+- **What it does**: From a seed URL, discover and scrape same-site internal pages in one job
+  with configurable depth/page limits, include/exclude patterns, URL normalize/dedup, link
+  graph for tree rendering, and per-page soft failure. Additive `POST /jobs` options
+  (`crawl`, `max_depth`, `max_pages`, scope) — not a separate `/jobs/crawl`. Admin Job form
+  fields configure the crawl.
+- **Inputs**: Seed in `urls[0]`; crawl options; shared politeness from F59.
+- **Outputs**: Multiple documents + link-graph/parent metadata; partial success metrics;
+  progress on Jobs detail.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/ingest` crawl module | BFS/scope/dedup/graph |
+  | OpenAPI / job options | Additive crawl fields |
+  | DM frontend JobForm | Crawl controls |
+  | tests / e2e | Scope, depth, dedup, soft-fail |
+- **Defaults (starting)**: `max_pages≈25`, `max_depth≈2`, polite delay (04 may refine).
+- **Out of scope (EV-022)**: #94 curation; cross-domain crawl; auth crawl.
+- **Ship order**: After F59; before F61.
+- **Source**: S024 / EV-022; GitHub #71; S024-D8/D10/D11/D13/D22.
+
+### F61: Corpus tree UI + nested source metadata (#70)
+
+- **What it does**: Admin Corpus **tree view** (toggle with flat list) grouped
+  **domain → URL path segments → document → chunks**, with expand/collapse, per-node status
+  and counts, selection + bulk actions. Backend hierarchy payload for a job/corpus.
+  **ChatRAG backend** may store/serve nested source metadata for future use — **no ChatRAG
+  UI** this cycle (licensing research tracked separately).
+- **Inputs**: Corpus/job hierarchy API; existing bulk dialogs.
+- **Outputs**: Nested browse UX in DM; EN/ES labels; Vitest coverage of nesting behavior.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/data-management-frontend` | Tree component + CorpusPage toggle |
+  | DM backend / write API | Hierarchy endpoints |
+  | `apps/chat-rag-backend` | Nested source metadata only (no FE) |
+  | tests | Vitest tree + API e2e as applicable |
+- **Out of scope (EV-022)**: ChatRAG public tree UI; changing bulk action semantics beyond
+  tree selection wiring.
+- **Ship order**: After F60 (uses crawl graph / path metadata).
+- **Source**: S024 / EV-022; GitHub #70; S024-D9/D12/D17/D18.
+
 ## Planned / Deferred (post-v1)
 
 | # | Feature | Priority | Complexity | Notes |
 |---|---------|----------|------------|-------|
 | P1 | Dedicated API gateway / BFF | Medium | Medium | R6 unresolved — direct backend URLs in v1 |
-| P2 | Multimodal / PDF ingest | Low | High | HTML scrape only in v1 |
+| P2 | Multimodal / full OCR ingest | Low | High | **F59** covers basic PDF text; full OCR still deferred |
 | P3 | Model fine-tuning on corpus | Low | High | Fine-tuning excluded from v1 |
 | P4 | Advanced admin (bulk reindex, A/B prompts) | Low | Medium | — |
 | P5 | Full APM / OpenTelemetry | Low | Medium | Basic logs in v1 (F17) |
+| P6 | ChatRAG nested corpus UI | Medium | Medium | Deferred — licensing research (S024-D17) |
 
 ## Monorepo layout (confirmed)
 

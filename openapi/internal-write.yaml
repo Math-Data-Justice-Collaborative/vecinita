@@ -77,6 +77,46 @@ paths:
                 $ref: "#/components/schemas/DocumentListPage"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /corpus/tree:
+    get:
+      operationId: getCorpusTree
+      summary: Nested corpus hierarchy (domain → path → document)
+      description: >
+        Admin Corpus tree view payload (F61 / #70). Flat list remains at GET /documents.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: root
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional domain or path prefix filter
+        - name: job_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Optional job-scoped filter (reserved)
+        - name: expand_depth
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 10
+            default: 1
+      responses:
+        "200":
+          description: Nested tree roots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CorpusTreeResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /documents/content-hash:
     get:
       operationId: getDocumentContentHash
@@ -1163,6 +1203,20 @@ components:
           format: uuid
           nullable: true
           description: Optional rebuild run association for revision stamps
+        source_domain:
+          type: string
+          nullable: true
+          description: Nested source domain for corpus tree (F61); derived from url when omitted
+        source_path:
+          type: string
+          nullable: true
+          description: Nested URL path directory (F61)
+        parent_url:
+          type: string
+          nullable: true
+        canonical_url:
+          type: string
+          nullable: true
         chunks:
           type: array
           maxItems: 100
@@ -1276,11 +1330,82 @@ components:
         language:
           type: string
           nullable: true
+        source_domain:
+          type: string
+          nullable: true
+        source_path:
+          type: string
+          nullable: true
+        parent_url:
+          type: string
+          nullable: true
+        canonical_url:
+          type: string
+          nullable: true
         tags:
           type: array
           maxItems: 100
           items:
             $ref: "#/components/schemas/TagInput"
+    TreeNode:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - kind
+        - label
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum:
+            - domain
+            - path
+            - document
+            - chunk
+        label:
+          type: string
+        url:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+          nullable: true
+        source_domain:
+          type: string
+          nullable: true
+        source_path:
+          type: string
+          nullable: true
+        parent_url:
+          type: string
+          nullable: true
+        canonical_url:
+          type: string
+          nullable: true
+        children:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/TreeNode"
+          default: []
+    CorpusTreeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - roots
+      properties:
+        roots:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/TreeNode"
     DocumentListPage:
       type: object
       required:

@@ -26,6 +26,10 @@ class Source(BaseModel):
     title: str | None = None
     url: str | None = None
     score: float
+    source_domain: str | None = None
+    source_path: str | None = None
+    parent_url: str | None = None
+    canonical_url: str | None = None
 
 
 class AskResponse(BaseModel):
@@ -52,6 +56,10 @@ class DocumentBrowseItem(BaseModel):
     url: str
     language: str | None = None
     tags: list[TagSummary]
+    source_domain: str | None = None
+    source_path: str | None = None
+    parent_url: str | None = None
+    canonical_url: str | None = None
 
 
 class DocumentBrowsePage(BaseModel):

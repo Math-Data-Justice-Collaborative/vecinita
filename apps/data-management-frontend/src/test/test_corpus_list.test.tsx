@@ -500,4 +500,328 @@ describe("CorpusList", () => {
       setTimeout(resolve, 50);
     });
   });
+
+  it("loads corpus tree when Tree view is selected", async () => {
+    const tree = {
+      roots: [
+        {
+          id: "domain:tree.example.com",
+          kind: "domain",
+          label: "tree.example.com",
+          counts: { documents: 1 },
+          children: [
+            {
+              id: "doc-tree-1",
+              kind: "document",
+              label: "leaf.html",
+              url: "https://tree.example.com/leaf.html",
+              status: "completed",
+            },
+          ],
+        },
+      ],
+    };
+    const treeUrls: string[] = [];
+    const requestUrl = (input: RequestInfo | URL): string => {
+      if (typeof input === "string") {
+        return input;
+      }
+      if (input instanceof URL) {
+        return input.href;
+      }
+      return input.url;
+    };
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockImplementation(async (input) => {
+        const url = requestUrl(input);
+        if (url.includes("/corpus/tree")) {
+          treeUrls.push(url);
+          return {
+            ok: true,
+            json: async () => tree,
+          } as Response;
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            items: MOCK_DOCS,
+            page: 1,
+            page_size: 50,
+            total: MOCK_DOCS.length,
+          }),
+        } as Response;
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("corpus-view-tree"));
+    await waitFor(() => {
+      expect(screen.getByText("tree.example.com")).toBeInTheDocument();
+    });
+    expect(treeUrls.length).toBeGreaterThan(0);
+  });
+
+  it("shows tree load error and refreshes tree view", async () => {
+    const tree = {
+      roots: [
+        {
+          id: "domain:refresh.example.com",
+          kind: "domain",
+          label: "refresh.example.com",
+          children: [],
+        },
+      ],
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: MOCK_DOCS,
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.length,
+        }),
+      })
+      .mockRejectedValueOnce(new Error("tree load failed"))
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => tree,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => tree,
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("corpus-view-tree"));
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent("tree load failed");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /refresh/i }));
+    await waitFor(() => {
+      expect(screen.getByText("refresh.example.com")).toBeInTheDocument();
+    });
+  });
+
+  it("shows generic tree load failure when reject is not an Error", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: MOCK_DOCS,
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.length,
+        }),
+      })
+      .mockRejectedValueOnce("tree string failure");
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("corpus-view-tree"));
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+  });
+
+  it("switches from tree view back to flat list", async () => {
+    const tree = {
+      roots: [
+        {
+          id: "domain:switch.example.com",
+          kind: "domain",
+          label: "switch.example.com",
+          children: [],
+        },
+      ],
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: MOCK_DOCS,
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.length,
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => tree,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: MOCK_DOCS,
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.length,
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("corpus-view-tree"));
+    await waitFor(() => {
+      expect(screen.getByText("switch.example.com")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("corpus-view-flat"));
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+  });
+
+  it("refreshes tree after bulk delete completes in tree view", async () => {
+    const treeWithDoc = {
+      roots: [
+        {
+          id: "domain:bulk.example.com",
+          kind: "domain",
+          label: "bulk.example.com",
+          children: [
+            {
+              id: "aaa-111",
+              kind: "document",
+              label: "Doc A",
+              url: "https://example.com/a",
+              status: "completed",
+            },
+          ],
+        },
+      ],
+    };
+    const treeAfter = {
+      roots: [
+        {
+          id: "domain:bulk.example.com",
+          kind: "domain",
+          label: "bulk.example.com",
+          children: [],
+        },
+      ],
+    };
+    let treeFetchCount = 0;
+    const requestUrl = (input: RequestInfo | URL): string => {
+      if (typeof input === "string") {
+        return input;
+      }
+      if (input instanceof URL) {
+        return input.href;
+      }
+      return input.url;
+    };
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockImplementation(async (input) => {
+        const url = requestUrl(input);
+        if (url.includes("/corpus/tree")) {
+          treeFetchCount += 1;
+          return {
+            ok: true,
+            json: async () => (treeFetchCount > 1 ? treeAfter : treeWithDoc),
+          } as Response;
+        }
+        if (url.includes("/documents/bulk")) {
+          return {
+            ok: true,
+            json: async () => ({
+              successes: ["aaa-111"],
+              failures: [],
+            }),
+          } as Response;
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            items: MOCK_DOCS,
+            page: 1,
+            page_size: 50,
+            total: MOCK_DOCS.length,
+          }),
+        } as Response;
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCorpus();
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("corpus-view-tree"));
+    await waitFor(() => {
+      expect(screen.getByText("bulk.example.com")).toBeInTheDocument();
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: /expand bulk\.example\.com/i }),
+    );
+    fireEvent.click(screen.getByRole("checkbox", { name: /select Doc A/i }));
+    await waitFor(() => {
+      expect(screen.getByTestId("bulk-toolbar")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("bulk-delete-btn"));
+    fireEvent.click(screen.getByRole("button", { name: /confirm delete/i }));
+    await waitFor(() => {
+      expect(treeFetchCount).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it("ignores tree load success after unmount", async () => {
+    let resolveTree: (value: Response) => void = () => undefined;
+    const pendingTree = new Promise<Response>((resolve) => {
+      resolveTree = resolve;
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: MOCK_DOCS,
+          page: 1,
+          page_size: 50,
+          total: MOCK_DOCS.length,
+        }),
+      })
+      .mockReturnValueOnce(pendingTree);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { unmount } = renderCorpus();
+    await waitFor(() => {
+      expect(screen.getByText("Doc A")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("corpus-view-tree"));
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+    unmount();
+
+    resolveTree({
+      ok: true,
+      json: async () => ({ roots: [] }),
+    } as Response);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+  });
 });

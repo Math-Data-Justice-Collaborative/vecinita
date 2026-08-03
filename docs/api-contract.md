@@ -212,7 +212,7 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
 ### POST `/jobs`
 
 - **Purpose**: Enqueue scrape→chunk→embed pipeline.
-- **Auth**: Infrastructure (Modal proxy + deploy API key at edge).
+- **Auth**: Supabase JWT + Modal proxy (same as other `/jobs*`; see §Authentication).
 - **Request**:
 
 ```json
@@ -221,7 +221,11 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
   "options": {
     "chunk_size_tokens": 256,
     "chunk_overlap_tokens": 32,
-    "force": false
+    "force": false,
+    "crawl": false,
+    "max_depth": 2,
+    "max_pages": 25,
+    "crawl_scope": "same_domain"
   }
 }
 ```
@@ -234,12 +238,17 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
   - On completed/failed ingest jobs, `metrics` MAY include `skipped_unchanged` and
     `urls_failed_embed` (OpenAPI `JobMetrics`; F47–F48 / M104).
 
-### GET `/internal/v1/documents/content-hash?url=`
-
-- **Purpose**: Lookup stored `content_hash` by URL for ingest skip (F47 / #163).
-- **Auth**: Service key (Modal → write API).
-- **Response** `200`: `{"url": "...", "content_hash": "…" | null, "document_id": uuid | null}`
-  (`content_hash` null when URL unknown).
+- **Crawl JobOptions (EV-022 / F60 — additive):**
+  - **`crawl`:** bool, default `false` — when `true`, treat `urls[0]` as seed and discover
+    same-site pages (F60 / #71). Single-URL ingest unchanged when `false`.
+  - **`max_depth`:** int, default **2** — max link depth from seed (`≥ 0`).
+  - **`max_pages`:** int, default **25** — hard cap on pages fetched (`≥ 1`).
+  - **`crawl_scope`:** string, default `same_domain` — `same_domain` | `path_prefix`
+    (path_prefix stays under seed path).
+  - Optional (04 may refine): `include_patterns[]`, `exclude_patterns[]`.
+  - **`metrics` MAY include:** `pages_fetched`, `pages_failed`, `pages_skipped_robots`,
+    `crawl_stopped_reason` (`max_pages` | `max_depth` | `complete` | …).
+  - Per-page failures **do not** fail the whole job unless zero pages succeed (S024-D13).
 
 - **Response** `202`:
 
@@ -249,6 +258,23 @@ Base path: `/` on Modal app (accessed via proxy URL + `requires_proxy_auth`).
   "status": "pending"
 }
 ```
+
+### GET `/jobs/{job_id}/tree`
+
+- **Purpose**: Hierarchical result nodes for a crawl/ingest job (F60/F61) — domain → path →
+  document (+ status). Nested JSON for Admin Jobs detail / Corpus tree seeding.
+- **Auth**: Same as other `/jobs*` (Supabase JWT + proxy).
+- **Response** `200`: `{ "job_id": "uuid", "roots": [ TreeNode... ] }` where `TreeNode` is
+  `{ "id", "kind": "domain"|"path"|"document"|"chunk", "label", "url"?, "status"?,
+  "counts"?, "children": TreeNode[] }`.
+- **404** if job unknown.
+
+### GET `/internal/v1/documents/content-hash?url=`
+
+- **Purpose**: Lookup stored `content_hash` by URL for ingest skip (F47 / #163).
+- **Auth**: Service key (Modal → write API).
+- **Response** `200`: `{"url": "...", "content_hash": "…" | null, "document_id": uuid | null}`
+  (`content_hash` null when URL unknown).
 
 ### GET `/jobs`
 
@@ -494,6 +520,20 @@ send these headers; they are honored only on the service-key path (BUG-2026-07-0
 - **Purpose**: List corpus (for admin UI via Modal proxy or direct DO).
 - **Query**: `page` (default 1), `page_size` (default 50, max 100).
 - **Response** `200`: `{ items: DocumentSummary[], page, page_size, total }`.
+  `DocumentSummary` MAY include nested-source fields (F61): `source_domain`, `source_path`,
+  `parent_url`, `canonical_url` (nullable until backfilled).
+
+### GET `/internal/v1/corpus/tree`
+
+- **Purpose**: Nested corpus hierarchy for Admin Corpus tree view (F61 / #70) —
+  **domain → URL path segments → document → chunks** (lazy children OK).
+- **Auth**: Admin JWT (same as corpus list).
+- **Query**: optional `root` (domain or path prefix), `job_id` (limit to one job’s docs),
+  `expand_depth` (default 1).
+- **Response** `200`: `{ "roots": [ TreeNode... ] }` (same `TreeNode` shape as
+  `GET /jobs/{id}/tree`).
+- **Notes**: Flat list endpoint remains; UI toggles tree vs flat (S024-D9). Bulk actions use
+  selected document ids from tree nodes.
 
 ### DELETE `/internal/v1/documents/{document_id}`
 

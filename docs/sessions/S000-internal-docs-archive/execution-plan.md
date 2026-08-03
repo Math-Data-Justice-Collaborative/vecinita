@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; **S023 Phase 25 delta 2026-08-03**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; **S024 Phase 26 delta 2026-08-03**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**044**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**045**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 25: EV-020 — Residual top_k + P3 (F50–F51) |
-| **Active milestone** | Phase 25 complete — await Gate C→D / 09+10 |
-| **Active task** | — (build tasks T105.1–T107.3 done) |
-| **Tasks completed** | Phase 21–25 M105–M107 complete (F50–F51) |
+| **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
+| **Active milestone** | M111 — **completed**; Phase D PASS; 11+12 **approved** |
+| **Active task** | **13-deploy-smoke** — Path A merge/deploy + H1–H5 |
+| **Tasks completed** | Phase 21–25 complete; M108–M111 done; 09–12 done (S024-D43/D46/D47) |
 | **Last updated** | 2026-08-03 |
-| **Evolve cycle** | EV-020 — Standard; S023-D12 Gate B→C PASS; TP1–TP6 approved; skip 05/06 |
-| **Git branch** | `evolve/EV-020-retrieval-topk-packing` |
-| **Active session** | S023-retrieval-topk-packing — 07-build |
-| **Scope addition** | 2026-08-03 — F50 top_k=8 + F51 default P3 (#158/#165). |
+| **Evolve cycle** | EV-022 — Standard; 12 signed (S024-D47 Decision A); 13 in progress |
+| **Git branch** | `evolve/EV-022-website-scrape-crawl` |
+| **Active session** | S024-website-scrape-crawl — 13-deploy-smoke |
+| **Scope addition** | 2026-08-03 — F59 scrape + F60 crawl + F61 tree (#185/#69/#71/#70). |
 
 ## Template
 
@@ -2152,6 +2152,91 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 ---
 
+## Phase 26: EV-022 — Website scrape & crawl (F59–F61)
+
+> **Session:** S024 · **Cycle:** EV-022 · **Branch:** `evolve/EV-022-website-scrape-crawl`  
+> **Issues:** #185 (epic), #69 (scrape), #71 (crawl), #70 (tree)  
+> **Decisions:** RD-252–263, S024-D1–D35, TP1–TP6 locked, Gate A→B PASS (S024-D34)  
+> **Out of scope:** ChatRAG tree UI; #94 curation; full OCR; provider ABC; auth-walled crawl;
+> new CORS origins
+
+#### M108: F59 — robust scrape (main-content, politeness, PDF, JS-render)
+
+**Goal:** Upgrade ingest scrape: `trafilatura` main-content; robots + RPS + UA; `pypdf`
+best-effort soft-fail; Playwright in Modal worker for `VECINITA_SCRAPE_JS_RENDER=auto|always`
+(ADR-045; AC-SC1–SC3; TC-196–199).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T108.1 | Test: unit red — main-content strips nav/footer; keeps headings/lists (TC-196) | Test | completed | AC-SC1, F59, #69 | — | 2026-08-03 | S024 | F59 |
+| T108.2 | Test: unit red — robots + rate-limit honored (TC-197) | Test | completed | AC-SC2, config-spec | — | 2026-08-03 | S024 | F59 |
+| T108.3 | Test: unit red — PDF extract / empty soft-fail (TC-198) | Test | completed | AC-SC3, S024-D29 | — | 2026-08-03 | S024 | F59 |
+| T108.4 | Config: pin `trafilatura` in pyproject + Modal DM image; confirm `pypdf`; wire scrape/crawl keys in `infra/vecinita.yaml` | Config | completed | TP5, ADR-045, config-spec | — | 2026-08-03 | S024 | F59 |
+| T108.5 | Code: scrape module — trafilatura extract, politeness, PDF via pypdf, Playwright render path (`auto`/`always`) | Code | completed | feature-list F59, ADR-045, RD-261 | T108.1–T108.4 | 2026-08-03 | S024 | F59 |
+| T108.6 | Test: unit green TC-196–198; fixtures under `data/fixtures/ingest/` | Test | completed | TC-196–198, D4b | T108.5 | 2026-08-03 | S024 | F59 |
+
+#### M109: F60 — website crawl + JobForm + job tree
+
+**Goal:** Same-site BFS crawl with depth/page caps, dedup, soft per-page fail; additive
+`POST /jobs` options; JobForm crawl fields; `GET /jobs/{id}/tree` (AC-SC4–SC7; TC-200–203).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T109.1 | Test: unit red — crawl scope + URL normalize/dedup/no cycles (TC-200) | Test | completed | AC-SC4, F60, #71 | T108.6 | 2026-08-03 | S024 | F60 |
+| T109.2 | Test: unit red — max_depth/max_pages caps + stop reason (TC-201) | Test | completed | AC-SC5, S024-D22 | T108.6 | 2026-08-03 | S024 | F60 |
+| T109.3 | Code: crawl BFS module + job options wiring + nested source fields on write | Code | completed | feature-list F60, api-contract, ADR-045 | T109.1, T109.2 | 2026-08-03 | S024 | F60 |
+| T109.4 | Code/Config: OpenAPI JobOptions crawl fields; `GET /jobs/{id}/tree` route | Code | completed | TP3, api-contract | T109.3 | 2026-08-03 | S024 | F60 |
+| T109.5 | Code: Admin JobForm crawl controls (additive; `crawl=false` preserves single-URL) | Code | completed | AC-SC7, UJ-065 | T109.4 | 2026-08-03 | S024 | F60 |
+| T109.6 | Test: Vitest JobForm crawl fields (TC-203); unit green TC-200–201 | Test | completed | TC-200–203 | T109.5 | 2026-08-03 | S024 | F60 |
+
+#### M110: F61 — corpus tree API + Admin tree UI + ChatRAG meta
+
+**Goal:** `GET /internal/v1/corpus/tree` nested payload; Admin Corpus tree toggle +
+expand/collapse + bulk selection; ChatRAG backend nested source fields only — no ChatRAG UI
+(AC-SC8–SC11; TC-204–207).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T110.1 | Test: API e2e red — corpus tree nesting + nested source fields (TC-204) | Test | completed | AC-SC8/SC11, UJ-066 | T109.6 | 2026-08-03 | S024 | F61 |
+| T110.2 | Code: write API / DM `GET /corpus/tree`; persist nested source columns | Code | completed | api-contract, ADR-045, F61 | T110.1 | 2026-08-03 | S024 | F61 |
+| T110.3 | Code: Admin Corpus tree UI (toggle flat, expand/collapse, status, bulk) | Code | completed | AC-SC9/SC10, #70 | T110.2 | 2026-08-03 | S024 | F61 |
+| T110.4 | Code: ChatRAG backend nested source metadata read (optional assert); **no FE** | Code | completed | AC-SC11, S024-D17/D30 | T110.2 | 2026-08-03 | S024 | F61 |
+| T110.5 | Test: Vitest tree expand/selection (TC-205–206); Playwright UJ-066 (TC-207) | Test | completed | TP4, EV022-M2 | T110.3 | 2026-08-03 | S024 | F61 |
+
+#### M111: UJ e2e suite + OpenAPI mirror + phase gate
+
+**Goal:** API e2e UJ-064/065/066; OpenAPI specs mirrored; phase-gate docs; AC-SC12 held.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T111.1 | Test: API e2e `test_uj064_robust_scrape.py` (TC-199) | Test | completed | UJ-064, e2e-coverage | T108.6 | 2026-08-03 | S024 | F59 |
+| T111.2 | Test: API e2e `test_uj065_website_crawl.py` (TC-202); optional Playwright UJ-065 | Test | completed | UJ-065, TP4 | T109.6 | 2026-08-03 | S024 | F60 |
+| T111.3 | Test: API e2e `test_uj066_corpus_tree.py` (TC-204) green with T110 | Test | completed | UJ-066, AC-SC8/SC11 | T110.5 | 2026-08-03 | S024 | F61 |
+| T111.4 | Docs/Config: OpenAPI mirror check; Phase 26 gate + Current State; issue closeout #69/#71/#70/#185 | Docs | completed | TP3, Phase 26 gate | T111.1–T111.3 | 2026-08-03 | S024 | F59–F61 |
+
+#### Phase 26 Gate Check
+
+- [x] All M108–M111 tasks completed (T108.1–T111.4)
+- [x] AC-SC1–SC11 met at T2 (unit + API e2e + Vitest + Playwright UJ-066); AC-SC12 scope held — **08-verify-build PASS** (TC-204 live DB CI-gated / S024-D41)
+- [x] ADR-045: Playwright in Modal worker; trafilatura + pypdf; nested trees + soft-fail
+- [x] OpenAPI JobOptions crawl + tree paths; `infra/vecinita.yaml` scrape/crawl keys (T111.4)
+- [x] No new CORS origins; ChatRAG UI unchanged
+- [x] ruff / basedpyright clean; pytest (scoped) + Vitest 702 + `make test-ui` UJ-066 — **08-verify-build PASS**
+
+**Issue closeout notes (after deploy / PR merge):**
+- **#69** — closed by F59/M108: main-content, politeness, PDF soft-fail, JS-render.
+- **#71** — closed by F60/M109: crawl options + job tree.
+- **#70** — closed by F61/M110: corpus tree UI + nested meta.
+- **#185** — close when all three children ship and 13-deploy-smoke H1–H5 + crawl smoke pass.
+
+**Tech-plan delta:** `docs/sessions/S024-website-scrape-crawl/reports/tech-plan-delta.md`
+**ADR:** [ADR-045](../../../adr/ADR-045-website-scrape-crawl-tree.md)
+**Roadmap:** `docs/sessions/S024-website-scrape-crawl/roadmap.md`
+**T111.3 closeout:** `docs/sessions/S024-website-scrape-crawl/reports/t111-3-e2e-closeout.md` (S024-D41)
+**T111.4 gate:** `docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md`
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -2271,6 +2356,12 @@ main
 | PR-56 | Major | Phase 22 / S020 (EV-017) | evolve/EV-017-retrieval-batch-b | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173 |
 | PR-57 | Major | Phase 24 / S022 (EV-019) | evolve/EV-019-ingest-resilience | main | merged ([#179](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179)) @ `bd6bb00` |
 | PR-58 | Major | Phase 25 / S023 (EV-020) | evolve/EV-020-retrieval-topk-packing | main | pending — Residual top_k=8 + default P3 (#158/#165) |
+| PR-59 | Major | Phase 26 / S024 (EV-022) | evolve/EV-022-website-scrape-crawl | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190 |
+
+S024 (EV-022) is evolve Standard: M108–M111 land as atomic commits on
+`evolve/EV-022-website-scrape-crawl` (major PR-59 to `main`; optional stacked PRs per
+slice #69→#71→#70). Gate A→B passed (S024-D34); TP1–TP6 locked (S024-D35); 05/06 skipped;
+Gate B→C after execution-plan review.
 
 S023 (EV-020) is evolve Standard: M105–M107 land as atomic commits on the single
 `evolve/EV-020-retrieval-topk-packing` branch (one PR to `main`, PR-58). Gate A→B passed
@@ -2913,6 +3004,27 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T107.1 | M107 | 25 | Test | pending | T106.4 | — | S023 | F50–F51 | — |
 | T107.2 | M107 | 25 | Docs | pending | T107.1 | — | S023 | F50–F51 | — |
 | T107.3 | M107 | 25 | Test | pending | T107.1 | — | S023 | F50–F51 | — |
+| T108.1 | M108 | 26 | Test | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.2 | M108 | 26 | Test | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.3 | M108 | 26 | Test | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.4 | M108 | 26 | Config | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.5 | M108 | 26 | Code | completed | T108.1–T108.4 | 2026-08-03 | S024 | F59 | — |
+| T108.6 | M108 | 26 | Test | completed | T108.5 | 2026-08-03 | S024 | F59 | — |
+| T109.1 | M109 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F60 | — |
+| T109.2 | M109 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F60 | — |
+| T109.3 | M109 | 26 | Code | completed | T109.1, T109.2 | 2026-08-03 | S024 | F60 | — |
+| T109.4 | M109 | 26 | Code | completed | T109.3 | 2026-08-03 | S024 | F60 | — |
+| T109.5 | M109 | 26 | Code | completed | T109.4 | 2026-08-03 | S024 | F60 | — |
+| T109.6 | M109 | 26 | Test | completed | T109.5 | 2026-08-03 | S024 | F60 | — |
+| T110.1 | M110 | 26 | Test | completed | T109.6 | 2026-08-03 | S024 | F61 | — |
+| T110.2 | M110 | 26 | Code | completed | T110.1 | 2026-08-03 | S024 | F61 | — |
+| T110.3 | M110 | 26 | Code | completed | T110.2 | 2026-08-03 | S024 | F61 | — |
+| T110.4 | M110 | 26 | Code | completed | T110.2 | 2026-08-03 | S024 | F61 | — |
+| T110.5 | M110 | 26 | Test | completed | T110.3 | 2026-08-03 | S024 | F61 | — |
+| T111.1 | M111 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F59 | — |
+| T111.2 | M111 | 26 | Test | completed | T109.6 | 2026-08-03 | S024 | F60 | — |
+| T111.3 | M111 | 26 | Test | completed | T110.5 | 2026-08-03 | S024 | F61 | S024-D41 waive local Docker; CI-gated |
+| T111.4 | M111 | 26 | Docs | completed | T111.1–T111.3 | 2026-08-03 | S024 | F59–F61 | — |
 
 ## Phase Gate Log
 
@@ -3024,3 +3136,9 @@ CI: `.github/workflows/ci.yml` (06-tech-tooling). Cursor hooks: lint, format, ba
 - [ ] EV-020 API e2e UJ-063; no Playwright (TP4)
 - [ ] EV-020 Path A ChatRAG redeploy; skip dep/topology churn (TP5)
 - [ ] EV-020 no new CORS/UI (TP6)
+- [ ] EV-022 Phase 26 — M108→M111 F59→F60→F61→e2e (TP1)
+- [ ] EV-022 ADR-045 crawl/tree + soft-fail + Playwright worker (TP2)
+- [ ] EV-022 nested source + OpenAPI + vecinita.yaml scrape/crawl keys (TP3)
+- [ ] EV-022 unit+API e2e; Playwright UJ-066 required; UJ-065 optional (TP4)
+- [ ] EV-022 Path A Modal DM; pypdf reuse; trafilatura + Playwright image (TP5)
+- [ ] EV-022 no new CORS; H4–H5 at 13 (TP6)

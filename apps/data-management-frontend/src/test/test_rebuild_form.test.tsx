@@ -129,7 +129,9 @@ describe("RebuildForm (T89.5 / TC-167 / UJ-053)", () => {
     vi.stubGlobal(
       "fetch",
       vi
-        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .fn<
+          (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+        >()
         .mockRejectedValueOnce(new Error("rebuild enqueue boom")),
     );
 
@@ -149,7 +151,9 @@ describe("RebuildForm (T89.5 / TC-167 / UJ-053)", () => {
     vi.stubGlobal(
       "fetch",
       vi
-        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .fn<
+          (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+        >()
         .mockRejectedValueOnce("not-an-error"),
     );
 
@@ -261,7 +265,9 @@ describe("RebuildPromoteForm (T89.5 / TC-169 / UJ-054)", () => {
     vi.stubGlobal(
       "fetch",
       vi
-        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .fn<
+          (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+        >()
         .mockRejectedValueOnce(new Error("promote boom")),
     );
 
@@ -284,7 +290,9 @@ describe("RebuildPromoteForm (T89.5 / TC-169 / UJ-054)", () => {
     vi.stubGlobal(
       "fetch",
       vi
-        .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+        .fn<
+          (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+        >()
         .mockRejectedValueOnce("not-an-error"),
     );
 

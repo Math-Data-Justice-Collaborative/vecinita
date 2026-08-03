@@ -69,6 +69,9 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-061 | Operator validates non-empty staging retrieve | Operator | Staging golden retrieve + ChatRAG sample ask | F46 EV-018 | local (+ staging) |
 | UJ-062 | Re-ingest resilience (hash skip, force, embed retry) | Admin operator | Admin ingest job re-run + force | F47–F49 EV-019 #163/#166/#160 | local |
 | UJ-063 | Ask with default top_k=8 + P3 packing | Community member | ChatRAG → `POST /api/v1/ask` / stream | F50–F51 EV-020 #158/#165 | local |
+| UJ-064 | Robust scrape (HTML/JS/PDF) single URL | Admin operator | Admin ingest job | F59 EV-022 #69 | local |
+| UJ-065 | Crawl seed → multi-page site | Admin operator | Admin JobForm crawl → Jobs detail | F60 EV-022 #71 | local |
+| UJ-066 | Browse corpus as tree (nesting) | Admin operator | Admin Corpus tree toggle + bulk | F61 EV-022 #70 | local |
 
 ## Visual journey maps
 
@@ -903,6 +906,93 @@ char budget) using production defaults — no request overrides.
 `tests/e2e/test_uj063_topk_p3_ask.py` (TC-195). No new Playwright (no UI change).
 
 **E2E tier**: local.
+
+---
+
+### UJ-064: Robust scrape (HTML / JS / PDF)
+
+**Actor**: Admin operator
+
+**Goal**: Ingest a single public URL with clean main-content extraction, politeness, and
+support for JS-rendered HTML and PDF text (best-effort).
+
+**Preconditions**: DM Job form; F59 scrape path live; fixture HTML/PDF available in tests.
+
+**Steps**:
+
+1. Submit `POST /jobs` with one HTML fixture URL (`crawl=false`).
+2. Job reaches `completed`; document text lacks nav/footer boilerplate vs fixture expectation.
+3. Submit a JS-sparse fixture (or render-flagged URL); content includes main body after render path.
+4. Submit a PDF URL/fixture; text extracted when present; if empty → page soft-failed with
+   error in job metrics (not silent empty corpus row) (S024-D29).
+5. Confirm robots-disallowed fixture is skipped with `pages_skipped_robots` / equivalent.
+
+**Acceptance**: Cleaner extract than pre-F59; robots/rate-limit honored; PDF/JS paths behave
+per AC-SC*; no ChatRAG UI change.
+
+**Automated tests**: Unit fixtures (TC-196–198); API e2e `tests/e2e/test_uj064_robust_scrape.py`
+(TC-199). Vitest N/A.
+
+**E2E tier**: local (T0/T2); T3 live optional single public page after deploy.
+
+---
+
+### UJ-065: Crawl seed → multi-page site
+
+**Actor**: Admin operator
+
+**Goal**: From one seed URL, crawl same-site pages under depth/page limits and see progress
+then results.
+
+**Preconditions**: JobForm crawl controls (F60); polite fixtures / mock HTTP graph.
+
+**Steps**:
+
+1. Open Job form; set seed URL; enable crawl; set `max_depth=2`, `max_pages=25` (or defaults).
+2. Submit job; Jobs detail shows progress / partial metrics while running.
+3. Job completes with `pages_fetched` ≥ 2 on fixture graph; link graph / tree available via
+   `GET /jobs/{id}/tree`.
+4. Force a mid-crawl page failure in fixture; job still completes with `pages_failed` &gt; 0
+   and other pages ingested (S024-D13).
+5. Confirm single-URL ingest (`crawl=false`) unchanged.
+
+**Acceptance**: Additive job options only; soft per-page fail; metrics present; UJ-002 still
+works.
+
+**Automated tests**: Unit scope/dedup (TC-200–201); API e2e
+`tests/e2e/test_uj065_website_crawl.py` (TC-202); Vitest JobForm crawl fields (TC-203).
+
+**UI E2E**: Playwright optional if JobForm ↔ Jobs detail cross-route — prefer
+`tests/ui/admin/uj065-crawl-job.spec.ts` when interaction spans pages.
+
+**E2E tier**: local; T3 live crawl on safe public fixture site post-deploy (S024-D24).
+
+---
+
+### UJ-066: Browse corpus as tree (nesting)
+
+**Actor**: Admin operator
+
+**Goal**: View ingest/crawl results as a nested tree (domain → path → document → chunks)
+with status/counts, toggle flat list, and run bulk actions from selection.
+
+**Preconditions**: Corpus with multi-path documents from crawl or fixtures; F61 APIs.
+
+**Steps**:
+
+1. Open Admin Corpus; toggle **Tree** view.
+2. Expand domain → path segments → document; see chunk children (lazy OK) and status badges.
+3. Select multiple documents in tree; open bulk delete/tag/metadata; confirm dialogs work.
+4. Toggle back to flat list; existing CorpusList behavior preserved.
+5. Empty corpus shows empty state + CTA toward ingest/crawl.
+
+**Acceptance**: Strong nesting UX (S024-D9); EN/ES labels; no ChatRAG FE (S024-D17).
+
+**Automated tests**: API e2e tree payload (TC-204); Vitest tree component (TC-205–206);
+Playwright `tests/ui/admin/uj066-corpus-tree.spec.ts` for tree ↔ bulk dialog interaction
+(TC-207).
+
+**E2E tier**: local (T0-ui + Vitest); T3-ui optional after deploy.
 
 ---
 

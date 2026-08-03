@@ -18,6 +18,7 @@ from vecinita_shared_schemas.data_management import (
     Job,
     JobList,
     JobOptions,
+    JobTreeResponse,
 )
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
@@ -25,6 +26,7 @@ from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, Supabase
 from vecinita_data_management_backend.email_test import ResendClient
 from vecinita_data_management_backend.eval_jobs import eval_run_to_job
 from vecinita_data_management_backend.job_events import JobEventBroker, iter_job_sse
+from vecinita_data_management_backend.job_tree import build_job_tree
 from vecinita_data_management_backend.rate_limit import SlidingWindowRateLimiter
 from vecinita_data_management_backend.store import InMemoryJobStore, JobStore, job_record_to_schema
 from vecinita_data_management_backend.user_admin_routes import register_user_admin_routes
@@ -68,6 +70,11 @@ def _store_options_from_request(job_options: JobOptions | None) -> tuple[str, di
         options["backfill_source"] = job_options.backfill_source
         if job_options.ack_reconstruct_from_chunks:
             options["ack_reconstruct_from_chunks"] = True
+    if job_options.crawl:
+        options["crawl"] = True
+        options["max_depth"] = job_options.max_depth
+        options["max_pages"] = job_options.max_pages
+        options["crawl_scope"] = job_options.crawl_scope
     return job_options.job_type, options
 
 
@@ -286,6 +293,17 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
         if record is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
         return job_record_to_schema(record)
+
+    @app.get("/jobs/{job_id}/tree", response_model=JobTreeResponse)
+    def get_job_tree(  # pyright: ignore[reportUnusedFunction]
+        job_id: UUID,
+        _auth: AuthPrincipal = Depends(auth_dep),
+    ) -> JobTreeResponse:
+        """Nested domain → path → document tree for a crawl/ingest job (F60)."""
+        record = job_store.get_job(job_id)
+        if record is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        return build_job_tree(record)
 
     @app.post("/jobs/{job_id}/cancel", response_model=Job)
     def cancel_job(  # pyright: ignore[reportUnusedFunction]

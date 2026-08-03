@@ -16,6 +16,9 @@ UserStatus = Literal["active", "invited", "disabled"]
 JobType = Literal["ingest", "retag", "eval", "rebuild"]
 RebuildMode = Literal["reembed", "rechunk", "rescrape"]
 BackfillSource = Literal["rescrape", "from_chunks"]
+CrawlScope = Literal["same_domain", "path_prefix"]
+TreeNodeKind = Literal["domain", "path", "document", "chunk"]
+CrawlStoppedReason = Literal["max_pages", "max_depth", "complete"]
 
 
 class JobOptions(BaseModel):
@@ -47,6 +50,16 @@ class JobOptions(BaseModel):
     backfill: bool = False
     backfill_source: BackfillSource = "rescrape"
     ack_reconstruct_from_chunks: bool = False
+    crawl: bool = Field(
+        default=False,
+        description="When true, treat urls[0] as seed and discover same-site pages (F60 / #71).",
+    )
+    max_depth: int = Field(default=2, ge=0, description="Max link depth from seed (F60).")
+    max_pages: int = Field(default=25, ge=1, description="Hard cap on pages fetched (F60).")
+    crawl_scope: CrawlScope = Field(
+        default="same_domain",
+        description="same_domain | path_prefix (path_prefix stays under seed path).",
+    )
 
     @model_validator(mode="after")
     def validate_rebuild_and_backfill(self) -> JobOptions:
@@ -107,6 +120,17 @@ class JobMetrics(BaseModel):
 
     skipped_unchanged: int = Field(default=0, ge=0)
     urls_failed_embed: int = Field(default=0, ge=0)
+    pages_fetched: int = Field(default=0, ge=0, description="Pages fetched during crawl (F60).")
+    pages_failed: int = Field(default=0, ge=0, description="Per-page soft failures (F60).")
+    pages_skipped_robots: int = Field(
+        default=0,
+        ge=0,
+        description="Pages skipped due to robots.txt (F60).",
+    )
+    crawl_stopped_reason: CrawlStoppedReason | None = Field(
+        default=None,
+        description="Why crawl stopped: max_pages | max_depth | complete (F60).",
+    )
 
 
 class Job(BaseModel):
@@ -127,6 +151,37 @@ class Job(BaseModel):
     updated_at: datetime
     initiated_by_user_id: UUID | None = None
     initiated_by_role: str | None = None
+
+
+class TreeNode(BaseModel):
+    """Nested hierarchy node for job/corpus trees (F60/F61 / ADR-045)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    kind: TreeNodeKind
+    label: str
+    url: str | None = None
+    status: str | None = None
+    counts: dict[str, int] | None = None
+    source_domain: str | None = None
+    source_path: str | None = None
+    parent_url: str | None = None
+    canonical_url: str | None = None
+    children: list[TreeNode] = Field(default_factory=list)
+
+
+class JobTreeResponse(BaseModel):
+    """GET /jobs/{job_id}/tree response."""
+
+    job_id: UUID
+    roots: list[TreeNode]
+
+
+class CorpusTreeResponse(BaseModel):
+    """GET /internal/v1/corpus/tree response (F61)."""
+
+    roots: list[TreeNode]
 
 
 class JobList(BaseModel):

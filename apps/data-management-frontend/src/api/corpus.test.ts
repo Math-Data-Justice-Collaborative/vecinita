@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   deleteDocument,
+  fetchCorpusTree,
   listDocumentChunks,
   listDocumentTags,
   listDocuments,
@@ -229,6 +230,43 @@ describe("corpus api", () => {
 
     await expect(deleteDocument(options, "doc-1")).rejects.toThrow(
       "Delete failed (500)",
+    );
+  });
+
+  it("fetchCorpusTree returns nested roots", async () => {
+    const tree = {
+      roots: [
+        {
+          id: "domain:example.com",
+          kind: "domain",
+          label: "example.com",
+          children: [],
+        },
+      ],
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(tree)));
+
+    await expect(fetchCorpusTree(options)).resolves.toEqual(tree);
+    expect(mockFetchUrl(0)).toContain("/internal/v1/corpus/tree");
+  });
+
+  it("fetchCorpusTree surfaces API error detail", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("tree boom", { status: 502 })),
+    );
+
+    await expect(fetchCorpusTree(options)).rejects.toThrow("tree boom");
+  });
+
+  it("fetchCorpusTree uses the status fallback when the error body is empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+
+    await expect(fetchCorpusTree(options)).rejects.toThrow(
+      "Fetch corpus tree failed (500)",
     );
   });
 });

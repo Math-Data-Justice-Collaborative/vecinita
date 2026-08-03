@@ -109,19 +109,31 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 - **Outputs**: Job records (URL, status, error codes — no operator identity); rebuild progress.
 - **Algorithm** (ingest):
   1. ASGI enqueues scrape job on Modal queue.
-  2. Worker fetches URL, normalizes HTML/text.
-  3. **Persist normalized body** to Postgres document store via internal-write (F41 / ADR-040).
-  4. **Content-hash skip (F47 / #163):** if `content_hash` matches stored document and
+  2. Worker fetches URL(s): **F59** main-content via **`trafilatura`**, redirects/charset/content-type,
+     robots.txt + rate limit + descriptive UA; **JS-render via Playwright in Modal DM worker**
+     when `VECINITA_SCRAPE_JS_RENDER` is `auto`/`always` (ADR-045); **PDF** via **`pypdf`**
+     best-effort — soft-fail page if no extractable text (S024-D29). Richer scrape metadata
+     on the document.
+  3. **Optional crawl (F60):** when `options.crawl=true`, seed = `urls[0]`; BFS same-site
+     (domain / path-prefix scope), `max_depth` / `max_pages`, URL normalize/dedup, link graph;
+     **per-page soft fail** — continue crawl; record page errors in job metrics (S024-D13).
+  4. **Persist normalized body** to Postgres document store via internal-write (F41 / ADR-040),
+     including **path/parent nested source fields** for tree + ChatRAG backend meta (F61).
+  5. **Content-hash skip (F47 / #163):** if `content_hash` matches stored document and
      `force` is false → refresh metadata (title/language/timestamps; tags if retagged) but
      **skip** re-chunk, delete-chunks, and re-embed; record skip in job metrics. If `force`
      or hash differs → continue.
-  5. **Chunk** text with HF tokenizer for embed pin + `chunk_overlap_tokens` (F49 / ADR-044).
-  6. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20)
+  6. **Chunk** text with HF tokenizer for embed pin + `chunk_overlap_tokens` (F49 / ADR-044).
+  7. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20)
      — fail-open per ADR-023.
-  7. Call FastEmbed on Modal via **sub-batched embed client with retries** (F48 / #166). On
+  8. Call FastEmbed on Modal via **sub-batched embed client with retries** (F48 / #166). On
      exhausted retries or dim mismatch → **fail that URL** (not silent partial corpus).
-  8. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
-  9. Update job status via job store on Modal.
+  9. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
+  10. Update job status via job store on Modal.
+- **Corpus tree (F61):** Admin Corpus toggles **tree vs flat**; hierarchy
+  domain → URL path segments → document → chunks via nested JSON APIs; selection + bulk
+  actions. ChatRAG **backend** may expose nested source metadata — **no ChatRAG UI** this
+  cycle (licensing research).
 - **Algorithm** (rebuild — F41):
   1. Operator enqueues `job_type=rebuild` with `mode` (`reembed`|`rechunk`|`rescrape`), optional
      `document_ids`, `force`, `dry_run` (Admin Jobs UI).
@@ -131,7 +143,7 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
   4. If `dry_run`, write **shadow** rows; run **F36 against shadow before promote**; operator
      promotes via **Admin UI** → internal-write promote (02 M2/M3).
   5. Retag is **not** part of rebuild (separate job).
-- **Source**: feature-list F7–F10, F20, F32, F41; RD-016; ADR-040; 02-verify-plan M1–M4
+- **Source**: feature-list F7–F10, F20, F32, F41, **F59–F61**; RD-016; ADR-040; S024/EV-022
 
 ### DO internal write API
 
@@ -301,7 +313,8 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 |-------|--------|
 | Dedicated API gateway (R6) | **Deferred** — direct backend URLs in v1 (TP-001) |
 | vLLM model / GPU | **Qwen2.5-1.5B-Instruct** on Modal **T4**; Ollama fallback if cost fails after DO consolidation |
-| Multimodal / PDF ingest | Post-v1 |
+| Full OCR / multimodal beyond basic PDF text | Post-v1 (F59 covers best-effort PDF text) |
+| ChatRAG nested corpus UI | Deferred — licensing research (S024-D17) |
 
 ## API surface (summary)
 
@@ -316,7 +329,9 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 | Internal write | PATCH | `/internal/v1/documents/{id}/tags` | Admin document tags |
 | Internal write | PATCH | `/internal/v1/chunks/{id}/tags` | Admin chunk tags |
 | Internal write | POST | `/internal/v1/documents/{id}/retag` | Admin LLM re-tag (proposed) |
-| Data Mgmt (Modal) | POST/GET | `/jobs`, `/jobs/{id}` | Proxy auth |
+| Data Mgmt (Modal) | POST/GET | `/jobs`, `/jobs/{id}` | Proxy auth; crawl options F60 |
+| Internal write | GET | `/internal/v1/corpus/tree` | Nested corpus hierarchy (F61) |
+| Data Mgmt (Modal) | GET | `/jobs/{id}/tree` | Job result tree nodes (F60/F61) |
 | Internal write | GET | `/internal/v1/stats/summary` | Dashboard aggregated stats (F25) |
 | Internal write | POST | `/internal/v1/stats/served` | Increment serving counter (F28) |
 | Internal write | GET | `/internal/v1/stats/top-served` | Top served documents (F28) |
@@ -345,6 +360,7 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | S020 / EV-017 (F43–F45) | 2026-08-02 | H1 cache cascade (F43); config-gated L1 soft language (F44); CE spike+gate with `bge-reranker-v2-m3` (F45); no LangGraph / ADR-006 amend. |
 | S021 / EV-018 (F46 + F45) | 2026-08-02 | Staging retrieve reliability (F46 non-empty pools); F45 CE re-gate only after F46; prod CE stays off until AC-BB9. |
 | S022 / EV-019 (F47–F49) | 2026-08-02 | Ingest resilience: content_hash skip + metadata refresh (F47); embed sub-batch/retry fail-URL (F48); HF tokenizer + overlap default 32 (F49 / ADR-044). |
+| S024 / EV-022 (F59–F61) | 2026-08-03 | Robust scrape + JS-render + PDF text (F59); website crawl (F60); admin corpus tree + ChatRAG backend nested meta (F61); epic #185. |
 
 ## References
 

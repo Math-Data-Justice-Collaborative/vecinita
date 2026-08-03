@@ -44,6 +44,10 @@ class _FakeConn:
                     "title": "T",
                     "url": "https://example.com/s",
                     "language": "en",
+                    "source_domain": None,
+                    "source_path": None,
+                    "parent_url": None,
+                    "canonical_url": None,
                 }
             ]
         )

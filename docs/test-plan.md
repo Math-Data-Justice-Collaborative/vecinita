@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-02 (S023/EV-020 F50–F51 — TC-193–195 top_k=8 + default P3)  
+> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — TC-196–207 scrape/crawl/tree)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -30,6 +30,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-002 Ingest URLs | `tests/e2e/test_uj002_ingest_job.py` | TC-010, TC-047 |
 | UJ-062 Ingest resilience (skip/force/retry) | `tests/e2e/test_uj062_ingest_resilience.py` | TC-187, TC-188, TC-189, TC-190 |
 | UJ-063 Ask top_k=8 + P3 defaults | `tests/e2e/test_uj063_topk_p3_ask.py` | TC-193, TC-194, TC-195 |
+| UJ-064 Robust scrape | `tests/e2e/test_uj064_robust_scrape.py` | TC-196, TC-197, TC-198, TC-199 |
+| UJ-065 Website crawl | `tests/e2e/test_uj065_website_crawl.py` | TC-200, TC-201, TC-202, TC-203 | `tests/ui/admin/uj065-crawl-job.spec.ts` (opt) |
+| UJ-066 Corpus tree nesting | `tests/e2e/test_uj066_corpus_tree.py` | TC-204, TC-205, TC-206, TC-207 | `tests/ui/admin/uj066-corpus-tree.spec.ts` |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1208,6 +1211,79 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Expected**: `len(sources) ≤ 8`; job/ask completes; packer path is p3 (assert via settings or
   prompt/context helper spy); AC-RQ8/RQ9; UJ-063.
 
+### TC-196: Main-content extract strips boilerplate (unit, F59)
+
+- **Objective**: HTML fixture with nav/footer yields main body only.
+- **Input**: Fixture HTML under `data/fixtures/ingest/boilerplate.html` (07).
+- **Expected**: Extracted text excludes nav/footer markers; keeps headings/lists; AC-SC1.
+
+### TC-197: Robots + rate-limit honored (unit, F59)
+
+- **Objective**: Disallowed path skipped; polite delay applied between requests.
+- **Input**: Mock robots.txt Disallow + two allowed URLs.
+- **Expected**: Disallowed not fetched; delay ≥ configured; AC-SC2.
+
+### TC-198: PDF best-effort / soft-fail (unit, F59)
+
+- **Objective**: Text PDF extracts; empty/scanned PDF soft-fails with error (no silent empty doc).
+- **Input**: Text PDF fixture + empty PDF fixture.
+- **Expected**: Text → non-empty body; empty → page failure recorded; AC-SC3 / S024-D29.
+
+### TC-199: Single-URL robust scrape job (UJ-064, F59)
+
+- **Objective**: API e2e ingest completes with upgraded scrape metadata.
+- **Input**: `POST /jobs` fixture URL; `crawl=false`.
+- **Expected**: `completed`; document stored; metadata fields present; AC-SC1; UJ-064.
+
+### TC-200: Crawl scope + dedup (unit, F60)
+
+- **Objective**: Same-domain/path_prefix; normalize URLs; no cycles.
+- **Input**: Synthetic link graph with external + duplicate + fragment URLs.
+- **Expected**: Only in-scope unique pages; AC-SC4.
+
+### TC-201: Crawl depth/page caps (unit, F60)
+
+- **Objective**: Stops at `max_depth` / `max_pages`.
+- **Input**: Deep/wide graph; caps 2 / 5.
+- **Expected**: Fetches ≤ caps; `crawl_stopped_reason` set; AC-SC5.
+
+### TC-202: Crawl job soft-fail + tree (UJ-065, F60)
+
+- **Objective**: API e2e crawl job partial success; `GET /jobs/{id}/tree` nested.
+- **Input**: `POST /jobs` with `crawl=true`, seed fixture, one failing child page.
+- **Expected**: Job completed; `pages_failed≥1`; tree roots non-empty; AC-SC6; UJ-065.
+
+### TC-203: JobForm crawl fields (Vitest, F60)
+
+- **Objective**: JobForm exposes crawl toggle + depth/pages; posts additive options.
+- **Input**: Render JobForm; enable crawl; submit.
+- **Expected**: Body includes `options.crawl=true` + limits; AC-SC7.
+
+### TC-204: Corpus tree API (UJ-066, F61)
+
+- **Objective**: `GET /internal/v1/corpus/tree` returns domain→path→document nesting.
+- **Input**: Seeded multi-path documents with path/parent nested source fields.
+- **Expected**: Nested `roots`; kinds correct; document nodes expose nested-source fields
+  (`source_domain` / `source_path` / `parent_url` as applicable); AC-SC8 + AC-SC11; UJ-066.
+
+### TC-205: Tree expand/collapse + status (Vitest, F61)
+
+- **Objective**: Tree component expands nodes; shows status/counts.
+- **Input**: Mock tree payload.
+- **Expected**: Expand/collapse; badges visible; AC-SC9.
+
+### TC-206: Tree selection drives bulk actions (Vitest, F61)
+
+- **Objective**: Selected tree docs open existing bulk dialogs.
+- **Input**: Select 2 docs; trigger bulk tag.
+- **Expected**: Dialog receives ids; AC-SC10.
+
+### TC-207: Corpus tree ↔ flat toggle (UI E2E, F61)
+
+- **Objective**: Playwright: toggle tree/flat; nest visible; bulk from tree.
+- **Input**: Admin Corpus with mocks.
+- **Expected**: Nesting visible; flat restored; AC-SC9/SC10; UJ-066.
+
 ## Test Data
 
 | Asset | Location | Used by |
@@ -1216,7 +1292,8 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 | Eval Q&A pairs | `data/fixtures/eval/` | TC-111–TC-113, F36 harness, TC-168, TC-174–175 |
 | Staging eval Q&A | `data/fixtures/eval/qa_pairs_staging.json` | TC-174–175, TC-184–186 (ISS-008 / F42 Hy1 / F45/F46) |
 | Empty-hit language fixture | `data/fixtures/eval/empty_hit_language.json` | TC-180–181 |
-| URL ingest fixture | `data/fixtures/ingest/` | TC-010, TC-163 |
+| URL ingest fixture | `data/fixtures/ingest/` | TC-010, TC-163, TC-196–199 |
+| Scrape/crawl HTML+PDF fixtures | `data/fixtures/ingest/` (extend in 07) | TC-196–202 |
 | Seed tag vocabulary | `data/fixtures/tags/seed_tags.json` | TC-041, TC-044 |
 | Tagged corpus fixtures | `data/fixtures/corpus/tagged/` | TC-040, TC-044 |
 | Privacy negative payloads | `tests/privacy/fixtures/` | TC-030 |

@@ -65,6 +65,9 @@ image = (
         "PyJWT>=2.10,<3",
         "cryptography>=42,<45",
         "tokenizers>=0.21,<1",
+        "trafilatura>=1.12,<3",
+        "pypdf>=6.13.3",
+        "playwright>=1.40,<2",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
     .add_local_dir(_REPO_ROOT / "packages" / "ingest", remote_path=f"{_PKG_ROOT}/packages/ingest")

@@ -78,6 +78,10 @@ def _to_ask_response(
             title=chunk.title,
             url=chunk.url,
             score=chunk.score,
+            source_domain=chunk.source_domain,
+            source_path=chunk.source_path,
+            parent_url=chunk.parent_url,
+            canonical_url=chunk.canonical_url,
         )
         for chunk in result.sources
     ]
@@ -106,6 +110,10 @@ def _sources_from_chunks(chunks: Sequence[RetrievedChunk]) -> list[Source]:
             title=chunk.title,
             url=chunk.url,
             score=chunk.score,
+            source_domain=chunk.source_domain,
+            source_path=chunk.source_path,
+            parent_url=chunk.parent_url,
+            canonical_url=chunk.canonical_url,
         )
         for chunk in chunks
     ]

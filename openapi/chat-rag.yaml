@@ -201,6 +201,19 @@ components:
         language:
           type: string
           nullable: true
+        source_domain:
+          type: string
+          nullable: true
+          description: Nested source domain (F61)
+        source_path:
+          type: string
+          nullable: true
+        parent_url:
+          type: string
+          nullable: true
+        canonical_url:
+          type: string
+          nullable: true
         tags:
           type: array
           maxItems: 100
@@ -277,6 +290,19 @@ components:
         score:
           type: number
           format: float
+        source_domain:
+          type: string
+          nullable: true
+          description: Nested source domain (F61)
+        source_path:
+          type: string
+          nullable: true
+        parent_url:
+          type: string
+          nullable: true
+        canonical_url:
+          type: string
+          nullable: true
     AskResponse:
       type: object
       required:

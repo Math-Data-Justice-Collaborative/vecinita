@@ -260,4 +260,129 @@ describe("JobForm", () => {
       "create job exploded",
     );
   });
+
+  it("posts additive crawl options when crawl is enabled (TC-203)", async () => {
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          job_id: "66666666-6666-4666-8666-666666666666",
+          status: "pending",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          job_id: "66666666-6666-4666-8666-666666666666",
+          status: "completed",
+          urls: ["https://example.com/seed"],
+          created_at: "2026-08-03T00:00:00Z",
+          updated_at: "2026-08-03T00:00:01Z",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    await renderReadyJobForm();
+
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/seed" },
+    });
+    fireEvent.click(screen.getByLabelText(/crawl same-site/i));
+    fireEvent.change(screen.getByLabelText(/max depth/i), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText(/max pages/i), {
+      target: { value: "10" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("job-status")).toHaveTextContent("completed");
+    });
+    const init = fetchMock.mock.calls[0]?.[1];
+    expect(typeof init?.body).toBe("string");
+    const body = JSON.parse(init?.body as string) as {
+      options?: {
+        crawl?: boolean;
+        max_depth?: number;
+        max_pages?: number;
+        crawl_scope?: string;
+        chunk_size_tokens?: number;
+      };
+    };
+    expect(body.options?.crawl).toBe(true);
+    expect(body.options?.max_depth).toBe(1);
+    expect(body.options?.max_pages).toBe(10);
+    expect(body.options?.crawl_scope).toBe("same_domain");
+    expect(body.options?.chunk_size_tokens).toBe(256);
+  });
+
+  it("shows validation error when crawl max depth is invalid", async () => {
+    await renderReadyJobForm();
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/seed" },
+    });
+    fireEvent.click(screen.getByTestId("ingest-crawl"));
+    fireEvent.change(screen.getByTestId("ingest-max-depth"), {
+      target: { value: "-1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /max depth must be 0 or greater/i,
+    );
+  });
+
+  it("shows validation error when crawl max pages is below one", async () => {
+    await renderReadyJobForm();
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/seed" },
+    });
+    fireEvent.click(screen.getByTestId("ingest-crawl"));
+    fireEvent.change(screen.getByTestId("ingest-max-depth"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByTestId("ingest-max-pages"), {
+      target: { value: "0" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /max pages must be at least 1/i,
+    );
+  });
+
+  it("omits crawl options when crawl is off (AC-SC7 single-URL)", async () => {
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          job_id: "77777777-7777-4777-8777-777777777777",
+          status: "pending",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          job_id: "77777777-7777-4777-8777-777777777777",
+          status: "completed",
+          urls: ["https://example.com/page"],
+          created_at: "2026-08-03T00:00:00Z",
+          updated_at: "2026-08-03T00:00:01Z",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    await renderReadyJobForm();
+
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/page" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("job-status")).toHaveTextContent("completed");
+    });
+    const requestInit = fetchMock.mock.calls[0]?.[1];
+    expect(typeof requestInit?.body).toBe("string");
+    const body = JSON.parse(requestInit?.body as string) as {
+      options?: { crawl?: boolean; chunk_size_tokens?: number };
+    };
+    expect(body.options?.crawl).toBeUndefined();
+    expect(body.options?.chunk_size_tokens).toBe(256);
+  });
 });
