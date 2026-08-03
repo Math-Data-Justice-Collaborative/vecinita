@@ -78,7 +78,7 @@ def test_pack_chunks_p1_joins_multiple_chunks() -> None:
 
 
 def test_pack_chunks_p3_dedupes_by_document_and_caps_chars() -> None:
-    """P3 (config-gated): one chunk per document_id + char budget."""
+    """TC-194 / P3: one chunk per document_id + char budget (AC-RQ9)."""
     doc = uuid4()
     high = _chunk(
         text="high-score text " * 20,
@@ -100,6 +100,22 @@ def test_pack_chunks_p3_dedupes_by_document_and_caps_chars() -> None:
     assert "Source: Keep" in packed
     assert "Source: Drop" not in packed
     assert len(packed) <= max_chars
+
+
+def test_tc194_p3_default_budget_matches_context_max_chars() -> None:
+    """TC-194: P3 packing with default CONTEXT_MAX_CHARS budget still dedupes."""
+    from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS  # noqa: PLC0415
+
+    doc = uuid4()
+    long_text = "x" * (DEFAULT_CONTEXT_MAX_CHARS + 200)
+    chunks = [
+        _chunk(text=long_text, title="A", score=0.9, document_id=doc),
+        _chunk(text="other", title="B", score=0.5, document_id=doc),
+    ]
+    packed = pack_chunks(chunks, mode="p3", max_chars=DEFAULT_CONTEXT_MAX_CHARS)
+    assert "Source: A" in packed
+    assert "Source: B" not in packed
+    assert len(packed) <= DEFAULT_CONTEXT_MAX_CHARS
 
 
 def test_pack_chunks_p3_keeps_first_when_later_score_not_higher() -> None:
