@@ -1,5 +1,9 @@
 # Create semver Git tag + GitHub Release after successful DigitalOcean CD on main.
 # F63 / #103 / S025-D6 / S025-D12 — not a pre-merge gate.
+#
+# First-run note: a newly added workflow_run listener may miss the first upstream
+# completion after landing on main — use workflow_dispatch once, or wait for the
+# next Deploy DigitalOcean success.
 name: Release
 
 on:
@@ -70,6 +74,9 @@ jobs:
           - Triggering workflow: Release
           EOF
           )"
+          # Annotated tags require a committer identity on the Actions runner.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" "$SHA" -m "Release $TAG"
           git push origin "refs/tags/$TAG"
           gh release create "$TAG" --target "$SHA" --title "$TAG" --notes "$BODY"

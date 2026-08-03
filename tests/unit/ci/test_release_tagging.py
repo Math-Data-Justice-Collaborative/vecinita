@@ -53,3 +53,6 @@ def test_release_workflow_triggers_after_deploy_digitalocean() -> None:
     assert "types: [completed]" in text
     assert "contents: write" in text
     assert "gh release create" in text
+    # Annotated tag on Actions requires committer identity (S025 13-deploy-smoke).
+    assert 'user.email "41898282+github-actions[bot]@users.noreply.github.com"' in text
+    assert "git tag -a" in text
