@@ -967,309 +967,20 @@ project:
       report: docs/sessions/S023-retrieval-topk-packing/reports/tech-plan-delta.md
       note: S023-D12 Gate B→C PASS; TP1–TP6 approved
     07-build:
-      status: in_progress
-      started_at: '2026-08-03'
+      status: completed
+      completed: '2026-08-03'
       session_id: S023-retrieval-topk-packing
       evolve_cycle_id: EV-020
-      active_task: T105.1
-      note: S023/EV-020 start_build @ T105.1 after Gate B→C PASS
+      head: bb4c400
+      note: Phase 25 M105–M107 T105.1–T107.3 complete
     08-verify-build:
       status: completed
-      started_at: '2026-08-02'
-      started: '2026-08-02'
-      completed_at: '2026-08-02'
-      completed: '2026-08-02'
-      partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S022/EV-019 — 08-verify-build COMPLETE PASS; Phase 24 M101–M104 @ a837f21; 
-        checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C approved; Phase D started @ 307e0d3
-      session_id: S022-ingest-resilience
-      branch: evolve/EV-019-ingest-resilience
-      evolve_cycle_id: EV-019
-      mode: evolve
-      delta_only: true
-      feature_ids:
-      - F47
-      - F48
-      - F49
-      feature: F47-F49
-      phase: Phase 24 (M101-M104)
-      overall_result: PASS
-      result_scope: delta
-      overall: pass
-      current_action: completed
-      next_action: none_session_closed
-      commits_head: 307e0d3
-      report: docs/sessions/S022-ingest-resilience/reports/verification-report.md
-      note: S022/EV-019 08-verify-build COMPLETE PASS 2026-08-02 — Phase 24 M101–M104 @ a837f21; report 
-        verification-report.md; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C checkpoint APPROVED; Phase D 
-        09+10 in progress @ 307e0d3 S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.
-      phase_c_status: passed
-      gate_c_to_d: passed
-      phase_c_note: 08 PASS; M101-M104 done — Phase C checkpoint APPROVED; Phase D 09+10 started @ 307e0d3
-      s020_baseline:
-        status: completed
-        started_at: '2026-08-02'
-        started: '2026-08-02'
-        completed_at: '2026-08-02'
-        completed: '2026-08-02'
-        partial_rerun_at: '2026-08-02'
-        partial_rerun_note: EV-017/S020-retrieval-batch-b — 08-verify-build COMPLETE PASS (scoped); Phase 22 M94–M98; 
-          prior S019/EV-016 COMPLETE nested under s019_baseline
-        session_id: S020-retrieval-batch-b
-        branch: evolve/EV-017-retrieval-batch-b
-        evolve_cycle_id: EV-017
-        mode: evolve
-        delta_only: true
-        feature_ids:
-        - F43
-        - F44
-        - F45
-        feature: F43-F45
-        phase: Phase 22 (M94-M98)
-        overall_result: PASS
-        result_scope: scoped
-        overall: pass
-        current_action: completed
-        next_action: none_session_closed
-        commits_head: ccc82df
-        report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
-        results_note: Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); 
-          Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 
-          blockers
-        note: 'S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11
-          skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending
-          staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md;
-          awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d
-          still pending S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix;
-          active_session=null.'
-        phase_c_status: passed
-        gate_c_to_d: passed
-        phase_c_decision: S020-D19
-        phase_c_approved_at: '2026-08-02'
-        s019_baseline:
-          status: completed
-          started_at: '2026-08-01T14:12:45Z'
-          completed_at: '2026-08-01T14:17:17Z'
-          partial_rerun_at: '2026-08-01'
-          partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested
-            under s017_baseline
-          session_id: S019-retrieval-quality
-          branch: evolve/EV-016-retrieval-quality
-          evolve_cycle_id: EV-016
-          mode: evolve
-          delta_only: true
-          feature_ids:
-          - F42
-          feature: F42
-          phase: Phase 21 (M91-M93)
-          overall_result: PASS
-          result_scope: delta
-          current_action: completed
-          next_action: start_09_qa_10_e2e
-          commits_status: landed
-          commits_head: 257486f
-          report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
-          note: S019/EV-016 08-verify-build COMPLETE — Phase 21 PASS (delta) @ 257486f; nested for S020 Phase 22 verify
-        s017_baseline:
-          status: completed
-          started_at: '2026-07-30'
-          completed_at: '2026-07-30'
-          partial_rerun_at: '2026-07-30'
-          partial_rerun_note: EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed 
-            @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline
-          session_id: S017-corpus-reembed-migration
-          branch: evolve/EV-015-corpus-reembed-migration
-          evolve_cycle_id: EV-015
-          mode: delta
-          feature: F41
-          note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED;
-            Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report
-            committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed
-            (user option 1); next → 09-qa + 10-e2e parallel'
-        s016_baseline:
-          status: completed
-          started_at: '2026-07-29'
-          completed_at: '2026-07-29'
-          partial_rerun_at: '2026-07-29'
-          partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest
-            162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
-          session_id: S016-chat-cold-start-ux
-          branch: evolve/EV-014-chat-cold-start-ux
-          evolve_cycle_id: EV-014
-          mode: delta
-          feature: F40
-          overall_result: PASS
-          result_scope: delta
-          report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
-          note: S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS 
-            unchanged; handoff → 10-e2e
-        s014_baseline:
-          status: completed
-          started_at: '2026-07-29'
-          completed_at: '2026-07-29'
-          partial_rerun_at: '2026-07-29'
-          partial_rerun_note: 'EV-013/S014 — #148 admin UI polish Phase 2 PASS (delta) 2026-07-29 (F9+F12); scope=data-management-frontend
-            + related tests/docs'
-          session_id: S014-admin-ui-polish-148
-          branch: evolve/EV-013-admin-ui-polish-148
-          evolve_cycle_id: EV-013
-          mode: delta
-          feature: F9/F12
-          scope: data-management-frontend + related tests/docs
-          overall_result: PASS
-          result_scope: delta
-          report: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
-          substeps:
-            phase: 2
-            phase_note: Phase 2 PASS 2026-07-29
-            integration_db: SKIPPED
-            integration_db_reason: no Docker/Postgres
-            personas: ADVISORY
-            persona_nits: 6
-            persona_blockers: 0
-            vitest: 674
-            uj051: PASS
-            make_audit: PASS
-            make_audit_note: 1 ignored nltk
-            prettier: auto_fixed_3_ev013_files
-          note: S014/EV-013 08-verify-build PASS (delta) 2026-07-29 — integration/DB SKIPPED (no Docker/Postgres); 
-            personas ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier 
-            auto-fixed 3 EV-013 files; handoff → 10-e2e; uncommitted 07-build still dirty; advisory nits optional before
-            10
-          s013_baseline:
-            status: completed
-            started_at: '2026-07-28'
-            completed_at: '2026-07-29'
-            partial_rerun_at: '2026-07-29'
-            partial_rerun_note: EV-012/S013 delta — M84 milestone verify gate (Phase 19)
-            session_id: S013-unified-job-monitoring
-            branch: evolve/EV-012-unified-job-monitoring
-            evolve_cycle_id: EV-012
-            milestone: M84
-            scope: M84
-            report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
-            overall_result: PASS
-            result_scope: scoped
-            commit: f98d40d
-            m82_gate:
-              status: passed
-              completed_at: '2026-07-28'
-              commit: '7209837'
-              overall_result: PASS
-            m84_gate: passed
-            m84_gate_passed_at: '2026-07-29'
-            note: 'M84 scoped PASS @ f98d40d retained (historical). M85/Phase19 08-verify-build completed PASS scoped 2026-07-29.
-              PR #153 open (do not merge).'
-            checks:
-              vitest_m84_suites: pass
-              ruff: pass
-              make_check_fast_fe_lint: blocked_local_node22_vs_nvmrc24_environment
-            minor_pr:
-              url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153
-              number: 153
-              status: open
-              merge_policy: do_not_merge
-              title: '[M82] EV-012 Unified Admin Jobs — Modal jobs API + SSE + CRUD'
-            m85_pending: false
-          s010_baseline:
-            status: completed
-            started_at: '2026-07-08'
-            completed_at: '2026-07-08'
-            partial_rerun_at: '2026-07-08'
-            partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
-            session_id: S010-unify-llm-service
-            branch: feat/S010-unify-llm-service
-            evolve_cycle_id: EV-011
-            report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
-            overall_result: PASS
-            note: S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage 
-              (max_model_len_for public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing 
-              pending).
-          s008_baseline:
-            status: completed
-            started_at: '2026-07-03'
-            completed_at: '2026-07-03'
-            session_id: S008-eval-ux-playground
-            branch: feat/S008-eval-ux-playground
-            evolve_cycle_id: EV-009
-            report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-            substeps:
-              phase: formal
-              result: PASS
-            note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
-          s004_baseline:
-            status: completed
-            completed_at: '2026-06-29'
-            session_id: S004-supabase-auth
-            branch: feat/S004-supabase-auth
-            overall_result: PASS
-            report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-            blocking_failures: []
-            note: S004/EV-005 F34 milestone-boundary verify PASS (2026-06-29, re-run after remediation). Prior blocking 
-              failures (cryptography CVEs; admin FE branch coverage 92.46% < 95%) resolved.
-          s005:
-            status: completed
-            completed_at: '2026-06-30'
-            session_id: S005-user-mgmt-auth
-            branch: feat/S005-user-mgmt-auth
-            feature: F35
-            milestone: M53
-            overall_result: PASS
-            report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-            session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
-            blocking_failures: []
-            remediated:
-            - Python lint (11)
-            - Python typecheck (2 casts)
-            - Frontend lint (1)
-            - Frontend format (1)
-            - DM FE branch coverage 94.18% < 95%
-            green:
-            - make check
-            - make test-unit-coverage
-            - 681+ pytest
-            - 312 vitest admin
-            note: 'S005 interim verify on feat/S005-user-mgmt-auth — PASS after remediation. Initial FAIL (Python lint, typecheck,
-              FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed in-session. Final: make check green, make test-unit-coverage
-              green, 681+ pytest + 312 vitest admin. Supersedes the earlier 2026-06-30 interim FAIL; cleared for the Phase
-              12 gate.'
-          s003_baseline:
-            status: completed
-            completed_at: '2026-06-28'
-            session_id: S003-persistent-chat-history
-            overall_result: PASS
-            session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
-        substeps:
-          result: PASS
-          result_scope: delta
-          phase: Phase 21 (M91-M93)
-          feature: F42
-          ruff: PASS
-          ruff_format: PASS
-          basedpyright: PASS
-          unit_packing_h7_chatrag: PASS
-          unit_eval_sandbox_f42: PASS
-          unit_staging_es_fixture: PASS
-          e2e_uj055: PASS
-          cors_unit: PASS
-          full_eval_service: SKIPPED
-          full_eval_service_reason: no local Postgres/Docker
-          ac_rq6: deferred_deploy_path
-          phase_c: passed
-          gate_c_to_d: passed
-          lint_fix_commit: 640cd25
-          commits_head: 257486f
-          phase_c_approved_at: '2026-08-01T20:49:00Z'
-          phase_c_approved_head: 257486f
-        s017_completion_trail_note: Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 
-          PASS 2026-08-01T14:17:17Z
-        m94_boundary: deferred_continue_batch
-        session_closed: true
-        session_closed_at: '2026-08-02'
-      phase_c_checkpoint_accepted: true
-      phase_c_checkpoint_choice: option_1_approve_gate_c_to_d_continue_09_10
-      session_closed: true
-      session_closed_at: '2026-08-02'
+      completed: '2026-08-03'
+      session_id: S023-retrieval-topk-packing
+      evolve_cycle_id: EV-020
+      report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+      result: pass
+      note: PASS; Gate C→D / phase_c checkpoint pending
     09-qa:
       status: completed
       started_at: '2026-08-02'
@@ -2297,7 +2008,7 @@ project:
               note: Approve for T0 ship; AC-BB9/UJ-060 staging-gated; prod CE off
               ac_bb9_met: false
               uj060: deferred_12_13
-              prod_ce: off
+              prod_ce: false
         next_action: none_session_closed
         session_closed: true
         session_closed_at: '2026-08-02'
@@ -2976,7 +2687,7 @@ project:
           started: '2026-08-02'
           completed:
           ac_bb9_met: false
-          prod_ce: off
+          prod_ce: false
           deploy_path_choice: option_1_path_a
         phase_1_5:
           status: completed
@@ -3478,29 +3189,41 @@ active_session:
     - TP6
   - stage: 07-build
     required: true
-    status: in_progress
+    status: completed
     mode: delta
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: start_build
-    active_task: T105.1
+    current_action: completed
+    active_task:
     active_milestone: M105
-    note: Started after Gate B→C PASS (S023-D12); Phase 25 M105 @ T105.1
+    note: Phase 25 M105–M107 COMPLETE @ bb4c400 (T105.1–T107.3); handoff → 08
+    completed_at: '2026-08-03'
+    head: bb4c400
   - stage: 08-verify-build
     required: true
-    status: pending
+    status: completed
     mode: delta
     skip_rationale:
+    started_at: '2026-08-03'
+    completed_at: '2026-08-03'
+    current_action: await_gate_c_to_d
+    report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+    result: pass
+    note: PASS @ bb4c400; Phase C build complete; Gate C→D pending (S023-D13); 
+      report=docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+    s023_d13_decision: S023-D13
   - stage: 09-qa
     required: true
     status: pending
     mode: delta
     skip_rationale:
+    note: Blocked on Gate C→D / phase_c checkpoint user approval
   - stage: 10-e2e
     required: true
     status: pending
     mode: delta
     skip_rationale:
+    note: Blocked on Gate C→D / phase_c checkpoint user approval
   - stage: 11-verify-impl
     required: true
     status: pending
@@ -3532,11 +3255,11 @@ active_session:
     required: false
     status: skipped
     skip_rationale: Optional at close
-  current_stage: 07-build
-  current_action: start_build
-  next_action: 07_build_t105_1
-  current_stage_note: S023/EV-020 Gate B→C PASS (S023-D12) 2026-08-03 — TP1–TP6 approved; 04 complete; 07-build 
-    in_progress @ T105.1
+  current_stage: 08-verify-build
+  current_action: await_gate_c_to_d
+  next_action: approve_gate_c_to_d_then_09_10
+  current_stage_note: S023/EV-020 Phase C build COMPLETE 2026-08-03 @ bb4c400 (S023-D13) — 07+08 done; await Gate C→D; 
+    then 09-qa + 10-e2e; report=docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
   started_at: '2026-08-02'
   mode: evolve
   delta_only: true
@@ -3560,8 +3283,9 @@ active_session:
   - S023-D9 — 02 audit complete; M1–M5/L1 recommended approve; await Gate A→B
   - S023-D10 approved 2026-08-03 — Gate A→B PASS; M1–M5/L1 approved (option 1); proceed to 04-tech-plan
   - S023-D11 — 04 drafted Phase 25 M105–M107; TP1–TP6 recommended; await Gate B→C
-  active_task: T105.1
-  active_milestone: M105
+  active_task:
+  active_milestone:
+  phase_c_status: build_complete_awaiting_gate
 sessions:
 - id: S022-ingest-resilience
   type: feature
@@ -9730,11 +9454,12 @@ stages:
     - .github/workflows/ci.yml
     verification: passed
   07-build:
-    status: in_progress
+    status: completed
     started_at: '2026-08-03'
+    completed: '2026-08-03'
+    completed_at: '2026-08-03T12:05:31Z'
     partial_rerun_at: '2026-08-03'
-    partial_rerun_note: S023/EV-020 — 07-build STARTED after Gate B→C PASS (S023-D12); current_action=start_build; 
-      active_task=T105.1; Phase 25 M105
+    partial_rerun_note: S023/EV-020 — 07-build COMPLETE @ bb4c400; T105.1–T107.3 / M105–M107; handoff → 08 then Gate C→D
     session_id: S023-retrieval-topk-packing
     branch: evolve/EV-020-retrieval-topk-packing
     evolve_cycle_id: EV-020
@@ -9743,1001 +9468,40 @@ stages:
     feature_ids:
     - F50
     - F51
-    current_action: start_build
-    next_action: t105_1_test_red_default_top_k_8
-    active_task: T105.1
-    active_milestone: M105
+    current_action: completed
+    next_action: await_gate_c_to_d
+    active_task:
     phase: 25
     milestones:
     - M105
     - M106
     - M107
+    milestones_completed:
+    - M105
+    - M106
+    - M107
+    tasks_completed:
+    - T105.1
+    - T105.2
+    - T105.3
+    - T105.4
+    - T106.1
+    - T106.2
+    - T106.3
+    - T106.4
+    - T107.1
+    - T107.2
+    - T107.3
+    head: bb4c400
     s023_d12_decision: S023-D12
+    s023_d13_decision: S023-D13
     gate_b_to_c: passed
-    checkpoints_phase_b: passed
-    note: S023/EV-020 07-build in_progress 2026-08-03 — Gate B→C PASS (S023-D12); start @ T105.1
+    note: S023/EV-020 07-build COMPLETE 2026-08-03 @ bb4c400 — Phase 25 M105–M107; checkpoints.phase_c pending Gate C→D
     substeps:
-      current_task: T105.1
-      current_milestone: M105
-      phase: 25
-    s021_baseline:
-      status: completed
-      started_at: '2026-08-02'
-      partial_rerun_at: '2026-08-02'
-      partial_rerun_note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); 
-        rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87; promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe
-        empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe filed+resolved; 
-        guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; 
-        current_action=09_10_in_progress; S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE 
-        ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; 
-        T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
-      session_id: S021-retrieval-follow-on
-      branch: evolve/EV-018-retrieval-follow-on
-      evolve_cycle_id: EV-018
-      mode: evolve
-      delta_only: true
-      feature_ids:
-      - F46
-      - F45
-      feature: F46+F45
-      phase: Phase 23 (M99-M100)
-      milestone: M100
-      milestone_status: completed
-      m99_status: completed
-      m100_status: completed
-      m100_completed_at: '2026-08-02'
-      m99_completed_at: '2026-08-02'
-      phase_status: in_progress
       current_task:
-      current_action: 09_10_in_progress
-      next_action: run 09-qa + 10-e2e for EV-018 delta
-      report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
-      s021_d19_decision: S021-D19
-      s021_d19_decision_recorded: true
-      note: S021/EV-018 07-build 2026-08-02 — T99.3 Path B COMPLETE (S021-D22 executed); 
-        rebuild_run_id=a0e8f32d-7e2e-4012-960c-2e956ceeba87; promoted 49 docs / 213 chunks BAAI/bge-small-en-v1.5; probe
-        empty@0.2=0/8 rifreeclinic cosine=1.0 onehot_like=0; BUG-2026-08-02-staging-basis-vector-wipe filed+resolved; 
-        guard attach_embeddings/clear_embeddings+CI script; report t99-3-path-b-rebuild.md; 
-        current_action=09_10_in_progress; S021/EV-018 08-verify-build PASS 2026-08-02 — M99+M100 done; T100.1 CE 
-        ship_gate_pass=true (CE+P1 rel=0.7778 faith=0.9375); S021-D24 AC-BB9 PASS keep CE flag false until 12/13; 
-        T100.2–T100.4 completed; current_action=09_10_in_progress; next_action=run 08-verify-build; commits_pending=true
-      substeps:
-        current_task:
-        task_status: completed
-        in_progress_tasks: []
-        blocked_tasks: []
-        completed_tasks_recent:
-        - T99.1
-        - T99.2
-        - T99.3
-        - T99.4
-        - T99.5
-        - T100.1
-        - T100.2
-        - T100.3
-        - T100.4
-        next_action: run 09-qa + 10-e2e for EV-018 delta
-        t100_1_status: completed
-        t100_1_ship_gate_pass: true
-        s021_d24_decision: S021-D24
-        t100_2_status: completed
-        t100_3_status: completed
-        t100_4_status: completed
-        m100_status: completed
-        t99_4_status: completed
-        t99_4_waiver: S021-D23
-        t99_4_report: docs/sessions/S021-retrieval-follow-on/reports/t99-4-e2e-closeout.md
-        t99_5_status: completed
-        t99_5_report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
-        t99_4_blocker:
-        t99_4_note: blocked — TC-186 PASS + bug 2/2 PASS; TC-185 SKIPPED (Postgres unavailable); Docker sock never 
-          appeared; local Docker/Postgres compose required; T99.3 completed; T99.5 pending
-        t99_1_note: e2e test_uj061_retrieve_nonempty.py; TC-186 pass; TC-185 skip without local Postgres
-        t99_2_note: COMPLETED — root cause embed↔corpus pin drift (S021-D20); staging probe done; ISS-009 resolved
-        t99_3_note: COMPLETED — Path B full E0 rebuild + BUG + guard (S021-D22); run 
-          a0e8f32d-7e2e-4012-960c-2e956ceeba87; 49 docs / 213 chunks; probe empty@0.2=0/8; rifreeclinic cosine=1.0; 
-          onehot_like=0
-        rebuild_started: true
-        promote_history_investigation: complete
-        s021_d21_decision: S021-D21
-        s021_d21_summary: shadow E0 good; live wiped with basis_vector one-hots 2026-08-02; E0 promote only 2/49 docs
-        promote_history_report: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
-        path_b_approved: true
-        path_b_approved_at: '2026-08-02'
-        s021_d22_decision: S021-D22
-        path_b_completed: true
-        path_b_completed_at: '2026-08-02'
-        t99_3_status: completed
-        rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
-        path_b_results:
-          rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
-          promoted_docs: 49
-          promoted_chunks: 213
-          model: BAAI/bge-small-en-v1.5
-          probe_empty_at_0_2: 0/8
-          rifreeclinic_cosine: 1.0
-          onehot_like: 0
-          bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
-          bug_status: filed_and_resolved
-          guard: attach_embeddings + clear_embeddings + CI script
-          report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
-          json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
-          script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
-          completed_at: '2026-08-02'
-          completed_at_ts: '2026-08-02T18:17:00Z'
-          commits_pending: true
-          commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — 
-            commits_pending=true
-      s020_baseline:
-        status: completed
-        started_at: '2026-08-02'
-        partial_rerun_at: '2026-08-02T15:34:08Z'
-        partial_rerun_note: EV-017/S020-retrieval-batch-b — 07-build COMPLETE; Phase 22 M94–M98 ALL COMPLETE @ 59edd12 
-          (T98.1–T98.4); M97 COMPLETE @ d33cbec; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 79939f4; 08-verify-build 
-          deferred until before Phase C PR (batch throughput); prior S019/EV-016 COMPLETE nested under s019_baseline
-        session_id: S020-retrieval-batch-b
-        branch: evolve/EV-017-retrieval-batch-b
-        evolve_cycle_id: EV-017
-        mode: evolve
-        delta_only: true
-        feature_ids:
-        - F43
-        - F44
-        - F45
-        feature: F43-F45
-        phase: Phase 22 (M94-M98)
-        milestone: M98
-        milestone_status: completed
-        phase_status: completed
-        m94_status: completed
-        m94_completed_at: '2026-08-02'
-        m94_completed_tasks:
-        - T94.1
-        - T94.2
-        - T94.3
-        - T94.4
-        - T94.5
-        m94_head: 0baa166
-        milestones_completed:
-        - M94
-        - M95
-        - M96
-        - M97
-        - M98
-        current_task:
-        current_action: completed
-        next_action: phase_c_checkpoint_pending (08 PASS)
-        s020_d18_decision: S020-D18
-        s020_d18_decision_recorded: true
-        commits_head: ccc82df
-        verify_build_m94:
-          status: superseded_by_phase_verify
-          reason: phase22_complete_running_08
-          note: Phase 22 M94–M98 COMPLETE; 08-verify-build now in_progress (was deferred until Phase C PR)
-        execution_plan_current_state_note: Phase 22 M94–M98 COMPLETE; 08-verify-build PASS (scoped); Phase C checkpoint 
-          pending; checkpoints.phase_c still pending
-        note: S020/EV-017 07-build COMPLETE 2026-08-02 — Phase 22 M94–M98 ALL COMPLETE @ 59edd12 (T98.1–T98.4 / F43–F45 
-          e2e + CE ship-gate + Phase 22 gate checklist); M97 COMPLETE @ d33cbec; M96 COMPLETE @ 9b0fef9; M95 COMPLETE @ 
-          79939f4; M94 COMPLETE @ 0baa166; 08-verify-build DEFERRED until before Phase C PR (batch throughput); 
-          checkpoints.phase_c still pending; prior S019 COMPLETE under s019_baseline
-        substeps:
-          current_task:
-          task_status: completed
-          in_progress_tasks: []
-          blocked_tasks: []
-          completed_tasks_recent:
-          - T94.1
-          - T94.2
-          - T94.3
-          - T94.4
-          - T94.5
-          - M94
-          - T95.1
-          - T95.2
-          - T95.3
-          - T95.4
-          - T95.5
-          - M95
-          - T96.1
-          - T96.2
-          - T96.3
-          - T96.4
-          - M96
-          - T97.1
-          - T97.2
-          - T97.3
-          - T97.4
-          - T97.5
-          - M97
-          - T98.1
-          - T98.2
-          - T98.3
-          - T98.4
-          - M98
-          next_action: 08_verify_build_deferred_until_phase_c_pr
-          m94_completed: true
-          t96_1_note: completed @ fd585ce — L1 soft language empty same-lang pass (TC-180)
-          t96_1_started_at: '2026-08-02T14:59:45Z'
-          t96_1_completed_at: '2026-08-02T15:01:17Z'
-          t96_1_commit: fd585ce
-          t96_2_note: completed @ c8a90b0 — soft language flag defaults off (L0-strict TC-181)
-          t96_2_started_at: '2026-08-02T15:01:17Z'
-          t95_1_started_at: '2026-08-02T14:38:00Z'
-          t95_1_completed_at: '2026-08-02T14:41:34Z'
-          t95_2_commit: c3f45be
-          t95_2_completed_at: '2026-08-02T14:47:29Z'
-          t95_3_commit: ec8df9e
-          t95_3_completed_at: '2026-08-02T14:47:28Z'
-          t95_4_commit: c19701f
-          t95_4_completed_at: '2026-08-02T14:50:08Z'
-          t95_5_commit: 79939f4
-          t95_5_completed_at: '2026-08-02T14:53:28Z'
-          m95_completed: true
-          m96_completed: true
-          t96_2_completed_at: '2026-08-02T15:06:30Z'
-          t96_2_commit: c8a90b0
-          t96_3_note: completed @ 416a83c — ChatRAG soft language L1 retrieve fallback
-          t96_3_started_at: '2026-08-02T15:06:30Z'
-          t96_3_completed_at: '2026-08-02T15:08:00Z'
-          t96_3_commit: 416a83c
-          t96_4_note: completed @ 9b0fef9 — empty-hit fixture + UJ-058 soft language e2e; M96 COMPLETE
-          t96_4_started_at: '2026-08-02T15:08:00Z'
-          t96_4_completed_at: '2026-08-02T15:09:36Z'
-          t96_4_commit: 9b0fef9
-          t97_1_note: completed @ d06140d — CE merge keeps ≤ top_k with mock CE (TC-182)
-          t97_1_started_at: '2026-08-02T15:11:00Z'
-          t97_1_completed_at: '2026-08-02T15:12:20Z'
-          t97_1_commit: d06140d
-          t97_2_note: completed @ 367d233 — VECINITA_RAG_RERANK_CE default off (TC-183)
-          t97_2_started_at: '2026-08-02T15:12:20Z'
-          t97_2_completed_at: '2026-08-02T15:13:16Z'
-          t97_2_commit: 367d233
-          t97_3_note: completed @ 1b99582 — mockable CE client + ChatRAG flag-gated hook
-          t97_3_started_at: '2026-08-02T15:13:16Z'
-          t97_3_completed_at: '2026-08-02T15:16:22Z'
-          t97_3_commit: 1b99582
-          t97_4_note: completed @ 94477d0 — ephemeral Modal T4 CE spike for bge-reranker-v2-m3
-          t97_4_started_at: '2026-08-02T15:16:22Z'
-          t97_4_completed_at: '2026-08-02T15:23:35Z'
-          t97_4_commit: 94477d0
-          t97_5_note: completed @ d33cbec — F45 CE spike runbook and metrics capture path; M97 COMPLETE
-          t97_5_started_at: '2026-08-02T15:23:35Z'
-          t97_5_completed_at: '2026-08-02T15:27:28Z'
-          t97_5_commit: d33cbec
-          m97_status: completed
-          m97_completed: true
-          m97_completed_at: '2026-08-02'
-          m97_head: d33cbec
-          t98_1_note: completed @ d2e9043 — UJ-057 answer cache e2e for TC-176–179
-          t98_1_started_at: '2026-08-02T15:27:28Z'
-          m98_status: completed
-          t98_1_completed_at: '2026-08-02T15:30:29Z'
-          t98_1_commit: d2e9043
-          t98_2_note: completed @ 8b81a42 — UJ-059 CE gated ask e2e with mock scorer
-          t98_2_started_at: '2026-08-02T15:30:29Z'
-          t98_2_completed_at: '2026-08-02T15:32:37Z'
-          t98_2_commit: 8b81a42
-          t98_3_note: completed @ 21b52dc — F45 CE ship-gate report template (Path A)
-          t98_3_started_at: '2026-08-02T15:32:37Z'
-          t98_3_completed_at: '2026-08-02T15:33:09Z'
-          t98_3_commit: 21b52dc
-          t98_4_note: completed @ 59edd12 — Phase 22 gate checklist and ADR-042 cross-links; M98 COMPLETE; Phase 22 
-            COMPLETE
-          t98_4_started_at: '2026-08-02T15:33:09Z'
-          t98_4_completed_at: '2026-08-02T15:33:56Z'
-          t98_4_commit: 59edd12
-          m98_completed: true
-          m98_completed_at: '2026-08-02'
-          m98_head: 59edd12
-        s019_baseline:
-          status: completed
-          started_at: '2026-08-01T13:55:27Z'
-          completed_at: '2026-08-01T14:17:17Z'
-          ready_at: '2026-08-01'
-          partial_rerun_at: '2026-08-01'
-          partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) COMPLETE after 08-verify-build PASS; prior 
-            S017/EV-015 COMPLETE nested under s017_baseline
-          session_id: S019-retrieval-quality
-          branch: evolve/EV-016-retrieval-quality
-          evolve_cycle_id: EV-016
-          mode: evolve
-          delta_only: true
-          feature_ids:
-          - F42
-          feature: F42
-          phase: Phase 21 (M91-M93)
-          milestone: M93
-          milestone_status: COMPLETE
-          phase_status: complete
-          phase21_tasks_complete: true
-          current_task: none
-          current_action: completed
-          next_action: phase_c_checkpoint
-          commits_status: landed
-          commits_head: 640cd25
-          note: S019/EV-016 07-build COMPLETE 2026-08-01T14:17:17Z — Phase 21 closed after 08-verify-build PASS; HEAD 
-            640cd25; prior S017 COMPLETE under s017_baseline
-          substeps:
-            current_task: none
-            task_status: phase21_tasks_complete
-            in_progress_tasks: []
-            blocked_tasks: []
-            completed_tasks_recent:
-            - M91
-            - M92
-            - M93
-            next_action: await_08_verify_build
-            commits_status: landed
-          s017_baseline:
-            status: completed
-            started_at: '2026-07-30'
-            completed_at: '2026-07-30'
-            partial_rerun_at: '2026-07-30'
-            partial_rerun_note: EV-015/S017 delta COMPLETE — F41 corpus rebuild Phase 20 / 07-build COMPLETE (M86–M90); 
-              prior S016/EV-014 COMPLETE nested under s016_baseline
-            report: docs/sessions/S017-corpus-reembed-migration/reports/phase20-gate.md
-            session_id: S017-corpus-reembed-migration
-            branch: evolve/EV-015-corpus-reembed-migration
-            evolve_cycle_id: EV-015
-            mode: delta
-            feature: F41
-            s014_baseline:
-              status: completed
-              started_at: '2026-07-29'
-              completed_at: '2026-07-29'
-              session_id: S014-admin-ui-polish-148
-              branch: evolve/EV-013-admin-ui-polish-148
-              evolve_cycle_id: EV-013
-              mode: delta
-              feature: F9/F12
-              phase: Phase 19 (M82-M85)
-              milestone: M85
-              report: docs/sessions/S014-admin-ui-polish-148/reports/07-build.md
-              note: S014/EV-013 07-build COMPLETE 2026-07-29 — TruncatedText + BoundedTagList + Corpus density; Vitest 
-                674 green; Playwright uj051 TC-155 pass; privacy no-cookie asserts
-              s013_baseline_note: S013/EV-012 M85+Phase19 completed 2026-07-29; nested fields below retain S013 
-                completion detail
-            note: S017/EV-015 07-build COMPLETE 2026-07-30 — Phase 20 COMPLETE (M86–M90); T90.3 @ 0eaf1f8, T90.4 @ 
-              db31487, T90.5 @ 7c1c61b; M90 COMPLETE; checkpoints.phase_c pending (Phase 20 build done, awaiting 
-              08-verify-build); next → 08-verify-build; TP-S017-05 single PR-55 at phase end
-            phase: Phase 20 (M86-M90)
-            milestone: M90
-            milestone_status: COMPLETE
-            phase_status: COMPLETE
-            substeps:
-              current_task: none
-              next_action: Phase 20 COMPLETE — invoke 08-verify-build on evolve/EV-015-corpus-reembed-migration; then 
-                09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05)
-              task_status: completed
-              in_progress_tasks: []
-              blocked_tasks: []
-              completed_tasks_recent:
-              - T86.1
-              - T86.2
-              - T86.3
-              - T86.4
-              - T87.1
-              - T87.2
-              - T87.3
-              - T87.4
-              - T87.5
-              - T87.6
-              - T88.1
-              - T88.2
-              - T88.3
-              - T88.4
-              - T88.5
-              - T88.6
-              - T89.1
-              - T89.3
-              - T89.2
-              - T89.4
-              - T89.5
-              - T89.6
-              - T89.7
-              - T90.1
-              - T90.2
-              - T90.3
-              - T90.4
-              - T90.5
-              completed_milestones:
-              - M86
-              - M87
-              - M88
-              - M89
-              - M90
-              note: M90 COMPLETE @ 7c1c61b (T90.3–T90.5); Phase 20 COMPLETE (M86–M90); T90.3 @ 0eaf1f8, T90.4 @ db31487,
-                T90.5 @ 7c1c61b; checkpoints.phase_c pending (Phase 20 build done, awaiting 08); TP-S017-05 single PR-55
-                at phase end
-            execution_plan:
-              active_task: none
-              active_milestone: M90
-              active_phase: Phase 20
-              note: S017/EV-015 Phase 20 COMPLETE — M86–M90 COMPLETE; T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b;
-                active_task=none; next → 08-verify-build; checkpoints.phase_c pending until 08 passes; TP-S017-05 single
-                PR-55; historical S014 M85 / S016 F40 retained below
-              T86.1:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-              T86.2:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-              T86.3:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-              T86.4:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-              T87.1:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                note: tests written (tests/unit/internal_write_api/test_ev015_batch_store_write.py); DB red/green 
-                  blocked locally (no Docker) — TestClient persistence not executed against Postgres yet
-              T87.2:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                note: JobOptions rebuild/backfill + ack validation — green
-              T87.3:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                note: batch upsert writes body_text + document_revisions
-              T87.4:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                note: ingest pipeline stamps body_text + version fields
-              T87.5:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                note: run_backfill_job + Admin BackfillForm @ cb1bda8 (TP-S017-08 / ADR-040 §5)
-              T87.6:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                note: OpenAPI DocumentUpsert + JobOptions rebuild/backfill fields
-              T88.1:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 430eb9e4f4d032f2967716687b1db7a3a6f23969
-                note: JobOptions rebuild validation tests (TC-161/162/166) @ 430eb9e
-              T88.2:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 9cdc4965c33f1db18537d2ba4a38cd44f898e17d
-                note: dry_run rebuild writes shadow only (TC-164) @ 9cdc496 — was red ImportError; greened by T88.3 @ 
-                  78e7a8c (unit tests green); T88.4 continues full shadow dual-write + rebuild_runs lifecycle
-                tdd: green
-                greened_by: T88.3 @ 78e7a8c
-              T88.3:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 78e7a8c5f9e578ac71f3761ca4ad888f640937fe
-                note: run_rebuild_job + dispatch @ 78e7a8c — TC-164 unit tests green; ADR-040/RD-190
-              T88.4:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: d889660391c182432bcd87d4ffad74b8f5e44c4e
-                note: shadow dual-write + rebuild_runs lifecycle @ d889660 — internal-write routes + 
-                  complete_rebuild_run; TC-164 pipeline unit green; Postgres-backed internal_write_api tests written but
-                  not executed (local Docker/Postgres unavailable — same advisory as T87.1)
-              T85.1:
-                status: completed
-                started_at: '2026-07-29'
-                completed_at: '2026-07-29'
-              T85.2:
-                status: completed
-                started_at: '2026-07-29'
-                completed_at: '2026-07-29'
-              execution_plan_md_sync:
-                status: synced_at_T85_5
-                file: docs/sessions/S000-internal-docs-archive/execution-plan.md
-                synced_as_of: '2026-07-29'
-                sync_owner: 07-build
-                pr_plan_note: 'Minor PR #153 (M82) open — do not merge; M83–M85 on same evolve branch'
-                note: M85 + Phase 19 gate docs synced via T85.5 (cc1c355); S016/F40 supersedes active pointer
-                canonical_current_state:
-                  active_phase: 'Phase 20: EV-015 — Corpus rebuild (F41) — COMPLETE (S017)'
-                  active_milestone: M90 COMPLETE — T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b
-                  active_task: none
-                  task_status: completed
-                  tasks_completed: 'Phase 20: T86.1–T86.4 (M86); T87.1–T87.6 (M87); T88.1–T88.6 (M88); T89.1–T89.7 (M89);
-                    T90.1–T90.5 (M90 COMPLETE); historical Phase 19 T82–T85 retained'
-                  orchestrator_resume: S017/EV-015 07-build COMPLETE — Phase 20 COMPLETE @ 7c1c61b; next invoke 
-                    08-verify-build; then 09+10 → 11 → 12 → 13; single PR-55 (TP-S017-05); phase_c pending until 08 
-                    passes
-                  execution_plan_md_note: Phase 20 COMPLETE — T90.3 @ 0eaf1f8, T90.4 @ db31487, T90.5 @ 7c1c61b; M90 
-                    COMPLETE; Current State → 08-verify-build
-              phase_19_gate: passed
-              T85.3:
-                status: completed
-                started_at: '2026-07-29'
-                completed_at: '2026-07-29'
-              T85.4:
-                status: completed
-                started_at: '2026-07-29'
-                completed_at: '2026-07-29'
-              T85.5:
-                status: completed
-                started_at: '2026-07-29'
-                completed_at: '2026-07-29'
-              T88.5:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 6841672e62c184998cbfeb7fb60eeaabb4bc606c
-                depends_on:
-                - T88.3
-                note: 'Config OpenAPI JobOptions rebuild fields locked @ 6841672 ([T88.5] config: lock OpenAPI JobOptions
-                  rebuild fields)'
-              T88.6:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 12b6689d84eef17b8214fad4d05af0adc0b0a7a3
-                note: 'Docs api-contract EV-015 rebuild JobOptions locked to OpenAPI @ 12b6689 ([T88.6] docs: lock EV-015
-                  rebuild JobOptions to OpenAPI)'
-              T89.1:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 0006c0d3c3a06b912953d531ca9d33a45ddf9f68
-                tdd: green
-                greened_by: T89.3 @ 301c31a
-                note: promote shadow-to-live unit coverage (TC-165) @ 0006c0d — was red ModuleNotFoundError 
-                  rebuild_promote; greened by T89.3 @ 301c31a (import/unit tests green); Postgres promote API test still
-                  needs local DB
-              T89.2:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: bb2148b9c5561971a358ac71f3ef80faaaffcf9a
-                tdd: green
-                greened_by: T89.4 @ 653452a
-                note: eval rebuild_run_id shadow retrieval (TC-168) @ bb2148b — completed red; greened by T89.4 @ 
-                  653452a
-              T89.3:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 301c31a2c5b790d436205172ff04e739b9a11bd0
-                note: 'transactional promote shadow rebuild to live @ 301c31a ([T89.3] feat: transactional promote shadow
-                  rebuild to live); greens T89.1 import/unit tests'
-              T89.4:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 653452a3ed15ae13ab45458ad518fb5dfc82f807
-                note: 'eval rebuild_run_id and shadow retrieval path @ 653452a ([T89.4] feat: eval rebuild_run_id and shadow
-                  retrieval path); greens T89.2 TC-168; follow-on docs pointer HEAD=227f0ac'
-              T89.5:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 5d3189fd8944ca4b49272e938f298014c3f570dc
-                note: Vitest rebuild enqueue + promote controls (TC-167/169) @ 5d3189f
-              T89.6:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: b4e349779e0bc5a5e58686c28684a0c7d7472367
-                note: Admin rebuild enqueue and promote UI @ b4e3497
-              T89.7:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 8f004f619fbdb765118e7644d77bcb58da1eefa4
-                note: OpenAPI promote path and eval rebuild_run_id @ 8f004f6; M89 COMPLETE
-              T90.1:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 4ea891d14aff2e575dd225c3fd2ae8529136873d
-                note: API e2e corpus rebuild enqueue (UJ-053) @ 4ea891d
-              T90.2:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 6e553acb17aea6c713024844efac5a1aab2f0c8c
-                note: API e2e shadow dry-run promote (UJ-054) @ 6e553ac — Postgres-backed; local DB unavailable at write
-                  time (CI Postgres)
-              T90.3:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 0eaf1f8d09e9f2e3e2a104b13117d1184f295a85
-                note: Playwright rebuild enqueue and promote UI (uj053/uj054) @ 0eaf1f8
-              T90.4:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: db3148749345bf0e1603f6ced105362915958663
-                note: CORS preflight for rebuild promote (H0c) @ db31487
-              T90.5:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                commit: 7c1c61b0e51efce4a111fc415e5c9ccd7d4d0a0a
-                note: Phase 20 gate and rebuild ops runbook @ 7c1c61b; M90 COMPLETE; Phase 20 COMPLETE
-            s010_baseline:
-              status: in_progress
-              started_at: '2026-07-10'
-              started_at_reopen: '2026-07-10'
-              session_id: S010-unify-llm-service
-              branch: feat/S010-unify-llm-service
-              evolve_cycle_id: EV-011
-              mode: delta_reopen
-              prior_status: completed
-              prior_completed_at: '2026-07-03'
-              feature: F39
-              phase: Phase 18 (M77-M81)
-              milestone: M80
-              parked_note: S010/EV-011 parked; T80.7 blocked — preserved under s010_baseline while S013/EV-012 07-build 
-                runs
-              substeps:
-                current_task: T80.7
-                task_status: blocked
-                in_progress_tasks: []
-                blocked_tasks:
-                - T80.7
-                completed_tasks_recent:
-                - T77.1
-                - T77.2
-                - T77.3
-                - T77.4
-                - T77.5
-                - T77.6
-                - T77.7
-                - T78.1
-                - T78.2
-                - T78.3
-                - T78.4
-                - T78.5
-                - T78.6
-                - T79.1
-                - T79.2
-                - T79.3
-                - T79.4
-                - T79.5
-                - T79.6
-                - T80.1
-                - T80.2
-                - T80.3
-                - T80.4
-                - T80.5
-                - T80.6
-                - T81.1
-                - T81.2
-                - T81.3
-                - T81.4
-                - T81.5
-              execution_plan:
-                active_task: T80.7
-                T79.2: completed
-                T79.3: completed
-                T79.4: completed
-                T79.5: completed
-                T79.6: completed
-                T79.2_completed_at: '2026-07-23'
-                T79.3_completed_at: '2026-07-23'
-                T79.4_completed_at: '2026-07-23'
-                T79.5_completed_at: '2026-07-23'
-                T79.6_completed_at: '2026-07-23'
-                T80.1: completed
-                T80.1_completed_at: '2026-07-24'
-                T80.2: completed
-                T80.2_completed_at: '2026-07-24'
-                T80.3: completed
-                T80.3_completed_at: '2026-07-24'
-                T80.4: completed
-                T80.4_completed_at: '2026-07-24'
-                T80.5: completed
-                T80.5_completed_at: '2026-07-24'
-                T80.6: completed
-                T80.6_completed_at: '2026-07-24'
-                T80.7: blocked
-                T81.1: completed
-                T81.1_completed_at: '2026-07-24'
-                T81.2: completed
-                T81.2_completed_at: '2026-07-24'
-                T81.3: completed
-                T81.3_completed_at: '2026-07-24'
-                T81.4: completed
-                T81.4_completed_at: '2026-07-24'
-                T81.5: completed
-                T81.5_completed_at: '2026-07-24'
-                active_milestone: M80
-                active_phase: Phase 18
-                completed_tasks:
-                - T77.1
-                - T77.2
-                - T77.3
-                - T77.4
-                - T77.5
-                - T77.6
-                - T77.7
-                - T78.1
-                - T78.2
-                - T78.3
-                - T78.4
-                - T78.5
-                - T78.6
-                - T79.1
-                - T79.2
-                - T79.3
-                - T79.4
-                - T79.5
-                - T79.6
-                - T80.1
-                - T80.2
-                - T80.3
-                - T80.4
-                - T80.5
-                - T80.6
-                - T81.1
-                - T81.2
-                - T81.3
-                - T81.4
-                - T81.5
-                note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7
-                  remains (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
-                  Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin;
-                  not pushed this session unless user requests.'
-                M79: all tasks completed
-                M81: all tasks completed
-              completed_milestones:
-              - M77
-              - M78
-              - M79
-              - M81
-              note: '2026-07-24 batch: T80.1–T80.6 and T81.1–T81.5 completed on feat/S010-unify-llm-service. Only T80.7 remains
-                (operator live Modal+DO deploy/smoke). Phase 18 gate PENDING — see docs/sessions/S010-unify-llm-service/reports/phase18-gate.md.
-                Next: user approve T80.7 OR waive; then 08-verify-build; then PR-53 (TP-S010-21). Branch ahead of origin;
-                not pushed this session unless user requests.'
-              s008_baseline:
-                status: completed
-                started_at: '2026-07-02'
-                completed_at: '2026-07-03'
-                session_id: S008-eval-ux-playground
-                branch: feat/S008-eval-ux-playground
-                evolve_cycle_id: EV-009
-                report: docs/sessions/S008-eval-ux-playground/reports/phase-15-gate-check.md
-                substeps:
-                  current_task: 08-verify-build — formal phase verify
-                  completed_tasks_recent:
-                  - T70.8
-                  - T67.4
-                execution_plan:
-                  active_task: 08-verify-build — formal phase verify
-                  phase_15_gate: T2_PASS
-                feature: F36
-                phase: Phase EV-009 (M65-M70)
-                reconciliation_note: S004/EV-005 F34 build (Phase 11 M43-M47) reconciled to completed during 10-e2e — 
-                  08-verify-build, 09-qa (remediated), and 10-e2e all completed downstream on feat/S004-supabase-auth. 
-                  Reopened for active S005/EV-006 F35 build (see s005); closed out completed 2026-06-30 (M53 22/22).
-                s005:
-                  status: completed
-                  session_id: S005-user-mgmt-auth
-                  branch: feat/S005-user-mgmt-auth
-                  feature: F35
-                  phase: Phase 12 (M48-M53)
-                  milestone: M53
-                  m53_progress: 22 of 22 tasks completed
-                  completed_tasks_recent:
-                  - T53.8
-                  - T53.9
-                  current_task: 07-build complete; 08-verify-build next
-                  in_progress_tasks: []
-                  started_at: '2026-06-30'
-                  completed_at: '2026-06-30'
-                  uncommitted: false
-                  note: 'S005/EV-006 F35 milestone M53 (auth UX hardening) — close-out 2026-06-30. M53 22/22 (T53.1–T53.22
-                    all committed; execution-plan and git agree). No tasks in progress; working tree clean before close-out.
-                    Close-out fixed a typecheck blocker (private-helper import in DM user-admin unit test → shared tests.helpers.user_admin_mocks).
-                    Next: 08-verify-build + Phase 12 gate.'
-                  advisories:
-                  - 'Pre-existing strict-mode lint/typecheck failures in the M53 slice fixed to keep the milestone gate green:
-                    useIdleTimeout.ts (void-on-void), IdleTimeoutGuard.tsx (floating promise + void-on-void), config.ts/vite-env.d.ts
-                    (idle env typing), authSessionHarness.ts renamed to .tsx.'
-                  - 'New unit tests: apps/data-management-frontend/src/api/users.test.ts; expanded test_users_page.test.tsx
-                    + test_force_signout.test.tsx.'
-                  - DM frontend coverage gate PASS (lines 98.4%, branches 95.53%); lint + typecheck green; 291 Vitest 
-                    tests pass.
-                s004_baseline:
-                  status: completed
-                  completed_at: '2026-06-29'
-                  session_id: S004-supabase-auth
-                  branch: feat/S004-supabase-auth
-                  feature: F34
-                  phase: Phase 11 (M43-M47)
-                  note: S004/EV-005 F34 Supabase admin auth build (Phase 11 M43-M47) reconciled to completed during 
-                    10-e2e.
-                s003_baseline:
-                  status: completed
-                  completed_at: '2026-06-26'
-                  reopened_at: '2026-06-28'
-                  session_id: S003-persistent-chat-history
-                  branch: feat/S003-persistent-chat-history
-                  feature: F33
-                  phase: Phase 10 (M39–M42)
-                  note: S003 F33 browser-local persistent chat history — M39–M42 done; Phase 10 gate PASS; 115 FE tests 
-                    + 95% coverage + build green
-                  reopen_note: '07-build reopened 2026-06-28 (explicit user approval) for an ADR-025 delta: chat-history storage
-                    switched sessionStorage -> localStorage (durable across tab close, shared across same-origin tabs; still
-                    device-only). Commit eacf4ad. Re-verified: 116 FE tests + 95% coverage + tsc/eslint/vite build green.
-                    Frontend-only — no API/contract/CORS change (AC-S7 preserved). ADR-025 supersedes-in-part ADR-023 and
-                    ADR-024. Status remains completed.'
-              session_parked_at: '2026-07-25'
-              session_parked_note: 'S010/EV-011 parked 2026-07-25 — session closed for hotfix #146/#145. T80.7 still blocked;
-                M80 incomplete; can resume later as new session.'
-            milestone_completed:
-            milestone_completed_at: '2026-07-29'
-            resume_confirmed_at: '2026-07-29'
-            current_task:
-            resume_source: 07-build complete — M85 + Phase 19 gate PASS @ T2; handoff 08-verify-build
-            orchestrator_handoff_at: '2026-07-29'
-            completed_milestones:
-            - M82
-            - M83
-            - M84
-            - M85
-            s016_baseline:
-              status: completed
-              started_at: '2026-07-29'
-              completed_at: '2026-07-29'
-              session_id: S016-chat-cold-start-ux
-              branch: evolve/EV-014-chat-cold-start-ux
-              evolve_cycle_id: EV-014
-              mode: delta
-              feature: F40
-              note: S016/EV-014 07-build COMPLETE 2026-07-29 — F40 ChatRAG cold-start UX implemented (Vitest TC-156–159 
-                + Playwright TC-160 pass); locale-context rename for macOS casing; handoff → 08-verify-build
-              report: docs/sessions/S016-chat-cold-start-ux/reports/07-build-cold-start-ux.md
-              partial_rerun_at: '2026-07-29'
-              partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); Vitest TC-156–159 + Playwright
-                TC-160 pass; locale-context rename for macOS casing'
-              milestone_completed: M85
-              milestone_completed_at: '2026-07-29'
-              current_task:
-              completed_milestones:
-              - M82
-              - M83
-              - M84
-              - M85
-        m95_status: completed
-        m95_completed_at: '2026-08-02'
-        m95_completed_tasks:
-        - T95.1
-        - T95.2
-        - T95.3
-        - T95.4
-        - T95.5
-        m95_head: 79939f4
-        t95_1_started_at: '2026-08-02T14:38:00Z'
-        t95_1_completed_at: '2026-08-02T14:41:34Z'
-        t95_1_commit: 8cb9181
-        t95_2_commit: c3f45be
-        t95_2_completed_at: '2026-08-02T14:47:29Z'
-        t95_3_commit: ec8df9e
-        t95_3_completed_at: '2026-08-02T14:47:28Z'
-        t95_4_commit: c19701f
-        t95_4_completed_at: '2026-08-02T14:50:08Z'
-        t95_5_commit: 79939f4
-        t95_5_completed_at: '2026-08-02T14:53:28Z'
-        t96_1_started_at: '2026-08-02T14:59:45Z'
-        t96_1_completed_at: '2026-08-02T15:01:17Z'
-        t96_1_commit: fd585ce
-        t96_2_started_at: '2026-08-02T15:01:17Z'
-        m96_status: completed
-        m96_completed_at: '2026-08-02'
-        m96_completed_tasks:
-        - T96.1
-        - T96.2
-        - T96.3
-        - T96.4
-        m96_head: 9b0fef9
-        t96_2_completed_at: '2026-08-02T15:06:30Z'
-        t96_2_commit: c8a90b0
-        t96_3_started_at: '2026-08-02T15:06:30Z'
-        t96_3_completed_at: '2026-08-02T15:08:00Z'
-        t96_3_commit: 416a83c
-        t96_4_started_at: '2026-08-02T15:08:00Z'
-        t96_4_completed_at: '2026-08-02T15:09:36Z'
-        t96_4_commit: 9b0fef9
-        t97_1_started_at: '2026-08-02T15:11:00Z'
-        t97_1_completed_at: '2026-08-02T15:12:20Z'
-        t97_1_commit: d06140d
-        t97_2_started_at: '2026-08-02T15:12:20Z'
-        t97_2_completed_at: '2026-08-02T15:13:16Z'
-        t97_2_commit: 367d233
-        t97_3_started_at: '2026-08-02T15:13:16Z'
-        t97_3_completed_at: '2026-08-02T15:16:22Z'
-        t97_3_commit: 1b99582
-        t97_4_started_at: '2026-08-02T15:16:22Z'
-        m97_status: completed
-        completed_at: '2026-08-02'
-        m98_status: completed
-        m98_completed_at: '2026-08-02'
-        m98_head: 59edd12
-        m98_completed_tasks:
-        - T98.1
-        - T98.2
-        - T98.3
-        - T98.4
-        m97_completed_at: '2026-08-02'
-        m97_head: d33cbec
-        t97_4_completed_at: '2026-08-02T15:23:35Z'
-        t97_4_commit: 94477d0
-        t97_5_started_at: '2026-08-02T15:23:35Z'
-        t97_5_completed_at: '2026-08-02T15:27:28Z'
-        t97_5_commit: d33cbec
-        t98_1_started_at: '2026-08-02T15:27:28Z'
-        t98_1_completed_at: '2026-08-02T15:30:29Z'
-        t98_1_commit: d2e9043
-        t98_2_started_at: '2026-08-02T15:30:29Z'
-        t98_2_completed_at: '2026-08-02T15:32:37Z'
-        t98_2_commit: 8b81a42
-        t98_3_started_at: '2026-08-02T15:32:37Z'
-        t98_3_completed_at: '2026-08-02T15:33:09Z'
-        t98_3_commit: 21b52dc
-        t98_4_started_at: '2026-08-02T15:33:09Z'
-        t98_4_completed_at: '2026-08-02T15:33:56Z'
-        t98_4_commit: 59edd12
-      s021_d20_decision: S021-D20
-      s021_d20_decision_recorded: true
-      root_cause: embed↔corpus pin drift
-      root_cause_decision: S021-D20
-      s021_d21_decision: S021-D21
-      s021_d21_decision_recorded: true
-      s021_d21_choice: option_2_investigate_promote_history
-      s021_d21_summary: shadow E0 good; live wiped with basis_vector one-hots 2026-08-02; E0 promote only 2/49 docs
-      promote_history_investigation: complete
-      promote_history_report: docs/sessions/S021-retrieval-follow-on/reports/promote-history-investigation.md
-      rebuild_started: true
-      path_b_approved: true
-      path_b_approved_at: '2026-08-02'
-      s021_d22_decision: S021-D22
-      s021_d22: Path B full E0 rebuild + BUG-2026-08-02-staging-basis-vector-wipe + harden attach_embeddings (user 
-        approved)
-      path_b_completed: true
-      path_b_completed_at: '2026-08-02'
-      path_b_completed_at_ts: '2026-08-02T18:17:00Z'
-      path_b_results:
-        rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
-        promoted_docs: 49
-        promoted_chunks: 213
-        model: BAAI/bge-small-en-v1.5
-        probe_empty_at_0_2: 0/8
-        rifreeclinic_cosine: 1.0
-        onehot_like: 0
-        bug_report: docs/bug-reports/BUG-2026-08-02-staging-basis-vector-wipe.md
-        bug_status: filed_and_resolved
-        guard: attach_embeddings + clear_embeddings + CI script
-        report: docs/sessions/S021-retrieval-follow-on/reports/phase23-gate.md
-        json: docs/sessions/S021-retrieval-follow-on/reports/path-b-e0-rebuild.json
-        script: docs/sessions/S021-retrieval-follow-on/scripts/path_b_e0_full_reembed.py
-        completed_at: '2026-08-02'
-        completed_at_ts: '2026-08-02T18:17:00Z'
-        commits_pending: true
-        commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — 
-          commits_pending=true
-      rebuild_run_id: a0e8f32d-7e2e-4012-960c-2e956ceeba87
-      s021_d22_executed: true
-      t99_3_status: completed
-      commits_pending: true
-      commits_note: Phase D started; recorded 1f2930d+1b46507; workflow-state dirty after 09/10 start — 
-        commits_pending=true
+      current_milestone:
+      phase: 25
+      all_tasks_completed: true
     s022_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -10805,37 +9569,36 @@ stages:
       session_closed_at: '2026-08-02'
   08-verify-build:
     status: completed
-    started_at: '2026-08-02'
-    started: '2026-08-02'
-    completed_at: '2026-08-02'
-    completed: '2026-08-02'
-    partial_rerun_at: '2026-08-02'
-    partial_rerun_note: S022/EV-019 — 08-verify-build COMPLETE PASS; Phase 24 M101–M104 @ a837f21; 
-      checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C approved; Phase D started @ 307e0d3
-    session_id: S022-ingest-resilience
-    branch: evolve/EV-019-ingest-resilience
-    evolve_cycle_id: EV-019
+    started_at: '2026-08-03'
+    completed: '2026-08-03'
+    completed_at: '2026-08-03T12:05:31Z'
+    partial_rerun_at: '2026-08-03'
+    partial_rerun_note: S023/EV-020 — 08-verify-build PASS @ bb4c400; 
+      report=docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md; current_action=await_gate_c_to_d;
+      checkpoints.phase_c pending
+    session_id: S023-retrieval-topk-packing
+    branch: evolve/EV-020-retrieval-topk-packing
+    evolve_cycle_id: EV-020
     mode: evolve
     delta_only: true
     feature_ids:
-    - F47
-    - F48
-    - F49
-    feature: F47-F49
-    phase: Phase 24 (M101-M104)
-    overall_result: PASS
-    result_scope: delta
-    overall: pass
-    current_action: completed
-    next_action: none_session_closed
-    commits_head: 307e0d3
-    report: docs/sessions/S022-ingest-resilience/reports/verification-report.md
-    note: S022/EV-019 08-verify-build COMPLETE PASS 2026-08-02 — Phase 24 M101–M104 @ a837f21; report 
-      verification-report.md; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C checkpoint APPROVED; Phase D 
-      09+10 in progress @ 307e0d3
-    phase_c_status: passed
-    gate_c_to_d: passed
-    phase_c_note: 08 PASS; M101-M104 done — Phase C checkpoint APPROVED; Phase D 09+10 started @ 307e0d3
+    - F50
+    - F51
+    current_action: await_gate_c_to_d
+    next_action: approve_gate_c_to_d_then_09_10
+    report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+    result: pass
+    head: bb4c400
+    phase: 25
+    milestones:
+    - M105
+    - M106
+    - M107
+    s023_d13_decision: S023-D13
+    gate_c_to_d: pending
+    checkpoints_phase_c: pending
+    phase_c_status: build_complete_awaiting_gate
+    note: S023/EV-020 08 PASS 2026-08-03 @ bb4c400 — Phase C build complete; Gate C→D pending user approval before 09+10
     s020_baseline:
       status: completed
       started_at: '2026-08-02'
@@ -11103,10 +9866,43 @@ stages:
       s017_completion_trail_note: Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS
         2026-08-01T14:17:17Z
       m94_boundary: deferred_continue_batch
-    phase_c_checkpoint_accepted: true
-    phase_c_checkpoint_choice: option_1_approve_gate_c_to_d_continue_09_10
-    session_closed: true
-    session_closed_at: '2026-08-02'
+    s022_baseline:
+      status: completed
+      started_at: '2026-08-02'
+      started: '2026-08-02'
+      completed_at: '2026-08-02'
+      completed: '2026-08-02'
+      partial_rerun_at: '2026-08-02'
+      partial_rerun_note: S022/EV-019 — 08-verify-build COMPLETE PASS; Phase 24 M101–M104 @ a837f21; 
+        checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C approved; Phase D started @ 307e0d3
+      session_id: S022-ingest-resilience
+      branch: evolve/EV-019-ingest-resilience
+      evolve_cycle_id: EV-019
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F47
+      - F48
+      - F49
+      feature: F47-F49
+      phase: Phase 24 (M101-M104)
+      overall_result: PASS
+      result_scope: delta
+      overall: pass
+      current_action: completed
+      next_action: none_session_closed
+      commits_head: 307e0d3
+      report: docs/sessions/S022-ingest-resilience/reports/verification-report.md
+      note: S022/EV-019 08-verify-build COMPLETE PASS 2026-08-02 — Phase 24 M101–M104 @ a837f21; report 
+        verification-report.md; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C checkpoint APPROVED; Phase D 
+        09+10 in progress @ 307e0d3
+      phase_c_status: passed
+      gate_c_to_d: passed
+      phase_c_note: 08 PASS; M101-M104 done — Phase C checkpoint APPROVED; Phase D 09+10 started @ 307e0d3
+      phase_c_checkpoint_accepted: true
+      phase_c_checkpoint_choice: option_1_approve_gate_c_to_d_continue_09_10
+      session_closed: true
+      session_closed_at: '2026-08-02'
   09-qa:
     status: completed
     started_at: '2026-08-02'
@@ -12131,7 +10927,7 @@ stages:
             note: Approve for T0 ship; AC-BB9/UJ-060 staging-gated; prod CE off
             ac_bb9_met: false
             uj060: deferred_12_13
-            prod_ce: off
+            prod_ce: false
       next_action: none_session_closed
       session_closed: true
       session_closed_at: '2026-08-02'
@@ -12829,7 +11625,7 @@ stages:
         started: '2026-08-02'
         completed:
         ac_bb9_met: false
-        prod_ce: off
+        prod_ce: false
         deploy_path_choice: option_1_path_a
       phase_1_5:
         status: completed
@@ -19554,7 +18350,7 @@ evolve_cycles:
       report:
       current_action: 13_deploy_smoke_path_a_merge
       ac_bb9_met: false
-      prod_ce: off
+      prod_ce: false
       note: 'Path A (option 1) — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy not complete; ac_bb9_met=false'
       deploy_path: A
       deploy_path_choice: option_1_path_a
@@ -19941,8 +18737,8 @@ evolve_cycles:
       note: Approve for T0 ship; AC-BB9/UJ-060 staging-gated; prod CE off
       ac_bb9_met: false
       uj060: deferred_12_13
-      prod_ce: off
-  prod_ce: off
+      prod_ce: false
+  prod_ce: false
   phase_d_checkpoint:
     status: passed
     passed_at: '2026-08-02'
@@ -21333,9 +20129,9 @@ evolve_cycles:
     Default VECINITA_RAG_PACKER p1→p3 (doc dedupe + char budget; CONTEXT_MAX_CHARS remains 3500).\nClose GitHub #158 and #165
     after ship. Reuse S019 spike evidence; not full re-investigation.\nOut of scope: CE enable, multilingual embed, Path B
     rechunk, adaptive top_k.\n"
-  current_stage: 07-build
-  current_action: start_build
-  next_action: 07_build_t105_1
+  current_stage: 08-verify-build
+  current_action: await_gate_c_to_d
+  next_action: approve_gate_c_to_d_then_09_10
   mode: evolve
   delta_only: true
   branch: evolve/EV-020-retrieval-topk-packing
@@ -21444,15 +20240,46 @@ evolve_cycles:
       - TP5
       - TP6
     07-build:
-      status: in_progress
+      status: completed
       started_at: '2026-08-03'
-      current_action: start_build
-      active_task: T105.1
-      active_milestone: M105
+      current_action: completed
+      active_task:
+      active_milestone:
       next_action: t105_1_test_red_default_top_k_8
-      note: S023/EV-020 07-build STARTED 2026-08-03 after Gate B→C PASS (S023-D12); Phase 25 M105; start @ T105.1
+      note: S023/EV-020 07-build COMPLETE 2026-08-03 — Phase 25 M105–M107 ALL COMPLETE @ bb4c400 (T105.1–T107.3); 
+        handoff → 08-verify-build; checkpoints.phase_c pending Gate C→D
+      completed: '2026-08-03'
+      completed_at: '2026-08-03T12:05:31Z'
+      milestones_completed:
+      - M105
+      - M106
+      - M107
+      tasks_completed:
+      - T105.1
+      - T105.2
+      - T105.3
+      - T105.4
+      - T106.1
+      - T106.2
+      - T106.3
+      - T106.4
+      - T107.1
+      - T107.2
+      - T107.3
+      head: bb4c400
     08-verify-build:
-      status: pending
+      status: completed
+      started_at: '2026-08-03'
+      completed: '2026-08-03'
+      completed_at: '2026-08-03T12:05:31Z'
+      current_action: await_gate_c_to_d
+      report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+      result: pass
+      head: bb4c400
+      note: S023/EV-020 08-verify-build COMPLETE PASS 2026-08-03 — Phase 25 M105–M107 @ bb4c400; 
+        report=docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md; Phase C build complete; Gate 
+        C→D / checkpoints.phase_c PENDING user approval before 09+10
+      s023_d13_decision: S023-D13
     09-qa:
       status: pending
     10-e2e:
@@ -21525,6 +20352,15 @@ evolve_cycles:
     evolve_cycle_id: EV-020
     recorded_at: '2026-08-03T11:49:49Z'
     kind: tech-plan-delta
+  - path: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+    status: completed
+    session_id: S023-retrieval-topk-packing
+    stage: 08-verify-build
+    skill_id: 08-verify-build
+    evolve_cycle_id: EV-020
+    recorded_at: '2026-08-03T12:05:31Z'
+    kind: verification-report
+    result: pass
   decisions:
   - EV-020 stub opened 2026-08-02 with S023; Phase 0 intake pending
   - S023 00-context COMPLETE 2026-08-02 — session artifacts recorded; handoff → Phase 0 await_scope_fn_approval
@@ -21568,8 +20404,30 @@ evolve_cycles:
   - S023-D12 Gate B→C PASS 2026-08-03 option 1 — Approve TP1–TP6 as recommended (Phase 25 order · no new ADR reuse 
     ADR-041 · DO env + EvalConfig · API e2e only · Path A ChatRAG · no new CORS/UI); checkpoints.phase_b=passed; handoff
     → 07-build T105.1
-  active_task: T105.1
-  active_milestone: M105
+  - &id002
+    id: S023-D13
+    decision: Phase C build complete — 07-build T105.1–T107.3 (M105–M107) + 08-verify-build PASS; verification-report.md
+      written; Gate C→D / phase_c checkpoint PENDING user approval before 09-qa + 10-e2e
+    recorded_at: '2026-08-03T12:05:31Z'
+    approved: '2026-08-03'
+    gate: c_to_d
+    gate_status: pending
+    checkpoints_phase_c: pending
+    build_complete: true
+    verify_build: passed
+    head: bb4c400
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+  - S023-D13 Phase C build COMPLETE 2026-08-03 @ bb4c400 — T105.1–T107.3 / M105–M107 done; 08-verify-build PASS 
+    (docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md); checkpoints.phase_c pending Gate C→D 
+    user approval; next → 09-qa + 10-e2e after Gate C→D PASS
+  active_task:
+  active_milestone:
+  phase_c_build_complete: true
+  phase_c_build_complete_at: '2026-08-03T12:05:31Z'
+  phase_c_build_head: bb4c400
+  phase_c_status: build_complete_awaiting_gate
+  phase_c_note: 07+08 COMPLETE @ bb4c400; phase_c checkpoint / Gate C→D pending user AskQuestion
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -25333,6 +24191,10 @@ decisions_log:
   · DO env + EvalConfig · API e2e only · Path A ChatRAG · no new CORS/UI); checkpoints.phase_b=passed; handoff → 
   07-build T105.1
 - *id001
+- S023-D13 Phase C build COMPLETE 2026-08-03 @ bb4c400 — T105.1–T107.3 / M105–M107 done; 08-verify-build PASS 
+  (docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md); checkpoints.phase_c pending Gate C→D user 
+  approval; next → 09-qa + 10-e2e after Gate C→D PASS
+- *id002
 artifacts:
 - path: docs/sessions/S023-retrieval-topk-packing/session-brief.md
   session_id: S023-retrieval-topk-packing
@@ -27562,6 +26424,15 @@ artifacts:
   kind: tech-plan-delta
   report: true
   note: Phase 25 M105–M107 drafted; TP1–TP6 recommended; await Gate B→C (S023-D11)
+- path: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+  status: completed
+  session_id: S023-retrieval-topk-packing
+  stage: 08-verify-build
+  skill_id: 08-verify-build
+  evolve_cycle_id: EV-020
+  recorded_at: '2026-08-03T12:05:31Z'
+  kind: verification-report
+  result: pass
 git_history:
   current_branch: evolve/EV-020-retrieval-topk-packing
   branches:
@@ -27876,6 +26747,7 @@ git_history:
     created_at: '2026-08-02'
     session_id: S023-retrieval-topk-packing
     evolve_cycle_id: EV-020
+    head: bb4c400
   commits:
   - sha: 97cb6a3
     sha_full: 97cb6a37ab78e678d2b74fedd59ce0b58e1fc180
@@ -30514,6 +29386,138 @@ git_history:
     session_id: S022-ingest-resilience
     files_changed: 9
     timestamp: '2026-08-02T21:20:00Z'
+  - sha: 09e8c3b
+    full_sha: 09e8c3b6e10a64a4176c42ec479eeeb68b6c735f
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: 'docs(S023/EV-020): approve TP1–TP6; Gate B→C PASS → Phase 25 build'
+    stage: 04-tech-plan
+    skill_id: 04-tech-plan
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    files_changed: 24
+    timestamp: '2026-08-03T12:00:05Z'
+  - sha: 16c5056
+    full_sha: 16c5056b4ea526fb65f63e247906de59e7683304
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T105.1] test: assert DEFAULT_TOP_K and ChatRAG default is 8 (TC-193 red)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T105.1
+    files_changed: 2
+    timestamp: '2026-08-03T12:00:09Z'
+  - sha: bdc82b0
+    full_sha: bdc82b0841fa97cdf17f61be5f888d59658aa34c
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T105.2] config: set DO VECINITA_TOP_K=8 and EvalConfig default 8'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T105.2
+    files_changed: 4
+    timestamp: '2026-08-03T12:01:03Z'
+  - sha: 7df13f3
+    full_sha: 7df13f3076449940b3e5a57dc9017a7c1aaa3043
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T105.3] feat: promote DEFAULT_TOP_K and ChatRAG settings default to 8'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T105.3
+    files_changed: 4
+    timestamp: '2026-08-03T12:01:03Z'
+  - sha: 824f8a5
+    full_sha: 824f8a5c579a62d1172e51f4d09bc4156216f8ce
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T105.4] test: confirm top_k default 8 green (TC-193)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T105.4
+    files_changed: 2
+    timestamp: '2026-08-03T12:01:18Z'
+  - sha: 56d5db4
+    full_sha: 56d5db464e9b8c554590845bd64a087c0f119af8
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T106.1] test: assert default rag_packer is p3 (TC-194 red)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T106.1
+    files_changed: 3
+    timestamp: '2026-08-03T12:02:07Z'
+  - sha: 0db20e2
+    full_sha: 0db20e227af564eae181ee4151c1308e623ce76a
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T106.2] config: set DO VECINITA_RAG_PACKER=p3'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T106.2
+    files_changed: 1
+    timestamp: '2026-08-03T12:02:28Z'
+  - sha: d9f69f0
+    full_sha: d9f69f08dfef2116831342e94d284028f75d134e
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T106.3] feat: default ChatRAG and eval packer to p3'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T106.3
+    files_changed: 3
+    timestamp: '2026-08-03T12:02:28Z'
+  - sha: f05f451
+    full_sha: f05f4514bca65ed78766e8121d3f637410e104d7
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T106.4] test: confirm default packer p3 green (TC-194)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T106.4
+    files_changed: 1
+    timestamp: '2026-08-03T12:02:40Z'
+  - sha: 8baaa77
+    full_sha: 8baaa7736984be4464f37546295a99f31df73ea8
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T107.1] test: add UJ-063 e2e for top_k=8 + P3 defaults (TC-195)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T107.1
+    files_changed: 2
+    timestamp: '2026-08-03T12:03:41Z'
+  - sha: 3bdf888
+    full_sha: 3bdf8885a25f458ef3866c81b8b9494162fde55c
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T107.2] docs: Phase 25 gate checklist and #158/#165 closeout notes'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T107.2
+    files_changed: 4
+    timestamp: '2026-08-03T12:04:11Z'
+  - sha: bb4c400
+    full_sha: bb4c400c0fb0154e936429b226040b51bb5d0473
+    branch: evolve/EV-020-retrieval-topk-packing
+    message: '[T107.3] docs: confirm AC-RQ10 held and record S023-D9–D12'
+    stage: 08-verify-build
+    skill_id: 08-verify-build
+    session_id: S023-retrieval-topk-packing
+    evolve_cycle_id: EV-020
+    task_id: T107.3
+    files_changed: 2
+    timestamp: '2026-08-03T12:04:27Z'
+    note: Includes verification-report.md; Phase C build tip
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df

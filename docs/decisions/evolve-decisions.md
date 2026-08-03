@@ -544,3 +544,29 @@ Residual retrieval ship after F42: promote prod **`top_k` 5→8** and default pa
 ### Phase 0 status
 
 EV-020 **in_progress**. Phase 0 **approved** (user option 1).
+
+### Decisions (Phase A–C — 2026-08-02 / 2026-08-03)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S023-D9 | 02 verify | Product plan audit PASS |
+| S023-D10 | Gate A→B | **PASS** |
+| S023-D11 | 04 drafted | Phase 25 M105–M107; TP1–TP6 recommended |
+| S023-D12 | Gate B→C / TP1–TP6 | **Approve all** → **07-build @ T105.1** |
+| S023-D13 | Phase C build | M105–M107 complete; Gate C→D pending |
+
+### Phase A status
+
+01-requirements **completed**.  
+02-verify-plan **completed** — Gate A→B **PASS** (S023-D10).
+
+### Phase B status
+
+04-tech-plan **completed** 2026-08-03 — TP1–TP6 (S023-D12); Gate B→C **PASS**.
+
+### Phase C status
+
+07-build **completed** 2026-08-03 — M105–M107 (T105.1–T107.3).  
+Verification: [verification-report.md](../sessions/S023-retrieval-topk-packing/reports/verification-report.md).  
+Next: **Gate C→D** → 09-qa + 10-e2e.
+
