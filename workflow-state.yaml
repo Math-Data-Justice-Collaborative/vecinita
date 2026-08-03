@@ -31626,6 +31626,18 @@ git_history:
       JobOptions crawl + TreeNode + JobTreeResponse + JobMetrics crawl; openapi tree
       path; app.py route + options wiring; job_tree.py; tests; execution-plan +
       workflow-state
+  - sha: 42198b3
+    full_sha: 42198b3500dd5b5f31928ad84d7c91a9f0740521
+    branch: evolve/EV-022-website-scrape-crawl
+    message: '[T109.5-T109.6] feat: Admin JobForm crawl controls (TC-203)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    task_id: T109.5-T109.6
+    files_changed: 6
+    timestamp: '2026-08-03T18:57:53Z'
+    note: JobForm crawl toggle + max depth/pages; i18n; CreateJobOptions crawl fields; TC-203 Vitest; M109 complete; next T110.1
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
