@@ -94,7 +94,7 @@ def _answer_for_row(  # noqa: PLR0913 — row synthesis needs chunks/llm/prompt 
     chunks: list[RetrievedChunk],
     llm: LLM | None,
     system_prompt: str | None = None,
-    packer: PackerMode = "p1",
+    packer: PackerMode = "p3",
     context_max_chars: int = DEFAULT_CONTEXT_MAX_CHARS,
 ) -> RagAnswer:
     if not chunks:
@@ -140,7 +140,7 @@ def _f42_rag_knobs() -> tuple[bool, int, PackerMode, int]:
     except ValueError:
         count = 3
     count = max(1, min(5, count))
-    packer_raw = os.environ.get("VECINITA_RAG_PACKER", "p1").strip().lower()
+    packer_raw = os.environ.get("VECINITA_RAG_PACKER", "p3").strip().lower()
     packer: PackerMode = "p3" if packer_raw == "p3" else "p1"
     max_chars_raw = os.environ.get(
         "VECINITA_RAG_CONTEXT_MAX_CHARS",

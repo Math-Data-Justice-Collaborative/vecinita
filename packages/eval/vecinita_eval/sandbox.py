@@ -43,7 +43,7 @@ def synthesize_with_system_prompt(  # noqa: PLR0913 — sandbox needs question/c
     llm: CompletingLlm,
     *,
     system_prompt: str,
-    packer: PackerMode = "p1",
+    packer: PackerMode = "p3",
     context_max_chars: int = DEFAULT_SYNTHESIS_CONTEXT_MAX_CHARS,
 ) -> RagAnswer:
     """Synthesize an answer using an explicit sandbox system prompt (shared F42 packer)."""
