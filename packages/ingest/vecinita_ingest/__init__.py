@@ -10,6 +10,7 @@ from vecinita_ingest.chunk import (
     encode_token_ids,
     estimate_tokens,
 )
+from vecinita_ingest.crawl import CrawlPlan, CrawlResult, discover_crawl_urls, normalize_url
 from vecinita_ingest.js_render import JsRenderMode, parse_js_render_mode, should_js_render
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.pdf import PdfExtractError, extract_pdf_text
@@ -23,17 +24,21 @@ __all__ = [
     "DEFAULT_CHUNK_SIZE_TOKENS",
     "DEFAULT_CHUNK_TOKENIZER_ID",
     "MIN_CHUNK_SIZE_TOKENS",
+    "CrawlPlan",
+    "CrawlResult",
     "JsRenderMode",
     "PdfExtractError",
     "RateLimiter",
     "ScrapedDocument",
     "chunk_text",
     "count_tokens",
+    "discover_crawl_urls",
     "encode_token_ids",
     "estimate_tokens",
     "extract_main_content",
     "extract_pdf_text",
     "fetch_url",
+    "normalize_url",
     "parse_html",
     "parse_js_render_mode",
     "robots_allows",

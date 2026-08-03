@@ -9,7 +9,7 @@ def test_crawl_scope_and_dedup_same_site_only() -> None:
     """TC-200 / AC-SC4: same-site scope; normalize/dedup; no cycles."""
     seed = "https://example.com/docs/"
     html_by_url = {
-        "https://example.com/docs/": """
+        normalize_url("https://example.com/docs/"): """
         <html><body>
           <a href="/docs/a">A</a>
           <a href="https://example.com/docs/b/">B</a>
@@ -35,6 +35,9 @@ def test_crawl_scope_and_dedup_same_site_only() -> None:
     assert urls.count("https://example.com/docs/a") == 1
 
 
+_MAX_PAGES_CAP = 5
+
+
 def test_crawl_respects_max_depth_and_max_pages() -> None:
     """TC-201 / AC-SC5: stop at depth/page caps with crawl_stopped_reason."""
     html_by_url = {
@@ -48,11 +51,14 @@ def test_crawl_respects_max_depth_and_max_pages() -> None:
         "https://example.com/2b": "<p>deep</p>",
     }
 
-    plan = CrawlPlan(seed_url="https://example.com/0", max_depth=1, max_pages=5)
+    plan = CrawlPlan(
+        seed_url="https://example.com/0",
+        max_depth=1,
+        max_pages=_MAX_PAGES_CAP,
+    )
     result: CrawlResult = discover_crawl_urls(plan, fetch_html=html_by_url.__getitem__)
 
-    assert len(result.urls) <= 5
+    assert len(result.urls) <= _MAX_PAGES_CAP
     assert "https://example.com/2a" not in result.urls
     assert "https://example.com/2b" not in result.urls
-    assert result.crawl_stopped_reason in {"max_depth", "max_pages", "complete"}
-    assert result.crawl_stopped_reason != "complete" or len(result.urls) <= 4
+    assert result.crawl_stopped_reason in {"max_depth", "max_pages"}

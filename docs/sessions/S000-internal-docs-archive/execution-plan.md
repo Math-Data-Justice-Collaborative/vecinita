@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
-| **Active milestone** | M108 — F59 robust scrape (complete) |
-| **Active task** | T109.1 — next (crawl scope unit red) |
-| **Tasks completed** | Phase 21–25 complete; M108 T108.1–T108.6 complete |
+| **Active milestone** | M109 — F60 website crawl |
+| **Active task** | T109.4 — OpenAPI JobOptions crawl + `/jobs/{id}/tree` |
+| **Tasks completed** | Phase 21–25 complete; M108 done; M109 T109.1–T109.3 done |
 | **Last updated** | 2026-08-03 |
 | **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M108 done |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
@@ -2182,9 +2182,9 @@ best-effort soft-fail; Playwright in Modal worker for `VECINITA_SCRAPE_JS_RENDER
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T109.1 | Test: unit red — crawl scope + URL normalize/dedup/no cycles (TC-200) | Test | pending | AC-SC4, F60, #71 | T108.6 | — | S024 | F60 |
-| T109.2 | Test: unit red — max_depth/max_pages caps + stop reason (TC-201) | Test | pending | AC-SC5, S024-D22 | T108.6 | — | S024 | F60 |
-| T109.3 | Code: crawl BFS module + job options wiring + nested source fields on write | Code | pending | feature-list F60, api-contract, ADR-045 | T109.1, T109.2 | — | S024 | F60 |
+| T109.1 | Test: unit red — crawl scope + URL normalize/dedup/no cycles (TC-200) | Test | completed | AC-SC4, F60, #71 | T108.6 | 2026-08-03 | S024 | F60 |
+| T109.2 | Test: unit red — max_depth/max_pages caps + stop reason (TC-201) | Test | completed | AC-SC5, S024-D22 | T108.6 | 2026-08-03 | S024 | F60 |
+| T109.3 | Code: crawl BFS module + job options wiring + nested source fields on write | Code | completed | feature-list F60, api-contract, ADR-045 | T109.1, T109.2 | 2026-08-03 | S024 | F60 |
 | T109.4 | Code/Config: OpenAPI JobOptions crawl fields; `GET /jobs/{id}/tree` route | Code | pending | TP3, api-contract | T109.3 | — | S024 | F60 |
 | T109.5 | Code: Admin JobForm crawl controls (additive; `crawl=false` preserves single-URL) | Code | pending | AC-SC7, UJ-065 | T109.4 | — | S024 | F60 |
 | T109.6 | Test: Vitest JobForm crawl fields (TC-203); unit green TC-200–201 | Test | pending | TC-200–203 | T109.5 | — | S024 | F60 |
@@ -3008,9 +3008,9 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T108.4 | M108 | 26 | Config | completed | — | 2026-08-03 | S024 | F59 | — |
 | T108.5 | M108 | 26 | Code | completed | T108.1–T108.4 | 2026-08-03 | S024 | F59 | — |
 | T108.6 | M108 | 26 | Test | completed | T108.5 | 2026-08-03 | S024 | F59 | — |
-| T109.1 | M109 | 26 | Test | pending | T108.6 | — | S024 | F60 | — |
-| T109.2 | M109 | 26 | Test | pending | T108.6 | — | S024 | F60 | — |
-| T109.3 | M109 | 26 | Code | pending | T109.1, T109.2 | — | S024 | F60 | — |
+| T109.1 | M109 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F60 | — |
+| T109.2 | M109 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F60 | — |
+| T109.3 | M109 | 26 | Code | completed | T109.1, T109.2 | 2026-08-03 | S024 | F60 | — |
 | T109.4 | M109 | 26 | Code | pending | T109.3 | — | S024 | F60 | — |
 | T109.5 | M109 | 26 | Code | pending | T109.4 | — | S024 | F60 | — |
 | T109.6 | M109 | 26 | Test | pending | T109.5 | — | S024 | F60 | — |
