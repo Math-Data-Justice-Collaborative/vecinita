@@ -1,13 +1,13 @@
 # Deploy Checklist
 
-> **Generated**: 2026-08-03 (S023 / EV-020 delta)  
-> **Status**: **ready** (12 signed S023-D21)  
-> **Session**: S023-retrieval-topk-packing  
-> **Features**: F50 top_k=8 · F51 default P3
+> **Generated**: 2026-08-03 (S024 / EV-022 delta)  
+> **Status**: **ready** (12 signed S024-D47)  
+> **Session**: S024-website-scrape-crawl  
+> **Features**: F59 robust scrape · F60 website crawl · F61 corpus tree
 
-Full checklist: [sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md](sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md)
+Full checklist: [sessions/S024-website-scrape-crawl/reports/deploy-checklist.md](sessions/S024-website-scrape-crawl/reports/deploy-checklist.md)
 
-Prior: [sessions/S022-ingest-resilience/reports/deploy-checklist.md](sessions/S022-ingest-resilience/reports/deploy-checklist.md)
+Prior: [sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md](sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md)
 
 ## Standing — Modal / DM job types (BUG-2026-07-31)
 

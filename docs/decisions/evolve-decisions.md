@@ -634,6 +634,12 @@ only (no ChatRAG UI — licensing research tracked).
 | S024-D38 | T110.2 verify | Unit tests only; TC-204 e2e deferred until Docker/Postgres (option 2) |
 | S024-D40 | T111.3 block | Docker daemon not running; cannot `make db-ready` |
 | S024-D41 | T111.3 waive | **Skip local Docker** — TC-204 CI-gated + skip-without-Postgres; local closeout = unit tree + Playwright UJ-066 (user 2026-08-03) |
+| S024-D42 | Gate C→D | **PASS** — Phase C approved; start Phase D (09-qa + 10-e2e) |
+| S024-D43 | Phase D | **PASS** — 09+10 accepted; start 11-verify-impl |
+| S024-D44 | 11 inspect | UI preview **Yes** (local); inspection env **staging** |
+| S024-D45 | 11 inspect | **Skip live browser** — approve from T0 + OpenAPI; staging visuals post-deploy |
+| S024-D46 | 11 signoff | **Approve all** — UJ-064–066 + F59–F61; close 11 → start 12-verify-deploy (user 2026-08-03) |
+| S024-D47 | 12 deploy gate | **Approve mitigations + rollback + Decision A** — ship static scrape/crawl/tree; JS-render browser path follow-up; close 12 → 13 (user 2026-08-03) |
 
 ### Impact analysis (docs / code)
 
@@ -677,4 +683,15 @@ EV-022 **in_progress**. Phase 0 **approved** (user option 1 — allocate F59–F
 |-------|--------|
 | 07-build | **M108–M111 complete** (T111.3 S024-D41 waive local Docker) |
 | 08-verify-build | **PASS** — see `reports/verification-report.md` |
-| Gate C→D | **pending** user checkpoint |
+| Gate C→D | **PASS** (S024-D42) |
+
+### Phase D status
+
+| Stage | Status |
+|-------|--------|
+| 09-qa | **completed** — `pass_with_advisories` (`reports/qa-report.md`) |
+| 10-e2e | **completed** — T0 PASS; TC-204 CI-gated (`reports/e2e-report.md`) |
+| Phase D checkpoint | **PASS** (S024-D43) |
+| 11-verify-impl | **completed** (S024-D46) — `reports/verify-impl.md` |
+| 12-verify-deploy | **completed** (S024-D47) — `reports/deploy-checklist.md` |
+| 13-deploy-smoke | **in_progress** |

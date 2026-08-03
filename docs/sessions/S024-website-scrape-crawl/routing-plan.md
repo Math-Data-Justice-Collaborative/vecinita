@@ -3,17 +3,17 @@
 | Stage | Required | Status | Mode | Notes |
 |-------|----------|--------|------|-------|
 | 00-context | yes | completed | scoped | Session open 2026-08-03; S024-D1–D4 |
-| 16-evolve | orchestrator | in_progress | — | EV-022; Phase B → Gate B→C |
-| 01-requirements | yes | completed | delta | RD-252–263; locks confirmed → 02 |
-| 02-verify-plan | yes | completed | delta | Gate A→B PASS (S024-D34); [02 audit](./reports/02-verify-plan-audit.md) |
-| 04-tech-plan | yes | completed* | delta | *TP locks + Phase 26 drafted; Gate B→C AskQuestion |
-| 07-build | yes | pending | — | M108–M111 after Gate B→C |
-| 08-verify-build | yes | pending | — | Per-milestone / cycle |
-| 09-qa | yes | pending | — | Full QA |
-| 10-e2e | yes | pending | — | API + admin UI journeys |
-| 11-verify-impl | yes | pending | — | Per-Fn AC + UI preview |
-| 12-verify-deploy | yes | pending | — | Deploy checklist |
-| 13-deploy-smoke | yes | pending | — | H1–H5 + ingest/crawl smokes |
+| 16-evolve | orchestrator | in_progress | — | EV-022; 12-verify-deploy |
+| 01-requirements | yes | completed | delta | RD-252–263 |
+| 02-verify-plan | yes | completed | delta | Gate A→B PASS (S024-D34) |
+| 04-tech-plan | yes | completed | delta | TP1–TP6 + ADR-045 (S024-D35/D37) |
+| 07-build | yes | completed | — | M108–M111 (T111.3 S024-D41) |
+| 08-verify-build | yes | completed | — | PASS — verification-report |
+| 09-qa | yes | completed | — | pass_with_advisories |
+| 10-e2e | yes | completed | — | T0 PASS; TC-204 CI-gated |
+| 11-verify-impl | yes | completed | — | S024-D46 Approve all — verify-impl.md |
+| 12-verify-deploy | yes | completed | — | S024-D47 approved — deploy-checklist.md |
+| 13-deploy-smoke | yes | in_progress | — | Path A redeploy + H1–H5 |
 
 ## Skipped
 
@@ -37,8 +37,7 @@ User answers **2026-08-03**:
 
 ## Next
 
-**Gate B→C** on Phase 26 / ADR-045 → on PASS start
-`@.cursor/skills/07-build/SKILL.md` (05/06 skipped).
+**13-deploy-smoke** — Path A merge/deploy + H1–H5 (+ optional live crawl per S024-D24)
 
 ## Ship targets
 

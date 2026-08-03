@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
-| **Active milestone** | M111 — **completed**; 08-verify-build **PASS** |
-| **Active task** | — (next: Gate **C→D** → Phase D 09+10) |
-| **Tasks completed** | Phase 21–25 complete; M108–M111 done (T111.3 local Docker waived S024-D41) |
+| **Active milestone** | M111 — **completed**; Phase D PASS; 11+12 **approved** |
+| **Active task** | **13-deploy-smoke** — Path A merge/deploy + H1–H5 |
+| **Tasks completed** | Phase 21–25 complete; M108–M111 done; 09–12 done (S024-D43/D46/D47) |
 | **Last updated** | 2026-08-03 |
-| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 08 PASS; awaiting Gate C→D |
+| **Evolve cycle** | EV-022 — Standard; 12 signed (S024-D47 Decision A); 13 in progress |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
-| **Active session** | S024-website-scrape-crawl — 08-verify-build complete |
+| **Active session** | S024-website-scrape-crawl — 13-deploy-smoke |
 | **Scope addition** | 2026-08-03 — F59 scrape + F60 crawl + F61 tree (#185/#69/#71/#70). |
 
 ## Template
@@ -2356,7 +2356,7 @@ main
 | PR-56 | Major | Phase 22 / S020 (EV-017) | evolve/EV-017-retrieval-batch-b | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173 |
 | PR-57 | Major | Phase 24 / S022 (EV-019) | evolve/EV-019-ingest-resilience | main | merged ([#179](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179)) @ `bd6bb00` |
 | PR-58 | Major | Phase 25 / S023 (EV-020) | evolve/EV-020-retrieval-topk-packing | main | pending — Residual top_k=8 + default P3 (#158/#165) |
-| PR-59 | Major | Phase 26 / S024 (EV-022) | evolve/EV-022-website-scrape-crawl | main | pending — Scrape/crawl/tree (#185/#69/#71/#70); optional stacked minors for #69→#71→#70 |
+| PR-59 | Major | Phase 26 / S024 (EV-022) | evolve/EV-022-website-scrape-crawl | main | opening — Scrape/crawl/tree (#185/#69/#71/#70); 12 approved S024-D47 (JS-render follow-up) |
 
 S024 (EV-022) is evolve Standard: M108–M111 land as atomic commits on
 `evolve/EV-022-website-scrape-crawl` (major PR-59 to `main`; optional stacked PRs per

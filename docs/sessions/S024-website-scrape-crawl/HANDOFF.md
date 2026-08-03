@@ -1,25 +1,24 @@
 # HANDOFF — S024-website-scrape-crawl
 
 > ADR-043 rolling digest · overwrite at safe-stops  
-> **Updated:** 2026-08-03 — 08-verify-build PASS; awaiting Gate C→D
+> **Updated:** 2026-08-03 — 12 COMPLETE (S024-D47 Decision A); start 13-deploy-smoke
 
 | Field | Value |
 |-------|--------|
 | Session | `S024-website-scrape-crawl` **in_progress** |
 | Evolve | `EV-022` — F59/F60/F61 |
 | Branch | `evolve/EV-022-website-scrape-crawl` |
-| Stage / action | **08-verify-build PASS** → Gate **C→D** → Phase D |
+| Stage / action | **13-deploy-smoke** — merge/deploy Path A + H1–H5 |
 | Issues | #185 · #69 → #71 → #70 |
 
 ## Progress
 
-- M108–M111 complete; 07-build complete
-- T111.3 — **S024-D41** waive local Docker; skip-without-Postgres on UJ-066
-- T111.4 — OpenAPI mirror PASS
-- 08 — lint/typecheck/format PASS; scoped pytest PASS; DM Vitest **702**; `make test-ui` **43** (UJ-066 ✓); audit PASS
+- 11-verify-impl **COMPLETE** (S024-D46)
+- 12-verify-deploy **COMPLETE** (S024-D47) — mitigations + rollback + JS Decision A
+- Checklist: `reports/deploy-checklist.md` · standing `docs/deploy-checklist.md`
 
 ## Next
 
-1. Gate **C→D** approval (Standard checkpoint)
-2. Phase D: 09-qa + 10-e2e → 11 → 12 → 13
-3. Issue closeout #69/#71/#70/#185 after deploy / PR merge
+1. Open/merge PR (or confirm tip) → Path A redeploy (Alembic + Modal DM + write + Admin FE)
+2. H1–H3 → `verify_connectivity.sh` H4–H5 → optional live crawl smoke
+3. Write `reports/deploy-smoke.md`; close EV-022
