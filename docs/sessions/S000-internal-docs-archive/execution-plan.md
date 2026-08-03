@@ -2356,7 +2356,7 @@ main
 | PR-56 | Major | Phase 22 / S020 (EV-017) | evolve/EV-017-retrieval-batch-b | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173 |
 | PR-57 | Major | Phase 24 / S022 (EV-019) | evolve/EV-019-ingest-resilience | main | merged ([#179](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179)) @ `bd6bb00` |
 | PR-58 | Major | Phase 25 / S023 (EV-020) | evolve/EV-020-retrieval-topk-packing | main | pending — Residual top_k=8 + default P3 (#158/#165) |
-| PR-59 | Major | Phase 26 / S024 (EV-022) | evolve/EV-022-website-scrape-crawl | main | opening — Scrape/crawl/tree (#185/#69/#71/#70); 12 approved S024-D47 (JS-render follow-up) |
+| PR-59 | Major | Phase 26 / S024 (EV-022) | evolve/EV-022-website-scrape-crawl | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190 |
 
 S024 (EV-022) is evolve Standard: M108–M111 land as atomic commits on
 `evolve/EV-022-website-scrape-crawl` (major PR-59 to `main`; optional stacked PRs per

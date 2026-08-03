@@ -2866,16 +2866,19 @@ project:
       phase: Phase 26 (M108-M111)
       deploy_path: A
       deploy_path_default: A
-      current_action: confirm_pr_merge_path_then_redeploy
-      next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+      current_action: watch_ci_then_merge_path_a
+      next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
       askquestion_pending: false
       s024_d47_decision: S024-D47
       js_render_decision: A_ship_static_js_render_follow_up
       js_render_not_gate: true
       live_crawl: optional_S024-D24
+      pr_number: 190
+      pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+      pr_status: open
       report:
-      note: 'Path A — merge tip → Alembic 0011 + Modal DM + write API + Admin FE; then H1–H5; live crawl optional S024-D24; JS-render not a 13 gate per Decision A'
-      updated_at: '2026-08-03T21:29:58Z'
+      note: 'PR #190 open; watching CI then merge Path A + H1–H5'
+      updated_at: '2026-08-03T21:33:05Z'
       s023_baseline:
         s022_baseline:
           status: completed
@@ -3807,6 +3810,13 @@ active_session:
   session_branch: feat/S024-website-scrape-crawl
   orchestrator: 16-evolve
   evolve_cycle_id: EV-022
+  pr_number: 190
+  pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+  pr_title: '[PR-59] Phase 26: Website scrape & crawl (F59–F61)'
+  pr_branch: evolve/EV-022-website-scrape-crawl
+  pr_base: main
+  pr_status: open
+  pr_opened_at: '2026-08-03'
   artifacts_dir: docs/sessions/S024-website-scrape-crawl/
   github_issues:
   - 185
@@ -4044,11 +4054,14 @@ active_session:
     status: in_progress
     started_at: '2026-08-03T21:29:58Z'
     mode: delta
-    current_action: confirm_pr_merge_path_then_redeploy
-    next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+    current_action: watch_ci_then_merge_path_a
+    next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
     askquestion_pending: false
     s024_d47_decision: S024-D47
-    note: 'Path A — merge tip → Alembic 0011 + Modal DM + write API + Admin FE; then H1–H5; live crawl optional S024-D24; JS-render not a 13 gate per Decision A'
+    pr_number: 190
+    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+    pr_status: open
+    note: 'PR #190 open; watching CI then merge Path A + H1–H5'
   - stage: 15-service-health
     required: false
     status: skipped
@@ -4060,10 +4073,10 @@ active_session:
     skip_rationale:
     started_at: '2026-08-03'
     current_action: orchestrating_13_deploy_smoke
-    note: 'S024/EV-022 orchestrating 13-deploy-smoke — Path A — merge tip → Alembic 0011 + Modal DM + write API + Admin FE; then H1–H5; live crawl optional S024-D24; JS-render not a 13 gate per Decision A'
+    note: 'S024/EV-022 orchestrating 13-deploy-smoke — PR #190 open; watching CI then merge Path A + H1–H5'
     askquestion_pending: false
     current_stage: 13-deploy-smoke
-    next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+    next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
     s024_d42_decision: S024-D42
     s024_d43_decision: S024-D43
     s024_d44_decision: S024-D44
@@ -4071,12 +4084,11 @@ active_session:
     s024_d46_decision: S024-D46
     checkpoints_phase_d: passed
   current_stage: 13-deploy-smoke
-  current_action: confirm_pr_merge_path_then_redeploy
-  next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+  current_action: watch_ci_then_merge_path_a
+  next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
   started_at: '2026-08-03'
   context_briefs: []
   feature_ids:
-    s024_d47_decision: S024-D47
   - F59
   - F60
   - F61
@@ -4085,7 +4097,7 @@ active_session:
   phase1_complete: true
   report: docs/sessions/S024-website-scrape-crawl/reports/deploy-checklist.md
   report_status: approved
-  note: 'Path A — merge tip → Alembic 0011 + Modal DM + write API + Admin FE; then H1–H5; live crawl optional S024-D24; JS-render not a 13 gate per Decision A'
+  note: 'PR #190 open; watching CI then merge Path A + H1–H5'
   askquestion_pending: false
   s024_d46_decision: S024-D46
   ui_preview: yes_local_non_deployed
@@ -12625,16 +12637,19 @@ stages:
     phase: Phase 26 (M108-M111)
     deploy_path: A
     deploy_path_default: A
-    current_action: confirm_pr_merge_path_then_redeploy
-    next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+    current_action: watch_ci_then_merge_path_a
+    next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
     askquestion_pending: false
     s024_d47_decision: S024-D47
     js_render_decision: A_ship_static_js_render_follow_up
     js_render_not_gate: true
     live_crawl: optional_S024-D24
+    pr_number: 190
+    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+    pr_status: open
     report:
-    note: 'Path A — merge tip → Alembic 0011 + Modal DM + write API + Admin FE; then H1–H5; live crawl optional S024-D24; JS-render not a 13 gate per Decision A'
-    updated_at: '2026-08-03T21:29:58Z'
+    note: 'PR #190 open; watching CI then merge Path A + H1–H5'
+    updated_at: '2026-08-03T21:33:05Z'
     s023_baseline:
       s022_baseline:
         status: completed
@@ -21886,6 +21901,13 @@ evolve_cycles:
 - id: EV-022
   session_id: S024-website-scrape-crawl
   cycle_type: feature
+  pr_number: 190
+  pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+  pr_title: '[PR-59] Phase 26: Website scrape & crawl (F59–F61)'
+  pr_branch: evolve/EV-022-website-scrape-crawl
+  pr_base: main
+  pr_status: open
+  pr_opened_at: '2026-08-03'
   feature_ids:
   - F59
   - F60
@@ -21956,8 +21978,8 @@ evolve_cycles:
     - 06-tech-tooling
     - 15-service-health
   current_stage: 13-deploy-smoke
-  current_action: confirm_pr_merge_path_then_redeploy
-  next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+  current_action: watch_ci_then_merge_path_a
+  next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
   active_task:
   active_milestone: M111
   mode: evolve
@@ -22622,14 +22644,18 @@ evolve_cycles:
       - F60
       - F61
       deploy_path: A
-      current_action: confirm_pr_merge_path_then_redeploy
-      next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+      current_action: watch_ci_then_merge_path_a
+      next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
       askquestion_pending: false
       s024_d47_decision: S024-D47
       js_render_decision: A_ship_static_js_render_follow_up
       js_render_not_gate: true
       live_crawl: optional_S024-D24
-      note: 'Path A — merge tip → Alembic 0011 + Modal DM + write API + Admin FE; then H1–H5; live crawl optional S024-D24; JS-render not a 13 gate per Decision A'
+      pr_number: 190
+      pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+      pr_status: open
+      note: 'PR #190 open; watching CI then merge Path A + H1–H5'
+      updated_at: '2026-08-03T21:33:05Z'
     15-service-health:
       status: skipped
       skip_rationale: Optional at close
@@ -23184,7 +23210,7 @@ evolve_cycles:
   s024_d37_status: confirmed
   s024_d37_confirmed_at: '2026-08-03T18:37:34Z'
   gate_b_to_c: passed
-  note: 'S024/EV-022 12 COMPLETE (S024-D47); 13-deploy-smoke in_progress — Path A — merge tip → Alembic 0011 + Modal DM + write API + Admin FE; then H1–H5; live crawl optional S024-D24; JS-render not a 13 gate per Decision A'
+  note: 'S024/EV-022 13-deploy-smoke in_progress — PR #190 open; watching CI then merge Path A + H1–H5'
   milestones_completed:
   - M108
   - M109
@@ -29582,6 +29608,16 @@ git_history:
     created_at: '2026-08-03'
     session_id: S024-website-scrape-crawl
     evolve_cycle_id: EV-022
+    pr_number: 190
+    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+    pr_title: '[PR-59] Phase 26: Website scrape & crawl (F59–F61)'
+    pr_base: main
+    pr_status: open
+    pr_plan_id: PR-59
+    pr_opened_at: '2026-08-03'
+    head_sha: 6422ce82614a57ae92454cdd1686cd5d08a7e3f6
+    head_short: 6422ce8
+    note: 'PR #190 open — Phase 26 F59–F61; watching CI then merge Path A + H1–H5'
   - name: evolve/EV-019-ingest-resilience
     purpose: EV-019 ingest resilience F47-F49
     base: main
@@ -32804,7 +32840,34 @@ git_history:
     - docs/sessions/S024-website-scrape-crawl/HANDOFF.md
     - docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
     - workflow-state.yaml
+  - sha: 6422ce8
+    sha_full: 6422ce82614a57ae92454cdd1686cd5d08a7e3f6
+    short: 6422ce8
+    branch: evolve/EV-022-website-scrape-crawl
+    message: 'docs(S024/EV-022): Phase D–12 signoff — ready for Path A deploy'
+    stage: 13-deploy-smoke
+    skill_id: 13-deploy-smoke
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    files_changed: 10
+    timestamp: '2026-08-03T21:31:19Z'
+    note: 'Phase D–12 signoff; PR #190 open; stage 13-deploy-smoke / 16-evolve'
+    skill_ids:
+    - 13-deploy-smoke
+    - 16-evolve
+    files:
+    - docs/decisions/evolve-decisions.md
+    - docs/deploy-checklist.md
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S024-website-scrape-crawl/HANDOFF.md
+    - docs/sessions/S024-website-scrape-crawl/reports/deploy-checklist.md
+    - docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md
+    - docs/sessions/S024-website-scrape-crawl/reports/qa-report.md
+    - docs/sessions/S024-website-scrape-crawl/reports/verify-impl.md
+    - docs/sessions/S024-website-scrape-crawl/routing-plan.md
+    - workflow-state.yaml
   notes:
+  - '2026-08-03T21:33:05Z S024/EV-022: PR #190 opened (PR-59 Phase 26 F59–F61) on evolve/EV-022-website-scrape-crawl → main; recorded commit 6422ce8; 13-deploy-smoke watching CI then merge Path A + H1–H5.'
   - '2026-08-03T20:23:45Z S024/EV-022: recorded commits 568b68e (incidental Brewfile / Docker-block recovery), 1f51786 (T111.3), ac12278 (T111.4); 07-build COMPLETE; current_stage=08-verify-build in_progress; Gate C→D pending.'
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df
@@ -33003,6 +33066,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: '13-deploy-smoke — confirm PR/merge path, redeploy Path A surfaces, run H1–H5, write deploy-smoke.md'
+next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
 pipeline_idle: false
 pipeline_idle_note: '2026-08-02 — S020/EV-017 07-build in_progress; M97 COMPLETE @ d33cbec (T97.1–T97.5); M98 in_progress / T98.1 in_progress (UJ-057 answer cache e2e); 08-verify-build deferred until before Phase C PR (batch throughput)'

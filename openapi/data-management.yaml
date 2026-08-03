@@ -901,6 +901,7 @@ components:
           nullable: true
         children:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/TreeNode"
           default: []
@@ -916,6 +917,7 @@ components:
           format: uuid
         roots:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/TreeNode"
     CorpusTreeResponse:
@@ -926,6 +928,7 @@ components:
       properties:
         roots:
           type: array
+          maxItems: 1000
           items:
             $ref: "#/components/schemas/TreeNode"
     JobList:
