@@ -31,11 +31,12 @@ Each CD workflow checks out `github.event.workflow_run.head_sha` so deploys matc
 
 ## After every push (required)
 
-Husky **pre-push** runs **fast tier** (`make check-fast` + `make test-fast`) before `git push`.
+Husky **pre-push** runs **lean** (`make lint` + `make test-fast`) before `git push`.
+Husky **pre-commit** runs typecheck + security-scan + job-dispatch (F62 / #182).
 Run **`make ci-push`** (or `make ci-pr-ready`) **before opening a PR**. GitHub CI is the merge
 gate. Opt-in full local parity on push: `VECINITA_FULL_PRE_PUSH=1 git push`. Opt-in medium
 (format-check): `VECINITA_MEDIUM_PRE_PUSH=1 git push`. Skip
-pre-push: `VECINITA_SKIP_PRE_PUSH=1 git push`.
+pre-push: `VECINITA_SKIP_PRE_PUSH=1 git push`; skip pre-commit: `VECINITA_SKIP_PRE_COMMIT=1`.
 
 ```bash
 # From repo root; branch defaults to current
