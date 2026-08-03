@@ -12,6 +12,13 @@ chat_rag:
 ingest:
   chunk_size_tokens: 256
   scrape_timeout_s: 30
+  scrape_user_agent: "VecinitaBot/1.0 (+https://github.com/Math-Data-Justice-Collaborative/vecinita)"
+  scrape_rate_limit_rps: 0.5
+  scrape_respect_robots: true
+  crawl_max_depth: 2
+  crawl_max_pages: 25
+  scrape_js_render: auto
+  scrape_pdf_enabled: true
 
 services:
   chat_rag_backend: http://localhost:8000

@@ -1,4 +1,4 @@
-"""HTML fetch and text extraction for public URLs (F7)."""
+"""HTML fetch and main-content extraction for public URLs (F7 / F59)."""
 
 from __future__ import annotations
 
@@ -7,10 +7,15 @@ from html.parser import HTMLParser
 from typing import Final
 
 import httpx
+import trafilatura
 
 from vecinita_ingest.models import ScrapedDocument
 
 _STRIP_TAGS: Final[frozenset[str]] = frozenset({"script", "style", "noscript"})
+_BOILERPLATE_RE: Final[re.Pattern[str]] = re.compile(
+    r"<(nav|footer|aside|header|script|style|noscript)\b[^>]*>.*?</\1>",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 class _TextExtractor(HTMLParser):
@@ -55,11 +60,41 @@ class _TextExtractor(HTMLParser):
         return re.sub(r"\s+", " ", joined).strip()
 
 
-def parse_html(html: str, *, url: str) -> ScrapedDocument:
-    """Extract title and visible text from HTML without network I/O."""
+def _extract_title(html: str) -> str | None:
     parser = _TextExtractor()
     parser.feed(html)
-    return ScrapedDocument(url=url, title=parser.title, text=parser.text_content())
+    return parser.title
+
+
+def _prune_boilerplate(html: str) -> str:
+    """Remove nav/footer/aside/header and non-content tags before extract."""
+    return _BOILERPLATE_RE.sub("", html)
+
+
+def _fallback_visible_text(html: str) -> str:
+    parser = _TextExtractor()
+    parser.feed(html)
+    return parser.text_content()
+
+
+def extract_main_content(html: str) -> str:
+    """Extract main body text via trafilatura after pruning chrome elements."""
+    pruned = _prune_boilerplate(html)
+    extracted = trafilatura.extract(
+        pruned,
+        include_tables=True,
+        include_comments=False,
+    )
+    if extracted and extracted.strip():
+        return extracted.strip()
+    return _fallback_visible_text(pruned)
+
+
+def parse_html(html: str, *, url: str) -> ScrapedDocument:
+    """Extract title and main-content text from HTML without network I/O."""
+    title = _extract_title(html)
+    text = extract_main_content(html)
+    return ScrapedDocument(url=url, title=title, text=text)
 
 
 def fetch_url(

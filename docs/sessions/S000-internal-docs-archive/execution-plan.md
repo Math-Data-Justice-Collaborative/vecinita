@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
-| **Active milestone** | M108 — F59 robust scrape |
-| **Active task** | T108.1 — Test: unit red TC-196 main-content extract |
-| **Tasks completed** | Phase 21–25 complete; Phase 26 planned (T108.1–T111.4 pending) |
+| **Active milestone** | M108 — F59 robust scrape (complete) |
+| **Active task** | T109.1 — next (crawl scope unit red) |
+| **Tasks completed** | Phase 21–25 complete; M108 T108.1–T108.6 complete |
 | **Last updated** | 2026-08-03 |
-| **Evolve cycle** | EV-022 — Standard; S024-D35 TP1–TP6 locked; Gate B→C pending; skip 05/06 |
+| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M108 done |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
-| **Active session** | S024-website-scrape-crawl — 04-tech-plan |
+| **Active session** | S024-website-scrape-crawl — 07-build |
 | **Scope addition** | 2026-08-03 — F59 scrape + F60 crawl + F61 tree (#185/#69/#71/#70). |
 
 ## Template
@@ -2168,12 +2168,12 @@ best-effort soft-fail; Playwright in Modal worker for `VECINITA_SCRAPE_JS_RENDER
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T108.1 | Test: unit red — main-content strips nav/footer; keeps headings/lists (TC-196) | Test | in_progress | AC-SC1, F59, #69 | — | — | S024 | F59 |
-| T108.2 | Test: unit red — robots + rate-limit honored (TC-197) | Test | pending | AC-SC2, config-spec | — | — | S024 | F59 |
-| T108.3 | Test: unit red — PDF extract / empty soft-fail (TC-198) | Test | pending | AC-SC3, S024-D29 | — | — | S024 | F59 |
-| T108.4 | Config: pin `trafilatura` in pyproject + Modal DM image; confirm `pypdf`; wire scrape/crawl keys in `infra/vecinita.yaml` | Config | pending | TP5, ADR-045, config-spec | — | — | S024 | F59 |
-| T108.5 | Code: scrape module — trafilatura extract, politeness, PDF via pypdf, Playwright render path (`auto`/`always`) | Code | pending | feature-list F59, ADR-045, RD-261 | T108.1–T108.4 | — | S024 | F59 |
-| T108.6 | Test: unit green TC-196–198; fixtures under `data/fixtures/ingest/` | Test | pending | TC-196–198, D4b | T108.5 | — | S024 | F59 |
+| T108.1 | Test: unit red — main-content strips nav/footer; keeps headings/lists (TC-196) | Test | completed | AC-SC1, F59, #69 | — | 2026-08-03 | S024 | F59 |
+| T108.2 | Test: unit red — robots + rate-limit honored (TC-197) | Test | completed | AC-SC2, config-spec | — | 2026-08-03 | S024 | F59 |
+| T108.3 | Test: unit red — PDF extract / empty soft-fail (TC-198) | Test | completed | AC-SC3, S024-D29 | — | 2026-08-03 | S024 | F59 |
+| T108.4 | Config: pin `trafilatura` in pyproject + Modal DM image; confirm `pypdf`; wire scrape/crawl keys in `infra/vecinita.yaml` | Config | completed | TP5, ADR-045, config-spec | — | 2026-08-03 | S024 | F59 |
+| T108.5 | Code: scrape module — trafilatura extract, politeness, PDF via pypdf, Playwright render path (`auto`/`always`) | Code | completed | feature-list F59, ADR-045, RD-261 | T108.1–T108.4 | 2026-08-03 | S024 | F59 |
+| T108.6 | Test: unit green TC-196–198; fixtures under `data/fixtures/ingest/` | Test | completed | TC-196–198, D4b | T108.5 | 2026-08-03 | S024 | F59 |
 
 #### M109: F60 — website crawl + JobForm + job tree
 
@@ -3002,12 +3002,12 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T107.1 | M107 | 25 | Test | pending | T106.4 | — | S023 | F50–F51 | — |
 | T107.2 | M107 | 25 | Docs | pending | T107.1 | — | S023 | F50–F51 | — |
 | T107.3 | M107 | 25 | Test | pending | T107.1 | — | S023 | F50–F51 | — |
-| T108.1 | M108 | 26 | Test | pending | — | — | S024 | F59 | — |
-| T108.2 | M108 | 26 | Test | pending | — | — | S024 | F59 | — |
-| T108.3 | M108 | 26 | Test | pending | — | — | S024 | F59 | — |
-| T108.4 | M108 | 26 | Config | pending | — | — | S024 | F59 | — |
-| T108.5 | M108 | 26 | Code | pending | T108.1–T108.4 | — | S024 | F59 | — |
-| T108.6 | M108 | 26 | Test | pending | T108.5 | — | S024 | F59 | — |
+| T108.1 | M108 | 26 | Test | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.2 | M108 | 26 | Test | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.3 | M108 | 26 | Test | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.4 | M108 | 26 | Config | completed | — | 2026-08-03 | S024 | F59 | — |
+| T108.5 | M108 | 26 | Code | completed | T108.1–T108.4 | 2026-08-03 | S024 | F59 | — |
+| T108.6 | M108 | 26 | Test | completed | T108.5 | 2026-08-03 | S024 | F59 | — |
 | T109.1 | M109 | 26 | Test | pending | T108.6 | — | S024 | F60 | — |
 | T109.2 | M109 | 26 | Test | pending | T108.6 | — | S024 | F60 | — |
 | T109.3 | M109 | 26 | Code | pending | T109.1, T109.2 | — | S024 | F60 | — |
