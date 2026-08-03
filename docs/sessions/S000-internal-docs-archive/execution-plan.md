@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 25: EV-020 — Residual top_k + P3 (F50–F51) |
-| **Active milestone** | M107 — UJ-063 e2e + phase gate |
-| **Active task** | T107.1 — API e2e UJ-063 (TC-195) |
-| **Tasks completed** | Phase 21–24 complete; Phase 25 M105–M106 complete |
+| **Active milestone** | Phase 25 complete — await Gate C→D / 09+10 |
+| **Active task** | — (build tasks T105.1–T107.3 done) |
+| **Tasks completed** | Phase 21–25 M105–M107 complete (F50–F51) |
 | **Last updated** | 2026-08-03 |
 | **Evolve cycle** | EV-020 — Standard; S023-D12 Gate B→C PASS; TP1–TP6 approved; skip 05/06 |
 | **Git branch** | `evolve/EV-020-retrieval-topk-packing` |
@@ -2129,18 +2129,23 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T107.1 | Test: API e2e `tests/e2e/test_uj063_topk_p3_ask.py` (TC-195) — ≤8 sources, p3 default | Test | in_progress | UJ-063, e2e-coverage, AC-RQ8/RQ9 | T106.4 | — | S023 | F50–F51 |
-| T107.2 | Docs: Phase 25 gate checklist + execution-plan Current State; issue closeout notes #158/#165 | Docs | pending | Phase 25 gate, RD-235 | T107.1 | — | S023 | F50–F51 |
-| T107.3 | Test/Docs: Confirm AC-RQ10 held; no Playwright; update any tests hardcoding top_k=5 / packer=p1 defaults | Test | pending | AC-RQ10, TP4/TP6 | T107.1 | — | S023 | F50–F51 |
+| T107.1 | Test: API e2e `tests/e2e/test_uj063_topk_p3_ask.py` (TC-195) — ≤8 sources, p3 default | Test | completed | UJ-063, e2e-coverage, AC-RQ8/RQ9 | T106.4 | 2026-08-03 | S023 | F50–F51 |
+| T107.2 | Docs: Phase 25 gate checklist + execution-plan Current State; issue closeout notes #158/#165 | Docs | completed | Phase 25 gate, RD-235 | T107.1 | 2026-08-03 | S023 | F50–F51 |
+| T107.3 | Test/Docs: Confirm AC-RQ10 held; no Playwright; update any tests hardcoding top_k=5 / packer=p1 defaults | Test | completed | AC-RQ10, TP4/TP6 | T107.1 | 2026-08-03 | S023 | F50–F51 |
 
 #### Phase 25 Gate Check
 
-- [ ] All M105–M107 tasks completed (T105.1–T107.3)
-- [ ] AC-RQ8–RQ9 met at T2 (unit + API e2e); AC-RQ10 scope held
-- [ ] DO yaml: `VECINITA_TOP_K=8`; `VECINITA_RAG_PACKER=p3`
-- [ ] No new ADR (reuse ADR-041)
-- [ ] No adaptive top_k; no CE enable; no Path B rechunk; no Playwright
-- [ ] ruff / basedpyright clean; pytest e2e UJ-063 green — **08-verify-build**
+- [x] All M105–M107 tasks completed (T105.1–T107.3)
+- [x] AC-RQ8–RQ9 met at T2 (unit + API e2e); AC-RQ10 scope held
+- [x] DO yaml: `VECINITA_TOP_K=8`; `VECINITA_RAG_PACKER=p3`
+- [x] No new ADR (reuse ADR-041)
+- [x] No adaptive top_k; no CE enable; no Path B rechunk; no Playwright
+- [x] ruff / basedpyright clean; pytest e2e UJ-063 green — **08-verify-build**
+
+**Issue closeout notes (after deploy / PR merge):**
+- **#158** — closed by F50: prod `top_k` / `VECINITA_TOP_K` = **8** (code + DO).
+- **#165** — closed by F51: default `VECINITA_RAG_PACKER` = **p3** (code + DO); `CONTEXT_MAX_CHARS` remains 3500.
+- Close issues when Path A ChatRAG is deployed and 13-deploy-smoke H1–H5 pass.
 
 **Tech-plan delta:** `docs/sessions/S023-retrieval-topk-packing/reports/tech-plan-delta.md`  
 **ADR:** reuse [ADR-041](../../../adr/) (F42 packing) — no new ADR

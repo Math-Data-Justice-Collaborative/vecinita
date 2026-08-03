@@ -7,8 +7,8 @@
 | 01-requirements | yes | completed | delta | Report: [01-requirements-topk-packing.md](./reports/01-requirements-topk-packing.md) |
 | 02-verify-plan | yes | pending | delta | Gate A→B |
 | 04-tech-plan | yes | completed | delta | Gate B→C PASS (S023-D12) |
-| 07-build | yes | in_progress | — | T105.1 · Phase 25 M105–M107 |
-| 08-verify-build | yes | pending | — | Milestone gate |
+| 07-build | yes | completed | — | M105–M107 done 2026-08-03 |
+| 08-verify-build | yes | completed | — | Milestone/phase verification report |
 | 09-qa | yes | pending | — | Full QA |
 | 10-e2e | yes | pending | — | ChatRAG retrieve/ask journeys |
 | 11-verify-impl | yes | pending | — | Per-Fn AC |
