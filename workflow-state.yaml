@@ -1368,7 +1368,7 @@ project:
       f62_commit: 2cad110
       f63_commit: fedf1f7
     08-verify-build:
-      status: in_progress
+      status: completed
       started_at: '2026-08-03'
       started: '2026-08-03'
       session_id: S025-ci-release-automation
@@ -1379,8 +1379,8 @@ project:
       feature_ids:
       - F62
       - F63
-      current_action: verifying
-      next_action: Run 08-verify-build checks for F62/F63
+      current_action: completed
+      next_action: 10-e2e (Phase D)
       askquestion_pending: false
       gate_a_to_b: passed
       s025_d13_decision: S025-D13
@@ -1388,7 +1388,7 @@ project:
       build_commits:
       - 2cad110
       - fedf1f7
-      note: S025/EV-023 08-verify-build IN_PROGRESS 2026-08-03 — 07-build COMPLETE (F62+F63); verifying build
+      note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c waived (Lean+build skipped 04); handoff → 10-e2e Phase D
       rd_range: RD-264..RD-271
       s024_baseline:
         status: completed
@@ -1431,6 +1431,19 @@ project:
         phase: Phase 26 (M108-M111)
         feature: F59+F60+F61
         s024_d42_decision: S024-D42
+      completed: '2026-08-03'
+      completed_at: '2026-08-03'
+      result: pass
+      report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+      commit: 23f9f71
+      commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+      verification_commit: 23f9f71
+      gate_c_to_d: passed
+      checkpoints_phase_c: passed
+      phase_c_status: passed
+      gate_b_to_c: waived
+      checkpoints_phase_b: waived
+      s025_d14_decision: S025-D14
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -1754,290 +1767,324 @@ project:
       report: docs/sessions/S024-website-scrape-crawl/reports/qa-report.md
     10-e2e:
       status: completed
-      started: '2026-08-03'
       started_at: '2026-08-03'
-      session_id: S024-website-scrape-crawl
-      evolve_cycle_id: EV-022
-      branch: evolve/EV-022-website-scrape-crawl
+      started: '2026-08-03'
+      started_ts: '2026-08-03T23:19:16Z'
+      completed: '2026-08-03'
+      completed_at: '2026-08-03T23:25:00Z'
+      completed_ts: '2026-08-03T23:25:00Z'
+      session_id: S025-ci-release-automation
+      branch: evolve/EV-023-ci-release-automation
+      evolve_cycle_id: EV-023
       mode: evolve
       delta_only: true
       feature_ids:
-      - F59
-      - F60
-      - F61
-      feature: F59+F60+F61
-      phase: Phase 26 (M108-M111)
-      parallel_with: 09-qa
+      - F62
+      - F63
+      result: pass
+      overall: pass
+      overall_result: PASS
+      report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+      current_action: completed
+      next_action: Open PR then 13-deploy-smoke
+      askquestion_pending: false
       gate_c_to_d: passed
       checkpoints_phase_c: passed
-      s024_d42_decision: S024-D42
-      current_action: completed
-      next_action: 11-verify-impl in progress (Phase D PASS S024-D43)
-      askquestion_pending: false
-      note: S024/EV-022 10-e2e COMPLETE 2026-08-03 — overall pass; T0 PASS; TC-204/UJ-066 API skipped locally per S024-D41; Playwright UJ-066 PASS; report docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md; Phase D PASS (S024-D43) → 11-verify-impl
-      s023_baseline:
+      gate_b_to_c: waived
+      checkpoints_phase_b: waived
+      checkpoints_phase_d: pending
+      s025_d14_decision: S025-D14
+      note: S025/EV-023 10-e2e COMPLETE PASS @ 2026-08-03T23:25:00Z — UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; no product API/UI e2e (waived); phase_d pending until PR/13; next → Open PR then 13-deploy-smoke
+      handoff_seed: docs/sessions/S025-ci-release-automation/checkpoints/01-requirements-seed.md
+      rd_range: RD-264..RD-271
+      verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+      verification_commit: 23f9f71
+      s024_baseline:
         status: completed
-        started_at: '2026-08-03'
         started: '2026-08-03'
-        completed_at: '2026-08-03'
-        completed: '2026-08-03'
-        session_id: S023-retrieval-topk-packing
-        branch: evolve/EV-020-retrieval-topk-packing
-        evolve_cycle_id: EV-020
+        started_at: '2026-08-03'
+        session_id: S024-website-scrape-crawl
+        evolve_cycle_id: EV-022
+        branch: evolve/EV-022-website-scrape-crawl
         mode: evolve
         delta_only: true
         feature_ids:
-        - F50
-        - F51
-        feature: F50+F51
-        phase: Phase 25 (M105-M107)
+        - F59
+        - F60
+        - F61
+        feature: F59+F60+F61
+        phase: Phase 26 (M108-M111)
         parallel_with: 09-qa
-        current_action: completed
-        next_action: 11-verify-impl
-        head: 4ea0c62
         gate_c_to_d: passed
         checkpoints_phase_c: passed
-        overall: pass
-        overall_result: PASS
-        report: docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md
-        s023_d15_decision: S023-D15
-        note: S023/EV-020 10-e2e COMPLETE 2026-08-03 — overall pass (T0 PASS); report docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md; Phase D next → 11-verify-impl
-        s022_baseline:
+        s024_d42_decision: S024-D42
+        current_action: completed
+        next_action: 11-verify-impl in progress (Phase D PASS S024-D43)
+        askquestion_pending: false
+        note: S024/EV-022 10-e2e COMPLETE 2026-08-03 — overall pass; T0 PASS; TC-204/UJ-066 API skipped locally per S024-D41; Playwright UJ-066 PASS; report docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md; Phase D PASS (S024-D43) → 11-verify-impl
+        s023_baseline:
           status: completed
-          started_at: '2026-08-02'
-          started: '2026-08-02'
-          session_id: S022-ingest-resilience
-          branch: evolve/EV-019-ingest-resilience
-          evolve_cycle_id: EV-019
+          started_at: '2026-08-03'
+          started: '2026-08-03'
+          completed_at: '2026-08-03'
+          completed: '2026-08-03'
+          session_id: S023-retrieval-topk-packing
+          branch: evolve/EV-020-retrieval-topk-packing
+          evolve_cycle_id: EV-020
           mode: evolve
           delta_only: true
           feature_ids:
-          - F47
-          - F48
-          - F49
-          feature: F47-F49
-          phase: Phase 24 (M101-M104)
-          commits_head: 307e0d3
+          - F50
+          - F51
+          feature: F50+F51
+          phase: Phase 25 (M105-M107)
           parallel_with: 09-qa
           current_action: completed
-          note: 'S022/EV-019 10-e2e COMPLETE 2026-08-02 — overall pass; report docs/sessions/S022-ingest-resilience/reports/e2e-report.md committed @ 60179b9; Docker unavailable advisory; delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.'
-          s021_baseline:
+          next_action: 11-verify-impl
+          head: 4ea0c62
+          gate_c_to_d: passed
+          checkpoints_phase_c: passed
+          overall: pass
+          overall_result: PASS
+          report: docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md
+          s023_d15_decision: S023-D15
+          note: S023/EV-020 10-e2e COMPLETE 2026-08-03 — overall pass (T0 PASS); report docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md; Phase D next → 11-verify-impl
+          s022_baseline:
             status: completed
             started_at: '2026-08-02'
             started: '2026-08-02'
-            completed_at: '2026-08-02'
-            completed: '2026-08-02'
-            session_id: S021-retrieval-follow-on
-            branch: evolve/EV-018-retrieval-follow-on
-            evolve_cycle_id: EV-018
+            session_id: S022-ingest-resilience
+            branch: evolve/EV-019-ingest-resilience
+            evolve_cycle_id: EV-019
             mode: evolve
             delta_only: true
             feature_ids:
-            - F46
-            - F45
-            feature: F46+F45
-            phase: Phase 23 (M99-M100)
-            current_action: completed
-            overall: pass
-            overall_result: PASS
+            - F47
+            - F48
+            - F49
+            feature: F47-F49
+            phase: Phase 24 (M101-M104)
+            commits_head: 307e0d3
             parallel_with: 09-qa
-            report: docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md
-            note: 'S021/EV-018 10-e2e COMPLETE 2026-08-02 — PASS 11 passed / 1 skipped; UJ-060 PASS; report docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-            s020_baseline:
+            current_action: completed
+            note: 'S022/EV-019 10-e2e COMPLETE 2026-08-02 — overall pass; report docs/sessions/S022-ingest-resilience/reports/e2e-report.md committed @ 60179b9; Docker unavailable advisory; delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.'
+            s021_baseline:
               status: completed
               started_at: '2026-08-02'
               started: '2026-08-02'
-              completed_at: '2026-08-02T00:55:43Z'
+              completed_at: '2026-08-02'
               completed: '2026-08-02'
-              partial_rerun_at: '2026-08-02'
-              partial_rerun_note: EV-017/S020 — 10-e2e COMPLETE; prior S019 nested under s019_baseline
-              session_id: S020-retrieval-batch-b
-              branch: evolve/EV-017-retrieval-batch-b
-              evolve_cycle_id: EV-017
+              session_id: S021-retrieval-follow-on
+              branch: evolve/EV-018-retrieval-follow-on
+              evolve_cycle_id: EV-018
               mode: evolve
               delta_only: true
               feature_ids:
-              - F43
-              - F44
+              - F46
               - F45
-              feature: F43-F45
-              phase: Phase 22 (M94-M98)
+              feature: F46+F45
+              phase: Phase 23 (M99-M100)
               current_action: completed
               overall: pass
               overall_result: PASS
               parallel_with: 09-qa
-              journeys:
-              - UJ-057
-              - UJ-058
-              - UJ-059
-              report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
-              pr_number: 173
-              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173'
-              pr_plan_id: PR-56
-              note: S020/EV-017 10-e2e COMPLETE 2026-08-02 — T0 PASS 11/11 UJ-057–059; UJ-060/AC-BB9 deferred; report docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md; Phase D await 11 (not started)
-              s019_baseline:
+              report: docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md
+              note: 'S021/EV-018 10-e2e COMPLETE 2026-08-02 — PASS 11 passed / 1 skipped; UJ-060 PASS; report docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+              s020_baseline:
                 status: completed
-                started_at: '2026-08-01'
-                partial_rerun_at: '2026-08-01'
-                partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
-                session_id: S019-retrieval-quality
-                branch: evolve/EV-016-retrieval-quality
-                evolve_cycle_id: EV-016
+                started_at: '2026-08-02'
+                started: '2026-08-02'
+                completed_at: '2026-08-02T00:55:43Z'
+                completed: '2026-08-02'
+                partial_rerun_at: '2026-08-02'
+                partial_rerun_note: EV-017/S020 — 10-e2e COMPLETE; prior S019 nested under s019_baseline
+                session_id: S020-retrieval-batch-b
+                branch: evolve/EV-017-retrieval-batch-b
+                evolve_cycle_id: EV-017
                 mode: evolve
                 delta_only: true
                 feature_ids:
-                - F42
-                feature: F42
-                note: 'S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories'
+                - F43
+                - F44
+                - F45
+                feature: F43-F45
+                phase: Phase 22 (M94-M98)
+                current_action: completed
                 overall: pass
                 overall_result: PASS
-              s017_baseline:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                partial_rerun_at: '2026-07-30'
-                partial_rerun_note: EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres; T2/T3 deferred); prior S016/EV-014 COMPLETE nested under s016_baseline
-                session_id: S017-corpus-reembed-migration
-                branch: evolve/EV-015-corpus-reembed-migration
-                evolve_cycle_id: EV-015
-                mode: delta
-                delta_only: true
-                feature: F41
-                scope: 'UJ-053/054 / TC-161–168 (#167 corpus rebuild)'
-                overall: pass
-                overall_result: PASS
-                result_scope: EV-015_scoped
-                advisories:
-                - UJ-054 API promote SKIPPED (no local Postgres) — CI Postgres
-                - T2/T3 deferred to 13-deploy-smoke / 15-service-health
-                report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
-                tiers:
-                  t0_uj053: PASS
-                  t0_uj054_playwright: PASS
-                  t0_uj054_api_promote: SKIPPED
-                  t0_uj054_api_skip_reason: no local Postgres
-                  t1: SKIPPED
-                  t1_skip_reason: no Docker/Postgres
-                  t2: deferred_to_13
-                  t3: deferred_to_13
-                next_action: run 12-verify-deploy
-                note: S017/EV-015 10-e2e COMPLETE 2026-07-30 — overall PASS with advisories; T0 UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED (no Postgres); T2/T3 deferred; report docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md; next → 11-verify-impl
-                s016_baseline:
+                parallel_with: 09-qa
+                journeys:
+                - UJ-057
+                - UJ-058
+                - UJ-059
+                report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
+                pr_number: 173
+                pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173'
+                pr_plan_id: PR-56
+                note: S020/EV-017 10-e2e COMPLETE 2026-08-02 — T0 PASS 11/11 UJ-057–059; UJ-060/AC-BB9 deferred; report docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md; Phase D await 11 (not started)
+                s019_baseline:
                   status: completed
-                  started_at: '2026-07-29'
-                  completed_at: '2026-07-29'
-                  partial_rerun_at: '2026-07-29'
-                  partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
-                  session_id: S016-chat-cold-start-ux
-                  branch: evolve/EV-014-chat-cold-start-ux
-                  evolve_cycle_id: EV-014
+                  started_at: '2026-08-01'
+                  partial_rerun_at: '2026-08-01'
+                  partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
+                  session_id: S019-retrieval-quality
+                  branch: evolve/EV-016-retrieval-quality
+                  evolve_cycle_id: EV-016
                   mode: evolve
                   delta_only: true
-                  feature: F40
-                  scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
+                  feature_ids:
+                  - F42
+                  feature: F42
+                  note: 'S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories'
+                  overall: pass
                   overall_result: PASS
-                  report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
-                  note: S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below
+                s017_baseline:
+                  status: completed
+                  started_at: '2026-07-30'
+                  completed_at: '2026-07-30'
+                  partial_rerun_at: '2026-07-30'
+                  partial_rerun_note: EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres; T2/T3 deferred); prior S016/EV-014 COMPLETE nested under s016_baseline
+                  session_id: S017-corpus-reembed-migration
+                  branch: evolve/EV-015-corpus-reembed-migration
+                  evolve_cycle_id: EV-015
+                  mode: delta
+                  delta_only: true
+                  feature: F41
+                  scope: 'UJ-053/054 / TC-161–168 (#167 corpus rebuild)'
+                  overall: pass
+                  overall_result: PASS
+                  result_scope: EV-015_scoped
+                  advisories:
+                  - UJ-054 API promote SKIPPED (no local Postgres) — CI Postgres
+                  - T2/T3 deferred to 13-deploy-smoke / 15-service-health
+                  report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
                   tiers:
-                    t0: PASS
-                    t0_detail: Vitest TC-156–159 PASS (covered in 08)
-                    t0_ui: PASS
-                    t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
-                    t0_api: N/A
-                    t0_api_waive_reason: no API contract change (RD-187)
+                    t0_uj053: PASS
+                    t0_uj054_playwright: PASS
+                    t0_uj054_api_promote: SKIPPED
+                    t0_uj054_api_skip_reason: no local Postgres
                     t1: SKIPPED
-                    t1_skip_reason: not required for FE-only F40 delta
+                    t1_skip_reason: no Docker/Postgres
                     t2: deferred_to_13
                     t3: deferred_to_13
-                  s014_baseline:
+                  next_action: run 12-verify-deploy
+                  note: S017/EV-015 10-e2e COMPLETE 2026-07-30 — overall PASS with advisories; T0 UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED (no Postgres); T2/T3 deferred; report docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md; next → 11-verify-impl
+                  s016_baseline:
                     status: completed
                     started_at: '2026-07-29'
                     completed_at: '2026-07-29'
                     partial_rerun_at: '2026-07-29'
-                    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
-                    session_id: S014-admin-ui-polish-148
-                    branch: evolve/EV-013-admin-ui-polish-148
-                    evolve_cycle_id: EV-013
+                    partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
+                    session_id: S016-chat-cold-start-ux
+                    branch: evolve/EV-014-chat-cold-start-ux
+                    evolve_cycle_id: EV-014
                     mode: evolve
                     delta_only: true
-                    scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+                    feature: F40
+                    scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
                     overall_result: PASS
-                    report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
-                    note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
+                    report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+                    note: S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below
                     tiers:
                       t0: PASS
-                      t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+                      t0_detail: Vitest TC-156–159 PASS (covered in 08)
                       t0_ui: PASS
-                      t0_ui_detail: Playwright uj051 1/1 PASS
+                      t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
                       t0_api: N/A
-                      t0_api_waive_reason: UI-only
+                      t0_api_waive_reason: no API contract change (RD-187)
                       t1: SKIPPED
-                      t1_skip_reason: no_docker
+                      t1_skip_reason: not required for FE-only F40 delta
                       t2: deferred_to_13
                       t3: deferred_to_13
-                    s013_baseline:
+                    s014_baseline:
                       status: completed
                       started_at: '2026-07-29'
                       completed_at: '2026-07-29'
-                      session_id: S013-unified-job-monitoring
-                      branch: evolve/EV-012-unified-job-monitoring
-                      evolve_cycle_id: EV-012
-                      mode: delta
+                      partial_rerun_at: '2026-07-29'
+                      partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+                      session_id: S014-admin-ui-polish-148
+                      branch: evolve/EV-013-admin-ui-polish-148
+                      evolve_cycle_id: EV-013
+                      mode: evolve
+                      delta_only: true
+                      scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
                       overall_result: PASS
-                      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-                      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-                      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+                      report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+                      note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
                       tiers:
-                        t0: pass
-                        t1: skipped
+                        t0: PASS
+                        t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+                        t0_ui: PASS
+                        t0_ui_detail: Playwright uj051 1/1 PASS
+                        t0_api: N/A
+                        t0_api_waive_reason: UI-only
+                        t1: SKIPPED
                         t1_skip_reason: no_docker
-                        t2: pass
-                        t3: pass
-                    s006:
-                      status: completed
-                      started_at: '2026-06-30'
-                      completed_at: '2026-06-30'
-                      session_id: S006-invite-acceptance
-                      branch: feat/S006-invite-acceptance
-                      feature: F35
-                      evolve_cycle_id: EV-007
-                      report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-                      note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
-                    s005:
-                      status: completed
-                      completed_at: '2026-06-30'
-                      session_id: S005-user-mgmt-auth
-                      branch: feat/S005-user-mgmt-auth
-                      report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
-                      note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
-              substeps:
-                t0_f42: PASS
-                t0_uj055: PASS_2_of_2
-                uj056: unit_eval_path
-                t1_integration: SKIPPED
-                t1_reason: Docker unavailable
-                t2_connectivity: DEFERRED
-                t3_browser: DEFERRED
-                ac_rq6: deferred_deploy_path
-                overall_result: PASS
-                result_scope: delta
-                parallel_09_qa: completed
-            next_action: none_session_closed
+                        t2: deferred_to_13
+                        t3: deferred_to_13
+                      s013_baseline:
+                        status: completed
+                        started_at: '2026-07-29'
+                        completed_at: '2026-07-29'
+                        session_id: S013-unified-job-monitoring
+                        branch: evolve/EV-012-unified-job-monitoring
+                        evolve_cycle_id: EV-012
+                        mode: delta
+                        overall_result: PASS
+                        report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+                        partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+                        note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+                        tiers:
+                          t0: pass
+                          t1: skipped
+                          t1_skip_reason: no_docker
+                          t2: pass
+                          t3: pass
+                      s006:
+                        status: completed
+                        started_at: '2026-06-30'
+                        completed_at: '2026-06-30'
+                        session_id: S006-invite-acceptance
+                        branch: feat/S006-invite-acceptance
+                        feature: F35
+                        evolve_cycle_id: EV-007
+                        report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+                        note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
+                      s005:
+                        status: completed
+                        completed_at: '2026-06-30'
+                        session_id: S005-user-mgmt-auth
+                        branch: feat/S005-user-mgmt-auth
+                        report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
+                        note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
+                substeps:
+                  t0_f42: PASS
+                  t0_uj055: PASS_2_of_2
+                  uj056: unit_eval_path
+                  t1_integration: SKIPPED
+                  t1_reason: Docker unavailable
+                  t2_connectivity: DEFERRED
+                  t3_browser: DEFERRED
+                  ac_rq6: deferred_deploy_path
+                  overall_result: PASS
+                  result_scope: delta
+                  parallel_09_qa: completed
+              next_action: none_session_closed
+              session_closed: true
+              session_closed_at: '2026-08-02'
+            completed_at: '2026-08-02'
+            completed: '2026-08-02'
+            overall: pass
+            overall_result: PASS
+            report: docs/sessions/S022-ingest-resilience/reports/e2e-report.md
             session_closed: true
             session_closed_at: '2026-08-02'
-          completed_at: '2026-08-02'
-          completed: '2026-08-02'
-          overall: pass
-          overall_result: PASS
-          report: docs/sessions/S022-ingest-resilience/reports/e2e-report.md
-          session_closed: true
-          session_closed_at: '2026-08-02'
-          next_action: none_session_closed
-      completed: '2026-08-03'
-      completed_at: '2026-08-03'
-      overall: pass
-      overall_result: PASS
-      report: docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md
+            next_action: none_session_closed
+        completed: '2026-08-03'
+        completed_at: '2026-08-03'
+        overall: pass
+        overall_result: PASS
+        report: docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md
     11-verify-impl:
       status: completed
       started_at: '2026-08-03'
@@ -4077,22 +4124,41 @@ active_session:
     - fedf1f7
   - stage: 08-verify-build
     required: true
-    status: in_progress
+    status: completed
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: verifying
-    next_action: Run 08-verify-build checks for F62/F63
+    current_action: completed
+    next_action: 10-e2e (Phase D)
     askquestion_pending: false
-    note: S025/EV-023 08-verify-build IN_PROGRESS — verifying F62/F63 build
+    note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); handoff → 10-e2e
+    completed_at: '2026-08-03'
+    report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+    commit: 23f9f71
+    result: pass
+    gate_c_to_d: passed
+    s025_d14_decision: S025-D14
   - stage: 09-qa
     required: false
     status: skipped
     skip_rationale: Lean+build preset — QA folded into verify-build/e2e
   - stage: 10-e2e
     required: true
-    status: pending
+    status: completed
     mode: delta
     skip_rationale:
+    started_at: '2026-08-03'
+    started_ts: '2026-08-03T23:19:16Z'
+    completed_at: '2026-08-03T23:25:00Z'
+    completed_ts: '2026-08-03T23:25:00Z'
+    current_action: completed
+    next_action: Open PR then 13-deploy-smoke
+    askquestion_pending: false
+    result: pass
+    overall_result: PASS
+    report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+    gate_c_to_d: passed
+    s025_d14_decision: S025-D14
+    note: S025/EV-023 10-e2e COMPLETE PASS @ 2026-08-03T23:25:00Z — UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; no product API/UI e2e (waived); phase_d pending until PR/13; next → Open PR then 13-deploy-smoke
   - stage: 11-verify-impl
     required: false
     status: skipped
@@ -4110,9 +4176,9 @@ active_session:
     required: false
     status: skipped
     skip_rationale: Lean+build preset — optional at close
-  current_stage: 08-verify-build
-  current_action: verifying
-  next_action: Run 08-verify-build checks for F62/F63
+  current_stage: 10-e2e
+  current_action: pr_then_13
+  next_action: Open PR then 13-deploy-smoke
   started_at: '2026-08-03'
   context_briefs: []
   routing_preset: lean_build
@@ -4137,12 +4203,17 @@ active_session:
   - 'S025-D11: Approve M2 — strict ^vX.Y.Z$ tags; next from v0.4.0 → v0.4.1'
   - 'S025-D12: Approve M3 — workflow_run on Deploy DigitalOcean success'
   - 'S025-D13: Gate A→B PASS → 07-build (04 skipped)'
+  - 'S025-D14: Gate C→D approved — proceed 10-e2e then PR/13'
+  - S025-D14 Gate C→D approved — proceed 10-e2e then PR/13
   phase_0_status: approved
   phase0_approved_at: '2026-08-03T23:09:09Z'
   handoff_seed: docs/sessions/S025-ci-release-automation/checkpoints/01-requirements-seed.md
-  report: docs/sessions/S025-ci-release-automation/reports/02-verify-plan-audit.md
+  report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+  e2e_report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+  e2e_result: pass
+  verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
   rd_range: RD-264..RD-271
-  commits_head: fedf1f7
+  commits_head: 23f9f71
   s025_d9_decision: S025-D9
   gate_a_to_b: passed
   s025_d13_decision: S025-D13
@@ -4150,6 +4221,14 @@ active_session:
   build_commits:
   - 2cad110
   - fedf1f7
+  verification_result: pass
+  gate_c_to_d: passed
+  checkpoints_phase_c: passed
+  gate_b_to_c: waived
+  checkpoints_phase_b: waived
+  checkpoints_phase_d: pending
+  s025_d14_decision: S025-D14
+  phase_d_started_at: '2026-08-03T23:19:16Z'
 sessions:
 - id: S024-website-scrape-crawl
   type: feature
@@ -11216,7 +11295,7 @@ stages:
     f62_commit: 2cad110
     f63_commit: fedf1f7
   08-verify-build:
-    status: in_progress
+    status: completed
     started_at: '2026-08-03'
     started: '2026-08-03'
     session_id: S025-ci-release-automation
@@ -11227,8 +11306,8 @@ stages:
     feature_ids:
     - F62
     - F63
-    current_action: verifying
-    next_action: Run 08-verify-build checks for F62/F63
+    current_action: completed
+    next_action: 10-e2e (Phase D)
     askquestion_pending: false
     gate_a_to_b: passed
     s025_d13_decision: S025-D13
@@ -11236,7 +11315,7 @@ stages:
     build_commits:
     - 2cad110
     - fedf1f7
-    note: S025/EV-023 08-verify-build IN_PROGRESS 2026-08-03 — 07-build COMPLETE (F62+F63); verifying build
+    note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c waived (Lean+build skipped 04); handoff → 10-e2e Phase D
     rd_range: RD-264..RD-271
     s024_baseline:
       status: completed
@@ -11565,6 +11644,19 @@ stages:
       phase: Phase 26 (M108-M111)
       feature: F59+F60+F61
       s024_d42_decision: S024-D42
+    completed: '2026-08-03'
+    completed_at: '2026-08-03'
+    result: pass
+    report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+    commit: 23f9f71
+    commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+    verification_commit: 23f9f71
+    gate_c_to_d: passed
+    checkpoints_phase_c: passed
+    phase_c_status: passed
+    gate_b_to_c: waived
+    checkpoints_phase_b: waived
+    s025_d14_decision: S025-D14
   09-qa:
     status: completed
     started: '2026-08-03'
@@ -11888,290 +11980,324 @@ stages:
     report: docs/sessions/S024-website-scrape-crawl/reports/qa-report.md
   10-e2e:
     status: completed
-    started: '2026-08-03'
     started_at: '2026-08-03'
-    session_id: S024-website-scrape-crawl
-    evolve_cycle_id: EV-022
-    branch: evolve/EV-022-website-scrape-crawl
+    started: '2026-08-03'
+    started_ts: '2026-08-03T23:19:16Z'
+    completed: '2026-08-03'
+    completed_at: '2026-08-03T23:25:00Z'
+    completed_ts: '2026-08-03T23:25:00Z'
+    session_id: S025-ci-release-automation
+    branch: evolve/EV-023-ci-release-automation
+    evolve_cycle_id: EV-023
     mode: evolve
     delta_only: true
     feature_ids:
-    - F59
-    - F60
-    - F61
-    feature: F59+F60+F61
-    phase: Phase 26 (M108-M111)
-    parallel_with: 09-qa
+    - F62
+    - F63
+    result: pass
+    overall: pass
+    overall_result: PASS
+    report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+    current_action: completed
+    next_action: Open PR then 13-deploy-smoke
+    askquestion_pending: false
     gate_c_to_d: passed
     checkpoints_phase_c: passed
-    s024_d42_decision: S024-D42
-    current_action: completed
-    next_action: 11-verify-impl in progress (Phase D PASS S024-D43)
-    askquestion_pending: false
-    note: S024/EV-022 10-e2e COMPLETE 2026-08-03 — overall pass; T0 PASS; TC-204/UJ-066 API skipped locally per S024-D41; Playwright UJ-066 PASS; report docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md; Phase D PASS (S024-D43) → 11-verify-impl
-    s023_baseline:
+    gate_b_to_c: waived
+    checkpoints_phase_b: waived
+    checkpoints_phase_d: pending
+    s025_d14_decision: S025-D14
+    note: S025/EV-023 10-e2e COMPLETE PASS @ 2026-08-03T23:25:00Z — UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; no product API/UI e2e (waived); phase_d pending until PR/13; next → Open PR then 13-deploy-smoke
+    handoff_seed: docs/sessions/S025-ci-release-automation/checkpoints/01-requirements-seed.md
+    rd_range: RD-264..RD-271
+    verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+    verification_commit: 23f9f71
+    s024_baseline:
       status: completed
-      started_at: '2026-08-03'
       started: '2026-08-03'
-      completed_at: '2026-08-03'
-      completed: '2026-08-03'
-      session_id: S023-retrieval-topk-packing
-      branch: evolve/EV-020-retrieval-topk-packing
-      evolve_cycle_id: EV-020
+      started_at: '2026-08-03'
+      session_id: S024-website-scrape-crawl
+      evolve_cycle_id: EV-022
+      branch: evolve/EV-022-website-scrape-crawl
       mode: evolve
       delta_only: true
       feature_ids:
-      - F50
-      - F51
-      feature: F50+F51
-      phase: Phase 25 (M105-M107)
+      - F59
+      - F60
+      - F61
+      feature: F59+F60+F61
+      phase: Phase 26 (M108-M111)
       parallel_with: 09-qa
-      current_action: completed
-      next_action: 11-verify-impl
-      head: 4ea0c62
       gate_c_to_d: passed
       checkpoints_phase_c: passed
-      overall: pass
-      overall_result: PASS
-      report: docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md
-      s023_d15_decision: S023-D15
-      note: S023/EV-020 10-e2e COMPLETE 2026-08-03 — overall pass (T0 PASS); report docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md; Phase D next → 11-verify-impl
-      s022_baseline:
+      s024_d42_decision: S024-D42
+      current_action: completed
+      next_action: 11-verify-impl in progress (Phase D PASS S024-D43)
+      askquestion_pending: false
+      note: S024/EV-022 10-e2e COMPLETE 2026-08-03 — overall pass; T0 PASS; TC-204/UJ-066 API skipped locally per S024-D41; Playwright UJ-066 PASS; report docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md; Phase D PASS (S024-D43) → 11-verify-impl
+      s023_baseline:
         status: completed
-        started_at: '2026-08-02'
-        started: '2026-08-02'
-        session_id: S022-ingest-resilience
-        branch: evolve/EV-019-ingest-resilience
-        evolve_cycle_id: EV-019
+        started_at: '2026-08-03'
+        started: '2026-08-03'
+        completed_at: '2026-08-03'
+        completed: '2026-08-03'
+        session_id: S023-retrieval-topk-packing
+        branch: evolve/EV-020-retrieval-topk-packing
+        evolve_cycle_id: EV-020
         mode: evolve
         delta_only: true
         feature_ids:
-        - F47
-        - F48
-        - F49
-        feature: F47-F49
-        phase: Phase 24 (M101-M104)
-        commits_head: 307e0d3
+        - F50
+        - F51
+        feature: F50+F51
+        phase: Phase 25 (M105-M107)
         parallel_with: 09-qa
         current_action: completed
-        note: 'S022/EV-019 10-e2e COMPLETE 2026-08-02 — overall pass; report docs/sessions/S022-ingest-resilience/reports/e2e-report.md committed @ 60179b9; Docker unavailable advisory; delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress'
-        s021_baseline:
+        next_action: 11-verify-impl
+        head: 4ea0c62
+        gate_c_to_d: passed
+        checkpoints_phase_c: passed
+        overall: pass
+        overall_result: PASS
+        report: docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md
+        s023_d15_decision: S023-D15
+        note: S023/EV-020 10-e2e COMPLETE 2026-08-03 — overall pass (T0 PASS); report docs/sessions/S023-retrieval-topk-packing/reports/e2e-report.md; Phase D next → 11-verify-impl
+        s022_baseline:
           status: completed
           started_at: '2026-08-02'
           started: '2026-08-02'
-          completed_at: '2026-08-02'
-          completed: '2026-08-02'
-          session_id: S021-retrieval-follow-on
-          branch: evolve/EV-018-retrieval-follow-on
-          evolve_cycle_id: EV-018
+          session_id: S022-ingest-resilience
+          branch: evolve/EV-019-ingest-resilience
+          evolve_cycle_id: EV-019
           mode: evolve
           delta_only: true
           feature_ids:
-          - F46
-          - F45
-          feature: F46+F45
-          phase: Phase 23 (M99-M100)
-          current_action: completed
-          overall: pass
-          overall_result: PASS
+          - F47
+          - F48
+          - F49
+          feature: F47-F49
+          phase: Phase 24 (M101-M104)
+          commits_head: 307e0d3
           parallel_with: 09-qa
-          report: docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md
-          note: 'S021/EV-018 10-e2e COMPLETE 2026-08-02 — PASS 11 passed / 1 skipped; UJ-060 PASS; report docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-          s020_baseline:
+          current_action: completed
+          note: 'S022/EV-019 10-e2e COMPLETE 2026-08-02 — overall pass; report docs/sessions/S022-ingest-resilience/reports/e2e-report.md committed @ 60179b9; Docker unavailable advisory; delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress'
+          s021_baseline:
             status: completed
             started_at: '2026-08-02'
             started: '2026-08-02'
-            completed_at: '2026-08-02T00:55:43Z'
+            completed_at: '2026-08-02'
             completed: '2026-08-02'
-            partial_rerun_at: '2026-08-02'
-            partial_rerun_note: EV-017/S020 — 10-e2e COMPLETE; prior S019 nested under s019_baseline
-            session_id: S020-retrieval-batch-b
-            branch: evolve/EV-017-retrieval-batch-b
-            evolve_cycle_id: EV-017
+            session_id: S021-retrieval-follow-on
+            branch: evolve/EV-018-retrieval-follow-on
+            evolve_cycle_id: EV-018
             mode: evolve
             delta_only: true
             feature_ids:
-            - F43
-            - F44
+            - F46
             - F45
-            feature: F43-F45
-            phase: Phase 22 (M94-M98)
+            feature: F46+F45
+            phase: Phase 23 (M99-M100)
             current_action: completed
             overall: pass
             overall_result: PASS
             parallel_with: 09-qa
-            journeys:
-            - UJ-057
-            - UJ-058
-            - UJ-059
-            report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
-            pr_number: 173
-            pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173'
-            pr_plan_id: PR-56
-            note: S020/EV-017 10-e2e COMPLETE 2026-08-02 — T0 PASS 11/11 UJ-057–059; UJ-060/AC-BB9 deferred; report docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md; Phase D await 11 (not started)
-            s019_baseline:
+            report: docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md
+            note: 'S021/EV-018 10-e2e COMPLETE 2026-08-02 — PASS 11 passed / 1 skipped; UJ-060 PASS; report docs/sessions/S021-retrieval-follow-on/reports/e2e-report.md S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+            s020_baseline:
               status: completed
-              started_at: '2026-08-01'
-              partial_rerun_at: '2026-08-01'
-              partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
-              session_id: S019-retrieval-quality
-              branch: evolve/EV-016-retrieval-quality
-              evolve_cycle_id: EV-016
+              started_at: '2026-08-02'
+              started: '2026-08-02'
+              completed_at: '2026-08-02T00:55:43Z'
+              completed: '2026-08-02'
+              partial_rerun_at: '2026-08-02'
+              partial_rerun_note: EV-017/S020 — 10-e2e COMPLETE; prior S019 nested under s019_baseline
+              session_id: S020-retrieval-batch-b
+              branch: evolve/EV-017-retrieval-batch-b
+              evolve_cycle_id: EV-017
               mode: evolve
               delta_only: true
               feature_ids:
-              - F42
-              feature: F42
-              note: 'S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories'
+              - F43
+              - F44
+              - F45
+              feature: F43-F45
+              phase: Phase 22 (M94-M98)
+              current_action: completed
               overall: pass
               overall_result: PASS
-            s017_baseline:
-              status: completed
-              started_at: '2026-07-30'
-              completed_at: '2026-07-30'
-              partial_rerun_at: '2026-07-30'
-              partial_rerun_note: EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres; T2/T3 deferred); prior S016/EV-014 COMPLETE nested under s016_baseline
-              session_id: S017-corpus-reembed-migration
-              branch: evolve/EV-015-corpus-reembed-migration
-              evolve_cycle_id: EV-015
-              mode: delta
-              delta_only: true
-              feature: F41
-              scope: 'UJ-053/054 / TC-161–168 (#167 corpus rebuild)'
-              overall: pass
-              overall_result: PASS
-              result_scope: EV-015_scoped
-              advisories:
-              - UJ-054 API promote SKIPPED (no local Postgres) — CI Postgres
-              - T2/T3 deferred to 13-deploy-smoke / 15-service-health
-              report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
-              tiers:
-                t0_uj053: PASS
-                t0_uj054_playwright: PASS
-                t0_uj054_api_promote: SKIPPED
-                t0_uj054_api_skip_reason: no local Postgres
-                t1: SKIPPED
-                t1_skip_reason: no Docker/Postgres
-                t2: deferred_to_13
-                t3: deferred_to_13
-              next_action: run 12-verify-deploy
-              note: S017/EV-015 10-e2e COMPLETE 2026-07-30 — overall PASS with advisories; T0 UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED (no Postgres); T2/T3 deferred; report docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md; next → 11-verify-impl
-              s016_baseline:
+              parallel_with: 09-qa
+              journeys:
+              - UJ-057
+              - UJ-058
+              - UJ-059
+              report: docs/sessions/S019-retrieval-quality/reports/e2e-report.md
+              pr_number: 173
+              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173'
+              pr_plan_id: PR-56
+              note: S020/EV-017 10-e2e COMPLETE 2026-08-02 — T0 PASS 11/11 UJ-057–059; UJ-060/AC-BB9 deferred; report docs/sessions/S020-retrieval-batch-b/reports/e2e-report.md; Phase D await 11 (not started)
+              s019_baseline:
                 status: completed
-                started_at: '2026-07-29'
-                completed_at: '2026-07-29'
-                partial_rerun_at: '2026-07-29'
-                partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
-                session_id: S016-chat-cold-start-ux
-                branch: evolve/EV-014-chat-cold-start-ux
-                evolve_cycle_id: EV-014
+                started_at: '2026-08-01'
+                partial_rerun_at: '2026-08-01'
+                partial_rerun_note: S019/EV-016 Phase C approved — 10-e2e STARTED (delta F42); prior S017 COMPLETE nested under s017_baseline
+                session_id: S019-retrieval-quality
+                branch: evolve/EV-016-retrieval-quality
+                evolve_cycle_id: EV-016
                 mode: evolve
                 delta_only: true
-                feature: F40
-                scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
+                feature_ids:
+                - F42
+                feature: F42
+                note: 'S019/EV-016 10-e2e COMPLETE 2026-08-02T00:55:43Z — F42 delta T0 PASS (UJ-055 2/2); UJ-056 unit/eval path; T1 SKIPPED (Docker); T2/T3 DEFERRED to 12/13 + ISS-008; overall_result PASS; 09-qa remediation COMPLETE overall=pass_with_advisories'
+                overall: pass
                 overall_result: PASS
-                report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
-                note: S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below
+              s017_baseline:
+                status: completed
+                started_at: '2026-07-30'
+                completed_at: '2026-07-30'
+                partial_rerun_at: '2026-07-30'
+                partial_rerun_note: EV-015/S017 COMPLETE — 10-e2e PASS with advisories (UJ-054 API promote SKIPPED no Postgres; T2/T3 deferred); prior S016/EV-014 COMPLETE nested under s016_baseline
+                session_id: S017-corpus-reembed-migration
+                branch: evolve/EV-015-corpus-reembed-migration
+                evolve_cycle_id: EV-015
+                mode: delta
+                delta_only: true
+                feature: F41
+                scope: 'UJ-053/054 / TC-161–168 (#167 corpus rebuild)'
+                overall: pass
+                overall_result: PASS
+                result_scope: EV-015_scoped
+                advisories:
+                - UJ-054 API promote SKIPPED (no local Postgres) — CI Postgres
+                - T2/T3 deferred to 13-deploy-smoke / 15-service-health
+                report: docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md
                 tiers:
-                  t0: PASS
-                  t0_detail: Vitest TC-156–159 PASS (covered in 08)
-                  t0_ui: PASS
-                  t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
-                  t0_api: N/A
-                  t0_api_waive_reason: no API contract change (RD-187)
+                  t0_uj053: PASS
+                  t0_uj054_playwright: PASS
+                  t0_uj054_api_promote: SKIPPED
+                  t0_uj054_api_skip_reason: no local Postgres
                   t1: SKIPPED
-                  t1_skip_reason: not required for FE-only F40 delta
+                  t1_skip_reason: no Docker/Postgres
                   t2: deferred_to_13
                   t3: deferred_to_13
-                s014_baseline:
+                next_action: run 12-verify-deploy
+                note: S017/EV-015 10-e2e COMPLETE 2026-07-30 — overall PASS with advisories; T0 UJ-053 PASS; UJ-054 Playwright PASS; UJ-054 API promote SKIPPED (no Postgres); T2/T3 deferred; report docs/sessions/S017-corpus-reembed-migration/reports/e2e-report.md; next → 11-verify-impl
+                s016_baseline:
                   status: completed
                   started_at: '2026-07-29'
                   completed_at: '2026-07-29'
                   partial_rerun_at: '2026-07-29'
-                  partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
-                  session_id: S014-admin-ui-polish-148
-                  branch: evolve/EV-013-admin-ui-polish-148
-                  evolve_cycle_id: EV-013
+                  partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); e2e-report PASS (UJ-052 / TC-156–160)'
+                  session_id: S016-chat-cold-start-ux
+                  branch: evolve/EV-014-chat-cold-start-ux
+                  evolve_cycle_id: EV-014
                   mode: evolve
                   delta_only: true
-                  scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
+                  feature: F40
+                  scope: 'UJ-052 / TC-156–160 (#87 ChatRAG cold-start UX)'
                   overall_result: PASS
-                  report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
-                  note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
+                  report: docs/sessions/S016-chat-cold-start-ux/reports/e2e-report.md
+                  note: S016/EV-014 10-e2e PASS 2026-07-29 — T0-ui Playwright chat suite 8/8 PASS (UJ-052 TC-160); T0 Vitest TC-156–159 PASS (08); T0 API N/A (RD-187); T2/T3 deferred to 13; next 13-deploy-smoke pending user approval; also await commit request; prior S014/S013 baselines preserved below
                   tiers:
                     t0: PASS
-                    t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+                    t0_detail: Vitest TC-156–159 PASS (covered in 08)
                     t0_ui: PASS
-                    t0_ui_detail: Playwright uj051 1/1 PASS
+                    t0_ui_detail: Playwright tests/ui/chat 8/8 PASS incl uj052 TC-160
                     t0_api: N/A
-                    t0_api_waive_reason: UI-only
+                    t0_api_waive_reason: no API contract change (RD-187)
                     t1: SKIPPED
-                    t1_skip_reason: no_docker
+                    t1_skip_reason: not required for FE-only F40 delta
                     t2: deferred_to_13
                     t3: deferred_to_13
-                  s013_baseline:
+                  s014_baseline:
                     status: completed
                     started_at: '2026-07-29'
                     completed_at: '2026-07-29'
-                    session_id: S013-unified-job-monitoring
-                    branch: evolve/EV-012-unified-job-monitoring
-                    evolve_cycle_id: EV-012
-                    mode: delta
+                    partial_rerun_at: '2026-07-29'
+                    partial_rerun_note: 'EV-013/S014 — #148 admin UI polish 10-e2e PASS; UJ-051 / TC-152–155; mode=evolve/delta_only'
+                    session_id: S014-admin-ui-polish-148
+                    branch: evolve/EV-013-admin-ui-polish-148
+                    evolve_cycle_id: EV-013
+                    mode: evolve
+                    delta_only: true
+                    scope: 'UJ-051 / TC-152–155 (#148 admin UI polish)'
                     overall_result: PASS
-                    report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
-                    partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
-                    note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+                    report: docs/sessions/S014-admin-ui-polish-148/reports/e2e-report.md
+                    note: S014/EV-013 10-e2e PASS 2026-07-29 — T0 Vitest PASS (675 full DM / 28 scoped UJ-051); T0-ui Playwright uj051 1/1 PASS; T0 API N/A waived (UI-only); T1 SKIPPED no Docker; T2/T3 deferred to 13; Lean+build skips 11; handoff → 13-deploy-smoke after user-approved deploy; prior S013/S006/S005 baselines preserved below
                     tiers:
-                      t0: pass
-                      t1: skipped
+                      t0: PASS
+                      t0_detail: Vitest PASS (675 full DM / 28 scoped UJ-051)
+                      t0_ui: PASS
+                      t0_ui_detail: Playwright uj051 1/1 PASS
+                      t0_api: N/A
+                      t0_api_waive_reason: UI-only
+                      t1: SKIPPED
                       t1_skip_reason: no_docker
-                      t2: pass
-                      t3: pass
-                  s006:
-                    status: completed
-                    started_at: '2026-06-30'
-                    completed_at: '2026-06-30'
-                    session_id: S006-invite-acceptance
-                    branch: feat/S006-invite-acceptance
-                    feature: F35
-                    evolve_cycle_id: EV-007
-                    report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
-                    note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
-                  s005:
-                    status: completed
-                    completed_at: '2026-06-30'
-                    session_id: S005-user-mgmt-auth
-                    branch: feat/S005-user-mgmt-auth
-                    report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
-                    note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
-            substeps:
-              t0_f42: PASS
-              t0_uj055: PASS_2_of_2
-              uj056: unit_eval_path
-              t1_integration: SKIPPED
-              t1_reason: Docker unavailable
-              t2_connectivity: DEFERRED
-              t3_browser: DEFERRED
-              ac_rq6: deferred_deploy_path
-              overall_result: PASS
-              result_scope: delta
-              parallel_09_qa: completed
-          next_action: none_session_closed
+                      t2: deferred_to_13
+                      t3: deferred_to_13
+                    s013_baseline:
+                      status: completed
+                      started_at: '2026-07-29'
+                      completed_at: '2026-07-29'
+                      session_id: S013-unified-job-monitoring
+                      branch: evolve/EV-012-unified-job-monitoring
+                      evolve_cycle_id: EV-012
+                      mode: delta
+                      overall_result: PASS
+                      report: docs/sessions/S013-unified-job-monitoring/reports/e2e-report.md
+                      partial_rerun_note: 'EV-012/S013 delta — unified job monitoring (GitHub #116); extend F32/F36'
+                      note: 'S013/EV-012 10-e2e PASS — T0 pass; T1 skipped (no docker); T2/T3 pass @ 13-deploy-smoke Path A smokes'
+                      tiers:
+                        t0: pass
+                        t1: skipped
+                        t1_skip_reason: no_docker
+                        t2: pass
+                        t3: pass
+                    s006:
+                      status: completed
+                      started_at: '2026-06-30'
+                      completed_at: '2026-06-30'
+                      session_id: S006-invite-acceptance
+                      branch: feat/S006-invite-acceptance
+                      feature: F35
+                      evolve_cycle_id: EV-007
+                      report: docs/sessions/S006-invite-acceptance/reports/e2e-report.md
+                      note: 'S006/EV-007 F35 ext formal 10-e2e COMPLETE — T0 69/69 e2e, T1 62/62 integration, 500 Vitest, 17 Supabase contract; T3 deferred'
+                    s005:
+                      status: completed
+                      completed_at: '2026-06-30'
+                      session_id: S005-user-mgmt-auth
+                      branch: feat/S005-user-mgmt-auth
+                      report: docs/sessions/S000-internal-docs-archive/reports/e2e-report.md
+                      note: 'S005/EV-006 F35 formal 10-e2e COMPLETE — T0 68/68 e2e, T1 62/62 integration, 483 Vitest, 14 Supabase contract; T3 deferred'
+              substeps:
+                t0_f42: PASS
+                t0_uj055: PASS_2_of_2
+                uj056: unit_eval_path
+                t1_integration: SKIPPED
+                t1_reason: Docker unavailable
+                t2_connectivity: DEFERRED
+                t3_browser: DEFERRED
+                ac_rq6: deferred_deploy_path
+                overall_result: PASS
+                result_scope: delta
+                parallel_09_qa: completed
+            next_action: none_session_closed
+            session_closed: true
+            session_closed_at: '2026-08-02'
+          completed_at: '2026-08-02'
+          completed: '2026-08-02'
+          overall: pass
+          overall_result: PASS
+          report: docs/sessions/S022-ingest-resilience/reports/e2e-report.md
           session_closed: true
           session_closed_at: '2026-08-02'
-        completed_at: '2026-08-02'
-        completed: '2026-08-02'
-        overall: pass
-        overall_result: PASS
-        report: docs/sessions/S022-ingest-resilience/reports/e2e-report.md
-        session_closed: true
-        session_closed_at: '2026-08-02'
-        next_action: none_session_closed
-    completed: '2026-08-03'
-    completed_at: '2026-08-03'
-    overall: pass
-    overall_result: PASS
-    report: docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md
+          next_action: none_session_closed
+      completed: '2026-08-03'
+      completed_at: '2026-08-03'
+      overall: pass
+      overall_result: PASS
+      report: docs/sessions/S024-website-scrape-crawl/reports/e2e-report.md
   11-verify-impl:
     status: completed
     started_at: '2026-08-03'
@@ -23938,9 +24064,9 @@ evolve_cycles:
     - 12-verify-deploy
     - 15-service-health
   routing_preset: lean_build
-  current_stage: 08-verify-build
-  current_action: verifying
-  next_action: 'Run 08-verify-build checks for F62/F63'
+  current_stage: 10-e2e
+  current_action: pr_then_13
+  next_action: Open PR then 13-deploy-smoke
   branch: evolve/EV-023-ci-release-automation
   evolve_branch: evolve/EV-023-ci-release-automation
   mode: evolve
@@ -23950,14 +24076,14 @@ evolve_cycles:
   askquestion_pending: false
   checkpoints:
     phase_a: passed
-    phase_b: pending
-    phase_c: pending
+    phase_b: waived
+    phase_c: passed
     phase_d: pending
     deploy: pending
   gates:
     a_to_b: passed
-    b_to_c: pending
-    c_to_d: pending
+    b_to_c: waived
+    c_to_d: passed
     deploy: pending
   stages:
     00-context:
@@ -24046,17 +24172,55 @@ evolve_cycles:
       f62_commit: 2cad110
       f63_commit: fedf1f7
     08-verify-build:
-      status: in_progress
+      status: completed
       started: '2026-08-03'
       started_at: '2026-08-03'
-      current_action: verifying
-      next_action: Run 08-verify-build checks for F62/F63
+      current_action: completed
+      next_action: 10-e2e (Phase D)
       askquestion_pending: false
       build_head: fedf1f7
       build_commits:
       - 2cad110
       - fedf1f7
-      note: S025/EV-023 08-verify-build IN_PROGRESS — 07-build COMPLETE (F62+F63)
+      note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c waived (Lean+build skipped 04); handoff → 10-e2e Phase D
+      completed: '2026-08-03'
+      completed_at: '2026-08-03'
+      result: pass
+      report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+      commit: 23f9f71
+      commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+      verification_commit: 23f9f71
+      gate_c_to_d: passed
+      checkpoints_phase_c: passed
+      phase_c_status: passed
+      gate_b_to_c: waived
+      checkpoints_phase_b: waived
+      s025_d14_decision: S025-D14
+    10-e2e:
+      status: completed
+      started: '2026-08-03'
+      started_at: '2026-08-03'
+      started_ts: '2026-08-03T23:19:16Z'
+      completed: '2026-08-03'
+      completed_at: '2026-08-03T23:25:00Z'
+      completed_ts: '2026-08-03T23:25:00Z'
+      current_action: completed
+      next_action: Open PR then 13-deploy-smoke
+      askquestion_pending: false
+      result: pass
+      overall: pass
+      overall_result: PASS
+      report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+      gate_c_to_d: passed
+      s025_d14_decision: S025-D14
+      note: S025/EV-023 10-e2e COMPLETE PASS @ 2026-08-03T23:25:00Z — UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; no product API/UI e2e (waived); phase_d pending until PR/13; next → Open PR then 13-deploy-smoke
+      t0:
+        result: pass
+        uj: UJ-067/068
+        tests_passed: 8
+        tests_total: 8
+      t2_t3: deferred_to_13
+      product_api_ui_e2e: waived
   artifacts:
   - path: docs/sessions/S025-ci-release-automation/reports/01-requirements-ci-release.md
     status: completed
@@ -24064,8 +24228,21 @@ evolve_cycles:
   - path: docs/sessions/S025-ci-release-automation/reports/02-verify-plan-audit.md
     status: completed
     commit: 4c6272c
+  - path: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+    status: completed
+    commit: 23f9f71
+    result: pass
+  - path: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+    status: completed
+    result: pass
+    session_id: S025-ci-release-automation
   issues: []
   decisions:
+  - id: S025-D14
+    decision: Gate C→D approved — proceed 10-e2e then PR/13
+    recorded_at: '2026-08-03T23:19:16Z'
+    status: confirmed
+    note: S025-D14 Gate C→D approved — proceed 10-e2e then PR/13
   - id: S025-D13
     decision: Gate A→B PASS → 07-build (04 skipped)
     recorded_at: '2026-08-03T23:13:00Z'
@@ -24118,7 +24295,7 @@ evolve_cycles:
     decision: 'Closed S024/EV-022 without 15/17 to start #194'
     recorded_at: '2026-08-03T23:00:00Z'
     status: confirmed
-  note: EV-023 opened 2026-08-03 after S024/EV-022 close (S024-D48); Lean+build preset
+  note: EV-023 10-e2e COMPLETE PASS 2026-08-03T23:25:00Z — UJ-067/068 T0 8/8; T2/T3→13; API/UI e2e waived; phase_d still pending (PR/13 not done); next pr_then_13
   phase0_approved_at: '2026-08-03T23:09:09Z'
   proposed_feature_ids: []
   proposed_features:
@@ -24150,13 +24327,21 @@ evolve_cycles:
     - S025-D7
     - S025-D8
     next_action: 01-requirements writing_delta_specs
-  report: docs/sessions/S025-ci-release-automation/reports/02-verify-plan-audit.md
+  report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+  e2e_report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+  e2e_result: pass
+  verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
   rd_range: RD-264..RD-271
-  commits_head: fedf1f7
+  commits_head: 23f9f71
   s025_d9_decision: S025-D9
   gate_a_to_b: passed
   s025_d13_decision: S025-D13
   build_head: fedf1f7
+  verification_result: pass
+  s025_d14_decision: S025-D14
+  gate_c_to_d: passed
+  gate_b_to_c: waived
+  phase_d_started_at: '2026-08-03T23:19:16Z'
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -25299,6 +25484,22 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-03'
+  id: S025-D14
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  decision: Gate C→D approved — proceed 10-e2e then PR/13
+  option: 1
+  choice: gate_c_to_d_pass_start_10_e2e
+  recorded_at: '2026-08-03T23:19:16Z'
+  approved: '2026-08-03'
+  approved_at: '2026-08-03T23:19:16Z'
+  status: confirmed
+  askquestion_pending: false
+  next_stage: 10-e2e
+  note: S025-D14 Gate C→D approved — proceed 10-e2e then PR/13
 - date: '2026-08-03'
   id: S025-D13
   skill: 02-verify-plan
@@ -30729,6 +30930,26 @@ artifacts:
   skill_id: 02-verify-plan
   recorded_at: '2026-08-03T23:12:41Z'
   commit: 4c6272c
+- path: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+  kind: verification-report
+  status: completed
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  stage: 08-verify-build
+  skill_id: 08-verify-build
+  recorded_at: '2026-08-03T23:17:19Z'
+  commit: 23f9f71
+  result: pass
+- path: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+  kind: e2e-report
+  status: completed
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  stage: 10-e2e
+  skill_id: 10-e2e
+  recorded_at: '2026-08-03T23:25:00Z'
+  result: pass
+  note: UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; product API/UI e2e waived
 git_history:
   current_branch: evolve/EV-023-ci-release-automation
   branches:
@@ -31085,6 +31306,28 @@ git_history:
     evolve_cycle_id: EV-020
     head: bb4c400
   commits:
+  - sha: 23f9f71
+    full_sha: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+    sha_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+    short: 23f9f71
+    branch: evolve/EV-023-ci-release-automation
+    message: '[S025] docs: 08-verify-build PASS for F62/F63'
+    stage: 08-verify-build
+    skill_id: 08-verify-build
+    session_id: S025-ci-release-automation
+    evolve_cycle_id: EV-023
+    files_changed: 2
+    timestamp: '2026-08-03T23:17:19Z'
+    note: 08-verify-build verification report committed @ 23f9f71; Gate C→D AskQuestion pending; checkpoints.phase_c pending until user approval; workflow-state.yaml uncommitted
+    files:
+    - docs/sessions/S025-ci-release-automation/reports/verification-report.md
+    - workflow-state.yaml
+    feature_ids:
+    - F62
+    - F63
+    rd_range: RD-264..RD-271
+    result: pass
+    build_head: fedf1f7
   - sha: 2cad110
     full_sha: 2cad11027b03ab41934f06f85d570056b2c19a7c
     sha_full: 2cad11027b03ab41934f06f85d570056b2c19a7c
