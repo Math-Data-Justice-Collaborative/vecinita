@@ -15,7 +15,7 @@ from vecinita_rag.multi_query import multi_query_retrieve
 from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode, pack_chunks
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.types import RagAnswer, RetrievedChunk
-from vecinita_shared_schemas.eval_config import EvalConfig
+from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_TOP_K, EvalConfig
 
 from vecinita_eval.criteria import (
     EvalCriterionDef,
@@ -325,7 +325,7 @@ def run_golden_eval(  # noqa: PLR0913
     groundedness: GroundednessScorer | None = None,
     llm: LLM | None = None,
     fixture_path: str | Path | None = None,
-    top_k: int = 5,
+    top_k: int = DEFAULT_EVAL_TOP_K,
     criteria: list[EvalCriterionDef] | None = None,
     config: EvalConfig | None = None,
 ) -> tuple[list[RowResult], EvalSummary]:

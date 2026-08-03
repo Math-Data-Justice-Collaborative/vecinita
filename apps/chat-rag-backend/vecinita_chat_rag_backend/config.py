@@ -176,7 +176,7 @@ class ChatRagSettings:
         if not database_url:
             msg = "DATABASE_URL is required for ChatRAG backend"
             raise RuntimeError(msg)
-        top_k = _int_env("VECINITA_TOP_K", 5)
+        top_k = _int_env("VECINITA_TOP_K", 8)
         rag_multi_query_count = _int_env("VECINITA_RAG_MULTI_QUERY_COUNT", 3)
         rag_packer: PackerMode = _rag_packer_env("VECINITA_RAG_PACKER", "p1")
         rag_context_max_chars = _int_env(
