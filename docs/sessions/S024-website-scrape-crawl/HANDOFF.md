@@ -1,14 +1,14 @@
 # HANDOFF — S024-website-scrape-crawl
 
 > ADR-043 rolling digest · overwrite at safe-stops  
-> **Updated:** 2026-08-03 — 12 COMPLETE (S024-D47 Decision A); start 13-deploy-smoke
+> **Updated:** 2026-08-03 — 13 Path A PASS (`cc2750c`); write `reports/deploy-smoke.md`
 
 | Field | Value |
 |-------|--------|
 | Session | `S024-website-scrape-crawl` **in_progress** |
 | Evolve | `EV-022` — F59/F60/F61 |
 | Branch | `evolve/EV-022-website-scrape-crawl` |
-| Stage / action | **13-deploy-smoke** — merge/deploy Path A + H1–H5 |
+| Stage / action | **13-deploy-smoke** COMPLETE — Path A CD + H1/H3/H4/H5 PASS |
 | Issues | #185 · #69 → #71 → #70 |
 
 ## Progress
@@ -19,6 +19,7 @@
 
 ## Next
 
-1. Open/merge PR (or confirm tip) → Path A redeploy (Alembic + Modal DM + write + Admin FE)
-2. H1–H3 → `verify_connectivity.sh` H4–H5 → optional live crawl smoke
-3. Write `reports/deploy-smoke.md`; close EV-022
+1. ~~Merge PR #190 → main CD (Modal + DO + Alembic `0011`)~~
+2. ~~H1/H3 + `verify_connectivity.sh` H4–H5~~ (H2 skipped — no local `DATABASE_URL`; Alembic in CD)
+3. Optional: live crawl smoke (S024-D24) when Admin API key available
+4. Close EV-022 / advance workflow state
