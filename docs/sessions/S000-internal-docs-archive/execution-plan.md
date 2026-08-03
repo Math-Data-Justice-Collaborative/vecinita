@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
-| **Active milestone** | M111 — UJ e2e suite + OpenAPI mirror + phase gate |
-| **Active task** | T111.3 — API e2e UJ-066 corpus tree (**blocked**: local Docker/Postgres) |
-| **Tasks completed** | Phase 21–25 complete; M108–M110 done; T111.1–T111.2 done |
+| **Active milestone** | M111 — **completed** (T111.1–T111.4) |
+| **Active task** | — (next: **08-verify-build** / Gate C→D) |
+| **Tasks completed** | Phase 21–25 complete; M108–M111 done (T111.3 local Docker waived S024-D41) |
 | **Last updated** | 2026-08-03 |
-| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M111 in progress |
+| **Evolve cycle** | EV-022 — Standard; Gate B→C PASS; 07-build M111 complete → 08 |
 | **Git branch** | `evolve/EV-022-website-scrape-crawl` |
-| **Active session** | S024-website-scrape-crawl — 07-build |
+| **Active session** | S024-website-scrape-crawl — 07-build → 08-verify-build |
 | **Scope addition** | 2026-08-03 — F59 scrape + F60 crawl + F61 tree (#185/#69/#71/#70). |
 
 ## Template
@@ -2211,16 +2211,16 @@ expand/collapse + bulk selection; ChatRAG backend nested source fields only — 
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T111.1 | Test: API e2e `test_uj064_robust_scrape.py` (TC-199) | Test | completed | UJ-064, e2e-coverage | T108.6 | 2026-08-03 | S024 | F59 |
 | T111.2 | Test: API e2e `test_uj065_website_crawl.py` (TC-202); optional Playwright UJ-065 | Test | completed | UJ-065, TP4 | T109.6 | 2026-08-03 | S024 | F60 |
-| T111.3 | Test: API e2e `test_uj066_corpus_tree.py` (TC-204) green with T110 | Test | blocked | UJ-066, AC-SC8/SC11 | T110.5 | — | S024 | F61 |
-| T111.4 | Docs/Config: OpenAPI mirror check; Phase 26 gate + Current State; issue closeout #69/#71/#70/#185 | Docs | pending | TP3, Phase 26 gate | T111.1–T111.3 | — | S024 | F59–F61 |
+| T111.3 | Test: API e2e `test_uj066_corpus_tree.py` (TC-204) green with T110 | Test | completed | UJ-066, AC-SC8/SC11 | T110.5 | 2026-08-03 | S024 | F61 |
+| T111.4 | Docs/Config: OpenAPI mirror check; Phase 26 gate + Current State; issue closeout #69/#71/#70/#185 | Docs | completed | TP3, Phase 26 gate | T111.1–T111.3 | 2026-08-03 | S024 | F59–F61 |
 
 #### Phase 26 Gate Check
 
-- [ ] All M108–M111 tasks completed (T108.1–T111.4)
-- [ ] AC-SC1–SC11 met at T2 (unit + API e2e + Vitest + Playwright UJ-066); AC-SC12 scope held
-- [ ] ADR-045: Playwright in Modal worker; trafilatura + pypdf; nested trees + soft-fail
-- [ ] OpenAPI JobOptions crawl + tree paths; `infra/vecinita.yaml` scrape/crawl keys
-- [ ] No new CORS origins; ChatRAG UI unchanged
+- [x] All M108–M111 tasks completed (T108.1–T111.4)
+- [ ] AC-SC1–SC11 met at T2 (unit + API e2e + Vitest + Playwright UJ-066); AC-SC12 scope held — **08-verify-build / 09–11**
+- [x] ADR-045: Playwright in Modal worker; trafilatura + pypdf; nested trees + soft-fail
+- [x] OpenAPI JobOptions crawl + tree paths; `infra/vecinita.yaml` scrape/crawl keys (T111.4)
+- [x] No new CORS origins; ChatRAG UI unchanged
 - [ ] ruff / basedpyright clean; pytest + Vitest + `make test-ui` UJ-066 — **08-verify-build**
 
 **Issue closeout notes (after deploy / PR merge):**
@@ -2229,9 +2229,11 @@ expand/collapse + bulk selection; ChatRAG backend nested source fields only — 
 - **#70** — closed by F61/M110: corpus tree UI + nested meta.
 - **#185** — close when all three children ship and 13-deploy-smoke H1–H5 + crawl smoke pass.
 
-**Tech-plan delta:** `docs/sessions/S024-website-scrape-crawl/reports/tech-plan-delta.md`  
-**ADR:** [ADR-045](../../../adr/ADR-045-website-scrape-crawl-tree.md)  
+**Tech-plan delta:** `docs/sessions/S024-website-scrape-crawl/reports/tech-plan-delta.md`
+**ADR:** [ADR-045](../../../adr/ADR-045-website-scrape-crawl-tree.md)
 **Roadmap:** `docs/sessions/S024-website-scrape-crawl/roadmap.md`
+**T111.3 closeout:** `docs/sessions/S024-website-scrape-crawl/reports/t111-3-e2e-closeout.md` (S024-D41)
+**T111.4 gate:** `docs/sessions/S024-website-scrape-crawl/reports/t111-4-openapi-phase-gate.md`
 
 ---
 
@@ -3021,8 +3023,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T110.5 | M110 | 26 | Test | completed | T110.3 | 2026-08-03 | S024 | F61 | — |
 | T111.1 | M111 | 26 | Test | completed | T108.6 | 2026-08-03 | S024 | F59 | — |
 | T111.2 | M111 | 26 | Test | completed | T109.6 | 2026-08-03 | S024 | F60 | — |
-| T111.3 | M111 | 26 | Test | blocked | T110.5 | — | S024 | F61 | Docker/Postgres (S024-D38) |
-| T111.4 | M111 | 26 | Docs | pending | T111.1–T111.3 | — | S024 | F59–F61 | — |
+| T111.3 | M111 | 26 | Test | completed | T110.5 | 2026-08-03 | S024 | F61 | S024-D41 waive local Docker; CI-gated |
+| T111.4 | M111 | 26 | Docs | completed | T111.1–T111.3 | 2026-08-03 | S024 | F59–F61 | — |
 
 ## Phase Gate Log
 
