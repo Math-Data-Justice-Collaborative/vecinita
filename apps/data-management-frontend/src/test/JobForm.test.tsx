@@ -315,6 +315,39 @@ describe("JobForm", () => {
     expect(body.options?.chunk_size_tokens).toBe(256);
   });
 
+  it("shows validation error when crawl max depth is invalid", async () => {
+    await renderReadyJobForm();
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/seed" },
+    });
+    fireEvent.click(screen.getByTestId("ingest-crawl"));
+    fireEvent.change(screen.getByTestId("ingest-max-depth"), {
+      target: { value: "-1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /max depth must be 0 or greater/i,
+    );
+  });
+
+  it("shows validation error when crawl max pages is below one", async () => {
+    await renderReadyJobForm();
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/seed" },
+    });
+    fireEvent.click(screen.getByTestId("ingest-crawl"));
+    fireEvent.change(screen.getByTestId("ingest-max-depth"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByTestId("ingest-max-pages"), {
+      target: { value: "0" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /max pages must be at least 1/i,
+    );
+  });
+
   it("omits crawl options when crawl is off (AC-SC7 single-URL)", async () => {
     const fetchMock = vi
       .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()

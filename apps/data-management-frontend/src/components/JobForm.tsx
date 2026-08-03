@@ -116,7 +116,11 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
           </p>
         ) : (
           <>
-            <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+            <form
+              noValidate
+              onSubmit={(e) => void handleSubmit(e)}
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="urls">{tr("admin.ingest.urlsLabel")}</Label>
                 <Textarea

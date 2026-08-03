@@ -116,7 +116,7 @@ function TreeBranch({
       </div>
       {hasChildren && expanded ? (
         <ul role="group" className="m-0 list-none p-0">
-          {(node.children ?? []).map((child) => (
+          {(node.children ?? /* v8 ignore next */ []).map((child) => (
             <TreeBranch
               key={child.id}
               node={child}

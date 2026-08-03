@@ -2867,7 +2867,7 @@ project:
       deploy_path: A
       deploy_path_default: A
       current_action: watch_ci_then_merge_path_a
-      next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+      next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
       askquestion_pending: false
       s024_d47_decision: S024-D47
       js_render_decision: A_ship_static_js_render_follow_up
@@ -2876,9 +2876,13 @@ project:
       pr_number: 190
       pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
       pr_status: open
+      pr_head_sha: 2c97d36
+      pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+      ci_status: re_running
+      ci_note: 'PR #190 CI re-running after fix @ 2c97d36'
       report:
-      note: 'PR #190 open; watching CI then merge Path A + H1–H5'
-      updated_at: '2026-08-03T21:33:05Z'
+      note: 'PR #190 CI re-running after fix @ 2c97d36; watch CI then merge Path A + H1–H5'
+      updated_at: '2026-08-03T21:35:21Z'
       s023_baseline:
         s022_baseline:
           status: completed
@@ -3817,6 +3821,10 @@ active_session:
   pr_base: main
   pr_status: open
   pr_opened_at: '2026-08-03'
+  pr_head_sha: 2c97d36
+  pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+  ci_status: re_running
+  ci_note: 'PR #190 CI re-running after fix @ 2c97d36'
   artifacts_dir: docs/sessions/S024-website-scrape-crawl/
   github_issues:
   - 185
@@ -4055,13 +4063,17 @@ active_session:
     started_at: '2026-08-03T21:29:58Z'
     mode: delta
     current_action: watch_ci_then_merge_path_a
-    next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+    next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
     askquestion_pending: false
     s024_d47_decision: S024-D47
     pr_number: 190
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
     pr_status: open
-    note: 'PR #190 open; watching CI then merge Path A + H1–H5'
+    pr_head_sha: 2c97d36
+    pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+    ci_status: re_running
+    ci_note: 'PR #190 CI re-running after fix @ 2c97d36'
+    note: 'PR #190 CI re-running after fix @ 2c97d36; watch CI then merge Path A + H1–H5'
   - stage: 15-service-health
     required: false
     status: skipped
@@ -4073,10 +4085,10 @@ active_session:
     skip_rationale:
     started_at: '2026-08-03'
     current_action: orchestrating_13_deploy_smoke
-    note: 'S024/EV-022 orchestrating 13-deploy-smoke — PR #190 open; watching CI then merge Path A + H1–H5'
+    note: 'S024/EV-022 orchestrating 13-deploy-smoke — PR #190 CI re-running after fix @ 2c97d36; watch then merge Path A + H1–H5'
     askquestion_pending: false
     current_stage: 13-deploy-smoke
-    next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+    next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
     s024_d42_decision: S024-D42
     s024_d43_decision: S024-D43
     s024_d44_decision: S024-D44
@@ -4085,7 +4097,7 @@ active_session:
     checkpoints_phase_d: passed
   current_stage: 13-deploy-smoke
   current_action: watch_ci_then_merge_path_a
-  next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+  next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
   started_at: '2026-08-03'
   context_briefs: []
   feature_ids:
@@ -4097,7 +4109,7 @@ active_session:
   phase1_complete: true
   report: docs/sessions/S024-website-scrape-crawl/reports/deploy-checklist.md
   report_status: approved
-  note: 'PR #190 open; watching CI then merge Path A + H1–H5'
+  note: 'PR #190 CI re-running after fix @ 2c97d36; watch CI then merge Path A + H1–H5'
   askquestion_pending: false
   s024_d46_decision: S024-D46
   ui_preview: yes_local_non_deployed
@@ -12638,7 +12650,7 @@ stages:
     deploy_path: A
     deploy_path_default: A
     current_action: watch_ci_then_merge_path_a
-    next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+    next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
     askquestion_pending: false
     s024_d47_decision: S024-D47
     js_render_decision: A_ship_static_js_render_follow_up
@@ -12647,9 +12659,13 @@ stages:
     pr_number: 190
     pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
     pr_status: open
+    pr_head_sha: 2c97d36
+    pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+    ci_status: re_running
+    ci_note: 'PR #190 CI re-running after fix @ 2c97d36'
     report:
-    note: 'PR #190 open; watching CI then merge Path A + H1–H5'
-    updated_at: '2026-08-03T21:33:05Z'
+    note: 'PR #190 CI re-running after fix @ 2c97d36; watch CI then merge Path A + H1–H5'
+    updated_at: '2026-08-03T21:35:21Z'
     s023_baseline:
       s022_baseline:
         status: completed
@@ -21908,6 +21924,10 @@ evolve_cycles:
   pr_base: main
   pr_status: open
   pr_opened_at: '2026-08-03'
+  pr_head_sha: 2c97d36
+  pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+  ci_status: re_running
+  ci_note: 'PR #190 CI re-running after fix @ 2c97d36'
   feature_ids:
   - F59
   - F60
@@ -21979,7 +21999,7 @@ evolve_cycles:
     - 15-service-health
   current_stage: 13-deploy-smoke
   current_action: watch_ci_then_merge_path_a
-  next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+  next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
   active_task:
   active_milestone: M111
   mode: evolve
@@ -22645,7 +22665,7 @@ evolve_cycles:
       - F61
       deploy_path: A
       current_action: watch_ci_then_merge_path_a
-      next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+      next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
       askquestion_pending: false
       s024_d47_decision: S024-D47
       js_render_decision: A_ship_static_js_render_follow_up
@@ -22654,8 +22674,12 @@ evolve_cycles:
       pr_number: 190
       pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
       pr_status: open
-      note: 'PR #190 open; watching CI then merge Path A + H1–H5'
-      updated_at: '2026-08-03T21:33:05Z'
+      pr_head_sha: 2c97d36
+      pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+      ci_status: re_running
+      ci_note: 'PR #190 CI re-running after fix @ 2c97d36'
+      note: 'PR #190 CI re-running after fix @ 2c97d36; watch CI then merge Path A + H1–H5'
+      updated_at: '2026-08-03T21:35:21Z'
     15-service-health:
       status: skipped
       skip_rationale: Optional at close
@@ -29615,9 +29639,11 @@ git_history:
     pr_status: open
     pr_plan_id: PR-59
     pr_opened_at: '2026-08-03'
-    head_sha: 6422ce82614a57ae92454cdd1686cd5d08a7e3f6
-    head_short: 6422ce8
-    note: 'PR #190 open — Phase 26 F59–F61; watching CI then merge Path A + H1–H5'
+    head_sha: 2c97d36753e088eec13289c1132b50957f34de62
+    head_short: 2c97d36
+    ci_status: re_running
+    ci_note: 'PR #190 CI re-running after fix @ 2c97d36'
+    note: 'PR #190 open — CI re-running after fix @ 2c97d36; watch then merge Path A + H1–H5'
   - name: evolve/EV-019-ingest-resilience
     purpose: EV-019 ingest resilience F47-F49
     base: main
@@ -32866,7 +32892,28 @@ git_history:
     - docs/sessions/S024-website-scrape-crawl/reports/verify-impl.md
     - docs/sessions/S024-website-scrape-crawl/routing-plan.md
     - workflow-state.yaml
+  - sha: 2c97d36
+    full_sha: 2c97d36753e088eec13289c1132b50957f34de62
+    sha_full: 2c97d36753e088eec13289c1132b50957f34de62
+    short: 2c97d36
+    branch: evolve/EV-022-website-scrape-crawl
+    message: '[EV-022] fix: CI — nested fields in shadow fixture, Alembic head, OpenAPI maxItems'
+    stage: 13-deploy-smoke
+    skill_id: 13-deploy-smoke
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    files_changed: 6
+    timestamp: '2026-08-03T21:35:21Z'
+    note: 'CI fix for PR #190; nested fields in shadow fixture, Alembic head, OpenAPI maxItems; CI re-running'
+    files:
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - openapi/data-management.yaml
+    - openapi/internal-write.yaml
+    - tests/integration/test_ev002_schema.py
+    - tests/unit/rag/test_ev015_shadow_retrieval.py
+    - workflow-state.yaml
   notes:
+  - '2026-08-03T21:35:21Z S024/EV-022: recorded commit 2c97d36 CI fix (nested shadow fixture, Alembic head, OpenAPI maxItems); PR #190 CI re-running after fix; next_action=Watch CI on PR #190 @ 2c97d36; merge when green.'
   - '2026-08-03T21:33:05Z S024/EV-022: PR #190 opened (PR-59 Phase 26 F59–F61) on evolve/EV-022-website-scrape-crawl → main; recorded commit 6422ce8; 13-deploy-smoke watching CI then merge Path A + H1–H5.'
   - '2026-08-03T20:23:45Z S024/EV-022: recorded commits 568b68e (incidental Brewfile / Docker-block recovery), 1f51786 (T111.3), ac12278 (T111.4); 07-build COMPLETE; current_stage=08-verify-build in_progress; Gate C→D pending.'
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
@@ -33066,6 +33113,6 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: 'Watch CI on PR #190; merge when green; Path A redeploy; H1–H5'
+next_action: 'Watch CI on PR #190 @ 2c97d36; merge when green'
 pipeline_idle: false
 pipeline_idle_note: '2026-08-02 — S020/EV-017 07-build in_progress; M97 COMPLETE @ d33cbec (T97.1–T97.5); M98 in_progress / T98.1 in_progress (UJ-057 answer cache e2e); 08-verify-build deferred until before Phase C PR (batch throughput)'

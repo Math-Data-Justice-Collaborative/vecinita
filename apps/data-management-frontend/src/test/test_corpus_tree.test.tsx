@@ -113,4 +113,85 @@ describe("CorpusTree", () => {
     fireEvent.click(checkboxA);
     expect(onToggleSelect).toHaveBeenCalledWith("doc-a");
   });
+
+  it("shows empty-tree message when roots are empty", () => {
+    renderWithProviders(
+      <ThemeProvider>
+        <MemoryRouter>
+          <CorpusTree
+            roots={[]}
+            selectedIds={new Set()}
+            onToggleSelect={vi.fn()}
+          />
+        </MemoryRouter>
+      </ThemeProvider>,
+    );
+    expect(
+      screen.getByText(/no documents in corpus tree/i),
+    ).toBeInTheDocument();
+  });
+
+  it("renders childless domain without expand control", () => {
+    const roots: TreeNode[] = [
+      {
+        id: "domain:lonely.example.com",
+        kind: "domain",
+        label: "lonely.example.com",
+        children: [],
+      },
+    ];
+    renderWithProviders(
+      <ThemeProvider>
+        <MemoryRouter>
+          <CorpusTree
+            roots={roots}
+            selectedIds={new Set()}
+            onToggleSelect={vi.fn()}
+          />
+        </MemoryRouter>
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByText("lonely.example.com")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /expand lonely\.example\.com/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders document nodes without status or url badges", () => {
+    const roots: TreeNode[] = [
+      {
+        id: "domain:bare.example.com",
+        kind: "domain",
+        label: "bare.example.com",
+        children: [
+          {
+            id: "doc-bare",
+            kind: "document",
+            label: "bare.html",
+          },
+        ],
+      },
+    ];
+    renderWithProviders(
+      <ThemeProvider>
+        <MemoryRouter>
+          <CorpusTree
+            roots={roots}
+            selectedIds={new Set()}
+            onToggleSelect={vi.fn()}
+          />
+        </MemoryRouter>
+      </ThemeProvider>,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /expand bare\.example\.com/i }),
+    );
+    expect(screen.getByText("bare.html")).toBeInTheDocument();
+    expect(
+      screen.queryByText(/completed|failed|pending/i),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/https?:\/\//i)).not.toBeInTheDocument();
+  });
 });

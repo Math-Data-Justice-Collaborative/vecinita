@@ -98,12 +98,14 @@ export function CorpusList() {
     try {
       const client = requireCorpusConfig();
       const result = await fetchCorpusTree(client);
+      /* v8 ignore next -- unmount race */
       if (!isActive()) {
         return;
       }
       setTreeRoots(result.roots);
       setSelectedIds(new Set());
     } catch (err) {
+      /* v8 ignore next -- unmount race */
       if (!isActive()) {
         return;
       }
@@ -141,11 +143,8 @@ export function CorpusList() {
     try {
       const client = requireCorpusConfig();
       await deleteDocument(client, doc.document_id);
-      if (viewMode === "tree") {
-        await refreshTree(() => true);
-      } else {
-        await refresh(() => true, page);
-      }
+      // Row delete exists only in flat table; always refresh the list page.
+      await refresh(() => true, page);
     } catch (err) {
       setError(
         err instanceof Error
@@ -181,6 +180,14 @@ export function CorpusList() {
   const selectionArray = Array.from(selectedIds);
 
   const handleRefreshClick = () => {
+    if (viewMode === "tree") {
+      void refreshTree(() => true);
+    } else {
+      void refresh(() => true, page);
+    }
+  };
+
+  const refreshAfterBulk = () => {
     if (viewMode === "tree") {
       void refreshTree(() => true);
     } else {
@@ -459,19 +466,19 @@ export function CorpusList() {
               open={bulkDeleteOpen}
               onOpenChange={setBulkDeleteOpen}
               documentIds={selectionArray}
-              onComplete={() => void refresh(() => true, page)}
+              onComplete={refreshAfterBulk}
             />
             <BulkTagDialog
               open={bulkTagOpen}
               onOpenChange={setBulkTagOpen}
               documentIds={selectionArray}
-              onComplete={() => void refresh(() => true, page)}
+              onComplete={refreshAfterBulk}
             />
             <BulkMetadataDialog
               open={bulkMetadataOpen}
               onOpenChange={setBulkMetadataOpen}
               documentIds={selectionArray}
-              onComplete={() => void refresh(() => true, page)}
+              onComplete={refreshAfterBulk}
             />
           </>
         )}
