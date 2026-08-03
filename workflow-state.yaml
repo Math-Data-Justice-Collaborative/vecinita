@@ -1157,12 +1157,12 @@ project:
       evolve_cycle_id: EV-022
       branch: evolve/EV-022-website-scrape-crawl
       phase: 26
-      active_task: T109.5
-      active_milestone: M109
-      current_action: T109.5 in_progress — Admin JobForm crawl controls
+      active_task: T110.1
+      active_milestone: M110
+      current_action: T110.1 — Corpus tree API red test
       gate_b_to_c: passed
       s024_d37_decision: S024-D37
-      note: S024/EV-022 07-build in_progress 2026-08-03 — M108 complete; T109.1–T109.4 completed (F60 crawl OpenAPI/tree); T109.5 in_progress — Admin JobForm crawl controls; active_task=T109.5; active_milestone=M109; current_stage=07-build
+      note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
       prior_completed:
         status: completed
         completed: '2026-08-03'
@@ -1170,9 +1170,10 @@ project:
         evolve_cycle_id: EV-020
         head: bb4c400
         note: Phase 25 M105–M107 T105.1–T107.3 complete
-      next_action: T109.5 in_progress — Admin JobForm crawl controls
+      next_action: T110.1 — Corpus tree API red test
       milestones_completed:
       - M108
+      - M109
       tasks_completed:
       - T108.1
       - T108.2
@@ -1184,13 +1185,16 @@ project:
       - T109.2
       - T109.3
       - T109.4
+      - T109.5
+      - T109.6
       substeps:
-        current_task: T109.5
-        current_milestone: M109
+        current_task: T110.1
+        current_milestone: M110
         phase: 26
-        task_status: in_progress
+        task_status: pending
         m108_status: completed
-        m109_status: in_progress
+        m109_status: completed
+        m110_status: in_progress
         all_tasks_completed: false
     08-verify-build:
       status: completed
@@ -3656,14 +3660,15 @@ active_session:
     skip_rationale:
     mode: delta
     started_at: '2026-08-03'
-    current_action: T109.5 in_progress — Admin JobForm crawl controls
-    active_task: T109.5
-    active_milestone: M109
+    current_action: T110.1 — Corpus tree API red test
+    active_task: T110.1
+    active_milestone: M110
     gate_b_to_c: passed
     s024_d37_decision: S024-D37
-    note: S024/EV-022 07-build in_progress 2026-08-03 — M108 complete; T109.1–T109.4 completed (F60 crawl OpenAPI/tree); T109.5 in_progress — Admin JobForm crawl controls; active_task=T109.5; active_milestone=M109; current_stage=07-build
+    note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
     milestones_completed:
     - M108
+    - M109
     tasks_completed:
     - T108.1
     - T108.2
@@ -3675,6 +3680,8 @@ active_session:
     - T109.2
     - T109.3
     - T109.4
+    - T109.5
+    - T109.6
   - stage: 08-verify-build
     required: true
     status: pending
@@ -3709,11 +3716,11 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: T109.5 in_progress — Admin JobForm crawl controls
-    note: S024/EV-022 07-build in_progress 2026-08-03 — M108 complete; T109.1–T109.4 completed (F60 crawl OpenAPI/tree); T109.5 in_progress — Admin JobForm crawl controls; active_task=T109.5; active_milestone=M109; current_stage=07-build
+    current_action: T110.1 — Corpus tree API red test
+    note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
     askquestion_pending: false
   current_stage: 07-build
-  current_action: T109.5 in_progress — Admin JobForm crawl controls
+  current_action: T110.1 — Corpus tree API red test
   started_at: '2026-08-03'
   context_briefs: []
   feature_ids:
@@ -3725,7 +3732,7 @@ active_session:
   phase1_complete: true
   report: docs/sessions/S024-website-scrape-crawl/reports/tech-plan-delta.md
   report_status: completed
-  note: S024/EV-022 07-build in_progress 2026-08-03 — M108 complete; T109.1–T109.4 completed (F60 crawl OpenAPI/tree); T109.5 in_progress — Admin JobForm crawl controls; active_task=T109.5; active_milestone=M109; current_stage=07-build
+  note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
   askquestion_pending: false
   s024_d35_decision: S024-D35
   s024_d36_decision: S024-D36
@@ -10129,10 +10136,10 @@ stages:
     - F59
     - F60
     - F61
-    current_action: T109.5 in_progress — Admin JobForm crawl controls
-    next_action: T109.5 in_progress — Admin JobForm crawl controls
-    active_task: T109.5
-    active_milestone: M109
+    current_action: T110.1 — Corpus tree API red test
+    next_action: T110.1 — Corpus tree API red test
+    active_task: T110.1
+    active_milestone: M110
     phase: 26
     milestones:
     - M108
@@ -10141,6 +10148,7 @@ stages:
     - M111
     milestones_completed:
     - M108
+    - M109
     tasks_completed:
     - T108.1
     - T108.2
@@ -10152,17 +10160,20 @@ stages:
     - T109.2
     - T109.3
     - T109.4
+    - T109.5
+    - T109.6
     gate_b_to_c: passed
     s024_d37_decision: S024-D37
-    note: S024/EV-022 07-build in_progress 2026-08-03 — M108 complete; T109.1–T109.4 completed (F60 crawl OpenAPI/tree); T109.5 in_progress — Admin JobForm crawl controls; active_task=T109.5; active_milestone=M109; current_stage=07-build
+    note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
     substeps:
-      current_task: T109.5
-      current_milestone: M109
+      current_task: T110.1
+      current_milestone: M110
       phase: 26
-      task_status: in_progress
+      task_status: pending
       all_tasks_completed: false
       m108_status: completed
-      m109_status: in_progress
+      m109_status: completed
+      m110_status: in_progress
     s023_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -21437,9 +21448,9 @@ evolve_cycles:
     - 06-tech-tooling
     - 15-service-health
   current_stage: 07-build
-  current_action: T109.5 in_progress — Admin JobForm crawl controls
-  active_task: T109.5
-  active_milestone: M109
+  current_action: T110.1 — Corpus tree API red test
+  active_task: T110.1
+  active_milestone: M110
   mode: evolve
   delta_only: true
   branch: evolve/EV-022-website-scrape-crawl
@@ -21837,20 +21848,21 @@ evolve_cycles:
       - M109
       - M110
       - M111
-      current_action: T109.5 in_progress — Admin JobForm crawl controls
-      active_task: T109.5
-      active_milestone: M109
-      next_action: T109.5 in_progress — Admin JobForm crawl controls
+      current_action: T110.1 — Corpus tree API red test
+      active_task: T110.1
+      active_milestone: M110
+      next_action: T110.1 — Corpus tree API red test
       gate_b_to_c: passed
       s024_d37_decision: S024-D37
       substeps:
-        current_task: T109.5
-        current_milestone: M109
+        current_task: T110.1
+        current_milestone: M110
         phase: 26
-        task_status: in_progress
-        next_action: Admin JobForm crawl controls
+        task_status: pending
+        next_action: Corpus tree API red test
         m108_status: completed
-        m109_status: in_progress
+        m109_status: completed
+        m110_status: in_progress
         completed_tasks_m108:
         - T108.1
         - T108.2
@@ -21858,9 +21870,17 @@ evolve_cycles:
         - T108.4
         - T108.5
         - T108.6
-      note: S024/EV-022 07-build in_progress 2026-08-03 — M108 complete; T109.1–T109.4 completed (F60 crawl OpenAPI/tree); T109.5 in_progress — Admin JobForm crawl controls; active_task=T109.5; active_milestone=M109; current_stage=07-build
+        completed_tasks_m109:
+        - T109.1
+        - T109.2
+        - T109.3
+        - T109.4
+        - T109.5
+        - T109.6
+      note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
       milestones_completed:
       - M108
+      - M109
       tasks_completed:
       - T108.1
       - T108.2
@@ -21872,6 +21892,8 @@ evolve_cycles:
       - T109.2
       - T109.3
       - T109.4
+      - T109.5
+      - T109.6
     08-verify-build:
       status: pending
     09-qa:
@@ -22236,7 +22258,7 @@ evolve_cycles:
     - askquestion_pending
     - gate_b_to_c_pending
     note: S024/EV-022 Gate B→C PASS (S024-D37) 2026-08-03 — user confirmed option 1; checkpoints.phase_b=passed; gates.b_to_c=passed; handoff → 07-build T108.1 (TC-196 main-content extract unit test red)
-  next_action: T109.5 in_progress — Admin JobForm crawl controls
+  next_action: T110.1 — Corpus tree API red test
   tp_locks:
     playwright_js_render: true
     js_render: A_playwright_modal_worker
@@ -22309,9 +22331,10 @@ evolve_cycles:
   s024_d37_status: confirmed
   s024_d37_confirmed_at: '2026-08-03T18:37:34Z'
   gate_b_to_c: passed
-  note: S024/EV-022 07-build in_progress 2026-08-03 — M108 complete; T109.1–T109.4 completed (F60 crawl OpenAPI/tree); T109.5 in_progress — Admin JobForm crawl controls; active_task=T109.5; active_milestone=M109; current_stage=07-build
+  note: S024/EV-022 07-build in_progress 2026-08-03 — M108–M109 complete; T109.1–T109.6 completed (F60 crawl OpenAPI/tree + Admin JobForm); T110.1 next — Corpus tree API red test; active_task=T110.1; active_milestone=M110; current_stage=07-build
   milestones_completed:
   - M108
+  - M109
   tasks_completed:
   - T108.1
   - T108.2
@@ -22323,6 +22346,8 @@ evolve_cycles:
   - T109.2
   - T109.3
   - T109.4
+  - T109.5
+  - T109.6
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -31586,6 +31611,21 @@ git_history:
     files_changed: 4
     timestamp: '2026-08-03T18:45:49Z'
     note: M109 T109.2–T109.3 same-site BFS crawl planner
+  - sha: 60641d3
+    full_sha: 60641d31cb5f7bd0926e7d89e8c3fe261909596f
+    branch: evolve/EV-022-website-scrape-crawl
+    message: '[T109.4] feat: OpenAPI JobOptions crawl + GET /jobs/{id}/tree'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    task_id: T109.4
+    files_changed: 9
+    timestamp: '2026-08-03T18:54:07Z'
+    note: >-
+      JobOptions crawl + TreeNode + JobTreeResponse + JobMetrics crawl; openapi tree
+      path; app.py route + options wiring; job_tree.py; tests; execution-plan +
+      workflow-state
   notes:
   - sha: ccc82df4d99eec69f4a6ea1c2000391986c0f480
     short: ccc82df

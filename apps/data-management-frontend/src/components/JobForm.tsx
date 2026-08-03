@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { createJob, getJob, parseUrlsInput } from "../api/jobs";
-import type { Job } from "../api/types";
+import type { CreateJobOptions, Job } from "../api/types";
 import { requireAdminConfig } from "../config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,8 @@ import { useIsAdmin, useAuth } from "@/auth/auth-context";
 
 const POLL_MS = 2000;
 const TERMINAL: Job["status"][] = ["completed", "failed"];
+const DEFAULT_MAX_DEPTH = 2;
+const DEFAULT_MAX_PAGES = 25;
 
 export interface JobFormProps {
   onJobUpdate?: (job: Job) => void;
@@ -24,6 +26,9 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
   const isAdmin = useIsAdmin();
   const [urlsText, setUrlsText] = useState("");
   const [chunkSize, setChunkSize] = useState("256");
+  const [crawl, setCrawl] = useState(false);
+  const [maxDepth, setMaxDepth] = useState(String(DEFAULT_MAX_DEPTH));
+  const [maxPages, setMaxPages] = useState(String(DEFAULT_MAX_PAGES));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
@@ -62,10 +67,28 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
       return;
     }
 
+    const options: CreateJobOptions = { chunk_size_tokens: parsedChunk };
+    if (crawl) {
+      const parsedDepth = Number(maxDepth);
+      if (!Number.isFinite(parsedDepth) || parsedDepth < 0) {
+        setError(tr("admin.ingest.validation.maxDepthMin"));
+        return;
+      }
+      const parsedPages = Number(maxPages);
+      if (!Number.isFinite(parsedPages) || parsedPages < 1) {
+        setError(tr("admin.ingest.validation.maxPagesMin"));
+        return;
+      }
+      options.crawl = true;
+      options.max_depth = parsedDepth;
+      options.max_pages = parsedPages;
+      options.crawl_scope = "same_domain";
+    }
+
     setBusy(true);
     try {
       const client = requireAdminConfig();
-      const created = await createJob(client, urls, parsedChunk);
+      const created = await createJob(client, urls, options);
       await pollUntilDone(created.job_id);
     } catch (err) {
       setError(err instanceof Error ? err.message : tr("admin.ingest.failed"));
@@ -122,6 +145,58 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
                   disabled={busy}
                 />
               </div>
+              <div className="flex items-start gap-2">
+                <input
+                  id="ingest-crawl"
+                  type="checkbox"
+                  className="mt-1"
+                  checked={crawl}
+                  disabled={busy}
+                  data-testid="ingest-crawl"
+                  onChange={(e) => {
+                    setCrawl(e.target.checked);
+                  }}
+                />
+                <Label htmlFor="ingest-crawl" className="font-normal">
+                  {tr("admin.ingest.crawlLabel")}
+                </Label>
+              </div>
+              {crawl ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ingest-max-depth">
+                      {tr("admin.ingest.maxDepthLabel")}
+                    </Label>
+                    <Input
+                      id="ingest-max-depth"
+                      type="number"
+                      min={0}
+                      value={maxDepth}
+                      data-testid="ingest-max-depth"
+                      onChange={(e) => {
+                        setMaxDepth(e.target.value);
+                      }}
+                      disabled={busy}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ingest-max-pages">
+                      {tr("admin.ingest.maxPagesLabel")}
+                    </Label>
+                    <Input
+                      id="ingest-max-pages"
+                      type="number"
+                      min={1}
+                      value={maxPages}
+                      data-testid="ingest-max-pages"
+                      onChange={(e) => {
+                        setMaxPages(e.target.value);
+                      }}
+                      disabled={busy}
+                    />
+                  </div>
+                </div>
+              ) : null}
               <Button type="submit" disabled={busy}>
                 {busy ? tr("admin.ingest.running") : tr("admin.ingest.submit")}
               </Button>

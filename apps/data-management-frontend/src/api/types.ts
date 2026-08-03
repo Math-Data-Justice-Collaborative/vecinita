@@ -29,6 +29,10 @@ export interface CreateJobOptions {
   backfill?: boolean;
   backfill_source?: BackfillSource;
   ack_reconstruct_from_chunks?: boolean;
+  crawl?: boolean;
+  max_depth?: number;
+  max_pages?: number;
+  crawl_scope?: "same_domain" | "path_prefix";
 }
 
 export interface CreateJobResponse {

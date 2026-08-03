@@ -424,6 +424,11 @@ const enStrings = {
   "admin.ingest.urlsLabel": "Public URLs (one per line)",
   "admin.ingest.urlsPlaceholder": "https://example.org/community/page",
   "admin.ingest.chunkSizeLabel": "Chunk size (tokens)",
+  "admin.ingest.crawlLabel": "Crawl same-site pages from first URL",
+  "admin.ingest.maxDepthLabel": "Max depth",
+  "admin.ingest.maxPagesLabel": "Max pages",
+  "admin.ingest.validation.maxDepthMin": "Max depth must be 0 or greater.",
+  "admin.ingest.validation.maxPagesMin": "Max pages must be at least 1.",
   "admin.ingest.running": "Running…",
   "admin.ingest.submit": "Submit ingest job",
   "admin.ingest.validation.noUrls": "Enter at least one URL (one per line).",
@@ -947,6 +952,14 @@ const esStrings = {
   "admin.ingest.urlsLabel": "URLs públicas (una por línea)",
   "admin.ingest.urlsPlaceholder": "https://example.org/community/page",
   "admin.ingest.chunkSizeLabel": "Tamaño de fragmento (tokens)",
+  "admin.ingest.crawlLabel":
+    "Rastrear páginas del mismo sitio desde la primera URL",
+  "admin.ingest.maxDepthLabel": "Profundidad máxima",
+  "admin.ingest.maxPagesLabel": "Máximo de páginas",
+  "admin.ingest.validation.maxDepthMin":
+    "La profundidad máxima debe ser 0 o mayor.",
+  "admin.ingest.validation.maxPagesMin":
+    "El máximo de páginas debe ser al menos 1.",
   "admin.ingest.running": "Ejecutando…",
   "admin.ingest.submit": "Enviar trabajo de ingesta",
   "admin.ingest.validation.noUrls":
