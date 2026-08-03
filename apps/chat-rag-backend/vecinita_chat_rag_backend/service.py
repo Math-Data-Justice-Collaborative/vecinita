@@ -57,7 +57,7 @@ def _build_prompt(
     chunks: list[RetrievedChunk],
     *,
     system_prompt: str,
-    packer: PackerMode = "p1",
+    packer: PackerMode = "p3",
     context_max_chars: int = 3500,
 ) -> str:
     """Build instruct prompt via shared HF chat-template helper (RD-167 / TC-145 / F42)."""
@@ -212,7 +212,7 @@ class ChatRagService:
     def _rag_packing(self) -> tuple[bool, int, PackerMode, int]:
         """Return (multi_query, count, packer, max_chars) from settings or defaults."""
         if self._settings is None:
-            return True, 3, "p1", 3500
+            return True, 3, "p3", 3500
         return (
             self._settings.rag_multi_query,
             self._settings.rag_multi_query_count,
