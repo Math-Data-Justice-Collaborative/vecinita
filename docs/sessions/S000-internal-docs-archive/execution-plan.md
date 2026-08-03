@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 25: EV-020 — Residual top_k + P3 (F50–F51) |
-| **Active milestone** | M106 — F51 default P3 (after M105 complete) |
-| **Active task** | T106.1 — Test red: default packer p3 (TC-194) |
-| **Tasks completed** | Phase 21–24 complete; Phase 25 M105 complete (T105.1–T105.4) |
+| **Active milestone** | M107 — UJ-063 e2e + phase gate |
+| **Active task** | T107.1 — API e2e UJ-063 (TC-195) |
+| **Tasks completed** | Phase 21–24 complete; Phase 25 M105–M106 complete |
 | **Last updated** | 2026-08-03 |
 | **Evolve cycle** | EV-020 — Standard; S023-D12 Gate B→C PASS; TP1–TP6 approved; skip 05/06 |
 | **Git branch** | `evolve/EV-020-retrieval-topk-packing` |
@@ -2118,10 +2118,10 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T106.1 | Test: unit red — default packer is `p3`; P3 dedupe+budget behavior still holds (TC-194) | Test | in_progress | AC-RQ9, F51, #165 | T105.4 | — | S023 | F51 |
-| T106.2 | Config: DO ChatRAG `VECINITA_RAG_PACKER=p3` (add if missing); yaml/docs already default p3 | Config | pending | config-spec, RD-232, RD-234 | — | — | S023 | F51 |
-| T106.3 | Code: ChatRAG settings default `rag_packer="p3"`; eval sandbox inherits same default | Code | pending | feature-list F51, RD-232 | T106.1, T106.2 | — | S023 | F51 |
-| T106.4 | Test: unit green for default p3; existing UJ-055 tests tolerate p3 default or assert packer | Test | pending | AC-RQ9, TC-194, UJ-055 | T106.3 | — | S023 | F51 |
+| T106.1 | Test: unit red — default packer is `p3`; P3 dedupe+budget behavior still holds (TC-194) | Test | completed | AC-RQ9, F51, #165 | T105.4 | 2026-08-03 | S023 | F51 |
+| T106.2 | Config: DO ChatRAG `VECINITA_RAG_PACKER=p3` (add if missing); yaml/docs already default p3 | Config | completed | config-spec, RD-232, RD-234 | — | 2026-08-03 | S023 | F51 |
+| T106.3 | Code: ChatRAG settings default `rag_packer="p3"`; eval sandbox inherits same default | Code | completed | feature-list F51, RD-232 | T106.1, T106.2 | 2026-08-03 | S023 | F51 |
+| T106.4 | Test: unit green for default p3; existing UJ-055 tests tolerate p3 default or assert packer | Test | completed | AC-RQ9, TC-194, UJ-055 | T106.3 | 2026-08-03 | S023 | F51 |
 
 #### M107: UJ-063 e2e + phase gate
 
@@ -2129,7 +2129,7 @@ fail URL after exhaust; dim mismatch hard-fail (AC-IR3/IR4).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T107.1 | Test: API e2e `tests/e2e/test_uj063_topk_p3_ask.py` (TC-195) — ≤8 sources, p3 default | Test | pending | UJ-063, e2e-coverage, AC-RQ8/RQ9 | T106.4 | — | S023 | F50–F51 |
+| T107.1 | Test: API e2e `tests/e2e/test_uj063_topk_p3_ask.py` (TC-195) — ≤8 sources, p3 default | Test | in_progress | UJ-063, e2e-coverage, AC-RQ8/RQ9 | T106.4 | — | S023 | F50–F51 |
 | T107.2 | Docs: Phase 25 gate checklist + execution-plan Current State; issue closeout notes #158/#165 | Docs | pending | Phase 25 gate, RD-235 | T107.1 | — | S023 | F50–F51 |
 | T107.3 | Test/Docs: Confirm AC-RQ10 held; no Playwright; update any tests hardcoding top_k=5 / packer=p1 defaults | Test | pending | AC-RQ10, TP4/TP6 | T107.1 | — | S023 | F50–F51 |
 
