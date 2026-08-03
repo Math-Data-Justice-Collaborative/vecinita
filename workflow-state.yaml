@@ -29788,8 +29788,24 @@ artifacts:
   recorded_at: '2026-08-03T22:18:30Z'
   note: 'Path A PASS @ cc2750c; PR #190 MERGED; Modal+DO CD success; H1/H3/H3b/H4/H5 PASS; H2 SKIP'
 git_history:
-  current_branch: main
+  current_branch: docs/S024-EV-022-deploy-smoke-closeout
   branches:
+  - name: docs/S024-EV-022-deploy-smoke-closeout
+    purpose: 'S024/EV-022 Path A deploy-smoke closeout docs (13 report + routing/HANDOFF)'
+    base: main
+    status: open
+    created_at: '2026-08-03'
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    head_sha: 55c45830d0bf4806d912d362cc8b60a42a729006
+    head_short: 55c4583
+    pr_number: 191
+    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/191'
+    pr_title: 'docs(S024/EV-022): Path A deploy smoke closeout'
+    pr_base: main
+    pr_status: open
+    pr_opened_at: '2026-08-03'
+    note: 'PR #191 OPEN — docs closeout after Path A PASS; stage 13 already completed'
   - name: evolve/EV-022-website-scrape-crawl
     purpose: 'EV-022 epic #185 scrape/crawl/tree UI'
     base: main
@@ -33093,7 +33109,28 @@ git_history:
     files_changed: merge
     timestamp: '2026-08-03T22:18:30Z'
     note: 'PR #190 merge commit; Path A deploy smoke PASS; Modal CD 30857801172; DO CD 30857894636; Alembic 20260803_0011'
+  - sha: 55c4583
+    full_sha: 55c45830d0bf4806d912d362cc8b60a42a729006
+    short: 55c4583
+    branch: docs/S024-EV-022-deploy-smoke-closeout
+    message: 'docs(S024/EV-022): Path A deploy smoke PASS and close 13'
+    stage: 13-deploy-smoke
+    skill_id: 13-deploy-smoke
+    session_id: S024-website-scrape-crawl
+    evolve_cycle_id: EV-022
+    pr_number: 191
+    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/191'
+    pr_status: open
+    files_changed: 4
+    files:
+    - docs/sessions/S024-website-scrape-crawl/HANDOFF.md
+    - docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
+    - docs/sessions/S024-website-scrape-crawl/routing-plan.md
+    - workflow-state.yaml
+    timestamp: '2026-08-03T22:22:05Z'
+    note: 'Docs closeout commit on docs/S024-EV-022-deploy-smoke-closeout; PR #191 open; 13-deploy-smoke already completed — no stage status change'
   notes:
+  - '2026-08-03T22:22:05Z S024/EV-022: recorded commit 55c4583 on docs/S024-EV-022-deploy-smoke-closeout — Path A deploy smoke PASS and close 13; PR #191 OPEN; stage completion unchanged.'
   - '2026-08-03T22:18:30Z S024/EV-022: Path A PASS — PR #190 MERGED @ cc2750c; Modal CD 30857801172 success; DO CD 30857894636 success; H1/H3/H3b/H4/H5 PASS; H2 SKIP; Alembic 20260803_0011 via DO CD; live OpenAPI /internal/v1/corpus/tree; report docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; gates.deploy=passed; awaiting cycle-close AskQuestion.'
   - '2026-08-03T21:35:21Z S024/EV-022: recorded commit 2c97d36 CI fix (nested shadow fixture, Alembic head, OpenAPI maxItems); PR #190 CI re-running after fix; next_action=Watch CI on PR #190 @ 2c97d36; merge when green.'
   - '2026-08-03T21:33:05Z S024/EV-022: PR #190 opened (PR-59 Phase 26 F59–F61) on evolve/EV-022-website-scrape-crawl → main; recorded commit 6422ce8; 13-deploy-smoke watching CI then merge Path A + H1–H5.'
