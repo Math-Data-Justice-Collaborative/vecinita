@@ -3,7 +3,7 @@
 | Stage | Required | Status | Mode | Notes |
 |-------|----------|--------|------|-------|
 | 00-context | yes | completed | scoped | Session open 2026-08-02; S022 closed first |
-| 16-evolve | orchestrator | in_progress | — | EV-020 — 13-deploy-smoke Path A |
+| 16-evolve | orchestrator | in_progress | — | EV-020 Path A PASS — await cycle close |
 | 01-requirements | yes | completed | delta | Report: [01-requirements-topk-packing.md](./reports/01-requirements-topk-packing.md) |
 | 02-verify-plan | yes | completed | delta | Gate A→B PASS (S023-D10) |
 | 04-tech-plan | yes | completed | delta | Gate B→C PASS (S023-D12) |
@@ -13,7 +13,7 @@
 | 10-e2e | yes | completed | — | T0 PASS; T2 deferred to 13 |
 | 11-verify-impl | yes | completed | — | S023-D19/D20; [verify-impl.md](./reports/verify-impl.md) |
 | 12-verify-deploy | yes | completed | delta | S023-D21; [deploy-checklist.md](./reports/deploy-checklist.md) |
-| 13-deploy-smoke | yes | in_progress | — | H1–H5 + DO `VECINITA_TOP_K` / packer |
+| 13-deploy-smoke | yes | completed | — | Path A PASS; [deploy-smoke.md](./reports/deploy-smoke.md) |
 
 ## Skipped
 
