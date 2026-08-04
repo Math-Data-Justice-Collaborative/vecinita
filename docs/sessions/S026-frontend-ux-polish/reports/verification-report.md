@@ -1,28 +1,27 @@
-# Verification report — M112 (F66 / #104)
+# Verification report — M113 (F67 / #106)
 
 **Session:** S026-frontend-ux-polish  
 **Cycle:** EV-024  
 **Stage:** 08-verify-build (milestone boundary)  
 **Date:** 2026-08-04  
 **Branch:** `evolve/EV-024-frontend-ux-polish`  
-**Head:** `7c04b49`
+**Head:** `09342a5`
 
 ## Scope
 
-M112 — shared `ActionIcon` in `packages/frontend-ui`; wire admin Health/Jobs/Corpus
-refresh + ChatRAG Ask/chrome; Vitest TC-221–222 / UJ-071.
+M113 — shared Radix `Tooltip` in `packages/frontend-ui`; EN/ES i18n keys; wire theme +
+language both apps + admin force sign-out + ChatRAG new chat; Vitest TC-223–224 / UJ-072.
 
 ## Checks
 
 | Check | Result | Notes |
 |-------|--------|-------|
-| `make check-fast` (lint + typecheck) | **PASS** | Pre-existing admin FE refresh warnings only |
-| `frontend-ui` Vitest + coverage 100% | **PASS** | 19 tests |
-| Admin Vitest (UJ-071 + Health) | **PASS** | 8 tests |
-| ChatRAG Vitest (UJ-071 + ChatPanel + Sidebar) | **PASS** | 22 tests |
-| H0c `tests/unit/test_cors_policy.py` | **PASS** | No CORS change this milestone |
-| `scripts/check_secrets.sh` | **PASS** | |
-| Operator specs not tracked | **PASS** | |
+| `frontend-ui` Vitest + typecheck + lint | **PASS** | 22 tests (incl. Tooltip) |
+| `frontend-i18n` Vitest + typecheck | **PASS** | 17 tests |
+| ChatRAG Vitest (UJ-072 + ThemeToggle + UJ-071) | **PASS** | 5 tests |
+| Admin Vitest (UJ-072 + UJ-071) | **PASS** | 3 tests |
+| ChatRAG / Admin typecheck + lint | **PASS** | Pre-existing admin FE refresh warnings only |
+| Format (prettier) | **PASS** | Touched packages |
 | Modal GPU smoke | **SKIPPED** | Frontend-only; no GPU budget ask |
 
 ## Connectivity artifacts
@@ -30,15 +29,13 @@ refresh + ChatRAG Ask/chrome; Vitest TC-221–222 / UJ-071.
 | Artifact | Present |
 |----------|---------|
 | `tests/smoke/test_staging_connectivity.py` | Yes (unchanged) |
-| `scripts/verify_connectivity.sh` (if any) | N/A this delta |
+| CORS / H0c | Unchanged this milestone |
 
 ## Auto-corrections
 
-None required.
+Prettier on `UsersPage.tsx` only.
 
 ## Verdict
 
-**PASS** — minor PR [#200](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200);
-GitHub CI green @ `0942ef9` (run
-[30939564361](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361);
-python flake HF 429 retried). Merge needs explicit approval. Next: M113 / F67.
+**PASS** — open minor PR for #106 after push; merge needs explicit approval.
+Next after merge: **M114** F64 cold-start tips (#87).
