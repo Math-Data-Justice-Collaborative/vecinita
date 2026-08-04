@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### EV-023: CI / local quality + release automation (F62–F63) — S025 / #194 #182 #103
+
+- **F62**: Husky pre-push = `make lint` + `make test-fast`; pre-commit = typecheck + security-scan + job-dispatch
+- **F63**: Auto semver patch tag + GitHub Release after Deploy DigitalOcean (`release.yml`)
+- **Deploy:** PR [#195](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195) → `main` @ `58e52c8`; identity fix [#196](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/196) @ `5fa370a`; tag **[v0.4.1](https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1)**
+
 ### EV-019: Ingest resilience (F47–F49) — S022 / #163 #166 #160
 
 - **F47**: `content_hash` skip on unchanged URL re-ingest (`force` bypass)
