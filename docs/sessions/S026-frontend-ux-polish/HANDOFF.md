@@ -12,7 +12,7 @@
 | Milestone | **M114 complete** — next **M115** F65 energy (#93) |
 | PR #200 | Merged (M112 F66 ActionIcon) — main CI + preflight green @ `e1ccf9e` |
 | PR M113 | [#202](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/202) open (Tooltip; frozen tip `pr/201-m113-tooltip`) — former #201 closed |
-| PR M114 | Open for #87 after push (stacked on #202 tip) |
+| PR M114 | [#203](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203) open — CI green @ `adf40b4` |
 | Branch | `evolve/EV-024-frontend-ux-polish` |
 | Features | F64–F69 |
 | Epic | [#193](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/193) |
