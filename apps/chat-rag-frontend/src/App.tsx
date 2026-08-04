@@ -11,6 +11,7 @@ import { usePathname } from "./hooks/usePathname";
 import { useTagFilters } from "./hooks/useTagFilters";
 import { useTheme } from "./hooks/useTheme";
 import { t } from "./i18n/messages";
+import { TooltipProvider } from "vecinita-frontend-ui";
 import "./App.css";
 
 function AppContent() {
@@ -97,7 +98,9 @@ function AppContent() {
 export default function App() {
   return (
     <LocaleProvider>
-      <AppContent />
+      <TooltipProvider>
+        <AppContent />
+      </TooltipProvider>
     </LocaleProvider>
   );
 }

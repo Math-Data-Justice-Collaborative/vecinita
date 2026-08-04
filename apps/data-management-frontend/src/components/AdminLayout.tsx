@@ -10,7 +10,8 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { LanguageToggle, useLocale } from "vecinita-frontend-ui";
+import { LanguageToggle, Tooltip, useLocale } from "vecinita-frontend-ui";
+import { t } from "vecinita-frontend-i18n";
 
 import { useAuth, useIsAdmin } from "@/auth/auth-context";
 import { ModelDownloadProgressIndicator } from "@/evaluation/ModelDownloadProgressIndicator";
@@ -79,7 +80,15 @@ function ChromeControls() {
       className="flex items-center gap-2"
       data-testid="admin-chrome-controls"
     >
-      <LanguageToggle locale={locale} onChange={setLocale} />
+      <Tooltip content={t(locale, "shared.tooltip.languageToggle")}>
+        <span
+          className="inline-flex"
+          tabIndex={0}
+          data-testid="language-toggle-wrap"
+        >
+          <LanguageToggle locale={locale} onChange={setLocale} />
+        </span>
+      </Tooltip>
       <ThemeToggle />
     </div>
   );

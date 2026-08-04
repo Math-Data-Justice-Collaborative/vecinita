@@ -802,6 +802,7 @@ already shipped; #87 residual = query tips + VECINA marketing only (**no mini su
 | S026-D26 | 05 M2–M4 | 37a 38a 39a — T118.1+T114.3; feedback in data-mgmt plan; secrets in T118.2; **M1 pending explain** |
 | S026-D27 | 05 M1 | Admin Feedback: DM `GET /admin/feedback` + internal-write POST (40a) |
 | S026-D28 | Gate B→C | **PASS** (41a) → **07-build** M112/F66 (#104); 06 skipped |
+| S026-D29 | Merge #200 → M113 | AskQuestion **42c→42a**: merge PR #200 (M112 F66) first, then continue M113 (F67 Tooltip / #106); merge_policy approved; PR not marked merged yet |
 
 ### Docs / artifacts
 
@@ -816,7 +817,7 @@ already shipped; #87 residual = query tips + VECINA marketing only (**no mini su
 
 ### Phase 0 status
 
-EV-024 **in_progress**. Gate B→C **PASS** (S026-D28). **07-build** active — M112/F66.
+EV-024 **in_progress**. Gate B→C **PASS** (S026-D28). **07-build** — S026-D29: merging PR #200 then M113/F67.
 
 ### Feature map
 
