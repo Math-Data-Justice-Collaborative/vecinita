@@ -40,11 +40,13 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S021 | feature | completed | Empty retrieve + CE re-gate follow-on (#83 / AC-BB9); RET-001 via #177 | `evolve/EV-018-retrieval-follow-on` (merged #174); RET #177 @ 6e3207d | 2026-08-02 | 2026-08-02 |
 | S022 | feature | completed | Ingest resilience (#163/#166/#160 → F47–F49) | `evolve/EV-019-ingest-resilience` | 2026-08-02 | 2026-08-02 |
 | S023 | feature | completed | Residual top_k=8 + default P3 packing (F50/F51) | `evolve/EV-020-retrieval-topk-packing` | 2026-08-02 | 2026-08-03 |
-| S024 | feature | in_progress | Website scrape & crawl pipeline (epic #185 → #69/#71/#70) | `evolve/EV-022-website-scrape-crawl` | 2026-08-03 | — |
+| S024 | feature | completed | Website scrape & crawl pipeline (epic #185 → #69/#71/#70) | `evolve/EV-022-website-scrape-crawl` | 2026-08-03 | 2026-08-03 |
+| S025 | feature | completed | CI / local quality + release automation (#194 → #182/#103; F62/F63) | `evolve/EV-023-ci-release-automation` | 2026-08-03 | 2026-08-04 |
+| S026 | feature | in_progress | ChatRAG + Admin UX polish epic (#193 → #87/#93/#104/#106/#186/#170) | `evolve/EV-024-frontend-ux-polish` | 2026-08-04 | — |
 
 ## Active session
 
-**S024-website-scrape-crawl** / **EV-022** — epic [#185](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/185) (scrape → crawl → tree UI). Branch `evolve/EV-022-website-scrape-crawl`. Predecessor S023/EV-020 closed 2026-08-03.
+**S026-frontend-ux-polish** / **EV-024** — epic [#193](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/193). Branch `evolve/EV-024-frontend-ux-polish`. Predecessor S025/EV-023 closed 2026-08-04.
 
 ## Folder layout
 

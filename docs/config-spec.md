@@ -38,6 +38,14 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_RAG_RERANK_CE_MODEL` | string | `BAAI/bge-reranker-v2-m3` | No | F45 CE model id (spike + gated prod) |
 | `VECINITA_RAG_RERANK_CE_TOP_N` | int | `20` | No | F45 retrieve-N before CE; keep `top_k` after |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
+| `VECINITA_ENERGY_GPU_TDP_W` | float | `70` | No | F65 heuristic GPU TDP (watts); prod pin T4 |
+| `VECINITA_ENERGY_GPU_UTIL` | float | `0.5` | No | F65 assumed GPU utilization (0–1] |
+| `VECINITA_ENERGY_GCO2E_PER_KWH` | float | `386` | No | F65 US-average-ish gCO₂e/kWh (configurable constant; not live grid) |
+| `VECINITA_ENERGY_CAR_GCO2E_PER_KM` | float | `251` | No | F65 avg car gCO₂e/km (≈ EPA 404 g/mi) for distance equivalent |
+| `VECINITA_ENERGY_CAR_GCO2E_PER_DAY` | float | — | No | Optional F65 use-guide % of typical car-day |
+| `VECINITA_ENERGY_CAR_GCO2E_PER_YEAR` | float | — | No | Optional F65 use-guide % of typical car-year |
+| `VECINITA_FEEDBACK_RETENTION_DAYS` | int | `90` | No | F68 purge horizon for `feedback` rows |
+| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | string | — | No | Optional operator notify URL on new feedback |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (prod) | Modal FastEmbed base URL |
 | `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal **`vecinita-llm`** base URL — ChatRAG / prod inference + warm (ADR-037) |
 | `VECINITA_MODAL_LLM_PLAYGROUND_URL` | string | — | Yes (admin/eval sandbox, Slice D) | Modal **`vecinita-llm-playground`** base URL — list/pull/eval sandbox (TP-S010-27) |

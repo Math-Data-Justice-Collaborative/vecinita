@@ -137,6 +137,14 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
   "answer": "string",
   "language": "en | es",
   "cache_hit": "none | exact | semantic | retrieve",
+  "energy_estimate": {
+    "wh": 0.0,
+    "g_co2e": 0.0,
+    "method": "tdp_util_walltime_v1",
+    "advisory": "string (localized or code; FE may also i18n)",
+    "car_km_equiv": 0.0,
+    "car_m_equiv": 0.0
+  },
   "sources": [
     {
       "chunk_id": "uuid",
@@ -152,6 +160,13 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
 `cache_hit` (F43 / EV-017): optional for older clients; **required in OpenAPI** after F43 ships.
 `none` = full generate path; `exact` / `semantic` skip LLM; `retrieve` reuses cached chunks then may still synthesize.
 
+`energy_estimate` (F65 / EV-024): heuristic Wh/gCO₂e from GPU TDP × util × ask wall time
+(defaults: T4 70 W × 0.5 × duration); **not** live Modal power metrics. Always include
+`advisory` that values are approximate. `car_km_equiv` / `car_m_equiv` =
+`g_co2e / VECINITA_ENERGY_CAR_GCO2E_PER_KM` (default **251** g/km ≈ EPA 404 g/mi) —
+primary UI car framing (S026-D22). FE may derive mi from km. Use guide may also show % of
+optional car-day/year constants; those need not be in the JSON if FE computes from config.
+
 - **Errors**: `400` validation / forbidden fields; `503` upstream Modal unavailable.
 
 ### POST `/api/v1/ask/stream`
@@ -161,7 +176,35 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
 - **Request**: Same as `/ask`.
 - **Response**: `text/event-stream` — events: `token`, `sources`, `done`.
   `done` payload may include `cache_hit` (same enum as `/ask`) when F43 is enabled.
+  `done` **includes** `energy_estimate` (F65) when EV-024 ships.
 - **Errors**: Same as `/ask`.
+
+### POST `/api/v1/feedback` (EV-024 / F68)
+
+- **Purpose**: Anonymous community product feedback (no visitor identity).
+- **Auth**: None (public).
+- **Request**:
+
+```json
+{
+  "category": "bug | wrong_answer | suggestion | other",
+  "message": "string (required, 1-4000 chars)",
+  "locale": "en | es (optional)"
+}
+```
+
+- **Forbidden fields**: `email`, `name`, `user_id`, chat transcript auto-attach — reject `400`
+  if present (ADR-046).
+- **Response** `201`:
+
+```json
+{
+  "id": "uuid",
+  "created_at": "ISO8601"
+}
+```
+
+- **Errors**: `400` validation / forbidden fields; `503` write path unavailable.
 
 ### GET `/api/v1/documents`
 
@@ -754,6 +797,9 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
       "event_type": "document.deleted",
       "entity_type": "document",
       "entity_id": "uuid",
+      "actor_id": "uuid | null",
+      "actor_role": "string | null",
+      "actor_email": "string | null",
       "request_id": "uuid",
       "payload": {"title": "Old Title", "url": "https://..."},
       "created_at": "ISO8601"
@@ -764,6 +810,24 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
   "total_count": 1200
 }
 ```
+
+`actor_email` (F69 / EV-024): **read-time enrich** from Supabase Auth; never stored on
+`audit_log`. Null when unresolved — UI falls back to truncated `actor_id`.
+
+### GET `/admin/feedback` (EV-024 / F68) — Data Management Backend
+
+- **Purpose**: List anonymous community feedback for operators.
+- **Auth**: Bearer JWT; roles `admin` | `super_admin`.
+- **Query**: `page`, `page_size`, optional `category`, `since`, `until`.
+- **Response** `200`: items with `id`, `created_at`, `category`, `message`, `locale`.
+- **Errors**: `401` / `403`.
+
+### POST `/internal/v1/feedback` (EV-024 / F68) — Internal Write API
+
+- **Purpose**: Persist feedback row (called by ChatRAG backend).
+- **Auth**: Internal API key.
+- **Body**: Same fields as public feedback (no email).
+- **Side effects**: Insert `feedback` row; optional operator notify.
 
 ### GET `/internal/v1/documents/{document_id}/history` (EV-002 / F29)
 

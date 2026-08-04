@@ -39,10 +39,13 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-042](ADR-042-in-process-h1-answer-cache.md) | In-process H1 answer / retrieval cache cascade | Accepted | 04-tech-plan (S020/EV-017 F43) |
 | [ADR-043](ADR-043-session-handoff-safe-stops.md) | Session HANDOFF.md + safe-stop resume digests | Accepted | 17-retrospective (RET-001) |
 | [ADR-044](ADR-044-ingest-chunk-tokenizer-overlap.md) | Ingest HF tokenizer + default chunk overlap 32 | Accepted | 01-requirements (S022/EV-019 F49) |
+| [ADR-045](ADR-045-website-scrape-crawl-tree.md) | Website scrape / crawl / corpus tree | Accepted | S024/EV-022 |
+| [ADR-046](ADR-046-anonymous-community-feedback.md) | Anonymous community feedback rows (ADR-004 amendment) | Accepted | 01-requirements (S026/EV-024 F68) |
+| [ADR-047](ADR-047-ask-energy-heuristic-car-equivalent.md) | Ask energy heuristic + car-travel equivalent | Accepted | 04-tech-plan (S026/EV-024 F65) |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost
-> clauses remain in force.
+> clauses remain in force. **ADR-046** narrowly permits anonymous `feedback` rows (no visitor email).
 
 ## Deferred (no ADR file yet)
 

@@ -284,6 +284,26 @@
 - [ ] **AC-REL4**: Idempotent if HEAD already tagged; skips on `[skip release]` (TC-213, TC-214, F63).
 - [ ] **AC-REL5**: Out of EV-023 without unlock: full semantic-release / conventional-commits analyzer; floating major/minor tags; tagging before Modal/DO complete.
 
+### EV-024 — ChatRAG + Admin UX polish (F64–F69) — S026 / epic #193
+
+- [ ] **AC-UX1**: Wait catalog includes bilingual `tip` and `marketing` entries (and existing `fact`); no mini surveys (UJ-069, TC-216, F64 / #87).
+- [ ] **AC-UX2**: F40 consent cookie + donate CTA behavior unchanged with typed catalog (TC-217, ADR-039).
+- [ ] **AC-UX3**: `/ask` and stream `done` include `energy_estimate` { wh, g_co2e, method, advisory, car_km_equiv, car_m_equiv } using T4 70 W × 0.5 util × wall seconds × configured gCO₂e/kWh; car distance from g_co2e ÷ car g/km (default 251) (UJ-070, TC-218–219, F65 / #93).
+- [ ] **AC-UX4**: ChatRAG UI shows estimate chip + permanent approximate advisory (EN/ES) (TC-220).
+- [ ] **AC-UX5**: Bilingual use guide available (query tips + env context; optional car-day/year %) (TC-220).
+- [ ] **AC-UX6**: Shared action-icon animations for pending refresh/send (and issue MVP surfaces) across admin + ChatRAG (UJ-071, TC-221, F66 / #104).
+- [ ] **AC-UX7**: `prefers-reduced-motion: reduce` skips/shortens animations (TC-222).
+- [ ] **AC-UX8**: Shared Tooltip; theme + language toggles both apps + ≥1 domain control/app; EN/ES (UJ-072, TC-223, F67 / #106).
+- [ ] **AC-UX9**: Tooltips keyboard-focusable; supplement `aria-label` (TC-224).
+- [ ] **AC-UX10**: `POST /api/v1/feedback` accepts category + message only; rejects email/identity fields (UJ-073, TC-225, F68 / #186, ADR-046).
+- [ ] **AC-UX11**: Feedback rows stored in corpus Postgres without PII columns (TC-225, privacy).
+- [ ] **AC-UX12**: ChatRAG Feedback button → page; Admin Feedback list for admin/super-admin (TC-226–227).
+- [ ] **AC-UX13**: Feedback retention purge at **90 days** (TC-228).
+- [ ] **AC-UX14**: Audit UI/API shows resolved actor email (Supabase) with UUID fallback; read-time only (UJ-074, TC-229, F69 / #170).
+- [ ] **AC-UX15**: `audit_log` schema/writes remain free of email/name (TC-230, AC-A6/U6/E8).
+- [ ] **AC-UX16**: Out of EV-024 without unlock: live Modal power metrics per ask; visitor contact email; mini surveys; auto-attach chat transcripts; denormalized actor names on audit_log; live fleet/traffic car factors.
+- [ ] **AC-UX17**: UI primary car framing is ≈ meters/miles of average car travel from `car_*_equiv`; use guide may add day/year % (TC-231, S026-D22).
+
 
 ## Quantitative benchmarks
 

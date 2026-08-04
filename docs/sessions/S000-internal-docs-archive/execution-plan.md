@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; **S024 Phase 26 delta 2026-08-03**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; S024 Phase 26 delta 2026-08-03; **S026 Phase 27 delta 2026-08-04**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**045**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**047**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 26: EV-022 — Website scrape & crawl (F59–F61) |
-| **Active milestone** | M111 — **completed**; Phase D PASS; 11+12 **approved** |
-| **Active task** | **13-deploy-smoke** — Path A merge/deploy + H1–H5 |
-| **Tasks completed** | Phase 21–25 complete; M108–M111 done; 09–12 done (S024-D43/D46/D47) |
-| **Last updated** | 2026-08-03 |
-| **Evolve cycle** | EV-022 — Standard; 12 signed (S024-D47 Decision A); 13 in progress |
-| **Git branch** | `evolve/EV-022-website-scrape-crawl` |
-| **Active session** | S024-website-scrape-crawl — 13-deploy-smoke |
-| **Scope addition** | 2026-08-03 — F59 scrape + F60 crawl + F61 tree (#185/#69/#71/#70). |
+| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
+| **Active milestone** | M112 — complete; next M113 F67 Tooltip (#106) |
+| **Active task** | **08-verify-build** — M112 boundary (then minor PR #104 stream) |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112 T112.1–T112.4 complete** |
+| **Last updated** | 2026-08-04 |
+| **Evolve cycle** | EV-024 — Standard; Gate B→C PASS (S026-D28); 07-build M112 done |
+| **Git branch** | `evolve/EV-024-frontend-ux-polish` |
+| **Active session** | S026-frontend-ux-polish — 07-build / 08 at M112 |
+| **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
 
 ## Template
 
@@ -2237,6 +2237,124 @@ expand/collapse + bulk selection; ChatRAG backend nested source fields only — 
 
 ---
 
+## Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69)
+
+> **Session:** S026 · **Cycle:** EV-024 · **Branch:** `evolve/EV-024-frontend-ux-polish`  
+> **Issues:** #193 (epic), #104, #106, #87, #93, #186, #170  
+> **Decisions:** RD-272–289, S026-D1–D24, TP1–TP6 locked, Gate A→B PASS (S026-D23)  
+> **ADRs:** [ADR-046](../../../adr/ADR-046-anonymous-community-feedback.md) (feedback);
+> [ADR-047](../../../adr/ADR-047-ask-energy-heuristic-car-equivalent.md) (energy)  
+> **Out of scope:** Mini surveys; live Modal power; visitor email; transcript attach;
+> denorm audit names; new CORS origins
+
+#### M112: F66 — ActionIcon micro-interactions (#104)
+
+**Goal:** Shared ActionIcon (spin/pulse/shake) in `frontend-ui`; wire MVP surfaces;
+`prefers-reduced-motion` (AC-UX6–UX7; TC-221–222).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T112.1 | Test: Vitest red — ActionIcon pending classes / `aria-busy`; reduced-motion (TC-221–222) | Test | completed | AC-UX6–UX7, F66, #104 | — | — | S026 | F66 |
+| T112.2 | Code: `ActionIcon` in `packages/frontend-ui`; export from package index | Code | completed | feature-list F66, ADR-020 | T112.1 | — | S026 | F66 |
+| T112.3 | Code: Wire admin Health/Jobs/Corpus + ChatRAG send/chrome MVP surfaces | Code | completed | S026-D15, UJ-071 | T112.2 | — | S026 | F66 |
+| T112.4 | Test: Vitest green both apps + package (TC-221–222) | Test | completed | TP4 | T112.3 | — | S026 | F66 |
+
+#### M113: F67 — Bilingual Tooltip (#106)
+
+**Goal:** Shared Tooltip (Radix) in `frontend-ui`; i18n keys; theme/locale + ≥1 domain
+control/app; keyboard focus (AC-UX8–UX9; TC-223–224).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T113.1 | Test: Vitest red — Tooltip EN/ES + keyboard focus (TC-223–224) | Test | pending | AC-UX8–UX9, F67, #106 | T112.4 | — | S026 | F67 |
+| T113.2 | Config: add `@radix-ui/react-tooltip` to `packages/frontend-ui` (lift from admin) | Config | pending | TP5, dependency-inventory | — | — | S026 | F67 |
+| T113.3 | Code: Tooltip primitive + i18n keys; wire MVP placements both apps | Code | pending | S026-D8/D15, ADR-019/020 | T113.1, T113.2 | — | S026 | F67 |
+| T113.4 | Test: Vitest green EN/ES + focus (TC-223–224) | Test | pending | TP4 | T113.3 | — | S026 | F67 |
+
+#### M114: F64 — Cold-start tips + marketing (#87)
+
+**Goal:** Typed wait catalog (`fact` \| `tip` \| `marketing`); no surveys; F40 consent/donate
+unchanged (AC-UX1–UX2; TC-216–217).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T114.1 | Test: Vitest/unit red — typed catalog rotation; no survey UI (TC-216); consent/donate (TC-217) | Test | pending | AC-UX1–UX2, F64, #87 | T113.4 | — | S026 | F64 |
+| T114.2 | Code: Extend `coldstart/facts` typed entries + wait UI rendering | Code | pending | S026-D3/D14, ADR-039 | T114.1 | — | S026 | F64 |
+| T114.3 | Test: Vitest green; Playwright `tests/ui/chat/uj069-wait-tips.spec.ts` (TC-216–217) | Test | pending | UJ-069, TP4 | T114.2 | — | S026 | F64 |
+
+#### M115: F65 — Energy estimate + car equivalent (#93)
+
+**Goal:** Backend `energy_estimate` (Wh, gCO₂e, car_*); FE chip + car line + advisory + use
+guide (AC-UX3–UX5, AC-UX17; TC-218–220, TC-231; ADR-047).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T115.1 | Test: unit/API e2e red — ask + stream `energy_estimate` formula + car_* (TC-218–219) | Test | pending | AC-UX3, ADR-047, #93 | T114.3 | — | S026 | F65 |
+| T115.2 | Code: ChatRAG energy helper + wire `/ask` + stream `done`; config env defaults | Code | pending | config-spec, api-contract, ADR-047 | T115.1 | — | S026 | F65 |
+| T115.3 | Code: FE chip + car-distance line + advisory + use guide (EN/ES) | Code | pending | AC-UX4–UX5/UX17, UJ-070 | T115.2 | — | S026 | F65 |
+| T115.4 | Test: e2e green TC-218–219; Vitest + Playwright uj070 (TC-220, TC-231) | Test | pending | TP4, UJ-070 | T115.3 | — | S026 | F65 |
+
+#### M116: F68 — Anonymous feedback (#186)
+
+**Goal:** `feedback` migration; ChatRAG POST; internal-write; Admin Feedback page; 90d purge;
+privacy rejects (AC-UX10–UX13; TC-225–228; ADR-046).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T116.1 | Test: privacy + API e2e red — POST feedback; reject email; admin list; purge (TC-225–228) | Test | pending | AC-UX10–UX13, ADR-046, #186 | T115.4 | — | S026 | F68 |
+| T116.2 | Code: DB migration `feedback` + retention purge; document table in `data-management-plan.md` | Code | pending | ADR-046, config-spec, 05 M3 | T116.1 | — | S026 | F68 |
+| T116.3 | Code: ChatRAG `POST /api/v1/feedback` → internal-write `POST /internal/v1/feedback`; DM backend `GET /admin/feedback` (JWT admin/super-admin) | Code | pending | api-contract, 05 M1 | T116.2 | — | S026 | F68 |
+| T116.4 | Code: ChatRAG Feedback page (calls public POST); Admin Feedback UI → DM `GET /admin/feedback` only | Code | pending | S026-D17, UJ-073, 05 M1 | T116.3 | — | S026 | F68 |
+| T116.5 | Test: e2e/privacy green; Vitest + Playwright uj073 (TC-225–228) | Test | pending | TP4, UJ-073 | T116.4 | — | S026 | F68 |
+
+#### M117: F69 — Audit actor email read-time (#170)
+
+**Goal:** Enrich audit list with `actor_email` from Supabase; UUID fallback; no DB PII
+(AC-UX14–UX15; TC-229–230).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T117.1 | Test: API e2e/privacy red — `actor_email` enrich; schema PII-free (TC-229–230) | Test | pending | AC-UX14–UX15, F69, #170 | T116.5 | — | S026 | F69 |
+| T117.2 | Code: DM/write audit list enrich (Supabase Admin lookup/cache) | Code | pending | api-contract, S026-D19 | T117.1 | — | S026 | F69 |
+| T117.3 | Code: Admin Audit UI render email / truncated UUID | Code | pending | UJ-074 | T117.2 | — | S026 | F69 |
+| T117.4 | Test: e2e + Vitest green (TC-229–230); Playwright optional | Test | pending | TP4 | T117.3 | — | S026 | F69 |
+
+#### M118: OpenAPI + UJ e2e suite + Phase 27 gate
+
+**Goal:** OpenAPI mirror; `infra/vecinita.yaml` energy/feedback keys; phase-gate docs;
+AC-UX16 held.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T118.1 | Test: confirm API e2e UJ-069/070/073/074 + Playwright suite green | Test | pending | e2e-coverage, TP4 | T114.3, T115.4, T116.5, T117.4 | — | S026 | F64–F69 |
+| T118.2 | Config: OpenAPI ask/feedback/audit fields; `infra/vecinita.yaml` + staging-secrets-matrix energy/feedback keys | Config | pending | TP3, ADR-011, 05 M4 | T118.1 | — | S026 | F64–F69 |
+| T118.3 | Docs: Phase 27 gate + Current State; issue closeout notes #104/#106/#87/#93/#186/#170/#193 | Docs | pending | Phase 27 gate | T118.2 | — | S026 | F64–F69 |
+
+#### Phase 27 Gate Check
+
+- [ ] All M112–M118 tasks completed (T112.1–T118.3)
+- [ ] AC-UX1–UX15, UX17 met at T2; AC-UX16 scope held — **08-verify-build**
+- [ ] ADR-046 feedback; ADR-047 energy; OpenAPI + infra yaml keys (T118.2)
+- [ ] Playwright UJ-069/070/073; optional 071/072/074
+- [ ] No new CORS origins; no visitor email; no live Modal power
+- [ ] ruff / basedpyright / Vitest / pytest e2e — **08-verify-build**
+
+**Issue closeout notes (after deploy / PR merge):**
+- **#104** — F66/M112 ActionIcon
+- **#106** — F67/M113 Tooltip
+- **#87** — F64/M114 wait tips+marketing
+- **#93** — F65/M115 energy + car equivalent
+- **#186** — F68/M116 feedback
+- **#170** — F69/M117 actor email
+- **#193** — close when children ship + 13 H1–H5
+
+**Tech-plan delta:** `docs/sessions/S026-frontend-ux-polish/reports/tech-plan-delta.md`  
+**ADRs:** [ADR-046](../../../adr/ADR-046-anonymous-community-feedback.md),
+[ADR-047](../../../adr/ADR-047-ask-energy-heuristic-car-equivalent.md)  
+**Roadmap:** `docs/sessions/S026-frontend-ux-polish/roadmap.md`
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -3025,6 +3143,33 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T111.2 | M111 | 26 | Test | completed | T109.6 | 2026-08-03 | S024 | F60 | — |
 | T111.3 | M111 | 26 | Test | completed | T110.5 | 2026-08-03 | S024 | F61 | S024-D41 waive local Docker; CI-gated |
 | T111.4 | M111 | 26 | Docs | completed | T111.1–T111.3 | 2026-08-03 | S024 | F59–F61 | — |
+| T112.1 | M112 | 27 | Test | completed | — | — | S026 | F66 | — |
+| T112.2 | M112 | 27 | Code | completed | T112.1 | — | S026 | F66 | — |
+| T112.3 | M112 | 27 | Code | completed | T112.2 | — | S026 | F66 | — |
+| T112.4 | M112 | 27 | Test | completed | T112.3 | — | S026 | F66 | — |
+| T113.1 | M113 | 27 | Test | pending | T112.4 | — | S026 | F67 | — |
+| T113.2 | M113 | 27 | Config | pending | — | — | S026 | F67 | — |
+| T113.3 | M113 | 27 | Code | pending | T113.1, T113.2 | — | S026 | F67 | — |
+| T113.4 | M113 | 27 | Test | pending | T113.3 | — | S026 | F67 | — |
+| T114.1 | M114 | 27 | Test | pending | T113.4 | — | S026 | F64 | — |
+| T114.2 | M114 | 27 | Code | pending | T114.1 | — | S026 | F64 | — |
+| T114.3 | M114 | 27 | Test | pending | T114.2 | — | S026 | F64 | — |
+| T115.1 | M115 | 27 | Test | pending | T114.3 | — | S026 | F65 | — |
+| T115.2 | M115 | 27 | Code | pending | T115.1 | — | S026 | F65 | — |
+| T115.3 | M115 | 27 | Code | pending | T115.2 | — | S026 | F65 | — |
+| T115.4 | M115 | 27 | Test | pending | T115.3 | — | S026 | F65 | — |
+| T116.1 | M116 | 27 | Test | pending | T115.4 | — | S026 | F68 | — |
+| T116.2 | M116 | 27 | Code | pending | T116.1 | — | S026 | F68 | 05 M3 |
+| T116.3 | M116 | 27 | Code | pending | T116.2 | — | S026 | F68 | 05 M1 |
+| T116.4 | M116 | 27 | Code | pending | T116.3 | — | S026 | F68 | 05 M1 |
+| T116.5 | M116 | 27 | Test | pending | T116.4 | — | S026 | F68 | — |
+| T117.1 | M117 | 27 | Test | pending | T116.5 | — | S026 | F69 | — |
+| T117.2 | M117 | 27 | Code | pending | T117.1 | — | S026 | F69 | — |
+| T117.3 | M117 | 27 | Code | pending | T117.2 | — | S026 | F69 | — |
+| T117.4 | M117 | 27 | Test | pending | T117.3 | — | S026 | F69 | — |
+| T118.1 | M118 | 27 | Test | pending | T114.3, T115.4, T116.5, T117.4 | — | S026 | F64–F69 | 05 M2 |
+| T118.2 | M118 | 27 | Config | pending | T118.1 | — | S026 | F64–F69 | 05 M4 |
+| T118.3 | M118 | 27 | Docs | pending | T118.2 | — | S026 | F64–F69 | — |
 
 ## Phase Gate Log
 

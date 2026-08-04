@@ -95,11 +95,11 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 
 ### ChatRAG Frontend
 
-- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001); **bilingual UI chrome** via shared packages (EV-004 F31); **cold-start / long-wait UX** with rotating fun facts + consent (EV-014 F40).
+- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001); **bilingual UI chrome** via shared packages (EV-004 F31); **cold-start / long-wait UX** with rotating fun facts + consent (EV-014 F40); EV-024 wait **tips/marketing** (F64), energy chip + advisory (F65), action icons (F66), tooltips (F67), Feedback page (F68).
 - **Inputs**: User messages in browser; tag chip selection for RAG; browse filters (tags, title/URL search); locale from `vecinita.locale` / browser detect; optional cold-start consent cookie + seen-fact ids (device-local only).
-- **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader); UI strings from `packages/frontend-i18n` (+ ChatRAG message tables); wait-status region with facts / donate CTA / consent banner during cold start or >8s first-token delay.
-- **Cold-start wait (F40)**: Reuse `streamAsk` retry + `prewarmChatServices`; rotate ~10 static EN/ES facts; no API/CMS; no Modal changes.
-- **Source**: feature-list F11, F19, F22, F31, F40
+- **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader); UI strings from `packages/frontend-i18n` (+ ChatRAG message tables); wait-status region with typed catalog (`fact` \| `tip` \| `marketing`) / donate CTA / consent banner during cold start or >8s first-token delay; post-ask `energy_estimate` chip + advisory; Feedback route.
+- **Cold-start wait (F40 / F64)**: Reuse `streamAsk` retry + `prewarmChatServices`; rotate typed static EN/ES catalog entries; no API/CMS; no Modal changes; no mini surveys.
+- **Source**: feature-list F11, F19, F22, F31, F40, F64–F68
 
 ### Data Management (Modal ASGI + workers)
 
@@ -213,12 +213,12 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 ### Frontend UI (`packages/frontend-ui`) — EV-004 F31
 
 - **Purpose**: Shared React + Tailwind components for consistent bilingual UX across ChatRAG and admin.
-- **Exports**: `LocaleProvider`, `useLocale`, `LanguageToggle`, `ThemeToggle`, `TagFilterChips`, `TagBadge`, `PaginationControls`; minimal shadcn re-exports (`Button`, `Badge`, `Input`, `Label`, `Dialog`).
+- **Exports**: `LocaleProvider`, `useLocale`, `LanguageToggle`, `ThemeToggle`, `TagFilterChips`, `TagBadge`, `PaginationControls`; minimal shadcn re-exports (`Button`, `Badge`, `Input`, `Label`, `Dialog`); EV-024: shared **Tooltip** (F67) + **ActionIcon** animation wrapper (F66).
 - **Inputs**: React tree wrapped in `LocaleProvider`; components read locale via `useLocale()`.
 - **Outputs**: Accessible UI controls; sets `document.documentElement.lang` on locale change.
 - **Styling**: Tailwind CSS in package; admin consumes directly; ChatRAG migrates layout to Tailwind in EV-004.
 - **Dependency rule**: Depends on `frontend-i18n` only; must not import `apps/*`.
-- **Source**: ADR-020 (amended); feature-list F31
+- **Source**: ADR-020 (amended); feature-list F31, F66, F67
 
 ### Admin authentication (Supabase Auth) — EV-005 F34
 
@@ -296,9 +296,11 @@ Migrations and CI must reject tables/columns including:
 
 `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`
 
-Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001), `audit_log`, `document_versions`, `document_serving_stats` (EV-002). Tag provenance: `source` enum only — no operator identity columns. Audit log: `request_id` only — no IP/identity columns (ADR-016).
+Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001), `audit_log`, `document_versions`, `document_serving_stats` (EV-002), **`feedback`** (EV-024 / F68 / ADR-046 — anonymous category + message only; no visitor email/`user_id`). Tag provenance: `source` enum only — no operator identity columns. Audit log: `request_id` only — no IP/identity columns (ADR-016); operator email may appear only as **read-time** enrich on admin API responses (F69), never as a corpus column.
 
 **EV-005 (F34) exception (corpus DB):** `audit_log` may add `actor_id` (opaque **Supabase user UUID**) + `actor_role` (`admin`/`viewer`) columns for attribution — **both non-PII**. No `email`/`name`/`password` column is permitted in the corpus DB. The forbidden list (`users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`) still applies to the corpus DB; Supabase manages its own `auth.*` schema in a **separate** database (ADR-026).
+
+**EV-024 (F68) exception (corpus DB):** `feedback` rows are anonymous product feedback (ADR-046); not personal accounts.
 
 ### Assumptions
 
@@ -320,11 +322,14 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 
 | Service | Method | Path | Notes |
 |---------|--------|------|-------|
-| ChatRAG | POST | `/api/v1/ask` | Non-streaming Q&A; optional `tags[]` |
-| ChatRAG | POST | `/api/v1/ask/stream` | SSE streaming; optional `tags[]` |
+| ChatRAG | POST | `/api/v1/ask` | Non-streaming Q&A; optional `tags[]`; `energy_estimate` (F65) |
+| ChatRAG | POST | `/api/v1/ask/stream` | SSE streaming; optional `tags[]`; `done.energy_estimate` (F65) |
+| ChatRAG | POST | `/api/v1/feedback` | Anonymous product feedback (F68 / ADR-046) |
 | ChatRAG | GET | `/api/v1/documents` | Public browse (tags, q, pagination) |
 | ChatRAG | GET | `/api/v1/documents/{id}` | Public document detail + tags |
 | ChatRAG | GET | `/api/v1/tags` | Public tag list (facets) |
+| Data Mgmt | GET | `/admin/feedback` | Admin Feedback list (F68; admin/super-admin) |
+| Internal write | POST | `/internal/v1/feedback` | Persist feedback row (F68) |
 | Internal write | GET | `/internal/v1/documents/{id}/chunks` | Admin chunk list |
 | Internal write | PATCH | `/internal/v1/documents/{id}/tags` | Admin document tags |
 | Internal write | PATCH | `/internal/v1/chunks/{id}/tags` | Admin chunk tags |
@@ -361,6 +366,7 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | S021 / EV-018 (F46 + F45) | 2026-08-02 | Staging retrieve reliability (F46 non-empty pools); F45 CE re-gate only after F46; prod CE stays off until AC-BB9. |
 | S022 / EV-019 (F47–F49) | 2026-08-02 | Ingest resilience: content_hash skip + metadata refresh (F47); embed sub-batch/retry fail-URL (F48); HF tokenizer + overlap default 32 (F49 / ADR-044). |
 | S024 / EV-022 (F59–F61) | 2026-08-03 | Robust scrape + JS-render + PDF text (F59); website crawl (F60); admin corpus tree + ChatRAG backend nested meta (F61); epic #185. |
+| S026 / EV-024 (F64–F69) | 2026-08-04 | UX polish: typed wait catalog; energy estimate; icons/tooltips; anonymous feedback + admin list; audit actor email at read-time; epic #193. |
 
 ## References
 
