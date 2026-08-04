@@ -22,13 +22,14 @@ from vecinita_shared_schemas.chat_rag import (
     DocumentBrowseDetail,
     DocumentBrowsePage,
     EnergyEstimate,
+    FeedbackCreateResponse,
     HealthResponse,
     Source,
     TagListResponse,
 )
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.json_types import as_json_object
-from vecinita_shared_schemas.validation import validate_ask_request
+from vecinita_shared_schemas.validation import validate_ask_request, validate_feedback_request
 
 from vecinita_chat_rag_backend.browse import get_document, list_documents, list_tag_facets
 from vecinita_chat_rag_backend.config import ChatRagSettings
@@ -268,5 +269,61 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         cfg = get_settings()
         engine = create_engine(cfg.database_url)
         return list_tag_facets(engine)
+
+    @app.post(
+        "/api/v1/feedback",
+        response_model=FeedbackCreateResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    async def submit_feedback(request: Request) -> FeedbackCreateResponse:  # pyright: ignore[reportUnusedFunction]
+        try:
+            raw_payload = cast("object", await request.json())
+        except json.JSONDecodeError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid JSON",
+            ) from exc
+        if not isinstance(raw_payload, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="JSON object required",
+            )
+        try:
+            body = validate_feedback_request(as_json_object(cast("object", raw_payload)))
+        except ValidationError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=exc.errors(),
+            ) from exc
+
+        cfg = get_settings()
+        if not cfg.internal_write_url or not cfg.internal_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Feedback write path unavailable",
+            )
+        try:
+            async with httpx.AsyncClient(timeout=cfg.request_timeout_s) as client:
+                response = await client.post(
+                    f"{cfg.internal_write_url.rstrip('/')}/internal/v1/feedback",
+                    json=body.model_dump(mode="json"),
+                    headers={"Authorization": f"Bearer {cfg.internal_api_key}"},
+                )
+        except httpx.HTTPError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Feedback write path unavailable",
+            ) from exc
+        if response.status_code == HTTPStatus.BAD_REQUEST:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=response.json(),
+            )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Feedback write path unavailable",
+            )
+        return FeedbackCreateResponse.model_validate(response.json())
 
     return app

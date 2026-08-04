@@ -105,3 +105,13 @@ def test_cors_audit_cleanup(client: TestClient) -> None:
 def test_cors_feedback_cleanup(client: TestClient) -> None:
     """Feedback cleanup endpoint allows POST via CORS preflight (F68)."""
     _preflight(client, "/internal/v1/feedback/cleanup", "POST")
+
+
+def test_cors_feedback_create(client: TestClient) -> None:
+    """Feedback create endpoint allows POST via CORS preflight (F68)."""
+    _preflight(client, "/internal/v1/feedback", "POST")
+
+
+def test_cors_feedback_list(client: TestClient) -> None:
+    """Feedback list endpoint allows GET via CORS preflight (F68)."""
+    _preflight(client, "/internal/v1/feedback", "GET")

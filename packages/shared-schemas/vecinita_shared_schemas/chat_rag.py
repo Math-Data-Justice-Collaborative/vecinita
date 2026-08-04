@@ -107,3 +107,23 @@ class HealthResponse(BaseModel):
 
     status: Literal["ok"]
     dependencies: dict[str, str] = Field(default_factory=dict)
+
+
+FeedbackCategory = Literal["bug", "wrong_answer", "suggestion", "other"]
+
+
+class FeedbackRequest(BaseModel):
+    """POST /api/v1/feedback request body (F68 / ADR-046)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    category: FeedbackCategory
+    message: str = Field(..., min_length=1, max_length=4000)
+    locale: Literal["en", "es"] | None = None
+
+
+class FeedbackCreateResponse(BaseModel):
+    """POST /api/v1/feedback (and internal write) create response."""
+
+    id: UUID
+    created_at: str

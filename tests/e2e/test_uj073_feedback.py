@@ -6,7 +6,7 @@ import os
 import uuid
 from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Self, cast
 from uuid import UUID
 
 import pytest
@@ -14,7 +14,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 from vecinita_chat_rag_backend.app import create_app as create_chat_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_data_management_backend.app import create_app as create_dm_app
+from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+from vecinita_shared_schemas.internal_write import FeedbackListResponse
 from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.helpers.json_response import (
@@ -149,22 +152,29 @@ def test_uj073_chatrag_post_feedback_returns_created(
         def json() -> dict[str, str]:
             return {"id": feedback_id, "created_at": created_at}
 
-        def raise_for_status(self) -> None:
-            return None
+    class _FakeAsyncClient:
+        def __init__(self, *args: object, **kwargs: object) -> None:
+            _ = (args, kwargs)
 
-    def _fake_post(url: str, **kwargs: object) -> _FakeResponse:
-        assert url.rstrip("/").endswith("/internal/v1/feedback")
-        headers_raw = kwargs.get("headers")
-        assert isinstance(headers_raw, dict)
-        headers = cast("dict[str, str]", headers_raw)
-        assert headers.get("Authorization") == f"Bearer {_API_KEY}"
-        payload = as_json_object(cast("object", kwargs.get("json")))
-        assert payload.get("category") == "other"
-        assert payload.get("message") == _MESSAGE
-        assert "email" not in payload
-        return _FakeResponse()
+        async def __aenter__(self) -> Self:
+            return self
 
-    monkeypatch.setattr("httpx.post", _fake_post)
+        async def __aexit__(self, *args: object) -> None:
+            _ = args
+
+        async def post(self, url: str, **kwargs: object) -> _FakeResponse:
+            assert url.rstrip("/").endswith("/internal/v1/feedback")
+            headers_raw = kwargs.get("headers")
+            assert isinstance(headers_raw, dict)
+            headers = cast("dict[str, str]", headers_raw)
+            assert headers.get("Authorization") == f"Bearer {_API_KEY}"
+            payload = as_json_object(cast("object", kwargs.get("json")))
+            assert payload.get("category") == "other"
+            assert payload.get("message") == _MESSAGE
+            assert "email" not in payload
+            return _FakeResponse()
+
+    monkeypatch.setattr("httpx.AsyncClient", _FakeAsyncClient)
 
     resp = chat_feedback_client.post(
         "/api/v1/feedback",
@@ -176,13 +186,49 @@ def test_uj073_chatrag_post_feedback_returns_created(
     assert json_str(body, "created_at") == created_at
 
 
+class _FeedbackWriteAdapter:
+    """Adapt write TestClient to InternalWriteClient.list_feedback for DM e2e."""
+
+    def __init__(self, client: TestClient) -> None:
+        self._client = client
+
+    def list_feedback(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 20,
+        category: str | None = None,
+    ) -> FeedbackListResponse:
+        params: dict[str, int | str] = {"page": page, "page_size": page_size}
+        if category is not None:
+            params["category"] = category
+        response = self._client.get(
+            "/internal/v1/feedback",
+            params=params,
+            headers=_auth_key(),
+        )
+        assert response.status_code == HTTPStatus.OK
+        return FeedbackListResponse.model_validate(response.json())
+
+
 def test_uj073_admin_lists_feedback(
-    dm_auth_client: TestClient,
     supabase_auth_env: EllipticCurvePrivateKey,
     write_client: TestClient,
     engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """TC-227 / AC-UX12: admin and super-admin can list feedback; viewer 403."""
+    _ = supabase_auth_env
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "test-proxy-key")
+    dm = TestClient(
+        create_dm_app(
+            store=InMemoryJobStore(),
+            require_proxy_auth=True,
+            eval_runs_client=_FeedbackWriteAdapter(write_client),  # type: ignore[arg-type]
+        )
+    )
+    dm.headers.update({"X-Vecinita-Proxy-Key": "test-proxy-key"})
+
     create = write_client.post(
         "/internal/v1/feedback",
         json={"category": "bug", "message": f"admin-list-{uuid.uuid4().hex[:8]}", "locale": "en"},
@@ -191,7 +237,7 @@ def test_uj073_admin_lists_feedback(
     assert create.status_code == HTTPStatus.CREATED
     feedback_id = json_str(response_json_object(create), "id")
 
-    admin = dm_auth_client.get(
+    admin = dm.get(
         "/admin/feedback",
         headers={"Authorization": _bearer(supabase_auth_env, role="admin")},
     )
@@ -205,13 +251,13 @@ def test_uj073_admin_lists_feedback(
         assert "name" not in item
         assert "user_id" not in item
 
-    super_admin = dm_auth_client.get(
+    super_admin = dm.get(
         "/admin/feedback",
         headers={"Authorization": _bearer(supabase_auth_env, role="super-admin")},
     )
     assert super_admin.status_code == HTTPStatus.OK
 
-    viewer = dm_auth_client.get(
+    viewer = dm.get(
         "/admin/feedback",
         headers={"Authorization": _bearer(supabase_auth_env, role="viewer")},
     )

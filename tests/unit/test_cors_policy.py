@@ -49,6 +49,21 @@ def test_chat_rag_cors_preflight_on_ask_stream() -> None:
     assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
 
 
+def test_chat_rag_cors_preflight_on_feedback() -> None:
+    """F68: OPTIONS on POST /api/v1/feedback from chat frontend origin."""
+    client = TestClient(create_chat_app())
+    response = client.options(
+        "/api/v1/feedback",
+        headers={
+            "Origin": CHAT_ORIGIN,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.headers.get("access-control-allow-origin") == CHAT_ORIGIN
+
+
 def test_chat_rag_cors_preflight_on_browse_documents() -> None:
     """TC-046: OPTIONS on GET /api/v1/documents from chat frontend origin."""
     client = TestClient(create_chat_app())
@@ -215,6 +230,21 @@ def test_data_management_cors_preflight_jobs_events_sse_headers() -> None:
     allow_headers = header_str(response.headers, "access-control-allow-headers").lower()
     assert "cache-control" in allow_headers
     assert "last-event-id" in allow_headers
+
+
+def test_data_management_cors_preflight_on_admin_feedback() -> None:
+    """F68: OPTIONS on GET /admin/feedback from admin frontend origin."""
+    client = TestClient(create_data_mgmt_app(require_proxy_auth=False))
+    response = client.options(
+        "/admin/feedback",
+        headers={
+            "Origin": ADMIN_ORIGIN,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization,content-type",
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
 
 
 def test_data_management_cors_preflight_on_admin_users_invite() -> None:

@@ -20,7 +20,7 @@ from vecinita_shared_schemas.data_management import (
     JobOptions,
     JobTreeResponse,
 )
-from vecinita_shared_schemas.internal_write import AuditEventRequest
+from vecinita_shared_schemas.internal_write import AuditEventRequest, FeedbackListResponse
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
 
 from vecinita_data_management_backend.email_test import ResendClient
@@ -384,6 +384,30 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
                     ) from exc
         if not job_store.delete_job(job_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    @app.get("/admin/feedback", response_model=FeedbackListResponse)
+    def list_admin_feedback(  # pyright: ignore[reportUnusedFunction]
+        _auth: AuthPrincipal = Depends(write_auth_dep),
+        page: Annotated[int, Query(ge=1)] = 1,
+        page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+        category: Annotated[str | None, Query()] = None,
+    ) -> FeedbackListResponse:
+        if resolved_eval_client is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Feedback list unavailable",
+            )
+        try:
+            return resolved_eval_client.list_feedback(
+                page=page,
+                page_size=page_size,
+                category=category,
+            )
+        except InternalWriteClientError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=str(exc),
+            ) from exc
 
     register_user_admin_routes(
         app,

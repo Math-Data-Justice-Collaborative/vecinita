@@ -218,6 +218,25 @@ class AuditCleanupResponse(BaseModel):
     retention_days: int
 
 
+class FeedbackItem(BaseModel):
+    """One anonymous feedback row (F68 / ADR-046)."""
+
+    id: UUID
+    created_at: datetime
+    category: str
+    message: str
+    locale: str | None = None
+
+
+class FeedbackListResponse(BaseModel):
+    """Paginated GET feedback list response."""
+
+    items: list[FeedbackItem]
+    page: int
+    page_size: int
+    total_count: int
+
+
 class AuditEventRequest(BaseModel):
     """Service-to-service audit ingest body (EV-006 F35, ADR-030 §3).
 

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 from pydantic import ValidationError
 
-from vecinita_shared_schemas.chat_rag import AskRequest
+from vecinita_shared_schemas.chat_rag import AskRequest, FeedbackRequest
 
 FORBIDDEN_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
     {
@@ -31,20 +31,30 @@ def find_identity_fields(payload: Mapping[str, object]) -> list[str]:
     return sorted(key for key in payload if key in FORBIDDEN_IDENTITY_FIELDS)
 
 
+def _reject_identity_fields(payload: Mapping[str, object], *, title: str) -> None:
+    identity = find_identity_fields(payload)
+    if not identity:
+        return
+    field = identity[0]
+    raise ValidationError.from_exception_data(
+        title,
+        [
+            {
+                "type": "extra_forbidden",
+                "loc": (field,),
+                "input": payload.get(field),
+            }
+        ],
+    )
+
+
 def validate_ask_request(payload: Mapping[str, object]) -> AskRequest:
     """Parse and validate ChatRAG ask body; reject identity fields explicitly."""
-    identity = find_identity_fields(payload)
-    if identity:
-        field = identity[0]
-        title = "AskRequest"
-        raise ValidationError.from_exception_data(
-            title,
-            [
-                {
-                    "type": "extra_forbidden",
-                    "loc": (field,),
-                    "input": payload.get(field),
-                }
-            ],
-        )
+    _reject_identity_fields(payload, title="AskRequest")
     return AskRequest.model_validate(payload)
+
+
+def validate_feedback_request(payload: Mapping[str, object]) -> FeedbackRequest:
+    """Parse and validate anonymous feedback body; reject identity fields (ADR-046)."""
+    _reject_identity_fields(payload, title="FeedbackRequest")
+    return FeedbackRequest.model_validate(payload)
