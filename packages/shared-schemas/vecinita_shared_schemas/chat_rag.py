@@ -32,6 +32,17 @@ class Source(BaseModel):
     canonical_url: str | None = None
 
 
+class EnergyEstimate(BaseModel):
+    """Heuristic ask energy / CO₂e / car-travel equivalent (F65 / ADR-047)."""
+
+    wh: float
+    g_co2e: float
+    method: Literal["tdp_util_walltime_v1"]
+    advisory: str
+    car_km_equiv: float
+    car_m_equiv: float
+
+
 class AskResponse(BaseModel):
     """POST /api/v1/ask response payload."""
 
@@ -39,6 +50,7 @@ class AskResponse(BaseModel):
     language: Literal["en", "es"]
     sources: list[Source]
     cache_hit: Literal["none", "exact", "semantic", "retrieve"] = "none"
+    energy_estimate: EnergyEstimate | None = None  # set by ChatRAG app (F65)
 
 
 class TagSummary(BaseModel):

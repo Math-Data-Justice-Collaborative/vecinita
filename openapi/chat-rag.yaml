@@ -49,6 +49,7 @@ paths:
           description: >
             Server-sent events (`token`, `sources`, `done`).
             The `done` event may include `cache_hit` (`none` | `exact` | `semantic` | `retrieve`) when F43 is enabled.
+            The `done` event includes `energy_estimate` (F65 / EV-024).
           content:
             text/event-stream:
               schema:
@@ -303,6 +304,33 @@ components:
         canonical_url:
           type: string
           nullable: true
+    EnergyEstimate:
+      type: object
+      description: >
+        F65 heuristic Wh/gCO₂e from GPU TDP × util × ask wall time (ADR-047).
+        Not live Modal power metrics. `car_*_equiv` from g_co2e ÷ car g/km.
+      required:
+        - wh
+        - g_co2e
+        - method
+        - advisory
+        - car_km_equiv
+        - car_m_equiv
+      properties:
+        wh:
+          type: number
+        g_co2e:
+          type: number
+        method:
+          type: string
+          enum:
+            - tdp_util_walltime_v1
+        advisory:
+          type: string
+        car_km_equiv:
+          type: number
+        car_m_equiv:
+          type: number
     AskResponse:
       type: object
       required:
@@ -330,6 +358,8 @@ components:
             - semantic
             - retrieve
           default: none
+        energy_estimate:
+          $ref: "#/components/schemas/EnergyEstimate"
         sources:
           type: array
           maxItems: 1000

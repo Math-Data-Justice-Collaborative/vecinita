@@ -9,12 +9,13 @@ from vecinita_chat_rag_backend.energy import (
     DEFAULT_GPU_TDP_W,
     DEFAULT_GPU_UTIL,
     ENERGY_METHOD,
+    EnergyKnobs,
     compute_energy_estimate,
 )
 
 
 def test_compute_energy_estimate_one_hour_defaults() -> None:
-    """Wh = TDP × util × duration_s / 3600; gCO₂e and car_* from defaults."""
+    """Wh = TDP * util * duration_s / 3600; gCO2e and car_* from defaults."""
     estimate = compute_energy_estimate(duration_s=3600.0)
     assert estimate.method == ENERGY_METHOD
     assert estimate.method == "tdp_util_walltime_v1"
@@ -42,11 +43,13 @@ def test_compute_energy_estimate_scales_with_duration() -> None:
 def test_compute_energy_estimate_respects_overrides() -> None:
     """Config knobs (TDP / util / intensity / car g/km) feed the formula."""
     estimate = compute_energy_estimate(
-        duration_s=3600.0,
-        gpu_tdp_w=100.0,
-        gpu_util=1.0,
-        gco2e_per_kwh=400.0,
-        car_gco2e_per_km=200.0,
+        3600.0,
+        EnergyKnobs(
+            gpu_tdp_w=100.0,
+            gpu_util=1.0,
+            gco2e_per_kwh=400.0,
+            car_gco2e_per_km=200.0,
+        ),
     )
     assert estimate.wh == pytest.approx(100.0)
     assert estimate.g_co2e == pytest.approx(40.0)

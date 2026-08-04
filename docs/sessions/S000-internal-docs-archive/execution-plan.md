@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
 | **Active milestone** | M115 — F65 Energy estimate + car equivalent (#93) |
-| **Active task** | **T115.1** — Test red: ask + stream energy_estimate + car_* (TC-218–219) |
+| **Active task** | **T115.3** — FE chip + car-distance line + advisory + use guide (EN/ES) |
 | **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); main green @ `f3f7dec` |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; 07-build M115 after #202+#203 merge (S026-D46/D47) |
@@ -2289,8 +2289,8 @@ guide (AC-UX3–UX5, AC-UX17; TC-218–220, TC-231; ADR-047).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T115.1 | Test: unit/API e2e red — ask + stream `energy_estimate` formula + car_* (TC-218–219) | Test | in_progress | AC-UX3, ADR-047, #93 | T114.3 | — | S026 | F65 |
-| T115.2 | Code: ChatRAG energy helper + wire `/ask` + stream `done`; config env defaults | Code | pending | config-spec, api-contract, ADR-047 | T115.1 | — | S026 | F65 |
+| T115.1 | Test: unit/API e2e red — ask + stream `energy_estimate` formula + car_* (TC-218–219) | Test | completed | AC-UX3, ADR-047, #93 | T114.3 | 2026-08-04 | S026 | F65 |
+| T115.2 | Code: ChatRAG energy helper + wire `/ask` + stream `done`; config env defaults | Code | completed | config-spec, api-contract, ADR-047 | T115.1 | 2026-08-04 | S026 | F65 |
 | T115.3 | Code: FE chip + car-distance line + advisory + use guide (EN/ES) | Code | pending | AC-UX4–UX5/UX17, UJ-070 | T115.2 | — | S026 | F65 |
 | T115.4 | Test: e2e green TC-218–219; Vitest + Playwright uj070 (TC-220, TC-231) | Test | pending | TP4, UJ-070 | T115.3 | — | S026 | F65 |
 
@@ -3154,9 +3154,9 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T114.1 | M114 | 27 | Test | completed | T113.4 | — | S026 | F64 | — |
 | T114.2 | M114 | 27 | Code | completed | T114.1 | — | S026 | F64 | — |
 | T114.3 | M114 | 27 | Test | completed | T114.2 | — | S026 | F64 | — |
-| T115.1 | M115 | 27 | Test | in_progress | T114.3 | — | S026 | F65 | — |
-| T115.2 | M115 | 27 | Code | pending | T115.1 | — | S026 | F65 | — |
-| T115.3 | M115 | 27 | Code | pending | T115.2 | — | S026 | F65 | — |
+| T115.1 | M115 | 27 | Test | completed | T114.3 | — | S026 | F65 | — |
+| T115.2 | M115 | 27 | Code | completed | T115.1 | — | S026 | F65 | — |
+| T115.3 | M115 | 27 | Code | in_progress | T115.2 | — | S026 | F65 | — |
 | T115.4 | M115 | 27 | Test | pending | T115.3 | — | S026 | F65 | — |
 | T116.1 | M116 | 27 | Test | pending | T115.4 | — | S026 | F68 | — |
 | T116.2 | M116 | 27 | Code | pending | T116.1 | — | S026 | F68 | 05 M3 |
