@@ -10,7 +10,11 @@ from uuid import UUID
 
 import pytest
 from sqlalchemy import text
-from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
+from vecinita_shared_schemas.db_mapping import (
+    mapping_row,
+    row_str,
+    sqlalchemy_scalar_one,
+)
 
 from tests.helpers.json_response import (
     json_object_list,
@@ -197,7 +201,7 @@ def test_uj074_audit_write_does_not_persist_email(
 
     try:
         with engine.connect() as conn:
-            row = (
+            row = mapping_row(
                 conn.execute(
                     text(
                         """
@@ -229,7 +233,7 @@ def test_uj074_audit_write_does_not_persist_email(
                     )
                 )
             )
-        assert "email" not in str(row["payload_text"]).lower()
+        assert "email" not in row_str(row, "payload_text").lower()
         assert count == 0
     finally:
         with engine.begin() as conn:
