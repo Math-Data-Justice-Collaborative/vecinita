@@ -1,9 +1,4 @@
-import {
-  act,
-  cleanup,
-  fireEvent,
-  screen,
-} from "@testing-library/react";
+import { act, cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FACT_ROTATION_MS } from "../coldstart/constants";
