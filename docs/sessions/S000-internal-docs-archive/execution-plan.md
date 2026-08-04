@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
 | **Active milestone** | M117 — F69 audit actor email (#170) |
-| **Active task** | **T117.1** — API e2e/privacy red for `actor_email` (TC-229–230) |
+| **Active task** | **T117.2** — DM/write audit list enrich (Supabase Admin lookup) |
 | **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115–M116** complete ([#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) open CI green @ `bb30b26` / #93+#186); main green @ `f3f7dec` |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; 07-build M117 after M116 verify |
@@ -2314,7 +2314,7 @@ privacy rejects (AC-UX10–UX13; TC-225–228; ADR-046).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T117.1 | Test: API e2e/privacy red — `actor_email` enrich; schema PII-free (TC-229–230) | Test | pending | AC-UX14–UX15, F69, #170 | T116.5 | — | S026 | F69 |
+| T117.1 | Test: API e2e/privacy red — `actor_email` enrich; schema PII-free (TC-229–230) | Test | completed | AC-UX14–UX15, F69, #170 | T116.5 | 2026-08-04 | S026 | F69 |
 | T117.2 | Code: DM/write audit list enrich (Supabase Admin lookup/cache) | Code | pending | api-contract, S026-D19 | T117.1 | — | S026 | F69 |
 | T117.3 | Code: Admin Audit UI render email / truncated UUID | Code | pending | UJ-074 | T117.2 | — | S026 | F69 |
 | T117.4 | Test: e2e + Vitest green (TC-229–230); Playwright optional | Test | pending | TP4 | T117.3 | — | S026 | F69 |
@@ -3163,7 +3163,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T116.3 | M116 | 27 | Code | pending | T116.2 | — | S026 | F68 | 05 M1 |
 | T116.4 | M116 | 27 | Code | pending | T116.3 | — | S026 | F68 | 05 M1 |
 | T116.5 | M116 | 27 | Test | completed | T116.4 | 2026-08-04 | S026 | F68 | — |
-| T117.1 | M117 | 27 | Test | pending | T116.5 | — | S026 | F69 | — |
+| T117.1 | M117 | 27 | Test | completed | T116.5 | 2026-08-04 | S026 | F69 | — |
 | T117.2 | M117 | 27 | Code | pending | T117.1 | — | S026 | F69 | — |
 | T117.3 | M117 | 27 | Code | pending | T117.2 | — | S026 | F69 | — |
 | T117.4 | M117 | 27 | Test | pending | T117.3 | — | S026 | F69 | — |
