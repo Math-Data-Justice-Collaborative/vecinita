@@ -207,6 +207,8 @@ export interface AuditLogEntryApi {
   created_at: string;
   actor_id?: string | null;
   actor_role?: string | null;
+  /** F69 — read-time enrich; never persisted on audit_log */
+  actor_email?: string | null;
 }
 
 export interface AuditLogResponseApi {
@@ -225,6 +227,7 @@ export interface AuditEvent {
   payload: Record<string, unknown>;
   actor_id?: string | null;
   actor_role?: string | null;
+  actor_email?: string | null;
 }
 
 /** Normalized for AuditPage rendering. */
@@ -249,6 +252,7 @@ export function parseAuditLogResponse(raw: AuditLogResponseApi): AuditPage {
       payload: item.payload,
       actor_id: item.actor_id ?? null,
       actor_role: item.actor_role ?? null,
+      actor_email: item.actor_email ?? null,
     })),
   };
 }

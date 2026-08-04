@@ -209,6 +209,7 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_HEALTH_TIMEOUT_MS",
                 "VECINITA_AUDIT_RETENTION_DAYS",
                 "SUPABASE_URL",
+                "SUPABASE_SECRET_KEY",  # F69 — audit actor_email Admin lookup
                 "VECINITA_AUTH_REQUIRED",
                 "SUPABASE_JWT_AUD",
             ],

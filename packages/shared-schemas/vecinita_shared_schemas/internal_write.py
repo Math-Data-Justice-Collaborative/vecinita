@@ -200,6 +200,8 @@ class AuditLogEntry(BaseModel):
     created_at: datetime
     actor_id: UUID | None = None
     actor_role: str | None = None
+    # F69 / EV-024: read-time enrich from Supabase Auth — never a DB column.
+    actor_email: str | None = None
 
 
 class AuditLogResponse(BaseModel):

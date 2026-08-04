@@ -31,6 +31,7 @@ import { TruncatedText } from "@/components/TruncatedText";
 import { requireCorpusConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { auditEventLabelKey } from "@/lib/auditEventLabel";
+import { formatActorLabel } from "@/lib/formatActorLabel";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -268,6 +269,7 @@ export function AuditPage() {
                   <TableHead>{tr("admin.audit.table.eventType")}</TableHead>
                   <TableHead>{tr("admin.audit.table.entity")}</TableHead>
                   <TableHead>{tr("admin.audit.table.entityId")}</TableHead>
+                  <TableHead>{tr("admin.audit.table.actor")}</TableHead>
                   <TableHead>{tr("admin.audit.table.timestamp")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -355,13 +357,20 @@ function AuditRow({
         <TableCell className="max-w-0 font-mono text-xs">
           <TruncatedText text={event.entity_id} />
         </TableCell>
+        <TableCell
+          className="max-w-0 text-xs"
+          data-testid="audit-actor-label"
+          title={event.actor_id ?? undefined}
+        >
+          {formatActorLabel(event.actor_email, event.actor_id)}
+        </TableCell>
         <TableCell className="text-xs text-muted-foreground">
           {formatLocaleDateTime(locale, event.timestamp)}
         </TableCell>
       </TableRow>
       {expanded && (
         <TableRow>
-          <TableCell colSpan={5}>
+          <TableCell colSpan={6}>
             <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 text-xs">
               {JSON.stringify(event.payload, null, 2)}
             </pre>

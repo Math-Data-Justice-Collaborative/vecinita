@@ -67,6 +67,10 @@ services:
       - key: SUPABASE_URL
         scope: RUN_TIME
         type: SECRET
+      # F69 / EV-024 — Admin API for read-time actor_email enrich on GET /internal/v1/audit
+      - key: SUPABASE_SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
       - key: VECINITA_AUTH_REQUIRED
         scope: RUN_TIME
         value: "true"
