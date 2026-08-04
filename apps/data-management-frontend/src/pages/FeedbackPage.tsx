@@ -27,7 +27,7 @@ export function FeedbackPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(
-    async (isActive: () => boolean = () => true) => {
+    async (isActive: () => boolean) => {
       setLoading(true);
       setError(null);
       try {

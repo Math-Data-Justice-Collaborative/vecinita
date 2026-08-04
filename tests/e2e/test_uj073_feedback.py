@@ -212,12 +212,13 @@ class _FeedbackWriteAdapter:
 
 
 def test_uj073_admin_lists_feedback(
-    supabase_auth_env: EllipticCurvePrivateKey,
     write_client: TestClient,
     engine: Engine,
+    supabase_auth_env: EllipticCurvePrivateKey,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """TC-227 / AC-UX12: admin and super-admin can list feedback; viewer 403."""
+    # write_client → internal_api_env resets auth; supabase_auth_env must run after.
     _ = supabase_auth_env
     monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "test-proxy-key")
     dm = TestClient(
