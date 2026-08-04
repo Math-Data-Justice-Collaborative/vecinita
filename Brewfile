@@ -21,3 +21,5 @@ brew "fnm"             # =1.39.0
 # --- Repo scripts / ops CLI ---
 brew "jq"              # =1.8.2
 brew "gh"              # =2.97.0
+# Supabase Auth config / migrations (supabase/README.md, ADR-027)
+brew "supabase"        # =2.111.0

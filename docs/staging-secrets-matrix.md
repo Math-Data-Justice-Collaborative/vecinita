@@ -204,7 +204,7 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 
 | Variable | Where | Required | Description |
 |----------|-------|----------|-------------|
-| `SUPABASE_SECRET_KEY` | **Modal data-management ASGI only** | Yes (F35) | Supabase Admin API key for `/admin/users*`. **Server-side only** — never in internal-write-api or any `VITE_*` build. |
+| `SUPABASE_SECRET_KEY` | **Modal data-management ASGI** (F35 `/admin/users*`) **and** **DO internal-write-api** (F69 audit `actor_email` enrich) | Yes (F35); Yes (F69 on write API) | Supabase Admin API. **Server-side only** — never in any `VITE_*` build. Modal remains primary for user-mgmt (ADR-030); write API needs the same key for read-time audit enrich (EV-024 / #170). |
 | `VECINITA_INTERNAL_WRITE_URL` | Modal data-management ASGI | Yes (F35) | Base URL for audit ingest (`POST /internal/v1/audit/event`) |
 | `VECINITA_INTERNAL_API_KEY` | Modal data-management ASGI | Yes (F35) | Service key for audit ingest calls |
 | `RESEND_API_KEY` | **Modal data-management ASGI only** | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) for `POST /admin/email/test` (Resend REST). Server-side only. (TP-S005-22) |
