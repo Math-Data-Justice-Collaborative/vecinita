@@ -1,9 +1,10 @@
 # Evolve Summary — EV-023 / S025
 
-> Completed: 2026-08-03  
+> Completed: 2026-08-04 · **Cycle closed** (S025-D16)  
 > Preset: Lean+build (`01 → 02 → 07 → 08 → 10 → 13`)  
 > Features: **F62** (#182), **F63** (#103) · Epic #194  
-> Branch: `evolve/EV-023-ci-release-automation` → main ([PR #195](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195))
+> Branch: `evolve/EV-023-ci-release-automation` → main ([PR #195](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195))  
+> Release: **[v0.4.1](https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1)** @ `5fa370a`
 
 ## Shipped
 
@@ -20,10 +21,14 @@
 | 07 / 08 | PASS |
 | 10-e2e | PASS (tooling T0) |
 | 13-deploy-smoke | PASS — see `deploy-smoke.md` |
+| Deploy gate | PASS (S025-D16) — product H1–H5 waived (infra-only) |
 
-## Follow-up fix
+## Follow-up PRs
 
-[PR #196](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/196) — Actions git identity for annotated tags (required for live Release).
+| PR | Role |
+|----|------|
+| [#196](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/196) | Actions git identity for annotated tags |
+| [#197](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197) | Docs closeout @ `e78e418` |
 
 ## Artifacts
 
