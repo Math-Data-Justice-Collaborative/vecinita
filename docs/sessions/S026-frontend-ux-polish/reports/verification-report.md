@@ -1,49 +1,46 @@
-# Verification report — M116 (F68 / #186)
+# Verification report — M117 (F69 / #170)
 
 **Session:** S026-frontend-ux-polish  
 **Cycle:** EV-024  
 **Stage:** 08-verify-build (milestone boundary)  
 **Date:** 2026-08-04  
 **Branch:** `evolve/EV-024-frontend-ux-polish`  
-**Head:** `bb30b26`  
-**CI:** [success](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30958904809)
+**Head:** `1719b3b`  
+**CI:** [success](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473)  
+**PR:** [#206](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206)
 
 ## Scope
 
-M116 — Anonymous feedback (ADR-046): `feedback` migration + 90d purge; ChatRAG
-`POST /api/v1/feedback` → internal-write; DM `GET /admin/feedback`; ChatRAG + Admin
-Feedback pages; privacy rejects; Vitest + Playwright UJ-073 / TC-225–228.
+M117 — Audit actor email read-time (F69 / #170): Supabase Admin enrich on
+`GET /internal/v1/audit` (`actor_email`); TTL cache; Admin Audit UI email /
+truncated UUID; `audit_log` remains PII-free (AC-UX14–UX15; TC-229–230; UJ-074).
 
-Also on branch (prior milestone, PR still open): M115 F65 energy estimate (#93).
+Prior milestones M115–M116 already merged via tip-locked [#205](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205).
 
 ## Checks
 
 | Check | Result | Notes |
 |-------|--------|-------|
-| Privacy `tests/privacy/test_feedback_table.py` | **CI PASS** | Local Colima Postgres volume chmod denied |
-| API e2e `tests/e2e/test_uj073_feedback.py` | **CI PASS** | TC-225–228; fixture order fix for JWT after `write_client` |
-| Unit feedback (ChatRAG / IWA / DM) | **PASS** | Local + CI coverage gate |
-| ChatRAG Vitest `test_uj073_feedback` | **PASS** | Node 24 |
-| Admin Vitest `feedback.test.ts` + `test_feedback_page` | **PASS** | Coverage 100% lines / ≥98% branches |
-| Playwright `tests/ui/chat/uj073-feedback.spec.ts` | **PASS** | Local + CI ui-e2e |
-| CORS H0c feedback preflights | **PASS** | ChatRAG POST + DM GET |
-| GitHub CI (`ci.yml` @ `bb30b26`) | **PASS** | run 30958904809 |
+| Privacy `tests/privacy/test_audit_log_actor_email.py` | **CI PASS** | Local Colima Postgres unavailable |
+| API e2e `tests/e2e/test_uj074_audit_actor_email.py` | **CI PASS** | TC-229–230; basedpyright `mapping_row`/`row_str` fix |
+| Unit `tests/unit/internal_write_api/test_actor_emails.py` | **PASS** | Local + CI |
+| Admin Vitest `formatActorLabel` + `test_uj074_audit_actor_email` | **PASS** | Local + CI frontend job |
+| GitHub CI (`ci.yml` @ `1719b3b`) | **PASS** | run 30960947473 |
 
 ## Connectivity artifacts
 
 | Artifact | Present |
 |----------|---------|
 | `tests/smoke/test_staging_connectivity.py` | Yes (unchanged) |
-| CORS / H0c | Extended for `/api/v1/feedback` and `/admin/feedback` |
+| CORS / H0c | Unchanged for audit GET |
 
-## Auto-corrections
+## Deploy note
 
-- SQLAlchemy `.mappings()` for feedback insert/list rows
-- Admin FE `formatLocaleDateTime(locale, …)` + `Authorization` index access
-- Alembic head assertion → `20260804_0012`
+`SUPABASE_SECRET_KEY` added to `infra/do/internal-write-api.yaml` + `do_apps.py`
+sync list — run secrets sync after merge so live enrich can resolve emails.
 
 ## Verdict
 
-**PASS** — update open PR [#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) to include M115+M116 (same evolve head). Merge needs explicit approval.
+**PASS** — M117 ready. Open PR [#206](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206). Merge needs explicit approval.
 
-Next: **M117** F69 audit actor email (#170) on same evolve branch.
+Next: **M118** OpenAPI + UJ e2e suite + Phase 27 gate (after #206 merge or continue on evolve).

@@ -1536,8 +1536,8 @@ project:
       active_milestone: M117
       active_feature: F69
       active_issue: 170
-      current_action: build_m117_t117_3
-      next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+      current_action: build_m117_t117_4
+      next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1546,11 +1546,11 @@ project:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1+T117.2 completed @3c428c6; T117.3 in_progress (Admin Audit UI email / UUID fallback); head @3c428c6; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress (CI watch + M117 closeout); head @c5b635a; next=Watch CI on PR #206; T117.4 verify green + 08-verify M117'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T23:30:34Z'
+      updated_at: '2026-08-04T23:38:25Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1709,6 +1709,7 @@ project:
       - T116.5
       - T117.1
       - T117.2
+      - T117.3
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -1722,7 +1723,7 @@ project:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T117.3
+        current_task: T117.4
         current_milestone: M117
         phase: 27
         task_status: in_progress
@@ -1753,6 +1754,7 @@ project:
         - T116.5
         - T117.1
         - T117.2
+        - T117.3
         m115_verify: PASS
         m116_status: completed
         completed_tasks_m115:
@@ -1775,13 +1777,16 @@ project:
         completed_tasks_m117:
         - T117.1
         - T117.2
+        - T117.3
         m115_pr_merged: true
         m116_pr_merged: true
+        m117_pr: 206
+        m117_pr_status: open
       m112_verify: PASS
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 3c428c6
+      build_head: c5b635a
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -1809,7 +1814,7 @@ project:
       m113_ci_status: success
       s026_d43_decision: S026-D43
       current_milestone: M117
-      current_task: T117.3
+      current_task: T117.4
       s026_d44_decision: S026-D44
       s026_d45_decision: S026-D45
       s026_d46_decision: S026-D46
@@ -1822,8 +1827,8 @@ project:
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
       m114_status: completed
-      active_task: T117.3
-      build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+      active_task: T117.4
+      build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -1832,7 +1837,7 @@ project:
       m115_head: 605fce9
       m115_pr: 205
       m115_pr_status: merged
-      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       t115_3_status: completed
       t115_3_commit: 464131f
       t115_4_status: completed
@@ -1850,8 +1855,8 @@ project:
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: closed_superseded
-      ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
-      ci_status: success
+      ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
+      ci_status: pending
       pr_204_ci_status: success
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
       m115_ci_status: success
@@ -1936,9 +1941,9 @@ project:
       - workflow-state.yaml
       branch_ahead_of_origin: 0
       branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @7f086c3
-      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
       s026_d51_decision: S026-D51
-      execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
+      execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
       t116_5_commit: bb30b26
       t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
       m116_status: completed
@@ -1954,7 +1959,7 @@ project:
       pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
       m116_pr: 205
       m116_pr_status: merged
-      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       t117_1_status: completed
       t117_1_note: T117.1 completed @100514f — privacy + API e2e red tests for F69 actor_email (TC-229–230)
@@ -1965,6 +1970,7 @@ project:
       m117_commits:
       - 100514f
       - 3c428c6
+      - c5b635a
       m117_status: in_progress
       m115_pr_merged: true
       m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -1989,8 +1995,51 @@ project:
       s026_d52_decision: S026-D52
       t117_2_commit: 3c428c6
       t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-      t117_3_status: in_progress
-      t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+      t117_3_status: completed
+      t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+      t117_3_commit: c5b635a
+      t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+      t117_4_status: in_progress
+      t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+      pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      pr_206_status: open
+      pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+      pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+      pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      pr_206_tip: c5b635a
+      pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      m117_pr: 206
+      m117_pr_status: open
+      m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      minor_pr_m117:
+        number: 206
+        status: open
+        merged: false
+        title: '[M117] F69 audit actor email read-time (#170)'
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+        branch: evolve/EV-024-frontend-ux-polish
+        head: evolve/EV-024-frontend-ux-polish
+        base: main
+        head_sha: c5b635a
+        tip: c5b635a
+        tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+        head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+        milestone: M117
+        features:
+        - F69
+        issues:
+        - 170
+        merge_policy: needs_user_approval
+        session_id: S026-frontend-ux-polish
+        evolve_cycle_id: EV-024
+        note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+        opened_at: '2026-08-04'
+        recorded_at: '2026-08-04T23:38:25Z'
+        updated_at: '2026-08-04T23:38:25Z'
+        ci_status: pending
+        reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
+      m117_head: c5b635a
     08-verify-build:
       status: completed
       started_at: '2026-08-04'
@@ -2022,7 +2071,7 @@ project:
       active_feature: F69
       active_issue: 170
       current_action: build_m117_t117_2
-      next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+      next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -2032,7 +2081,7 @@ project:
       phase_c: pending
       gate_c_to_d: pending
       s026_d28_decision: S026-D28
-      build_head: 7f086c3
+      build_head: c5b635a
       build_commits:
       - 47a618e
       - 18c8dc8
@@ -2045,7 +2094,7 @@ project:
       note: 'S026/EV-024 08-verify-build COMPLETE PASS (M116) — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; handoff → continue 07-build T117.2'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
-      updated_at: '2026-08-04T23:30:34Z'
+      updated_at: '2026-08-04T23:38:25Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -2135,7 +2184,7 @@ project:
       build_head_full: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
       m112_verify: PASS
       report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-      ci_status: success
+      ci_status: pending
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30958904809
       minor_pr:
         number: 204
@@ -2205,7 +2254,7 @@ project:
       m115_verify_at: '2026-08-04T21:35:14Z'
       m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
       m115_pr_status: merged
-      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       m115_pr: 205
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       m115_head: 605fce9
@@ -2226,11 +2275,11 @@ project:
       pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
       m116_pr: 205
       m116_pr_status: merged
-      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-      active_task: T117.3
+      active_task: T117.4
       current_milestone: M117
-      current_task: T117.3
+      current_task: T117.4
       m115_pr_merged: true
       m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
       m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -2251,8 +2300,8 @@ project:
       pr_205_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
       pr_205_merged_at: '2026-08-04T23:24:43Z'
       pr_204_superseded_by: 205
-      ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
-      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+      ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
+      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
       s026_d52_decision: S026-D52
       t117_2_status: completed
       t117_2_note: T117.2 completed @3c428c6 — enrich GET /internal/v1/audit with actor_email via Supabase Admin lookup/cache
@@ -2284,8 +2333,49 @@ project:
         evolve_cycle_id: EV-024
         note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.2'
         updated_at: '2026-08-04T23:24:43Z'
-      t117_3_status: in_progress
-      t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+      t117_3_status: completed
+      t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+      t117_3_commit: c5b635a
+      t117_4_status: in_progress
+      t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+      pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      pr_206_status: open
+      pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+      pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+      pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      pr_206_tip: c5b635a
+      pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      m117_pr: 206
+      m117_pr_status: open
+      m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      minor_pr_m117:
+        number: 206
+        status: open
+        merged: false
+        title: '[M117] F69 audit actor email read-time (#170)'
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+        branch: evolve/EV-024-frontend-ux-polish
+        head: evolve/EV-024-frontend-ux-polish
+        base: main
+        head_sha: c5b635a
+        tip: c5b635a
+        tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+        head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+        milestone: M117
+        features:
+        - F69
+        issues:
+        - 170
+        merge_policy: needs_user_approval
+        session_id: S026-frontend-ux-polish
+        evolve_cycle_id: EV-024
+        note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+        opened_at: '2026-08-04'
+        recorded_at: '2026-08-04T23:38:25Z'
+        updated_at: '2026-08-04T23:38:25Z'
+        ci_status: pending
+        reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -5062,14 +5152,14 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: build_m117_t117_3
+    current_action: build_m117_t117_4
     current_stage: 07-build
-    note: 'EV-024 Phase C — M115+M116 landed on main via tip-locked PR #205 @0c1d838 (feat/M115-M116 @7f086c3); #204 closed_superseded_by_205; M117 T117.2 completed @3c428c6; T117.3 in_progress — Admin Audit UI actor_email'
+    note: 'EV-024 Phase C — M115+M116 landed on main via tip-locked PR #205 @0c1d838 (feat/M115-M116 @7f086c3); #204 closed_superseded_by_205; M117 T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress — watch CI then 08-verify M117'
     askquestion_pending: false
-    next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+    next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
     askquestion_pending_topic:
     s026_d29_decision: S026-D29
-    updated_at: '2026-08-04T23:30:34Z'
+    updated_at: '2026-08-04T23:38:25Z'
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
@@ -5093,15 +5183,15 @@ active_session:
     m113_merge_sha: 9eaedb0
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
-    active_task: T117.3
-    build_head: 3c428c6
+    active_task: T117.4
+    build_head: c5b635a
     s026_d48_decision: S026-D48
     m115_verify: PASS
     m115_pr_status: merged
     s026_d49_decision: S026-D49
     m115_pr: 205
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-    ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
+    ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     s026_d50_decision: S026-D50
     t116_1_status: completed
@@ -5114,18 +5204,18 @@ active_session:
     t116_4_status: completed
     t116_4_commit: 1c8f6ff
     t116_5_status: completed
-    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
     s026_d51_decision: S026-D51
     current_milestone: M117
-    current_task: T117.3
-    build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+    current_task: T117.4
+    build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
     t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
     t116_5_commit: bb30b26
     t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
     branch_ahead_of_origin: 0
     branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @7f086c3
-    execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
-    ci_status: success
+    execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
+    ci_status: pending
     m116_commits:
     - a26d2a4
     - 9bba998
@@ -5161,10 +5251,10 @@ active_session:
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: closed_superseded
     pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
-    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     m116_pr: 205
     m116_pr_status: merged
-    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     t117_1_status: completed
     t117_1_note: T117.1 completed @100514f — privacy + API e2e red tests for F69 actor_email (TC-229–230)
@@ -5175,6 +5265,7 @@ active_session:
     m117_commits:
     - 100514f
     - 3c428c6
+    - c5b635a
     m115_pr_merged: true
     m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
     m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -5198,8 +5289,50 @@ active_session:
     s026_d52_decision: S026-D52
     t117_2_commit: 3c428c6
     t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-    t117_3_status: in_progress
-    t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+    t117_3_status: completed
+    t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+    t117_3_commit: c5b635a
+    t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+    t117_4_status: in_progress
+    t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+    pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    pr_206_status: open
+    pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+    pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+    pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    pr_206_tip: c5b635a
+    pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    m117_pr: 206
+    m117_pr_status: open
+    m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    minor_pr_m117:
+      number: 206
+      status: open
+      merged: false
+      title: '[M117] F69 audit actor email read-time (#170)'
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      branch: evolve/EV-024-frontend-ux-polish
+      head: evolve/EV-024-frontend-ux-polish
+      base: main
+      head_sha: c5b635a
+      tip: c5b635a
+      tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+      milestone: M117
+      features:
+      - F69
+      issues:
+      - 170
+      merge_policy: needs_user_approval
+      session_id: S026-frontend-ux-polish
+      evolve_cycle_id: EV-024
+      note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      opened_at: '2026-08-04'
+      recorded_at: '2026-08-04T23:38:25Z'
+      updated_at: '2026-08-04T23:38:25Z'
+      ci_status: pending
+      reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
   - stage: 01-requirements
     required: true
     status: completed
@@ -5348,16 +5481,16 @@ active_session:
     skip_rationale:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:20:46Z'
-    current_action: build_m117_t117_3
-    next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+    current_action: build_m117_t117_4
+    next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1+T117.2 completed @3c428c6; T117.3 in_progress (Admin Audit UI email / UUID fallback); head @3c428c6; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback'
-    updated_at: '2026-08-04T23:30:34Z'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress (CI watch + M117 closeout); head @c5b635a; next=Watch CI on PR #206; T117.4 verify green + 08-verify M117'
+    updated_at: '2026-08-04T23:38:25Z'
     active_milestone: M117
     active_feature: F69
     m112_status: completed
@@ -5376,7 +5509,7 @@ active_session:
     m112_merge_sha_short: e1ccf9e
     m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     substeps:
-      current_task: T117.3
+      current_task: T117.4
       current_milestone: M117
       phase: 27
       task_status: in_progress
@@ -5405,6 +5538,7 @@ active_session:
       - T116.5
       - T117.1
       - T117.2
+      - T117.3
       m115_verify: PASS
       m116_status: completed
       completed_tasks_m115:
@@ -5427,8 +5561,11 @@ active_session:
       completed_tasks_m117:
       - T117.1
       - T117.2
+      - T117.3
       m115_pr_merged: true
       m116_pr_merged: true
+      m117_pr: 206
+      m117_pr_status: open
     m113_status: completed
     m113_verify: PASS
     m113_pr: 202
@@ -5436,7 +5573,7 @@ active_session:
     m113_head: 06f4ab1
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     m113_ci_status: success
-    build_head: 3c428c6
+    build_head: c5b635a
     pr_201: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
     s026_d43_decision: S026-D43
     m114_status: completed
@@ -5455,9 +5592,9 @@ active_session:
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
     current_milestone: M117
-    current_task: T117.3
-    active_task: T117.3
-    build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+    current_task: T117.4
+    active_task: T117.4
+    build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
     tasks_completed:
     - T115.1
     - T115.2
@@ -5470,6 +5607,7 @@ active_session:
     - T116.5
     - T117.1
     - T117.2
+    - T117.3
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -5478,7 +5616,7 @@ active_session:
     m115_head: 605fce9
     m115_pr: 205
     m115_pr_status: merged
-    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     t115_3_status: completed
     t115_3_commit: 464131f
     t115_4_status: completed
@@ -5496,8 +5634,8 @@ active_session:
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: closed_superseded
-    ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
-    ci_status: success
+    ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
+    ci_status: pending
     pr_204_ci_status: success
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     m115_ci_status: success
@@ -5538,9 +5676,9 @@ active_session:
     t116_4_files: *id005
     branch_ahead_of_origin: 0
     branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @7f086c3
-    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
     s026_d51_decision: S026-D51
-    execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
+    execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
     t116_5_commit: bb30b26
     t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
     m116_status: completed
@@ -5556,7 +5694,7 @@ active_session:
     pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
     m116_pr: 205
     m116_pr_status: merged
-    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     t117_1_status: completed
     t117_1_note: T117.1 completed @100514f — privacy + API e2e red tests for F69 actor_email (TC-229–230)
@@ -5568,6 +5706,7 @@ active_session:
     m117_commits:
     - 100514f
     - 3c428c6
+    - c5b635a
     m117_status: in_progress
     m115_pr_merged: true
     m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -5592,8 +5731,51 @@ active_session:
     s026_d52_decision: S026-D52
     t117_2_commit: 3c428c6
     t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-    t117_3_status: in_progress
-    t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+    t117_3_status: completed
+    t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+    t117_3_commit: c5b635a
+    t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+    t117_4_status: in_progress
+    t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+    pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    pr_206_status: open
+    pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+    pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+    pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    pr_206_tip: c5b635a
+    pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    m117_pr: 206
+    m117_pr_status: open
+    m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    minor_pr_m117:
+      number: 206
+      status: open
+      merged: false
+      title: '[M117] F69 audit actor email read-time (#170)'
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      branch: evolve/EV-024-frontend-ux-polish
+      head: evolve/EV-024-frontend-ux-polish
+      base: main
+      head_sha: c5b635a
+      tip: c5b635a
+      tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+      milestone: M117
+      features:
+      - F69
+      issues:
+      - 170
+      merge_policy: needs_user_approval
+      session_id: S026-frontend-ux-polish
+      evolve_cycle_id: EV-024
+      note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      opened_at: '2026-08-04'
+      recorded_at: '2026-08-04T23:38:25Z'
+      updated_at: '2026-08-04T23:38:25Z'
+      ci_status: pending
+      reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
+    m117_head: c5b635a
   - stage: 08-verify-build
     required: true
     status: completed
@@ -5803,8 +5985,8 @@ active_session:
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
   current_stage: 07-build
-  current_action: build_m117_t117_3
-  next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+  current_action: build_m117_t117_4
+  next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -5875,10 +6057,10 @@ active_session:
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
   askquestion_pending_topic:
-  updated_at: '2026-08-04T23:30:34Z'
+  updated_at: '2026-08-04T23:38:25Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T117.2 complete — actor_email enrich @ 3c428c6. Also confirmed PR #205 merged to main @ 0c1d838; main CI+preflight green. Next: T117.3 Admin Audit UI render email / truncated UUID. active_feature=F69 active_milestone=M117 active_task=T117.3 current_action=build_m117_t117_3; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback; head @3c428c6'
+  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T117.3 completed @c5b635a; PR #206 OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206; T117.4 in_progress; M115+M116 merged via #205. Opened #206 for M117 because evolve/** push does not trigger ci.yml (only feat/** / PR). Watching CI on c5b635a then T117.4 closeout. active_feature=F69 active_milestone=M117 active_task=T117.4 current_action=build_m117_t117_4; next=Watch CI on PR #206; T117.4 verify green + 08-verify M117; head @c5b635a'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -5924,9 +6106,9 @@ active_session:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  active_task: T117.3
-  build_head: 3c428c6
-  build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+  active_task: T117.4
+  build_head: c5b635a
+  build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
@@ -5935,7 +6117,7 @@ active_session:
   m115_head: 605fce9
   m115_pr: 205
   m115_pr_status: merged
-  m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+  m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
   t115_3_status: completed
   t115_3_commit: 464131f
   t115_4_status: completed
@@ -5946,7 +6128,7 @@ active_session:
   m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
   pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204_status: closed_superseded
-  ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
+  ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
   m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
   s026_d50_decision: S026-D50
   t116_1_status: completed
@@ -5973,9 +6155,9 @@ active_session:
   t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
   t116_4_files: *id005
   branch_ahead_of_origin: 0
-  resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+  resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
   s026_d51_decision: S026-D51
-  execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
+  execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
   t116_5_commit: bb30b26
   t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
   t116_5_files:
@@ -5997,8 +6179,8 @@ active_session:
   - bb30b26
   - 7f086c3
   current_milestone: M117
-  current_task: T117.3
-  ci_status: success
+  current_task: T117.4
+  ci_status: pending
   tasks_completed:
   - T116.1
   - T116.2
@@ -6019,7 +6201,7 @@ active_session:
   pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
   m116_pr: 205
   m116_pr_status: merged
-  m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+  m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
   m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
   t117_1_status: completed
   t117_1_note: T117.1 completed @100514f — privacy + API e2e red tests for F69 actor_email (TC-229–230)
@@ -6050,8 +6232,50 @@ active_session:
   s026_d52_decision: S026-D52
   t117_2_commit: 3c428c6
   t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-  t117_3_status: in_progress
-  t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+  t117_3_status: completed
+  t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+  t117_3_commit: c5b635a
+  t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+  t117_4_status: in_progress
+  t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+  pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+  pr_206_status: open
+  pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+  pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+  pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+  pr_206_tip: c5b635a
+  pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+  m117_pr: 206
+  m117_pr_status: open
+  m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+  m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+  minor_pr_m117:
+    number: 206
+    status: open
+    merged: false
+    title: '[M117] F69 audit actor email read-time (#170)'
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    branch: evolve/EV-024-frontend-ux-polish
+    head: evolve/EV-024-frontend-ux-polish
+    base: main
+    head_sha: c5b635a
+    tip: c5b635a
+    tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+    milestone: M117
+    features:
+    - F69
+    issues:
+    - 170
+    merge_policy: needs_user_approval
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    opened_at: '2026-08-04'
+    recorded_at: '2026-08-04T23:38:25Z'
+    updated_at: '2026-08-04T23:38:25Z'
+    ci_status: pending
+    reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -13410,8 +13634,8 @@ stages:
     active_milestone: M117
     active_feature: F69
     active_issue: 170
-    current_action: build_m117_t117_3
-    next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+    current_action: build_m117_t117_4
+    next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -13420,11 +13644,11 @@ stages:
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1+T117.2 completed @3c428c6; T117.3 in_progress (Admin Audit UI email / UUID fallback); head @3c428c6; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress (CI watch + M117 closeout); head @c5b635a; next=Watch CI on PR #206; T117.4 verify green + 08-verify M117'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T23:30:34Z'
+    updated_at: '2026-08-04T23:38:25Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13687,6 +13911,7 @@ stages:
     - T116.5
     - T117.1
     - T117.2
+    - T117.3
     m112_status: completed
     m112_feature: F66
     m112_issue: 104
@@ -13700,7 +13925,7 @@ stages:
     - 0942ef9
     docs_commit: 47a618e
     substeps:
-      current_task: T117.3
+      current_task: T117.4
       current_milestone: M117
       phase: 27
       task_status: in_progress
@@ -13731,6 +13956,7 @@ stages:
       - T116.5
       - T117.1
       - T117.2
+      - T117.3
       m115_verify: PASS
       m116_status: completed
       completed_tasks_m115:
@@ -13753,13 +13979,16 @@ stages:
       completed_tasks_m117:
       - T117.1
       - T117.2
+      - T117.3
       m115_pr_merged: true
       m116_pr_merged: true
+      m117_pr: 206
+      m117_pr_status: open
     m112_verify: PASS
     m112_pr: 200
     m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-    build_head: 3c428c6
+    build_head: c5b635a
     pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     s026_d29_decision: S026-D29
     m112_pr_merged: true
@@ -13787,7 +14016,7 @@ stages:
     m113_ci_status: success
     s026_d43_decision: S026-D43
     current_milestone: M117
-    current_task: T117.3
+    current_task: T117.4
     s026_d44_decision: S026-D44
     s026_d45_decision: S026-D45
     s026_d46_decision: S026-D46
@@ -13800,8 +14029,8 @@ stages:
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
     m114_status: completed
-    active_task: T117.3
-    build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+    active_task: T117.4
+    build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -13810,7 +14039,7 @@ stages:
     m115_head: 605fce9
     m115_pr: 205
     m115_pr_status: merged
-    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     t115_3_status: completed
     t115_3_commit: 464131f
     t115_4_status: completed
@@ -13828,8 +14057,8 @@ stages:
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: closed_superseded
-    ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
-    ci_status: success
+    ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
+    ci_status: pending
     pr_204_ci_status: success
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     m115_ci_status: success
@@ -13870,9 +14099,9 @@ stages:
     t116_4_files: *id005
     branch_ahead_of_origin: 0
     branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @7f086c3
-    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
     s026_d51_decision: S026-D51
-    execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
+    execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
     t116_5_commit: bb30b26
     t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
     m116_status: completed
@@ -13888,7 +14117,7 @@ stages:
     pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
     m116_pr: 205
     m116_pr_status: merged
-    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     t117_1_status: completed
     t117_1_note: T117.1 completed @100514f — privacy + API e2e red tests for F69 actor_email (TC-229–230)
@@ -13899,6 +14128,7 @@ stages:
     m117_commits:
     - 100514f
     - 3c428c6
+    - c5b635a
     m117_status: in_progress
     m115_pr_merged: true
     m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -13923,8 +14153,51 @@ stages:
     s026_d52_decision: S026-D52
     t117_2_commit: 3c428c6
     t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-    t117_3_status: in_progress
-    t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+    t117_3_status: completed
+    t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+    t117_3_commit: c5b635a
+    t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+    t117_4_status: in_progress
+    t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+    pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    pr_206_status: open
+    pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+    pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+    pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    pr_206_tip: c5b635a
+    pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    m117_pr: 206
+    m117_pr_status: open
+    m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    minor_pr_m117:
+      number: 206
+      status: open
+      merged: false
+      title: '[M117] F69 audit actor email read-time (#170)'
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      branch: evolve/EV-024-frontend-ux-polish
+      head: evolve/EV-024-frontend-ux-polish
+      base: main
+      head_sha: c5b635a
+      tip: c5b635a
+      tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+      milestone: M117
+      features:
+      - F69
+      issues:
+      - 170
+      merge_policy: needs_user_approval
+      session_id: S026-frontend-ux-polish
+      evolve_cycle_id: EV-024
+      note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      opened_at: '2026-08-04'
+      recorded_at: '2026-08-04T23:38:25Z'
+      updated_at: '2026-08-04T23:38:25Z'
+      ci_status: pending
+      reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
+    m117_head: c5b635a
   08-verify-build:
     status: completed
     started_at: '2026-08-04'
@@ -13956,7 +14229,7 @@ stages:
     active_feature: F69
     active_issue: 170
     current_action: build_m117_t117_2
-    next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+    next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -13966,7 +14239,7 @@ stages:
     phase_c: pending
     gate_c_to_d: pending
     s026_d28_decision: S026-D28
-    build_head: 7f086c3
+    build_head: c5b635a
     build_commits:
     - 47a618e
     - 18c8dc8
@@ -13979,7 +14252,7 @@ stages:
     note: 'S026/EV-024 08-verify-build COMPLETE PASS (M116) — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; handoff → continue 07-build T117.2'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
-    updated_at: '2026-08-04T23:30:34Z'
+    updated_at: '2026-08-04T23:38:25Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -14352,7 +14625,7 @@ stages:
     build_head_full: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
     m112_verify: PASS
     report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-    ci_status: success
+    ci_status: pending
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30958904809
     minor_pr:
       number: 204
@@ -14422,7 +14695,7 @@ stages:
     m115_verify_at: '2026-08-04T21:35:14Z'
     m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
     m115_pr_status: merged
-    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     m115_pr: 205
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     m115_head: 605fce9
@@ -14443,11 +14716,11 @@ stages:
     pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
     m116_pr: 205
     m116_pr_status: merged
-    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+    m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-    active_task: T117.3
+    active_task: T117.4
     current_milestone: M117
-    current_task: T117.3
+    current_task: T117.4
     m115_pr_merged: true
     m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
     m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -14468,8 +14741,8 @@ stages:
     pr_205_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
     pr_205_merged_at: '2026-08-04T23:24:43Z'
     pr_204_superseded_by: 205
-    ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
-    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+    ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
+    resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
     s026_d52_decision: S026-D52
     t117_2_status: completed
     t117_2_note: T117.2 completed @3c428c6 — enrich GET /internal/v1/audit with actor_email via Supabase Admin lookup/cache
@@ -14501,8 +14774,49 @@ stages:
       evolve_cycle_id: EV-024
       note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.2'
       updated_at: '2026-08-04T23:24:43Z'
-    t117_3_status: in_progress
-    t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+    t117_3_status: completed
+    t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+    t117_3_commit: c5b635a
+    t117_4_status: in_progress
+    t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+    pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    pr_206_status: open
+    pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+    pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+    pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    pr_206_tip: c5b635a
+    pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    m117_pr: 206
+    m117_pr_status: open
+    m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    minor_pr_m117:
+      number: 206
+      status: open
+      merged: false
+      title: '[M117] F69 audit actor email read-time (#170)'
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      branch: evolve/EV-024-frontend-ux-polish
+      head: evolve/EV-024-frontend-ux-polish
+      base: main
+      head_sha: c5b635a
+      tip: c5b635a
+      tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+      milestone: M117
+      features:
+      - F69
+      issues:
+      - 170
+      merge_policy: needs_user_approval
+      session_id: S026-frontend-ux-polish
+      evolve_cycle_id: EV-024
+      note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      opened_at: '2026-08-04'
+      recorded_at: '2026-08-04T23:38:25Z'
+      updated_at: '2026-08-04T23:38:25Z'
+      ci_status: pending
+      reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
   09-qa:
     status: completed
     started: '2026-08-03'
@@ -27638,8 +27952,8 @@ evolve_cycles:
   routing_preset: standard
   preset: Standard
   current_stage: 07-build
-  current_action: build_m117_t117_3
-  next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+  current_action: build_m117_t117_4
+  next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -27692,14 +28006,14 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-04'
-      current_action: build_m117_t117_3
+      current_action: build_m117_t117_4
       askquestion_pending: false
-      note: 'EV-024 Phase C — M115+M116 landed on main via tip-locked PR #205 @0c1d838 (feat/M115-M116 @7f086c3); #204 closed_superseded_by_205; M117 T117.2 completed @3c428c6; T117.3 in_progress — Admin Audit UI actor_email'
+      note: 'EV-024 Phase C — M115+M116 landed on main via tip-locked PR #205 @0c1d838 (feat/M115-M116 @7f086c3); #204 closed_superseded_by_205; M117 T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress — watch CI then 08-verify M117'
       current_stage: 07-build
       askquestion_pending_topic:
-      next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+      next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
       s026_d29_decision: S026-D29
-      updated_at: '2026-08-04T23:30:34Z'
+      updated_at: '2026-08-04T23:38:25Z'
       m112_pr_merged: true
       m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
       m112_merge_sha_short: e1ccf9e
@@ -27715,15 +28029,15 @@ evolve_cycles:
       active_milestone: M117
       active_feature: F69
       active_issue: 170
-      active_task: T117.3
+      active_task: T117.4
       s026_d48_decision: S026-D48
       m115_verify: PASS
       m115_pr_status: merged
       s026_d49_decision: S026-D49
       m115_pr: 205
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-      build_head: 3c428c6
-      ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
+      build_head: c5b635a
+      ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
       s026_d50_decision: S026-D50
       t116_1_status: completed
       t116_1_commit: a26d2a4
@@ -27735,18 +28049,18 @@ evolve_cycles:
       t116_4_status: completed
       t116_4_commit: 1c8f6ff
       t116_5_status: completed
-      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
       s026_d51_decision: S026-D51
       current_milestone: M117
-      current_task: T117.3
-      build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+      current_task: T117.4
+      build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
       t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
       t116_5_commit: bb30b26
       t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
       branch_ahead_of_origin: 0
       branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @7f086c3
-      execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
-      ci_status: success
+      execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
+      ci_status: pending
       m116_commits:
       - a26d2a4
       - 9bba998
@@ -27782,10 +28096,10 @@ evolve_cycles:
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: closed_superseded
       pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
-      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       m116_pr: 205
       m116_pr_status: merged
-      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       t117_1_status: completed
       t117_1_note: Start T117.1 — API e2e/privacy red for actor_email (TC-229–230) F69/#170
@@ -27815,8 +28129,50 @@ evolve_cycles:
       t117_2_note: T117.2 completed @3c428c6 — enrich GET /internal/v1/audit with actor_email via Supabase Admin lookup/cache
       t117_2_commit: 3c428c6
       t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-      t117_3_status: in_progress
-      t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+      t117_3_status: completed
+      t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+      t117_3_commit: c5b635a
+      t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+      t117_4_status: in_progress
+      t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+      pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      pr_206_status: open
+      pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+      pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+      pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      pr_206_tip: c5b635a
+      pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      m117_pr: 206
+      m117_pr_status: open
+      m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      minor_pr_m117:
+        number: 206
+        status: open
+        merged: false
+        title: '[M117] F69 audit actor email read-time (#170)'
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+        branch: evolve/EV-024-frontend-ux-polish
+        head: evolve/EV-024-frontend-ux-polish
+        base: main
+        head_sha: c5b635a
+        tip: c5b635a
+        tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+        head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+        milestone: M117
+        features:
+        - F69
+        issues:
+        - 170
+        merge_policy: needs_user_approval
+        session_id: S026-frontend-ux-polish
+        evolve_cycle_id: EV-024
+        note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+        opened_at: '2026-08-04'
+        recorded_at: '2026-08-04T23:38:25Z'
+        updated_at: '2026-08-04T23:38:25Z'
+        ci_status: pending
+        reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -28080,8 +28436,8 @@ evolve_cycles:
       active_milestone: M117
       active_feature: F69
       active_issue: 170
-      current_action: build_m117_t117_3
-      next_action: 07-build T117.3 — Admin Audit UI actor_email / UUID fallback
+      current_action: build_m117_t117_4
+      next_action: 'Watch CI on PR #206; T117.4 verify green + 08-verify M117'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -28090,8 +28446,8 @@ evolve_cycles:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1+T117.2 completed @3c428c6; T117.3 in_progress (Admin Audit UI email / UUID fallback); head @3c428c6; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback'
-      updated_at: '2026-08-04T23:30:34Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; M117 F69 T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress (CI watch + M117 closeout); head @c5b635a; next=Watch CI on PR #206; T117.4 verify green + 08-verify M117'
+      updated_at: '2026-08-04T23:38:25Z'
       milestones_completed: *id012
       tasks_completed:
       - T112.1
@@ -28113,6 +28469,7 @@ evolve_cycles:
       - T116.5
       - T117.1
       - T117.2
+      - T117.3
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -28126,7 +28483,7 @@ evolve_cycles:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T117.3
+        current_task: T117.4
         current_milestone: M117
         phase: 27
         task_status: in_progress
@@ -28157,6 +28514,7 @@ evolve_cycles:
         - T116.5
         - T117.1
         - T117.2
+        - T117.3
         m115_verify: PASS
         m116_status: completed
         completed_tasks_m115:
@@ -28179,8 +28537,11 @@ evolve_cycles:
         completed_tasks_m117:
         - T117.1
         - T117.2
+        - T117.3
         m115_pr_merged: true
         m116_pr_merged: true
+        m117_pr: 206
+        m117_pr_status: open
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
       branch: evolve/EV-024-frontend-ux-polish
@@ -28188,7 +28549,7 @@ evolve_cycles:
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 3c428c6
+      build_head: c5b635a
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -28229,9 +28590,9 @@ evolve_cycles:
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
       current_milestone: M117
-      current_task: T117.3
-      active_task: T117.3
-      build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+      current_task: T117.4
+      active_task: T117.4
+      build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -28240,7 +28601,7 @@ evolve_cycles:
       m115_head: 605fce9
       m115_pr: 205
       m115_pr_status: merged
-      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       t115_3_status: completed
       t115_3_commit: 464131f
       t115_4_status: completed
@@ -28258,8 +28619,8 @@ evolve_cycles:
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: closed_superseded
-      ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
-      ci_status: success
+      ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
+      ci_status: pending
       pr_204_ci_status: success
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
       m115_ci_status: success
@@ -28300,9 +28661,9 @@ evolve_cycles:
       t116_4_files: *id005
       branch_ahead_of_origin: 0
       branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @7f086c3
-      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+      resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
       s026_d51_decision: S026-D51
-      execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
+      execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
       t116_5_commit: bb30b26
       t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
       t116_5_files:
@@ -28325,7 +28686,7 @@ evolve_cycles:
       pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
       m116_pr: 205
       m116_pr_status: merged
-      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+      m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       t117_1_status: completed
       t117_1_note: T117.1 completed @100514f — privacy + API e2e red tests for F69 actor_email (TC-229–230)
@@ -28336,6 +28697,7 @@ evolve_cycles:
       m117_commits:
       - 100514f
       - 3c428c6
+      - c5b635a
       m117_status: in_progress
       m115_pr_merged: true
       m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -28360,8 +28722,51 @@ evolve_cycles:
       s026_d52_decision: S026-D52
       t117_2_commit: 3c428c6
       t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-      t117_3_status: in_progress
-      t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+      t117_3_status: completed
+      t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+      t117_3_commit: c5b635a
+      t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+      t117_4_status: in_progress
+      t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+      pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      pr_206_status: open
+      pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+      pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+      pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+      pr_206_tip: c5b635a
+      pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      m117_pr: 206
+      m117_pr_status: open
+      m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+      m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+      minor_pr_m117:
+        number: 206
+        status: open
+        merged: false
+        title: '[M117] F69 audit actor email read-time (#170)'
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+        branch: evolve/EV-024-frontend-ux-polish
+        head: evolve/EV-024-frontend-ux-polish
+        base: main
+        head_sha: c5b635a
+        tip: c5b635a
+        tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+        head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+        milestone: M117
+        features:
+        - F69
+        issues:
+        - 170
+        merge_policy: needs_user_approval
+        session_id: S026-frontend-ux-polish
+        evolve_cycle_id: EV-024
+        note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+        opened_at: '2026-08-04'
+        recorded_at: '2026-08-04T23:38:25Z'
+        updated_at: '2026-08-04T23:38:25Z'
+        ci_status: pending
+        reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
+      m117_head: c5b635a
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
@@ -28823,6 +29228,23 @@ evolve_cycles:
     merge_policy: needs_user_approval
     feature: F67
     issue: 106
+  - path: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    kind: pull_request
+    number: 206
+    milestone: M117
+    feature: F69
+    issue: 170
+    status: open
+    title: '[M117] F69 audit actor email read-time (#170)'
+    branch: evolve/EV-024-frontend-ux-polish
+    tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    tip: c5b635a
+    skill_id: 07-build
+    recorded_at: '2026-08-04T23:38:25Z'
+    updated_at: '2026-08-04T23:38:25Z'
+    note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
   issues: []
   decisions:
   - id: S026-D52
@@ -29268,8 +29690,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T117.2 complete — actor_email enrich @ 3c428c6. Also confirmed PR #205 merged to main @ 0c1d838; main CI+preflight green. Next: T117.3 Admin Audit UI render email / truncated UUID. active_feature=F69 active_milestone=M117 active_task=T117.3 current_action=build_m117_t117_3; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback; head @3c428c6'
-  updated_at: '2026-08-04T23:30:34Z'
+  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T117.3 completed @c5b635a; PR #206 OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206; T117.4 in_progress; M115+M116 merged via #205. Opened #206 for M117 because evolve/** push does not trigger ci.yml (only feat/** / PR). Watching CI on c5b635a then T117.4 closeout. active_feature=F69 active_milestone=M117 active_task=T117.4 current_action=build_m117_t117_4; next=Watch CI on PR #206; T117.4 verify green + 08-verify M117; head @c5b635a'
+  updated_at: '2026-08-04T23:38:25Z'
   feature_map:
     F64:
       issue: 87
@@ -29542,7 +29964,7 @@ evolve_cycles:
     - T114.2
     feature: F64
     issue: 87
-  active_task: T117.3
+  active_task: T117.4
   s026_d44_decision: S026-D44
   s026_d45_decision: S026-D45
   m114_status: completed
@@ -29586,8 +30008,8 @@ evolve_cycles:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  build_head: 3c428c6
-  build_head_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+  build_head: c5b635a
+  build_head_full: c5b635ac0a87495f37d770a4526ede350fc76b28
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
@@ -29596,7 +30018,7 @@ evolve_cycles:
   m115_head: 605fce9
   m115_pr: 205
   m115_pr_status: merged
-  m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+  m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
   t115_3_status: completed
   t115_3_commit: 464131f
   t115_4_status: completed
@@ -29614,8 +30036,8 @@ evolve_cycles:
   - d93b78a
   - bde3db7
   - 605fce9
-  ci_note: 'M115+M116 MERGED via PR #205 @0c1d838 (tip 7f086c3); #204 closed_superseded; main CI+preflight green; continuing M117 T117.3 @3c428c6'
-  ci_status: success
+  ci_note: 'PR #206 OPEN for M117 F69 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @c5b635a; evolve/** push does not trigger ci.yml — watching CI via PR; T117.4 awaiting green then 08-verify M117'
+  ci_status: pending
   pr_204_ci_status: success
   m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
   m115_ci_status: success
@@ -29626,13 +30048,13 @@ evolve_cycles:
   execution_plan_current_state:
     phase: 27
     current_milestone: M117
-    current_task: T117.3
+    current_task: T117.4
     task_status: in_progress
     active_milestone: M117
     active_feature: F69
     active_issue: 170
-    note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
-    updated_at: '2026-08-04T23:30:34Z'
+    note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+    updated_at: '2026-08-04T23:38:25Z'
     t116_1_status: completed
     t116_1_commit: a26d2a4
     t116_2_status: completed
@@ -29647,7 +30069,11 @@ evolve_cycles:
     t117_1_commit: 100514f
     t117_2_status: completed
     t117_2_commit: 3c428c6
-    t117_3_status: in_progress
+    t117_3_status: completed
+    t117_3_commit: c5b635a
+    t117_4_status: in_progress
+    pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    pr_206_status: open
   t116_1_commit: a26d2a4
   t116_1_commit_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
   t116_2_status: completed
@@ -29670,12 +30096,12 @@ evolve_cycles:
   t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
   t116_4_files: *id005
   branch_ahead_of_origin: 0
-  resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1+T117.2 completed @3c428c6; T117.3 in_progress F69/#170; head 3c428c6'
+  resume_note: 'PR #205 MERGED @0c1d838; #204 closed_superseded; T117.1–T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress F69/#170; head c5b635a'
   s026_d51_decision: S026-D51
-  execution_plan_note: execution-plan.md should show T117.2 completed / T117.3 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 07-build T117.3 Admin Audit UI actor_email / UUID fallback
+  execution_plan_note: 'execution-plan.md should show T117.3 completed / T117.4 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); next Watch CI on PR #206; T117.4 verify green + 08-verify M117'
   pr_note: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204 open M115+M116
   current_milestone: M117
-  current_task: T117.3
+  current_task: T117.4
   m116_status: completed
   m116_verify: PASS
   m116_feature: F68
@@ -29689,7 +30115,7 @@ evolve_cycles:
   pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
   m116_pr: 205
   m116_pr_status: merged
-  m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.3'
+  m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
   m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
   branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @7f086c3
   t117_1_status: completed
@@ -29740,11 +30166,56 @@ evolve_cycles:
   tip_branch: feat/M115-M116
   t117_2_commit: 3c428c6
   t117_2_commit_full: 3c428c6f9fc42f289d8bb972927703579b18886d
-  t117_3_status: in_progress
-  t117_3_note: T117.3 in_progress — Admin Audit UI render actor_email / truncated UUID fallback
+  t117_3_status: completed
+  t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
   m117_commits:
   - 100514f
   - 3c428c6
+  - c5b635a
+  t117_3_commit: c5b635a
+  t117_3_commit_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+  t117_4_status: in_progress
+  t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+  pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+  pr_206_status: open
+  pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+  pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+  pr_206_tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+  pr_206_tip: c5b635a
+  pr_206_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+  m117_pr: 206
+  m117_pr_status: open
+  m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+  m117_pr_note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+  minor_pr_m117:
+    number: 206
+    status: open
+    merged: false
+    title: '[M117] F69 audit actor email read-time (#170)'
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    branch: evolve/EV-024-frontend-ux-polish
+    head: evolve/EV-024-frontend-ux-polish
+    base: main
+    head_sha: c5b635a
+    tip: c5b635a
+    tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+    milestone: M117
+    features:
+    - F69
+    issues:
+    - 170
+    merge_policy: needs_user_approval
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
+    opened_at: '2026-08-04'
+    recorded_at: '2026-08-04T23:38:25Z'
+    updated_at: '2026-08-04T23:38:25Z'
+    ci_status: pending
+    reason_pr_opened: 'evolve/** push does not trigger ci.yml (only feat/** / PR); opened #206 to run CI on c5b635a'
+  m117_status: in_progress
+  m117_head: c5b635a
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -37347,6 +37818,23 @@ artifacts:
   docs_commit: 7f086c3
   ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30958904809
   pr: 204
+- path: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+  session_id: S026-frontend-ux-polish
+  evolve_cycle_id: EV-024
+  kind: pull_request
+  number: 206
+  milestone: M117
+  feature: F69
+  issue: 170
+  status: open
+  title: '[M117] F69 audit actor email read-time (#170)'
+  branch: evolve/EV-024-frontend-ux-polish
+  tip_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+  tip: c5b635a
+  skill_id: 07-build
+  recorded_at: '2026-08-04T23:38:25Z'
+  updated_at: '2026-08-04T23:38:25Z'
+  note: 'PR #206 OPEN [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); head evolve/EV-024-frontend-ux-polish @c5b635a; NOT merged — await CI green then T117.4 / 08-verify M117'
 git_history:
   current_branch: evolve/EV-024-frontend-ux-polish
   branches:
@@ -37358,32 +37846,33 @@ git_history:
     created_at: '2026-08-04'
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
-    head_short: 3c428c6
-    note: 'PR #205 MERGED @0c1d838 (M115+M116 tip-locked); #204 closed_superseded; continue T117.2 on this branch | T117.2 completed @3c428c6; T117.3 in_progress; PR #205 MERGED @0c1d838'
-    head_sha: 3c428c6
-    pr_number: 203
-    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203
-    pr_status: merged
+    head_short: c5b635a
+    note: 'PR #205 MERGED @0c1d838 (M115+M116 tip-locked); #204 closed_superseded; continue T117.2 on this branch | T117.2 completed @3c428c6; T117.3 in_progress; PR #205 MERGED @0c1d838 | T117.3 completed @c5b635a; PR #206 OPEN; T117.4 in_progress'
+    head_sha: c5b635a
+    pr_number: 206
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    pr_status: open
     pr_merged: true
     merge_sha: f3f7dec
     merge_sha_full: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     merged_at: '2026-08-04T20:59:01Z'
-    ci_status: success
+    ci_status: pending
     main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     deploy_preflight_status: watching
-    updated_at: '2026-08-04T23:30:34Z'
+    updated_at: '2026-08-04T23:38:25Z'
     merge_sha_short: f3f7dec
     prior_pr_202_merge_sha: 9eaedb0
     m115_pr: 204
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     m115_pr_status: open_ci_green
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
-    ahead_of_origin: 4
-    head_sha_full: 3c428c6f9fc42f289d8bb972927703579b18886d
+    ahead_of_origin: 0
+    head_sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
     pr_205_status: merged
     pr_205_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
     pr_204_status: closed_superseded_by_205
+    pr_title: '[M117] F69 audit actor email read-time (#170)'
   - name: evolve/EV-023-ci-release-automation
     purpose: EV-023 CI / local quality + release automation (#194)
     base: main
@@ -41695,7 +42184,37 @@ git_history:
     - docs/sessions/S000-internal-docs-archive/execution-plan.md
     - workflow-state.yaml
     note: 'T117.2 completed — enrich audit list with actor_email via Supabase; continuing T117.3 Admin Audit UI; PR #205 already merged @0c1d838'
-  notes: '2026-08-04T23:30:34Z S026/EV-024: recorded commit 3c428c6 ([T117.2] feat: enrich audit list with actor_email via Supabase); T117.2 complete — actor_email enrich @ 3c428c6. Also confirmed PR #205 merged to main @ 0c1d838; main CI+preflight green. Next: T117.3 Admin Audit UI render email / truncated UUID. build_head=3c428c6; current_action=build_m117_t117_3; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback; M117 in_progress; askquestion_pending=false on evolve/EV-024-frontend-ux-polish. | User approved merge of M115+M116. Opened PR #205 from tip-locked branch (excludes T117.1). Merged to main @ 0c1d838. Closed #204 as superseded. Continue 07-build T117.2 on evolve/EV-024-frontend-ux-polish.'
+  - sha: c5b635a
+    full_sha: c5b635ac0a87495f37d770a4526ede350fc76b28
+    sha_full: c5b635ac0a87495f37d770a4526ede350fc76b28
+    short: c5b635a
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T117.3] feat: Admin Audit actor email / truncated UUID'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 8
+    timestamp: '2026-08-04T23:38:00Z'
+    milestone: M117
+    task: T117.3
+    feature_ids:
+    - F69
+    issue: 170
+    rd_range: RD-272..RD-289
+    files:
+    - apps/data-management-frontend/src/api/admin.ts
+    - apps/data-management-frontend/src/lib/formatActorLabel.test.ts
+    - apps/data-management-frontend/src/lib/formatActorLabel.ts
+    - apps/data-management-frontend/src/pages/AuditPage.tsx
+    - apps/data-management-frontend/src/test/test_uj074_audit_actor_email.test.tsx
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - packages/frontend-i18n/src/messages.ts
+    - workflow-state.yaml
+    pr: 206
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+    note: 'T117.3 completed — Admin Audit actor email / truncated UUID; PR #206 opened for M117 CI; continuing T117.4'
+  notes: '2026-08-04T23:38:25Z S026/EV-024: recorded commit c5b635a ([T117.3] feat: Admin Audit actor email / truncated UUID); PR #206 OPEN; T117.4 in_progress; M115+M116 merged via #205. Opened #206 for M117 because evolve/** push does not trigger ci.yml (only feat/** / PR). Watching CI on c5b635a then T117.4 closeout. build_head=c5b635a; current_action=build_m117_t117_4; next=Watch CI on PR #206; T117.4 verify green + 08-verify M117; M117 in_progress; askquestion_pending=false on evolve/EV-024-frontend-ux-polish. | 2026-08-04T23:30:34Z S026/EV-024: recorded commit 3c428c6 ([T117.2] feat: enrich audit list with actor_email via Supabase); T117.2 complete — actor_email enrich @ 3c428c6. Also confirmed PR #205 merged to main @ 0c1d838; main CI+preflight green. Next: T117.3 Admin Audit UI render email / truncated UUID. build_head=3c428c6; current_action=build_m117_t117_3; next=07-build T117.3 — Admin Audit UI actor_email / UUID fallback; M117 in_progress; askquestion_pending=false on evolve/EV-024-frontend-ux-polish. | User approved merge of M115+M116. Opened PR #205 from tip-locked branch (excludes T117.1). Merged to main @ 0c1d838. Closed #204 as superseded. Continue 07-build T117.2 on evolve/EV-024-frontend-ux-polish.'
   pull_requests:
     '195':
       number: 195
