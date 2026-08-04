@@ -2,6 +2,19 @@
 
 Archived evolve cycle reports.
 
+## EV-023 — CI / local quality + release automation (F62–F63)
+
+**Cycle:** EV-023  
+**Completed:** 2026-08-04  
+**Session:** S025-ci-release-automation  
+**Status:** completed (deploy gate S025-D16)  
+**Features:** F62 (#182), F63 (#103) · Epic #194  
+**Preset:** Lean+build (`01 → 02 → 07 → 08 → 10 → 13`)  
+**PRs:** [#195](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195) feature @ `58e52c8` · [#196](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/196) release git identity · [#197](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197) docs closeout @ `e78e418`  
+**Release:** [v0.4.1](https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1) @ `5fa370a`  
+**Report:** [evolve-summary](../sessions/S025-ci-release-automation/reports/evolve-summary.md) · [deploy-smoke](../sessions/S025-ci-release-automation/reports/deploy-smoke.md)  
+**Notes:** Infra-only; product H1–H5 waived. First live automated semver tag after DO CD.
+
 ## EV-019 — Ingest resilience (F47–F49)
 
 **Cycle:** EV-019  

@@ -1,4 +1,4 @@
-overall_status: in_progress
+overall_status: idle
 project:
   name: Vecinita
   description: 'Monorepo — bilingual community Q&A RAG + data management (5 apps; zero personal data, cost/sovereignty constraints)'
@@ -533,6 +533,9 @@ project:
         user_confirmed: true
         user_confirmed_at: '2026-08-03'
       s025_d9_decision: S025-D9
+      session_closed: true
+      session_closed_at: '2026-08-04'
+      close_decision: S025-D16
     02-verify-plan:
       status: completed
       started_at: '2026-08-03'
@@ -1163,6 +1166,9 @@ project:
         stage_02_completed: true
         s025_d13_decision: S025-D13
         verdict_summary: approve M1–M3 locks (option 1) — pre-push lint+test-fast; strict semver tags; release on DO CD success; Gate A→B PASS → 07-build (04 skipped)
+      session_closed: true
+      session_closed_at: '2026-08-04'
+      close_decision: S025-D16
     04-tech-plan:
       status: completed
       started_at: '2026-08-03'
@@ -1367,6 +1373,9 @@ project:
       - fedf1f7
       f62_commit: 2cad110
       f63_commit: fedf1f7
+      session_closed: true
+      session_closed_at: '2026-08-04'
+      close_decision: S025-D16
     08-verify-build:
       status: completed
       started_at: '2026-08-03'
@@ -1444,6 +1453,9 @@ project:
       gate_b_to_c: waived
       checkpoints_phase_b: waived
       s025_d14_decision: S025-D14
+      session_closed: true
+      session_closed_at: '2026-08-04'
+      close_decision: S025-D16
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -2088,6 +2100,9 @@ project:
       commit: b626dfd
       commit_full: b626dfd7256d31a9566e91546edda9407b53601e
       commits_head: b626dfd
+      session_closed: true
+      session_closed_at: '2026-08-04'
+      close_decision: S025-D16
     11-verify-impl:
       status: completed
       started_at: '2026-08-03'
@@ -3040,617 +3055,687 @@ project:
       updated_at: '2026-08-03T21:29:58Z'
     13-deploy-smoke:
       status: completed
-      started_at: '2026-08-03T21:29:58Z'
+      started_at: '2026-08-03T23:36:53Z'
       started: '2026-08-03'
-      completed: '2026-08-03'
-      completed_at: '2026-08-03T22:18:30Z'
+      started_ts: '2026-08-03T23:36:53Z'
+      completed: '2026-08-04'
+      completed_at: '2026-08-03T23:59:34Z'
+      completed_ts: '2026-08-03T23:59:34Z'
       partial_rerun_at: '2026-08-03'
-      partial_rerun_note: S024/EV-022 — 13-deploy-smoke COMPLETE Path A PASS @ cc2750c; prior S023 COMPLETE nested under s023_baseline
-      session_id: S024-website-scrape-crawl
+      partial_rerun_note: 'S025/EV-023 — 13-deploy-smoke PASS after PR #195 MERGED; prior S024 COMPLETE nested under s024_baseline'
+      session_id: S025-ci-release-automation
       branch: main
-      evolve_branch: evolve/EV-022-website-scrape-crawl
-      evolve_cycle_id: EV-022
+      evolve_branch: evolve/EV-023-ci-release-automation
+      evolve_cycle_id: EV-023
       mode: evolve
       delta_only: true
-      feature_ids:
-      - F59
-      - F60
-      - F61
-      feature: F59+F60+F61
-      phase: Phase 26 (M108-M111)
-      deploy_path: A
-      deploy_path_default: A
-      current_action: 13_complete_awaiting_cycle_close
-      next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+      feature_ids: &id002
+      - F62
+      - F63
+      feature: F62+F63
+      skill_id: 13-deploy-smoke
+      orchestrator: 16-evolve
+      deploy_path: infra_cd_release
+      current_action: completed
+      next_action: none_session_closed
       askquestion_pending: false
-      askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
-      s024_d47_decision: S024-D47
-      js_render_decision: A_ship_static_js_render_follow_up
-      js_render_not_gate: true
-      live_crawl: optional_S024-D24
-      pr_number: 190
-      pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+      pr_number: 195
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
       pr_status: merged
       pr_merged: true
-      pr_exists: true
-      merge_sha: cc2750ce2bd88b844fad62c946fa585a69a8eaa5
-      merge_sha_short: cc2750c
-      commits_head: cc2750c
-      commit_deployed: cc2750c
-      pr_head_sha: 2c97d36
-      pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
-      ci_status: success
-      path_a: passed
-      overall_result: path_a_pass
+      pr_merged_at: '2026-08-03T23:35:40Z'
+      merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+      merge_sha_short: 58e52c8
+      s025_d15_decision: S025-D15
+      s025_d16_decision: S025-D16
+      result: pass
+      overall_result: pass
       ready: true
       deploy_ready: true
-      alembic_revision: '20260803_0011'
-      alembic_note: 20260803_0011 applied via DO CD
-      report: docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
-      note: 'S024/EV-022 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS @ cc2750c (PR #190 MERGED); Modal CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172 success; DO CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636 success; Alembic 20260803_0011 applied via DO CD; H1/H3/H3b/H4/H5 PASS; H2 SKIP (no DATABASE_URL locally); live OpenAPI has /internal/v1/corpus/tree after write ACTIVE; report=docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; checkpoints.deploy=passed; gates.deploy=passed; EV-022 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
-      updated_at: '2026-08-03T22:18:30Z'
-      health_tiers:
-        h1_liveness: pass
-        h2_db_ready: skipped
-        h2_skip_reason: no DATABASE_URL locally; Alembic verified in DO CD
-        h3_rag_smoke: pass
-        h3b_browse: pass
-        h4_cors_preflight: pass
-        h5_frontend_bundle: pass
-      ci_runs:
-        deploy_modal:
-          id: '30857801172'
-          url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172'
-          conclusion: success
-        deploy_digitalocean:
-          id: '30857894636'
-          url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636'
-          conclusion: success
-      live_evidence:
-        openapi_corpus_tree: present
-        path: /internal/v1/corpus/tree
-        write_api: ACTIVE
-      s023_baseline:
-        s022_baseline:
-          status: completed
-          ready: true
-          started_at: '2026-08-02'
-          started: '2026-08-02'
-          completed: '2026-08-02'
-          completed_at: '2026-08-02'
-          partial_rerun_at: '2026-08-02'
-          partial_rerun_note: 'S022/EV-019 — 13-deploy-smoke COMPLETE; Path A PASS @ bd6bb00; Path B waived_follow_up; prior S021 COMPLETE nested under s021_baseline'
-          session_id: S022-ingest-resilience
-          branch: evolve/EV-019-ingest-resilience
-          evolve_cycle_id: EV-019
-          mode: evolve
-          delta_only: true
-          feature_ids:
-          - F47
-          - F48
-          - F49
-          feature: F47-F49
-          phase: Phase 24 (M101-M104)
-          current_action: close_pending
-          next_action: none_session_closed
-          deploy_path: A_path_b_waived
-          path_a: passed
-          path_b_rechunk: waived_follow_up
-          path_b_waiver_rationale: 'User S023-D0: waive Path B rechunk to follow-up so residual #158/#165 session can open after Path A smokes'
-          deploy_ready: true
-          ship_plan: path_a_complete_path_b_waived
-          ship_decision: path_a_complete_path_b_waived
-          overall_result: path_a_pass_path_b_waived
-          pr_exists: true
-          pr_number: 179
-          pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179'
-          pr_status: merged
-          pr_merged: true
-          pr_merged_at: '2026-08-02T23:43:07Z'
-          merge_sha: bd6bb00a927043129061e2b84e4369456f220f72
-          merge_sha_short: bd6bb00
-          commits_head: bd6bb00
-          commit_deployed: bd6bb00
-          report: docs/sessions/S022-ingest-resilience/reports/deploy-smoke.md
-          note: 'S022/EV-019 13-deploy-smoke COMPLETE 2026-08-02 — Path A PASS @ bd6bb00 (PR #179 MERGED); H1/H3/H4/H5 PASS; H2 SKIP; Path B rechunk waived_follow_up (S022-D-path-b-waive); CE false hold; close_session now valid; next open S023 for #158/#165 S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.'
-          s021_baseline:
+      report: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
+      evolve_summary: docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
+      release_tag: v0.4.1
+      release_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+      release_target_sha: 5fa370a
+      release_target_sha_short: 5fa370a
+      uj_068_t2_t3: pass
+      product_h1_h5: waived
+      product_h1_h5_waiver: infra_only
+      workflow_run_auto_release: verified_after_first_run_gotcha
+      idempotent_skip: pass
+      checkpoints_phase_d: passed
+      checkpoints_deploy: passed
+      gates_deploy: passed
+      pr_196: &id003
+        number: 196
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/196
+        status: merged
+        merged: true
+        note: git identity
+      pr_197: &id004
+        number: 197
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+        status: merged
+        merged: true
+        merged_at: '2026-08-04T00:01:53Z'
+        merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+        note: docs closeout reports
+      docs_closeout_pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+      note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+      updated_at: '2026-08-04T00:02:30Z'
+      s024_baseline:
+        status: completed
+        started_at: '2026-08-03T21:29:58Z'
+        started: '2026-08-03'
+        completed: '2026-08-03'
+        completed_at: '2026-08-03T22:18:30Z'
+        partial_rerun_at: '2026-08-03'
+        partial_rerun_note: S024/EV-022 — 13-deploy-smoke COMPLETE Path A PASS @ cc2750c; prior S023 COMPLETE nested under s023_baseline
+        session_id: S024-website-scrape-crawl
+        branch: main
+        evolve_branch: evolve/EV-022-website-scrape-crawl
+        evolve_cycle_id: EV-022
+        mode: evolve
+        delta_only: true
+        feature_ids:
+        - F59
+        - F60
+        - F61
+        feature: F59+F60+F61
+        phase: Phase 26 (M108-M111)
+        deploy_path: A
+        deploy_path_default: A
+        current_action: 13_complete_awaiting_cycle_close
+        next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+        askquestion_pending: false
+        askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
+        s024_d47_decision: S024-D47
+        js_render_decision: A_ship_static_js_render_follow_up
+        js_render_not_gate: true
+        live_crawl: optional_S024-D24
+        pr_number: 190
+        pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+        pr_status: merged
+        pr_merged: true
+        pr_exists: true
+        merge_sha: cc2750ce2bd88b844fad62c946fa585a69a8eaa5
+        merge_sha_short: cc2750c
+        commits_head: cc2750c
+        commit_deployed: cc2750c
+        pr_head_sha: 2c97d36
+        pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+        ci_status: success
+        path_a: passed
+        overall_result: path_a_pass
+        ready: true
+        deploy_ready: true
+        alembic_revision: '20260803_0011'
+        alembic_note: 20260803_0011 applied via DO CD
+        report: docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
+        note: 'S024/EV-022 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS @ cc2750c (PR #190 MERGED); Modal CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172 success; DO CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636 success; Alembic 20260803_0011 applied via DO CD; H1/H3/H3b/H4/H5 PASS; H2 SKIP (no DATABASE_URL locally); live OpenAPI has /internal/v1/corpus/tree after write ACTIVE; report=docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; checkpoints.deploy=passed; gates.deploy=passed; EV-022 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
+        updated_at: '2026-08-03T22:18:30Z'
+        health_tiers:
+          h1_liveness: pass
+          h2_db_ready: skipped
+          h2_skip_reason: no DATABASE_URL locally; Alembic verified in DO CD
+          h3_rag_smoke: pass
+          h3b_browse: pass
+          h4_cors_preflight: pass
+          h5_frontend_bundle: pass
+        ci_runs:
+          deploy_modal:
+            id: '30857801172'
+            url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172'
+            conclusion: success
+          deploy_digitalocean:
+            id: '30857894636'
+            url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636'
+            conclusion: success
+        live_evidence:
+          openapi_corpus_tree: present
+          path: /internal/v1/corpus/tree
+          write_api: ACTIVE
+        s023_baseline:
+          s022_baseline:
             status: completed
+            ready: true
             started_at: '2026-08-02'
             started: '2026-08-02'
+            completed: '2026-08-02'
             completed_at: '2026-08-02'
-            session_id: S021-retrieval-follow-on
-            branch: evolve/EV-018-retrieval-follow-on
-            evolve_cycle_id: EV-018
+            partial_rerun_at: '2026-08-02'
+            partial_rerun_note: 'S022/EV-019 — 13-deploy-smoke COMPLETE; Path A PASS @ bd6bb00; Path B waived_follow_up; prior S021 COMPLETE nested under s021_baseline'
+            session_id: S022-ingest-resilience
+            branch: evolve/EV-019-ingest-resilience
+            evolve_cycle_id: EV-019
             mode: evolve
             delta_only: true
-            feature: F46+F45
             feature_ids:
-            - F46
-            - F45
-            phase: Phase 23 (M99-M100)
-            current_action: 13_complete_awaiting_cycle_close
+            - F47
+            - F48
+            - F49
+            feature: F47-F49
+            phase: Phase 24 (M101-M104)
+            current_action: close_pending
             next_action: none_session_closed
-            deploy_path: A
-            prod_ce: false
-            path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate decision after Path A
-            decision: S021-D27
-            pr_plan_id: PR-57
-            pr_number: 174
-            pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
-            pr_title: '[EV-018] Retrieval follow-on — F46 empty retrieve + F45 CE re-gate'
-            pr_branch: evolve/EV-018-retrieval-follow-on
-            pr_base: main
+            deploy_path: A_path_b_waived
+            path_a: passed
+            path_b_rechunk: waived_follow_up
+            path_b_waiver_rationale: 'User S023-D0: waive Path B rechunk to follow-up so residual #158/#165 session can open after Path A smokes'
+            deploy_ready: true
+            ship_plan: path_a_complete_path_b_waived
+            ship_decision: path_a_complete_path_b_waived
+            overall_result: path_a_pass_path_b_waived
+            pr_exists: true
+            pr_number: 179
+            pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179'
             pr_status: merged
-            pr_opened_at: '2026-08-02'
-            pr_head_sha: dd92615
-            pr_stage: 13-deploy-smoke
-            commits_head: 9d1f10b
-            note: 'S021/EV-018 13-deploy-smoke Path A PASS 2026-08-02 — PR #174 MERGED @ 9d1f10b (full 9d1f10baecf2cdef61b3174774e03b847086fe17); evolve tip pre-merge dd92615; ChatRAG ACTIVE ade67338-06bf-40ba-aa21-2c29e08f9b9c; CE NOT_IN_SPEC→default false (hold); do_verify PASS; staging_smoke H1 PASS / H2 SKIP (no DATABASE_URL) / H3 PASS; verify_connectivity H0c+H4+H5 PASS; UJ-061 sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239; main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322; gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-            s020_baseline:
-              status: in_progress
+            pr_merged: true
+            pr_merged_at: '2026-08-02T23:43:07Z'
+            merge_sha: bd6bb00a927043129061e2b84e4369456f220f72
+            merge_sha_short: bd6bb00
+            commits_head: bd6bb00
+            commit_deployed: bd6bb00
+            report: docs/sessions/S022-ingest-resilience/reports/deploy-smoke.md
+            note: 'S022/EV-019 13-deploy-smoke COMPLETE 2026-08-02 — Path A PASS @ bd6bb00 (PR #179 MERGED); H1/H3/H4/H5 PASS; H2 SKIP; Path B rechunk waived_follow_up (S022-D-path-b-waive); CE false hold; close_session now valid; next open S023 for #158/#165 S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.'
+            s021_baseline:
+              status: completed
               started_at: '2026-08-02'
-              completed_at:
-              partial_rerun_at: '2026-08-02'
-              partial_rerun_note: 'S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; PR'
-              session_id: S020-retrieval-batch-b
-              branch: evolve/EV-017-retrieval-batch-b
-              evolve_cycle_id: EV-017
+              started: '2026-08-02'
+              completed_at: '2026-08-02'
+              session_id: S021-retrieval-follow-on
+              branch: evolve/EV-018-retrieval-follow-on
+              evolve_cycle_id: EV-018
               mode: evolve
               delta_only: true
-              feature: F42
+              feature: F46+F45
               feature_ids:
-              - F43
-              - F44
+              - F46
               - F45
-              commits_head: 73df939
-              commit_deployed: 5693422
-              current_action: 13_deploy_smoke_path_a_merge
-              next_action: 'Merge PR #173 then main CD + H1–H5'
-              ac_rq6_disposition: investigate_fix_option_1_resolved
-              merge_gate: merged
-              pr_number: 172
-              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172'
-              pr_status: merged
-              pr_head_sha: 73df939
-              merge_sha: b08ec30
-              merge_commit: b08ec30
-              pr_merged_at: '2026-08-01'
+              phase: Phase 23 (M99-M100)
+              current_action: 13_complete_awaiting_cycle_close
+              next_action: none_session_closed
               deploy_path: A
-              path_a_staging_result: PASS
-              overall_result: path_a_pass_ac_rq6_pass
-              report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
-              iss008_staging_run: confirmed_18_items
-              ac_rq6:
-                status: pass
-                relevancy: 0.833
-                relevancy_floor: 0.28
-                faith: 0.938
-                faith_floor: 0.91
-                disposition: investigate_fix_option_1_resolved
-                fix: judge+H7 fix (S019-D51)
-                evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
-              hy1_gate:
-                status: pass
-                evidence: 20260802T022836Z_hybrid-sweep.json
-                relevancy: 0.833
-                faith: 0.938
-              note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
-              s017_baseline:
+              prod_ce: false
+              path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate decision after Path A
+              decision: S021-D27
+              pr_plan_id: PR-57
+              pr_number: 174
+              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
+              pr_title: '[EV-018] Retrieval follow-on — F46 empty retrieve + F45 CE re-gate'
+              pr_branch: evolve/EV-018-retrieval-follow-on
+              pr_base: main
+              pr_status: merged
+              pr_opened_at: '2026-08-02'
+              pr_head_sha: dd92615
+              pr_stage: 13-deploy-smoke
+              commits_head: 9d1f10b
+              note: 'S021/EV-018 13-deploy-smoke Path A PASS 2026-08-02 — PR #174 MERGED @ 9d1f10b (full 9d1f10baecf2cdef61b3174774e03b847086fe17); evolve tip pre-merge dd92615; ChatRAG ACTIVE ade67338-06bf-40ba-aa21-2c29e08f9b9c; CE NOT_IN_SPEC→default false (hold); do_verify PASS; staging_smoke H1 PASS / H2 SKIP (no DATABASE_URL) / H3 PASS; verify_connectivity H0c+H4+H5 PASS; UJ-061 sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239; main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322; gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+              s020_baseline:
+                status: in_progress
+                started_at: '2026-08-02'
+                completed_at:
+                partial_rerun_at: '2026-08-02'
+                partial_rerun_note: 'S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; PR'
+                session_id: S020-retrieval-batch-b
+                branch: evolve/EV-017-retrieval-batch-b
+                evolve_cycle_id: EV-017
                 mode: evolve
                 delta_only: true
-                feature: F41
+                feature: F42
                 feature_ids:
-                - F41
-                deploy_path: A
-                deploy_approved: true
-                deploy_approved_at: '2026-07-30'
-                deploy_approval: phase_d_path_a_staging_sequence
-                path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
-                path_a_staging_result: PASS
-                head_sha: bbe9544
-                commit_deployed: 180ad14
-                alembic_revision: '20260730_0010'
-                alembic_from: '20260728_0009'
-                report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
-                untracked_left:
-                - scripts/deploy/_tmp_proxy_key_check.py
-                untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-                next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
-                overall_result: PASS
-                path_a_progress:
-                  alembic: pass
-                  alembic_revision: '20260730_0010'
-                  do_pins:
-                    write_api: ACTIVE_evolve
-                    admin_frontend: ACTIVE_evolve
-                  modal_dm_redeploy: pass
-                  secret_sync: pass
-                  do_verify: pass
-                  h1_h5_pre_promote: pass
-                  h1_h5_post_promote: pass
-                  backfill_scoped: pass
-                  live_equivalence: pass
-                  shadow_dry_run: pass
-                  rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
-                  f36_eval:
-                    status: completed
-                    run_id: 01ca4019
-                    note: operator-local execute_eval_run; top_k=2
-                  promote:
-                    chunks_promoted: 60
-                    documents_promoted: 2
-                advisories:
-                - Modal eval job_type falls through to ingest
-                - F36 used top_k=2 + local execute_eval_run
-                - full backfill still pending
-                - DO pins on evolve until merge
-                - do not commit scripts/deploy/_tmp_proxy_key_check.py
-                note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
-              s016_baseline:
-                status: completed
-                started_at: '2026-07-29'
-                completed_at: '2026-07-29'
-                partial_rerun_at: '2026-07-30'
-                partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG FE; H0c+H4/H5 PASS; deploy-smoke PASS'
-                session_id: S016-chat-cold-start-ux
-                branch: main
-                evolve_cycle_id: EV-014
-                mode: evolve
-                delta_only: true
-                feature: F40
-                deploy_path: A
-                head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-                merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-                merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-                merged_at: '2026-07-30T01:15:04Z'
-                commit_deployed: 82ad84e
-                drift: false
-                deploy_approved: true
-                deploy_approved_at: '2026-07-29'
-                deploy_approval: user_approved_commit_preview_deploy
-                overall_result: PASS
-                report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
-                pr_number: 157
-                pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157'
+                - F43
+                - F44
+                - F45
+                commits_head: 73df939
+                commit_deployed: 5693422
+                current_action: 13_deploy_smoke_path_a_merge
+                next_action: 'Merge PR #173 then main CD + H1–H5'
+                ac_rq6_disposition: investigate_fix_option_1_resolved
+                merge_gate: merged
+                pr_number: 172
+                pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172'
                 pr_status: merged
-                merge_gate: smokes_pass_before_merge
-                merge_approval: executed
-                merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
-                local_preview: 'http://127.0.0.1:5173/'
-                ci:
-                  status: success
-                  ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
-                  head_sha: 82ad84e
-                cd:
-                  deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560'
-                  deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804'
-                  deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533'
+                pr_head_sha: 73df939
+                merge_sha: b08ec30
+                merge_commit: b08ec30
+                pr_merged_at: '2026-08-01'
+                deploy_path: A
+                path_a_staging_result: PASS
+                overall_result: path_a_pass_ac_rq6_pass
+                report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+                iss008_staging_run: confirmed_18_items
+                ac_rq6:
                   status: pass
-                path_a_progress:
-                  push: done
-                  ci: pass
-                  ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
-                  deploy_preflight: pass
-                  deploy_modal: pass
-                  deploy_digitalocean: pass
-                  pin_redeploy: pass_via_main_cd
-                  do_apps:
-                    chat_rag_frontend: live_on_main
-                    url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
-                    asset: index-Biqk9SBJ.js
-                    f40_markers:
-                    - coldStartDonateCta
-                    - wrwc.org/donate
-                  smokes: pass
-                  smoke_tiers:
-                    h0c: pass
-                    h4: pass
-                    h5: pass
-                  merge_pr_157: merged
-                  h0ci_main: pass
-                  note: 'F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS post-merge @ 82ad84e'
-                health_tiers:
-                  h0c: pass
-                  h4: pass
-                  h5: pass
-                f40_live:
-                  url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
-                  asset: index-Biqk9SBJ.js
-                  markers:
-                  - coldStartDonateCta
-                  - wrwc.org/donate
-                next_askquestion: none_user_chose_done
-                next_action: none
-                note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533; F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app asset index-Biqk9SBJ.js; H0c+H4/H5 PASS; report docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md; prior S014/EV-013 Path A PASS nested under s014_baseline; user_close_choice=done (option 1) 2026-07-30; next_action=none'
-                s014_baseline:
+                  relevancy: 0.833
+                  relevancy_floor: 0.28
+                  faith: 0.938
+                  faith_floor: 0.91
+                  disposition: investigate_fix_option_1_resolved
+                  fix: judge+H7 fix (S019-D51)
+                  evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+                hy1_gate:
+                  status: pass
+                  evidence: 20260802T022836Z_hybrid-sweep.json
+                  relevancy: 0.833
+                  faith: 0.938
+                note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
+                s017_baseline:
+                  mode: evolve
+                  delta_only: true
+                  feature: F41
+                  feature_ids:
+                  - F41
+                  deploy_path: A
+                  deploy_approved: true
+                  deploy_approved_at: '2026-07-30'
+                  deploy_approval: phase_d_path_a_staging_sequence
+                  path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
+                  path_a_staging_result: PASS
+                  head_sha: bbe9544
+                  commit_deployed: 180ad14
+                  alembic_revision: '20260730_0010'
+                  alembic_from: '20260728_0009'
+                  report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
+                  untracked_left:
+                  - scripts/deploy/_tmp_proxy_key_check.py
+                  untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
+                  next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
+                  overall_result: PASS
+                  path_a_progress:
+                    alembic: pass
+                    alembic_revision: '20260730_0010'
+                    do_pins:
+                      write_api: ACTIVE_evolve
+                      admin_frontend: ACTIVE_evolve
+                    modal_dm_redeploy: pass
+                    secret_sync: pass
+                    do_verify: pass
+                    h1_h5_pre_promote: pass
+                    h1_h5_post_promote: pass
+                    backfill_scoped: pass
+                    live_equivalence: pass
+                    shadow_dry_run: pass
+                    rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
+                    f36_eval:
+                      status: completed
+                      run_id: 01ca4019
+                      note: operator-local execute_eval_run; top_k=2
+                    promote:
+                      chunks_promoted: 60
+                      documents_promoted: 2
+                  advisories:
+                  - Modal eval job_type falls through to ingest
+                  - F36 used top_k=2 + local execute_eval_run
+                  - full backfill still pending
+                  - DO pins on evolve until merge
+                  - do not commit scripts/deploy/_tmp_proxy_key_check.py
+                  note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
+                s016_baseline:
                   status: completed
                   started_at: '2026-07-29'
                   completed_at: '2026-07-29'
-                  partial_rerun_at: '2026-07-29'
-                  partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
-                  session_id: S014-admin-ui-polish-148
+                  partial_rerun_at: '2026-07-30'
+                  partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG FE; H0c+H4/H5 PASS; deploy-smoke PASS'
+                  session_id: S016-chat-cold-start-ux
                   branch: main
-                  evolve_cycle_id: EV-013
+                  evolve_cycle_id: EV-014
                   mode: evolve
                   delta_only: true
+                  feature: F40
                   deploy_path: A
+                  head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+                  merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+                  merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+                  merged_at: '2026-07-30T01:15:04Z'
+                  commit_deployed: 82ad84e
+                  drift: false
                   deploy_approved: true
                   deploy_approved_at: '2026-07-29'
-                  deploy_approval: choice_A_approve_13_deploy_smoke
-                  head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-                  docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
+                  deploy_approval: user_approved_commit_preview_deploy
                   overall_result: PASS
-                  report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
-                  commits_ahead_of_origin: 0
-                  pushed_at: '2026-07-29'
-                  pr_number: 154
-                  pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
+                  report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
+                  pr_number: 157
+                  pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157'
                   pr_status: merged
                   merge_gate: smokes_pass_before_merge
-                  do_not_merge_pr: 154
                   merge_approval: executed
+                  merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
+                  local_preview: 'http://127.0.0.1:5173/'
                   ci:
                     status: success
-                    ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-                    head_sha: f85b6ab
+                    ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
+                    head_sha: 82ad84e
+                  cd:
+                    deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560'
+                    deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804'
+                    deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533'
+                    status: pass
                   path_a_progress:
                     push: done
                     ci: pass
-                    ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-                    coverage_fix: f85b6ab
-                    pin_redeploy: pass
+                    ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
+                    deploy_preflight: pass
+                    deploy_modal: pass
+                    deploy_digitalocean: pass
+                    pin_redeploy: pass_via_main_cd
                     do_apps:
-                      admin_frontend: reset_to_main_active
-                      internal_write_api: untouched_main
-                      modal_data_management: untouched
+                      chat_rag_frontend: live_on_main
+                      url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
+                      asset: index-Biqk9SBJ.js
+                      f40_markers:
+                      - coldStartDonateCta
+                      - wrwc.org/donate
                     smokes: pass
                     smoke_tiers:
-                      h1: pass
-                      h2: pass
-                      h3: pass
-                      h3b: pass
+                      h0c: pass
                       h4: pass
                       h5: pass
-                    merge_pr_154: merged
+                    merge_pr_157: merged
                     h0ci_main: pass
-                  next_askquestion:
-                  note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
-                  s013_baseline:
+                    note: 'F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS post-merge @ 82ad84e'
+                  health_tiers:
+                    h0c: pass
+                    h4: pass
+                    h5: pass
+                  f40_live:
+                    url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
+                    asset: index-Biqk9SBJ.js
+                    markers:
+                    - coldStartDonateCta
+                    - wrwc.org/donate
+                  next_askquestion: none_user_chose_done
+                  next_action: none
+                  note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533; F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app asset index-Biqk9SBJ.js; H0c+H4/H5 PASS; report docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md; prior S014/EV-013 Path A PASS nested under s014_baseline; user_close_choice=done (option 1) 2026-07-30; next_action=none'
+                  s014_baseline:
                     status: completed
                     started_at: '2026-07-29'
                     completed_at: '2026-07-29'
                     partial_rerun_at: '2026-07-29'
-                    session_id: S013-unified-job-monitoring
-                    branch: evolve/EV-012-unified-job-monitoring
-                    evolve_cycle_id: EV-012
-                    mode: delta
+                    partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
+                    session_id: S014-admin-ui-polish-148
+                    branch: main
+                    evolve_cycle_id: EV-013
+                    mode: evolve
+                    delta_only: true
                     deploy_path: A
-                    head_sha: 113589139659a3508eb68340be91d93e7814ae77
+                    deploy_approved: true
+                    deploy_approved_at: '2026-07-29'
+                    deploy_approval: choice_A_approve_13_deploy_smoke
+                    head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+                    docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
                     overall_result: PASS
-                    report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+                    report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
                     commits_ahead_of_origin: 0
                     pushed_at: '2026-07-29'
-                    pr_number: 153
+                    pr_number: 154
+                    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
+                    pr_status: merged
                     merge_gate: smokes_pass_before_merge
-                    do_not_merge_pr: 153
-                    merge_approval: pending_user
-                    dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
-                    partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+                    do_not_merge_pr: 154
+                    merge_approval: executed
+                    ci:
+                      status: success
+                      ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+                      head_sha: f85b6ab
                     path_a_progress:
                       push: done
-                      ci_rewatch: pass
-                      ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
-                      lint_coverage_fix: 746181b
-                      iss004_branch_coverage_fix: 1135891
-                      h0c_migration_check: pass
-                      alembic_revision: 202607280009
+                      ci: pass
+                      ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+                      coverage_fix: f85b6ab
                       pin_redeploy: pass
-                      modal_data_management: redeployed_from_evolve_checkout
                       do_apps:
-                        internal_write_api: pinned_active
-                        admin_frontend: pinned_active
+                        admin_frontend: reset_to_main_active
+                        internal_write_api: untouched_main
+                        modal_data_management: untouched
                       smokes: pass
                       smoke_tiers:
-                        h0c: pass
                         h1: pass
                         h2: pass
                         h3: pass
                         h3b: pass
-                        t3_ev002: pass
                         h4: pass
                         h5: pass
-                      jobs_live:
-                      - list
-                      - retag_detail
-                      - eval_run_detail
-                      - sse
-                      merge_pr_153: awaiting_user_approval
-                    next_askquestion: merge_pr_153_or_hold_or_reset_pins
-                    note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit user merge approval; checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
-                    s001_baseline:
+                      merge_pr_154: merged
+                      h0ci_main: pass
+                    next_askquestion:
+                    note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
+                    s013_baseline:
                       status: completed
-                      started_at: '2026-06-26'
-                      completed_at: '2026-06-26'
-                      partial_rerun_at: '2026-06-26'
-                      partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-                      report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
-                  merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-                  merge:
-                    status: merged
-                    pr_number: 154
-                    merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-                    merged_at: '2026-07-29'
-                  next_action: none_cycle_closed
-              deploy_checkpoint: approved
-              deploy_checkpoint_at: '2026-07-30'
-              merge_approval: pending
-              ci_head_sha: bbe9544
-              ci_status: green
-              ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
-              session_closed: true
-              session_closed_at: '2026-07-30'
-              active_session_cleared: true
-              started: '2026-08-02'
-              completed:
-              ac_bb9_met: false
-              prod_ce: false
-              deploy_path_choice: option_1_path_a
-            phase_1_5:
-              status: completed
-              started_at: '2026-08-02'
-              note: 'Phase 1.5 COMPLETE — PR #174 MERGED @ 9d1f10b; Path A executed (S021-D27)'
-              pr_number: 174
-              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
-              pr_status: merged
-              completed_at: '2026-08-02'
+                      started_at: '2026-07-29'
+                      completed_at: '2026-07-29'
+                      partial_rerun_at: '2026-07-29'
+                      session_id: S013-unified-job-monitoring
+                      branch: evolve/EV-012-unified-job-monitoring
+                      evolve_cycle_id: EV-012
+                      mode: delta
+                      deploy_path: A
+                      head_sha: 113589139659a3508eb68340be91d93e7814ae77
+                      overall_result: PASS
+                      report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+                      commits_ahead_of_origin: 0
+                      pushed_at: '2026-07-29'
+                      pr_number: 153
+                      merge_gate: smokes_pass_before_merge
+                      do_not_merge_pr: 153
+                      merge_approval: pending_user
+                      dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
+                      partial_rerun_note: 'EV-012/S013 Path A — push evolve branch → pin/redeploy Modal data-management + DO admin FE + write-api from that SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+                      path_a_progress:
+                        push: done
+                        ci_rewatch: pass
+                        ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
+                        lint_coverage_fix: 746181b
+                        iss004_branch_coverage_fix: 1135891
+                        h0c_migration_check: pass
+                        alembic_revision: 202607280009
+                        pin_redeploy: pass
+                        modal_data_management: redeployed_from_evolve_checkout
+                        do_apps:
+                          internal_write_api: pinned_active
+                          admin_frontend: pinned_active
+                        smokes: pass
+                        smoke_tiers:
+                          h0c: pass
+                          h1: pass
+                          h2: pass
+                          h3: pass
+                          h3b: pass
+                          t3_ev002: pass
+                          h4: pass
+                          h5: pass
+                        jobs_live:
+                        - list
+                        - retag_detail
+                        - eval_run_detail
+                        - sse
+                        merge_pr_153: awaiting_user_approval
+                      next_askquestion: merge_pr_153_or_hold_or_reset_pins
+                      note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; Modal DM redeployed; DO write-api + admin FE pinned ACTIVE; Alembic 20260728_0009; H0c/H1–H5/T3/Jobs live PASS; report deploy-smoke.md; PR #153 awaits explicit user merge approval; checkpoints.deploy pending_merge_approval; prior S001 baseline preserved below'
+                      s001_baseline:
+                        status: completed
+                        started_at: '2026-06-26'
+                        completed_at: '2026-06-26'
+                        partial_rerun_at: '2026-06-26'
+                        partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+                        report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+                    merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+                    merge:
+                      status: merged
+                      pr_number: 154
+                      merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+                      merged_at: '2026-07-29'
+                    next_action: none_cycle_closed
+                deploy_checkpoint: approved
+                deploy_checkpoint_at: '2026-07-30'
+                merge_approval: pending
+                ci_head_sha: bbe9544
+                ci_status: green
+                ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
+                session_closed: true
+                session_closed_at: '2026-07-30'
+                active_session_cleared: true
+                started: '2026-08-02'
+                completed:
+                ac_bb9_met: false
+                prod_ce: false
+                deploy_path_choice: option_1_path_a
+              phase_1_5:
+                status: completed
+                started_at: '2026-08-02'
+                note: 'Phase 1.5 COMPLETE — PR #174 MERGED @ 9d1f10b; Path A executed (S021-D27)'
+                pr_number: 174
+                pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
+                pr_status: merged
+                completed_at: '2026-08-02'
+                merge_sha: 9d1f10b
+              h0c:
+                status: pass
+                evidence: verify_connectivity + pytest tests/unit/test_cors_policy.py
+                verified_at: '2026-08-02'
+                note: H0c PASS (verify_connectivity)
+              report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+              report_status: pass
+              deploy_gate: passed
+              commits_pending: true
+              commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
+              pr_merged_at: '2026-08-02'
+              pr_merge_sha: 9d1f10b
               merge_sha: 9d1f10b
-            h0c:
-              status: pass
-              evidence: verify_connectivity + pytest tests/unit/test_cors_policy.py
-              verified_at: '2026-08-02'
-              note: H0c PASS (verify_connectivity)
-            report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
-            report_status: pass
-            deploy_gate: passed
-            commits_pending: true
-            commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
-            pr_merged_at: '2026-08-02'
-            pr_merge_sha: 9d1f10b
-            merge_sha: 9d1f10b
-            merge_commit: 9d1f10baecf2cdef61b3174774e03b847086fe17
-            commit_deployed: 9d1f10b
-            chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
-            overall_result: PASS
-            path_a_staging_result: PASS
-            health_tiers:
-              h0c: pass
-              h0ci_github_main: pass
-              h1_liveness: pass
-              h2_db_ready: skipped
-              h2_note: SKIP — no DATABASE_URL in staging_smoke env
-              h3_rag_smoke: pass
-              h4_cors_preflight: pass
-              h5_frontend_bundle: pass
-            uj_061_sample:
-              status: PASS
-              sources: 5
-            ci:
-              status: success
-              pr_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
-              main_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
-              head_sha: 9d1f10b
-            cd:
-              status: pass
-              deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404'
-              deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655'
-              deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322'
-            path_a_progress:
-              push: done
-              ci_pr: pass
-              ci_pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
-              merge_pr_174: merged
-              merge_sha: 9d1f10b
-              ci_main: pass
-              ci_main_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
-              deploy_preflight: pass
-              deploy_modal: pass
-              deploy_digitalocean: pass
-              chatrag_redeploy: ACTIVE
+              merge_commit: 9d1f10baecf2cdef61b3174774e03b847086fe17
+              commit_deployed: 9d1f10b
               chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
-              ce: false_hold
-              do_verify: pass
-              staging_smoke:
-                h1: pass
-                h2: skipped
-                h3: pass
-              verify_connectivity:
+              overall_result: PASS
+              path_a_staging_result: PASS
+              health_tiers:
                 h0c: pass
-                h4: pass
-                h5: pass
-              uj_061_sample: pass_5_sources
-            do_verify: PASS
-            s021_d27_decision: S021-D27
+                h0ci_github_main: pass
+                h1_liveness: pass
+                h2_db_ready: skipped
+                h2_note: SKIP — no DATABASE_URL in staging_smoke env
+                h3_rag_smoke: pass
+                h4_cors_preflight: pass
+                h5_frontend_bundle: pass
+              uj_061_sample:
+                status: PASS
+                sources: 5
+              ci:
+                status: success
+                pr_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
+                main_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
+                head_sha: 9d1f10b
+              cd:
+                status: pass
+                deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404'
+                deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655'
+                deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322'
+              path_a_progress:
+                push: done
+                ci_pr: pass
+                ci_pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
+                merge_pr_174: merged
+                merge_sha: 9d1f10b
+                ci_main: pass
+                ci_main_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
+                deploy_preflight: pass
+                deploy_modal: pass
+                deploy_digitalocean: pass
+                chatrag_redeploy: ACTIVE
+                chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
+                ce: false_hold
+                do_verify: pass
+                staging_smoke:
+                  h1: pass
+                  h2: skipped
+                  h3: pass
+                verify_connectivity:
+                  h0c: pass
+                  h4: pass
+                  h5: pass
+                uj_061_sample: pass_5_sources
+              do_verify: PASS
+              s021_d27_decision: S021-D27
+              session_closed: true
+              session_closed_at: '2026-08-02'
             session_closed: true
             session_closed_at: '2026-08-02'
-          session_closed: true
-          session_closed_at: '2026-08-02'
-        status: completed
-        started_at: '2026-08-03'
-        started: '2026-08-03'
-        partial_rerun_at: '2026-08-03'
-        partial_rerun_note: 'S023/EV-020 — 13-deploy-smoke COMPLETE Path A PASS @ 726e7fc; prior S022 COMPLETE nested under s022_baseline'
-        session_id: S023-retrieval-topk-packing
-        evolve_cycle_id: EV-020
-        branch: evolve/EV-020-retrieval-topk-packing
-        mode: evolve
-        delta_only: true
-        feature_ids:
-        - F50
-        - F51
-        feature: F50+F51
-        current_action: awaiting cycle close (done / 15 / 17)
-        next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
-        soft_notes:
-        - DO CD first attempt admin-frontend mTLS Unauthorized; rerun 30816205384 succeeded
-        - H2 skipped — no DATABASE_URL in smoke env
-        askquestion_pending: true
-        s023_d21_decision: S023-D21
-        s023_d22_decision: S023-D22
-        deploy_path: A
-        deploy_path_choice: merge_cd_and_commit
-        path_a_sequence: commit_push → merge_PR_180 → CD_ChatRAG → H1–H5
-        pr_number: 180
-        pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180'
-        pr_status: merged
-        pr_ci: success
-        commits_head: 726e7fc
-        commit_deployed: 726e7fc
-        staging_lag_expected: false
-        uncommitted_session_docs: false
-        note: 'S023/EV-020 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS after merge #180 @ 726e7fc; CI 30815699108 PASS; deploy-preflight 30816055888 PASS; Deploy Modal 30816100316 PASS; Deploy DigitalOcean 30816205384 PASS (rerun after admin-frontend mTLS Unauthorized on first attempt); H1 PASS ChatRAG+write; H2 skipped (no DATABASE_URL); H3 PASS ask returned 8 sources (was 5 pre-redeploy; cache_hit on repeat); H4 PASS CORS; H5 PASS FE bundle staging ChatRAG URL; AC-RQ8/RQ9 met live; AC-RQ10 held; CE remains false. checkpoints.deploy=passed; gates.deploy=passed. EV-020 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
-        completed: '2026-08-03'
-        completed_at: '2026-08-03'
-        report: docs/sessions/S023-retrieval-topk-packing/reports/deploy-smoke.md
-        path_a: passed
-        overall_result: path_a_pass
-        merge_sha: 726e7fcaa9f08c7aeeacb8d5448ef6ba868ba313
-        merge_sha_short: 726e7fc
-        pr_merged: true
-        pr_merged_at: '2026-08-03T12:56:44Z'
-        pr_exists: true
-        ready: true
-        deploy_ready: true
-        askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
-        s023_d23_decision: S023-D23
-        health_tiers:
-          h1_liveness: pass
-          h2_db_ready: skipped
-          h3_rag_smoke: pass
-          h4_cors_preflight: pass
-          h5_frontend_bundle: pass
-        ci_runs:
-          ci:
-            id: 30815699108
-            conclusion: success
-          deploy_preflight:
-            id: 30816055888
-            conclusion: success
-          deploy_modal:
-            id: 30816100316
-            conclusion: success
-          deploy_digitalocean:
-            id: 30816205384
-            conclusion: success
-            note: rerun after admin-frontend mTLS Unauthorized; force build succeeded
-        live_evidence:
-          top_k: 8
-          sources_pre_redeploy: 5
-          sources_post_redeploy: 8
-          cache_hit_on_repeat: true
-          ac_rq8: met_live
-          ac_rq9: met_live
-          ac_rq10: held
-          context_expansion: false
+          status: completed
+          started_at: '2026-08-03'
+          started: '2026-08-03'
+          partial_rerun_at: '2026-08-03'
+          partial_rerun_note: 'S023/EV-020 — 13-deploy-smoke COMPLETE Path A PASS @ 726e7fc; prior S022 COMPLETE nested under s022_baseline'
+          session_id: S023-retrieval-topk-packing
+          evolve_cycle_id: EV-020
+          branch: evolve/EV-020-retrieval-topk-packing
+          mode: evolve
+          delta_only: true
+          feature_ids:
+          - F50
+          - F51
+          feature: F50+F51
+          current_action: awaiting cycle close (done / 15 / 17)
+          next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+          soft_notes:
+          - DO CD first attempt admin-frontend mTLS Unauthorized; rerun 30816205384 succeeded
+          - H2 skipped — no DATABASE_URL in smoke env
+          askquestion_pending: true
+          s023_d21_decision: S023-D21
+          s023_d22_decision: S023-D22
+          deploy_path: A
+          deploy_path_choice: merge_cd_and_commit
+          path_a_sequence: commit_push → merge_PR_180 → CD_ChatRAG → H1–H5
+          pr_number: 180
+          pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180'
+          pr_status: merged
+          pr_ci: success
+          commits_head: 726e7fc
+          commit_deployed: 726e7fc
+          staging_lag_expected: false
+          uncommitted_session_docs: false
+          note: 'S023/EV-020 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS after merge #180 @ 726e7fc; CI 30815699108 PASS; deploy-preflight 30816055888 PASS; Deploy Modal 30816100316 PASS; Deploy DigitalOcean 30816205384 PASS (rerun after admin-frontend mTLS Unauthorized on first attempt); H1 PASS ChatRAG+write; H2 skipped (no DATABASE_URL); H3 PASS ask returned 8 sources (was 5 pre-redeploy; cache_hit on repeat); H4 PASS CORS; H5 PASS FE bundle staging ChatRAG URL; AC-RQ8/RQ9 met live; AC-RQ10 held; CE remains false. checkpoints.deploy=passed; gates.deploy=passed. EV-020 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
+          completed: '2026-08-03'
+          completed_at: '2026-08-03'
+          report: docs/sessions/S023-retrieval-topk-packing/reports/deploy-smoke.md
+          path_a: passed
+          overall_result: path_a_pass
+          merge_sha: 726e7fcaa9f08c7aeeacb8d5448ef6ba868ba313
+          merge_sha_short: 726e7fc
+          pr_merged: true
+          pr_merged_at: '2026-08-03T12:56:44Z'
+          pr_exists: true
+          ready: true
+          deploy_ready: true
+          askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
+          s023_d23_decision: S023-D23
+          health_tiers:
+            h1_liveness: pass
+            h2_db_ready: skipped
+            h3_rag_smoke: pass
+            h4_cors_preflight: pass
+            h5_frontend_bundle: pass
+          ci_runs:
+            ci:
+              id: 30815699108
+              conclusion: success
+            deploy_preflight:
+              id: 30816055888
+              conclusion: success
+            deploy_modal:
+              id: 30816100316
+              conclusion: success
+            deploy_digitalocean:
+              id: 30816205384
+              conclusion: success
+              note: rerun after admin-frontend mTLS Unauthorized; force build succeeded
+          live_evidence:
+            top_k: 8
+            sources_pre_redeploy: 5
+            sources_post_redeploy: 8
+            cache_hit_on_repeat: true
+            ac_rq8: met_live
+            ac_rq9: met_live
+            ac_rq10: held
+            context_expansion: false
     15-service-health:
       status: skipped
       started_at: '2026-07-29'
@@ -4033,11 +4118,12 @@ project:
         note: S023 CLOSED 2026-08-03 — EV-020 cycle closed (done)
 session_counter: 25
 active_session:
-  id: S025-ci-release-automation
+sessions:
+- id: S025-ci-release-automation
   type: feature
   slug: ci-release-automation
   intent: 'GitHub #194 — CI / local quality + release automation epic (children #182 Husky gates, #103 release tagging). Minimal changes; Lean+build preset.'
-  status: in_progress
+  status: completed
   branch: evolve/EV-023-ci-release-automation
   session_branch: feat/S025-ci-release-automation
   orchestrator: 16-evolve
@@ -4058,17 +4144,24 @@ active_session:
     note: 'S025 opened after S024/EV-022 close — Lean+build routing for #194'
   - stage: 16-evolve
     required: true
-    status: in_progress
+    status: completed
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-03'
-    current_action: awaiting_merge_for_13
-    current_stage: 16-evolve Phase 0 approved
-    note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
-    askquestion_pending: true
-    next_action: User approve merge; then 13-deploy-smoke
+    current_action: cycle_closed
+    current_stage: completed
+    note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+    askquestion_pending: false
+    next_action: none
     pr_number: 195
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+    completed_at: '2026-08-04'
+    pr_status: merged
+    pr_merged: true
+    merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+    release_tag: v0.4.1
+    docs_closeout_pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+    s025_d16_decision: S025-D16
   - stage: 01-requirements
     required: true
     status: completed
@@ -4177,18 +4270,43 @@ active_session:
     skip_rationale: Lean+build preset — no deploy checklist gate for CI/tooling
   - stage: 13-deploy-smoke
     required: true
-    status: pending
+    status: completed
     mode: delta
     skip_rationale:
-    blocked_on: merge_pr_195
-    note: 'Awaiting user merge approval for PR #195 before 13-deploy-smoke'
+    note: 'S025/EV-023 13-deploy-smoke COMPLETE PASS (infra) — tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived; deploy gate passed (S025-D16).'
+    completed_at: '2026-08-04'
+    completed_ts: '2026-08-03T23:59:34Z'
+    started_at: '2026-08-03'
+    started_ts: '2026-08-03T23:36:53Z'
+    current_action: completed
+    next_action: none_session_closed
+    askquestion_pending: false
+    result: pass
+    overall_result: pass
+    report: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
+    evolve_summary: docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
+    release_tag: v0.4.1
+    release_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+    release_target_sha: 5fa370a
+    product_h1_h5: waived
+    pr_number: 195
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+    pr_status: merged
+    pr_merged: true
+    merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+    pr_197_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+    pr_197_status: merged
+    s025_d15_decision: S025-D15
+    s025_d16_decision: S025-D16
+    checkpoints_phase_d: passed
+    gates_deploy: passed
   - stage: 15-service-health
     required: false
     status: skipped
     skip_rationale: Lean+build preset — optional at close
-  current_stage: 16-evolve
-  current_action: awaiting_merge_for_13
-  next_action: User approve merge; then 13-deploy-smoke
+  current_stage: completed
+  current_action: cycle_closed
+  next_action: none_session_closed
   started_at: '2026-08-03'
   context_briefs: []
   routing_preset: lean_build
@@ -4198,7 +4316,7 @@ active_session:
   - F62
   - F63
   phase0_approved: true
-  askquestion_pending: true
+  askquestion_pending: false
   decisions:
   - 'S025-D1: Session type feature → 16-evolve orchestrator'
   - 'S025-D2: Routing = Lean+build (01→02→07→08→10→13; skip 03–06, 09, 11–12, 15)'
@@ -4215,10 +4333,12 @@ active_session:
   - 'S025-D13: Gate A→B PASS → 07-build (04 skipped)'
   - 'S025-D14: Gate C→D approved — proceed 10-e2e then PR/13'
   - S025-D14 Gate C→D approved — proceed 10-e2e then PR/13
+  - 'S025-D15: merge PR #195 approved; 13-deploy-smoke PASS (infra); tag v0.4.1'
+  - 'S025-D16: Approve → merge #197, close EV-023 / S025 (Decision option 1). PR #197 MERGED @e78e418 at 2026-08-04T00:01:53Z; deploy gate passed; cycle closed.'
   phase_0_status: approved
   phase0_approved_at: '2026-08-03T23:09:09Z'
   handoff_seed: docs/sessions/S025-ci-release-automation/checkpoints/01-requirements-seed.md
-  report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+  report: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
   e2e_report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
   e2e_result: pass
   verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
@@ -4236,7 +4356,7 @@ active_session:
   checkpoints_phase_c: passed
   gate_b_to_c: waived
   checkpoints_phase_b: waived
-  checkpoints_phase_d: pending
+  checkpoints_phase_d: passed
   s025_d14_decision: S025-D14
   phase_d_started_at: '2026-08-03T23:19:16Z'
   pr_number: 195
@@ -4244,15 +4364,45 @@ active_session:
   pr_title: '[EV-023] CI release automation (F62/F63)'
   pr_branch: evolve/EV-023-ci-release-automation
   pr_base: main
-  pr_status: open
+  pr_status: merged
   pr_opened_at: '2026-08-03'
   pr_opened_ts: '2026-08-03T23:25:00Z'
-  pr_merged: false
+  pr_merged: true
   pr_head_sha: b626dfd
   pr_head_full: b626dfd7256d31a9566e91546edda9407b53601e
-  askquestion_pending_topic: merge_approve_then_13_deploy_smoke
-  note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
-sessions:
+  note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+  completed_at: '2026-08-04'
+  checkpoints_deploy: passed
+  gates_deploy: passed
+  s025_d15_decision: S025-D15
+  s025_d16_decision: S025-D16
+  close_decision: S025-D16
+  close_note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+  pr_merged_at: '2026-08-03T23:35:40Z'
+  merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+  merge_sha_short: 58e52c8
+  docs_closeout_pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+  docs_closeout_pr_number: 197
+  pr_197_status: merged
+  pr_197_merged_at: '2026-08-04T00:01:53Z'
+  pr_197_merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+  release_tag: v0.4.1
+  release_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+  release_target_sha: 5fa370a
+  product_h1_h5: waived
+  product_h1_h5_waiver: infra_only
+  evolve_summary: docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
+  updated_at: '2026-08-04T00:02:30Z'
+  ci_status: success
+  session_closed: true
+  session_closed_at: '2026-08-04'
+  pr_197:
+    number: 197
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+    status: merged
+    merged: true
+    merged_at: '2026-08-04T00:01:53Z'
+    merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
 - id: S024-website-scrape-crawl
   type: feature
   slug: website-scrape-crawl
@@ -13282,631 +13432,687 @@ stages:
     updated_at: '2026-08-03T21:29:58Z'
   13-deploy-smoke:
     status: completed
-    started_at: '2026-08-03T21:29:58Z'
+    started_at: '2026-08-03T23:36:53Z'
     started: '2026-08-03'
-    completed: '2026-08-03'
-    completed_at: '2026-08-03T22:18:30Z'
+    started_ts: '2026-08-03T23:36:53Z'
+    completed: '2026-08-04'
+    completed_at: '2026-08-03T23:59:34Z'
+    completed_ts: '2026-08-03T23:59:34Z'
     partial_rerun_at: '2026-08-03'
-    partial_rerun_note: S024/EV-022 — 13-deploy-smoke COMPLETE Path A PASS @ cc2750c; prior S023 COMPLETE nested under s023_baseline
-    session_id: S024-website-scrape-crawl
+    partial_rerun_note: 'S025/EV-023 — 13-deploy-smoke PASS after PR #195 MERGED; prior S024 COMPLETE nested under s024_baseline'
+    session_id: S025-ci-release-automation
     branch: main
-    evolve_branch: evolve/EV-022-website-scrape-crawl
-    evolve_cycle_id: EV-022
+    evolve_branch: evolve/EV-023-ci-release-automation
+    evolve_cycle_id: EV-023
     mode: evolve
     delta_only: true
-    feature_ids:
-    - F59
-    - F60
-    - F61
-    feature: F59+F60+F61
-    phase: Phase 26 (M108-M111)
-    deploy_path: A
-    deploy_path_default: A
-    current_action: 13_complete_awaiting_cycle_close
-    next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
-    askquestion_pending: true
-    askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
-    s024_d47_decision: S024-D47
-    js_render_decision: A_ship_static_js_render_follow_up
-    js_render_not_gate: true
-    live_crawl: optional_S024-D24
-    pr_number: 190
-    pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+    feature_ids: *id002
+    feature: F62+F63
+    skill_id: 13-deploy-smoke
+    orchestrator: 16-evolve
+    deploy_path: infra_cd_release
+    current_action: completed
+    next_action: none_session_closed
+    askquestion_pending: false
+    pr_number: 195
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
     pr_status: merged
     pr_merged: true
-    pr_exists: true
-    merge_sha: cc2750ce2bd88b844fad62c946fa585a69a8eaa5
-    merge_sha_short: cc2750c
-    commits_head: cc2750c
-    commit_deployed: cc2750c
-    pr_head_sha: 2c97d36
-    pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
-    ci_status: success
-    path_a: passed
-    overall_result: path_a_pass
+    pr_merged_at: '2026-08-03T23:35:40Z'
+    merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+    merge_sha_short: 58e52c8
+    s025_d15_decision: S025-D15
+    s025_d16_decision: S025-D16
+    result: pass
+    overall_result: pass
     ready: true
     deploy_ready: true
-    alembic_revision: '20260803_0011'
-    alembic_note: 20260803_0011 applied via DO CD
-    report: docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
-    note: 'S024/EV-022 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS @ cc2750c (PR #190 MERGED); Modal CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172 success; DO CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636 success; Alembic 20260803_0011 applied via DO CD; H1/H3/H3b/H4/H5 PASS; H2 SKIP (no DATABASE_URL locally); live OpenAPI has /internal/v1/corpus/tree after write ACTIVE; report=docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; checkpoints.deploy=passed; gates.deploy=passed; EV-022 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
-    updated_at: '2026-08-03T22:18:30Z'
-    health_tiers:
-      h1_liveness: pass
-      h2_db_ready: skipped
-      h2_skip_reason: no DATABASE_URL locally; Alembic verified in DO CD
-      h3_rag_smoke: pass
-      h3b_browse: pass
-      h4_cors_preflight: pass
-      h5_frontend_bundle: pass
-    ci_runs:
-      deploy_modal:
-        id: '30857801172'
-        url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172'
-        conclusion: success
-      deploy_digitalocean:
-        id: '30857894636'
-        url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636'
-        conclusion: success
-    live_evidence:
-      openapi_corpus_tree: present
-      path: /internal/v1/corpus/tree
-      write_api: ACTIVE
-    s023_baseline:
-      s022_baseline:
-        status: completed
-        ready: true
-        started_at: '2026-08-02'
-        started: '2026-08-02'
-        completed: '2026-08-02'
-        completed_at: '2026-08-02'
-        partial_rerun_at: '2026-08-02'
-        partial_rerun_note: 'S022/EV-019 — 13-deploy-smoke COMPLETE; Path A PASS @ bd6bb00; Path B waived_follow_up; prior S021 COMPLETE nested under s021_baseline'
-        session_id: S022-ingest-resilience
-        branch: evolve/EV-019-ingest-resilience
-        evolve_cycle_id: EV-019
-        mode: evolve
-        delta_only: true
-        feature_ids:
-        - F47
-        - F48
-        - F49
-        feature: F47-F49
-        phase: Phase 24 (M101-M104)
-        current_action: close_pending
-        next_action: none_session_closed
-        deploy_path: A_path_b_waived
-        path_a: passed
-        path_b_rechunk: waived_follow_up
-        path_b_waiver_rationale: 'User S023-D0: waive Path B rechunk to follow-up so residual #158/#165 session can open after Path A smokes'
-        deploy_ready: true
-        ship_plan: path_a_complete_path_b_waived
-        ship_decision: path_a_complete_path_b_waived
-        overall_result: path_a_pass_path_b_waived
-        pr_exists: true
-        pr_number: 179
-        pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179'
-        pr_status: merged
-        pr_merged: true
-        pr_merged_at: '2026-08-02T23:43:07Z'
-        merge_sha: bd6bb00a927043129061e2b84e4369456f220f72
-        merge_sha_short: bd6bb00
-        commits_head: bd6bb00
-        commit_deployed: bd6bb00
-        report: docs/sessions/S022-ingest-resilience/reports/deploy-smoke.md
-        note: 'S022/EV-019 13-deploy-smoke COMPLETE 2026-08-02 — Path A PASS @ bd6bb00 (PR #179 MERGED); H1/H3/H4/H5 PASS; H2 SKIP; Path B rechunk waived_follow_up (S022-D-path-b-waive); CE false hold; close_session now valid; next open S023 for #158/#165'
-        s021_baseline:
+    report: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
+    evolve_summary: docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
+    release_tag: v0.4.1
+    release_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+    release_target_sha: 5fa370a
+    release_target_sha_short: 5fa370a
+    uj_068_t2_t3: pass
+    product_h1_h5: waived
+    product_h1_h5_waiver: infra_only
+    workflow_run_auto_release: verified_after_first_run_gotcha
+    idempotent_skip: pass
+    checkpoints_phase_d: passed
+    checkpoints_deploy: passed
+    gates_deploy: passed
+    pr_196: *id003
+    pr_197: *id004
+    docs_closeout_pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+    note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+    updated_at: '2026-08-04T00:02:30Z'
+    s024_baseline:
+      status: completed
+      started_at: '2026-08-03T21:29:58Z'
+      started: '2026-08-03'
+      completed: '2026-08-03'
+      completed_at: '2026-08-03T22:18:30Z'
+      partial_rerun_at: '2026-08-03'
+      partial_rerun_note: S024/EV-022 — 13-deploy-smoke COMPLETE Path A PASS @ cc2750c; prior S023 COMPLETE nested under s023_baseline
+      session_id: S024-website-scrape-crawl
+      branch: main
+      evolve_branch: evolve/EV-022-website-scrape-crawl
+      evolve_cycle_id: EV-022
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F59
+      - F60
+      - F61
+      feature: F59+F60+F61
+      phase: Phase 26 (M108-M111)
+      deploy_path: A
+      deploy_path_default: A
+      current_action: 13_complete_awaiting_cycle_close
+      next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+      askquestion_pending: true
+      askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
+      s024_d47_decision: S024-D47
+      js_render_decision: A_ship_static_js_render_follow_up
+      js_render_not_gate: true
+      live_crawl: optional_S024-D24
+      pr_number: 190
+      pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190'
+      pr_status: merged
+      pr_merged: true
+      pr_exists: true
+      merge_sha: cc2750ce2bd88b844fad62c946fa585a69a8eaa5
+      merge_sha_short: cc2750c
+      commits_head: cc2750c
+      commit_deployed: cc2750c
+      pr_head_sha: 2c97d36
+      pr_head_full: 2c97d36753e088eec13289c1132b50957f34de62
+      ci_status: success
+      path_a: passed
+      overall_result: path_a_pass
+      ready: true
+      deploy_ready: true
+      alembic_revision: '20260803_0011'
+      alembic_note: 20260803_0011 applied via DO CD
+      report: docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
+      note: 'S024/EV-022 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS @ cc2750c (PR #190 MERGED); Modal CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172 success; DO CD https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636 success; Alembic 20260803_0011 applied via DO CD; H1/H3/H3b/H4/H5 PASS; H2 SKIP (no DATABASE_URL locally); live OpenAPI has /internal/v1/corpus/tree after write ACTIVE; report=docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; checkpoints.deploy=passed; gates.deploy=passed; EV-022 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
+      updated_at: '2026-08-03T22:18:30Z'
+      health_tiers:
+        h1_liveness: pass
+        h2_db_ready: skipped
+        h2_skip_reason: no DATABASE_URL locally; Alembic verified in DO CD
+        h3_rag_smoke: pass
+        h3b_browse: pass
+        h4_cors_preflight: pass
+        h5_frontend_bundle: pass
+      ci_runs:
+        deploy_modal:
+          id: '30857801172'
+          url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857801172'
+          conclusion: success
+        deploy_digitalocean:
+          id: '30857894636'
+          url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30857894636'
+          conclusion: success
+      live_evidence:
+        openapi_corpus_tree: present
+        path: /internal/v1/corpus/tree
+        write_api: ACTIVE
+      s023_baseline:
+        s022_baseline:
           status: completed
+          ready: true
           started_at: '2026-08-02'
           started: '2026-08-02'
+          completed: '2026-08-02'
           completed_at: '2026-08-02'
-          session_id: S021-retrieval-follow-on
-          branch: evolve/EV-018-retrieval-follow-on
-          evolve_cycle_id: EV-018
+          partial_rerun_at: '2026-08-02'
+          partial_rerun_note: 'S022/EV-019 — 13-deploy-smoke COMPLETE; Path A PASS @ bd6bb00; Path B waived_follow_up; prior S021 COMPLETE nested under s021_baseline'
+          session_id: S022-ingest-resilience
+          branch: evolve/EV-019-ingest-resilience
+          evolve_cycle_id: EV-019
           mode: evolve
           delta_only: true
-          feature: F46+F45
           feature_ids:
-          - F46
-          - F45
-          phase: Phase 23 (M99-M100)
-          current_action: 13_complete_awaiting_cycle_close
+          - F47
+          - F48
+          - F49
+          feature: F47-F49
+          phase: Phase 24 (M101-M104)
+          current_action: close_pending
           next_action: none_session_closed
-          deploy_path: A
-          prod_ce: false
-          path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate decision after Path A
-          decision: S021-D27
-          pr_plan_id: PR-57
-          pr_number: 174
-          pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
-          pr_title: '[EV-018] Retrieval follow-on — F46 empty retrieve + F45 CE re-gate'
-          pr_branch: evolve/EV-018-retrieval-follow-on
-          pr_base: main
+          deploy_path: A_path_b_waived
+          path_a: passed
+          path_b_rechunk: waived_follow_up
+          path_b_waiver_rationale: 'User S023-D0: waive Path B rechunk to follow-up so residual #158/#165 session can open after Path A smokes'
+          deploy_ready: true
+          ship_plan: path_a_complete_path_b_waived
+          ship_decision: path_a_complete_path_b_waived
+          overall_result: path_a_pass_path_b_waived
+          pr_exists: true
+          pr_number: 179
+          pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179'
           pr_status: merged
-          pr_opened_at: '2026-08-02'
-          pr_head_sha: dd92615
-          pr_stage: 13-deploy-smoke
-          commits_head: 9d1f10b
-          note: 'S021/EV-018 13-deploy-smoke Path A PASS 2026-08-02 — PR #174 MERGED @ 9d1f10b (full 9d1f10baecf2cdef61b3174774e03b847086fe17); evolve tip pre-merge dd92615; ChatRAG ACTIVE ade67338-06bf-40ba-aa21-2c29e08f9b9c; CE NOT_IN_SPEC→default false (hold); do_verify PASS; staging_smoke H1 PASS / H2 SKIP (no DATABASE_URL) / H3 PASS; verify_connectivity H0c+H4+H5 PASS; UJ-061 sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239; main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322; gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-          s020_baseline:
-            status: in_progress
+          pr_merged: true
+          pr_merged_at: '2026-08-02T23:43:07Z'
+          merge_sha: bd6bb00a927043129061e2b84e4369456f220f72
+          merge_sha_short: bd6bb00
+          commits_head: bd6bb00
+          commit_deployed: bd6bb00
+          report: docs/sessions/S022-ingest-resilience/reports/deploy-smoke.md
+          note: 'S022/EV-019 13-deploy-smoke COMPLETE 2026-08-02 — Path A PASS @ bd6bb00 (PR #179 MERGED); H1/H3/H4/H5 PASS; H2 SKIP; Path B rechunk waived_follow_up (S022-D-path-b-waive); CE false hold; close_session now valid; next open S023 for #158/#165'
+          s021_baseline:
+            status: completed
             started_at: '2026-08-02'
-            completed_at:
-            partial_rerun_at: '2026-08-02'
-            partial_rerun_note: 'S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; PR'
-            session_id: S020-retrieval-batch-b
-            branch: evolve/EV-017-retrieval-batch-b
-            evolve_cycle_id: EV-017
+            started: '2026-08-02'
+            completed_at: '2026-08-02'
+            session_id: S021-retrieval-follow-on
+            branch: evolve/EV-018-retrieval-follow-on
+            evolve_cycle_id: EV-018
             mode: evolve
             delta_only: true
-            feature: F42
+            feature: F46+F45
             feature_ids:
-            - F43
-            - F44
+            - F46
             - F45
-            commits_head: 73df939
-            commit_deployed: 5693422
-            current_action: 13_deploy_smoke_path_a_merge
-            next_action: 'Merge PR #173 then main CD + H1–H5'
-            ac_rq6_disposition: investigate_fix_option_1_resolved
-            merge_gate: merged
-            pr_number: 172
-            pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172'
-            pr_status: merged
-            pr_head_sha: 73df939
-            merge_sha: b08ec30
-            merge_commit: b08ec30
-            pr_merged_at: '2026-08-01'
+            phase: Phase 23 (M99-M100)
+            current_action: 13_complete_awaiting_cycle_close
+            next_action: none_session_closed
             deploy_path: A
-            path_a_staging_result: PASS
-            overall_result: path_a_pass_ac_rq6_pass
-            report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
-            iss008_staging_run: confirmed_18_items
-            ac_rq6:
-              status: pass
-              relevancy: 0.833
-              relevancy_floor: 0.28
-              faith: 0.938
-              faith_floor: 0.91
-              disposition: investigate_fix_option_1_resolved
-              fix: judge+H7 fix (S019-D51)
-              evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
-            hy1_gate:
-              status: pass
-              evidence: 20260802T022836Z_hybrid-sweep.json
-              relevancy: 0.833
-              faith: 0.938
-            note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
-            s017_baseline:
+            prod_ce: false
+            path_a_ce_note: VECINITA_RAG_RERANK_CE=false — CE NOT_IN_SPEC → default false (hold); flag flip is a separate decision after Path A
+            decision: S021-D27
+            pr_plan_id: PR-57
+            pr_number: 174
+            pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
+            pr_title: '[EV-018] Retrieval follow-on — F46 empty retrieve + F45 CE re-gate'
+            pr_branch: evolve/EV-018-retrieval-follow-on
+            pr_base: main
+            pr_status: merged
+            pr_opened_at: '2026-08-02'
+            pr_head_sha: dd92615
+            pr_stage: 13-deploy-smoke
+            commits_head: 9d1f10b
+            note: 'S021/EV-018 13-deploy-smoke Path A PASS 2026-08-02 — PR #174 MERGED @ 9d1f10b (full 9d1f10baecf2cdef61b3174774e03b847086fe17); evolve tip pre-merge dd92615; ChatRAG ACTIVE ade67338-06bf-40ba-aa21-2c29e08f9b9c; CE NOT_IN_SPEC→default false (hold); do_verify PASS; staging_smoke H1 PASS / H2 SKIP (no DATABASE_URL) / H3 PASS; verify_connectivity H0c+H4+H5 PASS; UJ-061 sample PASS (5 sources); S021-D27 Full Path A execute; CI PR https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239; main CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322; gates.deploy=passed; checkpoints.deploy=passed; current_action=13_complete_awaiting_cycle_close; commits_pending=true (closeout docs); EV-018 remains in_progress awaiting cycle-close AskQuestion S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+            s020_baseline:
+              status: in_progress
+              started_at: '2026-08-02'
+              completed_at:
+              partial_rerun_at: '2026-08-02'
+              partial_rerun_note: 'S019/EV-016 13-deploy-smoke Path A PASS @ 5693422 — AC-RQ6 PASS after judge+H7 fix (S019-D51); Hy1 PASS (S019-D52); H1–H5 PASS; PR'
+              session_id: S020-retrieval-batch-b
+              branch: evolve/EV-017-retrieval-batch-b
+              evolve_cycle_id: EV-017
               mode: evolve
               delta_only: true
-              feature: F41
+              feature: F42
               feature_ids:
-              - F41
-              deploy_path: A
-              deploy_approved: true
-              deploy_approved_at: '2026-07-30'
-              deploy_approval: phase_d_path_a_staging_sequence
-              path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
-              path_a_staging_result: PASS
-              head_sha: bbe9544
-              commit_deployed: 180ad14
-              alembic_revision: '20260730_0010'
-              alembic_from: '20260728_0009'
-              report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
-              untracked_left:
-              - scripts/deploy/_tmp_proxy_key_check.py
-              untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
-              next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
-              overall_result: PASS
-              path_a_progress:
-                alembic: pass
-                alembic_revision: '20260730_0010'
-                do_pins:
-                  write_api: ACTIVE_evolve
-                  admin_frontend: ACTIVE_evolve
-                modal_dm_redeploy: pass
-                secret_sync: pass
-                do_verify: pass
-                h1_h5_pre_promote: pass
-                h1_h5_post_promote: pass
-                backfill_scoped: pass
-                live_equivalence: pass
-                shadow_dry_run: pass
-                rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
-                f36_eval:
-                  status: completed
-                  run_id: 01ca4019
-                  note: operator-local execute_eval_run; top_k=2
-                promote:
-                  chunks_promoted: 60
-                  documents_promoted: 2
-              advisories:
-              - Modal eval job_type falls through to ingest
-              - F36 used top_k=2 + local execute_eval_run
-              - full backfill still pending
-              - DO pins on evolve until merge
-              - do not commit scripts/deploy/_tmp_proxy_key_check.py
-              note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
-            s016_baseline:
-              status: completed
-              started_at: '2026-07-29'
-              completed_at: '2026-07-29'
-              partial_rerun_at: '2026-07-30'
-              partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG FE; H0c+H4/H5 PASS; deploy-smoke PASS'
-              session_id: S016-chat-cold-start-ux
-              branch: main
-              evolve_cycle_id: EV-014
-              mode: evolve
-              delta_only: true
-              feature: F40
-              deploy_path: A
-              head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-              merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-              merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
-              merged_at: '2026-07-30T01:15:04Z'
-              commit_deployed: 82ad84e
-              drift: false
-              deploy_approved: true
-              deploy_approved_at: '2026-07-29'
-              deploy_approval: user_approved_commit_preview_deploy
-              overall_result: PASS
-              report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
-              pr_number: 157
-              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157'
+              - F43
+              - F44
+              - F45
+              commits_head: 73df939
+              commit_deployed: 5693422
+              current_action: 13_deploy_smoke_path_a_merge
+              next_action: 'Merge PR #173 then main CD + H1–H5'
+              ac_rq6_disposition: investigate_fix_option_1_resolved
+              merge_gate: merged
+              pr_number: 172
+              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/172'
               pr_status: merged
-              merge_gate: smokes_pass_before_merge
-              merge_approval: executed
-              merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
-              local_preview: 'http://127.0.0.1:5173/'
-              ci:
-                status: success
-                ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
-                head_sha: 82ad84e
-              cd:
-                deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560'
-                deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804'
-                deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533'
+              pr_head_sha: 73df939
+              merge_sha: b08ec30
+              merge_commit: b08ec30
+              pr_merged_at: '2026-08-01'
+              deploy_path: A
+              path_a_staging_result: PASS
+              overall_result: path_a_pass_ac_rq6_pass
+              report: docs/sessions/S019-retrieval-quality/reports/deploy-smoke.md
+              iss008_staging_run: confirmed_18_items
+              ac_rq6:
                 status: pass
-              path_a_progress:
-                push: done
-                ci: pass
-                ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
-                deploy_preflight: pass
-                deploy_modal: pass
-                deploy_digitalocean: pass
-                pin_redeploy: pass_via_main_cd
-                do_apps:
-                  chat_rag_frontend: live_on_main
-                  url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
-                  asset: index-Biqk9SBJ.js
-                  f40_markers:
-                  - coldStartDonateCta
-                  - wrwc.org/donate
-                smokes: pass
-                smoke_tiers:
-                  h0c: pass
-                  h4: pass
-                  h5: pass
-                merge_pr_157: merged
-                h0ci_main: pass
-                note: 'F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS post-merge @ 82ad84e'
-              health_tiers:
-                h0c: pass
-                h4: pass
-                h5: pass
-              f40_live:
-                url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
-                asset: index-Biqk9SBJ.js
-                markers:
-                - coldStartDonateCta
-                - wrwc.org/donate
-              next_askquestion: none_user_chose_done
-              next_action: none
-              note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533; F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app asset index-Biqk9SBJ.js; H0c+H4/H5 PASS; report docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md; prior S014/EV-013 Path A PASS nested under s014_baseline'
-              s014_baseline:
+                relevancy: 0.833
+                relevancy_floor: 0.28
+                faith: 0.938
+                faith_floor: 0.91
+                disposition: investigate_fix_option_1_resolved
+                fix: judge+H7 fix (S019-D51)
+                evidence: docs/sessions/S019-retrieval-quality/reports/eval-experiments/20260802T022836Z_hybrid-sweep.json
+              hy1_gate:
+                status: pass
+                evidence: 20260802T022836Z_hybrid-sweep.json
+                relevancy: 0.833
+                faith: 0.938
+              note: 'Path A chosen — Merge #173 → main CD → H1–H5 → cache_hit → UJ-060 CE spike; deploy checkpoint pending'
+              s017_baseline:
+                mode: evolve
+                delta_only: true
+                feature: F41
+                feature_ids:
+                - F41
+                deploy_path: A
+                deploy_approved: true
+                deploy_approved_at: '2026-07-30'
+                deploy_approval: phase_d_path_a_staging_sequence
+                path_a_sequence: alembic → services → secret sync → H4–H5 → live equivalence + shadow→F36→promote
+                path_a_staging_result: PASS
+                head_sha: bbe9544
+                commit_deployed: 180ad14
+                alembic_revision: '20260730_0010'
+                alembic_from: '20260728_0009'
+                report: docs/sessions/S017-corpus-reembed-migration/reports/deploy-smoke.md
+                untracked_left:
+                - scripts/deploy/_tmp_proxy_key_check.py
+                untracked_note: Left untracked intentionally — do not commit scripts/deploy/_tmp_proxy_key_check.py
+                next_action: 'User merge approval for PR #168; after merge reset DO pins to main; optional full backfill / Modal eval hotfix'
+                overall_result: PASS
+                path_a_progress:
+                  alembic: pass
+                  alembic_revision: '20260730_0010'
+                  do_pins:
+                    write_api: ACTIVE_evolve
+                    admin_frontend: ACTIVE_evolve
+                  modal_dm_redeploy: pass
+                  secret_sync: pass
+                  do_verify: pass
+                  h1_h5_pre_promote: pass
+                  h1_h5_post_promote: pass
+                  backfill_scoped: pass
+                  live_equivalence: pass
+                  shadow_dry_run: pass
+                  rebuild_run_id: e3a78965-448f-4246-ab6f-d29f36feceaa
+                  f36_eval:
+                    status: completed
+                    run_id: 01ca4019
+                    note: operator-local execute_eval_run; top_k=2
+                  promote:
+                    chunks_promoted: 60
+                    documents_promoted: 2
+                advisories:
+                - Modal eval job_type falls through to ingest
+                - F36 used top_k=2 + local execute_eval_run
+                - full backfill still pending
+                - DO pins on evolve until merge
+                - do not commit scripts/deploy/_tmp_proxy_key_check.py
+                note: 'S017/EV-015 13 COMPLETE; PR #168 open; CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient); DO pins stay on evolve; merge awaits explicit approval'
+              s016_baseline:
                 status: completed
                 started_at: '2026-07-29'
                 completed_at: '2026-07-29'
-                partial_rerun_at: '2026-07-29'
-                partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
-                session_id: S014-admin-ui-polish-148
+                partial_rerun_at: '2026-07-30'
+                partial_rerun_note: 'EV-014/S016 CLOSED — PR #157 MERGED @82ad84e; CI/preflight/Modal/DO PASS; F40 LIVE ChatRAG FE; H0c+H4/H5 PASS; deploy-smoke PASS'
+                session_id: S016-chat-cold-start-ux
                 branch: main
-                evolve_cycle_id: EV-013
+                evolve_cycle_id: EV-014
                 mode: evolve
                 delta_only: true
+                feature: F40
                 deploy_path: A
+                head_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+                merge_commit: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+                merge_sha: 82ad84ed97cd723c6476f49838b0163f7513bc1c
+                merged_at: '2026-07-30T01:15:04Z'
+                commit_deployed: 82ad84e
+                drift: false
                 deploy_approved: true
                 deploy_approved_at: '2026-07-29'
-                deploy_approval: choice_A_approve_13_deploy_smoke
-                head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-                docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
+                deploy_approval: user_approved_commit_preview_deploy
                 overall_result: PASS
-                report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
-                commits_ahead_of_origin: 0
-                pushed_at: '2026-07-29'
-                pr_number: 154
-                pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
+                report: docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md
+                pr_number: 157
+                pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/157'
                 pr_status: merged
                 merge_gate: smokes_pass_before_merge
-                do_not_merge_pr: 154
                 merge_approval: executed
+                merge_approval_choice: user_option_1_merge_and_continue_deploy_smoke
+                local_preview: 'http://127.0.0.1:5173/'
                 ci:
                   status: success
-                  ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-                  head_sha: f85b6ab
+                  ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
+                  head_sha: 82ad84e
+                cd:
+                  deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560'
+                  deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804'
+                  deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533'
+                  status: pass
                 path_a_progress:
                   push: done
                   ci: pass
-                  ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
-                  coverage_fix: f85b6ab
-                  pin_redeploy: pass
+                  ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302'
+                  deploy_preflight: pass
+                  deploy_modal: pass
+                  deploy_digitalocean: pass
+                  pin_redeploy: pass_via_main_cd
                   do_apps:
-                    admin_frontend: reset_to_main_active
-                    internal_write_api: untouched_main
-                    modal_data_management: untouched
+                    chat_rag_frontend: live_on_main
+                    url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
+                    asset: index-Biqk9SBJ.js
+                    f40_markers:
+                    - coldStartDonateCta
+                    - wrwc.org/donate
                   smokes: pass
                   smoke_tiers:
-                    h1: pass
-                    h2: pass
-                    h3: pass
-                    h3b: pass
+                    h0c: pass
                     h4: pass
                     h5: pass
-                  merge_pr_154: merged
+                  merge_pr_157: merged
                   h0ci_main: pass
-                next_askquestion:
-                note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
-                s013_baseline:
+                  note: 'F40 LIVE @ https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app; verify_connectivity H0c+H4/H5 PASS post-merge @ 82ad84e'
+                health_tiers:
+                  h0c: pass
+                  h4: pass
+                  h5: pass
+                f40_live:
+                  url: 'https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app'
+                  asset: index-Biqk9SBJ.js
+                  markers:
+                  - coldStartDonateCta
+                  - wrwc.org/donate
+                next_askquestion: none_user_chose_done
+                next_action: none
+                note: 'S016/EV-014 13-deploy-smoke PASS CLOSED 2026-07-29 — PR #157 MERGED @ 82ad84ed97cd723c6476f49838b0163f7513bc1c (2026-07-30T01:15:04Z); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505112302; deploy-preflight https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505272560; Deploy Modal https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505304804; Deploy DO https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30505368533; F40 LIVE https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app asset index-Biqk9SBJ.js; H0c+H4/H5 PASS; report docs/sessions/S016-chat-cold-start-ux/reports/deploy-smoke.md; evolve-summary docs/sessions/S016-chat-cold-start-ux/reports/evolve-summary.md; prior S014/EV-013 Path A PASS nested under s014_baseline'
+                s014_baseline:
                   status: completed
                   started_at: '2026-07-29'
                   completed_at: '2026-07-29'
                   partial_rerun_at: '2026-07-29'
-                  session_id: S013-unified-job-monitoring
-                  branch: evolve/EV-012-unified-job-monitoring
-                  evolve_cycle_id: EV-012
-                  mode: delta
+                  partial_rerun_note: 'EV-013/S014 — PR #154 MERGED @ ecb9446; DO admin FE reset to main ACTIVE; H0ci PASS'
+                  session_id: S014-admin-ui-polish-148
+                  branch: main
+                  evolve_cycle_id: EV-013
+                  mode: evolve
+                  delta_only: true
                   deploy_path: A
-                  head_sha: 113589139659a3508eb68340be91d93e7814ae77
+                  deploy_approved: true
+                  deploy_approved_at: '2026-07-29'
+                  deploy_approval: choice_A_approve_13_deploy_smoke
+                  head_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+                  docs_sha: 661a2ead13778ffab4e766fe233b66295c6a1152
                   overall_result: PASS
-                  report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+                  report: docs/sessions/S014-admin-ui-polish-148/reports/deploy-smoke.md
                   commits_ahead_of_origin: 0
                   pushed_at: '2026-07-29'
-                  pr_number: 153
+                  pr_number: 154
+                  pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/154'
+                  pr_status: merged
                   merge_gate: smokes_pass_before_merge
-                  do_not_merge_pr: 153
-                  merge_approval: pending_user
-                  dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
-                  partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+                  do_not_merge_pr: 154
+                  merge_approval: executed
+                  ci:
+                    status: success
+                    ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+                    head_sha: f85b6ab
                   path_a_progress:
                     push: done
-                    ci_rewatch: pass
-                    ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
-                    lint_coverage_fix: 746181b
-                    iss004_branch_coverage_fix: 1135891
-                    h0c_migration_check: pass
-                    alembic_revision: 202607280009
+                    ci: pass
+                    ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30465841250'
+                    coverage_fix: f85b6ab
                     pin_redeploy: pass
-                    modal_data_management: redeployed_from_evolve_checkout
                     do_apps:
-                      internal_write_api: pinned_active
-                      admin_frontend: pinned_active
+                      admin_frontend: reset_to_main_active
+                      internal_write_api: untouched_main
+                      modal_data_management: untouched
                     smokes: pass
                     smoke_tiers:
-                      h0c: pass
                       h1: pass
                       h2: pass
                       h3: pass
                       h3b: pass
-                      t3_ev002: pass
                       h4: pass
                       h5: pass
-                    jobs_live:
-                    - list
-                    - retag_detail
-                    - eval_run_detail
-                    - sse
-                    merge_pr_153: awaiting_user_approval
-                  next_askquestion: merge_pr_153_or_hold_or_reset_pins
-                  note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge approval; prior EV-002/S001 H1–H5 results preserved below'
-                  prior_completed_at: '2026-06-26'
-                  prior_started_at: '2026-06-26'
-                  prior_partial_rerun_at: '2026-06-26'
-                  prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
-                  prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
-                  chat_url: 'https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app'
-                  connectivity_validated_at: '2026-05-27'
-                  prior_h0c: pass
-                  prior_h1: pass
-                  prior_h2: pass
-                  prior_h3: pass
-                  prior_h3b_browse: pass
-                  prior_h3_ev002_t3: pass
-                  prior_h4_do: pass
-                  prior_h4_modal: waiver
-                  prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
-                  prior_h5: pass
-                  cors_deployed: true
-                  deploy_time_fixes:
-                  - '98cc2ac: tag inference chat template + graceful fallback'
-                  - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
-                  prior_note: 'EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)'
-                merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-                merge:
-                  status: merged
-                  pr_number: 154
-                  merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
-                  merged_at: '2026-07-29'
-                next_action: none_cycle_closed
-            deploy_checkpoint: approved
-            deploy_checkpoint_at: '2026-07-30'
-            merge_approval: pending
-            ci_head_sha: bbe9544
-            ci_status: green
-            ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
-            session_closed: true
-            session_closed_at: '2026-07-30'
-            started: '2026-08-02'
-            completed:
-            ac_bb9_met: false
-            prod_ce: false
-            deploy_path_choice: option_1_path_a
-          phase_1_5:
-            status: completed
-            started_at: '2026-08-02'
-            note: 'Phase 1.5 COMPLETE — PR #174 MERGED @ 9d1f10b; Path A executed (S021-D27)'
-            pr_number: 174
-            pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
-            pr_status: merged
-            completed_at: '2026-08-02'
+                    merge_pr_154: merged
+                    h0ci_main: pass
+                  next_askquestion:
+                  note: 'S014/EV-013 CLOSED 2026-07-29 — PR #154 MERGED @ ecb9446; DO admin FE github.branch=main ACTIVE; H0ci PASS (ci.yml + deploy-preflight.yml); prior Path A FE-only smokes preserved; see evolve-summary.md'
+                  s013_baseline:
+                    status: completed
+                    started_at: '2026-07-29'
+                    completed_at: '2026-07-29'
+                    partial_rerun_at: '2026-07-29'
+                    session_id: S013-unified-job-monitoring
+                    branch: evolve/EV-012-unified-job-monitoring
+                    evolve_cycle_id: EV-012
+                    mode: delta
+                    deploy_path: A
+                    head_sha: 113589139659a3508eb68340be91d93e7814ae77
+                    overall_result: PASS
+                    report: docs/sessions/S013-unified-job-monitoring/reports/deploy-smoke.md
+                    commits_ahead_of_origin: 0
+                    pushed_at: '2026-07-29'
+                    pr_number: 153
+                    merge_gate: smokes_pass_before_merge
+                    do_not_merge_pr: 153
+                    merge_approval: pending_user
+                    dirty_tree_note: security docs / license-audit / S012 artifacts — NOT part of EV-012; leave uncommitted
+                    partial_rerun_note: 'EV-012/S013 Path A — push evolve → pin/redeploy Modal data-management + DO admin FE + write-api from SHA → H1–H5 / Jobs smokes → merge PR #153 after green'
+                    path_a_progress:
+                      push: done
+                      ci_rewatch: pass
+                      ci_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30454245590'
+                      lint_coverage_fix: 746181b
+                      iss004_branch_coverage_fix: 1135891
+                      h0c_migration_check: pass
+                      alembic_revision: 202607280009
+                      pin_redeploy: pass
+                      modal_data_management: redeployed_from_evolve_checkout
+                      do_apps:
+                        internal_write_api: pinned_active
+                        admin_frontend: pinned_active
+                      smokes: pass
+                      smoke_tiers:
+                        h0c: pass
+                        h1: pass
+                        h2: pass
+                        h3: pass
+                        h3b: pass
+                        t3_ev002: pass
+                        h4: pass
+                        h5: pass
+                      jobs_live:
+                      - list
+                      - retag_detail
+                      - eval_run_detail
+                      - sse
+                      merge_pr_153: awaiting_user_approval
+                    next_askquestion: merge_pr_153_or_hold_or_reset_pins
+                    note: 'S013/EV-012 13-deploy-smoke PASS — Path A @ 1135891; H0c/H1–H5/T3/Jobs live PASS; PR #153 awaits user merge approval; prior EV-002/S001 H1–H5 results preserved below'
+                    prior_completed_at: '2026-06-26'
+                    prior_started_at: '2026-06-26'
+                    prior_partial_rerun_at: '2026-06-26'
+                    prior_partial_rerun_note: S001 Modal GPU snapshot + DO warm path deploy
+                    prior_report: docs/sessions/S001-modal-cold-start-snapshot/reports/deploy-smoke.md
+                    chat_url: 'https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app'
+                    connectivity_validated_at: '2026-05-27'
+                    prior_h0c: pass
+                    prior_h1: pass
+                    prior_h2: pass
+                    prior_h3: pass
+                    prior_h3b_browse: pass
+                    prior_h3_ev002_t3: pass
+                    prior_h4_do: pass
+                    prior_h4_modal: waiver
+                    prior_h4_modal_note: Modal requires_proxy_auth blocks OPTIONS preflight at proxy; user-approved waiver
+                    prior_h5: pass
+                    cors_deployed: true
+                    deploy_time_fixes:
+                    - '98cc2ac: tag inference chat template + graceful fallback'
+                    - '4a1598f: fallback to unfiltered retrieval when tag filter yields empty'
+                    prior_note: 'EV-002 deployed 2026-05-27 @ 0a2f813 (evolve/EV-002-admin-overhaul); H1-H5 + T3 pass (Modal H4 waiver)'
+                  merge_sha: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+                  merge:
+                    status: merged
+                    pr_number: 154
+                    merge_commit: ecb9446cad9f177af3b8f74d99eee7286d446e6e
+                    merged_at: '2026-07-29'
+                  next_action: none_cycle_closed
+              deploy_checkpoint: approved
+              deploy_checkpoint_at: '2026-07-30'
+              merge_approval: pending
+              ci_head_sha: bbe9544
+              ci_status: green
+              ci_note: 'CI green on PR #168 after coverage gate fixes + security re-run (Supabase advisor 502 was transient)'
+              session_closed: true
+              session_closed_at: '2026-07-30'
+              started: '2026-08-02'
+              completed:
+              ac_bb9_met: false
+              prod_ce: false
+              deploy_path_choice: option_1_path_a
+            phase_1_5:
+              status: completed
+              started_at: '2026-08-02'
+              note: 'Phase 1.5 COMPLETE — PR #174 MERGED @ 9d1f10b; Path A executed (S021-D27)'
+              pr_number: 174
+              pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/174'
+              pr_status: merged
+              completed_at: '2026-08-02'
+              merge_sha: 9d1f10b
+            h0c:
+              status: pass
+              evidence: verify_connectivity + pytest tests/unit/test_cors_policy.py
+              verified_at: '2026-08-02'
+              note: H0c PASS (verify_connectivity)
+            report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
+            report_status: pass
+            deploy_gate: passed
+            commits_pending: true
+            commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
+            pr_merged_at: '2026-08-02'
+            pr_merge_sha: 9d1f10b
             merge_sha: 9d1f10b
-          h0c:
-            status: pass
-            evidence: verify_connectivity + pytest tests/unit/test_cors_policy.py
-            verified_at: '2026-08-02'
-            note: H0c PASS (verify_connectivity)
-          report: docs/sessions/S021-retrieval-follow-on/reports/deploy-smoke.md
-          report_status: pass
-          deploy_gate: passed
-          commits_pending: true
-          commits_note: 'Path A deploy complete @ 9d1f10b; commits_pending=true until parent commits closeout docs (deploy-smoke/evolve-summary/workflow-state)'
-          pr_merged_at: '2026-08-02'
-          pr_merge_sha: 9d1f10b
-          merge_sha: 9d1f10b
-          merge_commit: 9d1f10baecf2cdef61b3174774e03b847086fe17
-          commit_deployed: 9d1f10b
-          chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
-          overall_result: PASS
-          path_a_staging_result: PASS
-          health_tiers:
-            h0c: pass
-            h0ci_github_main: pass
-            h1_liveness: pass
-            h2_db_ready: skipped
-            h2_note: SKIP — no DATABASE_URL in staging_smoke env
-            h3_rag_smoke: pass
-            h4_cors_preflight: pass
-            h5_frontend_bundle: pass
-          uj_061_sample:
-            status: PASS
-            sources: 5
-          ci:
-            status: success
-            pr_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
-            main_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
-            head_sha: 9d1f10b
-          cd:
-            status: pass
-            deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404'
-            deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655'
-            deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322'
-          path_a_progress:
-            push: done
-            ci_pr: pass
-            ci_pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
-            merge_pr_174: merged
-            merge_sha: 9d1f10b
-            ci_main: pass
-            ci_main_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
-            deploy_preflight: pass
-            deploy_modal: pass
-            deploy_digitalocean: pass
-            chatrag_redeploy: ACTIVE
+            merge_commit: 9d1f10baecf2cdef61b3174774e03b847086fe17
+            commit_deployed: 9d1f10b
             chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
-            ce: false_hold
-            do_verify: pass
-            staging_smoke:
-              h1: pass
-              h2: skipped
-              h3: pass
-            verify_connectivity:
+            overall_result: PASS
+            path_a_staging_result: PASS
+            health_tiers:
               h0c: pass
-              h4: pass
-              h5: pass
-            uj_061_sample: pass_5_sources
-          do_verify: PASS
-          s021_d27_decision: S021-D27
+              h0ci_github_main: pass
+              h1_liveness: pass
+              h2_db_ready: skipped
+              h2_note: SKIP — no DATABASE_URL in staging_smoke env
+              h3_rag_smoke: pass
+              h4_cors_preflight: pass
+              h5_frontend_bundle: pass
+            uj_061_sample:
+              status: PASS
+              sources: 5
+            ci:
+              status: success
+              pr_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
+              main_run_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
+              head_sha: 9d1f10b
+            cd:
+              status: pass
+              deploy_preflight: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763789404'
+              deploy_modal: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763812655'
+              deploy_digitalocean: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763847322'
+            path_a_progress:
+              push: done
+              ci_pr: pass
+              ci_pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763494239'
+              merge_pr_174: merged
+              merge_sha: 9d1f10b
+              ci_main: pass
+              ci_main_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30763644043'
+              deploy_preflight: pass
+              deploy_modal: pass
+              deploy_digitalocean: pass
+              chatrag_redeploy: ACTIVE
+              chatrag_deployment_id: ade67338-06bf-40ba-aa21-2c29e08f9b9c
+              ce: false_hold
+              do_verify: pass
+              staging_smoke:
+                h1: pass
+                h2: skipped
+                h3: pass
+              verify_connectivity:
+                h0c: pass
+                h4: pass
+                h5: pass
+              uj_061_sample: pass_5_sources
+            do_verify: PASS
+            s021_d27_decision: S021-D27
+            session_closed: true
+            session_closed_at: '2026-08-02'
           session_closed: true
           session_closed_at: '2026-08-02'
-        session_closed: true
-        session_closed_at: '2026-08-02'
-      status: completed
-      started_at: '2026-08-03'
-      started: '2026-08-03'
-      partial_rerun_at: '2026-08-03'
-      partial_rerun_note: 'S023/EV-020 — 13-deploy-smoke COMPLETE Path A PASS @ 726e7fc; prior S022 COMPLETE nested under s022_baseline'
-      session_id: S023-retrieval-topk-packing
-      evolve_cycle_id: EV-020
-      branch: evolve/EV-020-retrieval-topk-packing
-      mode: evolve
-      delta_only: true
-      feature_ids:
-      - F50
-      - F51
-      feature: F50+F51
-      current_action: awaiting cycle close (done / 15 / 17)
-      next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
-      soft_notes:
-      - DO CD first attempt admin-frontend mTLS Unauthorized; rerun 30816205384 succeeded
-      - H2 skipped — no DATABASE_URL in smoke env
-      askquestion_pending: true
-      s023_d21_decision: S023-D21
-      s023_d22_decision: S023-D22
-      deploy_path: A
-      deploy_path_choice: merge_cd_and_commit
-      path_a_sequence: commit_push → merge_PR_180 → CD_ChatRAG → H1–H5
-      pr_number: 180
-      pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180'
-      pr_status: merged
-      pr_ci: success
-      commits_head: 726e7fc
-      commit_deployed: 726e7fc
-      staging_lag_expected: false
-      uncommitted_session_docs: false
-      note: 'S023/EV-020 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS after merge #180 @ 726e7fc; CI 30815699108 PASS; deploy-preflight 30816055888 PASS; Deploy Modal 30816100316 PASS; Deploy DigitalOcean 30816205384 PASS (rerun after admin-frontend mTLS Unauthorized on first attempt); H1 PASS ChatRAG+write; H2 skipped (no DATABASE_URL); H3 PASS ask returned 8 sources (was 5 pre-redeploy; cache_hit on repeat); H4 PASS CORS; H5 PASS FE bundle staging ChatRAG URL; AC-RQ8/RQ9 met live; AC-RQ10 held; CE remains false. checkpoints.deploy=passed; gates.deploy=passed. EV-020 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
-      completed: '2026-08-03'
-      completed_at: '2026-08-03'
-      report: docs/sessions/S023-retrieval-topk-packing/reports/deploy-smoke.md
-      path_a: passed
-      overall_result: path_a_pass
-      merge_sha: 726e7fcaa9f08c7aeeacb8d5448ef6ba868ba313
-      merge_sha_short: 726e7fc
-      pr_merged: true
-      pr_merged_at: '2026-08-03T12:56:44Z'
-      pr_exists: true
-      ready: true
-      deploy_ready: true
-      askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
-      s023_d23_decision: S023-D23
-      health_tiers:
-        h1_liveness: pass
-        h2_db_ready: skipped
-        h3_rag_smoke: pass
-        h4_cors_preflight: pass
-        h5_frontend_bundle: pass
-      ci_runs:
-        ci:
-          id: 30815699108
-          conclusion: success
-        deploy_preflight:
-          id: 30816055888
-          conclusion: success
-        deploy_modal:
-          id: 30816100316
-          conclusion: success
-        deploy_digitalocean:
-          id: 30816205384
-          conclusion: success
-          note: rerun after admin-frontend mTLS Unauthorized; force build succeeded
-      live_evidence:
-        top_k: 8
-        sources_pre_redeploy: 5
-        sources_post_redeploy: 8
-        cache_hit_on_repeat: true
-        ac_rq8: met_live
-        ac_rq9: met_live
-        ac_rq10: held
-        context_expansion: false
+        status: completed
+        started_at: '2026-08-03'
+        started: '2026-08-03'
+        partial_rerun_at: '2026-08-03'
+        partial_rerun_note: 'S023/EV-020 — 13-deploy-smoke COMPLETE Path A PASS @ 726e7fc; prior S022 COMPLETE nested under s022_baseline'
+        session_id: S023-retrieval-topk-packing
+        evolve_cycle_id: EV-020
+        branch: evolve/EV-020-retrieval-topk-packing
+        mode: evolve
+        delta_only: true
+        feature_ids:
+        - F50
+        - F51
+        feature: F50+F51
+        current_action: awaiting cycle close (done / 15 / 17)
+        next_action: awaiting cycle close AskQuestion (done / 15-service-health / 17-retrospective)
+        soft_notes:
+        - DO CD first attempt admin-frontend mTLS Unauthorized; rerun 30816205384 succeeded
+        - H2 skipped — no DATABASE_URL in smoke env
+        askquestion_pending: true
+        s023_d21_decision: S023-D21
+        s023_d22_decision: S023-D22
+        deploy_path: A
+        deploy_path_choice: merge_cd_and_commit
+        path_a_sequence: commit_push → merge_PR_180 → CD_ChatRAG → H1–H5
+        pr_number: 180
+        pr_url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180'
+        pr_status: merged
+        pr_ci: success
+        commits_head: 726e7fc
+        commit_deployed: 726e7fc
+        staging_lag_expected: false
+        uncommitted_session_docs: false
+        note: 'S023/EV-020 13-deploy-smoke COMPLETE 2026-08-03 — Path A PASS after merge #180 @ 726e7fc; CI 30815699108 PASS; deploy-preflight 30816055888 PASS; Deploy Modal 30816100316 PASS; Deploy DigitalOcean 30816205384 PASS (rerun after admin-frontend mTLS Unauthorized on first attempt); H1 PASS ChatRAG+write; H2 skipped (no DATABASE_URL); H3 PASS ask returned 8 sources (was 5 pre-redeploy; cache_hit on repeat); H4 PASS CORS; H5 PASS FE bundle staging ChatRAG URL; AC-RQ8/RQ9 met live; AC-RQ10 held; CE remains false. checkpoints.deploy=passed; gates.deploy=passed. EV-020 remains in_progress awaiting Phase 4 cycle-close AskQuestion (do not auto-complete).'
+        completed: '2026-08-03'
+        completed_at: '2026-08-03'
+        report: docs/sessions/S023-retrieval-topk-packing/reports/deploy-smoke.md
+        path_a: passed
+        overall_result: path_a_pass
+        merge_sha: 726e7fcaa9f08c7aeeacb8d5448ef6ba868ba313
+        merge_sha_short: 726e7fc
+        pr_merged: true
+        pr_merged_at: '2026-08-03T12:56:44Z'
+        pr_exists: true
+        ready: true
+        deploy_ready: true
+        askquestion_pending_note: Phase 4 cycle close AskQuestion — done / 15 / 17
+        s023_d23_decision: S023-D23
+        health_tiers:
+          h1_liveness: pass
+          h2_db_ready: skipped
+          h3_rag_smoke: pass
+          h4_cors_preflight: pass
+          h5_frontend_bundle: pass
+        ci_runs:
+          ci:
+            id: 30815699108
+            conclusion: success
+          deploy_preflight:
+            id: 30816055888
+            conclusion: success
+          deploy_modal:
+            id: 30816100316
+            conclusion: success
+          deploy_digitalocean:
+            id: 30816205384
+            conclusion: success
+            note: rerun after admin-frontend mTLS Unauthorized; force build succeeded
+        live_evidence:
+          top_k: 8
+          sources_pre_redeploy: 5
+          sources_post_redeploy: 8
+          cache_hit_on_repeat: true
+          ac_rq8: met_live
+          ac_rq9: met_live
+          ac_rq10: held
+          context_expansion: false
   14-hotfix:
     status: completed
     started_at: '2026-07-31'
@@ -14588,9 +14794,45 @@ deployment:
       verified_at: '2026-08-03'
       report: docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md
       live_openapi_corpus_tree: true
+    release:
+      tag: v0.4.1
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+      target_sha: 5fa370a
+      session_id: S025-ci-release-automation
+      evolve_cycle_id: EV-023
+      recorded_at: '2026-08-03T23:59:34Z'
+      note: S025/EV-023 infra release v0.4.1
+    s025_infra_release:
+      status: pass
+      tag: v0.4.1
+      target_sha: 5fa370a
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+      pr_195: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+      pr_196: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/196
+      pr_197: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+      pr_197_status: merged
+      pr_197_merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+      product_h1_h5: waived
+      gates_deploy: passed
+      checkpoints_deploy: passed
+      report: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
+      recorded_at: '2026-08-04T00:02:30Z'
+      closed_at: '2026-08-04T00:02:30Z'
+      close_decision: S025-D16
   url_discovery:
     method: uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
     modal_admin_manual: true
+  release:
+    tag: v0.4.1
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+    target_sha: 5fa370a
+    session_id: S025-ci-release-automation
+    evolve_cycle_id: EV-023
+    recorded_at: '2026-08-03T23:59:34Z'
+    source: workflow_run_auto_release_after_do_cd
+    idempotent_skip: pass
+    first_run_gotcha_resolved: true
+    note: F63 first live semver tag v0.4.1 @5fa370a; product H1–H5 waived (infra-only cycle); EV-023 closed S025-D16
 evolve_cycles:
 - id: EV-001
   cycle_type: feature
@@ -24056,9 +24298,9 @@ evolve_cycles:
   - F62
   - F63
   title: CI / local quality + release automation (#194)
-  status: in_progress
+  status: completed
   started: '2026-08-03'
-  completed:
+  completed: '2026-08-04'
   predecessor_evolve_cycle_id: EV-022
   predecessor_session_id: S024-website-scrape-crawl
   github_issues:
@@ -24090,41 +24332,48 @@ evolve_cycles:
     - 12-verify-deploy
     - 15-service-health
   routing_preset: lean_build
-  current_stage: 16-evolve
-  current_action: awaiting_merge_for_13
-  next_action: User approve merge; then 13-deploy-smoke
+  current_stage: completed
+  current_action: cycle_closed
+  next_action: none
   branch: evolve/EV-023-ci-release-automation
   evolve_branch: evolve/EV-023-ci-release-automation
   mode: evolve
   delta_only: true
   phase0_approved: true
   phase_0_status: approved
-  askquestion_pending: true
+  askquestion_pending: false
   checkpoints:
     phase_a: passed
     phase_b: waived
     phase_c: passed
-    phase_d: pending
-    deploy: pending
+    phase_d: passed
+    deploy: passed
   gates:
     a_to_b: passed
     b_to_c: waived
     c_to_d: passed
-    deploy: pending
+    deploy: passed
   stages:
     00-context:
       status: completed
       started: '2026-08-03'
       completed: '2026-08-03'
     16-evolve:
-      status: in_progress
+      status: completed
       started: '2026-08-03'
-      current_action: awaiting_merge_for_13
-      askquestion_pending: true
-      note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
-      next_action: User approve merge; then 13-deploy-smoke
+      completed: '2026-08-04'
+      completed_at: '2026-08-04'
+      current_action: cycle_closed
+      askquestion_pending: false
+      next_action: none
+      note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+      s025_d16_decision: S025-D16
       pr_number: 195
-      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+      pr_status: merged
+      docs_closeout_pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+      release_tag: v0.4.1
+      gates_deploy: passed
+      checkpoints_deploy: passed
     01-requirements:
       status: completed
       started: '2026-08-03'
@@ -24253,6 +24502,57 @@ evolve_cycles:
       commit: b626dfd
       commit_full: b626dfd7256d31a9566e91546edda9407b53601e
       commits_head: b626dfd
+    13-deploy-smoke:
+      status: completed
+      started: '2026-08-03'
+      started_at: '2026-08-03'
+      started_ts: '2026-08-03T23:36:53Z'
+      completed: '2026-08-04'
+      completed_at: '2026-08-03T23:59:34Z'
+      completed_ts: '2026-08-03T23:59:34Z'
+      result: pass
+      overall_result: pass
+      report: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
+      evolve_summary: docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
+      release_tag: v0.4.1
+      release_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+      release_target_sha: 5fa370a
+      product_h1_h5: waived
+      pr_number: 195
+      pr_status: merged
+      merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+      pr_197: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+      pr_197_status: merged
+      pr_197_merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+      checkpoints_phase_d: passed
+      gates_deploy: passed
+      s025_d15_decision: S025-D15
+      s025_d16_decision: S025-D16
+      note: 'S025/EV-023 13-deploy-smoke COMPLETE PASS (infra); deploy gate passed (S025-D16); tag v0.4.1 @5fa370a; #197 MERGED @e78e418.'
+      askquestion_pending: false
+      current_action: completed
+      next_action: none_session_closed
+    03-plan-tooling:
+      status: skipped
+      skip_rationale: Lean+build preset
+    05-verify-tech:
+      status: skipped
+      skip_rationale: Lean+build preset
+    06-tech-tooling:
+      status: skipped
+      skip_rationale: Lean+build preset
+    09-qa:
+      status: skipped
+      skip_rationale: Lean+build preset
+    11-verify-impl:
+      status: skipped
+      skip_rationale: Lean+build preset
+    12-verify-deploy:
+      status: skipped
+      skip_rationale: Lean+build preset — no deploy checklist gate for CI/tooling
+    15-service-health:
+      status: skipped
+      skip_rationale: Lean+build preset — optional at close; not required
   artifacts:
   - path: docs/sessions/S025-ci-release-automation/reports/01-requirements-ci-release.md
     status: completed
@@ -24328,7 +24628,7 @@ evolve_cycles:
     decision: 'Closed S024/EV-022 without 15/17 to start #194'
     recorded_at: '2026-08-03T23:00:00Z'
     status: confirmed
-  note: 'PR #195 OPEN @ b626dfd — evolve/EV-023-ci-release-automation → main; 10-e2e PASS already recorded; phase_d/deploy still pending until merge + 13-deploy-smoke; AskQuestion: merge approve → 13-deploy-smoke?'
+  note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
   phase0_approved_at: '2026-08-03T23:09:09Z'
   proposed_feature_ids: []
   proposed_features:
@@ -24360,7 +24660,7 @@ evolve_cycles:
     - S025-D7
     - S025-D8
     next_action: 01-requirements writing_delta_specs
-  report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
+  report: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
   e2e_report: docs/sessions/S025-ci-release-automation/reports/e2e-report.md
   e2e_result: pass
   verification_report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
@@ -24380,13 +24680,12 @@ evolve_cycles:
   pr_title: '[EV-023] CI release automation (F62/F63)'
   pr_branch: evolve/EV-023-ci-release-automation
   pr_base: main
-  pr_status: open
+  pr_status: merged
   pr_opened_at: '2026-08-03'
   pr_opened_ts: '2026-08-03T23:25:00Z'
-  pr_merged: false
+  pr_merged: true
   pr_head_sha: b626dfd
   pr_head_full: b626dfd7256d31a9566e91546edda9407b53601e
-  askquestion_pending_topic: merge_approve_then_13_deploy_smoke
   prs:
     '195':
       number: 195
@@ -24394,14 +24693,55 @@ evolve_cycles:
       title: '[EV-023] CI release automation (F62/F63)'
       branch: evolve/EV-023-ci-release-automation
       base: main
-      status: open
-      head_sha: b626dfd
-      head_sha_full: b626dfd7256d31a9566e91546edda9407b53601e
-      opened_at: '2026-08-03'
-      opened_ts: '2026-08-03T23:25:00Z'
+      status: merged
+      merged: true
+      merged_at: '2026-08-03T23:35:40Z'
+      merge_commit_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+      merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+      merge_sha_short: 58e52c8
       session_id: S025-ci-release-automation
       evolve_cycle_id: EV-023
-      note: Local workflow-state may have uncommitted git_history append after b626dfd
+      decision: S025-D15
+      note: MERGED @58e52c8; 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a
+    '196':
+      number: 196
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/196
+      status: merged
+      merged: true
+      session_id: S025-ci-release-automation
+      evolve_cycle_id: EV-023
+      note: git identity (merged)
+      recorded_at: '2026-08-03T23:59:34Z'
+    '197':
+      number: 197
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+      status: merged
+      merged: true
+      merged_at: '2026-08-04T00:01:53Z'
+      merge_commit_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+      merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+      merge_sha_short: e78e418
+      session_id: S025-ci-release-automation
+      evolve_cycle_id: EV-023
+      decision: S025-D16
+      note: docs closeout reports MERGED; cycle closed
+      recorded_at: '2026-08-04T00:02:30Z'
+  completed_at: '2026-08-04'
+  close_decision: S025-D16
+  close_note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+  s025_d15_decision: S025-D15
+  s025_d16_decision: S025-D16
+  merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+  merge_sha_short: 58e52c8
+  docs_closeout_pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+  docs_closeout_pr_number: 197
+  release_tag: v0.4.1
+  release_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/releases/tag/v0.4.1
+  release_target_sha: 5fa370a
+  product_h1_h5: waived
+  product_h1_h5_waiver: infra_only
+  evolve_summary: docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
+  updated_at: '2026-08-04T00:02:30Z'
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -28296,6 +28636,21 @@ decisions_log:
   - 10-e2e
   note: S024/EV-022 Gate C→D PASS (S024-D42) — phase_c/gates.c_to_d passed; 09-qa + 10-e2e in_progress; next → 11-verify-impl after Phase D
 - S024-D42 2026-08-03 — Gate C→D PASS (option 1); Phase C approved; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase D 09-qa + 10-e2e in_progress
+- date: '2026-08-04'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  id: S025-D16
+  decision: 'S025-D16: Approve → merge #197, close EV-023 / S025 (Decision option 1). PR #197 MERGED @e78e418 at 2026-08-04T00:01:53Z; deploy gate passed; cycle closed.'
+  recorded_at: '2026-08-04T00:02:30Z'
+  status: recorded
+  askquestion_pending: false
+  pr_197: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+  merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+  release_tag: v0.4.1
+  note: 'S025/EV-023 CLOSED 2026-08-04 — S025-D16 Approve→merge #197 + close. 13-deploy-smoke PASS (infra); tag v0.4.1 @5fa370a; PR #195 MERGED @58e52c8; PR #196 MERGED; docs PR #197 MERGED @e78e418; product H1–H5 waived (infra-only); checkpoints.deploy=passed; gates.deploy=passed; session archived; active_session=null.'
+- 'S025-D16 2026-08-04 — Approve merge #197 + close EV-023/S025; deploy gate passed; archived; active_session=null'
 artifacts:
 - path: docs/feature-list.md
   kind: standing-doc
@@ -31011,13 +31366,33 @@ artifacts:
   result: pass
   note: UJ-067/068 T0 PASS 8/8; T2/T3 deferred to 13; product API/UI e2e waived
   commit: b626dfd
+- path: docs/sessions/S025-ci-release-automation/reports/deploy-smoke.md
+  kind: deploy-smoke-report
+  status: completed
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  stage: 13-deploy-smoke
+  skill_id: 13-deploy-smoke
+  recorded_at: '2026-08-04T00:02:30Z'
+  release_tag: v0.4.1
+  note: closeout archived with S025-D16
+- path: docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
+  kind: evolve-summary
+  status: completed
+  session_id: S025-ci-release-automation
+  evolve_cycle_id: EV-023
+  stage: 16-evolve
+  skill_id: 16-evolve
+  recorded_at: '2026-08-04T00:02:30Z'
+  release_tag: v0.4.1
+  note: closeout archived with S025-D16
 git_history:
-  current_branch: evolve/EV-023-ci-release-automation
+  current_branch: main
   branches:
   - name: evolve/EV-023-ci-release-automation
     purpose: EV-023 CI / local quality + release automation (#194)
     base: main
-    status: open
+    status: merged
     created_at: '2026-08-03'
     session_id: S025-ci-release-automation
     evolve_cycle_id: EV-023
@@ -31025,12 +31400,14 @@ git_history:
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
     pr_title: '[EV-023] CI release automation (F62/F63)'
     pr_base: main
-    pr_status: open
+    pr_status: merged
     pr_opened_at: '2026-08-03'
     pr_opened_ts: '2026-08-03T23:25:00Z'
-    head_sha: b626dfd7256d31a9566e91546edda9407b53601e
-    head_short: b626dfd
-    note: 'PR #195 OPEN — await merge then 13-deploy-smoke; phase_d/deploy pending; local workflow-state may have uncommitted git_history append after b626dfd'
+    head_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+    head_short: 58e52c8
+    note: 'MERGED via #195 @58e52c8; EV-023 closed S025-D16'
+    merged_at: '2026-08-03T23:35:40Z'
+    merge_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
   - name: docs/S024-EV-022-deploy-smoke-closeout
     purpose: 'S024/EV-022 Path A deploy-smoke closeout docs (13 report + routing/HANDOFF)'
     base: main
@@ -31376,6 +31753,19 @@ git_history:
     session_id: S023-retrieval-topk-packing
     evolve_cycle_id: EV-020
     head: bb4c400
+  - name: docs/S025-EV-023-deploy-smoke-closeout
+    purpose: S025/EV-023 deploy-smoke closeout docs
+    base: main
+    status: merged
+    created_at: '2026-08-03'
+    merged_at: '2026-08-04T00:01:53Z'
+    session_id: S025-ci-release-automation
+    evolve_cycle_id: EV-023
+    pr_number: 197
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+    pr_status: merged
+    merge_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+    note: 'Docs closeout MERGED via #197; cycle closed'
   commits:
   - sha: b626dfd
     full_sha: b626dfd7256d31a9566e91546edda9407b53601e
@@ -34524,6 +34914,35 @@ git_history:
     - workflow-state.yaml
     timestamp: '2026-08-03T22:22:05Z'
     note: 'Docs closeout commit on docs/S024-EV-022-deploy-smoke-closeout; PR #191 open; 13-deploy-smoke already completed — no stage status change'
+  - sha: 58e52c8
+    full_sha: 58e52c86736f14cea52910da989e3fc1c5aa8b7d
+    branch: main
+    message: 'Merge pull request #195 from Math-Data-Justice-Collaborative/evolve/EV-023-ci-release-automation'
+    stage: 13-deploy-smoke
+    skill_id: 13-deploy-smoke
+    session_id: S025-ci-release-automation
+    evolve_cycle_id: EV-023
+    pr_number: 195
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/195
+    pr_status: merged
+    files_changed: 0
+    timestamp: '2026-08-03T23:35:40Z'
+    note: 'Feature PR #195 merge; F62/F63 on main'
+  - sha: e78e418
+    full_sha: e78e418e65ff2486162737c737f34fb13d81d7f3
+    short: e78e418
+    branch: main
+    message: 'Merge pull request #197 from Math-Data-Justice-Collaborative/docs/S025-EV-023-deploy-smoke-closeout'
+    stage: 16-evolve
+    skill_id: 16-evolve
+    session_id: S025-ci-release-automation
+    evolve_cycle_id: EV-023
+    pr_number: 197
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/197
+    pr_status: merged
+    files_changed: 0
+    timestamp: '2026-08-04T00:01:53Z'
+    note: 'Docs closeout PR #197 MERGED; S025-D16 cycle close'
   notes:
   - '2026-08-03T22:22:05Z S024/EV-022: recorded commit 55c4583 on docs/S024-EV-022-deploy-smoke-closeout — Path A deploy smoke PASS and close 13; PR #191 OPEN; stage completion unchanged.'
   - '2026-08-03T22:18:30Z S024/EV-022: Path A PASS — PR #190 MERGED @ cc2750c; Modal CD 30857801172 success; DO CD 30857894636 success; H1/H3/H3b/H4/H5 PASS; H2 SKIP; Alembic 20260803_0011 via DO CD; live OpenAPI /internal/v1/corpus/tree; report docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; gates.deploy=passed; awaiting cycle-close AskQuestion.'
