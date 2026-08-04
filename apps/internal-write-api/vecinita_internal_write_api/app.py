@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import os
 import time
 import uuid as _uuid
@@ -14,6 +15,7 @@ from uuid import UUID, uuid4
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
+from pydantic import ValidationError
 from sqlalchemy import create_engine, text
 from vecinita_ingest.nested_source import derive_nested_source
 from vecinita_llm_client import LlmClient, LlmClientError
@@ -30,6 +32,7 @@ from vecinita_shared_schemas.auth import (
     require_service,
     require_super_admin,
 )
+from vecinita_shared_schemas.chat_rag import FeedbackCreateResponse
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import CorpusTreeResponse
 from vecinita_shared_schemas.db_mapping import (
@@ -90,6 +93,7 @@ from vecinita_shared_schemas.internal_write import (
     EvalRunExecuteResponse,
     EvalRunListResponse,
     EvalTimeseriesResponse,
+    FeedbackListResponse,
     HealthAggregateResponse,
     HealthResponse,
     RebuildPromoteResponse,
@@ -124,6 +128,7 @@ from vecinita_shared_schemas.playground_models import (
     PlaygroundModelPullResponse,
     PlaygroundModelSummary,
 )
+from vecinita_shared_schemas.validation import validate_feedback_request
 
 from vecinita_internal_write_api.audit import (
     cleanup_audit_log,
@@ -155,6 +160,11 @@ from vecinita_internal_write_api.eval_service import (
     get_eval_timeseries,
     list_eval_runs,
     soft_delete_eval_run,
+)
+from vecinita_internal_write_api.feedback import (
+    cleanup_feedback,
+    insert_feedback,
+    list_feedback,
 )
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
@@ -1623,6 +1633,65 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             return AuditCleanupResponse(deleted=0, retention_days=retention_days)
         deleted = cleanup_audit_log(engine, retention_days=retention_days)
         return AuditCleanupResponse(deleted=deleted, retention_days=retention_days)
+
+    @app.post(
+        "/internal/v1/feedback/cleanup",
+        response_model=AuditCleanupResponse,
+    )
+    def feedback_cleanup(_actor: WriteActorDep) -> AuditCleanupResponse:  # pyright: ignore[reportUnusedFunction]
+        retention_days = int(os.environ.get("VECINITA_FEEDBACK_RETENTION_DAYS", "90"))
+        if retention_days <= 0:
+            return AuditCleanupResponse(deleted=0, retention_days=retention_days)
+        deleted = cleanup_feedback(engine, retention_days=retention_days)
+        return AuditCleanupResponse(deleted=deleted, retention_days=retention_days)
+
+    @app.post(
+        "/internal/v1/feedback",
+        response_model=FeedbackCreateResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    async def create_feedback(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        _actor: WriteActorDep,
+    ) -> FeedbackCreateResponse:
+        try:
+            raw_payload = cast("object", await request.json())
+        except json.JSONDecodeError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid JSON",
+            ) from exc
+        if not isinstance(raw_payload, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="JSON object required",
+            )
+        try:
+            body = validate_feedback_request(as_json_object(cast("object", raw_payload)))
+        except ValidationError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=exc.errors(),
+            ) from exc
+        with engine.begin() as conn:
+            return insert_feedback(conn, body)
+
+    @app.get(
+        "/internal/v1/feedback",
+        response_model=FeedbackListResponse,
+    )
+    def get_feedback_list(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        page: Annotated[int, Query(ge=1)] = 1,
+        page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+        category: Annotated[str | None, Query()] = None,
+    ) -> FeedbackListResponse:
+        return list_feedback(
+            engine,
+            page=page,
+            page_size=page_size,
+            category=category,
+        )
 
     @app.get(
         "/internal/v1/documents/{document_id}/history",

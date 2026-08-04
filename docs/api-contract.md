@@ -829,6 +829,20 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 - **Body**: Same fields as public feedback (no email).
 - **Side effects**: Insert `feedback` row; optional operator notify.
 
+### GET `/internal/v1/feedback` (EV-024 / F68) — Internal Write API
+
+- **Purpose**: List feedback rows for DM `GET /admin/feedback` proxy.
+- **Auth**: Internal API key (or admin write actor).
+- **Query**: `page`, `page_size`, optional `category`.
+- **Response** `200`: items with `id`, `created_at`, `category`, `message`, `locale`.
+
+### POST `/internal/v1/feedback/cleanup` (EV-024 / F68) — Internal Write API
+
+- **Purpose**: Purge `feedback` rows older than retention (default 90 days).
+- **Auth**: Internal API key.
+- **Env**: `VECINITA_FEEDBACK_RETENTION_DAYS` (`0` skips delete).
+- **Response** `200`: `{"deleted": N, "retention_days": N}`.
+
 ### GET `/internal/v1/documents/{document_id}/history` (EV-002 / F29)
 
 - **Purpose**: Per-document version history (metadata + tag snapshots).

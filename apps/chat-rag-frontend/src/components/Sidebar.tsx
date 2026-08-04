@@ -15,6 +15,7 @@ type SidebarProps = {
   locale: Locale;
   theme: Theme;
   onCorpus: boolean;
+  onFeedback: boolean;
   newChatDisabled: boolean;
   tags: TagFacet[];
   selectedTags: string[];
@@ -41,6 +42,7 @@ export function Sidebar({
   locale,
   theme,
   onCorpus,
+  onFeedback,
   newChatDisabled,
   tags,
   selectedTags,
@@ -82,8 +84,12 @@ export function Sidebar({
       <nav className="sidebar-nav" aria-label="Primary">
         <button
           type="button"
-          className={onCorpus ? "sidebar-nav-item" : "sidebar-nav-item active"}
-          aria-current={onCorpus ? undefined : "page"}
+          className={
+            onCorpus || onFeedback
+              ? "sidebar-nav-item"
+              : "sidebar-nav-item active"
+          }
+          aria-current={onCorpus || onFeedback ? undefined : "page"}
           onClick={() => {
             onNavigate("/");
           }}
@@ -99,6 +105,19 @@ export function Sidebar({
           }}
         >
           {t(locale, "navCorpus")}
+        </button>
+        <button
+          type="button"
+          className={
+            onFeedback ? "sidebar-nav-item active" : "sidebar-nav-item"
+          }
+          aria-current={onFeedback ? "page" : undefined}
+          data-testid="nav-feedback"
+          onClick={() => {
+            onNavigate("/feedback");
+          }}
+        >
+          {t(locale, "navFeedback")}
         </button>
       </nav>
 

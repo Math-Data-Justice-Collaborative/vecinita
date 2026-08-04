@@ -8,6 +8,7 @@ import { JobDetailPage } from "@/pages/JobDetailPage";
 import { JobsPage } from "@/pages/JobsPage";
 import { HealthPage } from "@/pages/HealthPage";
 import { AuditPage } from "@/pages/AuditPage";
+import { FeedbackPage } from "@/pages/FeedbackPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { SetPasswordPage } from "@/pages/SetPasswordPage";
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/jobs/:jobId" element={<JobDetailPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/audit" element={<AuditPage />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/evaluation" element={<EvaluationPage />} />
       </Route>

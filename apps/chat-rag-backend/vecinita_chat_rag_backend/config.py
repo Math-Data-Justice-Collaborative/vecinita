@@ -168,6 +168,11 @@ class ChatRagSettings:
     rag_rerank_ce: bool = False
     rag_rerank_ce_model: str = DEFAULT_CE_MODEL_ID
     rag_rerank_ce_top_n: int = DEFAULT_CE_TOP_N
+    # F65 / ADR-047 energy heuristic knobs
+    energy_gpu_tdp_w: float = 70.0
+    energy_gpu_util: float = 0.5
+    energy_gco2e_per_kwh: float = 386.0
+    energy_car_gco2e_per_km: float = 251.0
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -258,4 +263,8 @@ class ChatRagSettings:
                 DEFAULT_CE_MODEL_ID,
             ),
             rag_rerank_ce_top_n=rag_rerank_ce_top_n,
+            energy_gpu_tdp_w=_float_env("VECINITA_ENERGY_GPU_TDP_W", 70.0),
+            energy_gpu_util=_float_env("VECINITA_ENERGY_GPU_UTIL", 0.5),
+            energy_gco2e_per_kwh=_float_env("VECINITA_ENERGY_GCO2E_PER_KWH", 386.0),
+            energy_car_gco2e_per_km=_float_env("VECINITA_ENERGY_CAR_GCO2E_PER_KM", 251.0),
         )

@@ -45,8 +45,9 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 | `tags` | Normalized tag labels (language, slug) | No |
 | `document_tags` | Document ↔ tag assignments (`source`: llm \| human) | No |
 | `chunk_tags` | Chunk ↔ tag assignments (`source`: llm \| human) | No |
+| `feedback` | Anonymous product feedback (category + message; ADR-046 / F68) | No |
 
-**Forbidden:** `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`, `created_by`, operator identity columns on tag tables — enforced by migrations + `tests/privacy/`.
+**Forbidden:** `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`, `created_by`, operator identity columns on tag tables — enforced by migrations + `tests/privacy/`. Visitor email/name/`user_id` on `feedback` is also forbidden (ADR-046).
 
 ## Sources
 

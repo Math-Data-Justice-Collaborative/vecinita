@@ -158,7 +158,9 @@ export function isSourcesEvent(
   return "sources" in event;
 }
 
-export function isDoneEvent(event: StreamEvent): event is { done: true } {
+export function isDoneEvent(
+  event: StreamEvent,
+): event is Extract<StreamEvent, { done: true }> {
   return "done" in event;
 }
 

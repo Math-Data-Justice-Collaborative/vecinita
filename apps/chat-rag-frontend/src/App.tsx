@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { ChatPanel } from "./components/ChatPanel";
 import { CorpusBrowse } from "./components/CorpusBrowse";
+import { FeedbackPage } from "./components/FeedbackPage";
 import { Sidebar } from "./components/Sidebar";
 import { LocaleProvider } from "./context/LocaleContext";
 import { useChatHistory } from "./hooks/useChatHistory";
@@ -28,6 +29,7 @@ function AppContent() {
   // chips while ChatPanel consumes the selection for the ask request (D3).
   const tagFilters = useTagFilters();
   const onCorpus = pathname === "/corpus" || pathname.endsWith("/corpus");
+  const onFeedback = pathname === "/feedback" || pathname.endsWith("/feedback");
 
   return (
     <div className="app-shell" data-sidebar-open={sidebarOpen}>
@@ -36,6 +38,7 @@ function AppContent() {
         locale={locale}
         theme={theme}
         onCorpus={onCorpus}
+        onFeedback={onFeedback}
         newChatDisabled={chat.loading || chat.messages.length === 0}
         tags={tagFilters.tags}
         selectedTags={tagFilters.selected}
@@ -80,7 +83,14 @@ function AppContent() {
           </div>
         </header>
         <main className="app">
-          {onCorpus ? (
+          {onFeedback ? (
+            <FeedbackPage
+              locale={locale}
+              onNavigateHome={() => {
+                navigate("/");
+              }}
+            />
+          ) : onCorpus ? (
             <CorpusBrowse
               onNavigateHome={() => {
                 navigate("/");

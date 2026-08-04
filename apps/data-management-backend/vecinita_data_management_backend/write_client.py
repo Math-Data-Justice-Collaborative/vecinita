@@ -20,6 +20,7 @@ from vecinita_shared_schemas.internal_write import (
     DocumentDetail,
     DocumentListPage,
     EvalRunListResponse,
+    FeedbackListResponse,
     TagInput,
     TagPatchRequest,
     TagPatchResponse,
@@ -165,6 +166,27 @@ class InternalWriteClient:
             msg = f"get_document_detail failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return DocumentDetail.model_validate(response.json())
+
+    def list_feedback(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 20,
+        category: str | None = None,
+    ) -> FeedbackListResponse:
+        """GET anonymous feedback rows for the admin Feedback page (F68)."""
+        params: dict[str, int | str] = {"page": page, "page_size": page_size}
+        if category is not None:
+            params["category"] = category
+        response = self._client.get(
+            "/internal/v1/feedback",
+            params=params,
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"list_feedback failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        return FeedbackListResponse.model_validate(response.json())
 
     def list_documents(
         self,

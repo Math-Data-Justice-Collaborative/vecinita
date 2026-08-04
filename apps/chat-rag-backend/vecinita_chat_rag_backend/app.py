@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Annotated, cast
@@ -20,16 +21,19 @@ from vecinita_shared_schemas.chat_rag import (
     AskResponse,
     DocumentBrowseDetail,
     DocumentBrowsePage,
+    EnergyEstimate,
+    FeedbackCreateResponse,
     HealthResponse,
     Source,
     TagListResponse,
 )
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.json_types import as_json_object
-from vecinita_shared_schemas.validation import validate_ask_request
+from vecinita_shared_schemas.validation import validate_ask_request, validate_feedback_request
 
 from vecinita_chat_rag_backend.browse import get_document, list_documents, list_tag_facets
 from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_chat_rag_backend.energy import EnergyKnobs, compute_energy_estimate
 from vecinita_chat_rag_backend.service import ChatRagService
 
 if TYPE_CHECKING:
@@ -171,9 +175,24 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         )
         return {"status": "warming"}
 
+    def _energy_for_duration(duration_s: float, cfg: ChatRagSettings) -> EnergyEstimate:
+        # Floor tiny durations so cache/fast paths still emit a positive estimate.
+        wall_s = max(duration_s, 1e-3)
+        return compute_energy_estimate(
+            wall_s,
+            EnergyKnobs(
+                gpu_tdp_w=cfg.energy_gpu_tdp_w,
+                gpu_util=cfg.energy_gpu_util,
+                gco2e_per_kwh=cfg.energy_gco2e_per_kwh,
+                car_gco2e_per_km=cfg.energy_car_gco2e_per_km,
+            ),
+        )
+
     @app.post("/api/v1/ask", response_model=AskResponse)
     async def ask(request: Request) -> AskResponse:  # pyright: ignore[reportUnusedFunction]
         body = await parse_ask_body(request)
+        cfg = get_settings()
+        started = time.perf_counter()
         try:
             result = get_service().ask(body)
         except Exception as exc:
@@ -181,18 +200,20 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Upstream unavailable",
             ) from exc
-        cfg = get_settings()
+        estimate = _energy_for_duration(time.perf_counter() - started, cfg)
         _fire_stats(
             result.sources,
             cfg.internal_write_url,
             cfg.internal_api_key,
             stats_enabled=cfg.stats_enabled,
         )
-        return result
+        return result.model_copy(update={"energy_estimate": estimate})
 
     @app.post("/api/v1/ask/stream")
     async def ask_stream(request: Request) -> StreamingResponse:  # pyright: ignore[reportUnusedFunction]
         body = await parse_ask_body(request)
+        cfg = get_settings()
+        started = time.perf_counter()
         try:
             service = get_service()
             session = service.stream_ask(body)
@@ -206,7 +227,13 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             for token in session.tokens:
                 yield f"data: {json.dumps({'token': token})}\n\n"
             yield f"data: {json.dumps({'sources': _source_payload(session.sources)})}\n\n"
-            yield f"data: {json.dumps({'done': True, 'cache_hit': session.cache_hit})}\n\n"
+            estimate = _energy_for_duration(time.perf_counter() - started, cfg)
+            done_payload = {
+                "done": True,
+                "cache_hit": session.cache_hit,
+                "energy_estimate": estimate.model_dump(mode="json"),
+            }
+            yield f"data: {json.dumps(done_payload)}\n\n"
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 
@@ -242,5 +269,61 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         cfg = get_settings()
         engine = create_engine(cfg.database_url)
         return list_tag_facets(engine)
+
+    @app.post(
+        "/api/v1/feedback",
+        response_model=FeedbackCreateResponse,
+        status_code=status.HTTP_201_CREATED,
+    )
+    async def submit_feedback(request: Request) -> FeedbackCreateResponse:  # pyright: ignore[reportUnusedFunction]
+        try:
+            raw_payload = cast("object", await request.json())
+        except json.JSONDecodeError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid JSON",
+            ) from exc
+        if not isinstance(raw_payload, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="JSON object required",
+            )
+        try:
+            body = validate_feedback_request(as_json_object(cast("object", raw_payload)))
+        except ValidationError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=exc.errors(),
+            ) from exc
+
+        cfg = get_settings()
+        if not cfg.internal_write_url or not cfg.internal_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Feedback write path unavailable",
+            )
+        try:
+            async with httpx.AsyncClient(timeout=cfg.request_timeout_s) as client:
+                response = await client.post(
+                    f"{cfg.internal_write_url.rstrip('/')}/internal/v1/feedback",
+                    json=body.model_dump(mode="json"),
+                    headers={"Authorization": f"Bearer {cfg.internal_api_key}"},
+                )
+        except httpx.HTTPError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Feedback write path unavailable",
+            ) from exc
+        if response.status_code == HTTPStatus.BAD_REQUEST:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=response.json(),
+            )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Feedback write path unavailable",
+            )
+        return FeedbackCreateResponse.model_validate(response.json())
 
     return app

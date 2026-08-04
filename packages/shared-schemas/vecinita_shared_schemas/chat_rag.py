@@ -32,6 +32,17 @@ class Source(BaseModel):
     canonical_url: str | None = None
 
 
+class EnergyEstimate(BaseModel):
+    """Heuristic ask energy / CO₂e / car-travel equivalent (F65 / ADR-047)."""
+
+    wh: float
+    g_co2e: float
+    method: Literal["tdp_util_walltime_v1"]
+    advisory: str
+    car_km_equiv: float
+    car_m_equiv: float
+
+
 class AskResponse(BaseModel):
     """POST /api/v1/ask response payload."""
 
@@ -39,6 +50,7 @@ class AskResponse(BaseModel):
     language: Literal["en", "es"]
     sources: list[Source]
     cache_hit: Literal["none", "exact", "semantic", "retrieve"] = "none"
+    energy_estimate: EnergyEstimate | None = None  # set by ChatRAG app (F65)
 
 
 class TagSummary(BaseModel):
@@ -95,3 +107,23 @@ class HealthResponse(BaseModel):
 
     status: Literal["ok"]
     dependencies: dict[str, str] = Field(default_factory=dict)
+
+
+FeedbackCategory = Literal["bug", "wrong_answer", "suggestion", "other"]
+
+
+class FeedbackRequest(BaseModel):
+    """POST /api/v1/feedback request body (F68 / ADR-046)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    category: FeedbackCategory
+    message: str = Field(..., min_length=1, max_length=4000)
+    locale: Literal["en", "es"] | None = None
+
+
+class FeedbackCreateResponse(BaseModel):
+    """POST /api/v1/feedback (and internal write) create response."""
+
+    id: UUID
+    created_at: str

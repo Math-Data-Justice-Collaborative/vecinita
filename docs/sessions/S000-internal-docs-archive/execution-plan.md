@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
-| **Active milestone** | M114 — F64 Cold-start tips + marketing (#87) — 08 PASS; minor PR next |
-| **Active task** | **M115** — F65 energy estimate (#93) after M114 PR recorded |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112** (PR #200); **M113** (PR #202); **M114 complete** (08 PASS) |
+| **Active milestone** | M117 — F69 audit actor email (#170) |
+| **Active task** | **T117.1** — API e2e/privacy red for `actor_email` (TC-229–230) |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115–M116** complete ([#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) open CI green @ `bb30b26` / #93+#186); main green @ `f3f7dec` |
 | **Last updated** | 2026-08-04 |
-| **Evolve cycle** | EV-024 — Standard; Gate B→C PASS; 07-build M114 (S026-D43: continue; #202 stays open) |
+| **Evolve cycle** | EV-024 — Standard; 07-build M117 after M116 verify |
 | **Git branch** | `evolve/EV-024-frontend-ux-polish` |
-| **Active session** | S026-frontend-ux-polish — 07-build M114 / F64 |
+| **Active session** | S026-frontend-ux-polish — 07-build M117 / F69 |
 | **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
 
 ## Template
@@ -2289,10 +2289,10 @@ guide (AC-UX3–UX5, AC-UX17; TC-218–220, TC-231; ADR-047).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T115.1 | Test: unit/API e2e red — ask + stream `energy_estimate` formula + car_* (TC-218–219) | Test | pending | AC-UX3, ADR-047, #93 | T114.3 | — | S026 | F65 |
-| T115.2 | Code: ChatRAG energy helper + wire `/ask` + stream `done`; config env defaults | Code | pending | config-spec, api-contract, ADR-047 | T115.1 | — | S026 | F65 |
-| T115.3 | Code: FE chip + car-distance line + advisory + use guide (EN/ES) | Code | pending | AC-UX4–UX5/UX17, UJ-070 | T115.2 | — | S026 | F65 |
-| T115.4 | Test: e2e green TC-218–219; Vitest + Playwright uj070 (TC-220, TC-231) | Test | pending | TP4, UJ-070 | T115.3 | — | S026 | F65 |
+| T115.1 | Test: unit/API e2e red — ask + stream `energy_estimate` formula + car_* (TC-218–219) | Test | completed | AC-UX3, ADR-047, #93 | T114.3 | 2026-08-04 | S026 | F65 |
+| T115.2 | Code: ChatRAG energy helper + wire `/ask` + stream `done`; config env defaults | Code | completed | config-spec, api-contract, ADR-047 | T115.1 | 2026-08-04 | S026 | F65 |
+| T115.3 | Code: FE chip + car-distance line + advisory + use guide (EN/ES) | Code | completed | AC-UX4–UX5/UX17, UJ-070 | T115.2 | 2026-08-04 | S026 | F65 |
+| T115.4 | Test: e2e green TC-218–219; Vitest + Playwright uj070 (TC-220, TC-231) | Test | completed | TP4, UJ-070 | T115.3 | 2026-08-04 | S026 | F65 |
 
 #### M116: F68 — Anonymous feedback (#186)
 
@@ -2301,11 +2301,11 @@ privacy rejects (AC-UX10–UX13; TC-225–228; ADR-046).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T116.1 | Test: privacy + API e2e red — POST feedback; reject email; admin list; purge (TC-225–228) | Test | pending | AC-UX10–UX13, ADR-046, #186 | T115.4 | — | S026 | F68 |
-| T116.2 | Code: DB migration `feedback` + retention purge; document table in `data-management-plan.md` | Code | pending | ADR-046, config-spec, 05 M3 | T116.1 | — | S026 | F68 |
-| T116.3 | Code: ChatRAG `POST /api/v1/feedback` → internal-write `POST /internal/v1/feedback`; DM backend `GET /admin/feedback` (JWT admin/super-admin) | Code | pending | api-contract, 05 M1 | T116.2 | — | S026 | F68 |
-| T116.4 | Code: ChatRAG Feedback page (calls public POST); Admin Feedback UI → DM `GET /admin/feedback` only | Code | pending | S026-D17, UJ-073, 05 M1 | T116.3 | — | S026 | F68 |
-| T116.5 | Test: e2e/privacy green; Vitest + Playwright uj073 (TC-225–228) | Test | pending | TP4, UJ-073 | T116.4 | — | S026 | F68 |
+| T116.1 | Test: privacy + API e2e red — POST feedback; reject email; admin list; purge (TC-225–228) | Test | completed | AC-UX10–UX13, ADR-046, #186 | T115.4 | 2026-08-04 | S026 | F68 |
+| T116.2 | Code: DB migration `feedback` + retention purge; document table in `data-management-plan.md` | Code | completed | ADR-046, config-spec, 05 M3 | T116.1 | 2026-08-04 | S026 | F68 |
+| T116.3 | Code: ChatRAG `POST /api/v1/feedback` → internal-write `POST /internal/v1/feedback`; DM backend `GET /admin/feedback` (JWT admin/super-admin) | Code | completed | api-contract, 05 M1 | T116.2 | 2026-08-04 | S026 | F68 |
+| T116.4 | Code: ChatRAG Feedback page (calls public POST); Admin Feedback UI → DM `GET /admin/feedback` only | Code | completed | S026-D17, UJ-073, 05 M1 | T116.3 | 2026-08-04 | S026 | F68 |
+| T116.5 | Test: e2e/privacy green; Vitest + Playwright uj073 (TC-225–228) | Test | completed | TP4, UJ-073 | T116.4 | 2026-08-04 | S026 | F68 |
 
 #### M117: F69 — Audit actor email read-time (#170)
 
@@ -3154,15 +3154,15 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T114.1 | M114 | 27 | Test | completed | T113.4 | — | S026 | F64 | — |
 | T114.2 | M114 | 27 | Code | completed | T114.1 | — | S026 | F64 | — |
 | T114.3 | M114 | 27 | Test | completed | T114.2 | — | S026 | F64 | — |
-| T115.1 | M115 | 27 | Test | pending | T114.3 | — | S026 | F65 | — |
-| T115.2 | M115 | 27 | Code | pending | T115.1 | — | S026 | F65 | — |
-| T115.3 | M115 | 27 | Code | pending | T115.2 | — | S026 | F65 | — |
-| T115.4 | M115 | 27 | Test | pending | T115.3 | — | S026 | F65 | — |
+| T115.1 | M115 | 27 | Test | completed | T114.3 | — | S026 | F65 | — |
+| T115.2 | M115 | 27 | Code | completed | T115.1 | — | S026 | F65 | — |
+| T115.3 | M115 | 27 | Code | completed | T115.2 | — | S026 | F65 | — |
+| T115.4 | M115 | 27 | Test | completed | T115.3 | — | S026 | F65 | 2026-08-04 |
 | T116.1 | M116 | 27 | Test | pending | T115.4 | — | S026 | F68 | — |
 | T116.2 | M116 | 27 | Code | pending | T116.1 | — | S026 | F68 | 05 M3 |
 | T116.3 | M116 | 27 | Code | pending | T116.2 | — | S026 | F68 | 05 M1 |
 | T116.4 | M116 | 27 | Code | pending | T116.3 | — | S026 | F68 | 05 M1 |
-| T116.5 | M116 | 27 | Test | pending | T116.4 | — | S026 | F68 | — |
+| T116.5 | M116 | 27 | Test | completed | T116.4 | 2026-08-04 | S026 | F68 | — |
 | T117.1 | M117 | 27 | Test | pending | T116.5 | — | S026 | F69 | — |
 | T117.2 | M117 | 27 | Code | pending | T117.1 | — | S026 | F69 | — |
 | T117.3 | M117 | 27 | Code | pending | T117.2 | — | S026 | F69 | — |

@@ -6,6 +6,21 @@ const en = {
     "Bilingual community Q&A — answers stay in your browser only (F3).",
   navChat: "Chat",
   navCorpus: "Corpus",
+  navFeedback: "Feedback",
+  feedbackTitle: "Send feedback",
+  feedbackPrivacyNote:
+    "Anonymous only — do not include your email, name, or other personal details.",
+  feedbackCategoryLabel: "Category",
+  feedbackCategory_bug: "Bug",
+  feedbackCategory_wrong_answer: "Wrong answer",
+  feedbackCategory_suggestion: "Suggestion",
+  feedbackCategory_other: "Other",
+  feedbackMessageLabel: "Message",
+  feedbackMessageRequired: "Please enter a message.",
+  feedbackSubmit: "Submit feedback",
+  feedbackSubmitting: "Submitting…",
+  feedbackSuccess: "Thanks — your feedback was submitted.",
+  feedbackSubmitFailed: "Could not submit feedback. Please try again.",
   languageGroupLabel: "Language",
   chatPanelLabel: "Community Q&A chat",
   emptyHint: "Ask a question in English or Spanish about your community.",
@@ -64,6 +79,14 @@ const en = {
     `Page ${String(page)} of ${String(totalPages)} (${String(total)} documents)`,
   loadTagsFailed: "Failed to load tags",
   loadDocumentsFailed: "Failed to load documents",
+  energyEstimateLabel: "Approx. energy",
+  energyCarPrefix: "≈",
+  energyCarSuffix: "of average car travel",
+  energyAdvisory:
+    "Approximate — based on GPU TDP x utilization x wall time, not live power meters.",
+  energyUseGuideToggle: "How we estimate energy",
+  energyUseGuideBody:
+    "Ask specific questions (place, program, or need) for clearer answers. Energy and CO2e are heuristic estimates from assumed GPU power x time — useful for context, not billing. Tip: shorter, focused questions usually finish faster.",
 } as const;
 
 const es = {
@@ -72,6 +95,21 @@ const es = {
     "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador (F3).",
   navChat: "Chat",
   navCorpus: "Corpus",
+  navFeedback: "Comentarios",
+  feedbackTitle: "Enviar comentarios",
+  feedbackPrivacyNote:
+    "Solo anónimo — no incluyas tu correo, nombre u otros datos personales.",
+  feedbackCategoryLabel: "Categoría",
+  feedbackCategory_bug: "Error",
+  feedbackCategory_wrong_answer: "Respuesta incorrecta",
+  feedbackCategory_suggestion: "Sugerencia",
+  feedbackCategory_other: "Otro",
+  feedbackMessageLabel: "Mensaje",
+  feedbackMessageRequired: "Escribe un mensaje.",
+  feedbackSubmit: "Enviar comentarios",
+  feedbackSubmitting: "Enviando…",
+  feedbackSuccess: "Gracias — tus comentarios se enviaron.",
+  feedbackSubmitFailed: "No se pudieron enviar. Inténtalo de nuevo.",
   languageGroupLabel: "Idioma",
   chatPanelLabel: "Chat de preguntas comunitarias",
   emptyHint: "Pregunta en inglés o español sobre tu comunidad.",
@@ -131,6 +169,14 @@ const es = {
     `Página ${String(page)} de ${String(totalPages)} (${String(total)} documentos)`,
   loadTagsFailed: "No se pudieron cargar las etiquetas",
   loadDocumentsFailed: "No se pudieron cargar los documentos",
+  energyEstimateLabel: "Energía aprox.",
+  energyCarPrefix: "≈",
+  energyCarSuffix: "de viaje en auto promedio",
+  energyAdvisory:
+    "Aproximado — basado en TDP de GPU x utilización x tiempo, no medidores de potencia en vivo.",
+  energyUseGuideToggle: "Cómo estimamos la energía",
+  energyUseGuideBody:
+    "Haz preguntas concretas (lugar, programa o necesidad) para respuestas más claras. La energía y el CO2e son estimaciones heurísticas de potencia de GPU asumida x tiempo — útiles como contexto, no para facturación. Consejo: preguntas cortas y enfocadas suelen terminar antes.",
 } as const;
 
 export type MessageKey = keyof typeof en;
