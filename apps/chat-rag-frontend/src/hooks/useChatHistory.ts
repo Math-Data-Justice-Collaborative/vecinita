@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import type { ChatMessage, Source } from "../api/types";
+import type { ChatMessage, EnergyEstimate, Source } from "../api/types";
 import type { ConversationStore } from "./useConversationStore";
 
 function newId(): string {
@@ -62,12 +62,20 @@ export function useChatHistory(store: ConversationStore) {
     [updateMessageById],
   );
 
+  const setAssistantEnergy = useCallback(
+    (messageId: string, energyEstimate: EnergyEstimate) => {
+      updateMessageById(messageId, (msg) => ({ ...msg, energyEstimate }));
+    },
+    [updateMessageById],
+  );
+
   return {
     messages,
     appendUserMessage,
     appendAssistantPlaceholder,
     appendAssistantToken,
     setAssistantSources,
+    setAssistantEnergy,
     clearHistory: store.clearActive,
     loading,
     setLoading,

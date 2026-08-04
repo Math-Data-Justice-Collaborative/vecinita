@@ -64,6 +64,14 @@ const en = {
     `Page ${String(page)} of ${String(totalPages)} (${String(total)} documents)`,
   loadTagsFailed: "Failed to load tags",
   loadDocumentsFailed: "Failed to load documents",
+  energyEstimateLabel: "Approx. energy",
+  energyCarPrefix: "≈",
+  energyCarSuffix: "of average car travel",
+  energyAdvisory:
+    "Approximate — based on GPU TDP x utilization x wall time, not live power meters.",
+  energyUseGuideToggle: "How we estimate energy",
+  energyUseGuideBody:
+    "Ask specific questions (place, program, or need) for clearer answers. Energy and CO2e are heuristic estimates from assumed GPU power x time — useful for context, not billing. Tip: shorter, focused questions usually finish faster.",
 } as const;
 
 const es = {
@@ -131,6 +139,14 @@ const es = {
     `Página ${String(page)} de ${String(totalPages)} (${String(total)} documentos)`,
   loadTagsFailed: "No se pudieron cargar las etiquetas",
   loadDocumentsFailed: "No se pudieron cargar los documentos",
+  energyEstimateLabel: "Energía aprox.",
+  energyCarPrefix: "≈",
+  energyCarSuffix: "de viaje en auto promedio",
+  energyAdvisory:
+    "Aproximado — basado en TDP de GPU x utilización x tiempo, no medidores de potencia en vivo.",
+  energyUseGuideToggle: "Cómo estimamos la energía",
+  energyUseGuideBody:
+    "Haz preguntas concretas (lugar, programa o necesidad) para respuestas más claras. La energía y el CO2e son estimaciones heurísticas de potencia de GPU asumida x tiempo — útiles como contexto, no para facturación. Consejo: preguntas cortas y enfocadas suelen terminar antes.",
 } as const;
 
 export type MessageKey = keyof typeof en;

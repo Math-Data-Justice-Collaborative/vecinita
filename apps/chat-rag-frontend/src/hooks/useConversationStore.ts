@@ -60,7 +60,26 @@ function isChatMessage(value: unknown): value is ChatMessage {
   }
   const sources = candidate["sources"];
   if (sources !== undefined) {
-    return Array.isArray(sources) && sources.every(isSource);
+    if (!Array.isArray(sources) || !sources.every(isSource)) {
+      return false;
+    }
+  }
+  const energy = candidate["energyEstimate"];
+  if (energy !== undefined) {
+    if (typeof energy !== "object" || energy === null) {
+      return false;
+    }
+    const e = energy as Record<string, unknown>;
+    if (
+      typeof e["wh"] !== "number" ||
+      typeof e["g_co2e"] !== "number" ||
+      typeof e["car_km_equiv"] !== "number" ||
+      typeof e["car_m_equiv"] !== "number" ||
+      typeof e["advisory"] !== "string" ||
+      e["method"] !== "tdp_util_walltime_v1"
+    ) {
+      return false;
+    }
   }
   return true;
 }

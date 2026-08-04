@@ -18,6 +18,8 @@ import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
 import { useConversationStore } from "../hooks/useConversationStore";
 import { t } from "../i18n/messages";
 import { ColdStartWait } from "./ColdStartWait";
+import { parseEnergyEstimate } from "../api/energyEstimate";
+import { EnergyEstimatePanel } from "./EnergyEstimatePanel";
 import { SourceList } from "./SourceList";
 import { SuggestedQuestions } from "./SuggestedQuestions";
 
@@ -68,6 +70,7 @@ function ChatPanelView({
     appendAssistantPlaceholder,
     appendAssistantToken,
     setAssistantSources,
+    setAssistantEnergy,
     clearHistory,
     loading,
     setLoading,
@@ -129,6 +132,10 @@ function ChatPanelView({
         } else if (isSourcesEvent(chunk)) {
           sources = chunk.sources;
         } else if (isDoneEvent(chunk)) {
+          const energy = parseEnergyEstimate(chunk.energy_estimate);
+          if (energy) {
+            setAssistantEnergy(assistantId, energy);
+          }
           break;
         }
       }
@@ -176,6 +183,12 @@ function ChatPanelView({
               </p>
               {msg.sources && msg.sources.length > 0 ? (
                 <SourceList sources={msg.sources} locale={locale} />
+              ) : null}
+              {msg.role === "assistant" && msg.energyEstimate ? (
+                <EnergyEstimatePanel
+                  estimate={msg.energyEstimate}
+                  locale={locale}
+                />
               ) : null}
             </article>
           ))
