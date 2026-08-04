@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
-| **Active milestone** | M113 — F67 Tooltip (#106) |
-| **Active task** | T113.1 — Vitest red Tooltip EN/ES + keyboard focus |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112 complete** (PR #200 merged); M113 in progress |
+| **Active milestone** | M113 — F67 Tooltip (#106) — tasks complete; 08-verify-build next |
+| **Active task** | **08-verify-build** — M113 boundary (then minor PR #106 stream) |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112 complete** (PR #200); **M113 T113.1–T113.4 complete** |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; Gate B→C PASS (S026-D28); 07-build M113 after #200 merge (S026-D29) |
 | **Git branch** | `evolve/EV-024-frontend-ux-polish` |
@@ -2267,9 +2267,9 @@ control/app; keyboard focus (AC-UX8–UX9; TC-223–224).
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T113.1 | Test: Vitest red — Tooltip EN/ES + keyboard focus (TC-223–224) | Test | completed | AC-UX8–UX9, F67, #106 | T112.4 | 2026-08-04 | S026 | F67 |
-| T113.2 | Config: add `@radix-ui/react-tooltip` to `packages/frontend-ui` (lift from admin) | Config | in_progress | TP5, dependency-inventory | — | — | S026 | F67 |
-| T113.3 | Code: Tooltip primitive + i18n keys; wire MVP placements both apps | Code | pending | S026-D8/D15, ADR-019/020 | T113.1, T113.2 | — | S026 | F67 |
-| T113.4 | Test: Vitest green EN/ES + focus (TC-223–224) | Test | pending | TP4 | T113.3 | — | S026 | F67 |
+| T113.2 | Config: add `@radix-ui/react-tooltip` to `packages/frontend-ui` (lift from admin) | Config | completed | TP5, dependency-inventory | — | 2026-08-04 | S026 | F67 |
+| T113.3 | Code: Tooltip primitive + i18n keys; wire MVP placements both apps | Code | completed | S026-D8/D15, ADR-019/020 | T113.1, T113.2 | 2026-08-04 | S026 | F67 |
+| T113.4 | Test: Vitest green EN/ES + focus (TC-223–224) | Test | completed | TP4 | T113.3 | 2026-08-04 | S026 | F67 |
 
 #### M114: F64 — Cold-start tips + marketing (#87)
 
@@ -3147,10 +3147,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T112.2 | M112 | 27 | Code | completed | T112.1 | — | S026 | F66 | — |
 | T112.3 | M112 | 27 | Code | completed | T112.2 | — | S026 | F66 | — |
 | T112.4 | M112 | 27 | Test | completed | T112.3 | — | S026 | F66 | — |
-| T113.1 | M113 | 27 | Test | in_progress | T112.4 | — | S026 | F67 | — |
-| T113.2 | M113 | 27 | Config | pending | — | — | S026 | F67 | — |
-| T113.3 | M113 | 27 | Code | pending | T113.1, T113.2 | — | S026 | F67 | — |
-| T113.4 | M113 | 27 | Test | pending | T113.3 | — | S026 | F67 | — |
+| T113.1 | M113 | 27 | Test | completed | T112.4 | — | S026 | F67 | — |
+| T113.2 | M113 | 27 | Config | completed | — | — | S026 | F67 | — |
+| T113.3 | M113 | 27 | Code | completed | T113.1, T113.2 | — | S026 | F67 | — |
+| T113.4 | M113 | 27 | Test | completed | T113.3 | — | S026 | F67 | — |
 | T114.1 | M114 | 27 | Test | pending | T113.4 | — | S026 | F64 | — |
 | T114.2 | M114 | 27 | Code | pending | T114.1 | — | S026 | F64 | — |
 | T114.3 | M114 | 27 | Test | pending | T114.2 | — | S026 | F64 | — |
