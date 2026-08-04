@@ -10,7 +10,12 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { LanguageToggle, Tooltip, useLocale } from "vecinita-frontend-ui";
+import {
+  LanguageToggle,
+  Tooltip,
+  TooltipProvider,
+  useLocale,
+} from "vecinita-frontend-ui";
 import { t } from "vecinita-frontend-i18n";
 
 import { useAuth, useIsAdmin } from "@/auth/auth-context";
@@ -224,20 +229,25 @@ export function AdminLayout() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
-    <PlaygroundModelDownloadProvider>
-      <div className="flex h-screen overflow-hidden" data-testid="admin-layout">
-        <IdleTimeoutGuard />
-        <DesktopSidebar showChrome={isDesktop} />
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <MobileHeader showChrome={!isDesktop} />
-          <main
-            className="min-h-0 flex-1 overflow-auto p-4 md:p-6 lg:p-8"
-            data-testid="admin-main"
-          >
-            <Outlet />
-          </main>
+    <TooltipProvider>
+      <PlaygroundModelDownloadProvider>
+        <div
+          className="flex h-screen overflow-hidden"
+          data-testid="admin-layout"
+        >
+          <IdleTimeoutGuard />
+          <DesktopSidebar showChrome={isDesktop} />
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <MobileHeader showChrome={!isDesktop} />
+            <main
+              className="min-h-0 flex-1 overflow-auto p-4 md:p-6 lg:p-8"
+              data-testid="admin-main"
+            >
+              <Outlet />
+            </main>
+          </div>
         </div>
-      </div>
-    </PlaygroundModelDownloadProvider>
+      </PlaygroundModelDownloadProvider>
+    </TooltipProvider>
   );
 }
