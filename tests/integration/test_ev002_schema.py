@@ -80,8 +80,9 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    assert "20260803_0011" in current.stdout
-    assert "20260803_0011" in heads.stdout
+    assert "20260804_0012" in current.stdout
+    assert "20260804_0012" in heads.stdout
+    assert "20260803_0011" in history.stdout
     assert "20260730_0010" in history.stdout
     assert "20260728_0009" in history.stdout
     assert "20260707_0008" in history.stdout

@@ -25,20 +25,24 @@ logger = logging.getLogger(__name__)
 
 def insert_feedback(conn: Connection, body: FeedbackRequest) -> FeedbackCreateResponse:
     """Insert one anonymous feedback row; return id + created_at."""
-    raw = conn.execute(
-        text(
-            """
-            INSERT INTO feedback (category, message, locale)
-            VALUES (:category, :message, :locale)
-            RETURNING id, created_at
-            """
-        ),
-        {
-            "category": body.category,
-            "message": body.message,
-            "locale": body.locale,
-        },
-    ).one()
+    raw = (
+        conn.execute(
+            text(
+                """
+                INSERT INTO feedback (category, message, locale)
+                VALUES (:category, :message, :locale)
+                RETURNING id, created_at
+                """
+            ),
+            {
+                "category": body.category,
+                "message": body.message,
+                "locale": body.locale,
+            },
+        )
+        .mappings()
+        .one()
+    )
     row = mapping_row(raw)
     created_raw = row["created_at"]
     if isinstance(created_raw, datetime):
@@ -83,7 +87,7 @@ def list_feedback(
 
     with engine.connect() as conn:
         total = int(str(sqlalchemy_scalar_one(conn.execute(count_sql, params))))
-        rows = conn.execute(list_sql, params).all()
+        rows = conn.execute(list_sql, params).mappings().all()
 
     items: list[FeedbackItem] = []
     for raw in rows:
