@@ -2278,8 +2278,8 @@ unchanged (AC-UX1–UX2; TC-216–217).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T114.1 | Test: Vitest/unit red — typed catalog rotation; no survey UI (TC-216); consent/donate (TC-217) | Test | in_progress | AC-UX1–UX2, F64, #87 | T113.4 | — | S026 | F64 |
-| T114.2 | Code: Extend `coldstart/facts` typed entries + wait UI rendering | Code | pending | S026-D3/D14, ADR-039 | T114.1 | — | S026 | F64 |
+| T114.1 | Test: Vitest/unit red — typed catalog rotation; no survey UI (TC-216); consent/donate (TC-217) | Test | completed | AC-UX1–UX2, F64, #87 | T113.4 | 2026-08-04 | S026 | F64 |
+| T114.2 | Code: Extend `coldstart/facts` typed entries + wait UI rendering | Code | completed | S026-D3/D14, ADR-039 | T114.1 | 2026-08-04 | S026 | F64 |
 | T114.3 | Test: Vitest green; Playwright `tests/ui/chat/uj069-wait-tips.spec.ts` (TC-216–217) | Test | pending | UJ-069, TP4 | T114.2 | — | S026 | F64 |
 
 #### M115: F65 — Energy estimate + car equivalent (#93)
