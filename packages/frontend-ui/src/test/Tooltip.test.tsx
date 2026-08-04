@@ -6,7 +6,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Tooltip, TooltipProvider } from "../Tooltip";
 
@@ -55,5 +55,37 @@ describe("Tooltip (TC-223, TC-224 / F67)", () => {
     await waitFor(() => {
       expect(screen.getByRole("tooltip")).toHaveTextContent("Language");
     });
+  });
+
+  it("supports defaultOpen, onOpenChange, className, and side", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <TooltipProvider delayDuration={0}>
+        <Tooltip
+          content="Hint"
+          defaultOpen
+          onOpenChange={onOpenChange}
+          className="extra-tip"
+          side="bottom"
+        >
+          <button type="button">hint</button>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    const tip = screen.getByRole("tooltip");
+    expect(tip).toHaveTextContent("Hint");
+    expect(tip.className).toContain("extra-tip");
+    expect(tip.className).toContain("vecinita-tooltip-content");
+  });
+
+  it("uses TooltipProvider defaults when delay props omitted", () => {
+    render(
+      <TooltipProvider>
+        <Tooltip content="Default delay" open>
+          <button type="button">d</button>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Default delay");
   });
 });
