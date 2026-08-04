@@ -1536,8 +1536,8 @@ project:
       active_milestone: M112
       active_feature: F66
       active_issue: 104
-      current_action: build_m112
-      next_action: implement M112 first task
+      current_action: m112_complete_await_08
+      next_action: 'run 08-verify-build then minor PR for #104'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1546,11 +1546,11 @@ project:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — Gate B→C PASS (S026-D28 / 41a); Phase B approved; current_action=build_m112; next: implement M112 first task (F66 ActionIcon #104); Phase 27 M112–M118'
+      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 (F66 ActionIcon #104) COMPLETE (T112.1–T112.4 @ 18c8dc8/760a85b/6b171ab/7c04b49; docs 47a618e); milestones M113–M118 remain; current boundary → 08-verify-build / minor PR #104'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T18:20:46Z'
+      updated_at: '2026-08-04T18:27:00Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1683,86 +1683,174 @@ project:
         session_closed: true
         session_closed_at: '2026-08-04'
         close_decision: S025-D16
+      milestones_completed:
+      - M112
+      tasks_completed:
+      - T112.1
+      - T112.2
+      - T112.3
+      - T112.4
+      m112_status: completed
+      m112_feature: F66
+      m112_issue: 104
+      m112_head: 7c04b49
+      m112_commits:
+      - 18c8dc8
+      - 760a85b
+      - 6b171ab
+      - 7c04b49
+      docs_commit: 47a618e
+      substeps:
+        current_task:
+        current_milestone: M112
+        phase: 27
+        task_status: completed
+        m112_status: completed
+        completed_tasks_m112:
+        - T112.1
+        - T112.2
+        - T112.3
+        - T112.4
+        remaining_milestones:
+        - M113
+        - M114
+        - M115
+        - M116
+        - M117
+        - M118
     08-verify-build:
-      status: completed
-      started_at: '2026-08-03'
-      started: '2026-08-03'
-      session_id: S025-ci-release-automation
-      branch: evolve/EV-023-ci-release-automation
-      evolve_cycle_id: EV-023
+      status: in_progress
+      started_at: '2026-08-04'
+      started: '2026-08-04'
+      started_at_iso: '2026-08-04T18:27:00Z'
+      session_id: S026-frontend-ux-polish
+      branch: evolve/EV-024-frontend-ux-polish
+      session_branch: feat/S026-frontend-ux-polish
+      evolve_cycle_id: EV-024
       mode: evolve
       delta_only: true
       feature_ids:
-      - F62
-      - F63
-      current_action: completed
-      next_action: 10-e2e (Phase D)
+      - F64
+      - F65
+      - F66
+      - F67
+      - F68
+      - F69
+      phase: 27
+      milestones:
+      - M112
+      - M113
+      - M114
+      - M115
+      - M116
+      - M117
+      - M118
+      active_milestone: M112
+      active_feature: F66
+      active_issue: 104
+      current_action: verify_m112
+      next_action: 'run 08-verify-build then minor PR for #104'
       askquestion_pending: false
+      askquestion_pending_topic:
       gate_a_to_b: passed
-      s025_d13_decision: S025-D13
-      build_head: fedf1f7
+      gate_b_to_c: passed
+      phase_a: passed
+      phase_b: passed
+      phase_c: pending
+      gate_c_to_d: pending
+      s026_d28_decision: S026-D28
+      build_head: 7c04b49
       build_commits:
-      - 2cad110
-      - fedf1f7
-      note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c waived (Lean+build skipped 04); handoff → 10-e2e Phase D
-      rd_range: RD-264..RD-271
-      s024_baseline:
+      - 47a618e
+      - 18c8dc8
+      - 760a85b
+      - 6b171ab
+      - 7c04b49
+      m112_status: completed
+      note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M112 (F66 ActionIcon #104) build head 7c04b49; next: run 08-verify-build then minor PR for #104'
+      handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
+      rd_range: RD-272..RD-289
+      updated_at: '2026-08-04T18:27:00Z'
+      s025_baseline:
         status: completed
+        started_at: '2026-08-03'
         started: '2026-08-03'
-        started_at: '2026-08-03T20:15:45Z'
-        session_id: S024-website-scrape-crawl
-        evolve_cycle_id: EV-022
-        branch: evolve/EV-022-website-scrape-crawl
+        session_id: S025-ci-release-automation
+        branch: evolve/EV-023-ci-release-automation
+        evolve_cycle_id: EV-023
         mode: evolve
         delta_only: true
         feature_ids:
-        - F59
-        - F60
-        - F61
+        - F62
+        - F63
         current_action: completed
-        next_action: Phase D 09-qa + 10-e2e in progress
+        next_action: 10-e2e (Phase D)
         askquestion_pending: false
-        s024_d41_decision: S024-D41
-        note: Gate C→D PASS (S024-D42); Phase C approved; Phase D started
-        s023_baseline:
+        gate_a_to_b: passed
+        s025_d13_decision: S025-D13
+        build_head: fedf1f7
+        build_commits:
+        - 2cad110
+        - fedf1f7
+        note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c waived (Lean+build skipped 04); handoff → 10-e2e Phase D
+        rd_range: RD-264..RD-271
+        s024_baseline:
           status: completed
-          completed: '2026-08-03'
-          session_id: S023-retrieval-topk-packing
-          evolve_cycle_id: EV-020
-          report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+          started: '2026-08-03'
+          started_at: '2026-08-03T20:15:45Z'
+          session_id: S024-website-scrape-crawl
+          evolve_cycle_id: EV-022
+          branch: evolve/EV-022-website-scrape-crawl
+          mode: evolve
+          delta_only: true
+          feature_ids:
+          - F59
+          - F60
+          - F61
+          current_action: completed
+          next_action: Phase D 09-qa + 10-e2e in progress
+          askquestion_pending: false
+          s024_d41_decision: S024-D41
+          note: Gate C→D PASS (S024-D42); Phase C approved; Phase D started
+          s023_baseline:
+            status: completed
+            completed: '2026-08-03'
+            session_id: S023-retrieval-topk-packing
+            evolve_cycle_id: EV-020
+            report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+            result: pass
+            note: 'S023/EV-020 08 PASS 2026-08-03 @ bb4c400 — Gate C→D PASS; Phase D 09+10 COMPLETE (S023-D15); next → 11-verify-impl'
+            gate_c_to_d: passed
+            checkpoints_phase_c: passed
+            phase_c_status: passed
+            current_action: completed
+            next_action: 11-verify-impl
           result: pass
-          note: 'S023/EV-020 08 PASS 2026-08-03 @ bb4c400 — Gate C→D PASS; Phase D 09+10 COMPLETE (S023-D15); next → 11-verify-impl'
+          completed: '2026-08-03'
+          completed_at: '2026-08-03'
+          report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
           gate_c_to_d: passed
           checkpoints_phase_c: passed
           phase_c_status: passed
-          current_action: completed
-          next_action: 11-verify-impl
-        result: pass
+          phase: Phase 26 (M108-M111)
+          feature: F59+F60+F61
+          s024_d42_decision: S024-D42
         completed: '2026-08-03'
         completed_at: '2026-08-03'
-        report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+        result: pass
+        report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+        commit: 23f9f71
+        commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+        verification_commit: 23f9f71
         gate_c_to_d: passed
         checkpoints_phase_c: passed
         phase_c_status: passed
-        phase: Phase 26 (M108-M111)
-        feature: F59+F60+F61
-        s024_d42_decision: S024-D42
-      completed: '2026-08-03'
-      completed_at: '2026-08-03'
-      result: pass
-      report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
-      commit: 23f9f71
-      commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
-      verification_commit: 23f9f71
-      gate_c_to_d: passed
-      checkpoints_phase_c: passed
-      phase_c_status: passed
-      gate_b_to_c: waived
-      checkpoints_phase_b: waived
-      s025_d14_decision: S025-D14
-      session_closed: true
-      session_closed_at: '2026-08-04'
-      close_decision: S025-D16
+        gate_b_to_c: waived
+        checkpoints_phase_b: waived
+        s025_d14_decision: S025-D14
+        session_closed: true
+        session_closed_at: '2026-08-04'
+        close_decision: S025-D16
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -4539,10 +4627,11 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: build_m112
-    current_stage: 07-build
-    note: EV-024 Phase C — Gate B→C PASS (S026-D28 / 41a); phase_b passed; 07-build in_progress (M112); 06 skipped
+    current_action: verify_m112
+    current_stage: 08-verify-build
+    note: 'EV-024 Phase C — M112 complete; 08-verify-build in_progress (verify_m112); 07-build remains in_progress for M113–M118; next minor PR #104 after 08'
     askquestion_pending: false
+    next_action: 'run 08-verify-build then minor PR for #104'
   - stage: 01-requirements
     required: true
     status: completed
@@ -4691,22 +4780,38 @@ active_session:
     skip_rationale:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:20:46Z'
-    current_action: build_m112
-    next_action: implement M112 first task
+    current_action: m112_complete_await_08
+    next_action: 'run 08-verify-build then minor PR for #104'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — Gate B→C PASS (S026-D28 / 41a); Phase B approved; current_action=build_m112; next: implement M112 first task (F66 ActionIcon #104); Phase 27 M112–M118'
-    updated_at: '2026-08-04T18:20:46Z'
+    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 (F66 ActionIcon #104) COMPLETE (T112.1–T112.4 @ 18c8dc8/760a85b/6b171ab/7c04b49; docs 47a618e); milestones M113–M118 remain; current boundary → 08-verify-build / minor PR #104'
+    updated_at: '2026-08-04T18:27:00Z'
     active_milestone: M112
     active_feature: F66
+    m112_status: completed
+    milestones_completed:
+    - M112
   - stage: 08-verify-build
     required: true
-    status: pending
+    status: in_progress
     skip_rationale:
+    mode: delta
+    started_at: '2026-08-04'
+    started_at_iso: '2026-08-04T18:27:00Z'
+    current_action: verify_m112
+    next_action: 'run 08-verify-build then minor PR for #104'
+    askquestion_pending: false
+    askquestion_pending_topic:
+    active_milestone: M112
+    active_feature: F66
+    active_issue: 104
+    build_head: 7c04b49
+    note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M112 (F66 ActionIcon #104) build head 7c04b49; next: run 08-verify-build then minor PR for #104'
+    updated_at: '2026-08-04T18:27:00Z'
   - stage: 09-qa
     required: true
     status: pending
@@ -4733,9 +4838,9 @@ active_session:
     required: false
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
-  current_stage: 07-build
-  current_action: build_m112
-  next_action: 'implement M112 first task'
+  current_stage: 08-verify-build
+  current_action: verify_m112
+  next_action: 'run 08-verify-build then minor PR for #104'
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -4798,10 +4903,10 @@ active_session:
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
   askquestion_pending_topic:
-  updated_at: '2026-08-04T18:20:46Z'
+  updated_at: '2026-08-04T18:27:00Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — Gate B→C PASS (S026-D28 / 41a); Phase B approved; current_action=build_m112; next: implement M112 first task (F66 ActionIcon #104); Phase 27 M112–M118'
+  note: 'S026/EV-024 M112 boundary 2026-08-04 — M112 complete; current_stage=08-verify-build (verify_m112); 07-build stays in_progress for M113–M118; next: 08 then minor PR #104'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -12170,8 +12275,8 @@ stages:
     active_milestone: M112
     active_feature: F66
     active_issue: 104
-    current_action: build_m112
-    next_action: implement M112 first task
+    current_action: m112_complete_await_08
+    next_action: 'run 08-verify-build then minor PR for #104'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -12180,11 +12285,11 @@ stages:
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — Gate B→C PASS (S026-D28 / 41a); Phase B approved; current_action=build_m112; next: implement M112 first task (F66 ActionIcon #104); Phase 27 M112–M118'
+    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 (F66 ActionIcon #104) COMPLETE (T112.1–T112.4 @ 18c8dc8/760a85b/6b171ab/7c04b49; docs 47a618e); milestones M113–M118 remain; current boundary → 08-verify-build / minor PR #104'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T18:20:46Z'
+    updated_at: '2026-08-04T18:27:00Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -12421,369 +12526,457 @@ stages:
       - fedf1f7
       f62_commit: 2cad110
       f63_commit: fedf1f7
+    milestones_completed:
+    - M112
+    tasks_completed:
+    - T112.1
+    - T112.2
+    - T112.3
+    - T112.4
+    m112_status: completed
+    m112_feature: F66
+    m112_issue: 104
+    m112_head: 7c04b49
+    m112_commits:
+    - 18c8dc8
+    - 760a85b
+    - 6b171ab
+    - 7c04b49
+    docs_commit: 47a618e
+    substeps:
+      current_task:
+      current_milestone: M112
+      phase: 27
+      task_status: completed
+      m112_status: completed
+      completed_tasks_m112:
+      - T112.1
+      - T112.2
+      - T112.3
+      - T112.4
+      remaining_milestones:
+      - M113
+      - M114
+      - M115
+      - M116
+      - M117
+      - M118
   08-verify-build:
-    status: completed
-    started_at: '2026-08-03'
-    started: '2026-08-03'
-    session_id: S025-ci-release-automation
-    branch: evolve/EV-023-ci-release-automation
-    evolve_cycle_id: EV-023
+    status: in_progress
+    started_at: '2026-08-04'
+    started: '2026-08-04'
+    started_at_iso: '2026-08-04T18:27:00Z'
+    session_id: S026-frontend-ux-polish
+    branch: evolve/EV-024-frontend-ux-polish
+    session_branch: feat/S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
     mode: evolve
     delta_only: true
     feature_ids:
-    - F62
-    - F63
-    current_action: completed
-    next_action: 10-e2e (Phase D)
+    - F64
+    - F65
+    - F66
+    - F67
+    - F68
+    - F69
+    phase: 27
+    milestones:
+    - M112
+    - M113
+    - M114
+    - M115
+    - M116
+    - M117
+    - M118
+    active_milestone: M112
+    active_feature: F66
+    active_issue: 104
+    current_action: verify_m112
+    next_action: 'run 08-verify-build then minor PR for #104'
     askquestion_pending: false
+    askquestion_pending_topic:
     gate_a_to_b: passed
-    s025_d13_decision: S025-D13
-    build_head: fedf1f7
+    gate_b_to_c: passed
+    phase_a: passed
+    phase_b: passed
+    phase_c: pending
+    gate_c_to_d: pending
+    s026_d28_decision: S026-D28
+    build_head: 7c04b49
     build_commits:
-    - 2cad110
-    - fedf1f7
-    note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c waived (Lean+build skipped 04); handoff → 10-e2e Phase D
-    rd_range: RD-264..RD-271
-    s024_baseline:
+    - 47a618e
+    - 18c8dc8
+    - 760a85b
+    - 6b171ab
+    - 7c04b49
+    m112_status: completed
+    note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M112 (F66 ActionIcon #104) build head 7c04b49; next: run 08-verify-build then minor PR for #104'
+    handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
+    rd_range: RD-272..RD-289
+    updated_at: '2026-08-04T18:27:00Z'
+    s025_baseline:
       status: completed
+      started_at: '2026-08-03'
       started: '2026-08-03'
-      started_at: '2026-08-03T20:15:45Z'
-      session_id: S024-website-scrape-crawl
-      evolve_cycle_id: EV-022
-      branch: evolve/EV-022-website-scrape-crawl
+      session_id: S025-ci-release-automation
+      branch: evolve/EV-023-ci-release-automation
+      evolve_cycle_id: EV-023
       mode: evolve
       delta_only: true
       feature_ids:
-      - F59
-      - F60
-      - F61
+      - F62
+      - F63
       current_action: completed
-      next_action: Phase D 09-qa + 10-e2e in progress
+      next_action: 10-e2e (Phase D)
       askquestion_pending: false
-      s024_d41_decision: S024-D41
-      note: Gate C→D PASS (S024-D42); Phase C approved; Phase D started
-      s023_baseline:
+      gate_a_to_b: passed
+      s025_d13_decision: S025-D13
+      build_head: fedf1f7
+      build_commits:
+      - 2cad110
+      - fedf1f7
+      note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c waived (Lean+build skipped 04); handoff → 10-e2e Phase D
+      rd_range: RD-264..RD-271
+      s024_baseline:
         status: completed
-        started_at: '2026-08-03'
-        completed: '2026-08-03'
-        completed_at: '2026-08-03T12:05:31Z'
-        partial_rerun_at: '2026-08-03'
-        partial_rerun_note: 'S023/EV-020 — 08-verify-build PASS @ bb4c400; report=docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md; current_action=await_gate_c_to_d; checkpoints.phase_c pending'
-        session_id: S023-retrieval-topk-packing
-        branch: evolve/EV-020-retrieval-topk-packing
-        evolve_cycle_id: EV-020
+        started: '2026-08-03'
+        started_at: '2026-08-03T20:15:45Z'
+        session_id: S024-website-scrape-crawl
+        evolve_cycle_id: EV-022
+        branch: evolve/EV-022-website-scrape-crawl
         mode: evolve
         delta_only: true
         feature_ids:
-        - F50
-        - F51
+        - F59
+        - F60
+        - F61
         current_action: completed
-        next_action: 11-verify-impl
-        report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
-        result: pass
-        head: bb4c400
-        phase: 25
-        milestones:
-        - M105
-        - M106
-        - M107
-        s023_d13_decision: S023-D13
-        gate_c_to_d: passed
-        checkpoints_phase_c: passed
-        phase_c_status: passed
-        note: 'S023/EV-020 08 PASS 2026-08-03 @ bb4c400 — Gate C→D PASS; Phase D 09+10 COMPLETE (S023-D15); next → 11-verify-impl'
-        s020_baseline:
+        next_action: Phase D 09-qa + 10-e2e in progress
+        askquestion_pending: false
+        s024_d41_decision: S024-D41
+        note: Gate C→D PASS (S024-D42); Phase C approved; Phase D started
+        s023_baseline:
           status: completed
-          started_at: '2026-08-02'
-          started: '2026-08-02'
-          completed_at: '2026-08-02'
-          completed: '2026-08-02'
-          partial_rerun_at: '2026-08-02'
-          partial_rerun_note: EV-017/S020-retrieval-batch-b — 08-verify-build COMPLETE PASS (scoped); Phase 22 M94–M98; prior S019/EV-016 COMPLETE nested under s019_baseline
-          session_id: S020-retrieval-batch-b
-          branch: evolve/EV-017-retrieval-batch-b
-          evolve_cycle_id: EV-017
+          started_at: '2026-08-03'
+          completed: '2026-08-03'
+          completed_at: '2026-08-03T12:05:31Z'
+          partial_rerun_at: '2026-08-03'
+          partial_rerun_note: 'S023/EV-020 — 08-verify-build PASS @ bb4c400; report=docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md; current_action=await_gate_c_to_d; checkpoints.phase_c pending'
+          session_id: S023-retrieval-topk-packing
+          branch: evolve/EV-020-retrieval-topk-packing
+          evolve_cycle_id: EV-020
           mode: evolve
           delta_only: true
           feature_ids:
-          - F43
-          - F44
-          - F45
-          feature: F43-F45
-          phase: Phase 22 (M94-M98)
-          overall_result: PASS
-          result_scope: scoped
-          overall: pass
+          - F50
+          - F51
           current_action: completed
-          next_action: Present Phase C digest + AskQuestion (approve Gate C→D + open Phase C PR / hold / explain)
-          commits_head: ccc82df
-          report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
-          results_note: Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers
-          note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
-          phase_c_status: passed
+          next_action: 11-verify-impl
+          report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+          result: pass
+          head: bb4c400
+          phase: 25
+          milestones:
+          - M105
+          - M106
+          - M107
+          s023_d13_decision: S023-D13
           gate_c_to_d: passed
-          phase_c_decision: S020-D19
-          phase_c_approved_at: '2026-08-02'
-          s019_baseline:
+          checkpoints_phase_c: passed
+          phase_c_status: passed
+          note: 'S023/EV-020 08 PASS 2026-08-03 @ bb4c400 — Gate C→D PASS; Phase D 09+10 COMPLETE (S023-D15); next → 11-verify-impl'
+          s020_baseline:
             status: completed
-            started_at: '2026-08-01T14:12:45Z'
-            completed_at: '2026-08-01T14:17:17Z'
-            partial_rerun_at: '2026-08-01'
-            partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline
-            session_id: S019-retrieval-quality
-            branch: evolve/EV-016-retrieval-quality
-            evolve_cycle_id: EV-016
+            started_at: '2026-08-02'
+            started: '2026-08-02'
+            completed_at: '2026-08-02'
+            completed: '2026-08-02'
+            partial_rerun_at: '2026-08-02'
+            partial_rerun_note: EV-017/S020-retrieval-batch-b — 08-verify-build COMPLETE PASS (scoped); Phase 22 M94–M98; prior S019/EV-016 COMPLETE nested under s019_baseline
+            session_id: S020-retrieval-batch-b
+            branch: evolve/EV-017-retrieval-batch-b
+            evolve_cycle_id: EV-017
             mode: evolve
             delta_only: true
             feature_ids:
-            - F42
-            feature: F42
-            phase: Phase 21 (M91-M93)
+            - F43
+            - F44
+            - F45
+            feature: F43-F45
+            phase: Phase 22 (M94-M98)
             overall_result: PASS
-            result_scope: delta
+            result_scope: scoped
+            overall: pass
             current_action: completed
-            next_action: phase_c_checkpoint
-            commits_status: landed
-            commits_head: 257486f
-            report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
-            note: 'S019/EV-016 08-verify-build COMPLETE — Phase 21 PASS (delta) @ 257486f; nested for S020 Phase 22 verify'
-          s017_baseline:
-            status: completed
-            started_at: '2026-07-30'
-            completed_at: '2026-07-30'
-            partial_rerun_at: '2026-07-30'
-            partial_rerun_note: 'EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline'
-            session_id: S017-corpus-reembed-migration
-            branch: evolve/EV-015-corpus-reembed-migration
-            evolve_cycle_id: EV-015
-            mode: delta
-            feature: F41
-            note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
-          s016_baseline:
-            status: completed
-            started_at: '2026-07-29'
-            completed_at: '2026-07-29'
-            partial_rerun_at: '2026-07-29'
-            partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
-            session_id: S016-chat-cold-start-ux
-            branch: evolve/EV-014-chat-cold-start-ux
-            evolve_cycle_id: EV-014
-            mode: delta
-            feature: F40
-            overall_result: PASS
-            result_scope: delta
-            report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
-            note: S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e
-          s014_baseline:
-            status: completed
-            started_at: '2026-07-29'
-            completed_at: '2026-07-29'
-            partial_rerun_at: '2026-07-29'
-            partial_rerun_note: 'EV-013/S014 — #148 admin UI polish Phase 2 PASS (delta) 2026-07-29 (F9+F12); scope=data-management-frontend + related tests/docs'
-            session_id: S014-admin-ui-polish-148
-            branch: evolve/EV-013-admin-ui-polish-148
-            evolve_cycle_id: EV-013
-            mode: delta
-            feature: F9/F12
-            scope: data-management-frontend + related tests/docs
-            overall_result: PASS
-            result_scope: delta
-            report: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
-            substeps:
-              phase: 2
-              phase_note: Phase 2 PASS 2026-07-29
-              integration_db: SKIPPED
-              integration_db_reason: no Docker/Postgres
-              personas: ADVISORY
-              persona_nits: 6
-              persona_blockers: 0
-              vitest: 674
-              uj051: PASS
-              make_audit: PASS
-              make_audit_note: 1 ignored nltk
-              prettier: auto_fixed_3_ev013_files
-            note: S014/EV-013 08-verify-build PASS (delta) 2026-07-29 — integration/DB SKIPPED (no Docker/Postgres); personas ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier auto-fixed 3 EV-013 files; handoff → 10-e2e; uncommitted 07-build still dirty; advisory nits optional before 10
-            s013_baseline:
+            next_action: Present Phase C digest + AskQuestion (approve Gate C→D + open Phase C PR / hold / explain)
+            commits_head: ccc82df
+            report: docs/sessions/S020-retrieval-batch-b/reports/verification-report.md
+            results_note: Overall PASS (scoped); 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers
+            note: S020/EV-017 08-verify-build COMPLETE PASS (scoped) 2026-08-02 — Phase 22 M94–M98 / F43–F45; 100 passed / 11 skipped Phase 22 suite; make audit PASS (4 ignored nltk); Docker/Postgres SKIPPED locally; AC-BB9/TC-184 still pending staging spike JSON; personas 3 advisory / 0 blockers; report docs/sessions/S020-retrieval-batch-b/reports/verification-report.md; awaiting Phase C checkpoint AskQuestion before opening PR and advancing to 09/10; checkpoints.phase_c and gates.c_to_d still pending
+            phase_c_status: passed
+            gate_c_to_d: passed
+            phase_c_decision: S020-D19
+            phase_c_approved_at: '2026-08-02'
+            s019_baseline:
               status: completed
-              started_at: '2026-07-28'
+              started_at: '2026-08-01T14:12:45Z'
+              completed_at: '2026-08-01T14:17:17Z'
+              partial_rerun_at: '2026-08-01'
+              partial_rerun_note: S019/EV-016 Phase 21 (M91–M93 / F42) verification PASS (delta); prior S017 COMPLETE nested under s017_baseline
+              session_id: S019-retrieval-quality
+              branch: evolve/EV-016-retrieval-quality
+              evolve_cycle_id: EV-016
+              mode: evolve
+              delta_only: true
+              feature_ids:
+              - F42
+              feature: F42
+              phase: Phase 21 (M91-M93)
+              overall_result: PASS
+              result_scope: delta
+              current_action: completed
+              next_action: phase_c_checkpoint
+              commits_status: landed
+              commits_head: 257486f
+              report: docs/sessions/S019-retrieval-quality/reports/verification-report.md
+              note: 'S019/EV-016 08-verify-build COMPLETE — Phase 21 PASS (delta) @ 257486f; nested for S020 Phase 22 verify'
+            s017_baseline:
+              status: completed
+              started_at: '2026-07-30'
+              completed_at: '2026-07-30'
+              partial_rerun_at: '2026-07-30'
+              partial_rerun_note: 'EV-015/S017 COMPLETE — 08-verify-build PASS (scoped); UJ-054 collection fix committed @a9c7eeb; phase_c=passed; Gate C→D=passed; prior S016/EV-014 COMPLETE nested under s016_baseline'
+              session_id: S017-corpus-reembed-migration
+              branch: evolve/EV-015-corpus-reembed-migration
+              evolve_cycle_id: EV-015
+              mode: delta
+              feature: F41
+              note: 'S017/EV-015 08-verify-build COMPLETE 2026-07-30 — EV-015 scoped PASS; local Postgres/Docker suites SKIPPED; Playwright UJ-053/054 PASS; H0c PASS; make audit PASS; DM Vitest 688/688; UJ-054 collection fix + verification-report committed @ a9c7eeb ([T90.2] fix: avoid UJ-054 pytest plugin double-register); checkpoints.phase_c=passed; gates.c_to_d=passed (user option 1); next → 09-qa + 10-e2e parallel'
+            s016_baseline:
+              status: completed
+              started_at: '2026-07-29'
               completed_at: '2026-07-29'
               partial_rerun_at: '2026-07-29'
-              partial_rerun_note: EV-012/S013 delta — M84 milestone verify gate (Phase 19)
-              session_id: S013-unified-job-monitoring
-              branch: evolve/EV-012-unified-job-monitoring
-              evolve_cycle_id: EV-012
-              milestone: M84
-              scope: M84
-              report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
+              partial_rerun_note: 'EV-014/S016 delta COMPLETE — #87 ChatRAG cold-start UX (F40); 08-verify-build PASS; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e'
+              session_id: S016-chat-cold-start-ux
+              branch: evolve/EV-014-chat-cold-start-ux
+              evolve_cycle_id: EV-014
+              mode: delta
+              feature: F40
               overall_result: PASS
-              result_scope: scoped
-              commit: f98d40d
-              m82_gate:
-                status: passed
-                completed_at: '2026-07-28'
-                commit: '7209837'
+              result_scope: delta
+              report: docs/sessions/S016-chat-cold-start-ux/reports/verification-report.md
+              note: S016/EV-014 08-verify-build PASS 2026-07-29 — Lean+build; FE Vitest 162; Playwright TC-160; CORS unchanged; handoff → 10-e2e
+            s014_baseline:
+              status: completed
+              started_at: '2026-07-29'
+              completed_at: '2026-07-29'
+              partial_rerun_at: '2026-07-29'
+              partial_rerun_note: 'EV-013/S014 — #148 admin UI polish Phase 2 PASS (delta) 2026-07-29 (F9+F12); scope=data-management-frontend + related tests/docs'
+              session_id: S014-admin-ui-polish-148
+              branch: evolve/EV-013-admin-ui-polish-148
+              evolve_cycle_id: EV-013
+              mode: delta
+              feature: F9/F12
+              scope: data-management-frontend + related tests/docs
+              overall_result: PASS
+              result_scope: delta
+              report: docs/sessions/S014-admin-ui-polish-148/reports/verification-report.md
+              substeps:
+                phase: 2
+                phase_note: Phase 2 PASS 2026-07-29
+                integration_db: SKIPPED
+                integration_db_reason: no Docker/Postgres
+                personas: ADVISORY
+                persona_nits: 6
+                persona_blockers: 0
+                vitest: 674
+                uj051: PASS
+                make_audit: PASS
+                make_audit_note: 1 ignored nltk
+                prettier: auto_fixed_3_ev013_files
+              note: S014/EV-013 08-verify-build PASS (delta) 2026-07-29 — integration/DB SKIPPED (no Docker/Postgres); personas ADVISORY 6 nits / 0 blockers; Vitest 674; uj051 PASS; make audit PASS (1 ignored nltk); prettier auto-fixed 3 EV-013 files; handoff → 10-e2e; uncommitted 07-build still dirty; advisory nits optional before 10
+              s013_baseline:
+                status: completed
+                started_at: '2026-07-28'
+                completed_at: '2026-07-29'
+                partial_rerun_at: '2026-07-29'
+                partial_rerun_note: EV-012/S013 delta — M84 milestone verify gate (Phase 19)
+                session_id: S013-unified-job-monitoring
+                branch: evolve/EV-012-unified-job-monitoring
+                evolve_cycle_id: EV-012
+                milestone: M84
+                scope: M84
+                report: docs/sessions/S013-unified-job-monitoring/reports/verification-report.md
                 overall_result: PASS
-              m84_gate: passed
-              m84_gate_passed_at: '2026-07-29'
-              note: 'M84 scoped PASS @ f98d40d retained (historical). M85/Phase19 08-verify-build completed PASS scoped 2026-07-29. PR #153 open (do not merge).'
-              checks:
-                vitest_m84_suites: pass
-                ruff: pass
-                make_check_fast_fe_lint: blocked_local_node22_vs_nvmrc24_environment
-              minor_pr:
-                url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153'
-                number: 153
-                status: open
-                merge_policy: do_not_merge
-                title: '[M82] EV-012 Unified Admin Jobs — Modal jobs API + SSE + CRUD'
-              m85_pending: false
-            s010_baseline:
-              status: completed
-              started_at: '2026-07-08'
-              completed_at: '2026-07-08'
-              partial_rerun_at: '2026-07-08'
-              partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
-              session_id: S010-unify-llm-service
-              branch: feat/S010-unify-llm-service
-              evolve_cycle_id: EV-011
-              report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
-              overall_result: PASS
-              note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
-            s008_baseline:
-              session_id: S008-eval-ux-playground
-              branch: feat/S008-eval-ux-playground
-              evolve_cycle_id: EV-009
-              started_at: '2026-07-03'
-              completed_at: '2026-07-03'
-              status: completed
-              report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
-              note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
-            historical_scope: standalone
-            notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta; Modal smoke SKIPPED | S005: interim milestone-boundary verify PASS after in-session remediation — initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage green, 681+ pytest + 312 vitest admin'
-            historical_substeps:
-              phase: formal
+                result_scope: scoped
+                commit: f98d40d
+                m82_gate:
+                  status: passed
+                  completed_at: '2026-07-28'
+                  commit: '7209837'
+                  overall_result: PASS
+                m84_gate: passed
+                m84_gate_passed_at: '2026-07-29'
+                note: 'M84 scoped PASS @ f98d40d retained (historical). M85/Phase19 08-verify-build completed PASS scoped 2026-07-29. PR #153 open (do not merge).'
+                checks:
+                  vitest_m84_suites: pass
+                  ruff: pass
+                  make_check_fast_fe_lint: blocked_local_node22_vs_nvmrc24_environment
+                minor_pr:
+                  url: 'https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/153'
+                  number: 153
+                  status: open
+                  merge_policy: do_not_merge
+                  title: '[M82] EV-012 Unified Admin Jobs — Modal jobs API + SSE + CRUD'
+                m85_pending: false
+              s010_baseline:
+                status: completed
+                started_at: '2026-07-08'
+                completed_at: '2026-07-08'
+                partial_rerun_at: '2026-07-08'
+                partial_rerun_note: EV-011/S010 delta — unified vecinita-llm milestone verify (ADR-037)
+                session_id: S010-unify-llm-service
+                branch: feat/S010-unify-llm-service
+                evolve_cycle_id: EV-011
+                report: docs/sessions/S010-unify-llm-service/reports/verification-report.md
+                overall_result: PASS
+                note: 'S010/EV-011 ADR-037 unified vecinita-llm milestone verify PASS. Auto-fixed reportPrivateUsage (max_model_len_for public). Modal smoke SKIPPED. 2 persona nits (untracked scripts, 07-build routing pending).'
+              s008_baseline:
+                session_id: S008-eval-ux-playground
+                branch: feat/S008-eval-ux-playground
+                evolve_cycle_id: EV-009
+                started_at: '2026-07-03'
+                completed_at: '2026-07-03'
+                status: completed
+                report: docs/sessions/S008-eval-ux-playground/reports/verification-report.md
+                note: Formal milestone verify PASS — 952 pytest + 725 Vitest; routing 08 complete
+              historical_scope: standalone
+              notes: 'EV-004: 522 passed 32 skipped; H0c green; 7 FE test files auto-formatted; pip-audit 14 CVEs fixed via uv override bumps (aiohttp, msgpack, pypdf, starlette) | S001: milestone-boundary verify PASS; T12 still pending in 07-build; 2 uncommitted eslint/prettier auto-fixes | S003: milestone-boundary verify PASS; frontend-only F33 chat-history delta; Modal smoke SKIPPED | S005: interim milestone-boundary verify PASS after in-session remediation — initial FAIL (Python lint, typecheck, FE lint, FE format, DM FE branch coverage 94.18% < 95%) fixed; final make check + make test-unit-coverage green, 681+ pytest + 312 vitest admin'
+              historical_substeps:
+                phase: formal
+                result: PASS
+              s003:
+                session_id: S003-persistent-chat-history
+                branch: main
+                completed_at: '2026-06-28'
+                partial_rerun_at: '2026-06-28'
+                partial_rerun_note: 'S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only delta)'
+                overall_result: PASS
+                report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+                session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
+                user_invoked: true
+                notes:
+                - 'Branch main@9bd7a50; uncommitted S003/chat-UI work'
+                - 2 prettier auto-fixes uncommitted in chat-rag-frontend tests
+                - Modal smoke SKIPPED (frontend-only delta)
+              s004:
+                session_id: S004-supabase-auth
+                branch: feat/S004-supabase-auth
+                completed_at: '2026-06-29'
+                overall_result: PASS
+                report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+                blocking_failures: []
+                note: S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage) resolved.
+              s005:
+                session_id: S005-user-mgmt-auth
+                branch: feat/S005-user-mgmt-auth
+                completed_at: '2026-06-30'
+                feature: F35
+                milestone: M53
+                overall_result: PASS
+                report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
+                session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
+                blocking_failures: []
+                remediated:
+                - Python lint (11)
+                - Python typecheck (2 casts)
+                - Frontend lint (1)
+                - Frontend format (1)
+                - 'DM FE branch coverage 94.18% < 95%'
+                green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
+                note: 'S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck, format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30 FAIL; cleared for Phase 12 gate.'
+            substeps:
               result: PASS
-            s003:
-              session_id: S003-persistent-chat-history
-              branch: main
-              completed_at: '2026-06-28'
-              partial_rerun_at: '2026-06-28'
-              partial_rerun_note: 'S003 — milestone-boundary verify PASS (frontend-only F33 chat-history delta; main@9bd7a50 with uncommitted S003/chat-UI work; 2 prettier auto-fixes uncommitted in chat-rag-frontend tests; Modal smoke SKIPPED — frontend-only delta)'
-              overall_result: PASS
-              report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-              session_report: docs/sessions/S003-persistent-chat-history/reports/verification-report.md
-              user_invoked: true
-              notes:
-              - 'Branch main@9bd7a50; uncommitted S003/chat-UI work'
-              - 2 prettier auto-fixes uncommitted in chat-rag-frontend tests
-              - Modal smoke SKIPPED (frontend-only delta)
-            s004:
-              session_id: S004-supabase-auth
-              branch: feat/S004-supabase-auth
-              completed_at: '2026-06-29'
-              overall_result: PASS
-              report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-              blocking_failures: []
-              note: S004/EV-005 F34 milestone-boundary verify PASS (re-run after remediation). Prior blocking failures (cryptography CVEs; admin FE branch coverage) resolved.
-            s005:
-              session_id: S005-user-mgmt-auth
-              branch: feat/S005-user-mgmt-auth
-              completed_at: '2026-06-30'
-              feature: F35
-              milestone: M53
-              overall_result: PASS
-              report: docs/sessions/S000-internal-docs-archive/reports/verification-report.md
-              session_report: docs/sessions/S005-user-mgmt-auth/reports/verification-report.md
-              blocking_failures: []
-              remediated:
-              - Python lint (11)
-              - Python typecheck (2 casts)
-              - Frontend lint (1)
-              - Frontend format (1)
-              - 'DM FE branch coverage 94.18% < 95%'
-              green: make check + make test-unit-coverage; 681+ pytest + 312 vitest admin
-              note: 'S005/EV-006 F35 interim milestone-boundary verify PASS after in-session remediation. Initial FAIL (lint, typecheck, format, DM FE branch coverage) fixed; final make check + make test-unit-coverage green. Supersedes the earlier 2026-06-30 FAIL; cleared for Phase 12 gate.'
-          substeps:
-            result: PASS
+              result_scope: delta
+              phase: Phase 21 (M91-M93)
+              feature: F42
+              ruff: PASS
+              ruff_format: PASS
+              basedpyright: PASS
+              unit_packing_h7_chatrag: PASS
+              unit_eval_sandbox_f42: PASS
+              unit_staging_es_fixture: PASS
+              e2e_uj055: PASS
+              cors_unit: PASS
+              full_eval_service: SKIPPED
+              full_eval_service_reason: no local Postgres/Docker
+              ac_rq6: deferred_deploy_path
+              phase_c: passed
+              gate_c_to_d: passed
+              phase_c_approved_at: '2026-08-01T20:49:00Z'
+              phase_c_approved_head: 257486f
+              lint_fix_commit: 640cd25
+              commits_head: 640cd25
+            s017_completion_trail_note: 'Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS 2026-08-01T14:17:17Z'
+            m94_boundary: deferred_continue_batch
+          s022_baseline:
+            status: completed
+            started_at: '2026-08-02'
+            started: '2026-08-02'
+            completed_at: '2026-08-02'
+            completed: '2026-08-02'
+            partial_rerun_at: '2026-08-02'
+            partial_rerun_note: 'S022/EV-019 — 08-verify-build COMPLETE PASS; Phase 24 M101–M104 @ a837f21; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C approved; Phase D started @ 307e0d3'
+            session_id: S022-ingest-resilience
+            branch: evolve/EV-019-ingest-resilience
+            evolve_cycle_id: EV-019
+            mode: evolve
+            delta_only: true
+            feature_ids:
+            - F47
+            - F48
+            - F49
+            feature: F47-F49
+            phase: Phase 24 (M101-M104)
+            overall_result: PASS
             result_scope: delta
-            phase: Phase 21 (M91-M93)
-            feature: F42
-            ruff: PASS
-            ruff_format: PASS
-            basedpyright: PASS
-            unit_packing_h7_chatrag: PASS
-            unit_eval_sandbox_f42: PASS
-            unit_staging_es_fixture: PASS
-            e2e_uj055: PASS
-            cors_unit: PASS
-            full_eval_service: SKIPPED
-            full_eval_service_reason: no local Postgres/Docker
-            ac_rq6: deferred_deploy_path
-            phase_c: passed
+            overall: pass
+            current_action: completed
+            next_action: none_session_closed
+            commits_head: 307e0d3
+            report: docs/sessions/S022-ingest-resilience/reports/verification-report.md
+            note: 'S022/EV-019 08-verify-build COMPLETE PASS 2026-08-02 — Phase 24 M101–M104 @ a837f21; report verification-report.md; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C checkpoint APPROVED; Phase D 09+10 in progress @ 307e0d3'
+            phase_c_status: passed
             gate_c_to_d: passed
-            phase_c_approved_at: '2026-08-01T20:49:00Z'
-            phase_c_approved_head: 257486f
-            lint_fix_commit: 640cd25
-            commits_head: 640cd25
-          s017_completion_trail_note: 'Prior S017/EV-015 08 PASS nested under s017_baseline; superseded by S019 Phase 21 PASS 2026-08-01T14:17:17Z'
-          m94_boundary: deferred_continue_batch
-        s022_baseline:
-          status: completed
-          started_at: '2026-08-02'
-          started: '2026-08-02'
-          completed_at: '2026-08-02'
-          completed: '2026-08-02'
-          partial_rerun_at: '2026-08-02'
-          partial_rerun_note: 'S022/EV-019 — 08-verify-build COMPLETE PASS; Phase 24 M101–M104 @ a837f21; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C approved; Phase D started @ 307e0d3'
-          session_id: S022-ingest-resilience
-          branch: evolve/EV-019-ingest-resilience
-          evolve_cycle_id: EV-019
-          mode: evolve
-          delta_only: true
-          feature_ids:
-          - F47
-          - F48
-          - F49
-          feature: F47-F49
-          phase: Phase 24 (M101-M104)
-          overall_result: PASS
-          result_scope: delta
-          overall: pass
-          current_action: completed
-          next_action: none_session_closed
-          commits_head: 307e0d3
-          report: docs/sessions/S022-ingest-resilience/reports/verification-report.md
-          note: 'S022/EV-019 08-verify-build COMPLETE PASS 2026-08-02 — Phase 24 M101–M104 @ a837f21; report verification-report.md; checkpoints.phase_c=passed; gates.c_to_d=passed; Phase C checkpoint APPROVED; Phase D 09+10 in progress @ 307e0d3'
-          phase_c_status: passed
-          gate_c_to_d: passed
-          phase_c_note: '08 PASS; M101-M104 done — Phase C checkpoint APPROVED; Phase D 09+10 started @ 307e0d3'
-          phase_c_checkpoint_accepted: true
-          phase_c_checkpoint_choice: option_1_approve_gate_c_to_d_continue_09_10
-          session_closed: true
-          session_closed_at: '2026-08-02'
-      result: pass
+            phase_c_note: '08 PASS; M101-M104 done — Phase C checkpoint APPROVED; Phase D 09+10 started @ 307e0d3'
+            phase_c_checkpoint_accepted: true
+            phase_c_checkpoint_choice: option_1_approve_gate_c_to_d_continue_09_10
+            session_closed: true
+            session_closed_at: '2026-08-02'
+        result: pass
+        completed: '2026-08-03'
+        completed_at: '2026-08-03'
+        report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+        gate_c_to_d: passed
+        checkpoints_phase_c: passed
+        phase_c_status: passed
+        phase: Phase 26 (M108-M111)
+        feature: F59+F60+F61
+        s024_d42_decision: S024-D42
       completed: '2026-08-03'
       completed_at: '2026-08-03'
-      report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+      result: pass
+      report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+      commit: 23f9f71
+      commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+      verification_commit: 23f9f71
       gate_c_to_d: passed
       checkpoints_phase_c: passed
       phase_c_status: passed
-      phase: Phase 26 (M108-M111)
-      feature: F59+F60+F61
-      s024_d42_decision: S024-D42
-    completed: '2026-08-03'
-    completed_at: '2026-08-03'
-    result: pass
-    report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
-    commit: 23f9f71
-    commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
-    verification_commit: 23f9f71
-    gate_c_to_d: passed
-    checkpoints_phase_c: passed
-    phase_c_status: passed
-    gate_b_to_c: waived
-    checkpoints_phase_b: waived
-    s025_d14_decision: S025-D14
+      gate_b_to_c: waived
+      checkpoints_phase_b: waived
+      s025_d14_decision: S025-D14
   09-qa:
     status: completed
     started: '2026-08-03'
@@ -25808,9 +26001,9 @@ evolve_cycles:
     - 15-service-health
   routing_preset: standard
   preset: Standard
-  current_stage: 07-build
-  current_action: build_m112
-  next_action: 'implement M112 first task'
+  current_stage: 08-verify-build
+  current_action: verify_m112
+  next_action: 'run 08-verify-build then minor PR for #104'
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -25863,9 +26056,10 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-04'
-      current_action: phase0_complete
+      current_action: verify_m112
       askquestion_pending: false
-      note: Phase 0 APPROVED S026-D11; F64–F69 allocated
+      note: Phase C — M112 complete; verify_m112 / 08-verify-build; 07 remains open for M113–M118
+      current_stage: 08-verify-build
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -26129,8 +26323,8 @@ evolve_cycles:
       active_milestone: M112
       active_feature: F66
       active_issue: 104
-      current_action: build_m112
-      next_action: implement M112 first task
+      current_action: m112_complete_await_08
+      next_action: 'run 08-verify-build then minor PR for #104'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -26139,11 +26333,95 @@ evolve_cycles:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — Gate B→C PASS (S026-D28 / 41a); Phase B approved; current_action=build_m112; next: implement M112 first task (F66 ActionIcon #104); Phase 27 M112–M118'
-      updated_at: '2026-08-04T18:20:46Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 (F66 ActionIcon #104) COMPLETE (T112.1–T112.4 @ 18c8dc8/760a85b/6b171ab/7c04b49; docs 47a618e); milestones M113–M118 remain; current boundary → 08-verify-build / minor PR #104'
+      updated_at: '2026-08-04T18:27:00Z'
+      milestones_completed:
+      - M112
+      tasks_completed:
+      - T112.1
+      - T112.2
+      - T112.3
+      - T112.4
+      m112_status: completed
+      m112_feature: F66
+      m112_issue: 104
+      m112_head: 7c04b49
+      m112_commits:
+      - 18c8dc8
+      - 760a85b
+      - 6b171ab
+      - 7c04b49
+      docs_commit: 47a618e
+      substeps:
+        current_task:
+        current_milestone: M112
+        phase: 27
+        task_status: completed
+        m112_status: completed
+        completed_tasks_m112:
+        - T112.1
+        - T112.2
+        - T112.3
+        - T112.4
+        remaining_milestones:
+        - M113
+        - M114
+        - M115
+        - M116
+        - M117
+        - M118
+      session_id: S026-frontend-ux-polish
+      evolve_cycle_id: EV-024
+      branch: evolve/EV-024-frontend-ux-polish
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
+    08-verify-build:
+      status: in_progress
+      started: '2026-08-04'
+      started_at: '2026-08-04'
+      started_at_iso: '2026-08-04T18:27:00Z'
+      mode: delta
+      delta_only: true
+      feature_ids:
+      - F64
+      - F65
+      - F66
+      - F67
+      - F68
+      - F69
+      phase: 27
+      milestones:
+      - M112
+      - M113
+      - M114
+      - M115
+      - M116
+      - M117
+      - M118
+      active_milestone: M112
+      active_feature: F66
+      active_issue: 104
+      current_action: verify_m112
+      next_action: 'run 08-verify-build then minor PR for #104'
+      askquestion_pending: false
+      askquestion_pending_topic:
+      gate_a_to_b: passed
+      gate_b_to_c: passed
+      phase_a: passed
+      phase_b: passed
+      phase_c: pending
+      build_head: 7c04b49
+      build_commits:
+      - 47a618e
+      - 18c8dc8
+      - 760a85b
+      - 6b171ab
+      - 7c04b49
+      m112_status: completed
+      s026_d28_decision: S026-D28
+      note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M112 (F66 ActionIcon #104) build head 7c04b49; next: run 08-verify-build then minor PR for #104'
+      updated_at: '2026-08-04T18:27:00Z'
   artifacts:
   - &id011
     path: docs/dependency-inventory.md
@@ -26587,8 +26865,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — Gate B→C PASS (S026-D28 / 41a); Phase B approved; current_action=build_m112; next: implement M112 first task (F66 ActionIcon #104); Phase 27 M112–M118'
-  updated_at: '2026-08-04T18:20:46Z'
+  note: 'S026/EV-024 M112 boundary 2026-08-04 — M112 complete; current_stage=08-verify-build (verify_m112); 07-build stays in_progress for M113–M118; next: 08 then minor PR #104'
+  updated_at: '2026-08-04T18:27:00Z'
   feature_map:
     F64:
       issue: 87
@@ -37532,6 +37810,101 @@ git_history:
     files_changed: 0
     timestamp: '2026-08-04T00:09:50Z'
     note: Post-close durable state closeout MERGED to main; session already archived
+  - sha: 47a618e
+    full_sha: 47a618eaf7cdb50bd8e49b55df9c7798f73baccd
+    sha_full: 47a618eaf7cdb50bd8e49b55df9c7798f73baccd
+    short: 47a618e
+    branch: evolve/EV-024-frontend-ux-polish
+    message: 'docs(S026): EV-024 Phase A–B specs, Gate B→C PASS (S026-D28)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 26
+    timestamp: '2026-08-04T18:25:44Z'
+    note: Phase A–B standing/session docs + Gate B→C (S026-D28) before M112 impl
+    feature_ids:
+    - F64
+    - F65
+    - F66
+    - F67
+    - F68
+    - F69
+    rd_range: RD-272..RD-289
+    decision: S026-D28
+  - sha: 18c8dc8
+    full_sha: 18c8dc84427987ce92b9551e0b8e717604836e1b
+    sha_full: 18c8dc84427987ce92b9551e0b8e717604836e1b
+    short: 18c8dc8
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T112.1] test: ActionIcon pending classes and reduced-motion (TC-221–222)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 1
+    timestamp: '2026-08-04T18:25:51Z'
+    milestone: M112
+    task: T112.1
+    feature_ids:
+    - F66
+    issue: 104
+    rd_range: RD-272..RD-289
+  - sha: 760a85b
+    full_sha: 760a85b791c8da4738b1fc748f524b835031cad0
+    sha_full: 760a85b791c8da4738b1fc748f524b835031cad0
+    short: 760a85b
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T112.2] feat: shared ActionIcon with spin/pulse/shake/press'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 4
+    timestamp: '2026-08-04T18:25:51Z'
+    milestone: M112
+    task: T112.2
+    feature_ids:
+    - F66
+    issue: 104
+    rd_range: RD-272..RD-289
+  - sha: 6b171ab
+    full_sha: 6b171abff1c49c9616a242c06080f01f9256a02b
+    sha_full: 6b171abff1c49c9616a242c06080f01f9256a02b
+    short: 6b171ab
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T112.3] feat: wire ActionIcon on admin refresh and ChatRAG chrome'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 9
+    timestamp: '2026-08-04T18:25:51Z'
+    milestone: M112
+    task: T112.3
+    feature_ids:
+    - F66
+    issue: 104
+    rd_range: RD-272..RD-289
+  - sha: 7c04b49
+    full_sha: 7c04b4920423e1d91adb9cecc61b8e304973c817
+    sha_full: 7c04b4920423e1d91adb9cecc61b8e304973c817
+    short: 7c04b49
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T112.4] test: UJ-071 ActionIcon wiring in admin and ChatRAG'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 2
+    timestamp: '2026-08-04T18:25:51Z'
+    milestone: M112
+    task: T112.4
+    feature_ids:
+    - F66
+    issue: 104
+    rd_range: RD-272..RD-289
+    note: 'M112 complete — handoff → 08-verify-build / minor PR #104'
   notes:
   - '2026-08-03T22:22:05Z S024/EV-022: recorded commit 55c4583 on docs/S024-EV-022-deploy-smoke-closeout — Path A deploy smoke PASS and close 13; PR #191 OPEN; stage completion unchanged.'
   - '2026-08-03T22:18:30Z S024/EV-022: Path A PASS — PR #190 MERGED @ cc2750c; Modal CD 30857801172 success; DO CD 30857894636 success; H1/H3/H3b/H4/H5 PASS; H2 SKIP; Alembic 20260803_0011 via DO CD; live OpenAPI /internal/v1/corpus/tree; report docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; gates.deploy=passed; awaiting cycle-close AskQuestion.'
