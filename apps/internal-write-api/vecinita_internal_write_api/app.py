@@ -130,6 +130,7 @@ from vecinita_shared_schemas.playground_models import (
 )
 from vecinita_shared_schemas.validation import validate_feedback_request
 
+from vecinita_internal_write_api.actor_emails import resolve_actor_emails
 from vecinita_internal_write_api.audit import (
     cleanup_audit_log,
     create_document_version,
@@ -1581,6 +1582,14 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 .all()
             )
 
+        entries = [mapping_row(raw_row) for raw_row in rows]
+        actor_ids = [
+            actor
+            for entry in entries
+            if (actor := row_uuid_optional(entry, "actor_id")) is not None
+        ]
+        emails = resolve_actor_emails(actor_ids)
+
         return AuditLogResponse(
             items=[
                 AuditLogEntry(
@@ -1591,11 +1600,11 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     request_id=row_uuid(entry, "request_id"),
                     payload=as_json_object(row_value(entry, "payload")),
                     created_at=_row_datetime(entry, "created_at"),
-                    actor_id=row_uuid_optional(entry, "actor_id"),
+                    actor_id=(actor := row_uuid_optional(entry, "actor_id")),
                     actor_role=row_str_optional(entry, "actor_role"),
+                    actor_email=emails.get(actor) if actor is not None else None,
                 )
-                for raw_row in rows
-                for entry in (mapping_row(raw_row),)
+                for entry in entries
             ],
             page=page,
             page_size=page_size,
