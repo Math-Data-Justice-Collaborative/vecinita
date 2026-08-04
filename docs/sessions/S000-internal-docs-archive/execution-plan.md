@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
-| **Active milestone** | M116 — F68 ChatRAG feedback (#186) |
-| **Active task** | **T116.5** completed — next: 08-verify-build M116 + minor PR |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115** complete ([#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) open / #93); **M116** T116.1–T116.5 done; main green @ `f3f7dec` |
+| **Active milestone** | M117 — F69 audit actor email (#170) |
+| **Active task** | **T117.1** — API e2e/privacy red for `actor_email` (TC-229–230) |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115–M116** complete ([#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) open CI green @ `bb30b26` / #93+#186); main green @ `f3f7dec` |
 | **Last updated** | 2026-08-04 |
-| **Evolve cycle** | EV-024 — Standard; 07-build M116 after M115 PR open |
+| **Evolve cycle** | EV-024 — Standard; 07-build M117 after M116 verify |
 | **Git branch** | `evolve/EV-024-frontend-ux-polish` |
-| **Active session** | S026-frontend-ux-polish — 07-build M116 / F68 |
+| **Active session** | S026-frontend-ux-polish — 07-build M117 / F69 |
 | **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
 
 ## Template

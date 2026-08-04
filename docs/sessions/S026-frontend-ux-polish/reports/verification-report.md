@@ -1,44 +1,49 @@
-# Verification report — M115 (F65 / #93)
+# Verification report — M116 (F68 / #186)
 
 **Session:** S026-frontend-ux-polish  
 **Cycle:** EV-024  
 **Stage:** 08-verify-build (milestone boundary)  
 **Date:** 2026-08-04  
 **Branch:** `evolve/EV-024-frontend-ux-polish`  
-**Head:** `d93b78a`
+**Head:** `bb30b26`  
+**CI:** [success](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30958904809)
 
 ## Scope
 
-M115 — Ask energy estimate: backend `energy_estimate` on `/ask` + stream `done`
-(`tdp_util_walltime_v1`); FE chip (Wh / gCO₂e), car-distance line, advisory, use
-guide (EN/ES); OpenAPI `EnergyEstimate`; Vitest + Playwright UJ-070 / TC-218–220,
-TC-231.
+M116 — Anonymous feedback (ADR-046): `feedback` migration + 90d purge; ChatRAG
+`POST /api/v1/feedback` → internal-write; DM `GET /admin/feedback`; ChatRAG + Admin
+Feedback pages; privacy rejects; Vitest + Playwright UJ-073 / TC-225–228.
+
+Also on branch (prior milestone, PR still open): M115 F65 energy estimate (#93).
 
 ## Checks
 
 | Check | Result | Notes |
 |-------|--------|-------|
-| Unit `tests/unit/chat_rag/test_energy_estimate.py` | **PASS** | Formula + knobs |
-| ChatRAG Vitest (`EnergyEstimatePanel`, `test_uj070_energy`) | **PASS** | Node 24 (Node 26 localStorage opaque-origin break) |
-| Playwright `tests/ui/chat/uj070-energy.spec.ts` | **PASS** | Chip, car line, advisory, use guide |
-| API e2e `tests/e2e/test_uj070_energy_estimate.py` | **CI** | Local Colima Postgres volume chmod denied; Desktop unable to start — CI compose runs TC-218–219 |
-| Ruff on e2e + energy surfaces | **PASS** | TC002/PT018/RUF002 fixed in e2e |
-| ChatRAG FE lint | **PASS** | |
-| Modal GPU smoke | **SKIPPED** | Heuristic only; no GPU budget ask |
+| Privacy `tests/privacy/test_feedback_table.py` | **CI PASS** | Local Colima Postgres volume chmod denied |
+| API e2e `tests/e2e/test_uj073_feedback.py` | **CI PASS** | TC-225–228; fixture order fix for JWT after `write_client` |
+| Unit feedback (ChatRAG / IWA / DM) | **PASS** | Local + CI coverage gate |
+| ChatRAG Vitest `test_uj073_feedback` | **PASS** | Node 24 |
+| Admin Vitest `feedback.test.ts` + `test_feedback_page` | **PASS** | Coverage 100% lines / ≥98% branches |
+| Playwright `tests/ui/chat/uj073-feedback.spec.ts` | **PASS** | Local + CI ui-e2e |
+| CORS H0c feedback preflights | **PASS** | ChatRAG POST + DM GET |
+| GitHub CI (`ci.yml` @ `bb30b26`) | **PASS** | run 30958904809 |
 
 ## Connectivity artifacts
 
 | Artifact | Present |
 |----------|---------|
 | `tests/smoke/test_staging_connectivity.py` | Yes (unchanged) |
-| CORS / H0c | Unchanged this milestone |
+| CORS / H0c | Extended for `/api/v1/feedback` and `/admin/feedback` |
 
 ## Auto-corrections
 
-None beyond e2e lint fixes above.
+- SQLAlchemy `.mappings()` for feedback insert/list rows
+- Admin FE `formatLocaleDateTime(locale, …)` + `Authorization` index access
+- Alembic head assertion → `20260804_0012`
 
 ## Verdict
 
-**PASS** — open minor PR for #93 after push; merge needs explicit approval.
+**PASS** — update open PR [#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) to include M115+M116 (same evolve head). Merge needs explicit approval.
 
-Next after PR open: **M116** F68 feedback (#186) on same evolve branch (unless user pauses).
+Next: **M117** F69 audit actor email (#170) on same evolve branch.

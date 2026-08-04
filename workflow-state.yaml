@@ -1536,8 +1536,8 @@ project:
       active_milestone: M116
       active_feature: F68
       active_issue: 186
-      current_action: build_m116_t116_5
-      next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+      current_action: m116_complete_await_08_pr
+      next_action: 08-verify-build M116 then open minor PR; continue M117 F69
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1546,11 +1546,11 @@ project:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff (ChatRAG and Admin Feedback pages); T116.5 in_progress; head @{HEAD}; branch ahead of origin by 4 not pushed; PR #204 open_ci_green NOT merged (S026-D50); Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
+      note: M116 tasks complete; awaiting 08 + PR then M117
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T22:43:24Z'
+      updated_at: '2026-08-04T23:12:10Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1705,6 +1705,7 @@ project:
       - T116.2
       - T116.3
       - T116.4
+      - T116.5
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -1721,7 +1722,7 @@ project:
         current_task: T116.5
         current_milestone: M116
         phase: 27
-        task_status: in_progress
+        task_status: completed
         m112_status: completed
         m112_verify: PASS
         m112_pr: 200
@@ -1747,8 +1748,9 @@ project:
         - T116.2
         - T116.3
         - T116.4
+        - T116.5
         m115_verify: PASS
-        m116_status: in_progress
+        m116_status: tasks_complete_await_08
         completed_tasks_m115:
         - T115.1
         - T115.2
@@ -1761,11 +1763,12 @@ project:
         - T116.2
         - T116.3
         - T116.4
+        - T116.5
       m112_verify: PASS
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 1c8f6ff
+      build_head: bb30b26
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -1807,7 +1810,7 @@ project:
       m114_merge_sha_short: f3f7dec
       m114_status: completed
       active_task: T116.5
-      build_head_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
+      build_head_full: bb30b2611caed89279732df1364720a529ec89cf
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -1834,7 +1837,7 @@ project:
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: open_ci_green
-      ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
+      ci_note: 'M116 T116.5 CI green on evolve/EV-024-frontend-ux-polish @bb30b26; PR #204 still open_ci_green NOT merged (S026-D50)'
       ci_status: success
       pr_204_ci_status: success
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -1852,6 +1855,10 @@ project:
       - 9bba998
       - d3947bd
       - 1c8f6ff
+      - 5b0405a
+      - c52021a
+      - a48bad9
+      - bb30b26
       t116_2_commit_pending: false
       t116_2_commit: 9bba998
       t116_2_artifacts: &id002
@@ -1894,8 +1901,8 @@ project:
       - workflow-state.yaml
       t116_4_commit: 1c8f6ff
       t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
-      t116_5_status: in_progress
-      t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
+      t116_5_status: completed
+      t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
       t116_4_files: &id005
       - apps/chat-rag-frontend/src/App.css
       - apps/chat-rag-frontend/src/App.tsx
@@ -1913,16 +1920,18 @@ project:
       - docs/sessions/S026-frontend-ux-polish/HANDOFF.md
       - packages/frontend-i18n/src/messages.ts
       - workflow-state.yaml
-      branch_ahead_of_origin: 4
-      branch_unpushed_note: ahead of origin by 4 commits (a26d2a4..1c8f6ff) not pushed yet
-      resume_note: Resume 07-build per user continue-with-recommended; T116.5 in_progress
+      branch_ahead_of_origin: 0
+      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @bb30b26
+      resume_note: T116.5 completed @bb30b26; CI green; 08-verify-build M116 then open minor PR; continue M117 F69
       s026_d51_decision: S026-D51
-      execution_plan_note: execution-plan.md should show T116.5 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md)
+      execution_plan_note: execution-plan.md should show T116.5 completed (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 08-verify-build M116
+      t116_5_commit: bb30b26
+      t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
     08-verify-build:
-      status: completed
+      status: in_progress
       started_at: '2026-08-04'
       started: '2026-08-04'
-      started_at_iso: '2026-08-04T18:27:00Z'
+      started_at_iso: '2026-08-04T23:12:10Z'
       session_id: S026-frontend-ux-polish
       branch: evolve/EV-024-frontend-ux-polish
       session_branch: feat/S026-frontend-ux-polish
@@ -1945,11 +1954,11 @@ project:
       - M116
       - M117
       - M118
-      active_milestone: M113
-      active_feature: F67
-      active_issue: 106
-      current_action: completed
-      next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+      active_milestone: M116
+      active_feature: F68
+      active_issue: 186
+      current_action: verify_m116
+      next_action: 08-verify-build M116 then open minor PR; continue M117 F69
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1959,7 +1968,7 @@ project:
       phase_c: pending
       gate_c_to_d: pending
       s026_d28_decision: S026-D28
-      build_head: 06f4ab1
+      build_head: bb30b26
       build_commits:
       - 47a618e
       - 18c8dc8
@@ -1969,10 +1978,10 @@ project:
       - 8c81e65
       - 0942ef9
       m112_status: completed
-      note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head 605fce9; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; PR #204 CI green; head 605fce9; 07 continues M116 T116.1 (S026-D49) | AskQuestion resolved S026-D50 — continue M116 without merging PR #204; head 605fce9'
+      note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M116 (F68 #186) build head bb30b26; CI green on evolve/EV-024-frontend-ux-polish; next: 08-verify-build M116 then open minor PR; continue M117 F69'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
-      updated_at: '2026-08-04T22:01:21Z'
+      updated_at: '2026-08-04T23:12:10Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -2059,7 +2068,7 @@ project:
       overall_result: PASS
       result_scope: milestone
       milestone_verified: M114
-      build_head_full: 06f4ab11f423996df2da88307d111a9f720d92c9
+      build_head_full: bb30b2611caed89279732df1364720a529ec89cf
       m112_verify: PASS
       report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
       ci_status: success
@@ -2077,7 +2086,7 @@ project:
         milestone: M113
         ci_status: success
         ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
-        note: 'MERGED to main @ f3f7dec; main CI flake (Supabase advisors 502) then rerun green + deploy-preflight OK (S026-D47)'
+        note: MERGED to main @ f3f7dec; main CI flake (Supabase advisors 502) then rerun green + deploy-preflight OK (S026-D47)
         merge_approved_by: user
         merge_approved_decision: S026-D46
         merge_approved_at: '2026-08-04T20:41:30Z'
@@ -2138,6 +2147,7 @@ project:
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
       m115_ci_status: success
       s026_d50_decision: S026-D50
+      m116_status: verify_in_progress
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -4914,14 +4924,14 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: build_m116_t116_5
-    current_stage: 07-build
-    note: 'EV-024 Phase C — M116 T116.1 F68/#186 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff; T116.5 in_progress; Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
+    current_action: verify_m116
+    current_stage: 08-verify-build
+    note: EV-024 Phase C — M116 T116.1–T116.5 F68/#186 completed @bb30b26; CI green; current_stage→08-verify-build (verify_m116); next=08-verify-build M116 then open minor PR; continue M117 F69
     askquestion_pending: false
-    next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+    next_action: 08-verify-build M116 then open minor PR; continue M117 F69
     askquestion_pending_topic:
     s026_d29_decision: S026-D29
-    updated_at: '2026-08-04T22:43:24Z'
+    updated_at: '2026-08-04T23:12:10Z'
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
@@ -4946,14 +4956,14 @@ active_session:
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
     active_task: T116.5
-    build_head: 1c8f6ff
+    build_head: bb30b26
     s026_d48_decision: S026-D48
     m115_verify: PASS
     m115_pr_status: open_ci_green
     s026_d49_decision: S026-D49
     m115_pr: 204
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-    ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
+    ci_note: 'M116 T116.5 CI green on evolve/EV-024-frontend-ux-polish @bb30b26; PR #204 still open_ci_green NOT merged (S026-D50)'
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     s026_d50_decision: S026-D50
     t116_1_status: completed
@@ -4965,9 +4975,34 @@ active_session:
     t116_3_commit: d3947bd
     t116_4_status: completed
     t116_4_commit: 1c8f6ff
-    t116_5_status: in_progress
-    resume_note: Resume 07-build per user continue-with-recommended; T116.5 in_progress
+    t116_5_status: completed
+    resume_note: T116.5 completed @bb30b26; CI green; 08-verify-build M116 then open minor PR; continue M117 F69
     s026_d51_decision: S026-D51
+    current_milestone: M116
+    current_task: T116.5
+    build_head_full: bb30b2611caed89279732df1364720a529ec89cf
+    t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
+    t116_5_commit: bb30b26
+    t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
+    branch_ahead_of_origin: 0
+    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @bb30b26
+    execution_plan_note: execution-plan.md should show T116.5 completed (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 08-verify-build M116
+    ci_status: success
+    m116_commits:
+    - a26d2a4
+    - 9bba998
+    - d3947bd
+    - 1c8f6ff
+    - 5b0405a
+    - c52021a
+    - a48bad9
+    - bb30b26
+    tasks_completed:
+    - T116.1
+    - T116.2
+    - T116.3
+    - T116.4
+    - T116.5
   - stage: 01-requirements
     required: true
     status: completed
@@ -5116,16 +5151,16 @@ active_session:
     skip_rationale:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:20:46Z'
-    current_action: build_m116_t116_5
-    next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+    current_action: m116_complete_await_08_pr
+    next_action: 08-verify-build M116 then open minor PR; continue M117 F69
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff (ChatRAG and Admin Feedback pages); T116.5 in_progress; head @{HEAD}; branch ahead of origin by 4 not pushed; PR #204 open_ci_green NOT merged (S026-D50); Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
-    updated_at: '2026-08-04T22:43:24Z'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1–T116.5 completed @a26d2a4..bb30b26; CI green on evolve/EV-024-frontend-ux-polish @bb30b26; M116 tasks complete; awaiting 08 + PR then M117; PR #204 open_ci_green NOT merged (S026-D50); current_stage→08-verify-build (verify_m116)'
+    updated_at: '2026-08-04T23:12:10Z'
     active_milestone: M116
     active_feature: F68
     m112_status: completed
@@ -5146,7 +5181,7 @@ active_session:
       current_task: T116.5
       current_milestone: M116
       phase: 27
-      task_status: in_progress
+      task_status: completed
       m112_status: completed
       m112_pr_merged: true
       m113_status: completed
@@ -5170,8 +5205,9 @@ active_session:
       - T116.2
       - T116.3
       - T116.4
+      - T116.5
       m115_verify: PASS
-      m116_status: in_progress
+      m116_status: tasks_complete_await_08
       completed_tasks_m115:
       - T115.1
       - T115.2
@@ -5184,6 +5220,7 @@ active_session:
       - T116.2
       - T116.3
       - T116.4
+      - T116.5
     m113_status: completed
     m113_verify: PASS
     m113_pr: 202
@@ -5191,7 +5228,7 @@ active_session:
     m113_head: 06f4ab1
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     m113_ci_status: success
-    build_head: 1c8f6ff
+    build_head: bb30b26
     pr_201: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
     s026_d43_decision: S026-D43
     m114_status: completed
@@ -5212,7 +5249,7 @@ active_session:
     current_milestone: M116
     current_task: T116.5
     active_task: T116.5
-    build_head_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
+    build_head_full: bb30b2611caed89279732df1364720a529ec89cf
     tasks_completed:
     - T115.1
     - T115.2
@@ -5222,6 +5259,7 @@ active_session:
     - T116.2
     - T116.3
     - T116.4
+    - T116.5
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -5248,7 +5286,7 @@ active_session:
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: open_ci_green
-    ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
+    ci_note: 'M116 T116.5 CI green on evolve/EV-024-frontend-ux-polish @bb30b26; PR #204 still open_ci_green NOT merged (S026-D50)'
     ci_status: success
     pr_204_ci_status: success
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -5266,6 +5304,10 @@ active_session:
     - 9bba998
     - d3947bd
     - 1c8f6ff
+    - 5b0405a
+    - c52021a
+    - a48bad9
+    - bb30b26
     t116_2_commit_pending: false
     t116_2_commit: 9bba998
     t116_2_artifacts: *id002
@@ -5280,31 +5322,33 @@ active_session:
     t116_3_files: *id004
     t116_4_commit: 1c8f6ff
     t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
-    t116_5_status: in_progress
-    t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
+    t116_5_status: completed
+    t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
     t116_4_files: *id005
-    branch_ahead_of_origin: 4
-    branch_unpushed_note: ahead of origin by 4 commits (a26d2a4..1c8f6ff) not pushed yet
-    resume_note: Resume 07-build per user continue-with-recommended; T116.5 in_progress
+    branch_ahead_of_origin: 0
+    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @bb30b26
+    resume_note: T116.5 completed @bb30b26; CI green; 08-verify-build M116 then open minor PR; continue M117 F69
     s026_d51_decision: S026-D51
-    execution_plan_note: execution-plan.md should show T116.5 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md)
+    execution_plan_note: execution-plan.md should show T116.5 completed (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 08-verify-build M116
+    t116_5_commit: bb30b26
+    t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
   - stage: 08-verify-build
     required: true
-    status: completed
+    status: in_progress
     skip_rationale:
-    mode: delta
+    mode: evolve
     started_at: '2026-08-04'
-    started_at_iso: '2026-08-04T18:27:00Z'
-    current_action: completed
-    next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+    started_at_iso: '2026-08-04T23:12:10Z'
+    current_action: verify_m116
+    next_action: 08-verify-build M116 then open minor PR; continue M117 F69
     askquestion_pending: false
     askquestion_pending_topic:
-    active_milestone: M113
-    active_feature: F67
-    active_issue: 106
-    build_head: adf40b4
-    note: 'S026/EV-024 08 PASS (M114) — #202/@9eaedb0 + #203/@f3f7dec merged; handoff → 07-build T115.1 red tests for F65 energy estimate (#93) | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head 605fce9; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; PR #204 CI green; head 605fce9; 07 continues M116 T116.1 (S026-D49) | AskQuestion resolved S026-D50 — continue M116 without merging PR #204; head 605fce9'
-    updated_at: '2026-08-04T22:01:21Z'
+    active_milestone: M116
+    active_feature: F68
+    active_issue: 186
+    build_head: bb30b26
+    note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M116 (F68 #186) build head bb30b26; CI green on evolve/EV-024-frontend-ux-polish; next: 08-verify-build M116 then open minor PR; continue M117 F69'
+    updated_at: '2026-08-04T23:12:10Z'
     completed_at: '2026-08-04'
     completed_at_iso: '2026-08-04T20:36:17Z'
     overall_result: PASS
@@ -5332,7 +5376,7 @@ active_session:
       opened_at: '2026-08-04'
       recorded_at: '2026-08-04T20:36:17Z'
       updated_at: '2026-08-04T20:59:01Z'
-      note: 'MERGED to main @ f3f7dec; main CI flake (Supabase advisors 502) then rerun green + deploy-preflight OK (S026-D47)'
+      note: MERGED to main @ f3f7dec; main CI flake (Supabase advisors 502) then rerun green + deploy-preflight OK (S026-D47)
       merge_approved_by: user
       merge_approved_decision: S026-D46
       merge_approved_at: '2026-08-04T20:41:30Z'
@@ -5372,7 +5416,7 @@ active_session:
       deploy_preflight_status: watching
       deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
     milestone_verified: M114
-    build_head_full: 06f4ab11f423996df2da88307d111a9f720d92c9
+    build_head_full: bb30b2611caed89279732df1364720a529ec89cf
     m113_status: completed
     m113_verify: PASS
     s026_d43_decision: S026-D43
@@ -5395,6 +5439,13 @@ active_session:
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     m115_ci_status: success
     s026_d50_decision: S026-D50
+    session_id: S026-frontend-ux-polish
+    branch: evolve/EV-024-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    delta_only: true
+    started: '2026-08-04'
+    m116_status: verify_in_progress
+    phase: 27
   - stage: 09-qa
     required: true
     status: pending
@@ -5421,9 +5472,9 @@ active_session:
     required: false
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
-  current_stage: 07-build
-  current_action: build_m116_t116_5
-  next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+  current_stage: 08-verify-build
+  current_action: verify_m116
+  next_action: 08-verify-build M116 then open minor PR; continue M117 F69
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -5493,10 +5544,10 @@ active_session:
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
   askquestion_pending_topic:
-  updated_at: '2026-08-04T22:43:24Z'
+  updated_at: '2026-08-04T23:12:10Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M116 F68 T116.1 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff (ChatRAG and Admin Feedback pages); T116.5 in_progress; M116 still in_progress; branch ahead of origin by 4 (a26d2a4..1c8f6ff) not pushed; PR #204 open_ci_green NOT merged (S026-D50); active_feature=F68 active_milestone=M116 active_task=T116.5 current_action=build_m116_t116_5; next=07-build T116.5 e2e/privacy green + Playwright uj073; head @1c8f6ff; Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
+  note: 'T116.5 complete; CI green on evolve/EV-024-frontend-ux-polish @ bb30b26. Next: 08-verify-build M116 + open minor PR, then M117.'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -5542,8 +5593,8 @@ active_session:
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
   active_task: T116.5
-  build_head: 1c8f6ff
-  build_head_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
+  build_head: bb30b26
+  build_head_full: bb30b2611caed89279732df1364720a529ec89cf
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
@@ -5563,7 +5614,7 @@ active_session:
   m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204_status: open_ci_green
-  ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
+  ci_note: 'M116 T116.5 CI green on evolve/EV-024-frontend-ux-polish @bb30b26; PR #204 still open_ci_green NOT merged (S026-D50)'
   m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
   s026_d50_decision: S026-D50
   t116_1_status: completed
@@ -5586,13 +5637,41 @@ active_session:
   t116_3_files: *id004
   t116_4_commit: 1c8f6ff
   t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
-  t116_5_status: in_progress
-  t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
+  t116_5_status: completed
+  t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
   t116_4_files: *id005
-  branch_ahead_of_origin: 4
-  resume_note: Resume 07-build per user continue-with-recommended; T116.5 in_progress
+  branch_ahead_of_origin: 0
+  resume_note: T116.5 completed @bb30b26; CI green; 08-verify-build M116 then open minor PR; continue M117 F69
   s026_d51_decision: S026-D51
-  execution_plan_note: execution-plan.md should show T116.5 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md)
+  execution_plan_note: execution-plan.md should show T116.5 completed (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 08-verify-build M116
+  t116_5_commit: bb30b26
+  t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
+  t116_5_files:
+  - tests/ui/chat/uj073-feedback.spec.ts
+  - apps/data-management-frontend/src/api/feedback.ts
+  - apps/data-management-frontend/src/pages/FeedbackPage.tsx
+  - docs/sessions/S000-internal-docs-archive/execution-plan.md
+  - docs/sessions/S026-frontend-ux-polish/HANDOFF.md
+  - workflow-state.yaml
+  branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @bb30b26
+  m116_commits:
+  - a26d2a4
+  - 9bba998
+  - d3947bd
+  - 1c8f6ff
+  - 5b0405a
+  - c52021a
+  - a48bad9
+  - bb30b26
+  current_milestone: M116
+  current_task: T116.5
+  ci_status: success
+  tasks_completed:
+  - T116.1
+  - T116.2
+  - T116.3
+  - T116.4
+  - T116.5
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -12951,8 +13030,8 @@ stages:
     active_milestone: M116
     active_feature: F68
     active_issue: 186
-    current_action: build_m116_t116_5
-    next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+    current_action: m116_complete_await_08_pr
+    next_action: 08-verify-build M116 then open minor PR; continue M117 F69
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -12961,11 +13040,11 @@ stages:
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff (ChatRAG and Admin Feedback pages); T116.5 in_progress; head @{HEAD}; branch ahead of origin by 4 not pushed; PR #204 open_ci_green NOT merged (S026-D50); Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
+    note: M116 tasks complete; awaiting 08 + PR then M117
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T22:43:24Z'
+    updated_at: '2026-08-04T23:12:10Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13224,6 +13303,7 @@ stages:
     - T116.2
     - T116.3
     - T116.4
+    - T116.5
     m112_status: completed
     m112_feature: F66
     m112_issue: 104
@@ -13240,7 +13320,7 @@ stages:
       current_task: T116.5
       current_milestone: M116
       phase: 27
-      task_status: in_progress
+      task_status: completed
       m112_status: completed
       m112_verify: PASS
       m112_pr: 200
@@ -13266,8 +13346,9 @@ stages:
       - T116.2
       - T116.3
       - T116.4
+      - T116.5
       m115_verify: PASS
-      m116_status: in_progress
+      m116_status: tasks_complete_await_08
       completed_tasks_m115:
       - T115.1
       - T115.2
@@ -13280,11 +13361,12 @@ stages:
       - T116.2
       - T116.3
       - T116.4
+      - T116.5
     m112_verify: PASS
     m112_pr: 200
     m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-    build_head: 1c8f6ff
+    build_head: bb30b26
     pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     s026_d29_decision: S026-D29
     m112_pr_merged: true
@@ -13326,7 +13408,7 @@ stages:
     m114_merge_sha_short: f3f7dec
     m114_status: completed
     active_task: T116.5
-    build_head_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
+    build_head_full: bb30b2611caed89279732df1364720a529ec89cf
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -13353,7 +13435,7 @@ stages:
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: open_ci_green
-    ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
+    ci_note: 'M116 T116.5 CI green on evolve/EV-024-frontend-ux-polish @bb30b26; PR #204 still open_ci_green NOT merged (S026-D50)'
     ci_status: success
     pr_204_ci_status: success
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -13371,6 +13453,10 @@ stages:
     - 9bba998
     - d3947bd
     - 1c8f6ff
+    - 5b0405a
+    - c52021a
+    - a48bad9
+    - bb30b26
     t116_2_commit_pending: false
     t116_2_commit: 9bba998
     t116_2_artifacts: *id002
@@ -13385,19 +13471,21 @@ stages:
     t116_3_files: *id004
     t116_4_commit: 1c8f6ff
     t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
-    t116_5_status: in_progress
-    t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
+    t116_5_status: completed
+    t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
     t116_4_files: *id005
-    branch_ahead_of_origin: 4
-    branch_unpushed_note: ahead of origin by 4 commits (a26d2a4..1c8f6ff) not pushed yet
-    resume_note: Resume 07-build per user continue-with-recommended; T116.5 in_progress
+    branch_ahead_of_origin: 0
+    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @bb30b26
+    resume_note: T116.5 completed @bb30b26; CI green; 08-verify-build M116 then open minor PR; continue M117 F69
     s026_d51_decision: S026-D51
-    execution_plan_note: execution-plan.md should show T116.5 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md)
+    execution_plan_note: execution-plan.md should show T116.5 completed (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 08-verify-build M116
+    t116_5_commit: bb30b26
+    t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
   08-verify-build:
-    status: completed
+    status: in_progress
     started_at: '2026-08-04'
     started: '2026-08-04'
-    started_at_iso: '2026-08-04T18:27:00Z'
+    started_at_iso: '2026-08-04T23:12:10Z'
     session_id: S026-frontend-ux-polish
     branch: evolve/EV-024-frontend-ux-polish
     session_branch: feat/S026-frontend-ux-polish
@@ -13420,11 +13508,11 @@ stages:
     - M116
     - M117
     - M118
-    active_milestone: M113
-    active_feature: F67
-    active_issue: 106
-    current_action: completed
-    next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+    active_milestone: M116
+    active_feature: F68
+    active_issue: 186
+    current_action: verify_m116
+    next_action: 08-verify-build M116 then open minor PR; continue M117 F69
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -13434,7 +13522,7 @@ stages:
     phase_c: pending
     gate_c_to_d: pending
     s026_d28_decision: S026-D28
-    build_head: 06f4ab1
+    build_head: bb30b26
     build_commits:
     - 47a618e
     - 18c8dc8
@@ -13444,10 +13532,10 @@ stages:
     - 8c81e65
     - 0942ef9
     m112_status: completed
-    note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head 605fce9; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; PR #204 CI green; head 605fce9; 07 continues M116 T116.1 (S026-D49) | AskQuestion resolved S026-D50 — continue M116 without merging PR #204; head 605fce9'
+    note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M116 (F68 #186) build head bb30b26; CI green on evolve/EV-024-frontend-ux-polish; next: 08-verify-build M116 then open minor PR; continue M117 F69'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
-    updated_at: '2026-08-04T22:01:21Z'
+    updated_at: '2026-08-04T23:12:10Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13817,7 +13905,7 @@ stages:
     overall_result: PASS
     result_scope: milestone
     milestone_verified: M114
-    build_head_full: 06f4ab11f423996df2da88307d111a9f720d92c9
+    build_head_full: bb30b2611caed89279732df1364720a529ec89cf
     m112_verify: PASS
     report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
     ci_status: success
@@ -13869,6 +13957,7 @@ stages:
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     m115_ci_status: success
     s026_d50_decision: S026-D50
+    m116_status: verify_in_progress
   09-qa:
     status: completed
     started: '2026-08-03'
@@ -27003,9 +27092,9 @@ evolve_cycles:
     - 15-service-health
   routing_preset: standard
   preset: Standard
-  current_stage: 07-build
-  current_action: build_m116_t116_5
-  next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+  current_stage: 08-verify-build
+  current_action: verify_m116
+  next_action: 08-verify-build M116 then open minor PR; continue M117 F69
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -27058,14 +27147,14 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-04'
-      current_action: build_m116_t116_5
+      current_action: verify_m116
       askquestion_pending: false
-      note: 'EV-024 Phase C — M116 T116.1 F68/#186 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff; T116.5 in_progress; Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
-      current_stage: 07-build
+      note: EV-024 Phase C — M116 T116.1–T116.5 F68/#186 completed @bb30b26; CI green; current_stage→08-verify-build (verify_m116); next=08-verify-build M116 then open minor PR; continue M117 F69
+      current_stage: 08-verify-build
       askquestion_pending_topic:
-      next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+      next_action: 08-verify-build M116 then open minor PR; continue M117 F69
       s026_d29_decision: S026-D29
-      updated_at: '2026-08-04T22:43:24Z'
+      updated_at: '2026-08-04T23:12:10Z'
       m112_pr_merged: true
       m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
       m112_merge_sha_short: e1ccf9e
@@ -27088,8 +27177,8 @@ evolve_cycles:
       s026_d49_decision: S026-D49
       m115_pr: 204
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-      build_head: 1c8f6ff
-      ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
+      build_head: bb30b26
+      ci_note: 'M116 T116.5 CI green on evolve/EV-024-frontend-ux-polish @bb30b26; PR #204 still open_ci_green NOT merged (S026-D50)'
       s026_d50_decision: S026-D50
       t116_1_status: completed
       t116_1_commit: a26d2a4
@@ -27100,9 +27189,34 @@ evolve_cycles:
       t116_3_commit: d3947bd
       t116_4_status: completed
       t116_4_commit: 1c8f6ff
-      t116_5_status: in_progress
-      resume_note: Resume 07-build per user continue-with-recommended; T116.5 in_progress
+      t116_5_status: completed
+      resume_note: T116.5 completed @bb30b26; CI green; 08-verify-build M116 then open minor PR; continue M117 F69
       s026_d51_decision: S026-D51
+      current_milestone: M116
+      current_task: T116.5
+      build_head_full: bb30b2611caed89279732df1364720a529ec89cf
+      t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
+      t116_5_commit: bb30b26
+      t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
+      branch_ahead_of_origin: 0
+      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @bb30b26
+      execution_plan_note: execution-plan.md should show T116.5 completed (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 08-verify-build M116
+      ci_status: success
+      m116_commits:
+      - a26d2a4
+      - 9bba998
+      - d3947bd
+      - 1c8f6ff
+      - 5b0405a
+      - c52021a
+      - a48bad9
+      - bb30b26
+      tasks_completed:
+      - T116.1
+      - T116.2
+      - T116.3
+      - T116.4
+      - T116.5
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -27366,8 +27480,8 @@ evolve_cycles:
       active_milestone: M116
       active_feature: F68
       active_issue: 186
-      current_action: build_m116_t116_5
-      next_action: '07-build T116.5 e2e/privacy green + Playwright uj073'
+      current_action: m116_complete_await_08_pr
+      next_action: 08-verify-build M116 then open minor PR; continue M117 F69
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -27376,8 +27490,8 @@ evolve_cycles:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff (ChatRAG and Admin Feedback pages); T116.5 in_progress; head @{HEAD}; branch ahead of origin by 4 not pushed; PR #204 open_ci_green NOT merged (S026-D50); Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
-      updated_at: '2026-08-04T22:43:24Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1–T116.5 completed @a26d2a4..bb30b26; CI green on evolve/EV-024-frontend-ux-polish @bb30b26; M116 tasks complete; awaiting 08 + PR then M117; PR #204 open_ci_green NOT merged (S026-D50); current_stage→08-verify-build (verify_m116)'
+      updated_at: '2026-08-04T23:12:10Z'
       milestones_completed: *id013
       tasks_completed:
       - T112.1
@@ -27396,6 +27510,7 @@ evolve_cycles:
       - T116.2
       - T116.3
       - T116.4
+      - T116.5
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -27412,7 +27527,7 @@ evolve_cycles:
         current_task: T116.5
         current_milestone: M116
         phase: 27
-        task_status: in_progress
+        task_status: completed
         m112_status: completed
         m112_verify: PASS
         m112_pr: 200
@@ -27438,8 +27553,9 @@ evolve_cycles:
         - T116.2
         - T116.3
         - T116.4
+        - T116.5
         m115_verify: PASS
-        m116_status: in_progress
+        m116_status: tasks_complete_await_08
         completed_tasks_m115:
         - T115.1
         - T115.2
@@ -27452,6 +27568,7 @@ evolve_cycles:
         - T116.2
         - T116.3
         - T116.4
+        - T116.5
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
       branch: evolve/EV-024-frontend-ux-polish
@@ -27459,7 +27576,7 @@ evolve_cycles:
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 1c8f6ff
+      build_head: bb30b26
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -27502,7 +27619,7 @@ evolve_cycles:
       current_milestone: M116
       current_task: T116.5
       active_task: T116.5
-      build_head_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
+      build_head_full: bb30b2611caed89279732df1364720a529ec89cf
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -27529,7 +27646,7 @@ evolve_cycles:
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: open_ci_green
-      ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
+      ci_note: 'M116 T116.5 CI green on evolve/EV-024-frontend-ux-polish @bb30b26; PR #204 still open_ci_green NOT merged (S026-D50)'
       ci_status: success
       pr_204_ci_status: success
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -27547,6 +27664,10 @@ evolve_cycles:
       - 9bba998
       - d3947bd
       - 1c8f6ff
+      - 5b0405a
+      - c52021a
+      - a48bad9
+      - bb30b26
       t116_2_commit_pending: false
       t116_2_commit: 9bba998
       t116_2_artifacts: *id002
@@ -27561,23 +27682,32 @@ evolve_cycles:
       t116_3_files: *id004
       t116_4_commit: 1c8f6ff
       t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
-      t116_5_status: in_progress
-      t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
+      t116_5_status: completed
+      t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
       t116_4_files: *id005
-      branch_ahead_of_origin: 4
-      branch_unpushed_note: ahead of origin by 4 commits (a26d2a4..1c8f6ff) not pushed yet
-      resume_note: Resume 07-build per user continue-with-recommended; T116.5 in_progress
+      branch_ahead_of_origin: 0
+      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @bb30b26
+      resume_note: T116.5 completed @bb30b26; CI green; 08-verify-build M116 then open minor PR; continue M117 F69
       s026_d51_decision: S026-D51
-      execution_plan_note: execution-plan.md should show T116.5 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md)
+      execution_plan_note: execution-plan.md should show T116.5 completed (docs/sessions/S000-internal-docs-archive/execution-plan.md); next 08-verify-build M116
+      t116_5_commit: bb30b26
+      t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
+      t116_5_files:
+      - tests/ui/chat/uj073-feedback.spec.ts
+      - apps/data-management-frontend/src/api/feedback.ts
+      - apps/data-management-frontend/src/pages/FeedbackPage.tsx
+      - docs/sessions/S000-internal-docs-archive/execution-plan.md
+      - docs/sessions/S026-frontend-ux-polish/HANDOFF.md
+      - workflow-state.yaml
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
     08-verify-build:
-      status: completed
+      status: in_progress
       started: '2026-08-04'
       started_at: '2026-08-04'
-      started_at_iso: '2026-08-04T18:27:00Z'
-      mode: delta
+      started_at_iso: '2026-08-04T23:12:10Z'
+      mode: evolve
       delta_only: true
       feature_ids:
       - F64
@@ -27595,11 +27725,11 @@ evolve_cycles:
       - M116
       - M117
       - M118
-      active_milestone: M114
-      active_feature: F64
-      active_issue: 87
-      current_action: completed
-      next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+      active_milestone: M116
+      active_feature: F68
+      active_issue: 186
+      current_action: verify_m116
+      next_action: 08-verify-build M116 then open minor PR; continue M117 F69
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -27607,7 +27737,7 @@ evolve_cycles:
       phase_a: passed
       phase_b: passed
       phase_c: pending
-      build_head: adf40b4
+      build_head: bb30b26
       build_commits:
       - 47a618e
       - 18c8dc8
@@ -27618,8 +27748,8 @@ evolve_cycles:
       - 0942ef9
       m112_status: completed
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M114) — F64 cold-start tips #87; PR #203 open; M113=#202; AskQuestion pending | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head 605fce9; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; PR #204 CI green; head 605fce9; 07 continues M116 T116.1 (S026-D49) | AskQuestion resolved S026-D50 — continue M116 without merging PR #204; head 605fce9'
-      updated_at: '2026-08-04T22:01:21Z'
+      note: 'S026/EV-024 08-verify-build IN_PROGRESS 2026-08-04 — verify M116 (F68 #186) build head bb30b26; CI green on evolve/EV-024-frontend-ux-polish; next: 08-verify-build M116 then open minor PR; continue M117 F69'
+      updated_at: '2026-08-04T23:12:10Z'
       completed: '2026-08-04'
       completed_at: '2026-08-04'
       completed_at_iso: '2026-08-04T20:36:17Z'
@@ -27631,7 +27761,7 @@ evolve_cycles:
       overall_result: PASS
       result_scope: milestone
       milestone_verified: M114
-      build_head_full: 06f4ab11f423996df2da88307d111a9f720d92c9
+      build_head_full: bb30b2611caed89279732df1364720a529ec89cf
       m112_verify: PASS
       report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
       ci_status: success
@@ -27650,7 +27780,7 @@ evolve_cycles:
         merge_approved_decision: S026-D46
         merge_approved_at: '2026-08-04T20:41:30Z'
         merged: true
-        note: 'MERGED to main @ f3f7dec; main CI flake (Supabase advisors 502) then rerun green + deploy-preflight OK (S026-D47)'
+        note: MERGED to main @ f3f7dec; main CI flake (Supabase advisors 502) then rerun green + deploy-preflight OK (S026-D47)
         updated_at: '2026-08-04T20:59:01Z'
         s026_d46_decision: S026-D46
         merge_sha: f3f7dec
@@ -27710,6 +27840,7 @@ evolve_cycles:
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
       m115_ci_status: success
       s026_d50_decision: S026-D50
+      m116_status: verify_in_progress
   artifacts:
   - &id021
     path: docs/dependency-inventory.md
@@ -28377,8 +28508,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M116 F68 T116.1 completed @a26d2a4; T116.2 completed @9bba998; T116.3 completed @d3947bd; T116.4 completed @1c8f6ff (ChatRAG and Admin Feedback pages); T116.5 in_progress; M116 still in_progress; branch ahead of origin by 4 (a26d2a4..1c8f6ff) not pushed; PR #204 open_ci_green NOT merged (S026-D50); active_feature=F68 active_milestone=M116 active_task=T116.5 current_action=build_m116_t116_5; next=07-build T116.5 e2e/privacy green + Playwright uj073; head @1c8f6ff; Resume 07-build per user continue-with-recommended; T116.5 in_progress (S026-D51)'
-  updated_at: '2026-08-04T22:43:24Z'
+  note: 'S026/EV-024 M116 boundary 2026-08-04 — T116.5 complete; CI green @bb30b26; current_stage=08-verify-build (verify_m116); 07-build stays in_progress for M117–M118; next: 08-verify-build M116 then open minor PR; continue M117 F69'
+  updated_at: '2026-08-04T23:12:10Z'
   feature_map:
     F64:
       issue: 87
@@ -28526,7 +28657,7 @@ evolve_cycles:
       opened_at: '2026-08-04'
       recorded_at: '2026-08-04T20:36:17Z'
       updated_at: '2026-08-04T20:59:01Z'
-      note: 'MERGED to main @ 9eaedb0; main CI+deploy-preflight green (S026-D47)'
+      note: MERGED to main @ 9eaedb0; main CI+deploy-preflight green (S026-D47)
       merge_approved_by: user
       merge_approved_decision: S026-D46
       merge_approved_at: '2026-08-04T20:41:30Z'
@@ -28631,7 +28762,7 @@ evolve_cycles:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  build_head: 1c8f6ff
+  build_head: bb30b26
   build_head_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
   s026_d48_decision: S026-D48
   m115_status: completed
@@ -36263,6 +36394,10 @@ artifacts:
   status: open
   note: M114 F64/#87 (S026-D45)
   recorded_at: '2026-08-04T20:36:17Z'
+- path: tests/ui/chat/uj073-feedback.spec.ts
+  session_id: S026-frontend-ux-polish
+  stage: 07-build
+  added_at: '2026-08-04T22:47:26Z'
 git_history:
   current_branch: evolve/EV-024-frontend-ux-polish
   branches:
@@ -36276,7 +36411,7 @@ git_history:
     evolve_cycle_id: EV-024
     head_short: 1c8f6ff
     note: 'PRs #202@9eaedb0 + #203@f3f7dec MERGED (S026-D47); branch remains open for M115+; main green | M115 complete @464131f (T115.4 @605fce9); 08-verify PASS; PR #204 open; continue M116 | M115 PR #204 open @605fce9 for #93; continue M116 T116.1 (S026-D49) | T115.4 coverage fix @605fce9; CI red on d93b78a (coverage branches 91.77%); fix pushed @605fce9; PR #204 CI green; continue M116 T116.1 | T116.1 completed @a26d2a4; T116.2 in_progress; PR #204 still open NOT merged | T116.2 code landing commit_pending; T116.3 in_progress; PR #204 still open NOT merged | T116.2 completed @9bba998; T116.3 in_progress; PR #204 still open NOT merged | T116.3 completed @d3947bd; T116.4 in_progress; PR #204 still open NOT merged | T116.4 completed @1c8f6ff; T116.5 in_progress; ahead of origin by 4 not pushed; PR #204 still open NOT merged'
-    head_sha: 1c8f6ff
+    head_sha: bb30b26
     pr_number: 203
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203
     pr_status: merged
@@ -36288,7 +36423,7 @@ git_history:
     ci_status: success
     main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     deploy_preflight_status: watching
-    updated_at: '2026-08-04T22:21:46Z'
+    updated_at: '2026-08-04T23:12:10Z'
     merge_sha_short: f3f7dec
     prior_pr_202_merge_sha: 9eaedb0
     m115_pr: 204
@@ -36296,6 +36431,7 @@ git_history:
     m115_pr_status: open_ci_green
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     ahead_of_origin: 4
+    head_sha_full: bb30b2611caed89279732df1364720a529ec89cf
   - name: evolve/EV-023-ci-release-automation
     purpose: EV-023 CI / local quality + release automation (#194)
     base: main
@@ -40419,7 +40555,92 @@ git_history:
     issue: 186
     files: *id005
     note: 'T116.4 completed — ChatRAG and Admin Feedback pages; continuing T116.5; branch ahead of origin by 4 not pushed; PR #204 still open NOT merged'
+  - sha: 5b0405a
+    full_sha: 5b0405aea17ae18725de9afb9bfd8f143adfa54c
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T116.5] test: Playwright uj073 and harden Admin Feedback types'
+    stage: 07-build
+    files_changed:
+    - tests/ui/chat/uj073-feedback.spec.ts
+    - apps/data-management-frontend/src/api/feedback.ts
+    - apps/data-management-frontend/src/pages/FeedbackPage.tsx
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S026-frontend-ux-polish/HANDOFF.md
+    - workflow-state.yaml
+    timestamp: '2026-08-04T22:47:26Z'
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+  - sha: c52021a
+    full_sha: c52021a0253cf60738eb86e90e81fce885604f26
+    sha_full: c52021a0253cf60738eb86e90e81fce885604f26
+    short: c52021a
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T116.5] fix: use SQLAlchemy mappings for feedback rows'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 2
+    timestamp: '2026-08-04T22:51:12Z'
+    milestone: M116
+    task: T116.5
+    feature_ids:
+    - F68
+    issue: 186
+    rd_range: RD-272..RD-289
+    files:
+    - apps/internal-write-api/vecinita_internal_write_api/feedback.py
+    - tests/integration/test_ev002_schema.py
+  - sha: a48bad9
+    full_sha: a48bad9c65e7ea24ab05fcff796ca1223dd5b293
+    sha_full: a48bad9c65e7ea24ab05fcff796ca1223dd5b293
+    short: a48bad9
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T116.5] fix: admin feedback auth order and Vitest coverage'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 4
+    timestamp: '2026-08-04T22:59:37Z'
+    milestone: M116
+    task: T116.5
+    feature_ids:
+    - F68
+    issue: 186
+    rd_range: RD-272..RD-289
+    files:
+    - apps/data-management-frontend/src/api/feedback.test.ts
+    - apps/data-management-frontend/src/pages/FeedbackPage.tsx
+    - apps/data-management-frontend/src/test/test_feedback_page.test.tsx
+    - tests/e2e/test_uj073_feedback.py
+  - sha: bb30b26
+    full_sha: bb30b2611caed89279732df1364720a529ec89cf
+    sha_full: bb30b2611caed89279732df1364720a529ec89cf
+    short: bb30b26
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T116.5] test: unit coverage for F68 feedback backends'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 4
+    timestamp: '2026-08-04T23:07:06Z'
+    milestone: M116
+    task: T116.5
+    feature_ids:
+    - F68
+    issue: 186
+    rd_range: RD-272..RD-289
+    files:
+    - tests/unit/chat_rag/test_feedback_route.py
+    - tests/unit/data_management/test_feedback_admin.py
+    - tests/unit/internal_write_api/test_feedback.py
+    - tests/unit/internal_write_api/test_feedback_routes.py
+    note: T116.5 complete; CI green on evolve/EV-024-frontend-ux-polish @bb30b26; handoff → 08-verify-build M116 + minor PR then M117
+    result: ci_green
   notes:
+  - '2026-08-04T23:12:10Z S026/EV-024: T116.5 complete; CI green on evolve/EV-024-frontend-ux-polish @ bb30b26. Next: 08-verify-build M116 + open minor PR, then M117. current_stage=08-verify-build; current_action=verify_m116; next=08-verify-build M116 then open minor PR; continue M117 F69; build_head=bb30b26; appended commits c52021a, a48bad9, bb30b26; 07-build remains in_progress (M116 tasks complete; awaiting 08 + PR then M117); 08-verify-build in_progress; askquestion_pending=false on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T22:43:24Z S026/EV-024: Resume 07-build per user continue-with-recommended; T116.5 in_progress; current_stage=07-build; current_action=build_m116_t116_5; next=07-build T116.5 e2e/privacy green + Playwright uj073; substeps.current_task=T116.5 task_status=in_progress; execution-plan.md should show T116.5 in_progress (docs/sessions/S000-internal-docs-archive/execution-plan.md); PR #204 open_ci_green NOT merged; askquestion_pending=false on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T22:21:46Z S026/EV-024: recorded commit 1c8f6ff ([T116.4] feat: ChatRAG and Admin Feedback pages for F68); T116.4 completed; T116.5 in_progress; build_head=1c8f6ff; current_action=build_m116_t116_5; next=07-build T116.5 e2e/privacy green + Playwright uj073; M116 still in_progress; branch ahead of origin by 4 (a26d2a4..1c8f6ff) not pushed; PR #204 open_ci_green NOT merged; askquestion_pending=false on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T22:17:30Z S026/EV-024: recorded commit d3947bd ([T116.3] feat: wire ChatRAG, write, and DM feedback APIs); T116.3 completed; T116.4 in_progress; build_head=d3947bd; current_action=build_m116_t116_4; next=07-build T116.4 ChatRAG Feedback page + Admin Feedback UI; M116 still in_progress; PR #204 open_ci_green NOT merged; askquestion_pending=false on evolve/EV-024-frontend-ux-polish.'
