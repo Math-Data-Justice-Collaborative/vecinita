@@ -2301,7 +2301,7 @@ privacy rejects (AC-UX10–UX13; TC-225–228; ADR-046).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T116.1 | Test: privacy + API e2e red — POST feedback; reject email; admin list; purge (TC-225–228) | Test | pending | AC-UX10–UX13, ADR-046, #186 | T115.4 | — | S026 | F68 |
+| T116.1 | Test: privacy + API e2e red — POST feedback; reject email; admin list; purge (TC-225–228) | Test | completed | AC-UX10–UX13, ADR-046, #186 | T115.4 | 2026-08-04 | S026 | F68 |
 | T116.2 | Code: DB migration `feedback` + retention purge; document table in `data-management-plan.md` | Code | pending | ADR-046, config-spec, 05 M3 | T116.1 | — | S026 | F68 |
 | T116.3 | Code: ChatRAG `POST /api/v1/feedback` → internal-write `POST /internal/v1/feedback`; DM backend `GET /admin/feedback` (JWT admin/super-admin) | Code | pending | api-contract, 05 M1 | T116.2 | — | S026 | F68 |
 | T116.4 | Code: ChatRAG Feedback page (calls public POST); Admin Feedback UI → DM `GET /admin/feedback` only | Code | pending | S026-D17, UJ-073, 05 M1 | T116.3 | — | S026 | F68 |
