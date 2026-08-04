@@ -1,3 +1,5 @@
+import { ActionIcon } from "vecinita-frontend-ui";
+
 import type { Theme } from "../hooks/useTheme";
 import type { Locale } from "../hooks/useLocale.types";
 import { t } from "../i18n/messages";
@@ -23,9 +25,14 @@ export function ThemeToggle({ theme, locale, onToggle }: ThemeToggleProps) {
       title={label}
       onClick={onToggle}
     >
-      <span aria-hidden="true" className="theme-toggle-icon">
-        {goingDark ? "🌙" : "☀️"}
-      </span>
+      <ActionIcon
+        motion="press"
+        pending={false}
+        className="theme-toggle-icon"
+        data-testid="theme-toggle-icon"
+      >
+        <span aria-hidden="true">{goingDark ? "🌙" : "☀️"}</span>
+      </ActionIcon>
       <span className="theme-toggle-text">{t(locale, "themeToggleLabel")}</span>
     </button>
   );

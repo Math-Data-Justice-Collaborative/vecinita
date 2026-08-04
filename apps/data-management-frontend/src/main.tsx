@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import { LocaleProvider } from "vecinita-frontend-ui";
+import "vecinita-frontend-ui/action-icon.css";
 
 import { AuthProvider } from "@/auth/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";

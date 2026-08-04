@@ -1,5 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
+import { ActionIcon } from "vecinita-frontend-ui";
+
 import {
   formatAskFailureMessage,
   isDoneEvent,
@@ -208,7 +210,19 @@ function ChatPanelView({
             placeholder={t(locale, "questionPlaceholder")}
           />
           <div className="form-actions">
-            <button type="submit" disabled={loading || !question.trim()}>
+            <button
+              type="submit"
+              disabled={loading || !question.trim()}
+              data-testid="chat-ask-submit"
+            >
+              <ActionIcon
+                motion="pulse"
+                pending={loading}
+                className="chat-ask-icon"
+                data-testid="chat-ask-icon"
+              >
+                <span aria-hidden="true">➤</span>
+              </ActionIcon>{" "}
               {loading ? t(locale, "asking") : t(locale, "ask")}
             </button>
             <button
@@ -216,7 +230,11 @@ function ChatPanelView({
               className="secondary"
               disabled={loading || isEmpty}
               onClick={clearHistory}
+              data-testid="chat-clear-history"
             >
+              <ActionIcon motion="press" pending={false}>
+                <span aria-hidden="true">⌫</span>
+              </ActionIcon>{" "}
               {t(locale, "clearHistory")}
             </button>
           </div>
