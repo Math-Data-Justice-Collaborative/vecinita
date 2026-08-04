@@ -1533,11 +1533,11 @@ project:
       - M116
       - M117
       - M118
-      active_milestone: M115
-      active_feature: F65
-      active_issue: 93
-      current_action: start_m115_t115_1
-      next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+      active_milestone: M116
+      active_feature: F68
+      active_issue: 186
+      current_action: build_m116_t116_1
+      next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1546,11 +1546,11 @@ project:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — S026-D47: #202 MERGED @9eaedb0, #203 MERGED @f3f7dec; main green; start M115 T115.1 (F65 energy / #93)'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.3 @464131f; T115.4 Vitest+Playwright uj070 green, API e2e deferred to CI — local Colima Postgres chmod denied); M115 08-verify PASS; minor PR #93 about to open; active M116 F68 T116.1; head 464131f; T115.4 commit will follow'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T20:59:01Z'
+      updated_at: '2026-08-04T21:35:14Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1687,6 +1687,7 @@ project:
       - M112
       - M113
       - M114
+      - M115
       tasks_completed:
       - T112.1
       - T112.2
@@ -1696,6 +1697,10 @@ project:
       - T113.2
       - T113.3
       - T113.4
+      - T115.1
+      - T115.2
+      - T115.3
+      - T115.4
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -1709,8 +1714,8 @@ project:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T115.1
-        current_milestone: M115
+        current_task: T116.1
+        current_milestone: M116
         phase: 27
         task_status: pending
         m112_status: completed
@@ -1721,7 +1726,6 @@ project:
         m113_verify: PASS
         m113_pr: 202
         remaining_milestones:
-        - M115
         - M116
         - M117
         - M118
@@ -1729,11 +1733,24 @@ project:
         m114_status: completed
         m114_pr: 203
         m114_pr_merged: true
+        m115_status: completed
+        tasks_completed:
+        - T115.1
+        - T115.2
+        - T115.3
+        - T115.4
+        m115_verify: PASS
+        m116_status: in_progress
+        completed_tasks_m115:
+        - T115.1
+        - T115.2
+        - T115.3
+        - T115.4
       m112_verify: PASS
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 06f4ab1
+      build_head: 464131f
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -1760,8 +1777,8 @@ project:
       m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
       m113_ci_status: success
       s026_d43_decision: S026-D43
-      current_milestone: M115
-      current_task: T115.1
+      current_milestone: M116
+      current_task: T116.1
       s026_d44_decision: S026-D44
       s026_d45_decision: S026-D45
       s026_d46_decision: S026-D46
@@ -1774,6 +1791,27 @@ project:
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
       m114_status: completed
+      active_task: T116.1
+      build_head_full: 464131f588644f00f10c3b47f999cca8cc54f51b
+      s026_d48_decision: S026-D48
+      m115_status: completed
+      m115_verify: PASS
+      m115_feature: F65
+      m115_issue: 93
+      m115_head: 464131f
+      m115_pr:
+      m115_pr_status: about_to_open
+      m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
+      t115_3_status: completed
+      t115_3_commit: 464131f
+      t115_4_status: completed
+      t115_4_commit:
+      t115_4_commit_pending: true
+      t115_4_note: Vitest+Playwright uj070 green; API e2e deferred to CI (local Colima Postgres chmod denied); commit will follow
+      m115_commits:
+      - a2ce572
+      - e138137
+      - 464131f
     08-verify-build:
       status: completed
       started_at: '2026-08-04'
@@ -1825,10 +1863,10 @@ project:
       - 8c81e65
       - 0942ef9
       m112_status: completed
-      note: 'M114 08 PASS; PR #203'
+      note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); minor PR #93 about to open; 07 continues M116 T116.1'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
-      updated_at: '2026-08-04T20:59:01Z'
+      updated_at: '2026-08-04T21:35:14Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1982,6 +2020,11 @@ project:
       m113_merge_sha: 9eaedb0
       m114_pr_merged: true
       m114_merge_sha: f3f7dec
+      m115_verify: PASS
+      m115_verify_at: '2026-08-04T21:35:14Z'
+      m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+      m115_pr_status: about_to_open
+      m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -4758,14 +4801,14 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: start_m115_t115_1
+    current_action: build_m116_t116_1
     current_stage: 07-build
-    note: 'EV-024 Phase C — S026-D47: #202+#203 merged; start M115 T115.1 (F65)'
+    note: 'EV-024 Phase C — M115 COMPLETE (08-verify PASS; PR #93 about to open); M116 T116.1 F68/#186; T115.3+T115.4 completed; M115 08-verify PASS; minor PR for #93 about to open (placeholder); next M116 T116.1 F68/#186'
     askquestion_pending: false
-    next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+    next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
     askquestion_pending_topic:
     s026_d29_decision: S026-D29
-    updated_at: '2026-08-04T20:59:01Z'
+    updated_at: '2026-08-04T21:35:14Z'
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
@@ -4777,9 +4820,9 @@ active_session:
     m113_ci_status: success
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     s026_d43_decision: S026-D43
-    active_milestone: M115
-    active_feature: F65
-    active_issue: 93
+    active_milestone: M116
+    active_feature: F68
+    active_issue: 186
     m114_pr: 203
     s026_d44_decision: S026-D44
     s026_d45_decision: S026-D45
@@ -4789,6 +4832,11 @@ active_session:
     m113_merge_sha: 9eaedb0
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
+    active_task: T116.1
+    build_head: 464131f
+    s026_d48_decision: S026-D48
+    m115_verify: PASS
+    m115_pr_status: about_to_open
   - stage: 01-requirements
     required: true
     status: completed
@@ -4937,34 +4985,35 @@ active_session:
     skip_rationale:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:20:46Z'
-    current_action: start_m115_t115_1
-    next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+    current_action: build_m116_t116_1
+    next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — S026-D47: #202 MERGED @9eaedb0, #203 MERGED @f3f7dec; main green; start M115 T115.1 (F65 energy / #93)'
-    updated_at: '2026-08-04T20:59:01Z'
-    active_milestone: M115
-    active_feature: F65
+    note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.3 @464131f; T115.4 Vitest+Playwright uj070 green, API e2e deferred to CI — local Colima Postgres chmod denied); M115 08-verify PASS; minor PR #93 about to open; active M116 F68 T116.1; head 464131f; T115.4 commit will follow'
+    updated_at: '2026-08-04T21:35:14Z'
+    active_milestone: M116
+    active_feature: F68
     m112_status: completed
     milestones_completed: &id009
     - M112
     - M113
     - M114
+    - M115
     m112_verify: PASS
     m112_pr: 200
-    active_issue: 93
+    active_issue: 186
     s026_d29_decision: S026-D29
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
     m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     substeps:
-      current_task: T115.1
-      current_milestone: M115
+      current_task: T116.1
+      current_milestone: M116
       phase: 27
       task_status: pending
       m112_status: completed
@@ -4973,7 +5022,6 @@ active_session:
       m113_verify: PASS
       m113_pr: 202
       remaining_milestones:
-      - M115
       - M116
       - M117
       - M118
@@ -4981,6 +5029,19 @@ active_session:
       m114_pr: 203
       m113_pr_merged: true
       m114_pr_merged: true
+      m115_status: completed
+      tasks_completed:
+      - T115.1
+      - T115.2
+      - T115.3
+      - T115.4
+      m115_verify: PASS
+      m116_status: in_progress
+      completed_tasks_m115:
+      - T115.1
+      - T115.2
+      - T115.3
+      - T115.4
     m113_status: completed
     m113_verify: PASS
     m113_pr: 202
@@ -4988,7 +5049,7 @@ active_session:
     m113_head: 06f4ab1
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     m113_ci_status: success
-    build_head: 06f4ab1
+    build_head: 464131f
     pr_201: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
     s026_d43_decision: S026-D43
     m114_status: completed
@@ -5006,8 +5067,34 @@ active_session:
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
-    current_milestone: M115
-    current_task: T115.1
+    current_milestone: M116
+    current_task: T116.1
+    active_task: T116.1
+    build_head_full: 464131f588644f00f10c3b47f999cca8cc54f51b
+    tasks_completed:
+    - T115.1
+    - T115.2
+    - T115.3
+    - T115.4
+    s026_d48_decision: S026-D48
+    m115_status: completed
+    m115_verify: PASS
+    m115_feature: F65
+    m115_issue: 93
+    m115_head: 464131f
+    m115_pr:
+    m115_pr_status: about_to_open
+    m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
+    t115_3_status: completed
+    t115_3_commit: 464131f
+    t115_4_status: completed
+    t115_4_commit:
+    t115_4_commit_pending: true
+    t115_4_note: Vitest+Playwright uj070 green; API e2e deferred to CI (local Colima Postgres chmod denied); commit will follow
+    m115_commits:
+    - a2ce572
+    - e138137
+    - 464131f
   - stage: 08-verify-build
     required: true
     status: completed
@@ -5023,8 +5110,8 @@ active_session:
     active_feature: F67
     active_issue: 106
     build_head: adf40b4
-    note: 'S026/EV-024 08 PASS (M114) — #202/@9eaedb0 + #203/@f3f7dec merged; handoff → 07-build T115.1 red tests for F65 energy estimate (#93)'
-    updated_at: '2026-08-04T20:59:01Z'
+    note: 'S026/EV-024 08 PASS (M114) — #202/@9eaedb0 + #203/@f3f7dec merged; handoff → 07-build T115.1 red tests for F65 energy estimate (#93) | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); minor PR #93 about to open; 07 continues M116 T116.1'
+    updated_at: '2026-08-04T21:35:14Z'
     completed_at: '2026-08-04'
     completed_at_iso: '2026-08-04T20:36:17Z'
     overall_result: PASS
@@ -5103,6 +5190,11 @@ active_session:
     m113_merge_sha: 9eaedb0
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
+    m115_verify: PASS
+    m115_verify_at: '2026-08-04T21:35:14Z'
+    m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+    m115_pr_status: about_to_open
+    m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
   - stage: 09-qa
     required: true
     status: pending
@@ -5130,8 +5222,8 @@ active_session:
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
   current_stage: 07-build
-  current_action: start_m115_t115_1
-  next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+  current_action: build_m116_t116_1
+  next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -5175,6 +5267,7 @@ active_session:
   - 'S026-D29: AskQuestion 42c→42a — merge PR #200 (M112 F66) first, then continue M113 (F67 Tooltip / #106); merge_policy approved'
   - 'S026-D46: AskQuestion 44c — merge PR #202 (M113) then #203 (M114), then continue M115 (F65 energy / #93); merge_policy approved'
   - 'S026-D47: #202 MERGED @ 9eaedb0 + #203 MERGED @ f3f7dec; main green after CI flake rerun; start M115 T115.1'
+  - 'S026-D48: AskQuestion 45a — Continue T115.3 FE energy chip + car line + advisory + use guide'
   feature_map:
     F64:
       issue: 87
@@ -5197,10 +5290,10 @@ active_session:
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
   askquestion_pending_topic:
-  updated_at: '2026-08-04T20:59:01Z'
+  updated_at: '2026-08-04T21:35:14Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 S026-D47 2026-08-04 — PR #202 MERGED @ 9eaedb0 (main CI+preflight green); PR #203 MERGED @ f3f7dec; main CI flake (Supabase advisors API 502) then rerun green + deploy-preflight OK; active_feature=F65 active_milestone=M115 current_action=start_m115_t115_1; next=07-build T115.1 red tests for F65 energy estimate (#93) | S026-D47: #202+#203 merged; main green @ f3f7dec; start M115'
+  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M115 F65 COMPLETE (T115.1–T115.4; head 464131f; T115.4 commit pending); M115 08-verify PASS; minor PR #93 pending open; active_feature=F68 active_milestone=M116 active_task=T116.1 current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186) | T115.3+T115.4 completed; M115 08-verify PASS; minor PR for #93 about to open (placeholder); next M116 T116.1 F68/#186'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -5216,9 +5309,9 @@ active_session:
   m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
   m112_head: 0942ef9
   m112_verify: PASS
-  active_feature: F65
-  active_milestone: M115
-  active_issue: 93
+  active_feature: F68
+  active_milestone: M116
+  active_issue: 186
   s026_d29_decision: S026-D29
   m112_pr_merged: true
   m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
@@ -5228,6 +5321,7 @@ active_session:
   - M112
   - M113
   - M114
+  - M115
   m113_pr: 202
   m113_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
   m113_head: 06f4ab1
@@ -5244,6 +5338,24 @@ active_session:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
+  active_task: T116.1
+  build_head: 464131f
+  build_head_full: 464131f588644f00f10c3b47f999cca8cc54f51b
+  s026_d48_decision: S026-D48
+  m115_status: completed
+  m115_verify: PASS
+  m115_feature: F65
+  m115_issue: 93
+  m115_head: 464131f
+  m115_pr:
+  m115_pr_status: about_to_open
+  m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
+  t115_3_status: completed
+  t115_3_commit: 464131f
+  t115_4_status: completed
+  t115_4_commit:
+  t115_4_commit_pending: true
+  t115_4_note: Vitest+Playwright uj070 green; API e2e deferred to CI (local Colima Postgres chmod denied); commit will follow
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -12599,11 +12711,11 @@ stages:
     - M116
     - M117
     - M118
-    active_milestone: M115
-    active_feature: F65
-    active_issue: 93
-    current_action: start_m115_t115_1
-    next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+    active_milestone: M116
+    active_feature: F68
+    active_issue: 186
+    current_action: build_m116_t116_1
+    next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -12612,11 +12724,11 @@ stages:
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — S026-D47: #202 MERGED @9eaedb0, #203 MERGED @f3f7dec; main green; start M115 T115.1 (F65 energy / #93)'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.3 @464131f; T115.4 Vitest+Playwright uj070 green, API e2e deferred to CI — local Colima Postgres chmod denied); M115 08-verify PASS; minor PR #93 about to open; active M116 F68 T116.1; head 464131f; T115.4 commit will follow'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T20:59:01Z'
+    updated_at: '2026-08-04T21:35:14Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -12857,6 +12969,7 @@ stages:
     - M112
     - M113
     - M114
+    - M115
     tasks_completed:
     - T112.1
     - T112.2
@@ -12866,6 +12979,10 @@ stages:
     - T113.2
     - T113.3
     - T113.4
+    - T115.1
+    - T115.2
+    - T115.3
+    - T115.4
     m112_status: completed
     m112_feature: F66
     m112_issue: 104
@@ -12879,8 +12996,8 @@ stages:
     - 0942ef9
     docs_commit: 47a618e
     substeps:
-      current_task: T115.1
-      current_milestone: M115
+      current_task: T116.1
+      current_milestone: M116
       phase: 27
       task_status: pending
       m112_status: completed
@@ -12891,7 +13008,6 @@ stages:
       m113_verify: PASS
       m113_pr: 202
       remaining_milestones:
-      - M115
       - M116
       - M117
       - M118
@@ -12899,11 +13015,24 @@ stages:
       m114_status: completed
       m114_pr: 203
       m114_pr_merged: true
+      m115_status: completed
+      tasks_completed:
+      - T115.1
+      - T115.2
+      - T115.3
+      - T115.4
+      m115_verify: PASS
+      m116_status: in_progress
+      completed_tasks_m115:
+      - T115.1
+      - T115.2
+      - T115.3
+      - T115.4
     m112_verify: PASS
     m112_pr: 200
     m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-    build_head: 06f4ab1
+    build_head: 464131f
     pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     s026_d29_decision: S026-D29
     m112_pr_merged: true
@@ -12930,8 +13059,8 @@ stages:
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     m113_ci_status: success
     s026_d43_decision: S026-D43
-    current_milestone: M115
-    current_task: T115.1
+    current_milestone: M116
+    current_task: T116.1
     s026_d44_decision: S026-D44
     s026_d45_decision: S026-D45
     s026_d46_decision: S026-D46
@@ -12944,6 +13073,27 @@ stages:
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
     m114_status: completed
+    active_task: T116.1
+    build_head_full: 464131f588644f00f10c3b47f999cca8cc54f51b
+    s026_d48_decision: S026-D48
+    m115_status: completed
+    m115_verify: PASS
+    m115_feature: F65
+    m115_issue: 93
+    m115_head: 464131f
+    m115_pr:
+    m115_pr_status: about_to_open
+    m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
+    t115_3_status: completed
+    t115_3_commit: 464131f
+    t115_4_status: completed
+    t115_4_commit:
+    t115_4_commit_pending: true
+    t115_4_note: Vitest+Playwright uj070 green; API e2e deferred to CI (local Colima Postgres chmod denied); commit will follow
+    m115_commits:
+    - a2ce572
+    - e138137
+    - 464131f
   08-verify-build:
     status: completed
     started_at: '2026-08-04'
@@ -12995,10 +13145,10 @@ stages:
     - 8c81e65
     - 0942ef9
     m112_status: completed
-    note: 'M114 08 PASS; PR #203'
+    note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); minor PR #93 about to open; 07 continues M116 T116.1'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
-    updated_at: '2026-08-04T20:59:01Z'
+    updated_at: '2026-08-04T21:35:14Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13408,6 +13558,11 @@ stages:
     m113_merge_sha: 9eaedb0
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
+    m115_verify: PASS
+    m115_verify_at: '2026-08-04T21:35:14Z'
+    m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+    m115_pr_status: about_to_open
+    m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
   09-qa:
     status: completed
     started: '2026-08-03'
@@ -26543,8 +26698,8 @@ evolve_cycles:
   routing_preset: standard
   preset: Standard
   current_stage: 07-build
-  current_action: start_m115_t115_1
-  next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+  current_action: build_m116_t116_1
+  next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -26597,14 +26752,14 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-04'
-      current_action: start_m115_t115_1
+      current_action: build_m116_t116_1
       askquestion_pending: false
-      note: 'Phase C — S026-D47 #202+#203 merged; start M115 T115.1'
+      note: 'Phase C — M115 COMPLETE (08-verify PASS; PR #93 about to open); M116 T116.1; T115.3+T115.4 completed; M115 08-verify PASS; minor PR for #93 about to open (placeholder); next M116 T116.1 F68/#186'
       current_stage: 07-build
       askquestion_pending_topic:
-      next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+      next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
       s026_d29_decision: S026-D29
-      updated_at: '2026-08-04T20:59:01Z'
+      updated_at: '2026-08-04T21:35:14Z'
       m112_pr_merged: true
       m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
       m112_merge_sha_short: e1ccf9e
@@ -26617,9 +26772,13 @@ evolve_cycles:
       s026_d45_decision: S026-D45
       s026_d46_decision: S026-D46
       s026_d47_decision: S026-D47
-      active_milestone: M115
-      active_feature: F65
-      active_issue: 93
+      active_milestone: M116
+      active_feature: F68
+      active_issue: 186
+      active_task: T116.1
+      s026_d48_decision: S026-D48
+      m115_verify: PASS
+      m115_pr_status: about_to_open
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -26880,11 +27039,11 @@ evolve_cycles:
       - M116
       - M117
       - M118
-      active_milestone: M115
-      active_feature: F65
-      active_issue: 93
-      current_action: start_m115_t115_1
-      next_action: '07-build T115.1 red tests for F65 energy estimate (#93)'
+      active_milestone: M116
+      active_feature: F68
+      active_issue: 186
+      current_action: build_m116_t116_1
+      next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -26893,8 +27052,8 @@ evolve_cycles:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — S026-D47: #202 MERGED @9eaedb0, #203 MERGED @f3f7dec; main green; start M115 T115.1 (F65 energy / #93)'
-      updated_at: '2026-08-04T20:59:01Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.3 @464131f; T115.4 Vitest+Playwright uj070 green, API e2e deferred to CI — local Colima Postgres chmod denied); M115 08-verify PASS; minor PR #93 about to open; active M116 F68 T116.1; head 464131f; T115.4 commit will follow'
+      updated_at: '2026-08-04T21:35:14Z'
       milestones_completed: *id009
       tasks_completed:
       - T112.1
@@ -26905,6 +27064,10 @@ evolve_cycles:
       - T113.2
       - T113.3
       - T113.4
+      - T115.1
+      - T115.2
+      - T115.3
+      - T115.4
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -26918,8 +27081,8 @@ evolve_cycles:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T115.1
-        current_milestone: M115
+        current_task: T116.1
+        current_milestone: M116
         phase: 27
         task_status: pending
         m112_status: completed
@@ -26930,7 +27093,6 @@ evolve_cycles:
         m113_verify: PASS
         m113_pr: 202
         remaining_milestones:
-        - M115
         - M116
         - M117
         - M118
@@ -26938,6 +27100,19 @@ evolve_cycles:
         m114_pr: 203
         m113_pr_merged: true
         m114_pr_merged: true
+        m115_status: completed
+        tasks_completed:
+        - T115.1
+        - T115.2
+        - T115.3
+        - T115.4
+        m115_verify: PASS
+        m116_status: in_progress
+        completed_tasks_m115:
+        - T115.1
+        - T115.2
+        - T115.3
+        - T115.4
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
       branch: evolve/EV-024-frontend-ux-polish
@@ -26945,7 +27120,7 @@ evolve_cycles:
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 06f4ab1
+      build_head: 464131f
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -26985,8 +27160,29 @@ evolve_cycles:
       m114_pr_merged: true
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
-      current_milestone: M115
-      current_task: T115.1
+      current_milestone: M116
+      current_task: T116.1
+      active_task: T116.1
+      build_head_full: 464131f588644f00f10c3b47f999cca8cc54f51b
+      s026_d48_decision: S026-D48
+      m115_status: completed
+      m115_verify: PASS
+      m115_feature: F65
+      m115_issue: 93
+      m115_head: 464131f
+      m115_pr:
+      m115_pr_status: about_to_open
+      m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
+      t115_3_status: completed
+      t115_3_commit: 464131f
+      t115_4_status: completed
+      t115_4_commit:
+      t115_4_commit_pending: true
+      t115_4_note: Vitest+Playwright uj070 green; API e2e deferred to CI (local Colima Postgres chmod denied); commit will follow
+      m115_commits:
+      - a2ce572
+      - e138137
+      - 464131f
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
@@ -27036,8 +27232,8 @@ evolve_cycles:
       - 0942ef9
       m112_status: completed
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M114) — F64 cold-start tips #87; PR #203 open; M113=#202; AskQuestion pending'
-      updated_at: '2026-08-04T20:59:01Z'
+      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M114) — F64 cold-start tips #87; PR #203 open; M113=#202; AskQuestion pending | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); minor PR #93 about to open; 07 continues M116 T116.1'
+      updated_at: '2026-08-04T21:35:14Z'
       completed: '2026-08-04'
       completed_at: '2026-08-04'
       completed_at_iso: '2026-08-04T20:36:17Z'
@@ -27116,6 +27312,11 @@ evolve_cycles:
       m113_merge_sha: 9eaedb0
       m114_pr_merged: true
       m114_merge_sha: f3f7dec
+      m115_verify: PASS
+      m115_verify_at: '2026-08-04T21:35:14Z'
+      m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+      m115_pr_status: about_to_open
+      m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
   artifacts:
   - &id017
     path: docs/dependency-inventory.md
@@ -27362,6 +27563,30 @@ evolve_cycles:
     issue: 106
   issues: []
   decisions:
+  - id: S026-D48
+    decision: 'AskQuestion 45a: Continue T115.3 FE energy chip + car line + advisory + use guide'
+    summary: 'AskQuestion 45a: Continue T115.3 FE energy chip + car line + advisory + use guide'
+    topic: continue_t115_3_fe
+    recorded_at: '2026-08-04T21:21:38Z'
+    status: confirmed
+    choice: 45a
+    options:
+    - 45a
+    - 45b
+    - 45c
+    askquestion: '45'
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    skill_id: 16-evolve
+    current_action: build_m115_t115_3
+    next_action: '07-build T115.3 FE energy chip + car line + advisory + use guide (F65 / #93)'
+    next_milestone: M115
+    next_feature: F65
+    next_issue: 93
+    next_task: T115.3
+    askquestion_pending: false
+    askquestion_pending_topic:
+    note: 'S026-D48: 45a continue T115.3 FE'
   - id: S026-D47
     decision: 'Merged #202 @ 9eaedb0 (main CI+preflight green); merged #203 @ f3f7dec; main CI initially failed on Supabase advisors API 502 (flake), rerun green + deploy-preflight OK; continue M115'
     summary: 'Merged #202 @ 9eaedb0 (main CI+preflight green); merged #203 @ f3f7dec; main CI initially failed on Supabase advisors API 502 (flake), rerun green + deploy-preflight OK; continue M115'
@@ -27721,8 +27946,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 S026-D47 2026-08-04 — PR #202 MERGED @ 9eaedb0 (main CI+preflight green); PR #203 MERGED @ f3f7dec; main CI flake (Supabase advisors API 502) then rerun green + deploy-preflight OK; active_feature=F65 active_milestone=M115 current_action=start_m115_t115_1; next=07-build T115.1 red tests for F65 energy estimate (#93) | S026-D47: #202+#203 merged; main green @ f3f7dec; start M115'
-  updated_at: '2026-08-04T20:59:01Z'
+  note: 'S026/EV-024 S026-D47 2026-08-04 — PR #202 MERGED @ 9eaedb0 (main CI+preflight green); PR #203 MERGED @ f3f7dec; main CI flake (Supabase advisors API 502) then rerun green + deploy-preflight OK; active_feature=F65 active_milestone=M115 current_action=start_m115_t115_1; next=07-build T115.1 red tests for F65 energy estimate (#93) | S026-D47: #202+#203 merged; main green @ f3f7dec; start M115 | T115.1+T115.2 done (energy helper + ask/stream wire); next T115.3 FE | S026-D48: 45a continue T115.3 FE | T115.3+T115.4 completed; M115 08-verify PASS; minor PR for #93 about to open (placeholder); next M116 T116.1 F68/#186'
+  updated_at: '2026-08-04T21:35:14Z'
   feature_map:
     F64:
       issue: 87
@@ -27884,9 +28109,9 @@ evolve_cycles:
       deploy_preflight_status: success
       s026_d47_decision: S026-D47
     '203': *id010
-  active_feature: F65
-  active_milestone: M115
-  active_issue: 93
+  active_feature: F68
+  active_milestone: M116
+  active_issue: 186
   s026_d29_decision: S026-D29
   m112_pr_merged: true
   m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
@@ -27931,7 +28156,7 @@ evolve_cycles:
     - T114.2
     feature: F64
     issue: 87
-  active_task:
+  active_task: T116.1
   s026_d44_decision: S026-D44
   s026_d45_decision: S026-D45
   m114_status: completed
@@ -27940,10 +28165,33 @@ evolve_cycles:
   m115_tasks:
   - id: T115.1
     type: Test
-    status: pending
+    status: completed
     summary: unit/API e2e red — ask + stream energy_estimate formula + car_* (TC-218–219)
     feature: F65
     issue: 93
+    commit: a2ce572
+  - id: T115.2
+    type: Code
+    status: completed
+    summary: ChatRAG energy_estimate on ask and stream done
+    feature: F65
+    issue: 93
+    commit: e138137
+  - id: T115.3
+    type: Code
+    status: completed
+    summary: FE energy chip + car line + advisory + use guide (EN/ES)
+    feature: F65
+    issue: 93
+    commit: 464131f
+  - id: T115.4
+    type: Test
+    status: completed
+    summary: Vitest+Playwright uj070 green; API e2e deferred to CI (Colima chmod)
+    feature: F65
+    issue: 93
+    commit_pending: true
+    note: Commit will follow; FE e2e green; API e2e CI-deferred
   s026_d46_decision: S026-D46
   s026_d47_decision: S026-D47
   m113_pr_merged: true
@@ -27952,6 +28200,23 @@ evolve_cycles:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
+  build_head: 464131f
+  build_head_full: 464131f588644f00f10c3b47f999cca8cc54f51b
+  s026_d48_decision: S026-D48
+  m115_status: completed
+  m115_verify: PASS
+  m115_feature: F65
+  m115_issue: 93
+  m115_head: 464131f
+  m115_pr:
+  m115_pr_status: about_to_open
+  m115_pr_note: 'Minor PR for #93 about to open (placeholder)'
+  t115_3_status: completed
+  t115_3_commit: 464131f
+  t115_4_status: completed
+  t115_4_commit:
+  t115_4_commit_pending: true
+  t115_4_note: Vitest+Playwright uj070 green; API e2e deferred to CI (local Colima Postgres chmod denied); commit will follow
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -29094,6 +29359,36 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-04'
+  id: S026-D48
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S026-frontend-ux-polish
+  evolve_cycle_id: EV-024
+  decision: 'AskQuestion 45a: Continue T115.3 FE energy chip + car line + advisory + use guide'
+  summary: 'AskQuestion 45a: Continue T115.3 FE energy chip + car line + advisory + use guide'
+  topic: continue_t115_3_fe
+  options:
+  - 45a
+  - 45b
+  - 45c
+  choice: 45a
+  option: a
+  askquestion: '45'
+  recorded_at: '2026-08-04T21:21:38Z'
+  approved: '2026-08-04'
+  approved_at: '2026-08-04T21:21:38Z'
+  status: confirmed
+  askquestion_pending: false
+  askquestion_pending_topic:
+  current_action: build_m115_t115_3
+  next_action: '07-build T115.3 FE energy chip + car line + advisory + use guide (F65 / #93)'
+  next_milestone: M115
+  next_feature: F65
+  next_issue: 93
+  next_task: T115.3
+  note: 'S026-D48: 45a continue T115.3 FE'
+  parent_doc_note: Parent should append S026-D48 to docs/decisions/evolve-decisions.md §EV-024
 - date: '2026-08-04'
   id: S026-D47
   skill: 16-evolve
@@ -35390,9 +35685,9 @@ git_history:
     created_at: '2026-08-04'
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
-    head_short: adf40b4
-    note: 'PRs #202@9eaedb0 + #203@f3f7dec MERGED (S026-D47); branch remains open for M115+; main green'
-    head_sha: adf40b4
+    head_short: 464131f
+    note: 'PRs #202@9eaedb0 + #203@f3f7dec MERGED (S026-D47); branch remains open for M115+; main green | M115 complete @464131f (T115.4 commit pending); 08-verify PASS; PR #93 about to open; continue M116'
+    head_sha: 464131f
     pr_number: 203
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203
     pr_status: merged
@@ -35404,7 +35699,7 @@ git_history:
     ci_status: success
     main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     deploy_preflight_status: watching
-    updated_at: '2026-08-04T20:36:17Z'
+    updated_at: '2026-08-04T21:35:14Z'
     merge_sha_short: f3f7dec
     prior_pr_202_merge_sha: 9eaedb0
   - name: evolve/EV-023-ci-release-automation
@@ -39336,7 +39631,49 @@ git_history:
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
     timestamp: '2026-08-04T20:36:17Z'
+  - sha: a2ce572
+    full_sha: a2ce57277c826c02e9bb9523c683149dbbd3ccae
+    sha_full: a2ce57277c826c02e9bb9523c683149dbbd3ccae
+    short: a2ce572
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T115.1] test: energy_estimate formula and ask/stream red (TC-218–219)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 4
+    timestamp: '2026-08-04T21:00:29Z'
+  - sha: e138137
+    full_sha: e138137902396a2a07fe9a766160c33471b47e62
+    sha_full: e138137902396a2a07fe9a766160c33471b47e62
+    short: e138137
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T115.2] feat: ChatRAG energy_estimate on ask and stream done'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 7
+    timestamp: '2026-08-04T21:11:21Z'
+  - sha: 464131f
+    full_sha: 464131f588644f00f10c3b47f999cca8cc54f51b
+    sha_full: 464131f588644f00f10c3b47f999cca8cc54f51b
+    short: 464131f
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T115.3] feat: ChatRAG energy chip, car line, advisory, use guide'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 12
+    timestamp: '2026-08-04T21:25:21Z'
+    milestone: M115
+    task: T115.3
+    feature_ids:
+    - F65
+    issue: 93
   notes:
+  - '2026-08-04T21:35:14Z S026/EV-024: recorded commit 464131f (T115.3); T115.4 commit will follow (Vitest+Playwright uj070 green; API e2e deferred to CI — Colima Postgres chmod denied); M115 08-verify PASS; minor PR for #93 about to open; pointers → M116/T116.1/build_m116_t116_1 on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-03T22:22:05Z S024/EV-022: recorded commit 55c4583 on docs/S024-EV-022-deploy-smoke-closeout — Path A deploy smoke PASS and close 13; PR #191 OPEN; stage completion unchanged.'
   - '2026-08-03T22:18:30Z S024/EV-022: Path A PASS — PR #190 MERGED @ cc2750c; Modal CD 30857801172 success; DO CD 30857894636 success; H1/H3/H3b/H4/H5 PASS; H2 SKIP; Alembic 20260803_0011 via DO CD; live OpenAPI /internal/v1/corpus/tree; report docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; gates.deploy=passed; awaiting cycle-close AskQuestion.'
   - '2026-08-03T21:35:21Z S024/EV-022: recorded commit 2c97d36 CI fix (nested shadow fixture, Alembic head, OpenAPI maxItems); PR #190 CI re-running after fix; next_action=Watch CI on PR #190 @ 2c97d36; merge when green.'

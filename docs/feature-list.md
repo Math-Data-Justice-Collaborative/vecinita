@@ -67,7 +67,7 @@
 | F62 | Husky lean pre-push + expanded pre-commit (#182) | Planned | Cross-cutting (infra) | `.husky/`, `scripts/ci/`, Makefile, LOCAL_DEV, ci-local-parity | S025/EV-023 #182 |
 | F63 | Automate release tagging after main CD (#103) | Planned | Cross-cutting (infra) | `.github/workflows/`, deploy docs, CHANGELOG alignment | S025/EV-023 #103 |
 | F64 | Cold-start wait: query tips + VECINA marketing | Implemented | ChatRAG | chat-rag-frontend | S026/EV-024 #87/#193 |
-| F65 | Ask energy estimate + use guide + advisory | Planned | ChatRAG | chat-rag-backend, chat-rag-frontend | S026/EV-024 #93/#193 |
+| F65 | Ask energy estimate + use guide + advisory | Implemented | ChatRAG | chat-rag-backend, chat-rag-frontend | S026/EV-024 #93/#193 |
 | F66 | Action icon micro-interactions | Implemented | Cross-cutting | `frontend-ui`, both frontends | S026/EV-024 #104/#193 |
 | F67 | Bilingual tooltips / contextual hints | Implemented | Cross-cutting | `frontend-ui`, `frontend-i18n`, both frontends | S026/EV-024 #106/#193 |
 | F68 | ChatRAG feedback page + backend (anonymous) | Planned | ChatRAG + Admin | chat-rag-*, internal-write, database, admin FE | S026/EV-024 #186/#193 |

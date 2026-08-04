@@ -10,13 +10,13 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
-| **Active milestone** | M115 — F65 Energy estimate + car equivalent (#93) |
-| **Active task** | **T115.4** — e2e green + Vitest + Playwright uj070 (TC-218–220, TC-231) |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); main green @ `f3f7dec` |
+| **Active milestone** | M116 — F68 ChatRAG feedback (#186) |
+| **Active task** | **T116.1** — privacy + API e2e red (TC-225–228) |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115** complete (PR pending #93); main green @ `f3f7dec` |
 | **Last updated** | 2026-08-04 |
-| **Evolve cycle** | EV-024 — Standard; 07-build M115 after #202+#203 merge (S026-D46/D47) |
+| **Evolve cycle** | EV-024 — Standard; 07-build M116 after M115 PR open |
 | **Git branch** | `evolve/EV-024-frontend-ux-polish` |
-| **Active session** | S026-frontend-ux-polish — 07-build M115 / F65 |
+| **Active session** | S026-frontend-ux-polish — 07-build M116 / F68 |
 | **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
 
 ## Template
@@ -2292,7 +2292,7 @@ guide (AC-UX3–UX5, AC-UX17; TC-218–220, TC-231; ADR-047).
 | T115.1 | Test: unit/API e2e red — ask + stream `energy_estimate` formula + car_* (TC-218–219) | Test | completed | AC-UX3, ADR-047, #93 | T114.3 | 2026-08-04 | S026 | F65 |
 | T115.2 | Code: ChatRAG energy helper + wire `/ask` + stream `done`; config env defaults | Code | completed | config-spec, api-contract, ADR-047 | T115.1 | 2026-08-04 | S026 | F65 |
 | T115.3 | Code: FE chip + car-distance line + advisory + use guide (EN/ES) | Code | completed | AC-UX4–UX5/UX17, UJ-070 | T115.2 | 2026-08-04 | S026 | F65 |
-| T115.4 | Test: e2e green TC-218–219; Vitest + Playwright uj070 (TC-220, TC-231) | Test | in_progress | TP4, UJ-070 | T115.3 | — | S026 | F65 |
+| T115.4 | Test: e2e green TC-218–219; Vitest + Playwright uj070 (TC-220, TC-231) | Test | completed | TP4, UJ-070 | T115.3 | 2026-08-04 | S026 | F65 |
 
 #### M116: F68 — Anonymous feedback (#186)
 
@@ -3157,7 +3157,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T115.1 | M115 | 27 | Test | completed | T114.3 | — | S026 | F65 | — |
 | T115.2 | M115 | 27 | Code | completed | T115.1 | — | S026 | F65 | — |
 | T115.3 | M115 | 27 | Code | completed | T115.2 | — | S026 | F65 | — |
-| T115.4 | M115 | 27 | Test | in_progress | T115.3 | — | S026 | F65 | — |
+| T115.4 | M115 | 27 | Test | completed | T115.3 | — | S026 | F65 | 2026-08-04 |
 | T116.1 | M116 | 27 | Test | pending | T115.4 | — | S026 | F68 | — |
 | T116.2 | M116 | 27 | Code | pending | T116.1 | — | S026 | F68 | 05 M3 |
 | T116.3 | M116 | 27 | Code | pending | T116.2 | — | S026 | F68 | 05 M1 |

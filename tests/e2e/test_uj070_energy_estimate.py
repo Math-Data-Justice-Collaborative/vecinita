@@ -1,16 +1,18 @@
-"""UJ-070 / TC-218–219: ask + stream include energy_estimate (F65 / AC-UX3)."""
+"""UJ-070 / TC-218-219: ask + stream include energy_estimate (F65 / AC-UX3)."""
 
 from __future__ import annotations
 
 import json
 from http import HTTPStatus
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
-from fastapi.testclient import TestClient
 from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 from tests.helpers.json_response import response_json_object
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
 
@@ -48,7 +50,8 @@ def _assert_energy_estimate(payload: object) -> None:
         abs=1e-9,
     )
     advisory = estimate["advisory"]
-    assert isinstance(advisory, str) and advisory.strip()
+    assert isinstance(advisory, str)
+    assert advisory.strip()
 
 
 def test_uj070_ask_includes_energy_estimate(chat_client: TestClient) -> None:
