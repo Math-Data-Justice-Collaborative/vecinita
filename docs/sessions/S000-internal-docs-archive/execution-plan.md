@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
 | **Active milestone** | M114 — F64 Cold-start tips + marketing (#87) |
-| **Active task** | **T114.1** — Test red: typed catalog rotation; no survey; consent/donate (TC-216–217) |
+| **Active task** | **T114.3** — Vitest green + Playwright uj069-wait-tips (TC-216–217) |
 | **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112 complete** (PR #200); **M113 complete** (PR #202 open; former #201 retargeted) |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; Gate B→C PASS; 07-build M114 (S026-D43: continue; #202 stays open) |
@@ -2280,7 +2280,7 @@ unchanged (AC-UX1–UX2; TC-216–217).
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T114.1 | Test: Vitest/unit red — typed catalog rotation; no survey UI (TC-216); consent/donate (TC-217) | Test | completed | AC-UX1–UX2, F64, #87 | T113.4 | 2026-08-04 | S026 | F64 |
 | T114.2 | Code: Extend `coldstart/facts` typed entries + wait UI rendering | Code | completed | S026-D3/D14, ADR-039 | T114.1 | 2026-08-04 | S026 | F64 |
-| T114.3 | Test: Vitest green; Playwright `tests/ui/chat/uj069-wait-tips.spec.ts` (TC-216–217) | Test | pending | UJ-069, TP4 | T114.2 | — | S026 | F64 |
+| T114.3 | Test: Vitest green; Playwright `tests/ui/chat/uj069-wait-tips.spec.ts` (TC-216–217) | Test | completed | UJ-069, TP4 | T114.2 | 2026-08-04 | S026 | F64 |
 
 #### M115: F65 — Energy estimate + car equivalent (#93)
 
@@ -3151,9 +3151,9 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T113.2 | M113 | 27 | Config | completed | — | — | S026 | F67 | — |
 | T113.3 | M113 | 27 | Code | completed | T113.1, T113.2 | — | S026 | F67 | — |
 | T113.4 | M113 | 27 | Test | completed | T113.3 | — | S026 | F67 | — |
-| T114.1 | M114 | 27 | Test | in_progress | T113.4 | — | S026 | F64 | — |
-| T114.2 | M114 | 27 | Code | pending | T114.1 | — | S026 | F64 | — |
-| T114.3 | M114 | 27 | Test | pending | T114.2 | — | S026 | F64 | — |
+| T114.1 | M114 | 27 | Test | completed | T113.4 | — | S026 | F64 | — |
+| T114.2 | M114 | 27 | Code | completed | T114.1 | — | S026 | F64 | — |
+| T114.3 | M114 | 27 | Test | completed | T114.2 | — | S026 | F64 | — |
 | T115.1 | M115 | 27 | Test | pending | T114.3 | — | S026 | F65 | — |
 | T115.2 | M115 | 27 | Code | pending | T115.1 | — | S026 | F65 | — |
 | T115.3 | M115 | 27 | Code | pending | T115.2 | — | S026 | F65 | — |
