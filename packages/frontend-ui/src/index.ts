@@ -7,4 +7,10 @@ export {
 export { LanguageToggle } from "./LanguageToggle";
 export { LocaleProvider } from "./LocaleProvider";
 export { PaginationControls } from "./PaginationControls";
+export {
+  Tooltip,
+  TooltipProvider,
+  type TooltipProps,
+  type TooltipProviderProps,
+} from "./Tooltip";
 export { useLocale } from "./useLocale";

@@ -1,0 +1,91 @@
+import "@testing-library/jest-dom/vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { Tooltip, TooltipProvider } from "../Tooltip";
+
+describe("Tooltip (TC-223, TC-224 / F67)", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders English tooltip content when open (TC-223)", () => {
+    render(
+      <TooltipProvider delayDuration={0}>
+        <Tooltip content="Toggle theme" open>
+          <button type="button">theme</button>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Toggle theme");
+  });
+
+  it("renders Spanish tooltip content when open (TC-223)", () => {
+    render(
+      <TooltipProvider delayDuration={0}>
+        <Tooltip content="Cambiar tema" open>
+          <button type="button">tema</button>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Cambiar tema");
+  });
+
+  it("shows tooltip on keyboard focus without hover (TC-224)", async () => {
+    render(
+      <TooltipProvider delayDuration={0}>
+        <Tooltip content="Language">
+          <button type="button">lang</button>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+    const trigger = screen.getByRole("button", { name: "lang" });
+    trigger.focus();
+    fireEvent.focus(trigger);
+
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip")).toHaveTextContent("Language");
+    });
+  });
+
+  it("supports defaultOpen, onOpenChange, className, and side", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <TooltipProvider delayDuration={0}>
+        <Tooltip
+          content="Hint"
+          defaultOpen
+          onOpenChange={onOpenChange}
+          className="extra-tip"
+          side="bottom"
+        >
+          <button type="button">hint</button>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    const tip = screen.getByRole("tooltip");
+    expect(tip).toHaveTextContent("Hint");
+    expect(tip.className).toContain("extra-tip");
+    expect(tip.className).toContain("vecinita-tooltip-content");
+  });
+
+  it("uses TooltipProvider defaults when delay props omitted", () => {
+    render(
+      <TooltipProvider>
+        <Tooltip content="Default delay" open>
+          <button type="button">d</button>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Default delay");
+  });
+});

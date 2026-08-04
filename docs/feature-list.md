@@ -69,7 +69,7 @@
 | F64 | Cold-start wait: query tips + VECINA marketing | Planned | ChatRAG | chat-rag-frontend | S026/EV-024 #87/#193 |
 | F65 | Ask energy estimate + use guide + advisory | Planned | ChatRAG | chat-rag-backend, chat-rag-frontend | S026/EV-024 #93/#193 |
 | F66 | Action icon micro-interactions | Implemented | Cross-cutting | `frontend-ui`, both frontends | S026/EV-024 #104/#193 |
-| F67 | Bilingual tooltips / contextual hints | Planned | Cross-cutting | `frontend-ui`, `frontend-i18n`, both frontends | S026/EV-024 #106/#193 |
+| F67 | Bilingual tooltips / contextual hints | Implemented | Cross-cutting | `frontend-ui`, `frontend-i18n`, both frontends | S026/EV-024 #106/#193 |
 | F68 | ChatRAG feedback page + backend (anonymous) | Planned | ChatRAG + Admin | chat-rag-*, internal-write, database, admin FE | S026/EV-024 #186/#193 |
 | F69 | Admin audit actor username (read-time) | Planned | Data Management | data-management-backend/frontend | S026/EV-024 #170/#193 |
 

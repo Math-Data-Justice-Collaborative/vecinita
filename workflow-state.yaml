@@ -1534,23 +1534,23 @@ project:
       - M117
       - M118
       active_milestone: M113
-      active_feature:
-      active_issue:
-      current_action: await_m112_merge_or_continue_m113
-      next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
-      askquestion_pending: true
-      askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+      active_feature: F67
+      active_issue: 106
+      current_action: building_m113
+      next_action: '07-build T113.1 red tests for F67 Tooltip'
+      askquestion_pending: false
+      askquestion_pending_topic:
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 COMPLETE + 08 PASS @ 0942ef9; PR #200 open (CI success); awaiting merge approval or continue M113 (M113–M118 remain); AskQuestion pending'
+      note: 'S026/EV-024 07-build IN_PROGRESS — PR #200 MERGED @ e1ccf9e; M112 done; building M113 (F67 Tooltip / #106); next T113.1 red tests; M113 tasks not completed'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T18:46:00Z'
+      updated_at: '2026-08-04T19:24:00Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1703,10 +1703,10 @@ project:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task:
+        current_task: T113.1
         current_milestone: M113
         phase: 27
-        task_status: awaiting_decision
+        task_status: pending
         m112_status: completed
         m112_verify: PASS
         m112_pr: 200
@@ -1717,12 +1717,20 @@ project:
         - M116
         - M117
         - M118
+        m112_pr_merged: true
       m112_verify: PASS
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
       build_head: 0942ef9
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
+      s026_d29_decision: S026-D29
+      m112_pr_merged: true
+      m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      m112_merge_sha_short: e1ccf9e
+      m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+      pr_200_status: merged
+      pr_200_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     08-verify-build:
       status: completed
       started_at: '2026-08-04'
@@ -1754,9 +1762,9 @@ project:
       active_feature: F66
       active_issue: 104
       current_action: completed
-      next_action: 'await_m112_merge_or_continue_m113'
-      askquestion_pending: true
-      askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+      next_action: '07-build T113.1 red tests for F67 Tooltip'
+      askquestion_pending: false
+      askquestion_pending_topic:
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
@@ -1774,10 +1782,10 @@ project:
       - 8c81e65
       - 0942ef9
       m112_status: completed
-      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) 2026-08-04 — F66 ActionIcon #104 @ 0942ef9; report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md; GitHub CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; PR #200 open; milestone verify done — stage may re-open at next milestone boundary'
+      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) — PR #200 MERGED @ e1ccf9e; main CI green https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208; deploy-preflight watching; handoff → 07-build T113.1 red tests for F67 Tooltip'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
-      updated_at: '2026-08-04T18:46:00Z'
+      updated_at: '2026-08-04T19:24:00Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1873,12 +1881,28 @@ project:
         number: 200
         url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
         title: '[M112] F66 ActionIcon micro-interactions (#104)'
-        status: open
-        merge_policy: needs_user_approval
+        status: merged
+        merge_policy: approved
         head_sha: 0942ef9
         ci_status: success
         ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
+        merge_approved_by: user
+        merge_approved_decision: S026-D29
+        merge_approved_at: '2026-08-04T19:16:24Z'
+        merged: true
+        note: 'MERGED to main @ e1ccf9e; CI green on main after HF Hub 429 flake rerun; deploy-preflight watching'
+        merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+        merge_commit_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+        merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+        merge_sha_short: e1ccf9e
+        merged_at: '2026-08-04T19:24:00Z'
+        head_sha_full: 0942ef940d7651a659687adda361cc37144a36c3
+        main_ci_status: success
+        main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+        deploy_preflight_status: watching
+        deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
       may_reopen_next_milestone: true
+      s026_d29_decision: S026-D29
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -4655,12 +4679,18 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: await_m112_merge_or_continue_m113
+    current_action: building_m113
     current_stage: 07-build
-    note: 'EV-024 Phase C — M112 08 PASS + PR #200 open (CI green); current_stage=07-build; await merge approval or continue M113'
-    askquestion_pending: true
-    next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
-    askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+    note: 'EV-024 Phase C — PR #200 MERGED @ e1ccf9e; building M113 (F67)'
+    askquestion_pending: false
+    next_action: '07-build T113.1 red tests for F67 Tooltip'
+    askquestion_pending_topic:
+    s026_d29_decision: S026-D29
+    updated_at: '2026-08-04T19:24:00Z'
+    m112_pr_merged: true
+    m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    m112_merge_sha_short: e1ccf9e
+    m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
   - stage: 01-requirements
     required: true
     status: completed
@@ -4809,23 +4839,45 @@ active_session:
     skip_rationale:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:20:46Z'
-    current_action: await_m112_merge_or_continue_m113
-    next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
-    askquestion_pending: true
-    askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+    current_action: building_m113
+    next_action: '07-build T113.1 red tests for F67 Tooltip'
+    askquestion_pending: false
+    askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 COMPLETE + 08 PASS @ 0942ef9; PR #200 open (CI success); awaiting merge approval or continue M113 (M113–M118 remain); AskQuestion pending'
-    updated_at: '2026-08-04T18:46:00Z'
+    note: 'S026/EV-024 07-build IN_PROGRESS — PR #200 MERGED @ e1ccf9e; M112 done; building M113 (F67 Tooltip / #106); next T113.1 red tests; M113 tasks not completed'
+    updated_at: '2026-08-04T19:24:00Z'
     active_milestone: M113
-    active_feature: F66
+    active_feature: F67
     m112_status: completed
     milestones_completed:
     - M112
     m112_verify: PASS
     m112_pr: 200
+    active_issue: 106
+    s026_d29_decision: S026-D29
+    m112_pr_merged: true
+    m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    m112_merge_sha_short: e1ccf9e
+    m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+    substeps:
+      current_task: T113.1
+      current_milestone: M113
+      phase: 27
+      task_status: pending
+      m112_status: completed
+      m112_verify: PASS
+      m112_pr: 200
+      m112_pr_merged: true
+      remaining_milestones:
+      - M113
+      - M114
+      - M115
+      - M116
+      - M117
+      - M118
   - stage: 08-verify-build
     required: true
     status: completed
@@ -4834,15 +4886,15 @@ active_session:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:27:00Z'
     current_action: completed
-    next_action: 'await_m112_merge_or_continue_m113'
-    askquestion_pending: true
-    askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+    next_action: '07-build T113.1 red tests for F67 Tooltip'
+    askquestion_pending: false
+    askquestion_pending_topic:
     active_milestone: M112
     active_feature: F66
     active_issue: 104
     build_head: 0942ef9
-    note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) 2026-08-04 — F66 ActionIcon #104 @ 0942ef9; report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md; GitHub CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; PR #200 open; milestone verify done — stage may re-open at next milestone boundary'
-    updated_at: '2026-08-04T18:46:00Z'
+    note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) — PR #200 MERGED @ e1ccf9e; main CI green https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208; deploy-preflight watching; handoff → 07-build T113.1 red tests for F67 Tooltip'
+    updated_at: '2026-08-04T19:24:00Z'
     completed_at: '2026-08-04'
     completed_at_iso: '2026-08-04T18:46:00Z'
     overall_result: PASS
@@ -4854,12 +4906,28 @@ active_session:
       number: 200
       url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       title: '[M112] F66 ActionIcon micro-interactions (#104)'
-      status: open
-      merge_policy: needs_user_approval
+      status: merged
+      merge_policy: approved
       head_sha: 0942ef9
       ci_status: success
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
+      merge_approved_by: user
+      merge_approved_decision: S026-D29
+      merge_approved_at: '2026-08-04T19:16:24Z'
+      merged: true
+      note: 'MERGED to main @ e1ccf9e; CI green on main after HF Hub 429 flake rerun; deploy-preflight watching'
+      merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_commit_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_sha_short: e1ccf9e
+      merged_at: '2026-08-04T19:24:00Z'
+      head_sha_full: 0942ef940d7651a659687adda361cc37144a36c3
+      main_ci_status: success
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+      deploy_preflight_status: watching
+      deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
     may_reopen_next_milestone: true
+    s026_d29_decision: S026-D29
   - stage: 09-qa
     required: true
     status: pending
@@ -4887,8 +4955,8 @@ active_session:
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
   current_stage: 07-build
-  current_action: await_m112_merge_or_continue_m113
-  next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
+  current_action: building_m113
+  next_action: '07-build T113.1 red tests for F67 Tooltip'
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -4903,7 +4971,7 @@ active_session:
   - F69
   phase0_approved: true
   phase_0_status: approved
-  askquestion_pending: true
+  askquestion_pending: false
   decisions:
   - 'S026-D1: Session type feature → 16-evolve; open S026'
   - 'S026-D2: One session / one evolve branch; one PR per issue (6 PRs)'
@@ -4929,6 +4997,7 @@ active_session:
   - 'S026-D26: 05 M2/M3/M4 approved (37a 38a 39a); applied T118.1→T114.3, T116.2 data-management-plan, T118.2 staging-secrets-matrix; M1 pending (36c explain → re-ask)'
   - 'S026-D27: M1 approved (40a) — Admin Feedback DM GET /admin/feedback + ChatRAG→internal-write POST; Admin FE→DM only; T116.3/T116.4 amended; 05 complete; Gate B→C pending'
   - 'S026-D28: Gate B→C PASS (41a). M1 locked per S026-D27. 06 skipped. Proceed to 07-build starting M112/F66 ActionIcon (#104).'
+  - 'S026-D29: AskQuestion 42c→42a — merge PR #200 (M112 F66) first, then continue M113 (F67 Tooltip / #106); merge_policy approved'
   feature_map:
     F64:
       issue: 87
@@ -4950,11 +5019,11 @@ active_session:
       title: Admin audit actor username (read-time)
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
-  updated_at: '2026-08-04T18:46:00Z'
+  askquestion_pending_topic:
+  updated_at: '2026-08-04T19:24:00Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 M112 08 PASS 2026-08-04 — verification-report PASS; GitHub CI green on evolve/EV-024-frontend-ux-polish @ 0942ef9; PR #200 open ([M112] F66 ActionIcon micro-interactions (#104)); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; current_stage→07-build for M113; merge PR #200 needs user approval; AskQuestion continue M113 vs pause'
+  note: 'S026/EV-024 PR #200 MERGED @ e1ccf9e 2026-08-04 — M112 F66 ActionIcon on main; CI green on main (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208); deploy-preflight watching (may still be in progress); active_feature=F67 active_milestone=M113 current_action=building_m113; next=07-build T113.1 red tests for F67 Tooltip; M113 tasks NOT started/completed'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -4970,6 +5039,16 @@ active_session:
   m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
   m112_head: 0942ef9
   m112_verify: PASS
+  active_feature: F67
+  active_milestone: M113
+  active_issue: 106
+  s026_d29_decision: S026-D29
+  m112_pr_merged: true
+  m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+  m112_merge_sha_short: e1ccf9e
+  m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+  milestones_completed:
+  - M112
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -12326,23 +12405,23 @@ stages:
     - M117
     - M118
     active_milestone: M113
-    active_feature:
-    active_issue:
-    current_action: await_m112_merge_or_continue_m113
-    next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
-    askquestion_pending: true
-    askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+    active_feature: F67
+    active_issue: 106
+    current_action: building_m113
+    next_action: '07-build T113.1 red tests for F67 Tooltip'
+    askquestion_pending: false
+    askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_a: passed
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 COMPLETE + 08 PASS @ 0942ef9; PR #200 open (CI success); awaiting merge approval or continue M113 (M113–M118 remain); AskQuestion pending'
+    note: 'S026/EV-024 07-build IN_PROGRESS — PR #200 MERGED @ e1ccf9e; M112 done; building M113 (F67 Tooltip / #106); next T113.1 red tests; M113 tasks not completed'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T18:46:00Z'
+    updated_at: '2026-08-04T19:24:00Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -12599,10 +12678,10 @@ stages:
     - 0942ef9
     docs_commit: 47a618e
     substeps:
-      current_task:
+      current_task: T113.1
       current_milestone: M113
       phase: 27
-      task_status: awaiting_decision
+      task_status: pending
       m112_status: completed
       m112_verify: PASS
       m112_pr: 200
@@ -12613,12 +12692,20 @@ stages:
       - M116
       - M117
       - M118
+      m112_pr_merged: true
     m112_verify: PASS
     m112_pr: 200
     m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
     build_head: 0942ef9
     pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
+    s026_d29_decision: S026-D29
+    m112_pr_merged: true
+    m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    m112_merge_sha_short: e1ccf9e
+    m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+    pr_200_status: merged
+    pr_200_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
   08-verify-build:
     status: completed
     started_at: '2026-08-04'
@@ -12650,9 +12737,9 @@ stages:
     active_feature: F66
     active_issue: 104
     current_action: completed
-    next_action: 'await_m112_merge_or_continue_m113'
-    askquestion_pending: true
-    askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+    next_action: '07-build T113.1 red tests for F67 Tooltip'
+    askquestion_pending: false
+    askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_a: passed
@@ -12670,10 +12757,10 @@ stages:
     - 8c81e65
     - 0942ef9
     m112_status: completed
-    note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) 2026-08-04 — F66 ActionIcon #104 @ 0942ef9; report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md; GitHub CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; PR #200 open; milestone verify done — stage may re-open at next milestone boundary'
+    note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) — PR #200 MERGED @ e1ccf9e; main CI green https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208; deploy-preflight watching; handoff → 07-build T113.1 red tests for F67 Tooltip'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
-    updated_at: '2026-08-04T18:46:00Z'
+    updated_at: '2026-08-04T19:24:00Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13052,12 +13139,28 @@ stages:
       number: 200
       url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       title: '[M112] F66 ActionIcon micro-interactions (#104)'
-      status: open
-      merge_policy: needs_user_approval
+      status: merged
+      merge_policy: approved
       head_sha: 0942ef9
       ci_status: success
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
+      merge_approved_by: user
+      merge_approved_decision: S026-D29
+      merge_approved_at: '2026-08-04T19:16:24Z'
+      merged: true
+      note: 'MERGED to main @ e1ccf9e; CI green on main after HF Hub 429 flake rerun; deploy-preflight watching'
+      merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_commit_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_sha_short: e1ccf9e
+      merged_at: '2026-08-04T19:24:00Z'
+      head_sha_full: 0942ef940d7651a659687adda361cc37144a36c3
+      main_ci_status: success
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+      deploy_preflight_status: watching
+      deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
     may_reopen_next_milestone: true
+    s026_d29_decision: S026-D29
   09-qa:
     status: completed
     started: '2026-08-03'
@@ -26083,8 +26186,8 @@ evolve_cycles:
   routing_preset: standard
   preset: Standard
   current_stage: 07-build
-  current_action: await_m112_merge_or_continue_m113
-  next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
+  current_action: building_m113
+  next_action: '07-build T113.1 red tests for F67 Tooltip'
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -26117,7 +26220,7 @@ evolve_cycles:
     - S026-D11
     note: Intake locked (S026-D1–D10); Fn allocation approved S026-D11
     next_action: 01-requirements writing_delta_specs
-  askquestion_pending: true
+  askquestion_pending: false
   checkpoints:
     phase_a: passed
     phase_b: passed
@@ -26137,12 +26240,18 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-04'
-      current_action: await_m112_merge_or_continue_m113
-      askquestion_pending: true
-      note: 'Phase C — M112 08 PASS + PR #200; await_m112_merge_or_continue_m113'
+      current_action: building_m113
+      askquestion_pending: false
+      note: 'Phase C — PR #200 MERGED @ e1ccf9e; building M113 (F67)'
       current_stage: 07-build
-      askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
-      next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
+      askquestion_pending_topic:
+      next_action: '07-build T113.1 red tests for F67 Tooltip'
+      s026_d29_decision: S026-D29
+      updated_at: '2026-08-04T19:24:00Z'
+      m112_pr_merged: true
+      m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      m112_merge_sha_short: e1ccf9e
+      m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -26404,20 +26513,20 @@ evolve_cycles:
       - M117
       - M118
       active_milestone: M113
-      active_feature:
-      active_issue:
-      current_action: await_m112_merge_or_continue_m113
-      next_action: 'AskQuestion: continue M113 vs pause (merge PR #200 needs explicit user approval; optional UI preview)'
-      askquestion_pending: true
-      askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+      active_feature: F67
+      active_issue: 106
+      current_action: building_m113
+      next_action: '07-build T113.1 red tests for F67 Tooltip'
+      askquestion_pending: false
+      askquestion_pending_topic:
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M112 COMPLETE + 08 PASS @ 0942ef9; PR #200 open (CI success); awaiting merge approval or continue M113 (M113–M118 remain); AskQuestion pending'
-      updated_at: '2026-08-04T18:46:00Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS — PR #200 MERGED @ e1ccf9e; M112 done; building M113 (F67 Tooltip / #106); next T113.1 red tests; M113 tasks not completed'
+      updated_at: '2026-08-04T19:24:00Z'
       milestones_completed:
       - M112
       tasks_completed:
@@ -26438,10 +26547,10 @@ evolve_cycles:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task:
+        current_task: T113.1
         current_milestone: M113
         phase: 27
-        task_status: awaiting_decision
+        task_status: pending
         m112_status: completed
         m112_verify: PASS
         m112_pr: 200
@@ -26452,6 +26561,7 @@ evolve_cycles:
         - M116
         - M117
         - M118
+        m112_pr_merged: true
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
       branch: evolve/EV-024-frontend-ux-polish
@@ -26461,6 +26571,13 @@ evolve_cycles:
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
       build_head: 0942ef9
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
+      s026_d29_decision: S026-D29
+      m112_pr_merged: true
+      m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      m112_merge_sha_short: e1ccf9e
+      m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+      pr_200_status: merged
+      pr_200_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
@@ -26491,9 +26608,9 @@ evolve_cycles:
       active_feature: F66
       active_issue: 104
       current_action: completed
-      next_action: 'await_m112_merge_or_continue_m113'
-      askquestion_pending: true
-      askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+      next_action: '07-build T113.1 red tests for F67 Tooltip'
+      askquestion_pending: false
+      askquestion_pending_topic:
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
@@ -26510,8 +26627,8 @@ evolve_cycles:
       - 0942ef9
       m112_status: completed
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) 2026-08-04 — F66 ActionIcon #104 @ 0942ef9; report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md; GitHub CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; PR #200 open; milestone verify done — stage may re-open at next milestone boundary'
-      updated_at: '2026-08-04T18:46:00Z'
+      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M112) — PR #200 MERGED @ e1ccf9e; main CI green https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208; deploy-preflight watching; handoff → 07-build T113.1 red tests for F67 Tooltip'
+      updated_at: '2026-08-04T19:24:00Z'
       completed: '2026-08-04'
       completed_at: '2026-08-04'
       completed_at_iso: '2026-08-04T18:46:00Z'
@@ -26532,14 +26649,30 @@ evolve_cycles:
         number: 200
         url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
         title: '[M112] F66 ActionIcon micro-interactions (#104)'
-        status: open
-        merge_policy: needs_user_approval
+        status: merged
+        merge_policy: approved
         head_sha: 0942ef9
         ci_status: success
         ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
+        merge_approved_by: user
+        merge_approved_decision: S026-D29
+        merge_approved_at: '2026-08-04T19:16:24Z'
+        merged: true
+        note: 'MERGED to main @ e1ccf9e; CI green on main after HF Hub 429 flake rerun; deploy-preflight watching'
+        merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+        merge_commit_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+        merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+        merge_sha_short: e1ccf9e
+        merged_at: '2026-08-04T19:24:00Z'
+        head_sha_full: 0942ef940d7651a659687adda361cc37144a36c3
+        main_ci_status: success
+        main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+        deploy_preflight_status: watching
+        deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
       may_reopen_next_milestone: true
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
+      s026_d29_decision: S026-D29
   artifacts:
   - &id011
     path: docs/dependency-inventory.md
@@ -26776,6 +26909,27 @@ evolve_cycles:
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
   issues: []
   decisions:
+  - id: S026-D29
+    decision: 'S026-D29: AskQuestion 42c→42a — merge PR #200 (M112 F66 ActionIcon) first, then continue M113 (F67 Tooltip / #106). merge_policy approved for PR #200; do not mark merged until parent completes merge.'
+    summary: 'S026-D29: AskQuestion 42c→42a — merge PR #200 (M112 F66 ActionIcon) first, then continue M113 (F67 Tooltip / #106). merge_policy approved for PR #200; do not mark merged until parent completes merge.'
+    topic: merge_pr_200_then_m113
+    recorded_at: '2026-08-04T19:16:24Z'
+    status: confirmed
+    choice: 42c_then_42a
+    options:
+    - 42c
+    - 42a
+    askquestion: '42'
+    sequence: c_then_a
+    merge_pr: 200
+    merge_policy: approved
+    pr_status: open
+    merged: false
+    next_milestone: M113
+    next_feature: F67
+    next_issue: 106
+    current_action: merging_pr_200_then_m113
+    note: 'User 42c→42a: merge #200 first then M113; PR not marked merged yet (parent in progress)'
   - id: S026-D28
     decision: Gate B→C PASS (41a). M1 locked per S026-D27. 06 skipped. Proceed to 07-build starting M112/F66 ActionIcon (#104).
     summary: Gate B→C PASS (41a). M1 locked per S026-D27. 06 skipped. Proceed to 07-build starting M112/F66 ActionIcon (#104).
@@ -26997,8 +27151,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 M112 08 PASS 2026-08-04 — verification-report PASS; GitHub CI green on evolve/EV-024-frontend-ux-polish @ 0942ef9; PR #200 open ([M112] F66 ActionIcon micro-interactions (#104)); CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; current_stage→07-build for M113; merge PR #200 needs user approval; AskQuestion continue M113 vs pause'
-  updated_at: '2026-08-04T18:46:00Z'
+  note: 'S026/EV-024 PR #200 MERGED @ e1ccf9e 2026-08-04 — M112 F66 ActionIcon on main; CI green on main (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208); deploy-preflight watching (may still be in progress); active_feature=F67 active_milestone=M113 current_action=building_m113; next=07-build T113.1 red tests for F67 Tooltip; M113 tasks NOT started/completed'
+  updated_at: '2026-08-04T19:24:00Z'
   feature_map:
     F64:
       issue: 87
@@ -27047,7 +27201,7 @@ evolve_cycles:
   proposed_features_status: allocated
   proposed_features_allocated_at: '2026-08-04T13:51:00Z'
   proposed_features_decision: S026-D11
-  askquestion_pending_topic: continue_m113_vs_pause_ui_preview_merge_pr200
+  askquestion_pending_topic:
   s026_d20_decision: S026-D20
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
@@ -27073,8 +27227,8 @@ evolve_cycles:
       title: '[M112] F66 ActionIcon micro-interactions (#104)'
       branch: evolve/EV-024-frontend-ux-polish
       base: main
-      status: open
-      merged: false
+      status: merged
+      merged: true
       head_sha: 0942ef9
       head_sha_full: 0942ef940d7651a659687adda361cc37144a36c3
       milestone: M112
@@ -27086,8 +27240,36 @@ evolve_cycles:
       recorded_at: '2026-08-04T18:46:00Z'
       ci_status: success
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      merge_policy: needs_user_approval
-      note: M112 minor PR; CI green; do not merge without explicit user approval
+      merge_policy: approved
+      note: 'MERGED to main @ e1ccf9e; CI green on main after HF Hub 429 flake rerun; deploy-preflight watching'
+      merge_approved_by: user
+      merge_approved_decision: S026-D29
+      merge_approved_at: '2026-08-04T19:16:24Z'
+      merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_commit_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+      merge_sha_short: e1ccf9e
+      merged_at: '2026-08-04T19:24:00Z'
+      main_ci_status: success
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+      deploy_preflight_status: watching
+      deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
+  active_feature: F67
+  active_milestone: M113
+  active_issue: 106
+  s026_d29_decision: S026-D29
+  m112_pr_merged: true
+  m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+  m112_merge_sha_short: e1ccf9e
+  m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+  milestones_completed:
+  - M112
+  pr_status: merged
+  pr_merged: true
+  merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+  merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+  main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+  deploy_preflight_status: watching
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -28230,6 +28412,39 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- date: '2026-08-04'
+  id: S026-D29
+  skill: 07-build
+  skill_id: 07-build
+  session_id: S026-frontend-ux-polish
+  evolve_cycle_id: EV-024
+  decision: 'S026-D29: AskQuestion 42c→42a — merge PR #200 (M112 F66 ActionIcon) first, then continue M113 (F67 Tooltip / #106). merge_policy approved for PR #200; do not mark merged until parent completes merge.'
+  summary: 'S026-D29: AskQuestion 42c→42a — merge PR #200 (M112 F66 ActionIcon) first, then continue M113 (F67 Tooltip / #106). merge_policy approved for PR #200; do not mark merged until parent completes merge.'
+  topic: merge_pr_200_then_m113
+  options:
+  - 42c
+  - 42a
+  choice: 42c_then_42a
+  option: c_then_a
+  askquestion: '42'
+  recorded_at: '2026-08-04T19:16:24Z'
+  approved: '2026-08-04'
+  approved_at: '2026-08-04T19:16:24Z'
+  status: confirmed
+  askquestion_pending: false
+  askquestion_pending_topic:
+  merge_pr: 200
+  merge_policy: approved
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
+  pr_status: open
+  merged: false
+  current_action: merging_pr_200_then_m113
+  next_action: 'merge PR #200 then start 07-build M113 (F67)'
+  next_milestone: M113
+  next_feature: F67
+  next_issue: 106
+  note: 'AskQuestion 42 answered c then a; merge #200 approved; continue M113 after merge; PR not marked merged yet'
+  parent_doc_note: Appended S026-D29 to docs/decisions/evolve-decisions.md §EV-024
 - date: '2026-08-04'
   id: S026-D28
   skill: 05-verify-tech
@@ -31518,6 +31733,7 @@ decisions_log:
   pr_198: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/198
   merge_sha: 5234bc230c20c9049d74ee090052e8b401083a70
 - '2026-08-04 S026/EV-024: M112 08-verify-build PASS @ 0942ef9; PR #200 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200); CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; merge needs user approval; AskQuestion: continue M113 vs pause'
+- 'S026/EV-024: PR #200 MERGED @ e1ccf9e; building_m113; next T113.1 red tests (F67); main CI green https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208; deploy-preflight watching'
 artifacts:
 - *id008
 - *id009
@@ -34373,11 +34589,20 @@ git_history:
     created_at: '2026-08-04'
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
-    head_short: 5234bc2
-    note: Created locally from main @ 5234bc2; open_session 2026-08-04
-    head_sha: 0942ef9
+    head_short: e1ccf9e
+    note: 'PR #200 MERGED @ e1ccf9e (M112 F66); branch remains open for M113+; main CI green; deploy-preflight watching'
+    head_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     pr_number: 200
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
+    pr_status: merged
+    pr_merged: true
+    merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    merge_sha_full: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    merged_at: '2026-08-04T19:24:00Z'
+    ci_status: success
+    main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+    deploy_preflight_status: watching
   - name: evolve/EV-023-ci-release-automation
     purpose: EV-023 CI / local quality + release automation (#194)
     base: main
@@ -38114,6 +38339,25 @@ git_history:
     issue: 104
     rd_range: RD-272..RD-289
     note: 'Branch head for PR #200; GitHub CI green'
+  - sha: e1ccf9e
+    full_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    sha_full: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+    short: e1ccf9e
+    branch: main
+    message: 'Merge pull request #200 from evolve/EV-024-frontend-ux-polish'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    timestamp: '2026-08-04T19:24:00Z'
+    milestone: M112
+    feature_ids:
+    - F66
+    issue: 104
+    pr_number: 200
+    merge_commit: true
+    note: 'PR #200 MERGED to main; CI green after HF Hub 429 flake rerun; deploy-preflight watching'
+    main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
   notes:
   - '2026-08-03T22:22:05Z S024/EV-022: recorded commit 55c4583 on docs/S024-EV-022-deploy-smoke-closeout — Path A deploy smoke PASS and close 13; PR #191 OPEN; stage completion unchanged.'
   - '2026-08-03T22:18:30Z S024/EV-022: Path A PASS — PR #190 MERGED @ cc2750c; Modal CD 30857801172 success; DO CD 30857894636 success; H1/H3/H3b/H4/H5 PASS; H2 SKIP; Alembic 20260803_0011 via DO CD; live OpenAPI /internal/v1/corpus/tree; report docs/sessions/S024-website-scrape-crawl/reports/deploy-smoke.md; gates.deploy=passed; awaiting cycle-close AskQuestion.'

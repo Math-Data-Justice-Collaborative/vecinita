@@ -1,0 +1,49 @@
+/* F67 / #106 — Tooltip content (works without Tailwind in ChatRAG). */
+
+.vecinita-tooltip-content {
+  z-index: 50;
+  max-width: 16rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #111827;
+  color: #f9fafb;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  word-wrap: break-word;
+  animation: vecinita-tooltip-in 120ms ease-out;
+}
+
+.vecinita-tooltip-content[data-state="closed"] {
+  animation: vecinita-tooltip-out 100ms ease-in;
+}
+
+@keyframes vecinita-tooltip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes vecinita-tooltip-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vecinita-tooltip-content,
+  .vecinita-tooltip-content[data-state="closed"] {
+    animation: none;
+  }
+}

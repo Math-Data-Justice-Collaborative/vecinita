@@ -1,7 +1,8 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeToggle } from "./ThemeToggle";
+import { renderWithLocale } from "../test/renderWithLocale";
 
 describe("ThemeToggle", () => {
   afterEach(() => {
@@ -10,7 +11,9 @@ describe("ThemeToggle", () => {
 
   it("shows the dark-mode affordance when the current theme is light", () => {
     const onToggle = vi.fn();
-    render(<ThemeToggle theme="light" locale="en" onToggle={onToggle} />);
+    renderWithLocale(
+      <ThemeToggle theme="light" locale="en" onToggle={onToggle} />,
+    );
 
     const button = screen.getByTestId("theme-toggle");
     expect(button).toHaveAttribute(
@@ -24,7 +27,9 @@ describe("ThemeToggle", () => {
   });
 
   it("shows the light-mode affordance when the current theme is dark", () => {
-    render(<ThemeToggle theme="dark" locale="en" onToggle={() => {}} />);
+    renderWithLocale(
+      <ThemeToggle theme="dark" locale="en" onToggle={() => {}} />,
+    );
 
     const button = screen.getByTestId("theme-toggle");
     expect(button).toHaveAttribute(

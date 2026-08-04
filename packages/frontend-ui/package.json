@@ -16,6 +16,7 @@
     "./action-icon.css": "./src/action-icon.css"
   },
   "dependencies": {
+    "@radix-ui/react-tooltip": "^1.2.8",
     "vecinita-frontend-i18n": "*"
   },
   "peerDependencies": {

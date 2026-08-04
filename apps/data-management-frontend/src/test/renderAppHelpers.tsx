@@ -4,7 +4,7 @@ import {
   waitFor,
   type RenderResult,
 } from "@testing-library/react";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import {
   createMemoryRouter,
   MemoryRouter,
@@ -13,7 +13,7 @@ import {
   Routes,
 } from "react-router-dom";
 import { expect, vi } from "vitest";
-import { LocaleProvider } from "vecinita-frontend-ui";
+import { LocaleProvider, TooltipProvider } from "vecinita-frontend-ui";
 
 import { AuthProvider } from "@/auth/AuthContext";
 import App from "@/App";
@@ -42,20 +42,28 @@ export async function waitForAuthReady(): Promise<void> {
   });
 }
 
+function AppTree({ children }: { children: ReactNode }) {
+  return (
+    <LocaleProvider>
+      <TooltipProvider delayDuration={0}>
+        <ThemeProvider>{children}</ThemeProvider>
+      </TooltipProvider>
+    </LocaleProvider>
+  );
+}
+
 export function renderAppRoutes(initialRoute = "/dashboard"): RenderResult {
   installAuthenticatedSupabaseMock();
   return render(
-    <LocaleProvider>
-      <ThemeProvider>
-        <MemoryRouter initialEntries={[initialRoute]}>
-          <AuthProvider>
-            <Routes>
-              <Route path="/*" element={<App />} />
-            </Routes>
-          </AuthProvider>
-        </MemoryRouter>
-      </ThemeProvider>
-    </LocaleProvider>,
+    <AppTree>
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/*" element={<App />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    </AppTree>,
   );
 }
 
@@ -72,17 +80,15 @@ export function renderSuperAdminAppRoutes(
 ): RenderResult {
   installSuperAdminSupabaseMock();
   return render(
-    <LocaleProvider>
-      <ThemeProvider>
-        <MemoryRouter initialEntries={[initialRoute]}>
-          <AuthProvider>
-            <Routes>
-              <Route path="/*" element={<App />} />
-            </Routes>
-          </AuthProvider>
-        </MemoryRouter>
-      </ThemeProvider>
-    </LocaleProvider>,
+    <AppTree>
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/*" element={<App />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    </AppTree>,
   );
 }
 
@@ -104,13 +110,11 @@ export function renderSuperAdminAppWithRouter(
     initialEntries: [initialRoute],
   });
   const result = render(
-    <LocaleProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
-      </ThemeProvider>
-    </LocaleProvider>,
+    <AppTree>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </AppTree>,
   );
   return { ...result, router };
 }

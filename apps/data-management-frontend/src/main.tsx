@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
-import { LocaleProvider } from "vecinita-frontend-ui";
+import { LocaleProvider, TooltipProvider } from "vecinita-frontend-ui";
 
 import { AuthProvider } from "@/auth/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -17,13 +17,15 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <LocaleProvider>
-      <ThemeProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </BrowserRouter>
-      </ThemeProvider>
+      <TooltipProvider>
+        <ThemeProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </BrowserRouter>
+        </ThemeProvider>
+      </TooltipProvider>
     </LocaleProvider>
   </StrictMode>,
 );

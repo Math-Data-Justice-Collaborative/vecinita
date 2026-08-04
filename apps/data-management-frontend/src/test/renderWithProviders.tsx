@@ -1,6 +1,6 @@
 import { render, type RenderOptions } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
-import { LocaleProvider } from "vecinita-frontend-ui";
+import { LocaleProvider, TooltipProvider } from "vecinita-frontend-ui";
 
 import { AuthProvider } from "@/auth/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -8,9 +8,11 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 function AllProviders({ children }: { children: ReactNode }) {
   return (
     <LocaleProvider>
-      <ThemeProvider>
-        <AuthProvider>{children}</AuthProvider>
-      </ThemeProvider>
+      <TooltipProvider delayDuration={0}>
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
+      </TooltipProvider>
     </LocaleProvider>
   );
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { type StringMessageKey } from "vecinita-frontend-i18n";
-import { PaginationControls, useLocale } from "vecinita-frontend-ui";
+import { type StringMessageKey, t as i18nT } from "vecinita-frontend-i18n";
+import { PaginationControls, Tooltip, useLocale } from "vecinita-frontend-ui";
 
 import {
   changeUserRole,
@@ -558,18 +558,22 @@ export function UsersPage() {
                         </Button>
                       )}
                       {user.status === "active" ? (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={actionBusy === user.id}
-                          data-testid={`force-signout-${user.id}`}
-                          onClick={() => {
-                            void handleForceSignout(user.id);
-                          }}
+                        <Tooltip
+                          content={i18nT(locale, "admin.tooltip.forceSignout")}
                         >
-                          {tr("admin.users.action.forceSignout")}
-                        </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={actionBusy === user.id}
+                            data-testid={`force-signout-${user.id}`}
+                            onClick={() => {
+                              void handleForceSignout(user.id);
+                            }}
+                          >
+                            {tr("admin.users.action.forceSignout")}
+                          </Button>
+                        </Tooltip>
                       ) : null}
                       <Button
                         type="button"

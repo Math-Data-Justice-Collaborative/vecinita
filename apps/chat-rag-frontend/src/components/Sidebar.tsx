@@ -7,7 +7,8 @@ import { LanguageToggle } from "./LanguageToggle";
 import { PreviousChatsList } from "./PreviousChatsList";
 import { TagFilterChips } from "./TagFilterChips";
 import { ThemeToggle } from "./ThemeToggle";
-import { ActionIcon } from "vecinita-frontend-ui";
+import { ActionIcon, Tooltip } from "vecinita-frontend-ui";
+import { t as i18nT } from "vecinita-frontend-i18n";
 
 type SidebarProps = {
   open: boolean;
@@ -63,18 +64,20 @@ export function Sidebar({
     >
       <div className="sidebar-brand">{t(locale, "appTitle")}</div>
 
-      <button
-        type="button"
-        className="sidebar-new-chat"
-        disabled={newChatDisabled}
-        onClick={onNewChat}
-        data-testid="sidebar-new-chat"
-      >
-        <ActionIcon motion="press" pending={false} aria-hidden="true">
-          <span>+ </span>
-        </ActionIcon>
-        {t(locale, "newChat")}
-      </button>
+      <Tooltip content={i18nT(locale, "chat.tooltip.newChat")}>
+        <button
+          type="button"
+          className="sidebar-new-chat"
+          disabled={newChatDisabled}
+          onClick={onNewChat}
+          data-testid="sidebar-new-chat"
+        >
+          <ActionIcon motion="press" pending={false} aria-hidden="true">
+            <span>+ </span>
+          </ActionIcon>
+          {t(locale, "newChat")}
+        </button>
+      </Tooltip>
 
       <nav className="sidebar-nav" aria-label="Primary">
         <button
