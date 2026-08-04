@@ -35,6 +35,12 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-066 Corpus tree nesting | `tests/e2e/test_uj066_corpus_tree.py` | TC-204, TC-205, TC-206, TC-207 | `tests/ui/admin/uj066-corpus-tree.spec.ts` |
 | UJ-067 Lean Husky push | `tests/unit/ci/test_husky_tiers.py` (07) | TC-208, TC-209, TC-210, TC-211 | — (no UI) |
 | UJ-068 Auto release tag | `tests/unit/ci/test_release_tagging.py` (07) | TC-212, TC-213, TC-214, TC-215 | — (no UI) |
+| UJ-069 Wait tips + marketing | Vitest + `tests/ui/chat/uj069-wait-tips.spec.ts` | TC-216, TC-217 | yes |
+| UJ-070 Energy estimate + guide | `tests/e2e/test_uj070_energy_estimate.py` + Vitest | TC-218, TC-219, TC-220, TC-231 | `tests/ui/chat/uj070-energy.spec.ts` |
+| UJ-071 Icon micro-interactions | Vitest both frontends + `frontend-ui` | TC-221, TC-222 | opt |
+| UJ-072 Bilingual tooltips | Vitest `frontend-ui` + both apps | TC-223, TC-224 | opt |
+| UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228 | `tests/ui/chat/uj073-feedback.spec.ts` |
+| UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1335,6 +1341,90 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: `.github/workflows/release*.yml` structure.
 - **Expected**: Trigger after workflow named **Deploy DigitalOcean** succeeds on `main`;
   permissions `contents: write`; Release body includes SHA + CI/CD URLs; AC-REL1 + AC-REL3.
+
+### TC-216: Wait catalog includes tip + marketing types (UJ-069, F64)
+
+- **Objective**: Typed catalog rotates `tip` and `marketing` entries during wait UX.
+- **Input**: Mocked slow ask; Vitest / Playwright wait shell.
+- **Expected**: Tip + marketing visible; no survey UI; AC-UX1.
+
+### TC-217: F40 consent + donate unchanged with typed catalog (UJ-069, F64)
+
+- **Objective**: ADR-039 consent/donate still pass with F64 content.
+- **Expected**: TC-158/159 behavior preserved; AC-UX2.
+
+### TC-218: Ask response includes energy_estimate (UJ-070, F65)
+
+- **Objective**: `/api/v1/ask` returns `energy_estimate` with wh, g_co2e, method, advisory,
+  `car_km_equiv`, `car_m_equiv`.
+- **Input**: TestClient ask with fixed duration stub.
+- **Expected**: Formula uses TDP 70 × util 0.5 × seconds; car_* from g_co2e / 251; AC-UX3.
+
+### TC-219: Stream done includes energy_estimate (UJ-070, F65)
+
+- **Objective**: SSE `done` carries same estimate object.
+- **Expected**: AC-UX3; e2e stream path.
+
+### TC-220: FE shows estimate chip + advisory + use guide (UJ-070, F65)
+
+- **Objective**: UI renders estimate + advisory (EN/ES) and use guide entry.
+- **Expected**: AC-UX4–UX5; Vitest + T0-ui.
+
+### TC-231: FE shows car-travel distance equivalent (UJ-070, F65)
+
+- **Objective**: Chip/secondary line shows ≈ meters (and/or miles) from `car_m_equiv` /
+  `car_km_equiv`; use guide may mention day/year %.
+- **Expected**: AC-UX17; Vitest + T0-ui; copy marked approximate.
+
+### TC-221: Refresh/send icons animate while pending (UJ-071, F66)
+
+- **Objective**: Shared ActionIcon applies spin/pulse when `pending`.
+- **Expected**: Class/`aria-busy`; stops on settle/error; AC-UX6.
+
+### TC-222: prefers-reduced-motion skips animation (UJ-071, F66)
+
+- **Objective**: Reduced-motion media query disables/shortens animations.
+- **Expected**: AC-UX7.
+
+### TC-223: Tooltip EN/ES for theme toggle (UJ-072, F67)
+
+- **Objective**: Tooltip content switches with locale.
+- **Expected**: AC-UX8; Vitest.
+
+### TC-224: Tooltip keyboard focus (UJ-072, F67)
+
+- **Objective**: Focus shows tooltip without hover-only dependency.
+- **Expected**: AC-UX9.
+
+### TC-225: POST /feedback stores anonymous row (UJ-073, F68)
+
+- **Objective**: Valid category+message persists; rejects email field.
+- **Expected**: 201/200; privacy reject; AC-UX10–UX11.
+
+### TC-226: Feedback button → page journey (UJ-073, F68)
+
+- **Objective**: ChatRAG chrome Feedback navigates to `/feedback`; submit success UI.
+- **Expected**: Vitest/Playwright; AC-UX12.
+
+### TC-227: Admin Feedback list (UJ-073, F68)
+
+- **Objective**: Admin/super-admin lists feedback; other roles 403.
+- **Expected**: AC-UX12.
+
+### TC-228: Feedback 90-day purge (UJ-073, F68)
+
+- **Objective**: Rows older than 90d removed by purge path.
+- **Expected**: AC-UX13.
+
+### TC-229: Audit list returns actor_email when resolvable (UJ-074, F69)
+
+- **Objective**: Enriched audit items include `actor_email` from Supabase; else null + UI UUID fallback.
+- **Expected**: AC-UX14; no DB column for email on audit_log.
+
+### TC-230: audit_log schema remains PII-free (UJ-074, F69)
+
+- **Objective**: Privacy tests — no email/name columns or writes on audit_log.
+- **Expected**: AC-UX15.
 
 ## Test Data
 

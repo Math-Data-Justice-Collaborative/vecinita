@@ -12,7 +12,8 @@
     "format:check": "prettier --check ."
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./action-icon.css": "./src/action-icon.css"
   },
   "dependencies": {
     "vecinita-frontend-i18n": "*"

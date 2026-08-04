@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
-import { useLocale } from "vecinita-frontend-ui";
+import { ActionIcon, useLocale } from "vecinita-frontend-ui";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -106,9 +106,14 @@ export function HealthPage() {
             disabled={loading}
             aria-label={tr("admin.health.refreshAria")}
           >
-            <RefreshCw
-              className={cn("mr-2 h-4 w-4", loading && "animate-spin")}
-            />
+            <ActionIcon
+              motion="spin"
+              pending={loading}
+              className="mr-2 inline-flex"
+              data-testid="health-refresh-icon"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </ActionIcon>
             {tr("shared.refresh")}
           </Button>
         </div>

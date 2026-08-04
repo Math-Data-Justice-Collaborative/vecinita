@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-03 (S025/EV-023 — F62–F63 CI/release; prior S024/EV-022 F59–F61)
+> **Last updated**: 2026-08-04 (S026/EV-024 — F64–F69 UX polish epic #193; prior S025/EV-023 F62–F63)
 
 ## Summary
 
@@ -66,6 +66,12 @@
 | F61 | Corpus tree UI + nested source metadata (#70) | Planned | Data Management (+ ChatRAG backend meta) | data-management-frontend, DM backend, write API, chat-rag-backend | S024/EV-022 #70 |
 | F62 | Husky lean pre-push + expanded pre-commit (#182) | Planned | Cross-cutting (infra) | `.husky/`, `scripts/ci/`, Makefile, LOCAL_DEV, ci-local-parity | S025/EV-023 #182 |
 | F63 | Automate release tagging after main CD (#103) | Planned | Cross-cutting (infra) | `.github/workflows/`, deploy docs, CHANGELOG alignment | S025/EV-023 #103 |
+| F64 | Cold-start wait: query tips + VECINA marketing | Planned | ChatRAG | chat-rag-frontend | S026/EV-024 #87/#193 |
+| F65 | Ask energy estimate + use guide + advisory | Planned | ChatRAG | chat-rag-backend, chat-rag-frontend | S026/EV-024 #93/#193 |
+| F66 | Action icon micro-interactions | Implemented | Cross-cutting | `frontend-ui`, both frontends | S026/EV-024 #104/#193 |
+| F67 | Bilingual tooltips / contextual hints | Planned | Cross-cutting | `frontend-ui`, `frontend-i18n`, both frontends | S026/EV-024 #106/#193 |
+| F68 | ChatRAG feedback page + backend (anonymous) | Planned | ChatRAG + Admin | chat-rag-*, internal-write, database, admin FE | S026/EV-024 #186/#193 |
+| F69 | Admin audit actor username (read-time) | Planned | Data Management | data-management-backend/frontend | S026/EV-024 #170/#193 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -1131,6 +1137,128 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   floating `v1`/`v1.2` tags; **no** full conventional-commits semantic-release yet.
 - **Out of scope**: CHANGELOG auto-rewrite beyond release notes body; tagging before Modal/DO.
 - **Source**: S025 / EV-023; GitHub #103 / #194.
+
+### F64: Cold-start wait — query tips + VECINA marketing (#87 residual)
+
+- **What it does**: Extends F40 wait-surface catalog with typed entries (`fact` | `tip` |
+  `marketing`) so cold-start / slow-stream UX also rotates **how-to-query tips** and
+  **VECINA marketing** copy (EN/ES). No mini surveys. Reuses F40 consent + donate CTA.
+- **Inputs**: Locale; wait UX active (cold-start retry or >8s no first token); consent prefs.
+- **Outputs**: Richer rotating wait content; same cookie/localStorage posture as ADR-039.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/chat-rag-frontend` `coldstart/facts` | Typed catalog + rotation |
+  | `packages/frontend-i18n` | Tip/marketing strings if not inlined in catalog |
+- **Out of scope**: Mini surveys; CMS-backed content; Modal latency changes.
+- **Source**: S026 / EV-024; GitHub #87 / #193; S026-D3/D14.
+
+### F65: Ask energy estimate + use guide + advisory (#93)
+
+- **What it does**: After each ask, ChatRAG backend returns a **heuristic** energy estimate
+  (Wh + gCO₂e) derived from pinned prod GPU **T4 TDP 70 W × 50% util × ask wall time**,
+  times a configurable US-average gCO₂e/kWh factor. FE shows estimate chip + permanent
+  **estimate advisory** (approximate; not live Modal power metrics) and a primary
+  **car-travel equivalent** line (“≈ X m / Y mi of average car travel”) from
+  `g_co2e ÷ VECINITA_ENERGY_CAR_GCO2E_PER_KM` (default ~251 g/km ≈ EPA 404 g/mi).
+  Use guide may also mention % of a typical car-day/year using optional day/year
+  constants — still approximate. Includes a short bilingual **use guide** (better queries
+  + env context), reusable on wait surface and/or chrome. Conceptual basis: Modal
+  [GPU metrics](https://modal.com/docs/guide/gpu-metrics) power-as-proxy — **not** live
+  dashboard telemetry per request.
+- **Inputs**: Ask wall duration (backend); env constants for TDP/util/intensity/car.
+- **Outputs**: `energy_estimate` on `/ask` and stream `done` (incl. car-distance fields);
+  UI chip + car line + advisory; use guide.
+- **Key parameters**:
+  | Parameter | Default | Description |
+  |-----------|---------|-------------|
+  | `VECINITA_ENERGY_GPU_TDP_W` | `70` | T4 TDP watts |
+  | `VECINITA_ENERGY_GPU_UTIL` | `0.5` | Assumed utilization |
+  | `VECINITA_ENERGY_GCO2E_PER_KWH` | `386` | Grid intensity (US-avg-ish) |
+  | `VECINITA_ENERGY_CAR_GCO2E_PER_KM` | `251` | Avg car gCO₂e/km (≈ EPA 404 g/mi) |
+  | `VECINITA_ENERGY_CAR_GCO2E_PER_DAY` | optional | For use-guide % of car-day |
+  | `VECINITA_ENERGY_CAR_GCO2E_PER_YEAR` | optional | For use-guide % of car-year |
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/chat-rag-backend` | Duration + estimate helper; response field |
+  | `apps/chat-rag-frontend` | Chip, car-distance line, advisory, use guide |
+  | `docs/api-contract.md` / OpenAPI | `energy_estimate` schema |
+- **Out of scope**: Live Modal power API; measured PUE; regional live grid APIs; live
+  traffic/fleet data for car factors.
+- **Source**: S026 / EV-024; GitHub #93 / #193; S026-D5/D12/D18; 02 M7 / S026-D22; ADR-047.
+
+### F66: Action icon micro-interactions (#104)
+
+- **What it does**: Shared action-bound icon animation pattern (`ActionIcon` or equivalent)
+  in `packages/frontend-ui`: refresh=spin, send=pulse, destructive=shake/scale, etc.;
+  honors `prefers-reduced-motion`. Apply across admin Health/Jobs/Corpus (+ optional press
+  feedback) and ChatRAG Ask/send, clear/new chat, theme toggle.
+- **Inputs**: Pending/loading flags on controls.
+- **Outputs**: Consistent in-progress icon feedback; Vitest on class/`aria-busy`.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/frontend-ui` | Shared animation wrapper |
+  | `apps/data-management-frontend` | Health/Jobs/Corpus (+ optional) |
+  | `apps/chat-rag-frontend` | Ask/send + chrome actions |
+- **Out of scope**: Lottie; route-level page transitions; new animation libraries.
+- **Source**: S026 / EV-024; GitHub #104 / #193; S026-D15.
+
+### F67: Bilingual tooltips / contextual hints (#106)
+
+- **What it does**: Accessible shared **Tooltip** in `packages/frontend-ui` (Radix/shadcn-
+  aligned); i18n keys `shared.tooltip.*` / `admin.tooltip.*` / `chat.tooltip.*`. MVP:
+  theme + language toggles both apps + ≥1 domain control per app (e.g. Users force-sign-out,
+  ChatRAG new chat / delete conversation). Supplements `aria-label`; keyboard focusable.
+- **Inputs**: Locale; hover/focus on triggers.
+- **Outputs**: Localized tooltips; Vitest EN/ES.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/frontend-ui` | Tooltip primitive |
+  | `packages/frontend-i18n` | Typed tooltip keys |
+  | Both frontends | MVP placements |
+- **Out of scope**: Tooltips on dynamic API content (titles, tags, audit JSON); backend changes.
+- **Source**: S026 / EV-024; GitHub #106 / #193; S026-D8/D15.
+
+### F68: ChatRAG feedback page + backend (#186)
+
+- **What it does**: ChatRAG **Feedback** control → `/feedback` page (category + required
+  message; **no contact email**). `POST /api/v1/feedback` → internal-write → corpus
+  `feedback` table (anonymous). Admin **Feedback** page (admin+super-admin) lists entries.
+  Optional operator notify webhook/email on new row (not visitor identity). **90-day**
+  retention + purge. ADR-046 amends ADR-004 for anonymous feedback rows only.
+- **Inputs**: Category enum; message text; locale chrome.
+- **Outputs**: Stored feedback rows; admin list; privacy tests.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/database` | `feedback` migration + purge |
+  | `apps/internal-write-api` | Write/list feedback |
+  | `apps/chat-rag-backend` / frontend | POST + page/button |
+  | `apps/data-management-frontend` / backend | Admin Feedback UI |
+- **Out of scope**: Visitor email/PII; auto-attach chat transcripts; thumbs on messages.
+- **Source**: S026 / EV-024; GitHub #186 / #193; S026-D6/D13/D16/D17; ADR-046.
+
+### F69: Admin audit actor username (read-time) (#170)
+
+- **What it does**: At admin audit **read** time, resolve `actor_id` → Supabase Auth
+  **email** (fallback truncated UUID). Show on Audit Log / document history / user activity.
+  **Never** persist email/name on `audit_log` rows (privacy AC-A6/U6/E8 unchanged).
+  **Naming:** GitHub #170 / Fn title say “username”; product display and API field are
+  **`actor_email`** (S026-D19 / 02 M1). Treat “username” as the issue alias, not a separate
+  Supabase username field.
+- **Inputs**: `actor_id` on audit rows; Supabase admin users lookup/cache.
+- **Outputs**: Friendly actor label in admin UI; Vitest + optional API enrich field.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/data-management-backend` | Enrichment on audit list responses |
+  | `apps/data-management-frontend` | Render `actor_email` / display label |
+- **Out of scope**: Denormalizing names into corpus DB; ChatRAG identity; displaying a
+  non-email Supabase “username” as the primary label.
+- **Source**: S026 / EV-024; GitHub #170 / #193; S026-D7/D19; 02 M1.
 
 ## Planned / Deferred (post-v1)
 

@@ -743,6 +743,88 @@ EV-023 **in_progress**. Phase 0 **approved** (user `1,1,1,1`).
 
 | Gate | Status |
 |------|--------|
-| 01-requirements | **in_progress** |
-| 02-verify-plan | pending |
+| 01-requirements | **completed** (S025 closed) |
+| 02-verify-plan | completed |
 | 03-plan-tooling | skipped |
+
+---
+
+## Cycle EV-024 — Scope (S026 / #193)
+
+**Approved intake:** 2026-08-04  
+**Session:** S026-frontend-ux-polish  
+**Issues:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/193  
+(children [#87](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/87),
+[#93](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/93),
+[#104](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/104),
+[#106](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/106);
+related-in-scope [#186](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/186),
+[#170](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/170))  
+**Features:** F64, F65, F66, F67, F68, F69  
+**Preset:** Standard  
+**Branch:** `evolve/EV-024-frontend-ux-polish`
+
+### Scope summary
+
+ChatRAG + Admin UX polish epic, expanded to include Feedback (#186) and audit username (#170).
+One session / one evolve branch; **strict one PR per issue** (six PRs). F40 cold-start core
+already shipped; #87 residual = query tips + VECINA marketing only (**no mini surveys**).
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S026-D1 | Session | `feature` → 16-evolve; open S026 |
+| S026-D2 | Ship model | One branch/session; **one PR per issue** |
+| S026-D3 | #87 residual | Tips + marketing; re-audit F40; **no surveys** |
+| S026-D4 | Related | Include #186 + #170 |
+| S026-D5 | #93 energy | Backend heuristic Wh/CO₂e + **UI estimate advisory**; Modal power-as-proxy conceptual basis |
+| S026-D6 | #186 | Backend endpoint + store/forward (privacy review in 01) |
+| S026-D7 | #170 | Read-time enrich; no name on `audit_log` |
+| S026-D8 | #106 Tooltip | Shared `packages/frontend-ui` |
+| S026-D9 | Routing | Standard |
+| S026-D10 | Open | Approved → Fn allocation next |
+| S026-D11 | Fn allocation | **F64–F69** (one Fn per issue); Phase 0 complete → 01-requirements |
+| S026-D12 | F65 energy constants | T4 **70 W** × util **50%** × ask wall time → Wh; fixed US-avg gCO₂e/kWh; approximate + UI advisory |
+| S026-D13 | F68 feedback store | Corpus Postgres `feedback` via internal-write; ChatRAG `POST /feedback`; optional email notify; **90d** retention |
+| S026-D14 | F64 content | Extend F40 fact catalog with typed entries (`tip` / `marketing` / `fact`) |
+| S026-D15 | F66/F67 MVP | Ship issue MVP lists as written (#104 surfaces; #106 theme/locale + ≥1 domain control/app) |
+| S026-D16 | F68 PII | No visitor email; ADR-046 anonymous feedback only |
+| S026-D17 | F68 admin | Admin Feedback page (admin+super-admin) |
+| S026-D18 | F65 API | `energy_estimate` on `/ask` + stream `done` + UI advisory |
+| S026-D19 | F69 display | Prefer Supabase email; fallback truncated actor_id |
+| S026-D20 | Gate 24a | 01-requirements complete → 02-verify-plan |
+| S026-D21 | 02 medium/low | L1+M1–M6 approved (25a–28a); M7 car-equivalent framing pending |
+| S026-D22 | 02 M7 | Car framing = distance (251 g/km); day/year % in use guide (29a) |
+| S026-D23 | Gate A→B | PASS (30a) → start 04-tech-plan |
+| S026-D24 | 04 TP1–TP6 | 31a 32a+b 33a 34a — Phase 27 + ADR-047 + Path A |
+| S026-D25 | Gate 35a | 04-tech-plan complete → 05-verify-tech |
+| S026-D26 | 05 M2–M4 | 37a 38a 39a — T118.1+T114.3; feedback in data-mgmt plan; secrets in T118.2; **M1 pending explain** |
+| S026-D27 | 05 M1 | Admin Feedback: DM `GET /admin/feedback` + internal-write POST (40a) |
+| S026-D28 | Gate B→C | **PASS** (41a) → **07-build** M112/F66 (#104); 06 skipped |
+
+### Docs / artifacts
+
+| Area | Paths |
+|------|-------|
+| Session | `docs/sessions/S026-frontend-ux-polish/` |
+| Decisions | this section; RD + TP in decisions.md |
+| Product | feature-list F64+; journeys/TC/AC; api-contract deltas |
+| Verify | `reports/02-verify-plan-audit.md`; `reports/05-verify-tech-audit.md` |
+| Tech | `reports/tech-plan-delta.md` (locked); `roadmap.md`; Phase 27 execution-plan |
+| ADRs | ADR-046, ADR-047 |
+
+### Phase 0 status
+
+EV-024 **in_progress**. Gate B→C **PASS** (S026-D28). **07-build** active — M112/F66.
+
+### Feature map
+
+| Fn | Issue | Title |
+|----|-------|-------|
+| F64 | #87 | Cold-start wait: query tips + VECINA marketing |
+| F65 | #93 | Ask energy estimate + use guide + advisory |
+| F66 | #104 | Action icon micro-interactions |
+| F67 | #106 | Bilingual tooltips / contextual hints |
+| F68 | #186 | ChatRAG feedback page + backend |
+| F69 | #170 | Admin audit actor username (read-time) |

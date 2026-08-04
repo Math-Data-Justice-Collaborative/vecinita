@@ -1,0 +1,75 @@
+/* F66 / #104 — ActionIcon motion (works without Tailwind in ChatRAG). */
+
+@keyframes vecinita-action-spin-kf {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vecinita-action-pulse-kf {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes vecinita-action-shake-kf {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-2px) rotate(-4deg);
+  }
+  40%,
+  80% {
+    transform: translateX(2px) rotate(4deg);
+  }
+}
+
+@keyframes vecinita-action-press-kf {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.88);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.vecinita-action-spin {
+  display: inline-flex;
+  animation: vecinita-action-spin-kf 0.85s linear infinite;
+}
+
+.vecinita-action-pulse {
+  display: inline-flex;
+  animation: vecinita-action-pulse-kf 1s ease-in-out infinite;
+}
+
+.vecinita-action-shake {
+  display: inline-flex;
+  animation: vecinita-action-shake-kf 0.45s ease-in-out;
+}
+
+.vecinita-action-press {
+  display: inline-flex;
+  animation: vecinita-action-press-kf 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vecinita-action-spin,
+  .vecinita-action-pulse,
+  .vecinita-action-shake,
+  .vecinita-action-press {
+    animation: none !important;
+  }
+}

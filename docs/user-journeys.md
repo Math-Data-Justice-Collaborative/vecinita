@@ -1056,6 +1056,133 @@ lint/structure assertions; live tag creation verified on first green main merge 
 
 ---
 
+### UJ-069: Cold-start wait shows tips + marketing (F64)
+
+**Actor**: Community visitor (ChatRAG)
+
+**Goal**: During cold-start / long wait, see rotating bilingual content including query tips
+and VECINA marketing (in addition to F40 fun facts), without mini surveys.
+
+**Preconditions**: ChatRAG FE with F40 wait UX; slow first token or cold-start retry.
+
+**Steps**:
+
+1. Submit an ask that triggers wait UX (retry or >8s no token).
+2. Observe rotating entries with types `fact` / `tip` / `marketing`.
+3. Confirm donate CTA + consent still behave per UJ-052 / ADR-039.
+4. No survey UI appears.
+
+**Acceptance**: AC-UX1–UX2; TC-216–217.
+
+**Components**: `ColdStartWait` ↔ fact catalog ↔ ChatPanel.
+
+**E2E tier**: T0-ui Playwright + Vitest.
+
+---
+
+### UJ-070: Ask shows energy estimate + advisory (F65)
+
+**Actor**: Community visitor (ChatRAG)
+
+**Goal**: After an answer, see an approximate energy / CO₂e estimate with a clear advisory
+that it is heuristic (not live Modal power), a **car-travel distance equivalent**
+(meters/miles), plus access a short use guide (may include % of car-day/year).
+
+**Preconditions**: ChatRAG backend returns `energy_estimate`; FE wired.
+
+**Steps**:
+
+1. Ask a question (stream or non-stream).
+2. On completion, UI shows Wh / gCO₂e chip, car-distance line (≈ m/mi), and advisory (EN/ES).
+3. Open use guide (wait surface and/or chrome) with query + env guidance; optional
+   car-day/year fraction copy.
+
+**Acceptance**: AC-UX3–UX5, AC-UX17; TC-218–220, TC-231.
+
+**Components**: ChatPanel ↔ ask API ↔ energy chip / use guide.
+
+**E2E tier**: API e2e + Vitest + T0-ui for chip/advisory/car line.
+
+---
+
+### UJ-071: Action icons animate while pending (F66)
+
+**Actor**: Visitor / admin operator
+
+**Goal**: Refresh/send/destructive actions show consistent icon animations while pending;
+reduced-motion disables/shortens them.
+
+**Steps**:
+
+1. Admin: trigger Jobs/Corpus/Health refresh — icon spins while loading.
+2. ChatRAG: Ask while streaming — send control shows pending animation.
+3. With `prefers-reduced-motion: reduce`, animations skipped/shortened.
+
+**Acceptance**: AC-UX6–UX7; TC-221–222.
+
+**E2E tier**: Vitest (required); Playwright optional for cross-component.
+
+---
+
+### UJ-072: Bilingual tooltips on chrome controls (F67)
+
+**Actor**: Visitor / admin operator
+
+**Goal**: Hover/focus theme and language toggles (and ≥1 domain control per app) shows
+localized tooltip; locale toggle switches tooltip language.
+
+**Steps**:
+
+1. Focus/hover theme toggle — tooltip in current locale.
+2. Switch language — tooltip text switches EN↔ES.
+3. Keyboard focus reveals tooltip without mouse.
+
+**Acceptance**: AC-UX8–UX9; TC-223–224.
+
+**E2E tier**: Vitest EN/ES; Playwright optional for focus.
+
+---
+
+### UJ-073: Submit anonymous product feedback (F68)
+
+**Actor**: Community visitor; Admin reviewer
+
+**Goal**: Visitor submits category + message via Feedback page; admin lists it; no email
+field; rows purge after 90 days.
+
+**Steps**:
+
+1. ChatRAG: open Feedback from chrome → `/feedback`.
+2. Choose category; enter message; submit — success state.
+3. Confirm request rejects `email` / identity fields.
+4. Admin: open Feedback page; see new row (admin/super-admin).
+5. Retention job deletes rows older than 90 days.
+
+**Acceptance**: AC-UX10–UX13; TC-225–228.
+
+**E2E tier**: API e2e + Vitest UI journeys + privacy tests.
+
+---
+
+### UJ-074: Audit log shows actor email (F69)
+
+**Actor**: Admin operator
+
+**Goal**: Audit Log / history / user activity shows resolved actor email (from Supabase),
+falling back to truncated `actor_id`; corpus `audit_log` still has no email column.
+
+**Steps**:
+
+1. Open Admin Audit Log with known `actor_id`.
+2. See email label when resolvable; truncated UUID otherwise.
+3. Privacy/schema tests confirm no email/name on `audit_log` writes.
+
+**Acceptance**: AC-UX14–UX15; TC-229–230.
+
+**E2E tier**: Vitest UI + API/integration enrich; privacy regression.
+
+---
+
 ### UJ-056: Admin validates F42 via F36 staging golden (Hy1)
 
 **Actor**: Admin operator (`admin` role)

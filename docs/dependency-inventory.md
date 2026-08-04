@@ -101,7 +101,7 @@
 | **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
-| **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI | — | EV-004 F31; depends on frontend-i18n |
+| **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI + Tooltip/ActionIcon (EV-024) | — | EV-004 F31; EV-024 F66/F67; depends on frontend-i18n; `@radix-ui/react-tooltip` |
 | **@supabase/supabase-js** | `^2.108.2` Supabase Auth browser session (DM frontend SPA) | MIT | **EV-005 F34** (ADR-026/027); admin frontend only; pinned 04-tech-plan (TP-S004-04) |
 
 ### EV-004 workspace packages (F31)

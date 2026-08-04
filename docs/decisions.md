@@ -5,13 +5,27 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-08-03 (EV-022 F59–F61 RD-252–263)
+> **Last updated**: 2026-08-04 (EV-024 F64–F69 RD-272–285)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-08-04 | EV024-TP1–TP6 | approved | Phase 27 M112–M118; ADR-046+047; Playwright 069/070/073; Path A (S026-D24) |
+| 2026-08-04 | EV024-TV-M1 | approved (fix) | Admin Feedback: DM GET /admin/feedback + internal-write POST (S026-D27) |
+| 2026-08-04 | EV024-TV-M2 | approved (fix) | T118.1 depends T114.3 (S026-D26) |
+| 2026-08-04 | EV024-TV-M3 | approved (fix) | feedback in data-management-plan via T116.2 (S026-D26) |
+| 2026-08-04 | EV024-TV-M4 | approved (fix) | energy/feedback in staging-secrets-matrix via T118.2 (S026-D26) |
+| 2026-08-04 | EV024-H1–H13 | auto-approved | F64–F69 locked RD-272–285 / S026-D1–D19 |
+| 2026-08-04 | EV024-L1 | approved (fix) | Add `feedback` to spec.md allowed domains + F68 exception |
+| 2026-08-04 | EV024-M1 | approved | F69 title “username” = issue alias; API/UI = `actor_email` |
+| 2026-08-04 | EV024-M2 | approved | Default `VECINITA_ENERGY_GCO2E_PER_KWH` = **386** |
+| 2026-08-04 | EV024-M3 | approved | Feedback categories `bug\|wrong_answer\|suggestion\|other`; message 1–4000 |
+| 2026-08-04 | EV024-M4 | approved (fix) | Patch spec.md FE/API/domains for EV-024 |
+| 2026-08-04 | EV024-M5 | approved | OpenAPI + infra yaml energy/feedback keys → 04/07 |
+| 2026-08-04 | EV024-M6 | approved | Skip deployment-integration EV-024 note (no new VITE_*/CORS) |
+| 2026-08-04 | EV024-M7 | approved | Car framing = driving distance (251 g/km); day/year % in use guide |
 | 2026-08-03 | EV022-H1–H9 | auto-approved | F59–F61 locked RD-252–263 / S024-D27–D33 |
 | 2026-08-03 | EV022-L1 | approved (fix) | Move POST `/jobs` 202 under POST; was orphaned under content-hash |
 | 2026-08-03 | EV022-M1 | approved (fix) | POST `/jobs` Auth → Supabase JWT + Modal proxy |
@@ -744,6 +758,47 @@ Epic #194. Lean+build routing.
 
 Artifacts: feature-list F62–F63; UJ-067–068; TC-208–215; AC-CI1–5 / AC-REL1–5;
 `docs/sessions/S025-ci-release-automation/reports/01-requirements-ci-release.md`.
+
+### EV-024 requirements decisions (2026-08-04) — RD-272–RD-285
+
+S026 / ChatRAG + Admin UX polish — **F64–F69**; epic #193 (+ #87/#93/#104/#106/#186/#170).
+Standard routing; one PR per issue.
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-272 | Fn scope | **F64–F69** one Fn per issue | S026-D11 |
+| RD-273 | Ship model | One evolve branch; **6 PRs** | S026-D2 |
+| RD-274 | #87 residual | Tips + marketing; **no surveys**; typed F40 catalog | S026-D3/D14 |
+| RD-275 | Energy formula | T4 **70 W** × **0.5** util × wall time; US-avg gCO₂e/kWh; advisory | S026-D12 |
+| RD-276 | Energy API | `energy_estimate` on `/ask` + stream `done` | S026-D18 |
+| RD-277 | Feedback store | Corpus `feedback` via internal-write; ChatRAG POST; **90d** | S026-D13 |
+| RD-278 | Feedback PII | **No visitor email**; ADR-046 amends ADR-004 | S026-D16 |
+| RD-279 | Feedback admin | Admin Feedback page (admin+super-admin) | S026-D17 |
+| RD-280 | Tooltip home | Shared `packages/frontend-ui` | S026-D8 |
+| RD-281 | Icon/tooltip MVP | Full issue MVP lists | S026-D15 |
+| RD-282 | Audit actor | Read-time Supabase **email**; UUID fallback; no DB PII | S026-D7/D19 |
+| RD-283 | Modal basis | Power-as-proxy docs conceptual only — no live metrics API | S026-D5 |
+| RD-284 | Journeys/tests | UJ-069–074; TC-216–230; AC-UX1–16 | 01 |
+| RD-285 | Out of scope | Mini surveys; live Modal power; visitor email; transcript attach; denorm audit names | S026 |
+| RD-286 | Energy intensity | Default gCO₂e/kWh = **386** (US-avg-ish constant) | 02 M2 / S026-D21 |
+| RD-287 | Feedback contract | Categories `bug\|wrong_answer\|suggestion\|other`; message 1–4000 | 02 M3 / S026-D21 |
+| RD-288 | F69 naming | Title “username” (#170 alias); display/API **`actor_email`** | 02 M1 / S026-D21 |
+| RD-289 | Energy car UI | Primary ≈ m/mi via **251** g/km; day/year % optional in use guide | 02 M7 / S026-D22 |
+
+### EV-024 tech-plan decisions (2026-08-04) — TP1–TP6
+
+S026 / Phase 27 — F64–F69 (Standard; 05 next; 03/06 skipped).
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP1 | Phase / milestones | **Phase 27**: M112→M118 (F66→F67→F64→F65→F68→F69→gate) | S026-D24 / 31a |
+| TP2 | ADR | **ADR-046** + **ADR-047** (energy/car) | S026-D24 / 32a+b |
+| TP3 | Schema / OpenAPI | `feedback` in M116; OpenAPI + infra yaml in M118 | S026-D24 / 33a |
+| TP4 | Tests | Playwright required UJ-069/070/073; optional 071/072/074 | S026-D24 / 33a |
+| TP5 | Deploy / deps | Path A; `@radix-ui/react-tooltip` in `frontend-ui`; no new Python pkgs | S026-D24 / 32a / 34a |
+| TP6 | Connectivity | Existing CORS; H4–H5 at 13; energy ChatRAG-local | S026-D24 / 34a |
+
+Artifacts: Phase 27 execution-plan; ADR-047; `reports/tech-plan-delta.md`; `roadmap.md`.
 
 ### EV-019 tech-plan decisions (2026-08-02) — TP1–TP6
 

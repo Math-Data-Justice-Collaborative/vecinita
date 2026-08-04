@@ -7,6 +7,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { PreviousChatsList } from "./PreviousChatsList";
 import { TagFilterChips } from "./TagFilterChips";
 import { ThemeToggle } from "./ThemeToggle";
+import { ActionIcon } from "vecinita-frontend-ui";
 
 type SidebarProps = {
   open: boolean;
@@ -67,8 +68,11 @@ export function Sidebar({
         className="sidebar-new-chat"
         disabled={newChatDisabled}
         onClick={onNewChat}
+        data-testid="sidebar-new-chat"
       >
-        <span aria-hidden="true">+ </span>
+        <ActionIcon motion="press" pending={false} aria-hidden="true">
+          <span>+ </span>
+        </ActionIcon>
         {t(locale, "newChat")}
       </button>
 

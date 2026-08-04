@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PaginationControls } from "vecinita-frontend-ui";
+import { ActionIcon, PaginationControls } from "vecinita-frontend-ui";
 
 import { deleteDocument, fetchCorpusTree, listDocuments } from "../api/corpus";
 import type { DocumentSummary, TreeNode } from "../api/types";
@@ -22,7 +22,7 @@ import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
 import { CorpusTree } from "@/components/CorpusTree";
 import { TruncatedText } from "@/components/TruncatedText";
 import { BoundedTagList } from "@/components/BoundedTagList";
-import { Trash2, Tags, FileEdit } from "lucide-react";
+import { RefreshCw, Trash2, Tags, FileEdit } from "lucide-react";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useIsAdmin } from "@/auth/auth-context";
 import { cn } from "@/lib/utils";
@@ -233,7 +233,17 @@ export function CorpusList() {
             size="sm"
             onClick={handleRefreshClick}
             disabled={loading}
+            data-testid="corpus-refresh"
+            aria-label={tr("shared.refresh")}
           >
+            <ActionIcon
+              motion="spin"
+              pending={loading}
+              className="mr-2 inline-flex"
+              data-testid="corpus-refresh-icon"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </ActionIcon>
             {tr("shared.refresh")}
           </Button>
         </div>

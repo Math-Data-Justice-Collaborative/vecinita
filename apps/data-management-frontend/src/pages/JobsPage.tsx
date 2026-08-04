@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { type StringMessageKey } from "vecinita-frontend-i18n";
-import { useLocale } from "vecinita-frontend-ui";
+import { ActionIcon, useLocale } from "vecinita-frontend-ui";
 import { useNavigate } from "react-router-dom";
 
 import { listJobs, subscribeJobEvents } from "@/api/jobs";
@@ -85,6 +85,7 @@ export function JobsPage() {
   }, [statusFilter]);
 
   const load = useCallback(async (isActive: () => boolean = () => true) => {
+    if (isActive()) setLoading(true);
     try {
       const client = requireAdminConfig();
       const filter = statusFilterRef.current;
@@ -234,8 +235,16 @@ export function JobsPage() {
             size="icon"
             aria-label={tr("shared.refresh")}
             onClick={() => void load()}
+            disabled={loading}
+            data-testid="jobs-refresh"
           >
-            <RefreshCw className="h-4 w-4" />
+            <ActionIcon
+              motion="spin"
+              pending={loading}
+              data-testid="jobs-refresh-icon"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </ActionIcon>
           </Button>
         </div>
       </div>

@@ -8,8 +8,7 @@ import { DEFAULT_WRWC_DONATE_URL } from "./constants";
 
 describe("coldstart facts", () => {
   afterEach(() => {
-    document.cookie =
-      "vecinita_chat_coldstart_consent=; Path=/; Max-Age=0";
+    document.cookie = "vecinita_chat_coldstart_consent=; Path=/; Max-Age=0";
     localStorage.removeItem(COLD_START_FACTS_STORAGE_KEY);
   });
 

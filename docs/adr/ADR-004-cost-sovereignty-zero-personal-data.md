@@ -73,6 +73,11 @@ Prior sibling designs used Supabase Auth, admin invites, and optional chat/sessi
 | **CI** | Lint / policy hooks | Fail build if migrations add forbidden table names; optional grep for `supabase.auth` |
 | **Operations** | Access without identity in DB | Data-mgmt protected by deploy secret / private network — operators never stored as rows |
 
+**Amendment (ADR-046 / EV-024):** Anonymous community `feedback` rows (category + message only,
+no visitor email/name/`user_id`) are an explicit narrow exception for product feedback.
+See [ADR-046](ADR-046-anonymous-community-feedback.md). Operator Auth emails remain outside
+corpus DB (ADR-026); F69 resolves them at **read time** only.
+
 Enforcement is **verified** in QA (09) and deploy smoke (13), not assumed from design docs alone.
 - Operational tradeoff: without admin accounts, key rotation and access control are entirely platform/DevOps responsibility.
 
