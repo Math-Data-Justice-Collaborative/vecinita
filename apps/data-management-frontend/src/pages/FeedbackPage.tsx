@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "vecinita-frontend-ui";
 
 import {
   fetchFeedbackList,
@@ -20,6 +21,7 @@ import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 
 export function FeedbackPage() {
   const tr = useAdminT();
+  const { locale } = useLocale();
   const [data, setData] = useState<FeedbackListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +95,7 @@ export function FeedbackPage() {
                   data.items.map((item: FeedbackItem) => (
                     <TableRow key={item.id} data-testid="feedback-row">
                       <TableCell>
-                        {formatLocaleDateTime(item.created_at)}
+                        {formatLocaleDateTime(locale, item.created_at)}
                       </TableCell>
                       <TableCell>{item.category}</TableCell>
                       <TableCell className="max-w-xl whitespace-pre-wrap">

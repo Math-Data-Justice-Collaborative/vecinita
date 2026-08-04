@@ -26,7 +26,7 @@ function headers(options: FeedbackClientOptions): Record<string, string> {
     "X-Vecinita-Proxy-Key": options.modalKey,
   };
   if (options.accessToken) {
-    result.Authorization = `Bearer ${options.accessToken}`;
+    result["Authorization"] = `Bearer ${options.accessToken}`;
   }
   return result;
 }
