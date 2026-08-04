@@ -63,3 +63,23 @@ def test_compute_energy_estimate_rejects_non_positive_duration() -> None:
         compute_energy_estimate(duration_s=0.0)
     with pytest.raises(ValueError, match="duration"):
         compute_energy_estimate(duration_s=-1.0)
+
+
+@pytest.mark.parametrize(
+    ("knobs", "match"),
+    [
+        (EnergyKnobs(gpu_tdp_w=0.0), "gpu_tdp_w"),
+        (EnergyKnobs(gpu_tdp_w=-10.0), "gpu_tdp_w"),
+        (EnergyKnobs(gpu_util=0.0), "gpu_util"),
+        (EnergyKnobs(gpu_util=1.1), "gpu_util"),
+        (EnergyKnobs(gco2e_per_kwh=0.0), "gco2e_per_kwh"),
+        (EnergyKnobs(car_gco2e_per_km=-1.0), "car_gco2e_per_km"),
+    ],
+)
+def test_compute_energy_estimate_rejects_invalid_knobs(
+    knobs: EnergyKnobs,
+    match: str,
+) -> None:
+    """TDP, util, intensity, and car factors must be in valid ranges."""
+    with pytest.raises(ValueError, match=match):
+        compute_energy_estimate(duration_s=1.0, knobs=knobs)
