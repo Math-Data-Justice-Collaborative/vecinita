@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 
+import "./action-icon.css";
+
 /** Motion → CSS class (defined in `action-icon.css`). */
 export const ACTION_ICON_MOTION_CLASS = {
   spin: "vecinita-action-spin",
