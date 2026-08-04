@@ -18,8 +18,9 @@ type ColdStartWaitProps = {
 };
 
 /**
- * Rotating fun facts + soft donate CTA + consent banner during cold-start /
- * long-wait (F40 / UJ-052 / ADR-039).
+ * Rotating typed wait catalog (fact | tip | marketing) + soft donate CTA +
+ * consent banner during cold-start / long-wait (F40 / F64 / UJ-052 / UJ-069 /
+ * ADR-039).
  */
 export function ColdStartWait({ locale, active }: ColdStartWaitProps) {
   const [consent, setConsent] = useState<ColdStartConsent>(() =>
@@ -71,7 +72,11 @@ export function ColdStartWait({ locale, active }: ColdStartWaitProps) {
       <p className="status-hint" role="status">
         {t(locale, "coldStartStatus")}
       </p>
-      <p className="cold-start-fact" data-testid="cold-start-fact">
+      <p
+        className="cold-start-fact"
+        data-testid="cold-start-fact"
+        data-kind={fact.kind}
+      >
         {factText(fact, locale)}
       </p>
       <p className="cold-start-donate">

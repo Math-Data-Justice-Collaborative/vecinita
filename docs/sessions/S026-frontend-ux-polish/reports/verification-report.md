@@ -1,27 +1,26 @@
-# Verification report — M113 (F67 / #106)
+# Verification report — M114 (F64 / #87)
 
 **Session:** S026-frontend-ux-polish  
 **Cycle:** EV-024  
 **Stage:** 08-verify-build (milestone boundary)  
 **Date:** 2026-08-04  
 **Branch:** `evolve/EV-024-frontend-ux-polish`  
-**Head:** `09342a5`
+**Head:** `bb69153`
 
 ## Scope
 
-M113 — shared Radix `Tooltip` in `packages/frontend-ui`; EN/ES i18n keys; wire theme +
-language both apps + admin force sign-out + ChatRAG new chat; Vitest TC-223–224 / UJ-072.
+M114 — typed cold-start wait catalog (`fact` | `tip` | `marketing`); `data-kind` on wait
+shell; F40 consent + donate preserved; no survey UI; Vitest + Playwright UJ-069 /
+TC-216–217.
 
 ## Checks
 
 | Check | Result | Notes |
 |-------|--------|-------|
-| `frontend-ui` Vitest + typecheck + lint | **PASS** | 22 tests (incl. Tooltip) |
-| `frontend-i18n` Vitest + typecheck | **PASS** | 17 tests |
-| ChatRAG Vitest (UJ-072 + ThemeToggle + UJ-071) | **PASS** | 5 tests |
-| Admin Vitest (UJ-072 + UJ-071) | **PASS** | 3 tests |
-| ChatRAG / Admin typecheck + lint | **PASS** | Pre-existing admin FE refresh warnings only |
-| Format (prettier) | **PASS** | Touched packages |
+| ChatRAG Vitest (coldstart + ColdStartWait + UJ-069) | **PASS** | 24 tests |
+| Playwright `tests/ui/chat/uj069-wait-tips.spec.ts` | **PASS** | tip/marketing/fact + consent/donate |
+| ChatRAG lint + typecheck | **PASS** | |
+| Format (prettier) | **PASS** | auto-fixed `test_uj069_wait_tips.test.tsx` |
 | Modal GPU smoke | **SKIPPED** | Frontend-only; no GPU budget ask |
 
 ## Connectivity artifacts
@@ -33,9 +32,12 @@ language both apps + admin force sign-out + ChatRAG new chat; Vitest TC-223–22
 
 ## Auto-corrections
 
-Prettier on `UsersPage.tsx` only.
+Prettier on `test_uj069_wait_tips.test.tsx`.
 
 ## Verdict
 
-**PASS** — open minor PR for #106 after push; merge needs explicit approval.
-Next after merge: **M114** F64 cold-start tips (#87).
+**PASS** — open minor PR for #87 after push; merge needs explicit approval.
+
+**Note:** M113 review retargeted to [#202](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/202) (`pr/201-m113-tooltip` @ `06f4ab1`); former #201 closed so M114 can land on the evolve branch without polluting Tooltip review (S026-D43).
+
+Next after merge: **M115** F65 energy estimate (#93).
