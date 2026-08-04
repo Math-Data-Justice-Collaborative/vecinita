@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
-| **Active milestone** | M114 — F64 Cold-start tips + marketing (#87) |
-| **Active task** | **T114.3** — Vitest green + Playwright uj069-wait-tips (TC-216–217) |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112 complete** (PR #200); **M113 complete** (PR #202 open; former #201 retargeted) |
+| **Active milestone** | M114 — F64 Cold-start tips + marketing (#87) — tasks complete; 08-verify-build next |
+| **Active task** | **08-verify-build** — M114 boundary (then minor PR #87 stream) |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112** (PR #200); **M113** (PR #202 open); **M114 T114.1–T114.3 complete** |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; Gate B→C PASS; 07-build M114 (S026-D43: continue; #202 stays open) |
 | **Git branch** | `evolve/EV-024-frontend-ux-polish` |
