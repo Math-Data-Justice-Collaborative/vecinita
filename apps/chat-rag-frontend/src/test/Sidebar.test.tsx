@@ -1,15 +1,10 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react";
+import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Sidebar } from "../components/Sidebar";
 import type { TagFacet } from "../api/browse";
 import type { Conversation } from "../hooks/useConversationStore";
+import { renderWithLocale } from "./renderWithLocale";
 
 const housing: TagFacet = {
   slug: "housing",
@@ -44,7 +39,7 @@ function renderSidebar(overrides: Partial<Parameters<typeof Sidebar>[0]> = {}) {
     onToggleTheme: vi.fn(),
     ...overrides,
   };
-  render(<Sidebar {...props} />);
+  renderWithLocale(<Sidebar {...props} />);
   return props;
 }
 
