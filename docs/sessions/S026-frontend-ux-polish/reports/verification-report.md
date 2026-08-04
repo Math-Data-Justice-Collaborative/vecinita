@@ -5,7 +5,7 @@
 **Stage:** 08-verify-build (milestone boundary)  
 **Date:** 2026-08-04  
 **Branch:** `evolve/EV-024-frontend-ux-polish`  
-**Head:** `6ca97eb`
+**Head:** `bb69153`
 
 ## Scope
 
