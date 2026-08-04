@@ -2266,8 +2266,8 @@ control/app; keyboard focus (AC-UX8–UX9; TC-223–224).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T113.1 | Test: Vitest red — Tooltip EN/ES + keyboard focus (TC-223–224) | Test | in_progress | AC-UX8–UX9, F67, #106 | T112.4 | — | S026 | F67 |
-| T113.2 | Config: add `@radix-ui/react-tooltip` to `packages/frontend-ui` (lift from admin) | Config | pending | TP5, dependency-inventory | — | — | S026 | F67 |
+| T113.1 | Test: Vitest red — Tooltip EN/ES + keyboard focus (TC-223–224) | Test | completed | AC-UX8–UX9, F67, #106 | T112.4 | 2026-08-04 | S026 | F67 |
+| T113.2 | Config: add `@radix-ui/react-tooltip` to `packages/frontend-ui` (lift from admin) | Config | in_progress | TP5, dependency-inventory | — | — | S026 | F67 |
 | T113.3 | Code: Tooltip primitive + i18n keys; wire MVP placements both apps | Code | pending | S026-D8/D15, ADR-019/020 | T113.1, T113.2 | — | S026 | F67 |
 | T113.4 | Test: Vitest green EN/ES + focus (TC-223–224) | Test | pending | TP4 | T113.3 | — | S026 | F67 |
 
