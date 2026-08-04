@@ -9,9 +9,7 @@ export interface Source {
 }
 
 export type StreamEvent =
-  | { token: string }
-  | { sources: Source[] }
-  | { done: true };
+  { token: string } | { sources: Source[] } | { done: true };
 
 export interface ChatMessage {
   id: string;

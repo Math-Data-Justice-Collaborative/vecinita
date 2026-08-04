@@ -17,8 +17,7 @@ describe("ColdStartWait (TC-156, TC-158, TC-159)", () => {
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
-    document.cookie =
-      "vecinita_chat_coldstart_consent=; Path=/; Max-Age=0";
+    document.cookie = "vecinita_chat_coldstart_consent=; Path=/; Max-Age=0";
     localStorage.removeItem("vecinita.chat.coldstart.facts.v1");
   });
 
@@ -73,9 +72,7 @@ describe("ColdStartWait (TC-156, TC-158, TC-159)", () => {
     renderWithLocale(<ColdStartWait locale="en" active />);
 
     const banner = screen.getByTestId("cold-start-consent");
-    expect(
-      within(banner).getByText(/not tracking/i),
-    ).toBeInTheDocument();
+    expect(within(banner).getByText(/not tracking/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("cold-start-consent-accept"));
     expect(screen.queryByTestId("cold-start-consent")).not.toBeInTheDocument();
@@ -86,17 +83,14 @@ describe("ColdStartWait (TC-156, TC-158, TC-159)", () => {
       ),
     ).toContain(firstFact?.id);
 
-    document.cookie =
-      "vecinita_chat_coldstart_consent=; Path=/; Max-Age=0";
+    document.cookie = "vecinita_chat_coldstart_consent=; Path=/; Max-Age=0";
     localStorage.removeItem("vecinita.chat.coldstart.facts.v1");
     cleanup();
 
     renderWithLocale(<ColdStartWait locale="en" active />);
     fireEvent.click(screen.getByTestId("cold-start-consent-opt-out"));
     expect(document.cookie).toContain("vecinita_chat_coldstart_consent=0");
-    expect(
-      localStorage.getItem("vecinita.chat.coldstart.facts.v1"),
-    ).toBeNull();
+    expect(localStorage.getItem("vecinita.chat.coldstart.facts.v1")).toBeNull();
     expect(screen.getByTestId("cold-start-fact")).toBeInTheDocument();
   });
 
