@@ -1536,8 +1536,8 @@ project:
       active_milestone: M116
       active_feature: F68
       active_issue: 186
-      current_action: build_m116_t116_1
-      next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+      current_action: build_m116_t116_2
+      next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1546,11 +1546,11 @@ project:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 task_status=in_progress; T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed); head @605fce9; PR #204 open_ci_green NOT merged (S026-D50)'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 in_progress; head @a26d2a4; PR #204 open_ci_green NOT merged (S026-D50)'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T22:06:19Z'
+      updated_at: '2026-08-04T22:09:30Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1701,6 +1701,7 @@ project:
       - T115.2
       - T115.3
       - T115.4
+      - T116.1
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -1714,7 +1715,7 @@ project:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T116.1
+        current_task: T116.2
         current_milestone: M116
         phase: 27
         task_status: in_progress
@@ -1739,6 +1740,7 @@ project:
         - T115.2
         - T115.3
         - T115.4
+        - T116.1
         m115_verify: PASS
         m116_status: in_progress
         completed_tasks_m115:
@@ -1748,11 +1750,13 @@ project:
         - T115.4
         m115_pr: 204
         m115_pr_status: open_ci_green
+        completed_tasks_m116:
+        - T116.1
       m112_verify: PASS
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 605fce9
+      build_head: a26d2a4
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -1780,7 +1784,7 @@ project:
       m113_ci_status: success
       s026_d43_decision: S026-D43
       current_milestone: M116
-      current_task: T116.1
+      current_task: T116.2
       s026_d44_decision: S026-D44
       s026_d45_decision: S026-D45
       s026_d46_decision: S026-D46
@@ -1793,8 +1797,8 @@ project:
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
       m114_status: completed
-      active_task: T116.1
-      build_head_full: 605fce91e731a89e2d3619005d3d2cec49764d70
+      active_task: T116.2
+      build_head_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -1828,8 +1832,14 @@ project:
       m115_ci_status: success
       pr_204_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
       s026_d50_decision: S026-D50
-      t116_1_status: in_progress
-      t116_1_note: T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)
+      t116_1_status: completed
+      t116_1_note: T116.1 completed @a26d2a4 — privacy + API e2e red tests for F68 TC-225–228
+      t116_1_commit: a26d2a4
+      t116_1_commit_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+      t116_2_status: in_progress
+      t116_2_note: T116.2 in_progress — feedback migration + retention purge + data-management-plan
+      m116_commits:
+      - a26d2a4
     08-verify-build:
       status: completed
       started_at: '2026-08-04'
@@ -4826,14 +4836,14 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: build_m116_t116_1
+    current_action: build_m116_t116_2
     current_stage: 07-build
-    note: 'EV-024 Phase C — M116 T116.1 F68/#186 in_progress (red tests TC-225–228); T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)'
+    note: 'EV-024 Phase C — M116 T116.1 F68/#186 completed @a26d2a4; T116.2 in_progress (migration + retention + data-management-plan)'
     askquestion_pending: false
-    next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+    next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
     askquestion_pending_topic:
     s026_d29_decision: S026-D29
-    updated_at: '2026-08-04T22:06:19Z'
+    updated_at: '2026-08-04T22:09:30Z'
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
@@ -4857,8 +4867,8 @@ active_session:
     m113_merge_sha: 9eaedb0
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
-    active_task: T116.1
-    build_head: 605fce9
+    active_task: T116.2
+    build_head: a26d2a4
     s026_d48_decision: S026-D48
     m115_verify: PASS
     m115_pr_status: open_ci_green
@@ -4868,7 +4878,9 @@ active_session:
     ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     s026_d50_decision: S026-D50
-    t116_1_status: in_progress
+    t116_1_status: completed
+    t116_1_commit: a26d2a4
+    t116_2_status: in_progress
   - stage: 01-requirements
     required: true
     status: completed
@@ -5017,16 +5029,16 @@ active_session:
     skip_rationale:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:20:46Z'
-    current_action: build_m116_t116_1
-    next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+    current_action: build_m116_t116_2
+    next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 task_status=in_progress; T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed); head @605fce9; PR #204 open_ci_green NOT merged (S026-D50)'
-    updated_at: '2026-08-04T22:06:19Z'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 in_progress; head @a26d2a4; PR #204 open_ci_green NOT merged (S026-D50)'
+    updated_at: '2026-08-04T22:09:30Z'
     active_milestone: M116
     active_feature: F68
     m112_status: completed
@@ -5044,7 +5056,7 @@ active_session:
     m112_merge_sha_short: e1ccf9e
     m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     substeps:
-      current_task: T116.1
+      current_task: T116.2
       current_milestone: M116
       phase: 27
       task_status: in_progress
@@ -5067,6 +5079,7 @@ active_session:
       - T115.2
       - T115.3
       - T115.4
+      - T116.1
       m115_verify: PASS
       m116_status: in_progress
       completed_tasks_m115:
@@ -5076,6 +5089,8 @@ active_session:
       - T115.4
       m115_pr: 204
       m115_pr_status: open_ci_green
+      completed_tasks_m116:
+      - T116.1
     m113_status: completed
     m113_verify: PASS
     m113_pr: 202
@@ -5083,7 +5098,7 @@ active_session:
     m113_head: 06f4ab1
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     m113_ci_status: success
-    build_head: 605fce9
+    build_head: a26d2a4
     pr_201: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
     s026_d43_decision: S026-D43
     m114_status: completed
@@ -5102,14 +5117,15 @@ active_session:
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
     current_milestone: M116
-    current_task: T116.1
-    active_task: T116.1
-    build_head_full: 605fce91e731a89e2d3619005d3d2cec49764d70
+    current_task: T116.2
+    active_task: T116.2
+    build_head_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
     tasks_completed:
     - T115.1
     - T115.2
     - T115.3
     - T115.4
+    - T116.1
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -5143,8 +5159,14 @@ active_session:
     m115_ci_status: success
     pr_204_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     s026_d50_decision: S026-D50
-    t116_1_status: in_progress
-    t116_1_note: T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)
+    t116_1_status: completed
+    t116_1_note: T116.1 completed @a26d2a4 — privacy + API e2e red tests for F68 TC-225–228
+    t116_1_commit: a26d2a4
+    t116_1_commit_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+    t116_2_status: in_progress
+    t116_2_note: T116.2 in_progress — feedback migration + retention purge + data-management-plan
+    m116_commits:
+    - a26d2a4
   - stage: 08-verify-build
     required: true
     status: completed
@@ -5279,8 +5301,8 @@ active_session:
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
   current_stage: 07-build
-  current_action: build_m116_t116_1
-  next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+  current_action: build_m116_t116_2
+  next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -5349,10 +5371,10 @@ active_session:
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
   askquestion_pending_topic:
-  updated_at: '2026-08-04T22:06:19Z'
+  updated_at: '2026-08-04T22:09:30Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M116 F68 T116.1 task_status=in_progress; T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed); active_feature=F68 active_milestone=M116 active_task=T116.1 current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186); head @605fce9; PR #204 open_ci_green NOT merged (S026-D50)'
+  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M116 F68 T116.1 completed @a26d2a4; T116.1 completed @a26d2a4; T116.2 in_progress — feedback migration + retention purge + data-management-plan; M116 still in_progress; PR #204 open_ci_green NOT merged (S026-D50); active_feature=F68 active_milestone=M116 active_task=T116.2 current_action=build_m116_t116_2; next=07-build T116.2 feedback migration + retention purge + data-management-plan; head @a26d2a4'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -5397,9 +5419,9 @@ active_session:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  active_task: T116.1
-  build_head: 605fce9
-  build_head_full: 605fce91e731a89e2d3619005d3d2cec49764d70
+  active_task: T116.2
+  build_head: a26d2a4
+  build_head_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
@@ -5422,8 +5444,12 @@ active_session:
   ci_note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; NOT merged (S026-D50); merge needs explicit approval later'
   m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
   s026_d50_decision: S026-D50
-  t116_1_status: in_progress
-  t116_1_note: T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)
+  t116_1_status: completed
+  t116_1_note: T116.1 completed @a26d2a4 — privacy + API e2e red tests for F68 TC-225–228
+  t116_1_commit: a26d2a4
+  t116_1_commit_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+  t116_2_status: in_progress
+  t116_2_note: T116.2 in_progress — feedback migration + retention purge + data-management-plan
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -12782,8 +12808,8 @@ stages:
     active_milestone: M116
     active_feature: F68
     active_issue: 186
-    current_action: build_m116_t116_1
-    next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+    current_action: build_m116_t116_2
+    next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -12792,11 +12818,11 @@ stages:
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 task_status=in_progress; T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed); head @605fce9; PR #204 open_ci_green NOT merged (S026-D50)'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 in_progress; head @a26d2a4; PR #204 open_ci_green NOT merged (S026-D50)'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T22:06:19Z'
+    updated_at: '2026-08-04T22:09:30Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13051,6 +13077,7 @@ stages:
     - T115.2
     - T115.3
     - T115.4
+    - T116.1
     m112_status: completed
     m112_feature: F66
     m112_issue: 104
@@ -13064,7 +13091,7 @@ stages:
     - 0942ef9
     docs_commit: 47a618e
     substeps:
-      current_task: T116.1
+      current_task: T116.2
       current_milestone: M116
       phase: 27
       task_status: in_progress
@@ -13089,6 +13116,7 @@ stages:
       - T115.2
       - T115.3
       - T115.4
+      - T116.1
       m115_verify: PASS
       m116_status: in_progress
       completed_tasks_m115:
@@ -13098,11 +13126,13 @@ stages:
       - T115.4
       m115_pr: 204
       m115_pr_status: open_ci_green
+      completed_tasks_m116:
+      - T116.1
     m112_verify: PASS
     m112_pr: 200
     m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-    build_head: 605fce9
+    build_head: a26d2a4
     pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     s026_d29_decision: S026-D29
     m112_pr_merged: true
@@ -13130,7 +13160,7 @@ stages:
     m113_ci_status: success
     s026_d43_decision: S026-D43
     current_milestone: M116
-    current_task: T116.1
+    current_task: T116.2
     s026_d44_decision: S026-D44
     s026_d45_decision: S026-D45
     s026_d46_decision: S026-D46
@@ -13143,8 +13173,8 @@ stages:
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
     m114_status: completed
-    active_task: T116.1
-    build_head_full: 605fce91e731a89e2d3619005d3d2cec49764d70
+    active_task: T116.2
+    build_head_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -13178,8 +13208,14 @@ stages:
     m115_ci_status: success
     pr_204_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     s026_d50_decision: S026-D50
-    t116_1_status: in_progress
-    t116_1_note: T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)
+    t116_1_status: completed
+    t116_1_note: T116.1 completed @a26d2a4 — privacy + API e2e red tests for F68 TC-225–228
+    t116_1_commit: a26d2a4
+    t116_1_commit_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+    t116_2_status: in_progress
+    t116_2_note: T116.2 in_progress — feedback migration + retention purge + data-management-plan
+    m116_commits:
+    - a26d2a4
   08-verify-build:
     status: completed
     started_at: '2026-08-04'
@@ -26791,8 +26827,8 @@ evolve_cycles:
   routing_preset: standard
   preset: Standard
   current_stage: 07-build
-  current_action: build_m116_t116_1
-  next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+  current_action: build_m116_t116_2
+  next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -26845,14 +26881,14 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-04'
-      current_action: build_m116_t116_1
+      current_action: build_m116_t116_2
       askquestion_pending: false
-      note: 'EV-024 Phase C — M116 T116.1 F68/#186 in_progress (red tests TC-225–228); T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)'
+      note: 'EV-024 Phase C — M116 T116.1 F68/#186 completed @a26d2a4; T116.2 in_progress (migration + retention + data-management-plan)'
       current_stage: 07-build
       askquestion_pending_topic:
-      next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+      next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
       s026_d29_decision: S026-D29
-      updated_at: '2026-08-04T22:06:19Z'
+      updated_at: '2026-08-04T22:09:30Z'
       m112_pr_merged: true
       m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
       m112_merge_sha_short: e1ccf9e
@@ -26868,17 +26904,19 @@ evolve_cycles:
       active_milestone: M116
       active_feature: F68
       active_issue: 186
-      active_task: T116.1
+      active_task: T116.2
       s026_d48_decision: S026-D48
       m115_verify: PASS
       m115_pr_status: open_ci_green
       s026_d49_decision: S026-D49
       m115_pr: 204
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-      build_head: 605fce9
+      build_head: a26d2a4
       ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
       s026_d50_decision: S026-D50
-      t116_1_status: in_progress
+      t116_1_status: completed
+      t116_1_commit: a26d2a4
+      t116_2_status: in_progress
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -27142,8 +27180,8 @@ evolve_cycles:
       active_milestone: M116
       active_feature: F68
       active_issue: 186
-      current_action: build_m116_t116_1
-      next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
+      current_action: build_m116_t116_2
+      next_action: '07-build T116.2 feedback migration + retention purge + data-management-plan'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -27152,8 +27190,8 @@ evolve_cycles:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 task_status=in_progress; T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed); head @605fce9; PR #204 open_ci_green NOT merged (S026-D50)'
-      updated_at: '2026-08-04T22:06:19Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M116 F68 T116.1 completed @a26d2a4; T116.2 in_progress; head @a26d2a4; PR #204 open_ci_green NOT merged (S026-D50)'
+      updated_at: '2026-08-04T22:09:30Z'
       milestones_completed: *id009
       tasks_completed:
       - T112.1
@@ -27168,6 +27206,7 @@ evolve_cycles:
       - T115.2
       - T115.3
       - T115.4
+      - T116.1
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -27181,7 +27220,7 @@ evolve_cycles:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T116.1
+        current_task: T116.2
         current_milestone: M116
         phase: 27
         task_status: in_progress
@@ -27206,6 +27245,7 @@ evolve_cycles:
         - T115.2
         - T115.3
         - T115.4
+        - T116.1
         m115_verify: PASS
         m116_status: in_progress
         completed_tasks_m115:
@@ -27215,6 +27255,8 @@ evolve_cycles:
         - T115.4
         m115_pr: 204
         m115_pr_status: open_ci_green
+        completed_tasks_m116:
+        - T116.1
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
       branch: evolve/EV-024-frontend-ux-polish
@@ -27222,7 +27264,7 @@ evolve_cycles:
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 605fce9
+      build_head: a26d2a4
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -27263,9 +27305,9 @@ evolve_cycles:
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
       current_milestone: M116
-      current_task: T116.1
-      active_task: T116.1
-      build_head_full: 605fce91e731a89e2d3619005d3d2cec49764d70
+      current_task: T116.2
+      active_task: T116.2
+      build_head_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -27299,8 +27341,14 @@ evolve_cycles:
       m115_ci_status: success
       pr_204_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
       s026_d50_decision: S026-D50
-      t116_1_status: in_progress
-      t116_1_note: T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)
+      t116_1_status: completed
+      t116_1_note: T116.1 completed @a26d2a4 — privacy + API e2e red tests for F68 TC-225–228
+      t116_1_commit: a26d2a4
+      t116_1_commit_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+      t116_2_status: in_progress
+      t116_2_note: T116.2 in_progress — feedback migration + retention purge + data-management-plan
+      m116_commits:
+      - a26d2a4
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
@@ -28109,8 +28157,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M116 F68 T116.1 task_status=in_progress; T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed); active_feature=F68 active_milestone=M116 active_task=T116.1 current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186); head @605fce9; PR #204 open_ci_green NOT merged (S026-D50)'
-  updated_at: '2026-08-04T22:06:19Z'
+  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M116 F68 T116.1 completed @a26d2a4; T116.1 completed @a26d2a4; T116.2 in_progress — feedback migration + retention purge + data-management-plan; M116 still in_progress; PR #204 open_ci_green NOT merged (S026-D50); active_feature=F68 active_milestone=M116 active_task=T116.2 current_action=build_m116_t116_2; next=07-build T116.2 feedback migration + retention purge + data-management-plan; head @a26d2a4'
+  updated_at: '2026-08-04T22:09:30Z'
   feature_map:
     F64:
       issue: 87
@@ -28319,7 +28367,7 @@ evolve_cycles:
     - T114.2
     feature: F64
     issue: 87
-  active_task: T116.1
+  active_task: T116.2
   s026_d44_decision: S026-D44
   s026_d45_decision: S026-D45
   m114_status: completed
@@ -28363,8 +28411,8 @@ evolve_cycles:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  build_head: 605fce9
-  build_head_full: 605fce91e731a89e2d3619005d3d2cec49764d70
+  build_head: a26d2a4
+  build_head_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
@@ -28398,18 +28446,24 @@ evolve_cycles:
   m115_ci_status: success
   pr_204_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
   s026_d50_decision: S026-D50
-  t116_1_status: in_progress
-  t116_1_note: T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)
+  t116_1_status: completed
+  t116_1_note: T116.1 completed @a26d2a4 — privacy + API e2e red tests for F68 TC-225–228
   execution_plan_current_state:
     phase: 27
     current_milestone: M116
-    current_task: T116.1
+    current_task: T116.2
     task_status: in_progress
     active_milestone: M116
     active_feature: F68
     active_issue: 186
-    note: T116.1 in_progress — implementing red tests for F68 TC-225–228 (not completed)
-    updated_at: '2026-08-04T22:06:19Z'
+    note: T116.2 in_progress — feedback migration + retention purge + data-management-plan
+    updated_at: '2026-08-04T22:09:30Z'
+    t116_1_status: completed
+    t116_1_commit: a26d2a4
+  t116_1_commit: a26d2a4
+  t116_1_commit_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+  t116_2_status: in_progress
+  t116_2_note: T116.2 in_progress — feedback migration + retention purge + data-management-plan
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -35942,9 +35996,9 @@ git_history:
     created_at: '2026-08-04'
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
-    head_short: 605fce9
-    note: 'PRs #202@9eaedb0 + #203@f3f7dec MERGED (S026-D47); branch remains open for M115+; main green | M115 complete @464131f (T115.4 @605fce9); 08-verify PASS; PR #204 open; continue M116 | M115 PR #204 open @605fce9 for #93; continue M116 T116.1 (S026-D49) | T115.4 coverage fix @605fce9; CI red on d93b78a (coverage branches 91.77%); fix pushed @605fce9; PR #204 CI green; continue M116 T116.1'
-    head_sha: 605fce9
+    head_short: a26d2a4
+    note: 'PRs #202@9eaedb0 + #203@f3f7dec MERGED (S026-D47); branch remains open for M115+; main green | M115 complete @464131f (T115.4 @605fce9); 08-verify PASS; PR #204 open; continue M116 | M115 PR #204 open @605fce9 for #93; continue M116 T116.1 (S026-D49) | T115.4 coverage fix @605fce9; CI red on d93b78a (coverage branches 91.77%); fix pushed @605fce9; PR #204 CI green; continue M116 T116.1 | T116.1 completed @a26d2a4; T116.2 in_progress; PR #204 still open NOT merged'
+    head_sha: a26d2a4
     pr_number: 203
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203
     pr_status: merged
@@ -35956,7 +36010,7 @@ git_history:
     ci_status: success
     main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     deploy_preflight_status: watching
-    updated_at: '2026-08-04T21:56:00Z'
+    updated_at: '2026-08-04T22:09:30Z'
     merge_sha_short: f3f7dec
     prior_pr_202_merge_sha: 9eaedb0
     m115_pr: 204
@@ -40004,7 +40058,33 @@ git_history:
     files:
     - tests/unit/chat_rag/test_energy_estimate.py
     note: 'M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; merge needs user approval'
+  - sha: a26d2a4
+    full_sha: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+    sha_full: a26d2a4ad86cbb0ce7d98cf118cd2bc18c6e4442
+    short: a26d2a4
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T116.1] test: privacy + API e2e red for F68 feedback'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 6
+    timestamp: '2026-08-04T22:08:49Z'
+    milestone: M116
+    task: T116.1
+    feature_ids:
+    - F68
+    issue: 186
+    files:
+    - docs/api-contract.md
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - tests/e2e/test_uj073_feedback.py
+    - tests/privacy/test_feedback_table.py
+    - tests/unit/test_feedback_cleanup_endpoint.py
+    - workflow-state.yaml
+    note: 'T116.1 completed — privacy + API e2e red for F68; continuing T116.2; PR #204 still open NOT merged'
   notes:
+  - '2026-08-04T22:09:30Z S026/EV-024: recorded commit a26d2a4 ([T116.1] test: privacy + API e2e red for F68 feedback); T116.1 completed; T116.2 in_progress; build_head=a26d2a4; current_action=build_m116_t116_2; next=07-build T116.2 feedback migration + retention purge + data-management-plan; M116 still in_progress; PR #204 open_ci_green NOT merged; askquestion_pending=false on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T22:06:19Z S026/EV-024: T116.1 task_status=in_progress — implementing red tests for F68 TC-225–228 (not completed); M116 remains active; current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186) on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T22:01:21Z S026/EV-024: S026-D50 — continue M116 T116.1 without merging PR #204; askquestion_pending=false; current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186) on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T21:56:00Z S026/EV-024: recorded commit 605fce9 ([T115.4] test: cover energy knob validation branches); build_head=605fce9; m115_pr_status=open_ci_green; M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; merge needs user approval; askquestion_pending=true (merge PR #204 vs continue M116 T116.1 vs pause); active_task remains T116.1 / M116 on evolve/EV-024-frontend-ux-polish.'

@@ -156,6 +156,7 @@ from vecinita_internal_write_api.eval_service import (
     list_eval_runs,
     soft_delete_eval_run,
 )
+from vecinita_internal_write_api.feedback import cleanup_feedback
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
     DataManagementJobsClientError,
@@ -1622,6 +1623,17 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         if retention_days <= 0:
             return AuditCleanupResponse(deleted=0, retention_days=retention_days)
         deleted = cleanup_audit_log(engine, retention_days=retention_days)
+        return AuditCleanupResponse(deleted=deleted, retention_days=retention_days)
+
+    @app.post(
+        "/internal/v1/feedback/cleanup",
+        response_model=AuditCleanupResponse,
+    )
+    def feedback_cleanup(_actor: WriteActorDep) -> AuditCleanupResponse:  # pyright: ignore[reportUnusedFunction]
+        retention_days = int(os.environ.get("VECINITA_FEEDBACK_RETENTION_DAYS", "90"))
+        if retention_days <= 0:
+            return AuditCleanupResponse(deleted=0, retention_days=retention_days)
+        deleted = cleanup_feedback(engine, retention_days=retention_days)
         return AuditCleanupResponse(deleted=deleted, retention_days=retention_days)
 
     @app.get(

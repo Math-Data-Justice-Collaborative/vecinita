@@ -100,3 +100,8 @@ def test_cors_audit_log(client: TestClient) -> None:
 def test_cors_audit_cleanup(client: TestClient) -> None:
     """Audit cleanup endpoint allows POST via CORS preflight."""
     _preflight(client, "/internal/v1/audit/cleanup", "POST")
+
+
+def test_cors_feedback_cleanup(client: TestClient) -> None:
+    """Feedback cleanup endpoint allows POST via CORS preflight (F68)."""
+    _preflight(client, "/internal/v1/feedback/cleanup", "POST")
