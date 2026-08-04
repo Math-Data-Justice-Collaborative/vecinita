@@ -86,6 +86,58 @@ describe("useConversationStore", () => {
     expect(result.current.active.messages).toHaveLength(1);
   });
 
+  it("rehydrates assistant energyEstimate when valid (F65)", () => {
+    const first = renderHook(() => useConversationStore());
+    act(() => {
+      first.result.current.setActiveMessages(() => [
+        { id: "u1", role: "user", content: "hours?" },
+        {
+          id: "a1",
+          role: "assistant",
+          content: "Open daily.",
+          energyEstimate: {
+            wh: 0.02,
+            g_co2e: 0.008,
+            method: "tdp_util_walltime_v1",
+            advisory: "Approximate.",
+            car_km_equiv: 0.00003,
+            car_m_equiv: 0.03,
+          },
+        },
+      ]);
+    });
+    first.unmount();
+
+    const second = renderHook(() => useConversationStore());
+    expect(second.result.current.active.messages[1]?.energyEstimate?.wh).toBe(
+      0.02,
+    );
+  });
+
+  it("ignores messages with invalid energyEstimate shapes (F65)", () => {
+    localStorage.setItem(
+      CHAT_HISTORY_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        active: {
+          id: "a",
+          createdAt: 1,
+          messages: [
+            {
+              id: "a1",
+              role: "assistant",
+              content: "x",
+              energyEstimate: { wh: 1, method: "wrong" },
+            },
+          ],
+        },
+        previous: [],
+      }),
+    );
+    const { result } = renderHook(() => useConversationStore());
+    expect(result.current.active.messages).toHaveLength(0);
+  });
+
   it("ignores corrupt or unsupported stored payloads", () => {
     localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, "{ not json");
     const corrupt = renderHook(() => useConversationStore());

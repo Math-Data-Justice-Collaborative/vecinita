@@ -12,7 +12,7 @@
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
 | **Active milestone** | M116 — F68 ChatRAG feedback (#186) |
 | **Active task** | **T116.1** — privacy + API e2e red (TC-225–228) |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115** complete (PR pending #93); main green @ `f3f7dec` |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115** complete ([#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) open / #93); main green @ `f3f7dec` |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; 07-build M116 after M115 PR open |
 | **Git branch** | `evolve/EV-024-frontend-ux-polish` |

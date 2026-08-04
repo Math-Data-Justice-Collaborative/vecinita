@@ -5,7 +5,7 @@
 **Stage:** 08-verify-build (milestone boundary)  
 **Date:** 2026-08-04  
 **Branch:** `evolve/EV-024-frontend-ux-polish`  
-**Head:** (see git after T115.4 commit)
+**Head:** `d93b78a`
 
 ## Scope
 
