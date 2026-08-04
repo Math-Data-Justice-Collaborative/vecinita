@@ -19,6 +19,9 @@
 
 ## Open / next
 
+- **M115 PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204 (CI green @ `605fce9`)
+
+
 1. Open **M115** minor PR for #93 (energy estimate) — present for approval; do not auto-merge
 2. Watch CI on evolve branch after push
 3. Continue **M116** (feedback / #186) on same evolve branch after M115 PR exists

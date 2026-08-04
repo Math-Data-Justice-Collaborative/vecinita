@@ -1546,11 +1546,11 @@ project:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 @d93b78a Playwright uj070 + verify closeout; API e2e CI-deferred); M115 08-verify PASS; PR #204 open for #93; active M116 F68 T116.1; head d93b78a; S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 coverage fix @bde3db7); M115 08-verify PASS; PR #204 open for #93; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; active M116 F68 T116.1; head bde3db7; S026-D49: continue M116 unless user pauses'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T21:37:30Z'
+      updated_at: '2026-08-04T21:40:54Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1751,7 +1751,7 @@ project:
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: d93b78a
+      build_head: bde3db7
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -1793,31 +1793,35 @@ project:
       m114_merge_sha_short: f3f7dec
       m114_status: completed
       active_task: T116.1
-      build_head_full: d93b78a420a6cac1d2ed964f0822e6333a247a42
+      build_head_full: bde3db7ec013fcf3930a9744402c4faec6befab7
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
       m115_feature: F65
       m115_issue: 93
-      m115_head: d93b78a
+      m115_head: bde3db7
       m115_pr: 204
       m115_pr_status: open
-      m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); merge needs user approval; continue M116 unless user pauses (S026-D49)'
+      m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; merge needs user approval; continue M116 unless user pauses (S026-D49)'
       t115_3_status: completed
       t115_3_commit: 464131f
       t115_4_status: completed
-      t115_4_commit: d93b78a
+      t115_4_commit: bde3db7
       t115_4_commit_pending: false
-      t115_4_note: Committed @d93b78a; Vitest+Playwright uj070; API e2e CI-deferred (local Colima Postgres chmod denied)
+      t115_4_note: 'Committed @d93b78a; coverage fix @bde3db7 after CI red (branches 91.77%); Vitest+Playwright uj070; API e2e CI-deferred; watching CI for PR #204'
       m115_commits:
       - a2ce572
       - e138137
       - 464131f
       - d93b78a
+      - bde3db7
       s026_d49_decision: S026-D49
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: open
+      ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
+      ci_status: watching
+      pr_204_ci_status: watching
     08-verify-build:
       status: completed
       started_at: '2026-08-04'
@@ -1869,10 +1873,10 @@ project:
       - 8c81e65
       - 0942ef9
       m112_status: completed
-      note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head d93b78a; 07 continues M116 T116.1 (S026-D49)'
+      note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head bde3db7; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; head bde3db7; 07 continues M116 T116.1 (S026-D49)'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
-      updated_at: '2026-08-04T21:37:30Z'
+      updated_at: '2026-08-04T21:40:54Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -2033,7 +2037,7 @@ project:
       m115_pr_note: 'PR #204 open for #93; continue M116 (S026-D49)'
       m115_pr: 204
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-      m115_head: d93b78a
+      m115_head: bde3db7
       s026_d49_decision: S026-D49
     09-qa:
       status: completed
@@ -4813,12 +4817,12 @@ active_session:
     started_at: '2026-08-04'
     current_action: build_m116_t116_1
     current_stage: 07-build
-    note: 'EV-024 Phase C — M115 COMPLETE (08-verify PASS; PR #204 open for #93); M116 T116.1 F68/#186; S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
+    note: 'EV-024 Phase C — M115 COMPLETE (coverage fix @bde3db7; PR #204 open for #93); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; M116 T116.1 F68/#186; S026-D49: continue M116 unless user pauses'
     askquestion_pending: false
     next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
     askquestion_pending_topic:
     s026_d29_decision: S026-D29
-    updated_at: '2026-08-04T21:37:30Z'
+    updated_at: '2026-08-04T21:40:54Z'
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
@@ -4843,13 +4847,14 @@ active_session:
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
     active_task: T116.1
-    build_head: d93b78a
+    build_head: bde3db7
     s026_d48_decision: S026-D48
     m115_verify: PASS
     m115_pr_status: open
     s026_d49_decision: S026-D49
     m115_pr: 204
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
+    ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
   - stage: 01-requirements
     required: true
     status: completed
@@ -5006,8 +5011,8 @@ active_session:
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 @d93b78a Playwright uj070 + verify closeout; API e2e CI-deferred); M115 08-verify PASS; PR #204 open for #93; active M116 F68 T116.1; head d93b78a; S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
-    updated_at: '2026-08-04T21:37:30Z'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 coverage fix @bde3db7); M115 08-verify PASS; PR #204 open for #93; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; active M116 F68 T116.1; head bde3db7; S026-D49: continue M116 unless user pauses'
+    updated_at: '2026-08-04T21:40:54Z'
     active_milestone: M116
     active_feature: F68
     m112_status: completed
@@ -5063,7 +5068,7 @@ active_session:
     m113_head: 06f4ab1
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     m113_ci_status: success
-    build_head: d93b78a
+    build_head: bde3db7
     pr_201: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
     s026_d43_decision: S026-D43
     m114_status: completed
@@ -5084,7 +5089,7 @@ active_session:
     current_milestone: M116
     current_task: T116.1
     active_task: T116.1
-    build_head_full: d93b78a420a6cac1d2ed964f0822e6333a247a42
+    build_head_full: bde3db7ec013fcf3930a9744402c4faec6befab7
     tasks_completed:
     - T115.1
     - T115.2
@@ -5095,25 +5100,29 @@ active_session:
     m115_verify: PASS
     m115_feature: F65
     m115_issue: 93
-    m115_head: d93b78a
+    m115_head: bde3db7
     m115_pr: 204
     m115_pr_status: open
-    m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); merge needs user approval; continue M116 unless user pauses (S026-D49)'
+    m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; merge needs user approval; continue M116 unless user pauses (S026-D49)'
     t115_3_status: completed
     t115_3_commit: 464131f
     t115_4_status: completed
-    t115_4_commit: d93b78a
+    t115_4_commit: bde3db7
     t115_4_commit_pending: false
-    t115_4_note: Committed @d93b78a; Vitest+Playwright uj070; API e2e CI-deferred (local Colima Postgres chmod denied)
+    t115_4_note: 'Committed @d93b78a; coverage fix @bde3db7 after CI red (branches 91.77%); Vitest+Playwright uj070; API e2e CI-deferred; watching CI for PR #204'
     m115_commits:
     - a2ce572
     - e138137
     - 464131f
     - d93b78a
+    - bde3db7
     s026_d49_decision: S026-D49
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: open
+    ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
+    ci_status: watching
+    pr_204_ci_status: watching
   - stage: 08-verify-build
     required: true
     status: completed
@@ -5129,8 +5138,8 @@ active_session:
     active_feature: F67
     active_issue: 106
     build_head: adf40b4
-    note: 'S026/EV-024 08 PASS (M114) — #202/@9eaedb0 + #203/@f3f7dec merged; handoff → 07-build T115.1 red tests for F65 energy estimate (#93) | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head d93b78a; 07 continues M116 T116.1 (S026-D49)'
-    updated_at: '2026-08-04T21:37:30Z'
+    note: 'S026/EV-024 08 PASS (M114) — #202/@9eaedb0 + #203/@f3f7dec merged; handoff → 07-build T115.1 red tests for F65 energy estimate (#93) | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head bde3db7; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; head bde3db7; 07 continues M116 T116.1 (S026-D49)'
+    updated_at: '2026-08-04T21:40:54Z'
     completed_at: '2026-08-04'
     completed_at_iso: '2026-08-04T20:36:17Z'
     overall_result: PASS
@@ -5216,7 +5225,7 @@ active_session:
     m115_pr_note: 'PR #204 open for #93; continue M116 (S026-D49)'
     m115_pr: 204
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-    m115_head: d93b78a
+    m115_head: bde3db7
     s026_d49_decision: S026-D49
   - stage: 09-qa
     required: true
@@ -5314,10 +5323,10 @@ active_session:
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
   askquestion_pending_topic:
-  updated_at: '2026-08-04T21:37:30Z'
+  updated_at: '2026-08-04T21:40:54Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M115 F65 COMPLETE (T115.1–T115.4 @ d93b78a); M115 08-verify PASS; PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; active_feature=F68 active_milestone=M116 active_task=T116.1 current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186) | S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
+  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M115 F65 COMPLETE (T115.1–T115.4; coverage fix @bde3db7); M115 08-verify PASS; PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; active_feature=F68 active_milestone=M116 active_task=T116.1 current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186) | S026-D49: continue M116 unless user pauses'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -5363,27 +5372,28 @@ active_session:
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
   active_task: T116.1
-  build_head: d93b78a
-  build_head_full: d93b78a420a6cac1d2ed964f0822e6333a247a42
+  build_head: bde3db7
+  build_head_full: bde3db7ec013fcf3930a9744402c4faec6befab7
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
   m115_feature: F65
   m115_issue: 93
-  m115_head: d93b78a
+  m115_head: bde3db7
   m115_pr: 204
   m115_pr_status: open
-  m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); merge needs user approval; continue M116 unless user pauses (S026-D49)'
+  m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; merge needs user approval; continue M116 unless user pauses (S026-D49)'
   t115_3_status: completed
   t115_3_commit: 464131f
   t115_4_status: completed
-  t115_4_commit: d93b78a
+  t115_4_commit: bde3db7
   t115_4_commit_pending: false
-  t115_4_note: Committed @d93b78a; Vitest+Playwright uj070; API e2e CI-deferred (local Colima Postgres chmod denied)
+  t115_4_note: 'Committed @d93b78a; coverage fix @bde3db7 after CI red (branches 91.77%); Vitest+Playwright uj070; API e2e CI-deferred; watching CI for PR #204'
   s026_d49_decision: S026-D49
   m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204_status: open
+  ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -12752,11 +12762,11 @@ stages:
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 @d93b78a Playwright uj070 + verify closeout; API e2e CI-deferred); M115 08-verify PASS; PR #204 open for #93; active M116 F68 T116.1; head d93b78a; S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
+    note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 coverage fix @bde3db7); M115 08-verify PASS; PR #204 open for #93; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; active M116 F68 T116.1; head bde3db7; S026-D49: continue M116 unless user pauses'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T21:37:30Z'
+    updated_at: '2026-08-04T21:40:54Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13061,7 +13071,7 @@ stages:
     m112_pr: 200
     m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-    build_head: d93b78a
+    build_head: bde3db7
     pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     s026_d29_decision: S026-D29
     m112_pr_merged: true
@@ -13103,31 +13113,35 @@ stages:
     m114_merge_sha_short: f3f7dec
     m114_status: completed
     active_task: T116.1
-    build_head_full: d93b78a420a6cac1d2ed964f0822e6333a247a42
+    build_head_full: bde3db7ec013fcf3930a9744402c4faec6befab7
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
     m115_feature: F65
     m115_issue: 93
-    m115_head: d93b78a
+    m115_head: bde3db7
     m115_pr: 204
     m115_pr_status: open
-    m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); merge needs user approval; continue M116 unless user pauses (S026-D49)'
+    m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; merge needs user approval; continue M116 unless user pauses (S026-D49)'
     t115_3_status: completed
     t115_3_commit: 464131f
     t115_4_status: completed
-    t115_4_commit: d93b78a
+    t115_4_commit: bde3db7
     t115_4_commit_pending: false
-    t115_4_note: Committed @d93b78a; Vitest+Playwright uj070; API e2e CI-deferred (local Colima Postgres chmod denied)
+    t115_4_note: 'Committed @d93b78a; coverage fix @bde3db7 after CI red (branches 91.77%); Vitest+Playwright uj070; API e2e CI-deferred; watching CI for PR #204'
     m115_commits:
     - a2ce572
     - e138137
     - 464131f
     - d93b78a
+    - bde3db7
     s026_d49_decision: S026-D49
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: open
+    ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
+    ci_status: watching
+    pr_204_ci_status: watching
   08-verify-build:
     status: completed
     started_at: '2026-08-04'
@@ -13179,10 +13193,10 @@ stages:
     - 8c81e65
     - 0942ef9
     m112_status: completed
-    note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head d93b78a; 07 continues M116 T116.1 (S026-D49)'
+    note: 'M114 08 PASS; PR #203 | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head bde3db7; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; head bde3db7; 07 continues M116 T116.1 (S026-D49)'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
-    updated_at: '2026-08-04T21:37:30Z'
+    updated_at: '2026-08-04T21:40:54Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -13599,7 +13613,7 @@ stages:
     m115_pr_note: 'PR #204 open for #93; continue M116 (S026-D49)'
     m115_pr: 204
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-    m115_head: d93b78a
+    m115_head: bde3db7
     s026_d49_decision: S026-D49
   09-qa:
     status: completed
@@ -26792,12 +26806,12 @@ evolve_cycles:
       started: '2026-08-04'
       current_action: build_m116_t116_1
       askquestion_pending: false
-      note: 'Phase C — M115 COMPLETE (08-verify PASS; PR #204 open); M116 T116.1; S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
+      note: 'Phase C — M115 COMPLETE (coverage fix @bde3db7; PR #204 open); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; M116 T116.1; S026-D49: continue M116 unless user pauses'
       current_stage: 07-build
       askquestion_pending_topic:
       next_action: '07-build T116.1 red tests for F68 ChatRAG feedback (#186)'
       s026_d29_decision: S026-D29
-      updated_at: '2026-08-04T21:37:30Z'
+      updated_at: '2026-08-04T21:40:54Z'
       m112_pr_merged: true
       m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
       m112_merge_sha_short: e1ccf9e
@@ -26820,7 +26834,8 @@ evolve_cycles:
       s026_d49_decision: S026-D49
       m115_pr: 204
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-      build_head: d93b78a
+      build_head: bde3db7
+      ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -27094,8 +27109,8 @@ evolve_cycles:
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 @d93b78a Playwright uj070 + verify closeout; API e2e CI-deferred); M115 08-verify PASS; PR #204 open for #93; active M116 F68 T116.1; head d93b78a; S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
-      updated_at: '2026-08-04T21:37:30Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS — M115 F65 COMPLETE (T115.4 coverage fix @bde3db7); M115 08-verify PASS; PR #204 open for #93; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; active M116 F68 T116.1; head bde3db7; S026-D49: continue M116 unless user pauses'
+      updated_at: '2026-08-04T21:40:54Z'
       milestones_completed: *id009
       tasks_completed:
       - T112.1
@@ -27163,7 +27178,7 @@ evolve_cycles:
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: d93b78a
+      build_head: bde3db7
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -27206,31 +27221,35 @@ evolve_cycles:
       current_milestone: M116
       current_task: T116.1
       active_task: T116.1
-      build_head_full: d93b78a420a6cac1d2ed964f0822e6333a247a42
+      build_head_full: bde3db7ec013fcf3930a9744402c4faec6befab7
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
       m115_feature: F65
       m115_issue: 93
-      m115_head: d93b78a
+      m115_head: bde3db7
       m115_pr: 204
       m115_pr_status: open
-      m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); merge needs user approval; continue M116 unless user pauses (S026-D49)'
+      m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; merge needs user approval; continue M116 unless user pauses (S026-D49)'
       t115_3_status: completed
       t115_3_commit: 464131f
       t115_4_status: completed
-      t115_4_commit: d93b78a
+      t115_4_commit: bde3db7
       t115_4_commit_pending: false
-      t115_4_note: Committed @d93b78a; Vitest+Playwright uj070; API e2e CI-deferred (local Colima Postgres chmod denied)
+      t115_4_note: 'Committed @d93b78a; coverage fix @bde3db7 after CI red (branches 91.77%); Vitest+Playwright uj070; API e2e CI-deferred; watching CI for PR #204'
       m115_commits:
       - a2ce572
       - e138137
       - 464131f
       - d93b78a
+      - bde3db7
       s026_d49_decision: S026-D49
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: open
+      ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
+      ci_status: watching
+      pr_204_ci_status: watching
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
@@ -27280,8 +27299,8 @@ evolve_cycles:
       - 0942ef9
       m112_status: completed
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M114) — F64 cold-start tips #87; PR #203 open; M113=#202; AskQuestion pending | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head d93b78a; 07 continues M116 T116.1 (S026-D49)'
-      updated_at: '2026-08-04T21:37:30Z'
+      note: 'S026/EV-024 08-verify-build COMPLETE PASS (M114) — F64 cold-start tips #87; PR #203 open; M113=#202; AskQuestion pending | M115 08-verify PASS (Vitest+Playwright uj070; API e2e CI-deferred); PR #204 open for #93; 07 continues M116 T116.1 | M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; head bde3db7; 07 continues M116 T116.1 (S026-D49) | CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; head bde3db7; 07 continues M116 T116.1 (S026-D49)'
+      updated_at: '2026-08-04T21:40:54Z'
       completed: '2026-08-04'
       completed_at: '2026-08-04'
       completed_at_iso: '2026-08-04T20:36:17Z'
@@ -27367,7 +27386,7 @@ evolve_cycles:
       m115_pr_note: 'PR #204 open for #93; continue M116 (S026-D49)'
       m115_pr: 204
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-      m115_head: d93b78a
+      m115_head: bde3db7
       s026_d49_decision: S026-D49
   artifacts:
   - &id017
@@ -28018,8 +28037,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 S026-D47 2026-08-04 — PR #202 MERGED @ 9eaedb0 (main CI+preflight green); PR #203 MERGED @ f3f7dec; main CI flake (Supabase advisors API 502) then rerun green + deploy-preflight OK; active_feature=F65 active_milestone=M115 current_action=start_m115_t115_1; next=07-build T115.1 red tests for F65 energy estimate (#93) | S026-D47: #202+#203 merged; main green @ f3f7dec; start M115 | T115.1+T115.2 done (energy helper + ask/stream wire); next T115.3 FE | S026-D48: 45a continue T115.3 FE | T115.3+T115.4 completed; M115 08-verify PASS; minor PR for #93 about to open (placeholder); next M116 T116.1 F68/#186 | S026-D49: M115 PR #204 opened; continue to M116 unless user pauses'
-  updated_at: '2026-08-04T21:37:30Z'
+  note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — M115 F65 COMPLETE (T115.1–T115.4; coverage fix @bde3db7); M115 08-verify PASS; PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; active_feature=F68 active_milestone=M116 active_task=T116.1 current_action=build_m116_t116_1; next=07-build T116.1 red tests for F68 ChatRAG feedback (#186) | S026-D49: continue M116 unless user pauses'
+  updated_at: '2026-08-04T21:40:54Z'
   feature_map:
     F64:
       issue: 87
@@ -28262,8 +28281,8 @@ evolve_cycles:
     summary: Vitest+Playwright uj070 green; API e2e deferred to CI (Colima chmod)
     feature: F65
     issue: 93
-    note: Committed @d93b78a; Vitest+Playwright uj070; API e2e CI-deferred
-    commit: d93b78a
+    note: 'Committed @d93b78a; coverage fix @bde3db7 after CI red (branches 91.77%); Vitest+Playwright uj070; API e2e CI-deferred; watching CI for PR #204'
+    commit: bde3db7
   s026_d46_decision: S026-D46
   s026_d47_decision: S026-D47
   m113_pr_merged: true
@@ -28272,27 +28291,36 @@ evolve_cycles:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  build_head: d93b78a
-  build_head_full: d93b78a420a6cac1d2ed964f0822e6333a247a42
+  build_head: bde3db7
+  build_head_full: bde3db7ec013fcf3930a9744402c4faec6befab7
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
   m115_feature: F65
   m115_issue: 93
-  m115_head: d93b78a
+  m115_head: bde3db7
   m115_pr: 204
   m115_pr_status: open
-  m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); merge needs user approval; continue M116 unless user pauses (S026-D49)'
+  m115_pr_note: 'PR #204 open for #93 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204); CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; merge needs user approval; continue M116 unless user pauses (S026-D49)'
   t115_3_status: completed
   t115_3_commit: 464131f
   t115_4_status: completed
-  t115_4_commit: d93b78a
+  t115_4_commit: bde3db7
   t115_4_commit_pending: false
-  t115_4_note: Committed @d93b78a; Vitest+Playwright uj070; API e2e CI-deferred (local Colima Postgres chmod denied)
+  t115_4_note: 'Committed @d93b78a; coverage fix @bde3db7 after CI red (branches 91.77%); Vitest+Playwright uj070; API e2e CI-deferred; watching CI for PR #204'
   s026_d49_decision: S026-D49
   m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204_status: open
+  m115_commits:
+  - a2ce572
+  - e138137
+  - 464131f
+  - d93b78a
+  - bde3db7
+  ci_note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
+  ci_status: watching
+  pr_204_ci_status: watching
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -32904,6 +32932,7 @@ decisions_log:
 - *id011
 - *id012
 - *id013
+- 'S026/EV-024: CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; build_head=bde3db7; active_task=T116.1 / M116 unchanged'
 artifacts:
 - *id014
 - *id015
@@ -35793,9 +35822,9 @@ git_history:
     created_at: '2026-08-04'
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
-    head_short: d93b78a
-    note: 'PRs #202@9eaedb0 + #203@f3f7dec MERGED (S026-D47); branch remains open for M115+; main green | M115 complete @464131f (T115.4 @d93b78a); 08-verify PASS; PR #204 open; continue M116 | M115 PR #204 open @d93b78a for #93; continue M116 T116.1 (S026-D49)'
-    head_sha: d93b78a
+    head_short: bde3db7
+    note: 'PRs #202@9eaedb0 + #203@f3f7dec MERGED (S026-D47); branch remains open for M115+; main green | M115 complete @464131f (T115.4 @bde3db7); 08-verify PASS; PR #204 open; continue M116 | M115 PR #204 open @bde3db7 for #93; continue M116 T116.1 (S026-D49) | T115.4 coverage fix @bde3db7; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; continue M116 T116.1'
+    head_sha: bde3db7
     pr_number: 203
     pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203
     pr_status: merged
@@ -35804,10 +35833,10 @@ git_history:
     merge_sha_full: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     merged_at: '2026-08-04T20:59:01Z'
-    ci_status: success
+    ci_status: watching
     main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     deploy_preflight_status: watching
-    updated_at: '2026-08-04T21:37:30Z'
+    updated_at: '2026-08-04T21:40:54Z'
     merge_sha_short: f3f7dec
     prior_pr_202_merge_sha: 9eaedb0
     m115_pr: 204
@@ -39809,7 +39838,33 @@ git_history:
     - tests/ui/chat/uj070-energy.spec.ts
     - workflow-state.yaml
     note: 'T115.4 Playwright uj070 + M115 verify closeout; PR #204 opened for #93'
+  - sha: bde3db7
+    full_sha: bde3db7ec013fcf3930a9744402c4faec6befab7
+    sha_full: bde3db7ec013fcf3930a9744402c4faec6befab7
+    short: bde3db7
+    branch: evolve/EV-024-frontend-ux-polish
+    message: '[T115.4] fix: restore ChatRAG Vitest branch coverage for F65'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
+    files_changed: 6
+    timestamp: '2026-08-04T21:40:43Z'
+    milestone: M115
+    task: T115.4
+    feature_ids:
+    - F65
+    issue: 93
+    files:
+    - apps/chat-rag-frontend/src/api/energyEstimate.test.ts
+    - apps/chat-rag-frontend/src/components/EnergyEstimatePanel.test.tsx
+    - apps/chat-rag-frontend/src/hooks/useConversationStore.test.ts
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+    - workflow-state.yaml
+    note: 'CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204'
   notes:
+  - '2026-08-04T21:40:54Z S026/EV-024: recorded commit bde3db7 ([T115.4] fix: restore ChatRAG Vitest branch coverage for F65); build_head=bde3db7; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; active_task remains T116.1 / M116 on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T21:37:30Z S026/EV-024: recorded commit d93b78a (T115.4); M115 PR #204 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) for #93; build_head=d93b78a; continue M116/T116.1/build_m116_t116_1 unless user pauses (S026-D49) on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-04T21:35:14Z S026/EV-024: recorded commit 464131f (T115.3); T115.4 commit will follow (Vitest+Playwright uj070 green; API e2e deferred to CI — Colima Postgres chmod denied); M115 08-verify PASS; minor PR for #93 about to open; pointers → M116/T116.1/build_m116_t116_1 on evolve/EV-024-frontend-ux-polish.'
   - '2026-08-03T22:22:05Z S024/EV-022: recorded commit 55c4583 on docs/S024-EV-022-deploy-smoke-closeout — Path A deploy smoke PASS and close 13; PR #191 OPEN; stage completion unchanged.'
@@ -40026,8 +40081,8 @@ git_history:
       base: main
       status: open
       merged: false
-      head_sha: d93b78a
-      head_sha_full: d93b78a420a6cac1d2ed964f0822e6333a247a42
+      head_sha: bde3db7
+      head_sha_full: bde3db7ec013fcf3930a9744402c4faec6befab7
       milestone: M115
       feature: F65
       issue: 93
@@ -40038,7 +40093,9 @@ git_history:
       opened_ts: '2026-08-04T21:37:30Z'
       recorded_at: '2026-08-04T21:37:30Z'
       merge_policy: needs_user_approval
-      note: 'M115 minor PR for #93; continue M116 unless user pauses (S026-D49); do not merge without explicit user approval'
+      note: 'M115 minor PR for #93; CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; continue M116 unless user pauses (S026-D49); do not merge without explicit user approval'
+      ci_status: watching
+      updated_at: '2026-08-04T21:40:54Z'
 constraints:
   cost:
     target_usd_per_month: 25
