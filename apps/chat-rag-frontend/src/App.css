@@ -724,6 +724,36 @@ button.secondary:hover:not(:disabled) {
   gap: 0.5rem;
 }
 
+.feedback-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 40rem;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.feedback-form textarea,
+.feedback-form select {
+  width: 100%;
+}
+
+.feedback-privacy {
+  opacity: 0.85;
+}
+
+.feedback-success {
+  color: var(--accent, #2f6f4e);
+}
+
+.feedback-error {
+  color: var(--danger, #b42318);
+}
+
 /* ---------- Responsive: sidebar as off-canvas drawer ---------- */
 
 @media (max-width: 768px) {

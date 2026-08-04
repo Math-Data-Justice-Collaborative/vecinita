@@ -25,6 +25,7 @@ function renderSidebar(overrides: Partial<Parameters<typeof Sidebar>[0]> = {}) {
     locale: "en" as const,
     theme: "dark" as const,
     onCorpus: false,
+    onFeedback: false,
     newChatDisabled: false,
     tags: [housing],
     selectedTags: [] as string[],

@@ -6,7 +6,7 @@
 | Cycle | EV-024 — ChatRAG + Admin UX polish (F64–F69) |
 | Branch | `evolve/EV-024-frontend-ux-polish` |
 | Stage | 07-build (Phase C) |
-| Milestone | **M116** F68 feedback (#186) — T116.1–T116.3 done; next T116.4 |
+| Milestone | **M116** F68 feedback (#186) — T116.1–T116.4 done; next T116.5 |
 | Main tip | `f3f7dec` (M114 merged; CI + deploy-preflight green) |
 
 ## Merged
@@ -20,7 +20,7 @@
 ## Open / next
 
 - **M115 PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204 (CI green @ `605fce9`)
-- **M116:** T116.4 ChatRAG Feedback page + Admin Feedback UI
+- **M116:** T116.5 e2e/privacy green + Playwright uj073
 
 ## Local notes
 

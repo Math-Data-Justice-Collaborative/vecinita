@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
 | **Active milestone** | M116 — F68 ChatRAG feedback (#186) |
-| **Active task** | **T116.4** — ChatRAG Feedback page + Admin Feedback UI |
+| **Active task** | **T116.5** — e2e/privacy green + Vitest/Playwright uj073 |
 | **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M114** merged (#200/#202/#203); **M115** complete ([#204](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204) open / #93); main green @ `f3f7dec` |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; 07-build M116 after M115 PR open |
@@ -2304,7 +2304,7 @@ privacy rejects (AC-UX10–UX13; TC-225–228; ADR-046).
 | T116.1 | Test: privacy + API e2e red — POST feedback; reject email; admin list; purge (TC-225–228) | Test | completed | AC-UX10–UX13, ADR-046, #186 | T115.4 | 2026-08-04 | S026 | F68 |
 | T116.2 | Code: DB migration `feedback` + retention purge; document table in `data-management-plan.md` | Code | completed | ADR-046, config-spec, 05 M3 | T116.1 | 2026-08-04 | S026 | F68 |
 | T116.3 | Code: ChatRAG `POST /api/v1/feedback` → internal-write `POST /internal/v1/feedback`; DM backend `GET /admin/feedback` (JWT admin/super-admin) | Code | completed | api-contract, 05 M1 | T116.2 | 2026-08-04 | S026 | F68 |
-| T116.4 | Code: ChatRAG Feedback page (calls public POST); Admin Feedback UI → DM `GET /admin/feedback` only | Code | pending | S026-D17, UJ-073, 05 M1 | T116.3 | — | S026 | F68 |
+| T116.4 | Code: ChatRAG Feedback page (calls public POST); Admin Feedback UI → DM `GET /admin/feedback` only | Code | completed | S026-D17, UJ-073, 05 M1 | T116.3 | 2026-08-04 | S026 | F68 |
 | T116.5 | Test: e2e/privacy green; Vitest + Playwright uj073 (TC-225–228) | Test | pending | TP4, UJ-073 | T116.4 | — | S026 | F68 |
 
 #### M117: F69 — Audit actor email read-time (#170)

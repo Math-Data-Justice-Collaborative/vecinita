@@ -5,6 +5,7 @@ import {
   FlaskConical,
   Heart,
   ListChecks,
+  MessageSquareText,
   ScrollText,
   Menu,
   Users,
@@ -119,6 +120,11 @@ function NavItems({ onClick }: { onClick?: () => void }) {
     },
     ...(isAdmin
       ? [
+          {
+            to: "/feedback",
+            label: tr("admin.nav.feedback"),
+            icon: MessageSquareText,
+          } as const,
           { to: "/users", label: tr("admin.nav.users"), icon: Users } as const,
           {
             to: "/evaluation",
