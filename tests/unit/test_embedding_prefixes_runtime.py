@@ -101,3 +101,34 @@ def test_assert_embedding_dimension_rejects_wrong_len() -> None:
     """Non-384 vectors raise EmbeddingClientError mentioning 384 (AC-ME1)."""
     with pytest.raises(EmbeddingClientError, match="384"):
         assert_embedding_dimension([0.1, 0.2, 0.3])
+
+
+def test_resolve_e5_setting_rejects_unknown_and_defaults_from_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Invalid ``VECINITA_EMBED_E5_PREFIXES`` raises; empty/unset → auto (TC-233)."""
+    monkeypatch.delenv("VECINITA_EMBED_E5_PREFIXES", raising=False)
+    assert e5_prefixes_enabled(model_id=_E1) is True
+    monkeypatch.setenv("VECINITA_EMBED_E5_PREFIXES", "")
+    assert e5_prefixes_enabled(model_id=_E0) is False
+    monkeypatch.setenv("VECINITA_EMBED_E5_PREFIXES", "bogus")
+    with pytest.raises(EmbeddingClientError, match="VECINITA_EMBED_E5_PREFIXES"):
+        e5_prefixes_enabled(model_id=_E1)
+
+
+def test_apply_embed_prefix_reads_model_id_from_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``model_id=None`` / empty resolves ``VECINITA_EMBEDDING_MODEL_ID`` (TC-233)."""
+    monkeypatch.setenv("VECINITA_EMBEDDING_MODEL_ID", _E1)
+    assert apply_embed_prefix(_QUERY_TEXT, mode="query") == f"query: {_QUERY_TEXT}"
+    assert apply_embed_prefix(_QUERY_TEXT, mode="query", model_id="") == (f"query: {_QUERY_TEXT}")
+
+
+def test_resolve_embed_runtime_empty_string_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Explicit empty runtime arg defaults to ``fastembed`` (TC-234)."""
+    monkeypatch.setenv("VECINITA_EMBED_RUNTIME", "onnx")
+    assert resolve_embed_runtime("") == "fastembed"
+    assert resolve_embed_runtime("sentence_transformers") == "sentence_transformers"
