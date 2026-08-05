@@ -9,14 +9,14 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
-| **Active milestone** | M118 — OpenAPI + UJ e2e suite + Phase 27 gate |
-| **Active task** | **T118.1** — confirm API e2e UJ-069/070/073/074 + Playwright suite green |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M116** merged (#200/#202/#203/#205); **M117** F69 verify PASS ([#206](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206) open CI green @ `1719b3b`) |
+| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) — **build complete** (Gate C→D pending) |
+| **Active milestone** | M118 — OpenAPI + UJ e2e suite + Phase 27 gate — **completed** |
+| **Active task** | — (T118.3 completed); next **08-verify-build** / Gate C→D → 09-qa |
+| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M118** (code PRs #200/#202/#203/#205/#206; M118 OpenAPI/gate docs) |
 | **Last updated** | 2026-08-04 |
-| **Evolve cycle** | EV-024 — Standard; 07-build M118 after M117 verify (#206 open) |
+| **Evolve cycle** | EV-024 — Standard; Phase C build done; await Gate C→D |
 | **Git branch** | `evolve/EV-024-frontend-ux-polish` |
-| **Active session** | S026-frontend-ux-polish — 07-build M118 / Phase 27 gate |
+| **Active session** | S026-frontend-ux-polish — M118 complete; Gate C→D |
 | **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
 
 ## Template
@@ -2326,26 +2326,28 @@ AC-UX16 held.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T118.1 | Test: confirm API e2e UJ-069/070/073/074 + Playwright suite green | Test | pending | e2e-coverage, TP4 | T114.3, T115.4, T116.5, T117.4 | — | S026 | F64–F69 |
-| T118.2 | Config: OpenAPI ask/feedback/audit fields; `infra/vecinita.yaml` + staging-secrets-matrix energy/feedback keys | Config | pending | TP3, ADR-011, 05 M4 | T118.1 | — | S026 | F64–F69 |
-| T118.3 | Docs: Phase 27 gate + Current State; issue closeout notes #104/#106/#87/#93/#186/#170/#193 | Docs | pending | Phase 27 gate | T118.2 | — | S026 | F64–F69 |
+| T118.1 | Test: confirm API e2e UJ-069/070/073/074 + Playwright suite green | Test | completed | e2e-coverage, TP4 | T114.3, T115.4, T116.5, T117.4 | 2026-08-04 | S026 | F64–F69 |
+| T118.2 | Config: OpenAPI ask/feedback/audit fields; `infra/vecinita.yaml` + staging-secrets-matrix energy/feedback keys | Config | completed | TP3, ADR-011, 05 M4 | T118.1 | 2026-08-04 | S026 | F64–F69 |
+| T118.3 | Docs: Phase 27 gate + Current State; issue closeout notes #104/#106/#87/#93/#186/#170/#193 | Docs | completed | Phase 27 gate | T118.2 | 2026-08-04 | S026 | F64–F69 |
 
 #### Phase 27 Gate Check
 
-- [ ] All M112–M118 tasks completed (T112.1–T118.3)
-- [ ] AC-UX1–UX15, UX17 met at T2; AC-UX16 scope held — **08-verify-build**
-- [ ] ADR-046 feedback; ADR-047 energy; OpenAPI + infra yaml keys (T118.2)
-- [ ] Playwright UJ-069/070/073; optional 071/072/074
-- [ ] No new CORS origins; no visitor email; no live Modal power
-- [ ] ruff / basedpyright / Vitest / pytest e2e — **08-verify-build**
+- [x] All M112–M118 tasks completed (T112.1–T118.3)
+- [ ] AC-UX1–UX15, UX17 met at T2; AC-UX16 scope held — **08-verify-build** / 09–11
+- [x] ADR-046 feedback; ADR-047 energy; OpenAPI + infra yaml keys (T118.2)
+- [x] Playwright UJ-069/070/073; optional 071/072/074 — [t118-1](../../S026-frontend-ux-polish/reports/t118-1-uj-suite.md)
+- [x] No new CORS origins; no visitor email; no live Modal power
+- [ ] ruff / basedpyright / Vitest / pytest e2e — **08-verify-build** (M112–M117 CI green; M118 tip)
+
+**Gate report:** `docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md`
 
 **Issue closeout notes (after deploy / PR merge):**
-- **#104** — F66/M112 ActionIcon
-- **#106** — F67/M113 Tooltip
-- **#87** — F64/M114 wait tips+marketing
-- **#93** — F65/M115 energy + car equivalent
-- **#186** — F68/M116 feedback
-- **#170** — F69/M117 actor email
+- **#104** — F66/M112 ActionIcon — code via #200; close after optional smoke
+- **#106** — F67/M113 Tooltip — code via #202; close after optional smoke
+- **#87** — F64/M114 wait tips+marketing — **CLOSED**
+- **#93** — F65/M115 energy + car equivalent — code via #205; close when staging energy visible
+- **#186** — F68/M116 feedback — code via #205; close when feedback write path live
+- **#170** — F69/M117 actor email — code via #206; close after `SUPABASE_SECRET_KEY` sync
 - **#193** — close when children ship + 13 H1–H5
 
 **Tech-plan delta:** `docs/sessions/S026-frontend-ux-polish/reports/tech-plan-delta.md`  
@@ -2475,6 +2477,17 @@ main
 | PR-57 | Major | Phase 24 / S022 (EV-019) | evolve/EV-019-ingest-resilience | main | merged ([#179](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/179)) @ `bd6bb00` |
 | PR-58 | Major | Phase 25 / S023 (EV-020) | evolve/EV-020-retrieval-topk-packing | main | pending — Residual top_k=8 + default P3 (#158/#165) |
 | PR-59 | Major | Phase 26 / S024 (EV-022) | evolve/EV-022-website-scrape-crawl | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/190 |
+| PR-60 | Minor | M112 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#200](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200)) — F66/#104 |
+| PR-61 | Minor | M113 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#202](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/202)) — F67/#106 |
+| PR-62 | Minor | M114 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#203](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203)) — F64/#87 |
+| PR-63 | Minor | M115+M116 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#205](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205)) — F65+F68/#93/#186 |
+| PR-64 | Minor | M117 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#206](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206)) @ `eb65837` — F69/#170 |
+| PR-65 | Minor | M118 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — OpenAPI + Phase 27 gate docs |
+| PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — after Gate C→D / verify (code already on main via PR-60–64) |
+
+S026 (EV-024) is evolve Standard: M112–M118 on `evolve/EV-024-frontend-ux-polish`
+(one PR per issue #104→#106→#87→#93/#186→#170; M118 OpenAPI/gate). Gate A→B / B→C passed;
+build tasks complete (T118.3); Gate C→D pending.
 
 S024 (EV-022) is evolve Standard: M108–M111 land as atomic commits on
 `evolve/EV-022-website-scrape-crawl` (major PR-59 to `main`; optional stacked PRs per
@@ -3158,23 +3171,24 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T115.2 | M115 | 27 | Code | completed | T115.1 | — | S026 | F65 | — |
 | T115.3 | M115 | 27 | Code | completed | T115.2 | — | S026 | F65 | — |
 | T115.4 | M115 | 27 | Test | completed | T115.3 | — | S026 | F65 | 2026-08-04 |
-| T116.1 | M116 | 27 | Test | pending | T115.4 | — | S026 | F68 | — |
-| T116.2 | M116 | 27 | Code | pending | T116.1 | — | S026 | F68 | 05 M3 |
-| T116.3 | M116 | 27 | Code | pending | T116.2 | — | S026 | F68 | 05 M1 |
-| T116.4 | M116 | 27 | Code | pending | T116.3 | — | S026 | F68 | 05 M1 |
+| T116.1 | M116 | 27 | Test | completed | T115.4 | 2026-08-04 | S026 | F68 | — |
+| T116.2 | M116 | 27 | Code | completed | T116.1 | 2026-08-04 | S026 | F68 | 05 M3 |
+| T116.3 | M116 | 27 | Code | completed | T116.2 | 2026-08-04 | S026 | F68 | 05 M1 |
+| T116.4 | M116 | 27 | Code | completed | T116.3 | 2026-08-04 | S026 | F68 | 05 M1 |
 | T116.5 | M116 | 27 | Test | completed | T116.4 | 2026-08-04 | S026 | F68 | — |
 | T117.1 | M117 | 27 | Test | completed | T116.5 | 2026-08-04 | S026 | F69 | — |
 | T117.2 | M117 | 27 | Code | completed | T117.1 | 2026-08-04 | S026 | F69 | — |
 | T117.3 | M117 | 27 | Code | completed | T117.2 | 2026-08-04 | S026 | F69 | — |
 | T117.4 | M117 | 27 | Test | completed | T117.3 | 2026-08-04 | S026 | F69 | — |
-| T118.1 | M118 | 27 | Test | pending | T114.3, T115.4, T116.5, T117.4 | — | S026 | F64–F69 | 05 M2 |
-| T118.2 | M118 | 27 | Config | pending | T118.1 | — | S026 | F64–F69 | 05 M4 |
-| T118.3 | M118 | 27 | Docs | pending | T118.2 | — | S026 | F64–F69 | — |
+| T118.1 | M118 | 27 | Test | completed | T114.3, T115.4, T116.5, T117.4 | 2026-08-04 | S026 | F64–F69 | 05 M2 |
+| T118.2 | M118 | 27 | Config | completed | T118.1 | 2026-08-04 | S026 | F64–F69 | 05 M4 |
+| T118.3 | M118 | 27 | Docs | completed | T118.2 | 2026-08-04 | S026 | F64–F69 | — |
 
 ## Phase Gate Log
 
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
+| 27 | 2026-08-04 | **partial (build PASS)** | S026/EV-024 M112–M118 tasks complete; OpenAPI/infra/secrets mirror PASS; Playwright UJ-069/070/073 PASS ([t118-3](../../S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md)). **Deferred:** AC-UX T2 suite + full lint matrix to 08/09–11; live `SUPABASE_SECRET_KEY` sync (no prod.env); issue closes + epic #193 after 13 H1–H5. Gate C→D AskQuestion pending. |
 | 1 | 2026-05-19 | **pass** | M1–M3 complete; alembic head; 12 pytest smoke/privacy/seed; ruff/pyright; OpenAPI in repo + api-contract.md |
 | 2 | 2026-05-19 | **pass** | E2E UJ-002/006/008 (4 tests incl. UJ-003); ruff/pyright clean; 36 pytest; Modal README + apps; no DATABASE_URL in Modal paths |
 | 3 | — | — | — |

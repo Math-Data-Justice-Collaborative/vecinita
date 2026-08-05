@@ -450,6 +450,46 @@ paths:
                 $ref: "#/components/schemas/AuditLogResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /feedback:
+    post:
+      operationId: createFeedbackInternal
+      summary: Persist anonymous feedback (F68 / ADR-046)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackRequest"
+      responses:
+        "201":
+          description: Feedback row created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackCreateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /feedback/cleanup:
+    post:
+      operationId: cleanupFeedback
+      summary: Purge feedback older than retention (default 90d)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Cleanup result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackCleanupResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /stats/served:
     post:
       operationId: recordStatsServed
@@ -1578,6 +1618,12 @@ components:
         actor_role:
           type: string
           nullable: true
+        actor_email:
+          type: string
+          nullable: true
+          description: >
+            F69 / EV-024 — read-time enrich from Supabase Auth Admin API.
+            Never stored on audit_log. Null when unresolved (UI truncates actor_id).
     AuditLogResponse:
       type: object
       required:
@@ -1596,6 +1642,53 @@ components:
         page:
           type: integer
         page_size:
+          type: integer
+    FeedbackRequest:
+      type: object
+      description: Anonymous feedback (F68) — no email/identity fields.
+      additionalProperties: false
+      required:
+        - category
+        - message
+      properties:
+        category:
+          type: string
+          enum:
+            - bug
+            - wrong_answer
+            - suggestion
+            - other
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        locale:
+          type: string
+          enum:
+            - en
+            - es
+          nullable: true
+    FeedbackCreateResponse:
+      type: object
+      required:
+        - id
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+    FeedbackCleanupResponse:
+      type: object
+      required:
+        - deleted
+        - retention_days
+      properties:
+        deleted:
+          type: integer
+        retention_days:
           type: integer
     StatsServedRequest:
       type: object
