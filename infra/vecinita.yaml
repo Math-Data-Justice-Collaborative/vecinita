@@ -8,6 +8,15 @@ chat_rag:
   rag_packer: p3
   rag_context_max_chars: 3500
   request_timeout_s: 60
+  # F65 / ADR-047 — heuristic energy knobs (env VECINITA_ENERGY_* overrides)
+  energy_gpu_tdp_w: 70
+  energy_gpu_util: 0.5
+  energy_gco2e_per_kwh: 386
+  energy_car_gco2e_per_km: 251
+
+feedback:
+  # F68 / ADR-046 — purge horizon (env VECINITA_FEEDBACK_RETENTION_DAYS)
+  retention_days: 90
 
 ingest:
   chunk_size_tokens: 256

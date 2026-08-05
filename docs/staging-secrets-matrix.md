@@ -196,6 +196,20 @@ template: `supabase/.env.example`. Note: `prod.env` stores the DB password as
 **Push everywhere (Supabase check + Modal + DO):** `bash scripts/deploy/sync_env.sh --apply`  
 **Push to Modal only:** `bash scripts/deploy/sync_modal_secret.sh --apply`
 
+## EV-024 (F64–F69) — ChatRAG + Admin UX polish (#193)
+
+Non-secret defaults also live in `infra/vecinita.yaml` (`chat_rag.energy_*`, `feedback.retention_days`).
+
+| Variable | Where | Required | Description |
+|----------|-------|----------|-------------|
+| `VECINITA_ENERGY_GPU_TDP_W` | ChatRAG backend (DO) | No (default 70) | F65 heuristic GPU TDP watts |
+| `VECINITA_ENERGY_GPU_UTIL` | ChatRAG backend | No (default 0.5) | F65 assumed utilization |
+| `VECINITA_ENERGY_GCO2E_PER_KWH` | ChatRAG backend | No (default 386) | F65 intensity constant |
+| `VECINITA_ENERGY_CAR_GCO2E_PER_KM` | ChatRAG backend | No (default 251) | F65 car distance factor |
+| `VECINITA_FEEDBACK_RETENTION_DAYS` | Internal write API | No (default 90) | F68 feedback purge horizon |
+| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | Internal write API | No | Optional notify on new feedback |
+| `SUPABASE_SECRET_KEY` | **DO internal-write-api** (+ Modal DM) | Yes for F69 live enrich | Read-time `actor_email` on `GET /internal/v1/audit` |
+
 ## EV-006 (F35) — Admin user management + Resend SMTP (#75)
 
 Builds on EV-005. Adds the live admin user-management surface and production email delivery.

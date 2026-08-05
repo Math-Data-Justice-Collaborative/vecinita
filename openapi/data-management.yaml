@@ -555,6 +555,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+  /admin/feedback:
+    get:
+      operationId: listAdminFeedback
+      summary: List anonymous community feedback (F68 / ADR-046)
+      description: Proxies to internal-write list; admin | super_admin only.
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum:
+              - bug
+              - wrong_answer
+              - suggestion
+              - other
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: until
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Paginated feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /admin/email/test:
     post:
       operationId: sendAdminTestEmail
@@ -1032,6 +1082,51 @@ components:
     AcknowledgedResponse:
       type: object
       properties: {}
+    FeedbackItem:
+      type: object
+      required:
+        - id
+        - created_at
+        - category
+        - message
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        category:
+          type: string
+          enum:
+            - bug
+            - wrong_answer
+            - suggestion
+            - other
+        message:
+          type: string
+        locale:
+          type: string
+          nullable: true
+    FeedbackListResponse:
+      type: object
+      required:
+        - items
+        - page
+        - page_size
+        - total_count
+      properties:
+        items:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/FeedbackItem"
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_count:
+          type: integer
     EmailTestRequest:
       type: object
       additionalProperties: false

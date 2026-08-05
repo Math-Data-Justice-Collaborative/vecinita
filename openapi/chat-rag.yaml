@@ -138,6 +138,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+  /feedback:
+    post:
+      operationId: createFeedback
+      summary: Submit anonymous community feedback (F68 / ADR-046)
+      description: >
+        Proxies to internal-write. Rejects email/identity fields (AC-UX11).
+        No visitor email or user_id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackRequest"
+      responses:
+        "201":
+          description: Feedback accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackCreateResponse"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 components:
   # Documented for OpenAPI completeness; ChatRAG remains public (security: []).
   securitySchemes:
@@ -331,6 +355,43 @@ components:
           type: number
         car_m_equiv:
           type: number
+    FeedbackRequest:
+      type: object
+      description: Anonymous feedback body (F68 / ADR-046) — no email or identity fields.
+      additionalProperties: false
+      required:
+        - category
+        - message
+      properties:
+        category:
+          type: string
+          enum:
+            - bug
+            - wrong_answer
+            - suggestion
+            - other
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        locale:
+          type: string
+          enum:
+            - en
+            - es
+          nullable: true
+    FeedbackCreateResponse:
+      type: object
+      required:
+        - id
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
     AskResponse:
       type: object
       required:

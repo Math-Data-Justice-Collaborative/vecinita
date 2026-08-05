@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) |
 | **Active milestone** | M118 — OpenAPI + UJ e2e suite + Phase 27 gate |
-| **Active task** | **T118.1** — confirm API e2e UJ-069/070/073/074 + Playwright suite green — `in_progress` |
+| **Active task** | **T118.3** — Phase 27 gate docs + issue closeout notes |
 | **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M117** merged (#200/#202/#203/#205/#206); next **M118** Phase 27 gate |
 | **Last updated** | 2026-08-04 |
 | **Evolve cycle** | EV-024 — Standard; 07-build M118 after M117 verify (#206 open) |
@@ -2326,8 +2326,8 @@ AC-UX16 held.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T118.1 | Test: confirm API e2e UJ-069/070/073/074 + Playwright suite green | Test | in_progress | e2e-coverage, TP4 | T114.3, T115.4, T116.5, T117.4 | — | S026 | F64–F69 |
-| T118.2 | Config: OpenAPI ask/feedback/audit fields; `infra/vecinita.yaml` + staging-secrets-matrix energy/feedback keys | Config | pending | TP3, ADR-011, 05 M4 | T118.1 | — | S026 | F64–F69 |
+| T118.1 | Test: confirm API e2e UJ-069/070/073/074 + Playwright suite green | Test | completed | e2e-coverage, TP4 | T114.3, T115.4, T116.5, T117.4 | 2026-08-04 | S026 | F64–F69 |
+| T118.2 | Config: OpenAPI ask/feedback/audit fields; `infra/vecinita.yaml` + staging-secrets-matrix energy/feedback keys | Config | completed | TP3, ADR-011, 05 M4 | T118.1 | 2026-08-04 | S026 | F64–F69 |
 | T118.3 | Docs: Phase 27 gate + Current State; issue closeout notes #104/#106/#87/#93/#186/#170/#193 | Docs | pending | Phase 27 gate | T118.2 | — | S026 | F64–F69 |
 
 #### Phase 27 Gate Check
@@ -3167,8 +3167,8 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T117.2 | M117 | 27 | Code | completed | T117.1 | 2026-08-04 | S026 | F69 | — |
 | T117.3 | M117 | 27 | Code | completed | T117.2 | 2026-08-04 | S026 | F69 | — |
 | T117.4 | M117 | 27 | Test | completed | T117.3 | 2026-08-04 | S026 | F69 | — |
-| T118.1 | M118 | 27 | Test | pending | T114.3, T115.4, T116.5, T117.4 | — | S026 | F64–F69 | 05 M2 |
-| T118.2 | M118 | 27 | Config | pending | T118.1 | — | S026 | F64–F69 | 05 M4 |
+| T118.1 | M118 | 27 | Test | completed | T114.3, T115.4, T116.5, T117.4 | 2026-08-04 | S026 | F64–F69 | 05 M2 |
+| T118.2 | M118 | 27 | Config | completed | T118.1 | 2026-08-04 | S026 | F64–F69 | 05 M4 |
 | T118.3 | M118 | 27 | Docs | pending | T118.2 | — | S026 | F64–F69 | — |
 
 ## Phase Gate Log
