@@ -1,8 +1,9 @@
 # ADR-008: FastEmbed 384-dimensional embeddings on Modal
 
-**Status:** Accepted  
+**Status:** Superseded by [ADR-048](ADR-048-multilingual-384-embeddings.md)  
 **Stage:** 01-requirements  
-**Date:** 2026-05-19
+**Date:** 2026-05-19  
+**Superseded:** 2026-08-05 (S027/EV-025 / #159)
 
 ## Context
 

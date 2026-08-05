@@ -11,7 +11,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-005](ADR-005-managed-postgres-pgvector.md) | DigitalOcean Managed Postgres with pgvector | Accepted | 01-requirements |
 | [ADR-006](ADR-006-llamaindex-rag-orchestration.md) | LlamaIndex for RAG orchestration (not LangGraph) | Accepted | 01-requirements |
 | [ADR-007](ADR-007-modal-do-database-write-boundary.md) | Modal workers persist via DO internal write API | Accepted | 01-requirements |
-| [ADR-008](ADR-008-fastembed-384-modal.md) | FastEmbed 384-dimensional embeddings on Modal | Accepted | 01-requirements |
+| [ADR-008](ADR-008-fastembed-384-modal.md) | FastEmbed 384-dimensional embeddings on Modal | **Superseded by ADR-048** | 01-requirements |
 | [ADR-009](ADR-009-vllm-primary-llm-modal.md) | vLLM as primary LLM on Modal | Accepted | 01-requirements |
 | [ADR-010](ADR-010-multi-app-digitalocean-topology.md) | Multi-app DigitalOcean deployment topology | Accepted (cost validation pending) | 01-requirements |
 | [ADR-011](ADR-011-openapi-contract-source-of-truth.md) | OpenAPI as API contract source of truth | Accepted | 01-requirements |
@@ -42,6 +42,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-045](ADR-045-website-scrape-crawl-tree.md) | Website scrape / crawl / corpus tree | Accepted | S024/EV-022 |
 | [ADR-046](ADR-046-anonymous-community-feedback.md) | Anonymous community feedback rows (ADR-004 amendment) | Accepted | 01-requirements (S026/EV-024 F68) |
 | [ADR-047](ADR-047-ask-energy-heuristic-car-equivalent.md) | Ask energy heuristic + car-travel equivalent | Accepted | 04-tech-plan (S026/EV-024 F65) |
+| [ADR-048](ADR-048-multilingual-384-embeddings.md) | Multilingual 384-d embeddings (ADR-008 successor) | Accepted | 01–02 (S027/EV-025 #159) |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost
@@ -53,7 +54,8 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 |-------|------------|-----------|
 | Dedicated API gateway (R6) | Deferred — direct backend URLs in v1 | 04-tech-plan |
 | Ollama vs vLLM fallback sizing | **Closed** — unified vLLM-only on `vecinita-llm` (ADR-037) | — |
-| Exact FastEmbed / vLLM model pins | Open | 04-tech-plan |
+| Exact FastEmbed / vLLM model pins | Embed pin → **ADR-048** (E1 candidate); LLM → ADR-037 | — |
+| Chunk tokenizer align to multilingual pin | **In EV-025** (S027-D15/M2b) with F71 rechunk | S027/EV-025 |
 
 ## Traceability
 

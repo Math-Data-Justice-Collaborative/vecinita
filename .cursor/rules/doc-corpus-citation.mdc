@@ -1,0 +1,63 @@
+---
+description: Require [Corpus]/[Spec] citations for changes; interview when docs are missing
+alwaysApply: true
+---
+
+# Doc corpus citation
+
+Every change, claim, or reference that affects product behavior, contracts, or plans must
+cite the standing doc corpus. Do not invent scope from memory.
+
+**Registry:** `docs/CORPUS.md` — prefer `[Corpus: <id>]` from that table.
+
+## Citation format
+
+```
+[Corpus: product]
+[Corpus: feature-list.md §F70]
+[Corpus: user-journeys.md §UJ-012]
+[Spec: docs/api-contract.md §POST /chat]
+[Spec: docs/test-plan.md §TC-041]
+[Spec: docs/adr/ADR-037-unified-vecinita-llm-modal-app.md]
+[Corpus: WAIVED — <topic>; reason: <why>; decided: EV-NNN|date]
+```
+
+| Form | When |
+|------|------|
+| `[Corpus: <id>]` | Row exists in `docs/CORPUS.md` |
+| `[Corpus: path §…]` / `[Spec: docs/… §…]` | Path+section; `[Spec:…]` for contracts, tests, ADRs, deploy satellites |
+| `[Corpus: WAIVED — …]` | Coverage missing and user explicitly waived via AskQuestion |
+
+## When required
+
+| Action | Cite |
+|--------|------|
+| Edit code / config / infra | Corpus/spec section that authorizes the change |
+| Edit or propose a doc delta | Source Fn, ADR, decision, or prior section |
+| AskQuestion / gate / PR / commit | At least one `[Corpus:…]` or `[Spec:…]` (or waiver) |
+| Reference existing behavior | The doc that defines it |
+
+## Missing documentation — interview (block)
+
+If `CORPUS.md` is absent, a needed row/doc is missing, or no authoritative section covers the claim:
+
+1. **Stop** — do not implement or silently invent the doc.
+2. **AskQuestion** (`[Decision]` / `[Ambiguity]`):
+   - Recommended: add/update the named doc(s) / CORPUS row.
+   - Also offer: waive-and-proceed · defer · re-scope · explain.
+3. Proceed **only** after add-now (then cite) **or** an explicit **waiver citation**.
+4. Record add/waiver in `docs/decisions/evolve-decisions.md` (or active session log).
+
+```
+// ❌ BAD
+// "Retrieval should return 10 hits by default"
+
+// ✅ GOOD
+// Default top_k=10 [Corpus: api] [Spec: docs/api-contract.md §POST /chat retrieval]
+```
+
+## Do not
+
+- Proceed on undocumented behavior without AskQuestion + cite or waiver.
+- Cite a path/id that does not exist (add the doc/row first, or waive).
+- Use vague cites (`per docs`, `per spec`) without id or path+section.

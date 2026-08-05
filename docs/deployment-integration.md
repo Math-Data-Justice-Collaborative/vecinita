@@ -16,7 +16,7 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | data-management-frontend | DO App Platform (static) | Admin UI |
 | DO internal write API | DO App Platform (**standalone** app) | Sole holder of `DATABASE_URL` for writes from Modal; audited S8.4 |
 | data-management-modal | Modal | ASGI + queues + scrape |
-| vecinita-embedding | Modal | FastEmbed 384-dim |
+| vecinita-embedding | Modal | 384-d embeddings (ADR-048) — FastEmbed preferred; ST/ONNX fallback; CPU |
 | vecinita-llm | Modal | **Prod LLM** — vLLM pinned to `qwen2.5:1.5b-instruct`; volume **`llm-models`**; generate/warm (ADR-037) |
 | vecinita-llm-playground | Modal | **Playground LLM** — vLLM + HF list/pull/staging; **same** `llm-models` volume; sandbox `model_id` reloads (TP-S010-25) |
 | ~~vecinita-ollama~~ | ~~Modal~~ | **Deprecated** — de-deployed; superseded by `vecinita-llm` (+ playground app) |
@@ -202,7 +202,7 @@ incremental tokens.
 |-----------|----------------|-------------|
 | Query | `packages/rag` + ChatRAG Backend | chat-rag-backend |
 | Ingest | `packages/ingest` + Modal workers | data-management-modal |
-| Embed | FastEmbed service | vecinita-embedding |
+| Embed | Modal embedding service (FastEmbed / ST / ONNX per `VECINITA_EMBED_RUNTIME`) | vecinita-embedding |
 | Generate | vLLM | `vecinita-llm` (prod) + `vecinita-llm-playground` |
 | Persist | Internal write API | DO app |
 | Schema | `apps/database` | migrations job |

@@ -1,0 +1,75 @@
+# Doc corpus registry
+
+Canonical index of **standing** product docs. Cite rows as `[Corpus: <id>]` (see
+`.cursor/rules/doc-corpus-citation.mdc`). Session/ephemeral artifacts live under
+`docs/sessions/{id}/` and are **not** corpus rows unless promoted here.
+
+**Parity:** Before shipping a behavior change, the cited corpus row(s) must already
+define or be updated to define that behavior — or carry an explicit waiver cite.
+
+## Standing docs
+
+| ID | Path | Purpose |
+|----|------|---------|
+| product | [feature-list.md](feature-list.md) | Features (Fn) + acceptance bullets |
+| journeys | [user-journeys.md](user-journeys.md) | Caller journeys (UJ-NNN) |
+| system-spec | [spec.md](spec.md) | Architecture, components, constraints |
+| architecture | [architecture.md](architecture.md) | System topology / data-flow companion |
+| config | [config-spec.md](config-spec.md) | Config parameters, defaults, validation |
+| api | [api-contract.md](api-contract.md) | HTTP/API surface |
+| tests | [test-plan.md](test-plan.md) | Test matrix + TC-NNN |
+| acceptance | [acceptance-criteria.md](acceptance-criteria.md) | Pass/fail thresholds |
+| deps | [dependency-inventory.md](dependency-inventory.md) | Dependencies and licenses |
+| data | [data-management-plan.md](data-management-plan.md) | Schema, seed corpus, eval fixtures |
+| data-flow | [data-flow.md](data-flow.md) | Runtime data paths |
+| deploy | [deploy-checklist.md](deploy-checklist.md) | Deploy checklist |
+| deploy-integration | [deployment-integration.md](deployment-integration.md) | Modal / DO / hybrid wiring |
+| staging | [staging-runbook.md](staging-runbook.md) | Staging ops + corpus protection |
+| typing | [typing-policy.md](typing-policy.md) | Python/TS typing (ADR-018) |
+| adr | [adr/README.md](adr/README.md) + `adr/ADR-*.md` | Architecture decisions |
+| decisions | [decisions/](decisions/) + [decisions.md](decisions.md) | Interview / evolve decision logs |
+| evolve-decisions | [decisions/evolve-decisions.md](decisions/evolve-decisions.md) | Evolve cycle scopes + waivers |
+
+### Tech satellites (cite path or nearest hub id)
+
+Vecinita has not merged a single `tech-spec.md` / `env-contract.md` / `deploy.md`.
+When personal skills say `[Corpus: tech-spec]`, open **config** + **deps** +
+**deploy-integration** (+ **staging** as needed).
+
+| Topic | Path |
+|-------|------|
+| Env / secrets matrix | [staging-secrets-matrix.md](staging-secrets-matrix.md) |
+| Local dev | [LOCAL_DEV.md](LOCAL_DEV.md) |
+| Eval golden set | [eval-golden-set.md](eval-golden-set.md) |
+
+## Citation examples
+
+```
+[Corpus: product]          → feature-list.md (prefer + §Fn when known)
+[Corpus: feature-list.md §F70]
+[Corpus: api]
+[Spec: docs/api-contract.md §POST /chat]
+[Corpus: WAIVED — multilingual dim; reason: spike only; decided: EV-025]
+```
+
+## Skill obligations (open only touched rows)
+
+| Stage band | Minimum corpus rows |
+|------------|---------------------|
+| 00 / 16 intake | product, journeys (if UI), system-spec |
+| 01–02 product | product, journeys, system-spec, api (if contract), tests |
+| 04–05 tech | system-spec, config, api, deps, deploy-integration, data (if schema) |
+| 07–08 build | cited Spec Source rows + tests |
+| 09–11 verify | tests, acceptance, journeys (if UI), product |
+| 12–13 deploy | deploy, deploy-integration, staging |
+| 14 hotfix | product + system-spec + rows for the failing surface |
+| 15 health | deploy-integration, staging |
+
+Domain / runbooks (e.g. [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md))
+are **opt-in** — cite by path when touched; add a CORPUS row only if they become normative.
+
+## Missing coverage
+
+If a needed row or authoritative section is absent: **AskQuestion** per
+`.cursor/rules/doc-corpus-citation.mdc` — add docs (recommended), waive with
+`[Corpus: WAIVED — …]`, defer, or re-scope. Do not invent normative text silently.

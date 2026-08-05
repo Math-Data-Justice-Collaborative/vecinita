@@ -1,71 +1,173 @@
-"""Modal app: vecinita-embedding — FastEmbed 384-dim (ADR-008).
+"""Modal app: vecinita-embedding — 384-d embeddings (ADR-048 / F70).
 
 Deploy: modal deploy infra/modal/embedding_app.py
 Stage weights: modal run infra/modal/embedding_app.py::stage_embedding_weights
+
+Runtime: ``VECINITA_EMBED_RUNTIME`` = fastembed | sentence_transformers | onnx
+Model: ``VECINITA_EMBEDDING_MODEL_ID`` (default multilingual-e5-small)
 """
 
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
+from typing import Protocol, cast
 
 import modal
+from vecinita_embedding_client.modal_pins import (
+    DEFAULT_EMBEDDING_MODEL_ID,
+    EMBED_IMAGE_PIPS,
+    EMBED_MEMORY_MIB,
+    EMBED_SERVICE_TIMEOUT_S,
+    EMBED_STAGE_TIMEOUT_S,
+)
+from vecinita_embedding_client.prefixes import resolve_embed_runtime
 
 APP_NAME = "vecinita-embedding"
 VOLUME_NAME = "embedding-models"
-MODEL_NAME = "BAAI/bge-small-en-v1.5"
+
+
+def _resolve_repo_root() -> Path:
+    """Repo root when deploying from infra/modal; /opt/vecinita when Modal mounts at /root."""
+    here = Path(__file__).resolve()
+    if here.parent.name == "modal" and here.parent.parent.name == "infra":
+        return here.parents[2]
+    return Path("/opt/vecinita")
+
+
+_REPO_ROOT = _resolve_repo_root()
+_PKG_ROOT = "/opt/vecinita"
+_PYTHONPATH = ":".join(
+    [
+        f"{_PKG_ROOT}/packages/embedding-client",
+        f"{_PKG_ROOT}/packages/shared-schemas",
+    ],
+)
 
 app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
-image = modal.Image.debian_slim(python_version="3.11").pip_install(
-    "fastembed>=0.4,<0.5", "pydantic>=2.7,<3", "starlette>=0.38,<1"
+image = (
+    modal.Image.debian_slim(python_version="3.11")
+    .pip_install(
+        *EMBED_IMAGE_PIPS,
+        "httpx>=0.27,<1",
+    )
+    .env({"PYTHONPATH": _PYTHONPATH})
+    .add_local_dir(
+        _REPO_ROOT / "packages" / "embedding-client",
+        remote_path=f"{_PKG_ROOT}/packages/embedding-client",
+    )
+    .add_local_dir(
+        _REPO_ROOT / "packages" / "shared-schemas",
+        remote_path=f"{_PKG_ROOT}/packages/shared-schemas",
+    )
 )
 
-# Import the remote-only dep in global scope so it is captured in the CPU memory
-# snapshot (S001 Tier-1). FastEmbed/ONNX is CPU-only, so no GPU snapshot is needed.
+# Capture FastEmbed + ST in the CPU memory snapshot (S001 Tier-1). CPU only — no GPU.
 with image.imports():
     from fastembed import TextEmbedding
+    from sentence_transformers import SentenceTransformer
+
+
+def _model_id() -> str:
+    raw = os.environ.get("VECINITA_EMBEDDING_MODEL_ID", "").strip()
+    return raw or DEFAULT_EMBEDDING_MODEL_ID
+
+
+class _EmbedBackend(Protocol):
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        """Return one 384-d vector per input text."""
+        ...
+
+
+class _FastEmbedBackend:
+    def __init__(self, model_id: str, cache_dir: str) -> None:
+        self._model = TextEmbedding(model_name=model_id, cache_dir=cache_dir)
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        return [vector.tolist() for vector in self._model.embed(texts)]
+
+
+class _SentenceTransformersBackend:
+    def __init__(self, model_id: str, cache_dir: str) -> None:
+        self._model = SentenceTransformer(model_id, cache_folder=cache_dir)
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        raw = self._model.encode(
+            texts,
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+        )
+        return cast("list[list[float]]", raw.tolist())
+
+
+class _OnnxSentenceTransformersBackend:
+    """ONNX path via sentence-transformers ONNX backend when runtime=onnx."""
+
+    def __init__(self, model_id: str, cache_dir: str) -> None:
+        self._model = SentenceTransformer(
+            model_id,
+            cache_folder=cache_dir,
+            backend="onnx",
+        )
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        raw = self._model.encode(
+            texts,
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+        )
+        return cast("list[list[float]]", raw.tolist())
+
+
+def _load_backend(cache_dir: str) -> _EmbedBackend:
+    runtime = resolve_embed_runtime()
+    model_id = _model_id()
+    if runtime == "fastembed":
+        return _FastEmbedBackend(model_id, cache_dir)
+    if runtime == "onnx":
+        return _OnnxSentenceTransformersBackend(model_id, cache_dir)
+    return _SentenceTransformersBackend(model_id, cache_dir)
 
 
 @app.function(
     image=image,
     volumes={"/models": model_volume},
-    timeout=600,
+    timeout=EMBED_STAGE_TIMEOUT_S,
+    memory=EMBED_MEMORY_MIB,
 )
 def stage_embedding_weights() -> str:
-    """One-shot: download FastEmbed model into the embedding-models volume."""
-    model = TextEmbedding(model_name=MODEL_NAME, cache_dir="/models")
-    vectors = list(model.embed(["vecinita staging warmup"]))
+    """One-shot: download embed model weights into the embedding-models volume."""
+    backend = _load_backend("/models")
+    vectors = backend.embed(["vecinita staging warmup"])
     dim = len(vectors[0])
     model_volume.commit()
-    return f"staged {MODEL_NAME} dim={dim}"
+    runtime = resolve_embed_runtime()
+    return f"staged {_model_id()} runtime={runtime} dim={dim}"
 
 
 @app.cls(
     image=image,
     volumes={"/models": model_volume},
-    timeout=120,
-    # Keep the CPU container warm longer between bursts (was unset → 60s default);
-    # cheap for a CPU service and cuts repeat cold starts (S001 Tier-0).
+    timeout=EMBED_SERVICE_TIMEOUT_S,
+    memory=EMBED_MEMORY_MIB,
     scaledown_window=600,
-    # CPU memory snapshot: skip ONNX/library init on most boots (S001 Tier-1).
     enable_memory_snapshot=True,
 )
 class EmbeddingService:
     @modal.enter(snap=True)
     def load_model(self) -> None:
-        self._model = TextEmbedding(model_name=MODEL_NAME, cache_dir="/models")
-        # Warm-up forward pass inside snap=True so the ONNX session / first-inference
-        # init is folded into the CPU memory snapshot instead of hitting the first
-        # request as tail latency (Modal docs: warm up in snap=True). S001 Tier-1.
-        list(self._model.embed(["warmup"]))
+        self._backend = _load_backend("/models")
+        self._backend.embed(["warmup"])
 
     @modal.method()
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        return [vector.tolist() for vector in self._model.embed(texts)]
+        return self._backend.embed(texts)
 
 
-@app.function(image=image)
+@app.function(image=image, memory=EMBED_MEMORY_MIB)
 @modal.asgi_app()
 def embedding_api():
     from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -85,7 +187,13 @@ def embedding_api():
     service = EmbeddingService()
 
     async def health(_: Request) -> JSONResponse:
-        return JSONResponse({"status": "ok"})
+        return JSONResponse(
+            {
+                "status": "ok",
+                "model_id": _model_id(),
+                "runtime": resolve_embed_runtime(),
+            },
+        )
 
     async def warm(_: Request) -> JSONResponse:
         """Boot EmbeddingService during user think-time (S001 T11)."""

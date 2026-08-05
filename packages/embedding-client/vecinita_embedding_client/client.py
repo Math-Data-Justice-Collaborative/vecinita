@@ -1,4 +1,4 @@
-"""HTTP client for Modal FastEmbed service (ADR-008)."""
+"""HTTP client for Modal embedding service (ADR-048 / F70)."""
 
 from __future__ import annotations
 

@@ -72,12 +72,16 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 - **Algorithm**:
   1. Auto-detect query language (en/es).
   2. **F43 H1 cascade (default on):** exact answer cache (normalized query+locale content-hash) → semantic answer cache (conservative cosine; miss → continue) → retrieve-result cache → else generate path below; store on miss. Keys never identity-keyed (ADR-004). TTL + size cap; bust on corpus version / F41 rebuild.
-  3. Embed query via Modal FastEmbed (HTTP) — prod pin **E0** `BAAI/bge-small-en-v1.5` (384-d).
+  3. Embed query via Modal embedding HTTP — shared client pin per **ADR-048** / F70
+     (planned candidate E1 `intfloat/multilingual-e5-small`; final pin after F36 operator
+     review). Apply e5 **`query:`** prefix when the pin requires it. Dimension remains **384**.
   4. pgvector similarity search on DO Postgres; **optional tag filter** (user-selected or LLM-inferred).
      **F46 (EV-018):** staging must return non-empty pools for in-corpus questions — diagnose
      embed↔corpus pin, `min_retrieval_score`, golden fixture URLs, or retrieve bugs; fix before
      treating CE ship metrics as valid (EV-017 empty-pool lesson).
   5. **F44 L1 (default off):** if same-lang retrieve is empty above `min_retrieval_score`, optionally retry without language filter.
+     **F71 (EV-025):** may tune F44 thresholds/flags only if post–multilingual-pin F36 shows
+     ES/lang-filter harm (no separate Fn).
   6. **H7 (default on, F42):** thin multi-query fan-out — 2–3 **cheap heuristic** rewrites
      (locale-aware string variants, **not** LLM rewrites; Spanish-aware for `es`), retrieve per
      rewrite, merge/dedupe by chunk id / score, keep `top_k`.
@@ -87,11 +91,12 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
      `packages/rag` helpers, then **document_id dedupe + char budget** (prod default; was P1-only
      in EV-016). `p1` remains available via `VECINITA_RAG_PACKER=p1`.
   9. Synthesize with packed context; stream or return completion via Modal LLM HTTP; populate cascade stores on generate.
-- **Key parameters**: See `docs/config-spec.md`: `top_k` (default **8**, F50), H7/P3, cache, soft language, CE flags.
+- **Key parameters**: See `docs/config-spec.md`: `top_k` (default **8**, F50), H7/P3, cache, soft language, CE flags,
+  `VECINITA_EMBEDDING_MODEL_ID` (F70/F71).
   F46 may adjust retrieve knobs or corpus pin ops without new product env vars unless 04 unlocks.
 - **Error handling**: 4xx for validation (including rejected identity fields); 5xx with request ID in logs (no raw prompt persistence).
 - **Latency**: Target **p95 < 15s** excluding cold start (RD-017); cache hits should be ≪ generate path.
-- **Source**: feature-list F1–F6, F42–F46; S019/EV-016; S020/EV-017; S021/EV-018
+- **Source**: feature-list F1–F6, F42–F46, **F70–F71**; S019/EV-016; S020/EV-017; S021/EV-018; S027/EV-025; ADR-048
 
 ### ChatRAG Frontend
 
@@ -126,24 +131,29 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
   6. **Chunk** text with HF tokenizer for embed pin + `chunk_overlap_tokens` (F49 / ADR-044).
   7. **LLM auto-tag** document (and optional chunk tags) from seeded vocabulary + allow new tags (F20)
      — fail-open per ADR-023.
-  8. Call FastEmbed on Modal via **sub-batched embed client with retries** (F48 / #166). On
-     exhausted retries or dim mismatch → **fail that URL** (not silent partial corpus).
+  8. Call Modal embedding via **sub-batched embed client with retries** (F48 / #166) using the
+     shared pin (**ADR-048** / F70). Apply e5 **`passage:`** prefix on chunk texts when required.
+     On exhausted retries or dim mismatch → **fail that URL** (not silent partial corpus).
   9. **POST chunks/embeddings/tags to DO internal write API** (not direct Postgres).
   10. Update job status via job store on Modal.
 - **Corpus tree (F61):** Admin Corpus toggles **tree vs flat**; hierarchy
   domain → URL path segments → document → chunks via nested JSON APIs; selection + bulk
   actions. ChatRAG **backend** may expose nested source metadata — **no ChatRAG UI** this
   cycle (licensing research).
-- **Algorithm** (rebuild — F41):
+- **Algorithm** (rebuild — F41 / **F71 multilingual cutover**):
   1. Operator enqueues `job_type=rebuild` with `mode` (`reembed`|`rechunk`|`rescrape`), optional
-     `document_ids`, `force`, `dry_run` (Admin Jobs UI).
+     `document_ids`, `force`, `dry_run` (Admin Jobs UI). F71 uses **`reembed`** with F70
+     `embedding_model_id`.
   2. Worker reads body from **document store** (store-backed modes); `rescrape` may refresh store from URL.
      Existing corpus gets **one-time backfill** into store (02 M4).
-  3. Re-chunk and/or re-embed per mode; stamp revision / `rebuild_run_id`.
+  3. Re-chunk and/or re-embed per mode; stamp revision / `rebuild_run_id` / embed model id.
+     F71 this cycle: **rechunk + re-embed** so tokenizer matches embed pin (S027-D15/M2b).
   4. If `dry_run`, write **shadow** rows; run **F36 against shadow before promote**; operator
      promotes via **Admin UI** → internal-write promote (02 M2/M3).
+     **F71 order:** staging shadow→F36→promote, then repeat on prod (S027-D21). Keep prior E0
+     revision restorable (S027-D22).
   5. Retag is **not** part of rebuild (separate job).
-- **Source**: feature-list F7–F10, F20, F32, F41, **F59–F61**; RD-016; ADR-040; S024/EV-022
+- **Source**: feature-list F7–F10, F20, F32, F41, **F59–F61**, **F70–F71**; RD-016; ADR-040; ADR-048; S024/EV-022; S027/EV-025
 
 ### DO internal write API
 
@@ -268,7 +278,7 @@ F43 cache and F44/F45 flags apply on ChatRAG; harness measures cost/hit-rate and
 ### Ingest path (detail)
 
 ```
-Admin UI → Modal ASGI (/jobs) → Modal queue worker → scrape → chunk → FastEmbed
+Admin UI → Modal ASGI (/jobs) → Modal queue worker → scrape → chunk → Modal embed (ADR-048)
          → DO internal write API → Postgres
 ```
 
@@ -281,10 +291,10 @@ Admin UI → Modal ASGI (/jobs) → Modal queue worker → scrape → chunk → 
 | H1 | Five applications, separate deploy boundaries | ADR-001 |
 | H2 | Hybrid Modal + DigitalOcean; US regions only | ADR-002, R10a |
 | H3 | Greenfield APIs; OpenAPI required as source of truth | ADR-003, user interview |
-| H4 | DO Managed Postgres + pgvector; 384-dim default | ADR-005, ADR-008 |
+| H4 | DO Managed Postgres + pgvector; 384-dim default | ADR-005, ADR-008 → **ADR-048** |
 | H5 | Zero personal data **in the corpus DB** — no user/admin/session/message tables, no server chat history. **Admin-surface operator identity lives in Supabase only** (EV-005 F34); corpus DB may store only an opaque Supabase user UUID + role for audit attribution | ADR-004, **ADR-026** |
 | H11 | **Admin surfaces require Supabase JWT** (DM UI/API, internal-write API); ChatRAG stays anonymous; invite-only registration; `admin`/`viewer` roles | ADR-026 (EV-005 F34) |
-| H6 | No paid third-party LLM/embed APIs as default | ADR-004, ADR-008, ADR-009 |
+| H6 | No paid third-party LLM/embed APIs as default | ADR-004, ADR-008 → **ADR-048**, ADR-009 |
 | H7 | Cost ≤ $50/mo cap (target $25) | ADR-004, ADR-010 |
 | H8 | Only DO backends hold `DATABASE_URL` | ADR-007 |
 | H9 | `packages/` must not import `apps/` | ADR-012 |

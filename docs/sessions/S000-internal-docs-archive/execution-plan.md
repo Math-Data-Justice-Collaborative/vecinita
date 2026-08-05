@@ -1,23 +1,23 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; S024 Phase 26 delta 2026-08-03; **S026 Phase 27 delta 2026-08-04**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; S024 Phase 26 delta 2026-08-03; S026 Phase 27 delta 2026-08-04; **S027 Phase 28 delta 2026-08-05**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**047**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**048**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) — **build complete** (Gate C→D pending) |
-| **Active milestone** | M118 — OpenAPI + UJ e2e suite + Phase 27 gate — **completed** |
-| **Active task** | — (T118.3 completed); next **08-verify-build** / Gate C→D → 09-qa |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M118** (code PRs #200/#202/#203/#205/#206; M118 OpenAPI/gate docs) |
-| **Last updated** | 2026-08-04 |
-| **Evolve cycle** | EV-024 — Standard; Phase C build done; await Gate C→D |
-| **Git branch** | `evolve/EV-024-frontend-ux-polish` |
-| **Active session** | S026-frontend-ux-polish — M118 complete; Gate C→D |
-| **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
+| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — **05 PASS pending Gate B→C** |
+| **Active milestone** | M119 — F70 runtime — **completed**; next M120 |
+| **Active task** | T120.1 — staging rebuild e2e red (after 08-verify / PR for M119) |
+| **Tasks completed** | Phase 21–27; S027 Phase A; 04 TP lock; **05 M1–M6 applied** (S027-D29) |
+| **Last updated** | 2026-08-05 |
+| **Evolve cycle** | EV-025 — Standard; Phase B (05) complete pending Gate B→C |
+| **Git branch** | `evolve/EV-025-multilingual-embeddings` |
+| **Active session** | S027-multilingual-embeddings — 05 surgical fixes applied; Gate B→C AskQuestion |
+| **Scope addition** | 2026-08-05 — F70–F71 multilingual 384-d embed + staging→prod cutover (#159). |
 
 ## Template
 
@@ -2357,6 +2357,87 @@ AC-UX16 held.
 
 ---
 
+## Phase 28: EV-025 — Multilingual embeddings (F70–F71)
+
+> **Session:** S027 · **Cycle:** EV-025 · **Branch:** `evolve/EV-025-multilingual-embeddings`  
+> **Issue:** [#159](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/159)  
+> **Decisions:** RD-290–308, S027-D1–D29, TP1–TP5 locked (S027-D27), Gate A→B PASS (S027-D26);
+> 05 M1–M6 surgical fixes (S027-D29)  
+> **ADRs:** [ADR-048](../../../adr/ADR-048-multilingual-384-embeddings.md) (Accepted; supersedes ADR-008);
+> ADR-040 (F41 rebuild); ADR-044 (tokenizer aligned to embed pin)  
+> **Out of scope:** Dual-index; dim≠384; UI / new Playwright; bge-m3 multi-vector; paid embed APIs;
+> new CORS origins; 06-tech-tooling unless 07 forces hooks
+
+#### M119: F70 — Embed runtime + e5 prefixes + Modal
+
+**Goal:** Shared client prefixes + config (`VECINITA_EMBEDDING_MODEL_ID`, `VECINITA_EMBED_RUNTIME`);
+Modal `vecinita-embedding` hosts E1 via timeboxed FastEmbed upgrade then **sentence-transformers**
+fallback (ONNX only if ST blocked); stay **CPU** with memory/timeout bump
+(**AC-ME1–ME2**; TC-233–234). F36 report ACs live on M120.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T119.1 | Test: unit red — e5 `query:`/`passage:` prefixes; runtime enum; dim=384 hard-fail (TC-233–234) | Test | completed | AC-ME1–ME2, F70, ADR-048 | — | 2026-08-05 | S027 | F70 |
+| T119.2 | Code: `packages/embedding-client` prefix helper + pin/runtime config plumbing | Code | completed | config-spec, RD-293, api-contract | T119.1 | 2026-08-05 | S027 | F70 |
+| T119.3 | Config: Modal image — timebox `fastembed` bump for E1; add `sentence-transformers` (+ optional `onnxruntime`); CPU memory/timeout | Config | completed | TP2–TP4, S027-D12, dependency-inventory | T119.1 | 2026-08-05 | S027 | F70 |
+| T119.4 | Code: `infra/modal/embedding_app.py` runtime switch (fastembed \| sentence_transformers \| onnx); stage E1 weights | Code | completed | ADR-048, F10 rewrite, deployment-integration | T119.2, T119.3 | 2026-08-05 | S027 | F70 |
+| T119.5 | Test: unit/integration green TC-233–234; Modal health/embed smoke (T0/T2) | Test | completed | TC-233–234, ADR-004 tiers | T119.4 | 2026-08-05 | S027 | F70 |
+
+#### M120: F71 — Staging rechunk + shadow → F36 → promote
+
+**Goal:** Align `VECINITA_CHUNK_TOKENIZER_ID` with embed pin; F41 **rechunk** (re-tokenize + re-embed)
+on staging shadow; F36 EN/ES advisory (Hy1 + dense rank if available); operator promote
+(**AC-ME3–ME6, AC-ME8–ME9, AC-ME11**; TC-232, TC-235–239, TC-241).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T120.1 | Test: API e2e red — rebuild stamps + rechunk; F36 report shape; ask/promote paths (TC-232, TC-235–239, TC-241) | Test | pending | AC-ME3–ME6/ME8–ME9/ME11, F71, F41/ADR-040 | T119.5 | — | S027 | F71 |
+| T120.2 | Config/Docs: default tokenizer id = embed pin; staging secrets/runbook for shadow rebuild | Config | pending | config-spec, ADR-044, S027-D15 | T119.5 | — | S027 | F71 |
+| T120.3 | Code: wire F41 rebuild path for pin+tokenizer stamps; ensure rechunk re-embeds under F70 client | Code | pending | feature-list F71, RD-294/295 | T120.1, T120.2 | — | S027 | F71 |
+| T120.3b | Code: eval/F36 report — EN/ES rel+faith vs E0 baseline columns + dense hit@k/mean_rank when available (TC-235–236) | Code | pending | AC-ME3–ME4, S027-D18, F36 | T120.1, T120.3 | — | S027 | F71 |
+| T120.4 | Ops/Docs: staging shadow → F36 report checklist (EN/ES rel+faith vs E0; hit@k/mean_rank) | Docs | pending | S027-D18, AC-ME3–ME4/ME8–ME9, F36 | T120.3b | — | S027 | F71 |
+| T120.5 | Test: e2e green TC-232/235–239/241; staging promote dry-run path covered | Test | pending | UJ-053/076, TP5 | T120.3b, T120.4 | — | S027 | F71 |
+
+#### M121: F71 — Prod cutover + E0 rollback
+
+**Goal:** Repeat staging cutover on prod (runbook in 07–11; **live smoke at 13**); verify prior
+E0 revision restorable via F41 rollback (AC-ME7, AC-ME9–ME10; TC-238–240; S027-D21/D22).
+Optional F44 tune only if F36 shows harm.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T121.1 | Test: unit/e2e red — rollback restores prior revision stamps / E0 pin path (TC-239); ES ask path (TC-238) | Test | pending | AC-ME7/ME9, S027-D22 | T120.5 | — | S027 | F71 |
+| T121.2 | Docs: prod cutover + E0 rollback runbook; operator promote abort = judgment (D11); staging-then-prod order (TC-240) | Docs | pending | S027-D11/D21/D22, AC-ME6, staging-runbook | T120.5 | — | S027 | F71 |
+| T121.3 | Code (conditional): F44 soft language-filter tune **only if** post-pin F36 shows ES harm | Code | pending | S027-D19/D20, ADR-013 | T120.5 | — | S027 | F71 |
+| T121.4 | Test: green TC-238–240; skip T121.3 tests if F44 not triggered | Test | pending | TC-238–240, AC-ME6/ME7/ME9 | T121.1, T121.2, T121.3 | — | S027 | F71 |
+
+#### M122: Phase 28 gate — TC suite + docs closeout
+
+**Goal:** Confirm TC-232–241 + AC-ME1–11 mapped; OpenAPI/api-contract pin notes; phase-gate docs;
+H4–H5 regression note for **13-deploy-smoke**; #159 closeout notes after 13.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T122.1 | Test: confirm unit + API e2e TC-232–241 green (no new Playwright — D16) | Test | pending | e2e-coverage, RD-300 | T119.5, T120.5, T121.4 | — | S027 | F70–F71 |
+| T122.2 | Docs/Config: api-contract + deployment-integration embed runtime notes; inventory micros if locked; ADR-048 stage metadata | Docs | pending | TP4, RD-303/304 | T122.1 | — | S027 | F70–F71 |
+| T122.3 | Docs: Phase 28 gate + Current State; H4–H5 at 13 note; #159 closeout notes | Docs | pending | Phase 28 gate, connectivity-gates | T122.2 | — | S027 | F70–F71 |
+
+#### Phase 28 Gate Check
+
+- [ ] All M119–M122 tasks completed (T119.1–T122.3 including T120.3b)
+- [ ] AC-ME1–ME11 met at verify (08/09–11); F44 tune only if harm shown
+- [ ] ADR-048 Accepted; ADR-008 superseded; tokenizer aligned (ADR-044)
+- [ ] Staging cutover + runbooks in 07–11; **live prod cutover smoke at 13**; E0 rollback runbook-proven
+- [ ] No new UI/Playwright/CORS; dim remains 384
+- [ ] ruff / basedpyright / pytest e2e — **08-verify-build**
+
+**Tech-plan delta:** `docs/sessions/S027-multilingual-embeddings/reports/tech-plan-delta.md`  
+**05 audit:** `docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md`  
+**ADR:** [ADR-048](../../../adr/ADR-048-multilingual-384-embeddings.md)  
+**Roadmap:** `docs/sessions/S027-multilingual-embeddings/roadmap.md`
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -2484,6 +2565,11 @@ main
 | PR-64 | Minor | M117 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#206](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206)) @ `eb65837` — F69/#170 |
 | PR-65 | Minor | M118 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — OpenAPI + Phase 27 gate docs |
 | PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — after Gate C→D / verify (code already on main via PR-60–64) |
+| PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208 |
+| PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 staging rechunk/promote |
+| PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 prod cutover + rollback |
+| PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — Phase 28 gate docs |
+| PR-71 | Major | Phase 28 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — after Gate C→D / verify |
 
 S026 (EV-024) is evolve Standard: M112–M118 on `evolve/EV-024-frontend-ux-polish`
 (one PR per issue #104→#106→#87→#93/#186→#170; M118 OpenAPI/gate). Gate A→B / B→C passed;
@@ -3183,11 +3269,30 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T118.1 | M118 | 27 | Test | completed | T114.3, T115.4, T116.5, T117.4 | 2026-08-04 | S026 | F64–F69 | 05 M2 |
 | T118.2 | M118 | 27 | Config | completed | T118.1 | 2026-08-04 | S026 | F64–F69 | 05 M4 |
 | T118.3 | M118 | 27 | Docs | completed | T118.2 | 2026-08-04 | S026 | F64–F69 | — |
+| T119.1 | M119 | 28 | Test | completed | — | 2026-08-05 | S027 | F70 | — |
+| T119.2 | M119 | 28 | Code | completed | T119.1 | 2026-08-05 | S027 | F70 | — |
+| T119.3 | M119 | 28 | Config | completed | T119.1 | 2026-08-05 | S027 | F70 | TP2–TP4 |
+| T119.4 | M119 | 28 | Code | completed | T119.2, T119.3 | 2026-08-05 | S027 | F70 | — |
+| T119.5 | M119 | 28 | Test | completed | T119.4 | 2026-08-05 | S027 | F70 | — |
+| T120.1 | M120 | 28 | Test | pending | T119.5 | — | S027 | F71 | 05 M1/M4 |
+| T120.2 | M120 | 28 | Config | pending | T119.5 | — | S027 | F71 | — |
+| T120.3 | M120 | 28 | Code | pending | T120.1, T120.2 | — | S027 | F71 | — |
+| T120.3b | M120 | 28 | Code | pending | T120.1, T120.3 | — | S027 | F71 | 05 M2 |
+| T120.4 | M120 | 28 | Docs | pending | T120.3b | — | S027 | F71 | 05 L1 |
+| T120.5 | M120 | 28 | Test | pending | T120.3b, T120.4 | — | S027 | F71 | — |
+| T121.1 | M121 | 28 | Test | pending | T120.5 | — | S027 | F71 | 05 M5 |
+| T121.2 | M121 | 28 | Docs | pending | T120.5 | — | S027 | F71 | — |
+| T121.3 | M121 | 28 | Code | pending | T120.5 | — | S027 | F71 | conditional F44 |
+| T121.4 | M121 | 28 | Test | pending | T121.1, T121.2, T121.3 | — | S027 | F71 | — |
+| T122.1 | M122 | 28 | Test | pending | T119.5, T120.5, T121.4 | — | S027 | F70–F71 | — |
+| T122.2 | M122 | 28 | Docs | pending | T122.1 | — | S027 | F70–F71 | 05 L2 |
+| T122.3 | M122 | 28 | Docs | pending | T122.2 | — | S027 | F70–F71 | 05 L3/M6 |
 
 ## Phase Gate Log
 
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
+| 28 | — | — | S027/EV-025 F70–F71 — 05 M1–M6 applied (S027-D29); await Gate B→C → 07 |
 | 27 | 2026-08-04 | **partial (build PASS)** | S026/EV-024 M112–M118 tasks complete; OpenAPI/infra/secrets mirror PASS; Playwright UJ-069/070/073 PASS ([t118-3](../../S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md)). **Deferred:** AC-UX T2 suite + full lint matrix to 08/09–11; live `SUPABASE_SECRET_KEY` sync (no prod.env); issue closes + epic #193 after 13 H1–H5. Gate C→D AskQuestion pending. |
 | 1 | 2026-05-19 | **pass** | M1–M3 complete; alembic head; 12 pytest smoke/privacy/seed; ruff/pyright; OpenAPI in repo + api-contract.md |
 | 2 | 2026-05-19 | **pass** | E2E UJ-002/006/008 (4 tests incl. UJ-003); ruff/pyright clean; 36 pytest; Modal README + apps; no DATABASE_URL in Modal paths |

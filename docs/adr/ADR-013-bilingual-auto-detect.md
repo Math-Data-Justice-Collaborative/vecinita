@@ -38,6 +38,9 @@ Operators may ingest corpus in either language; users should receive answers in 
 - Eval fixtures need en and es sample queries (`apps/database` seeds).
 - Acceptance tests assert `language` matches question locale.
 - Mis-detection is a quality issue — tune detector thresholds in config-spec, not schema changes.
+- **EV-025 / ADR-048:** Fair bilingual dense retrieval depends on a multilingual embed pin.
+  Soft language filter (F44) may be retuned after cutover only if F36 shows ES/lang-filter harm
+  (S027-D19/D20); dual-index remains rejected.
 
 ## References
 

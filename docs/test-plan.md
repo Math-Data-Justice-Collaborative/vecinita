@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-03 (S025/EV-023 F62–F63 — TC-208–215 Husky/release)  
+> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — TC-232–240 multilingual embeds; prior S025 TC-208–215)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -41,6 +41,8 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-072 Bilingual tooltips | Vitest `frontend-ui` + both apps | TC-223, TC-224 | opt |
 | UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228 | `tests/ui/chat/uj073-feedback.spec.ts` |
 | UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
+| UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
+| UJ-076 F36 EN/ES embed promote report | `tests/e2e/test_uj076_embed_promote_report.py` + unit | TC-232–236, TC-239–241 | — (Jobs UI unchanged) |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1425,6 +1427,59 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: Privacy tests — no email/name columns or writes on audit_log.
 - **Expected**: AC-UX15.
+
+### TC-232: Rebuild stamps multilingual embedding_model_id (UJ-076 / UJ-053, F71)
+
+- **Objective**: `job_type=rebuild` `mode=reembed` records candidate `embedding_model_id` (E1 or chosen pin) on shadow/live revision.
+- **Input**: Rebuild options with F70 model id; dry_run true/false.
+- **Expected**: Version stamp matches pin; AC-ME1.
+
+### TC-233: Shared client applies e5 query/passage prefixes (F70)
+
+- **Objective**: Unit/integration — when pin is e5-family and prefixes enabled, ask path prefixes `query:`, ingest/re-embed prefixes `passage:`.
+- **Expected**: AC-ME2; S027-D13.
+
+### TC-234: Embed runtime fallback selectable (F70)
+
+- **Objective**: Config `VECINITA_EMBED_RUNTIME` accepts `fastembed` | `sentence_transformers` | `onnx`; Modal path resolves without paid APIs.
+- **Expected**: AC-ME1; dim remains 384.
+
+### TC-235: F36 shadow report includes EN/ES rel+faith vs E0 (UJ-076, F71)
+
+- **Objective**: Report artifact includes Hy1 answer relevancy + faithfulness split EN/ES vs E0 baseline (advisory).
+- **Expected**: AC-ME3; S027-D18.
+
+### TC-236: Dense hit@k / mean_rank in report when available (UJ-076, F71)
+
+- **Objective**: When dense harness available, report includes hit@k and mean_rank EN/ES; otherwise documented skip.
+- **Expected**: AC-ME4.
+
+### TC-237: EN ask after cutover returns sources (UJ-075, F70–F71)
+
+- **Objective**: API e2e — in-corpus EN ask after pin wiring returns `sources` length ≥ 1 and language en (mocked embed OK).
+- **Expected**: AC-ME7.
+
+### TC-238: ES ask after cutover returns sources (UJ-075, F70–F71)
+
+- **Objective**: API e2e — in-corpus ES ask returns `sources` length ≥ 1 and language es (mocked embed OK).
+- **Expected**: AC-ME8.
+
+### TC-239: Promote activates shadow; E0 revision retained (UJ-076 / UJ-054, F71)
+
+- **Objective**: After promote, live retrieval uses new revision; prior E0 revision remains restorable via rollback path.
+- **Expected**: AC-ME5, AC-ME9; S027-D22.
+
+### TC-240: Staging-then-prod cutover order documented + enforceable (F71)
+
+- **Objective**: Runbook/tests assert staging shadow→F36→promote precedes prod repeat (S027-D21).
+- **Expected**: AC-ME6, AC-ME10.
+
+### TC-241: Tokenizer aligns with embed pin + rechunk (UJ-076 / F71)
+
+- **Objective**: Rebuild stamps `chunk_tokenizer_id` (or equivalent) matching
+  `VECINITA_EMBEDDING_MODEL_ID`; mode includes rechunk so live chunks are retokenized before
+  re-embed (S027-D15/M2b).
+- **Expected**: AC-ME11.
 
 ## Test Data
 

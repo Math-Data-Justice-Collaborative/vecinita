@@ -785,6 +785,30 @@ Standard routing; one PR per issue.
 | RD-288 | F69 naming | Title “username” (#170 alias); display/API **`actor_email`** | 02 M1 / S026-D21 |
 | RD-289 | Energy car UI | Primary ≈ m/mi via **251** g/km; day/year % optional in use guide | 02 M7 / S026-D22 |
 
+### EV-025 requirements decisions (2026-08-05) — S027 / #159
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-290 | Scope | Implement multilingual 384-d swap + staging-then-prod cutover | S027-D1/D5/D21 |
+| RD-291 | Model | E1 `intfloat/multilingual-e5-small` planned candidate; final pin after F36 operator review | S027-D14/D11 |
+| RD-292 | Runtime | FastEmbed first; ST/ONNX fallback; no hard $/latency budget | S027-D12/D23 |
+| RD-293 | Prefixes | e5 `query:` ask + `passage:` ingest/re-embed in shared client | S027-D13 |
+| RD-294 | Tokenizer | Align tokenizer with embed pin + **rechunk+reembed** this cycle (02 M2b amends 15c) | S027-D15/D25 |
+| RD-295 | Cutover | Staging shadow→F36→promote, then prod; E0 revision restorable | S027-D21/D22 |
+| RD-296 | Promote gate | Operator judgment after F36 report (no hard numeric abort) | S027-D11 |
+| RD-297 | F36 report | EN/ES rel+faith (Hy1) vs E0 + dense hit@k/mean_rank if available | S027-D18 |
+| RD-298 | F44 | May tune if post-pin harm; fold into F71 (no F72) | S027-D19/D20 |
+| RD-299 | ADR | **ADR-048** supersedes ADR-008 (**Accepted** at 02) | S027-D17/D25 |
+| RD-300 | Journeys/tests | UJ-075–076; extend UJ-053/054; TC-232–241; AC-ME1–ME11 | S027-D16/D25 |
+| RD-301 | OOS | Dual-index; dim≠384; UI; bge-m3 multi-vector | S027-D6 |
+| RD-302 | F10 | Rewrite F10 as multilingual 384-d Modal embed service (FastEmbed+ST/ONNX) | 02 M3b |
+| RD-303 | Deps | Inventory `sentence-transformers` + `onnxruntime` (optional) for Modal embed | 02 L2 |
+| RD-304 | API | Document Modal embed pin/runtime/prefixes in api-contract | 02 L3 |
+| RD-305 | Phase/milestones | Phase 28: M119 F70 → M120 staging → M121 prod → M122 gate | S027-D27 TP1 |
+| RD-306 | Runtime ship | FE upgrade timebox then ST; ONNX only if ST blocked; CPU Modal | S027-D27 TP2/TP3 |
+| RD-307 | Dep ranges | fastembed `>=0.4,<0.8`; ST `>=3.0,<6`; onnxruntime `>=1.16,<2` | S027-D27 TP4 |
+| RD-308 | Rebuild | F41 rechunk (re-tokenize+re-embed); stamp model+tokenizer | S027-D27 TP5 |
+
 ### EV-024 tech-plan decisions (2026-08-04) — TP1–TP6
 
 S026 / Phase 27 — F64–F69 (Standard; 05 next; 03/06 skipped).

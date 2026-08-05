@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — trafilatura + Playwright worker + pypdf; ADR-045)
+> **Last updated**: 2026-08-05 (S027/EV-025 — sentence-transformers / onnxruntime for ADR-048; prior S024 scrape deps)
 
 ## Runtime dependencies (Python — planned)
 
@@ -19,11 +19,13 @@
 | httpx | TBD | Modal HTTP clients | BSD | |
 | modal | >=1.2,<2 | Workers + ASGI | Apache-2.0 | Template registry |
 | **vllm** | **0.8.5.x** (Modal image only; AWQ + sleep mode, S010/ADR-037) | **Primary** LLM on Modal **T4**; Qwen2.5 default + playground tags (e.g. `qwen3:8b` → AWQ) | Apache-2.0 | ADR-009, ADR-037, infra/modal/llm_app.py |
-| **transformers** | **4.51.3** (Modal image; also needed by `llm-client` chat-template helper at Slice C; **ingest chunker F49**) | Qwen3 `model_type` + HF `apply_chat_template`; chunk HF tokenizer (`BAAI/bge-small-en-v1.5`) | Apache-2.0 | S010 T76.7 / TP-S010-24; S022 ADR-044 |
+| **transformers** | **4.51.3** (Modal image; also needed by `llm-client` chat-template helper at Slice C; **ingest chunker F49 / F71**) | Qwen3 `model_type` + HF `apply_chat_template`; chunk HF tokenizer (align to embed pin — EV-025) | Apache-2.0 | S010 T76.7 / TP-S010-24; S022 ADR-044; S027 ADR-048 |
 | **vecinita-llm-client** | workspace | Unified HTTP client to Modal LLM (`httpx`); depends on **vecinita-shared-schemas** | — | T9.3; Phase 18 M77/M81 |
 | **vecinita-shared-schemas** | workspace | Shared schemas + LLM HTTP config resolver (URL/proxy/timeout) | — | TP-S010-20 |
 | **vecinita-tagging** (`packages/tagging`) | workspace | LLM tag prompts, vocabulary merge, caps; reuses vLLM HTTP | — | EV-001 F20/F22; no new Modal deployable |
-| fastembed | TBD | 384-dim embeddings (Modal) | MIT | |
+| fastembed | `>=0.4,<0.8` (Modal embed; upgrade timebox from historical `<0.5`) | Preferred 384-d embed runtime on Modal | MIT | ADR-048 / F70 TP2/TP4; if E1 unloadable → ST |
+| sentence-transformers | `>=3.0,<6` (Modal embed image) | Fallback embed runtime when FastEmbed cannot host pin | Apache-2.0 | ADR-048 S027-D7/D12; EV-025 TP2/TP4; exact micro at 07 |
+| onnxruntime | `>=1.16,<2` (CPU; Modal embed image if ONNX path) | Optional ONNX embed inference | MIT | ADR-048; only if `VECINITA_EMBED_RUNTIME=onnx`; exact micro at 07 |
 | langdetect or equivalent | TBD | Bilingual auto-detect | | |
 | pytest / httpx | dev | Tests | | |
 
