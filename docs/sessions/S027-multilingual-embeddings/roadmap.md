@@ -22,10 +22,10 @@ client e5 prefixes, F41 rechunk+re-embed, staging then prod cutover (#159).
 | 00-context | ✅ Complete | Session open; Standard (S027-D8) |
 | 01-requirements | ✅ Complete | RD-290–304; ADR-048 |
 | 02-verify-plan | ✅ Complete | Gate A→B PASS (S027-D26) |
-| 04-tech-plan | ✅ TP1–TP5 locked | Phase 28 drafted (S027-D27); completed S027-D28 |
-| 05-verify-tech | ✅ Complete | M1–M6 applied (S027-D29); Gate B→C pending |
-| 07-build M119–M122 | ⬜ Pending | After Gate B→C |
-| 08–13 | ⬜ Pending | Per routing-plan; live prod cutover smoke at 13 |
+| 04-tech-plan | ✅ Complete | TP1–TP5; Phase 28 |
+| 05-verify-tech | ✅ Complete | M1–M6; Gate B→C PASS (S027-D30) |
+| 07-build M119–M122 | ✅ Complete | PR #208/#210/#211 merged; M122 docs gate |
+| 08–13 | ⬜ Pending | Formal verify + **live prod cutover H4–H5 at 13** |
 
 ## Milestone build order
 
@@ -60,31 +60,37 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  tp[04 locked] --> v05[05-verify-tech]
-  v05 --> gbc[Gate B→C]
-  gbc --> b119[07 M119]
-  b119 --> b120[07 M120]
-  b120 --> b121[07 M121]
-  b121 --> b122[07 M122]
-  b122 --> ver[08–13 cutover]
+  m122[M122 done] --> v08[08-verify-build]
+  v08 --> d09[09-qa]
+  d09 --> e10[10-e2e]
+  e10 --> v11[11-verify-impl]
+  v11 --> d12[12-verify-deploy]
+  d12 --> s13[13 H4-H5 live cutover]
 ```
 
 ## Phase gate checklist (exit)
 
-- [ ] T119.1–T122.3 completed
-- [ ] AC-ME1–ME11 verified
-- [ ] Staging + prod cutover; E0 rollback path
-- [ ] No UI/CORS/dim drift
+- [x] T119.1–T122.3 completed (conditionals: S027-D35 / S027-D39)
+- [ ] AC-ME1–ME11 verified at 08/09–11 (mapped + unit/stub green at 07)
+- [x] Staging runbooks + E0 rollback path documented
+- [ ] Live prod cutover smoke (H4–H5 at 13)
+- [x] No UI/CORS/dim drift
 
 ## PR plan
 
 | Order | Milestone | PR slot | Status |
 |-------|-----------|---------|--------|
-| 1 | M119 F70 | PR-67 | pending |
-| 2 | M120 F71 staging | PR-68 | pending |
-| 3 | M121 F71 prod | PR-69 | pending |
-| 4 | M122 gate | PR-70 | pending |
-| 5 | Phase 28 major | PR-71 | pending |
+| 1 | M119 F70 | PR-67 | merged — #208 |
+| 2 | M120 F71 staging | PR-68 | merged — #210 |
+| 3 | M121 F71 prod | PR-69 | merged — #211 @`e38516a` |
+| 4 | M122 gate | PR-70 | opening |
+| 5 | Phase 28 major | PR-71 | pending — after 08+ |
+
+## #159 closeout
+
+Close [#159](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/159) only after
+**13-deploy-smoke** live cutover confirmation — not at M122 alone.
+See [t122_3_phase28_gate.md](./reports/t122_3_phase28_gate.md).
 
 ## Issue creation (optional — do not run without approval)
 
