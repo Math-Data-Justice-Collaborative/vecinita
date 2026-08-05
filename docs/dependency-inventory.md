@@ -23,9 +23,9 @@
 | **vecinita-llm-client** | workspace | Unified HTTP client to Modal LLM (`httpx`); depends on **vecinita-shared-schemas** | — | T9.3; Phase 18 M77/M81 |
 | **vecinita-shared-schemas** | workspace | Shared schemas + LLM HTTP config resolver (URL/proxy/timeout) | — | TP-S010-20 |
 | **vecinita-tagging** (`packages/tagging`) | workspace | LLM tag prompts, vocabulary merge, caps; reuses vLLM HTTP | — | EV-001 F20/F22; no new Modal deployable |
-| fastembed | `>=0.4,<0.8` (Modal embed; upgrade timebox from historical `<0.5`) | Preferred 384-d embed runtime on Modal | MIT | ADR-048 / F70 TP2/TP4; if E1 unloadable → ST |
-| sentence-transformers | `>=3.0,<6` (Modal embed image) | Fallback embed runtime when FastEmbed cannot host pin | Apache-2.0 | ADR-048 S027-D7/D12; EV-025 TP2/TP4; exact micro at 07 |
-| onnxruntime | `>=1.16,<2` (CPU; Modal embed image if ONNX path) | Optional ONNX embed inference | MIT | ADR-048; only if `VECINITA_EMBED_RUNTIME=onnx`; exact micro at 07 |
+| fastembed | `>=0.4,<0.8` (Modal embed; locked in `packages/embedding-client/.../modal_pins.py` as `FASTEMBED_PIN`) | Preferred 384-d embed runtime on Modal | MIT | ADR-048 / F70 TP2/TP4; if E1 unloadable → ST |
+| sentence-transformers | `>=3.0,<6` (Modal embed; `SENTENCE_TRANSFORMERS_PIN`) | Fallback embed runtime when FastEmbed cannot host pin | Apache-2.0 | ADR-048 S027-D7/D12; EV-025 TP2/TP4; micros locked T119/T122.2 |
+| onnxruntime | `>=1.16,<2` (CPU; Modal embed if ONNX; `ONNXRUNTIME_PIN`) | Optional ONNX embed inference | MIT | ADR-048; only if `VECINITA_EMBED_RUNTIME=onnx`; micros locked T119/T122.2 |
 | langdetect or equivalent | TBD | Bilingual auto-detect | | |
 | pytest / httpx | dev | Tests | | |
 

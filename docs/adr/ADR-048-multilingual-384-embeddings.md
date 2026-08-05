@@ -1,11 +1,20 @@
 # ADR-048: Multilingual 384-d embeddings (ADR-008 successor)
 
 **Status:** Accepted  
-**Stage:** 01-requirements / 02-verify-plan (EV-025 / S027)  
+**Stage:** 07-build / M122 (EV-025 / S027) — implemented M119–M121; Phase 28 docs gate  
 **Date:** 2026-08-05  
 **Supersedes:** [ADR-008](ADR-008-fastembed-384-modal.md)  
 **Related:** ADR-005 (pgvector 384), ADR-009 (self-hosted), ADR-013 (bilingual), ADR-040 (F41 rebuild),
-ADR-044 (chunk tokenizer — **aligned to embed pin in EV-025**), F10/F70–F71, GitHub #159, S027-D1–D25
+ADR-044 (chunk tokenizer — **aligned to embed pin in EV-025**), F10/F70–F71, GitHub #159, S027-D1–D40
+
+### Stage metadata (T122.2)
+
+| Field | Value |
+|-------|-------|
+| Accepted | 01-requirements / 02-verify-plan (S027-D1–D25) |
+| Implemented | 07-build M119–M121 (runtime + staging + prod runbook) |
+| Gate docs | M122 (this milestone) |
+| Live cutover smoke | **13-deploy-smoke** (H4–H5) — not claimed at 07 |
 
 ## Context
 

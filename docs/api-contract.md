@@ -529,11 +529,14 @@ Consumers: ingest rebuild/ingest workers and ChatRAG query embed through
 | `POST /embed/batch` | Batch texts → 384-d vectors |
 | `GET /health` | Liveness; may expose model id / runtime |
 
-**Pin:** `VECINITA_EMBEDDING_MODEL_ID` (planned candidate `intfloat/multilingual-e5-small`;
-final after F36 operator review). Dimension **384** (`embedding_dim` stamps must match).
+**Pin:** `VECINITA_EMBEDDING_MODEL_ID` default **`intfloat/multilingual-e5-small`** (E1;
+ADR-048 / F70). Legacy E0 `BAAI/bge-small-en-v1.5` remains restorable via F41 rollback
+(`LEGACY_E0_EMBEDDING_MODEL_ID`). Dimension **384** (`embedding_dim` stamps must match).
 **Runtime:** `VECINITA_EMBED_RUNTIME` = `fastembed` \| `sentence_transformers` \| `onnx`
-(FastEmbed preferred). **Prefixes:** when e5-family and prefixes on/auto, client sends
-`query:`-prefixed ask texts and `passage:`-prefixed ingest/rechunk texts (S027-D13).
+(FastEmbed preferred; ST/ONNX micros in `modal_pins.py`). **Prefixes:** when e5-family and
+prefixes on/auto, client sends `query:`-prefixed ask texts and `passage:`-prefixed
+ingest/rechunk texts (S027-D13). **Tokenizer:** `VECINITA_CHUNK_TOKENIZER_ID` must match the
+embed pin; F71 rebuild uses `mode=rechunk` then re-embed (TC-241 / AC-ME11).
 No public ChatRAG schema change for pin (internal client + revision stamps only).
 
 ---

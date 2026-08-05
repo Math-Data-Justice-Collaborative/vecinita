@@ -402,6 +402,50 @@ CE enablement is a **separate** ops step — not the default Path A ship.
 
 Session checklist: `docs/sessions/S021-retrieval-follow-on/reports/deploy-checklist.md`.
 
+## EV-025 — Multilingual embeddings (F70–F71 / ADR-048) — S027
+
+**ADR:** ADR-048 (supersedes ADR-008) · **Tech:** Phase 28 M119–M122 · **Issue:** #159  
+**Cutover order:** staging shadow → F36 → promote, then prod (S027-D21). Live prod smoke at
+**13-deploy-smoke** (H4–H5). E0 rollback: `docs/staging-runbook.md` §Prod cutover / E0 rollback.
+
+### Deploy units touched
+
+| Unit | Change |
+|------|--------|
+| Modal `vecinita-embedding` | E1 pin + `VECINITA_EMBED_RUNTIME` (fastembed \| ST \| onnx); CPU memory/timeout for ST |
+| `packages/embedding-client` | Shared pin, e5 prefixes, dim=384 hard-fail, runtime resolver |
+| Modal data-management | F71 rebuild rechunk+re-embed stamps; shadow dual-write |
+| DO internal-write-api | Embed-promote report (EN/ES Hy1 + dense when available); promote / E0 restore |
+| DO chat-rag-backend | Ask path uses shared client prefixes (no public schema change) |
+| Frontends | **No UI change** (S027-D16) |
+
+### Secrets / config
+
+| Variable | Where | Notes |
+|----------|-------|-------|
+| `VECINITA_EMBEDDING_MODEL_ID` | Modal embed + DM / write stamps | Default E1 `intfloat/multilingual-e5-small` |
+| `VECINITA_EMBED_RUNTIME` | Modal embed | `fastembed` (default) \| `sentence_transformers` \| `onnx` |
+| `VECINITA_EMBED_E5_PREFIXES` | Shared client | `auto` / on / off — e5 `query:`/`passage:` |
+| `VECINITA_CHUNK_TOKENIZER_ID` | Ingest / rebuild | Must match embed pin (AC-ME11) |
+| `VECINITA_MODAL_EMBED_URL` (+ proxy key) | DO backends / Modal callers | Unchanged URL shape |
+
+Micros locked in `packages/embedding-client/vecinita_embedding_client/modal_pins.py`
+(`FASTEMBED_PIN`, `SENTENCE_TRANSFORMERS_PIN`, `ONNXRUNTIME_PIN`) — see dependency-inventory.
+
+### Redeploy order (staging → prod)
+
+1. Modal `vecinita-embedding` (new pin + runtime)
+2. Modal data-management (rebuild worker)
+3. DO internal-write-api (promote report + stamps)
+4. DO chat-rag-backend (shared client)
+5. Staging cutover per runbook → F36 → operator promote
+6. Prod cutover only after staging (TC-240); **H4–H5 at 13**
+
+### Rollback
+
+- Restore prior E0 revision via F41 rebuild+promote with `LEGACY_E0` pin (TC-239 / AC-ME9).
+- Do not TRUNCATE corpus; follow corpus-db-safety + staging-runbook.
+
 ## Open questions
 
 - Budget alerts at 80%/100% of $50 — implement in T14.4 / 13-deploy-smoke

@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate C→D PASS (cond.); M122 |
 | **Active milestone** | M122 — Phase 28 gate — TC suite + docs closeout |
-| **Active task** | T122.1 completed — continue T122.2 docs |
+| **Active task** | T122.2 completed — continue T122.3 Phase 28 gate docs |
 | **Last updated** | 2026-08-05 |
 | **Evolve cycle** | EV-025 — Standard; Phase C build (M122) |
 | **Git branch** | `evolve/EV-025-multilingual-embeddings` |
@@ -2417,7 +2417,7 @@ H4–H5 regression note for **13-deploy-smoke**; #159 closeout notes after 13.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T122.1 | Test: confirm unit + API e2e TC-232–241 green (no new Playwright — D16) | Test | in_progress | e2e-coverage, RD-300 | T119.5, T120.5, T121.4 | — | S027 | F70–F71 |
+| T122.1 | Test: confirm unit + API e2e TC-232–241 green (no new Playwright — D16) | Test | completed | e2e-coverage, RD-300 | T119.5, T120.5, T121.4 | 2026-08-05 | S027 | F70–F71 |
 | T122.2 | Docs/Config: api-contract + deployment-integration embed runtime notes; inventory micros if locked; ADR-048 stage metadata | Docs | pending | TP4, RD-303/304 | T122.1 | — | S027 | F70–F71 |
 | T122.3 | Docs: Phase 28 gate + Current State; H4–H5 at 13 note; #159 closeout notes | Docs | pending | Phase 28 gate, connectivity-gates | T122.2 | — | S027 | F70–F71 |
 
@@ -3283,7 +3283,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T121.2 | M121 | 28 | Docs | completed | T120.5 | — | S027 | F71 | — |
 | T121.3 | M121 | 28 | Code | skipped | T120.5 | — | S027 | F71 | conditional F44 |
 | T121.4 | M121 | 28 | Test | completed | T121.1, T121.2, T121.3 | — | S027 | F71 | — |
-| T122.1 | M122 | 28 | Test | pending | T119.5, T120.5, T121.4 | — | S027 | F70–F71 | — |
+| T122.1 | M122 | 28 | Test | completed | T119.5, T120.5, T121.4 | — | S027 | F70–F71 | — |
 | T122.2 | M122 | 28 | Docs | pending | T122.1 | — | S027 | F70–F71 | 05 L2 |
 | T122.3 | M122 | 28 | Docs | pending | T122.2 | — | S027 | F70–F71 | 05 L3/M6 |
 
