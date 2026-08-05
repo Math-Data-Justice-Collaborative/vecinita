@@ -5,7 +5,7 @@
 | Session | S027-multilingual-embeddings |
 | Cycle | EV-025 — multilingual embeddings (#159) |
 | Branch | `evolve/EV-025-multilingual-embeddings` |
-| Stage | **07-build** — **M119 complete** (T119.1–5); next **08-verify-build** then PR / M120 |
+| Stage | **08-verify-build** — M119 **CONDITIONAL PASS** (local PG Docker blocked); await PR decision |
 
 ## M119 shipped (local)
 
@@ -16,12 +16,17 @@
 
 ## Next
 
-1. **08-verify-build** for M119 (then minor PR)
-2. Continue **M120** T120.1 (staging rechunk e2e red)
+1. **AskQuestion S027-D32:** open minor PR (CI = full suite gate) vs fix local Docker Postgres first
+2. Continue **M120** T120.1 after PR recorded
 
-## Uncommitted
+## Commits (M119)
 
-Working tree has Phase A–B docs + M119 code — commit when you ask (atomic task commits preferred).
+Phase A/B docs + `[T119.1]`–`[T119.4]` on `evolve/EV-025-multilingual-embeddings`.  
+08 report: `reports/verification-report.md` — **CONDITIONAL PASS** (local PG Docker blocked).
+
+## Uncommitted (pending this turn)
+
+`workflow-state.yaml` + verification report + HANDOFF — commit with `[T119.5]` / 08 artifact.
 
 ## Links
 
