@@ -1,11 +1,12 @@
-"""T120.1 red - UJ-076 / TC-232,235-236,239,241 multilingual rebuild + F36 report (F71).
+"""T120.1 / T121.1 — UJ-076 / TC-232,235-236,239,241 multilingual rebuild + F36 (F71).
 
 API e2e for F71 staging cutover contract:
 - rebuild stamps multilingual embedding_model_id + chunk_tokenizer_id (rechunk)
 - F36 embed-promote report EN/ES rel+faith vs E0 (+ dense when available)
 - promote activates shadow while E0 revision remains queryable
+- T121.1: E0 rollback restore via new LEGACY_E0 rebuild + promote (AC-ME9)
 
-Requires local DATABASE_URL (compose). Remote CI runs unit only (S027-D34).
+Requires local DATABASE_URL (compose). Remote CI runs unit only (S027-D34 / S027-D35).
 """
 
 from __future__ import annotations
@@ -17,7 +18,10 @@ from uuid import UUID
 import pytest
 from sqlalchemy import text
 from vecinita_embedding_client import EMBEDDING_DIMENSION
-from vecinita_embedding_client.modal_pins import DEFAULT_EMBEDDING_MODEL_ID
+from vecinita_embedding_client.modal_pins import (
+    DEFAULT_EMBEDDING_MODEL_ID,
+    LEGACY_E0_EMBEDDING_MODEL_ID,
+)
 from vecinita_shared_schemas.db_mapping import mapping_row, row_int, row_str, sqlalchemy_scalar_one
 from vecinita_shared_schemas.json_types import as_json_object
 
@@ -31,9 +35,11 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.e2e
 
 _E1_PIN = DEFAULT_EMBEDDING_MODEL_ID  # intfloat/multilingual-e5-small
+_E0_PIN = LEGACY_E0_EMBEDDING_MODEL_ID
 _CHUNK_SIZE_TOKENS = 256
 _EMBEDDING = [0.05] * EMBEDDING_DIMENSION
 _SHADOW_TEXT = "uj076-multilingual-shadow-chunk"
+_E0_RESTORE_TEXT = "uj076-e0-rollback-restore-chunk"
 
 
 def test_tc232_241_rebuild_stamps_multilingual_pin_and_tokenizer(
@@ -280,3 +286,167 @@ def test_tc239_promote_activates_shadow_e0_revision_retained(
     assert isinstance(e1_revisions, int)
     assert e0_revisions >= 1  # prior E0 restorable
     assert e1_revisions >= 1  # new pin stamped
+
+
+def _create_shadow_promote(
+    write_client: TestClient,
+    *,
+    url: str,
+    embedding_model_id: str,
+    shadow_text: str,
+) -> UUID:
+    create = write_client.post(
+        "/internal/v1/rebuild/runs",
+        json={
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "status": "running",
+            "embedding_model_id": embedding_model_id,
+            "embedding_dim": EMBEDDING_DIMENSION,
+            "chunk_size_tokens": _CHUNK_SIZE_TOKENS,
+            "chunk_tokenizer_id": embedding_model_id,
+        },
+        headers=auth_headers(),
+    )
+    assert create.status_code == HTTPStatus.OK, create.text
+    rebuild_run_id = UUID(json_str(as_json_object(cast("object", create.json())), "rebuild_run_id"))
+
+    shadow = write_client.post(
+        f"/internal/v1/rebuild/{rebuild_run_id}/shadow/batch",
+        json={
+            "documents": [
+                {
+                    "url": url,
+                    "rebuild_run_id": str(rebuild_run_id),
+                    "chunks": [
+                        {
+                            "chunk_index": 0,
+                            "text": shadow_text,
+                            "embedding": _EMBEDDING,
+                        }
+                    ],
+                }
+            ]
+        },
+        headers=auth_headers(),
+    )
+    assert shadow.status_code == HTTPStatus.OK, shadow.text
+
+    complete = write_client.patch(
+        f"/internal/v1/rebuild/{rebuild_run_id}",
+        json={"status": "completed"},
+        headers=auth_headers(),
+    )
+    assert complete.status_code == HTTPStatus.OK, complete.text
+
+    promote = write_client.post(
+        f"/internal/v1/rebuild/{rebuild_run_id}/promote",
+        headers=auth_headers(),
+    )
+    assert promote.status_code == HTTPStatus.OK, promote.text
+    promote_body = as_json_object(cast("object", promote.json()))
+    assert promote_body.get("promoted") is True
+    assert json_int(promote_body, "chunks_promoted") >= 1
+    return rebuild_run_id
+
+
+def test_tc239_e0_rollback_restores_live_text_and_stamps(
+    write_client: TestClient,
+    engine: Engine,
+    seeded_document: UUID,
+) -> None:
+    """T121.1 / TC-239 / AC-ME9: new E0 rebuild+promote restores prior live + stamps."""
+    with engine.connect() as conn:
+        url = row_str(
+            mapping_row(
+                conn.execute(
+                    text("SELECT url FROM documents WHERE id = :id"),
+                    {"id": seeded_document},
+                )
+                .mappings()
+                .one()
+            ),
+            "url",
+        )
+
+    _create_shadow_promote(
+        write_client,
+        url=url,
+        embedding_model_id=_E0_PIN,
+        shadow_text=_E0_RESTORE_TEXT,
+    )
+    _create_shadow_promote(
+        write_client,
+        url=url,
+        embedding_model_id=_E1_PIN,
+        shadow_text=_SHADOW_TEXT,
+    )
+
+    with engine.connect() as conn:
+        live_e1 = row_str(
+            mapping_row(
+                conn.execute(
+                    text(
+                        """
+                        SELECT text FROM chunks
+                        WHERE document_id = :id
+                        ORDER BY chunk_index
+                        LIMIT 1
+                        """
+                    ),
+                    {"id": seeded_document},
+                )
+                .mappings()
+                .one()
+            ),
+            "text",
+        )
+    assert live_e1 == _SHADOW_TEXT
+
+    _create_shadow_promote(
+        write_client,
+        url=url,
+        embedding_model_id=_E0_PIN,
+        shadow_text=_E0_RESTORE_TEXT,
+    )
+
+    with engine.connect() as conn:
+        live_restored = row_str(
+            mapping_row(
+                conn.execute(
+                    text(
+                        """
+                        SELECT text FROM chunks
+                        WHERE document_id = :id
+                        ORDER BY chunk_index
+                        LIMIT 1
+                        """
+                    ),
+                    {"id": seeded_document},
+                )
+                .mappings()
+                .one()
+            ),
+            "text",
+        )
+        latest = mapping_row(
+            conn.execute(
+                text(
+                    """
+                    SELECT embedding_model_id, chunk_tokenizer_id
+                    FROM document_revisions
+                    WHERE document_id = :id
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                    """
+                ),
+                {"id": seeded_document},
+            )
+            .mappings()
+            .one()
+        )
+
+    assert live_restored == _E0_RESTORE_TEXT
+    assert row_str(latest, "embedding_model_id") == _E0_PIN
+    assert row_str(latest, "chunk_tokenizer_id") == _E0_PIN

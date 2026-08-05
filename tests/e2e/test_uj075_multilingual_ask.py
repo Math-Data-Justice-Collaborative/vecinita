@@ -1,7 +1,8 @@
-"""T120.1 red - UJ-075 / TC-237-238 ask after multilingual cutover (F70-F71).
+"""T120.1 / T121.1 — UJ-075 / TC-237-238 ask after multilingual cutover (F70-F71).
 
 Stubbed ChatRAG retrieve/LLM (no compose). Asserts EN/ES ask return non-empty sources
 and that the F71 cutover pin alignment gate holds (tokenizer default == embed pin).
+T121.1 locks TC-238 (AC-ME8) for M121 prod-cutover regression.
 """
 
 from __future__ import annotations
