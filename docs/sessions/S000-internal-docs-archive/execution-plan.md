@@ -9,13 +9,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate C→D PASS (cond.); M121 |
-| **Active milestone** | M121 — F71 prod cutover + E0 rollback |
-| **Active task** | T121.4 complete — open PR-69 / continue M122 |
+| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate C→D PASS (cond.); M122 |
+| **Active milestone** | M122 — Phase 28 gate — TC suite + docs closeout |
+| **Active task** | T122.1 completed — continue T122.2 docs |
 | **Last updated** | 2026-08-05 |
-| **Evolve cycle** | EV-025 — Standard; Phase C build (M121) |
+| **Evolve cycle** | EV-025 — Standard; Phase C build (M122) |
 | **Git branch** | `evolve/EV-025-multilingual-embeddings` |
-| **Active session** | S027-multilingual-embeddings — M121 T121.2 |
+| **Active session** | S027-multilingual-embeddings — M122 T122.1 |
 | **Scope addition** | 2026-08-05 — F70–F71 multilingual 384-d embed + staging→prod cutover (#159). |
 
 ## Template
@@ -2417,7 +2417,7 @@ H4–H5 regression note for **13-deploy-smoke**; #159 closeout notes after 13.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T122.1 | Test: confirm unit + API e2e TC-232–241 green (no new Playwright — D16) | Test | pending | e2e-coverage, RD-300 | T119.5, T120.5, T121.4 | — | S027 | F70–F71 |
+| T122.1 | Test: confirm unit + API e2e TC-232–241 green (no new Playwright — D16) | Test | in_progress | e2e-coverage, RD-300 | T119.5, T120.5, T121.4 | — | S027 | F70–F71 |
 | T122.2 | Docs/Config: api-contract + deployment-integration embed runtime notes; inventory micros if locked; ADR-048 stage metadata | Docs | pending | TP4, RD-303/304 | T122.1 | — | S027 | F70–F71 |
 | T122.3 | Docs: Phase 28 gate + Current State; H4–H5 at 13 note; #159 closeout notes | Docs | pending | Phase 28 gate, connectivity-gates | T122.2 | — | S027 | F70–F71 |
 
@@ -2566,7 +2566,7 @@ main
 | PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — after Gate C→D / verify (code already on main via PR-60–64) |
 | PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208 |
 | PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #210 @`b35e980` |
-| PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 prod cutover + rollback |
+| PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #211 @`e38516a` |
 | PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — Phase 28 gate docs |
 | PR-71 | Major | Phase 28 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — after Gate C→D / verify |
 
