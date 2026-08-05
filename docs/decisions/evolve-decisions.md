@@ -891,6 +891,7 @@ call must include recorded EN vs ES metrics. Out: dual-index, dim≠384, UI, bge
 | S027-D39 | T121.3 F44 | **Skipped / not_triggered** — no post-pin F36 ES harm evidence this cycle (S027-D19/D20); F44 soft language-filter tune deferred. T121.2 @`bf325e3` TC-240 green; T121.4 green confirm in progress |
 | S027-D40 | Merge #211 | **Approve merge** PR #211 (option 1) — tip @`0e65f14` CI green; **MERGED** @`e38516a` (2026-08-05T19:24:50Z); main CI [31039293277](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31039293277) + deploy-preflight [31039596545](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31039596545) success; continue **M122 / T122.1** |
 | S027-D41 | Merge #213 | **Approve merge** PR #213 (option 1) — tip @`2e9044b` CI green; **MERGED** @`de1355c`; then **08-verify-build**; **17-retrospective** queued after cycle (prod bugs observed) |
+| S027-D42 | Phase D | **Start 09-qa** (option 1) — 08 PASS (cond. S027-D35); 17-retro remains after cycle |
 
 ### Feature map
 
