@@ -2565,7 +2565,7 @@ main
 | PR-64 | Minor | M117 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#206](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206)) @ `eb65837` — F69/#170 |
 | PR-65 | Minor | M118 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — OpenAPI + Phase 27 gate docs |
 | PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — after Gate C→D / verify (code already on main via PR-60–64) |
-| PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F70 runtime + Modal |
+| PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | opening — F70 runtime + Modal (S027-D32; CI = full pytest gate) |
 | PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 staging rechunk/promote |
 | PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 prod cutover + rollback |
 | PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — Phase 28 gate docs |

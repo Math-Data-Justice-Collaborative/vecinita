@@ -5,7 +5,7 @@
 | Session | S027-multilingual-embeddings |
 | Cycle | EV-025 — multilingual embeddings (#159) |
 | Branch | `evolve/EV-025-multilingual-embeddings` |
-| Stage | **08-verify-build** — M119 **CONDITIONAL PASS** (local PG Docker blocked); await PR decision |
+| Stage | **08-verify-build** — M119 CONDITIONAL PASS; S027-D32 = open PR (CI + F62 hooks; no in-agent `test-py`) |
 
 ## M119 shipped (local)
 
@@ -16,17 +16,13 @@
 
 ## Next
 
-1. **AskQuestion S027-D32:** open minor PR (CI = full suite gate) vs fix local Docker Postgres first
+1. Open/push **PR-67** (M119 minor); watch GitHub CI
 2. Continue **M120** T120.1 after PR recorded
 
 ## Commits (M119)
 
-Phase A/B docs + `[T119.1]`–`[T119.4]` on `evolve/EV-025-multilingual-embeddings`.  
-08 report: `reports/verification-report.md` — **CONDITIONAL PASS** (local PG Docker blocked).
-
-## Uncommitted (pending this turn)
-
-`workflow-state.yaml` + verification report + HANDOFF — commit with `[T119.5]` / 08 artifact.
+Phase A/B docs + `[T119.1]`–`[T119.5]` on `evolve/EV-025-multilingual-embeddings`.  
+08: CONDITIONAL PASS — full local pytest offloaded to Husky F62 + GitHub CI (S027-D32).
 
 ## Links
 
