@@ -498,6 +498,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 embedding_model_id,
                                 embedding_dim,
                                 chunk_size_tokens,
+                                chunk_tokenizer_id,
                                 rebuild_run_id
                             )
                             VALUES (
@@ -507,6 +508,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 :embedding_model_id,
                                 :embedding_dim,
                                 :chunk_size_tokens,
+                                :chunk_tokenizer_id,
                                 :rebuild_run_id
                             )
                             """
@@ -518,6 +520,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                             "embedding_model_id": document.embedding_model_id,
                             "embedding_dim": document.embedding_dim,
                             "chunk_size_tokens": document.chunk_size_tokens,
+                            "chunk_tokenizer_id": document.chunk_tokenizer_id,
                             "rebuild_run_id": document.rebuild_run_id,
                         },
                     )
@@ -621,11 +624,13 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                             """
                             INSERT INTO rebuild_runs (
                                 mode, dry_run, force, status, job_id,
-                                embedding_model_id, embedding_dim, chunk_size_tokens
+                                embedding_model_id, embedding_dim, chunk_size_tokens,
+                                chunk_tokenizer_id
                             )
                             VALUES (
                                 :mode, :dry_run, :force, :status, :job_id,
-                                :embedding_model_id, :embedding_dim, :chunk_size_tokens
+                                :embedding_model_id, :embedding_dim, :chunk_size_tokens,
+                                :chunk_tokenizer_id
                             )
                             RETURNING id
                             """
@@ -639,6 +644,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                             "embedding_model_id": body.embedding_model_id,
                             "embedding_dim": body.embedding_dim,
                             "chunk_size_tokens": body.chunk_size_tokens,
+                            "chunk_tokenizer_id": body.chunk_tokenizer_id,
                         },
                     ).scalar_one(),
                 )

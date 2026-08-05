@@ -15,10 +15,6 @@ from vecinita_shared_schemas.json_types import as_json_object
 
 
 @pytest.mark.unit
-@pytest.mark.xfail(
-    reason="T120.2 pending: CreateRebuildRunRequest.chunk_tokenizer_id not wired yet",
-    strict=True,
-)
 def test_create_rebuild_run_accepts_chunk_tokenizer_id_aligned_to_e1() -> None:
     """TC-241: chunk_tokenizer_id must be accepted and equal to embed pin."""
     pin = DEFAULT_EMBEDDING_MODEL_ID

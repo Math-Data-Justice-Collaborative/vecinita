@@ -12,7 +12,9 @@ from uuid import UUID
 import httpx
 from pydantic import HttpUrl
 from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClientError
+from vecinita_embedding_client.modal_pins import DEFAULT_EMBEDDING_MODEL_ID
 from vecinita_ingest import chunk_text, fetch_url
+from vecinita_ingest.chunk import resolve_tokenizer_id
 from vecinita_ingest.crawl import CrawlPlan, discover_crawl_urls
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.nested_source import derive_nested_source
@@ -42,14 +44,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_EMBEDDING_MODEL_ID = "BAAI/bge-small-en-v1.5"
 _DEFAULT_MAX_DEPTH = 2
 _DEFAULT_MAX_PAGES = 25
 
 
 def _embedding_model_id() -> str:
     """Resolve revision stamp model id from env (config-spec VECINITA_EMBEDDING_MODEL_ID)."""
-    return os.environ.get("VECINITA_EMBEDDING_MODEL_ID", _DEFAULT_EMBEDDING_MODEL_ID)
+    return os.environ.get("VECINITA_EMBEDDING_MODEL_ID", DEFAULT_EMBEDDING_MODEL_ID)
+
+
+def _chunk_tokenizer_id() -> str:
+    """Resolve chunk tokenizer stamp (ADR-044 / F71 — aligned to embed pin)."""
+    return resolve_tokenizer_id()
 
 
 def _raise_no_chunks(url: str) -> None:
@@ -158,6 +164,7 @@ def _ingest_one_url(  # noqa: PLR0913  # mirrors run_ingest_job stage branches
                 embedding_model_id=_embedding_model_id(),
                 embedding_dim=EMBEDDING_DIMENSION,
                 chunk_size_tokens=chunk_size,
+                chunk_tokenizer_id=_chunk_tokenizer_id(),
                 source_domain=nested.source_domain,
                 source_path=nested.source_path,
                 parent_url=nested.parent_url,
@@ -216,6 +223,7 @@ def _ingest_one_url(  # noqa: PLR0913  # mirrors run_ingest_job stage branches
             embedding_model_id=_embedding_model_id(),
             embedding_dim=EMBEDDING_DIMENSION,
             chunk_size_tokens=chunk_size,
+            chunk_tokenizer_id=_chunk_tokenizer_id(),
             source_domain=nested.source_domain,
             source_path=nested.source_path,
             parent_url=nested.parent_url,
@@ -561,10 +569,11 @@ def _document_upsert_from_rebuild(  # noqa: PLR0913  # stamped upsert needs chun
     chunk_size: int,
     chunk_overlap: int,
     model_id: str,
+    tokenizer_id: str,
     rebuild_run_id: UUID | None,
     embed_client: EmbeddingClient,
 ) -> DocumentUpsert:
-    """Chunk, embed, and stamp one rebuild DocumentUpsert (ADR-040 §4)."""
+    """Chunk, embed, and stamp one rebuild DocumentUpsert (ADR-040 §4 / F71)."""
     chunks = chunk_text(
         body,
         chunk_size_tokens=chunk_size,
@@ -586,6 +595,7 @@ def _document_upsert_from_rebuild(  # noqa: PLR0913  # stamped upsert needs chun
         embedding_model_id=model_id,
         embedding_dim=EMBEDDING_DIMENSION,
         chunk_size_tokens=chunk_size,
+        chunk_tokenizer_id=tokenizer_id,
         rebuild_run_id=rebuild_run_id,
         chunks=chunk_models,
     )
@@ -616,6 +626,7 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
     chunk_size: int,
     chunk_overlap: int,
     model_id: str,
+    tokenizer_id: str,
     rebuild_run_id: UUID | None,
 ) -> list[DocumentUpsert]:
     """Resolve bodies and build stamped upserts for all rebuild targets."""
@@ -640,6 +651,7 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
                 chunk_size=chunk_size,
                 chunk_overlap=chunk_overlap,
                 model_id=model_id,
+                tokenizer_id=tokenizer_id,
                 rebuild_run_id=rebuild_run_id,
                 embed_client=embed_client,
             )
@@ -669,6 +681,7 @@ def run_rebuild_job(
     chunk_size = _chunk_size_from_options(record.options)
     chunk_overlap = _chunk_overlap_from_options(record.options)
     model_id = _embedding_model_id()
+    tokenizer_id = _chunk_tokenizer_id()
 
     store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
@@ -687,6 +700,7 @@ def run_rebuild_job(
                     "embedding_model_id": model_id,
                     "embedding_dim": EMBEDDING_DIMENSION,
                     "chunk_size_tokens": chunk_size,
+                    "chunk_tokenizer_id": tokenizer_id,
                 }
             )
 
@@ -699,6 +713,7 @@ def run_rebuild_job(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             model_id=model_id,
+            tokenizer_id=tokenizer_id,
             rebuild_run_id=rebuild_run_id,
         )
         _write_rebuild_batch(write_client, documents, dry_run=dry_run)
@@ -843,6 +858,7 @@ def run_backfill_job(
                     embedding_model_id=_embedding_model_id(),
                     embedding_dim=EMBEDDING_DIMENSION,
                     chunk_size_tokens=chunk_size,
+                    chunk_tokenizer_id=_chunk_tokenizer_id(),
                     chunks=[],
                 )
             )

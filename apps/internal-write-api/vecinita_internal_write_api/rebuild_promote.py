@@ -157,6 +157,7 @@ def _promote_on_connection(
                 embedding_model_id,
                 embedding_dim,
                 chunk_size_tokens,
+                chunk_tokenizer_id,
                 rebuild_mode,
                 rebuild_run_id
             )
@@ -167,6 +168,7 @@ def _promote_on_connection(
                 rr.embedding_model_id,
                 rr.embedding_dim,
                 rr.chunk_size_tokens,
+                rr.chunk_tokenizer_id,
                 rr.mode,
                 rr.id
             FROM documents d

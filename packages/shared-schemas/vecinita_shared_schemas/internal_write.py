@@ -55,6 +55,7 @@ class DocumentUpsert(BaseModel):
     embedding_model_id: str | None = None
     embedding_dim: int | None = Field(default=None, ge=1)
     chunk_size_tokens: int | None = Field(default=None, ge=1)
+    chunk_tokenizer_id: str | None = None
     rebuild_run_id: UUID | None = None
     source_domain: str | None = None
     source_path: str | None = None
@@ -68,6 +69,16 @@ class DocumentUpsert(BaseModel):
         """Ingest needs chunks; store-only backfill may send body_text alone (TP-S017-08)."""
         if not self.chunks and self.body_text is None:
             msg = "chunks or body_text required"
+            raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def tokenizer_must_match_embed_pin(self) -> DocumentUpsert:
+        """When both stamps set, tokenizer id must equal embed pin (AC-ME11 / F71)."""
+        embed = self.embedding_model_id
+        tokenizer = self.chunk_tokenizer_id
+        if embed is not None and tokenizer is not None and embed != tokenizer:
+            msg = "chunk_tokenizer_id must match embedding_model_id when both are set"
             raise ValueError(msg)
         return self
 
@@ -103,7 +114,7 @@ class CreateRebuildRunResponse(BaseModel):
 
 
 class CreateRebuildRunRequest(BaseModel):
-    """POST /internal/v1/rebuild/runs request body (TP-S017-02)."""
+    """POST /internal/v1/rebuild/runs request body (TP-S017-02 / F71)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -115,6 +126,17 @@ class CreateRebuildRunRequest(BaseModel):
     embedding_model_id: str | None = None
     embedding_dim: int | None = Field(default=None, ge=1)
     chunk_size_tokens: int | None = Field(default=None, ge=1)
+    chunk_tokenizer_id: str | None = None
+
+    @model_validator(mode="after")
+    def tokenizer_must_match_embed_pin(self) -> CreateRebuildRunRequest:
+        """When both stamps set, tokenizer id must equal embed pin (AC-ME11 / F71)."""
+        embed = self.embedding_model_id
+        tokenizer = self.chunk_tokenizer_id
+        if embed is not None and tokenizer is not None and embed != tokenizer:
+            msg = "chunk_tokenizer_id must match embedding_model_id when both are set"
+            raise ValueError(msg)
+        return self
 
 
 class UpdateRebuildRunRequest(BaseModel):
