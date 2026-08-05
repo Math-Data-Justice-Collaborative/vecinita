@@ -9,13 +9,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate C→D PASS (cond.); M121 |
-| **Active milestone** | M121 — F71 prod cutover + E0 rollback |
-| **Active task** | T121.4 complete — open PR-69 / continue M122 |
+| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — M122 complete; await 08–13 |
+| **Active milestone** | M122 — Phase 28 gate — TC suite + docs closeout (**completed**) |
+| **Active task** | T122.3 completed — open PR-70; next 08-verify-build / Phase D |
 | **Last updated** | 2026-08-05 |
-| **Evolve cycle** | EV-025 — Standard; Phase C build (M121) |
+| **Evolve cycle** | EV-025 — Standard; Phase C build complete (M119–M122) |
 | **Git branch** | `evolve/EV-025-multilingual-embeddings` |
-| **Active session** | S027-multilingual-embeddings — M121 T121.2 |
+| **Active session** | S027-multilingual-embeddings — M122 done |
 | **Scope addition** | 2026-08-05 — F70–F71 multilingual 384-d embed + staging→prod cutover (#159). |
 
 ## Template
@@ -2417,19 +2417,20 @@ H4–H5 regression note for **13-deploy-smoke**; #159 closeout notes after 13.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T122.1 | Test: confirm unit + API e2e TC-232–241 green (no new Playwright — D16) | Test | pending | e2e-coverage, RD-300 | T119.5, T120.5, T121.4 | — | S027 | F70–F71 |
-| T122.2 | Docs/Config: api-contract + deployment-integration embed runtime notes; inventory micros if locked; ADR-048 stage metadata | Docs | pending | TP4, RD-303/304 | T122.1 | — | S027 | F70–F71 |
-| T122.3 | Docs: Phase 28 gate + Current State; H4–H5 at 13 note; #159 closeout notes | Docs | pending | Phase 28 gate, connectivity-gates | T122.2 | — | S027 | F70–F71 |
+| T122.1 | Test: confirm unit + API e2e TC-232–241 green (no new Playwright — D16) | Test | completed | e2e-coverage, RD-300 | T119.5, T120.5, T121.4 | 2026-08-05 | S027 | F70–F71 |
+| T122.2 | Docs/Config: api-contract + deployment-integration embed runtime notes; inventory micros if locked; ADR-048 stage metadata | Docs | completed | TP4, RD-303/304 | T122.1 | 2026-08-05 | S027 | F70–F71 |
+| T122.3 | Docs: Phase 28 gate + Current State; H4–H5 at 13 note; #159 closeout notes | Docs | completed | Phase 28 gate, connectivity-gates | T122.2 | 2026-08-05 | S027 | F70–F71 |
 
 #### Phase 28 Gate Check
 
-- [ ] All M119–M122 tasks completed (T119.1–T122.3 including T120.3b)
-- [ ] AC-ME1–ME11 met at verify (08/09–11); F44 tune only if harm shown
-- [ ] ADR-048 Accepted; ADR-008 superseded; tokenizer aligned (ADR-044)
-- [ ] Staging cutover + runbooks in 07–11; **live prod cutover smoke at 13**; E0 rollback runbook-proven
-- [ ] No new UI/Playwright/CORS; dim remains 384
+- [x] All M119–M122 tasks completed (T119.1–T122.3 including T120.3b) — T120.5 `completed_conditional` (S027-D35); T121.3 skipped (S027-D39)
+- [ ] AC-ME1–ME11 met at verify (08/09–11); F44 tune only if harm shown — **mapped + unit/stub green at 07**; formal verify deferred
+- [x] ADR-048 Accepted; ADR-008 superseded; tokenizer aligned (ADR-044)
+- [x] Staging cutover + runbooks in 07–11; E0 rollback runbook-proven (docs/TC-239–240) — **live prod cutover smoke at 13** (H4–H5) still open
+- [x] No new UI/Playwright/CORS; dim remains 384
 - [ ] ruff / basedpyright / pytest e2e — **08-verify-build**
 
+**07 gate report:** `docs/sessions/S027-multilingual-embeddings/reports/t122_3_phase28_gate.md`  
 **Tech-plan delta:** `docs/sessions/S027-multilingual-embeddings/reports/tech-plan-delta.md`  
 **05 audit:** `docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md`  
 **ADR:** [ADR-048](../../../adr/ADR-048-multilingual-384-embeddings.md)  
@@ -2566,8 +2567,8 @@ main
 | PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — after Gate C→D / verify (code already on main via PR-60–64) |
 | PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208 |
 | PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #210 @`b35e980` |
-| PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 prod cutover + rollback |
-| PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — Phase 28 gate docs |
+| PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #211 @`e38516a` |
+| PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — #213 @`2a284ff` |
 | PR-71 | Major | Phase 28 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — after Gate C→D / verify |
 
 S026 (EV-024) is evolve Standard: M112–M118 on `evolve/EV-024-frontend-ux-polish`
@@ -3283,15 +3284,15 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T121.2 | M121 | 28 | Docs | completed | T120.5 | — | S027 | F71 | — |
 | T121.3 | M121 | 28 | Code | skipped | T120.5 | — | S027 | F71 | conditional F44 |
 | T121.4 | M121 | 28 | Test | completed | T121.1, T121.2, T121.3 | — | S027 | F71 | — |
-| T122.1 | M122 | 28 | Test | pending | T119.5, T120.5, T121.4 | — | S027 | F70–F71 | — |
-| T122.2 | M122 | 28 | Docs | pending | T122.1 | — | S027 | F70–F71 | 05 L2 |
-| T122.3 | M122 | 28 | Docs | pending | T122.2 | — | S027 | F70–F71 | 05 L3/M6 |
+| T122.1 | M122 | 28 | Test | completed | T119.5, T120.5, T121.4 | — | S027 | F70–F71 | — |
+| T122.2 | M122 | 28 | Docs | completed | T122.1 | — | S027 | F70–F71 | 05 L2 |
+| T122.3 | M122 | 28 | Docs | completed | T122.2 | — | S027 | F70–F71 | 05 L3/M6 |
 
 ## Phase Gate Log
 
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
-| 28 | — | — | S027/EV-025 F70–F71 — 05 M1–M6 applied (S027-D29); await Gate B→C → 07 |
+| 28 | 2026-08-05 | **partial (07-build PASS)** | S027/EV-025 M119–M122 tasks complete (T120.5 conditional S027-D35; T121.3 skipped S027-D39). ADR-048 Accepted; TC-232–241 unit+stub green ([t122_1](../../S027-multilingual-embeddings/reports/t122_1_tc_green_gate.md); [t122_3](../../S027-multilingual-embeddings/reports/t122_3_phase28_gate.md)). **Deferred:** 08 formal verify; AC-ME live verify 09–11; **live prod cutover H4–H5 at 13**; #159 close after 13. |
 | 27 | 2026-08-04 | **partial (build PASS)** | S026/EV-024 M112–M118 tasks complete; OpenAPI/infra/secrets mirror PASS; Playwright UJ-069/070/073 PASS ([t118-3](../../S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md)). **Deferred:** AC-UX T2 suite + full lint matrix to 08/09–11; live `SUPABASE_SECRET_KEY` sync (no prod.env); issue closes + epic #193 after 13 H1–H5. Gate C→D AskQuestion pending. |
 | 1 | 2026-05-19 | **pass** | M1–M3 complete; alembic head; 12 pytest smoke/privacy/seed; ruff/pyright; OpenAPI in repo + api-contract.md |
 | 2 | 2026-05-19 | **pass** | E2E UJ-002/006/008 (4 tests incl. UJ-003); ruff/pyright clean; 36 pytest; Modal README + apps; no DATABASE_URL in Modal paths |

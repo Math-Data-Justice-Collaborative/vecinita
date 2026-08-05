@@ -889,6 +889,7 @@ call must include recorded EN vs ES metrics. Out: dual-index, dim≠384, UI, bge
 | S027-D37 | #210 merged + Gate C→D | **PR #210 MERGED** @`b35e980` (2026-08-05T17:45:19Z); main CI + deploy-preflight **green**; **Gate C→D PASS** (conditional on **S027-D35** compose-e2e waive). Phase C checkpoint AskQuestion before 09-qa / M121 |
 | S027-D38 | Phase C checkpoint | **Option 1** — continue **07-build M121** (prod cutover + E0 rollback) before Phase D; T121.1 `in_progress`; 09-qa deferred; branch `evolve/EV-025-multilingual-embeddings` (synced with main after #210) |
 | S027-D39 | T121.3 F44 | **Skipped / not_triggered** — no post-pin F36 ES harm evidence this cycle (S027-D19/D20); F44 soft language-filter tune deferred. T121.2 @`bf325e3` TC-240 green; T121.4 green confirm in progress |
+| S027-D40 | Merge #211 | **Approve merge** PR #211 (option 1) — tip @`0e65f14` CI green; **MERGED** @`e38516a` (2026-08-05T19:24:50Z); main CI [31039293277](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31039293277) + deploy-preflight [31039596545](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31039596545) success; continue **M122 / T122.1** |
 
 ### Feature map
 
