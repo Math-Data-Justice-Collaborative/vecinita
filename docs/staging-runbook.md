@@ -400,6 +400,37 @@ Sync with `do_apps.py sync-all-secrets` after pin changes (see §Modal embed / L
 **Local verification:** `make test-py` (compose) covers rebuild stamps + promote + report
 shape (`tests/e2e/test_uj076_embed_promote_report.py`). Remote CI is unit-only (S027-D34).
 
+### Prod cutover (M121 / TC-240)
+
+**Order is mandatory (S027-D21 / AC-ME6):** complete staging shadow → F36 → operator promote
+**before** any prod rebuild promote. Do not start prod cutover until staging promote is
+accepted and ChatRAG smoke (H4/H5) looks healthy on staging.
+
+1. Sync the same F70 pin secrets on **prod** DO + Modal (`VECINITA_EMBEDDING_MODEL_ID` /
+   `VECINITA_CHUNK_TOKENIZER_ID` = E1; embed URL serves the pin).
+2. Repeat the staging checklist on prod: shadow `mode=rechunk` → F36 EN/ES report →
+   **operator judgment** promote (no hard numeric abort — S027-D11).
+3. Record prod `rebuild_run_id`, revision stamps, and eval links in the session deploy notes.
+4. Live prod smoke remains **13-deploy-smoke** (H1–H5); this runbook is the operator
+   procedure for 07–12.
+
+### E0 rollback (M121 / TC-239 / AC-ME9)
+
+If post-promote retrieval regresses, restore the prior **E0** corpus via F41 — do **not**
+re-`POST …/promote` on an already-`promoted` run (idempotent; does not re-copy shadow).
+
+1. Note prior live chunk text / revision stamps (or use retained E0 shadow artifacts).
+2. Create a **new** rebuild run stamped with `LEGACY_E0` =
+   `BAAI/bge-small-en-v1.5` for both `embedding_model_id` and `chunk_tokenizer_id`
+   (`mode=rechunk`, `dry_run=true`, `force=true` as needed).
+3. Shadow-batch the prior E0 chunk text + embeddings for affected documents.
+4. Mark the run `completed`, then promote.
+5. Confirm live chunks match the E0 restore text and latest `document_revisions` stamps
+   are `BAAI/bge-small-en-v1.5` (unit/e2e: `test_f71_e0_rollback` / UJ-076 T121.1).
+
+**E0 rollback** is runbook-proven in CI unit/schema + local compose e2e when Docker works
+(S027-D35 waive otherwise); live staging/prod rollback drill is optional at 13.
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  

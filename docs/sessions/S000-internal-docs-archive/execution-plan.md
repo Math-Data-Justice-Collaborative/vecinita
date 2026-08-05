@@ -9,14 +9,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate B→C PASS; M119 merged |
-| **Active milestone** | M120 — F71 staging rechunk / F36 / promote |
-| **Active task** | T120.5 — e2e green TC-232/235–239/241 |
-| **Tasks completed** | Phase 21–27; S027 Phase A/B; M119 (PR #208 merged @`2c884bd`); S027-D34 CI split; T120.1–T120.4 |
+| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate C→D PASS (cond.); M121 |
+| **Active milestone** | M121 — F71 prod cutover + E0 rollback |
+| **Active task** | T121.4 complete — open PR-69 / continue M122 |
 | **Last updated** | 2026-08-05 |
-| **Evolve cycle** | EV-025 — Standard; Phase C build (M120) |
+| **Evolve cycle** | EV-025 — Standard; Phase C build (M121) |
 | **Git branch** | `evolve/EV-025-multilingual-embeddings` |
-| **Active session** | S027-multilingual-embeddings — 05 surgical fixes applied; Gate B→C AskQuestion |
+| **Active session** | S027-multilingual-embeddings — M121 T121.2 |
 | **Scope addition** | 2026-08-05 — F70–F71 multilingual 384-d embed + staging→prod cutover (#159). |
 
 ## Template
@@ -2396,7 +2395,7 @@ on staging shadow; F36 EN/ES advisory (Hy1 + dense rank if available); operator 
 | T120.3 | Code: wire F41 rebuild path for pin+tokenizer stamps; ensure rechunk re-embeds under F70 client | Code | completed | feature-list F71, RD-294/295 | T120.1, T120.2 | 2026-08-05 | S027 | F71 |
 | T120.3b | Code: eval/F36 report — EN/ES rel+faith vs E0 baseline columns + dense hit@k/mean_rank when available (TC-235–236) | Code | completed | AC-ME3–ME4, S027-D18, F36 | T120.1, T120.3 | 2026-08-05 | S027 | F71 |
 | T120.4 | Ops/Docs: staging shadow → F36 report checklist (EN/ES rel+faith vs E0; hit@k/mean_rank) | Docs | completed | S027-D18, AC-ME3–ME4/ME8–ME9, F36 | T120.3b | 2026-08-05 | S027 | F71 |
-| T120.5 | Test: e2e green TC-232/235–239/241; staging promote dry-run path covered | Test | in_progress | UJ-053/076, TP5 | T120.3b, T120.4 | — | S027 | F71 |
+| T120.5 | Test: e2e green TC-232/235–239/241; staging promote dry-run path covered | Test | completed_conditional | UJ-053/076, TP5 | T120.3b, T120.4 | 2026-08-05 | S027 | F71 |
 
 #### M121: F71 — Prod cutover + E0 rollback
 
@@ -2406,10 +2405,10 @@ Optional F44 tune only if F36 shows harm.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T121.1 | Test: unit/e2e red — rollback restores prior revision stamps / E0 pin path (TC-239); ES ask path (TC-238) | Test | pending | AC-ME7/ME9, S027-D22 | T120.5 | — | S027 | F71 |
-| T121.2 | Docs: prod cutover + E0 rollback runbook; operator promote abort = judgment (D11); staging-then-prod order (TC-240) | Docs | pending | S027-D11/D21/D22, AC-ME6, staging-runbook | T120.5 | — | S027 | F71 |
-| T121.3 | Code (conditional): F44 soft language-filter tune **only if** post-pin F36 shows ES harm | Code | pending | S027-D19/D20, ADR-013 | T120.5 | — | S027 | F71 |
-| T121.4 | Test: green TC-238–240; skip T121.3 tests if F44 not triggered | Test | pending | TC-238–240, AC-ME6/ME7/ME9 | T121.1, T121.2, T121.3 | — | S027 | F71 |
+| T121.1 | Test: unit/e2e red — rollback restores prior revision stamps / E0 pin path (TC-239); ES ask path (TC-238) | Test | completed | AC-ME7/ME9, S027-D22 | T120.5 | 2026-08-05 | S027 | F71 |
+| T121.2 | Docs: prod cutover + E0 rollback runbook; operator promote abort = judgment (D11); staging-then-prod order (TC-240) | Docs | completed | S027-D11/D21/D22, AC-ME6, staging-runbook | T120.5 | 2026-08-05 | S027 | F71 |
+| T121.3 | Code (conditional): F44 soft language-filter tune **only if** post-pin F36 shows ES harm | Code | skipped | S027-D19/D20, ADR-013 | T120.5 | 2026-08-05 | S027 | F71 |
+| T121.4 | Test: green TC-238–240; skip T121.3 tests if F44 not triggered | Test | completed | TC-238–240, AC-ME6/ME7/ME9 | T121.1, T121.2, T121.3 | 2026-08-05 | S027 | F71 |
 
 #### M122: Phase 28 gate — TC suite + docs closeout
 
@@ -2566,7 +2565,7 @@ main
 | PR-65 | Minor | M118 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — OpenAPI + Phase 27 gate docs |
 | PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — after Gate C→D / verify (code already on main via PR-60–64) |
 | PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208 |
-| PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 staging rechunk/promote |
+| PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #210 @`b35e980` |
 | PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — F71 prod cutover + rollback |
 | PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — Phase 28 gate docs |
 | PR-71 | Major | Phase 28 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — after Gate C→D / verify |
@@ -3279,11 +3278,11 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T120.3 | M120 | 28 | Code | pending | T120.1, T120.2 | — | S027 | F71 | — |
 | T120.3b | M120 | 28 | Code | pending | T120.1, T120.3 | — | S027 | F71 | 05 M2 |
 | T120.4 | M120 | 28 | Docs | pending | T120.3b | — | S027 | F71 | 05 L1 |
-| T120.5 | M120 | 28 | Test | pending | T120.3b, T120.4 | — | S027 | F71 | — |
-| T121.1 | M121 | 28 | Test | pending | T120.5 | — | S027 | F71 | 05 M5 |
-| T121.2 | M121 | 28 | Docs | pending | T120.5 | — | S027 | F71 | — |
-| T121.3 | M121 | 28 | Code | pending | T120.5 | — | S027 | F71 | conditional F44 |
-| T121.4 | M121 | 28 | Test | pending | T121.1, T121.2, T121.3 | — | S027 | F71 | — |
+| T120.5 | M120 | 28 | Test | completed_conditional | T120.3b, T120.4 | — | S027 | F71 | — |
+| T121.1 | M121 | 28 | Test | completed | T120.5 | — | S027 | F71 | 05 M5 |
+| T121.2 | M121 | 28 | Docs | completed | T120.5 | — | S027 | F71 | — |
+| T121.3 | M121 | 28 | Code | skipped | T120.5 | — | S027 | F71 | conditional F44 |
+| T121.4 | M121 | 28 | Test | completed | T121.1, T121.2, T121.3 | — | S027 | F71 | — |
 | T122.1 | M122 | 28 | Test | pending | T119.5, T120.5, T121.4 | — | S027 | F70–F71 | — |
 | T122.2 | M122 | 28 | Docs | pending | T122.1 | — | S027 | F70–F71 | 05 L2 |
 | T122.3 | M122 | 28 | Docs | pending | T122.2 | — | S027 | F70–F71 | 05 L3/M6 |
