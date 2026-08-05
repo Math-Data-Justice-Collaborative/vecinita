@@ -882,6 +882,8 @@ call must include recorded EN vs ES metrics. Out: dual-index, dim≠384, UI, bge
 | S027-D28 | 04→05 | Complete 04-tech-plan → start **05-verify-tech** (option 1) |
 | S027-D29 | 05 M1–M6 | **Approve all recommended fixes** — applied to Phase 28 (incl. T120.3b); Gate B→C pending |
 | S027-D30 | Gate B→C | **PASS** (option 1) → start 07-build M119 / T119.1 |
+| S027-D33 | M119 next | **Merge #208 first, then M120** (option 3) |
+| S027-D34 | Merge + CI | **Merge #208** @`2c884bd`; CI split — remote: unit + coverage **PR comment** + strict lint/format; local: compose/integration/long-running (`make test-py` / `ci-push`); rich asserts |
 
 ### Feature map
 

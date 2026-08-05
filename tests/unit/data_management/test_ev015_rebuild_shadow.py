@@ -7,6 +7,8 @@ from uuid import UUID, uuid4
 import pytest
 from vecinita_data_management_backend.pipeline import run_rebuild_job
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_embedding_client.modal_pins import DEFAULT_EMBEDDING_MODEL_ID
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     DocumentDetail,
@@ -22,7 +24,7 @@ class _RecordingWriteClient:
         self._docs = docs
         self._details = details
         self.live_batches: list[BatchUpsertRequest] = []
-        self.shadow_batches: list[object] = []
+        self.shadow_batches: list[BatchUpsertRequest] = []
         self.created_rebuild_runs: list[dict[str, object]] = []
         self.completed_rebuild_runs: list[tuple[UUID, str]] = []
 
@@ -47,7 +49,7 @@ class _RecordingWriteClient:
     def upsert_batch(self, body: BatchUpsertRequest) -> None:
         self.live_batches.append(body)
 
-    def upsert_shadow_batch(self, body: object) -> None:
+    def upsert_shadow_batch(self, body: BatchUpsertRequest) -> None:
         self.shadow_batches.append(body)
 
     def create_rebuild_run(self, body: dict[str, object]) -> UUID:
@@ -108,8 +110,19 @@ def test_run_rebuild_job_dry_run_writes_shadow_not_live() -> None:
     )
 
     assert write_client.created_rebuild_runs, "expected rebuild_runs row for dry_run"
-    assert write_client.created_rebuild_runs[0].get("dry_run") is True
+    created = write_client.created_rebuild_runs[0]
+    assert created.get("dry_run") is True
+    assert created.get("mode") == "rechunk"
+    assert created.get("embedding_model_id") == DEFAULT_EMBEDDING_MODEL_ID
+    assert created.get("chunk_tokenizer_id") == DEFAULT_EMBEDDING_MODEL_ID
+    assert created.get("embedding_dim") == EMBEDDING_DIMENSION
     assert write_client.shadow_batches, "expected shadow dual-write"
+    shadow_body = write_client.shadow_batches[0]
+    assert isinstance(shadow_body, BatchUpsertRequest)
+    assert len(shadow_body.documents) == 1
+    stamped = shadow_body.documents[0]
+    assert stamped.embedding_model_id == DEFAULT_EMBEDDING_MODEL_ID
+    assert stamped.chunk_tokenizer_id == DEFAULT_EMBEDDING_MODEL_ID
     assert write_client.live_batches == [], "live retrieval must stay unchanged until promote"
     assert write_client.completed_rebuild_runs, "expected rebuild_runs completed status"
     assert write_client.completed_rebuild_runs[0][1] == "completed"

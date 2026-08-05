@@ -402,6 +402,7 @@ Locked OpenAPI paths (`openapi/data-management.yaml` JobOptions;
 |---------------|---------|
 | `POST /jobs` (`job_type=rebuild`) | Enqueue rebuild with `mode` / `force` / `dry_run` / optional `document_ids` |
 | `POST /internal/v1/rebuild/{rebuild_run_id}/promote` | Promote shadow revision → live (staging; prod via runbook); **Admin UI** invokes this (02 M3); auth = **`admin`** (enqueue parity, 02 M6) |
+| `GET /internal/v1/rebuild/{rebuild_run_id}/embed-promote-report` | F71 EN/ES Hy1 relevancy+faithfulness vs E0 (+ dense hit@k/mean_rank when available) (UJ-076 / TC-235–236) |
 | `GET /internal/v1/documents/{id}/revisions` | List document revisions / version stamps (optional in M1) |
 
 **`POST /jobs` rebuild JobOptions (T88.5 / `openapi/data-management.yaml`, RD-189–192):**

@@ -1238,6 +1238,12 @@ components:
           type: integer
           minimum: 1
           nullable: true
+        chunk_tokenizer_id:
+          type: string
+          nullable: true
+          description: >
+            HF tokenizer id stamp (F71 / ADR-044); must match embedding_model_id
+            when both are set (AC-ME11)
         rebuild_run_id:
           type: string
           format: uuid

@@ -30,3 +30,5 @@ EMBED_SERVICE_TIMEOUT_S: Final[int] = 300
 EMBED_STAGE_TIMEOUT_S: Final[int] = 900
 
 DEFAULT_EMBEDDING_MODEL_ID: Final[str] = "intfloat/multilingual-e5-small"
+# Pre-EV-025 English pin retained for F71 promote compare / rollback (S027-D22).
+LEGACY_E0_EMBEDDING_MODEL_ID: Final[str] = "BAAI/bge-small-en-v1.5"

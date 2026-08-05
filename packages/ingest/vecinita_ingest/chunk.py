@@ -18,7 +18,7 @@ MIN_CHUNK_SIZE_TOKENS: Final[int] = 64
 DEFAULT_CHUNK_SIZE_TOKENS: Final[int] = 256
 MAX_CHUNK_SIZE_TOKENS: Final[int] = 2048
 DEFAULT_CHUNK_OVERLAP_TOKENS: Final[int] = 32
-DEFAULT_CHUNK_TOKENIZER_ID: Final[str] = "BAAI/bge-small-en-v1.5"
+DEFAULT_CHUNK_TOKENIZER_ID: Final[str] = "intfloat/multilingual-e5-small"
 
 
 class ChunkTokenizer(Protocol):

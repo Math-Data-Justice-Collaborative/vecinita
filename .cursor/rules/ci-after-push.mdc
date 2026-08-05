@@ -67,8 +67,10 @@ done
 ## Before opening a PR (local parity)
 
 Run `make ci-push` before marking a PR ready for review. Day-to-day `git push` runs fast tier
-(`make check-fast` + `make test-fast`); format-check, audit, full pytest, coverage, and frontend
-builds are enforced in `.github/workflows/ci.yml`.
+(`make check-fast` + `make test-fast`). GitHub CI enforces unit tests, format-check, audit,
+**unit coverage** (sticky PR comment), and frontend builds. **Compose-backed** suites
+(`integration` / `e2e` / `privacy` / `smoke` / `eval` / `bugs`) are a **local** gate via
+`make test-py` / `make ci-push` (S027-D34) — not the remote `python` job.
 
 When changes touch Python, frontends, workflows, Modal, or secrets (full local run):
 
@@ -81,7 +83,9 @@ bash scripts/check_no_operator_specs_tracked.sh
 uv run ruff check apps packages tests infra scripts
 uv run ruff format --check apps packages tests infra scripts
 uv run basedpyright apps packages tests infra scripts
+# Local compose suite (S027-D34) — remote CI runs tests/unit only:
 uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs
+# or: make test-py / make ci-push
 cd apps/chat-rag-frontend && npm ci && npm run lint && npm test
 cd apps/data-management-frontend && npm ci && npm run lint && npm test
 ```

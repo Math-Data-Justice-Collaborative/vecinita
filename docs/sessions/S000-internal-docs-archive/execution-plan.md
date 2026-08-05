@@ -9,12 +9,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — **05 PASS pending Gate B→C** |
-| **Active milestone** | M119 — F70 runtime — **completed**; next M120 |
-| **Active task** | T120.1 — staging rebuild e2e red (after 08-verify / PR for M119) |
-| **Tasks completed** | Phase 21–27; S027 Phase A; 04 TP lock; **05 M1–M6 applied** (S027-D29) |
+| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate B→C PASS; M119 merged |
+| **Active milestone** | M120 — F71 staging rechunk / F36 / promote |
+| **Active task** | T120.5 — e2e green TC-232/235–239/241 |
+| **Tasks completed** | Phase 21–27; S027 Phase A/B; M119 (PR #208 merged @`2c884bd`); S027-D34 CI split; T120.1–T120.4 |
 | **Last updated** | 2026-08-05 |
-| **Evolve cycle** | EV-025 — Standard; Phase B (05) complete pending Gate B→C |
+| **Evolve cycle** | EV-025 — Standard; Phase C build (M120) |
 | **Git branch** | `evolve/EV-025-multilingual-embeddings` |
 | **Active session** | S027-multilingual-embeddings — 05 surgical fixes applied; Gate B→C AskQuestion |
 | **Scope addition** | 2026-08-05 — F70–F71 multilingual 384-d embed + staging→prod cutover (#159). |
@@ -2391,12 +2391,12 @@ on staging shadow; F36 EN/ES advisory (Hy1 + dense rank if available); operator 
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T120.1 | Test: API e2e red — rebuild stamps + rechunk; F36 report shape; ask/promote paths (TC-232, TC-235–239, TC-241) | Test | pending | AC-ME3–ME6/ME8–ME9/ME11, F71, F41/ADR-040 | T119.5 | — | S027 | F71 |
-| T120.2 | Config/Docs: default tokenizer id = embed pin; staging secrets/runbook for shadow rebuild | Config | pending | config-spec, ADR-044, S027-D15 | T119.5 | — | S027 | F71 |
-| T120.3 | Code: wire F41 rebuild path for pin+tokenizer stamps; ensure rechunk re-embeds under F70 client | Code | pending | feature-list F71, RD-294/295 | T120.1, T120.2 | — | S027 | F71 |
-| T120.3b | Code: eval/F36 report — EN/ES rel+faith vs E0 baseline columns + dense hit@k/mean_rank when available (TC-235–236) | Code | pending | AC-ME3–ME4, S027-D18, F36 | T120.1, T120.3 | — | S027 | F71 |
-| T120.4 | Ops/Docs: staging shadow → F36 report checklist (EN/ES rel+faith vs E0; hit@k/mean_rank) | Docs | pending | S027-D18, AC-ME3–ME4/ME8–ME9, F36 | T120.3b | — | S027 | F71 |
-| T120.5 | Test: e2e green TC-232/235–239/241; staging promote dry-run path covered | Test | pending | UJ-053/076, TP5 | T120.3b, T120.4 | — | S027 | F71 |
+| T120.1 | Test: API e2e red — rebuild stamps + rechunk; F36 report shape; ask/promote paths (TC-232, TC-235–239, TC-241) | Test | completed | AC-ME3–ME6/ME8–ME9/ME11, F71, F41/ADR-040 | T119.5 | 2026-08-05 | S027 | F71 |
+| T120.2 | Config/Docs: default tokenizer id = embed pin; staging secrets/runbook for shadow rebuild | Config | completed | config-spec, ADR-044, S027-D15 | T119.5 | 2026-08-05 | S027 | F71 |
+| T120.3 | Code: wire F41 rebuild path for pin+tokenizer stamps; ensure rechunk re-embeds under F70 client | Code | completed | feature-list F71, RD-294/295 | T120.1, T120.2 | 2026-08-05 | S027 | F71 |
+| T120.3b | Code: eval/F36 report — EN/ES rel+faith vs E0 baseline columns + dense hit@k/mean_rank when available (TC-235–236) | Code | completed | AC-ME3–ME4, S027-D18, F36 | T120.1, T120.3 | 2026-08-05 | S027 | F71 |
+| T120.4 | Ops/Docs: staging shadow → F36 report checklist (EN/ES rel+faith vs E0; hit@k/mean_rank) | Docs | completed | S027-D18, AC-ME3–ME4/ME8–ME9, F36 | T120.3b | 2026-08-05 | S027 | F71 |
+| T120.5 | Test: e2e green TC-232/235–239/241; staging promote dry-run path covered | Test | in_progress | UJ-053/076, TP5 | T120.3b, T120.4 | — | S027 | F71 |
 
 #### M121: F71 — Prod cutover + E0 rollback
 
@@ -3274,7 +3274,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T119.3 | M119 | 28 | Config | completed | T119.1 | 2026-08-05 | S027 | F70 | TP2–TP4 |
 | T119.4 | M119 | 28 | Code | completed | T119.2, T119.3 | 2026-08-05 | S027 | F70 | — |
 | T119.5 | M119 | 28 | Test | completed | T119.4 | 2026-08-05 | S027 | F70 | — |
-| T120.1 | M120 | 28 | Test | pending | T119.5 | — | S027 | F71 | 05 M1/M4 |
+| T120.1 | M120 | 28 | Test | in_progress | T119.5 | — | S027 | F71 | 05 M1/M4 |
 | T120.2 | M120 | 28 | Config | pending | T119.5 | — | S027 | F71 | — |
 | T120.3 | M120 | 28 | Code | pending | T120.1, T120.2 | — | S027 | F71 | — |
 | T120.3b | M120 | 28 | Code | pending | T120.1, T120.3 | — | S027 | F71 | 05 M2 |

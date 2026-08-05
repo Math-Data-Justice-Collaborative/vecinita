@@ -362,6 +362,44 @@ bash scripts/deploy/staging_smoke.sh   # H1 asserts modal_embed/modal_llm ok
 CI guards: `bash scripts/check_do_required_secrets.sh` (YAML + sync helper parity),
 `scripts/deploy/ci_materialize_env.sh` (DO deploy job — required keys + validator).
 
+## EV-025 (F70–F71) — Staging shadow rechunk before promote
+
+Multilingual cutover (S027-D21): **staging first** — shadow rebuild → F36 EN/ES report →
+operator promote — then repeat on prod. Do not promote prod until staging promote is accepted.
+
+### Secrets / pins (staging DO + Modal)
+
+| Variable | Expected (planned E1) | Notes |
+|----------|----------------------|-------|
+| `VECINITA_EMBEDDING_MODEL_ID` | `intfloat/multilingual-e5-small` | F70 pin; final after F36 review (S027-D14) |
+| `VECINITA_CHUNK_TOKENIZER_ID` | **same as embed pin** | ADR-048 / S027-D15 — default in code matches E1 (T120.2) |
+| `VECINITA_EMBED_RUNTIME` | `fastembed` (or `sentence_transformers` / `onnx`) | Modal embed app |
+| `VECINITA_MODAL_EMBED_URL` | `https://vecinita--vecinita-embedding-…` | Must serve F70 pin before rebuild |
+
+Sync with `do_apps.py sync-all-secrets` after pin changes (see §Modal embed / LLM URLs).
+
+### Shadow rebuild checklist
+
+1. Confirm Modal embed `/health` (or warm) serves the F70 pin at 384-d.
+2. Enqueue F41 `job_type=rebuild` with `mode=rechunk`, `dry_run=true`, stamps
+   `embedding_model_id` + `chunk_tokenizer_id` = pin (defaults match E1 after T120.2/T120.3).
+3. Confirm Alembic head includes `20260805_0013` (`chunk_tokenizer_id` on `rebuild_runs` /
+   `document_revisions`) before create/promote.
+4. Run F36 against shadow (`rebuild_run_id` on eval config). Capture EN/ES Hy1
+   answer relevancy + faithfulness vs E0, plus dense hit@k / mean_rank when the harness
+   provides them (UJ-076 / TC-235–236 / S027-D18).
+5. Open advisory report:
+   `GET /internal/v1/rebuild/{rebuild_run_id}/embed-promote-report`
+   — expect `candidate_embedding_model_id` = pin, `baseline_embedding_model_id` =
+   `BAAI/bge-small-en-v1.5` (E0), `by_language.en|es` with `answer_relevancy`,
+   `faithfulness`, nested `baseline_e0`, and `dense_available` + ranks when present.
+6. Operator judgment promote (no hard numeric gate — S027-D11); retain E0 revision for
+   rollback (TC-239 / S027-D22).
+7. Only then repeat the sequence on prod (M121 / TC-240 staging-then-prod).
+
+**Local verification:** `make test-py` (compose) covers rebuild stamps + promote + report
+shape (`tests/e2e/test_uj076_embed_promote_report.py`). Remote CI is unit-only (S027-D34).
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  
