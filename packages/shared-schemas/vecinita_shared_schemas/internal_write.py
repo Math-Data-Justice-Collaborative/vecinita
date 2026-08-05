@@ -106,6 +106,35 @@ class RebuildPromoteResponse(BaseModel):
     documents_promoted: int = Field(..., ge=0)
 
 
+class EmbedPromoteHy1Metrics(BaseModel):
+    """Hy1 answer relevancy + faithfulness (optional dense ranks) for one language."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    answer_relevancy: float | None = None
+    faithfulness: float | None = None
+    hit_at_k: float | None = None
+    mean_rank: float | None = None
+
+
+class EmbedPromoteLanguageMetrics(EmbedPromoteHy1Metrics):
+    """Candidate Hy1 metrics plus nested E0 baseline for one language (AC-ME3)."""
+
+    baseline_e0: EmbedPromoteHy1Metrics
+
+
+class EmbedPromoteReportResponse(BaseModel):
+    """GET /internal/v1/rebuild/{id}/embed-promote-report (UJ-076 / TC-235-236)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    rebuild_run_id: UUID
+    candidate_embedding_model_id: str
+    baseline_embedding_model_id: str
+    dense_available: bool = False
+    by_language: dict[Literal["en", "es"], EmbedPromoteLanguageMetrics]
+
+
 class CreateRebuildRunResponse(BaseModel):
     """POST /internal/v1/rebuild/runs response (TP-S017-02)."""
 

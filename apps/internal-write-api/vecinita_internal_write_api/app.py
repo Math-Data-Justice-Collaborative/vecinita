@@ -82,6 +82,7 @@ from vecinita_shared_schemas.internal_write import (
     DocumentListPage,
     DocumentSummary,
     DocumentVersionEntry,
+    EmbedPromoteReportResponse,
     EvalCriterionCreateRequest,
     EvalCriterionListResponse,
     EvalCriterionResponse,
@@ -137,6 +138,10 @@ from vecinita_internal_write_api.audit import (
     emit_audit_event,
 )
 from vecinita_internal_write_api.corpus_tree import build_corpus_tree
+from vecinita_internal_write_api.embed_promote_report import (
+    EmbedPromoteReportNotFoundError,
+    build_embed_promote_report,
+)
 from vecinita_internal_write_api.eval_config_presets_service import (
     EvalConfigPresetAccessError,
     clone_eval_config_preset,
@@ -793,6 +798,23 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         except RebuildPromoteConflictError as exc:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
+                detail=str(exc),
+            ) from exc
+
+    @app.get(
+        "/internal/v1/rebuild/{rebuild_run_id}/embed-promote-report",
+        response_model=EmbedPromoteReportResponse,
+    )
+    def get_embed_promote_report(  # pyright: ignore[reportUnusedFunction]
+        rebuild_run_id: UUID,
+        _actor: WriteActorDep,
+    ) -> EmbedPromoteReportResponse:
+        """F71 EN/ES Hy1 vs E0 advisory report for shadow promote (UJ-076 / TC-235-236)."""
+        try:
+            return build_embed_promote_report(engine, rebuild_run_id=rebuild_run_id)
+        except EmbedPromoteReportNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail=str(exc),
             ) from exc
 
