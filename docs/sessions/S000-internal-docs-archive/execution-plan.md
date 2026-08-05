@@ -9,13 +9,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — M122 complete; await 08–13 |
-| **Active milestone** | M122 — Phase 28 gate — TC suite + docs closeout (**completed**) |
-| **Active task** | T122.3 completed — open PR-70; next 08-verify-build / Phase D |
+| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — 08-verify-build PASS; Phase D next |
+| **Active milestone** | M122 — completed (merged #213) |
+| **Active task** | 08-verify-build complete — continue 09-qa |
 | **Last updated** | 2026-08-05 |
-| **Evolve cycle** | EV-025 — Standard; Phase C build complete (M119–M122) |
+| **Evolve cycle** | EV-025 — Standard; Phase D verify |
 | **Git branch** | `evolve/EV-025-multilingual-embeddings` |
-| **Active session** | S027-multilingual-embeddings — M122 done |
+| **Active session** | S027-multilingual-embeddings — 08 done; 17-retro after cycle |
 | **Scope addition** | 2026-08-05 — F70–F71 multilingual 384-d embed + staging→prod cutover (#159). |
 
 ## Template
@@ -2568,7 +2568,7 @@ main
 | PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208 |
 | PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #210 @`b35e980` |
 | PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #211 @`e38516a` |
-| PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — #213 @`2a284ff` |
+| PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #213 @`de1355c` |
 | PR-71 | Major | Phase 28 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — after Gate C→D / verify |
 
 S026 (EV-024) is evolve Standard: M112–M118 on `evolve/EV-024-frontend-ux-polish`
