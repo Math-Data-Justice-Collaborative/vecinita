@@ -1579,8 +1579,8 @@ project:
       active_milestone: M119
       active_task:
       current_task:
-      current_action: m119_08_pr_opening
-      next_action: Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1
+      current_action: m119_08_await_ci
+      next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1594,7 +1594,7 @@ project:
       rd_range: RD-305..RD-308
       tp_lock: TP1–TP5
       report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-05T14:45:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
       skipped_06: true
       skipped_06_note: Standard skip — no new tooling; Gate B→C → 07 directly
       substeps:
@@ -2312,7 +2312,7 @@ project:
       m119_status: completed_committed
       m119_completed_at: '2026-08-05T12:52:00Z'
       m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
-      m119_verify: pr_opening
+      m119_verify: pr_open_await_ci
       next_milestone: M120
       next_task: T120.1
       t119_2_status: completed
@@ -2335,10 +2335,13 @@ project:
       s027_d30_status: confirmed
       askquestion_cleared: M119 complete — commit + 08-verify-build / continue M120 / pause? → user option 1 (commit + 08-verify-build then minor PR)
       m119_committed_at: '2026-08-05T12:52:00Z'
-      m119_tip: ffb199b
-      m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+      m119_tip: 16f4d06
+      m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
       s027_d32_decision: S027-D32
       s027_d32_status: confirmed
+      m119_pr_status: open_await_ci
+      m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      pr_plan_id: PR-67
     08-verify-build:
       status: completed_conditional
       started_at: '2026-08-05'
@@ -2362,8 +2365,8 @@ project:
       active_milestone: M119
       active_task:
       current_task:
-      current_action: m119_08_pr_opening
-      next_action: 'Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1'
+      current_action: m119_08_await_ci
+      next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -2372,8 +2375,8 @@ project:
       phase_b: passed
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
-      build_head: ffb199b
-      build_head_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+      build_head: 16f4d06
+      build_head_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
       build_commits:
       - dc49d3a
       - bd34f2c
@@ -2381,14 +2384,14 @@ project:
       - dc3c33c
       - 206f88a
       m119_status: completed_committed
-      m119_verify: pr_opening
-      m119_tip: ffb199b
-      note: S027/EV-025 08-verify-build CONDITIONAL PASS → PR opening 2026-08-05 — S027-D32 option 1 confirmed; askquestion_pending=false; m119_verify=pr_opening; local Docker Postgres blocked (not M119 regression); full pytest deferred to GitHub CI; F62 hooks stay typecheck/security on commit + lint+test-fast on push; parent will push + open PR-67 and record URL; Gate C→D / phase_c remain pending
+      m119_verify: pr_open_await_ci
+      m119_tip: 16f4d06
+      note: 'S027/EV-025 08-verify-build CONDITIONAL PASS → PR open await CI 2026-08-05 — PR #208 (PR-67) OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208; tip @16f4d06; m119_verify=pr_open_await_ci; askquestion_pending=false; parent watching CI then AskQuestion continue M120; Gate C→D / phase_c remain pending'
       handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
       rd_range: RD-305..RD-308
       tp_lock: TP1–TP5
       report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
-      updated_at: '2026-08-05T14:45:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
       next_milestone: M120
       next_task: T120.1
       s026_baseline:
@@ -2893,7 +2896,7 @@ project:
       m119_full_pytest: blocked_docker_postgres_userns
       gate_c_to_d: pending
       phase_c: pending
-      m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+      m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
       s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
       s027_d32_option: 1
       s027_d32_confirmed_at: '2026-08-05T14:45:00Z'
@@ -2903,9 +2906,47 @@ project:
       in_agent_full_test_py: false
       f62_hooks_note: 'pre-commit: typecheck+security-scan; pre-push: lint+test-fast; full pytest via GitHub CI'
       pr_plan_id: PR-67
-      m119_pr_status: opening
-      m119_pr_note: Parent will push branch + open M119 minor PR; update PR-67 URL when open
-      handoff_note: S027-D32 option 1 confirmed — open M119 minor PR (CI gate); Gate C→D / phase_c still pending until Phase 28 build complete
+      m119_pr_status: open_await_ci
+      m119_pr_note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+      handoff_note: 'PR #208 open; watching CI; then AskQuestion continue M120; Gate C→D / phase_c still pending until Phase 28 build complete'
+      m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      m119_pr_number: 208
+      m119_pr_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      pr_208: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      pr_208_status: open_await_ci
+      pr_208_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      pr_208_tip: 16f4d06
+      pr_208_tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      minor_pr_m119:
+        number: 208
+        status: open
+        merged: false
+        title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+        branch: evolve/EV-025-multilingual-embeddings
+        head: evolve/EV-025-multilingual-embeddings
+        base: main
+        head_sha: 16f4d06
+        tip: 16f4d06
+        tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+        head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+        milestone: M119
+        features:
+        - F70
+        - F71
+        issues:
+        - 159
+        pr_plan_id: PR-67
+        merge_policy: needs_user_approval
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
+        note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+        opened_at: '2026-08-05'
+        opened_ts: '2026-08-05T14:48:00Z'
+        recorded_at: '2026-08-05T14:48:00Z'
+        updated_at: '2026-08-05T14:48:00Z'
+        ci_status: pending
+        reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
     09-qa:
       status: completed
       started: '2026-08-05'
@@ -5866,13 +5907,13 @@ active_session:
     status: in_progress
     mode: orchestrator
     skip_rationale:
-    current_action: m119_08_pr_opening
-    note: EV-025 Phase C — S027-D32 option 1 (open M119 minor PR / CI gate); askquestion_pending=false; current_action=m119_08_pr_opening; m119_verify=pr_opening; next → push + open PR-67
+    current_action: m119_08_await_ci
+    note: 'EV-025 Phase C — M119 PR #208 OPEN @16f4d06; current_action=m119_08_await_ci; m119_verify=pr_open_await_ci; askquestion_pending=false; next=Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
     phase0_approved: true
-    next_action: 'Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1'
+    next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
     askquestion_pending: false
     askquestion_pending_topic:
-    updated_at: '2026-08-05T14:45:00Z'
+    updated_at: '2026-08-05T14:48:00Z'
     current_stage: 08-verify-build
     active_milestone: M119
     active_task:
@@ -5880,7 +5921,7 @@ active_session:
     m119_status: completed_committed
     m119_completed_at: '2026-08-05T12:52:00Z'
     m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
-    m119_verify: pr_opening
+    m119_verify: pr_open_await_ci
     next_milestone: M120
     next_task: T120.1
     t119_1_status: completed
@@ -5908,6 +5949,43 @@ active_session:
     s027_d32_status: confirmed
     s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
     pr_plan_id: PR-67
+    m119_tip: 16f4d06
+    m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    m119_pr_status: open_await_ci
+    m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    m119_pr_number: 208
+    m119_pr_note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+    pr_208: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    minor_pr_m119:
+      number: 208
+      status: open
+      merged: false
+      title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      branch: evolve/EV-025-multilingual-embeddings
+      head: evolve/EV-025-multilingual-embeddings
+      base: main
+      head_sha: 16f4d06
+      tip: 16f4d06
+      tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      milestone: M119
+      features:
+      - F70
+      - F71
+      issues:
+      - 159
+      pr_plan_id: PR-67
+      merge_policy: needs_user_approval
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
+      note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+      opened_at: '2026-08-05'
+      opened_ts: '2026-08-05T14:48:00Z'
+      recorded_at: '2026-08-05T14:48:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
+      ci_status: pending
+      reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
   - stage: 01-requirements
     required: true
     status: completed
@@ -6072,8 +6150,8 @@ active_session:
     skip_rationale:
     started_at: '2026-08-05'
     started_at_iso: '2026-08-05T16:40:00Z'
-    current_action: m119_08_pr_opening
-    next_action: Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1
+    current_action: m119_08_await_ci
+    next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -6081,7 +6159,7 @@ active_session:
     phase_b: passed
     s027_d30_decision: S027-D30
     note: S027/EV-025 07-build IN_PROGRESS 2026-08-05 — M119 completed_committed (tip @206f88a); current_action=m119_08_verify_build; askquestion_pending=false; handoff → 08-verify-build for M119 (then minor PR); next_milestone=M120 queued
-    updated_at: '2026-08-05T14:45:00Z'
+    updated_at: '2026-08-05T14:48:00Z'
     active_milestone: M119
     active_task:
     current_task:
@@ -6090,7 +6168,7 @@ active_session:
     m119_status: completed_committed
     m119_completed_at: '2026-08-05T12:52:00Z'
     m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
-    m119_verify: pr_opening
+    m119_verify: pr_open_await_ci
     next_milestone: M120
     next_task: T120.1
     t119_2_status: completed
@@ -6117,25 +6195,27 @@ active_session:
     m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
     s027_d32_decision: S027-D32
     s027_d32_status: confirmed
+    m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    m119_pr_status: open_await_ci
   - stage: 08-verify-build
     required: true
     status: completed_conditional
     mode: delta
     skip_rationale:
-    next_action: 'Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1'
+    next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
     handoff_active_milestone: M119
-    handoff_note: S027-D32 option 1 confirmed — open M119 minor PR (CI gate); Gate C→D / phase_c still pending until Phase 28 build complete
+    handoff_note: 'PR #208 open; watching CI; then AskQuestion continue M120'
     started_at: '2026-08-05'
     started_at_iso: '2026-08-05T12:52:00Z'
-    current_action: m119_08_pr_opening
+    current_action: m119_08_await_ci
     askquestion_pending: false
     askquestion_pending_topic:
     active_milestone: M119
     m119_status: completed_committed
-    m119_verify: pr_opening
-    build_head: ffb199b
-    note: S027/EV-025 08-verify-build CONDITIONAL PASS → PR opening 2026-08-05 — S027-D32 option 1 confirmed; askquestion_pending=false; m119_verify=pr_opening; local Docker Postgres blocked (not M119 regression); full pytest deferred to GitHub CI; F62 hooks stay typecheck/security on commit + lint+test-fast on push; parent will push + open PR-67 and record URL; Gate C→D / phase_c remain pending
-    updated_at: '2026-08-05T14:45:00Z'
+    m119_verify: pr_open_await_ci
+    build_head: 16f4d06
+    note: 'S027/EV-025 08-verify-build CONDITIONAL PASS → PR open await CI 2026-08-05 — PR #208 (PR-67) OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208; tip @16f4d06; m119_verify=pr_open_await_ci; askquestion_pending=false; parent watching CI then AskQuestion continue M120; Gate C→D / phase_c remain pending'
+    updated_at: '2026-08-05T14:48:00Z'
     overall: conditional_pass
     report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
     report_status: completed_conditional
@@ -6150,9 +6230,9 @@ active_session:
     m119_full_pytest: blocked_docker_postgres_userns
     gate_c_to_d: pending
     phase_c: pending
-    m119_tip: ffb199b
-    m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
-    build_head_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+    m119_tip: 16f4d06
+    m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    build_head_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
     s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
     s027_d32_option: 1
     s027_d32_confirmed_at: '2026-08-05T14:45:00Z'
@@ -6162,8 +6242,46 @@ active_session:
     in_agent_full_test_py: false
     f62_hooks_note: 'pre-commit: typecheck+security-scan; pre-push: lint+test-fast; full pytest via GitHub CI'
     pr_plan_id: PR-67
-    m119_pr_status: opening
-    m119_pr_note: Parent will push branch + open M119 minor PR; update PR-67 URL when open
+    m119_pr_status: open_await_ci
+    m119_pr_note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+    m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    m119_pr_number: 208
+    m119_pr_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+    pr_208: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    pr_208_status: open_await_ci
+    pr_208_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+    pr_208_tip: 16f4d06
+    pr_208_tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    minor_pr_m119:
+      number: 208
+      status: open
+      merged: false
+      title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      branch: evolve/EV-025-multilingual-embeddings
+      head: evolve/EV-025-multilingual-embeddings
+      base: main
+      head_sha: 16f4d06
+      tip: 16f4d06
+      tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      milestone: M119
+      features:
+      - F70
+      - F71
+      issues:
+      - 159
+      pr_plan_id: PR-67
+      merge_policy: needs_user_approval
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
+      note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+      opened_at: '2026-08-05'
+      opened_ts: '2026-08-05T14:48:00Z'
+      recorded_at: '2026-08-05T14:48:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
+      ci_status: pending
+      reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
   - stage: 09-qa
     required: true
     status: pending
@@ -6190,12 +6308,12 @@ active_session:
     mode: delta
     skip_rationale:
   current_stage: 08-verify-build
-  note: S027/EV-025 08-verify-build CONDITIONAL PASS → PR opening 2026-08-05 — S027-D32 option 1 confirmed; askquestion_pending=false; m119_verify=pr_opening; local Docker Postgres blocked (not M119 regression); full pytest deferred to GitHub CI; F62 hooks stay typecheck/security on commit + lint+test-fast on push; parent will push + open PR-67 and record URL; Gate C→D / phase_c remain pending
+  note: 'S027/EV-025 08-verify-build CONDITIONAL PASS → PR open await CI 2026-08-05 — PR #208 (PR-67) OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208; tip @16f4d06; m119_verify=pr_open_await_ci; askquestion_pending=false; parent watching CI then AskQuestion continue M120; Gate C→D / phase_c remain pending'
   started_at: '2026-08-05'
   context_briefs: []
-  current_action: m119_08_pr_opening
-  next_action: 'Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1'
-  updated_at: '2026-08-05T14:45:00Z'
+  current_action: m119_08_await_ci
+  next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
+  updated_at: '2026-08-05T14:48:00Z'
   report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
   askquestion_pending: false
   askquestion_pending_topic:
@@ -6268,7 +6386,7 @@ active_session:
   m119_status: completed_committed
   m119_completed_at: '2026-08-05T12:52:00Z'
   m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
-  m119_verify: pr_opening
+  m119_verify: pr_open_await_ci
   next_milestone: M120
   next_task: T120.1
   t119_1_status: completed
@@ -6293,12 +6411,12 @@ active_session:
   askquestion_cleared: 'S027-D32: open M119 minor PR (CI gate) despite local Postgres env block vs fix Docker first → user option 1 (open PR / CI is gate)'
   s027_d31_decision: S027-D31
   s027_d31_status: confirmed
-  build_head: ffb199b
-  build_head_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+  build_head: 16f4d06
+  build_head_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
   s027_d32_decision: S027-D32
   s027_d32_status: confirmed
-  m119_tip: ffb199b
-  m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+  m119_tip: 16f4d06
+  m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
   s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
   s027_d32_option: 1
   s027_d32_note: 'Option 1 — Open M119 minor PR (CI gate). Local Docker Postgres blocked (userns); do NOT re-run full make test-py in-agent. Rely on Husky pre-commit/pre-push + GitHub CI as full gate. F62 hooks remain: typecheck+security on commit; lint+test-fast on push.'
@@ -6308,8 +6426,48 @@ active_session:
   in_agent_full_test_py: false
   f62_hooks_note: 'pre-commit: typecheck+security-scan; pre-push: lint+test-fast; full pytest via GitHub CI'
   pr_plan_id: PR-67
-  m119_pr_status: opening
-  m119_pr_note: Parent will push branch + open M119 minor PR; update PR-67 URL when open
+  m119_pr_status: open_await_ci
+  m119_pr_note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+  m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+  m119_pr_number: 208
+  m119_pr_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+  pr_208: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+  pr_208_status: open_await_ci
+  pr_208_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+  pr_208_tip: 16f4d06
+  pr_208_tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+  minor_pr_m119:
+    number: 208
+    status: open
+    merged: false
+    title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    branch: evolve/EV-025-multilingual-embeddings
+    head: evolve/EV-025-multilingual-embeddings
+    base: main
+    head_sha: 16f4d06
+    tip: 16f4d06
+    tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    milestone: M119
+    features:
+    - F70
+    - F71
+    issues:
+    - 159
+    pr_plan_id: PR-67
+    merge_policy: needs_user_approval
+    session_id: S027-multilingual-embeddings
+    evolve_cycle_id: EV-025
+    note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+    opened_at: '2026-08-05'
+    opened_ts: '2026-08-05T14:48:00Z'
+    recorded_at: '2026-08-05T14:48:00Z'
+    updated_at: '2026-08-05T14:48:00Z'
+    ci_status: pending
+    reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
+  gate_c_to_d: pending
+  phase_c: pending
 sessions:
 - id: S026-frontend-ux-polish
   type: feature
@@ -17053,8 +17211,8 @@ stages:
     active_milestone: M119
     active_task:
     current_task:
-    current_action: m119_08_pr_opening
-    next_action: 'Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1'
+    current_action: m119_08_await_ci
+    next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -17063,8 +17221,8 @@ stages:
     phase_b: passed
     s027_d29_decision: S027-D29
     s027_d30_decision: S027-D30
-    build_head: ffb199b
-    build_head_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+    build_head: 16f4d06
+    build_head_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
     build_commits:
     - dc49d3a
     - bd34f2c
@@ -17072,14 +17230,14 @@ stages:
     - dc3c33c
     - 206f88a
     m119_status: completed_committed
-    m119_verify: pr_opening
-    m119_tip: ffb199b
-    note: S027/EV-025 08-verify-build CONDITIONAL PASS → PR opening 2026-08-05 — S027-D32 option 1 confirmed; askquestion_pending=false; m119_verify=pr_opening; local Docker Postgres blocked (not M119 regression); full pytest deferred to GitHub CI; F62 hooks stay typecheck/security on commit + lint+test-fast on push; parent will push + open PR-67 and record URL; Gate C→D / phase_c remain pending
+    m119_verify: pr_open_await_ci
+    m119_tip: 16f4d06
+    note: 'S027/EV-025 08-verify-build CONDITIONAL PASS → PR open await CI 2026-08-05 — PR #208 (PR-67) OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208; tip @16f4d06; m119_verify=pr_open_await_ci; askquestion_pending=false; parent watching CI then AskQuestion continue M120; Gate C→D / phase_c remain pending'
     handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
     rd_range: RD-305..RD-308
     tp_lock: TP1–TP5
     report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
-    updated_at: '2026-08-05T14:45:00Z'
+    updated_at: '2026-08-05T14:48:00Z'
     next_milestone: M120
     next_task: T120.1
     s026_baseline:
@@ -17864,7 +18022,7 @@ stages:
     m119_full_pytest: blocked_docker_postgres_userns
     gate_c_to_d: pending
     phase_c: pending
-    m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+    m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
     s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
     s027_d32_option: 1
     s027_d32_confirmed_at: '2026-08-05T14:45:00Z'
@@ -17874,9 +18032,47 @@ stages:
     in_agent_full_test_py: false
     f62_hooks_note: 'pre-commit: typecheck+security-scan; pre-push: lint+test-fast; full pytest via GitHub CI'
     pr_plan_id: PR-67
-    m119_pr_status: opening
-    m119_pr_note: Parent will push branch + open M119 minor PR; update PR-67 URL when open
+    m119_pr_status: open_await_ci
+    m119_pr_note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
     handoff_note: S027-D32 option 1 confirmed — open M119 minor PR (CI gate); Gate C→D / phase_c still pending until Phase 28 build complete
+    m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    m119_pr_number: 208
+    m119_pr_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+    pr_208: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    pr_208_status: open_await_ci
+    pr_208_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+    pr_208_tip: 16f4d06
+    pr_208_tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    minor_pr_m119:
+      number: 208
+      status: open
+      merged: false
+      title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      branch: evolve/EV-025-multilingual-embeddings
+      head: evolve/EV-025-multilingual-embeddings
+      base: main
+      head_sha: 16f4d06
+      tip: 16f4d06
+      tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      milestone: M119
+      features:
+      - F70
+      - F71
+      issues:
+      - 159
+      pr_plan_id: PR-67
+      merge_policy: needs_user_approval
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
+      note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+      opened_at: '2026-08-05'
+      opened_ts: '2026-08-05T14:48:00Z'
+      recorded_at: '2026-08-05T14:48:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
+      ci_status: pending
+      reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
   09-qa:
     status: completed
     started: '2026-08-05'
@@ -21202,8 +21398,8 @@ evolve_cycles:
       active_milestone: M119
       active_task:
       current_task:
-      current_action: m119_08_pr_opening
-      next_action: Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1
+      current_action: m119_08_await_ci
+      next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -21213,7 +21409,7 @@ evolve_cycles:
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
       note: S027/EV-025 07-build IN_PROGRESS 2026-08-05 — M119 completed_committed (tip @206f88a); current_action=m119_08_verify_build; askquestion_pending=false; handoff → 08-verify-build for M119 (then minor PR); next_milestone=M120 queued
-      updated_at: '2026-08-05T14:45:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
       skipped_06: true
       substeps:
         current_task:
@@ -21236,7 +21432,7 @@ evolve_cycles:
       m119_status: completed_committed
       m119_completed_at: '2026-08-05T12:52:00Z'
       m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
-      m119_verify: pr_opening
+      m119_verify: pr_open_await_ci
       next_milestone: M120
       next_task: T120.1
       t119_2_status: completed
@@ -21259,10 +21455,12 @@ evolve_cycles:
       s027_d30_status: confirmed
       askquestion_cleared: M119 complete — commit + 08-verify-build / continue M120 / pause? → user option 1 (commit + 08-verify-build then minor PR)
       m119_committed_at: '2026-08-05T12:52:00Z'
-      m119_tip: ffb199b
+      m119_tip: 16f4d06
       m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
       s027_d32_decision: S027-D32
       s027_d32_status: confirmed
+      m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      m119_pr_status: open_await_ci
     08-verify-build:
       status: completed_conditional
       started: '2026-08-05'
@@ -21280,12 +21478,12 @@ evolve_cycles:
       - M121
       - M122
       active_milestone: M119
-      current_action: m119_08_pr_opening
-      next_action: 'Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1'
+      current_action: m119_08_await_ci
+      next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
       askquestion_pending: false
       askquestion_pending_topic:
-      build_head: ffb199b
-      build_head_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+      build_head: 16f4d06
+      build_head_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
       build_commits:
       - dc49d3a
       - bd34f2c
@@ -21293,9 +21491,9 @@ evolve_cycles:
       - dc3c33c
       - 206f88a
       m119_status: completed_committed
-      m119_verify: pr_opening
-      note: S027/EV-025 08-verify-build CONDITIONAL PASS → PR opening 2026-08-05 — S027-D32 option 1 confirmed; askquestion_pending=false; m119_verify=pr_opening; local Docker Postgres blocked (not M119 regression); full pytest deferred to GitHub CI; F62 hooks stay typecheck/security on commit + lint+test-fast on push; parent will push + open PR-67 and record URL; Gate C→D / phase_c remain pending
-      updated_at: '2026-08-05T14:45:00Z'
+      m119_verify: pr_open_await_ci
+      note: 'S027/EV-025 08-verify-build CONDITIONAL PASS → PR open await CI 2026-08-05 — PR #208 (PR-67) OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208; tip @16f4d06; m119_verify=pr_open_await_ci; askquestion_pending=false; parent watching CI then AskQuestion continue M120; Gate C→D / phase_c remain pending'
+      updated_at: '2026-08-05T14:48:00Z'
       next_milestone: M120
       next_task: T120.1
       overall: conditional_pass
@@ -21316,8 +21514,8 @@ evolve_cycles:
       evolve_cycle_id: EV-025
       branch: evolve/EV-025-multilingual-embeddings
       session_branch: feat/S027-multilingual-embeddings
-      m119_tip: ffb199b
-      m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+      m119_tip: 16f4d06
+      m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
       s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
       s027_d32_option: 1
       s027_d32_confirmed_at: '2026-08-05T14:45:00Z'
@@ -21327,9 +21525,47 @@ evolve_cycles:
       in_agent_full_test_py: false
       f62_hooks_note: 'pre-commit: typecheck+security-scan; pre-push: lint+test-fast; full pytest via GitHub CI'
       pr_plan_id: PR-67
-      m119_pr_status: opening
-      m119_pr_note: Parent will push branch + open M119 minor PR; update PR-67 URL when open
-      handoff_note: S027-D32 option 1 confirmed — open M119 minor PR (CI gate); Gate C→D / phase_c still pending until Phase 28 build complete
+      m119_pr_status: open_await_ci
+      m119_pr_note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+      handoff_note: 'PR #208 open; watching CI; then AskQuestion continue M120; Gate C→D / phase_c still pending'
+      m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      m119_pr_number: 208
+      m119_pr_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      pr_208: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      pr_208_status: open_await_ci
+      pr_208_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      pr_208_tip: 16f4d06
+      pr_208_tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      minor_pr_m119:
+        number: 208
+        status: open
+        merged: false
+        title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+        branch: evolve/EV-025-multilingual-embeddings
+        head: evolve/EV-025-multilingual-embeddings
+        base: main
+        head_sha: 16f4d06
+        tip: 16f4d06
+        tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+        head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+        milestone: M119
+        features:
+        - F70
+        - F71
+        issues:
+        - 159
+        pr_plan_id: PR-67
+        merge_policy: needs_user_approval
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
+        note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+        opened_at: '2026-08-05'
+        opened_ts: '2026-08-05T14:48:00Z'
+        recorded_at: '2026-08-05T14:48:00Z'
+        updated_at: '2026-08-05T14:48:00Z'
+        ci_status: pending
+        reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
     09-qa:
       status: pending
     10-e2e:
@@ -21344,19 +21580,19 @@ evolve_cycles:
       status: in_progress
       phase0_approved: true
       phase_0_status: approved
-      current_action: m119_08_pr_opening
-      next_action: Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1
-      note: EV-025 Phase C — S027-D32 option 1 (open M119 minor PR / CI gate); askquestion_pending=false; current_action=m119_08_pr_opening; m119_verify=pr_opening; next → push + open PR-67
+      current_action: m119_08_await_ci
+      next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
+      note: 'EV-025 Phase C — M119 PR #208 OPEN @16f4d06; current_action=m119_08_await_ci; m119_verify=pr_open_await_ci; askquestion_pending=false; next=Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
       askquestion_pending: false
       askquestion_pending_topic:
-      updated_at: '2026-08-05T14:45:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
       active_milestone: M119
       active_task:
       current_task:
       m119_status: completed_committed
       m119_completed_at: '2026-08-05T12:48:00Z'
       m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
-      m119_verify: pr_opening
+      m119_verify: pr_open_await_ci
       next_milestone: M120
       next_task: T120.1
       t119_1_status: completed
@@ -21383,6 +21619,40 @@ evolve_cycles:
       askquestion_cleared: 'S027-D32: open M119 minor PR (CI gate) despite local Postgres env block vs fix Docker first → user option 1 (open PR / CI is gate)'
       s027_d32_decision: S027-D32
       s027_d32_status: confirmed
+      m119_tip: 16f4d06
+      m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      m119_pr_status: open_await_ci
+      pr_plan_id: PR-67
+      minor_pr_m119:
+        number: 208
+        status: open
+        merged: false
+        title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+        branch: evolve/EV-025-multilingual-embeddings
+        head: evolve/EV-025-multilingual-embeddings
+        base: main
+        head_sha: 16f4d06
+        tip: 16f4d06
+        tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+        head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+        milestone: M119
+        features:
+        - F70
+        - F71
+        issues:
+        - 159
+        pr_plan_id: PR-67
+        merge_policy: needs_user_approval
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
+        note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+        opened_at: '2026-08-05'
+        opened_ts: '2026-08-05T14:48:00Z'
+        recorded_at: '2026-08-05T14:48:00Z'
+        updated_at: '2026-08-05T14:48:00Z'
+        ci_status: pending
+        reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -21532,12 +21802,12 @@ evolve_cycles:
   issues: []
   phase0_approved: true
   phase_0_status: approved
-  current_action: m119_08_pr_opening
-  next_action: 'Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1'
+  current_action: m119_08_await_ci
+  next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
   askquestion_pending: false
   askquestion_pending_topic:
-  updated_at: '2026-08-05T14:45:00Z'
-  note: S027/EV-025 08-verify-build CONDITIONAL PASS → PR opening 2026-08-05 — S027-D32 option 1 confirmed; askquestion_pending=false; m119_verify=pr_opening; local Docker Postgres blocked (not M119 regression); full pytest deferred to GitHub CI; F62 hooks stay typecheck/security on commit + lint+test-fast on push; parent will push + open PR-67 and record URL; Gate C→D / phase_c remain pending
+  updated_at: '2026-08-05T14:48:00Z'
+  note: 'S027/EV-025 08-verify-build CONDITIONAL PASS → PR open await CI 2026-08-05 — PR #208 (PR-67) OPEN https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208; tip @16f4d06; m119_verify=pr_open_await_ci; askquestion_pending=false; parent watching CI then AskQuestion continue M120; Gate C→D / phase_c remain pending'
   s027_d25_decision: S027-D25
   s027_d26_decision: S027-D26
   s027_d27_decision: S027-D27
@@ -21563,11 +21833,13 @@ evolve_cycles:
     askquestion_pending_topic:
     approved: '2026-08-05'
     approved_at: '2026-08-05T14:45:00Z'
-    m119_verify: pr_opening
-    current_action: m119_08_pr_opening
-    next_action: Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1
+    m119_verify: pr_open_await_ci
+    current_action: m119_08_await_ci
+    next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
     pr_plan_id: PR-67
-    note: S027-D32 option 1 — open M119 minor PR (PR-67); local PG Docker blocked; CI is full gate; F62 commit=typecheck/security, push=lint+test-fast; m119_verify=pr_opening
+    note: 'S027/EV-025 — PR #208 (PR-67) OPEN @16f4d06; m119_verify=pr_open_await_ci; CI watching; askquestion cleared; next=Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
+    m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    pr_number: 208
   - id: S027-D30
     decision: Gate B→C PASS (option 1). M1–M6+L1–L3 applied per S027-D29. 06 skipped. Proceed to 07-build starting M119/T119.1 (F70 multilingual embed config).
     summary: Gate B→C PASS (option 1). M1–M6+L1–L3 applied per S027-D29. 06 skipped. Proceed to 07-build starting M119/T119.1 (F70 multilingual embed config).
@@ -21715,7 +21987,7 @@ evolve_cycles:
   m119_status: completed_committed
   m119_completed_at: '2026-08-05T12:48:00Z'
   m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
-  m119_verify: pr_opening
+  m119_verify: pr_open_await_ci
   next_milestone: M120
   next_task: T120.1
   t119_1_status: completed
@@ -21738,18 +22010,59 @@ evolve_cycles:
   execution_plan_note: execution-plan.md should show T119.1–T119.5 completed / M119 completed_committed; next 08-verify-build for M119 (then minor PR); then M120 T120.1
   s027_d30_status: confirmed
   askquestion_cleared: 'S027-D32: open M119 minor PR (CI gate) despite local Postgres env block vs fix Docker first → user option 1 (open PR / CI is gate)'
-  m119_tip: ffb199b
+  m119_tip: 16f4d06
   s027_d31_decision: S027-D31
   s027_d32_decision: S027-D32
   s027_d32_status: confirmed
   s027_d32_note: 'Option 1 — Open M119 minor PR (CI gate). Local Docker Postgres blocked (userns); do NOT re-run full make test-py in-agent. Rely on Husky pre-commit/pre-push + GitHub CI as full gate. F62 hooks remain: typecheck+security on commit; lint+test-fast on push.'
-  m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
-  build_head: ffb199b
-  build_head_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+  m119_tip_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+  build_head: 16f4d06
+  build_head_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
   s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
   s027_d32_option: 1
   pr_plan_id: PR-67
-  m119_pr_status: opening
+  m119_pr_status: open_await_ci
+  m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+  m119_pr_number: 208
+  m119_pr_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+  m119_pr_note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+  pr_208: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+  pr_208_status: open_await_ci
+  pr_208_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+  pr_208_tip: 16f4d06
+  pr_208_tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+  minor_pr_m119:
+    number: 208
+    status: open
+    merged: false
+    title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    branch: evolve/EV-025-multilingual-embeddings
+    head: evolve/EV-025-multilingual-embeddings
+    base: main
+    head_sha: 16f4d06
+    tip: 16f4d06
+    tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    milestone: M119
+    features:
+    - F70
+    - F71
+    issues:
+    - 159
+    pr_plan_id: PR-67
+    merge_policy: needs_user_approval
+    session_id: S027-multilingual-embeddings
+    evolve_cycle_id: EV-025
+    note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
+    opened_at: '2026-08-05'
+    opened_ts: '2026-08-05T14:48:00Z'
+    recorded_at: '2026-08-05T14:48:00Z'
+    updated_at: '2026-08-05T14:48:00Z'
+    ci_status: pending
+    reason_pr_opened: M119 minor PR — F70 embed runtime + e5 prefixes + Modal; CI via PR (evolve/** push does not trigger ci.yml alone)
+  gate_c_to_d: pending
+  phase_c: pending
 - id: EV-001
   cycle_type: feature
   feature_ids:
@@ -40390,11 +40703,11 @@ decisions_log:
   askquestion_pending_topic:
   recorded_at: '2026-08-05T14:45:00Z'
   current_stage: 08-verify-build
-  m119_verify: pr_opening
+  m119_verify: pr_open_await_ci
   overall: conditional_pass
   gate_c_to_d: pending
   checkpoints_phase_c: pending
-  note: S027-D32 option 1 confirmed; do not re-run full make test-py in-agent; parent pushes + opens PR-67; Gate C→D / phase_c remain pending
+  note: 'S027-D32 option 1 executed — PR #208 OPEN (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; m119_verify=pr_open_await_ci; parent watching CI'
   summary: 'S027-D32: open M119 minor PR (CI gate) despite local Postgres env block vs fix Docker first → user option 1 (open PR / CI is gate)'
   choice: option_1_open_m119_minor_pr_ci_gate
   option: 1
@@ -40405,13 +40718,16 @@ decisions_log:
   approved: '2026-08-05'
   approved_at: '2026-08-05T14:45:00Z'
   confirmed_at: '2026-08-05T14:45:00Z'
-  current_action: m119_08_pr_opening
-  next_action: Push evolve/EV-025-multilingual-embeddings; open M119 minor PR (PR-67); record PR URL; then continue M120 T120.1
+  current_action: m119_08_await_ci
+  next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
   pr_plan_id: PR-67
   ci_is_full_gate: true
   local_full_pytest: waived_docker_postgres_userns
   in_agent_full_test_py: false
   f62_hooks_note: 'pre-commit: typecheck+security-scan; pre-push: lint+test-fast; full pytest via GitHub CI'
+  m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+  pr_number: 208
+  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
 artifacts:
 - path: CHANGELOG.md
   kind: changelog
@@ -48331,7 +48647,25 @@ git_history:
     - docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
     - workflow-state.yaml
     note: M119 08 CONDITIONAL PASS report + HANDOFF + workflow-state; tip @ffb199b; S027-D32 AskQuestion still pending
-  notes: '2026-08-05T00:20:00Z S026/EV-024: PR #207 CI green @2b8e8cd (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032); pr_207_status=open_ci_green; current_action=present_gate_c_to_d; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207 CI green); phase_c/c_to_d pending (NOT passed); next=User AskQuestion Gate C→D; on pass → 08-verify-build closeout / 09-qa; merge #207 needs explicit approval | 2026-08-05T00:12:00Z S026/EV-024: recorded commit 2b8e8cd ([T118.3] docs: Phase 27 gate + issue closeout notes); PR #207 OPEN; CI watching; T118.3 committed @2b8e8cd; M118 completed; PR #207 OPEN; CI watching; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207); phase_c/c_to_d remain pending. Issue closeout comments posted on #104/#106/#93/#186/#170/#193; do not auto-close. #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. build_head=2b8e8cd; current_action=await_ci_207_gate_c_to_d; next=Await CI on #207; AskQuestion Gate C→D; then 08-verify / 09-qa; askquestion_pending=true; phase_c/c_to_d pending on evolve/EV-024-frontend-ux-polish. | PR #206 merged to main @ eb65837; evolve tip has Brewfile/secrets docs commit | 2026-08-05T02:00:00Z S026/EV-024 S026-D56: 12 COMPLETE APPROVED → 13 in_progress (validate_or_redeploy); main_tip=c942971; evolve_tip=d429d39; PR #207 merged; evolve CI watch waived_n_a; checkpoints.deploy=pending; CD Modal+DO green | 2026-08-05T02:15:00Z S026/EV-024 S026-D57: 13 validate_existing_smokes (option 1); no force redeploy; H1–H5 vs staging @c942971; prod.env still missing / F69 enrich deferred; 13 remains in_progress | 2026-08-05T00:51:00Z S026/EV-024 13 validate-existing smokes PASS pending accept; await_smoke_accept; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md; deploy gate pending | 2026-08-05T00:54:00Z S026/EV-024 S026-D58: Accept 13 PASS; deploy gate+Phase D closed; write_evolve_summary; cycle in_progress; summary=docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md | 2026-08-05T00:59:44Z S026/EV-024: recorded closeout commit d12c37a ([M118] docs: close EV-024 / S026 after deploy gate PASS); evolve tip @d12c37a; cycle remains completed; session closed'
+  - sha: 16f4d06
+    full_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    short: 16f4d06
+    branch: evolve/EV-025-multilingual-embeddings
+    message: '[M119] docs: S027-D32 open PR-67; CI/F62 gate for full pytest'
+    stage: 08-verify-build
+    skill_id: 16-evolve
+    session_id: S027-multilingual-embeddings
+    evolve_cycle_id: EV-025
+    files_changed: 3
+    timestamp: '2026-08-05T14:47:48Z'
+    milestone: M119
+    files:
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S027-multilingual-embeddings/HANDOFF.md
+    - workflow-state.yaml
+    note: 'M119 PR-67 open prep tip @16f4d06; PR #208 OPEN; m119_verify=pr_open_await_ci'
+  notes: '2026-08-05T14:48:00Z S027/EV-025: PR #208 OPEN (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; recorded commit 16f4d06 ([M119] docs: S027-D32 open PR-67; CI/F62 gate for full pytest); m119_verify=pr_open_await_ci; askquestion_pending=false; current_action=m119_08_await_ci; next=Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval) | 2026-08-05T00:20:00Z S026/EV-024: PR #207 CI green @2b8e8cd (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032); pr_207_status=open_ci_green; current_action=present_gate_c_to_d; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207 CI green); phase_c/c_to_d pending (NOT passed); next=User AskQuestion Gate C→D; on pass → 08-verify-build closeout / 09-qa; merge #207 needs explicit approval | 2026-08-05T00:12:00Z S026/EV-024: recorded commit 2b8e8cd ([T118.3] docs: Phase 27 gate + issue closeout notes); PR #207 OPEN; CI watching; T118.3 committed @2b8e8cd; M118 completed; PR #207 OPEN; CI watching; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207); phase_c/c_to_d remain pending. Issue closeout comments posted on #104/#106/#93/#186/#170/#193; do not auto-close. #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. build_head=2b8e8cd; current_action=await_ci_207_gate_c_to_d; next=Await CI on #207; AskQuestion Gate C→D; then 08-verify / 09-qa; askquestion_pending=true; phase_c/c_to_d pending on evolve/EV-024-frontend-ux-polish. | PR #206 merged to main @ eb65837; evolve tip has Brewfile/secrets docs commit | 2026-08-05T02:00:00Z S026/EV-024 S026-D56: 12 COMPLETE APPROVED → 13 in_progress (validate_or_redeploy); main_tip=c942971; evolve_tip=d429d39; PR #207 merged; evolve CI watch waived_n_a; checkpoints.deploy=pending; CD Modal+DO green | 2026-08-05T02:15:00Z S026/EV-024 S026-D57: 13 validate_existing_smokes (option 1); no force redeploy; H1–H5 vs staging @c942971; prod.env still missing / F69 enrich deferred; 13 remains in_progress | 2026-08-05T00:51:00Z S026/EV-024 13 validate-existing smokes PASS pending accept; await_smoke_accept; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md; deploy gate pending | 2026-08-05T00:54:00Z S026/EV-024 S026-D58: Accept 13 PASS; deploy gate+Phase D closed; write_evolve_summary; cycle in_progress; summary=docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md | 2026-08-05T00:59:44Z S026/EV-024: recorded closeout commit d12c37a ([M118] docs: close EV-024 / S026 after deploy gate PASS); evolve tip @d12c37a; cycle remains completed; session closed'
   pull_requests:
     '195':
       number: 195
@@ -48374,6 +48708,33 @@ git_history:
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
       m115_pr_status: open_ci_green
       s026_d50_decision: S026-D50
+    '208':
+      number: 208
+      url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+      title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+      branch: evolve/EV-025-multilingual-embeddings
+      base: main
+      status: open
+      merged: false
+      head_sha: 16f4d06
+      head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+      milestone: M119
+      features:
+      - F70
+      - F71
+      issue: 159
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
+      skill_id: 16-evolve
+      pr_plan_id: PR-67
+      opened_at: '2026-08-05'
+      opened_ts: '2026-08-05T14:48:00Z'
+      recorded_at: '2026-08-05T14:48:00Z'
+      updated_at: '2026-08-05T14:48:00Z'
+      ci_status: pending
+      merge_policy: needs_user_approval
+      m119_pr_status: open_await_ci
+      note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
   updated_at: '2026-08-05T00:54:00Z'
 constraints:
   cost:
@@ -48387,9 +48748,9 @@ constraints:
     self_hosted_inference_default: true
   personal_data: none_option_b
   privacy_enforcement: schema_api_logs_tests_ci
-next_action: Await AskQuestion M1–M6 (recommended = approve all fixes); then apply to execution-plan; complete 05; Gate B→C
+next_action: 'Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval)'
 pipeline_idle: false
-pipeline_idle_note: 2026-08-05 — S027/EV-025 05-verify-tech audit complete (S027-D29 pending); M1–M6 AskQuestion; Gate B→C blocked.
+pipeline_idle_note: '2026-08-05T14:48:00Z S027/EV-025 M119 PR #208 OPEN @16f4d06; m119_verify=pr_open_await_ci; watching CI'
 pull_requests:
   '204':
     number: 204
@@ -48462,3 +48823,32 @@ pull_requests:
     note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1 @21ed50e'
     recorded_at: '2026-08-04T23:56:04Z'
     updated_at: '2026-08-04T23:56:04Z'
+  '208':
+    number: 208
+    url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
+    title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
+    branch: evolve/EV-025-multilingual-embeddings
+    head_branch: evolve/EV-025-multilingual-embeddings
+    base: main
+    status: open
+    merged: false
+    tip_sha: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    head_sha: 16f4d06
+    head_sha_full: 16f4d061b1dfb87e63a75743bc1cfcb9900559ae
+    milestone: M119
+    features:
+    - F70
+    - F71
+    issues:
+    - 159
+    session_id: S027-multilingual-embeddings
+    evolve_cycle_id: EV-025
+    skill_id: 16-evolve
+    pr_plan_id: PR-67
+    opened_at: '2026-08-05'
+    opened_ts: '2026-08-05T14:48:00Z'
+    recorded_at: '2026-08-05T14:48:00Z'
+    updated_at: '2026-08-05T14:48:00Z'
+    ci_status: pending
+    merge_policy: needs_user_approval
+    note: 'PR #208 OPEN [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; CI watching; NOT merged — after green AskQuestion continue M120'
