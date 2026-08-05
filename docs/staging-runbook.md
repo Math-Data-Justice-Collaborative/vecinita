@@ -362,6 +362,35 @@ bash scripts/deploy/staging_smoke.sh   # H1 asserts modal_embed/modal_llm ok
 CI guards: `bash scripts/check_do_required_secrets.sh` (YAML + sync helper parity),
 `scripts/deploy/ci_materialize_env.sh` (DO deploy job — required keys + validator).
 
+## EV-025 (F70–F71) — Staging shadow rechunk before promote
+
+Multilingual cutover (S027-D21): **staging first** — shadow rebuild → F36 EN/ES report →
+operator promote — then repeat on prod. Do not promote prod until staging promote is accepted.
+
+### Secrets / pins (staging DO + Modal)
+
+| Variable | Expected (planned E1) | Notes |
+|----------|----------------------|-------|
+| `VECINITA_EMBEDDING_MODEL_ID` | `intfloat/multilingual-e5-small` | F70 pin; final after F36 review (S027-D14) |
+| `VECINITA_CHUNK_TOKENIZER_ID` | **same as embed pin** | ADR-048 / S027-D15 — default in code matches E1 (T120.2) |
+| `VECINITA_EMBED_RUNTIME` | `fastembed` (or `sentence_transformers` / `onnx`) | Modal embed app |
+| `VECINITA_MODAL_EMBED_URL` | `https://vecinita--vecinita-embedding-…` | Must serve F70 pin before rebuild |
+
+Sync with `do_apps.py sync-all-secrets` after pin changes (see §Modal embed / LLM URLs).
+
+### Shadow rebuild checklist
+
+1. Confirm Modal embed `/health` (or warm) serves the F70 pin at 384-d.
+2. Enqueue F41 `job_type=rebuild` with `mode=rechunk`, `dry_run=true`, stamps
+   `embedding_model_id` + `chunk_tokenizer_id` = pin.
+3. Run F36 against shadow; capture EN/ES relevancy + faithfulness vs E0 (and dense hit@k /
+   mean_rank when available) — UJ-076 / TC-235–236.
+4. Operator judgment promote (no hard numeric gate — S027-D11); retain E0 revision for rollback.
+5. Only then repeat the sequence on prod (M121).
+
+Local compose suites (`make test-py`) cover rebuild/promote API e2e; remote CI is unit-only
+(S027-D34).
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  

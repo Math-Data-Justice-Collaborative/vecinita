@@ -125,10 +125,6 @@ def test_tc238_es_ask_after_cutover_returns_sources() -> None:
     assert json_str(sources[0], "chunk_id")
 
 
-@pytest.mark.xfail(
-    reason="T120.2 pending: DEFAULT_CHUNK_TOKENIZER_ID still BAAI/bge-small-en-v1.5",
-    strict=True,
-)
 def test_tc241_cutover_tokenizer_default_matches_embed_pin() -> None:
     """TC-241 / AC-ME11: default chunk tokenizer must match F70 embed pin after cutover."""
     assert DEFAULT_CHUNK_TOKENIZER_ID == _E1_PIN
