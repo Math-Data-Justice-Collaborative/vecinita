@@ -3451,378 +3451,301 @@ project:
       updated_at: '2026-08-05T00:45:00Z'
       required: true
     11-verify-impl:
-      status: completed
-      started_at: '2026-08-03'
-      started: '2026-08-03'
-      completed: '2026-08-03'
-      completed_at: '2026-08-03'
-      partial_rerun_at: '2026-08-03'
-      partial_rerun_note: S024/EV-022 — 11-verify-impl STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline; Phase D PASS (S024-D43)
-      session_id: S024-website-scrape-crawl
-      branch: evolve/EV-022-website-scrape-crawl
-      evolve_cycle_id: EV-022
+      status: in_progress
+      started_at: '2026-08-05'
+      started: '2026-08-05'
+      started_at_iso: '2026-08-05T01:00:00Z'
+      partial_rerun_at: '2026-08-05'
+      partial_rerun_note: S026/EV-024 — 11-verify-impl STARTED (delta F64–F69); prior S024 COMPLETE nested under s024_baseline; S026-D55 bulk approve
+      session_id: S026-frontend-ux-polish
+      branch: evolve/EV-024-frontend-ux-polish
+      session_branch: feat/S026-frontend-ux-polish
+      evolve_cycle_id: EV-024
       mode: evolve
       delta_only: true
       feature_ids:
-      - F59
-      - F60
-      - F61
-      feature: F59+F60+F61
-      phase: Phase 26 (M108-M111)
-      current_action: completed
-      next_action: Complete 12-verify-deploy pre-deploy checks (H0c, VITE/CORS, secrets, Alembic 0011, failure modes, rollback) then AskQuestion deploy gate
-      s024_d43_decision: S024-D43
-      s024_d44_decision: S024-D44
-      s024_d45_decision: S024-D45
-      s024_d46_decision: S024-D46
+      - F64
+      - F65
+      - F66
+      - F67
+      - F68
+      - F69
+      feature: F64+F65+F66+F67+F68+F69
+      phase: Phase 27 (M112-M118)
+      build_head: c942971
+      current_action: write_verify_impl_bulk_approve
+      next_action: finish verify-impl.md then pass phase_d → 12-verify-deploy
       askquestion_pending: false
-      checkpoints_phase_d: passed
-      ui_preview: yes_local_non_deployed
-      local_preview_port: 5174
-      local_preview_required: false
+      askquestion_pending_topic:
+      askquestion_cleared: 11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)
+      s026_d55_decision: S026-D55
+      decision: S026-D55
+      user_choice: A_bulk_approve_all_f64_f69
+      approved_features:
+      - F64
+      - F65
+      - F66
+      - F67
+      - F68
+      - F69
+      ui_preview: skipped
       manual_browser_inspection: waived
-      inspection_basis: t0_openapi
-      inspection_env: staging_visuals_deferred
+      inspection_basis: t0_code_qa_e2e
       staging_visuals: deferred_post_deploy
-      report: docs/sessions/S024-website-scrape-crawl/reports/verify-impl.md
-      report_status: completed
-      note: S024/EV-022 11-verify-impl COMPLETE APPROVED 2026-08-03 — S024-D46 Approve all UJ-064–066 + F59–F61; S024-D45 browser waived; verify-impl written @ aeb76a9; handoff → 12-verify-deploy
-      s023_baseline:
+      t2_t3_h4_h5: deferred_to_12_13_documented_waiver
+      checkpoints_phase_d: pending
+      report: docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md
+      report_status: writing
+      required: true
+      note: S026/EV-024 11-verify-impl IN_PROGRESS 2026-08-05 — S026-D55 User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; writing docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md; phase_d remains pending until report complete + handoff 12
+      updated_at: '2026-08-05T01:00:00Z'
+      s024_baseline:
         status: completed
         started_at: '2026-08-03'
         started: '2026-08-03'
+        completed: '2026-08-03'
+        completed_at: '2026-08-03'
         partial_rerun_at: '2026-08-03'
-        partial_rerun_note: 'S023/EV-020 — 11-verify-impl STARTED (delta F50+F51); prior S022 COMPLETE nested under s022_baseline; user chose recommended start after S023-D17 advisory remediation; draft PR #180'
-        session_id: S023-retrieval-topk-packing
-        branch: evolve/EV-020-retrieval-topk-packing
-        evolve_cycle_id: EV-020
+        partial_rerun_note: S024/EV-022 — 11-verify-impl STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline; Phase D PASS (S024-D43)
+        session_id: S024-website-scrape-crawl
+        branch: evolve/EV-022-website-scrape-crawl
+        evolve_cycle_id: EV-022
         mode: evolve
         delta_only: true
         feature_ids:
-        - F50
-        - F51
-        feature: F50+F51
-        phase: Phase 25 (M105-M107)
-        draft_pr: 180
-        draft_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180
+        - F59
+        - F60
+        - F61
+        feature: F59+F60+F61
+        phase: Phase 26 (M108-M111)
         current_action: completed
-        next_action: run 12-verify-deploy
-        s023_d17_decision: S023-D17
-        s023_d18_decision: S023-D18
-        s023_d19_decision: S023-D19
-        user_start_choice: recommended_start_11_after_advisory_remediation
-        substeps:
-          phase1_collect: completed
-          phase2_completeness: completed
-          phase3a_journey_signoff: completed
-          phase3b_api_inspection: skipped_openapi_code_t0_only
-          phase3_feature_approval: completed
-          phase5_scope: completed
-          phase6_report: completed
-          current: completed
-        report: docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md
+        next_action: Complete 12-verify-deploy pre-deploy checks (H0c, VITE/CORS, secrets, Alembic 0011, failure modes, rollback) then AskQuestion deploy gate
+        s024_d43_decision: S024-D43
+        s024_d44_decision: S024-D44
+        s024_d45_decision: S024-D45
+        s024_d46_decision: S024-D46
+        askquestion_pending: false
+        checkpoints_phase_d: passed
+        ui_preview: yes_local_non_deployed
+        local_preview_port: 5174
+        local_preview_required: false
+        manual_browser_inspection: waived
+        inspection_basis: t0_openapi
+        inspection_env: staging_visuals_deferred
+        staging_visuals: deferred_post_deploy
+        report: docs/sessions/S024-website-scrape-crawl/reports/verify-impl.md
         report_status: completed
-        handoff_note: HANDOFF.md regenerated
-        note: 'S023/EV-020 11-verify-impl COMPLETE APPROVED 2026-08-03 — S023-D20: F50 and F51 approved (UJ-063 T0; inspection OpenAPI/code/T0 only; AC-RQ8/RQ9 met_at_T0_plus_infra; AC-RQ10 held; live DO deferred to 12/13); report=docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy Path A DO'
-        s022_baseline:
+        note: S024/EV-022 11-verify-impl COMPLETE APPROVED 2026-08-03 — S024-D46 Approve all UJ-064–066 + F59–F61; S024-D45 browser waived; verify-impl written @ aeb76a9; handoff → 12-verify-deploy
+        s023_baseline:
           status: completed
-          started_at: '2026-08-02'
-          started: '2026-08-02'
-          completed_at: '2026-08-02'
-          completed: '2026-08-02'
-          partial_rerun_at: '2026-08-02'
-          partial_rerun_note: S022/EV-019 — 11-verify-impl COMPLETE APPROVED (delta F47–F49); prior S021 COMPLETE nested under s021_baseline
-          session_id: S022-ingest-resilience
-          branch: evolve/EV-019-ingest-resilience
-          evolve_cycle_id: EV-019
+          started_at: '2026-08-03'
+          started: '2026-08-03'
+          partial_rerun_at: '2026-08-03'
+          partial_rerun_note: 'S023/EV-020 — 11-verify-impl STARTED (delta F50+F51); prior S022 COMPLETE nested under s022_baseline; user chose recommended start after S023-D17 advisory remediation; draft PR #180'
+          session_id: S023-retrieval-topk-packing
+          branch: evolve/EV-020-retrieval-topk-packing
+          evolve_cycle_id: EV-020
           mode: evolve
           delta_only: true
           feature_ids:
-          - F47
-          - F48
-          - F49
-          feature: F47-F49
-          phase: Phase 24 (M101-M104)
-          commits_head: abe4608
-          t0_code_tip: 307e0d3
+          - F50
+          - F51
+          feature: F50+F51
+          phase: Phase 25 (M105-M107)
+          draft_pr: 180
+          draft_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180
           current_action: completed
-          next_action: none_session_closed
-          overall: approved
-          overall_result: approved
-          result: approved
-          user_approved: true
-          user_approved_at: '2026-08-02'
-          user_approval_choice: approve_all_f47_f49_uj062_ac_ir7_held
-          report: docs/sessions/S022-ingest-resilience/reports/verify-impl.md
-          report_status: completed
-          feature_list_status: Implemented
-          acceptance_criteria: AC-IR1–IR7 checked (IR7 held)
-          journey_signoffs:
-            UJ-062:
-              approved: true
-              approved_at: '2026-08-02'
-              user_choice: approve
-              t0: PASS_4_of_4
-              t3: n_a_ac_ir7_no_fe
-              note: matches expected caller experience
-          feature_signoffs:
-            F47:
-              approved: true
-              approved_at: '2026-08-02'
-              user_choice: approve
-            F48:
-              approved: true
-              approved_at: '2026-08-02'
-              user_choice: approve
-            F49:
-              approved: true
-              approved_at: '2026-08-02'
-              user_choice: approve
-          ac_ir7:
-            status: held
-            confirmed: true
-            confirmed_at: '2026-08-02'
+          next_action: run 12-verify-deploy
+          s023_d17_decision: S023-D17
+          s023_d18_decision: S023-D18
+          s023_d19_decision: S023-D19
+          user_start_choice: recommended_start_11_after_advisory_remediation
           substeps:
             phase1_collect: completed
             phase2_completeness: completed
             phase3a_journey_signoff: completed
-            phase3b_api_inspection: completed
+            phase3b_api_inspection: skipped_openapi_code_t0_only
             phase3_feature_approval: completed
             phase5_scope: completed
             phase6_report: completed
             current: completed
-          note: S022/EV-019 11-verify-impl COMPLETE APPROVED 2026-08-02 — user approved F47–F49 + UJ-062 + AC-IR7 held; feature-list Implemented; AC-IR1–IR7 checked; report verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.
-          commits_pending: false
-          commits_note: 11-verify-impl APPROVED committed @ abe4608
-          s021_baseline:
+          report: docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md
+          report_status: completed
+          handoff_note: HANDOFF.md regenerated
+          note: 'S023/EV-020 11-verify-impl COMPLETE APPROVED 2026-08-03 — S023-D20: F50 and F51 approved (UJ-063 T0; inspection OpenAPI/code/T0 only; AC-RQ8/RQ9 met_at_T0_plus_infra; AC-RQ10 held; live DO deferred to 12/13); report=docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy Path A DO'
+          s022_baseline:
             status: completed
             started_at: '2026-08-02'
             started: '2026-08-02'
             completed_at: '2026-08-02'
             completed: '2026-08-02'
-            session_id: S021-retrieval-follow-on
-            branch: evolve/EV-018-retrieval-follow-on
-            evolve_cycle_id: EV-018
+            partial_rerun_at: '2026-08-02'
+            partial_rerun_note: S022/EV-019 — 11-verify-impl COMPLETE APPROVED (delta F47–F49); prior S021 COMPLETE nested under s021_baseline
+            session_id: S022-ingest-resilience
+            branch: evolve/EV-019-ingest-resilience
+            evolve_cycle_id: EV-019
             mode: evolve
             delta_only: true
             feature_ids:
-            - F46
-            - F45
-            feature: F46+F45
-            phase: Phase 23 (M99-M100)
+            - F47
+            - F48
+            - F49
+            feature: F47-F49
+            phase: Phase 24 (M101-M104)
+            commits_head: abe4608
+            t0_code_tip: 307e0d3
             current_action: completed
-            overall: pass
-            overall_result: PASS
-            decision: S021-D25
-            user_choice: option_1_approve_f46_f45
-            report: docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md
-            note: 'S021/EV-018 11-verify-impl COMPLETE 2026-08-02 — S021-D25 Approve F46+F45; continue → 12 S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-            s020_baseline:
+            next_action: none_session_closed
+            overall: approved
+            overall_result: approved
+            result: approved
+            user_approved: true
+            user_approved_at: '2026-08-02'
+            user_approval_choice: approve_all_f47_f49_uj062_ac_ir7_held
+            report: docs/sessions/S022-ingest-resilience/reports/verify-impl.md
+            report_status: completed
+            feature_list_status: Implemented
+            acceptance_criteria: AC-IR1–IR7 checked (IR7 held)
+            journey_signoffs:
+              UJ-062:
+                approved: true
+                approved_at: '2026-08-02'
+                user_choice: approve
+                t0: PASS_4_of_4
+                t3: n_a_ac_ir7_no_fe
+                note: matches expected caller experience
+            feature_signoffs:
+              F47:
+                approved: true
+                approved_at: '2026-08-02'
+                user_choice: approve
+              F48:
+                approved: true
+                approved_at: '2026-08-02'
+                user_choice: approve
+              F49:
+                approved: true
+                approved_at: '2026-08-02'
+                user_choice: approve
+            ac_ir7:
+              status: held
+              confirmed: true
+              confirmed_at: '2026-08-02'
+            substeps:
+              phase1_collect: completed
+              phase2_completeness: completed
+              phase3a_journey_signoff: completed
+              phase3b_api_inspection: completed
+              phase3_feature_approval: completed
+              phase5_scope: completed
+              phase6_report: completed
+              current: completed
+            note: S022/EV-019 11-verify-impl COMPLETE APPROVED 2026-08-02 — user approved F47–F49 + UJ-062 + AC-IR7 held; feature-list Implemented; AC-IR1–IR7 checked; report verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.
+            commits_pending: false
+            commits_note: 11-verify-impl APPROVED committed @ abe4608
+            s021_baseline:
               status: completed
               started_at: '2026-08-02'
               started: '2026-08-02'
-              completed: '2026-08-02'
               completed_at: '2026-08-02'
-              partial_rerun_at: '2026-08-02'
-              partial_rerun_note: EV-017/S020-retrieval-batch-b — 11-verify-impl in_progress Phase 3a; stale S019 top-level fields reconciled
-              session_id: S020-retrieval-batch-b
-              branch: evolve/EV-017-retrieval-batch-b
-              evolve_cycle_id: EV-017
+              completed: '2026-08-02'
+              session_id: S021-retrieval-follow-on
+              branch: evolve/EV-018-retrieval-follow-on
+              evolve_cycle_id: EV-018
               mode: evolve
               delta_only: true
               feature_ids:
-              - F43
-              - F44
+              - F46
               - F45
-              feature:
-              preparing: false
-              head_sha: e1e2899
-              commits_head: e1e2899
-              result: approved
-              overall: approved
-              overall_result: approved
-              report: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md
-              report_committed: true
-              report_commit_note: verify-impl.md present; Phase 3a UJ-057/058 Approve rows updated (report may need commit)
-              user_approved: true
-              user_approved_at: '2026-08-02'
-              user_approval_choice: approve_and_proceed
+              feature: F46+F45
+              phase: Phase 23 (M99-M100)
               current_action: completed
-              journey_signoffs:
-                UJ-057:
-                  approved: true
-                  approved_at: '2026-08-02'
-                  user_choice: option_1_approve
-                  t0: PASS_6_of_6
-                  t3: deferred_live_warm_post_deploy
-                  note: matches expected caller experience
-                UJ-058:
-                  approved: true
-                  approved_at: '2026-08-02'
-                  user_choice: option_1_approve
-                  t0: PASS_3_of_3
-                  t3: deferred_staging_flag_on
-                  note: matches expected caller experience
-                UJ-059:
-                  approved: true
-                  approved_at: '2026-08-02'
-                  user_choice: option_1_approve
-                  t0: PASS_2_of_2
-                  t3: live_ce_only_after_ship_gate
-                  note: mock CE gated ask; live CE only after ship gate
-                  batch: 2
-                  batch_user_phrase: approve all
-                UJ-060:
-                  approved: false
-                  deferred: true
-                  deferred_to: 12-verify-deploy/13-deploy-smoke
-                  deferred_at: '2026-08-02'
-                  user_choice: option_3_defer_12_13
-                  user_phrase: approve all
-                  interpretation: User 'approve all' for journey batch 2 treated as accepting recommended option 3 (Defer → 12/13), NOT option 1 ship-gate-satisfied; prod CE stays off; AC-BB9/TC-184 remain staging-gated
-                  ac_bb9_met: false
-                  tc_184_met: false
-                  note: staging Modal T4 CE spike deferred; AC-BB9/TC-184 not met
-                  batch: 2
-                  status: deferred
-              substeps:
-                phase1_collect: completed
-                phase2_completeness: completed
-                phase3a_journey_signoff: completed
-                phase3b_api_inspection: completed
-                phase3_feature_approval: completed
-                phase5_scope: completed
-                phase6_report: completed
-                current: completed
-              next_action: run 12-verify-deploy
-              note: S020/EV-017 11-verify-impl COMPLETE approved — F43–F45 Approve and proceed; UJ-060/AC-BB9 staging-gated; handoff 12-verify-deploy
-              verify_impl_report_note: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md completed artifact for 11-verify-impl
-              s017_baseline:
+              overall: pass
+              overall_result: PASS
+              decision: S021-D25
+              user_choice: option_1_approve_f46_f45
+              report: docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md
+              note: 'S021/EV-018 11-verify-impl COMPLETE 2026-08-02 — S021-D25 Approve F46+F45; continue → 12 S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+              s020_baseline:
                 status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                partial_rerun_at: '2026-07-30'
-                partial_rerun_note: EV-015/S017 COMPLETE — 11-verify-impl user sign-off (option A); prior baseline nested
-                session_id: S017-corpus-reembed-migration
-                branch: evolve/EV-015-corpus-reembed-migration
-                evolve_cycle_id: EV-015
-                mode: delta
+                started_at: '2026-08-02'
+                started: '2026-08-02'
+                completed: '2026-08-02'
+                completed_at: '2026-08-02'
+                partial_rerun_at: '2026-08-02'
+                partial_rerun_note: EV-017/S020-retrieval-batch-b — 11-verify-impl in_progress Phase 3a; stale S019 top-level fields reconciled
+                session_id: S020-retrieval-batch-b
+                branch: evolve/EV-017-retrieval-batch-b
+                evolve_cycle_id: EV-017
+                mode: evolve
                 delta_only: true
-                feature: F41
                 feature_ids:
-                - F41
+                - F43
+                - F44
+                - F45
+                feature:
+                preparing: false
+                head_sha: e1e2899
+                commits_head: e1e2899
+                result: approved
+                overall: approved
+                overall_result: approved
+                report: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md
+                report_committed: true
+                report_commit_note: verify-impl.md present; Phase 3a UJ-057/058 Approve rows updated (report may need commit)
                 user_approved: true
-                user_approved_at: '2026-07-30'
-                user_approval_choice: A
-                overall: pass
-                overall_result: PASS
-                report: docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md
-                inspection_artifacts: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
-                report_committed: false
-                report_commit_note: verify-impl.md / inspection artifacts may be uncommitted; do not invent sha; B01 remediation commit ref 1c2e46e
-                head_ref_b01: 1c2e46e
-                features:
-                  F41:
+                user_approved_at: '2026-08-02'
+                user_approval_choice: approve_and_proceed
+                current_action: completed
+                journey_signoffs:
+                  UJ-057:
                     approved: true
-                    ac: AC-RB1–10
-                    ac_checked: true
-                    deferred:
-                    - AC-RB8 staging drill
-                    note: F41 feature AC-RB1–10 approved; AC-RB8 staging drill deferred
-                journeys:
-                  UJ-053:
+                    approved_at: '2026-08-02'
+                    user_choice: option_1_approve
+                    t0: PASS_6_of_6
+                    t3: deferred_live_warm_post_deploy
+                    note: matches expected caller experience
+                  UJ-058:
                     approved: true
-                    note: user approved option A
-                  UJ-054:
+                    approved_at: '2026-08-02'
+                    user_choice: option_1_approve
+                    t0: PASS_3_of_3
+                    t3: deferred_staging_flag_on
+                    note: matches expected caller experience
+                  UJ-059:
                     approved: true
-                    note: user approved option A with known deferrals
-                    deferrals:
-                    - API promote CI/staging
-                    - F36 gate @ 12/13
-                manual_inspection:
-                  approved: true
-                  method: local Playwright preview /corpus screenshots
-                  artifacts_dir: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
-                  user_choice: A
-                prerequisites:
-                  09-qa: PASS
-                  10-e2e: PASS_with_advisories
+                    approved_at: '2026-08-02'
+                    user_choice: option_1_approve
+                    t0: PASS_2_of_2
+                    t3: live_ce_only_after_ship_gate
+                    note: mock CE gated ask; live CE only after ship gate
+                    batch: 2
+                    batch_user_phrase: approve all
+                  UJ-060:
+                    approved: false
+                    deferred: true
+                    deferred_to: 12-verify-deploy/13-deploy-smoke
+                    deferred_at: '2026-08-02'
+                    user_choice: option_3_defer_12_13
+                    user_phrase: approve all
+                    interpretation: User 'approve all' for journey batch 2 treated as accepting recommended option 3 (Defer → 12/13), NOT option 1 ship-gate-satisfied; prod CE stays off; AC-BB9/TC-184 remain staging-gated
+                    ac_bb9_met: false
+                    tc_184_met: false
+                    note: staging Modal T4 CE spike deferred; AC-BB9/TC-184 not met
+                    batch: 2
+                    status: deferred
                 substeps:
                   phase1_collect: completed
                   phase2_completeness: completed
                   phase3a_journey_signoff: completed
+                  phase3b_api_inspection: completed
                   phase3_feature_approval: completed
                   phase5_scope: completed
                   phase6_report: completed
                   current: completed
                 next_action: run 12-verify-deploy
-                note: 'S017/EV-015 11-verify-impl COMPLETE 2026-07-30 — user approved (option A) manual inspection (local Playwright preview /corpus screenshots), UJ-053, UJ-054 (known deferrals: API promote CI/staging; F36 gate @ 12/13), F41 AC-RB1–10 (AC-RB8 staging drill deferred); report docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md; inspection artifacts under docs/sessions/S017-corpus-reembed-migration/reports/inspection/; acceptance-criteria.md AC-RB1–10 marked [x]; report may be uncommitted (no invent sha); B01 HEAD ref 1c2e46e; 09-qa PASS; 10-e2e PASS w/ advisories; checkpoints.phase_d remains pending until 12-verify-deploy also completes; next → 12-verify-deploy'
-                s007_baseline:
-                  status: completed
-                  completed_at: '2026-07-01'
-                  session_id: S007-rag-eval
-                  branch: feat/S007-rag-eval
-                  evolve_cycle_id: EV-008
-                  report: docs/sessions/S007-rag-eval/reports/verify-impl.md
-                  note: F36 delta approved; prerequisite waiver recorded
-                  s008:
-                    status: completed
-                    completed_at: '2026-07-02'
-                    partial_rerun_at: '2026-07-02'
-                    partial_rerun_note: Partial — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user waiver 2026-07-02)
-                    session_id: S008-eval-ux-playground
-                    branch: feat/S008-eval-ux-playground
-                    evolve_cycle_id: EV-009
-                    report: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
-                    verified_milestones:
-                    - M65
-                    - M66
-                    - M67
-                    - M68
-                    - M69
-                    deferred:
-                    - M70
-                    - UJ-047
-                    - AC-E26
-                    note: S008/EV-009 partial 11-verify-impl — M65-M69 verified inline; M70 playground build pending; formal 08→09→10 still required before deploy stages
-                  s009:
-                    status: completed
-                    completed_at: '2026-07-06'
-                    session_id: S009-playground-model-download
-                    branch: feat/S009-playground-model-download
-                    evolve_cycle_id: EV-010
-                    report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
-                    note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
-              s019_baseline:
-                status: completed
-                session_id: S019-retrieval-quality
-                evolve_cycle_id: EV-016
-                feature: F42
-                feature_ids:
-                - F42
-                user_approved: true
-                user_approved_at: '2026-08-02T01:31:00Z'
-                user_approval_choice: option_1_approve
-                overall: approved
-                overall_result: approved
-                result: approved
-                journey_signoffs:
-                  UJ-055:
-                    approved: true
-                    approved_at: '2026-08-02T01:23:38Z'
-                    user_choice: option_1_approve
-                    confirmed_at: '2026-08-02T01:31:00Z'
-                  UJ-056:
-                    approved: true
-                    approved_at: '2026-08-02T01:24:00Z'
-                    user_choice: option_1_approve_local_path
-                    note: live Hy1/AC-RQ6 deferred to 12/13
-                    confirmed_at: '2026-08-02T01:31:00Z'
-                report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
-                note: Nested from stale top-level fields during S020 reconcile 2026-08-02
-                completed_at: '2026-08-02T01:31:00Z'
-                head_sha: 3e780b6
-                report_commit_sha: 3e780b6
+                note: S020/EV-017 11-verify-impl COMPLETE approved — F43–F45 Approve and proceed; UJ-060/AC-BB9 staging-gated; handoff 12-verify-deploy
+                verify_impl_report_note: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md completed artifact for 11-verify-impl
                 s017_baseline:
                   status: completed
                   started_at: '2026-07-30'
@@ -3919,128 +3842,254 @@ project:
                       evolve_cycle_id: EV-010
                       report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
                       note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
-              ac_bb9_met: false
-              tc_184_met: false
-              api_inspection:
-                status: approved
-                approved_at: '2026-08-02'
-                env_choice: option_3_staging_swagger
-                user_choice: approve_inspection
-                staging_docs_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/docs
-                staging_openapi_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/openapi.json
-                staging_openapi_http: 200
-                staging_commit: b08ec30
-                tip_commit: e1e2899
-                evidence:
-                  staging_ask_response_fields:
-                  - answer
-                  - language
-                  - sources
-                  staging_cache_hit: false
-                  staging_cache_hit_note: NO cache_hit on deployed AskResponse — expected; EV-017 tip not on staging
-                  tip_openapi: openapi/chat-rag.yaml
-                  tip_ask_response_cache_hit: required
-                  tip_stream_done_cache_hit: may_include
-                  f44_f45_public_openapi_ops: none_new_flag_gated_internals
-                  uj060_spike_docs: true
-                  source_of_truth_until_deploy: tip_openapi
-                features_inspected:
-                - F43
-                - F44
-                - F45
-                verify_impl_phase_3b: updated
-              report_status: completed
-              feature_approvals:
-                F43:
-                  approved: true
+                s019_baseline:
+                  status: completed
+                  session_id: S019-retrieval-quality
+                  evolve_cycle_id: EV-016
+                  feature: F42
+                  feature_ids:
+                  - F42
+                  user_approved: true
+                  user_approved_at: '2026-08-02T01:31:00Z'
+                  user_approval_choice: option_1_approve
+                  overall: approved
+                  overall_result: approved
+                  result: approved
+                  journey_signoffs:
+                    UJ-055:
+                      approved: true
+                      approved_at: '2026-08-02T01:23:38Z'
+                      user_choice: option_1_approve
+                      confirmed_at: '2026-08-02T01:31:00Z'
+                    UJ-056:
+                      approved: true
+                      approved_at: '2026-08-02T01:24:00Z'
+                      user_choice: option_1_approve_local_path
+                      note: live Hy1/AC-RQ6 deferred to 12/13
+                      confirmed_at: '2026-08-02T01:31:00Z'
+                  report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
+                  note: Nested from stale top-level fields during S020 reconcile 2026-08-02
+                  completed_at: '2026-08-02T01:31:00Z'
+                  head_sha: 3e780b6
+                  report_commit_sha: 3e780b6
+                  s017_baseline:
+                    status: completed
+                    started_at: '2026-07-30'
+                    completed_at: '2026-07-30'
+                    partial_rerun_at: '2026-07-30'
+                    partial_rerun_note: EV-015/S017 COMPLETE — 11-verify-impl user sign-off (option A); prior baseline nested
+                    session_id: S017-corpus-reembed-migration
+                    branch: evolve/EV-015-corpus-reembed-migration
+                    evolve_cycle_id: EV-015
+                    mode: delta
+                    delta_only: true
+                    feature: F41
+                    feature_ids:
+                    - F41
+                    user_approved: true
+                    user_approved_at: '2026-07-30'
+                    user_approval_choice: A
+                    overall: pass
+                    overall_result: PASS
+                    report: docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md
+                    inspection_artifacts: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
+                    report_committed: false
+                    report_commit_note: verify-impl.md / inspection artifacts may be uncommitted; do not invent sha; B01 remediation commit ref 1c2e46e
+                    head_ref_b01: 1c2e46e
+                    features:
+                      F41:
+                        approved: true
+                        ac: AC-RB1–10
+                        ac_checked: true
+                        deferred:
+                        - AC-RB8 staging drill
+                        note: F41 feature AC-RB1–10 approved; AC-RB8 staging drill deferred
+                    journeys:
+                      UJ-053:
+                        approved: true
+                        note: user approved option A
+                      UJ-054:
+                        approved: true
+                        note: user approved option A with known deferrals
+                        deferrals:
+                        - API promote CI/staging
+                        - F36 gate @ 12/13
+                    manual_inspection:
+                      approved: true
+                      method: local Playwright preview /corpus screenshots
+                      artifacts_dir: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
+                      user_choice: A
+                    prerequisites:
+                      09-qa: PASS
+                      10-e2e: PASS_with_advisories
+                    substeps:
+                      phase1_collect: completed
+                      phase2_completeness: completed
+                      phase3a_journey_signoff: completed
+                      phase3_feature_approval: completed
+                      phase5_scope: completed
+                      phase6_report: completed
+                      current: completed
+                    next_action: run 12-verify-deploy
+                    note: 'S017/EV-015 11-verify-impl COMPLETE 2026-07-30 — user approved (option A) manual inspection (local Playwright preview /corpus screenshots), UJ-053, UJ-054 (known deferrals: API promote CI/staging; F36 gate @ 12/13), F41 AC-RB1–10 (AC-RB8 staging drill deferred); report docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md; inspection artifacts under docs/sessions/S017-corpus-reembed-migration/reports/inspection/; acceptance-criteria.md AC-RB1–10 marked [x]; report may be uncommitted (no invent sha); B01 HEAD ref 1c2e46e; 09-qa PASS; 10-e2e PASS w/ advisories; checkpoints.phase_d remains pending until 12-verify-deploy also completes; next → 12-verify-deploy'
+                    s007_baseline:
+                      status: completed
+                      completed_at: '2026-07-01'
+                      session_id: S007-rag-eval
+                      branch: feat/S007-rag-eval
+                      evolve_cycle_id: EV-008
+                      report: docs/sessions/S007-rag-eval/reports/verify-impl.md
+                      note: F36 delta approved; prerequisite waiver recorded
+                      s008:
+                        status: completed
+                        completed_at: '2026-07-02'
+                        partial_rerun_at: '2026-07-02'
+                        partial_rerun_note: Partial — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user waiver 2026-07-02)
+                        session_id: S008-eval-ux-playground
+                        branch: feat/S008-eval-ux-playground
+                        evolve_cycle_id: EV-009
+                        report: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
+                        verified_milestones:
+                        - M65
+                        - M66
+                        - M67
+                        - M68
+                        - M69
+                        deferred:
+                        - M70
+                        - UJ-047
+                        - AC-E26
+                        note: S008/EV-009 partial 11-verify-impl — M65-M69 verified inline; M70 playground build pending; formal 08→09→10 still required before deploy stages
+                      s009:
+                        status: completed
+                        completed_at: '2026-07-06'
+                        session_id: S009-playground-model-download
+                        branch: feat/S009-playground-model-download
+                        evolve_cycle_id: EV-010
+                        report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
+                        note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
+                ac_bb9_met: false
+                tc_184_met: false
+                api_inspection:
+                  status: approved
                   approved_at: '2026-08-02'
-                  user_choice: approve_and_proceed
-                  note: Answer/retrieve cache H1; tip OpenAPI cache_hit SoT until deploy
-                F44:
-                  approved: true
-                  approved_at: '2026-08-02'
-                  user_choice: approve_and_proceed
-                  note: Soft language L1; flag-gated; staging flag-on deferred
-                F45:
-                  approved: true
-                  approved_at: '2026-08-02'
-                  user_choice: approve_and_proceed
-                  note: Approve for T0 ship; AC-BB9/UJ-060 staging-gated; prod CE off
-                  ac_bb9_met: false
-                  uj060: deferred_12_13
-                  prod_ce: false
-            next_action: none_session_closed
+                  env_choice: option_3_staging_swagger
+                  user_choice: approve_inspection
+                  staging_docs_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/docs
+                  staging_openapi_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/openapi.json
+                  staging_openapi_http: 200
+                  staging_commit: b08ec30
+                  tip_commit: e1e2899
+                  evidence:
+                    staging_ask_response_fields:
+                    - answer
+                    - language
+                    - sources
+                    staging_cache_hit: false
+                    staging_cache_hit_note: NO cache_hit on deployed AskResponse — expected; EV-017 tip not on staging
+                    tip_openapi: openapi/chat-rag.yaml
+                    tip_ask_response_cache_hit: required
+                    tip_stream_done_cache_hit: may_include
+                    f44_f45_public_openapi_ops: none_new_flag_gated_internals
+                    uj060_spike_docs: true
+                    source_of_truth_until_deploy: tip_openapi
+                  features_inspected:
+                  - F43
+                  - F44
+                  - F45
+                  verify_impl_phase_3b: updated
+                report_status: completed
+                feature_approvals:
+                  F43:
+                    approved: true
+                    approved_at: '2026-08-02'
+                    user_choice: approve_and_proceed
+                    note: Answer/retrieve cache H1; tip OpenAPI cache_hit SoT until deploy
+                  F44:
+                    approved: true
+                    approved_at: '2026-08-02'
+                    user_choice: approve_and_proceed
+                    note: Soft language L1; flag-gated; staging flag-on deferred
+                  F45:
+                    approved: true
+                    approved_at: '2026-08-02'
+                    user_choice: approve_and_proceed
+                    note: Approve for T0 ship; AC-BB9/UJ-060 staging-gated; prod CE off
+                    ac_bb9_met: false
+                    uj060: deferred_12_13
+                    prod_ce: false
+              next_action: none_session_closed
+              session_closed: true
+              session_closed_at: '2026-08-02'
             session_closed: true
             session_closed_at: '2026-08-02'
-          session_closed: true
-          session_closed_at: '2026-08-02'
-        completeness:
-          AC-RQ8: met_at_T0_plus_infra
-          AC-RQ9: met_at_T0_plus_infra
-          AC-RQ10: held
-          uj_063: approved_t0
-          inspection: openapi_code_t0_only
-          t3: n_a_under_ac_rq10
-          ci: green
-          scope_creep: none
-          gaps: none
-          feature_approvals: F50_F51_approved
-        phase3_askquestion:
-          presented: true
-          presented_at: '2026-08-03T12:38:48Z'
-          recommended: approve UJ-063 on T0; skip live inspection — OpenAPI/code only
-          status: answered
-          q1: approve_uj063_t0
-          q2: skip_live_inspection
-          answered_at: '2026-08-03T12:41:55Z'
-          choice: recommended_q1_q2
-          decision_id: S023-D19
-        completed_at: '2026-08-03'
-        completed: '2026-08-03'
-        s023_d20_decision: S023-D20
-        overall: approved
-        overall_result: approved
-        result: approved
-        user_approved: true
-        user_approved_at: '2026-08-03'
-        user_approval_choice: approve_f50_f51
-        feature_list_status: Implemented
-        commits_head: 267af20
-        journey_signoffs:
-          UJ-063:
-            approved: true
-            approved_at: '2026-08-03'
-            user_choice: approve
-            t0: PASS
-            t3: n_a_under_ac_rq10
+          completeness:
+            AC-RQ8: met_at_T0_plus_infra
+            AC-RQ9: met_at_T0_plus_infra
+            AC-RQ10: held
+            uj_063: approved_t0
             inspection: openapi_code_t0_only
+            t3: n_a_under_ac_rq10
+            ci: green
+            scope_creep: none
+            gaps: none
+            feature_approvals: F50_F51_approved
+          phase3_askquestion:
+            presented: true
+            presented_at: '2026-08-03T12:38:48Z'
+            recommended: approve UJ-063 on T0; skip live inspection — OpenAPI/code only
+            status: answered
+            q1: approve_uj063_t0
+            q2: skip_live_inspection
+            answered_at: '2026-08-03T12:41:55Z'
+            choice: recommended_q1_q2
             decision_id: S023-D19
-        feature_signoffs:
-          F50:
-            approved: true
-            approved_at: '2026-08-03'
-            user_choice: approve
-            decision_id: S023-D20
-          F51:
-            approved: true
-            approved_at: '2026-08-03'
-            user_choice: approve
-            decision_id: S023-D20
-        feature_approvals:
-          F50:
-            approved: true
-            approved_at: '2026-08-03'
-            user_choice: approve_f50_f51
-            decision_id: S023-D20
-          F51:
-            approved: true
-            approved_at: '2026-08-03'
-            user_choice: approve_f50_f51
-            decision_id: S023-D20
-        ac_rq10:
-          status: held
-          confirmed: true
-          confirmed_at: '2026-08-03'
+          completed_at: '2026-08-03'
+          completed: '2026-08-03'
+          s023_d20_decision: S023-D20
+          overall: approved
+          overall_result: approved
+          result: approved
+          user_approved: true
+          user_approved_at: '2026-08-03'
+          user_approval_choice: approve_f50_f51
+          feature_list_status: Implemented
+          commits_head: 267af20
+          journey_signoffs:
+            UJ-063:
+              approved: true
+              approved_at: '2026-08-03'
+              user_choice: approve
+              t0: PASS
+              t3: n_a_under_ac_rq10
+              inspection: openapi_code_t0_only
+              decision_id: S023-D19
+          feature_signoffs:
+            F50:
+              approved: true
+              approved_at: '2026-08-03'
+              user_choice: approve
+              decision_id: S023-D20
+            F51:
+              approved: true
+              approved_at: '2026-08-03'
+              user_choice: approve
+              decision_id: S023-D20
+          feature_approvals:
+            F50:
+              approved: true
+              approved_at: '2026-08-03'
+              user_choice: approve_f50_f51
+              decision_id: S023-D20
+            F51:
+              approved: true
+              approved_at: '2026-08-03'
+              user_choice: approve_f50_f51
+              decision_id: S023-D20
+          ac_rq10:
+            status: held
+            confirmed: true
+            confirmed_at: '2026-08-03'
     12-verify-deploy:
       status: completed
       started_at: '2026-08-03T21:16:29Z'
@@ -5579,14 +5628,14 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: merge_pr_207_then_verify
-    current_stage: 08-verify-build
-    note: 'EV-024 Phase C→D — Gate C→D PASS (S026-D54 / option 2); phase_c=passed; c_to_d=passed; askquestion cleared (Gate C→D / phase_c — user option 2 (pass + merge #207)); merge #207 approved; current_action=merge_pr_207_then_verify; next=Merge PR #207; watch CI on main; 08-verify-build M118 closeout; then 09-qa'
+    current_action: write_verify_impl_bulk_approve
+    current_stage: 11-verify-impl
+    note: 'EV-024 Phase D — S026-D55 bulk approve F64–F69; 11-verify-impl in_progress (write_verify_impl_bulk_approve); phase_d pending until report + 12'
     askquestion_pending: false
-    next_action: 'Merge PR #207; watch CI on main; 08-verify-build M118 closeout; then 09-qa'
+    next_action: 'finish verify-impl.md then pass phase_d → 12-verify-deploy'
     askquestion_pending_topic:
     s026_d29_decision: S026-D29
-    updated_at: '2026-08-05T00:30:00Z'
+    updated_at: '2026-08-05T01:00:00Z'
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
@@ -5896,12 +5945,13 @@ active_session:
     m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
     m118_ci_status: success
     ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
-    askquestion_cleared: 'Gate C→D / phase_c — user option 2 (pass + merge #207)'
+    askquestion_cleared: '11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)'
     checkpoints_phase_c: passed
     s026_d54_decision: S026-D54
     pr_207_merge_approved: true
     pr_207_merge_approved_at: '2026-08-05T00:30:00Z'
     pr_207_merge_approved_decision: S026-D54
+    s026_d55_decision: S026-D55
   - stage: 01-requirements
     required: true
     status: completed
@@ -7058,7 +7108,7 @@ active_session:
     updated_at: '2026-08-05T00:45:00Z'
   - stage: 11-verify-impl
     required: true
-    status: pending
+    status: in_progress
     skip_rationale:
     mode: evolve
     delta_only: true
@@ -7072,12 +7122,33 @@ active_session:
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
     build_head: c942971
-    current_action: phase_d_11_verify_impl
-    next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
+    current_action: write_verify_impl_bulk_approve
+    next_action: finish verify-impl.md then pass phase_d → 12-verify-deploy
     askquestion_pending: false
     askquestion_pending_topic:
-    note: S026/EV-024 11-verify-impl PENDING 2026-08-05 — Phase D 09+10 complete; await AskQuestion (UI preview + AC sign-off); phase_d remains pending
-    updated_at: '2026-08-05T00:45:00Z'
+    note: S026/EV-024 11-verify-impl IN_PROGRESS 2026-08-05 — S026-D55 User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; writing docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md; phase_d remains pending until report complete + handoff 12
+    updated_at: '2026-08-05T01:00:00Z'
+    started_at: '2026-08-05'
+    started: '2026-08-05'
+    started_at_iso: '2026-08-05T01:00:00Z'
+    branch: evolve/EV-024-frontend-ux-polish
+    askquestion_cleared: 11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)
+    s026_d55_decision: S026-D55
+    decision: S026-D55
+    user_choice: A_bulk_approve_all_f64_f69
+    approved_features:
+    - F64
+    - F65
+    - F66
+    - F67
+    - F68
+    - F69
+    ui_preview: skipped
+    manual_browser_inspection: waived
+    t2_t3_h4_h5: deferred_to_12_13_documented_waiver
+    checkpoints_phase_d: pending
+    report: docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md
+    report_status: writing
   - stage: 12-verify-deploy
     required: true
     status: pending
@@ -7092,8 +7163,8 @@ active_session:
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
   current_stage: 11-verify-impl
-  current_action: phase_d_11_verify_impl
-  next_action: '11-verify-impl AskQuestion (UI preview + AC sign-off)'
+  current_action: write_verify_impl_bulk_approve
+  next_action: 'finish verify-impl.md then pass phase_d → 12-verify-deploy'
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -7166,10 +7237,10 @@ active_session:
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
   askquestion_pending_topic:
-  updated_at: '2026-08-05T00:45:00Z'
+  updated_at: '2026-08-05T01:00:00Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026-D54 Gate C→D PASS; #207 merged c942971; main CI+preflight green; 08 M118 PASS; Phase D 09+10 COMPLETE (pass_with_advisories / pass_t0); phase_d pending until 11; next → 11-verify-impl AskQuestion'
+  note: 'S026/EV-024 11-verify-impl IN_PROGRESS 2026-08-05 — S026-D55 User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; writing docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md; phase_d remains pending until report complete + handoff 12'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -7266,7 +7337,7 @@ active_session:
   t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
   t116_4_files: *id005
   branch_ahead_of_origin: 0
-  resume_note: '#207 merged @c942971; 08 M118 PASS; 09 pass_with_advisories; 10 pass_t0; phase_d pending; next=11-verify-impl AskQuestion (UI preview + AC sign-off)'
+  resume_note: 'S026-D55 bulk approve F64–F69; UI preview skipped; T2/T3 H4–H5 deferred 12/13; writing verify-impl; phase_d pending'
   s026_d51_decision: S026-D51
   execution_plan_note: 'Phase 27 M112–M118 merged via #207 @c942971; 08/09/10 complete; next 11-verify-impl AskQuestion (UI preview + AC sign-off)'
   t116_5_commit: bb30b26
@@ -7535,7 +7606,7 @@ active_session:
   m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
   m118_ci_status: success
   ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
-  askquestion_cleared: 'Gate C→D / phase_c — user option 2 (pass + merge #207)'
+  askquestion_cleared: '11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)'
   checkpoints_phase_c: passed
   s026_d54_decision: S026-D54
   pr_207_merge_approved: true
@@ -7564,6 +7635,7 @@ active_session:
   pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
   phase_a: passed
   phase_b: passed
+  s026_d55_decision: S026-D55
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -17177,378 +17249,301 @@ stages:
     updated_at: '2026-08-05T00:45:00Z'
     required: true
   11-verify-impl:
-    status: completed
-    started_at: '2026-08-03'
-    started: '2026-08-03'
-    completed: '2026-08-03'
-    completed_at: '2026-08-03'
-    partial_rerun_at: '2026-08-03'
-    partial_rerun_note: S024/EV-022 — 11-verify-impl STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline; Phase D PASS (S024-D43)
-    session_id: S024-website-scrape-crawl
-    branch: evolve/EV-022-website-scrape-crawl
-    evolve_cycle_id: EV-022
+    status: in_progress
+    started_at: '2026-08-05'
+    started: '2026-08-05'
+    started_at_iso: '2026-08-05T01:00:00Z'
+    partial_rerun_at: '2026-08-05'
+    partial_rerun_note: S026/EV-024 — 11-verify-impl STARTED (delta F64–F69); prior S024 COMPLETE nested under s024_baseline; S026-D55 bulk approve
+    session_id: S026-frontend-ux-polish
+    branch: evolve/EV-024-frontend-ux-polish
+    session_branch: feat/S026-frontend-ux-polish
+    evolve_cycle_id: EV-024
     mode: evolve
     delta_only: true
     feature_ids:
-    - F59
-    - F60
-    - F61
-    feature: F59+F60+F61
-    phase: Phase 26 (M108-M111)
-    current_action: completed
-    next_action: Complete 12-verify-deploy pre-deploy checks (H0c, VITE/CORS, secrets, Alembic 0011, failure modes, rollback) then AskQuestion deploy gate
-    s024_d43_decision: S024-D43
-    s024_d44_decision: S024-D44
-    s024_d45_decision: S024-D45
-    s024_d46_decision: S024-D46
+    - F64
+    - F65
+    - F66
+    - F67
+    - F68
+    - F69
+    feature: F64+F65+F66+F67+F68+F69
+    phase: Phase 27 (M112-M118)
+    build_head: c942971
+    current_action: write_verify_impl_bulk_approve
+    next_action: finish verify-impl.md then pass phase_d → 12-verify-deploy
     askquestion_pending: false
-    checkpoints_phase_d: passed
-    ui_preview: yes_local_non_deployed
-    local_preview_port: 5174
-    local_preview_required: false
+    askquestion_pending_topic:
+    askquestion_cleared: 11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)
+    s026_d55_decision: S026-D55
+    decision: S026-D55
+    user_choice: A_bulk_approve_all_f64_f69
+    approved_features:
+    - F64
+    - F65
+    - F66
+    - F67
+    - F68
+    - F69
+    ui_preview: skipped
     manual_browser_inspection: waived
-    inspection_basis: t0_openapi
-    inspection_env: staging_visuals_deferred
+    inspection_basis: t0_code_qa_e2e
     staging_visuals: deferred_post_deploy
-    report: docs/sessions/S024-website-scrape-crawl/reports/verify-impl.md
-    report_status: completed
-    note: S024/EV-022 11-verify-impl COMPLETE APPROVED 2026-08-03 — S024-D46 Approve all UJ-064–066 + F59–F61; S024-D45 browser waived; verify-impl written @ aeb76a9; handoff → 12-verify-deploy
-    s023_baseline:
+    t2_t3_h4_h5: deferred_to_12_13_documented_waiver
+    checkpoints_phase_d: pending
+    report: docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md
+    report_status: writing
+    required: true
+    note: S026/EV-024 11-verify-impl IN_PROGRESS 2026-08-05 — S026-D55 User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; writing docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md; phase_d remains pending until report complete + handoff 12
+    updated_at: '2026-08-05T01:00:00Z'
+    s024_baseline:
       status: completed
       started_at: '2026-08-03'
       started: '2026-08-03'
+      completed: '2026-08-03'
+      completed_at: '2026-08-03'
       partial_rerun_at: '2026-08-03'
-      partial_rerun_note: 'S023/EV-020 — 11-verify-impl STARTED (delta F50+F51); prior S022 COMPLETE nested under s022_baseline; user chose recommended start after S023-D17 advisory remediation; draft PR #180'
-      session_id: S023-retrieval-topk-packing
-      branch: evolve/EV-020-retrieval-topk-packing
-      evolve_cycle_id: EV-020
+      partial_rerun_note: S024/EV-022 — 11-verify-impl STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline; Phase D PASS (S024-D43)
+      session_id: S024-website-scrape-crawl
+      branch: evolve/EV-022-website-scrape-crawl
+      evolve_cycle_id: EV-022
       mode: evolve
       delta_only: true
       feature_ids:
-      - F50
-      - F51
-      feature: F50+F51
-      phase: Phase 25 (M105-M107)
-      draft_pr: 180
-      draft_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180
+      - F59
+      - F60
+      - F61
+      feature: F59+F60+F61
+      phase: Phase 26 (M108-M111)
       current_action: completed
-      next_action: run 12-verify-deploy
-      s023_d17_decision: S023-D17
-      s023_d18_decision: S023-D18
-      s023_d19_decision: S023-D19
-      user_start_choice: recommended_start_11_after_advisory_remediation
-      substeps:
-        phase1_collect: completed
-        phase2_completeness: completed
-        phase3a_journey_signoff: completed
-        phase3b_api_inspection: skipped_openapi_code_t0_only
-        phase3_feature_approval: completed
-        phase5_scope: completed
-        phase6_report: completed
-        current: completed
-      report: docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md
+      next_action: Complete 12-verify-deploy pre-deploy checks (H0c, VITE/CORS, secrets, Alembic 0011, failure modes, rollback) then AskQuestion deploy gate
+      s024_d43_decision: S024-D43
+      s024_d44_decision: S024-D44
+      s024_d45_decision: S024-D45
+      s024_d46_decision: S024-D46
+      askquestion_pending: false
+      checkpoints_phase_d: passed
+      ui_preview: yes_local_non_deployed
+      local_preview_port: 5174
+      local_preview_required: false
+      manual_browser_inspection: waived
+      inspection_basis: t0_openapi
+      inspection_env: staging_visuals_deferred
+      staging_visuals: deferred_post_deploy
+      report: docs/sessions/S024-website-scrape-crawl/reports/verify-impl.md
       report_status: completed
-      handoff_note: HANDOFF.md regenerated
-      note: 'S023/EV-020 11-verify-impl COMPLETE APPROVED 2026-08-03 — S023-D20: F50 and F51 approved (UJ-063 T0; inspection OpenAPI/code/T0 only; AC-RQ8/RQ9 met_at_T0_plus_infra; AC-RQ10 held; live DO deferred to 12/13); report=docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy Path A DO'
-      s022_baseline:
+      note: S024/EV-022 11-verify-impl COMPLETE APPROVED 2026-08-03 — S024-D46 Approve all UJ-064–066 + F59–F61; S024-D45 browser waived; verify-impl written @ aeb76a9; handoff → 12-verify-deploy
+      s023_baseline:
         status: completed
-        started_at: '2026-08-02'
-        started: '2026-08-02'
-        completed_at: '2026-08-02'
-        completed: '2026-08-02'
-        partial_rerun_at: '2026-08-02'
-        partial_rerun_note: S022/EV-019 — 11-verify-impl COMPLETE APPROVED (delta F47–F49); prior S021 COMPLETE nested under s021_baseline
-        session_id: S022-ingest-resilience
-        branch: evolve/EV-019-ingest-resilience
-        evolve_cycle_id: EV-019
+        started_at: '2026-08-03'
+        started: '2026-08-03'
+        partial_rerun_at: '2026-08-03'
+        partial_rerun_note: 'S023/EV-020 — 11-verify-impl STARTED (delta F50+F51); prior S022 COMPLETE nested under s022_baseline; user chose recommended start after S023-D17 advisory remediation; draft PR #180'
+        session_id: S023-retrieval-topk-packing
+        branch: evolve/EV-020-retrieval-topk-packing
+        evolve_cycle_id: EV-020
         mode: evolve
         delta_only: true
         feature_ids:
-        - F47
-        - F48
-        - F49
-        feature: F47-F49
-        phase: Phase 24 (M101-M104)
-        commits_head: abe4608
-        t0_code_tip: 307e0d3
+        - F50
+        - F51
+        feature: F50+F51
+        phase: Phase 25 (M105-M107)
+        draft_pr: 180
+        draft_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/180
         current_action: completed
-        next_action: none_session_closed
-        overall: approved
-        overall_result: approved
-        result: approved
-        user_approved: true
-        user_approved_at: '2026-08-02'
-        user_approval_choice: approve_all_f47_f49_uj062_ac_ir7_held
-        report: docs/sessions/S022-ingest-resilience/reports/verify-impl.md
-        report_status: completed
-        feature_list_status: Implemented
-        acceptance_criteria: AC-IR1–IR7 checked (IR7 held)
-        journey_signoffs:
-          UJ-062:
-            approved: true
-            approved_at: '2026-08-02'
-            user_choice: approve
-            t0: PASS_4_of_4
-            t3: n_a_ac_ir7_no_fe
-            note: matches expected caller experience
-        feature_signoffs:
-          F47:
-            approved: true
-            approved_at: '2026-08-02'
-            user_choice: approve
-          F48:
-            approved: true
-            approved_at: '2026-08-02'
-            user_choice: approve
-          F49:
-            approved: true
-            approved_at: '2026-08-02'
-            user_choice: approve
-        ac_ir7:
-          status: held
-          confirmed: true
-          confirmed_at: '2026-08-02'
+        next_action: run 12-verify-deploy
+        s023_d17_decision: S023-D17
+        s023_d18_decision: S023-D18
+        s023_d19_decision: S023-D19
+        user_start_choice: recommended_start_11_after_advisory_remediation
         substeps:
           phase1_collect: completed
           phase2_completeness: completed
           phase3a_journey_signoff: completed
-          phase3b_api_inspection: completed
+          phase3b_api_inspection: skipped_openapi_code_t0_only
           phase3_feature_approval: completed
           phase5_scope: completed
           phase6_report: completed
           current: completed
-        note: S022/EV-019 11-verify-impl COMPLETE APPROVED 2026-08-02 — user approved F47–F49 + UJ-062 + AC-IR7 held; feature-list Implemented; AC-IR1–IR7 checked; report verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy
-        commits_pending: false
-        commits_note: 11-verify-impl APPROVED committed @ abe4608
-        s021_baseline:
+        report: docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md
+        report_status: completed
+        handoff_note: HANDOFF.md regenerated
+        note: 'S023/EV-020 11-verify-impl COMPLETE APPROVED 2026-08-03 — S023-D20: F50 and F51 approved (UJ-063 T0; inspection OpenAPI/code/T0 only; AC-RQ8/RQ9 met_at_T0_plus_infra; AC-RQ10 held; live DO deferred to 12/13); report=docs/sessions/S023-retrieval-topk-packing/reports/verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy Path A DO'
+        s022_baseline:
           status: completed
           started_at: '2026-08-02'
           started: '2026-08-02'
           completed_at: '2026-08-02'
           completed: '2026-08-02'
-          session_id: S021-retrieval-follow-on
-          branch: evolve/EV-018-retrieval-follow-on
-          evolve_cycle_id: EV-018
+          partial_rerun_at: '2026-08-02'
+          partial_rerun_note: S022/EV-019 — 11-verify-impl COMPLETE APPROVED (delta F47–F49); prior S021 COMPLETE nested under s021_baseline
+          session_id: S022-ingest-resilience
+          branch: evolve/EV-019-ingest-resilience
+          evolve_cycle_id: EV-019
           mode: evolve
           delta_only: true
           feature_ids:
-          - F46
-          - F45
-          feature: F46+F45
-          phase: Phase 23 (M99-M100)
+          - F47
+          - F48
+          - F49
+          feature: F47-F49
+          phase: Phase 24 (M101-M104)
+          commits_head: abe4608
+          t0_code_tip: 307e0d3
           current_action: completed
-          overall: pass
-          overall_result: PASS
-          decision: S021-D25
-          user_choice: option_1_approve_f46_f45
-          report: docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md
-          note: 'S021/EV-018 11-verify-impl COMPLETE 2026-08-02 — S021-D25 Approve F46+F45; continue → 12 S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-          s020_baseline:
+          next_action: none_session_closed
+          overall: approved
+          overall_result: approved
+          result: approved
+          user_approved: true
+          user_approved_at: '2026-08-02'
+          user_approval_choice: approve_all_f47_f49_uj062_ac_ir7_held
+          report: docs/sessions/S022-ingest-resilience/reports/verify-impl.md
+          report_status: completed
+          feature_list_status: Implemented
+          acceptance_criteria: AC-IR1–IR7 checked (IR7 held)
+          journey_signoffs:
+            UJ-062:
+              approved: true
+              approved_at: '2026-08-02'
+              user_choice: approve
+              t0: PASS_4_of_4
+              t3: n_a_ac_ir7_no_fe
+              note: matches expected caller experience
+          feature_signoffs:
+            F47:
+              approved: true
+              approved_at: '2026-08-02'
+              user_choice: approve
+            F48:
+              approved: true
+              approved_at: '2026-08-02'
+              user_choice: approve
+            F49:
+              approved: true
+              approved_at: '2026-08-02'
+              user_choice: approve
+          ac_ir7:
+            status: held
+            confirmed: true
+            confirmed_at: '2026-08-02'
+          substeps:
+            phase1_collect: completed
+            phase2_completeness: completed
+            phase3a_journey_signoff: completed
+            phase3b_api_inspection: completed
+            phase3_feature_approval: completed
+            phase5_scope: completed
+            phase6_report: completed
+            current: completed
+          note: S022/EV-019 11-verify-impl COMPLETE APPROVED 2026-08-02 — user approved F47–F49 + UJ-062 + AC-IR7 held; feature-list Implemented; AC-IR1–IR7 checked; report verify-impl.md; phase_d pending until 12; handoff → 12-verify-deploy
+          commits_pending: false
+          commits_note: 11-verify-impl APPROVED committed @ abe4608
+          s021_baseline:
             status: completed
             started_at: '2026-08-02'
             started: '2026-08-02'
-            completed: '2026-08-02'
             completed_at: '2026-08-02'
-            partial_rerun_at: '2026-08-02'
-            partial_rerun_note: EV-017/S020-retrieval-batch-b — 11-verify-impl in_progress Phase 3a; stale S019 top-level fields reconciled
-            session_id: S020-retrieval-batch-b
-            branch: evolve/EV-017-retrieval-batch-b
-            evolve_cycle_id: EV-017
+            completed: '2026-08-02'
+            session_id: S021-retrieval-follow-on
+            branch: evolve/EV-018-retrieval-follow-on
+            evolve_cycle_id: EV-018
             mode: evolve
             delta_only: true
             feature_ids:
-            - F43
-            - F44
+            - F46
             - F45
-            feature:
-            preparing: false
-            head_sha: e1e2899
-            commits_head: e1e2899
-            result: approved
-            overall: approved
-            overall_result: approved
-            report: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md
-            report_committed: true
-            report_commit_note: verify-impl.md present; Phase 3a UJ-057/058 Approve rows updated (report may need commit)
-            user_approved: true
-            user_approved_at: '2026-08-02'
-            user_approval_choice: approve_and_proceed
+            feature: F46+F45
+            phase: Phase 23 (M99-M100)
             current_action: completed
-            journey_signoffs:
-              UJ-057:
-                approved: true
-                approved_at: '2026-08-02'
-                user_choice: option_1_approve
-                t0: PASS_6_of_6
-                t3: deferred_live_warm_post_deploy
-                note: matches expected caller experience
-              UJ-058:
-                approved: true
-                approved_at: '2026-08-02'
-                user_choice: option_1_approve
-                t0: PASS_3_of_3
-                t3: deferred_staging_flag_on
-                note: matches expected caller experience
-              UJ-059:
-                approved: true
-                approved_at: '2026-08-02'
-                user_choice: option_1_approve
-                t0: PASS_2_of_2
-                t3: live_ce_only_after_ship_gate
-                note: mock CE gated ask; live CE only after ship gate
-                batch: 2
-                batch_user_phrase: approve all
-              UJ-060:
-                approved: false
-                deferred: true
-                deferred_to: 12-verify-deploy/13-deploy-smoke
-                deferred_at: '2026-08-02'
-                user_choice: option_3_defer_12_13
-                user_phrase: approve all
-                interpretation: User 'approve all' for journey batch 2 treated as accepting recommended option 3 (Defer → 12/13), NOT option 1 ship-gate-satisfied; prod CE stays off; AC-BB9/TC-184 remain staging-gated
-                ac_bb9_met: false
-                tc_184_met: false
-                note: staging Modal T4 CE spike deferred; AC-BB9/TC-184 not met
-                batch: 2
-                status: deferred
-            substeps:
-              phase1_collect: completed
-              phase2_completeness: completed
-              phase3a_journey_signoff: completed
-              phase3b_api_inspection: completed
-              phase3_feature_approval: completed
-              phase5_scope: completed
-              phase6_report: completed
-              current: completed
-            next_action: run 12-verify-deploy
-            note: S020/EV-017 11-verify-impl COMPLETE approved — F43–F45 Approve and proceed; UJ-060/AC-BB9 staging-gated; handoff 12-verify-deploy
-            verify_impl_report_note: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md completed artifact for 11-verify-impl
-            s017_baseline:
+            overall: pass
+            overall_result: PASS
+            decision: S021-D25
+            user_choice: option_1_approve_f46_f45
+            report: docs/sessions/S021-retrieval-follow-on/reports/verify-impl.md
+            note: 'S021/EV-018 11-verify-impl COMPLETE 2026-08-02 — S021-D25 Approve F46+F45; continue → 12 S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+            s020_baseline:
               status: completed
-              started_at: '2026-07-30'
-              completed_at: '2026-07-30'
-              partial_rerun_at: '2026-07-30'
-              partial_rerun_note: EV-015/S017 COMPLETE — 11-verify-impl user sign-off (option A); prior baseline nested
-              session_id: S017-corpus-reembed-migration
-              branch: evolve/EV-015-corpus-reembed-migration
-              evolve_cycle_id: EV-015
-              mode: delta
+              started_at: '2026-08-02'
+              started: '2026-08-02'
+              completed: '2026-08-02'
+              completed_at: '2026-08-02'
+              partial_rerun_at: '2026-08-02'
+              partial_rerun_note: EV-017/S020-retrieval-batch-b — 11-verify-impl in_progress Phase 3a; stale S019 top-level fields reconciled
+              session_id: S020-retrieval-batch-b
+              branch: evolve/EV-017-retrieval-batch-b
+              evolve_cycle_id: EV-017
+              mode: evolve
               delta_only: true
-              feature: F41
               feature_ids:
-              - F41
+              - F43
+              - F44
+              - F45
+              feature:
+              preparing: false
+              head_sha: e1e2899
+              commits_head: e1e2899
+              result: approved
+              overall: approved
+              overall_result: approved
+              report: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md
+              report_committed: true
+              report_commit_note: verify-impl.md present; Phase 3a UJ-057/058 Approve rows updated (report may need commit)
               user_approved: true
-              user_approved_at: '2026-07-30'
-              user_approval_choice: A
-              overall: pass
-              overall_result: PASS
-              report: docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md
-              inspection_artifacts: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
-              report_committed: false
-              report_commit_note: verify-impl.md / inspection artifacts may be uncommitted; do not invent sha; B01 remediation commit ref 1c2e46e
-              head_ref_b01: 1c2e46e
-              features:
-                F41:
+              user_approved_at: '2026-08-02'
+              user_approval_choice: approve_and_proceed
+              current_action: completed
+              journey_signoffs:
+                UJ-057:
                   approved: true
-                  ac: AC-RB1–10
-                  ac_checked: true
-                  deferred:
-                  - AC-RB8 staging drill
-                  note: F41 feature AC-RB1–10 approved; AC-RB8 staging drill deferred
-              journeys:
-                UJ-053:
+                  approved_at: '2026-08-02'
+                  user_choice: option_1_approve
+                  t0: PASS_6_of_6
+                  t3: deferred_live_warm_post_deploy
+                  note: matches expected caller experience
+                UJ-058:
                   approved: true
-                  note: user approved option A
-                UJ-054:
+                  approved_at: '2026-08-02'
+                  user_choice: option_1_approve
+                  t0: PASS_3_of_3
+                  t3: deferred_staging_flag_on
+                  note: matches expected caller experience
+                UJ-059:
                   approved: true
-                  note: user approved option A with known deferrals
-                  deferrals:
-                  - API promote CI/staging
-                  - F36 gate @ 12/13
-              manual_inspection:
-                approved: true
-                method: local Playwright preview /corpus screenshots
-                artifacts_dir: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
-                user_choice: A
-              prerequisites:
-                09-qa: PASS
-                10-e2e: PASS_with_advisories
+                  approved_at: '2026-08-02'
+                  user_choice: option_1_approve
+                  t0: PASS_2_of_2
+                  t3: live_ce_only_after_ship_gate
+                  note: mock CE gated ask; live CE only after ship gate
+                  batch: 2
+                  batch_user_phrase: approve all
+                UJ-060:
+                  approved: false
+                  deferred: true
+                  deferred_to: 12-verify-deploy/13-deploy-smoke
+                  deferred_at: '2026-08-02'
+                  user_choice: option_3_defer_12_13
+                  user_phrase: approve all
+                  interpretation: User 'approve all' for journey batch 2 treated as accepting recommended option 3 (Defer → 12/13), NOT option 1 ship-gate-satisfied; prod CE stays off; AC-BB9/TC-184 remain staging-gated
+                  ac_bb9_met: false
+                  tc_184_met: false
+                  note: staging Modal T4 CE spike deferred; AC-BB9/TC-184 not met
+                  batch: 2
+                  status: deferred
               substeps:
                 phase1_collect: completed
                 phase2_completeness: completed
                 phase3a_journey_signoff: completed
+                phase3b_api_inspection: completed
                 phase3_feature_approval: completed
                 phase5_scope: completed
                 phase6_report: completed
                 current: completed
               next_action: run 12-verify-deploy
-              note: 'S017/EV-015 11-verify-impl COMPLETE 2026-07-30 — user approved (option A) manual inspection (local Playwright preview /corpus screenshots), UJ-053, UJ-054 (known deferrals: API promote CI/staging; F36 gate @ 12/13), F41 AC-RB1–10 (AC-RB8 staging drill deferred); report docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md; inspection artifacts under docs/sessions/S017-corpus-reembed-migration/reports/inspection/; acceptance-criteria.md AC-RB1–10 marked [x]; report may be uncommitted (no invent sha); B01 HEAD ref 1c2e46e; 09-qa PASS; 10-e2e PASS w/ advisories; checkpoints.phase_d remains pending until 12-verify-deploy also completes; next → 12-verify-deploy'
-              s007_baseline:
-                status: completed
-                completed_at: '2026-07-01'
-                session_id: S007-rag-eval
-                branch: feat/S007-rag-eval
-                evolve_cycle_id: EV-008
-                report: docs/sessions/S007-rag-eval/reports/verify-impl.md
-                note: F36 delta approved; prerequisite waiver recorded
-                s008:
-                  status: completed
-                  completed_at: '2026-07-02'
-                  partial_rerun_at: '2026-07-02'
-                  partial_rerun_note: Partial — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user waiver 2026-07-02)
-                  session_id: S008-eval-ux-playground
-                  branch: feat/S008-eval-ux-playground
-                  evolve_cycle_id: EV-009
-                  report: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
-                  verified_milestones:
-                  - M65
-                  - M66
-                  - M67
-                  - M68
-                  - M69
-                  deferred:
-                  - M70
-                  - UJ-047
-                  - AC-E26
-                  note: S008/EV-009 partial 11-verify-impl — M65-M69 verified inline; M70 playground build pending; formal 08→09→10 still required before deploy stages
-                s009:
-                  status: completed
-                  completed_at: '2026-07-06'
-                  session_id: S009-playground-model-download
-                  branch: feat/S009-playground-model-download
-                  evolve_cycle_id: EV-010
-                  report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
-                  note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
-            s019_baseline:
-              status: completed
-              session_id: S019-retrieval-quality
-              evolve_cycle_id: EV-016
-              feature: F42
-              feature_ids:
-              - F42
-              user_approved: true
-              user_approved_at: '2026-08-02T01:31:00Z'
-              user_approval_choice: option_1_approve
-              overall: approved
-              overall_result: approved
-              result: approved
-              journey_signoffs:
-                UJ-055:
-                  approved: true
-                  approved_at: '2026-08-02T01:23:38Z'
-                  user_choice: option_1_approve
-                  confirmed_at: '2026-08-02T01:31:00Z'
-                UJ-056:
-                  approved: true
-                  approved_at: '2026-08-02T01:24:00Z'
-                  user_choice: option_1_approve_local_path
-                  note: live Hy1/AC-RQ6 deferred to 12/13
-                  confirmed_at: '2026-08-02T01:31:00Z'
-              report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
-              note: Nested from stale top-level fields during S020 reconcile 2026-08-02
-              completed_at: '2026-08-02T01:31:00Z'
-              head_sha: 3e780b6
-              report_commit_sha: 3e780b6
+              note: S020/EV-017 11-verify-impl COMPLETE approved — F43–F45 Approve and proceed; UJ-060/AC-BB9 staging-gated; handoff 12-verify-deploy
+              verify_impl_report_note: docs/sessions/S020-retrieval-batch-b/reports/verify-impl.md completed artifact for 11-verify-impl
               s017_baseline:
                 status: completed
                 started_at: '2026-07-30'
@@ -17645,128 +17640,254 @@ stages:
                     evolve_cycle_id: EV-010
                     report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
                     note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
-            ac_bb9_met: false
-            tc_184_met: false
-            api_inspection:
-              status: approved
-              approved_at: '2026-08-02'
-              env_choice: option_3_staging_swagger
-              user_choice: approve_inspection
-              staging_docs_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/docs
-              staging_openapi_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/openapi.json
-              staging_openapi_http: 200
-              staging_commit: b08ec30
-              tip_commit: e1e2899
-              evidence:
-                staging_ask_response_fields:
-                - answer
-                - language
-                - sources
-                staging_cache_hit: false
-                staging_cache_hit_note: NO cache_hit on deployed AskResponse — expected; EV-017 tip not on staging
-                tip_openapi: openapi/chat-rag.yaml
-                tip_ask_response_cache_hit: required
-                tip_stream_done_cache_hit: may_include
-                f44_f45_public_openapi_ops: none_new_flag_gated_internals
-                uj060_spike_docs: true
-                source_of_truth_until_deploy: tip_openapi
-              features_inspected:
-              - F43
-              - F44
-              - F45
-              verify_impl_phase_3b: updated
-            report_status: completed
-            feature_approvals:
-              F43:
-                approved: true
+              s019_baseline:
+                status: completed
+                session_id: S019-retrieval-quality
+                evolve_cycle_id: EV-016
+                feature: F42
+                feature_ids:
+                - F42
+                user_approved: true
+                user_approved_at: '2026-08-02T01:31:00Z'
+                user_approval_choice: option_1_approve
+                overall: approved
+                overall_result: approved
+                result: approved
+                journey_signoffs:
+                  UJ-055:
+                    approved: true
+                    approved_at: '2026-08-02T01:23:38Z'
+                    user_choice: option_1_approve
+                    confirmed_at: '2026-08-02T01:31:00Z'
+                  UJ-056:
+                    approved: true
+                    approved_at: '2026-08-02T01:24:00Z'
+                    user_choice: option_1_approve_local_path
+                    note: live Hy1/AC-RQ6 deferred to 12/13
+                    confirmed_at: '2026-08-02T01:31:00Z'
+                report: docs/sessions/S019-retrieval-quality/reports/verify-impl.md
+                note: Nested from stale top-level fields during S020 reconcile 2026-08-02
+                completed_at: '2026-08-02T01:31:00Z'
+                head_sha: 3e780b6
+                report_commit_sha: 3e780b6
+                s017_baseline:
+                  status: completed
+                  started_at: '2026-07-30'
+                  completed_at: '2026-07-30'
+                  partial_rerun_at: '2026-07-30'
+                  partial_rerun_note: EV-015/S017 COMPLETE — 11-verify-impl user sign-off (option A); prior baseline nested
+                  session_id: S017-corpus-reembed-migration
+                  branch: evolve/EV-015-corpus-reembed-migration
+                  evolve_cycle_id: EV-015
+                  mode: delta
+                  delta_only: true
+                  feature: F41
+                  feature_ids:
+                  - F41
+                  user_approved: true
+                  user_approved_at: '2026-07-30'
+                  user_approval_choice: A
+                  overall: pass
+                  overall_result: PASS
+                  report: docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md
+                  inspection_artifacts: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
+                  report_committed: false
+                  report_commit_note: verify-impl.md / inspection artifacts may be uncommitted; do not invent sha; B01 remediation commit ref 1c2e46e
+                  head_ref_b01: 1c2e46e
+                  features:
+                    F41:
+                      approved: true
+                      ac: AC-RB1–10
+                      ac_checked: true
+                      deferred:
+                      - AC-RB8 staging drill
+                      note: F41 feature AC-RB1–10 approved; AC-RB8 staging drill deferred
+                  journeys:
+                    UJ-053:
+                      approved: true
+                      note: user approved option A
+                    UJ-054:
+                      approved: true
+                      note: user approved option A with known deferrals
+                      deferrals:
+                      - API promote CI/staging
+                      - F36 gate @ 12/13
+                  manual_inspection:
+                    approved: true
+                    method: local Playwright preview /corpus screenshots
+                    artifacts_dir: docs/sessions/S017-corpus-reembed-migration/reports/inspection/
+                    user_choice: A
+                  prerequisites:
+                    09-qa: PASS
+                    10-e2e: PASS_with_advisories
+                  substeps:
+                    phase1_collect: completed
+                    phase2_completeness: completed
+                    phase3a_journey_signoff: completed
+                    phase3_feature_approval: completed
+                    phase5_scope: completed
+                    phase6_report: completed
+                    current: completed
+                  next_action: run 12-verify-deploy
+                  note: 'S017/EV-015 11-verify-impl COMPLETE 2026-07-30 — user approved (option A) manual inspection (local Playwright preview /corpus screenshots), UJ-053, UJ-054 (known deferrals: API promote CI/staging; F36 gate @ 12/13), F41 AC-RB1–10 (AC-RB8 staging drill deferred); report docs/sessions/S017-corpus-reembed-migration/reports/verify-impl.md; inspection artifacts under docs/sessions/S017-corpus-reembed-migration/reports/inspection/; acceptance-criteria.md AC-RB1–10 marked [x]; report may be uncommitted (no invent sha); B01 HEAD ref 1c2e46e; 09-qa PASS; 10-e2e PASS w/ advisories; checkpoints.phase_d remains pending until 12-verify-deploy also completes; next → 12-verify-deploy'
+                  s007_baseline:
+                    status: completed
+                    completed_at: '2026-07-01'
+                    session_id: S007-rag-eval
+                    branch: feat/S007-rag-eval
+                    evolve_cycle_id: EV-008
+                    report: docs/sessions/S007-rag-eval/reports/verify-impl.md
+                    note: F36 delta approved; prerequisite waiver recorded
+                    s008:
+                      status: completed
+                      completed_at: '2026-07-02'
+                      partial_rerun_at: '2026-07-02'
+                      partial_rerun_note: Partial — M65-M69 verified inline; M70/UJ-047/AC-E26 deferred; journey AskQuestion skipped (user waiver 2026-07-02)
+                      session_id: S008-eval-ux-playground
+                      branch: feat/S008-eval-ux-playground
+                      evolve_cycle_id: EV-009
+                      report: docs/sessions/S008-eval-ux-playground/reports/verify-impl.md
+                      verified_milestones:
+                      - M65
+                      - M66
+                      - M67
+                      - M68
+                      - M69
+                      deferred:
+                      - M70
+                      - UJ-047
+                      - AC-E26
+                      note: S008/EV-009 partial 11-verify-impl — M65-M69 verified inline; M70 playground build pending; formal 08→09→10 still required before deploy stages
+                    s009:
+                      status: completed
+                      completed_at: '2026-07-06'
+                      session_id: S009-playground-model-download
+                      branch: feat/S009-playground-model-download
+                      evolve_cycle_id: EV-010
+                      report: docs/sessions/S009-playground-model-download/reports/verify-impl.md
+                      note: S009/EV-010 F38 delta — F38 catalog extension approved 2026-07-06; UJ-048 approved; super-admin seeded for admin@vecinita.admin; 07-build build extension uncommitted; formal 08→09→10 still required before deploy stages
+              ac_bb9_met: false
+              tc_184_met: false
+              api_inspection:
+                status: approved
                 approved_at: '2026-08-02'
-                user_choice: approve_and_proceed
-                note: Answer/retrieve cache H1; tip OpenAPI cache_hit SoT until deploy
-              F44:
-                approved: true
-                approved_at: '2026-08-02'
-                user_choice: approve_and_proceed
-                note: Soft language L1; flag-gated; staging flag-on deferred
-              F45:
-                approved: true
-                approved_at: '2026-08-02'
-                user_choice: approve_and_proceed
-                note: Approve for T0 ship; AC-BB9/UJ-060 staging-gated; prod CE off
-                ac_bb9_met: false
-                uj060: deferred_12_13
-                prod_ce: false
-          next_action: none_session_closed
+                env_choice: option_3_staging_swagger
+                user_choice: approve_inspection
+                staging_docs_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/docs
+                staging_openapi_url: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app/openapi.json
+                staging_openapi_http: 200
+                staging_commit: b08ec30
+                tip_commit: e1e2899
+                evidence:
+                  staging_ask_response_fields:
+                  - answer
+                  - language
+                  - sources
+                  staging_cache_hit: false
+                  staging_cache_hit_note: NO cache_hit on deployed AskResponse — expected; EV-017 tip not on staging
+                  tip_openapi: openapi/chat-rag.yaml
+                  tip_ask_response_cache_hit: required
+                  tip_stream_done_cache_hit: may_include
+                  f44_f45_public_openapi_ops: none_new_flag_gated_internals
+                  uj060_spike_docs: true
+                  source_of_truth_until_deploy: tip_openapi
+                features_inspected:
+                - F43
+                - F44
+                - F45
+                verify_impl_phase_3b: updated
+              report_status: completed
+              feature_approvals:
+                F43:
+                  approved: true
+                  approved_at: '2026-08-02'
+                  user_choice: approve_and_proceed
+                  note: Answer/retrieve cache H1; tip OpenAPI cache_hit SoT until deploy
+                F44:
+                  approved: true
+                  approved_at: '2026-08-02'
+                  user_choice: approve_and_proceed
+                  note: Soft language L1; flag-gated; staging flag-on deferred
+                F45:
+                  approved: true
+                  approved_at: '2026-08-02'
+                  user_choice: approve_and_proceed
+                  note: Approve for T0 ship; AC-BB9/UJ-060 staging-gated; prod CE off
+                  ac_bb9_met: false
+                  uj060: deferred_12_13
+                  prod_ce: false
+            next_action: none_session_closed
+            session_closed: true
+            session_closed_at: '2026-08-02'
           session_closed: true
           session_closed_at: '2026-08-02'
-        session_closed: true
-        session_closed_at: '2026-08-02'
-      completeness:
-        AC-RQ8: met_at_T0_plus_infra
-        AC-RQ9: met_at_T0_plus_infra
-        AC-RQ10: held
-        uj_063: approved_t0
-        inspection: openapi_code_t0_only
-        t3: n_a_under_ac_rq10
-        ci: green
-        scope_creep: none
-        gaps: none
-        feature_approvals: F50_F51_approved
-      phase3_askquestion:
-        presented: true
-        presented_at: '2026-08-03T12:38:48Z'
-        recommended: approve UJ-063 on T0; skip live inspection — OpenAPI/code only
-        status: answered
-        q1: approve_uj063_t0
-        q2: skip_live_inspection
-        answered_at: '2026-08-03T12:41:55Z'
-        choice: recommended_q1_q2
-        decision_id: S023-D19
-      completed_at: '2026-08-03'
-      completed: '2026-08-03'
-      s023_d20_decision: S023-D20
-      overall: approved
-      overall_result: approved
-      result: approved
-      user_approved: true
-      user_approved_at: '2026-08-03'
-      user_approval_choice: approve_f50_f51
-      feature_list_status: Implemented
-      commits_head: 267af20
-      journey_signoffs:
-        UJ-063:
-          approved: true
-          approved_at: '2026-08-03'
-          user_choice: approve
-          t0: PASS
-          t3: n_a_under_ac_rq10
+        completeness:
+          AC-RQ8: met_at_T0_plus_infra
+          AC-RQ9: met_at_T0_plus_infra
+          AC-RQ10: held
+          uj_063: approved_t0
           inspection: openapi_code_t0_only
+          t3: n_a_under_ac_rq10
+          ci: green
+          scope_creep: none
+          gaps: none
+          feature_approvals: F50_F51_approved
+        phase3_askquestion:
+          presented: true
+          presented_at: '2026-08-03T12:38:48Z'
+          recommended: approve UJ-063 on T0; skip live inspection — OpenAPI/code only
+          status: answered
+          q1: approve_uj063_t0
+          q2: skip_live_inspection
+          answered_at: '2026-08-03T12:41:55Z'
+          choice: recommended_q1_q2
           decision_id: S023-D19
-      feature_signoffs:
-        F50:
-          approved: true
-          approved_at: '2026-08-03'
-          user_choice: approve
-          decision_id: S023-D20
-        F51:
-          approved: true
-          approved_at: '2026-08-03'
-          user_choice: approve
-          decision_id: S023-D20
-      feature_approvals:
-        F50:
-          approved: true
-          approved_at: '2026-08-03'
-          user_choice: approve_f50_f51
-          decision_id: S023-D20
-        F51:
-          approved: true
-          approved_at: '2026-08-03'
-          user_choice: approve_f50_f51
-          decision_id: S023-D20
-      ac_rq10:
-        status: held
-        confirmed: true
-        confirmed_at: '2026-08-03'
+        completed_at: '2026-08-03'
+        completed: '2026-08-03'
+        s023_d20_decision: S023-D20
+        overall: approved
+        overall_result: approved
+        result: approved
+        user_approved: true
+        user_approved_at: '2026-08-03'
+        user_approval_choice: approve_f50_f51
+        feature_list_status: Implemented
+        commits_head: 267af20
+        journey_signoffs:
+          UJ-063:
+            approved: true
+            approved_at: '2026-08-03'
+            user_choice: approve
+            t0: PASS
+            t3: n_a_under_ac_rq10
+            inspection: openapi_code_t0_only
+            decision_id: S023-D19
+        feature_signoffs:
+          F50:
+            approved: true
+            approved_at: '2026-08-03'
+            user_choice: approve
+            decision_id: S023-D20
+          F51:
+            approved: true
+            approved_at: '2026-08-03'
+            user_choice: approve
+            decision_id: S023-D20
+        feature_approvals:
+          F50:
+            approved: true
+            approved_at: '2026-08-03'
+            user_choice: approve_f50_f51
+            decision_id: S023-D20
+          F51:
+            approved: true
+            approved_at: '2026-08-03'
+            user_choice: approve_f50_f51
+            decision_id: S023-D20
+        ac_rq10:
+          status: held
+          confirmed: true
+          confirmed_at: '2026-08-03'
   12-verify-deploy:
     status: completed
     started_at: '2026-08-03T21:16:29Z'
@@ -29668,8 +29789,8 @@ evolve_cycles:
   routing_preset: standard
   preset: Standard
   current_stage: 11-verify-impl
-  current_action: phase_d_11_verify_impl
-  next_action: '11-verify-impl AskQuestion (UI preview + AC sign-off)'
+  current_action: write_verify_impl_bulk_approve
+  next_action: 'finish verify-impl.md then pass phase_d → 12-verify-deploy'
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -31358,7 +31479,7 @@ evolve_cycles:
       updated_at: '2026-08-05T00:45:00Z'
       required: true
     11-verify-impl:
-      status: pending
+      status: in_progress
       required: true
       mode: evolve
       delta_only: true
@@ -31372,12 +31493,33 @@ evolve_cycles:
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
       build_head: c942971
-      current_action: phase_d_11_verify_impl
-      next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
+      current_action: write_verify_impl_bulk_approve
+      next_action: finish verify-impl.md then pass phase_d → 12-verify-deploy
       askquestion_pending: false
       askquestion_pending_topic:
-      note: S026/EV-024 11-verify-impl PENDING 2026-08-05 — Phase D 09+10 complete; await AskQuestion (UI preview + AC sign-off); phase_d remains pending
-      updated_at: '2026-08-05T00:45:00Z'
+      note: S026/EV-024 11-verify-impl IN_PROGRESS 2026-08-05 — S026-D55 User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; writing docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md; phase_d remains pending until report complete + handoff 12
+      updated_at: '2026-08-05T01:00:00Z'
+      started_at: '2026-08-05'
+      started: '2026-08-05'
+      started_at_iso: '2026-08-05T01:00:00Z'
+      branch: evolve/EV-024-frontend-ux-polish
+      askquestion_cleared: 11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)
+      s026_d55_decision: S026-D55
+      decision: S026-D55
+      user_choice: A_bulk_approve_all_f64_f69
+      approved_features:
+      - F64
+      - F65
+      - F66
+      - F67
+      - F68
+      - F69
+      ui_preview: skipped
+      manual_browser_inspection: waived
+      t2_t3_h4_h5: deferred_to_12_13_documented_waiver
+      checkpoints_phase_d: pending
+      report: docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md
+      report_status: writing
   artifacts:
   - path: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
     session_id: S026-frontend-ux-polish
@@ -32138,8 +32280,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026-D54 Gate C→D PASS; #207 merged c942971; main CI+preflight green; 08 M118 PASS; Phase D 09+10 COMPLETE (pass_with_advisories / pass_t0); phase_d pending until 11; next → 11-verify-impl AskQuestion'
-  updated_at: '2026-08-05T00:45:00Z'
+  note: 'S026/EV-024 11-verify-impl IN_PROGRESS 2026-08-05 — S026-D55 User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; writing docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md; phase_d remains pending until report complete + handoff 12'
+  updated_at: '2026-08-05T01:00:00Z'
   feature_map:
     F64:
       issue: 87
@@ -32595,7 +32737,7 @@ evolve_cycles:
   t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
   t116_4_files: *id005
   branch_ahead_of_origin: 0
-  resume_note: '#207 merged @c942971; 08 M118 PASS; 09 pass_with_advisories; 10 pass_t0; phase_d pending; next=11-verify-impl AskQuestion (UI preview + AC sign-off)'
+  resume_note: 'S026-D55 bulk approve F64–F69; UI preview skipped; T2/T3 H4–H5 deferred 12/13; writing verify-impl; phase_d pending'
   s026_d51_decision: S026-D51
   execution_plan_note: 'Phase 27 M112–M118 merged via #207 @c942971; 08/09/10 complete; next 11-verify-impl AskQuestion (UI preview + AC sign-off)'
   pr_note: 'PR #206 open_ci_green [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @ecc7412; CI green @ 1719b3b (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473); NOT merged — merge still needs explicit user approval; AskQuestion pending: merge PR #206 (M117) vs continue T118.1'
@@ -32746,7 +32888,7 @@ evolve_cycles:
   ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
   t118_1_status: completed
   t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
-  notes: 'S026-D54 Gate C→D PASS; #207 merged c942971; main CI+preflight green; 08 M118 PASS; Phase D 09+10 COMPLETE (pass_with_advisories / pass_t0); phase_d pending until 11; next → 11-verify-impl AskQuestion'
+  notes: 'S026/EV-024 11-verify-impl IN_PROGRESS 2026-08-05 — S026-D55 User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; writing docs/sessions/S026-frontend-ux-polish/reports/verify-impl.md; phase_d remains pending until report complete + handoff 12'
   pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
   pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
   pr_206_merge_sha_short: eb65837
@@ -32855,7 +32997,7 @@ evolve_cycles:
   m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
   m118_ci_status: success
   ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
-  askquestion_cleared: 'Gate C→D / phase_c — user option 2 (pass + merge #207)'
+  askquestion_cleared: '11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)'
   s026_d54_decision: S026-D54
   pr_207_merge_approved: true
   pr_207_merge_approved_at: '2026-08-05T00:30:00Z'
@@ -32876,6 +33018,7 @@ evolve_cycles:
   phase_b: passed
   handoff_active_milestone:
   handoff_active_task:
+  s026_d55_decision: S026-D55
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -37639,6 +37782,35 @@ decisions_log:
 - *id015
 - 'S026/EV-024: CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; build_head=bde3db7; active_task=T116.1 / M116 unchanged'
 - 'S026/EV-024: recorded 605fce9 ([T115.4] test: cover energy knob validation branches); build_head=605fce9; m115_pr_status=open_ci_green; M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; merge needs user approval; askquestion_pending=true (merge PR #204 vs continue M116 T116.1 vs pause); active_task=T116.1 / M116 ready'
+- date: '2026-08-05'
+  id: S026-D55
+  skill: 11-verify-impl
+  skill_id: 11-verify-impl
+  session_id: S026-frontend-ux-polish
+  evolve_cycle_id: EV-024
+  decision: Option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver; write verify-impl; then pass phase_d and continue 12-verify-deploy
+  option: A
+  choice: A_bulk_approve_all_f64_f69
+  approved_features:
+  - F64
+  - F65
+  - F66
+  - F67
+  - F68
+  - F69
+  ui_preview: skipped
+  manual_browser_inspection: waived
+  t2_t3_h4_h5: deferred_to_12_13_documented_waiver
+  recorded_at: '2026-08-05T01:00:00Z'
+  approved: '2026-08-05'
+  approved_at: '2026-08-05T01:00:00Z'
+  status: confirmed
+  askquestion_pending: false
+  askquestion_cleared: 11-verify-impl UI preview + AC sign-off — user option A (S026-D55 bulk approve F64–F69)
+  next_stage: 11-verify-impl
+  next_action: write_verify_impl_bulk_approve
+  current_action: write_verify_impl_bulk_approve
+  note: User option A — bulk approve all F64–F69 at 11-verify-impl; UI preview skipped; T2/T3 H4–H5 deferred to 12/13 with documented waiver
 artifacts:
 - path: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
   session_id: S026-frontend-ux-polish

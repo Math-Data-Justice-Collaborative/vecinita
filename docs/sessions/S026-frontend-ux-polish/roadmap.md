@@ -29,7 +29,10 @@ tips/marketing (#87), energy+car (#93), anonymous feedback (#186), audit actor e
 | 07-build M112–M118 | ✅ Complete | Code PRs #200–#206; M118 #207 @ `c942971` |
 | Gate C→D | ✅ PASS | S026-D54 (option 2: pass + merge #207) |
 | 08-verify-build | ✅ M118 PASS | [verification-report](./reports/verification-report.md) |
-| 09–13 | 🔄 Next | 09-qa + 10-e2e parallel → 11 → 12 → 13 |
+| 09-qa / 10-e2e | ✅ Complete | pass_with_advisories / T0 PASS |
+| 11-verify-impl | ✅ Approved | S026-D55 all F64–F69 |
+| 12-verify-deploy | 🔄 Sign-off | [deploy-checklist](./reports/deploy-checklist.md) |
+| 13-deploy-smoke | ⬜ Next | after 12 approval |
 
 ## Milestone build order
 

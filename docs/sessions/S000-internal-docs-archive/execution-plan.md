@@ -9,14 +9,14 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) — **Gate C→D PASS**; Phase D Verify |
+| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) — Phase D → **12-verify-deploy** |
 | **Active milestone** | M118 — **completed** (merged #207 @ `c942971`) |
-| **Active task** | —; next **09-qa** + **10-e2e** (parallel) |
-| **Tasks completed** | Phase 21–26; S026 Phase A–C; **M112–M118** (#200/#202/#203/#205/#206/#207) |
+| **Active task** | —; **11-verify-impl PASS** (S026-D55); next **12 sign-off** → 13 |
+| **Tasks completed** | Phase 21–26; S026 Phase A–D (11 approved); **M112–M118** (#200–#207) |
 | **Last updated** | 2026-08-04 |
-| **Evolve cycle** | EV-024 — Standard; phase_c / c_to_d passed (S026-D54); Phase D |
-| **Git branch** | `evolve/EV-024-frontend-ux-polish` (synced with main @ `c942971`) |
-| **Active session** | S026-frontend-ux-polish — 08-verify M118 PASS; → 09/10 |
+| **Evolve cycle** | EV-024 — Standard; C→D + phase_d impl approved; await 12 deploy sign-off |
+| **Git branch** | `evolve/EV-024-frontend-ux-polish` |
+| **Active session** | S026-frontend-ux-polish — 12-verify-deploy checklist pending sign-off |
 | **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
 
 ## Template
