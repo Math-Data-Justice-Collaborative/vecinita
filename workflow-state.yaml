@@ -1536,21 +1536,21 @@ project:
       active_milestone: M118
       active_feature: F64-F69
       active_issue: 193
-      current_action: build_m118_t118_1
-      next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-      askquestion_pending: false
-      askquestion_pending_topic:
+      current_action: m118_pr_and_gate_c_to_d
+      next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+      askquestion_pending: true
+      askquestion_pending_topic: Gate C→D / phase_c after M118
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — PR #206 MERGED to main @eb65837 (M117 F69); m117_pr_status=merged; askquestion_pending=false; active_milestone=M118 active_task=T118.1 (in_progress) current_action=build_m118_t118_1; build_head=21ed50e; supabase CLI linked (cfuvghdsuwactfeamtym); prod.env missing — secret sync deferred; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T118.3 completed; M118 completed; M112–M118 all tasks done; active_milestone=M118 active_task=null current_action=m118_pr_and_gate_c_to_d; build_head=4a151d0; checkpoints.phase_c=pending gates.c_to_d=pending; askquestion_pending=true (Gate C→D / phase_c after M118); PR-65 M118 pending; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
       report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-04T23:56:04Z'
+      updated_at: '2026-08-05T00:08:00Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -1690,6 +1690,7 @@ project:
       - M115
       - M116
       - M117
+      - M118
       tasks_completed:
       - T112.1
       - T112.2
@@ -1712,6 +1713,9 @@ project:
       - T117.2
       - T117.3
       - T117.4
+      - T118.1
+      - T118.2
+      - T118.3
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -1725,10 +1729,10 @@ project:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T118.1
+        current_task:
         current_milestone: M118
         phase: 27
-        task_status: in_progress
+        task_status: completed
         m112_status: completed
         m112_verify: PASS
         m112_pr: 200
@@ -1736,8 +1740,7 @@ project:
         m113_status: completed
         m113_verify: PASS
         m113_pr: 202
-        remaining_milestones:
-        - M118
+        remaining_milestones: []
         m113_pr_merged: true
         m114_status: completed
         m114_pr: 203
@@ -1757,6 +1760,9 @@ project:
         - T117.2
         - T117.3
         - T117.4
+        - T118.1
+        - T118.2
+        - T118.3
         m115_verify: PASS
         m116_status: completed
         completed_tasks_m115:
@@ -1786,14 +1792,21 @@ project:
         m117_pr: 206
         m117_pr_status: merged
         m117_verify: PASS
-        m118_status: in_progress
+        m118_status: completed
         m117_pr_merged: true
-        t118_1_status: in_progress
+        t118_1_status: completed
+        t118_2_status: completed
+        t118_3_status: completed
+        completed_tasks_m118:
+        - T118.1
+        - T118.2
+        - T118.3
+        all_tasks_completed: true
       m112_verify: PASS
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 21ed50e
+      build_head: 4a151d0
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -1821,7 +1834,7 @@ project:
       m113_ci_status: success
       s026_d43_decision: S026-D43
       current_milestone: M118
-      current_task: T118.1
+      current_task:
       s026_d44_decision: S026-D44
       s026_d45_decision: S026-D45
       s026_d46_decision: S026-D46
@@ -1834,8 +1847,8 @@ project:
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
       m114_status: completed
-      active_task: T118.1
-      build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+      active_task:
+      build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -1862,7 +1875,7 @@ project:
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: closed_superseded
-      ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+      ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       ci_status: success
       pr_204_ci_status: success
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -1947,10 +1960,10 @@ project:
       - packages/frontend-i18n/src/messages.ts
       - workflow-state.yaml
       branch_ahead_of_origin: 0
-      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-      resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
+      resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       s026_d51_decision: S026-D51
-      execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+      execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
       t116_5_commit: bb30b26
       t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
       m116_status: completed
@@ -2069,9 +2082,9 @@ project:
       pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
       pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-      t118_1_status: in_progress
-      t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-      notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+      t118_1_status: completed
+      t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+      notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       pr_206_merge_sha_short: eb65837
@@ -2083,15 +2096,35 @@ project:
       m117_merge_sha_short: eb65837
       m117_merged_at: '2026-08-04T23:56:04Z'
       task_status:
-        T118.1: in_progress
+        T118.1: completed
+        T118.2: completed
+        T118.3: completed
       s026_d53_decision: S026-D53
       supabase_cli:
         linked_project_ref: cfuvghdsuwactfeamtym
         brewfile: supabase added (=2.111.0)
-        note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+        note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
         linked_at: '2026-08-04T23:56:04Z'
+        reminder_at: '2026-08-05T00:02:08Z'
         session_id: S026-frontend-ux-polish
         evolve_cycle_id: EV-024
+        operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+      t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+      t118_2_status: completed
+      t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+      t118_3_status: completed
+      t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+      phase_c: pending
+      gate_c_to_d: pending
+      t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+      t118_3_completed_at: '2026-08-05T00:08:00Z'
+      m118_status: completed
+      m118_completed_at: '2026-08-05T00:08:00Z'
+      m118_verify: pending_pr
+      m118_pr: pending
+      m118_pr_status: pending
+      m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+      issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     08-verify-build:
       status: completed
       started_at: '2026-08-04'
@@ -2122,10 +2155,10 @@ project:
       active_milestone: M118
       active_feature: F64-F69
       active_issue: 193
-      current_action: build_m118_t118_1
-      next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-      askquestion_pending: false
-      askquestion_pending_topic:
+      current_action: m118_pr_and_gate_c_to_d
+      next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+      askquestion_pending: true
+      askquestion_pending_topic: Gate C→D / phase_c after M118
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
@@ -2146,7 +2179,7 @@ project:
       note: 'S026/EV-024 08-verify-build COMPLETE PASS (M117) — PR #206 MERGED @eb65837; handoff → continue 07-build T118.1'
       handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
       rd_range: RD-272..RD-289
-      updated_at: '2026-08-04T23:56:04Z'
+      updated_at: '2026-08-05T00:08:00Z'
       s025_baseline:
         status: completed
         started_at: '2026-08-03'
@@ -2329,9 +2362,9 @@ project:
       m116_pr_status: merged
       m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
       m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-      active_task: T118.1
+      active_task:
       current_milestone: M118
-      current_task: T118.1
+      current_task:
       m115_pr_merged: true
       m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
       m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -2353,7 +2386,7 @@ project:
       pr_205_merged_at: '2026-08-04T23:24:43Z'
       pr_204_superseded_by: 205
       ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
-      resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+      resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       s026_d52_decision: S026-D52
       t117_2_status: completed
       t117_2_note: T117.2 completed @3c428c6 — enrich GET /internal/v1/audit with actor_email via Supabase Admin lookup/cache
@@ -2443,7 +2476,7 @@ project:
       pr_206_green_sha: 1719b3b
       pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
       handoff_active_milestone: M118
-      handoff_active_task: T118.1
+      handoff_active_task:
       t117_4_commit: 1719b3b
       pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
       pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
@@ -2456,22 +2489,29 @@ project:
       m117_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       m117_merge_sha_short: eb65837
       m117_merged_at: '2026-08-04T23:56:04Z'
-      t118_1_status: in_progress
+      t118_1_status: completed
       t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
       task_status:
-        T118.1: in_progress
+        T118.1: completed
+        T118.2: completed
+        T118.3: completed
       s026_d53_decision: S026-D53
       execution_plan_note: execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets
       branch_ahead_of_origin: 0
       branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-      notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+      notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       supabase_cli:
         linked_project_ref: cfuvghdsuwactfeamtym
         brewfile: supabase added (=2.111.0)
-        note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+        note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
         linked_at: '2026-08-04T23:56:04Z'
+        reminder_at: '2026-08-05T00:02:08Z'
         session_id: S026-frontend-ux-polish
         evolve_cycle_id: EV-024
+        operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+      t118_2_status: completed
+      t118_3_status: completed
+      m118_status: completed
     09-qa:
       status: completed
       started: '2026-08-03'
@@ -5248,14 +5288,14 @@ active_session:
     mode: orchestrator
     skip_rationale:
     started_at: '2026-08-04'
-    current_action: build_m118_t118_1
+    current_action: m118_pr_and_gate_c_to_d
     current_stage: 07-build
-    note: 'EV-024 Phase C — PR #206 MERGED @eb65837 (M117 F69); M118 T118.1 in_progress; supabase CLI linked; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-    askquestion_pending: false
-    next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-    askquestion_pending_topic:
+    note: 'EV-024 Phase C — T118.3+M118 completed; await M118 PR + AskQuestion Gate C→D (Gate C→D / phase_c after M118); phase_c/c_to_d pending; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+    askquestion_pending: true
+    next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+    askquestion_pending_topic: Gate C→D / phase_c after M118
     s026_d29_decision: S026-D29
-    updated_at: '2026-08-04T23:56:04Z'
+    updated_at: '2026-08-05T00:08:00Z'
     m112_pr_merged: true
     m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
     m112_merge_sha_short: e1ccf9e
@@ -5279,15 +5319,15 @@ active_session:
     m113_merge_sha: 9eaedb0
     m114_pr_merged: true
     m114_merge_sha: f3f7dec
-    active_task: T118.1
-    build_head: 21ed50e
+    active_task:
+    build_head: 4a151d0
     s026_d48_decision: S026-D48
     m115_verify: PASS
     m115_pr_status: merged
     s026_d49_decision: S026-D49
     m115_pr: 205
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-    ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+    ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
     s026_d50_decision: S026-D50
     t116_1_status: completed
@@ -5300,17 +5340,17 @@ active_session:
     t116_4_status: completed
     t116_4_commit: 1c8f6ff
     t116_5_status: completed
-    resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+    resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     s026_d51_decision: S026-D51
     current_milestone: M118
-    current_task: T118.1
-    build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+    current_task:
+    build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
     t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
     t116_5_commit: bb30b26
     t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
     branch_ahead_of_origin: 0
-    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-    execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
+    execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
     ci_status: success
     m116_commits:
     - a26d2a4
@@ -5332,6 +5372,9 @@ active_session:
     - T117.2
     - T117.3
     - T117.4
+    - T118.1
+    - T118.2
+    - T118.3
     m116_status: completed
     m116_verify: PASS
     m116_feature: F68
@@ -5349,6 +5392,7 @@ active_session:
     - M115
     - M116
     - M117
+    - M118
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: closed_superseded
     pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
@@ -5458,9 +5502,9 @@ active_session:
     pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
     pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-    t118_1_status: in_progress
-    t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-    notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+    t118_1_status: completed
+    t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+    notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     pr_206_merge_sha_short: eb65837
@@ -5472,15 +5516,35 @@ active_session:
     m117_merge_sha_short: eb65837
     m117_merged_at: '2026-08-04T23:56:04Z'
     task_status:
-      T118.1: in_progress
+      T118.1: completed
+      T118.2: completed
+      T118.3: completed
     s026_d53_decision: S026-D53
     supabase_cli:
       linked_project_ref: cfuvghdsuwactfeamtym
       brewfile: supabase added (=2.111.0)
-      note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+      note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
       linked_at: '2026-08-04T23:56:04Z'
+      reminder_at: '2026-08-05T00:02:08Z'
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
+      operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+    t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+    t118_2_status: completed
+    t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+    t118_3_status: completed
+    t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+    phase_c: pending
+    gate_c_to_d: pending
+    t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+    t118_3_completed_at: '2026-08-05T00:08:00Z'
+    m118_status: completed
+    m118_completed_at: '2026-08-05T00:08:00Z'
+    m118_verify: pending_pr
+    m118_pr: pending
+    m118_pr_status: pending
+    m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+    issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   - stage: 01-requirements
     required: true
     status: completed
@@ -5629,16 +5693,16 @@ active_session:
     skip_rationale:
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T18:20:46Z'
-    current_action: build_m118_t118_1
-    next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-    askquestion_pending: false
-    askquestion_pending_topic:
+    current_action: m118_pr_and_gate_c_to_d
+    next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+    askquestion_pending: true
+    askquestion_pending_topic: Gate C→D / phase_c after M118
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — PR #206 MERGED to main @eb65837 (M117 F69); m117_pr_status=merged; askquestion_pending=false; active_milestone=M118 active_task=T118.1 (in_progress) current_action=build_m118_t118_1; build_head=21ed50e; supabase CLI linked (cfuvghdsuwactfeamtym); prod.env missing — secret sync deferred; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-    updated_at: '2026-08-04T23:56:04Z'
+    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T118.3 completed; M118 completed; M112–M118 all tasks done; active_milestone=M118 active_task=null current_action=m118_pr_and_gate_c_to_d; build_head=4a151d0; checkpoints.phase_c=pending gates.c_to_d=pending; askquestion_pending=true (Gate C→D / phase_c after M118); PR-65 M118 pending; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+    updated_at: '2026-08-05T00:08:00Z'
     active_milestone: M118
     active_feature: F64-F69
     m112_status: completed
@@ -5649,6 +5713,7 @@ active_session:
     - M115
     - M116
     - M117
+    - M118
     m112_verify: PASS
     m112_pr: 200
     active_issue: 193
@@ -5658,17 +5723,16 @@ active_session:
     m112_merge_sha_short: e1ccf9e
     m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
     substeps:
-      current_task: T118.1
+      current_task:
       current_milestone: M118
       phase: 27
-      task_status: in_progress
+      task_status: completed
       m112_status: completed
       m112_pr_merged: true
       m113_status: completed
       m113_verify: PASS
       m113_pr: 202
-      remaining_milestones:
-      - M118
+      remaining_milestones: []
       m114_status: completed
       m114_pr: 203
       m113_pr_merged: true
@@ -5688,6 +5752,9 @@ active_session:
       - T117.2
       - T117.3
       - T117.4
+      - T118.1
+      - T118.2
+      - T118.3
       m115_verify: PASS
       m116_status: completed
       completed_tasks_m115:
@@ -5717,9 +5784,16 @@ active_session:
       m117_pr: 206
       m117_pr_status: merged
       m117_verify: PASS
-      m118_status: in_progress
+      m118_status: completed
       m117_pr_merged: true
-      t118_1_status: in_progress
+      t118_1_status: completed
+      t118_2_status: completed
+      t118_3_status: completed
+      completed_tasks_m118:
+      - T118.1
+      - T118.2
+      - T118.3
+      all_tasks_completed: true
     m113_status: completed
     m113_verify: PASS
     m113_pr: 202
@@ -5727,7 +5801,7 @@ active_session:
     m113_head: 06f4ab1
     m113_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30944692363
     m113_ci_status: success
-    build_head: 21ed50e
+    build_head: 4a151d0
     pr_201: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
     s026_d43_decision: S026-D43
     m114_status: completed
@@ -5746,9 +5820,9 @@ active_session:
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
     current_milestone: M118
-    current_task: T118.1
-    active_task: T118.1
-    build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+    current_task:
+    active_task:
+    build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
     tasks_completed:
     - T115.1
     - T115.2
@@ -5763,6 +5837,9 @@ active_session:
     - T117.2
     - T117.3
     - T117.4
+    - T118.1
+    - T118.2
+    - T118.3
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -5789,7 +5866,7 @@ active_session:
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: closed_superseded
-    ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+    ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     ci_status: success
     pr_204_ci_status: success
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -5830,10 +5907,10 @@ active_session:
     t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
     t116_4_files: *id005
     branch_ahead_of_origin: 0
-    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-    resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
+    resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     s026_d51_decision: S026-D51
-    execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+    execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
     t116_5_commit: bb30b26
     t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
     m116_status: completed
@@ -5953,9 +6030,9 @@ active_session:
     pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
     pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-    t118_1_status: in_progress
-    t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-    notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+    t118_1_status: completed
+    t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+    notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     pr_206_merge_sha_short: eb65837
@@ -5967,15 +6044,35 @@ active_session:
     m117_merge_sha_short: eb65837
     m117_merged_at: '2026-08-04T23:56:04Z'
     task_status:
-      T118.1: in_progress
+      T118.1: completed
+      T118.2: completed
+      T118.3: completed
     s026_d53_decision: S026-D53
     supabase_cli:
       linked_project_ref: cfuvghdsuwactfeamtym
       brewfile: supabase added (=2.111.0)
-      note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+      note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
       linked_at: '2026-08-04T23:56:04Z'
+      reminder_at: '2026-08-05T00:02:08Z'
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
+      operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+    t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+    t118_2_status: completed
+    t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+    t118_3_status: completed
+    t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+    phase_c: pending
+    gate_c_to_d: pending
+    t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+    t118_3_completed_at: '2026-08-05T00:08:00Z'
+    m118_status: completed
+    m118_completed_at: '2026-08-05T00:08:00Z'
+    m118_verify: pending_pr
+    m118_pr: pending
+    m118_pr_status: pending
+    m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+    issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   - stage: 08-verify-build
     required: true
     status: completed
@@ -5983,16 +6080,16 @@ active_session:
     mode: evolve
     started_at: '2026-08-04'
     started_at_iso: '2026-08-04T23:12:10Z'
-    current_action: build_m118_t118_1
-    next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-    askquestion_pending: false
-    askquestion_pending_topic:
+    current_action: m118_pr_and_gate_c_to_d
+    next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+    askquestion_pending: true
+    askquestion_pending_topic: Gate C→D / phase_c after M118
     active_milestone: M118
     active_feature: F64-F69
     active_issue: 193
     build_head: 21ed50e
     note: 'S026/EV-024 08-verify-build COMPLETE PASS (M117) — PR #206 MERGED @eb65837; handoff → continue 07-build T118.1'
-    updated_at: '2026-08-04T23:56:04Z'
+    updated_at: '2026-08-05T00:08:00Z'
     completed_at: '2026-08-04'
     completed_at_iso: '2026-08-04T23:49:00Z'
     overall_result: PASS
@@ -6102,9 +6199,9 @@ active_session:
     m116_pr_status: merged
     m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.2'
     m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-    active_task: T118.1
+    active_task:
     current_milestone: M118
-    current_task: T118.1
+    current_task:
     m115_pr_merged: true
     m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
     m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -6126,7 +6223,7 @@ active_session:
     pr_205_merged_at: '2026-08-04T23:24:43Z'
     pr_204_superseded_by: 205
     ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
-    resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+    resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     s026_d52_decision: S026-D52
     t117_2_status: in_progress
     t117_2_note: T117.2 in_progress — enrich GET /internal/v1/audit with actor_email (DM/write Supabase Admin lookup/cache)
@@ -6175,7 +6272,7 @@ active_session:
     m117_pr_note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1 @21ed50e'
     m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
     handoff_active_milestone: M118
-    handoff_active_task: T118.1
+    handoff_active_task:
     t117_4_status: completed
     t117_4_commit: 1719b3b
     minor_pr_m117:
@@ -6225,22 +6322,31 @@ active_session:
     m117_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     m117_merge_sha_short: eb65837
     m117_merged_at: '2026-08-04T23:56:04Z'
-    t118_1_status: in_progress
+    t118_1_status: completed
     t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
     task_status:
-      T118.1: in_progress
+      T118.1: completed
+      T118.2: completed
+      T118.3: completed
     s026_d53_decision: S026-D53
     execution_plan_note: execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets
     branch_ahead_of_origin: 0
     branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-    notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+    notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     supabase_cli:
       linked_project_ref: cfuvghdsuwactfeamtym
       brewfile: supabase added (=2.111.0)
-      note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+      note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
       linked_at: '2026-08-04T23:56:04Z'
+      reminder_at: '2026-08-05T00:02:08Z'
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
+      operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+    t118_2_status: completed
+    t118_3_status: completed
+    m118_status: completed
+    phase_c: pending
+    gate_c_to_d: pending
   - stage: 09-qa
     required: true
     status: pending
@@ -6268,8 +6374,8 @@ active_session:
     status: skipped
     skip_rationale: Optional after deploy; not in default Standard
   current_stage: 07-build
-  current_action: build_m118_t118_1
-  next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+  current_action: m118_pr_and_gate_c_to_d
+  next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
   started_at: '2026-08-04T13:32:00Z'
   context_briefs: []
   routing_preset: standard
@@ -6284,7 +6390,7 @@ active_session:
   - F69
   phase0_approved: true
   phase_0_status: approved
-  askquestion_pending: false
+  askquestion_pending: true
   decisions:
   - 'S026-D1: Session type feature → 16-evolve; open S026'
   - 'S026-D2: One session / one evolve branch; one PR per issue (6 PRs)'
@@ -6340,11 +6446,11 @@ active_session:
       title: Admin audit actor username (read-time)
   phase0_approved_at: '2026-08-04T13:51:00Z'
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  askquestion_pending_topic:
-  updated_at: '2026-08-04T23:56:04Z'
+  askquestion_pending_topic: Gate C→D / phase_c after M118
+  updated_at: '2026-08-05T00:08:00Z'
   s026_d20_decision: S026-D20
   report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-  note: 'S026/EV-024 PR #206 MERGED @eb65837; M117 landed; supabase CLI linked; Brewfile/secrets @21ed50e; T118.1 in_progress. current_action=build_m118_t118_1; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets; head @21ed50e'
+  note: 'S026/EV-024 T118.3+M118 completed; await M118 PR + Gate C→D; phase_c/c_to_d remain pending; head @4a151d0 current_action=m118_pr_and_gate_c_to_d; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
   gate_a_to_b: passed
@@ -6375,6 +6481,7 @@ active_session:
   - M115
   - M116
   - M117
+  - M118
   m113_pr: 202
   m113_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201
   m113_head: 06f4ab1
@@ -6391,9 +6498,9 @@ active_session:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  active_task: T118.1
-  build_head: 21ed50e
-  build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+  active_task:
+  build_head: 4a151d0
+  build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
@@ -6413,7 +6520,7 @@ active_session:
   m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
   pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
   pr_204_status: closed_superseded
-  ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+  ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
   s026_d50_decision: S026-D50
   t116_1_status: completed
@@ -6440,9 +6547,9 @@ active_session:
   t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
   t116_4_files: *id005
   branch_ahead_of_origin: 0
-  resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+  resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   s026_d51_decision: S026-D51
-  execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+  execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
   t116_5_commit: bb30b26
   t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
   t116_5_files:
@@ -6452,7 +6559,7 @@ active_session:
   - docs/sessions/S000-internal-docs-archive/execution-plan.md
   - docs/sessions/S026-frontend-ux-polish/HANDOFF.md
   - workflow-state.yaml
-  branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
+  branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
   m116_commits:
   - a26d2a4
   - 9bba998
@@ -6464,7 +6571,7 @@ active_session:
   - bb30b26
   - 7f086c3
   current_milestone: M118
-  current_task: T118.1
+  current_task:
   ci_status: success
   tasks_completed:
   - T116.1
@@ -6476,6 +6583,9 @@ active_session:
   - T117.2
   - T117.3
   - T117.4
+  - T118.1
+  - T118.2
+  - T118.3
   pr_note: 'PR #206 open_ci_green [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @ecc7412; CI green @ 1719b3b (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473); NOT merged — merge still needs explicit user approval; AskQuestion pending: merge PR #206 (M117) vs continue T118.1'
   m116_status: completed
   m116_verify: PASS
@@ -6593,9 +6703,9 @@ active_session:
   pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
   pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
   ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-  t118_1_status: in_progress
-  t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-  notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+  t118_1_status: completed
+  t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+  notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
   pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
   pr_206_merge_sha_short: eb65837
@@ -6607,15 +6717,38 @@ active_session:
   m117_merge_sha_short: eb65837
   m117_merged_at: '2026-08-04T23:56:04Z'
   task_status:
-    T118.1: in_progress
+    T118.1: completed
+    T118.2: completed
+    T118.3: completed
   s026_d53_decision: S026-D53
   supabase_cli:
     linked_project_ref: cfuvghdsuwactfeamtym
     brewfile: supabase added (=2.111.0)
-    note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+    note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
     linked_at: '2026-08-04T23:56:04Z'
+    reminder_at: '2026-08-05T00:02:08Z'
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
+    operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+  t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+  t118_2_status: completed
+  t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+  t118_3_status: completed
+  t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+  artifacts:
+  - docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+  - docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+  phase_c: pending
+  gate_c_to_d: pending
+  t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+  t118_3_completed_at: '2026-08-05T00:08:00Z'
+  m118_status: completed
+  m118_completed_at: '2026-08-05T00:08:00Z'
+  m118_verify: pending_pr
+  m118_pr: pending
+  m118_pr_status: pending
+  m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+  issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
 sessions:
 - id: S025-ci-release-automation
   type: feature
@@ -13974,21 +14107,21 @@ stages:
     active_milestone: M118
     active_feature: F64-F69
     active_issue: 193
-    current_action: build_m118_t118_1
-    next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-    askquestion_pending: false
-    askquestion_pending_topic:
+    current_action: m118_pr_and_gate_c_to_d
+    next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+    askquestion_pending: true
+    askquestion_pending_topic: Gate C→D / phase_c after M118
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_a: passed
     phase_b: passed
     s026_d27_decision: S026-D27
     s026_d28_decision: S026-D28
-    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — PR #206 MERGED to main @eb65837 (M117 F69); m117_pr_status=merged; askquestion_pending=false; active_milestone=M118 active_task=T118.1 (in_progress) current_action=build_m118_t118_1; build_head=21ed50e; supabase CLI linked (cfuvghdsuwactfeamtym); prod.env missing — secret sync deferred; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+    note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T118.3 completed; M118 completed; M112–M118 all tasks done; active_milestone=M118 active_task=null current_action=m118_pr_and_gate_c_to_d; build_head=4a151d0; checkpoints.phase_c=pending gates.c_to_d=pending; askquestion_pending=true (Gate C→D / phase_c after M118); PR-65 M118 pending; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
     report: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-04T23:56:04Z'
+    updated_at: '2026-08-05T00:08:00Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -14232,6 +14365,7 @@ stages:
     - M115
     - M116
     - M117
+    - M118
     tasks_completed:
     - T112.1
     - T112.2
@@ -14254,6 +14388,9 @@ stages:
     - T117.2
     - T117.3
     - T117.4
+    - T118.1
+    - T118.2
+    - T118.3
     m112_status: completed
     m112_feature: F66
     m112_issue: 104
@@ -14267,10 +14404,10 @@ stages:
     - 0942ef9
     docs_commit: 47a618e
     substeps:
-      current_task: T118.1
+      current_task:
       current_milestone: M118
       phase: 27
-      task_status: in_progress
+      task_status: completed
       m112_status: completed
       m112_verify: PASS
       m112_pr: 200
@@ -14278,8 +14415,7 @@ stages:
       m113_status: completed
       m113_verify: PASS
       m113_pr: 202
-      remaining_milestones:
-      - M118
+      remaining_milestones: []
       m113_pr_merged: true
       m114_status: completed
       m114_pr: 203
@@ -14299,6 +14435,9 @@ stages:
       - T117.2
       - T117.3
       - T117.4
+      - T118.1
+      - T118.2
+      - T118.3
       m115_verify: PASS
       m116_status: completed
       completed_tasks_m115:
@@ -14328,14 +14467,21 @@ stages:
       m117_pr: 206
       m117_pr_status: merged
       m117_verify: PASS
-      m118_status: in_progress
+      m118_status: completed
       m117_pr_merged: true
-      t118_1_status: in_progress
+      t118_1_status: completed
+      t118_2_status: completed
+      t118_3_status: completed
+      completed_tasks_m118:
+      - T118.1
+      - T118.2
+      - T118.3
+      all_tasks_completed: true
     m112_verify: PASS
     m112_pr: 200
     m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-    build_head: 21ed50e
+    build_head: 4a151d0
     pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
     s026_d29_decision: S026-D29
     m112_pr_merged: true
@@ -14363,7 +14509,7 @@ stages:
     m113_ci_status: success
     s026_d43_decision: S026-D43
     current_milestone: M118
-    current_task: T118.1
+    current_task:
     s026_d44_decision: S026-D44
     s026_d45_decision: S026-D45
     s026_d46_decision: S026-D46
@@ -14376,8 +14522,8 @@ stages:
     m114_merge_sha: f3f7dec
     m114_merge_sha_short: f3f7dec
     m114_status: completed
-    active_task: T118.1
-    build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+    active_task:
+    build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
     s026_d48_decision: S026-D48
     m115_status: completed
     m115_verify: PASS
@@ -14404,7 +14550,7 @@ stages:
     m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
     pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
     pr_204_status: closed_superseded
-    ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+    ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     ci_status: success
     pr_204_ci_status: success
     m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -14445,10 +14591,10 @@ stages:
     t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
     t116_4_files: *id005
     branch_ahead_of_origin: 0
-    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-    resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+    branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
+    resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     s026_d51_decision: S026-D51
-    execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+    execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
     t116_5_commit: bb30b26
     t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
     m116_status: completed
@@ -14567,9 +14713,9 @@ stages:
     pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
     pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-    t118_1_status: in_progress
-    t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-    notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+    t118_1_status: completed
+    t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+    notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     pr_206_merge_sha_short: eb65837
@@ -14581,15 +14727,35 @@ stages:
     m117_merge_sha_short: eb65837
     m117_merged_at: '2026-08-04T23:56:04Z'
     task_status:
-      T118.1: in_progress
+      T118.1: completed
+      T118.2: completed
+      T118.3: completed
     s026_d53_decision: S026-D53
     supabase_cli:
       linked_project_ref: cfuvghdsuwactfeamtym
       brewfile: supabase added (=2.111.0)
-      note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+      note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
       linked_at: '2026-08-04T23:56:04Z'
+      reminder_at: '2026-08-05T00:02:08Z'
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
+      operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+    t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+    t118_2_status: completed
+    t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+    t118_3_status: completed
+    t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+    phase_c: pending
+    gate_c_to_d: pending
+    t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+    t118_3_completed_at: '2026-08-05T00:08:00Z'
+    m118_status: completed
+    m118_completed_at: '2026-08-05T00:08:00Z'
+    m118_verify: pending_pr
+    m118_pr: pending
+    m118_pr_status: pending
+    m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+    issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   08-verify-build:
     status: completed
     started_at: '2026-08-04'
@@ -14620,10 +14786,10 @@ stages:
     active_milestone: M118
     active_feature: F64-F69
     active_issue: 193
-    current_action: build_m118_t118_1
-    next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-    askquestion_pending: false
-    askquestion_pending_topic:
+    current_action: m118_pr_and_gate_c_to_d
+    next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+    askquestion_pending: true
+    askquestion_pending_topic: Gate C→D / phase_c after M118
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_a: passed
@@ -14644,7 +14810,7 @@ stages:
     note: 'S026/EV-024 08-verify-build COMPLETE PASS (M117) — PR #206 MERGED @eb65837; handoff → continue 07-build T118.1'
     handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
     rd_range: RD-272..RD-289
-    updated_at: '2026-08-04T23:56:04Z'
+    updated_at: '2026-08-05T00:08:00Z'
     s025_baseline:
       status: completed
       started_at: '2026-08-03'
@@ -15110,9 +15276,9 @@ stages:
     m116_pr_status: merged
     m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
     m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-    active_task: T118.1
+    active_task:
     current_milestone: M118
-    current_task: T118.1
+    current_task:
     m115_pr_merged: true
     m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
     m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -15134,7 +15300,7 @@ stages:
     pr_205_merged_at: '2026-08-04T23:24:43Z'
     pr_204_superseded_by: 205
     ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
-    resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+    resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     s026_d52_decision: S026-D52
     t117_2_status: completed
     t117_2_note: T117.2 completed @3c428c6 — enrich GET /internal/v1/audit with actor_email via Supabase Admin lookup/cache
@@ -15224,7 +15390,7 @@ stages:
     pr_206_green_sha: 1719b3b
     pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
     handoff_active_milestone: M118
-    handoff_active_task: T118.1
+    handoff_active_task:
     t117_4_commit: 1719b3b
     pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
     pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
@@ -15237,22 +15403,29 @@ stages:
     m117_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
     m117_merge_sha_short: eb65837
     m117_merged_at: '2026-08-04T23:56:04Z'
-    t118_1_status: in_progress
+    t118_1_status: completed
     t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
     task_status:
-      T118.1: in_progress
+      T118.1: completed
+      T118.2: completed
+      T118.3: completed
     s026_d53_decision: S026-D53
     execution_plan_note: execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets
     branch_ahead_of_origin: 0
     branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-    notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+    notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     supabase_cli:
       linked_project_ref: cfuvghdsuwactfeamtym
       brewfile: supabase added (=2.111.0)
-      note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+      note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
       linked_at: '2026-08-04T23:56:04Z'
+      reminder_at: '2026-08-05T00:02:08Z'
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
+      operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+    t118_2_status: completed
+    t118_3_status: completed
+    m118_status: completed
   09-qa:
     status: completed
     started: '2026-08-03'
@@ -28388,8 +28561,8 @@ evolve_cycles:
   routing_preset: standard
   preset: Standard
   current_stage: 07-build
-  current_action: build_m118_t118_1
-  next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+  current_action: m118_pr_and_gate_c_to_d
+  next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
   branch: evolve/EV-024-frontend-ux-polish
   evolve_branch: evolve/EV-024-frontend-ux-polish
   mode: evolve
@@ -28422,7 +28595,7 @@ evolve_cycles:
     - S026-D11
     note: Intake locked (S026-D1–D10); Fn allocation approved S026-D11
     next_action: 01-requirements writing_delta_specs
-  askquestion_pending: false
+  askquestion_pending: true
   checkpoints:
     phase_a: passed
     phase_b: passed
@@ -28442,14 +28615,14 @@ evolve_cycles:
     16-evolve:
       status: in_progress
       started: '2026-08-04'
-      current_action: build_m118_t118_1
-      askquestion_pending: false
-      note: 'EV-024 Phase C — PR #206 MERGED @eb65837 (M117 F69); M118 T118.1 in_progress; supabase CLI linked; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+      current_action: m118_pr_and_gate_c_to_d
+      askquestion_pending: true
+      note: 'EV-024 Phase C — T118.3+M118 completed; await M118 PR + AskQuestion Gate C→D (Gate C→D / phase_c after M118); phase_c/c_to_d pending; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
       current_stage: 07-build
-      askquestion_pending_topic:
-      next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+      askquestion_pending_topic: Gate C→D / phase_c after M118
+      next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
       s026_d29_decision: S026-D29
-      updated_at: '2026-08-04T23:56:04Z'
+      updated_at: '2026-08-05T00:08:00Z'
       m112_pr_merged: true
       m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
       m112_merge_sha_short: e1ccf9e
@@ -28465,15 +28638,15 @@ evolve_cycles:
       active_milestone: M118
       active_feature: F64-F69
       active_issue: 193
-      active_task: T118.1
+      active_task:
       s026_d48_decision: S026-D48
       m115_verify: PASS
       m115_pr_status: merged
       s026_d49_decision: S026-D49
       m115_pr: 205
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-      build_head: 21ed50e
-      ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+      build_head: 4a151d0
+      ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       s026_d50_decision: S026-D50
       t116_1_status: completed
       t116_1_commit: a26d2a4
@@ -28485,17 +28658,17 @@ evolve_cycles:
       t116_4_status: completed
       t116_4_commit: 1c8f6ff
       t116_5_status: completed
-      resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+      resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       s026_d51_decision: S026-D51
       current_milestone: M118
-      current_task: T118.1
-      build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+      current_task:
+      build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
       t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
       t116_5_commit: bb30b26
       t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
       branch_ahead_of_origin: 0
-      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-      execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
+      execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
       ci_status: success
       m116_commits:
       - a26d2a4
@@ -28517,6 +28690,9 @@ evolve_cycles:
       - T117.2
       - T117.3
       - T117.4
+      - T118.1
+      - T118.2
+      - T118.3
       m116_status: completed
       m116_verify: PASS
       m116_feature: F68
@@ -28534,6 +28710,7 @@ evolve_cycles:
       - M115
       - M116
       - M117
+      - M118
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: closed_superseded
       pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116 @7f086c3'
@@ -28642,9 +28819,9 @@ evolve_cycles:
       pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
       pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-      t118_1_status: in_progress
-      t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-      notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+      t118_1_status: completed
+      t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+      notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       pr_206_merge_sha_short: eb65837
@@ -28656,15 +28833,35 @@ evolve_cycles:
       m117_merge_sha_short: eb65837
       m117_merged_at: '2026-08-04T23:56:04Z'
       task_status:
-        T118.1: in_progress
+        T118.1: completed
+        T118.2: completed
+        T118.3: completed
       s026_d53_decision: S026-D53
       supabase_cli:
         linked_project_ref: cfuvghdsuwactfeamtym
         brewfile: supabase added (=2.111.0)
-        note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+        note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
         linked_at: '2026-08-04T23:56:04Z'
+        reminder_at: '2026-08-05T00:02:08Z'
         session_id: S026-frontend-ux-polish
         evolve_cycle_id: EV-024
+        operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+      t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+      t118_2_status: completed
+      t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+      t118_3_status: completed
+      t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+      phase_c: pending
+      gate_c_to_d: pending
+      t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+      t118_3_completed_at: '2026-08-05T00:08:00Z'
+      m118_status: completed
+      m118_completed_at: '2026-08-05T00:08:00Z'
+      m118_verify: pending_pr
+      m118_pr: pending
+      m118_pr_status: pending
+      m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+      issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     01-requirements:
       status: completed
       started: '2026-08-04'
@@ -28928,18 +29125,18 @@ evolve_cycles:
       active_milestone: M118
       active_feature: F64-F69
       active_issue: 193
-      current_action: build_m118_t118_1
-      next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-      askquestion_pending: false
-      askquestion_pending_topic:
+      current_action: m118_pr_and_gate_c_to_d
+      next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+      askquestion_pending: true
+      askquestion_pending_topic: Gate C→D / phase_c after M118
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
       phase_b: passed
       s026_d27_decision: S026-D27
       s026_d28_decision: S026-D28
-      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — PR #206 MERGED to main @eb65837 (M117 F69); m117_pr_status=merged; askquestion_pending=false; active_milestone=M118 active_task=T118.1 (in_progress) current_action=build_m118_t118_1; build_head=21ed50e; supabase CLI linked (cfuvghdsuwactfeamtym); prod.env missing — secret sync deferred; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-      updated_at: '2026-08-04T23:56:04Z'
+      note: 'S026/EV-024 07-build IN_PROGRESS 2026-08-04 — T118.3 completed; M118 completed; M112–M118 all tasks done; active_milestone=M118 active_task=null current_action=m118_pr_and_gate_c_to_d; build_head=4a151d0; checkpoints.phase_c=pending gates.c_to_d=pending; askquestion_pending=true (Gate C→D / phase_c after M118); PR-65 M118 pending; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+      updated_at: '2026-08-05T00:08:00Z'
       milestones_completed: *id012
       tasks_completed:
       - T112.1
@@ -28963,6 +29160,9 @@ evolve_cycles:
       - T117.2
       - T117.3
       - T117.4
+      - T118.1
+      - T118.2
+      - T118.3
       m112_status: completed
       m112_feature: F66
       m112_issue: 104
@@ -28976,10 +29176,10 @@ evolve_cycles:
       - 0942ef9
       docs_commit: 47a618e
       substeps:
-        current_task: T118.1
+        current_task:
         current_milestone: M118
         phase: 27
-        task_status: in_progress
+        task_status: completed
         m112_status: completed
         m112_verify: PASS
         m112_pr: 200
@@ -28987,8 +29187,7 @@ evolve_cycles:
         m113_status: completed
         m113_verify: PASS
         m113_pr: 202
-        remaining_milestones:
-        - M118
+        remaining_milestones: []
         m114_status: completed
         m114_pr: 203
         m113_pr_merged: true
@@ -29008,6 +29207,9 @@ evolve_cycles:
         - T117.2
         - T117.3
         - T117.4
+        - T118.1
+        - T118.2
+        - T118.3
         m115_verify: PASS
         m116_status: completed
         completed_tasks_m115:
@@ -29037,9 +29239,16 @@ evolve_cycles:
         m117_pr: 206
         m117_pr_status: merged
         m117_verify: PASS
-        m118_status: in_progress
+        m118_status: completed
         m117_pr_merged: true
-        t118_1_status: in_progress
+        t118_1_status: completed
+        t118_2_status: completed
+        t118_3_status: completed
+        completed_tasks_m118:
+        - T118.1
+        - T118.2
+        - T118.3
+        all_tasks_completed: true
       session_id: S026-frontend-ux-polish
       evolve_cycle_id: EV-024
       branch: evolve/EV-024-frontend-ux-polish
@@ -29047,7 +29256,7 @@ evolve_cycles:
       m112_pr: 200
       m112_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       m112_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-      build_head: 21ed50e
+      build_head: 4a151d0
       pr_200: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
       s026_d29_decision: S026-D29
       m112_pr_merged: true
@@ -29088,9 +29297,9 @@ evolve_cycles:
       m114_merge_sha: f3f7dec
       m114_merge_sha_short: f3f7dec
       current_milestone: M118
-      current_task: T118.1
-      active_task: T118.1
-      build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+      current_task:
+      active_task:
+      build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
       s026_d48_decision: S026-D48
       m115_status: completed
       m115_verify: PASS
@@ -29117,7 +29326,7 @@ evolve_cycles:
       m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
       pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
       pr_204_status: closed_superseded
-      ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+      ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       ci_status: success
       pr_204_ci_status: success
       m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -29158,10 +29367,10 @@ evolve_cycles:
       t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
       t116_4_files: *id005
       branch_ahead_of_origin: 0
-      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-      resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+      branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
+      resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       s026_d51_decision: S026-D51
-      execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+      execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
       t116_5_commit: bb30b26
       t116_5_commit_full: bb30b2611caed89279732df1364720a529ec89cf
       t116_5_files:
@@ -29287,9 +29496,9 @@ evolve_cycles:
       pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
       pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
       ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-      t118_1_status: in_progress
-      t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-      notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+      t118_1_status: completed
+      t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+      notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       pr_206_merge_sha_short: eb65837
@@ -29301,15 +29510,35 @@ evolve_cycles:
       m117_merge_sha_short: eb65837
       m117_merged_at: '2026-08-04T23:56:04Z'
       task_status:
-        T118.1: in_progress
+        T118.1: completed
+        T118.2: completed
+        T118.3: completed
       s026_d53_decision: S026-D53
       supabase_cli:
         linked_project_ref: cfuvghdsuwactfeamtym
         brewfile: supabase added (=2.111.0)
-        note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+        note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
         linked_at: '2026-08-04T23:56:04Z'
+        reminder_at: '2026-08-05T00:02:08Z'
         session_id: S026-frontend-ux-polish
         evolve_cycle_id: EV-024
+        operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+      t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+      t118_2_status: completed
+      t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+      t118_3_status: completed
+      t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+      phase_c: pending
+      gate_c_to_d: pending
+      t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+      t118_3_completed_at: '2026-08-05T00:08:00Z'
+      m118_status: completed
+      m118_completed_at: '2026-08-05T00:08:00Z'
+      m118_verify: pending_pr
+      m118_pr: pending
+      m118_pr_status: pending
+      m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+      issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
     06-tech-tooling:
       status: skipped
       skip_rationale: Standard — no new tooling; Gate B→C → 07 directly
@@ -29339,10 +29568,10 @@ evolve_cycles:
       active_milestone: M118
       active_feature: F64-F69
       active_issue: 193
-      current_action: build_m118_t118_1
-      next_action: '07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-      askquestion_pending: false
-      askquestion_pending_topic:
+      current_action: m118_pr_and_gate_c_to_d
+      next_action: 'Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+      askquestion_pending: true
+      askquestion_pending_topic: Gate C→D / phase_c after M118
       gate_a_to_b: passed
       gate_b_to_c: passed
       phase_a: passed
@@ -29360,7 +29589,7 @@ evolve_cycles:
       m112_status: completed
       s026_d28_decision: S026-D28
       note: 'S026/EV-024 08-verify-build COMPLETE PASS (M117) — PR #206 MERGED @eb65837; handoff → continue 07-build T118.1'
-      updated_at: '2026-08-04T23:56:04Z'
+      updated_at: '2026-08-05T00:08:00Z'
       completed: '2026-08-04'
       completed_at: '2026-08-04'
       completed_at_iso: '2026-08-04T23:49:00Z'
@@ -29471,9 +29700,9 @@ evolve_cycles:
       m116_pr_status: merged
       m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.2'
       m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-      active_task: T118.1
+      active_task:
       current_milestone: M118
-      current_task: T118.1
+      current_task:
       m115_pr_merged: true
       m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
       m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
@@ -29495,7 +29724,7 @@ evolve_cycles:
       pr_205_merged_at: '2026-08-04T23:24:43Z'
       pr_204_superseded_by: 205
       ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
-      resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+      resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       s026_d52_decision: S026-D52
       t117_2_status: in_progress
       t117_2_note: T117.2 in_progress — enrich GET /internal/v1/audit with actor_email (DM/write Supabase Admin lookup/cache)
@@ -29544,7 +29773,7 @@ evolve_cycles:
       m117_pr_note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1 @21ed50e'
       m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
       handoff_active_milestone: M118
-      handoff_active_task: T118.1
+      handoff_active_task:
       t117_4_status: completed
       t117_4_commit: 1719b3b
       minor_pr_m117:
@@ -29594,22 +29823,29 @@ evolve_cycles:
       m117_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
       m117_merge_sha_short: eb65837
       m117_merged_at: '2026-08-04T23:56:04Z'
-      t118_1_status: in_progress
+      t118_1_status: completed
       t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
       task_status:
-        T118.1: in_progress
+        T118.1: completed
+        T118.2: completed
+        T118.3: completed
       s026_d53_decision: S026-D53
       execution_plan_note: execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets
       branch_ahead_of_origin: 0
       branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-      notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+      notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
       supabase_cli:
         linked_project_ref: cfuvghdsuwactfeamtym
         brewfile: supabase added (=2.111.0)
-        note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+        note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
         linked_at: '2026-08-04T23:56:04Z'
+        reminder_at: '2026-08-05T00:02:08Z'
         session_id: S026-frontend-ux-polish
         evolve_cycle_id: EV-024
+        operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+      t118_2_status: completed
+      t118_3_status: completed
+      m118_status: completed
   artifacts:
   - &id019
     path: docs/dependency-inventory.md
@@ -30334,8 +30570,8 @@ evolve_cycles:
     recorded_at: '2026-08-04T13:32:00Z'
     status: confirmed
   handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-  note: 'S026/EV-024 Phase C — PR #206 MERGED @eb65837; M117 complete on main; T118.1 in_progress @21ed50e; askquestion_pending=false; next=07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
-  updated_at: '2026-08-04T23:56:04Z'
+  note: 'S026/EV-024 Phase C — T118.3+M118 completed; askquestion_pending=true (Gate C→D / phase_c after M118); checkpoints.phase_c=pending gates.c_to_d=pending; next=Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
+  updated_at: '2026-08-05T00:08:00Z'
   feature_map:
     F64:
       issue: 87
@@ -30384,7 +30620,7 @@ evolve_cycles:
   proposed_features_status: allocated
   proposed_features_allocated_at: '2026-08-04T13:51:00Z'
   proposed_features_decision: S026-D11
-  askquestion_pending_topic:
+  askquestion_pending_topic: Gate C→D / phase_c after M118
   s026_d20_decision: S026-D20
   s026_d21_decision: S026-D21
   s026_d22_decision: S026-D22
@@ -30629,7 +30865,7 @@ evolve_cycles:
     - T114.2
     feature: F64
     issue: 87
-  active_task: T118.1
+  active_task:
   s026_d44_decision: S026-D44
   s026_d45_decision: S026-D45
   m114_status: completed
@@ -30673,8 +30909,8 @@ evolve_cycles:
   m114_pr_merged: true
   m114_merge_sha: f3f7dec
   m114_merge_sha_short: f3f7dec
-  build_head: 21ed50e
-  build_head_full: 21ed50e15ef12f9be2f18a8aff31b8e286572aa4
+  build_head: 4a151d0
+  build_head_full: 4a151d07fbcb0d1057c6b35c559c1ef2a550d6e8
   s026_d48_decision: S026-D48
   m115_status: completed
   m115_verify: PASS
@@ -30701,7 +30937,7 @@ evolve_cycles:
   - d93b78a
   - bde3db7
   - 605fce9
-  ci_note: 'PR #206 MERGED @eb65837; M117 on main; continuing M118 T118.1 @21ed50e; supabase CLI linked'
+  ci_note: 'PR #206 MERGED @eb65837; M117 on main; T118.3+M118 completed @4a151d0; M112–M118 tasks done; await M118 PR + Gate C→D AskQuestion; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   ci_status: success
   pr_204_ci_status: success
   m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
@@ -30761,12 +30997,12 @@ evolve_cycles:
   t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
   t116_4_files: *id005
   branch_ahead_of_origin: 0
-  resume_note: 'PR #206 MERGED @eb65837; M117 on main; T118.1 in_progress; supabase linked; head 21ed50e'
+  resume_note: 'T118.3+M118 completed; M112–M118 tasks done; Open M118 PR then AskQuestion Gate C→D; phase_c/c_to_d still pending; head 4a151d0; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   s026_d51_decision: S026-D51
-  execution_plan_note: 'execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets'
+  execution_plan_note: 'execution-plan.md should show T118.1–T118.3 completed / M118 completed; next Open M118 PR (OpenAPI/gate docs); AskQuestion Gate C→D; then 08-verify-build / 09-qa'
   pr_note: 'PR #206 open_ci_green [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206); tip @ecc7412; CI green @ 1719b3b (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473); NOT merged — merge still needs explicit user approval; AskQuestion pending: merge PR #206 (M117) vs continue T118.1'
   current_milestone: M118
-  current_task: T118.1
+  current_task:
   m116_status: completed
   m116_verify: PASS
   m116_feature: F68
@@ -30782,7 +31018,7 @@ evolve_cycles:
   m116_pr_status: merged
   m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205; continuing M117 T117.4 (PR #206 open)'
   m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-  branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
+  branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @4a151d0
   t117_1_status: completed
   t117_1_note: T117.1 completed @100514f — privacy + API e2e red tests for F69 actor_email (TC-229–230)
   t116_5_commit: bb30b26
@@ -30806,6 +31042,9 @@ evolve_cycles:
   - T117.2
   - T117.3
   - T117.4
+  - T118.1
+  - T118.2
+  - T118.3
   t117_1_commit: 100514f
   t117_1_commit_full: 100514f41b14c48314798fdedad040757385b5a8
   t117_2_status: completed
@@ -30907,9 +31146,9 @@ evolve_cycles:
   pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
   pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
   ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-  t118_1_status: in_progress
-  t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2 OpenAPI/secrets
-  notes: 'PR #206 MERGED @eb65837. M117 F69 on main. Brewfile/secrets @21ed50e. T118.1 in_progress. prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env'
+  t118_1_status: completed
+  t118_1_note: T118.1 completed — UJ e2e + Playwright suite green (F64–F69); report=docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+  notes: 'T118.3 completed; M118 completed; M112–M118 tasks all completed. PR-65 M118 pending. Gate C→D AskQuestion next after M118 PR. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
   pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
   pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
   pr_206_merge_sha_short: eb65837
@@ -30921,16 +31160,36 @@ evolve_cycles:
   m117_merge_sha_short: eb65837
   m117_merged_at: '2026-08-04T23:56:04Z'
   task_status:
-    T118.1: in_progress
+    T118.1: completed
+    T118.2: completed
+    T118.3: completed
   s026_d53_decision: S026-D53
   supabase_cli:
     linked_project_ref: cfuvghdsuwactfeamtym
     brewfile: supabase added (=2.111.0)
-    note: prod.env missing locally — live DO/Modal secret sync deferred until operator sources prod.env
+    note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
     linked_at: '2026-08-04T23:56:04Z'
+    reminder_at: '2026-08-05T00:02:08Z'
     session_id: S026-frontend-ux-polish
     evolve_cycle_id: EV-024
+    operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
   merged_at: '2026-08-04T23:56:04Z'
+  t118_1_report: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+  t118_2_status: completed
+  t118_2_note: T118.2 completed — OpenAPI/secrets matrix/Brewfile; live secret sync deferred (prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply))
+  t118_3_status: completed
+  t118_3_note: 'T118.3 completed 2026-08-04 — Phase 27 gate build-complete slice PASS (partial; AC T2 + full lint deferred to 08/09–11). Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. report=docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md'
+  phase_c: pending
+  gate_c_to_d: pending
+  t118_3_report: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+  t118_3_completed_at: '2026-08-05T00:08:00Z'
+  m118_status: completed
+  m118_completed_at: '2026-08-05T00:08:00Z'
+  m118_verify: pending_pr
+  m118_pr: pending
+  m118_pr_status: pending
+  m118_note: M118 completed (T118.1–T118.3); PR-65 M118 pending; Gate C→D AskQuestion after PR (Gate C→D / phase_c after M118)
+  issue_closeout_note: 'Issue closeout notes recorded; do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
 retrospective_cycles:
 - id: RET-001
   title: EV-018 / S021 retrieval follow-on retrospective
@@ -35674,6 +35933,27 @@ decisions_log:
 - 'S026/EV-024: CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; build_head=bde3db7; active_task=T116.1 / M116 unchanged'
 - 'S026/EV-024: recorded 605fce9 ([T115.4] test: cover energy knob validation branches); build_head=605fce9; m115_pr_status=open_ci_green; M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; merge needs user approval; askquestion_pending=true (merge PR #204 vs continue M116 T116.1 vs pause); active_task=T116.1 / M116 ready'
 artifacts:
+- path: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+  kind: report
+  type: docs/sessions/S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md
+  session_id: S026-frontend-ux-polish
+  evolve_cycle_id: EV-024
+  stage: 07-build
+  skill_id: 07-build
+  milestone: M118
+  task: T118.3
+  recorded_at: '2026-08-05T00:08:00Z'
+  note: T118.3 Phase 27 gate build-complete slice PASS (partial); issue closeout notes; await M118 PR + Gate C→D
+- path: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+  type: docs/sessions/S026-frontend-ux-polish/reports/t118-1-uj-suite.md
+  session_id: S026-frontend-ux-polish
+  evolve_cycle_id: EV-024
+  stage: 07-build
+  skill_id: 07-build
+  milestone: M118
+  task: T118.1
+  recorded_at: '2026-08-05T00:02:08Z'
+  note: T118.1 UJ e2e + Playwright suite confirmation (F64–F69)
 - *id016
 - *id017
 - *id018

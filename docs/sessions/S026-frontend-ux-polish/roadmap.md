@@ -25,8 +25,9 @@ tips/marketing (#87), energy+car (#93), anonymous feedback (#186), audit actor e
 | 01-requirements | ✅ Complete | RD-272–289 |
 | 02-verify-plan | ✅ Complete | Gate A→B PASS (S026-D23) |
 | 04-tech-plan | ✅ TP1–TP6 locked | Phase 27 drafted (S026-D24); completed S026-D25 |
-| 05-verify-tech | ✅ Complete | S026-D26–D27; Gate B→C next |
-| 07-build M112–M118 | 🔄 In progress | Gate B→C PASS (S026-D28); M112 started |
+| 05-verify-tech | ✅ Complete | Gate B→C PASS (S026-D28) |
+| 07-build M112–M118 | ✅ Complete | Code PRs #200–#206; M118 OpenAPI/gate (T118.3) |
+| Gate C→D | 🔄 Pending | AskQuestion after M118 PR / 08-verify |
 | 08–13 | ⬜ Pending | Per routing-plan |
 
 ## Milestone build order
@@ -69,12 +70,12 @@ flowchart LR
 
 ## PR plan (one per issue)
 
-| Order | Issue | Milestone | Branch tip |
-|-------|-------|-----------|------------|
-| 1 | #104 | M112 | feat commits on evolve branch |
-| 2 | #106 | M113 | |
-| 3 | #87 | M114 | |
-| 4 | #93 | M115 | |
-| 5 | #186 | M116 | |
-| 6 | #170 | M117 | |
-| — | #193 | M118 gate | Close epic after children + smoke |
+| Order | Issue | Milestone | PR | Status |
+|-------|-------|-----------|-----|--------|
+| 1 | #104 | M112 | #200 | merged |
+| 2 | #106 | M113 | #202 | merged |
+| 3 | #87 | M114 | #203 | merged; issue CLOSED |
+| 4 | #93 | M115 | #205 | merged |
+| 5 | #186 | M116 | #205 | merged |
+| 6 | #170 | M117 | #206 | merged @ `eb65837` |
+| — | #193 | M118 gate | M118 PR | OpenAPI/gate docs; close epic after children + 13 H1–H5 |
