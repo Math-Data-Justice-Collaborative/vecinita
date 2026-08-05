@@ -23,6 +23,7 @@ from vecinita_shared_schemas.json_types import as_json_object
 
 _E1 = DEFAULT_EMBEDDING_MODEL_ID
 _E0 = LEGACY_E0_EMBEDDING_MODEL_ID
+_CHUNK_SIZE_TOKENS = 256
 
 
 @pytest.mark.unit
@@ -38,7 +39,7 @@ def test_tc239_e0_rollback_create_rebuild_uses_legacy_pin_and_matching_tokenizer
             "force": True,
             "embedding_model_id": _E0,
             "embedding_dim": EMBEDDING_DIMENSION,
-            "chunk_size_tokens": 256,
+            "chunk_size_tokens": _CHUNK_SIZE_TOKENS,
             "chunk_tokenizer_id": _E0,
         }
     )
@@ -49,7 +50,7 @@ def test_tc239_e0_rollback_create_rebuild_uses_legacy_pin_and_matching_tokenizer
     assert payload.get("status") == "running"
     assert payload.get("embedding_model_id") == _E0
     assert payload.get("embedding_dim") == EMBEDDING_DIMENSION
-    assert payload.get("chunk_size_tokens") == 256
+    assert payload.get("chunk_size_tokens") == _CHUNK_SIZE_TOKENS
     assert payload.get("chunk_tokenizer_id") == _E0
     assert payload.get("job_id") is None
 

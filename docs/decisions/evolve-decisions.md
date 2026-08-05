@@ -884,6 +884,11 @@ call must include recorded EN vs ES metrics. Out: dual-index, dim≠384, UI, bge
 | S027-D30 | Gate B→C | **PASS** (option 1) → start 07-build M119 / T119.1 |
 | S027-D33 | M119 next | **Merge #208 first, then M120** (option 3) |
 | S027-D34 | Merge + CI | **Merge #208** @`2c884bd`; CI split — remote: unit + coverage **PR comment** + strict lint/format; local: compose/integration/long-running (`make test-py` / `ci-push`); rich asserts |
+| S027-D35 | T120.5 compose e2e | **Waive** local compose e2e this cycle (unit+CI gate @`837f996`; e2e when Docker works or staging ops). Cite **S027-D32** Docker userns class; T120.5/`M120` → `completed_conditional`; PR **#210** open_ci_green — await explicit merge (Gate C→D pending) |
+| S027-D36 | Merge #210 | **Approve merge** PR #210 (option 1) — tip @`837f996` open_ci_green |
+| S027-D37 | #210 merged + Gate C→D | **PR #210 MERGED** @`b35e980` (2026-08-05T17:45:19Z); main CI + deploy-preflight **green**; **Gate C→D PASS** (conditional on **S027-D35** compose-e2e waive). Phase C checkpoint AskQuestion before 09-qa / M121 |
+| S027-D38 | Phase C checkpoint | **Option 1** — continue **07-build M121** (prod cutover + E0 rollback) before Phase D; T121.1 `in_progress`; 09-qa deferred; branch `evolve/EV-025-multilingual-embeddings` (synced with main after #210) |
+| S027-D39 | T121.3 F44 | **Skipped / not_triggered** — no post-pin F36 ES harm evidence this cycle (S027-D19/D20); F44 soft language-filter tune deferred. T121.2 @`bf325e3` TC-240 green; T121.4 green confirm in progress |
 
 ### Feature map
 
