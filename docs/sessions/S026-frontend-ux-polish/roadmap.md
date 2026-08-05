@@ -26,9 +26,10 @@ tips/marketing (#87), energy+car (#93), anonymous feedback (#186), audit actor e
 | 02-verify-plan | ✅ Complete | Gate A→B PASS (S026-D23) |
 | 04-tech-plan | ✅ TP1–TP6 locked | Phase 27 drafted (S026-D24); completed S026-D25 |
 | 05-verify-tech | ✅ Complete | Gate B→C PASS (S026-D28) |
-| 07-build M112–M118 | ✅ Complete | Code PRs #200–#206; M118 OpenAPI/gate (T118.3) |
-| Gate C→D | 🔄 Pending | AskQuestion after M118 PR / 08-verify |
-| 08–13 | ⬜ Pending | Per routing-plan |
+| 07-build M112–M118 | ✅ Complete | Code PRs #200–#206; M118 #207 @ `c942971` |
+| Gate C→D | ✅ PASS | S026-D54 (option 2: pass + merge #207) |
+| 08-verify-build | ✅ M118 PASS | [verification-report](./reports/verification-report.md) |
+| 09–13 | 🔄 Next | 09-qa + 10-e2e parallel → 11 → 12 → 13 |
 
 ## Milestone build order
 

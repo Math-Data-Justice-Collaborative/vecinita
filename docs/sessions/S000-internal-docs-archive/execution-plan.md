@@ -9,14 +9,14 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) — **build complete** (Gate C→D pending) |
-| **Active milestone** | M118 — OpenAPI + UJ e2e suite + Phase 27 gate — **completed** |
-| **Active task** | — (T118.3 completed); next **08-verify-build** / Gate C→D → 09-qa |
-| **Tasks completed** | Phase 21–26; S026 Phase A–B; **M112–M118** (code PRs #200/#202/#203/#205/#206; M118 OpenAPI/gate docs) |
+| **Active phase** | Phase 27: EV-024 — ChatRAG + Admin UX polish (F64–F69) — **Gate C→D PASS**; Phase D Verify |
+| **Active milestone** | M118 — **completed** (merged #207 @ `c942971`) |
+| **Active task** | —; next **09-qa** + **10-e2e** (parallel) |
+| **Tasks completed** | Phase 21–26; S026 Phase A–C; **M112–M118** (#200/#202/#203/#205/#206/#207) |
 | **Last updated** | 2026-08-04 |
-| **Evolve cycle** | EV-024 — Standard; Phase C build done; await Gate C→D |
-| **Git branch** | `evolve/EV-024-frontend-ux-polish` |
-| **Active session** | S026-frontend-ux-polish — M118 complete; Gate C→D |
+| **Evolve cycle** | EV-024 — Standard; phase_c / c_to_d passed (S026-D54); Phase D |
+| **Git branch** | `evolve/EV-024-frontend-ux-polish` (synced with main @ `c942971`) |
+| **Active session** | S026-frontend-ux-polish — 08-verify M118 PASS; → 09/10 |
 | **Scope addition** | 2026-08-04 — F64–F69 UX polish (#193 + #87/#93/#104/#106/#186/#170). |
 
 ## Template
@@ -2482,8 +2482,8 @@ main
 | PR-62 | Minor | M114 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#203](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/203)) — F64/#87 |
 | PR-63 | Minor | M115+M116 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#205](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205)) — F65+F68/#93/#186 |
 | PR-64 | Minor | M117 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#206](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206)) @ `eb65837` — F69/#170 |
-| PR-65 | Minor | M118 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — OpenAPI + Phase 27 gate docs |
-| PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — after Gate C→D / verify (code already on main via PR-60–64) |
+| PR-65 | Minor | M118 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | merged ([#207](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207)) @ `c942971` — OpenAPI + Phase 27 gate |
+| PR-66 | Major | Phase 27 / S026 (EV-024) | evolve/EV-024-frontend-ux-polish | main | pending — optional rollup; code+docs on main via PR-60–65; Gate C→D PASS |
 
 S026 (EV-024) is evolve Standard: M112–M118 on `evolve/EV-024-frontend-ux-polish`
 (one PR per issue #104→#106→#87→#93/#186→#170; M118 OpenAPI/gate). Gate A→B / B→C passed;
