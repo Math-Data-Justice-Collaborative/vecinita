@@ -10,6 +10,7 @@ Model: ``VECINITA_EMBEDDING_MODEL_ID`` (default multilingual-e5-small)
 from __future__ import annotations
 
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Protocol, cast
@@ -26,6 +27,7 @@ from vecinita_embedding_client.prefixes import resolve_embed_runtime
 
 APP_NAME = "vecinita-embedding"
 VOLUME_NAME = "embedding-models"
+_LOG = logging.getLogger(__name__)
 
 
 def _resolve_repo_root() -> Path:
@@ -47,6 +49,8 @@ _PYTHONPATH = ":".join(
 
 app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
+# Pin + runtime (S027-D55): VECINITA_EMBED_RUNTIME / VECINITA_EMBEDDING_MODEL_ID
+_EMBED_SECRETS = [modal.Secret.from_name("vecinita-embedding")]
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -123,10 +127,20 @@ class _OnnxSentenceTransformersBackend:
 
 
 def _load_backend(cache_dir: str) -> _EmbedBackend:
+    """Load the configured embed backend; FastEmbed → ST on unsupported pins (S027-D12)."""
     runtime = resolve_embed_runtime()
     model_id = _model_id()
     if runtime == "fastembed":
-        return _FastEmbedBackend(model_id, cache_dir)
+        try:
+            return _FastEmbedBackend(model_id, cache_dir)
+        except ValueError as exc:
+            # S019 spike + BUG-2026-08-05: FastEmbed lacks multilingual-e5-small.
+            _LOG.warning(
+                "FastEmbed cannot load %s (%s); falling back to sentence_transformers",
+                model_id,
+                exc,
+            )
+            return _SentenceTransformersBackend(model_id, cache_dir)
     if runtime == "onnx":
         return _OnnxSentenceTransformersBackend(model_id, cache_dir)
     return _SentenceTransformersBackend(model_id, cache_dir)
@@ -137,6 +151,7 @@ def _load_backend(cache_dir: str) -> _EmbedBackend:
     volumes={"/models": model_volume},
     timeout=EMBED_STAGE_TIMEOUT_S,
     memory=EMBED_MEMORY_MIB,
+    secrets=_EMBED_SECRETS,
 )
 def stage_embedding_weights() -> str:
     """One-shot: download embed model weights into the embedding-models volume."""
@@ -155,6 +170,7 @@ def stage_embedding_weights() -> str:
     memory=EMBED_MEMORY_MIB,
     scaledown_window=600,
     enable_memory_snapshot=True,
+    secrets=_EMBED_SECRETS,
 )
 class EmbeddingService:
     @modal.enter(snap=True)
@@ -167,7 +183,7 @@ class EmbeddingService:
         return self._backend.embed(texts)
 
 
-@app.function(image=image, memory=EMBED_MEMORY_MIB)
+@app.function(image=image, memory=EMBED_MEMORY_MIB, secrets=_EMBED_SECRETS)
 @modal.asgi_app()
 def embedding_api():
     from pydantic import BaseModel, ConfigDict, Field, ValidationError
