@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-04 (S026/EV-024 — F64–F69 UX polish epic #193; prior S025/EV-023 F62–F63)
+> **Last updated**: 2026-08-05 (S027/EV-025 — F70–F71 multilingual embeddings #159; prior S026/EV-024 F64–F69)
 
 ## Summary
 
@@ -19,7 +19,7 @@
 | F7 | URL scrape → chunk → embed → store | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
 | F8 | Ingest job queue & status API | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
 | F9 | Corpus list / delete (admin) | Implemented (+ EV-013 polish) | Data Management | data-management-backend, data-management-frontend | 11-verify-impl 2026-05-19; EV-013 #148 density/truncation |
-| F10 | FastEmbed embeddings (384-dim) on Modal | Implemented | Data Management | data-management-backend (Modal) | D6 verified; live optional |
+| F10 | Multilingual 384-d embeddings on Modal | Planned (EV-025 evolve) | Data Management / Cross-cutting | Modal embed, embedding-client | S027/EV-025 #159; was FastEmbed-en |
 | F11 | ChatRAG web UI (React/Vite) | Implemented | ChatRAG | chat-rag-frontend | Vitest smoke; UI E2E waived v1 |
 | F12 | Data management admin UI | Implemented (+ EV-013 polish) | Data Management | data-management-frontend | Vitest smoke; EV-013 #148 shared table density |
 | F13 | Database migrations & pgvector | Implemented | Database | apps/database | 11-verify-impl 2026-05-19 |
@@ -72,6 +72,8 @@
 | F67 | Bilingual tooltips / contextual hints | Implemented | Cross-cutting | `frontend-ui`, `frontend-i18n`, both frontends | S026/EV-024 #106/#193 |
 | F68 | ChatRAG feedback page + backend (anonymous) | Implemented | ChatRAG + Admin | chat-rag-*, internal-write, database, admin FE | S026/EV-024 #186/#193 |
 | F69 | Admin audit actor username (read-time) | Implemented | Data Management | data-management-backend/frontend | S026/EV-024 #170/#193 |
+| F70 | Multilingual embedding runtime + model pin | Planned | Cross-cutting | Modal embed, `packages/embedding-client`, ChatRAG + ingest | S027/EV-025 #159 |
+| F71 | Corpus re-embed + prod cutover (multilingual pin) | Planned | Data Management | F41 rebuild/promote, Modal, internal-write, Admin Jobs | S027/EV-025 #159 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -161,13 +163,24 @@
 - **Source**: User interview 01-requirements
 - **EV-013 / #148 polish (S014)**: Dense single-screen corpus table — keep server pagination (`page_size` 50 from #112); sticky header; compact rows; truncate long titles/URLs with ellipsis; full text via native `title` + `aria-label` (no Tooltip required); bound tag chips (`+N`); Actions column stays visible without horizontal page scroll on ~1280×800. Empty/loading/error states unchanged. **Privacy**: truncation chrome uses **no cookies** and **no new `localStorage` keys**; theme stays on existing device-local `vecinita-ui-theme` only; OS `prefers-contrast: more` / `contrast-more:` CSS only (no high-contrast toggle, no tracking).
 
-### F10: FastEmbed embeddings (384-dim) on Modal
+### F10: Multilingual 384-d embeddings on Modal
 
-- **What it does**: Batch/single embed endpoints on Modal using FastEmbed with model weights on Modal volume.
-- **Inputs**: Text or batch of texts.
-- **Outputs**: 384-dimensional vectors.
-- **Limitations**: Modal pay-per-invoke; align migrations with `vector(384)`.
-- **Source**: User interview; context-brief R8 (384-dim reference)
+- **What it does**: Batch/single embed HTTP on Modal (`/embed`, `/embed/batch`) producing
+  **384-d** vectors for ingest and ChatRAG query. **EV-025 / ADR-048:** hosts the shared
+  multilingual pin (planned candidate E1 `intfloat/multilingual-e5-small`; final after F36
+  operator review). Runtime prefers **FastEmbed**; allows **sentence-transformers** or
+  **custom ONNX** when FastEmbed cannot load the winner (S027-D12). Shared
+  `packages/embedding-client` applies e5 `query:` / `passage:` prefixes when required.
+  Historical v1 ship used English-only `BAAI/bge-small-en-v1.5` via FastEmbed (ADR-008,
+  superseded). Detailed cutover + rechunk lives in **F70/F71**; F10 is the embed **service**
+  capability row.
+- **Inputs**: Text or batch of texts; query vs passage mode; model id / runtime config.
+- **Outputs**: 384-dimensional vectors; health/model metadata.
+- **Limitations**: Modal pay-per-invoke; `vector(384)` schema (dim change needs new ADR);
+  weights on Modal volume / image — not in Vecinita DB.
+- **Protected surfaces**: `infra/modal/embedding_app.py`; `packages/embedding-client`.
+- **Source**: User interview; R8; S027/EV-025; ADR-048; F70.
+- **Status**: Evolving under EV-025 (F70 implementation); prior FastEmbed-en path Implemented.
 
 ### F11: ChatRAG web UI (React/Vite)
 
@@ -814,8 +827,9 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `apps/data-management-backend` | Rebuild pipeline; ingest writes store; **backfill** job/path |
   | `apps/data-management-frontend` | Jobs UI: enqueue rebuild (mode/force/dry-run) + **promote** |
   | Modal data-management | Long-running rebuild worker |
-- **Out of scope (this cycle)**: Live prod rebuild; multilingual model pick (#159); chunk
-  overlap values (#160); dual-write dim migration impl; retag-inside-rebuild; new % widget.
+- **Out of scope (this cycle)**: Live prod rebuild; chunk overlap values (#160); dual-write
+  dim migration impl; retag-inside-rebuild; new % widget.
+  **Note:** Multilingual model pick (#159) moved to **S027/EV-025 F70–F71** (no longer OOS).
 - **Source**: S017 / EV-015; GitHub #167; ADR-040; intake 2026-07-30 (S017-D1–D17);
   02-verify-plan M1–M4 (2026-07-30).
 
@@ -921,9 +935,11 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `packages/rag` | L1 retrieve helper (same-lang then optional unfiltered retry) |
   | `apps/chat-rag-backend` | Flag-gated wire on retrieve path |
   | tests / fixtures | Empty-hit fixture + unit/e2e coverage |
-- **Out of scope (this cycle)**: L2 opposite-language-only; changing default-on without evidence;
-  #159 embed swap.
+- **Out of scope (this cycle)**: L2 opposite-language-only; changing default-on without evidence.
+  (#159 embed swap moved to EV-025 F70–F71.)
 - **Source**: S020 / EV-017; GitHub #162; S019 A3 spike; S020-D6/D7/D8.
+- **Follow-on (EV-025)**: F71 may retune flag/thresholds only if post–multilingual-pin F36
+  shows ES/lang-filter harm (S027-D19/D20); no separate F72.
 
 ### F45: Cross-encoder rerank spike + gated ship (#83/#161)
 
@@ -1259,6 +1275,57 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Out of scope**: Denormalizing names into corpus DB; ChatRAG identity; displaying a
   non-email Supabase “username” as the primary label.
 - **Source**: S026 / EV-024; GitHub #170 / #193; S026-D7/D19; 02 M1.
+
+### F70: Multilingual embedding runtime + model pin (#159)
+
+- **What it does**: Replaces English-only prod pin `BAAI/bge-small-en-v1.5` with a
+  **multilingual 384-d** model (prefer `intfloat/multilingual-e5-small` / E1 from S019).
+  Updates Modal embedding app + shared `packages/embedding-client` so **ingest and query**
+  share one pin. Prefer FastEmbed; **allow** sentence-transformers or custom ONNX on Modal
+  when FastEmbed cannot host the winner (S027-D7). Applies e5 `query:` / `passage:` prefixes
+  consistently when required. ADR-008 successor (dim stays 384 — no schema migration).
+- **Inputs**: Model id / runtime choice; texts for `/embed` and `/embed/batch`; query vs
+  passage mode.
+- **Outputs**: 384-d vectors; health/model metadata; config pin
+  (`VECINITA_EMBEDDING_MODEL_ID` and related); ADR-008 successor.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `infra/modal/embedding_app.py` | Host winner model (FastEmbed and/or ST/ONNX) |
+  | `packages/embedding-client` | Shared pin + prefix rules for ingest + ChatRAG |
+  | ChatRAG + DM ingest paths | Consume shared client only |
+  | `docs/adr` / config-spec | ADR-008 successor; pin defaults |
+- **Out of scope**: Dual-index; dim≠384; UI; bge-m3 multi-vector.
+  Tokenizer **aligns with embed pin this cycle** (S027-D15 amended by 02 M2b) via F71 rechunk.
+- **Source**: S027 / EV-025; GitHub #159; S027-D1–D25; S019 spike E0/E1/E2.
+
+### F71: Corpus re-embed + prod cutover (multilingual pin) (#159)
+
+- **What it does**: Runs F41 rebuild with the F70 model pin on **staging first**
+  (shadow → F36 EN/ES advisory report → operator promote), then **repeats on prod**
+  (S027-D5/D21). Mode: **`rechunk` then re-embed** (or equivalent rebuild that re-tokenizes
+  with the pin’s HF tokenizer and re-embeds) so `VECINITA_CHUNK_TOKENIZER_ID` matches the
+  embed pin (**S027-D15 amended — 02 M2b**). Version stamps `embedding_model_id`,
+  chunk settings, and `rebuild_run_id`. Promote is **operator judgment** after the report
+  (S027-D11) — no hard numeric abort. Keep prior **E0 revision restorable** via F41 rollback
+  (S027-D22). Optionally tune F44 soft language filter **only if** post-pin F36 shows
+  ES/lang-filter harm (S027-D19/D20; no separate Fn).
+- **Inputs**: F70 pin live on Modal; F41 rebuild (`mode=rechunk` and/or `reembed` as needed
+  for tokenizer+embed); golden/eval set; promote path; optional F44 flag/thresholds.
+- **Outputs**: Staging then prod re-chunked + re-embedded corpus; F36/dense metrics report;
+  promote audit; rollback runbook; #159 closable or follow-on clearly ticketed.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | F41 rebuild / promote | Stamp + run with F70 model id + aligned tokenizer; staging then prod |
+  | Admin Jobs UI | Operator enqueue/promote (existing) |
+  | ChatRAG retrieve | Reads new vectors after promote |
+  | F36 / eval harness | EN vs ES evidence for ship call |
+  | `packages/rag` (optional) | F44 threshold/flag tune if harm shown |
+  | config / ADR-044 | `VECINITA_CHUNK_TOKENIZER_ID` set to embed pin |
+- **Out of scope**: Dual-write dim migration; rescrape-as-default; UI redesign of Jobs;
+  standalone F72.
+- **Source**: S027 / EV-025; GitHub #159; F41 / ADR-040; S027-D1–D25; 02 M2b.
 
 ## Planned / Deferred (post-v1)
 

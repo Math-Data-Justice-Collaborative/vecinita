@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-08-03 (S025/EV-023 F62–F63 — AC-CI1–CI5, AC-REL1–REL5)
+> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — AC-ME1–ME10 multilingual embeds; prior S025 AC-CI/REL)
 
 ## Per-feature criteria
 
@@ -303,6 +303,20 @@
 - [ ] **AC-UX15**: `audit_log` schema/writes remain free of email/name (TC-230, AC-A6/U6/E8).
 - [ ] **AC-UX16**: Out of EV-024 without unlock: live Modal power metrics per ask; visitor contact email; mini surveys; auto-attach chat transcripts; denormalized actor names on audit_log; live fleet/traffic car factors.
 - [ ] **AC-UX17**: UI primary car framing is ≈ meters/miles of average car travel from `car_*_equiv`; use guide may add day/year % (TC-231, S026-D22).
+
+### EV-025 — Multilingual embeddings (F70–F71) — S027 / #159
+
+- [ ] **AC-ME1**: Modal embed + shared client host the chosen 384-d pin (E1 candidate; final after F36 review); FastEmbed preferred with ST/ONNX fallback; no paid embed APIs (UJ-075/076, TC-232, TC-234, ADR-048, F70).
+- [ ] **AC-ME2**: e5-family pins apply `query:` on ask and `passage:` on ingest/re-embed via shared client (TC-233, S027-D13).
+- [ ] **AC-ME3**: F36 promote report includes EN vs ES answer relevancy + faithfulness (Hy1) vs E0 baseline (advisory) (UJ-076, TC-235, S027-D18).
+- [ ] **AC-ME4**: Dense hit@k / mean_rank EN/ES included when harness available; else documented skip (TC-236).
+- [ ] **AC-ME5**: Promote is operator judgment after the report — no hard numeric abort gate (S027-D11, TC-239).
+- [ ] **AC-ME6**: Cutover order: staging shadow→F36→promote, then repeat on prod (S027-D21, TC-240).
+- [ ] **AC-ME7**: After cutover, in-corpus EN ask returns non-empty sources (UJ-075, TC-237).
+- [ ] **AC-ME8**: After cutover, in-corpus ES ask returns non-empty sources (UJ-075, TC-238).
+- [ ] **AC-ME9**: Prior E0 revision remains restorable via F41 rollback runbook (TC-239, S027-D22).
+- [ ] **AC-ME10**: Out of EV-025 without unlock: dual-index; dim≠384; UI changes; bge-m3 multi-vector; hard numeric promote gate; F72 as separate Fn (F44 tune only if post-pin harm, folded into F71). Tokenizer **must** align + rechunk (in-scope — S027-D15/M2b).
+- [ ] **AC-ME11**: `VECINITA_CHUNK_TOKENIZER_ID` matches embed pin; F71 rebuild rechunks then re-embeds (TC-241, S027-D15/M2b, ADR-044/048).
 
 
 ## Quantitative benchmarks

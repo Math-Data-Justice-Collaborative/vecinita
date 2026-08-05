@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-03 (S025/EV-023 F62–F63 — UJ-067–068 Husky/release; prior S024 UJ-064–066)
+> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — UJ-075–076 multilingual embed cutover; prior S025 UJ-067–068)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -74,6 +74,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-066 | Browse corpus as tree (nesting) | Admin operator | Admin Corpus tree toggle + bulk | F61 EV-022 #70 | local |
 | UJ-067 | Lean local push (Husky) | Developer | `git push` → Husky pre-push | F62 EV-023 #182 | local |
 | UJ-068 | Auto release tag after main CD | Maintainer / CD | DO deploy workflow → release job | F63 EV-023 #103 | local |
+| UJ-075 | Ask after multilingual embed cutover | Community member | ChatRAG → `POST /api/v1/ask` / stream | F70–F71 EV-025 #159 | local (+ staging/prod smoke) |
+| UJ-076 | F36 EN/ES compare for embed pin promote | Admin operator | F36 eval / shadow rebuild report | F71 EV-025 #159 | local (+ staging) |
 
 ## Visual journey maps
 
@@ -1180,6 +1182,54 @@ falling back to truncated `actor_id`; corpus `audit_log` still has no email colu
 **Acceptance**: AC-UX14–UX15; TC-229–230.
 
 **E2E tier**: Vitest UI + API/integration enrich; privacy regression.
+
+---
+
+### UJ-075: Ask after multilingual embed cutover (F70–F71)
+
+**Actor**: Community member (no account)
+
+**Goal**: After F70 pin + F71 promote, bilingual asks return answers with sources from the
+re-embedded corpus; query embed uses the shared client (e5 `query:` prefix when required).
+
+**Preconditions**: F70 Modal embed app serves the chosen pin; corpus live revision stamped
+with matching `embedding_model_id`; ChatRAG uses `packages/embedding-client`.
+
+**Steps**:
+
+1. `POST /api/v1/ask` (or stream) with an in-corpus **EN** question — non-empty `sources[]`,
+   answer language en.
+2. Repeat with an in-corpus **ES** question — non-empty `sources[]`, answer language es.
+3. Confirm embed client applies prefixes consistently (unit/integration; not visible in UI).
+
+**Acceptance**: AC-ME7–ME8; TC-237–238.
+
+**E2E tier**: API e2e (mocked embed OK for prefix/pin wiring); live smoke at 12/13.
+
+---
+
+### UJ-076: F36 EN/ES compare for embed pin promote (F71)
+
+**Actor**: Admin operator
+
+**Goal**: Before promoting a multilingual re-embed revision, review an F36 (and dense)
+advisory report vs E0 baseline — EN/ES relevancy + faithfulness (Hy1) plus dense
+hit@k/mean_rank when available — then decide promote or keep E0 (operator judgment).
+
+**Preconditions**: F41 dry-run shadow reembed with candidate `embedding_model_id`; staging
+golden available; E0 baseline metrics recorded or re-runnable.
+
+**Steps**:
+
+1. Enqueue `rebuild` `mode=reembed` `dry_run=true` with F70 model id (extends UJ-053/054).
+2. Run F36 against shadow (Hy1 path) with EN/ES breakdown; capture dense metrics if harness provides.
+3. Compare to E0 baseline; operator decides promote or abort.
+4. On promote: activate shadow (UJ-054); confirm live pin stamp; retain E0 revision for rollback.
+5. Repeat staging→prod order per S027-D21.
+
+**Acceptance**: AC-ME3–ME6, AC-ME9–ME10; TC-232–236, TC-239–240.
+
+**E2E tier**: API e2e for rebuild stamp + report artifact shape; live F36 at staging/ops.
 
 ---
 

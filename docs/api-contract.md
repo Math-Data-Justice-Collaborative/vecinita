@@ -1,7 +1,7 @@
 # API Contract
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-02 (S020/EV-017 F43 — optional `cache_hit` on ask responses)  
+> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — Modal embed pin + ADR-048; prior S020 cache_hit)  
 > **OpenAPI**: Source of truth in repo — `openapi/chat-rag.yaml`, `openapi/data-management.yaml`, `openapi/internal-write.yaml`
 
 Contracts are **greenfield** (ADR-003). Public routes must not accept identity fields (`email`, `user_id`, `name`, etc.).
@@ -416,7 +416,8 @@ Locked OpenAPI paths (`openapi/data-management.yaml` JobOptions;
 - **`urls`:** may be empty for rebuild (same as retag/eval); required non-empty for ingest.
 
 **Batch upsert delta:** documents may include `body_text`; revisions stamped with
-`embedding_model_id`, `embedding_dim`, `chunk_size_tokens`, `rebuild_run_id` as applicable.
+`embedding_model_id`, `embedding_dim`, `chunk_size_tokens`, `chunk_tokenizer_id` (when present),
+`rebuild_run_id` as applicable.
 Body-only upserts (empty `chunks`) update the store without rewriting live chunks
 (TP-S017-08 backfill). `GET /internal/v1/documents?missing_body=true` lists docs lacking
 store body for backfill targeting.
@@ -425,6 +426,8 @@ store body for backfill targeting.
 **F36:** eval against shadow **before** promote (02 M2). **Backfill:** F41 includes one-time
 store population for existing docs via `job_type=rebuild` + `backfill=true` (prefer
 `backfill_source=rescrape`; `from_chunks` requires `ack_reconstruct_from_chunks`) (02 M4).
+**EV-025 / F71:** multilingual cutover uses `mode=rechunk` (tokenizer align to embed pin) and/or
+`reembed` so live chunks match ADR-048 pin; staging shadow→F36→promote then prod (S027-D21).
 
 ### GET `/health`
 
@@ -510,6 +513,27 @@ HTTP path aliases stay `/models/ollama*`. Cognitive layer uses **playground** na
 
 Do **not** reintroduce `OllamaModelsClient` or `ollama_*` schema modules. FE path rename away from
 `/models/ollama` is out of scope (feature-list F39 follow-on).
+
+---
+
+## Modal embedding (vecinita-embedding / ADR-048)
+
+Base path: Modal embed app via `VECINITA_MODAL_EMBED_URL` (+ proxy key as deployed).
+Consumers: ingest rebuild/ingest workers and ChatRAG query embed through
+`packages/embedding-client` only (F10/F70).
+
+| Method | Purpose |
+|--------|---------|
+| `POST /embed` | Single text → 384-d vector |
+| `POST /embed/batch` | Batch texts → 384-d vectors |
+| `GET /health` | Liveness; may expose model id / runtime |
+
+**Pin:** `VECINITA_EMBEDDING_MODEL_ID` (planned candidate `intfloat/multilingual-e5-small`;
+final after F36 operator review). Dimension **384** (`embedding_dim` stamps must match).
+**Runtime:** `VECINITA_EMBED_RUNTIME` = `fastembed` \| `sentence_transformers` \| `onnx`
+(FastEmbed preferred). **Prefixes:** when e5-family and prefixes on/auto, client sends
+`query:`-prefixed ask texts and `passage:`-prefixed ingest/rechunk texts (S027-D13).
+No public ChatRAG schema change for pin (internal client + revision stamps only).
 
 ---
 

@@ -829,3 +829,63 @@ EV-024 **in_progress**. Gate B→C **PASS** (S026-D28). **07-build** — S026-D2
 | F67 | #106 | Bilingual tooltips / contextual hints |
 | F68 | #186 | ChatRAG feedback page + backend |
 | F69 | #170 | Admin audit actor username (read-time) |
+
+---
+
+## Cycle EV-025 — Scope (S027 / #159)
+
+**Intake locked:** 2026-08-05 (Phase 0 Fn gate pending)  
+**Session:** S027-multilingual-embeddings  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/159  
+**Features:** F70, F71  
+**Preset:** Standard  
+**Branch:** `evolve/EV-025-multilingual-embeddings`
+
+### Scope summary
+
+Implement multilingual 384-d embedding swap (prefer E1 `multilingual-e5-small`), allow
+sentence-transformers/ONNX if FastEmbed cannot host, re-embed corpus via F41, and **cut over
+prod this cycle** (user override of ticket “no prod re-embed” OOS). Build on S019 spike; ship
+call must include recorded EN vs ES metrics. Out: dual-index, dim≠384, UI, bge-m3 multi-vector.
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S027-D1 | Outcome | Investigate **and implement** switch + re-embed (1c) |
+| S027-D2 | Prior art | Build on S019; fill FastEmbed/ONNX + ADR gaps (2a) |
+| S027-D3 | Done when | Recommendation + ADR + recorded EN/ES metrics (3b) |
+| S027-D4 | Session | Open S027 → 16-evolve (4a) |
+| S027-D5 | Deploy | **Prod cutover this cycle** (5c); **amended by D21** — staging shadow→F36→promote first, then prod (not “minimal-only”) |
+| S027-D6 | Scope | 6a — 384-d; no dual-index / UI / bge-m3 MV |
+| S027-D7 | Runtime | Allow ST / custom ONNX if FastEmbed cannot host (7b) |
+| S027-D8 | Routing | **Standard** (8a) |
+| S027-D9 | Fn allocation | **F70 + F71** approved; Phase 0 complete → 01-requirements |
+| S027-D10 | Locked intake | Confirm all S027-D1–D9 as written (10a) |
+| S027-D11 | Promote abort | **Operator judgment** after F36 report — no hard numeric gate (11c) |
+| S027-D12 | Runtime order | FastEmbed upgrade/extend first; ST/ONNX fallback if winner unloadable (12a) |
+| S027-D13 | e5 prefixes | Enforce `query:` on ask + `passage:` on ingest/re-embed in shared client (13a) |
+| S027-D14 | Model pin | E1 is **planned candidate**; final pin after F36 operator review (14b / D11) |
+| S027-D15 | Tokenizer | **Amended 02 M2b:** align `VECINITA_CHUNK_TOKENIZER_ID` with embed pin + **rechunk+reembed** this cycle (was reembed-only 15c) |
+| S027-D16 | Journeys/tests | Extend UJ-053/054 + UJ-075/076; API e2e + prefix units; no new Playwright if Jobs UI unchanged (16a) |
+| S027-D17 | ADR | New **ADR-048** supersedes ADR-008 (17a) |
+| S027-D18 | F36 report | EN/ES relevancy + faithfulness (Hy1) vs E0 + dense hit@k/mean_rank if available (18a) |
+| S027-D19 | ADR-013 / F44 | **May tune** soft language filter if ES improves (19b) — scope expand vs earlier “doc only” |
+| S027-D20 | F44 scope | Fold tune into **F71** (no F72); only if post-pin F36 shows ES/lang-filter harm (22a) |
+| S027-D21 | Cutover order | **Staging first**: shadow reembed → F36 → promote on staging; then repeat on prod (23c — amends D5 “minimal staging”) |
+| S027-D22 | Rollback | Keep prior E0 revision restorable via F41 promote/rollback + runbook (24a) |
+| S027-D23 | Cost/latency | No hard $/latency budget; FastEmbed preferred; ST/ONNX OK; re-embed may run overnight (25a) |
+| S027-D24 | 01 write gate | Delta specs written (26a / user `1`) → 02-verify-plan |
+| S027-D25 | 02 verdicts | M1a E1 planned default; **M2b tokenizer+rechunk**; M3b rewrite F10; L1–L3 addressed (ADR-048 Accepted; deps; api-contract note) |
+| S027-D26 | Gate A→B | **PASS** (recommended) — Phase A approved; start 04-tech-plan for F70/F71 |
+| S027-D27 | 04 TP1–TP5 | **Approve all recommended** — Phase 28 M119–M122; FE timebox→ST; CPU Modal; pin ranges; F41 rechunk |
+| S027-D28 | 04→05 | Complete 04-tech-plan → start **05-verify-tech** (option 1) |
+| S027-D29 | 05 M1–M6 | **Approve all recommended fixes** — applied to Phase 28 (incl. T120.3b); Gate B→C pending |
+| S027-D30 | Gate B→C | **PASS** (option 1) → start 07-build M119 / T119.1 |
+
+### Feature map
+
+| Fn | Issue | Title |
+|----|-------|-------|
+| F70 | #159 | Multilingual embedding runtime + model pin |
+| F71 | #159 | Corpus re-embed + prod cutover (multilingual pin) |

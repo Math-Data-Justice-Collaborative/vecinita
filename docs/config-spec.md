@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-03 (S024/EV-022 F59–F61 — scrape/crawl/tree config)
+> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — multilingual embed pin + runtime; ADR-048)
 
 ## Precedence
 
@@ -230,7 +230,7 @@ corpus DB stays PII-free.
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes | Matches DO secret |
 | `VECINITA_CHUNK_SIZE_TOKENS` | int | `256` | No | Ingest chunk target (HF tokenizer for embed pin; F49 / ADR-044) |
 | `VECINITA_CHUNK_OVERLAP_TOKENS` | int | `32` | No | Overlap between consecutive chunks; must be `&lt; chunk_size` (F49 / ADR-044) |
-| `VECINITA_CHUNK_TOKENIZER_ID` | string | `BAAI/bge-small-en-v1.5` | No | HF tokenizer id; default = pinned embed model (ADR-044) |
+| `VECINITA_CHUNK_TOKENIZER_ID` | string | Match embed pin (planned `intfloat/multilingual-e5-small`; final with F70 pin) | No | HF tokenizer id (ADR-044). **EV-025:** must align with `VECINITA_EMBEDDING_MODEL_ID`; F71 rechunk applies (S027-D15/M2b). Historical default was `BAAI/bge-small-en-v1.5`. |
 | `VECINITA_EMBED_BATCH_SIZE` | int | `32` | No | Max texts per `/embed/batch` sub-call (F48 / #166) |
 | `VECINITA_EMBED_MAX_RETRIES` | int | `3` | No | Retries for transient embed HTTP failures (F48) |
 | `VECINITA_EMBED_RETRY_BACKOFF_S` | float | `0.5` | No | Base backoff seconds (exponential) between embed retries (F48) |
@@ -244,7 +244,9 @@ corpus DB stays PII-free.
 | `VECINITA_SCRAPE_PDF_ENABLED` | string | `true` | No | Best-effort PDF text extract; soft-fail if empty (F59 / S024-D29) |
 | `VECINITA_LLM_TAG_MAX_TOKENS` | int | `128` | No | Max tokens for LLM tagging completion per document |
 | `VECINITA_REBUILD_SHADOW_ENABLED` | bool | `true` | No | **Planned/unused (TP-S017-12-A):** not read in code; `dry_run` shadow dual-write is always available for rebuild (F41) |
-| `VECINITA_EMBEDDING_MODEL_ID` | string | FastEmbed default pin | No | Version stamp on revisions/embeddings (F41; #159 may change) |
+| `VECINITA_EMBEDDING_MODEL_ID` | string | Planned candidate `intfloat/multilingual-e5-small` (E1); final after F36 operator review (ADR-048 / F70) | No | Embed pin + version stamp on revisions/embeddings (F41/F70/F71). Historical default was `BAAI/bge-small-en-v1.5` (E0). |
+| `VECINITA_EMBED_RUNTIME` | string | `fastembed` | No | **F70:** `fastembed` \| `sentence_transformers` \| `onnx` — Modal host for the pin; FastEmbed preferred; ST/ONNX if unloadable (S027-D12) |
+| `VECINITA_EMBED_E5_PREFIXES` | string | `auto` | No | **F70:** `auto` \| `on` \| `off` — when `auto`/`on` and pin is e5-family, apply `query:` / `passage:` in shared client (S027-D13) |
 
 ### Frontends
 
@@ -382,7 +384,7 @@ chat_rag:
 ingest:
   chunk_size_tokens: 256
   chunk_overlap_tokens: 32
-  chunk_tokenizer_id: BAAI/bge-small-en-v1.5
+  chunk_tokenizer_id: intfloat/multilingual-e5-small  # align with embed pin (EV-025)
   embed_batch_size: 32
   embed_max_retries: 3
   scrape_timeout_s: 30
