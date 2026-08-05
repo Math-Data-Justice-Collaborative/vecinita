@@ -4,10 +4,12 @@ description: >
   Evolves an existing deployed service: add one or more product features (multiple Fn in one
   cycle), scope/API/arch changes, or structured change requests. Interviews the user, routes
   selectively through product planning, technical planning, build, verification, and deploy
-  with delta spec updates, mandatory phase checkpoints, and ADR logging. Use when adding
-  features X Y Z to the current app, changing scope after deployment, or running a change
-  request — not for surgical bugs (14-hotfix) or greenfield (pipeline). Any stage 00–17 may
-  accept feature requests; this skill orchestrates multi-feature cycles when no cycle is active.
+  with delta spec updates, mandatory phase checkpoints, and ADR logging. Every change and
+  reference must cite docs/CORPUS.md ([Corpus: id] or [Spec: path §]); missing coverage →
+  interview to add docs or record a waiver. Use when adding features X Y Z to the current app,
+  changing scope after deployment, or running a change request — not for surgical bugs
+  (14-hotfix) or greenfield (pipeline). Any stage 00–17 may accept feature requests; this skill
+  orchestrates multi-feature cycles when no cycle is active.
 ---
 
 # 16 — Evolve
@@ -27,6 +29,13 @@ the applicable rows in connectivity-gates §Pipeline stages 00–15 (at minimum:
 
 **User is the source of truth.** Interview before editing specs or code. Every ambiguous,
 uncertain, or contradictory finding uses **AskQuestion** — never guess.
+
+**Doc corpus citations (required):** Every change, claim, or reference in this cycle must
+cite the standing doc corpus per [doc-corpus-citation.mdc](../../rules/doc-corpus-citation.mdc)
+and [docs/CORPUS.md](../../../docs/CORPUS.md). Prefer `[Corpus: <id>]`; also
+`[Corpus: path §…]` / `[Spec: docs/… §…]`. If no covering doc exists, **block** and
+AskQuestion about adding that documentation (or record an explicit waiver cite) before
+implementing — never invent scope. See §Doc corpus citation below.
 
 ## When to use
 
@@ -73,9 +82,51 @@ first, or proceed with a reduced doc set (record waiver via workflow-state-manag
 | Ambiguity / contradiction | Category label in prompt: `[Decision]`, `[Ambiguity]`, `[Contradiction]`, `[Uncertainty]` |
 | Phase gate failure | List unmet criteria; **block** until resolved (no silent proceed) |
 | Phase checkpoint (A–D, deploy) | Progress digest + AskQuestion before next phase |
+| **Missing corpus/spec coverage** | `[Decision]` AskQuestion: add/update named doc(s) · waive · defer · explain — **block** until answered |
 
 Do not post interview prompts as markdown lists expecting inline replies.
 
+## Doc corpus citation
+
+Standing docs under `docs/` are the authority for evolve deltas. Registry:
+[docs/CORPUS.md](../../../docs/CORPUS.md). Rule:
+[doc-corpus-citation.mdc](../../rules/doc-corpus-citation.mdc).
+
+| Moment | Obligation |
+|--------|------------|
+| Phase 0 intake | Cite existing Fn / journeys / specs that bound the change; flag gaps |
+| Phase 1 impact / routing | Each doc-to-update row includes a `[Corpus:…]` / `[Spec:…]` cite |
+| Child stage handoff | Pass `citations: [...]` in evolve context; child skills must not invent uncovered behavior |
+| AskQuestion / checkpoints / PR / commits | Include at least one cite (or waiver) for the scoped delta |
+| Missing coverage | Stop → AskQuestion to add documentation → write minimal delta → then continue |
+
+```yaml
+# Evolve context addition (Phase 2)
+citations:
+  - "[Corpus: product]"
+  - "[Corpus: feature-list.md §F70]"
+  - "[Spec: docs/api-contract.md §POST /embed]"
+```
+
+**Missing-doc AskQuestion template:**
+
+```
+prompt: "[Decision] No corpus/spec covers <claim>. Add documentation before changing code?
+
+  Gap: <what is undefined>
+  Recommended: docs/<file> §<section> (CORPUS id: <id>)"
+
+options:
+  1. "Add/update <file> (and CORPUS row if needed), then continue"
+  2. "Add different doc — I'll specify"
+  3. "Waive — proceed with [Corpus: WAIVED — …] (record rationale)"
+  4. "Defer — park in evolve decisions; do not implement yet"
+  5. "Let me explain / provide more context"
+```
+
+On **waive**: use
+`[Corpus: WAIVED — <topic>; reason: <why>; decided: EV-NNN|date]` and append to
+`docs/decisions/evolve-decisions.md` §Cycle {id}.
 ## Session management
 
 Orchestrator for `feature` and `new_service` sessions. Requires `active_session` from **00-context**.
@@ -204,6 +255,7 @@ feature_ids: [F19, F20, F21]
 scope: <approved Phase 0>
 affected_artifacts: [paths]
 delta_only: true
+citations: ["[Corpus: product]", "[Corpus: feature-list.md §Fn]", "[Spec: docs/… §…]"]
 ```
 
 Child skills invoke **workflow-state-manager** themselves; 16-evolve verifies transition checks
@@ -264,6 +316,8 @@ Intentional chat ends (ADR-043). At each, regenerate `HANDOFF.md`:
 5. **Child skills own detail** — 16-evolve orchestrates; read child SKILL.md when invoking.
 6. **State via agent only** — never edit `workflow-state.yaml` directly.
 7. **Resume digest + HANDOFF.md** — ADR-043; do not rely on long narrative alone.
+8. **Cite the corpus** — every change/reference carries `[Corpus:…]` / `[Spec:…]`; missing
+   coverage → AskQuestion to add docs before implement (doc-corpus-citation rule).
 
 ## Additional resources
 
