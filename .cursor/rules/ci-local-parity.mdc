@@ -18,12 +18,16 @@ before opening a PR**. GitHub Actions remains the merge gate.
 | **git commit** (Husky) | `scripts/ci/pre_commit.sh` | Typecheck + security-scan + job-dispatch |
 | **git push** (Husky) | `make lint` + `make test-fast` | Lint + scoped unit tests only |
 | Before commit (manual) | `make check` | Lint + format-check + typecheck |
-| **Before opening PR** | `make ci-push` or `make ci-pr-ready` | Full CI parity locally |
+| **Before opening PR** | `make ci-push` or `make ci-pr-ready` | Full local parity incl. compose suites (S027-D34) |
 
 Hook scripts: `.cursor/hooks/make_format_lint_fix.py`, `.cursor/hooks/typecheck.py`,
 `.cursor/hooks/make_ci_on_stop.py`.
 
 Stop-hook failures are **advisory** (do not block ending the session).
+
+GitHub remote CI (S027-D34): `pytest tests/unit` + coverage gate + sticky PR coverage comment +
+strict ruff/format/basedpyright. Compose-backed suites stay on **local** `make test-py` /
+`make ci-push`.
 
 ## Tier 1 — Lean push + agent stop
 

@@ -23,6 +23,7 @@ class CliOptions:
     enforce: bool
     line_threshold: float
     branch_threshold: float
+    markdown_out: Path | None
 
 
 @dataclass(frozen=True)
@@ -192,6 +193,67 @@ def _print_section(title: str, rows: list[CoverageRow]) -> None:
     print()
 
 
+def _markdown_section(title: str, rows: list[CoverageRow]) -> list[str]:
+    """Render one coverage section as GitHub-flavored markdown table lines."""
+    if not rows:
+        return []
+    lines = [
+        f"### {title}",
+        "",
+        "| Component | Lines | Branches | Line % | Branch % |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for row in rows:
+        line_label = f"{row.lines_covered}/{row.lines_total}"
+        branch_label = (
+            f"{row.branches_covered}/{row.branches_total}" if row.branches_total else "n/a"
+        )
+        branch_pct = f"{row.branch_pct:.1f}%" if row.branches_total else "n/a"
+        lines.append(
+            f"| `{row.component}` | {line_label} | {branch_label} | "
+            f"{row.line_pct:.1f}% | {branch_pct} |"
+        )
+    total = _aggregate(rows)
+    total_lines = f"{total.lines_covered}/{total.lines_total}"
+    total_branches = (
+        f"{total.branches_covered}/{total.branches_total}" if total.branches_total else "n/a"
+    )
+    total_branch_pct = f"{total.branch_pct:.1f}%" if total.branches_total else "n/a"
+    lines.append(
+        f"| **{total.component}** | {total_lines} | {total_branches} | "
+        f"**{total.line_pct:.1f}%** | {total_branch_pct} |"
+    )
+    lines.append("")
+    return lines
+
+
+def render_markdown_summary(
+    python_rows: list[CoverageRow],
+    typescript_rows: list[CoverageRow],
+    *,
+    line_threshold: float,
+    branch_threshold: float,
+) -> str:
+    """Build sticky PR-comment markdown for unit coverage (S027-D34)."""
+    parts: list[str] = [
+        "<!-- vecinita-unit-coverage -->",
+        "## Unit coverage",
+        "",
+        f"Per-component gate: **≥{line_threshold:.0f}%** line / "
+        f"**≥{branch_threshold:.0f}%** branch (ADR-019).",
+        "",
+        "Compose-backed suites (`integration` / `e2e` / …) run via **local** "
+        "`make test-py` / `make ci-push` — not this remote job.",
+        "",
+    ]
+    parts.extend(_markdown_section("Python (packages + backend apps)", python_rows))
+    parts.extend(_markdown_section("TypeScript (frontend apps + packages)", typescript_rows))
+    all_rows = python_rows + typescript_rows
+    if all_rows:
+        parts.extend(_markdown_section("Combined", all_rows))
+    return "\n".join(parts).rstrip() + "\n"
+
+
 def _below_threshold(
     row: CoverageRow,
     *,
@@ -237,16 +299,24 @@ def _parse_args(argv: list[str] | None = None) -> CliOptions:
         default=DEFAULT_BRANCH_THRESHOLD,
         help="Minimum branch coverage percentage per component (default: 95).",
     )
+    parser.add_argument(
+        "--markdown-out",
+        type=Path,
+        default=None,
+        help="Write GitHub PR-comment markdown (sticky marker) to this path.",
+    )
     parsed = parser.parse_args(argv)
     coverage_dir = cast("Path", parsed.coverage_dir)
     enforce = cast("bool", parsed.enforce)
     line_threshold = cast("float", parsed.line_threshold)
     branch_threshold = cast("float", parsed.branch_threshold)
+    markdown_out = cast("Path | None", parsed.markdown_out)
     return CliOptions(
         coverage_dir=coverage_dir,
         enforce=enforce,
         line_threshold=line_threshold,
         branch_threshold=branch_threshold,
+        markdown_out=markdown_out,
     )
 
 
@@ -285,6 +355,17 @@ def main(argv: list[str] | None = None) -> int:
     if not python_rows and not typescript_rows:
         print("No coverage reports found.", file=sys.stderr)
         return 1
+
+    if options.markdown_out is not None:
+        markdown = render_markdown_summary(
+            python_rows,
+            typescript_rows,
+            line_threshold=options.line_threshold,
+            branch_threshold=options.branch_threshold,
+        )
+        options.markdown_out.parent.mkdir(parents=True, exist_ok=True)
+        options.markdown_out.write_text(markdown, encoding="utf-8")
+        print(f"Wrote PR coverage markdown: {_display_path(options.markdown_out)}")
 
     if options.enforce:
         failures: list[str] = []

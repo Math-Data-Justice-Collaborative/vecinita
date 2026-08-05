@@ -1550,16 +1550,22 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 **Platform:** GitHub Actions
 
-**PR pipeline (target):**
+**PR pipeline (remote — `.github/workflows/ci.yml`):**
 
-1. ruff + basedpyright (Python) — no `typing.Any` (ADR-018; supersedes pyright/mypy)
+1. ruff lint + format-check + basedpyright (Python) — no `typing.Any` (ADR-018; supersedes pyright/mypy)
 2. eslint (frontends) — no `any` / unsafe-any flows (`docs/typing-policy.md`)
-3. `uv run pytest tests/unit tests/integration tests/privacy tests/e2e tests/smoke tests/eval tests/bugs` (or `bash scripts/run_tests.sh`)
-4. Vitest (frontends)
-5. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031)
-6. pip-audit (advisory or blocking per 04-tech-plan)
+3. `uv run pytest tests/unit` (S027-D34 — unit only on remote)
+4. Vitest (frontends) + Playwright UI e2e (`ui-e2e`)
+5. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031) and **posts a sticky PR comment** with the per-component table (`scripts/ci/comment_unit_coverage_pr.sh`)
+6. pip-audit (blocking) + security job
 
-**Workflow:** `.github/workflows/ci.yml` (created in **06-tech-tooling**).
+**Local CI (compose / long-running — before opening a PR):**
+
+- `make test-py` or `make ci-push` — Postgres via `scripts/ci/with_local_postgres.sh` (docker compose)
+- Runs `tests/unit` + `tests/integration` + `tests/privacy` + `tests/e2e` + `tests/smoke` + `tests/eval` + `tests/bugs`
+- Do **not** rely on remote GitHub Actions for compose-backed suites (S027-D34)
+
+**Workflow:** `.github/workflows/ci.yml` (created in **06-tech-tooling**; unit/coverage split S027-D34).
 
 ## Open Questions
 

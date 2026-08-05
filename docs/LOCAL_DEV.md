@@ -133,7 +133,9 @@ make ci-pr-ready   # alias for ci-push
 
 Husky installs on `npm ci` (`prepare` script). **Pre-push is lean** (lint + units);
 heavier local gates run on **pre-commit**. GitHub CI remains the merge gate for
-format-check, audit, full tests, coverage, and production builds. (F62 / #182)
+**unit** tests, format-check, audit, **unit coverage** (with PR comment), and production
+builds. **Compose-backed** suites (`integration` / `e2e` / `privacy` / `smoke` / `eval` /
+`bugs`) run locally via `make test-py` / `make ci-push` (S027-D34 / F62).
 
 ```bash
 # Skip pre-commit (emergencies only):

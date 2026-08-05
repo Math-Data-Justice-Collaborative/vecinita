@@ -153,3 +153,47 @@ def test_enforce_not_required_without_flag(tmp_path: Path) -> None:
     result = _run_summary(tmp_path, enforce=False)
 
     assert result.returncode == 0
+
+
+def test_markdown_out_writes_pr_comment_body(tmp_path: Path) -> None:
+    """S027-D34: --markdown-out emits a sticky PR-comment markdown table."""
+    _write_python_coverage(
+        tmp_path,
+        component_path="packages/embedding-client/embedding_client/client.py",
+        counts=_CoverageCounts(
+            lines_total=100,
+            lines_covered=96,
+            branches_total=50,
+            branches_covered=48,
+        ),
+    )
+    out = tmp_path / "summary.md"
+    command = [
+        sys.executable,
+        str(SUMMARY_SCRIPT),
+        "--coverage-dir",
+        str(tmp_path),
+        "--markdown-out",
+        str(out),
+        "--line-threshold",
+        str(int(THRESHOLD)),
+        "--branch-threshold",
+        str(int(THRESHOLD)),
+    ]
+    result = subprocess.run(  # noqa: S603
+        command,
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert out.is_file()
+    body = out.read_text(encoding="utf-8")
+    assert "<!-- vecinita-unit-coverage -->" in body
+    assert "## Unit coverage" in body
+    assert "packages/embedding-client" in body
+    assert "96.0%" in body or "96%" in body
+    assert "Line %" in body or "line %" in body.lower()
+    assert "| Component |" in body
