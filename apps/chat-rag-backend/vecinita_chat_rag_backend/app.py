@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import json
 import time
@@ -194,7 +195,9 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         cfg = get_settings()
         started = time.perf_counter()
         try:
-            result = get_service().ask(body)
+            # Offload sync RAG/LLM httpx work so DO /health probes keep running
+            # (BUG-2026-08-05 — event-loop stall → 504 no_healthy_upstream).
+            result = await asyncio.to_thread(get_service().ask, body)
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -216,7 +219,8 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         started = time.perf_counter()
         try:
             service = get_service()
-            session = service.stream_ask(body)
+            # stream_ask does sync retrieve/embed before yielding tokens — same stall risk.
+            session = await asyncio.to_thread(service.stream_ask, body)
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
