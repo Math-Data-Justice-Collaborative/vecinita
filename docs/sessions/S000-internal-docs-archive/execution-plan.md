@@ -2568,7 +2568,7 @@ main
 | PR-67 | Minor | M119 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208 |
 | PR-68 | Minor | M120 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #210 @`b35e980` |
 | PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #211 @`e38516a` |
-| PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — Phase 28 gate docs |
+| PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | open — #213 @`2a284ff` |
 | PR-71 | Major | Phase 28 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — after Gate C→D / verify |
 
 S026 (EV-024) is evolve Standard: M112–M118 on `evolve/EV-024-frontend-ux-polish`
