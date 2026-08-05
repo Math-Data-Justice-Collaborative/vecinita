@@ -5,27 +5,20 @@
 | Session | S027-multilingual-embeddings |
 | Cycle | EV-025 — multilingual embeddings (#159) |
 | Branch | `evolve/EV-025-multilingual-embeddings` |
-| Stage | **08 done / PR-67 open** — [#208](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208) CI green @`8e81ad3`; next M120 or merge |
+| Stage | **07-build M120** — T120.1 red landed; next T120.2 |
 
-## M119 shipped (local)
+## Done this turn
 
-- `packages/embedding-client` — `prefixes.py` (e5 query/passage, runtime enum, dim assert)
-- `modal_pins.py` — FE/ST/ONNX image ranges + 4GiB CPU / 300s timeout
-- `infra/modal/embedding_app.py` — runtime switch + local package mount
-- Tests: `test_embedding_prefixes_runtime.py`, `test_embedding_modal_pins.py` (32 unit green)
+- **Merged** [PR #208](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208) @`2c884bd` (main CI + deploy-preflight green)
+- **S027-D34 CI split** @`11ef43a`: remote `pytest tests/unit` + coverage sticky PR comment; compose suites via local `make test-py` / `ci-push`
+- **T120.1 red**: `test_uj075_multilingual_ask.py`, `test_uj076_embed_promote_report.py`, `test_f71_rebuild_tokenizer_stamps.py` (failing on `chunk_tokenizer_id` + tokenizer default)
 
 ## Next
 
-1. AskQuestion: continue **M120** T120.1 vs pause vs merge #208 first
-2. Merge still needs explicit approval
+1. Open M120 PR (evolve push does not trigger CI — needs PR event)
+2. T120.2 — config/docs: default tokenizer id = embed pin
+3. T120.3 / T120.3b — wire rebuild stamps + F36 embed-promote report
 
-## Commits (M119)
+## Corpus
 
-Phase A/B + `[T119.1]`–`[T119.5]` + coverage branch fix on `evolve/EV-025-multilingual-embeddings`.  
-PR: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208 — CI green.  
-Long jobs: Husky F62 (pre-commit) + GitHub CI (S027-D32); no in-agent `make test-py`.
-
-## Links
-
-- [roadmap.md](./roadmap.md)
-- Issue [#159](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/159)
+[Corpus: feature-list.md §F70] [Corpus: feature-list.md §F71] [Spec: ADR-048] [Spec: TC-232–241]

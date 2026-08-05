@@ -1577,10 +1577,10 @@ project:
       - M121
       - M122
       active_milestone: M120
-      active_task:
-      current_task:
-      current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-      next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+      active_task: T120.1
+      current_task: T120.1
+      current_action: t120_1_in_progress
+      next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1589,16 +1589,16 @@ project:
       phase_b: passed
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
-      note: 'S027/EV-025 07-build IN_PROGRESS — M119 completed_merged (PR #208 @2c884bd); active_milestone=M120; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1; Gate C→D pending'
+      note: 'S027/EV-025 07-build IN_PROGRESS — S027-D34 CI split landed @11ef43a; ci_policy_implemented=true; main@2c884bd CI+preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072, https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460); active_milestone=M120; current_action=t120_1_in_progress; T120.1 in_progress (red e2e); watching CI on 11ef43a; Gate C→D pending'
       handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
       rd_range: RD-305..RD-308
       tp_lock: TP1–TP5
       report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-05T15:12:00Z'
+      updated_at: '2026-08-05T15:20:42Z'
       skipped_06: true
       skipped_06_note: Standard skip — no new tooling; Gate B→C → 07 directly
-      substeps:
-        current_task:
+      substeps: &id007
+        current_task: T120.1
         current_milestone: M120
         m119_status: completed_merged
         t119_1_status: completed
@@ -1614,6 +1614,7 @@ project:
         - T119.5
         next_milestone: M120
         next_task: T120.1
+        t120_1_status: in_progress
       t119_1_status: completed
       s026_baseline:
         status: completed
@@ -2319,12 +2320,13 @@ project:
       t119_3_status: completed
       t119_4_status: completed
       t119_5_status: completed
-      task_status:
+      task_status: &id008
         T119.1: completed
         T119.2: completed
         T119.3: completed
         T119.4: completed
         T119.5: completed
+        T120.1: in_progress
       tasks_completed:
       - T119.1
       - T119.2
@@ -2350,25 +2352,46 @@ project:
       s027_d33_choice: option_3_merge_208_first_then_m120
       s027_d33_option: 3
       s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-      ci_policy_decision_status: approved
+      ci_policy_decision_status: implemented
       ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-      ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+      ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
       pr_208_merge_approved: true
-      m120_started: false
+      m120_started: true
       green_sha: c574f58
-      build_head: 2c884bd
+      build_head: 11ef43a
       ci_policy_decision: S027-D34
       ci_policy_approved: true
       ci_policy_approved_at: '2026-08-05T15:12:00Z'
-      ci_policy_implemented: false
+      ci_policy_implemented: true
       s027_d34_decision: S027-D34
-      s027_d34_status: confirmed
+      s027_d34_status: applied
       s027_d34_recorded_at: '2026-08-05T15:12:00Z'
       pr_208_merged: true
       pr_208_merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       pr_208_merged_at: '2026-08-05T15:11:52Z'
       gate_c_to_d: pending
       phase_c: pending
+      m120_started_at: '2026-08-05T15:20:42Z'
+      t120_1_status: in_progress
+      ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+      ci_policy_implemented_sha: 11ef43a
+      ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      s027_d34_applied_at: '2026-08-05T15:20:42Z'
+      s027_d34_applied_sha: 11ef43a
+      main_ci_status: success
+      main_ci_merge_sha: 2c884bd
+      main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_preflight_status: success
+      main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      watching_ci_sha: 11ef43a
+      watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      watching_ci_branch: evolve/EV-025-multilingual-embeddings
+      watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+      build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
     08-verify-build:
       status: completed_conditional
       started_at: '2026-08-05'
@@ -2392,8 +2415,8 @@ project:
       active_milestone: M120
       active_task:
       current_task:
-      current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-      next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+      current_action: t120_1_in_progress
+      next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -2402,8 +2425,8 @@ project:
       phase_b: passed
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
-      build_head: 2c884bd
-      build_head_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+      build_head: 11ef43a
+      build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
       build_commits:
       - dc49d3a
       - bd34f2c
@@ -2415,12 +2438,12 @@ project:
       m119_status: completed_merged
       m119_verify: merged
       m119_tip: c574f58
-      note: 'S027/EV-025 08-verify-build — PR #208 MERGED @2c884bd 2026-08-05 — S027-D34 merge approved + CI policy approved; head was @c574f58; mergeCommit 2c884bd202524605d96e4d0d510e69e5a100a3a7; m119_status=completed_merged; active_milestone=M120; next=Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.; Gate C→D / phase_c remain pending (NOT passed)'
+      note: 'S027/EV-025 08-verify-build — M119 merged @2c884bd; S027-D34 CI split implemented @11ef43a; main CI+preflight green; handoff M120 T120.1 in_progress; Gate C→D / phase_c remain pending (NOT passed)'
       handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
       rd_range: RD-305..RD-308
       tp_lock: TP1–TP5
       report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
-      updated_at: '2026-08-05T15:12:00Z'
+      updated_at: '2026-08-05T15:20:42Z'
       next_milestone: M120
       next_task: T120.1
       s026_baseline:
@@ -2937,7 +2960,7 @@ project:
       pr_plan_id: PR-67
       m119_pr_status: merged
       m119_pr_note: 'PR #208 MERGED [M119] F70 — Embed runtime + e5 prefixes + Modal (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); head was @c574f58; mergeCommit @2c884bd (2c884bd202524605d96e4d0d510e69e5a100a3a7) into main at 2026-08-05T15:11:52Z; S027-D34 merge approved + CI policy approved; prior PR CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394); parent watching main CI on @2c884bd'
-      handoff_note: 'PR #208 MERGED @2c884bd; S027-D34; active_milestone=M120; Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.; Gate C→D / phase_c still pending'
+      handoff_note: 'S027-D34 @11ef43a; main@2c884bd green; M120 T120.1 in_progress; watching CI on 11ef43a; Gate C→D pending'
       m119_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208
       m119_pr_number: 208
       m119_pr_title: '[M119] F70 — Embed runtime + e5 prefixes + Modal'
@@ -2995,9 +3018,11 @@ project:
         sequencing_decision: S027-D33
         sequencing_choice: option_3_merge_208_first_then_m120
         await_explicit_merge_approval: false
-        main_ci_status: watching
+        main_ci_status: success
         main_ci_merge_sha: 2c884bd
         main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+        main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+        main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
       coverage_fix_sha: 8e81ad3
       coverage_fix_sha_full: 8e81ad31d1452f4f5d83418576188cbc44342711
       coverage_fix_note: 'Coverage gate fixed @8e81ad3; tip/CI reconfirmed green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)'
@@ -3017,9 +3042,9 @@ project:
       s027_d33_choice: option_3_merge_208_first_then_m120
       s027_d33_option: 3
       s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-      ci_policy_decision_status: approved
+      ci_policy_decision_status: implemented
       ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-      ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+      ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
       m119_pr_mergeable: false
       m119_pr_merged: true
       pr_208_merge_approved: true
@@ -3028,13 +3053,13 @@ project:
       pr_208_mergeable: false
       prior_green_sha: 8e81ad3
       prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
-      m120_started: false
+      m120_started: true
       ci_policy_decision: S027-D34
       ci_policy_approved: true
       ci_policy_approved_at: '2026-08-05T15:12:00Z'
-      ci_policy_implemented: false
+      ci_policy_implemented: true
       s027_d34_decision: S027-D34
-      s027_d34_status: confirmed
+      s027_d34_status: applied
       s027_d34_recorded_at: '2026-08-05T15:12:00Z'
       m119_completed_at: '2026-08-05T15:11:52Z'
       m119_merged_at: '2026-08-05T15:11:52Z'
@@ -3053,10 +3078,24 @@ project:
       merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       merged_at: '2026-08-05T15:11:52Z'
-      main_ci_status: watching
+      main_ci_status: success
       main_ci_merge_sha: 2c884bd
       main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-      parent_note: Parent watching main CI on 2c884bd; then CI split chore on evolve/EV-025-multilingual-embeddings; then T120.1
+      parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
+      ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+      ci_policy_implemented_sha: 11ef43a
+      ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      s027_d34_applied_at: '2026-08-05T15:20:42Z'
+      s027_d34_applied_sha: 11ef43a
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_preflight_status: success
+      main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      watching_ci_sha: 11ef43a
+      watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      watching_ci_branch: evolve/EV-025-multilingual-embeddings
+      watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
     09-qa:
       status: completed
       started: '2026-08-05'
@@ -6017,17 +6056,17 @@ active_session:
     status: in_progress
     mode: orchestrator
     skip_rationale:
-    current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-    note: 'EV-025 Phase C — PR #208 MERGED @2c884bd (S027-D34); CI policy approved; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1; active_milestone=M120; askquestion_pending=false; next=Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.; Gate C→D / phase_c remain pending'
+    current_action: t120_1_in_progress
+    note: 'EV-025 Phase C — S027-D34 CI split applied @11ef43a; main@2c884bd CI+preflight green; current_action=t120_1_in_progress; active_milestone=M120; T120.1 in_progress; watching CI on 11ef43a; Gate C→D / phase_c remain pending'
     phase0_approved: true
-    next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+    next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
-    updated_at: '2026-08-05T15:12:00Z'
+    updated_at: '2026-08-05T15:20:42Z'
     current_stage: 07-build
     active_milestone: M120
-    active_task:
-    current_task:
+    active_task: T120.1
+    current_task: T120.1
     m119_status: completed_merged
     m119_completed_at: '2026-08-05T12:52:00Z'
     m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
@@ -6045,6 +6084,7 @@ active_session:
       T119.3: completed
       T119.4: completed
       T119.5: completed
+      T120.1: in_progress
     tasks_completed:
     - T119.1
     - T119.2
@@ -6115,9 +6155,11 @@ active_session:
       sequencing_decision: S027-D33
       sequencing_choice: option_3_merge_208_first_then_m120
       await_explicit_merge_approval: false
-      main_ci_status: watching
+      main_ci_status: success
       main_ci_merge_sha: 2c884bd
       main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
     coverage_fix_sha: 8e81ad3
     pr_208_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394
     m119_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394
@@ -6126,21 +6168,21 @@ active_session:
     s027_d33_choice: option_3_merge_208_first_then_m120
     s027_d33_option: 3
     s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-    ci_policy_decision_status: approved
+    ci_policy_decision_status: implemented
     ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-    ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+    ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
     pr_208_merge_approved: true
     green_sha: c574f58
     green_sha_full: c574f580aba837b6c5c5d4809769cc2af3ca3f7c
     prior_green_sha: 8e81ad3
     prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
-    m120_started: false
+    m120_started: true
     ci_policy_decision: S027-D34
     ci_policy_approved: true
     ci_policy_approved_at: '2026-08-05T15:12:00Z'
-    ci_policy_implemented: false
+    ci_policy_implemented: true
     s027_d34_decision: S027-D34
-    s027_d34_status: confirmed
+    s027_d34_status: applied
     s027_d34_recorded_at: '2026-08-05T15:12:00Z'
     m119_merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     pr_208_merged: true
@@ -6149,6 +6191,28 @@ active_session:
     gate_c_to_d: pending
     phase_c: pending
     merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+    m120_started_at: '2026-08-05T15:20:42Z'
+    t120_1_status: in_progress
+    ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+    ci_policy_implemented_sha: 11ef43a
+    ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    s027_d34_applied_at: '2026-08-05T15:20:42Z'
+    s027_d34_applied_sha: 11ef43a
+    main_ci_status: success
+    main_ci_merge_sha: 2c884bd
+    main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+    main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_preflight_status: success
+    main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+    main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+    watching_ci_sha: 11ef43a
+    watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    watching_ci_branch: evolve/EV-025-multilingual-embeddings
+    watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+    build_head: 11ef43a
+    build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
   - stage: 01-requirements
     required: true
     status: completed
@@ -6313,19 +6377,19 @@ active_session:
     skip_rationale:
     started_at: '2026-08-05'
     started_at_iso: '2026-08-05T16:40:00Z'
-    current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-    next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+    current_action: t120_1_in_progress
+    next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s027_d30_decision: S027-D30
-    note: S027/EV-025 07-build IN_PROGRESS 2026-08-05 — M119 completed_committed (tip @206f88a); current_action=m119_08_verify_build; askquestion_pending=false; handoff → 08-verify-build for M119 (then minor PR); next_milestone=M120 queued
-    updated_at: '2026-08-05T15:12:00Z'
+    note: S027/EV-025 07-build IN_PROGRESS — S027-D34 CI split landed @11ef43a; ci_policy_implemented=true; main@2c884bd CI+preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072, https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460); active_milestone=M120; current_action=t120_1_in_progress; T120.1 in_progress (red e2e); watching CI on 11ef43a; Gate C→D pending
+    updated_at: '2026-08-05T15:20:42Z'
     active_milestone: M120
-    active_task:
-    current_task:
+    active_task: T120.1
+    current_task: T120.1
     t119_1_status: completed
     skipped_06: true
     m119_status: completed_merged
@@ -6344,6 +6408,7 @@ active_session:
       T119.3: completed
       T119.4: completed
       T119.5: completed
+      T120.1: in_progress
     tasks_completed:
     - T119.1
     - T119.2
@@ -6367,41 +6432,81 @@ active_session:
     s027_d33_choice: option_3_merge_208_first_then_m120
     s027_d33_option: 3
     s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-    ci_policy_decision_status: approved
+    ci_policy_decision_status: implemented
     ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-    ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+    ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
     pr_208_merge_approved: true
-    m120_started: false
+    m120_started: true
     ci_policy_decision: S027-D34
     ci_policy_approved: true
     ci_policy_approved_at: '2026-08-05T15:12:00Z'
-    ci_policy_implemented: false
+    ci_policy_implemented: true
     s027_d34_decision: S027-D34
-    s027_d34_status: confirmed
+    s027_d34_status: applied
     s027_d34_recorded_at: '2026-08-05T15:12:00Z'
     pr_208_merged: true
     pr_208_merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     gate_c_to_d: pending
     phase_c: pending
+    m120_started_at: '2026-08-05T15:20:42Z'
+    t120_1_status: in_progress
+    ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+    ci_policy_implemented_sha: 11ef43a
+    ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    s027_d34_applied_at: '2026-08-05T15:20:42Z'
+    s027_d34_applied_sha: 11ef43a
+    main_ci_status: success
+    main_ci_merge_sha: 2c884bd
+    main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+    main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_preflight_status: success
+    main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+    main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+    watching_ci_sha: 11ef43a
+    watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    watching_ci_branch: evolve/EV-025-multilingual-embeddings
+    watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+    build_head: 11ef43a
+    build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
+    substeps:
+      current_task: T120.1
+      current_milestone: M120
+      m119_status: completed_merged
+      t120_1_status: in_progress
+      next_milestone: M120
+      next_task: T120.1
+      t119_1_status: completed
+      t119_2_status: completed
+      t119_3_status: completed
+      t119_4_status: completed
+      t119_5_status: completed
+      tasks_completed:
+      - T119.1
+      - T119.2
+      - T119.3
+      - T119.4
+      - T119.5
   - stage: 08-verify-build
     required: true
     status: completed_conditional
     mode: delta
     skip_rationale:
-    next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+    next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
     handoff_active_milestone: M119
     handoff_note: 'PR #208 MERGED @2c884bd; S027-D34; active_milestone=M120; Gate C→D still pending'
     started_at: '2026-08-05'
     started_at_iso: '2026-08-05T12:52:00Z'
-    current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
+    current_action: t120_1_in_progress
     askquestion_pending: false
     askquestion_pending_topic:
     active_milestone: M120
     m119_status: completed_merged
     m119_verify: merged
-    build_head: 2c884bd
-    note: 'S027/EV-025 08-verify-build — PR #208 MERGED @2c884bd 2026-08-05 — S027-D34 merge approved + CI policy approved; head was @c574f58; mergeCommit 2c884bd202524605d96e4d0d510e69e5a100a3a7; m119_status=completed_merged; active_milestone=M120; next=Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.; Gate C→D / phase_c remain pending (NOT passed)'
-    updated_at: '2026-08-05T15:12:00Z'
+    build_head: 11ef43a
+    note: 'S027/EV-025 08-verify-build — M119 merged @2c884bd; S027-D34 CI split implemented @11ef43a; main CI+preflight green; handoff M120 T120.1 in_progress; Gate C→D / phase_c remain pending (NOT passed)'
+    updated_at: '2026-08-05T15:20:42Z'
     overall: conditional_pass
     report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
     report_status: completed_conditional
@@ -6418,7 +6523,7 @@ active_session:
     phase_c: pending
     m119_tip: c574f58
     m119_tip_full: c574f580aba837b6c5c5d4809769cc2af3ca3f7c
-    build_head_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+    build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
     s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
     s027_d32_option: 1
     s027_d32_confirmed_at: '2026-08-05T14:45:00Z'
@@ -6512,9 +6617,9 @@ active_session:
     s027_d33_choice: option_3_merge_208_first_then_m120
     s027_d33_option: 3
     s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-    ci_policy_decision_status: approved
+    ci_policy_decision_status: implemented
     ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-    ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+    ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
     m119_pr_mergeable: false
     m119_pr_merged: true
     pr_208_merge_approved: true
@@ -6523,15 +6628,15 @@ active_session:
     pr_208_mergeable: false
     prior_green_sha: 8e81ad3
     prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
-    m120_started: false
+    m120_started: true
     next_milestone: M120
     next_task: T120.1
     ci_policy_decision: S027-D34
     ci_policy_approved: true
     ci_policy_approved_at: '2026-08-05T15:12:00Z'
-    ci_policy_implemented: false
+    ci_policy_implemented: true
     s027_d34_decision: S027-D34
-    s027_d34_status: confirmed
+    s027_d34_status: applied
     s027_d34_recorded_at: '2026-08-05T15:12:00Z'
     m119_completed_at: '2026-08-05T15:11:52Z'
     m119_merged_at: '2026-08-05T15:11:52Z'
@@ -6552,10 +6657,24 @@ active_session:
     merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     merged_at: '2026-08-05T15:11:52Z'
-    main_ci_status: watching
+    main_ci_status: success
     main_ci_merge_sha: 2c884bd
     main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-    parent_note: Parent watching main CI on 2c884bd; then CI split chore on evolve/EV-025-multilingual-embeddings; then T120.1
+    parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
+    ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+    ci_policy_implemented_sha: 11ef43a
+    ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    s027_d34_applied_at: '2026-08-05T15:20:42Z'
+    s027_d34_applied_sha: 11ef43a
+    main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_preflight_status: success
+    main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+    main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+    watching_ci_sha: 11ef43a
+    watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    watching_ci_branch: evolve/EV-025-multilingual-embeddings
+    watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
   - stage: 09-qa
     required: true
     status: pending
@@ -6582,12 +6701,12 @@ active_session:
     mode: delta
     skip_rationale:
   current_stage: 07-build
-  note: 'S027/EV-025 08-verify-build — PR #208 MERGED @2c884bd 2026-08-05 — S027-D34 merge approved + CI policy approved; head was @c574f58; mergeCommit 2c884bd202524605d96e4d0d510e69e5a100a3a7; m119_status=completed_merged; active_milestone=M120; next=Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.; Gate C→D / phase_c remain pending (NOT passed)'
+  note: 'EV-025 Phase C — S027-D34 CI split applied @11ef43a; main@2c884bd CI+preflight green; current_action=t120_1_in_progress; active_milestone=M120; T120.1 in_progress; watching CI on 11ef43a; Gate C→D / phase_c remain pending'
   started_at: '2026-08-05'
   context_briefs: []
-  current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-  next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
-  updated_at: '2026-08-05T15:12:00Z'
+  current_action: t120_1_in_progress
+  next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
+  updated_at: '2026-08-05T15:20:42Z'
   report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
   askquestion_pending: false
   askquestion_pending_topic:
@@ -6656,8 +6775,8 @@ active_session:
   s027_d29_choice: option_1_approve_all
   s027_d30_decision: S027-D30
   active_milestone: M120
-  active_task:
-  current_task:
+  active_task: T120.1
+  current_task: T120.1
   m119_status: completed_merged
   m119_completed_at: '2026-08-05T15:11:52Z'
   m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
@@ -6675,6 +6794,7 @@ active_session:
     T119.3: completed
     T119.4: completed
     T119.5: completed
+    T120.1: in_progress
   tasks_completed:
   - T119.1
   - T119.2
@@ -6686,8 +6806,8 @@ active_session:
   askquestion_cleared: 'EXPLICIT merge approval — PR #208 @c574f58 MERGEABLE + CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)? → APPROVED + MERGED (S027-D34); CI split policy approved as written'
   s027_d31_decision: S027-D31
   s027_d31_status: confirmed
-  build_head: 2c884bd
-  build_head_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+  build_head: 11ef43a
+  build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
   s027_d32_decision: S027-D32
   s027_d32_status: confirmed
   m119_tip: c574f58
@@ -6787,9 +6907,9 @@ active_session:
   s027_d33_choice: option_3_merge_208_first_then_m120
   s027_d33_option: 3
   s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-  ci_policy_decision_status: approved
+  ci_policy_decision_status: implemented
   ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-  ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+  ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
   m119_pr_mergeable: false
   m119_pr_merged: true
   pr_208_merge_approved: true
@@ -6798,13 +6918,13 @@ active_session:
   pr_208_mergeable: false
   prior_green_sha: 8e81ad3
   prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
-  m120_started: false
+  m120_started: true
   ci_policy_decision: S027-D34
   ci_policy_approved: true
   ci_policy_approved_at: '2026-08-05T15:12:00Z'
-  ci_policy_implemented: false
+  ci_policy_implemented: true
   s027_d34_decision: S027-D34
-  s027_d34_status: confirmed
+  s027_d34_status: applied
   s027_d34_recorded_at: '2026-08-05T15:12:00Z'
   m119_merged_at: '2026-08-05T15:11:52Z'
   m119_merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
@@ -6822,10 +6942,25 @@ active_session:
   merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
   merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
   merged_at: '2026-08-05T15:11:52Z'
-  main_ci_status: watching
+  main_ci_status: success
   main_ci_merge_sha: 2c884bd
   main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-  parent_note: Parent watching main CI on 2c884bd; then CI split chore on evolve/EV-025-multilingual-embeddings; then T120.1
+  parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
+  ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+  ci_policy_implemented_sha: 11ef43a
+  ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+  s027_d34_applied_at: '2026-08-05T15:20:42Z'
+  s027_d34_applied_sha: 11ef43a
+  main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+  main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+  main_preflight_status: success
+  main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+  main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+  watching_ci_sha: 11ef43a
+  watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+  watching_ci_branch: evolve/EV-025-multilingual-embeddings
+  watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+  t120_1_status: in_progress
 sessions:
 - id: S026-frontend-ux-polish
   type: feature
@@ -9515,7 +9650,7 @@ sessions:
       opened_at: '2026-08-04'
       recorded_at: '2026-08-04T00:10:00Z'
       note: Post-close durable state closeout MERGED; on main
-      files: &id007
+      files: &id009
       - workflow-state.yaml
       - docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
       - docs/evolve-history.md
@@ -16684,11 +16819,11 @@ stages:
     - M120
     - M121
     - M122
-    active_milestone: M119
-    active_task:
-    current_task:
-    current_action: m119_08_verify_build
-    next_action: 08-verify-build for M119 (then minor PR); then M120 T120.1
+    active_milestone: M120
+    active_task: T120.1
+    current_task: T120.1
+    current_action: t120_1_in_progress
+    next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -16697,31 +16832,15 @@ stages:
     phase_b: passed
     s027_d29_decision: S027-D29
     s027_d30_decision: S027-D30
-    note: S027/EV-025 07-build IN_PROGRESS 2026-08-05 — M119 completed_committed (tip @206f88a); current_action=m119_08_verify_build; askquestion_pending=false; handoff → 08-verify-build for M119 (then minor PR); next_milestone=M120 queued
+    note: 'S027/EV-025 07-build IN_PROGRESS — S027-D34 CI split landed @11ef43a; ci_policy_implemented=true; main@2c884bd CI+preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072, https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460); active_milestone=M120; current_action=t120_1_in_progress; T120.1 in_progress (red e2e); watching CI on 11ef43a; Gate C→D pending'
     handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
     rd_range: RD-305..RD-308
     tp_lock: TP1–TP5
     report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-05T13:19:30Z'
+    updated_at: '2026-08-05T15:20:42Z'
     skipped_06: true
     skipped_06_note: Standard skip — no new tooling; Gate B→C → 07 directly
-    substeps:
-      current_task:
-      current_milestone: M119
-      m119_status: completed_committed
-      t119_1_status: completed
-      t119_2_status: completed
-      t119_3_status: completed
-      t119_4_status: completed
-      t119_5_status: completed
-      tasks_completed:
-      - T119.1
-      - T119.2
-      - T119.3
-      - T119.4
-      - T119.5
-      next_milestone: M120
-      next_task: T120.1
+    substeps: *id007
     t119_1_status: completed
     s026_baseline:
       status: completed
@@ -17518,7 +17637,7 @@ stages:
       pr_207_merge_approved: true
       pr_207_merge_approved_at: '2026-08-05T00:30:00Z'
       pr_207_merge_approved_decision: S026-D54
-    m119_status: completed_committed
+    m119_status: completed_merged
     m119_completed_at: '2026-08-05T12:52:00Z'
     m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
     m119_verify: conditional_pass_await_pr_decision
@@ -17528,12 +17647,7 @@ stages:
     t119_3_status: completed
     t119_4_status: completed
     t119_5_status: completed
-    task_status:
-      T119.1: completed
-      T119.2: completed
-      T119.3: completed
-      T119.4: completed
-      T119.5: completed
+    task_status: *id008
     tasks_completed:
     - T119.1
     - T119.2
@@ -17546,6 +17660,24 @@ stages:
     m119_committed_at: '2026-08-05T12:52:00Z'
     m119_tip: ffb199b
     m119_tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
+    m120_started: true
+    t120_1_status: in_progress
+    ci_policy_implemented: true
+    ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+    ci_policy_implemented_sha: 11ef43a
+    ci_policy_decision_status: implemented
+    ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
+    s027_d34_status: applied
+    s027_d34_applied_sha: 11ef43a
+    watching_ci_sha: 11ef43a
+    watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+    main_ci_status: success
+    main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_preflight_status: success
+    main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+    build_head: 11ef43a
+    build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
   08-verify-build:
     status: completed_conditional
     started_at: '2026-08-05'
@@ -17569,8 +17701,8 @@ stages:
     active_milestone: M120
     active_task:
     current_task:
-    current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-    next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+    current_action: t120_1_in_progress
+    next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -17579,8 +17711,8 @@ stages:
     phase_b: passed
     s027_d29_decision: S027-D29
     s027_d30_decision: S027-D30
-    build_head: 2c884bd
-    build_head_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+    build_head: 11ef43a
+    build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
     build_commits:
     - dc49d3a
     - bd34f2c
@@ -17592,12 +17724,12 @@ stages:
     m119_status: completed_merged
     m119_verify: merged
     m119_tip: c574f58
-    note: 'S027/EV-025 08-verify-build — PR #208 MERGED @2c884bd 2026-08-05 — S027-D34 merge approved + CI policy approved; head was @c574f58; mergeCommit 2c884bd202524605d96e4d0d510e69e5a100a3a7; m119_status=completed_merged; active_milestone=M120; next=Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.; Gate C→D / phase_c remain pending (NOT passed)'
+    note: 'S027/EV-025 08-verify-build — M119 merged @2c884bd; S027-D34 CI split implemented @11ef43a; main CI+preflight green; handoff M120 T120.1 in_progress; Gate C→D / phase_c remain pending (NOT passed)'
     handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
     rd_range: RD-305..RD-308
     tp_lock: TP1–TP5
     report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
-    updated_at: '2026-08-05T15:12:00Z'
+    updated_at: '2026-08-05T15:20:42Z'
     next_milestone: M120
     next_task: T120.1
     s026_baseline:
@@ -18474,9 +18606,9 @@ stages:
     s027_d33_choice: option_3_merge_208_first_then_m120
     s027_d33_option: 3
     s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-    ci_policy_decision_status: approved
+    ci_policy_decision_status: implemented
     ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-    ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+    ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
     m119_pr_mergeable: false
     m119_pr_merged: true
     pr_208_merge_approved: true
@@ -18485,13 +18617,13 @@ stages:
     pr_208_mergeable: false
     prior_green_sha: 8e81ad3
     prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
-    m120_started: false
+    m120_started: true
     ci_policy_decision: S027-D34
     ci_policy_approved: true
     ci_policy_approved_at: '2026-08-05T15:12:00Z'
-    ci_policy_implemented: false
+    ci_policy_implemented: true
     s027_d34_decision: S027-D34
-    s027_d34_status: confirmed
+    s027_d34_status: applied
     s027_d34_recorded_at: '2026-08-05T15:12:00Z'
     m119_completed_at: '2026-08-05T15:11:52Z'
     m119_merged_at: '2026-08-05T15:11:52Z'
@@ -18510,10 +18642,18 @@ stages:
     merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     merged_at: '2026-08-05T15:11:52Z'
-    main_ci_status: watching
+    main_ci_status: success
     main_ci_merge_sha: 2c884bd
     main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-    parent_note: Parent watching main CI on 2c884bd; then CI split chore on evolve/EV-025-multilingual-embeddings; then T120.1
+    parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
+    ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+    ci_policy_implemented_sha: 11ef43a
+    s027_d34_applied_sha: 11ef43a
+    watching_ci_sha: 11ef43a
+    watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+    main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+    main_preflight_status: success
+    main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
   09-qa:
     status: completed
     started: '2026-08-05'
@@ -21837,10 +21977,10 @@ evolve_cycles:
       - M121
       - M122
       active_milestone: M120
-      active_task:
-      current_task:
-      current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-      next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+      active_task: T120.1
+      current_task: T120.1
+      current_action: t120_1_in_progress
+      next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -21849,13 +21989,13 @@ evolve_cycles:
       phase_b: passed
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
-      note: S027/EV-025 07-build IN_PROGRESS 2026-08-05 — M119 completed_committed (tip @206f88a); current_action=m119_08_verify_build; askquestion_pending=false; handoff → 08-verify-build for M119 (then minor PR); next_milestone=M120 queued
-      updated_at: '2026-08-05T15:12:00Z'
+      note: S027/EV-025 07-build IN_PROGRESS — S027-D34 CI split landed @11ef43a; ci_policy_implemented=true; main@2c884bd CI+preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072, https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460); active_milestone=M120; current_action=t120_1_in_progress; T120.1 in_progress (red e2e); watching CI on 11ef43a; Gate C→D pending
+      updated_at: '2026-08-05T15:20:42Z'
       skipped_06: true
       substeps:
-        current_task:
-        current_milestone: M119
-        m119_status: completed_committed
+        current_task: T120.1
+        current_milestone: M120
+        m119_status: completed_merged
         t119_1_status: completed
         t119_2_status: completed
         t119_3_status: completed
@@ -21869,6 +22009,7 @@ evolve_cycles:
         - T119.5
         next_milestone: M120
         next_task: T120.1
+        t120_1_status: in_progress
       t119_1_status: completed
       m119_status: completed_merged
       m119_completed_at: '2026-08-05T12:52:00Z'
@@ -21886,6 +22027,7 @@ evolve_cycles:
         T119.3: completed
         T119.4: completed
         T119.5: completed
+        T120.1: in_progress
       tasks_completed:
       - T119.1
       - T119.2
@@ -21909,22 +22051,44 @@ evolve_cycles:
       s027_d33_choice: option_3_merge_208_first_then_m120
       s027_d33_option: 3
       s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-      ci_policy_decision_status: approved
+      ci_policy_decision_status: implemented
       ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-      ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+      ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
       pr_208_merge_approved: true
-      m120_started: false
+      m120_started: true
       ci_policy_decision: S027-D34
       ci_policy_approved: true
       ci_policy_approved_at: '2026-08-05T15:12:00Z'
-      ci_policy_implemented: false
+      ci_policy_implemented: true
       s027_d34_decision: S027-D34
-      s027_d34_status: confirmed
+      s027_d34_status: applied
       s027_d34_recorded_at: '2026-08-05T15:12:00Z'
       pr_208_merged: true
       pr_208_merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       gate_c_to_d: pending
       phase_c: pending
+      m120_started_at: '2026-08-05T15:20:42Z'
+      t120_1_status: in_progress
+      ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+      ci_policy_implemented_sha: 11ef43a
+      ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      s027_d34_applied_at: '2026-08-05T15:20:42Z'
+      s027_d34_applied_sha: 11ef43a
+      main_ci_status: success
+      main_ci_merge_sha: 2c884bd
+      main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_preflight_status: success
+      main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      watching_ci_sha: 11ef43a
+      watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      watching_ci_branch: evolve/EV-025-multilingual-embeddings
+      watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+      build_head: 11ef43a
+      build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
     08-verify-build:
       status: completed_conditional
       started: '2026-08-05'
@@ -21942,12 +22106,12 @@ evolve_cycles:
       - M121
       - M122
       active_milestone: M120
-      current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-      next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+      current_action: t120_1_in_progress
+      next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
-      build_head: 2c884bd
-      build_head_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+      build_head: 11ef43a
+      build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
       build_commits:
       - dc49d3a
       - bd34f2c
@@ -21958,8 +22122,8 @@ evolve_cycles:
       - c574f58
       m119_status: completed_merged
       m119_verify: merged
-      note: 'S027/EV-025 08-verify-build — PR #208 MERGED @2c884bd 2026-08-05 — S027-D34 merge approved + CI policy approved; head was @c574f58; mergeCommit 2c884bd202524605d96e4d0d510e69e5a100a3a7; m119_status=completed_merged; active_milestone=M120; next=Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.; Gate C→D / phase_c remain pending (NOT passed)'
-      updated_at: '2026-08-05T15:12:00Z'
+      note: 'S027/EV-025 08-verify-build — M119 merged @2c884bd; S027-D34 CI split implemented @11ef43a; main CI+preflight green; handoff M120 T120.1 in_progress; Gate C→D / phase_c remain pending (NOT passed)'
+      updated_at: '2026-08-05T15:20:42Z'
       next_milestone: M120
       next_task: T120.1
       overall: conditional_pass
@@ -22073,9 +22237,9 @@ evolve_cycles:
       s027_d33_choice: option_3_merge_208_first_then_m120
       s027_d33_option: 3
       s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-      ci_policy_decision_status: approved
+      ci_policy_decision_status: implemented
       ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-      ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+      ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
       m119_pr_mergeable: false
       m119_pr_merged: true
       pr_208_merge_approved: true
@@ -22084,13 +22248,13 @@ evolve_cycles:
       pr_208_mergeable: false
       prior_green_sha: 8e81ad3
       prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
-      m120_started: false
+      m120_started: true
       ci_policy_decision: S027-D34
       ci_policy_approved: true
       ci_policy_approved_at: '2026-08-05T15:12:00Z'
-      ci_policy_implemented: false
+      ci_policy_implemented: true
       s027_d34_decision: S027-D34
-      s027_d34_status: confirmed
+      s027_d34_status: applied
       s027_d34_recorded_at: '2026-08-05T15:12:00Z'
       m119_completed_at: '2026-08-05T15:11:52Z'
       m119_merged_at: '2026-08-05T15:11:52Z'
@@ -22111,10 +22275,24 @@ evolve_cycles:
       merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       merged_at: '2026-08-05T15:11:52Z'
-      main_ci_status: watching
+      main_ci_status: success
       main_ci_merge_sha: 2c884bd
       main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-      parent_note: Parent watching main CI on 2c884bd; then CI split chore on evolve/EV-025-multilingual-embeddings; then T120.1
+      parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
+      ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+      ci_policy_implemented_sha: 11ef43a
+      ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      s027_d34_applied_at: '2026-08-05T15:20:42Z'
+      s027_d34_applied_sha: 11ef43a
+      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+      main_preflight_status: success
+      main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+      watching_ci_sha: 11ef43a
+      watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+      watching_ci_branch: evolve/EV-025-multilingual-embeddings
+      watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
     09-qa:
       status: pending
     10-e2e:
@@ -22395,12 +22573,12 @@ evolve_cycles:
   issues: []
   phase0_approved: true
   phase_0_status: approved
-  current_action: watch_main_ci_2c884bd_then_ci_split_then_t120_1
-  next_action: 'Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+  current_action: t120_1_in_progress
+  next_action: 'Continue M120 T120.1 (red e2e); watch CI on tip 11ef43a. Gate C→D / phase_c remain pending.'
   askquestion_pending: false
   askquestion_pending_topic:
-  updated_at: '2026-08-05T15:12:00Z'
-  note: 'S027/EV-025 — PR #208 MERGED @2c884bd; S027-D34; M119 complete/merged; active_milestone=M120; next=Watch main CI+deploy-preflight on mergeCommit 2c884bd; then implement CI split chore on evolve/EV-025-multilingual-embeddings; then start M120 T120.1. Gate C→D / phase_c remain pending.'
+  updated_at: '2026-08-05T15:20:42Z'
+  note: 'S027/EV-025 — S027-D34 CI split @11ef43a; main@2c884bd green; active_milestone=M120; T120.1 in_progress; watching CI on 11ef43a'
   s027_d25_decision: S027-D25
   s027_d26_decision: S027-D26
   s027_d27_decision: S027-D27
@@ -22585,8 +22763,8 @@ evolve_cycles:
   s027_d29_choice: option_1_approve_all
   s027_d30_decision: S027-D30
   active_milestone: M120
-  active_task:
-  current_task:
+  active_task: T120.1
+  current_task: T120.1
   m119_status: completed_merged
   m119_completed_at: '2026-08-05T15:11:52Z'
   m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
@@ -22619,8 +22797,8 @@ evolve_cycles:
   s027_d32_status: confirmed
   s027_d32_note: 'Option 1 — Open M119 minor PR (CI gate). Local Docker Postgres blocked (userns); do NOT re-run full make test-py in-agent. Rely on Husky pre-commit/pre-push + GitHub CI as full gate. F62 hooks remain: typecheck+security on commit; lint+test-fast on push.'
   m119_tip_full: c574f580aba837b6c5c5d4809769cc2af3ca3f7c
-  build_head: 2c884bd
-  build_head_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+  build_head: 11ef43a
+  build_head_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
   s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
   s027_d32_option: 1
   pr_plan_id: PR-67
@@ -22710,9 +22888,9 @@ evolve_cycles:
   s027_d33_choice: option_3_merge_208_first_then_m120
   s027_d33_option: 3
   s027_d33_recorded_at: '2026-08-05T15:09:39Z'
-  ci_policy_decision_status: approved
+  ci_policy_decision_status: implemented
   ci_policy_intent: 'APPROVED (S027-D34): remote CI = unit tests + coverage gather/report as PR comment + strict lint/format; local CI = compose/integration/long-running jobs; rich asserts in tests (test-assert-quality).'
-  ci_policy_note: 'S027-D34: CI split policy approved as written — implement as chore on evolve branch after main@2c884bd CI green; do not block T120.1 start sequencing beyond that chore'
+  ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
   m119_pr_mergeable: false
   m119_pr_merged: true
   pr_208_merge_approved: true
@@ -22721,13 +22899,13 @@ evolve_cycles:
   pr_208_mergeable: false
   prior_green_sha: 8e81ad3
   prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
-  m120_started: false
+  m120_started: true
   ci_policy_decision: S027-D34
   ci_policy_approved: true
   ci_policy_approved_at: '2026-08-05T15:12:00Z'
-  ci_policy_implemented: false
+  ci_policy_implemented: true
   s027_d34_decision: S027-D34
-  s027_d34_status: confirmed
+  s027_d34_status: applied
   s027_d34_recorded_at: '2026-08-05T15:12:00Z'
   m119_merged_at: '2026-08-05T15:11:52Z'
   m119_merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
@@ -22745,10 +22923,26 @@ evolve_cycles:
   merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
   merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
   merged_at: '2026-08-05T15:11:52Z'
-  main_ci_status: watching
+  main_ci_status: success
   main_ci_merge_sha: 2c884bd
   main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-  parent_note: Parent watching main CI on 2c884bd; then CI split chore on evolve/EV-025-multilingual-embeddings; then T120.1
+  parent_note: S027-D34 applied @11ef43a; main@2c884bd CI+preflight green; T120.1 in_progress; watching CI on 11ef43a
+  ci_policy_implemented_at: '2026-08-05T15:20:42Z'
+  ci_policy_implemented_sha: 11ef43a
+  ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+  s027_d34_applied_at: '2026-08-05T15:20:42Z'
+  s027_d34_applied_sha: 11ef43a
+  main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+  main_ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
+  main_preflight_status: success
+  main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+  main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
+  watching_ci_sha: 11ef43a
+  watching_ci_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+  watching_ci_branch: evolve/EV-025-multilingual-embeddings
+  watching_ci_note: Watching CI on 11ef43a (S027-D34 CI split tip)
+  history:
+  - '2026-08-05T15:20:42Z S027/EV-025: S027-D34 CI split landed @11ef43a; ci_policy_implemented=true; main@2c884bd CI+preflight green; current_action=t120_1_in_progress; M120/T120.1 in_progress; watching CI on 11ef43a; Gate C→D NOT passed'
 - id: EV-001
   cycle_type: feature
   feature_ids:
@@ -32412,7 +32606,7 @@ evolve_cycles:
       commit_full: 4a98fe5025eaa7f9e70b9d637bf6aba425288780
       note: S025/EV-023 01-requirements COMPLETE @ 4a98fe5 — user confirmed (S025-D9 option 1) → 02-verify-plan
       askquestion_pending: false
-      artifacts_updated: &id024
+      artifacts_updated: &id026
       - docs/feature-list.md
       - docs/user-journeys.md
       - docs/test-plan.md
@@ -32774,7 +32968,7 @@ evolve_cycles:
       opened_at: '2026-08-04'
       recorded_at: '2026-08-04T00:10:00Z'
       note: Post-close durable state closeout MERGED; on main
-      files: *id007
+      files: *id009
       merged_at: '2026-08-04T00:09:50Z'
       merge_commit_sha: 5234bc230c20c9049d74ee090052e8b401083a70
       merge_sha: 5234bc230c20c9049d74ee090052e8b401083a70
@@ -33221,7 +33415,7 @@ evolve_cycles:
       s026_d28_decision: S026-D28
       note: 'S026/EV-024 07-build COMPLETE 2026-08-05 — Gate C→D PASS (S026-D54 / option 2); phase_c=passed; gates.c_to_d=passed; M112–M118 done; PR #207 merge approved (not yet merged) tip @2b8e8cd; handoff → merge #207 then 08-verify-build M118 closeout'
       updated_at: '2026-08-05T00:30:00Z'
-      milestones_completed: &id008
+      milestones_completed: &id010
       - M112
       - M113
       - M114
@@ -33446,7 +33640,7 @@ evolve_cycles:
       - 7f086c3
       t116_2_commit_pending: false
       t116_2_commit: 9bba998
-      t116_2_artifacts: &id009
+      t116_2_artifacts: &id011
       - apps/database/alembic/versions/20260804_0012_ev024_feedback.py
       - apps/internal-write-api/vecinita_internal_write_api/feedback.py
       - apps/internal-write-api/vecinita_internal_write_api/app.py
@@ -33454,7 +33648,7 @@ evolve_cycles:
       t116_3_status: completed
       t116_3_note: T116.3 completed @d3947bd — wire ChatRAG, write, and DM feedback APIs
       t116_2_commit_full: 9bba998fcd7e3d26a32bd1856ee5572b60ab33ec
-      t116_2_files: &id010
+      t116_2_files: &id012
       - apps/database/alembic/versions/20260804_0012_ev024_feedback.py
       - apps/internal-write-api/vecinita_internal_write_api/app.py
       - apps/internal-write-api/vecinita_internal_write_api/feedback.py
@@ -33468,7 +33662,7 @@ evolve_cycles:
       t116_3_commit_full: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
       t116_4_status: completed
       t116_4_note: T116.4 completed @1c8f6ff — ChatRAG and Admin Feedback pages for F68
-      t116_3_files: &id011
+      t116_3_files: &id013
       - apps/chat-rag-backend/vecinita_chat_rag_backend/app.py
       - apps/data-management-backend/vecinita_data_management_backend/app.py
       - apps/data-management-backend/vecinita_data_management_backend/write_client.py
@@ -33488,7 +33682,7 @@ evolve_cycles:
       t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
       t116_5_status: completed
       t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
-      t116_4_files: &id012
+      t116_4_files: &id014
       - apps/chat-rag-frontend/src/App.css
       - apps/chat-rag-frontend/src/App.tsx
       - apps/chat-rag-frontend/src/api/feedback.ts
@@ -34585,7 +34779,7 @@ evolve_cycles:
     recorded_at: '2026-08-05T00:54:00Z'
     updated_at: '2026-08-05T00:57:00Z'
     note: 'S026-D58: write before close_cycle'
-  - &id017
+  - &id019
     path: docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md
     kind: report
     type: docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md
@@ -34626,7 +34820,7 @@ evolve_cycles:
     merged: true
     merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
     merge_sha_short: c942971
-  - &id021
+  - &id023
     path: docs/dependency-inventory.md
     kind: dependency-inventory
     status: updated
@@ -34657,7 +34851,7 @@ evolve_cycles:
     askquestion_pending_topic:
     gate_b_to_c: pending
     s026_d25_decision: S026-D25
-  - &id018
+  - &id020
     path: docs/adr/ADR-047-ask-energy-heuristic-car-equivalent.md
     kind: adr
     status: locked
@@ -34673,7 +34867,7 @@ evolve_cycles:
     askquestion_pending_topic:
     gate_b_to_c: pending
     s026_d25_decision: S026-D25
-  - &id019
+  - &id021
     path: docs/sessions/S026-frontend-ux-polish/roadmap.md
     kind: roadmap
     status: locked
@@ -34689,7 +34883,7 @@ evolve_cycles:
     askquestion_pending_topic:
     gate_b_to_c: pending
     s026_d25_decision: S026-D25
-  - &id020
+  - &id022
     path: docs/sessions/S026-frontend-ux-polish/reports/tech-plan-delta.md
     kind: tech-plan-delta
     status: locked
@@ -34771,7 +34965,7 @@ evolve_cycles:
     note: S026-D11 Fn allocation — parent must edit markdown Features/Phase 0
     session_id: S026-frontend-ux-polish
     recorded_at: '2026-08-04T13:51:00Z'
-  - &id022
+  - &id024
     path: docs/sessions/S026-frontend-ux-polish/reports/02-verify-plan-audit.md
     kind: verify-plan-audit
     status: completed
@@ -34828,7 +35022,7 @@ evolve_cycles:
     recorded_at: '2026-08-04T16:28:00Z'
     updated_at: '2026-08-04T16:28:00Z'
     note: S026-D22 — VECINITA_ENERGY_CAR_GCO2E_PER_KM default 251 (RD-289)
-  - &id023
+  - &id025
     path: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
     kind: verify-tech-audit
     status: completed
@@ -35112,7 +35306,7 @@ evolve_cycles:
     askquestion_pending_topic:
     resolved_by: S026-D47
     resolved_at: '2026-08-04T20:59:01Z'
-  - &id016
+  - &id018
     id: S026-D45
     decision: 'M114 complete; PR #203 opened to main for F64/#87 (includes M113 commits until #202 merges); merge needs approval'
     summary: 'M114 complete; PR #203 opened to main for F64/#87 (includes M113 commits until #202 merges); merge needs approval'
@@ -35132,7 +35326,7 @@ evolve_cycles:
     askquestion_pending_topic:
     resolved_by: S026-D46
     resolved_at: '2026-08-04T20:41:30Z'
-  - &id015
+  - &id017
     id: S026-D44
     decision: 'Retargeted M113 review: closed #201, opened #202 from frozen tip pr/201-m113-tooltip @ 06f4ab1 so M114 can continue on evolve branch without polluting Tooltip PR'
     summary: 'Retargeted M113 review: closed #201, opened #202 from frozen tip pr/201-m113-tooltip @ 06f4ab1 so M114 can continue on evolve branch without polluting Tooltip PR'
@@ -35147,7 +35341,7 @@ evolve_cycles:
     frozen_tip: pr/201-m113-tooltip
     frozen_sha: 06f4ab1
     note: 'M113 review PR is now #202; #201 superseded'
-  - &id014
+  - &id016
     id: S026-D43
     decision: 'Continue M114 (F64 cold-start tips / #87) now; leave PR #201 open pending explicit merge approval'
     rationale: User Continue with C after M113 CI green; same pattern as M112→M113 with prior PR open
@@ -35364,7 +35558,7 @@ evolve_cycles:
   - id: S026-D11
     decision: Allocate F64–F69 (one Fn per issue); Phase 0 approved → 01-requirements
     choice: 15a / reply 1
-    feature_ids: &id013
+    feature_ids: &id015
     - F64
     - F65
     - F66
@@ -35688,7 +35882,7 @@ evolve_cycles:
   m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
   m112_merge_sha_short: e1ccf9e
   m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
-  milestones_completed: *id008
+  milestones_completed: *id010
   pr_status: merged
   pr_merged: true
   merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
@@ -35854,21 +36048,21 @@ evolve_cycles:
   t116_2_note: T116.2 completed @9bba998 — feedback table migration + 90d purge (cleanup_feedback) + data-management-plan
   t116_2_commit_pending: false
   t116_2_commit: 9bba998
-  t116_2_artifacts: *id009
+  t116_2_artifacts: *id011
   t116_3_status: completed
   t116_3_note: T116.3 completed @d3947bd — wire ChatRAG, write, and DM feedback APIs
   t116_2_commit_full: 9bba998fcd7e3d26a32bd1856ee5572b60ab33ec
-  t116_2_files: *id010
+  t116_2_files: *id012
   t116_3_commit: d3947bd
   t116_3_commit_full: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
   t116_4_status: completed
   t116_4_note: T116.4 completed @1c8f6ff — ChatRAG and Admin Feedback pages for F68
-  t116_3_files: *id011
+  t116_3_files: *id013
   t116_4_commit: 1c8f6ff
   t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
   t116_5_status: completed
   t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
-  t116_4_files: *id012
+  t116_4_files: *id014
   branch_ahead_of_origin: 0
   resume_note: S026-D58 13 PASS accepted; deploy gate PASSED; current_action=write_evolve_summary; write docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md (+ docs/sessions/S026-frontend-ux-polish/reports/evolve-report.md) then close cycle; cycle NOT completed
   s026_d51_decision: S026-D51
@@ -38448,7 +38642,7 @@ decisions_log:
   summary: Allocate F64–F69 (one Fn per issue); Phase 0 approved → 01-requirements
   topic: feature_allocation
   choice: 15a / reply 1
-  feature_ids: *id013
+  feature_ids: *id015
   next_stage: 01-requirements
   recorded_at: '2026-08-04T13:51:00Z'
   approved: '2026-08-04'
@@ -41368,9 +41562,9 @@ decisions_log:
 - '2026-08-04 S026/EV-024: M112 08-verify-build PASS @ 0942ef9; PR #200 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200); CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; merge needs user approval; AskQuestion: continue M113 vs pause'
 - 'S026/EV-024: PR #200 MERGED @ e1ccf9e; building_m113; next T113.1 red tests (F67); main CI green https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208; deploy-preflight watching'
 - '2026-08-04 S026/EV-024: M113 08-verify-build PASS @ 9856f20; PR #201 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201); merge_policy=needs_user_approval; feature F67 issue 106; PR #200 already merged; milestones_completed=[M112,M113]; active→M114/F64/#87; AskQuestion: continue M114 vs pause vs merge #201 first'
-- *id014
-- *id015
 - *id016
+- *id017
+- *id018
 - 'S026/EV-024: CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; build_head=bde3db7; active_task=T116.1 / M116 unchanged'
 - 'S026/EV-024: recorded 605fce9 ([T115.4] test: cover energy knob validation branches); build_head=605fce9; m115_pr_status=open_ci_green; M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; merge needs user approval; askquestion_pending=true (merge PR #204 vs continue M116 T116.1 vs pause); active_task=T116.1 / M116 ready'
 - date: '2026-08-05'
@@ -41506,6 +41700,7 @@ decisions_log:
   m119_tip: c574f58
   m119_tip_full: c574f580aba837b6c5c5d4809769cc2af3ca3f7c
   updated_at: '2026-08-05T15:09:39Z'
+- '2026-08-05T15:20:42Z S027-D34 applied @11ef43a: CI split chore landed; ci_policy_implemented=true; main@2c884bd CI+preflight green; M120 T120.1 in_progress; watching CI on 11ef43a'
 artifacts:
 - path: CHANGELOG.md
   kind: changelog
@@ -41557,7 +41752,7 @@ artifacts:
   stage: 16-evolve
   skill_id: 16-evolve
   note: EV-024/S026 closeout — written/present
-- *id017
+- *id019
 - path: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
   session_id: S026-frontend-ux-polish
   evolve_cycle_id: EV-024
@@ -41605,9 +41800,9 @@ artifacts:
   task: T118.1
   recorded_at: '2026-08-05T00:02:08Z'
   note: T118.1 UJ e2e + Playwright suite confirmation (F64–F69)
-- *id018
-- *id019
 - *id020
+- *id021
+- *id022
 - path: docs/feature-list.md
   kind: standing-doc
   session_id: S027-multilingual-embeddings
@@ -42719,7 +42914,7 @@ artifacts:
 - docs/data-management-plan.md
 - docs/deployment-integration.md
 - docs/acceptance-criteria.md
-- *id021
+- *id023
 - docs/sessions/S000-internal-docs-archive/reference.md#roadmap
 - docs/sessions/S000-internal-docs-archive/reference.md#glossary
 - docs/sessions/S000-internal-docs-archive/reference.md#risk-register
@@ -44438,10 +44633,10 @@ artifacts:
   skill_id: 16-evolve
   recorded_at: '2026-08-04T13:51:00Z'
   parent_must_edit: true
-- *id022
+- *id024
 - docs/decisions.md
 - docs/sessions/S026-frontend-ux-polish/reports/02-verify-plan-audit.md
-- *id023
+- *id025
 - path: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
   session_id: S026-frontend-ux-polish
   evolve_cycle_id: EV-024
@@ -45413,7 +45608,7 @@ git_history:
     files_changed: 8
     timestamp: '2026-08-03T23:10:44Z'
     note: 01-requirements delta committed @ 4a98fe5; workflow-state.yaml from e29e4e1 session-open still uncommitted (bundled separately)
-    files: *id024
+    files: *id026
     rd_range: RD-264..RD-271
     feature_ids:
     - F62
@@ -48963,7 +49158,7 @@ git_history:
     feature_ids:
     - F68
     issue: 186
-    files: *id010
+    files: *id012
     note: 'T116.2 completed — feedback migration + 90d purge; continuing T116.3; PR #204 still open NOT merged'
   - sha: d3947bd
     full_sha: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
@@ -48982,7 +49177,7 @@ git_history:
     feature_ids:
     - F68
     issue: 186
-    files: *id011
+    files: *id013
     note: 'T116.3 completed — ChatRAG/write/DM feedback APIs; continuing T116.4; PR #204 still open NOT merged'
   - sha: 1c8f6ff
     full_sha: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
@@ -49001,7 +49196,7 @@ git_history:
     feature_ids:
     - F68
     issue: 186
-    files: *id012
+    files: *id014
     note: 'T116.4 completed — ChatRAG and Admin Feedback pages; continuing T116.5; branch ahead of origin by 4 not pushed; PR #204 still open NOT merged'
   - sha: 5b0405a
     full_sha: 5b0405aea17ae18725de9afb9bfd8f143adfa54c
@@ -49509,6 +49704,33 @@ git_history:
     - docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
     - workflow-state.yaml
     note: 'M119 PR #208 tip @c574f58; CI green confirmed (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394); S027-D33 merge-first; await explicit merge approval'
+  - sha: 11ef43a
+    full_sha: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
+    short: 11ef43a
+    branch: evolve/EV-025-multilingual-embeddings
+    message: '[S027-D34] chore: remote unit CI + coverage PR comment; compose local'
+    stage: 16-evolve/07-build
+    skill_id: 16-evolve
+    session_id: S027-multilingual-embeddings
+    evolve_cycle_id: EV-025
+    files_changed: 11
+    timestamp: '2026-08-05T15:20:42Z'
+    milestone: M120
+    decision: S027-D34
+    files:
+    - .cursor/rules/ci-after-push.mdc
+    - .cursor/rules/ci-local-parity.mdc
+    - .github/workflows/ci.yml
+    - docs/LOCAL_DEV.md
+    - docs/decisions/evolve-decisions.md
+    - docs/test-plan.md
+    - scripts/ci/comment_unit_coverage_pr.sh
+    - scripts/test/print_unit_coverage_summary.py
+    - tests/unit/ci/test_remote_ci_unit_split.py
+    - tests/unit/test_coverage_gate.py
+    - workflow-state.yaml
+    note: S027-D34 CI split chore landed @11ef43a; remote unit CI + coverage PR comment; compose suites local; watching CI on 11ef43a; start M120 T120.1
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1 | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394); askquestion_pending=true EXPLICIT merge approval; ci_policy_intent pending (not implemented); NOT merged; M120 not started; current_action=askquestion_explicit_merge_approval_pr208 | 2026-08-05T15:01:54Z S027/EV-025: PR #208 CI green @8e81ad3 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113); m119_verify=ci_green; m119_pr_status=open_ci_green; askquestion_pending=true (M119 PR #208 CI green @8e81ad3 — continue M120 T120.1 vs pause vs merge #208?); current_action=askquestion_m120_continue_vs_pause_merge; next=AskQuestion M120 T120.1 — continue build vs pause vs merge #208 first (merge still needs explicit approval) | 2026-08-05T14:56:48Z S027/EV-025: PR #208 CI coverage fix pushed @8e81ad3 ([T119.5] test: cover embed prefix env/default branches for 95% gate); also recorded ce06b2e; m119_verify=ci_coverage_fix_pushed; askquestion_pending=false; current_action=m119_08_await_ci_after_coverage_fix; next=Watch GitHub CI on #208 after coverage fix @8e81ad3; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval) | 2026-08-05T14:48:00Z S027/EV-025: PR #208 OPEN (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; recorded commit 16f4d06 ([M119] docs: S027-D32 open PR-67; CI/F62 gate for full pytest); m119_verify=pr_open_await_ci; askquestion_pending=false; current_action=m119_08_await_ci; next=Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval) | 2026-08-05T00:20:00Z S026/EV-024: PR #207 CI green @2b8e8cd (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032); pr_207_status=open_ci_green; current_action=present_gate_c_to_d; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207 CI green); phase_c/c_to_d pending (NOT passed); next=User AskQuestion Gate C→D; on pass → 08-verify-build closeout / 09-qa; merge #207 needs explicit approval | 2026-08-05T00:12:00Z S026/EV-024: recorded commit 2b8e8cd ([T118.3] docs: Phase 27 gate + issue closeout notes); PR #207 OPEN; CI watching; T118.3 committed @2b8e8cd; M118 completed; PR #207 OPEN; CI watching; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207); phase_c/c_to_d remain pending. Issue closeout comments posted on #104/#106/#93/#186/#170/#193; do not auto-close. #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. build_head=2b8e8cd; current_action=await_ci_207_gate_c_to_d; next=Await CI on #207; AskQuestion Gate C→D; then 08-verify / 09-qa; askquestion_pending=true; phase_c/c_to_d pending on evolve/EV-024-frontend-ux-polish. | PR #206 merged to main @ eb65837; evolve tip has Brewfile/secrets docs commit | 2026-08-05T02:00:00Z S026/EV-024 S026-D56: 12 COMPLETE APPROVED → 13 in_progress (validate_or_redeploy); main_tip=c942971; evolve_tip=d429d39; PR #207 merged; evolve CI watch waived_n_a; checkpoints.deploy=pending; CD Modal+DO green | 2026-08-05T02:15:00Z S026/EV-024 S026-D57: 13 validate_existing_smokes (option 1); no force redeploy; H1–H5 vs staging @c942971; prod.env still missing / F69 enrich deferred; 13 remains in_progress | 2026-08-05T00:51:00Z S026/EV-024 13 validate-existing smokes PASS pending accept; await_smoke_accept; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md; deploy gate pending | 2026-08-05T00:54:00Z S026/EV-024 S026-D58: Accept 13 PASS; deploy gate+Phase D closed; write_evolve_summary; cycle in_progress; summary=docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md
     | 2026-08-05T00:59:44Z S026/EV-024: recorded closeout commit d12c37a ([M118] docs: close EV-024 / S026 after deploy gate PASS); evolve tip @d12c37a; cycle remains completed; session closed'
   pull_requests:
