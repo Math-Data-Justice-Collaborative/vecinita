@@ -382,14 +382,23 @@ Sync with `do_apps.py sync-all-secrets` after pin changes (see §Modal embed / L
 
 1. Confirm Modal embed `/health` (or warm) serves the F70 pin at 384-d.
 2. Enqueue F41 `job_type=rebuild` with `mode=rechunk`, `dry_run=true`, stamps
-   `embedding_model_id` + `chunk_tokenizer_id` = pin.
-3. Run F36 against shadow; capture EN/ES relevancy + faithfulness vs E0 (and dense hit@k /
-   mean_rank when available) — UJ-076 / TC-235–236.
-4. Operator judgment promote (no hard numeric gate — S027-D11); retain E0 revision for rollback.
-5. Only then repeat the sequence on prod (M121).
+   `embedding_model_id` + `chunk_tokenizer_id` = pin (defaults match E1 after T120.2/T120.3).
+3. Confirm Alembic head includes `20260805_0013` (`chunk_tokenizer_id` on `rebuild_runs` /
+   `document_revisions`) before create/promote.
+4. Run F36 against shadow (`rebuild_run_id` on eval config). Capture EN/ES Hy1
+   answer relevancy + faithfulness vs E0, plus dense hit@k / mean_rank when the harness
+   provides them (UJ-076 / TC-235–236 / S027-D18).
+5. Open advisory report:
+   `GET /internal/v1/rebuild/{rebuild_run_id}/embed-promote-report`
+   — expect `candidate_embedding_model_id` = pin, `baseline_embedding_model_id` =
+   `BAAI/bge-small-en-v1.5` (E0), `by_language.en|es` with `answer_relevancy`,
+   `faithfulness`, nested `baseline_e0`, and `dense_available` + ranks when present.
+6. Operator judgment promote (no hard numeric gate — S027-D11); retain E0 revision for
+   rollback (TC-239 / S027-D22).
+7. Only then repeat the sequence on prod (M121 / TC-240 staging-then-prod).
 
-Local compose suites (`make test-py`) cover rebuild/promote API e2e; remote CI is unit-only
-(S027-D34).
+**Local verification:** `make test-py` (compose) covers rebuild stamps + promote + report
+shape (`tests/e2e/test_uj076_embed_promote_report.py`). Remote CI is unit-only (S027-D34).
 
 ## Related
 

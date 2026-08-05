@@ -604,7 +604,7 @@ project:
         session_closed: true
         session_closed_at: '2026-08-04'
         close_decision: S025-D16
-      substeps: &id006
+      substeps: &id007
         seed_loaded: true
         handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
         interviews:
@@ -1577,10 +1577,10 @@ project:
       - M121
       - M122
       active_milestone: M120
-      active_task: T120.3b
-      current_task: T120.3b
-      current_action: t120_3b_in_progress
-      next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+      active_task: T120.4
+      current_task: T120.4
+      current_action: t120_4_in_progress
+      next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1589,16 +1589,16 @@ project:
       phase_b: passed
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
-      note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3 completed; active_milestone=M120; current_action=t120_3b_in_progress; T120.3b in_progress; tip @c945aad; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D pending'
+      note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3b completed; active_milestone=M120; current_action=t120_4_in_progress; T120.4 in_progress; tip @e7fa2b6; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
       rd_range: RD-305..RD-308
       tp_lock: TP1–TP5
       report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
-      updated_at: '2026-08-05T16:27:47Z'
+      updated_at: '2026-08-05T16:32:05Z'
       skipped_06: true
       skipped_06_note: Standard skip — no new tooling; Gate B→C → 07 directly
-      substeps: &id007
-        current_task: T120.3b
+      substeps: &id008
+        current_task: T120.4
         current_milestone: M120
         m119_status: completed_merged
         t119_1_status: completed
@@ -1615,12 +1615,14 @@ project:
         - T120.1
         - T120.2
         - T120.3
+        - T120.3b
         next_milestone: M120
-        next_task: T120.3b
+        next_task: T120.4
         t120_1_status: completed
         t120_2_status: completed
         t120_3_status: completed
-        t120_3b_status: in_progress
+        t120_3b_status: completed
+        t120_4_status: in_progress
       t119_1_status: completed
       s026_baseline:
         status: completed
@@ -2321,12 +2323,12 @@ project:
       m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
       m119_verify: merged
       next_milestone: M120
-      next_task: T120.3b
+      next_task: T120.4
       t119_2_status: completed
       t119_3_status: completed
       t119_4_status: completed
       t119_5_status: completed
-      task_status: &id008
+      task_status: &id009
         T119.1: completed
         T119.2: completed
         T119.3: completed
@@ -2335,7 +2337,8 @@ project:
         T120.1: completed
         T120.2: completed
         T120.3: completed
-        T120.3b: in_progress
+        T120.3b: completed
+        T120.4: in_progress
       tasks_completed:
       - T119.1
       - T119.2
@@ -2345,7 +2348,8 @@ project:
       - T120.1
       - T120.2
       - T120.3
-      execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      - T120.3b
+      execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
       s027_d30_status: confirmed
       askquestion_cleared: 'EXPLICIT merge approval — PR #208 @c574f58 MERGEABLE + CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)? → APPROVED + MERGED (S027-D34); CI split policy approved as written'
       m119_committed_at: '2026-08-05T12:52:00Z'
@@ -2370,7 +2374,7 @@ project:
       pr_208_merge_approved: true
       m120_started: true
       green_sha: c574f58
-      build_head: c945aad
+      build_head: e7fa2b6
       ci_policy_decision: S027-D34
       ci_policy_approved: true
       ci_policy_approved_at: '2026-08-05T15:12:00Z'
@@ -2398,12 +2402,12 @@ project:
       main_preflight_status: success
       main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
       main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-      watching_ci_sha: c945aad
-      watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      watching_ci_sha: e7fa2b6
+      watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       watching_ci_branch: evolve/EV-025-multilingual-embeddings
-      watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
-      build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
-      parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
+      build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+      parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
       t120_1_completed_at: '2026-08-05T15:27:19Z'
       t120_1_note: T120.1 completed — red e2e @72fb57d + xfail @5346ec3 for remote unit CI until T120.2; tip @5346ec3
       t120_2_status: completed
@@ -2412,14 +2416,14 @@ project:
       m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
       m120_pr_number: 210
       m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-      m120_pr_tip: c945aad
-      m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+      m120_pr_tip: e7fa2b6
+      m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
       pr_210_status: open
       pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      pr_210_tip: c945aad
-      pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      pr_210_tip: e7fa2b6
+      pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       minor_pr_m120:
         number: 210
         status: open
@@ -2429,10 +2433,10 @@ project:
         branch: evolve/EV-025-multilingual-embeddings
         head: evolve/EV-025-multilingual-embeddings
         base: main
-        head_sha: c945aad
-        tip: c945aad
-        tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-        head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+        head_sha: e7fa2b6
+        tip: e7fa2b6
+        tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+        head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
         milestone: M120
         features:
         - F70
@@ -2443,13 +2447,17 @@ project:
         merge_policy: needs_user_approval
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
-        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
         opened_at: '2026-08-05'
-        updated_at: '2026-08-05T16:27:47Z'
-        recorded_at: '2026-08-05T16:27:47Z'
-        tip_updated_at: '2026-08-05T16:27:47Z'
+        updated_at: '2026-08-05T16:32:05Z'
+        recorded_at: '2026-08-05T16:32:05Z'
+        tip_updated_at: '2026-08-05T16:32:05Z'
         ci_status: pending
         await_explicit_merge_approval: true
+        branch_ahead_of_origin: 2
+        ahead_shas: &id002
+        - c945aad
+        - e7fa2b6
       t120_2_completed_at: '2026-08-05T15:32:35Z'
       t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
       t120_3_status: completed
@@ -2457,9 +2465,17 @@ project:
       t120_3_started_at: '2026-08-05T16:20:35Z'
       t120_3_confirmed_at: '2026-08-05T16:20:35Z'
       t120_3_completed_at: '2026-08-05T16:27:47Z'
-      t120_3b_status: in_progress
-      t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+      t120_3b_status: completed
+      t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       t120_3b_started_at: '2026-08-05T16:27:47Z'
+      t120_3b_completed_at: '2026-08-05T16:32:05Z'
+      t120_4_status: in_progress
+      t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+      t120_4_started_at: '2026-08-05T16:32:05Z'
+      tip: e7fa2b6
+      branch_ahead_of_origin: 2
+      commits_ahead_of_origin: 2
+      ahead_shas: *id002
     08-verify-build:
       status: completed_conditional
       started_at: '2026-08-05'
@@ -2481,10 +2497,10 @@ project:
       - M121
       - M122
       active_milestone: M120
-      active_task: T120.3b
-      current_task: T120.3b
-      current_action: t120_3b_in_progress
-      next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+      active_task: T120.4
+      current_task: T120.4
+      current_action: t120_4_in_progress
+      next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -2493,8 +2509,8 @@ project:
       phase_b: passed
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
-      build_head: c945aad
-      build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      build_head: e7fa2b6
+      build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       build_commits:
       - dc49d3a
       - bd34f2c
@@ -2506,14 +2522,14 @@ project:
       m119_status: completed_merged
       m119_verify: merged
       m119_tip: c574f58
-      note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3 completed; handoff T120.3b in_progress tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D / phase_c remain pending (NOT passed)'
+      note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3b completed; handoff T120.4 in_progress tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; ahead 2; Gate C→D / phase_c remain pending (NOT passed)'
       handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
       rd_range: RD-305..RD-308
       tp_lock: TP1–TP5
       report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
-      updated_at: '2026-08-05T16:27:47Z'
+      updated_at: '2026-08-05T16:32:05Z'
       next_milestone: M120
-      next_task: T120.3b
+      next_task: T120.4
       s026_baseline:
         status: completed
         started_at: '2026-08-05'
@@ -3149,7 +3165,7 @@ project:
       main_ci_status: success
       main_ci_merge_sha: 2c884bd
       main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-      parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
       ci_policy_implemented_at: '2026-08-05T15:20:42Z'
       ci_policy_implemented_sha: 11ef43a
       ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
@@ -3160,10 +3176,10 @@ project:
       main_preflight_status: success
       main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
       main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-      watching_ci_sha: c945aad
-      watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      watching_ci_sha: e7fa2b6
+      watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       watching_ci_branch: evolve/EV-025-multilingual-embeddings
-      watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
+      watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
       t120_1_status: completed
       t120_1_completed_at: '2026-08-05T15:27:19Z'
       t120_1_note: T120.1 completed — red e2e @72fb57d + xfail @5346ec3 for remote unit CI until T120.2; tip @5346ec3
@@ -3172,25 +3188,27 @@ project:
         T120.1: completed
         T120.2: completed
         T120.3: completed
-        T120.3b: in_progress
+        T120.3b: completed
+        T120.4: in_progress
       tasks_completed:
       - T120.1
       - T120.2
       - T120.3
+      - T120.3b
       m120_pr_status: open
       m120_pr_plan_id: PR-68
       m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
-      execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
       m120_pr_number: 210
       m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-      m120_pr_tip: c945aad
-      m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+      m120_pr_tip: e7fa2b6
+      m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
       pr_210_status: open
       pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      pr_210_tip: c945aad
-      pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      pr_210_tip: e7fa2b6
+      pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       minor_pr_m120:
         number: 210
         status: open
@@ -3200,10 +3218,10 @@ project:
         branch: evolve/EV-025-multilingual-embeddings
         head: evolve/EV-025-multilingual-embeddings
         base: main
-        head_sha: c945aad
-        tip: c945aad
-        tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-        head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+        head_sha: e7fa2b6
+        tip: e7fa2b6
+        tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+        head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
         milestone: M120
         features:
         - F70
@@ -3214,13 +3232,15 @@ project:
         merge_policy: needs_user_approval
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
-        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
         opened_at: '2026-08-05'
-        updated_at: '2026-08-05T16:27:47Z'
-        recorded_at: '2026-08-05T16:27:47Z'
-        tip_updated_at: '2026-08-05T16:27:47Z'
+        updated_at: '2026-08-05T16:32:05Z'
+        recorded_at: '2026-08-05T16:32:05Z'
+        tip_updated_at: '2026-08-05T16:32:05Z'
         ci_status: pending
         await_explicit_merge_approval: true
+        branch_ahead_of_origin: 2
+        ahead_shas: *id002
       t120_2_completed_at: '2026-08-05T15:32:35Z'
       t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
       t120_3_status: completed
@@ -3228,9 +3248,17 @@ project:
       t120_3_started_at: '2026-08-05T16:20:35Z'
       t120_3_confirmed_at: '2026-08-05T16:20:35Z'
       t120_3_completed_at: '2026-08-05T16:27:47Z'
-      t120_3b_status: in_progress
-      t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+      t120_3b_status: completed
+      t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       t120_3b_started_at: '2026-08-05T16:27:47Z'
+      t120_3b_completed_at: '2026-08-05T16:32:05Z'
+      t120_4_status: in_progress
+      t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+      t120_4_started_at: '2026-08-05T16:32:05Z'
+      tip: e7fa2b6
+      branch_ahead_of_origin: 2
+      commits_ahead_of_origin: 2
+      ahead_shas: *id002
     09-qa:
       status: completed
       started: '2026-08-05'
@@ -6191,23 +6219,23 @@ active_session:
     status: in_progress
     mode: orchestrator
     skip_rationale:
-    current_action: t120_3b_in_progress
-    note: 'EV-025 Phase C — T120.3 completed @c945aad; current_action=t120_3b_in_progress; active_milestone=M120; T120.3b in_progress; PR #210 (PR-68) open; tip @c945aad; Gate C→D / phase_c remain pending'
+    current_action: t120_4_in_progress
+    note: 'EV-025 Phase C — T120.3b completed @e7fa2b6; current_action=t120_4_in_progress; active_milestone=M120; T120.4 in_progress; PR #210 (PR-68) open; tip @e7fa2b6; ahead 2; Gate C→D / phase_c remain pending'
     phase0_approved: true
-    next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+    next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
-    updated_at: '2026-08-05T16:27:47Z'
+    updated_at: '2026-08-05T16:32:05Z'
     current_stage: 07-build
     active_milestone: M120
-    active_task: T120.3b
-    current_task: T120.3b
+    active_task: T120.4
+    current_task: T120.4
     m119_status: completed_merged
     m119_completed_at: '2026-08-05T12:52:00Z'
     m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
     m119_verify: merged
     next_milestone: M120
-    next_task: T120.3b
+    next_task: T120.4
     t119_1_status: completed
     t119_2_status: completed
     t119_3_status: completed
@@ -6222,7 +6250,8 @@ active_session:
       T120.1: completed
       T120.2: completed
       T120.3: completed
-      T120.3b: in_progress
+      T120.3b: completed
+      T120.4: in_progress
     tasks_completed:
     - T119.1
     - T119.2
@@ -6232,7 +6261,8 @@ active_session:
     - T120.1
     - T120.2
     - T120.3
-    execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    - T120.3b
+    execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
     s027_d30_decision: S027-D30
     s027_d30_status: confirmed
     askquestion_cleared: 'EXPLICIT merge approval — PR #208 @c574f58 MERGEABLE + CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)? → APPROVED + MERGED (S027-D34); CI split policy approved as written'
@@ -6347,13 +6377,13 @@ active_session:
     main_preflight_status: success
     main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
     main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-    watching_ci_sha: c945aad
-    watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    watching_ci_sha: e7fa2b6
+    watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     watching_ci_branch: evolve/EV-025-multilingual-embeddings
-    watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
-    build_head: c945aad
-    build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
-    parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
+    build_head: e7fa2b6
+    build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
     t120_1_completed_at: '2026-08-05T15:27:19Z'
     t120_1_note: T120.1 completed — red e2e @72fb57d + xfail @5346ec3 for remote unit CI until T120.2; tip @5346ec3
     t120_2_status: completed
@@ -6362,14 +6392,14 @@ active_session:
     m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     m120_pr_number: 210
     m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-    m120_pr_tip: c945aad
-    m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+    m120_pr_tip: e7fa2b6
+    m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     pr_210_status: open
     pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    pr_210_tip: c945aad
-    pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    pr_210_tip: e7fa2b6
+    pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     minor_pr_m120:
       number: 210
       status: open
@@ -6379,10 +6409,10 @@ active_session:
       branch: evolve/EV-025-multilingual-embeddings
       head: evolve/EV-025-multilingual-embeddings
       base: main
-      head_sha: c945aad
-      tip: c945aad
-      tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-      head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      head_sha: e7fa2b6
+      tip: e7fa2b6
+      tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+      head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       milestone: M120
       features:
       - F70
@@ -6393,21 +6423,31 @@ active_session:
       merge_policy: needs_user_approval
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
-      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       opened_at: '2026-08-05'
-      updated_at: '2026-08-05T16:27:47Z'
-      recorded_at: '2026-08-05T16:27:47Z'
-      tip_updated_at: '2026-08-05T16:27:47Z'
+      updated_at: '2026-08-05T16:32:05Z'
+      recorded_at: '2026-08-05T16:32:05Z'
+      tip_updated_at: '2026-08-05T16:32:05Z'
       ci_status: pending
       await_explicit_merge_approval: true
+      branch_ahead_of_origin: 2
+      ahead_shas: *id002
     t120_2_completed_at: '2026-08-05T15:32:35Z'
     t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
     t120_3_status: completed
     t120_3_note: T120.3 completed — wired chunk_tokenizer_id through schemas, Alembic 20260805_0013, internal-write create/promote, DM rebuild pipeline under F70 pin @c945aad
     t120_3_completed_at: '2026-08-05T16:27:47Z'
-    t120_3b_status: in_progress
-    t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+    t120_3b_status: completed
+    t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     t120_3b_started_at: '2026-08-05T16:27:47Z'
+    t120_3b_completed_at: '2026-08-05T16:32:05Z'
+    t120_4_status: in_progress
+    t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+    t120_4_started_at: '2026-08-05T16:32:05Z'
+    tip: e7fa2b6
+    branch_ahead_of_origin: 2
+    commits_ahead_of_origin: 2
+    ahead_shas: *id002
   - stage: 01-requirements
     required: true
     status: completed
@@ -6572,19 +6612,19 @@ active_session:
     skip_rationale:
     started_at: '2026-08-05'
     started_at_iso: '2026-08-05T16:40:00Z'
-    current_action: t120_3b_in_progress
-    next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+    current_action: t120_4_in_progress
+    next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
     gate_b_to_c: passed
     phase_b: passed
     s027_d30_decision: S027-D30
-    note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3 completed; active_milestone=M120; current_action=t120_3b_in_progress; T120.3b in_progress; tip @c945aad; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D pending'
-    updated_at: '2026-08-05T16:27:47Z'
+    note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3b completed; active_milestone=M120; current_action=t120_4_in_progress; T120.4 in_progress; tip @e7fa2b6; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+    updated_at: '2026-08-05T16:32:05Z'
     active_milestone: M120
-    active_task: T120.3b
-    current_task: T120.3b
+    active_task: T120.4
+    current_task: T120.4
     t119_1_status: completed
     skipped_06: true
     m119_status: completed_merged
@@ -6592,7 +6632,7 @@ active_session:
     m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
     m119_verify: merged
     next_milestone: M120
-    next_task: T120.3b
+    next_task: T120.4
     t119_2_status: completed
     t119_3_status: completed
     t119_4_status: completed
@@ -6606,7 +6646,8 @@ active_session:
       T120.1: completed
       T120.2: completed
       T120.3: completed
-      T120.3b: in_progress
+      T120.3b: completed
+      T120.4: in_progress
     tasks_completed:
     - T119.1
     - T119.2
@@ -6616,7 +6657,8 @@ active_session:
     - T120.1
     - T120.2
     - T120.3
-    execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    - T120.3b
+    execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
     s027_d30_status: confirmed
     askquestion_cleared: 'EXPLICIT merge approval — PR #208 @c574f58 MERGEABLE + CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)? → APPROVED + MERGED (S027-D34); CI split policy approved as written'
     m119_committed_at: '2026-08-05T12:52:00Z'
@@ -6664,13 +6706,13 @@ active_session:
     main_preflight_status: success
     main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
     main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-    watching_ci_sha: c945aad
-    watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    watching_ci_sha: e7fa2b6
+    watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     watching_ci_branch: evolve/EV-025-multilingual-embeddings
-    watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
-    build_head: c945aad
-    build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
-    parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
+    build_head: e7fa2b6
+    build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
     substeps:
       current_task: T120.1
       current_milestone: M120
@@ -6698,14 +6740,14 @@ active_session:
     m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     m120_pr_number: 210
     m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-    m120_pr_tip: c945aad
-    m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+    m120_pr_tip: e7fa2b6
+    m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     pr_210_status: open
     pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    pr_210_tip: c945aad
-    pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    pr_210_tip: e7fa2b6
+    pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     minor_pr_m120:
       number: 210
       status: open
@@ -6715,10 +6757,10 @@ active_session:
       branch: evolve/EV-025-multilingual-embeddings
       head: evolve/EV-025-multilingual-embeddings
       base: main
-      head_sha: c945aad
-      tip: c945aad
-      tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-      head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      head_sha: e7fa2b6
+      tip: e7fa2b6
+      tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+      head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       milestone: M120
       features:
       - F70
@@ -6729,40 +6771,50 @@ active_session:
       merge_policy: needs_user_approval
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
-      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       opened_at: '2026-08-05'
-      updated_at: '2026-08-05T16:27:47Z'
-      recorded_at: '2026-08-05T16:27:47Z'
-      tip_updated_at: '2026-08-05T16:27:47Z'
+      updated_at: '2026-08-05T16:32:05Z'
+      recorded_at: '2026-08-05T16:32:05Z'
+      tip_updated_at: '2026-08-05T16:32:05Z'
       ci_status: pending
       await_explicit_merge_approval: true
+      branch_ahead_of_origin: 2
+      ahead_shas: *id002
     t120_2_completed_at: '2026-08-05T15:32:35Z'
     t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
     t120_3_status: completed
     t120_3_completed_at: '2026-08-05T16:27:47Z'
     t120_3_note: T120.3 completed — wired chunk_tokenizer_id through schemas, Alembic 20260805_0013, internal-write create/promote, DM rebuild pipeline under F70 pin @c945aad
-    t120_3b_status: in_progress
-    t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+    t120_3b_status: completed
+    t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     t120_3b_started_at: '2026-08-05T16:27:47Z'
+    t120_3b_completed_at: '2026-08-05T16:32:05Z'
+    t120_4_status: in_progress
+    t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+    t120_4_started_at: '2026-08-05T16:32:05Z'
+    tip: e7fa2b6
+    branch_ahead_of_origin: 2
+    commits_ahead_of_origin: 2
+    ahead_shas: *id002
   - stage: 08-verify-build
     required: true
     status: completed_conditional
     mode: delta
     skip_rationale:
-    next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+    next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
     handoff_active_milestone: M119
     handoff_note: 'PR #210 open_await_ci; watching CI @5346ec3; continuing T120.2'
     started_at: '2026-08-05'
     started_at_iso: '2026-08-05T12:52:00Z'
-    current_action: t120_3b_in_progress
+    current_action: t120_4_in_progress
     askquestion_pending: false
     askquestion_pending_topic:
     active_milestone: M120
     m119_status: completed_merged
     m119_verify: merged
-    build_head: c945aad
-    note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3 completed; handoff T120.3b in_progress tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D / phase_c remain pending (NOT passed)'
-    updated_at: '2026-08-05T16:27:47Z'
+    build_head: e7fa2b6
+    note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3b completed; handoff T120.4 in_progress tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; ahead 2; Gate C→D / phase_c remain pending (NOT passed)'
+    updated_at: '2026-08-05T16:32:05Z'
     overall: conditional_pass
     report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
     report_status: completed_conditional
@@ -6779,7 +6831,7 @@ active_session:
     phase_c: pending
     m119_tip: c574f58
     m119_tip_full: c574f580aba837b6c5c5d4809769cc2af3ca3f7c
-    build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
     s027_d32_option: 1
     s027_d32_confirmed_at: '2026-08-05T14:45:00Z'
@@ -6886,7 +6938,7 @@ active_session:
     prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113
     m120_started: true
     next_milestone: M120
-    next_task: T120.3b
+    next_task: T120.4
     ci_policy_decision: S027-D34
     ci_policy_approved: true
     ci_policy_approved_at: '2026-08-05T15:12:00Z'
@@ -6907,8 +6959,8 @@ active_session:
     pr_208_merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     pr_208_merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     pr_208_merge_sha_short: 2c884bd
-    active_task: T120.3b
-    current_task: T120.3b
+    active_task: T120.4
+    current_task: T120.4
     m120_start_after: main_ci_green_then_ci_split_chore
     merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
     merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
@@ -6916,7 +6968,7 @@ active_session:
     main_ci_status: success
     main_ci_merge_sha: 2c884bd
     main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-    parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
     ci_policy_implemented_at: '2026-08-05T15:20:42Z'
     ci_policy_implemented_sha: 11ef43a
     ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
@@ -6927,23 +6979,23 @@ active_session:
     main_preflight_status: success
     main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
     main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-    watching_ci_sha: c945aad
-    watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    watching_ci_sha: e7fa2b6
+    watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     watching_ci_branch: evolve/EV-025-multilingual-embeddings
-    watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
+    watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
     m120_pr_status: open
     m120_pr_plan_id: PR-68
     m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     m120_pr_number: 210
     m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-    m120_pr_tip: c945aad
-    m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+    m120_pr_tip: e7fa2b6
+    m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     pr_210_status: open
     pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    pr_210_tip: c945aad
-    pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    pr_210_tip: e7fa2b6
+    pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     minor_pr_m120:
       number: 210
       status: open
@@ -6953,10 +7005,10 @@ active_session:
       branch: evolve/EV-025-multilingual-embeddings
       head: evolve/EV-025-multilingual-embeddings
       base: main
-      head_sha: c945aad
-      tip: c945aad
-      tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-      head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      head_sha: e7fa2b6
+      tip: e7fa2b6
+      tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+      head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       milestone: M120
       features:
       - F70
@@ -6967,13 +7019,15 @@ active_session:
       merge_policy: needs_user_approval
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
-      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       opened_at: '2026-08-05'
-      updated_at: '2026-08-05T16:27:47Z'
-      recorded_at: '2026-08-05T16:27:47Z'
-      tip_updated_at: '2026-08-05T16:27:47Z'
+      updated_at: '2026-08-05T16:32:05Z'
+      recorded_at: '2026-08-05T16:32:05Z'
+      tip_updated_at: '2026-08-05T16:32:05Z'
       ci_status: pending
       await_explicit_merge_approval: true
+      branch_ahead_of_origin: 2
+      ahead_shas: *id002
     t120_1_status: completed
     t120_2_status: completed
     t120_2_completed_at: '2026-08-05T15:32:35Z'
@@ -6983,17 +7037,27 @@ active_session:
       T120.1: completed
       T120.2: completed
       T120.3: completed
-      T120.3b: in_progress
+      T120.3b: completed
+      T120.4: in_progress
     tasks_completed:
     - T120.1
     - T120.2
     - T120.3
-    execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    - T120.3b
+    execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
     t120_3_completed_at: '2026-08-05T16:27:47Z'
     t120_3_note: T120.3 completed — wired chunk_tokenizer_id through schemas, Alembic 20260805_0013, internal-write create/promote, DM rebuild pipeline under F70 pin @c945aad
-    t120_3b_status: in_progress
-    t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+    t120_3b_status: completed
+    t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     t120_3b_started_at: '2026-08-05T16:27:47Z'
+    t120_3b_completed_at: '2026-08-05T16:32:05Z'
+    t120_4_status: in_progress
+    t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+    t120_4_started_at: '2026-08-05T16:32:05Z'
+    tip: e7fa2b6
+    branch_ahead_of_origin: 2
+    commits_ahead_of_origin: 2
+    ahead_shas: *id002
   - stage: 09-qa
     required: true
     status: pending
@@ -7020,12 +7084,12 @@ active_session:
     mode: delta
     skip_rationale:
   current_stage: 07-build
-  note: 'EV-025 Phase C — T120.3 completed @c945aad; current_action=t120_3b_in_progress; active_milestone=M120; T120.3b in_progress; PR #210 (PR-68) open; tip @c945aad; Gate C→D / phase_c remain pending'
+  note: 'EV-025 Phase C — T120.3b completed @e7fa2b6; current_action=t120_4_in_progress; active_milestone=M120; T120.4 in_progress; PR #210 (PR-68) open; tip @e7fa2b6; ahead 2; Gate C→D / phase_c remain pending'
   started_at: '2026-08-05'
   context_briefs: []
-  current_action: t120_3b_in_progress
-  next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
-  updated_at: '2026-08-05T16:27:47Z'
+  current_action: t120_4_in_progress
+  next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
+  updated_at: '2026-08-05T16:32:05Z'
   report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
   askquestion_pending: false
   askquestion_pending_topic:
@@ -7094,14 +7158,14 @@ active_session:
   s027_d29_choice: option_1_approve_all
   s027_d30_decision: S027-D30
   active_milestone: M120
-  active_task: T120.3b
-  current_task: T120.3b
+  active_task: T120.4
+  current_task: T120.4
   m119_status: completed_merged
   m119_completed_at: '2026-08-05T15:11:52Z'
   m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
   m119_verify: merged
   next_milestone: M120
-  next_task: T120.3b
+  next_task: T120.4
   t119_1_status: completed
   t119_2_status: completed
   t119_3_status: completed
@@ -7116,7 +7180,8 @@ active_session:
     T120.1: completed
     T120.2: completed
     T120.3: completed
-    T120.3b: in_progress
+    T120.3b: completed
+    T120.4: in_progress
   tasks_completed:
   - T119.1
   - T119.2
@@ -7126,13 +7191,14 @@ active_session:
   - T120.1
   - T120.2
   - T120.3
-  execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+  - T120.3b
+  execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
   s027_d30_status: confirmed
   askquestion_cleared: 'EXPLICIT merge approval — PR #208 @c574f58 MERGEABLE + CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)? → APPROVED + MERGED (S027-D34); CI split policy approved as written'
   s027_d31_decision: S027-D31
   s027_d31_status: confirmed
-  build_head: c945aad
-  build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  build_head: e7fa2b6
+  build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   s027_d32_decision: S027-D32
   s027_d32_status: confirmed
   m119_tip: c574f58
@@ -7270,7 +7336,7 @@ active_session:
   main_ci_status: success
   main_ci_merge_sha: 2c884bd
   main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-  parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+  parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
   ci_policy_implemented_at: '2026-08-05T15:20:42Z'
   ci_policy_implemented_sha: 11ef43a
   ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
@@ -7281,10 +7347,10 @@ active_session:
   main_preflight_status: success
   main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
   main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-  watching_ci_sha: c945aad
-  watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  watching_ci_sha: e7fa2b6
+  watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   watching_ci_branch: evolve/EV-025-multilingual-embeddings
-  watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
+  watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
   t120_1_status: completed
   t120_1_completed_at: '2026-08-05T15:27:19Z'
   t120_1_note: T120.1 completed — red e2e @72fb57d + xfail @5346ec3 for remote unit CI until T120.2; tip @5346ec3
@@ -7294,14 +7360,14 @@ active_session:
   m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
   m120_pr_number: 210
   m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-  m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-  m120_pr_tip: c945aad
-  m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+  m120_pr_tip: e7fa2b6
+  m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
   pr_210_status: open
   pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-  pr_210_tip: c945aad
-  pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  pr_210_tip: e7fa2b6
+  pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   minor_pr_m120:
     number: 210
     status: open
@@ -7311,10 +7377,10 @@ active_session:
     branch: evolve/EV-025-multilingual-embeddings
     head: evolve/EV-025-multilingual-embeddings
     base: main
-    head_sha: c945aad
-    tip: c945aad
-    tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-    head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    head_sha: e7fa2b6
+    tip: e7fa2b6
+    tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     milestone: M120
     features:
     - F70
@@ -7325,13 +7391,15 @@ active_session:
     merge_policy: needs_user_approval
     session_id: S027-multilingual-embeddings
     evolve_cycle_id: EV-025
-    note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+    note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     opened_at: '2026-08-05'
-    updated_at: '2026-08-05T16:27:47Z'
-    recorded_at: '2026-08-05T16:27:47Z'
-    tip_updated_at: '2026-08-05T16:27:47Z'
+    updated_at: '2026-08-05T16:32:05Z'
+    recorded_at: '2026-08-05T16:32:05Z'
+    tip_updated_at: '2026-08-05T16:32:05Z'
     ci_status: pending
     await_explicit_merge_approval: true
+    branch_ahead_of_origin: 2
+    ahead_shas: *id002
   t120_2_completed_at: '2026-08-05T15:32:35Z'
   t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
   t120_3_status: completed
@@ -7339,9 +7407,17 @@ active_session:
   t120_3_started_at: '2026-08-05T16:20:35Z'
   t120_3_confirmed_at: '2026-08-05T16:20:35Z'
   t120_3_completed_at: '2026-08-05T16:27:47Z'
-  t120_3b_status: in_progress
-  t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+  t120_3b_status: completed
+  t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
   t120_3b_started_at: '2026-08-05T16:27:47Z'
+  t120_3b_completed_at: '2026-08-05T16:32:05Z'
+  t120_4_status: in_progress
+  t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+  t120_4_started_at: '2026-08-05T16:32:05Z'
+  tip: e7fa2b6
+  branch_ahead_of_origin: 2
+  commits_ahead_of_origin: 2
+  ahead_shas: *id002
 sessions:
 - id: S026-frontend-ux-polish
   type: feature
@@ -8078,7 +8154,7 @@ sessions:
     - 7f086c3
     t116_2_commit_pending: false
     t116_2_commit: 9bba998
-    t116_2_artifacts: &id002
+    t116_2_artifacts: &id003
     - apps/database/alembic/versions/20260804_0012_ev024_feedback.py
     - apps/internal-write-api/vecinita_internal_write_api/feedback.py
     - apps/internal-write-api/vecinita_internal_write_api/app.py
@@ -8086,7 +8162,7 @@ sessions:
     t116_3_status: completed
     t116_3_note: T116.3 completed @d3947bd — wire ChatRAG, write, and DM feedback APIs
     t116_2_commit_full: 9bba998fcd7e3d26a32bd1856ee5572b60ab33ec
-    t116_2_files: &id003
+    t116_2_files: &id004
     - apps/database/alembic/versions/20260804_0012_ev024_feedback.py
     - apps/internal-write-api/vecinita_internal_write_api/app.py
     - apps/internal-write-api/vecinita_internal_write_api/feedback.py
@@ -8100,7 +8176,7 @@ sessions:
     t116_3_commit_full: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
     t116_4_status: completed
     t116_4_note: T116.4 completed @1c8f6ff — ChatRAG and Admin Feedback pages for F68
-    t116_3_files: &id004
+    t116_3_files: &id005
     - apps/chat-rag-backend/vecinita_chat_rag_backend/app.py
     - apps/data-management-backend/vecinita_data_management_backend/app.py
     - apps/data-management-backend/vecinita_data_management_backend/write_client.py
@@ -8120,7 +8196,7 @@ sessions:
     t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
     t116_5_status: completed
     t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
-    t116_4_files: &id005
+    t116_4_files: &id006
     - apps/chat-rag-frontend/src/App.css
     - apps/chat-rag-frontend/src/App.tsx
     - apps/chat-rag-frontend/src/api/feedback.ts
@@ -9335,21 +9411,21 @@ sessions:
   t116_2_note: T116.2 completed @9bba998 — feedback table migration + 90d purge (cleanup_feedback) + data-management-plan
   t116_2_commit_pending: false
   t116_2_commit: 9bba998
-  t116_2_artifacts: *id002
+  t116_2_artifacts: *id003
   t116_3_status: completed
   t116_3_note: T116.3 completed @d3947bd — wire ChatRAG, write, and DM feedback APIs
   t116_2_commit_full: 9bba998fcd7e3d26a32bd1856ee5572b60ab33ec
-  t116_2_files: *id003
+  t116_2_files: *id004
   t116_3_commit: d3947bd
   t116_3_commit_full: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
   t116_4_status: completed
   t116_4_note: T116.4 completed @1c8f6ff — ChatRAG and Admin Feedback pages for F68
-  t116_3_files: *id004
+  t116_3_files: *id005
   t116_4_commit: 1c8f6ff
   t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
   t116_5_status: completed
   t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
-  t116_4_files: *id005
+  t116_4_files: *id006
   branch_ahead_of_origin: 0
   resume_note: 'S026/EV-024 CLOSED 2026-08-05 — S026-D58 13 PASS accepted + closeout docs written. PR #207 MERGED @c942971; checkpoints.deploy=passed; gates.deploy=passed; phase_a–d=passed; evolve-summary=docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md; evolve-report=docs/sessions/S026-frontend-ux-polish/reports/evolve-report.md; standing=docs/evolve-report-EV-024.md; evolve-history + CHANGELOG updated; session archived; active_session=null.'
   s026_d51_decision: S026-D51
@@ -10031,7 +10107,7 @@ sessions:
       opened_at: '2026-08-04'
       recorded_at: '2026-08-04T00:10:00Z'
       note: Post-close durable state closeout MERGED; on main
-      files: &id009
+      files: &id010
       - workflow-state.yaml
       - docs/sessions/S025-ci-release-automation/reports/evolve-summary.md
       - docs/evolve-history.md
@@ -15780,7 +15856,7 @@ stages:
         user_confirmed: true
         user_confirmed_at: '2026-08-03'
       s025_d9_decision: S025-D9
-    substeps: *id006
+    substeps: *id007
     phase_0c:
       status: completed
       seed_loaded: true
@@ -17201,10 +17277,10 @@ stages:
     - M121
     - M122
     active_milestone: M120
-    active_task: T120.3b
-    current_task: T120.3b
-    current_action: t120_3b_in_progress
-    next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+    active_task: T120.4
+    current_task: T120.4
+    current_action: t120_4_in_progress
+    next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -17213,15 +17289,15 @@ stages:
     phase_b: passed
     s027_d29_decision: S027-D29
     s027_d30_decision: S027-D30
-    note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3 completed; active_milestone=M120; current_action=t120_3b_in_progress; T120.3b in_progress; tip @c945aad; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D pending'
+    note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3b completed; active_milestone=M120; current_action=t120_4_in_progress; T120.4 in_progress; tip @e7fa2b6; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
     rd_range: RD-305..RD-308
     tp_lock: TP1–TP5
     report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
-    updated_at: '2026-08-05T16:27:47Z'
+    updated_at: '2026-08-05T16:32:05Z'
     skipped_06: true
     skipped_06_note: Standard skip — no new tooling; Gate B→C → 07 directly
-    substeps: *id007
+    substeps: *id008
     t119_1_status: completed
     s026_baseline:
       status: completed
@@ -18023,12 +18099,12 @@ stages:
     m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
     m119_verify: conditional_pass_await_pr_decision
     next_milestone: M120
-    next_task: T120.3b
+    next_task: T120.4
     t119_2_status: completed
     t119_3_status: completed
     t119_4_status: completed
     t119_5_status: completed
-    task_status: *id008
+    task_status: *id009
     tasks_completed:
     - T119.1
     - T119.2
@@ -18038,7 +18114,8 @@ stages:
     - T120.1
     - T120.2
     - T120.3
-    execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    - T120.3b
+    execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
     s027_d30_status: confirmed
     askquestion_cleared: M119 complete — commit + 08-verify-build / continue M120 / pause? → user option 1 (commit + 08-verify-build then minor PR)
     m119_committed_at: '2026-08-05T12:52:00Z'
@@ -18053,15 +18130,15 @@ stages:
     ci_policy_note: 'S027-D34 APPLIED @11ef43a: remote CI = unit + coverage PR comment + strict lint/format; local CI = compose/integration/long-running (make test-py / make ci-push). Watching CI on 11ef43a.'
     s027_d34_status: applied
     s027_d34_applied_sha: 11ef43a
-    watching_ci_sha: c945aad
-    watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
+    watching_ci_sha: e7fa2b6
+    watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
     main_ci_status: success
     main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
     main_preflight_status: success
     main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-    build_head: c945aad
-    build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
-    parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    build_head: e7fa2b6
+    build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
     t120_1_completed_at: '2026-08-05T15:27:19Z'
     t120_1_note: T120.1 completed — red e2e @72fb57d + xfail @5346ec3 for remote unit CI until T120.2; tip @5346ec3
     t120_2_status: completed
@@ -18073,14 +18150,14 @@ stages:
     m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     m120_pr_number: 210
     m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-    m120_pr_tip: c945aad
-    m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+    m120_pr_tip: e7fa2b6
+    m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     pr_210_status: open
     pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    pr_210_tip: c945aad
-    pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    pr_210_tip: e7fa2b6
+    pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     minor_pr_m120:
       number: 210
       status: open
@@ -18090,10 +18167,10 @@ stages:
       branch: evolve/EV-025-multilingual-embeddings
       head: evolve/EV-025-multilingual-embeddings
       base: main
-      head_sha: c945aad
-      tip: c945aad
-      tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-      head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      head_sha: e7fa2b6
+      tip: e7fa2b6
+      tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+      head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       milestone: M120
       features:
       - F70
@@ -18104,14 +18181,16 @@ stages:
       merge_policy: needs_user_approval
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
-      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       opened_at: '2026-08-05'
-      updated_at: '2026-08-05T16:27:47Z'
-      recorded_at: '2026-08-05T16:27:47Z'
-      tip_updated_at: '2026-08-05T16:27:47Z'
+      updated_at: '2026-08-05T16:32:05Z'
+      recorded_at: '2026-08-05T16:32:05Z'
+      tip_updated_at: '2026-08-05T16:32:05Z'
       ci_status: pending
       await_explicit_merge_approval: true
-    watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      branch_ahead_of_origin: 2
+      ahead_shas: *id002
+    watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     watching_ci_branch: evolve/EV-025-multilingual-embeddings
     t120_2_completed_at: '2026-08-05T15:32:35Z'
     t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
@@ -18120,9 +18199,17 @@ stages:
     t120_3_started_at: '2026-08-05T16:20:35Z'
     t120_3_confirmed_at: '2026-08-05T16:20:35Z'
     t120_3_completed_at: '2026-08-05T16:27:47Z'
-    t120_3b_status: in_progress
-    t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+    t120_3b_status: completed
+    t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     t120_3b_started_at: '2026-08-05T16:27:47Z'
+    t120_3b_completed_at: '2026-08-05T16:32:05Z'
+    t120_4_status: in_progress
+    t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+    t120_4_started_at: '2026-08-05T16:32:05Z'
+    tip: e7fa2b6
+    branch_ahead_of_origin: 2
+    commits_ahead_of_origin: 2
+    ahead_shas: *id002
   08-verify-build:
     status: completed_conditional
     started_at: '2026-08-05'
@@ -18144,10 +18231,10 @@ stages:
     - M121
     - M122
     active_milestone: M120
-    active_task: T120.3b
-    current_task: T120.3b
-    current_action: t120_3b_in_progress
-    next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+    active_task: T120.4
+    current_task: T120.4
+    current_action: t120_4_in_progress
+    next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -18156,8 +18243,8 @@ stages:
     phase_b: passed
     s027_d29_decision: S027-D29
     s027_d30_decision: S027-D30
-    build_head: c945aad
-    build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    build_head: e7fa2b6
+    build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     build_commits:
     - dc49d3a
     - bd34f2c
@@ -18169,14 +18256,14 @@ stages:
     m119_status: completed_merged
     m119_verify: merged
     m119_tip: c574f58
-    note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3 completed; handoff T120.3b in_progress tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D / phase_c remain pending (NOT passed)'
+    note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3b completed; handoff T120.4 in_progress tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; ahead 2; Gate C→D / phase_c remain pending (NOT passed)'
     handoff_seed: docs/sessions/S027-multilingual-embeddings/checkpoints/01-requirements-seed.md
     rd_range: RD-305..RD-308
     tp_lock: TP1–TP5
     report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
-    updated_at: '2026-08-05T16:27:47Z'
+    updated_at: '2026-08-05T16:32:05Z'
     next_milestone: M120
-    next_task: T120.3b
+    next_task: T120.4
     s026_baseline:
       status: completed
       started_at: '2026-08-05'
@@ -19090,12 +19177,12 @@ stages:
     main_ci_status: success
     main_ci_merge_sha: 2c884bd
     main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-    parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
     ci_policy_implemented_at: '2026-08-05T15:20:42Z'
     ci_policy_implemented_sha: 11ef43a
     s027_d34_applied_sha: 11ef43a
-    watching_ci_sha: c945aad
-    watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
+    watching_ci_sha: e7fa2b6
+    watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
     main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019062072
     main_preflight_status: success
     main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
@@ -19107,25 +19194,27 @@ stages:
       T120.1: completed
       T120.2: completed
       T120.3: completed
-      T120.3b: in_progress
+      T120.3b: completed
+      T120.4: in_progress
     tasks_completed:
     - T120.1
     - T120.2
     - T120.3
+    - T120.3b
     m120_pr_status: open
     m120_pr_plan_id: PR-68
     m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
-    execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+    execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
     m120_pr_number: 210
     m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-    m120_pr_tip: c945aad
-    m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+    m120_pr_tip: e7fa2b6
+    m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
     pr_210_status: open
     pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-    pr_210_tip: c945aad
-    pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    pr_210_tip: e7fa2b6
+    pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     minor_pr_m120:
       number: 210
       status: open
@@ -19135,10 +19224,10 @@ stages:
       branch: evolve/EV-025-multilingual-embeddings
       head: evolve/EV-025-multilingual-embeddings
       base: main
-      head_sha: c945aad
-      tip: c945aad
-      tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-      head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      head_sha: e7fa2b6
+      tip: e7fa2b6
+      tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+      head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       milestone: M120
       features:
       - F70
@@ -19149,14 +19238,16 @@ stages:
       merge_policy: needs_user_approval
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
-      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+      note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       opened_at: '2026-08-05'
-      updated_at: '2026-08-05T16:27:47Z'
-      recorded_at: '2026-08-05T16:27:47Z'
-      tip_updated_at: '2026-08-05T16:27:47Z'
+      updated_at: '2026-08-05T16:32:05Z'
+      recorded_at: '2026-08-05T16:32:05Z'
+      tip_updated_at: '2026-08-05T16:32:05Z'
       ci_status: pending
       await_explicit_merge_approval: true
-    watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      branch_ahead_of_origin: 2
+      ahead_shas: *id002
+    watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     watching_ci_branch: evolve/EV-025-multilingual-embeddings
     t120_2_completed_at: '2026-08-05T15:32:35Z'
     t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
@@ -19165,9 +19256,17 @@ stages:
     t120_3_started_at: '2026-08-05T16:20:35Z'
     t120_3_confirmed_at: '2026-08-05T16:20:35Z'
     t120_3_completed_at: '2026-08-05T16:27:47Z'
-    t120_3b_status: in_progress
-    t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+    t120_3b_status: completed
+    t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     t120_3b_started_at: '2026-08-05T16:27:47Z'
+    t120_3b_completed_at: '2026-08-05T16:32:05Z'
+    t120_4_status: in_progress
+    t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+    t120_4_started_at: '2026-08-05T16:32:05Z'
+    tip: e7fa2b6
+    branch_ahead_of_origin: 2
+    commits_ahead_of_origin: 2
+    ahead_shas: *id002
   09-qa:
     status: completed
     started: '2026-08-05'
@@ -22491,10 +22590,10 @@ evolve_cycles:
       - M121
       - M122
       active_milestone: M120
-      active_task: T120.3b
-      current_task: T120.3b
-      current_action: t120_3b_in_progress
-      next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+      active_task: T120.4
+      current_task: T120.4
+      current_action: t120_4_in_progress
+      next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -22503,11 +22602,11 @@ evolve_cycles:
       phase_b: passed
       s027_d29_decision: S027-D29
       s027_d30_decision: S027-D30
-      note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3 completed; active_milestone=M120; current_action=t120_3b_in_progress; T120.3b in_progress; tip @c945aad; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D pending'
-      updated_at: '2026-08-05T16:27:47Z'
+      note: 'S027/EV-025 07-build IN_PROGRESS — T120.1–T120.3b completed; active_milestone=M120; current_action=t120_4_in_progress; T120.4 in_progress; tip @e7fa2b6; PR-68 M120 minor PR #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+      updated_at: '2026-08-05T16:32:05Z'
       skipped_06: true
       substeps:
-        current_task: T120.3b
+        current_task: T120.4
         current_milestone: M120
         m119_status: completed_merged
         t119_1_status: completed
@@ -22524,19 +22623,21 @@ evolve_cycles:
         - T120.1
         - T120.2
         - T120.3
+        - T120.3b
         next_milestone: M120
-        next_task: T120.3b
+        next_task: T120.4
         t120_1_status: completed
         t120_2_status: completed
         t120_3_status: completed
-        t120_3b_status: in_progress
+        t120_3b_status: completed
+        t120_4_status: in_progress
       t119_1_status: completed
       m119_status: completed_merged
       m119_completed_at: '2026-08-05T12:52:00Z'
       m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
       m119_verify: merged
       next_milestone: M120
-      next_task: T120.3b
+      next_task: T120.4
       t119_2_status: completed
       t119_3_status: completed
       t119_4_status: completed
@@ -22550,7 +22651,8 @@ evolve_cycles:
         T120.1: completed
         T120.2: completed
         T120.3: completed
-        T120.3b: in_progress
+        T120.3b: completed
+        T120.4: in_progress
       tasks_completed:
       - T119.1
       - T119.2
@@ -22560,7 +22662,8 @@ evolve_cycles:
       - T120.1
       - T120.2
       - T120.3
-      execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      - T120.3b
+      execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
       s027_d30_status: confirmed
       askquestion_cleared: 'EXPLICIT merge approval — PR #208 @c574f58 MERGEABLE + CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)? → APPROVED + MERGED (S027-D34); CI split policy approved as written'
       m119_committed_at: '2026-08-05T12:52:00Z'
@@ -22608,13 +22711,13 @@ evolve_cycles:
       main_preflight_status: success
       main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
       main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-      watching_ci_sha: c945aad
-      watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      watching_ci_sha: e7fa2b6
+      watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       watching_ci_branch: evolve/EV-025-multilingual-embeddings
-      watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
-      build_head: c945aad
-      build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
-      parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
+      build_head: e7fa2b6
+      build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+      parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
       t120_1_completed_at: '2026-08-05T15:27:19Z'
       t120_1_note: T120.1 completed — red e2e @72fb57d + xfail @5346ec3 for remote unit CI until T120.2; tip @5346ec3
       t120_2_status: completed
@@ -22624,14 +22727,14 @@ evolve_cycles:
       m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
       m120_pr_number: 210
       m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-      m120_pr_tip: c945aad
-      m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+      m120_pr_tip: e7fa2b6
+      m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
       pr_210_status: open
       pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      pr_210_tip: c945aad
-      pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      pr_210_tip: e7fa2b6
+      pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       minor_pr_m120:
         number: 210
         status: open
@@ -22641,10 +22744,10 @@ evolve_cycles:
         branch: evolve/EV-025-multilingual-embeddings
         head: evolve/EV-025-multilingual-embeddings
         base: main
-        head_sha: c945aad
-        tip: c945aad
-        tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-        head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+        head_sha: e7fa2b6
+        tip: e7fa2b6
+        tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+        head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
         milestone: M120
         features:
         - F70
@@ -22655,13 +22758,15 @@ evolve_cycles:
         merge_policy: needs_user_approval
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
-        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
         opened_at: '2026-08-05'
-        updated_at: '2026-08-05T16:27:47Z'
-        recorded_at: '2026-08-05T16:27:47Z'
-        tip_updated_at: '2026-08-05T16:27:47Z'
+        updated_at: '2026-08-05T16:32:05Z'
+        recorded_at: '2026-08-05T16:32:05Z'
+        tip_updated_at: '2026-08-05T16:32:05Z'
         ci_status: pending
         await_explicit_merge_approval: true
+        branch_ahead_of_origin: 2
+        ahead_shas: *id002
       t120_2_completed_at: '2026-08-05T15:32:35Z'
       t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
       t120_3_status: completed
@@ -22671,9 +22776,17 @@ evolve_cycles:
       session_id: S027-multilingual-embeddings
       branch: evolve/EV-025-multilingual-embeddings
       t120_3_completed_at: '2026-08-05T16:27:47Z'
-      t120_3b_status: in_progress
-      t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+      t120_3b_status: completed
+      t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       t120_3b_started_at: '2026-08-05T16:27:47Z'
+      t120_3b_completed_at: '2026-08-05T16:32:05Z'
+      t120_4_status: in_progress
+      t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+      t120_4_started_at: '2026-08-05T16:32:05Z'
+      tip: e7fa2b6
+      branch_ahead_of_origin: 2
+      commits_ahead_of_origin: 2
+      ahead_shas: *id002
     08-verify-build:
       status: completed_conditional
       started: '2026-08-05'
@@ -22691,12 +22804,12 @@ evolve_cycles:
       - M121
       - M122
       active_milestone: M120
-      current_action: t120_3b_in_progress
-      next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+      current_action: t120_4_in_progress
+      next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
       askquestion_pending: false
       askquestion_pending_topic:
-      build_head: c945aad
-      build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      build_head: e7fa2b6
+      build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       build_commits:
       - dc49d3a
       - bd34f2c
@@ -22707,10 +22820,10 @@ evolve_cycles:
       - c574f58
       m119_status: completed_merged
       m119_verify: merged
-      note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3 completed; handoff T120.3b in_progress tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; Gate C→D / phase_c remain pending (NOT passed)'
-      updated_at: '2026-08-05T16:27:47Z'
+      note: 'S027/EV-025 08-verify-build — M119 merged; M120 T120.1–T120.3b completed; handoff T120.4 in_progress tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; ahead 2; Gate C→D / phase_c remain pending (NOT passed)'
+      updated_at: '2026-08-05T16:32:05Z'
       next_milestone: M120
-      next_task: T120.3b
+      next_task: T120.4
       overall: conditional_pass
       report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
       report_status: completed_conditional
@@ -22854,8 +22967,8 @@ evolve_cycles:
       pr_208_merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       pr_208_merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       pr_208_merge_sha_short: 2c884bd
-      active_task: T120.3b
-      current_task: T120.3b
+      active_task: T120.4
+      current_task: T120.4
       m120_start_after: main_ci_green_then_ci_split_chore
       merge_commit: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       merge_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
@@ -22863,7 +22976,7 @@ evolve_cycles:
       main_ci_status: success
       main_ci_merge_sha: 2c884bd
       main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-      parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
       ci_policy_implemented_at: '2026-08-05T15:20:42Z'
       ci_policy_implemented_sha: 11ef43a
       ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
@@ -22874,10 +22987,10 @@ evolve_cycles:
       main_preflight_status: success
       main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
       main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-      watching_ci_sha: c945aad
-      watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      watching_ci_sha: e7fa2b6
+      watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       watching_ci_branch: evolve/EV-025-multilingual-embeddings
-      watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
+      watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
       t120_1_status: completed
       t120_1_completed_at: '2026-08-05T15:27:19Z'
       t120_1_note: T120.1 completed — red e2e @72fb57d + xfail @5346ec3 for remote unit CI until T120.2; tip @5346ec3
@@ -22886,25 +22999,27 @@ evolve_cycles:
         T120.1: completed
         T120.2: completed
         T120.3: completed
-        T120.3b: in_progress
+        T120.3b: completed
+        T120.4: in_progress
       tasks_completed:
       - T120.1
       - T120.2
       - T120.3
+      - T120.3b
       m120_pr_status: open
       m120_pr_plan_id: PR-68
       m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
-      execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+      execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
       m120_pr_number: 210
       m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-      m120_pr_tip: c945aad
-      m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+      m120_pr_tip: e7fa2b6
+      m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
       pr_210_status: open
       pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-      pr_210_tip: c945aad
-      pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+      pr_210_tip: e7fa2b6
+      pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
       minor_pr_m120:
         number: 210
         status: open
@@ -22914,10 +23029,10 @@ evolve_cycles:
         branch: evolve/EV-025-multilingual-embeddings
         head: evolve/EV-025-multilingual-embeddings
         base: main
-        head_sha: c945aad
-        tip: c945aad
-        tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-        head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+        head_sha: e7fa2b6
+        tip: e7fa2b6
+        tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+        head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
         milestone: M120
         features:
         - F70
@@ -22928,13 +23043,15 @@ evolve_cycles:
         merge_policy: needs_user_approval
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
-        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+        note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
         opened_at: '2026-08-05'
-        updated_at: '2026-08-05T16:27:47Z'
-        recorded_at: '2026-08-05T16:27:47Z'
-        tip_updated_at: '2026-08-05T16:27:47Z'
+        updated_at: '2026-08-05T16:32:05Z'
+        recorded_at: '2026-08-05T16:32:05Z'
+        tip_updated_at: '2026-08-05T16:32:05Z'
         ci_status: pending
         await_explicit_merge_approval: true
+        branch_ahead_of_origin: 2
+        ahead_shas: *id002
       t120_2_completed_at: '2026-08-05T15:32:35Z'
       t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
       t120_3_status: completed
@@ -22942,9 +23059,17 @@ evolve_cycles:
       t120_3_started_at: '2026-08-05T16:20:35Z'
       t120_3_confirmed_at: '2026-08-05T16:20:35Z'
       t120_3_completed_at: '2026-08-05T16:27:47Z'
-      t120_3b_status: in_progress
-      t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+      t120_3b_status: completed
+      t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
       t120_3b_started_at: '2026-08-05T16:27:47Z'
+      t120_3b_completed_at: '2026-08-05T16:32:05Z'
+      t120_4_status: in_progress
+      t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+      t120_4_started_at: '2026-08-05T16:32:05Z'
+      tip: e7fa2b6
+      branch_ahead_of_origin: 2
+      commits_ahead_of_origin: 2
+      ahead_shas: *id002
     09-qa:
       status: pending
     10-e2e:
@@ -23276,12 +23401,12 @@ evolve_cycles:
   issues: []
   phase0_approved: true
   phase_0_status: approved
-  current_action: t120_3b_in_progress
-  next_action: 'Continue M120 T120.3b. T120.1–T120.3 completed; tip @c945aad; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210. Gate C→D / phase_c remain pending.'
+  current_action: t120_4_in_progress
+  next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
   askquestion_pending: false
   askquestion_pending_topic:
-  updated_at: '2026-08-05T16:27:47Z'
-  note: 'EV-025 Phase C — T120.3 completed @c945aad; current_action=t120_3b_in_progress; active_milestone=M120; T120.3b in_progress; PR #210 (PR-68) open; tip @c945aad; Gate C→D / phase_c remain pending'
+  updated_at: '2026-08-05T16:32:05Z'
+  note: 'EV-025 Phase C — T120.3b completed @e7fa2b6; current_action=t120_4_in_progress; active_milestone=M120; T120.4 in_progress; PR #210 (PR-68) open; tip @e7fa2b6; ahead 2; Gate C→D / phase_c remain pending'
   s027_d25_decision: S027-D25
   s027_d26_decision: S027-D26
   s027_d27_decision: S027-D27
@@ -23466,14 +23591,14 @@ evolve_cycles:
   s027_d29_choice: option_1_approve_all
   s027_d30_decision: S027-D30
   active_milestone: M120
-  active_task: T120.3b
-  current_task: T120.3b
+  active_task: T120.4
+  current_task: T120.4
   m119_status: completed_merged
   m119_completed_at: '2026-08-05T15:11:52Z'
   m119_note: 'M119 completed_committed (T119.1–T119.5) @ 206f88a — docs Phase A/B + ADR-048 (dc49d3a); e5 prefixes/runtime tests (bd34f2c); embedding-client helpers (12d9650); modal_pins FE/ST/ONNX + 4GiB (dc3c33c); embedding_app runtime switch (206f88a). User option 1: commit + 08-verify-build (then minor PR). m119_verify=in_progress.'
   m119_verify: merged
   next_milestone: M120
-  next_task: T120.3b
+  next_task: T120.4
   t119_1_status: completed
   t119_2_status: completed
   t119_3_status: completed
@@ -23488,7 +23613,8 @@ evolve_cycles:
     T120.1: completed
     T120.2: completed
     T120.3: completed
-    T120.3b: in_progress
+    T120.3b: completed
+    T120.4: in_progress
   tasks_completed:
   - T119.1
   - T119.2
@@ -23498,7 +23624,8 @@ evolve_cycles:
   - T120.1
   - T120.2
   - T120.3
-  execution_plan_note: 'execution-plan.md should show T120.1–T120.3 completed; T120.3b in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+  - T120.3b
+  execution_plan_note: 'execution-plan.md should show T120.1–T120.3b completed; T120.4 in_progress; M120 active; PR-68 #210 open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2'
   s027_d30_status: confirmed
   askquestion_cleared: 'EXPLICIT merge approval — PR #208 @c574f58 MERGEABLE + CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394)? → APPROVED + MERGED (S027-D34); CI split policy approved as written'
   m119_tip: c574f58
@@ -23507,8 +23634,8 @@ evolve_cycles:
   s027_d32_status: confirmed
   s027_d32_note: 'Option 1 — Open M119 minor PR (CI gate). Local Docker Postgres blocked (userns); do NOT re-run full make test-py in-agent. Rely on Husky pre-commit/pre-push + GitHub CI as full gate. F62 hooks remain: typecheck+security on commit; lint+test-fast on push.'
   m119_tip_full: c574f580aba837b6c5c5d4809769cc2af3ca3f7c
-  build_head: c945aad
-  build_head_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  build_head: e7fa2b6
+  build_head_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   s027_d32_choice: option_1_open_m119_minor_pr_ci_gate
   s027_d32_option: 1
   pr_plan_id: PR-68
@@ -23636,7 +23763,7 @@ evolve_cycles:
   main_ci_status: success
   main_ci_merge_sha: 2c884bd
   main_ci_merge_sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-  parent_note: 'T120.1–T120.3 completed; T120.3b in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @c945aad'
+  parent_note: 'T120.1–T120.3b completed; T120.4 in_progress; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6)'
   ci_policy_implemented_at: '2026-08-05T15:20:42Z'
   ci_policy_implemented_sha: 11ef43a
   ci_policy_implemented_sha_full: 11ef43a2bcaaf16cc47c104b31a4f31e0ec2aff1
@@ -23647,11 +23774,13 @@ evolve_cycles:
   main_preflight_status: success
   main_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
   main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31019511460
-  watching_ci_sha: c945aad
-  watching_ci_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  watching_ci_sha: e7fa2b6
+  watching_ci_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   watching_ci_branch: evolve/EV-025-multilingual-embeddings
-  watching_ci_note: 'PR #210 tip @c945aad (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.3b; Gate C→D pending'
-  history: '2026-08-05T16:27:47Z S027/EV-025: T120.3 completed @c945aad; appended git; current_action=t120_3b_in_progress; M120/T120.3b in_progress; PR #210 tip updated; Gate C→D NOT passed
+  watching_ci_note: 'PR #210 tip @e7fa2b6 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); continue T120.4; ahead 2; Gate C→D pending'
+  history: '2026-08-05T16:32:05Z S027/EV-025: T120.3b completed @e7fa2b6; appended git; current_action=t120_4_in_progress; M120/T120.4 in_progress; PR #210 tip updated; ahead 2; Gate C→D NOT passed
+
+    2026-08-05T16:27:47Z S027/EV-025: T120.3 completed @c945aad; appended git; current_action=t120_3b_in_progress; M120/T120.3b in_progress; PR #210 tip updated; Gate C→D NOT passed
 
     2026-08-05T16:20:35Z S027/EV-025: confirmed T120.3 in_progress (wire F41 rebuild pin+tokenizer stamps); parent resuming 16-evolve Continue; current_action=t120_3_in_progress; tip @75830eb; PR #210 open; Gate C→D NOT passed; NOT completed'
   t120_1_status: completed
@@ -23663,14 +23792,14 @@ evolve_cycles:
   m120_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
   m120_pr_number: 210
   m120_pr_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-  m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
-  m120_pr_tip: c945aad
-  m120_pr_tip_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  m120_pr_note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
+  m120_pr_tip: e7fa2b6
+  m120_pr_tip_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   pr_210: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210
   pr_210_status: open
   pr_210_title: '[M120] F71 — Staging rechunk e2e red + CI unit/coverage split'
-  pr_210_tip: c945aad
-  pr_210_tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
+  pr_210_tip: e7fa2b6
+  pr_210_tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
   minor_pr_m120:
     number: 210
     status: open
@@ -23680,10 +23809,10 @@ evolve_cycles:
     branch: evolve/EV-025-multilingual-embeddings
     head: evolve/EV-025-multilingual-embeddings
     base: main
-    head_sha: c945aad
-    tip: c945aad
-    tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-    head_sha_full: c945aad323b7b82f9e82127d6be30b39ab2b9670
+    head_sha: e7fa2b6
+    tip: e7fa2b6
+    tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    head_sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
     milestone: M120
     features:
     - F70
@@ -23694,22 +23823,32 @@ evolve_cycles:
     merge_policy: needs_user_approval
     session_id: S027-multilingual-embeddings
     evolve_cycle_id: EV-025
-    note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @c945aad; T120.3 landed; NOT merged — continue T120.3b; Gate C→D pending'
+    note: 'PR #210 OPEN [M120] F71 — Staging rechunk e2e red + CI unit/coverage split (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210); tip @e7fa2b6; T120.3b landed; NOT merged — continue T120.4; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
     opened_at: '2026-08-05'
-    updated_at: '2026-08-05T16:27:47Z'
-    recorded_at: '2026-08-05T16:27:47Z'
-    tip_updated_at: '2026-08-05T16:27:47Z'
+    updated_at: '2026-08-05T16:32:05Z'
+    recorded_at: '2026-08-05T16:32:05Z'
+    tip_updated_at: '2026-08-05T16:32:05Z'
     ci_status: pending
     await_explicit_merge_approval: true
+    branch_ahead_of_origin: 2
+    ahead_shas: *id002
   t120_2_completed_at: '2026-08-05T15:32:35Z'
   t120_2_note: T120.2 completed — default chunk tokenizer = multilingual-e5 pin @75830eb
   t120_3_status: completed
   t120_3_note: T120.3 completed — wired chunk_tokenizer_id through schemas, Alembic 20260805_0013, internal-write create/promote, DM rebuild pipeline under F70 pin @c945aad
   t120_3_confirmed_at: '2026-08-05T16:20:35Z'
   t120_3_completed_at: '2026-08-05T16:27:47Z'
-  t120_3b_status: in_progress
-  t120_3b_note: 'T120.3b in_progress — follow-on after T120.3 F41 rebuild pin+tokenizer stamps; PR #210 still open; Gate C→D pending'
+  t120_3b_status: completed
+  t120_3b_note: 'T120.3b completed — F71 embed-promote EN/ES Hy1 report vs E0 @e7fa2b6; PR #210 still open; branch ahead of origin by 2 (c945aad + e7fa2b6); Gate C→D pending'
   t120_3b_started_at: '2026-08-05T16:27:47Z'
+  t120_3b_completed_at: '2026-08-05T16:32:05Z'
+  t120_4_status: in_progress
+  t120_4_note: 'T120.4 in_progress — follow-on after T120.3b embed-promote report; PR #210 open; tip @e7fa2b6; ahead 2; Gate C→D pending'
+  t120_4_started_at: '2026-08-05T16:32:05Z'
+  tip: e7fa2b6
+  branch_ahead_of_origin: 2
+  commits_ahead_of_origin: 2
+  ahead_shas: *id002
 - id: EV-001
   cycle_type: feature
   feature_ids:
@@ -33373,7 +33512,7 @@ evolve_cycles:
       commit_full: 4a98fe5025eaa7f9e70b9d637bf6aba425288780
       note: S025/EV-023 01-requirements COMPLETE @ 4a98fe5 — user confirmed (S025-D9 option 1) → 02-verify-plan
       askquestion_pending: false
-      artifacts_updated: &id026
+      artifacts_updated: &id027
       - docs/feature-list.md
       - docs/user-journeys.md
       - docs/test-plan.md
@@ -33735,7 +33874,7 @@ evolve_cycles:
       opened_at: '2026-08-04'
       recorded_at: '2026-08-04T00:10:00Z'
       note: Post-close durable state closeout MERGED; on main
-      files: *id009
+      files: *id010
       merged_at: '2026-08-04T00:09:50Z'
       merge_commit_sha: 5234bc230c20c9049d74ee090052e8b401083a70
       merge_sha: 5234bc230c20c9049d74ee090052e8b401083a70
@@ -33915,7 +34054,7 @@ evolve_cycles:
       - F67
       - F68
       - F69
-      substeps: *id006
+      substeps: *id007
       note: S026/EV-024 01-requirements COMPLETE 2026-08-04 — Gate 24a Yes (S026-D20); Batch B locked (S026-D16–D19); F64–F69 deltas; report ready; checkpoints.phase_a / gates.a_to_b remain pending until 02 finishes
       askquestion_pending: false
       askquestion_pending_topic:
@@ -34182,7 +34321,7 @@ evolve_cycles:
       s026_d28_decision: S026-D28
       note: 'S026/EV-024 07-build COMPLETE 2026-08-05 — Gate C→D PASS (S026-D54 / option 2); phase_c=passed; gates.c_to_d=passed; M112–M118 done; PR #207 merge approved (not yet merged) tip @2b8e8cd; handoff → merge #207 then 08-verify-build M118 closeout'
       updated_at: '2026-08-05T00:30:00Z'
-      milestones_completed: &id010
+      milestones_completed: &id011
       - M112
       - M113
       - M114
@@ -34407,7 +34546,7 @@ evolve_cycles:
       - 7f086c3
       t116_2_commit_pending: false
       t116_2_commit: 9bba998
-      t116_2_artifacts: &id011
+      t116_2_artifacts: &id012
       - apps/database/alembic/versions/20260804_0012_ev024_feedback.py
       - apps/internal-write-api/vecinita_internal_write_api/feedback.py
       - apps/internal-write-api/vecinita_internal_write_api/app.py
@@ -34415,7 +34554,7 @@ evolve_cycles:
       t116_3_status: completed
       t116_3_note: T116.3 completed @d3947bd — wire ChatRAG, write, and DM feedback APIs
       t116_2_commit_full: 9bba998fcd7e3d26a32bd1856ee5572b60ab33ec
-      t116_2_files: &id012
+      t116_2_files: &id013
       - apps/database/alembic/versions/20260804_0012_ev024_feedback.py
       - apps/internal-write-api/vecinita_internal_write_api/app.py
       - apps/internal-write-api/vecinita_internal_write_api/feedback.py
@@ -34429,7 +34568,7 @@ evolve_cycles:
       t116_3_commit_full: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
       t116_4_status: completed
       t116_4_note: T116.4 completed @1c8f6ff — ChatRAG and Admin Feedback pages for F68
-      t116_3_files: &id013
+      t116_3_files: &id014
       - apps/chat-rag-backend/vecinita_chat_rag_backend/app.py
       - apps/data-management-backend/vecinita_data_management_backend/app.py
       - apps/data-management-backend/vecinita_data_management_backend/write_client.py
@@ -34449,7 +34588,7 @@ evolve_cycles:
       t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
       t116_5_status: completed
       t116_5_note: T116.5 completed @bb30b26 — Playwright uj073 + Admin FE TS + SQLAlchemy mappings + auth order/Vitest + unit coverage for F68 feedback backends; CI green on evolve/EV-024-frontend-ux-polish
-      t116_4_files: &id014
+      t116_4_files: &id015
       - apps/chat-rag-frontend/src/App.css
       - apps/chat-rag-frontend/src/App.tsx
       - apps/chat-rag-frontend/src/api/feedback.ts
@@ -35546,7 +35685,7 @@ evolve_cycles:
     recorded_at: '2026-08-05T00:54:00Z'
     updated_at: '2026-08-05T00:57:00Z'
     note: 'S026-D58: write before close_cycle'
-  - &id019
+  - &id020
     path: docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md
     kind: report
     type: docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md
@@ -35587,7 +35726,7 @@ evolve_cycles:
     merged: true
     merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
     merge_sha_short: c942971
-  - &id023
+  - &id024
     path: docs/dependency-inventory.md
     kind: dependency-inventory
     status: updated
@@ -35618,7 +35757,7 @@ evolve_cycles:
     askquestion_pending_topic:
     gate_b_to_c: pending
     s026_d25_decision: S026-D25
-  - &id020
+  - &id021
     path: docs/adr/ADR-047-ask-energy-heuristic-car-equivalent.md
     kind: adr
     status: locked
@@ -35634,7 +35773,7 @@ evolve_cycles:
     askquestion_pending_topic:
     gate_b_to_c: pending
     s026_d25_decision: S026-D25
-  - &id021
+  - &id022
     path: docs/sessions/S026-frontend-ux-polish/roadmap.md
     kind: roadmap
     status: locked
@@ -35650,7 +35789,7 @@ evolve_cycles:
     askquestion_pending_topic:
     gate_b_to_c: pending
     s026_d25_decision: S026-D25
-  - &id022
+  - &id023
     path: docs/sessions/S026-frontend-ux-polish/reports/tech-plan-delta.md
     kind: tech-plan-delta
     status: locked
@@ -35732,7 +35871,7 @@ evolve_cycles:
     note: S026-D11 Fn allocation — parent must edit markdown Features/Phase 0
     session_id: S026-frontend-ux-polish
     recorded_at: '2026-08-04T13:51:00Z'
-  - &id024
+  - &id025
     path: docs/sessions/S026-frontend-ux-polish/reports/02-verify-plan-audit.md
     kind: verify-plan-audit
     status: completed
@@ -35789,7 +35928,7 @@ evolve_cycles:
     recorded_at: '2026-08-04T16:28:00Z'
     updated_at: '2026-08-04T16:28:00Z'
     note: S026-D22 — VECINITA_ENERGY_CAR_GCO2E_PER_KM default 251 (RD-289)
-  - &id025
+  - &id026
     path: docs/sessions/S026-frontend-ux-polish/reports/05-verify-tech-audit.md
     kind: verify-tech-audit
     status: completed
@@ -36073,7 +36212,7 @@ evolve_cycles:
     askquestion_pending_topic:
     resolved_by: S026-D47
     resolved_at: '2026-08-04T20:59:01Z'
-  - &id018
+  - &id019
     id: S026-D45
     decision: 'M114 complete; PR #203 opened to main for F64/#87 (includes M113 commits until #202 merges); merge needs approval'
     summary: 'M114 complete; PR #203 opened to main for F64/#87 (includes M113 commits until #202 merges); merge needs approval'
@@ -36093,7 +36232,7 @@ evolve_cycles:
     askquestion_pending_topic:
     resolved_by: S026-D46
     resolved_at: '2026-08-04T20:41:30Z'
-  - &id017
+  - &id018
     id: S026-D44
     decision: 'Retargeted M113 review: closed #201, opened #202 from frozen tip pr/201-m113-tooltip @ 06f4ab1 so M114 can continue on evolve branch without polluting Tooltip PR'
     summary: 'Retargeted M113 review: closed #201, opened #202 from frozen tip pr/201-m113-tooltip @ 06f4ab1 so M114 can continue on evolve branch without polluting Tooltip PR'
@@ -36108,7 +36247,7 @@ evolve_cycles:
     frozen_tip: pr/201-m113-tooltip
     frozen_sha: 06f4ab1
     note: 'M113 review PR is now #202; #201 superseded'
-  - &id016
+  - &id017
     id: S026-D43
     decision: 'Continue M114 (F64 cold-start tips / #87) now; leave PR #201 open pending explicit merge approval'
     rationale: User Continue with C after M113 CI green; same pattern as M112→M113 with prior PR open
@@ -36325,7 +36464,7 @@ evolve_cycles:
   - id: S026-D11
     decision: Allocate F64–F69 (one Fn per issue); Phase 0 approved → 01-requirements
     choice: 15a / reply 1
-    feature_ids: &id015
+    feature_ids: &id016
     - F64
     - F65
     - F66
@@ -36649,7 +36788,7 @@ evolve_cycles:
   m112_merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
   m112_merge_sha_short: e1ccf9e
   m112_main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
-  milestones_completed: *id010
+  milestones_completed: *id011
   pr_status: merged
   pr_merged: true
   merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
@@ -36815,21 +36954,21 @@ evolve_cycles:
   t116_2_note: T116.2 completed @9bba998 — feedback table migration + 90d purge (cleanup_feedback) + data-management-plan
   t116_2_commit_pending: false
   t116_2_commit: 9bba998
-  t116_2_artifacts: *id011
+  t116_2_artifacts: *id012
   t116_3_status: completed
   t116_3_note: T116.3 completed @d3947bd — wire ChatRAG, write, and DM feedback APIs
   t116_2_commit_full: 9bba998fcd7e3d26a32bd1856ee5572b60ab33ec
-  t116_2_files: *id012
+  t116_2_files: *id013
   t116_3_commit: d3947bd
   t116_3_commit_full: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
   t116_4_status: completed
   t116_4_note: T116.4 completed @1c8f6ff — ChatRAG and Admin Feedback pages for F68
-  t116_3_files: *id013
+  t116_3_files: *id014
   t116_4_commit: 1c8f6ff
   t116_4_commit_full: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
   t116_5_status: completed
   t116_5_note: T116.5 in_progress — e2e/privacy green + Playwright uj073
-  t116_4_files: *id014
+  t116_4_files: *id015
   branch_ahead_of_origin: 0
   resume_note: S026-D58 13 PASS accepted; deploy gate PASSED; current_action=write_evolve_summary; write docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md (+ docs/sessions/S026-frontend-ux-polish/reports/evolve-report.md) then close cycle; cycle NOT completed
   s026_d51_decision: S026-D51
@@ -38297,6 +38436,7 @@ issue_log:
   blocking_for: []
   note: RESOLVED 2026-07-30 — TP-S017-01 option 2; amended TP-S017-07 staging shadow path required; 04-tech-plan remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
 decisions_log:
+- 'S027/EV-025: T120.3b completed @e7fa2b6; next T120.4; PR #210 tip @e7fa2b6; ahead 2 (c945aad + e7fa2b6); Gate C→D pending; askquestion_pending=false'
 - 'S027/EV-025: T120.3 completed @c945aad; next T120.3b; PR #210 tip @c945aad; Gate C→D pending; askquestion_pending=false'
 - 'S027/EV-025: T120.2 completed @75830eb; next T120.3; PR #210 tip @75830eb; askquestion_pending=false'
 - 'S027/EV-025: PR #210 (PR-68) open_await_ci https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; tip @5346ec3; parent watching CI then continue T120.2'
@@ -39412,7 +39552,7 @@ decisions_log:
   summary: Allocate F64–F69 (one Fn per issue); Phase 0 approved → 01-requirements
   topic: feature_allocation
   choice: 15a / reply 1
-  feature_ids: *id015
+  feature_ids: *id016
   next_stage: 01-requirements
   recorded_at: '2026-08-04T13:51:00Z'
   approved: '2026-08-04'
@@ -42332,9 +42472,9 @@ decisions_log:
 - '2026-08-04 S026/EV-024: M112 08-verify-build PASS @ 0942ef9; PR #200 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200); CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361; merge needs user approval; AskQuestion: continue M113 vs pause'
 - 'S026/EV-024: PR #200 MERGED @ e1ccf9e; building_m113; next T113.1 red tests (F67); main CI green https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208; deploy-preflight watching'
 - '2026-08-04 S026/EV-024: M113 08-verify-build PASS @ 9856f20; PR #201 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/201); merge_policy=needs_user_approval; feature F67 issue 106; PR #200 already merged; milestones_completed=[M112,M113]; active→M114/F64/#87; AskQuestion: continue M114 vs pause vs merge #201 first'
-- *id016
 - *id017
 - *id018
+- *id019
 - 'S026/EV-024: CI red on d93b78a (coverage branches 91.77%); fix pushed @bde3db7; watching CI for PR #204; build_head=bde3db7; active_task=T116.1 / M116 unchanged'
 - 'S026/EV-024: recorded 605fce9 ([T115.4] test: cover energy knob validation branches); build_head=605fce9; m115_pr_status=open_ci_green; M115 PR #204 CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658); head @605fce9; merge needs user approval; askquestion_pending=true (merge PR #204 vs continue M116 T116.1 vs pause); active_task=T116.1 / M116 ready'
 - date: '2026-08-05'
@@ -42523,7 +42663,7 @@ artifacts:
   stage: 16-evolve
   skill_id: 16-evolve
   note: EV-024/S026 closeout — written/present
-- *id019
+- *id020
 - path: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
   session_id: S026-frontend-ux-polish
   evolve_cycle_id: EV-024
@@ -42571,9 +42711,9 @@ artifacts:
   task: T118.1
   recorded_at: '2026-08-05T00:02:08Z'
   note: T118.1 UJ e2e + Playwright suite confirmation (F64–F69)
-- *id020
 - *id021
 - *id022
+- *id023
 - path: docs/feature-list.md
   kind: standing-doc
   session_id: S027-multilingual-embeddings
@@ -43685,7 +43825,7 @@ artifacts:
 - docs/data-management-plan.md
 - docs/deployment-integration.md
 - docs/acceptance-criteria.md
-- *id023
+- *id024
 - docs/sessions/S000-internal-docs-archive/reference.md#roadmap
 - docs/sessions/S000-internal-docs-archive/reference.md#glossary
 - docs/sessions/S000-internal-docs-archive/reference.md#risk-register
@@ -45404,10 +45544,10 @@ artifacts:
   skill_id: 16-evolve
   recorded_at: '2026-08-04T13:51:00Z'
   parent_must_edit: true
-- *id024
+- *id025
 - docs/decisions.md
 - docs/sessions/S026-frontend-ux-polish/reports/02-verify-plan-audit.md
-- *id025
+- *id026
 - path: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
   session_id: S026-frontend-ux-polish
   evolve_cycle_id: EV-024
@@ -45602,16 +45742,19 @@ git_history:
     purpose: Multilingual embedding swap cycle EV-025
     base: main @ c942971
     status: active
-    head_short: c945aad
-    head_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-    tip: c945aad
-    tip_sha: c945aad323b7b82f9e82127d6be30b39ab2b9670
-    tip_short: c945aad
-    updated_at: '2026-08-05T16:27:47Z'
+    head_short: e7fa2b6
+    head_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    tip: e7fa2b6
+    tip_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    tip_short: e7fa2b6
+    updated_at: '2026-08-05T16:32:05Z'
     m119_tip: 206f88a
-    note: 'T120.3 completed; T120.3b in_progress tip @c945aad; PR #210 open; Gate C→D pending'
+    note: 'T120.3b completed; T120.4 in_progress tip @e7fa2b6; PR #210 open; ahead 2 (c945aad + e7fa2b6); Gate C→D pending'
     tip_full: ffb199bfc97e6d71b435ade7d048e2e9a249e0d1
-    m120_tip: c945aad
+    m120_tip: e7fa2b6
+    branch_ahead_of_origin: 2
+    commits_ahead_of_origin: 2
+    ahead_shas: *id002
   - name: evolve/EV-024-frontend-ux-polish
     purpose: EV-024 ChatRAG + Admin UX polish (#193)
     base: main
@@ -46380,7 +46523,7 @@ git_history:
     files_changed: 8
     timestamp: '2026-08-03T23:10:44Z'
     note: 01-requirements delta committed @ 4a98fe5; workflow-state.yaml from e29e4e1 session-open still uncommitted (bundled separately)
-    files: *id026
+    files: *id027
     rd_range: RD-264..RD-271
     feature_ids:
     - F62
@@ -49930,7 +50073,7 @@ git_history:
     feature_ids:
     - F68
     issue: 186
-    files: *id012
+    files: *id013
     note: 'T116.2 completed — feedback migration + 90d purge; continuing T116.3; PR #204 still open NOT merged'
   - sha: d3947bd
     full_sha: d3947bd5c1f8550fe6a1e240b3a9e8ff36e53fb7
@@ -49949,7 +50092,7 @@ git_history:
     feature_ids:
     - F68
     issue: 186
-    files: *id013
+    files: *id014
     note: 'T116.3 completed — ChatRAG/write/DM feedback APIs; continuing T116.4; PR #204 still open NOT merged'
   - sha: 1c8f6ff
     full_sha: 1c8f6ffdbe32cfa0eadc8885c9d441c1773dc719
@@ -49968,7 +50111,7 @@ git_history:
     feature_ids:
     - F68
     issue: 186
-    files: *id014
+    files: *id015
     note: 'T116.4 completed — ChatRAG and Admin Feedback pages; continuing T116.5; branch ahead of origin by 4 not pushed; PR #204 still open NOT merged'
   - sha: 5b0405a
     full_sha: 5b0405aea17ae18725de9afb9bfd8f143adfa54c
@@ -50585,6 +50728,30 @@ git_history:
     - tests/unit/data_management/test_ev015_rebuild_shadow.py
     - tests/unit/shared_schemas/test_f71_rebuild_tokenizer_stamps.py
     - workflow-state.yaml
+  - sha: e7fa2b6
+    full_sha: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    sha_full: e7fa2b6b3f53352c02ce93654cda56e6dabb5116
+    short: e7fa2b6
+    branch: evolve/EV-025-multilingual-embeddings
+    message: '[T120.3b] feat: F71 embed-promote EN/ES Hy1 report vs E0'
+    stage: 07-build
+    skill_id: 16-evolve
+    session_id: S027-multilingual-embeddings
+    evolve_cycle_id: EV-025
+    files_changed: 9
+    timestamp: '2026-08-05T16:30:57Z'
+    milestone: M120
+    task: T120.3b
+    files:
+    - apps/internal-write-api/vecinita_internal_write_api/app.py
+    - apps/internal-write-api/vecinita_internal_write_api/embed_promote_report.py
+    - docs/api-contract.md
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - packages/embedding-client/vecinita_embedding_client/modal_pins.py
+    - packages/shared-schemas/vecinita_shared_schemas/internal_write.py
+    - tests/unit/internal_write_api/test_f71_embed_promote_report.py
+    - tests/unit/shared_schemas/test_f71_embed_promote_report.py
+    - workflow-state.yaml
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1 | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394); askquestion_pending=true EXPLICIT merge approval; ci_policy_intent pending (not implemented); NOT merged; M120 not started; current_action=askquestion_explicit_merge_approval_pr208 | 2026-08-05T15:01:54Z S027/EV-025: PR #208 CI green @8e81ad3 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113); m119_verify=ci_green; m119_pr_status=open_ci_green; askquestion_pending=true (M119 PR #208 CI green @8e81ad3 — continue M120 T120.1 vs pause vs merge #208?); current_action=askquestion_m120_continue_vs_pause_merge; next=AskQuestion M120 T120.1 — continue build vs pause vs merge #208 first (merge still needs explicit approval) | 2026-08-05T14:56:48Z S027/EV-025: PR #208 CI coverage fix pushed @8e81ad3 ([T119.5] test: cover embed prefix env/default branches for 95% gate); also recorded ce06b2e; m119_verify=ci_coverage_fix_pushed; askquestion_pending=false; current_action=m119_08_await_ci_after_coverage_fix; next=Watch GitHub CI on #208 after coverage fix @8e81ad3; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval) | 2026-08-05T14:48:00Z S027/EV-025: PR #208 OPEN (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; recorded commit 16f4d06 ([M119] docs: S027-D32 open PR-67; CI/F62 gate for full pytest); m119_verify=pr_open_await_ci; askquestion_pending=false; current_action=m119_08_await_ci; next=Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval) | 2026-08-05T00:20:00Z S026/EV-024: PR #207 CI green @2b8e8cd (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032); pr_207_status=open_ci_green; current_action=present_gate_c_to_d; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207 CI green); phase_c/c_to_d pending (NOT passed); next=User AskQuestion Gate C→D; on pass → 08-verify-build closeout / 09-qa; merge #207 needs explicit approval | 2026-08-05T00:12:00Z S026/EV-024: recorded commit 2b8e8cd ([T118.3] docs: Phase 27 gate + issue closeout notes); PR #207 OPEN; CI watching; T118.3 committed @2b8e8cd; M118 completed; PR #207 OPEN; CI watching; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207); phase_c/c_to_d remain pending. Issue closeout comments posted on #104/#106/#93/#186/#170/#193; do not auto-close. #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. build_head=2b8e8cd; current_action=await_ci_207_gate_c_to_d; next=Await CI on #207; AskQuestion Gate C→D; then 08-verify / 09-qa; askquestion_pending=true; phase_c/c_to_d pending on evolve/EV-024-frontend-ux-polish. | PR #206 merged to main @ eb65837; evolve tip has Brewfile/secrets docs commit | 2026-08-05T02:00:00Z S026/EV-024 S026-D56: 12 COMPLETE APPROVED → 13 in_progress (validate_or_redeploy); main_tip=c942971; evolve_tip=d429d39; PR #207 merged; evolve CI watch waived_n_a; checkpoints.deploy=pending; CD Modal+DO green | 2026-08-05T02:15:00Z S026/EV-024 S026-D57: 13 validate_existing_smokes (option 1); no force redeploy; H1–H5 vs staging @c942971; prod.env still missing / F69 enrich deferred; 13 remains in_progress | 2026-08-05T00:51:00Z S026/EV-024 13 validate-existing smokes PASS pending accept; await_smoke_accept; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md; deploy gate pending | 2026-08-05T00:54:00Z S026/EV-024 S026-D58: Accept 13 PASS; deploy gate+Phase D closed; write_evolve_summary; cycle in_progress; summary=docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md
     | 2026-08-05T00:59:44Z S026/EV-024: recorded closeout commit d12c37a ([M118] docs: close EV-024 / S026 after deploy gate PASS); evolve tip @d12c37a; cycle remains completed; session closed'
   pull_requests:
@@ -50675,6 +50842,9 @@ git_history:
   updated_at: '2026-08-05T00:54:00Z'
   main_tip: 2c884bd
   main_tip_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
+  tip: e7fa2b6
+  build_head: e7fa2b6
+  branch_ahead_of_origin: 2
 constraints:
   cost:
     target_usd_per_month: 25

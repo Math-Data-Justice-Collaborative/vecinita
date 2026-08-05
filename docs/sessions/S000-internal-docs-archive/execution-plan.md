@@ -11,8 +11,8 @@
 |-------|-------|
 | **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — Gate B→C PASS; M119 merged |
 | **Active milestone** | M120 — F71 staging rechunk / F36 / promote |
-| **Active task** | T120.4 — staging shadow → F36 report checklist |
-| **Tasks completed** | Phase 21–27; S027 Phase A/B; M119 (PR #208 merged @`2c884bd`); S027-D34 CI split; T120.1–T120.3b |
+| **Active task** | T120.5 — e2e green TC-232/235–239/241 |
+| **Tasks completed** | Phase 21–27; S027 Phase A/B; M119 (PR #208 merged @`2c884bd`); S027-D34 CI split; T120.1–T120.4 |
 | **Last updated** | 2026-08-05 |
 | **Evolve cycle** | EV-025 — Standard; Phase C build (M120) |
 | **Git branch** | `evolve/EV-025-multilingual-embeddings` |
@@ -2395,8 +2395,8 @@ on staging shadow; F36 EN/ES advisory (Hy1 + dense rank if available); operator 
 | T120.2 | Config/Docs: default tokenizer id = embed pin; staging secrets/runbook for shadow rebuild | Config | completed | config-spec, ADR-044, S027-D15 | T119.5 | 2026-08-05 | S027 | F71 |
 | T120.3 | Code: wire F41 rebuild path for pin+tokenizer stamps; ensure rechunk re-embeds under F70 client | Code | completed | feature-list F71, RD-294/295 | T120.1, T120.2 | 2026-08-05 | S027 | F71 |
 | T120.3b | Code: eval/F36 report — EN/ES rel+faith vs E0 baseline columns + dense hit@k/mean_rank when available (TC-235–236) | Code | completed | AC-ME3–ME4, S027-D18, F36 | T120.1, T120.3 | 2026-08-05 | S027 | F71 |
-| T120.4 | Ops/Docs: staging shadow → F36 report checklist (EN/ES rel+faith vs E0; hit@k/mean_rank) | Docs | pending | S027-D18, AC-ME3–ME4/ME8–ME9, F36 | T120.3b | — | S027 | F71 |
-| T120.5 | Test: e2e green TC-232/235–239/241; staging promote dry-run path covered | Test | pending | UJ-053/076, TP5 | T120.3b, T120.4 | — | S027 | F71 |
+| T120.4 | Ops/Docs: staging shadow → F36 report checklist (EN/ES rel+faith vs E0; hit@k/mean_rank) | Docs | completed | S027-D18, AC-ME3–ME4/ME8–ME9, F36 | T120.3b | 2026-08-05 | S027 | F71 |
+| T120.5 | Test: e2e green TC-232/235–239/241; staging promote dry-run path covered | Test | in_progress | UJ-053/076, TP5 | T120.3b, T120.4 | — | S027 | F71 |
 
 #### M121: F71 — Prod cutover + E0 rollback
 
