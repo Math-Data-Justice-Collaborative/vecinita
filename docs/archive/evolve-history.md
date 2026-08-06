@@ -2,6 +2,19 @@
 
 Archived evolve cycle reports.
 
+## EV-025 — Multilingual embeddings (F70–F71)
+
+**Cycle:** EV-025  
+**Completed:** 2026-08-05  
+**Session:** S027-multilingual-embeddings  
+**Status:** completed (S027-D63; staging-as-live F71 cutover S027-D61)  
+**Features:** F70 (#159), F71 (#159)  
+**Preset:** Standard (`01–13` + 15 before close)  
+**PRs:** Phase 28 M119–M122 merges; hotfix [#221](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/221) @ `4b7231b`  
+**Live:** E1 promote `094e957e-…` · 385 chunks @ 384-d · H3 sources EN=8 / ES=3 · 15-service-health PASS  
+**Report:** [evolve-summary](../sessions/S027-multilingual-embeddings/reports/evolve-summary.md) · [deploy-smoke](../sessions/S027-multilingual-embeddings/reports/deploy-smoke.md) · [service-health](../sessions/S027-multilingual-embeddings/reports/service-health.md)  
+**Notes:** No separate prod DO stack; staging apps/DB are the live surface. 17-retrospective queued.
+
 ## EV-023 — CI / local quality + release automation (F62–F63)
 
 **Cycle:** EV-023  

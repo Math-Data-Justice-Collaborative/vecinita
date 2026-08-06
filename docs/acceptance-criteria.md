@@ -306,17 +306,17 @@
 
 ### EV-025 — Multilingual embeddings (F70–F71) — S027 / #159
 
-- [ ] **AC-ME1**: Modal embed + shared client host the chosen 384-d pin (E1 candidate; final after F36 review); FastEmbed preferred with ST/ONNX fallback; no paid embed APIs (UJ-075/076, TC-232, TC-234, ADR-048, F70).
-- [ ] **AC-ME2**: e5-family pins apply `query:` on ask and `passage:` on ingest/re-embed via shared client (TC-233, S027-D13).
-- [ ] **AC-ME3**: F36 promote report includes EN vs ES answer relevancy + faithfulness (Hy1) vs E0 baseline (advisory) (UJ-076, TC-235, S027-D18).
-- [ ] **AC-ME4**: Dense hit@k / mean_rank EN/ES included when harness available; else documented skip (TC-236).
-- [ ] **AC-ME5**: Promote is operator judgment after the report — no hard numeric abort gate (S027-D11, TC-239).
-- [ ] **AC-ME6**: Cutover order: staging shadow→F36→promote, then repeat on prod (S027-D21, TC-240).
-- [ ] **AC-ME7**: After cutover, in-corpus EN ask returns non-empty sources (UJ-075, TC-237).
-- [ ] **AC-ME8**: After cutover, in-corpus ES ask returns non-empty sources (UJ-075, TC-238).
-- [ ] **AC-ME9**: Prior E0 revision remains restorable via F41 rollback runbook (TC-239, S027-D22).
-- [ ] **AC-ME10**: Out of EV-025 without unlock: dual-index; dim≠384; UI changes; bge-m3 multi-vector; hard numeric promote gate; F72 as separate Fn (F44 tune only if post-pin harm, folded into F71). Tokenizer **must** align + rechunk (in-scope — S027-D15/M2b).
-- [ ] **AC-ME11**: `VECINITA_CHUNK_TOKENIZER_ID` matches embed pin; F71 rebuild rechunks then re-embeds (TC-241, S027-D15/M2b, ADR-044/048).
+- [x] **AC-ME1**: Modal embed + shared client host the chosen 384-d pin (E1 candidate; final after F36 review); FastEmbed preferred with ST/ONNX fallback; no paid embed APIs (UJ-075/076, TC-232, TC-234, ADR-048, F70). *(11-verify-impl S027-D47 2026-08-05 — code/T0; live F36 finalize @ 13)*
+- [x] **AC-ME2**: e5-family pins apply `query:` on ask and `passage:` on ingest/re-embed via shared client (TC-233, S027-D13). *(11-verify-impl S027-D47)*
+- [x] **AC-ME3**: F36 promote report includes EN vs ES answer relevancy + faithfulness (Hy1) vs E0 baseline (advisory) (UJ-076, TC-235, S027-D18). *(11-verify-impl S027-D47 — schema/units; compose WAIVED S027-D35; live @ 13)*
+- [x] **AC-ME4**: Dense hit@k / mean_rank EN/ES included when harness available; else documented skip (TC-236). *(11-verify-impl S027-D47 — cond. live @ 13)*
+- [x] **AC-ME5**: Promote is operator judgment after the report — no hard numeric abort gate (S027-D11, TC-239). *(11-verify-impl S027-D47)*
+- [x] **AC-ME6**: Cutover order: staging shadow→F36→promote, then repeat on prod (S027-D21, TC-240). *(11-verify-impl S027-D47 — runbook; execute @ 13)*
+- [x] **AC-ME7**: After cutover, in-corpus EN ask returns non-empty sources (UJ-075, TC-237). *(11-verify-impl S027-D47 — T0 stub; live @ 13)*
+- [x] **AC-ME8**: After cutover, in-corpus ES ask returns non-empty sources (UJ-075, TC-238). *(11-verify-impl S027-D47 — T0 stub; live @ 13)*
+- [x] **AC-ME9**: Prior E0 revision remains restorable via F41 rollback runbook (TC-239, S027-D22). *(11-verify-impl S027-D47 — code; ops @ 13)*
+- [x] **AC-ME10**: Out of EV-025 without unlock: dual-index; dim≠384; UI changes; bge-m3 multi-vector; hard numeric promote gate; F72 as separate Fn (F44 tune only if post-pin harm, folded into F71). Tokenizer **must** align + rechunk (in-scope — S027-D15/M2b). *(11-verify-impl S027-D47 — scope held)*
+- [x] **AC-ME11**: `VECINITA_CHUNK_TOKENIZER_ID` matches embed pin; F71 rebuild rechunks then re-embeds (TC-241, S027-D15/M2b, ADR-044/048). *(11-verify-impl S027-D47 — T0 pin; compose stamp WAIVED S027-D35)*
 
 
 ## Quantitative benchmarks

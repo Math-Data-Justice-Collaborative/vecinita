@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### EV-025: Multilingual embeddings (F70–F71) — S027 / #159
+
+- **F70**: Pin `intfloat/multilingual-e5-small` @ 384-d; Modal embed ST runtime (+ FastEmbed→ST fallback)
+- **F71**: Staging shadow→F36→promote; staging-as-live cutover (no separate prod stack); E0 rollback runbook
+- **Deploy:** Hotfix [#221](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/221) → `main` @ `4b7231b`; promote `094e957e-…` (385 chunks); H1–H5 + 15-service-health PASS
+
 ### EV-023: CI / local quality + release automation (F62–F63) — S025 / #194 #182 #103
 
 - **F62**: Husky pre-push = `make lint` + `make test-fast`; pre-commit = typecheck + security-scan + job-dispatch

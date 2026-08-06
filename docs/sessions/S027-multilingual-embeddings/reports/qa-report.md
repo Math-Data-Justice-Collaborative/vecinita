@@ -110,13 +110,15 @@ See `reports/e2e-report.md` — UJ-075 PASS; UJ-076 WAIVED (S027-D35); T2/T3 def
 
 ## Findings for 11-verify-impl
 
-| ID | Severity | Finding | Suggested action |
-|----|----------|---------|------------------|
-| QA-S027-001 | Advisory | Local compose/DB suites unavailable (Docker userns) | Accept S027-D35; re-run when Docker works or rely on CI + staging |
-| QA-S027-002 | Advisory | H4–H5 live cutover not run | Required at **13-deploy-smoke** |
-| QA-S027-003 | Advisory | DM Vitest worker exited once under load | Flake; green on rerun + CI; monitor |
-| QA-S027-004 | Advisory | Main CI security `install-tools` flaky GitHub fetch | Flag for **17-retrospective** with prod-bug review |
-| QA-S027-005 | Advisory | User-reported bugs pushed to prod this cycle | **17-retrospective** after Phase D / deploy |
+| ID | Severity | Finding | Suggested action | Disposition (S027-D43 rem.) |
+|----|----------|---------|------------------|-----------------------------|
+| QA-S027-001 | Advisory | Local compose/DB suites unavailable (Docker userns) | Accept S027-D35; re-run when Docker works or rely on CI + staging | **Accepted** (S027-D44) — S027-D35 stands |
+| QA-S027-002 | Advisory | H4–H5 live cutover not run | Required at **13-deploy-smoke** | **Accepted** (S027-D44) — carry to 13 |
+| QA-S027-003 | Advisory | DM Vitest worker exited once under load | Flake; green on rerun + CI; monitor | **Accepted** (S027-D44) — flake; 736/736 reconfirm |
+| QA-S027-004 | Advisory | Main CI security `install-tools` flaky GitHub fetch | Flag for **17-retrospective** with prod-bug review | **Accepted** (S027-D44) — queue 17 |
+| QA-S027-005 | Advisory | User-reported bugs pushed to prod this cycle | **17-retrospective** after Phase D / deploy | **Accepted** (S027-D44) — queue 17 (not started) |
+
+Remediation note: `reports/qa-remediation.md` (2026-08-05).
 
 ## Phase / plan alignment
 

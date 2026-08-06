@@ -72,8 +72,8 @@
 | F67 | Bilingual tooltips / contextual hints | Implemented | Cross-cutting | `frontend-ui`, `frontend-i18n`, both frontends | S026/EV-024 #106/#193 |
 | F68 | ChatRAG feedback page + backend (anonymous) | Implemented | ChatRAG + Admin | chat-rag-*, internal-write, database, admin FE | S026/EV-024 #186/#193 |
 | F69 | Admin audit actor username (read-time) | Implemented | Data Management | data-management-backend/frontend | S026/EV-024 #170/#193 |
-| F70 | Multilingual embedding runtime + model pin | Planned | Cross-cutting | Modal embed, `packages/embedding-client`, ChatRAG + ingest | S027/EV-025 #159 |
-| F71 | Corpus re-embed + prod cutover (multilingual pin) | Planned | Data Management | F41 rebuild/promote, Modal, internal-write, Admin Jobs | S027/EV-025 #159 |
+| F70 | Multilingual embedding runtime + model pin | Implemented | Cross-cutting | Modal embed, `packages/embedding-client`, ChatRAG + ingest | S027/EV-025 #159 |
+| F71 | Corpus re-embed + prod cutover (multilingual pin) | Implemented | Data Management | F41 rebuild/promote, Modal, internal-write, Admin Jobs | S027/EV-025 #159 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -180,7 +180,7 @@
   weights on Modal volume / image — not in Vecinita DB.
 - **Protected surfaces**: `infra/modal/embedding_app.py`; `packages/embedding-client`.
 - **Source**: User interview; R8; S027/EV-025; ADR-048; F70.
-- **Status**: Evolving under EV-025 (F70 implementation); prior FastEmbed-en path Implemented.
+- **Status**: Implemented (F70 pin in code; 11-verify-impl S027-D47; prior FastEmbed-en path superseded).
 
 ### F11: ChatRAG web UI (React/Vite)
 
@@ -1297,6 +1297,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `docs/adr` / config-spec | ADR-008 successor; pin defaults |
 - **Out of scope**: Dual-index; dim≠384; UI; bge-m3 multi-vector.
   Tokenizer **aligns with embed pin this cycle** (S027-D15 amended by 02 M2b) via F71 rechunk.
+- **Status**: Implemented (11-verify-impl S027-D47 2026-08-05; live cutover confirm @ 13).
 - **Source**: S027 / EV-025; GitHub #159; S027-D1–D25; S019 spike E0/E1/E2.
 
 ### F71: Corpus re-embed + prod cutover (multilingual pin) (#159)
@@ -1325,6 +1326,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | config / ADR-044 | `VECINITA_CHUNK_TOKENIZER_ID` set to embed pin |
 - **Out of scope**: Dual-write dim migration; rescrape-as-default; UI redesign of Jobs;
   standalone F72.
+- **Status**: Implemented (11-verify-impl S027-D47 2026-08-05; live staging→prod cutover confirm @ 13).
 - **Source**: S027 / EV-025; GitHub #159; F41 / ADR-040; S027-D1–D25; 02 M2b.
 
 ## Planned / Deferred (post-v1)

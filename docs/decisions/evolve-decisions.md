@@ -892,6 +892,28 @@ call must include recorded EN vs ES metrics. Out: dual-index, dim≠384, UI, bge
 | S027-D40 | Merge #211 | **Approve merge** PR #211 (option 1) — tip @`0e65f14` CI green; **MERGED** @`e38516a` (2026-08-05T19:24:50Z); main CI [31039293277](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31039293277) + deploy-preflight [31039596545](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31039596545) success; continue **M122 / T122.1** |
 | S027-D41 | Merge #213 | **Approve merge** PR #213 (option 1) — tip @`2e9044b` CI green; **MERGED** @`de1355c`; then **08-verify-build**; **17-retrospective** queued after cycle (prod bugs observed) |
 | S027-D42 | Phase D | **Start 09-qa** (option 1) — 08 PASS (cond. S027-D35); 17-retro remains after cycle |
+| S027-D43 | QA advisories | User option **3** — address QA advisories before 11-verify-impl; rem. note `reports/qa-remediation.md`; recommended package: Accept S027-D35 (001), carry H4–H5→13 (002), accept DM Vitest flake (003; 736/736 reconfirm), queue 004+005 → 17-retro after cycle; AskQuestion disposition pending |
+| S027-D44 | QA + 11 | User option **1** — **accept** QA-S027-001..005 dispositions (per `qa-remediation.md`); start **11-verify-impl**; H4–H5 remain required at 13; 17-retro remains after cycle |
+| S027-D45 | 11 journeys | User option **1** — **Approve** UJ-075 + UJ-076 (T0 stub PASS / compose WAIVED S027-D35); live T3/H4–H5 at **13** |
+| S027-D46 | 11 inspection | User option **1** — **Skip** live Swagger/UI inspection; OpenAPI + unit/e2e evidence only (S027-D16); live cutover @ 13 |
+| S027-D47 | 11 features | User option **1** — **Approve F70 + F71**; 11-verify-impl **completed** (cond. live @ 13 / S027-D35); next → 12-verify-deploy |
+| S027-D48 | 12 start | User option **1** — **Start 12-verify-deploy**; checklist draft `reports/deploy-checklist.md`; staging drift `c942971`→`de1355c` |
+| S027-D49 | 12 sign-off | User option **1** — **Approve** all failure mitigations + rollback; deploy checklist **ready**; 12-verify-deploy **completed**; next → 13-deploy-smoke |
+| S027-D50 | 13 start | User option **1** — **Start 13-deploy-smoke**; Path A validate CD @`de1355c` (Modal [31042438756](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31042438756) + DO [31042551937](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31042551937) success) then H1–H5 + staging cutover |
+| S027-D51 | 13 H3 | User option **1** — **Investigate+fix** ChatRAG H3 ask hang → `504 no_healthy_upstream` (basic-xxs single instance) |
+| S027-D52 | BUG-2026-08-05 | User option **1** — confirm root cause (async ask blocks event loop); apply `asyncio.to_thread` on `/api/v1/ask` + stream setup |
+| S027-D53 | Hotfix ship | User option **1** — PR **#220** MERGED @`903d5e7`; Modal+DO CD success; UH **fixed** (health stays up during ask); H4–H5 **PASS**; H3 ask still hangs ≥120s after warm (separate) |
+| S027-D54 | 13 H3 hang | User option **1** — **Investigate H3 ask hang** separately from UH fix (Modal generate / retrieve / timeouts); BUG-2026-08-05 UH **fixed_deployed**; 13-deploy-smoke remains **in_progress** |
+| S027-D55 | H3 embed fix | User: **2 then 1** — ops `VECINITA_EMBED_RUNTIME=sentence_transformers` (Modal secret + stage + redeploy) first; then code FastEmbed→ST fallback (S027-D12) |
+| S027-D56 | Hotfix PR | User option **1** — commit + open hotfix PR [#221](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/221) (`a354fc0`) for embed E1 FastEmbed→ST |
+| S027-D57 | Merge #221 | User: **merge + ensure live** — PR **#221** MERGED @`4b7231b`; verify CI/CD + H1–H5 |
+| S027-D58 | F71 cutover | User option **1** — start staging shadow→F36→promote; no prod corpus mutation |
+| S027-D59 | Staging promote | User option **1** (continue-with-recommended) — **promote staging** shadow `094e957e-…` → live after F36 PASS; executed: **385** chunks / **47** docs; post-promote H3 EN sources=8 / ES sources=3; H4–H5 PASS; **no prod** corpus mutation |
+| S027-D60 | Staging accept → prod path | User option **2** — start prod cutover next; **blocked on Ambiguity**: no distinct prod DO apps/DB found (only `vecinita-*-…ondigitalocean.app` + `vecinita-staging*` Postgres); staging promote may already be the live cutover — AskQuestion `prod_f71_target` |
+| S027-D61 | Prod target | User option **1** — **staging-as-live complete**; D59 promote + H3/H4–H5 = F71 cutover this cycle; no second promote; **13-deploy-smoke PASS** (cond.); deploy/phase_d gates passed |
+| S027-D62 | Cycle close path | User option **2** — run **15-service-health** first (post-F71 staging-as-live @`4b7231b`), then close EV-025 |
+| S027-D63 | Cycle close | User option **1** — **close EV-025**; evolve-summary + evolve-history archived; next **17-retrospective** |
+| S027-D64 | State reconcile + session close | User option **1** — treat HANDOFF/reports/D63 as truth; reconcile `workflow-state.yaml` (EV-025 + routing 07–13/15/16 completed @ tip `4b7231b`); **close_session** — archive S027, `active_session: null`, overall `idle` (YAML had been wiped mid-build by HEAD restore) |
 
 ### Feature map
 
