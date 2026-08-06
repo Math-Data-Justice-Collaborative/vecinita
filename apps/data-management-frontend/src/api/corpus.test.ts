@@ -7,6 +7,7 @@ import {
   listDocumentTags,
   listDocuments,
   patchChunkTags,
+  patchDocumentMetadata,
   patchDocumentTags,
   retagDocument,
 } from "./corpus";
@@ -149,6 +150,40 @@ describe("corpus api", () => {
     expect(url).toContain("/documents/doc-1/tags");
     expect(init.method).toBe("PATCH");
     expect(init.body).toContain("human");
+  });
+
+  it("patchDocumentMetadata sends PATCH display_title (F74)", async () => {
+    const dto = {
+      document_id: "doc-1",
+      url: "https://example.com/doc",
+      title: "Scraped",
+      display_title: "Neighbor name",
+      language: "en",
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(dto)));
+
+    await expect(
+      patchDocumentMetadata(options, "doc-1", {
+        display_title: "Neighbor name",
+      }),
+    ).resolves.toEqual(dto);
+
+    const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/documents/doc-1");
+    expect(init.method).toBe("PATCH");
+    expect(JSON.parse(init.body as string)).toEqual({
+      display_title: "Neighbor name",
+    });
+  });
+
+  it("patchDocumentMetadata throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 404 })),
+    );
+    await expect(
+      patchDocumentMetadata(options, "missing", { display_title: "x" }),
+    ).rejects.toThrow(/Patch document metadata failed \(404\)/);
   });
 
   it("patchDocumentTags uses the status fallback when the error body is empty", async () => {

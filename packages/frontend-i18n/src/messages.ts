@@ -500,6 +500,18 @@ const enStrings = {
   "admin.documentAdmin.queueRetagFailed": "Failed to queue retag job",
   "admin.documentAdmin.retagFailed": "Retag job failed",
   "admin.documentAdmin.pollRetagFailed": "Failed to poll retag job",
+  "admin.documentAdmin.displayTitleLabel": "Display title",
+  "admin.documentAdmin.displayTitlePlaceholder":
+    "Neighbor-friendly name (optional)",
+  "admin.documentAdmin.displayTitleHint":
+    "Shown in citations and lists. Scraped title is kept separately.",
+  "admin.documentAdmin.saveDisplayTitle": "Save display title",
+  "admin.documentAdmin.displayTitleSaved": "Display title saved.",
+  "admin.documentAdmin.saveDisplayTitleFailed": "Failed to save display title",
+  "admin.documentAdmin.clearDisplayTitle": "Clear (use scraped title)",
+  "admin.bulkMetadata.displayTitleLabel": "Display title",
+  "admin.bulkMetadata.displayTitlePlaceholder":
+    "Operator display name (optional)",
   "admin.documentHistory.loading": "Loading history…",
   "admin.documentHistory.empty": "No history for this document.",
   "admin.documentHistory.title": "History",
@@ -1062,6 +1074,18 @@ const esStrings = {
   "admin.documentAdmin.retagFailed": "El trabajo de re-etiquetado falló",
   "admin.documentAdmin.pollRetagFailed":
     "No se pudo consultar el trabajo de re-etiquetado",
+  "admin.documentAdmin.displayTitleLabel": "Título para mostrar",
+  "admin.documentAdmin.displayTitlePlaceholder":
+    "Nombre legible para vecinos (opcional)",
+  "admin.documentAdmin.displayTitleHint":
+    "Se muestra en citas y listas. El título raspado se conserva aparte.",
+  "admin.documentAdmin.saveDisplayTitle": "Guardar título para mostrar",
+  "admin.documentAdmin.displayTitleSaved": "Título para mostrar guardado.",
+  "admin.documentAdmin.saveDisplayTitleFailed":
+    "No se pudo guardar el título para mostrar",
+  "admin.documentAdmin.clearDisplayTitle": "Borrar (usar título raspado)",
+  "admin.bulkMetadata.displayTitleLabel": "Título para mostrar",
+  "admin.bulkMetadata.displayTitlePlaceholder": "Nombre de operador (opcional)",
   "admin.documentHistory.loading": "Cargando historial…",
   "admin.documentHistory.empty": "Sin historial para este documento.",
   "admin.documentHistory.title": "Historial",

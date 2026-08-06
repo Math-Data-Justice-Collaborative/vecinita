@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 07-build |
-| **Active milestone** | M124 — F73 relevance sources (complete) → next M125 |
-| **Active task** | T124.4 done — next T125.1 display_title tests |
+| **Active milestone** | M125 — F74 display_title (complete) → next M126 |
+| **Active task** | T125.8 done — next T126.1 Phase 29 gate |
 | **Last updated** | 2026-08-06 |
 | **Evolve cycle** | EV-026 — Standard; Phase C build |
 | **Git branch** | `evolve/EV-026-chat-source-ux` |
@@ -2484,14 +2484,14 @@ bulk metadata; COALESCE in packing/citations; DocumentAdmin rename; audit `docum
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T125.1 | Test: unit/API red — migration column; PATCH body; COALESCE; rescrape preserves display; null reset; audit (TC-248–251) | Test | pending | AC-SU6–SU10, F74, ADR-051 | T124.4 | — | S028 | F74 |
-| T125.2 | Config: Alembic `documents.display_title` nullable text | Config | pending | feature-list F74, RD-312 | T125.1 | — | S028 | F74 |
-| T125.3 | Code: write API `PATCH /internal/v1/documents/{id}` + bulk metadata `display_title` + audit | Code | pending | api-contract, RD-313 | T125.1, T125.2 | — | S028 | F74 |
-| T125.4 | Code: rag packing + chat sources title = `COALESCE(display_title, title)` | Code | pending | RD-320, feature-list F74 | T125.3 | — | S028 | F74 |
-| T125.5 | Code: DocumentAdmin single-doc rename UI + admin client PATCH | Code | pending | UJ-079, RD-313 | T125.3 | — | S028 | F74 |
-| T125.6 | Test: e2e UJ-079 + admin Vitest green (TC-248–251); Playwright optional | Test | pending | e2e-coverage, RD-317 | T125.4, T125.5 | — | S028 | F74 |
-| T125.7 | Config: OpenAPI + shared schemas DTO for PATCH + `display_title` | Config | pending | ADR-011, TP4 | T125.3 | — | S028 | F74 |
-| T125.8 | Test: CORS H0c OPTIONS `PATCH /internal/v1/documents/{id}` from admin origin | Test | pending | connectivity-gates, smoke | T125.3 | — | S028 | F74 |
+| T125.1 | Test: unit/API red — migration column; PATCH body; COALESCE; rescrape preserves display; null reset; audit (TC-248–251) | Test | completed | AC-SU6–SU10, F74, ADR-051 | T124.4 | 2026-08-06 | S028 | F74 |
+| T125.2 | Config: Alembic `documents.display_title` nullable text | Config | completed | feature-list F74, RD-312 | T125.1 | 2026-08-06 | S028 | F74 |
+| T125.3 | Code: write API `PATCH /internal/v1/documents/{id}` + bulk metadata `display_title` + audit | Code | completed | api-contract, RD-313 | T125.1, T125.2 | 2026-08-06 | S028 | F74 |
+| T125.4 | Code: rag packing + chat sources title = `COALESCE(display_title, title)` | Code | completed | RD-320, feature-list F74 | T125.3 | 2026-08-06 | S028 | F74 |
+| T125.5 | Code: DocumentAdmin single-doc rename UI + admin client PATCH | Code | completed | UJ-079, RD-313 | T125.3 | 2026-08-06 | S028 | F74 |
+| T125.6 | Test: e2e UJ-079 + admin Vitest green (TC-248–251); Playwright optional | Test | completed | e2e-coverage, RD-317 | T125.4, T125.5 | 2026-08-06 | S028 | F74 |
+| T125.7 | Config: OpenAPI + shared schemas DTO for PATCH + `display_title` | Config | completed | ADR-011, TP4 | T125.3 | 2026-08-06 | S028 | F74 |
+| T125.8 | Test: CORS H0c OPTIONS `PATCH /internal/v1/documents/{id}` from admin origin | Test | completed | connectivity-gates, smoke | T125.3 | 2026-08-06 | S028 | F74 |
 
 #### M126: Phase 29 gate — TC suite + docs closeout
 
@@ -3386,14 +3386,14 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T124.2 | M124 | 29 | Code | completed | T124.1 | 2026-08-06 | S028 | F73 | TP4 |
 | T124.3 | M124 | 29 | Test | completed | T124.2 | 2026-08-06 | S028 | F73 | — |
 | T124.4 | M124 | 29 | Docs | completed | T124.3 | 2026-08-06 | S028 | F73 | — |
-| T125.1 | M125 | 29 | Test | pending | T124.4 | — | S028 | F74 | — |
-| T125.2 | M125 | 29 | Config | pending | T125.1 | — | S028 | F74 | ADR-051 |
-| T125.3 | M125 | 29 | Code | pending | T125.1, T125.2 | — | S028 | F74 | — |
-| T125.4 | M125 | 29 | Code | pending | T125.3 | — | S028 | F74 | — |
-| T125.5 | M125 | 29 | Code | pending | T125.3 | — | S028 | F74 | — |
-| T125.6 | M125 | 29 | Test | pending | T125.4, T125.5 | — | S028 | F74 | — |
-| T125.7 | M125 | 29 | Config | pending | T125.3 | — | S028 | F74 | OpenAPI |
-| T125.8 | M125 | 29 | Test | pending | T125.3 | — | S028 | F74 | CORS H0c |
+| T125.1 | M125 | 29 | Test | completed | T124.4 | — | S028 | F74 | — |
+| T125.2 | M125 | 29 | Config | completed | T125.1 | — | S028 | F74 | ADR-051 |
+| T125.3 | M125 | 29 | Code | completed | T125.1, T125.2 | — | S028 | F74 | — |
+| T125.4 | M125 | 29 | Code | completed | T125.3 | — | S028 | F74 | — |
+| T125.5 | M125 | 29 | Code | completed | T125.3 | — | S028 | F74 | — |
+| T125.6 | M125 | 29 | Test | completed | T125.4, T125.5 | — | S028 | F74 | — |
+| T125.7 | M125 | 29 | Config | completed | T125.3 | — | S028 | F74 | OpenAPI |
+| T125.8 | M125 | 29 | Test | completed | T125.3 | — | S028 | F74 | CORS H0c |
 | T126.1 | M126 | 29 | Test | pending | T123.5, T124.3, T125.6 | — | S028 | F72–F74 | — |
 | T126.2 | M126 | 29 | Docs | pending | T126.1 | — | S028 | F72–F74 | — |
 | T126.3 | M126 | 29 | Docs | pending | T126.2 | — | S028 | F72–F74 | — |

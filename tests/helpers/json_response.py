@@ -48,6 +48,13 @@ def json_str(obj: JsonObject, key: str) -> str:
     return str(obj[key])
 
 
+def json_str_optional(obj: JsonObject, key: str) -> str | None:
+    """Return the value at key as str, or None when missing/null."""
+    if key not in obj or obj[key] is None:
+        return None
+    return str(obj[key])
+
+
 def json_list(obj: JsonObject, key: str) -> list[object]:
     """Return the JSON array value at key."""
     value = obj[key]

@@ -182,6 +182,7 @@ class DocumentSummary(BaseModel):
     document_id: UUID
     url: str
     title: str | None = None
+    display_title: str | None = None
     language: str | None = None
     source_domain: str | None = None
     source_path: str | None = None
@@ -214,8 +215,29 @@ class DocumentDetail(BaseModel):
     document_id: UUID
     url: str
     title: str | None = None
+    display_title: str | None = None
     language: str | None = None
     text: str
+
+
+class DocumentPatchRequest(BaseModel):
+    """PATCH /internal/v1/documents/{id} — partial metadata update (F74)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    display_title: str | None = None
+    title: str | None = None
+    language: str | None = None
+
+
+class DocumentMetadataResponse(BaseModel):
+    """Updated document metadata after PATCH (F74)."""
+
+    document_id: UUID
+    url: str
+    title: str | None = None
+    display_title: str | None = None
+    language: str | None = None
 
 
 class TagPatchRequest(BaseModel):
@@ -381,6 +403,7 @@ class MetadataUpdates(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     title: str | None = None
+    display_title: str | None = None
     language: str | None = None
 
 

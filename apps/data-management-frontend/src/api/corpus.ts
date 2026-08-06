@@ -1,6 +1,8 @@
 import type {
   ChunkDetail,
   CorpusTreeResponse,
+  DocumentMetadataPatch,
+  DocumentMetadataResponse,
   DocumentSummary,
   TagInput,
 } from "./types";
@@ -110,6 +112,31 @@ export async function listDocumentTags(
   }
   const body = (await response.json()) as { tags: TagInput[] };
   return body.tags;
+}
+
+export async function patchDocumentMetadata(
+  options: CorpusClientOptions,
+  documentId: string,
+  updates: DocumentMetadataPatch,
+): Promise<DocumentMetadataResponse> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/documents/${documentId}`,
+    {
+      method: "PATCH",
+      headers: {
+        ...authHeaders(options),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updates),
+    },
+  );
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(
+      detail || `Patch document metadata failed (${String(response.status)})`,
+    );
+  }
+  return response.json() as Promise<DocumentMetadataResponse>;
 }
 
 export async function patchDocumentTags(

@@ -2585,13 +2585,28 @@ project:
         session_id: S028-chat-source-ux
         evolve_cycle_id: EV-026
         status: in_progress
-        current_action: T123.1
-        next_action: 07-build T123.1 Vitest red for URL helper in vecinita-frontend-ui
-        branch: feat/S028-chat-source-ux
+        current_action: T125.1
+        next_action: 07-build T125.1 migration + PATCH + COALESCE tests (red) for F74 display_title
+        branch: evolve/EV-026-chat-source-ux
         planned_evolve_branch: evolve/EV-026-chat-source-ux
+        branch_rename_status: completed
+        milestone: M125
+        task: T125.1
+        active_feature: F74
+        m123_status: completed
+        m124_status: completed
+        m125_status: in_progress
+        task_status: in_progress
+        tip_sha: 08dd6a7
+        askquestion_pending: false
         s028_d25_decision: S028-D25
-        updated_at: '2026-08-06T19:04:21Z'
-        note: 'S028-D25: active S028 07-build in_progress; historical baseline remains S027 completed'
+        updated_at: '2026-08-06T21:29:23Z'
+        note: '07-build: M123+M124 done; M125 F74 T125.1 in_progress (display_title migration + PATCH)'
+        substeps:
+          current_task: T125.1
+          task_status: in_progress
+          milestone: M125
+          active_feature: F74
     08-verify-build:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -6677,7 +6692,7 @@ active_session:
   intent: 'GitHub #222 #223 #224 chat source UX (URL validation display, dynamic relevance sources, operator display names)
     via 16-evolve; feature preset routing; prod-only deploy — be careful'
   status: in_progress
-  branch: feat/S028-chat-source-ux
+  branch: evolve/EV-026-chat-source-ux
   orchestrator: 16-evolve
   evolve_cycle_id: EV-026
   feature_ids:
@@ -6751,6 +6766,9 @@ active_session:
       [Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/05-verify-tech-audit.md]'
     - 'HANDOFF refreshed 2026-08-06T19:04:21Z: Gate B→C passed → 07 T123.1; 06-tech-tooling remains skipped; branch still
       feat/S028-chat-source-ux until evolve rename at 07 start'
+    - '07-build progress 2026-08-06T19:09:30Z: commits dbd34da (docs Phase A/B), af18200 [T123] F72, 08dd6a7 [T124] F73; M123+M124 completed; current_action=T125.1; tip=08dd6a7'
+    - 'HANDOFF refreshed 2026-08-06T19:09:30Z: 07-build M123 F72 + M124 F73 complete @08dd6a7; branch renamed feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux; next M125 F74 T125.1; askquestion_pending=false'
+    - 'T125.1 STARTED — F74 display_title migration + PATCH + COALESCE (red first); tip@08dd6a7'
   routing_plan:
     - stage: 00-context
       required: true
@@ -6854,20 +6872,32 @@ active_session:
       mode: delta
       skip_rationale:
       started_at: '2026-08-06T19:04:21Z'
-      current_action: T123.1
-      next_action: 07-build T123.1 Vitest red for URL helper in vecinita-frontend-ui
+      current_action: T125.1
+      next_action: 07-build T125.1 migration + PATCH + COALESCE tests (red) for F74 display_title
       askquestion_pending: false
       s028_d25_decision: S028-D25
       gate_b_to_c: passed
       phase_b: passed
-      milestone: M123
-      task: T123.1
-      note: S028-D25 Gate B→C PASS → 07-build in_progress; current_action=T123.1; Vitest red for URL helper in 
-        vecinita-frontend-ui; planned rename feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux at 07 start (record
-        when created); 06 remains skipped
-      updated_at: '2026-08-06T19:04:21Z'
-      branch: feat/S028-chat-source-ux
+      milestone: M125
+      task: T125.1
+      active_feature: F74
+      m123_status: completed
+      m124_status: completed
+      m125_status: in_progress
+      task_status: in_progress
+      m123_tip: af18200
+      m124_tip: 08dd6a7
+      tip_sha: 08dd6a7
+      substeps:
+        current_task: T125.1
+        task_status: in_progress
+        feature_id: F74
+        milestone: M125
+      note: '07-build: M123+M124 done; M125 F74 T125.1 in_progress (display_title migration + PATCH)'
+      updated_at: '2026-08-06T21:29:23Z'
+      branch: evolve/EV-026-chat-source-ux
       planned_evolve_branch: evolve/EV-026-chat-source-ux
+      branch_rename_status: completed
     - stage: 08-verify-build
       required: true
       status: pending
@@ -6905,15 +6935,15 @@ active_session:
     - docs/sessions/S028-chat-source-ux/HANDOFF.md
     - docs/sessions/S028-chat-source-ux/checkpoints/01-requirements-seed.md
     - docs/sessions/S028-chat-source-ux/reports/05-verify-tech-audit.md
-  next_action: 07-build T123.1 Vitest red for URL helper in vecinita-frontend-ui
+  next_action: 07-build T125.1 migration + PATCH + COALESCE tests (red) for F74 display_title
   orchestrator_status: in_progress
-  updated_at: '2026-08-06T19:04:21Z'
-  next_recommended: 05-verify-tech
+  updated_at: '2026-08-06T21:29:23Z'
+  next_recommended: 07-build T125.1
   delta_only: true
   askquestion_pending: false
   askquestion_pending_topic:
-  handoff: Gate B→C passed → 07 T123.1
-  current_action: T123.1
+  handoff: M125 F74 T125.1 in_progress (display_title migration + PATCH)
+  current_action: T125.1
   citations:
     - '[Corpus: feature-list.md §F72–F74]'
     - '[Spec: docs/adr/ADR-051-display-title-vs-lock-flag.md]'
@@ -19554,13 +19584,28 @@ stages:
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
       status: in_progress
-      current_action: T123.1
-      next_action: 07-build T123.1 Vitest red for URL helper in vecinita-frontend-ui
-      branch: feat/S028-chat-source-ux
+      current_action: T125.1
+      next_action: 07-build T125.1 migration + PATCH + COALESCE tests (red) for F74 display_title
+      branch: evolve/EV-026-chat-source-ux
       planned_evolve_branch: evolve/EV-026-chat-source-ux
+      branch_rename_status: completed
+      milestone: M125
+      task: T125.1
+      active_feature: F74
+      m123_status: completed
+      m124_status: completed
+      m125_status: in_progress
+      task_status: in_progress
+      tip_sha: 08dd6a7
+      askquestion_pending: false
       s028_d25_decision: S028-D25
-      updated_at: '2026-08-06T19:04:21Z'
-      note: 'S028-D25: active S028 07-build in_progress; historical baseline remains S027 completed'
+      updated_at: '2026-08-06T21:29:23Z'
+      note: '07-build: M123+M124 done; M125 F74 T125.1 in_progress (display_title migration + PATCH)'
+      substeps:
+        current_task: T125.1
+        task_status: in_progress
+        milestone: M125
+        active_feature: F74
   08-verify-build:
     status: completed
     session_id: S027-multilingual-embeddings
@@ -24188,13 +24233,16 @@ evolve_cycles:
     routing_preset: feature
     preset: feature
     current_stage: 07-build
-    current_action: T123.1
-    next_action: 07-build T123.1 Vitest red for URL helper in vecinita-frontend-ui
-    branch: feat/S028-chat-source-ux
-    session_branch: feat/S028-chat-source-ux
+    current_action: T125.1
+    next_action: 07-build T125.1 migration + PATCH + COALESCE tests (red) for F74 display_title
+    branch: evolve/EV-026-chat-source-ux
+    session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
-    branch_note: Currently feat/S028-chat-source-ux; planned rename/create evolve/EV-026-chat-source-ux at 07-build 
-      start (record in git_history.branches when created) — S028-D25
+    evolve_branch: evolve/EV-026-chat-source-ux
+    branch_rename_status: completed
+    branch_renamed_at: '2026-08-06T19:09:30Z'
+    branch_note: 'Renamed feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux at 07-build (S028-D25); recorded in
+      git_history.branches'
     mode: evolve
     delta_only: true
     phase0_approved: true
@@ -24317,12 +24365,12 @@ evolve_cycles:
         status: refreshed
         kind: handoff
         session_id: S028-chat-source-ux
-        stage: 05-verify-tech
-        skill_id: 05-verify-tech
+        stage: 07-build
+        skill_id: 07-build
         evolve_cycle_id: EV-026
         recorded_at: '2026-08-06T18:46:15Z'
-        updated_at: '2026-08-06T18:53:18Z'
-        note: 'HANDOFF refreshed: 05 statement_review — M1/M2/L1 AskQuestion (S028-D24); Gate B→C pending'
+        updated_at: '2026-08-06T19:09:30Z'
+        note: 'HANDOFF updated: M123+M124 complete; next M125 F74 T125.1; branch evolve/EV-026-chat-source-ux'
       - path: docs/sessions/S028-chat-source-ux/checkpoints/01-requirements-seed.md
         kind: handoff_seed
         status: completed
@@ -24393,9 +24441,8 @@ evolve_cycles:
         note: Phase 29 M123–M126 locked (S028-D23)
     issues: []
     updated_at: '2026-08-06T19:04:21Z'
-    note: 'S028-D25 2026-08-06T19:04:21Z: Gate B→C PASS (option 1) — checkpoints.phase_b=passed; gates.b_to_c=passed; 07-build
-      in_progress T123.1; 06 remains skipped; HANDOFF: Gate B→C passed → 07 T123.1; next_action: 07-build T123.1 Vitest red
-      for URL helper in vecinita-frontend-ui'
+    note: '07-build: M123+M124 done; M125 F74 T125.1 in_progress (display_title migration + PATCH)'
+    updated_at: '2026-08-06T21:29:23Z'
     phase1_approved: true
     phase1_approved_at: '2026-08-06T16:36:58Z'
     phase_1_status: approved
@@ -24622,10 +24669,13 @@ evolve_cycles:
         started_at: '2026-08-06'
         started_at_iso: '2026-08-06T19:04:21Z'
         session_id: S028-chat-source-ux
-        branch: feat/S028-chat-source-ux
+        branch: evolve/EV-026-chat-source-ux
         planned_evolve_branch: evolve/EV-026-chat-source-ux
-        branch_rename_note: Planned rename feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux at 07 start; record 
-          in git_history.branches when created
+        branch_rename_status: completed
+        branch_renamed_from: feat/S028-chat-source-ux
+        branch_renamed_at: '2026-08-06T19:09:30Z'
+        branch_rename_note: 'Renamed feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux; recorded in
+          git_history.branches'
         evolve_cycle_id: EV-026
         mode: evolve
         delta_only: true
@@ -24633,19 +24683,41 @@ evolve_cycles:
           - F72
           - F73
           - F74
-        current_action: T123.1
-        next_action: 07-build T123.1 Vitest red for URL helper in vecinita-frontend-ui
+        current_action: T125.1
+        next_action: 'T125.1 red: migration + PATCH display_title + COALESCE citation tests'
         askquestion_pending: false
-        milestone: M123
-        task: T123.1
+        milestone: M125
+        task: T125.1
+        active_feature: F74
         phase: Phase 29 M123–M126
+        milestones:
+          - M123
+          - M124
+          - M125
+          - M126
+        m123_status: completed
+        m124_status: completed
+        m125_status: in_progress
+        task_status: in_progress
+        m123_tip: af18200
+        m124_tip: 08dd6a7
+        tip_sha: 08dd6a7
+        tip_full: 08dd6a741330855bbb1e36098d2667b608523f9a
+        commits:
+          - dbd34da
+          - af18200
+          - 08dd6a7
+        substeps:
+          current_task: T125.1
+          task_status: in_progress
+          feature_id: F74
         gate_b_to_c: passed
         phase_b: passed
         s028_d25_decision: S028-D25
         s028_d25_choice: option_1
-        note: S028-D25 Gate B→C PASS → 07-build in_progress; current_action=T123.1; 07-build T123.1 Vitest red for URL 
-          helper in vecinita-frontend-ui; 06 remains skipped; planned branch rename at 07 start (not yet created)
-        updated_at: '2026-08-06T19:04:21Z'
+        handoff_updated: true
+        note: '07-build: M123+M124 done; M125 F74 T125.1 in_progress (display_title migration + PATCH)'
+        updated_at: '2026-08-06T21:29:23Z'
     docs_touched:
       - docs/feature-list.md
       - docs/user-journeys.md
@@ -24668,7 +24740,7 @@ evolve_cycles:
     tp_lock: TP1–TP4
     phase: Phase 29 M123–M126
     rd_range: RD-322..RD-324
-    handoff: Gate B→C passed → 07 T123.1
+    handoff: M125 F74 T125.1 in_progress (display_title migration + PATCH)
     s028_d24_decision: S028-D24
     s028_d24_choices:
       M1: 1
@@ -51105,26 +51177,51 @@ artifacts:
     updated_at: '2026-08-06T18:46:15Z'
     note: Accepted at M126 gate
 git_history:
-  current_branch: feat/S028-chat-source-ux
+  current_branch: evolve/EV-026-chat-source-ux
   branches:
-    - name: feat/S028-chat-source-ux
-      purpose: 'S028/EV-026 chat source UX (#222 #223 #224) — session branch; evolve/EV-026-chat-source-ux at Phase 1 or when
-        code starts'
+    - name: evolve/EV-026-chat-source-ux
+      purpose: 'S028/EV-026 chat source UX (#222 #223 #224) — F72–F74 Phase 29 build'
       base: main
       created_from: main @ c81dbcc
+      renamed_from: feat/S028-chat-source-ux
       status: open
+      created_at: '2026-08-06'
+      renamed_at: '2026-08-06T19:09:30Z'
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      head_sha: 08dd6a741330855bbb1e36098d2667b608523f9a
+      tip: 08dd6a7
+      tip_sha: 08dd6a7
+      tip_full: 08dd6a741330855bbb1e36098d2667b608523f9a
+      note: 'Renamed from feat/S028-chat-source-ux at 07-build start (S028-D25); tip @08dd6a7 after M123+M124'
+      updated_at: '2026-08-06T19:09:30Z'
+      m123_status: completed
+      m124_status: completed
+      m123_tip: af18200
+      m124_tip: 08dd6a7
+      next_milestone: M125
+      next_task: T125.1
+      m125_status: in_progress
+      task_status: in_progress
+      updated_at: '2026-08-06T21:29:23Z'
+    - name: feat/S028-chat-source-ux
+      purpose: 'S028/EV-026 chat source UX (#222 #223 #224) — session branch (renamed)'
+      base: main
+      created_from: main @ c81dbcc
+      status: renamed
       created_at: '2026-08-06'
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
+      renamed_to: evolve/EV-026-chat-source-ux
+      renamed_at: '2026-08-06T19:09:30Z'
       head_sha: c81dbccc2701e64a7077461f251b048c36d345a3
       tip: c81dbcc
       tip_sha: c81dbcc
-      note: Currently feat/S028-chat-source-ux; planned rename/create evolve/EV-026-chat-source-ux at 07-build start 
-        (S028-D25 Gate B→C PASS) — record when branch created
-      updated_at: '2026-08-06T19:04:21Z'
+      note: 'Renamed to evolve/EV-026-chat-source-ux at 07-build start (S028-D25); do not use — historical entry'
+      updated_at: '2026-08-06T19:09:30Z'
       planned_rename_to: evolve/EV-026-chat-source-ux
       planned_rename_at: 07-build_start
-      planned_rename_status: pending
+      planned_rename_status: completed
     - name: evolve/EV-025-multilingual-embeddings
       purpose: Multilingual embedding swap cycle EV-025
       base: main @ c942971
@@ -56242,6 +56339,51 @@ git_history:
       merge_commit: true
       pr_number: 228
       note: 'S028 open_session tip refresh — live main @c81dbcc (PR #228); recorded at session open'
+    - sha: dbd34da
+      sha_full: dbd34da55828ea8a85c94cd434644818f42b0051
+      full_sha: dbd34da55828ea8a85c94cd434644818f42b0051
+      short: dbd34da
+      branch: evolve/EV-026-chat-source-ux
+      message: 'docs(S028): EV-026 Phase A/B plan, ADR-051, Phase 29'
+      stage: 07-build
+      skill_id: 07-build
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      files_changed: 24
+      timestamp: '2026-08-06T19:06:25Z'
+      note: 'Phase A/B docs + ADR-051 + Phase 29 plan committed on evolve branch (pre-M123)'
+    - sha: af18200
+      sha_full: af182002d5c2a8b6a3d113b3a7e3cce73d4fbd61
+      full_sha: af182002d5c2a8b6a3d113b3a7e3cce73d4fbd61
+      short: af18200
+      branch: evolve/EV-026-chat-source-ux
+      message: '[T123] feat: F72 citation URL helper and SourceList filter'
+      stage: 07-build
+      skill_id: 07-build
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      milestone: M123
+      task: T123
+      feature_id: F72
+      files_changed: 5
+      timestamp: '2026-08-06T19:06:28Z'
+      note: 'M123 F72 complete — isSafeHttpUrl + SourceList'
+    - sha: 08dd6a7
+      sha_full: 08dd6a741330855bbb1e36098d2667b608523f9a
+      full_sha: 08dd6a741330855bbb1e36098d2667b608523f9a
+      short: 08dd6a7
+      branch: evolve/EV-026-chat-source-ux
+      message: '[T124] feat: F73 relevance-gated sources without pad'
+      stage: 07-build
+      skill_id: 07-build
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      milestone: M124
+      task: T124
+      feature_id: F73
+      files_changed: 8
+      timestamp: '2026-08-06T19:09:06Z'
+      note: 'M124 F73 complete — CE score_threshold + dense no-pad; UJ-078 e2e'
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);

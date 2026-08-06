@@ -307,7 +307,11 @@ export async function fetchDocumentHistory(
 export async function bulkUpdateMetadata(
   options: CorpusClientOptions,
   documentIds: string[],
-  updates: { title?: string; language?: string },
+  updates: {
+    title?: string;
+    display_title?: string | null;
+    language?: string;
+  },
 ): Promise<BulkResult> {
   const response = await fetch(
     `${options.baseUrl}/internal/v1/documents/bulk/metadata`,
@@ -317,7 +321,7 @@ export async function bulkUpdateMetadata(
         Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ document_ids: documentIds, ...updates }),
+      body: JSON.stringify({ document_ids: documentIds, updates }),
     },
   );
   if (!response.ok)

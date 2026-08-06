@@ -85,7 +85,7 @@ flowchart LR
 |-------|-----------|---------|--------|
 | 1 | M123 F72 | PR-72 | pending |
 | 2 | M124 F73 | PR-73 | pending |
-| 3 | M125 F74 | PR-74 | pending |
+| 3 | M125 F74 | PR-74 | completed |
 | 4 | M126 gate | PR-75 | pending |
 | 5 | Phase 29 major | PR-76 | pending — after Gate C→D / verify |
 

@@ -823,4 +823,115 @@ describe("DocumentAdmin", () => {
       );
     });
   });
+
+  it("saves display_title via PATCH (UJ-079 / F74)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(
+        jsonOk({
+          document_id: DOC.document_id,
+          url: DOC.url,
+          title: DOC.title,
+          display_title: "Neighbor Food Pantry",
+          language: "en",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAdmin();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("display-title-input")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("display-title-input"), {
+      target: { value: "Neighbor Food Pantry" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: /save display title/i }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(
+        /display title saved/i,
+      );
+    });
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent(
+      "Neighbor Food Pantry",
+    );
+
+    const patchCall = fetchMock.mock.calls.find(
+      (call) =>
+        typeof call[0] === "string" &&
+        call[0].includes(`/documents/${DOC.document_id}`) &&
+        (call[1] as RequestInit | undefined)?.method === "PATCH",
+    );
+    expect(patchCall).toBeDefined();
+    const init = patchCall?.[1] as RequestInit;
+    expect(JSON.parse(init.body as string)).toEqual({
+      display_title: "Neighbor Food Pantry",
+    });
+  });
+
+  it("clears display_title with null PATCH body (TC-251)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(
+        jsonOk({
+          document_id: DOC.document_id,
+          url: DOC.url,
+          title: DOC.title,
+          display_title: null,
+          language: "en",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin
+          document={{ ...DOC, display_title: "Old Display" }}
+          onClose={vi.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("clear-display-title")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("clear-display-title"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(
+        /display title saved/i,
+      );
+    });
+    expect(screen.getByTestId("display-title-input")).toHaveValue("");
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent(
+      DOC.title,
+    );
+  });
 });

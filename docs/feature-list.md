@@ -76,7 +76,7 @@
 | F71 | Corpus re-embed + prod cutover (multilingual pin) | Implemented | Data Management | F41 rebuild/promote, Modal, internal-write, Admin Jobs | S027/EV-025 #159 |
 | F72 | Citation UI — validate URLs before href | Planned | ChatRAG | chat-rag-frontend `SourceList` | S028/EV-026 #222 |
 | F73 | Dynamic relevance-gated sources (no fixed pad) | Planned | ChatRAG | packages/rag, chat-rag-backend | S028/EV-026 #223 |
-| F74 | Operator-settable `display_title` | Planned | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
+| F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -1391,7 +1391,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `packages/rag` / ChatRAG | Packing + `sources[].title` from display coalesce |
 - **Out of scope**: LLM title generation; community end-user edit; #94/#217 source-add curation.
 - **API/version**: Prefer compatible nullable column; if breaking unavoidable → major bump (S028-D15).
-- **Status**: Planned (S028/EV-026).
+- **Status**: Implemented (S028/EV-026 M125).
 - **Source**: S028 / EV-026; GitHub #224; F27; RD-312–RD-315.
 
 ## Planned / Deferred (post-v1)

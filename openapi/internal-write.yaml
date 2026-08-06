@@ -141,6 +141,38 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
   /documents/{document_id}:
+    patch:
+      operationId: patchDocumentMetadata
+      summary: Patch single-document metadata including display_title (EV-026 F74)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentPatchRequest"
+      responses:
+        "200":
+          description: Updated document metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentMetadataResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
     delete:
       operationId: deleteDocument
       summary: Delete document and dependent chunks/embeddings
@@ -1373,6 +1405,10 @@ components:
         title:
           type: string
           nullable: true
+        display_title:
+          type: string
+          nullable: true
+          description: Operator display name override (F74); null uses scraped title
         language:
           type: string
           nullable: true
@@ -1393,6 +1429,40 @@ components:
           maxItems: 100
           items:
             $ref: "#/components/schemas/TagInput"
+    DocumentPatchRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        display_title:
+          type: string
+          nullable: true
+          description: Set override; JSON null clears to scraped title
+        title:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+    DocumentMetadataResponse:
+      type: object
+      required:
+        - document_id
+        - url
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        url:
+          type: string
+        title:
+          type: string
+          nullable: true
+        display_title:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
     TreeNode:
       type: object
       additionalProperties: false
@@ -1526,6 +1596,7 @@ components:
       type: object
       required:
         - document_ids
+        - updates
       properties:
         document_ids:
           type: array
@@ -1533,12 +1604,20 @@ components:
           items:
             type: string
             format: uuid
-        title:
-          type: string
-          nullable: true
-        language:
-          type: string
-          nullable: true
+        updates:
+          type: object
+          additionalProperties: false
+          properties:
+            title:
+              type: string
+              nullable: true
+            display_title:
+              type: string
+              nullable: true
+              description: Operator display name; null clears override (F74)
+            language:
+              type: string
+              nullable: true
     BulkResultResponse:
       type: object
       required:

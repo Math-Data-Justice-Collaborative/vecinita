@@ -230,8 +230,10 @@ describe("admin API fetch helpers", () => {
     );
     await bulkUpdateMetadata(CLIENT, ["d1"], { title: "New", language: "es" });
     const body = mockFetchJsonBody();
-    expect(body["title"]).toBe("New");
-    expect(body["language"]).toBe("es");
+    expect(body["document_ids"]).toEqual(["d1"]);
+    const updates = body["updates"] as Record<string, unknown>;
+    expect(updates["title"]).toBe("New");
+    expect(updates["language"]).toBe("es");
   });
 
   it("bulkUpdateMetadata throws on HTTP error", async () => {

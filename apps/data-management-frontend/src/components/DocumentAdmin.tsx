@@ -4,6 +4,7 @@ import {
   listDocumentChunks,
   listDocumentTags,
   patchChunkTags,
+  patchDocumentMetadata,
   patchDocumentTags,
   retagDocument,
 } from "../api/corpus";
@@ -45,6 +46,12 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [retagJobId, setRetagJobId] = useState<string | null>(null);
+  const [displayTitle, setDisplayTitle] = useState(
+    document.display_title ?? "",
+  );
+  const [savedDisplayTitle, setSavedDisplayTitle] = useState<string | null>(
+    document.display_title ?? null,
+  );
 
   const loadDocumentTags = useCallback(async () => {
     try {
@@ -83,6 +90,11 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
     void loadChunks();
     void loadDocumentTags();
   }, [loadChunks, loadDocumentTags]);
+
+  useEffect(() => {
+    setDisplayTitle(document.display_title ?? "");
+    setSavedDisplayTitle(document.display_title ?? null);
+  }, [document.document_id, document.display_title]);
 
   useEffect(() => {
     if (!retagJobId) {
@@ -145,6 +157,54 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
     }
   }
 
+  async function handleSaveDisplayTitle(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    try {
+      const client = requireCorpusConfig();
+      const trimmed = displayTitle.trim();
+      const updated = await patchDocumentMetadata(
+        client,
+        document.document_id,
+        {
+          display_title: trimmed.length > 0 ? trimmed : null,
+        },
+      );
+      setSavedDisplayTitle(updated.display_title);
+      setDisplayTitle(updated.display_title ?? "");
+      setStatus(tr("admin.documentAdmin.displayTitleSaved"));
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.saveDisplayTitleFailed"),
+      );
+    }
+  }
+
+  async function handleClearDisplayTitle() {
+    setError(null);
+    try {
+      const client = requireCorpusConfig();
+      const updated = await patchDocumentMetadata(
+        client,
+        document.document_id,
+        {
+          display_title: null,
+        },
+      );
+      setSavedDisplayTitle(updated.display_title);
+      setDisplayTitle("");
+      setStatus(tr("admin.documentAdmin.displayTitleSaved"));
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.saveDisplayTitleFailed"),
+      );
+    }
+  }
+
   async function handleSaveChunkTags(chunkId: string) {
     setError(null);
     try {
@@ -183,12 +243,12 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
     }
   }
 
+  const headingTitle = savedDisplayTitle ?? document.title ?? document.url;
+
   return (
     <div className="space-y-4" aria-label={tr("admin.documentAdmin.ariaLabel")}>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          {document.title ?? document.url}
-        </h3>
+        <h3 className="text-lg font-semibold">{headingTitle}</h3>
         <Button variant="outline" size="sm" onClick={onClose}>
           {tr("admin.actions.close")}
         </Button>
@@ -204,6 +264,48 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
           {status}
         </p>
       ) : null}
+
+      <AdminWriteGate>
+        <form
+          onSubmit={(e) => void handleSaveDisplayTitle(e)}
+          className="space-y-3"
+          data-testid="display-title-form"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="doc-display-title">
+              {tr("admin.documentAdmin.displayTitleLabel")}
+            </Label>
+            <Input
+              id="doc-display-title"
+              value={displayTitle}
+              onChange={(e) => {
+                setDisplayTitle(e.target.value);
+              }}
+              placeholder={tr("admin.documentAdmin.displayTitlePlaceholder")}
+              data-testid="display-title-input"
+            />
+            <p className="text-xs text-muted-foreground">
+              {tr("admin.documentAdmin.displayTitleHint")}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm">
+              {tr("admin.documentAdmin.saveDisplayTitle")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void handleClearDisplayTitle()}
+              data-testid="clear-display-title"
+            >
+              {tr("admin.documentAdmin.clearDisplayTitle")}
+            </Button>
+          </div>
+        </form>
+      </AdminWriteGate>
+
+      <Separator />
 
       <AdminWriteGate>
         <form
