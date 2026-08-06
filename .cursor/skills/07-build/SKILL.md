@@ -220,6 +220,17 @@ When all tasks in a milestone are `completed`:
 3. **Present to user** (PR URL). Do NOT stop the session.
 4. Update PR Plan table. Continue Task Loop for next milestone.
 
+### Runtime pin readiness (RET-002 RA-014)
+
+Before marking a milestone **deploy-ready** (or handing off to 12/13 cutover) when the change
+touches **embedding / LLM / model pins** or rebuild/promote paths:
+
+1. Confirm the **pinned model id** is loadable on the **configured runtime** (e.g. FastEmbed
+   catalog vs `sentence_transformers` / ONNX fallback — S027-D12 / BUG-2026-08-05).
+2. If unsupported on default runtime: set fallback env/runtime in the same milestone (or block
+   cutover) — do not ship a pin that only fails at live H3.
+3. Note the check in the milestone verify report / HANDOFF.
+
 ### Phase Boundary
 
 When all milestones in a phase are `completed`:

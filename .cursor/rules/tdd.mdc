@@ -1,5 +1,5 @@
 ---
-description: Enforces test-driven development — write tests before implementation (all stacks)
+description: TDD — tests first, fix source on failure, spec-driven I/O and asserts
 alwaysApply: true
 ---
 
@@ -7,34 +7,53 @@ alwaysApply: true
 
 TDD is the process for **every** new function, feature, or behavior change, on **all** stacks
 (Python `pytest`, frontend `vitest`). Always write the test case(s) first, then implement.
+Cite `[Corpus: tests]` / `[Corpus: acceptance]` when choosing fixtures and asserts.
 
 1. **Test first (hard ordering gate)**: Write the test before writing the implementation, then
    **run it and watch it fail** (red) for the right reason. Only then write the minimal code to
    make it pass (green), then refactor. Do not write production code for a behavior that has no
    failing test yet.
 
-2. **Coverage requirement**: Every new public function, class, or module must have a
-   corresponding test. Reference `docs/test-plan.md` for test case definitions and
-   `docs/acceptance-criteria.md` for pass/fail thresholds.
+2. **Fix source, not the test**: When a test fails (red during TDD, regression, or CI), treat
+   that as a **product defect** unless the test itself is wrong vs the spec. Change
+   implementation under `apps/`, `packages/`, `infra/`, etc. Do **not** weaken asserts, loosen
+   tolerances, delete cases, or rewrite expected I/O just to get green. If the test disagrees
+   with the spec, fix the test to match the spec — then fix source until green.
 
-3. **Test location**: Mirror the source structure.
+   ```python
+   # ❌ BAD — green by lowering the bar
+   assert result["status"] in ("completed", "failed")
+
+   # ✅ GOOD — assert the contract; fix the job runner if it fails
+   assert result["status"] == "completed"  # docs/test-plan.md TC-…
+   ```
+
+3. **Spec-driven I/O and asserts**: Prefer fixtures, request/response shapes, status codes,
+   thresholds, and error messages from standing docs — especially `docs/test-plan.md` (TC-NNN),
+   `docs/acceptance-criteria.md`, `docs/api-contract.md`, `docs/user-journeys.md` (UJ-NNN),
+   and feature/ADR sections that define behavior. Trace each assert to a corpus/spec cite in
+   the test name, docstring, or comment when non-obvious.
+
+4. **Raise when specs do not define it**: If inputs, outputs, or pass/fail criteria are missing
+   or ambiguous, stop and AskQuestion as `[Ambiguity]` / `[Decision]` before inventing values.
+   Recommend a concrete default; include “Let me explain / provide more context.” On approval,
+   back-add to the relevant spec, then write the test.
+
+5. **Coverage requirement**: Every new public function, class, or module must have a
+   corresponding test. Reference `docs/test-plan.md` and `docs/acceptance-criteria.md`.
+
+6. **Test location**: Mirror the source structure.
    - Python: `tests/` (e.g. `…/pipeline.py` → `tests/unit/.../test_pipeline.py`).
    - Frontend: colocated `apps/*/src/**/*.test.{ts,tsx}`.
    - End-to-end / journeys: `tests/e2e/` (API) + Vitest UI tests — see `e2e-coverage.mdc`.
-   - Tracked bugs (14-hotfix / 15-modal-health): `tests/bugs/test_bug_YYYY_MM_DD_[slug].py`
-     with report `docs/bug-reports/BUG-YYYY-MM-DD-[slug].md` — see `bug-investigation.mdc`
+   - Tracked bugs: `tests/bugs/test_bug_YYYY_MM_DD_[slug].py` +
+     `docs/bug-reports/BUG-YYYY-MM-DD-[slug].md` — see `bug-investigation.mdc`
 
-4. **Test naming**: Use descriptive names stating the expected behavior:
-   - `test_[function]_[scenario]_[expected_result]`
-   - Example: `test_normalize_empty_input_raises_value_error`
+7. **Test naming**: `test_[function]_[scenario]_[expected_result]`
+   (e.g. `test_normalize_empty_input_raises_value_error`).
 
-5. **Run tests**: After implementation, run the relevant tests to verify they pass before
-   moving to the next task. Do not accumulate untested code.
+8. **Run tests**: After implementation, run the relevant tests before the next task.
+   Do not accumulate untested code.
 
-6. **No skipping**: Do not implement code without a corresponding test unless the user
-   explicitly approves. If a test is hard to write, that signals a design problem — raise
-   it as a `[Decision]` via AskQuestion.
-
-7. **Spec alignment**: Test assertions should match the metrics and thresholds in
-   `docs/test-plan.md` and `docs/acceptance-criteria.md`. If a test needs a threshold not
-   in the specs, raise it as `[Ambiguity]` before choosing a value.
+9. **No skipping**: Do not implement without a corresponding test unless the user explicitly
+   approves. Hard-to-test code → `[Decision]` via AskQuestion.

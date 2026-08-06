@@ -23,6 +23,27 @@ Run **Agent 6** and populate deploy-checklist connectivity rows (H0c, VITE matri
 `verify_connectivity.sh` planned). Sign-off means “ready for 13 including H4–H5,” not API-only.
 See connectivity-gates §Stage 12.
 
+## Single-env / live role (RET-002 RA-008)
+
+Before marking deploy-ready, resolve **what the target stack is**:
+
+| Situation | `env_role` | Agent behavior |
+|-----------|------------|----------------|
+| Distinct non-prod + prod stacks exist | `staging` then `prod` | Keep separate checklists; never treat staging URLs as prod |
+| **Only one** deployed stack (names may still say “staging”) | `staging_as_live` / **live = prod** | Treat that stack as **production** in AskQuestions, checklists, and reports |
+| Explicit second env planned but not provisioned | `staging_as_live` | Same as sole-stack; do not imply a safer non-prod cutover target |
+
+Record `env_role` on the deploy checklist and in the session note. Cite [ADR-049](../../docs/adr/ADR-049-single-env-staging-as-live.md).
+
+## CI/CD tip gate (RET-002 RA-009)
+
+Tip SHA must have **required** workflows green before deploy-ready / promote:
+
+- Always: project CI (e.g. `.github/workflows/ci.yml`)
+- On `main` / live cutover: deploy-preflight and any CD that must succeed first
+
+**Red, cancelled, or missing run** → **hard stop**. Do not continue 12→13 or promote without an explicit **waiver AskQuestion** (first option = wait/fix; last = explain). Prefer `bash scripts/ci/watch_github_ci.sh [branch]` (or project equivalent) and treat non-zero exit as blocking.
+
 ## Prerequisites
 
 1. **11-verify-impl** must be `completed` — implementation verified by user
@@ -260,6 +281,9 @@ Next step: 13-deploy-smoke
    CE floors) do **not** authorize flipping a kill-switch env (e.g. `VECINITA_RAG_RERANK_CE`).
    Checklist and AskQuestion must keep **evidence PASS** separate from **explicit Path A flag
    approval**. Default ship may keep the flag off.
+7. **Single-env honesty** (RET-002 RA-008): If only one stack exists, call it **live/prod** in
+   user-facing text — do not imply a safer “staging-only” cutover.
+8. **CI/CD tip green** (RET-002 RA-009): Red tip SHA blocks deploy-ready unless user waives.
 
 ## Continue
 

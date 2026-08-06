@@ -73,6 +73,8 @@ first, or proceed with a reduced doc set (record waiver via workflow-state-manag
 
 **Every user-facing question must use the AskQuestion tool** — same protocol as
 [14-hotfix](../14-hotfix/SKILL.md) and [considerations.md](../considerations.md) §7.
+If the AskQuestion tool is unavailable, use the **markdown numbered-options fallback** in
+considerations §7 (RET-002 RA-017) — same option rules; do not invent answers.
 
 | Situation | Pattern |
 |-----------|---------|
@@ -84,7 +86,7 @@ first, or proceed with a reduced doc set (record waiver via workflow-state-manag
 | Phase checkpoint (A–D, deploy) | Progress digest + AskQuestion before next phase |
 | **Missing corpus/spec coverage** | `[Decision]` AskQuestion: add/update named doc(s) · waive · defer · explain — **block** until answered |
 
-Do not post interview prompts as markdown lists expecting inline replies.
+Do not invent user answers. Prefer the AskQuestion tool; markdown lists are allowed only as the §7 fallback.
 
 ## Doc corpus citation
 
@@ -175,6 +177,24 @@ On resume (including a new chat mid-cycle), print before other work:
 | Links | `HANDOFF.md` + latest report under `artifacts_dir/reports/` |
 
 Regenerate `docs/sessions/{id}/HANDOFF.md` at each safe-stop and on resume.
+
+### Mid-evolve interrupt → 14-hotfix (RET-002 RA-016)
+
+When **live** H3 (or other P0 production) fails during an `in_progress` evolve cycle (often
+from 13-deploy-smoke or 15-service-health):
+
+1. **AskQuestion** immediately (do not silently keep building the next milestone):
+   - **Pause evolve and open 14-hotfix** (recommended)
+   - Continue evolve with explicit waiver (record risk)
+   - Investigate only (stay on 15) then re-AskQuestion
+   - Let me explain / provide more context
+2. If pause+14: set `evolve_cycles[].interrupted_by_hotfix: true`, `interrupt_reason`, and
+   `hotfix_ref` (BUG/PR when known). Update `HANDOFF.md` with **Interrupt** section
+   (symptom, tip SHA, next = 14-hotfix).
+3. Resume **16-evolve** only after hotfix close AskQuestion clears the interrupt flag
+   (or user explicitly abandons the cycle).
+
+Deploy gates still require ADR-049 env honesty and ADR-050 CI/CD tip green before promote.
 
 ### Git branch and commit-as-you-go
 
@@ -275,7 +295,7 @@ For **11-verify-impl**, include **per–acceptance-criterion** status for each F
 | **A→B** | Fn in feature-list; delta specs; 02 pass; 03 if routed |
 | **B→C** | Execution-plan tasks approved; 05 pass; 06 if routed |
 | **C→D** | All Fn tasks done; latest 08 pass |
-| **Deploy** | 09+10 pass; 11+12 user-approved; deploy approved |
+| **Deploy** | 09+10 pass; 11+12 user-approved; deploy approved; tip CI/CD green (ADR-050) unless waived; `env_role` honest (ADR-049) |
 
 On failure: list unmet criteria → AskQuestion → fix in place per considerations §2.
 

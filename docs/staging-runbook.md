@@ -4,6 +4,33 @@
 > **Health tiers:** `.cursor/skills/deployment-catalog.md`, `15-service-health`  
 > **Secrets:** [staging-secrets-matrix.md](staging-secrets-matrix.md)
 
+## Env role: staging label vs live (RET-002 / ADR-049)
+
+Until a **distinct** non-prod stack exists, DO apps/DB still named “staging” are the **live /
+production** surface (`env_role: staging_as_live`). Skills and operators must:
+
+- Say **live/prod** in cutover AskQuestions and smokes — do not imply a safer staging-only target.
+- Keep corpus/promote approval gates (`no-live-prod-corpus-push`).
+- Cite [ADR-049](adr/ADR-049-single-env-staging-as-live.md).
+
+When a true second environment is provisioned, restore separate staging→prod paths.
+
+## CI/CD before promote (RET-002 / ADR-050)
+
+Tip SHA must be **green** before deploy-ready, promote, or cutover:
+
+```bash
+bash scripts/ops/require_ci_green.sh          # default: current branch
+bash scripts/ops/require_ci_green.sh main     # live cutover
+```
+
+Wraps `scripts/ci/watch_github_ci.sh` (CI always; deploy-preflight on `main`). **Red /
+cancelled = hard stop** unless an explicit waiver AskQuestion. Prefer enabling GitHub
+**branch protection** required checks on `main` (ci.yml + deploy-preflight) when the org allows.
+
+Cite [ADR-050](adr/ADR-050-ci-cd-blocks-live-deploy.md). Approved live ops: `scripts/ops/`
+(`--dry-run` default; `--approve` only after AskQuestion).
+
 ## Health tiers
 
 | Tier | Check | Pass criteria |

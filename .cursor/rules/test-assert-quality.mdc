@@ -1,0 +1,70 @@
+---
+description: Require maximal, meaningful asserts on test responses (unit/TDD)
+alwaysApply: true
+---
+
+# Test assert quality (responses)
+
+When writing unit tests or doing TDD (pytest or Vitest), assert **as much of the
+observable response as is meaningful** — not just that something “worked.”
+
+## Do
+
+1. **Assert the full contract surface** the caller cares about: status/code, shape,
+   field values, error type/code, and side-effect observables (returned ids, counts,
+   flags). Prefer one focused test with several related asserts over a single vague check.
+2. **Name expected values explicitly** — compare to concrete literals or fixtures from
+   `docs/test-plan.md` / acceptance criteria, not only `is not None` / truthiness.
+3. **For dict/JSON/API bodies**: assert every field that the behavior under test sets or
+   guarantees; use equality on the whole object when the payload is small and stable.
+4. **For errors**: assert exception type **and** the stable message/code/attribute the API
+   documents (not only `pytest.raises(SomeError)` with an empty body).
+5. **For collections**: assert length **and** contents (membership or exact order when
+   order is part of the contract).
+
+## Do not
+
+- Stop at `assert result` / `expect(res).toBeTruthy()` / status-only checks when the
+  response has fields.
+- Assert only that a key exists when the value is what the behavior produces.
+- Leave `assert response.json()` (or similar) without checking the parsed body.
+- Pad with redundant asserts that restate the same fact three ways — maximal means
+  **coverage of the response**, not noise.
+
+## Examples
+
+```python
+# ❌ BAD — weak
+assert job["status"]
+assert "job_id" in job
+
+# ✅ GOOD — maximal + meaningful
+assert job == {
+    "job_id": "abc-123",
+    "status": "completed",
+    "error": None,
+    "result": {"chunks": 3},
+}
+# or field-by-field when partial comparison is clearer:
+assert job["status"] == "completed"
+assert job["error"] is None
+assert job["result"]["chunks"] == 3
+```
+
+```typescript
+// ❌ BAD
+expect(res.ok).toBe(true);
+
+// ✅ GOOD
+expect(res.status).toBe(200);
+expect(await res.json()).toEqual({
+  model_id: "qwen2.5:1.5b-instruct",
+  ready: true,
+});
+```
+
+## When writing the red test (TDD)
+
+Before implementation, the failing asserts must already encode the **full expected
+response**. Do not add “real” field asserts only after green — that hides incomplete
+behavior.

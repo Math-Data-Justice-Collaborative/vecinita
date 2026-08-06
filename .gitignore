@@ -12,6 +12,9 @@ prod.env
 .tmp/
 .wiki-build/
 
+# Cursor / agent ephemeral (workflow-state-manager one-shots, local scratch)
+.cursor/tmp/
+
 # Supabase CLI local state (`supabase link`, config push) — never commit
 supabase/.temp/
 supabase/.env
