@@ -9,7 +9,7 @@ Approved: **S028-D1** (1a / 2a). Prod-careful: **S028-D2**.
 | 02-verify-plan | yes | completed | S028-D20; Gate A→B pass |
 | 04-tech-plan | yes | completed | S028-D23 Phase 29 approved |
 | 05-verify-tech | yes | completed | S028-D24 M1/M2/L1; Gate B→C AskQ |
-| 07-build | yes | pending | |
+| 07-build | yes | completed | M123–M126; ADR-051 Accepted |
 | 08-verify-build | yes | pending | verification-report.md |
 | 09-qa | yes | pending | qa-report.md |
 | 10-e2e | yes | pending | e2e-report.md |
@@ -21,14 +21,14 @@ Approved: **S028-D1** (1a / 2a). Prod-careful: **S028-D2**.
 
 | Stage | Required | Status | Notes |
 |-------|----------|--------|-------|
-| 16-evolve | yes | in_progress | EV-026; Phase A done → Phase B |
+| 16-evolve | yes | in_progress | EV-026; Phase C build done → Gate C→D / 08 |
 
 ## Skipped
 
 | Stage | Rationale |
 |-------|-----------|
 | 03-plan-tooling | no new guardrails expected (reconfirm Phase 1 / RD-319) |
-| 06-tech-tooling | no new deps expected (reconfirm Phase 1) |
+| 06-tech-tooling | no new deps (T126.2 inventory confirm) |
 
 ## Preset
 
@@ -37,4 +37,4 @@ Orchestrator: **16-evolve**.
 
 ## Next
 
-**Gate B→C** AskQuestion → **07-build** (06 skipped). First task **T123.1**.
+**08-verify-build** (Gate C→D). H4–H5 live smoke only at 13 after AskQuestion (S028-D2).

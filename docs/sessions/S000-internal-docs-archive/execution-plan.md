@@ -9,9 +9,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 07-build |
-| **Active milestone** | M126 — Phase 29 gate (TC suite + docs closeout) |
-| **Active task** | T126.2 done — next T126.3 Phase 29 gate docs |
+| **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — Gate C→D / 08-verify-build |
+| **Active milestone** | M126 — Phase 29 gate (complete) |
+| **Active task** | T126.3 done — next 08-verify-build |
 | **Last updated** | 2026-08-06 |
 | **Evolve cycle** | EV-026 — Standard; Phase C build |
 | **Git branch** | `evolve/EV-026-chat-source-ux` |
@@ -2502,16 +2502,16 @@ for 13; issue closeout notes after verify/deploy gates.
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T126.1 | Test: confirm unit + API e2e + Vitest TC-242–251 green (Playwright only if added) | Test | completed | e2e-coverage, RD-317 | T123.5, T124.3, T125.6 | 2026-08-06 | S028 | F72–F74 |
 | T126.2 | Docs/Config: ADR-051 Accepted; api-contract/OpenAPI notes; inventory unchanged (no new deps) | Docs | completed | TP4, ADR-051 | T126.1 | 2026-08-06 | S028 | F72–F74 |
-| T126.3 | Docs: Phase 29 gate + Current State; H4–H5 at 13 note; #222–#224 closeout notes | Docs | pending | Phase 29 gate, connectivity-gates | T126.2 | — | S028 | F72–F74 |
+| T126.3 | Docs: Phase 29 gate + Current State; H4–H5 at 13 note; #222–#224 closeout notes | Docs | completed | Phase 29 gate, connectivity-gates | T126.2 | 2026-08-06 | S028 | F72–F74 |
 
 #### Phase 29 Gate Check
 
-- [ ] All M123–M126 tasks completed (T123.1–T126.3)
-- [ ] AC-SU1–SU10 met at verify (08/09–11); mapped + unit/stub green at 07
-- [ ] ADR-051 Accepted; RD-321 remains deferred (no ingest title→display)
-- [ ] OpenAPI + CORS H0c for single-doc PATCH; no new secrets/origins
-- [ ] 06-tech-tooling skipped; Playwright optional only
-- [ ] Live prod smoke only after AskQuestion (S028-D2 / RD-318)
+- [x] All M123–M126 tasks completed (T123.1–T126.3)
+- [x] AC-SU1–SU10 mapped + unit/API e2e/Vitest green at 07 ([t126_1](../../S028-chat-source-ux/reports/t126_1_tc_green_gate.md)); formal verify 08/09–11
+- [x] ADR-051 Accepted; RD-321 remains deferred (no ingest title→display)
+- [x] OpenAPI + CORS H0c for single-doc PATCH; no new secrets/origins
+- [x] 06-tech-tooling skipped; Playwright optional only
+- [ ] Live prod smoke only after AskQuestion (S028-D2 / RD-318) — **deferred to 13**
 
 **Tech-plan delta:** `docs/sessions/S028-chat-source-ux/reports/tech-plan-delta.md`  
 **ADR:** [ADR-051](../../../adr/ADR-051-display-title-vs-lock-flag.md)  
@@ -2654,7 +2654,7 @@ main
 | PR-72 | Minor | M123 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F72/#222 |
 | PR-73 | Minor | M124 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F73/#223 |
 | PR-74 | Minor | M125 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F74/#224 |
-| PR-75 | Minor | M126 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — Phase 29 gate |
+| PR-75 | Minor | M126 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — open (M123–M126 on branch) |
 | PR-76 | Major | Phase 29 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — after Gate C→D / verify |
 
 S028 (EV-026) is evolve Standard: M123–M126 on `evolve/EV-026-chat-source-ux`
@@ -3396,13 +3396,13 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T125.8 | M125 | 29 | Test | completed | T125.3 | — | S028 | F74 | CORS H0c |
 | T126.1 | M126 | 29 | Test | completed | T123.5, T124.3, T125.6 | — | S028 | F72–F74 | — |
 | T126.2 | M126 | 29 | Docs | completed | T126.1 | — | S028 | F72–F74 | ADR-051 |
-| T126.3 | M126 | 29 | Docs | pending | T126.2 | — | S028 | F72–F74 | — |
+| T126.3 | M126 | 29 | Docs | completed | T126.2 | — | S028 | F72–F74 | — |
 
 ## Phase Gate Log
 
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
-| 29 | — | pending | S028/EV-026 M123–M126 — 04 draft; Gate B→C after 05 |
+| 29 | 2026-08-06 | **partial (07-build PASS)** | S028/EV-026 M123–M126 complete (T123.1–T126.3). ADR-051 Accepted; TC-242–251 unit+e2e+Vitest+CORS H0c green ([t126_1](../../S028-chat-source-ux/reports/t126_1_tc_green_gate.md); [t126_3](../../S028-chat-source-ux/reports/t126_3_phase29_gate.md)). **Deferred:** 08 formal verify; AC-SU live verify 09–11; **live H4–H5 at 13** (AskQuestion S028-D2); #222–#224 close after 11 (13 if deploy). |
 | 28 | 2026-08-05 | **partial (07-build PASS)** | S027/EV-025 M119–M122 tasks complete (T120.5 conditional S027-D35; T121.3 skipped S027-D39). ADR-048 Accepted; TC-232–241 unit+stub green ([t122_1](../../S027-multilingual-embeddings/reports/t122_1_tc_green_gate.md); [t122_3](../../S027-multilingual-embeddings/reports/t122_3_phase28_gate.md)). **Deferred:** 08 formal verify; AC-ME live verify 09–11; **live prod cutover H4–H5 at 13**; #159 close after 13. |
 | 27 | 2026-08-04 | **partial (build PASS)** | S026/EV-024 M112–M118 tasks complete; OpenAPI/infra/secrets mirror PASS; Playwright UJ-069/070/073 PASS ([t118-3](../../S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md)). **Deferred:** AC-UX T2 suite + full lint matrix to 08/09–11; live `SUPABASE_SECRET_KEY` sync (no prod.env); issue closes + epic #193 after 13 H1–H5. Gate C→D AskQuestion pending. |
 | 1 | 2026-05-19 | **pass** | M1–M3 complete; alembic head; 12 pytest smoke/privacy/seed; ruff/pyright; OpenAPI in repo + api-contract.md |

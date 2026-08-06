@@ -2585,35 +2585,48 @@ project:
         session_id: S028-chat-source-ux
         evolve_cycle_id: EV-026
         status: in_progress
-        current_action: T126.2
-        next_action: '07-build T126.2 ADR-051 Accepted + api-contract/OpenAPI/docs closeout'
+        build_status: completed
+        current_action: 'Gate C→D / 08-verify-build'
+        next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
         branch: evolve/EV-026-chat-source-ux
         planned_evolve_branch: evolve/EV-026-chat-source-ux
         branch_rename_status: completed
         milestone: M126
-        task: T126.2
+        task: T126.3
         active_feature: F72-F74
         m123_status: completed
         m124_status: completed
         m125_status: completed
-        m126_status: in_progress
-        task_status: in_progress
-        tip_sha: 0cf33fa
-        tip_full: 0cf33faf570e461954d9f98cbbf0b470557d96b2
-        askquestion_pending: false
+        m126_status: completed
+        task_status: completed
+        implementation_complete: true
+        tip_sha: 49217b3
+        tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
+        tip_note: 'tip@49217b3 after T126.2 commit; T126.3 commit pending'
+        askquestion_pending: true
+        askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
         s028_d25_decision: S028-D25
-        updated_at: '2026-08-06T21:48:09Z'
-        note: '07-build: T126.2 STARTED — ADR-051 Accepted + docs closeout; tip@0cf33fa after T126.1 commit; M126 in_progress'
+        updated_at: '2026-08-06T21:51:30Z'
+        note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
         t126_1_status: completed
         t126_1_started_at: '2026-08-06T21:44:33Z'
         t126_1_completed_at: '2026-08-06T21:46:44Z'
         t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
         t126_1_commit: 0cf33fa
-        t126_2_status: in_progress
+        t126_2_status: completed
         t126_2_started_at: '2026-08-06T21:48:09Z'
+        t126_2_completed_at: '2026-08-06T21:49:39Z'
+        t126_2_report: docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+        t126_2_commit: 49217b3
+        adr_051_status: Accepted
+        t126_3_status: completed
+        t126_3_completed_at: '2026-08-06T21:51:30Z'
+        t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+        phase_c: pending
+        gate_c_to_d: pending
         substeps:
-          current_task: T126.2
-          task_status: in_progress
+          current_task: completed
+          task_status: completed
           milestone: M126
           active_feature: F72-F74
     08-verify-build:
@@ -6719,6 +6732,7 @@ active_session:
     - 223
     - 224
   current_stage: 07-build
+  current_stage_note: '07-build implementation COMPLETE; awaiting Gate C→D then 08-verify-build'
   started_at: '2026-08-06'
   started_at_iso: '2026-08-06T16:01:41Z'
   mode: evolve
@@ -6782,6 +6796,8 @@ active_session:
     - 'T126.1 STARTED 2026-08-06T21:44:33Z — M126 Phase 29 gate confirm TC-242–251; ADR-051 Accepted deferred to T126.2; tip@aecb764'
     - 'T126.1 COMPLETE 2026-08-06T21:46:44Z — TC-242–251 green confirmed 2026-08-06 (unit + e2e + Vitest + CORS H0c); report=docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md; current_action=T126.2; M126 still in_progress'
     - 'T126.2 STARTED 2026-08-06T21:48:09Z — tip@0cf33fa ([T126.1] test: confirm TC-242-251 green gate (F72-F74)); t126_1 commit recorded; askquestion_pending=false'
+    - 'T126.2 COMPLETE 2026-08-06T21:49:39Z — ADR-051 Accepted; report=docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md; current_action=T126.3; M126 still in_progress'
+    - 'T126.3 + M126 COMPLETE 2026-08-06T21:51:30Z — Phase 29 07-build PASS; report=docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md; tip@49217b3; T126.3 commit pending; Gate C→D AskQuestion pending (Standard)'
   routing_plan:
     - stage: 00-context
       required: true
@@ -6881,46 +6897,61 @@ active_session:
       skip_rationale: no new deps expected
     - stage: 07-build
       required: true
-      status: in_progress
+      status: completed
       mode: delta
       skip_rationale:
       started_at: '2026-08-06T19:04:21Z'
-      current_action: T126.2
-      next_action: '07-build T126.2 ADR-051 Accepted + api-contract/OpenAPI/docs closeout'
-      askquestion_pending: false
+      completed_at: '2026-08-06T21:51:30Z'
+      completed: '2026-08-06'
+      current_action: 'Gate C→D / 08-verify-build'
+      next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
+      askquestion_pending: true
+      askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
       s028_d25_decision: S028-D25
       gate_b_to_c: passed
       phase_b: passed
+      phase_c: pending
+      gate_c_to_d: pending
       milestone: M126
-      task: T126.2
+      task: T126.3
       active_feature: F72-F74
       m123_status: completed
       m124_status: completed
       m125_status: completed
-      m126_status: in_progress
-      task_status: in_progress
+      m126_status: completed
+      task_status: completed
+      implementation_complete: true
       m123_tip: af18200
       m124_tip: 08dd6a7
       m125_tip: aecb764
-      tip_sha: 0cf33fa
-      tip_full: 0cf33faf570e461954d9f98cbbf0b470557d96b2
+      tip_sha: 49217b3
+      tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
+      tip_note: 'tip@49217b3 after T126.2; T126.3 commit pending'
       substeps:
-        current_task: T126.2
-        task_status: in_progress
+        current_task: completed
+        task_status: completed
         feature_id: F72-F74
         milestone: M126
-      note: '07-build: T126.2 STARTED — ADR-051 Accepted + docs closeout; tip@0cf33fa after T126.1 commit; M126 in_progress'
+      note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
       t126_1_status: completed
       t126_1_started_at: '2026-08-06T21:44:33Z'
       t126_1_completed_at: '2026-08-06T21:46:44Z'
       t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
       t126_1_commit: 0cf33fa
-      t126_2_status: in_progress
+      t126_2_status: completed
       t126_2_started_at: '2026-08-06T21:48:09Z'
-      updated_at: '2026-08-06T21:48:09Z'
+      t126_2_completed_at: '2026-08-06T21:49:39Z'
+      t126_2_report: docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+      t126_2_commit: 49217b3
+      adr_051_status: Accepted
+      t126_3_status: completed
+      t126_3_completed_at: '2026-08-06T21:51:30Z'
+      t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+      updated_at: '2026-08-06T21:51:30Z'
       branch: evolve/EV-026-chat-source-ux
       planned_evolve_branch: evolve/EV-026-chat-source-ux
       branch_rename_status: completed
+      report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
     - stage: 08-verify-build
       required: true
       status: pending
@@ -6959,15 +6990,17 @@ active_session:
     - docs/sessions/S028-chat-source-ux/checkpoints/01-requirements-seed.md
     - docs/sessions/S028-chat-source-ux/reports/05-verify-tech-audit.md
     - docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
-  next_action: '07-build T126.2 ADR-051 Accepted + api-contract/OpenAPI/docs closeout'
+    - docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+    - docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+  next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
   orchestrator_status: in_progress
-  updated_at: '2026-08-06T21:48:09Z'
-  next_recommended: 07-build T126.2
+  updated_at: '2026-08-06T21:51:30Z'
+  next_recommended: 08-verify-build
   delta_only: true
-  askquestion_pending: false
-  askquestion_pending_topic:
-  handoff: 'T126.2 in_progress — ADR-051 Accepted + docs; tip@0cf33fa; M126 in_progress'
-  current_action: T126.2
+  askquestion_pending: true
+  askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
+  handoff: '07-build complete (M123–M126) → Gate C→D AskQuestion → 08-verify-build'
+  current_action: 'Gate C→D / 08-verify-build'
   citations:
     - '[Corpus: feature-list.md §F72–F74]'
     - '[Spec: docs/adr/ADR-051-display-title-vs-lock-flag.md]'
@@ -19608,35 +19641,48 @@ stages:
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
       status: in_progress
-      current_action: T126.2
-      next_action: '07-build T126.2 ADR-051 Accepted + api-contract/OpenAPI/docs closeout'
+      build_status: completed
+      current_action: 'Gate C→D / 08-verify-build'
+      next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
       branch: evolve/EV-026-chat-source-ux
       planned_evolve_branch: evolve/EV-026-chat-source-ux
       branch_rename_status: completed
       milestone: M126
-      task: T126.2
+      task: T126.3
       active_feature: F72-F74
       m123_status: completed
       m124_status: completed
       m125_status: completed
-      m126_status: in_progress
-      task_status: in_progress
-      tip_sha: 0cf33fa
-      tip_full: 0cf33faf570e461954d9f98cbbf0b470557d96b2
-      askquestion_pending: false
+      m126_status: completed
+      task_status: completed
+      implementation_complete: true
+      tip_sha: 49217b3
+      tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
+      tip_note: 'tip@49217b3 after T126.2 commit; T126.3 commit pending'
+      askquestion_pending: true
+      askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
       s028_d25_decision: S028-D25
-      updated_at: '2026-08-06T21:48:09Z'
-      note: '07-build: T126.2 STARTED — ADR-051 Accepted + docs closeout; tip@0cf33fa after T126.1 commit; M126 in_progress'
+      updated_at: '2026-08-06T21:51:30Z'
+      note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
       t126_1_status: completed
       t126_1_started_at: '2026-08-06T21:44:33Z'
       t126_1_completed_at: '2026-08-06T21:46:44Z'
       t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
       t126_1_commit: 0cf33fa
-      t126_2_status: in_progress
+      t126_2_status: completed
       t126_2_started_at: '2026-08-06T21:48:09Z'
+      t126_2_completed_at: '2026-08-06T21:49:39Z'
+      t126_2_report: docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+      t126_2_commit: 49217b3
+      adr_051_status: Accepted
+      t126_3_status: completed
+      t126_3_completed_at: '2026-08-06T21:51:30Z'
+      t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+      phase_c: pending
+      gate_c_to_d: pending
       substeps:
-        current_task: T126.2
-        task_status: in_progress
+        current_task: completed
+        task_status: completed
         milestone: M126
         active_feature: F72-F74
   08-verify-build:
@@ -24266,8 +24312,9 @@ evolve_cycles:
     routing_preset: feature
     preset: feature
     current_stage: 07-build
-    current_action: T126.2
-    next_action: '07-build T126.2 ADR-051 Accepted + api-contract/OpenAPI/docs closeout'
+    current_action: 'Gate C→D / 08-verify-build'
+    next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
+    current_stage_note: '07-build implementation COMPLETE (M123–M126); Gate C→D pending'
     branch: evolve/EV-026-chat-source-ux
     session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
@@ -24319,8 +24366,8 @@ evolve_cycles:
         - S028-D14
         - S028-D15
         - S028-D16
-    askquestion_pending: false
-    askquestion_pending_topic:
+    askquestion_pending: true
+    askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
     decisions:
       - 'S028-D1: routing + open approved (1a/2a); feature preset'
       - 'S028-D2: prod-only deploy posture; AskQuestion before 12–13'
@@ -24377,16 +24424,20 @@ evolve_cycles:
       phase_a: passed
       phase_b: passed
       phase_c: pending
+      phase_c_note: ready_for_askquestion — Phase 29 07-build complete; Standard Gate C→D
       phase_d: pending
       deploy: pending
+      updated_at: '2026-08-06T21:51:30Z'
     adrs:
       - path: docs/adr/ADR-051-display-title-vs-lock-flag.md
         id: ADR-051
-        status: Proposed
-        note: display_title vs lock flag — Accepted at M126 gate
+        status: Accepted
+        note: display_title vs lock flag — Accepted at M126/T126.2
         session_id: S028-chat-source-ux
         evolve_cycle_id: EV-026
         recorded_at: '2026-08-06T18:46:15Z'
+        accepted_at: '2026-08-06T21:49:39Z'
+        accepted_task: T126.2
     artifacts:
       - path: docs/sessions/S028-chat-source-ux/session-brief.md
         status: completed
@@ -24454,14 +24505,16 @@ evolve_cycles:
         updated_at: '2026-08-06T18:49:05Z'
       - path: docs/adr/ADR-051-display-title-vs-lock-flag.md
         kind: adr
-        status: Proposed
+        status: Accepted
         session_id: S028-chat-source-ux
-        stage: 04-tech-plan
-        skill_id: 04-tech-plan
+        stage: 07-build
+        skill_id: 07-build
         evolve_cycle_id: EV-026
         recorded_at: '2026-08-06T18:46:15Z'
-        updated_at: '2026-08-06T18:46:15Z'
-        note: Accepted at M126 gate
+        updated_at: '2026-08-06T21:49:39Z'
+        accepted_at: '2026-08-06T21:49:39Z'
+        accepted_task: T126.2
+        note: Accepted at M126/T126.2
       - path: docs/sessions/S000-internal-docs-archive/execution-plan.md
         kind: execution_plan
         status: Phase 29 locked
@@ -24484,9 +24537,33 @@ evolve_cycles:
         recorded_at: '2026-08-06T21:46:44Z'
         updated_at: '2026-08-06T21:46:44Z'
         note: 'TC-242–251 green confirmed 2026-08-06 (unit + e2e + Vitest + CORS H0c)'
+      - path: docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+        kind: stage_report
+        status: completed
+        session_id: S028-chat-source-ux
+        stage: 07-build
+        skill_id: 07-build
+        evolve_cycle_id: EV-026
+        milestone: M126
+        task: T126.2
+        recorded_at: '2026-08-06T21:49:39Z'
+        updated_at: '2026-08-06T21:49:39Z'
+        note: 'ADR-051 Accepted; api-contract/OpenAPI/docs closeout'
+      - path: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+        kind: stage_report
+        status: completed
+        session_id: S028-chat-source-ux
+        stage: 07-build
+        skill_id: 07-build
+        evolve_cycle_id: EV-026
+        milestone: M126
+        task: T126.3
+        recorded_at: '2026-08-06T21:51:30Z'
+        updated_at: '2026-08-06T21:51:30Z'
+        note: 'Phase 29 gate closeout; 07-build PASS (partial — verify deferred)'
     issues: []
-    updated_at: '2026-08-06T21:48:09Z'
-    note: '07-build: T126.2 STARTED — ADR-051 Accepted + docs closeout; tip@0cf33fa after T126.1 commit; M126 in_progress'
+    updated_at: '2026-08-06T21:51:30Z'
+    note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
     phase1_approved: true
     phase1_approved_at: '2026-08-06T16:36:58Z'
     phase_1_status: approved
@@ -24708,10 +24785,12 @@ evolve_cycles:
         note: 'S028-D25: 06 remains skipped (Gate B→C → 07); skip_rationale=no new deps expected'
         updated_at: '2026-08-06T19:04:21Z'
       07-build:
-        status: in_progress
+        status: completed
         started: '2026-08-06'
         started_at: '2026-08-06'
         started_at_iso: '2026-08-06T19:04:21Z'
+        completed: '2026-08-06'
+        completed_at: '2026-08-06T21:51:30Z'
         session_id: S028-chat-source-ux
         branch: evolve/EV-026-chat-source-ux
         planned_evolve_branch: evolve/EV-026-chat-source-ux
@@ -24727,11 +24806,12 @@ evolve_cycles:
           - F72
           - F73
           - F74
-        current_action: T126.2
-        next_action: 'T126.2 ADR-051 Accepted + docs closeout'
-        askquestion_pending: false
+        current_action: 'Gate C→D / 08-verify-build'
+        next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
+        askquestion_pending: true
+        askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
         milestone: M126
-        task: T126.2
+        task: T126.3
         active_feature: F72-F74
         phase: Phase 29 M123–M126
         milestones:
@@ -24742,37 +24822,50 @@ evolve_cycles:
         m123_status: completed
         m124_status: completed
         m125_status: completed
-        m126_status: in_progress
-        task_status: in_progress
+        m126_status: completed
+        task_status: completed
+        implementation_complete: true
         m123_tip: af18200
         m124_tip: 08dd6a7
         m125_tip: aecb764
-        tip_sha: 0cf33fa
-        tip_full: 0cf33faf570e461954d9f98cbbf0b470557d96b2
+        tip_sha: 49217b3
+        tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
+        tip_note: 'tip@49217b3 after T126.2; T126.3 commit pending'
         commits:
           - dbd34da
           - af18200
           - 08dd6a7
           - aecb764
           - 0cf33fa
+          - 49217b3
         substeps:
-          current_task: T126.2
-          task_status: in_progress
+          current_task: completed
+          task_status: completed
           feature_id: F72-F74
         gate_b_to_c: passed
         phase_b: passed
+        phase_c: pending
+        gate_c_to_d: pending
         s028_d25_decision: S028-D25
         s028_d25_choice: option_1
         handoff_updated: true
-        note: '07-build: T126.2 STARTED — ADR-051 Accepted + docs closeout; tip@0cf33fa after T126.1 commit; M126 in_progress'
+        note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
         t126_1_status: completed
         t126_1_started_at: '2026-08-06T21:44:33Z'
         t126_1_completed_at: '2026-08-06T21:46:44Z'
         t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
         t126_1_commit: 0cf33fa
-        t126_2_status: in_progress
+        t126_2_status: completed
         t126_2_started_at: '2026-08-06T21:48:09Z'
-        updated_at: '2026-08-06T21:48:09Z'
+        t126_2_completed_at: '2026-08-06T21:49:39Z'
+        t126_2_report: docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+        t126_2_commit: 49217b3
+        adr_051_status: Accepted
+        t126_3_status: completed
+        t126_3_completed_at: '2026-08-06T21:51:30Z'
+        t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+        report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+        updated_at: '2026-08-06T21:51:30Z'
     docs_touched:
       - docs/feature-list.md
       - docs/user-journeys.md
@@ -24795,7 +24888,7 @@ evolve_cycles:
     tp_lock: TP1–TP4
     phase: Phase 29 M123–M126
     rd_range: RD-322..RD-324
-    handoff: 'T126.2 in_progress — ADR-051 Accepted + docs; tip@0cf33fa; M126 in_progress'
+    handoff: '07-build complete (M123–M126) → Gate C→D AskQuestion → 08-verify-build'
     s028_d24_decision: S028-D24
     s028_d24_choices:
       M1: 1
@@ -51225,12 +51318,12 @@ artifacts:
     session_id: S028-chat-source-ux
     evolve_cycle_id: EV-026
     kind: adr
-    status: Proposed
-    stage: 04-tech-plan
-    skill_id: 04-tech-plan
+    status: Accepted
+    stage: 07-build
+    skill_id: 07-build
     recorded_at: '2026-08-06T18:46:15Z'
-    updated_at: '2026-08-06T18:46:15Z'
-    note: Accepted at M126 gate
+    updated_at: '2026-08-06T21:51:30Z'
+    note: Accepted at M126/T126.2
 git_history:
   current_branch: evolve/EV-026-chat-source-ux
   branches:
@@ -51244,29 +51337,41 @@ git_history:
       renamed_at: '2026-08-06T19:09:30Z'
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
-      head_sha: 0cf33faf570e461954d9f98cbbf0b470557d96b2
-      tip: 0cf33fa
-      tip_sha: 0cf33fa
-      tip_full: 0cf33faf570e461954d9f98cbbf0b470557d96b2
-      note: 'Tip @0cf33fa after T126.1 TC green gate commit; T126.2 in_progress'
+      head_sha: 49217b3fb074ab6b467cc456daff73d648577bcd
+      tip: 49217b3
+      tip_sha: 49217b3
+      tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
+      tip_note: 'tip@49217b3 after T126.2; T126.3 commit pending'
+      note: 'M123–M126 COMPLETE; tip@49217b3; Gate C→D AskQuestion pending; next 08-verify-build'
       m123_status: completed
       m124_status: completed
       m125_status: completed
+      m126_status: completed
       m123_tip: af18200
       m124_tip: 08dd6a7
       m125_tip: aecb764
-      next_milestone: M126
-      next_task: T126.2
-      m126_status: in_progress
-      task_status: in_progress
-      current_action: T126.2
+      next_milestone: none
+      next_task: Gate C→D / 08-verify-build
+      task_status: completed
+      current_action: 'Gate C→D / 08-verify-build'
       t126_1_status: completed
       t126_1_completed_at: '2026-08-06T21:46:44Z'
       t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
       t126_1_commit: 0cf33fa
-      t126_2_status: in_progress
+      t126_2_status: completed
       t126_2_started_at: '2026-08-06T21:48:09Z'
-      updated_at: '2026-08-06T21:48:09Z'
+      t126_2_completed_at: '2026-08-06T21:49:39Z'
+      t126_2_report: docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+      t126_2_commit: 49217b3
+      adr_051_status: Accepted
+      t126_3_status: completed
+      t126_3_completed_at: '2026-08-06T21:51:30Z'
+      t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+      askquestion_pending: true
+      askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
+      phase_c: pending
+      gate_c_to_d: pending
+      updated_at: '2026-08-06T21:51:30Z'
     - name: feat/S028-chat-source-ux
       purpose: 'S028/EV-026 chat source UX (#222 #223 #224) — session branch (renamed)'
       base: main
@@ -56485,6 +56590,33 @@ git_history:
         - workflow-state.yaml
       timestamp: '2026-08-06T21:48:09Z'
       note: 'T126.1 COMPLETE — TC-242–251 green gate report + execution-plan + workflow-state'
+    - sha: 49217b3
+      sha_full: 49217b3fb074ab6b467cc456daff73d648577bcd
+      full_sha: 49217b3fb074ab6b467cc456daff73d648577bcd
+      short: 49217b3
+      branch: evolve/EV-026-chat-source-ux
+      message: '[T126.2] docs: ADR-051 Accepted + OpenAPI inventory notes'
+      stage: 07-build
+      skill_id: 07-build
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      milestone: M126
+      task: T126.2
+      feature_ids:
+        - F72
+        - F73
+        - F74
+      files_changed: 7
+      files:
+        - docs/adr/ADR-051-display-title-vs-lock-flag.md
+        - docs/api-contract.md
+        - docs/dependency-inventory.md
+        - docs/sessions/S000-internal-docs-archive/execution-plan.md
+        - docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
+        - docs/sessions/S028-chat-source-ux/reports/tech-plan-delta.md
+        - workflow-state.yaml
+      timestamp: '2026-08-06T21:51:30Z'
+      note: 'T126.2 COMPLETE — ADR-051 Accepted + OpenAPI/inventory notes'
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
