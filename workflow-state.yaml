@@ -3245,20 +3245,42 @@ project:
         - id: QA-S028-001
           severity: blocking
           scope: out_of_cycle
-          summary: 'UJ-076 TC-239 e0_revisions fail (EV-025/F71) — disposition at 11-verify-impl'
+          status: fixed
+          summary: 'UJ-076 TC-239 e0_revisions — FIXED (LEGACY_E0 archive on first cutover)'
         - id: QA-S028-002
           severity: advisory
-          summary: 'h2 CVE-2026-71554 (4.3.0 → 4.4.1)'
-        - id: H4-H5
+          status: fixed
+          summary: 'h2 CVE-2026-71554 — FIXED (h2>=4.4.1 uv override)'
+        - id: QA-S028-003
           severity: advisory
-          summary: 'H4–H5 deferred to 13-deploy-smoke (staging FE URLs unset)'
+          status: accepted
+          carry_to: 13-deploy-smoke
+          summary: 'H4–H5 deferred to 13 (staging FE URLs unset; S028-D2)'
+        - id: QA-S028-004
+          severity: advisory
+          status: accepted
+          scope: pre_existing
+          summary: 'DM FE coverage gaps Evaluation/Jobs — accepted outside EV-026'
+        - id: QA-S028-005
+          severity: advisory
+          status: accepted
+          carry_to: 11-verify-impl
+          summary: 'Close #222–#224 after 11-verify-impl (13 if deploy)'
       scope:
         F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
         F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
         F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
       prior_09_notes: 'No prior S028 09-qa report. Prior S027/EV-025 09-qa COMPLETE (docs/sessions/S027-multilingual-embeddings/reports/qa-report.md @ tip 4b7231b).'
-      note: 'S028/EV-026 09-qa COMPLETE 2026-08-06T22:40:28Z — overall=pass_with_advisories; F72–F74 delta all green; QA-S028-001: blocking out-of-cycle UJ-076 TC-239 (e0_revisions; EV-025/F71) — disposition at 11-verify-impl; QA-S028-002: advisory h2 CVE-2026-71554 (4.3.0→4.4.1); H4–H5 deferred to 13 (staging FE URLs unset); F72–F74 delta checks all green (TC-242–251, CORS H0c, FE Vitest, Playwright T0-ui); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
-      updated_at: '2026-08-06T22:40:28Z'
+      note: 'S028/EV-026 09-qa COMPLETE pass_with_advisories; post-09 remediation 2026-08-06T22:47:07Z — QA-S028-001/002 FIXED; QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing; QA-S028-005 accepted→11; tip@c8b25e1; reports=qa-report.md + qa-remediation.md'
+      remediation_report: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+      remediation_at: '2026-08-06T22:47:07Z'
+      remediation_results:
+        QA-S028-001: fixed
+        QA-S028-002: fixed
+        QA-S028-003: accepted_carry_13
+        QA-S028-004: accepted_preexisting
+        QA-S028-005: accepted_carry_11
+      updated_at: '2026-08-06T22:47:07Z'
       s027_baseline:
         status: completed
         session_id: S027-multilingual-embeddings
@@ -6384,7 +6406,7 @@ project:
       askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
       close_cycle_pending: false
       session_closed: false
-      handoff: '09-qa COMPLETE pass_with_advisories → next 10-e2e (pending); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+      handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
       s028_d23_decision: S028-D23
       s028_d23_status: already_done
       s028_d24_pending: false
@@ -6393,6 +6415,7 @@ project:
       s028_d27_decision: S028-D27
       s028_d28_decision: S028-D28
       s028_d29_decision: S028-D29
+      s028_d30_decision: S028-D30
       tip_sha: c8b25e1
       tip_full: c8b25e14f2edf125781b2704a80f60ebecb83e41
       tip_prev: 1332dc1
@@ -6400,8 +6423,8 @@ project:
       gate_c_to_d: passed
       stage_08_result: PASS
       stage_09_result: pass_with_advisories
-      note: 'S028/EV-026 09-qa COMPLETE 2026-08-06T22:40:28Z — overall=pass_with_advisories; current_stage=10-e2e (pending); tip@c8b25e1; [Corpus: feature-list.md §F72–F74]'
-      updated_at: '2026-08-06T22:40:28Z'
+      note: 'S028/EV-026 QA remediation 2026-08-06T22:47:07Z — 001/002 FIXED; 003–005 accepted; current_stage=10-e2e (pending, not started); tip@c8b25e1; [Corpus: feature-list.md §F72–F74]'
+      updated_at: '2026-08-06T22:47:07Z'
       predecessor:
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
@@ -6819,7 +6842,7 @@ active_session:
     - 223
     - 224
   current_stage: 10-e2e
-  current_stage_note: '09-qa COMPLETE pass_with_advisories; next 10-e2e pending; tip@c8b25e1; F72–F74 delta all green'
+  current_stage_note: 'QA remediation done (001/002 fixed; 003–005 accepted); next 10-e2e pending (not started); tip@c8b25e1'
   started_at: '2026-08-06'
   started_at_iso: '2026-08-06T16:01:41Z'
   mode: evolve
@@ -6890,6 +6913,7 @@ active_session:
     - '08-verify-build COMPLETE PASS 2026-08-06T22:16:30Z — report=docs/sessions/S028-chat-source-ux/reports/verification-report.md; security remediations included; tip@44f03da; next 09-qa pending (do not start until user continues)'
     - 'S028-D28 2026-08-06T22:35:23Z: User approved continue (y) after 08 PASS — start 09-qa; routing_plan 09-qa=in_progress; tip synced 44f03da→1332dc1; askquestion_pending=false; [Corpus: feature-list.md §F72–F74]'
     - 'S028-D29 2026-08-06T22:40:28Z: 09-qa COMPLETE overall=pass_with_advisories; F72–F74 delta all green; QA-S028-001: blocking out-of-cycle UJ-076 TC-239 (e0_revisions; EV-025/F71) — disposition at 11-verify-impl; QA-S028-002: advisory h2 CVE-2026-71554 (4.3.0→4.4.1); H4–H5 deferred to 13 (staging FE URLs unset); F72–F74 delta checks all green (TC-242–251, CORS H0c, FE Vitest, Playwright T0-ui); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md; current_stage=10-e2e (pending); askquestion_pending=false; [Corpus: feature-list.md §F72–F74]'
+    - 'S028-D30 2026-08-06T22:47:07Z: QA remediation — user asked address advisories+blocking; QA-S028-001/002 FIXED; QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing coverage; QA-S028-005 accepted→11; artifact=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md; current_stage remains 10-e2e pending (not started); askquestion_pending=false; [Corpus: feature-list.md §F72–F74]'
   routing_plan:
     - stage: 00-context
       required: true
@@ -7112,19 +7136,41 @@ active_session:
         - id: QA-S028-001
           severity: blocking
           scope: out_of_cycle
-          summary: 'UJ-076 TC-239 e0_revisions fail (EV-025/F71) — disposition at 11-verify-impl'
+          status: fixed
+          summary: 'UJ-076 TC-239 e0_revisions — FIXED (LEGACY_E0 archive on first cutover)'
         - id: QA-S028-002
           severity: advisory
-          summary: 'h2 CVE-2026-71554 (4.3.0 → 4.4.1)'
-        - id: H4-H5
+          status: fixed
+          summary: 'h2 CVE-2026-71554 — FIXED (h2>=4.4.1 uv override)'
+        - id: QA-S028-003
           severity: advisory
-          summary: 'H4–H5 deferred to 13-deploy-smoke (staging FE URLs unset)'
+          status: accepted
+          carry_to: 13-deploy-smoke
+          summary: 'H4–H5 deferred to 13 (staging FE URLs unset; S028-D2)'
+        - id: QA-S028-004
+          severity: advisory
+          status: accepted
+          scope: pre_existing
+          summary: 'DM FE coverage gaps Evaluation/Jobs — accepted outside EV-026'
+        - id: QA-S028-005
+          severity: advisory
+          status: accepted
+          carry_to: 11-verify-impl
+          summary: 'Close #222–#224 after 11-verify-impl (13 if deploy)'
       scope:
         F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
         F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
         F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
-      note: 'S028/EV-026 09-qa COMPLETE 2026-08-06T22:40:28Z — overall=pass_with_advisories; F72–F74 delta all green; QA-S028-001: blocking out-of-cycle UJ-076 TC-239 (e0_revisions; EV-025/F71) — disposition at 11-verify-impl; QA-S028-002: advisory h2 CVE-2026-71554 (4.3.0→4.4.1); H4–H5 deferred to 13 (staging FE URLs unset); F72–F74 delta checks all green (TC-242–251, CORS H0c, FE Vitest, Playwright T0-ui); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md; [Corpus: feature-list.md §F72–F74]'
-      updated_at: '2026-08-06T22:40:28Z'
+      note: 'S028/EV-026 09-qa COMPLETE + remediation 2026-08-06T22:47:07Z — 001/002 FIXED; 003 accepted→13; 004 accepted pre-existing; 005 accepted→11; tip@c8b25e1; reports=qa-report.md + qa-remediation.md; [Corpus: feature-list.md §F72–F74]'
+      remediation_report: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+      remediation_at: '2026-08-06T22:47:07Z'
+      remediation_results:
+        QA-S028-001: fixed
+        QA-S028-002: fixed
+        QA-S028-003: accepted_carry_13
+        QA-S028-004: accepted_preexisting
+        QA-S028-005: accepted_carry_11
+      updated_at: '2026-08-06T22:47:07Z'
       s028_d29_decision: S028-D29
     - stage: 10-e2e
       required: true
@@ -7160,19 +7206,21 @@ active_session:
     - docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
     - docs/sessions/S028-chat-source-ux/reports/verification-report.md
     - docs/sessions/S028-chat-source-ux/reports/qa-report.md
+    - docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
   next_action: 10-e2e (pending)
   orchestrator_status: in_progress
-  updated_at: '2026-08-06T22:40:28Z'
+  updated_at: '2026-08-06T22:47:07Z'
   next_recommended: 10-e2e
   delta_only: true
   askquestion_pending: false
   askquestion_pending_topic:
   askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
-  handoff: '09-qa COMPLETE pass_with_advisories → next 10-e2e (pending); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+  handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
   current_action: awaiting_10_e2e
   s028_d28_decision: S028-D28
   s028_d28_choice: continue_09_qa_after_08_pass
   s028_d29_decision: S028-D29
+  s028_d30_decision: S028-D30
   stage_09_result: pass_with_advisories
   stage_09_overall: pass_with_advisories
   citations:
@@ -7204,7 +7252,7 @@ active_session:
   stage_08_result: PASS
   stage_08_security_remediations: included
   session_branch: evolve/EV-026-chat-source-ux
-  qa_findings: 'QA-S028-001: blocking out-of-cycle UJ-076 TC-239 (e0_revisions; EV-025/F71) — disposition at 11-verify-impl; QA-S028-002: advisory h2 CVE-2026-71554 (4.3.0→4.4.1); H4–H5 deferred to 13 (staging FE URLs unset); F72–F74 delta checks all green (TC-242–251, CORS H0c, FE Vitest, Playwright T0-ui)'
+  qa_findings: 'QA-S028-001 FIXED (LEGACY_E0); QA-S028-002 FIXED (h2>=4.4.1); QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing coverage; QA-S028-005 accepted→11; remediation=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
 sessions:
   - id: S027-multilingual-embeddings
     type: feature
@@ -20805,20 +20853,42 @@ stages:
       - id: QA-S028-001
         severity: blocking
         scope: out_of_cycle
-        summary: 'UJ-076 TC-239 e0_revisions fail (EV-025/F71) — disposition at 11-verify-impl'
+        status: fixed
+        summary: 'UJ-076 TC-239 e0_revisions — FIXED (LEGACY_E0 archive on first cutover)'
       - id: QA-S028-002
         severity: advisory
-        summary: 'h2 CVE-2026-71554 (4.3.0 → 4.4.1)'
-      - id: H4-H5
+        status: fixed
+        summary: 'h2 CVE-2026-71554 — FIXED (h2>=4.4.1 uv override)'
+      - id: QA-S028-003
         severity: advisory
-        summary: 'H4–H5 deferred to 13-deploy-smoke (staging FE URLs unset)'
+        status: accepted
+        carry_to: 13-deploy-smoke
+        summary: 'H4–H5 deferred to 13 (staging FE URLs unset; S028-D2)'
+      - id: QA-S028-004
+        severity: advisory
+        status: accepted
+        scope: pre_existing
+        summary: 'DM FE coverage gaps Evaluation/Jobs — accepted outside EV-026'
+      - id: QA-S028-005
+        severity: advisory
+        status: accepted
+        carry_to: 11-verify-impl
+        summary: 'Close #222–#224 after 11-verify-impl (13 if deploy)'
     scope:
       F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
       F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
       F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
     prior_09_notes: 'No prior S028 09-qa report. Prior S027/EV-025 09-qa COMPLETE (docs/sessions/S027-multilingual-embeddings/reports/qa-report.md @ tip 4b7231b).'
-    note: 'S028/EV-026 09-qa COMPLETE 2026-08-06T22:40:28Z — overall=pass_with_advisories; F72–F74 delta all green; QA-S028-001: blocking out-of-cycle UJ-076 TC-239 (e0_revisions; EV-025/F71) — disposition at 11-verify-impl; QA-S028-002: advisory h2 CVE-2026-71554 (4.3.0→4.4.1); H4–H5 deferred to 13 (staging FE URLs unset); F72–F74 delta checks all green (TC-242–251, CORS H0c, FE Vitest, Playwright T0-ui); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
-    updated_at: '2026-08-06T22:40:28Z'
+    note: 'S028/EV-026 09-qa COMPLETE pass_with_advisories; post-09 remediation 2026-08-06T22:47:07Z — QA-S028-001/002 FIXED; QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing; QA-S028-005 accepted→11; tip@c8b25e1; reports=qa-report.md + qa-remediation.md'
+    remediation_report: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+    remediation_at: '2026-08-06T22:47:07Z'
+    remediation_results:
+      QA-S028-001: fixed
+      QA-S028-002: fixed
+      QA-S028-003: accepted_carry_13
+      QA-S028-004: accepted_preexisting
+      QA-S028-005: accepted_carry_11
+    updated_at: '2026-08-06T22:47:07Z'
     s027_baseline:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -23978,7 +24048,7 @@ stages:
     askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
     close_cycle_pending: false
     session_closed: false
-    handoff: '09-qa COMPLETE pass_with_advisories → next 10-e2e (pending); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+    handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
     s028_d23_decision: S028-D23
     s028_d23_status: already_done
     s028_d24_pending: false
@@ -24589,7 +24659,7 @@ evolve_cycles:
     current_stage: 10-e2e
     current_action: awaiting_10_e2e
     next_action: 10-e2e (pending)
-    current_stage_note: '09-qa COMPLETE pass_with_advisories; next 10-e2e pending; tip@c8b25e1; F72–F74 delta all green'
+    current_stage_note: 'QA remediation done (001/002 fixed; 003–005 accepted); next 10-e2e pending (not started); tip@c8b25e1'
     branch: evolve/EV-026-chat-source-ux
     session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
@@ -24683,6 +24753,8 @@ evolve_cycles:
         at 07 start (record when created); 2026-08-06T19:04:21Z'
       - 'S028-D26: Gate C→D PASS (option 1) — proceed to 08-verify-build; checkpoints.phase_c=passed; gates.c_to_d=passed; askquestion_pending=false; tip@70c4565; dirty workflow-state tip sync rides with 08 artifacts; 2026-08-06T22:04:00Z'
       - 'S028-D27: 08-verify-build COMPLETE PASS — report=docs/sessions/S028-chat-source-ux/reports/verification-report.md; security remediations included; tip@44f03da; next 09-qa pending; 2026-08-06T22:16:30Z'
+      - 'S028-D29: 09-qa COMPLETE pass_with_advisories — tip@c8b25e1; next 10-e2e pending'
+      - 'S028-D30: QA remediation — 001/002 FIXED; 003 accepted→13; 004 accepted pre-existing; 005 accepted→11; 10-e2e remains pending; 2026-08-06T22:47:07Z'
     feature_map:
       F72:
         issue: 222
@@ -25240,20 +25312,42 @@ evolve_cycles:
           - id: QA-S028-001
             severity: blocking
             scope: out_of_cycle
-            summary: 'UJ-076 TC-239 e0_revisions fail (EV-025/F71) — disposition at 11-verify-impl'
+            status: fixed
+            summary: 'UJ-076 TC-239 e0_revisions — FIXED (LEGACY_E0 archive on first cutover)'
           - id: QA-S028-002
             severity: advisory
-            summary: 'h2 CVE-2026-71554 (4.3.0 → 4.4.1)'
-          - id: H4-H5
+            status: fixed
+            summary: 'h2 CVE-2026-71554 — FIXED (h2>=4.4.1 uv override)'
+          - id: QA-S028-003
             severity: advisory
-            summary: 'H4–H5 deferred to 13-deploy-smoke (staging FE URLs unset)'
+            status: accepted
+            carry_to: 13-deploy-smoke
+            summary: 'H4–H5 deferred to 13 (staging FE URLs unset; S028-D2)'
+          - id: QA-S028-004
+            severity: advisory
+            status: accepted
+            scope: pre_existing
+            summary: 'DM FE coverage gaps Evaluation/Jobs — accepted outside EV-026'
+          - id: QA-S028-005
+            severity: advisory
+            status: accepted
+            carry_to: 11-verify-impl
+            summary: 'Close #222–#224 after 11-verify-impl (13 if deploy)'
         scope:
           F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
           F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
           F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
         prior_09_notes: 'No prior S028 09-qa report. Prior S027/EV-025 09-qa COMPLETE (docs/sessions/S027-multilingual-embeddings/reports/qa-report.md @ tip 4b7231b).'
-        note: 'S028/EV-026 09-qa COMPLETE 2026-08-06T22:40:28Z — overall=pass_with_advisories; F72–F74 delta all green; QA-S028-001: blocking out-of-cycle UJ-076 TC-239 (e0_revisions; EV-025/F71) — disposition at 11-verify-impl; QA-S028-002: advisory h2 CVE-2026-71554 (4.3.0→4.4.1); H4–H5 deferred to 13 (staging FE URLs unset); F72–F74 delta checks all green (TC-242–251, CORS H0c, FE Vitest, Playwright T0-ui); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
-        updated_at: '2026-08-06T22:40:28Z'
+        note: 'S028/EV-026 09-qa COMPLETE pass_with_advisories; post-09 remediation 2026-08-06T22:47:07Z — QA-S028-001/002 FIXED; QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing; QA-S028-005 accepted→11; tip@c8b25e1; reports=qa-report.md + qa-remediation.md'
+        remediation_report: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+        remediation_at: '2026-08-06T22:47:07Z'
+        remediation_results:
+          QA-S028-001: fixed
+          QA-S028-002: fixed
+          QA-S028-003: accepted_carry_13
+          QA-S028-004: accepted_preexisting
+          QA-S028-005: accepted_carry_11
+        updated_at: '2026-08-06T22:47:07Z'
       10-e2e:
         status: pending
         session_id: S028-chat-source-ux
@@ -25261,6 +25355,16 @@ evolve_cycles:
         mode: delta
         note: 'Not started; next after 09-qa COMPLETE (parallel optional)'
         askquestion_pending: false
+      - path: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+        kind: qa-remediation
+        status: completed
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        stage: 09-qa
+        skill_id: 09-qa
+        recorded_at: '2026-08-06T22:47:07Z'
+        updated_at: '2026-08-06T22:47:07Z'
+        note: 'QA remediation — 001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted'
     docs_touched:
       - docs/feature-list.md
       - docs/user-journeys.md
@@ -25283,7 +25387,7 @@ evolve_cycles:
     tp_lock: TP1–TP4
     phase: Phase 29 M123–M126
     rd_range: RD-322..RD-324
-    handoff: '09-qa COMPLETE pass_with_advisories → next 10-e2e (pending); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+    handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
     s028_d28_decision: S028-D28
     s028_d29_decision: S028-D29
     stage_09_result: pass_with_advisories
@@ -42774,25 +42878,60 @@ issue_log:
       remains in_progress; interview complete → drafting_artifacts; ADR-040/RD-191 drafting as 04 artifacts.
   - id: QA-S028-001
     category: regression_out_of_cycle
-    summary: 'UJ-076 TC-239 e0_revisions fail (EV-025/F71) — blocking for merge disposition at 11-verify-impl; not F72–F74'
-    status: open
+    summary: 'UJ-076 TC-239 e0_revisions fail (EV-025/F71) — first-cutover promote missing LEGACY_E0 archive'
+    status: resolved
     severity: blocking
     scope: out_of_cycle
-    blocking_for:
-      - 11-verify-impl
+    blocking_for: []
     session_id: S028-chat-source-ux
     evolve_cycle_id: EV-026
     recorded_at: '2026-08-06T22:40:28Z'
-    note: 'Reproduced in 09-qa; assert e0_revisions >= 1 → 0; [Spec: docs/sessions/S028-chat-source-ux/reports/qa-report.md]'
+    resolved_at: '2026-08-06T22:47:07Z'
+    closed_at: '2026-08-06T22:47:07Z'
+    resolution: 'Fixed — rebuild_promote inserts LEGACY_E0 archive on first cutover; unit + UJ-076 green'
+    note: 'Post-09 remediation; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
   - id: QA-S028-002
     category: security_advisory
     summary: 'h2 CVE-2026-71554 — upgrade 4.3.0 → 4.4.1'
-    status: open
+    status: resolved
     severity: advisory
     session_id: S028-chat-source-ux
     evolve_cycle_id: EV-026
     recorded_at: '2026-08-06T22:40:28Z'
-    note: '09-qa advisory; [Spec: docs/sessions/S028-chat-source-ux/reports/qa-report.md]'
+    resolved_at: '2026-08-06T22:47:07Z'
+    closed_at: '2026-08-06T22:47:07Z'
+    resolution: 'Fixed — uv override-dependencies h2>=4.4.1; make audit clean (nltk ignores only)'
+    note: 'Post-09 remediation; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
+  - id: QA-S028-003
+    category: deferred_smoke
+    summary: 'H4–H5 live AskQuestion-gated (S028-D2); staging FE URLs unset'
+    status: accepted
+    severity: advisory
+    carry_to: 13-deploy-smoke
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    recorded_at: '2026-08-06T22:47:07Z'
+    note: 'Accepted carry to 13; [Spec: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md]'
+  - id: QA-S028-004
+    category: coverage_preexisting
+    summary: 'DM FE unit coverage gaps Evaluation/Jobs pages (not DocumentAdmin/F74)'
+    status: accepted
+    severity: advisory
+    scope: pre_existing
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    recorded_at: '2026-08-06T22:47:07Z'
+    note: 'Accepted pre-existing coverage; track outside EV-026; [Spec: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md]'
+  - id: QA-S028-005
+    category: issue_closeout
+    summary: 'Close GitHub #222–#224 after 11-verify-impl (13 if deploy)'
+    status: accepted
+    severity: advisory
+    carry_to: 11-verify-impl
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    recorded_at: '2026-08-06T22:47:07Z'
+    note: 'Accepted carry to 11; [Spec: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md]'
 
 decisions_log:
   - id: S028-D1
@@ -48522,6 +48661,28 @@ decisions_log:
     status: confirmed
     note: '[Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/qa-report.md]'
   - 'S028-D29 / EV-026: 09-qa COMPLETE pass_with_advisories 2026-08-06T22:40:28Z — tip@c8b25e1; next 10-e2e pending'
+  - id: S028-D30
+    skill: 09-qa
+    skill_id: 09-qa
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    decision: 'S028-D30: User asked address advisories+blocking — QA-S028-001/002 FIXED; QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing coverage; QA-S028-005 accepted→11; 10-e2e remains pending (not started); askquestion_pending=false'
+    summary: 'S028/EV-026 QA remediation COMPLETE; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
+    topic: 09_qa_remediation
+    results:
+      QA-S028-001: fixed
+      QA-S028-002: fixed
+      QA-S028-003: accepted_carry_13
+      QA-S028-004: accepted_preexisting
+      QA-S028-005: accepted_carry_11
+    report: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+    next_action: 10-e2e (pending)
+    askquestion_pending: false
+    recorded_at: '2026-08-06T22:47:07Z'
+    approved: '2026-08-06'
+    status: confirmed
+    note: '[Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md]'
+  - 'S028-D30 / EV-026: QA remediation 2026-08-06T22:47:07Z — 001/002 fixed; 003–005 accepted; 10-e2e pending'
 artifacts:
   - path: docs/sessions/S027-multilingual-embeddings/reports/deploy-smoke.md
     kind: deploy-smoke
@@ -51860,8 +52021,18 @@ artifacts:
     tip_sha: c8b25e1
     tip_full: c8b25e14f2edf125781b2704a80f60ebecb83e41
     recorded_at: '2026-08-06T22:40:28Z'
-    updated_at: '2026-08-06T22:40:28Z'
-    note: '09-qa COMPLETE pass_with_advisories; F72–F74 delta all green; QA-S028-001 out-of-cycle TC-239; QA-S028-002 h2 CVE; H4–H5 deferred'
+    updated_at: '2026-08-06T22:47:07Z'
+    note: '09-qa COMPLETE pass_with_advisories; post-09 remediation closed 001/002; 003–005 accepted'
+  - path: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    kind: qa-remediation
+    status: completed
+    stage: 09-qa
+    skill_id: 09-qa
+    recorded_at: '2026-08-06T22:47:07Z'
+    updated_at: '2026-08-06T22:47:07Z'
+    note: 'QA remediation — 001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted; 10-e2e still pending'
 git_history:
   current_branch: evolve/EV-026-chat-source-ux
   branches:
