@@ -157,6 +157,16 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
 }
 ```
 
+`sources[].title` (F74 / EV-026): **display string** =
+`COALESCE(documents.display_title, documents.title)` (or chunk inherit of that). Field name
+stays `title` for compatibility (S028-D12). FE may still receive non-http(s) `url` values
+from fixtures; ChatRAG UI must not render those as href (F72) — display filter only.
+
+`sources[]` length (F73 / EV-026): **0…top_k** after relevance filter (`min_retrieval_score`;
+CE/rerank threshold when enabled). **Not** a fixed display quota — do not pad. Synthesis
+and UI use the same filtered set. `top_k` / `VECINITA_TOP_K` is an **upper bound** (F50
+default 8 remains the max default, not a target count).
+
 `cache_hit` (F43 / EV-017): optional for older clients; **required in OpenAPI** after F43 ships.
 `none` = full generate path; `exact` / `semantic` skip LLM; `retrieve` reuses cached chunks then may still synthesize.
 
@@ -784,7 +794,7 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 
 ### PATCH `/internal/v1/documents/bulk/metadata` (EV-002 / F27)
 
-- **Purpose**: Bulk edit document metadata (title, language).
+- **Purpose**: Bulk edit document metadata (title, language, **display_title** — F74 / EV-026).
 - **Request**:
 
 ```json
@@ -792,12 +802,16 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
   "document_ids": ["uuid", "uuid"],
   "updates": {
     "title": "New Title (optional)",
+    "display_title": "Operator display name (optional; null clears)",
     "language": "es (optional)"
   }
 }
 ```
 
 - **Validation**: Max 100 documents; only provided fields are updated.
+- **`display_title` (F74)**: Sets operator display name. Explicit JSON `null` clears the
+  override (fall back to scraped `title`). Scrape/re-ingest updates raw `title` only and
+  does **not** clear `display_title`.
 - **Response** `200`: <!-- TS-EV002-C03: partial success per TP-024 -->
 
 ```json
@@ -809,7 +823,29 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 }
 ```
 
-- **Side effects**: Emits `document.edited` audit event per successfully updated document; creates document_versions entries.
+- **Side effects**: Emits `document.edited` audit event per successfully updated document
+  (payload includes before/after for changed fields, including `display_title`); creates
+  document_versions entries.
+
+### PATCH `/internal/v1/documents/{document_id}` (EV-026 / F74)
+
+- **Purpose**: Single-document metadata edit (discoverable rename without bulk-select).
+- **Auth**: Internal API key + admin JWT (same as other write routes).
+- **Request**:
+
+```json
+{
+  "display_title": "Neighbor-friendly name (optional; null clears)",
+  "title": "string (optional — prefer display_title for operator rename)",
+  "language": "en | es (optional)"
+}
+```
+
+- **Behavior**: Partial update; `display_title: null` clears override. Citations/admin lists
+  use `COALESCE(display_title, title)`.
+- **Response** `200`: Updated document DTO including `title`, `display_title`, `url`, ids.
+- **Side effects**: `document.edited` audit + version row (same as bulk metadata).
+- **Errors**: `404` missing document; `400` validation; `401`/`403` auth.
 
 ### GET `/internal/v1/audit` (EV-002 / F29)
 

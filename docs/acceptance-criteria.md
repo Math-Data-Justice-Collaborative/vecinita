@@ -315,8 +315,23 @@
 - [x] **AC-ME7**: After cutover, in-corpus EN ask returns non-empty sources (UJ-075, TC-237). *(11-verify-impl S027-D47 — T0 stub; live @ 13)*
 - [x] **AC-ME8**: After cutover, in-corpus ES ask returns non-empty sources (UJ-075, TC-238). *(11-verify-impl S027-D47 — T0 stub; live @ 13)*
 - [x] **AC-ME9**: Prior E0 revision remains restorable via F41 rollback runbook (TC-239, S027-D22). *(11-verify-impl S027-D47 — code; ops @ 13)*
-- [x] **AC-ME10**: Out of EV-025 without unlock: dual-index; dim≠384; UI changes; bge-m3 multi-vector; hard numeric promote gate; F72 as separate Fn (F44 tune only if post-pin harm, folded into F71). Tokenizer **must** align + rechunk (in-scope — S027-D15/M2b). *(11-verify-impl S027-D47 — scope held)*
+- [x] **AC-ME10**: Out of EV-025 without unlock: dual-index; dim≠384; UI changes; bge-m3 multi-vector; hard numeric promote gate; **no separate multilingual Fn** beyond F70–F71 (F44 tune only if post-pin harm, folded into F71). Tokenizer **must** align + rechunk (in-scope — S027-D15/M2b). *(11-verify-impl S027-D47 — scope held)*  
+  *Note (S028/EV-026): “F72 as separate Fn” in the EV-025 OOS list meant “do not allocate another multilingual feature id.” **F72** was later allocated to ChatRAG citation URL validation (#222) — unrelated to embeds.*
 - [x] **AC-ME11**: `VECINITA_CHUNK_TOKENIZER_ID` matches embed pin; F71 rebuild rechunks then re-embeds (TC-241, S027-D15/M2b, ADR-044/048). *(11-verify-impl S027-D47 — T0 pin; compose stamp WAIVED S027-D35)*
+
+### EV-026 — Chat source UX (F72–F74) — S028 / #222 #223 #224
+
+- [ ] **AC-SU1**: Citation UI only uses `<a href>` for absolute `http:`/`https:` URLs (TC-242–243, UJ-077, F72).
+- [ ] **AC-SU2**: Invalid/missing URL → title/label plain text; no ingest/job URL rejection (TC-243–244, S028-D6).
+- [ ] **AC-SU3**: `sources[]` length is 0…`top_k` by relevance; no pad to a fixed count (TC-245–246, UJ-078, F73).
+- [ ] **AC-SU4**: Hits below `min_retrieval_score` (and CE threshold when CE on) omitted; synth + UI same set (TC-245–246, S028-D9).
+- [ ] **AC-SU5**: Zero qualified hits → empty `sources[]` is valid (TC-247).
+- [ ] **AC-SU6**: Operator can set single-document `display_title` without bulk-select (TC-248, UJ-079, F74).
+- [ ] **AC-SU7**: Title/`display_title` edits emit `document.edited` with before/after (TC-248).
+- [ ] **AC-SU8**: ChatRAG `sources[].title` and packing use `COALESCE(display_title, title)` (TC-249).
+- [ ] **AC-SU9**: Rescrape/re-ingest updates raw `title` but preserves `display_title` (TC-250, S028-D10).
+- [ ] **AC-SU10**: Clearing `display_title` (null) falls back to scraped `title` (TC-251).
+- [ ] **AC-SU11**: Out of EV-026 without unlock: #94/#217 source-add; LLM titles; community title edit; ingest URL rejection; major version only if breaking (S028-D15).
 
 
 ## Quantitative benchmarks

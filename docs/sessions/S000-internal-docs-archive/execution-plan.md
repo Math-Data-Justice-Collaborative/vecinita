@@ -1,22 +1,22 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; S024 Phase 26 delta 2026-08-03; S026 Phase 27 delta 2026-08-04; **S027 Phase 28 delta 2026-08-05**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; S024 Phase 26 delta 2026-08-03; S026 Phase 27 delta 2026-08-04; S027 Phase 28 delta 2026-08-05; **S028 Phase 29 delta 2026-08-06**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**048**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**051**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 28: EV-025 — Multilingual embeddings (F70–F71) — 08-verify-build PASS; Phase D next |
-| **Active milestone** | M122 — completed (merged #213) |
-| **Active task** | 08-verify-build complete — continue 09-qa |
-| **Last updated** | 2026-08-05 |
-| **Evolve cycle** | EV-025 — Standard; Phase D verify |
-| **Git branch** | `evolve/EV-025-multilingual-embeddings` |
-| **Active session** | S027-multilingual-embeddings — 08 done; 17-retro after cycle |
-| **Scope addition** | 2026-08-05 — F70–F71 multilingual 384-d embed + staging→prod cutover (#159). |
+| **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 07-build |
+| **Active milestone** | M123 — F72 citation URL (in progress → complete) |
+| **Active task** | T123.5 green — next M124 / T124.1 |
+| **Last updated** | 2026-08-06 |
+| **Evolve cycle** | EV-026 — Standard; Phase C build |
+| **Git branch** | `evolve/EV-026-chat-source-ux` |
+| **Active session** | S028-chat-source-ux — 07-build; Gate B→C PASS |
+| **Scope addition** | 2026-08-06 — F72–F74 citation URLs, relevance sources, `display_title` (#222–#224). |
 
 ## Template
 
@@ -2438,6 +2438,87 @@ H4–H5 regression note for **13-deploy-smoke**; #159 closeout notes after 13.
 
 ---
 
+## Phase 29: EV-026 — Chat source UX (F72–F74)
+
+> **Session:** S028 · **Cycle:** EV-026 · **Branch:** `feat/S028-chat-source-ux` →
+> `evolve/EV-026-chat-source-ux` at 07  
+> **Issues:** [#222](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/222),
+> [#223](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/223),
+> [#224](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/224)  
+> **Decisions:** RD-309–321; S028-D1–D22; TP1–TP4 locked (S028-D22); Gate A→B PASS (S028-D20)  
+> **ADRs:** [ADR-051](../../../adr/ADR-051-display-title-vs-lock-flag.md) (Proposed → Accepted at M126)  
+> **Out of scope:** Ingest `title`→`display_title` (RD-321 deferred); new deps / 06; required
+> Playwright; new CORS origins/secrets; #94/#217 source-add
+
+#### M123: F72 — Citation URL helper + SourceList
+
+**Goal:** Absolute `http:`/`https:` only get `<a href>`; invalid/missing URLs show title as
+text (AC-SU1–SU2; TC-242–244; UJ-077). Helper lives in `packages/frontend-ui` for admin reuse.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T123.1 | Test: Vitest red — `isSafeHttpUrl` / `citationHref` (valid/invalid/relative/blank) in `packages/frontend-ui` | Test | completed | AC-SU1, TC-242–244, F72 | — | 2026-08-06 | S028 | F72 |
+| T123.2 | Code: add helper + export from `vecinita-frontend-ui` | Code | completed | RD-310, TP3, ADR-020 | T123.1 | 2026-08-06 | S028 | F72 |
+| T123.3 | Test: Vitest red — `SourceList` href only for safe URLs (TC-242–244) | Test | completed | UJ-077, RD-317 | T123.2 | 2026-08-06 | S028 | F72 |
+| T123.4 | Code: wire `SourceList` to helper; no backend URL scrub | Code | completed | feature-list F72, RD-310 | T123.3 | 2026-08-06 | S028 | F72 |
+| T123.5 | Test: SourceList + helper Vitest green | Test | completed | TC-242–244 | T123.4 | 2026-08-06 | S028 | F72 |
+
+#### M124: F73 — Relevance-gated sources (no pad)
+
+**Goal:** Ask `sources[]` length is **0…`top_k`** after `min_retrieval_score` (dense via rag
+`score_threshold`; CE threshold when CE on); **no pad**; synth + UI same set; empty
+`sources[]` valid when none clear the bar (AC-SU3–SU5; TC-245–247; UJ-078).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T124.1 | Test: unit red — filter/no-pad; empty above threshold; cap at `top_k`; CE path when enabled (TC-245–247) | Test | pending | AC-SU3–SU5, F73, RD-311 | T123.5 | — | S028 | F73 |
+| T124.2 | Code: verify/wire chat-rag ask + synth to pass `score_threshold=min_retrieval_score`; drop below-threshold; no pad | Code | pending | api-contract §sources, config-spec | T124.1 | — | S028 | F73 |
+| T124.3 | Test: API e2e UJ-078 / TC-245–247 green | Test | pending | e2e-coverage, test-plan | T124.2 | — | S028 | F73 |
+| T124.4 | Docs: eval note — few-strong vs many-weak sources (RD-317) | Docs | pending | test-plan / eval notes | T124.3 | — | S028 | F73 |
+
+#### M125: F74 — `display_title` migration + PATCH + admin + packing
+
+**Goal:** Nullable `documents.display_title`; scrape updates `title` only; PATCH single-doc +
+bulk metadata; COALESCE in packing/citations; DocumentAdmin rename; audit `document.edited`
+(AC-SU6–SU10; TC-248–251; UJ-079). **No** ingest title→display (TP2).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T125.1 | Test: unit/API red — migration column; PATCH body; COALESCE; rescrape preserves display; null reset; audit (TC-248–251) | Test | pending | AC-SU6–SU10, F74, ADR-051 | T124.4 | — | S028 | F74 |
+| T125.2 | Config: Alembic `documents.display_title` nullable text | Config | pending | feature-list F74, RD-312 | T125.1 | — | S028 | F74 |
+| T125.3 | Code: write API `PATCH /internal/v1/documents/{id}` + bulk metadata `display_title` + audit | Code | pending | api-contract, RD-313 | T125.1, T125.2 | — | S028 | F74 |
+| T125.4 | Code: rag packing + chat sources title = `COALESCE(display_title, title)` | Code | pending | RD-320, feature-list F74 | T125.3 | — | S028 | F74 |
+| T125.5 | Code: DocumentAdmin single-doc rename UI + admin client PATCH | Code | pending | UJ-079, RD-313 | T125.3 | — | S028 | F74 |
+| T125.6 | Test: e2e UJ-079 + admin Vitest green (TC-248–251); Playwright optional | Test | pending | e2e-coverage, RD-317 | T125.4, T125.5 | — | S028 | F74 |
+| T125.7 | Config: OpenAPI + shared schemas DTO for PATCH + `display_title` | Config | pending | ADR-011, TP4 | T125.3 | — | S028 | F74 |
+| T125.8 | Test: CORS H0c OPTIONS `PATCH /internal/v1/documents/{id}` from admin origin | Test | pending | connectivity-gates, smoke | T125.3 | — | S028 | F74 |
+
+#### M126: Phase 29 gate — TC suite + docs closeout
+
+**Goal:** Confirm TC-242–251 + AC-SU1–10 mapped; ADR-051 Accepted; OpenAPI/docs; H4–H5 note
+for 13; issue closeout notes after verify/deploy gates.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|---------|---------|
+| T126.1 | Test: confirm unit + API e2e + Vitest TC-242–251 green (Playwright only if added) | Test | pending | e2e-coverage, RD-317 | T123.5, T124.3, T125.6 | — | S028 | F72–F74 |
+| T126.2 | Docs/Config: ADR-051 Accepted; api-contract/OpenAPI notes; inventory unchanged (no new deps) | Docs | pending | TP4, ADR-051 | T126.1 | — | S028 | F72–F74 |
+| T126.3 | Docs: Phase 29 gate + Current State; H4–H5 at 13 note; #222–#224 closeout notes | Docs | pending | Phase 29 gate, connectivity-gates | T126.2 | — | S028 | F72–F74 |
+
+#### Phase 29 Gate Check
+
+- [ ] All M123–M126 tasks completed (T123.1–T126.3)
+- [ ] AC-SU1–SU10 met at verify (08/09–11); mapped + unit/stub green at 07
+- [ ] ADR-051 Accepted; RD-321 remains deferred (no ingest title→display)
+- [ ] OpenAPI + CORS H0c for single-doc PATCH; no new secrets/origins
+- [ ] 06-tech-tooling skipped; Playwright optional only
+- [ ] Live prod smoke only after AskQuestion (S028-D2 / RD-318)
+
+**Tech-plan delta:** `docs/sessions/S028-chat-source-ux/reports/tech-plan-delta.md`  
+**ADR:** [ADR-051](../../../adr/ADR-051-display-title-vs-lock-flag.md)  
+**Roadmap:** `docs/sessions/S028-chat-source-ux/roadmap.md`
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -2570,6 +2651,15 @@ main
 | PR-69 | Minor | M121 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #211 @`e38516a` |
 | PR-70 | Minor | M122 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | merged — #213 @`de1355c` |
 | PR-71 | Major | Phase 28 / S027 (EV-025) | evolve/EV-025-multilingual-embeddings | main | pending — after Gate C→D / verify |
+| PR-72 | Minor | M123 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F72/#222 |
+| PR-73 | Minor | M124 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F73/#223 |
+| PR-74 | Minor | M125 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F74/#224 |
+| PR-75 | Minor | M126 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — Phase 29 gate |
+| PR-76 | Major | Phase 29 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — after Gate C→D / verify |
+
+S028 (EV-026) is evolve Standard: M123–M126 on `evolve/EV-026-chat-source-ux`
+(one PR per Fn/gate; major PR-76 to `main`). Gate A→B passed (S028-D20); TP1–TP4 locked
+(S028-D22); 03/06 skipped; Gate B→C after 05-verify-tech.
 
 S026 (EV-024) is evolve Standard: M112–M118 on `evolve/EV-024-frontend-ux-polish`
 (one PR per issue #104→#106→#87→#93/#186→#170; M118 OpenAPI/gate). Gate A→B / B→C passed;
@@ -3287,11 +3377,32 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T122.1 | M122 | 28 | Test | completed | T119.5, T120.5, T121.4 | — | S027 | F70–F71 | — |
 | T122.2 | M122 | 28 | Docs | completed | T122.1 | — | S027 | F70–F71 | 05 L2 |
 | T122.3 | M122 | 28 | Docs | completed | T122.2 | — | S027 | F70–F71 | 05 L3/M6 |
+| T123.1 | M123 | 29 | Test | completed | — | 2026-08-06 | S028 | F72 | — |
+| T123.2 | M123 | 29 | Code | completed | T123.1 | 2026-08-06 | S028 | F72 | TP3 |
+| T123.3 | M123 | 29 | Test | completed | T123.2 | 2026-08-06 | S028 | F72 | — |
+| T123.4 | M123 | 29 | Code | completed | T123.3 | 2026-08-06 | S028 | F72 | — |
+| T123.5 | M123 | 29 | Test | completed | T123.4 | 2026-08-06 | S028 | F72 | — |
+| T124.1 | M124 | 29 | Test | pending | T123.5 | — | S028 | F73 | — |
+| T124.2 | M124 | 29 | Code | pending | T124.1 | — | S028 | F73 | TP4 |
+| T124.3 | M124 | 29 | Test | pending | T124.2 | — | S028 | F73 | — |
+| T124.4 | M124 | 29 | Docs | pending | T124.3 | — | S028 | F73 | — |
+| T125.1 | M125 | 29 | Test | pending | T124.4 | — | S028 | F74 | — |
+| T125.2 | M125 | 29 | Config | pending | T125.1 | — | S028 | F74 | ADR-051 |
+| T125.3 | M125 | 29 | Code | pending | T125.1, T125.2 | — | S028 | F74 | — |
+| T125.4 | M125 | 29 | Code | pending | T125.3 | — | S028 | F74 | — |
+| T125.5 | M125 | 29 | Code | pending | T125.3 | — | S028 | F74 | — |
+| T125.6 | M125 | 29 | Test | pending | T125.4, T125.5 | — | S028 | F74 | — |
+| T125.7 | M125 | 29 | Config | pending | T125.3 | — | S028 | F74 | OpenAPI |
+| T125.8 | M125 | 29 | Test | pending | T125.3 | — | S028 | F74 | CORS H0c |
+| T126.1 | M126 | 29 | Test | pending | T123.5, T124.3, T125.6 | — | S028 | F72–F74 | — |
+| T126.2 | M126 | 29 | Docs | pending | T126.1 | — | S028 | F72–F74 | — |
+| T126.3 | M126 | 29 | Docs | pending | T126.2 | — | S028 | F72–F74 | — |
 
 ## Phase Gate Log
 
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
+| 29 | — | pending | S028/EV-026 M123–M126 — 04 draft; Gate B→C after 05 |
 | 28 | 2026-08-05 | **partial (07-build PASS)** | S027/EV-025 M119–M122 tasks complete (T120.5 conditional S027-D35; T121.3 skipped S027-D39). ADR-048 Accepted; TC-232–241 unit+stub green ([t122_1](../../S027-multilingual-embeddings/reports/t122_1_tc_green_gate.md); [t122_3](../../S027-multilingual-embeddings/reports/t122_3_phase28_gate.md)). **Deferred:** 08 formal verify; AC-ME live verify 09–11; **live prod cutover H4–H5 at 13**; #159 close after 13. |
 | 27 | 2026-08-04 | **partial (build PASS)** | S026/EV-024 M112–M118 tasks complete; OpenAPI/infra/secrets mirror PASS; Playwright UJ-069/070/073 PASS ([t118-3](../../S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md)). **Deferred:** AC-UX T2 suite + full lint matrix to 08/09–11; live `SUPABASE_SECRET_KEY` sync (no prod.env); issue closes + epic #193 after 13 H1–H5. Gate C→D AskQuestion pending. |
 | 1 | 2026-05-19 | **pass** | M1–M3 complete; alembic head; 12 pytest smoke/privacy/seed; ruff/pyright; OpenAPI in repo + api-contract.md |

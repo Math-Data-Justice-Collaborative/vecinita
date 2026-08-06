@@ -661,3 +661,37 @@ Continue PR #60 branch; source imports via npm workspaces; strict typed `t()`; f
 - [x] Connectivity tasks include H4 + H5 for both frontends (M38)
 - [x] AC-F4/AC-F5 have dedicated test coverage (TC-070/071)
 - [ ] **06-tech-tooling** skipped for EV-004 per routing — **next: 07-build** (M32)
+
+---
+
+## EV-026 delta audit (2026-08-06) — S028 / F72–F74
+
+> **Stage**: 05-verify-tech (EV-026)  
+> **Session report**: `docs/sessions/S028-chat-source-ux/reports/05-verify-tech-audit.md`  
+> **Prerequisite**: 04-tech-plan completed (S028-D23); Phase 29 M123–M126
+
+### Document inventory
+
+| # | Document | Result |
+|---|----------|--------|
+| 1 | execution-plan Phase 29 | Updated (M1 AC cites; L1 package name) |
+| 2 | feature-list F72 | Updated (M2 frontend-ui surface) |
+| 3 | tech-plan-delta / ADR-051 / roadmap | Pass |
+| 4 | api-contract / config-spec / test-plan / UJ | Pass |
+| 5 | dependency-inventory | Pass — no new deps (06 skip) |
+
+### Results
+
+| Metric | Count |
+|--------|-------|
+| Auto-approved (high) | 10 |
+| User-approved (fix) | 3 (M1, M2, L1 — S028-D24) |
+| Denied / skipped | 0 |
+
+### Phase B gate (EV-026 partial)
+
+- [x] Execution plan audited
+- [x] Consistency check complete (M1–M2/L1 applied)
+- [x] Connectivity: T125.8 H0c; H4–H5 at 13 AskQ
+- [ ] **06-tech-tooling** skipped — **Gate B→C AskQuestion** → **07-build** (M123)
+

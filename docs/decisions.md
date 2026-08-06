@@ -5,13 +5,20 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-08-04 (EV-024 F64–F69 RD-272–285)
+> **Last updated**: 2026-08-06 (EV-026 F72–F74 S028-D22 TP lock)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-08-06 | EV026-H1–H17 | auto-approved | F72–F74 locked RD-309–321 / S028-D* |
+| 2026-08-06 | EV026-C1 | approved (fix) | UJ-063 ≤ top_k after filter; RD-231 superseded by RD-311 (S028-D20) |
+| 2026-08-06 | EV026-M1 | approved (fix) | F72 Source → RD-310 / RD-317 (not RD-320) |
+| 2026-08-06 | EV026-TP | approved | TP1–TP4 Phase 29 / defer ingest / frontend-ui helper / ADR-051 (S028-D22) |
+| 2026-08-06 | EV026-M2 | approved (fix) | feature-list `top_k` row = F73 upper bound |
+| 2026-08-06 | EV026-M3 | approved | TC-195 strong-hit fixture remains valid under F73 |
+| 2026-08-06 | EV026-L1 | approved (fix) | AC-ME10 footnote — F72 reused for #222 citation UX |
 | 2026-08-04 | EV024-TP1–TP6 | approved | Phase 27 M112–M118; ADR-046+047; Playwright 069/070/073; Path A (S026-D24) |
 | 2026-08-04 | EV024-TV-M1 | approved (fix) | Admin Feedback: DM GET /admin/feedback + internal-write POST (S026-D27) |
 | 2026-08-04 | EV024-TV-M2 | approved (fix) | T118.1 depends T114.3 (S026-D26) |
@@ -704,7 +711,7 @@ Standard routing. Reuse S019 spikes; not full re-investigation.
 |----|-------|----------|--------|
 | RD-229 | Fn scope | **F50** (#158), **F51** (#165) | S023-D6 |
 | RD-230 | F50 top_k | Prod default **`top_k=8`** (code + DO `VECINITA_TOP_K`) | S023-D6 |
-| RD-231 | F50 sources | Sources shown = retrieve `top_k` (no separate FE cap) | S023-D6 |
+| RD-231 | F50 sources | Sources shown = retrieve `top_k` (no separate FE cap) — **superseded for length semantics by RD-311 / F73** (0…top_k after score filter; no pad) | S023-D6; S028-D20 |
 | RD-232 | F51 packer | Default **`VECINITA_RAG_PACKER=p3`**; `CONTEXT_MAX_CHARS=3500` unchanged | S023-D6 |
 | RD-233 | Tests | **UJ-063**; TC-193–195; AC-RQ8–RQ10; extend UJ-055 notes | 01 delta |
 | RD-234 | Deploy | Staging Path A — DO ChatRAG env + code defaults | Phase 0 |
@@ -808,6 +815,50 @@ Standard routing; one PR per issue.
 | RD-306 | Runtime ship | FE upgrade timebox then ST; ONNX only if ST blocked; CPU Modal | S027-D27 TP2/TP3 |
 | RD-307 | Dep ranges | fastembed `>=0.4,<0.8`; ST `>=3.0,<6`; onnxruntime `>=1.16,<2` | S027-D27 TP4 |
 | RD-308 | Rebuild | F41 rechunk (re-tokenize+re-embed); stamp model+tokenizer | S027-D27 TP5 |
+
+### EV-026 requirements decisions (2026-08-06) — S028 / #222 #223 #224
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-309 | Fn scope | Allocate **F72** (#222), **F73** (#223), **F74** (#224) | S028-D4/D16 |
+| RD-310 | F72 URLs | ChatRAG FE: href only for absolute http(s); backend may store invalid/fixture URLs | S028-D6 / OQ5 |
+| RD-311 | F73 filter | `top_k` max; drop below `min_retrieval_score` (+ CE threshold if on); no pad; same set synth+UI | S028-D9 / OQ6 |
+| RD-312 | F74 column | Nullable `documents.display_title`; scrape updates raw `title` only | S028-D10 |
+| RD-313 | F74 UX/API | DocumentAdmin single-doc rename; `PATCH /documents/{id}`; bulk accepts `display_title`; chunks inherit display name | S028-D11 / OQ1 |
+| RD-314 | Curation OOS | No #94/#217 source-add this cycle; F74 title edits only | S028-D8 |
+| RD-315 | Compatibility | Prefer compatible API (`sources[].title` = display string); major version bump if breaking | S028-D12/D15 |
+| RD-316 | Surfaces | chat-rag FE/BE + rag; internal-write + migration; admin FE; no new secrets/CORS | S028-D13 |
+| RD-317 | Tests | Vitest URL; unit+e2e filtered sources; API+admin display_title; eval note; Playwright optional | S028-D14 / OQ8 |
+| RD-318 | Deploy | Prod-only careful; AskQuestion before 12–13 / corpus mutation | S028-D2/D7 |
+| RD-319 | Routing | Feature preset; skip 03/06 unless tech plan finds need | S028-D1/D17 |
+| RD-320 | F74 coalesce/reset | Citations use `COALESCE(display_title, title)`; null clears override; `document.edited` audit | OQ2–OQ4 |
+| RD-321 | Ingest title | **Deferred this cycle** — DocumentAdmin + PATCH/bulk only; no job/upsert `title`→`display_title` | S028-D22 TP2 |
+| RD-322 | Phase/milestones | Phase 29: M123 F72 → M124 F73 → M125 F74 → M126 gate | S028-D22 TP1 |
+| RD-323 | F72 helper pkg | `isSafeHttpUrl` / citation href in `vecinita-frontend-ui` (`packages/frontend-ui`); SourceList Vitest | S028-D22 TP3; S028-D24 M2 |
+| RD-324 | F73+ADR+06 | Wire score filter/no-pad; ADR-051; skip 06; OpenAPI PATCH; CORS H0c | S028-D22 TP4 |
+
+### EV-026 tech-plan decisions (2026-08-06) — TP1–TP4
+
+S028 / Phase 29 — F72–F74 (Standard; 05 next; 03/06 skipped).
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP1 | Phase / milestones | **Phase 29**: M123→M126 (F72→F73→F74→gate) | S028-D22 / 1 |
+| TP2 | RD-321 ingest | **Defer** ingest→`display_title` | S028-D22 / 1 |
+| TP3 | F72 helper | `vecinita-frontend-ui` + chat-rag SourceList Vitest | S028-D22 / 2+1; S028-D24 |
+| TP4 | F73 + ADR | Wire filter; **ADR-051**; skip 06; OpenAPI + CORS H0c | S028-D22 / 2 |
+
+Artifacts: Phase 29 execution-plan; ADR-051; `reports/tech-plan-delta.md`; `roadmap.md`.
+
+### EV-026 tech-verify decisions (2026-08-06) — 05 M1–L1
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| M1 | AC cites | M124 AC-SU3–SU5; M125 AC-SU6–SU10 | S028-D24 |
+| M2 | F72 surfaces | Add `packages/frontend-ui` / `vecinita-frontend-ui` | S028-D24 |
+| L1 | Package name | T123.2 uses `vecinita-frontend-ui` | S028-D24 |
+
+Audit: `docs/sessions/S028-chat-source-ux/reports/05-verify-tech-audit.md`.
 
 ### EV-024 tech-plan decisions (2026-08-04) — TP1–TP6
 

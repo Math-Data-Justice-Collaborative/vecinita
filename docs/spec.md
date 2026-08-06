@@ -87,20 +87,20 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
      rewrite, merge/dedupe by chunk id / score, keep `top_k`.
   7. **F45 CE (default off):** if enabled after ship gate, rerank top-N with `BAAI/bge-reranker-v2-m3`, keep `top_k`.
      **Re-gate (EV-018):** run AC-BB9 / UJ-060 only after F46 non-empty pools (AC-FO1).
-  8. **P3 pack (F42 + F51):** format each chunk as `Source: {title}\nURL: {url}\n{text}` via
-     `packages/rag` helpers, then **document_id dedupe + char budget** (prod default; was P1-only
+  8. **P3 pack (F42 + F51):** format each chunk as `Source: {COALESCE(display_title, title)}\nURL: {url}\n{text}` via
+     `packages/rag` helpers (F74), then **document_id dedupe + char budget** (prod default; was P1-only
      in EV-016). `p1` remains available via `VECINITA_RAG_PACKER=p1`.
   9. Synthesize with packed context; stream or return completion via Modal LLM HTTP; populate cascade stores on generate.
-- **Key parameters**: See `docs/config-spec.md`: `top_k` (default **8**, F50), H7/P3, cache, soft language, CE flags,
+- **Key parameters**: See `docs/config-spec.md`: `top_k` (default **8** max, F50/F73), H7/P3, cache, soft language, CE flags,
   `VECINITA_EMBEDDING_MODEL_ID` (F70/F71).
   F46 may adjust retrieve knobs or corpus pin ops without new product env vars unless 04 unlocks.
 - **Error handling**: 4xx for validation (including rejected identity fields); 5xx with request ID in logs (no raw prompt persistence).
 - **Latency**: Target **p95 < 15s** excluding cold start (RD-017); cache hits should be ≪ generate path.
-- **Source**: feature-list F1–F6, F42–F46, **F70–F71**; S019/EV-016; S020/EV-017; S021/EV-018; S027/EV-025; ADR-048
+- **Source**: feature-list F1–F6, F42–F46, F70–F74; S019–S021; S027/EV-025; S028/EV-026; ADR-048
 
 ### ChatRAG Frontend
 
-- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001); **bilingual UI chrome** via shared packages (EV-004 F31); **cold-start / long-wait UX** with rotating fun facts + consent (EV-014 F40); EV-024 wait **tips/marketing** (F64), energy chip + advisory (F65), action icons (F66), tooltips (F67), Feedback page (F68).
+- **Purpose**: Public chat UI; client-side conversation state only; **corpus browse** and **tag filter sidebar** (EV-001); **bilingual UI chrome** via shared packages (EV-004 F31); **cold-start / long-wait UX** with rotating fun facts + consent (EV-014 F40); EV-024 wait **tips/marketing** (F64), energy chip + advisory (F65), action icons (F66), tooltips (F67), Feedback page (F68); **citation URL validation** (F72 — href only for http/https).
 - **Inputs**: User messages in browser; tag chip selection for RAG; browse filters (tags, title/URL search); locale from `vecinita.locale` / browser detect; optional cold-start consent cookie + seen-fact ids (device-local only).
 - **Outputs**: Rendered answers; calls streaming endpoint; browse list opens **original document URL** in new tab (no in-app reader); UI strings from `packages/frontend-i18n` (+ ChatRAG message tables); wait-status region with typed catalog (`fact` \| `tip` \| `marketing`) / donate CTA / consent banner during cold start or >8s first-token delay; post-ask `energy_estimate` chip + advisory; Feedback route.
 - **Cold-start wait (F40 / F64)**: Reuse `streamAsk` retry + `prewarmChatServices`; rotate typed static EN/ES catalog entries; no API/CMS; no Modal changes; no mini surveys.
@@ -170,6 +170,7 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
   | PATCH | `/internal/v1/documents/bulk/tags` | F27 — bulk tag |
   | POST | `/internal/v1/documents/bulk/retag` | F27 — bulk LLM re-tag |
   | PATCH | `/internal/v1/documents/bulk/metadata` | F27 — bulk edit metadata |
+  | PATCH | `/internal/v1/documents/{id}` | F74 — single-doc display_title / metadata |
   | GET | `/internal/v1/audit` | F29 — global audit log (paginated, filterable) |
   | GET | `/internal/v1/documents/{id}/history` | F29 — per-document version history |
 - **New endpoints (EV-015 F41)**:
@@ -306,7 +307,7 @@ Migrations and CI must reject tables/columns including:
 
 `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`
 
-Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001), `audit_log`, `document_versions`, `document_serving_stats` (EV-002), **`feedback`** (EV-024 / F68 / ADR-046 — anonymous category + message only; no visitor email/`user_id`). Tag provenance: `source` enum only — no operator identity columns. Audit log: `request_id` only — no IP/identity columns (ADR-016); operator email may appear only as **read-time** enrich on admin API responses (F69), never as a corpus column.
+Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, `document_tags`, `chunk_tags` (EV-001), `audit_log`, `document_versions`, `document_serving_stats` (EV-002), **`feedback`** (EV-024 / F68 / ADR-046 — anonymous category + message only; no visitor email/`user_id`). **`documents.display_title`** (nullable text, EV-026 / F74) — operator display name; scrape updates `title` only. Tag provenance: `source` enum only — no operator identity columns. Audit log: `request_id` only — no IP/identity columns (ADR-016); operator email may appear only as **read-time** enrich on admin API responses (F69), never as a corpus column.
 
 **EV-005 (F34) exception (corpus DB):** `audit_log` may add `actor_id` (opaque **Supabase user UUID**) + `actor_role` (`admin`/`viewer`) columns for attribution — **both non-PII**. No `email`/`name`/`password` column is permitted in the corpus DB. The forbidden list (`users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`) still applies to the corpus DB; Supabase manages its own `auth.*` schema in a **separate** database (ADR-026).
 
@@ -354,6 +355,7 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 | Internal write | PATCH | `/internal/v1/documents/bulk/tags` | Bulk tag (F27) |
 | Internal write | POST | `/internal/v1/documents/bulk/retag` | Bulk LLM re-tag (F27) |
 | Internal write | PATCH | `/internal/v1/documents/bulk/metadata` | Bulk edit metadata (F27) |
+| Internal write | PATCH | `/internal/v1/documents/{id}` | Single-doc display_title / metadata (F74) |
 | Internal write | GET | `/internal/v1/audit` | Global audit log (F29) |
 | Internal write | GET | `/internal/v1/documents/{id}/history` | Per-document history (F29) |
 | Internal write | POST | `/internal/v1/rebuild/{rebuild_run_id}/promote` | Promote shadow rebuild (F41) |
@@ -371,12 +373,13 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | S004 / EV-005 (F34) | 2026-06-28 | Added admin Supabase Auth: §Component Details "Admin authentication"; H5 amended + H11 added; forbidden-schema EV-005 exception (`actor_id`/`actor_role`); API surface auth note. Supersedes ADR-004 admin auth clause (ADR-026). |
 | S017 / EV-015 (F41) | 2026-07-30 | Document store + rebuild job (`reembed`/`rechunk`/`rescrape`); shadow dry-run + promote; version stamps (ADR-040). |
 | S019 / EV-016 (F42) | 2026-08-01 | H7+P1 on E0: heuristic multi-query + Source/URL packing in `packages/rag` (ADR-041); ChatRAG + F36 share helpers; P3 config-gated off; no LangGraph / no embed swap. |
-| S023 / EV-020 (F50–F51) | 2026-08-02 | Prod defaults: `top_k=8` (F50/#158); packer `p3` (F51/#165); sources shown = retrieve count; no adaptive top_k / no CE enable. |
+| S023 / EV-020 (F50–F51) | 2026-08-02 | Prod defaults: `top_k=8` (F50/#158); packer `p3` (F51/#165); sources ≤ retrieve `top_k` (no FE cap); length filter refined by F73/EV-026; no adaptive top_k / no CE enable. |
 | S020 / EV-017 (F43–F45) | 2026-08-02 | H1 cache cascade (F43); config-gated L1 soft language (F44); CE spike+gate with `bge-reranker-v2-m3` (F45); no LangGraph / ADR-006 amend. |
 | S021 / EV-018 (F46 + F45) | 2026-08-02 | Staging retrieve reliability (F46 non-empty pools); F45 CE re-gate only after F46; prod CE stays off until AC-BB9. |
 | S022 / EV-019 (F47–F49) | 2026-08-02 | Ingest resilience: content_hash skip + metadata refresh (F47); embed sub-batch/retry fail-URL (F48); HF tokenizer + overlap default 32 (F49 / ADR-044). |
 | S024 / EV-022 (F59–F61) | 2026-08-03 | Robust scrape + JS-render + PDF text (F59); website crawl (F60); admin corpus tree + ChatRAG backend nested meta (F61); epic #185. |
-| S026 / EV-024 (F64–F69) | 2026-08-04 | UX polish: typed wait catalog; energy estimate; icons/tooltips; anonymous feedback + admin list; audit actor email at read-time; epic #193. |
+| S027 / EV-025 (F70–F71) | 2026-08-05 | Multilingual 384-d embed pin + F41 rechunk/re-embed cutover (ADR-048). |
+| S028 / EV-026 (F72–F74) | 2026-08-06 | Citation URL display filter (F72); relevance-gated sources 0…top_k (F73); `documents.display_title` + single-doc PATCH (F74). |
 
 ## References
 

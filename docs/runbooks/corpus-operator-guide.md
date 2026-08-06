@@ -2,7 +2,7 @@
 
 > **Audience:** Corpus operators and community admins  
 > **Issue:** [#52](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/52)  
-> **Last updated:** 2026-07-03  
+> **Last updated:** 2026-08-06 (S028/EV-026 F74 display_title)  
 > **Developer reference:** [data-management-dev-guide.md](data-management-dev-guide.md)
 
 ---
@@ -108,9 +108,18 @@ Available from corpus selection UI:
 | Bulk delete | Removes documents, chunks, embeddings, tags |
 | Bulk tag | Apply tag to many documents |
 | Bulk retag | Re-run LLM tagging |
-| Bulk metadata | Edit titles/metadata fields |
+| Bulk metadata | Edit titles / **display_title** / metadata fields |
+| Single-doc rename | DocumentAdmin: set or clear **display title** (F74) — survives rescrape; citations use it |
 
 All writes create **audit log** entries (immutable).
+
+### Display titles (F74 / EV-026)
+
+- Scraped HTML `<title>` lands in **`title`**.
+- Operator-facing name is **`display_title`** (optional). ChatRAG citations and packing use
+  `display_title` when set, otherwise `title`.
+- **Clear** the display title to fall back to the scraped title again.
+- Prefer single-doc rename for one source; use bulk metadata for many.
 
 ### Version history
 

@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — TC-232–240 multilingual embeds; prior S025 TC-208–215)  
+> **Last updated**: 2026-08-06 (S028/EV-026 F72–F74 — TC-242–251 chat source UX; prior S027 TC-232–241)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -43,6 +43,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
 | UJ-076 F36 EN/ES embed promote report | `tests/e2e/test_uj076_embed_promote_report.py` + unit | TC-232–236, TC-239–241 | — (Jobs UI unchanged) |
+| UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
+| UJ-078 Relevance-gated sources | `tests/e2e/test_uj078_relevance_sources.py` + unit | TC-245, TC-246, TC-247 | — |
+| UJ-079 Operator display_title | `tests/e2e/test_uj079_display_title.py` + Vitest admin | TC-248, TC-249, TC-250, TC-251 | opt |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1480,6 +1483,58 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
   `VECINITA_EMBEDDING_MODEL_ID`; mode includes rechunk so live chunks are retokenized before
   re-embed (S027-D15/M2b).
 - **Expected**: AC-ME11.
+
+### TC-242: Valid https URL renders as citation link (UJ-077, F72)
+
+- **Objective**: `SourceList` uses `<a href>` for absolute `https://` (and `http://`) URLs.
+- **Input**: `{ title: "Doc", url: "https://example.org/page" }`.
+- **Expected**: Anchor present with that href; AC-SU1.
+
+### TC-243: Invalid URL renders plain text (UJ-077, F72)
+
+- **Objective**: No `<a href>` for `fixture://…`, relative paths, empty, or `javascript:`.
+- **Expected**: Title/label plain text; AC-SU1–SU2.
+
+### TC-244: Missing URL still shows title (UJ-077, F72)
+
+- **Objective**: `url` null/absent → title shown; no broken link.
+- **Expected**: AC-SU2.
+
+### TC-245: Few strong sources — no pad to top_k (UJ-078, F73)
+
+- **Objective**: With `top_k=8` and only 2 hits above `min_retrieval_score`, `sources[]` length is 2.
+- **Expected**: AC-SU3–SU4.
+
+### TC-246: Weak hits filtered out (UJ-078, F73)
+
+- **Objective**: Many candidates below threshold → omitted from `sources[]` and synthesis set.
+- **Expected**: AC-SU3; eval note few-strong vs many-weak.
+
+### TC-247: Empty sources valid when none clear bar (UJ-078, F73)
+
+- **Objective**: Zero hits above threshold → `sources[]` empty (or empty-retrieval path); no pad.
+- **Expected**: AC-SU5.
+
+### TC-248: PATCH display_title single document (UJ-079, F74)
+
+- **Objective**: `PATCH /internal/v1/documents/{id}` with `{ "display_title": "…" }` persists;
+  audit `document.edited` before/after.
+- **Expected**: AC-SU6–SU7.
+
+### TC-249: Citation uses COALESCE(display_title, title) (UJ-079, F74)
+
+- **Objective**: Ask/stream `sources[].title` equals display name when set; else scraped `title`.
+- **Expected**: AC-SU8.
+
+### TC-250: Rescrape preserves display_title (UJ-079, F74)
+
+- **Objective**: Re-ingest updates raw `title`; `display_title` unchanged until cleared.
+- **Expected**: AC-SU9.
+
+### TC-251: Clear display_title resets to scraped title (UJ-079, F74)
+
+- **Objective**: Set `display_title` null → coalesce falls back to `title`.
+- **Expected**: AC-SU10.
 
 ## Test Data
 

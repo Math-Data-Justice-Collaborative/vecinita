@@ -43,6 +43,9 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-046](ADR-046-anonymous-community-feedback.md) | Anonymous community feedback rows (ADR-004 amendment) | Accepted | 01-requirements (S026/EV-024 F68) |
 | [ADR-047](ADR-047-ask-energy-heuristic-car-equivalent.md) | Ask energy heuristic + car-travel equivalent | Accepted | 04-tech-plan (S026/EV-024 F65) |
 | [ADR-048](ADR-048-multilingual-384-embeddings.md) | Multilingual 384-d embeddings (ADR-008 successor) | Accepted | 01–02 (S027/EV-025 #159) |
+| [ADR-049](ADR-049-single-env-staging-as-live.md) | Single-env staging-as-live honesty | Accepted | 17-retrospective (RET-002) |
+| [ADR-050](ADR-050-ci-cd-blocks-live-deploy.md) | CI/CD must block live deploy and promote | Accepted | 17-retrospective (RET-002 / S027) |
+| [ADR-051](ADR-051-display-title-vs-lock-flag.md) | `display_title` column vs title lock-flag | Proposed | 04-tech-plan (S028/EV-026 F74) |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost
