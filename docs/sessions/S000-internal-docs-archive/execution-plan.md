@@ -9,9 +9,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 09-qa |
-| **Active milestone** | M126 — Phase 29 gate (complete); 08 PASS |
-| **Active task** | Next: 09-qa |
+| **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 10-e2e |
+| **Active milestone** | M126 complete; 08 PASS; 09 pass_with_advisories |
+| **Active task** | Next: 10-e2e (then 11-verify-impl) |
 | **Last updated** | 2026-08-06 |
 | **Evolve cycle** | EV-026 — Standard; Phase C build |
 | **Git branch** | `evolve/EV-026-chat-source-ux` |

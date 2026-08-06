@@ -11,7 +11,7 @@ Approved: **S028-D1** (1a / 2a). Prod-careful: **S028-D2**.
 | 05-verify-tech | yes | completed | S028-D24 M1/M2/L1; Gate B→C AskQ |
 | 07-build | yes | completed | M123–M126; ADR-051 Accepted |
 | 08-verify-build | yes | completed | verification-report.md PASS |
-| 09-qa | yes | pending | qa-report.md |
+| 09-qa | yes | completed | qa-report.md — pass_with_advisories |
 | 10-e2e | yes | pending | e2e-report.md |
 | 11-verify-impl | yes | pending | AC sign-off |
 | 12-verify-deploy | yes | pending | **AskQuestion before prod** (S028-D2) |

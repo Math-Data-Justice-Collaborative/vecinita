@@ -2664,23 +2664,25 @@ project:
         evolve_cycle_id: EV-026
         status: completed
         current_action: completed
-        next_action: 09-qa (pending until user continues)
+        next_action: 09-qa in_progress
         branch: evolve/EV-026-chat-source-ux
-        tip_sha: 44f03da
-        tip_full: 44f03da8a99d1e696fc9803cf3a9f0ce51e79291
+        tip_sha: 1332dc1
+        tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+        tip_prev: 44f03da
         askquestion_pending: false
         askquestion_pending_topic:
         phase_c: passed
         gate_c_to_d: passed
         s028_d26_decision: S028-D26
         s028_d27_decision: S028-D27
+        s028_d28_decision: S028-D28
         report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
         report_status: completed
         result: PASS
         overall_result: PASS
         security_remediations: included
-        note: '08-verify-build COMPLETE PASS; tip@44f03da; next 09-qa pending'
-        updated_at: '2026-08-06T22:16:30Z'
+        note: '08 PASS complete; 09-qa STARTED; tip@1332dc1'
+        updated_at: '2026-08-06T22:35:23Z'
       report_status: completed
       s026_baseline:
         status: completed
@@ -3208,461 +3210,492 @@ project:
         session_closed_at: '2026-08-05T00:57:00Z'
         close_decision: S026-D58
     09-qa:
-      status: completed
-      session_id: S027-multilingual-embeddings
-      evolve_cycle_id: EV-025
-      started_at: '2026-08-05'
-      started: '2026-08-05'
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      branch: main
-      mode: delta
+      status: in_progress
+      started_at: '2026-08-06'
+      started_at_iso: '2026-08-06T22:35:23Z'
+      session_id: S028-chat-source-ux
+      branch: evolve/EV-026-chat-source-ux
+      session_branch: evolve/EV-026-chat-source-ux
+      evolve_cycle_id: EV-026
+      mode: evolve
       delta_only: true
       feature_ids:
-        - F70
-        - F71
-      tip_sha: 4b7231b
-      commit_deployed: 4b7231b
-      current_action: completed
+        - F72
+        - F73
+        - F74
+      current_action: delta_qa_f72_f74
+      next_action: write qa-report.md
       askquestion_pending: false
-      note: S027/EV-025 09-qa COMPLETE (S027-D64 reconcile) — 
-        report=docs/sessions/S027-multilingual-embeddings/reports/qa-report.md.
-      updated_at: '2026-08-06T14:46:45Z'
-      s027_d64_decision: S027-D64
-      reconciled_from: S027-D63
-      session_closed: true
-      session_closed_at: '2026-08-06T14:46:45Z'
-      close_decision: S027-D64
-      report: docs/sessions/S027-multilingual-embeddings/reports/qa-report.md
-      report_status: completed
-      s026_baseline:
+      askquestion_pending_topic:
+      tip_sha: 1332dc1
+      tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      tip_prev: 44f03da
+      report: docs/sessions/S028-chat-source-ux/reports/qa-report.md
+      report_status: pending
+      s028_d28_decision: S028-D28
+      scope:
+        F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
+        F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
+        F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
+      prior_09_notes: 'No prior S028 09-qa report. Prior S027/EV-025 09-qa COMPLETE (docs/sessions/S027-multilingual-embeddings/reports/qa-report.md @ tip 4b7231b).'
+      note: 'S028/EV-026 09-qa STARTED 2026-08-06T22:35:23Z — user continue (y) after 08 PASS; delta QA F72–F74; tip@1332dc1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+      updated_at: '2026-08-06T22:35:23Z'
+      s027_baseline:
         status: completed
-        started: '2026-08-05'
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
         started_at: '2026-08-05'
-        session_id: S026-frontend-ux-polish
-        evolve_cycle_id: EV-024
+        started: '2026-08-05'
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
         branch: main
         mode: delta
         delta_only: true
         feature_ids:
-          - F64
-          - F65
-          - F66
-          - F67
-          - F68
-          - F69
-        feature: F59+F60+F61
-        phase: Phase 26 (M108-M111)
-        parallel_with: 10-e2e
-        gate_c_to_d: passed
-        checkpoints_phase_c: passed
-        s024_d42_decision: S024-D42
+          - F70
+          - F71
+        tip_sha: 4b7231b
+        commit_deployed: 4b7231b
         current_action: completed
-        next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
         askquestion_pending: false
-        note: 'S026/EV-024 09-qa COMPLETE 2026-08-05 — overall=pass_with_advisories; report=docs/sessions/S026-frontend-ux-polish/reports/qa-report.md;
-          main @c942971; CI+preflight green; advisories: staging H4–H5 deferred; SUPABASE_SECRET_KEY live sync deferred'
-        s023_baseline:
+        note: S027/EV-025 09-qa COMPLETE (S027-D64 reconcile) — 
+          report=docs/sessions/S027-multilingual-embeddings/reports/qa-report.md.
+        updated_at: '2026-08-06T14:46:45Z'
+        s027_d64_decision: S027-D64
+        reconciled_from: S027-D63
+        session_closed: true
+        session_closed_at: '2026-08-06T14:46:45Z'
+        close_decision: S027-D64
+        report: docs/sessions/S027-multilingual-embeddings/reports/qa-report.md
+        report_status: completed
+        s026_baseline:
           status: completed
-          started_at: '2026-08-03'
-          started: '2026-08-03'
-          completed_at: '2026-08-03'
-          completed: '2026-08-03'
-          session_id: S023-retrieval-topk-packing
-          branch: evolve/EV-020-retrieval-topk-packing
-          evolve_cycle_id: EV-020
-          mode: evolve
+          started: '2026-08-05'
+          started_at: '2026-08-05'
+          session_id: S026-frontend-ux-polish
+          evolve_cycle_id: EV-024
+          branch: main
+          mode: delta
           delta_only: true
           feature_ids:
-            - F50
-            - F51
-          feature: F50+F51
-          phase: Phase 25 (M105-M107)
+            - F64
+            - F65
+            - F66
+            - F67
+            - F68
+            - F69
+          feature: F59+F60+F61
+          phase: Phase 26 (M108-M111)
           parallel_with: 10-e2e
-          current_action: completed
-          next_action: 11-verify-impl
-          head: 4ea0c62
           gate_c_to_d: passed
           checkpoints_phase_c: passed
-          overall: pass_with_advisories
-          overall_result: PASS_WITH_ADVISORIES
-          report: docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md
-          s023_d15_decision: S023-D15
-          note: S023/EV-020 09-qa COMPLETE 2026-08-03 — overall pass_with_advisories; report 
-            docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md; Phase D next → 11-verify-impl
-          s022_baseline:
+          s024_d42_decision: S024-D42
+          current_action: completed
+          next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
+          askquestion_pending: false
+          note: 'S026/EV-024 09-qa COMPLETE 2026-08-05 — overall=pass_with_advisories; report=docs/sessions/S026-frontend-ux-polish/reports/qa-report.md;
+            main @c942971; CI+preflight green; advisories: staging H4–H5 deferred; SUPABASE_SECRET_KEY live sync deferred'
+          s023_baseline:
             status: completed
-            started_at: '2026-08-02'
-            started: '2026-08-02'
-            session_id: S022-ingest-resilience
-            branch: evolve/EV-019-ingest-resilience
-            evolve_cycle_id: EV-019
+            started_at: '2026-08-03'
+            started: '2026-08-03'
+            completed_at: '2026-08-03'
+            completed: '2026-08-03'
+            session_id: S023-retrieval-topk-packing
+            branch: evolve/EV-020-retrieval-topk-packing
+            evolve_cycle_id: EV-020
             mode: evolve
             delta_only: true
             feature_ids:
-              - F47
-              - F48
-              - F49
-            feature: F47-F49
-            phase: Phase 24 (M101-M104)
-            commits_head: 307e0d3
+              - F50
+              - F51
+            feature: F50+F51
+            phase: Phase 25 (M105-M107)
             parallel_with: 10-e2e
             current_action: completed
-            note: S022/EV-019 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
-              docs/sessions/S022-ingest-resilience/reports/qa-report.md committed @ 60179b9; Docker unavailable 
-              advisory; delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress
-              S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.
-            s021_baseline:
+            next_action: 11-verify-impl
+            head: 4ea0c62
+            gate_c_to_d: passed
+            checkpoints_phase_c: passed
+            overall: pass_with_advisories
+            overall_result: PASS_WITH_ADVISORIES
+            report: docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md
+            s023_d15_decision: S023-D15
+            note: S023/EV-020 09-qa COMPLETE 2026-08-03 — overall pass_with_advisories; report 
+              docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md; Phase D next → 11-verify-impl
+            s022_baseline:
               status: completed
               started_at: '2026-08-02'
               started: '2026-08-02'
-              completed_at: '2026-08-02'
-              completed: '2026-08-02'
-              session_id: S021-retrieval-follow-on
-              branch: evolve/EV-018-retrieval-follow-on
-              evolve_cycle_id: EV-018
+              session_id: S022-ingest-resilience
+              branch: evolve/EV-019-ingest-resilience
+              evolve_cycle_id: EV-019
               mode: evolve
               delta_only: true
               feature_ids:
-                - F46
-                - F45
-              feature: F46+F45
-              phase: Phase 23 (M99-M100)
-              current_action: completed
-              overall: pass_with_advisories
-              overall_result: PASS_WITH_ADVISORIES
+                - F47
+                - F48
+                - F49
+              feature: F47-F49
+              phase: Phase 24 (M101-M104)
+              commits_head: 307e0d3
               parallel_with: 10-e2e
-              report: docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
-              note: 'S021/EV-018 09-qa COMPLETE 2026-08-02 — pass_with_advisories; report docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
-                S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-              s020_baseline:
+              current_action: completed
+              note: S022/EV-019 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
+                docs/sessions/S022-ingest-resilience/reports/qa-report.md committed @ 60179b9; Docker unavailable 
+                advisory; delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress
+                S022 CLOSED 2026-08-02 after Path A PASS @ bd6bb00; Path B waived_follow_up.
+              s021_baseline:
                 status: completed
                 started_at: '2026-08-02'
                 started: '2026-08-02'
                 completed_at: '2026-08-02'
                 completed: '2026-08-02'
-                partial_rerun_at: '2026-08-02'
-                partial_rerun_note: EV-017/S020 — 09-qa COMPLETE; prior S019 nested under s019_baseline
-                session_id: S020-retrieval-batch-b
-                branch: evolve/EV-017-retrieval-batch-b
-                evolve_cycle_id: EV-017
+                session_id: S021-retrieval-follow-on
+                branch: evolve/EV-018-retrieval-follow-on
+                evolve_cycle_id: EV-018
                 mode: evolve
                 delta_only: true
                 feature_ids:
-                  - F43
-                  - F44
+                  - F46
                   - F45
-                feature: F43-F45
-                phase: Phase 22 (M94-M98)
+                feature: F46+F45
+                phase: Phase 23 (M99-M100)
                 current_action: completed
                 overall: pass_with_advisories
                 overall_result: PASS_WITH_ADVISORIES
                 parallel_with: 10-e2e
-                report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
-                pr_number: 173
-                pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
-                pr_plan_id: PR-56
-                note: S020/EV-017 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
-                  docs/sessions/S020-retrieval-batch-b/reports/qa-report.md; Phase D await 11 (not started); 
-                  checkpoints.phase_d pending
-                s019_baseline:
+                report: docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
+                note: 'S021/EV-018 09-qa COMPLETE 2026-08-02 — pass_with_advisories; report docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
+                  S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+                s020_baseline:
                   status: completed
-                  started_at: '2026-08-01'
-                  completed_at: '2026-08-02T01:13:21Z'
+                  started_at: '2026-08-02'
+                  started: '2026-08-02'
+                  completed_at: '2026-08-02'
+                  completed: '2026-08-02'
                   partial_rerun_at: '2026-08-02'
-                  partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall 
-                    pass_with_advisories; prior fail nested
-                  session_id: S019-retrieval-quality
-                  branch: evolve/EV-016-retrieval-quality
-                  evolve_cycle_id: EV-016
+                  partial_rerun_note: EV-017/S020 — 09-qa COMPLETE; prior S019 nested under s019_baseline
+                  session_id: S020-retrieval-batch-b
+                  branch: evolve/EV-017-retrieval-batch-b
+                  evolve_cycle_id: EV-017
                   mode: evolve
                   delta_only: true
                   feature_ids:
-                    - F42
-                  feature: F42
+                    - F43
+                    - F44
+                    - F45
+                  feature: F43-F45
+                  phase: Phase 22 (M94-M98)
+                  current_action: completed
                   overall: pass_with_advisories
                   overall_result: PASS_WITH_ADVISORIES
-                  report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
-                  remediation: completed
-                  remediation_decision: S019-D47
-                  remediation_started_at: '2026-08-02T01:08:35Z'
-                  remediation_completed_at: '2026-08-02T01:13:21Z'
-                  remediation_note: 'B01 spike ruff cleared; B02 basedpyright cleared (Protocols + UJ-055/ISS-008 typing);
-                    B03 nltk held <3.10 with documented CVE ignores. Re-check: full ruff PASS, basedpyright 0 errors, make
-                    audit PASS, spike+UJ-055+F42 tests PASS. Advisories A01–A06 remain for 11. Remediation files uncommitted
-                    (user has not asked to commit).'
-                  note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after 
-                    fix-in-place B01–B03; 10-e2e PASS; ready for 11-verify-impl; AC-RQ6/ISS-008 ship-path deferred; 
-                    advisories A01–A06 for 11
-                s017_baseline:
-                  status: completed
-                  started_at: '2026-07-30'
-                  completed_at: '2026-07-30'
-                  partial_rerun_at: '2026-07-30'
-                  partial_rerun_note: EV-015/S017 COMPLETE — 09-qa overall PASS after QA-S017-B01 remediation (DM FE 
-                    coverage lines 100% 2814/2814, branches 98.11% 1817/1852); F41 Rebuild* covered; prior baseline 
-                    nested
-                  session_id: S017-corpus-reembed-migration
-                  branch: evolve/EV-015-corpus-reembed-migration
-                  evolve_cycle_id: EV-015
-                  mode: delta
-                  feature: F41
-                  overall: pass
-                  overall_result: PASS
-                  report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
-                  report_amended: true
-                  blocking:
-                    - id: QA-S017-B01
-                      category: coverage_gate
-                      summary: DM FE coverage gate FAIL — lines 99.78% / branches 97.46% (need 100% / 98%) — RESOLVED
-                      status: resolved
-                      blocking_for: []
-                      remediation_note: 'RESOLVED 2026-07-30 — qa-report.md amended (overall pass); make test-coverage-fe
-                        FE_APP=data-management-frontend PASS (lines 100% 2814/2814, branches 98.11% 1817/1852) via test_rebuild_form.test.tsx
-                        + test_backfill_form.test.tsx. Committed @ 1c2e46e (committed: true).'
-                      local_coverage:
-                        lines: 100% (2814/2814)
-                        branches: 98.11% (1817/1852)
-                        command: make test-coverage-fe FE_APP=data-management-frontend
-                        committed: true
-                        commit: 1c2e46e
-                  results:
-                    lint: PASS
-                    format: PASS
-                    typecheck: PASS
-                    python_tests: PASS_scoped
-                    frontend: DM Vitest 688/688 — PASS
-                    playwright_uj053_054: PASS
-                    coverage_gate: PASS
-                    coverage_gate_detail: lines 100% (2814/2814), branches 98.11% (1817/1852)
-                    security: PASS
-                    rebuild_coverage: F41 Rebuild* covered
-                  next_action: run 12-verify-deploy
-                  note: S017/EV-015 09-qa PASS 2026-07-30 — QA-S017-B01 resolved; qa-report.md amended (overall pass); 
-                    coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852) via test_rebuild_form.test.tsx
-                    + test_backfill_form.test.tsx; B01 committed @ 1c2e46e; next → complete 11-verify-impl sign-off 
-                    (UJ-053/UJ-054 + F41 AC-RB1–10)
-                  s009_baseline:
+                  parallel_with: 10-e2e
+                  report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+                  pr_number: 173
+                  pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+                  pr_plan_id: PR-56
+                  note: S020/EV-017 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
+                    docs/sessions/S020-retrieval-batch-b/reports/qa-report.md; Phase D await 11 (not started); 
+                    checkpoints.phase_d pending
+                  s019_baseline:
                     status: completed
-                    started_at: '2026-07-07'
-                    completed_at: '2026-07-07'
-                    partial_rerun_at: '2026-07-07'
-                    partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; 
-                      prior F38 blockers resolved
-                    session_id: S009-playground-model-download
-                    branch: feat/S009-playground-model-download
-                    evolve_cycle_id: EV-010
-                    report: docs/sessions/S009-playground-model-download/reports/qa-report.md
-                    overall: fail
-                    note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 
-                      blockers resolved
-                    s008_baseline:
+                    started_at: '2026-08-01'
+                    completed_at: '2026-08-02T01:13:21Z'
+                    partial_rerun_at: '2026-08-02'
+                    partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall 
+                      pass_with_advisories; prior fail nested
+                    session_id: S019-retrieval-quality
+                    branch: evolve/EV-016-retrieval-quality
+                    evolve_cycle_id: EV-016
+                    mode: evolve
+                    delta_only: true
+                    feature_ids:
+                      - F42
+                    feature: F42
+                    overall: pass_with_advisories
+                    overall_result: PASS_WITH_ADVISORIES
+                    report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
+                    remediation: completed
+                    remediation_decision: S019-D47
+                    remediation_started_at: '2026-08-02T01:08:35Z'
+                    remediation_completed_at: '2026-08-02T01:13:21Z'
+                    remediation_note: 'B01 spike ruff cleared; B02 basedpyright cleared (Protocols + UJ-055/ISS-008 typing);
+                      B03 nltk held <3.10 with documented CVE ignores. Re-check: full ruff PASS, basedpyright 0 errors, make
+                      audit PASS, spike+UJ-055+F42 tests PASS. Advisories A01–A06 remain for 11. Remediation files uncommitted
+                      (user has not asked to commit).'
+                    note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after 
+                      fix-in-place B01–B03; 10-e2e PASS; ready for 11-verify-impl; AC-RQ6/ISS-008 ship-path deferred; 
+                      advisories A01–A06 for 11
+                  s017_baseline:
+                    status: completed
+                    started_at: '2026-07-30'
+                    completed_at: '2026-07-30'
+                    partial_rerun_at: '2026-07-30'
+                    partial_rerun_note: EV-015/S017 COMPLETE — 09-qa overall PASS after QA-S017-B01 remediation (DM FE 
+                      coverage lines 100% 2814/2814, branches 98.11% 1817/1852); F41 Rebuild* covered; prior baseline 
+                      nested
+                    session_id: S017-corpus-reembed-migration
+                    branch: evolve/EV-015-corpus-reembed-migration
+                    evolve_cycle_id: EV-015
+                    mode: delta
+                    feature: F41
+                    overall: pass
+                    overall_result: PASS
+                    report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+                    report_amended: true
+                    blocking:
+                      - id: QA-S017-B01
+                        category: coverage_gate
+                        summary: DM FE coverage gate FAIL — lines 99.78% / branches 97.46% (need 100% / 98%) — RESOLVED
+                        status: resolved
+                        blocking_for: []
+                        remediation_note: 'RESOLVED 2026-07-30 — qa-report.md amended (overall pass); make test-coverage-fe
+                          FE_APP=data-management-frontend PASS (lines 100% 2814/2814, branches 98.11% 1817/1852) via test_rebuild_form.test.tsx
+                          + test_backfill_form.test.tsx. Committed @ 1c2e46e (committed: true).'
+                        local_coverage:
+                          lines: 100% (2814/2814)
+                          branches: 98.11% (1817/1852)
+                          command: make test-coverage-fe FE_APP=data-management-frontend
+                          committed: true
+                          commit: 1c2e46e
+                    results:
+                      lint: PASS
+                      format: PASS
+                      typecheck: PASS
+                      python_tests: PASS_scoped
+                      frontend: DM Vitest 688/688 — PASS
+                      playwright_uj053_054: PASS
+                      coverage_gate: PASS
+                      coverage_gate_detail: lines 100% (2814/2814), branches 98.11% (1817/1852)
+                      security: PASS
+                      rebuild_coverage: F41 Rebuild* covered
+                    next_action: run 12-verify-deploy
+                    note: S017/EV-015 09-qa PASS 2026-07-30 — QA-S017-B01 resolved; qa-report.md amended (overall pass); 
+                      coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852) via test_rebuild_form.test.tsx
+                      + test_backfill_form.test.tsx; B01 committed @ 1c2e46e; next → complete 11-verify-impl sign-off 
+                      (UJ-053/UJ-054 + F41 AC-RB1–10)
+                    s009_baseline:
                       status: completed
-                      started_at: '2026-07-03'
-                      completed_at: '2026-07-03'
-                      session_id: S008-eval-ux-playground
-                      branch: feat/S008-eval-ux-playground
-                      evolve_cycle_id: EV-009
-                      report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+                      started_at: '2026-07-07'
+                      completed_at: '2026-07-07'
+                      partial_rerun_at: '2026-07-07'
+                      partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; 
+                        prior F38 blockers resolved
+                      session_id: S009-playground-model-download
+                      branch: feat/S009-playground-model-download
+                      evolve_cycle_id: EV-010
+                      report: docs/sessions/S009-playground-model-download/reports/qa-report.md
                       overall: fail
-                      note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage
-                        gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking
-                    s007:
-                      status: completed
-                      started_at: '2026-07-01'
-                      completed_at: '2026-07-01'
-                      partial_rerun_at: '2026-07-01'
-                      session_id: S007-rag-eval
-                      branch: feat/S007-rag-eval
-                      feature: F36
-                      evolve_cycle_id: EV-008
-                      overall: fail
-                      report: docs/sessions/S007-rag-eval/reports/qa-report.md
-                      reports:
-                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                        - docs/sessions/S007-rag-eval/reports/qa-report.md
-                      blocking:
-                        - id: QA-S007-B05
-                          category: coverage_gate
-                          summary: internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8% below thresholds
-                      results:
-                        lint: PASS
-                        format: PASS
-                        typecheck: PASS
-                        python_tests: PASS
-                        frontend: all green — PASS
-                        coverage_gate: FAIL
-                      note: Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate
-                    s006:
-                      status: completed
-                      started_at: '2026-06-30'
-                      completed_at: '2026-06-30'
-                      session_id: S006-invite-acceptance
-                      branch: feat/S006-invite-acceptance
-                      feature: F35
-                      overall: pass_with_advisories
-                      report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
-                      reports:
-                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                        - docs/sessions/S006-invite-acceptance/reports/qa-report.md
-                      results:
-                        python: 729 passed — PASS
-                        frontend: all green — PASS
-                        coverage_gate: PASS
-                      note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729
-                        passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                        + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
-                    s005:
-                      status: completed
-                      started_at: '2026-06-30'
-                      completed_at: '2026-06-30'
-                      session_id: S005-user-mgmt-auth
-                      branch: feat/S005-user-mgmt-auth
-                      feature: F35
-                      overall: pass_with_advisories
-                      report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      reports:
-                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                        - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
-                      results:
-                        python: 703 passed — PASS
-                        frontend: all green — PASS
-                        coverage_gate: PASS
-                      note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest
-                        passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                        + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
-                    s004:
-                      status: completed
-                      started_at: '2026-06-29'
-                      completed_at: '2026-06-29'
-                      session_id: S004-supabase-auth
-                      overall: pass_with_advisories
-                      rerun_at: '2026-06-29'
-                      rerun_overall: fail
-                      remediation_at: '2026-06-29'
-                      remediation_overall: pass_with_advisories
-                      report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      reports:
-                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                        - docs/sessions/S004-supabase-auth/reports/qa-report.md
-                      blocking: []
-                      resolved:
-                        - id: QA-S004-010
-                          status: resolved
-                          resolved_at: '2026-06-29'
-                          summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage 
-                            async cleanup
-                          resolution: Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed 
-                            test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test 
-                            test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 
-                            (242 passed); coverage gate PASS combined 100% (1278/1278 branches).
-                        - id: QA-S004-011
-                          status: resolved
-                          resolved_at: '2026-06-29'
-                          summary: Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)
-                          resolution: ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs 
-                            spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md 
-                            (TP-S004-11/ADR-019)/dependency-inventory.md updated.
-                      accepted_or_deferred:
-                        - 'QA-S004-003: resolved (auth hooks split; lint clean)'
-                        - 'QA-S004-004 / QA-S004-012: documented/accepted'
-                        - 'QA-S004-005/006/007/008/009: deferred (env/GPU/ops)'
-                      rerun_results:
-                        python: 603 passed, 33 skipped — PASS
-                        chat_fe: 142/142 — PASS
-                        coverage_gate: PASS (100%)
-                        admin_fe: 230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation
-                      remediation_results:
-                        admin_fe: 242 passed, vitest exit 0 (QA-S004-010 resolved)
-                        coverage_gate: PASS combined 100% (1278/1278 branches)
-                      prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during
-                        10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002;
-                        admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on
-                        QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
-                      note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED
-                        (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression
-                        test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019).
-                        Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE
-                        142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops).
-                        Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                        + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
-              next_action: none_session_closed
+                      note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 
+                        blockers resolved
+                      s008_baseline:
+                        status: completed
+                        started_at: '2026-07-03'
+                        completed_at: '2026-07-03'
+                        session_id: S008-eval-ux-playground
+                        branch: feat/S008-eval-ux-playground
+                        evolve_cycle_id: EV-009
+                        report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+                        overall: fail
+                        note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage
+                          gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking
+                      s007:
+                        status: completed
+                        started_at: '2026-07-01'
+                        completed_at: '2026-07-01'
+                        partial_rerun_at: '2026-07-01'
+                        session_id: S007-rag-eval
+                        branch: feat/S007-rag-eval
+                        feature: F36
+                        evolve_cycle_id: EV-008
+                        overall: fail
+                        report: docs/sessions/S007-rag-eval/reports/qa-report.md
+                        reports:
+                          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                          - docs/sessions/S007-rag-eval/reports/qa-report.md
+                        blocking:
+                          - id: QA-S007-B05
+                            category: coverage_gate
+                            summary: internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8% below thresholds
+                        results:
+                          lint: PASS
+                          format: PASS
+                          typecheck: PASS
+                          python_tests: PASS
+                          frontend: all green — PASS
+                          coverage_gate: FAIL
+                        note: Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate
+                      s006:
+                        status: completed
+                        started_at: '2026-06-30'
+                        completed_at: '2026-06-30'
+                        session_id: S006-invite-acceptance
+                        branch: feat/S006-invite-acceptance
+                        feature: F35
+                        overall: pass_with_advisories
+                        report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
+                        reports:
+                          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                          - docs/sessions/S006-invite-acceptance/reports/qa-report.md
+                        results:
+                          python: 729 passed — PASS
+                          frontend: all green — PASS
+                          coverage_gate: PASS
+                        note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729
+                          passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                          + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
+                      s005:
+                        status: completed
+                        started_at: '2026-06-30'
+                        completed_at: '2026-06-30'
+                        session_id: S005-user-mgmt-auth
+                        branch: feat/S005-user-mgmt-auth
+                        feature: F35
+                        overall: pass_with_advisories
+                        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        reports:
+                          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                          - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+                        results:
+                          python: 703 passed — PASS
+                          frontend: all green — PASS
+                          coverage_gate: PASS
+                        note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest
+                          passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                          + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
+                      s004:
+                        status: completed
+                        started_at: '2026-06-29'
+                        completed_at: '2026-06-29'
+                        session_id: S004-supabase-auth
+                        overall: pass_with_advisories
+                        rerun_at: '2026-06-29'
+                        rerun_overall: fail
+                        remediation_at: '2026-06-29'
+                        remediation_overall: pass_with_advisories
+                        report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        reports:
+                          - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                          - docs/sessions/S004-supabase-auth/reports/qa-report.md
+                        blocking: []
+                        resolved:
+                          - id: QA-S004-010
+                            status: resolved
+                            resolved_at: '2026-06-29'
+                            summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage 
+                              async cleanup
+                            resolution: Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed 
+                              test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test 
+                              test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 
+                              (242 passed); coverage gate PASS combined 100% (1278/1278 branches).
+                          - id: QA-S004-011
+                            status: resolved
+                            resolved_at: '2026-06-29'
+                            summary: Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)
+                            resolution: ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs 
+                              spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md 
+                              (TP-S004-11/ADR-019)/dependency-inventory.md updated.
+                        accepted_or_deferred:
+                          - 'QA-S004-003: resolved (auth hooks split; lint clean)'
+                          - 'QA-S004-004 / QA-S004-012: documented/accepted'
+                          - 'QA-S004-005/006/007/008/009: deferred (env/GPU/ops)'
+                        rerun_results:
+                          python: 603 passed, 33 skipped — PASS
+                          chat_fe: 142/142 — PASS
+                          coverage_gate: PASS (100%)
+                          admin_fe: 230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation
+                        remediation_results:
+                          admin_fe: 242 passed, vitest exit 0 (QA-S004-010 resolved)
+                          coverage_gate: PASS combined 100% (1278/1278 branches)
+                        prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during
+                          10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002;
+                          admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on
+                          QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
+                        note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED
+                          (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression
+                          test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019).
+                          Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE
+                          142/142 PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops).
+                          Supersedes the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                          + docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+                next_action: none_session_closed
+                session_closed: true
+                session_closed_at: '2026-08-02'
+              completed_at: '2026-08-02'
+              completed: '2026-08-02'
+              overall: pass_with_advisories
+              overall_result: PASS_WITH_ADVISORIES
+              report: docs/sessions/S022-ingest-resilience/reports/qa-report.md
               session_closed: true
               session_closed_at: '2026-08-02'
-            completed_at: '2026-08-02'
-            completed: '2026-08-02'
-            overall: pass_with_advisories
-            overall_result: PASS_WITH_ADVISORIES
-            report: docs/sessions/S022-ingest-resilience/reports/qa-report.md
-            session_closed: true
-            session_closed_at: '2026-08-02'
-            next_action: none_session_closed
-        completed: '2026-08-05'
-        completed_at: '2026-08-05'
-        overall: pass_with_advisories
-        overall_result: pass_with_advisories
-        report: docs/sessions/S026-frontend-ux-polish/reports/qa-report.md
-        pr_207: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-        pr_207_status: merged
-        pr_207_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
-        pr_207_head_branch: evolve/EV-024-frontend-ux-polish
-        pr_207_tip: c942971
-        pr_207_tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        pr_207_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        pr_207_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        pr_207_merge_sha_short: c942971
-        pr_207_merged: true
-        pr_207_merged_at: '2026-08-05T00:15:11Z'
-        pr_207_merge_approved: true
-        pr_207_merge_approved_decision: S026-D54
-        pr_207_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
-          merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
-          deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
-        m118_pr: 207
-        m118_pr_status: merged
-        m118_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-        m118_pr_merged: true
-        m118_pr_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
-          merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
-          deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
-        m118_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        m118_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        m118_merge_sha_short: c942971
-        m118_merged_at: '2026-08-05T00:15:11Z'
-        m118_status: completed_merged
-        m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        m118_ci_status: success
-        main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        main_ci: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
-        deploy_preflight_status: success
-        merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        merged_at: '2026-08-05T00:15:11Z'
-        pr_number: 207
-        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-        pr_status: merged
-        pr_merged: true
-        pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
-        build_head: c942971
-        build_head_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        s026_d54_decision: S026-D54
-        phase_c: passed
-        phase_a: passed
-        phase_b: passed
-        gate_a_to_b: passed
-        gate_b_to_c: passed
-        started_at_iso: '2026-08-05T00:45:00Z'
-        completed_at_iso: '2026-08-05T00:45:00Z'
-        askquestion_pending_topic:
-        ci_status: success
-        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
-        updated_at: '2026-08-05T00:45:00Z'
-        required: true
-        session_closed: true
-        session_closed_at: '2026-08-05T00:57:00Z'
-        close_decision: S026-D58
+              next_action: none_session_closed
+          completed: '2026-08-05'
+          completed_at: '2026-08-05'
+          overall: pass_with_advisories
+          overall_result: pass_with_advisories
+          report: docs/sessions/S026-frontend-ux-polish/reports/qa-report.md
+          pr_207: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+          pr_207_status: merged
+          pr_207_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
+          pr_207_head_branch: evolve/EV-024-frontend-ux-polish
+          pr_207_tip: c942971
+          pr_207_tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          pr_207_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          pr_207_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          pr_207_merge_sha_short: c942971
+          pr_207_merged: true
+          pr_207_merged_at: '2026-08-05T00:15:11Z'
+          pr_207_merge_approved: true
+          pr_207_merge_approved_decision: S026-D54
+          pr_207_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
+            merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
+            deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
+          m118_pr: 207
+          m118_pr_status: merged
+          m118_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+          m118_pr_merged: true
+          m118_pr_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
+            merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
+            deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
+          m118_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          m118_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          m118_merge_sha_short: c942971
+          m118_merged_at: '2026-08-05T00:15:11Z'
+          m118_status: completed_merged
+          m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          m118_ci_status: success
+          main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          main_ci: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
+          deploy_preflight_status: success
+          merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          merged_at: '2026-08-05T00:15:11Z'
+          pr_number: 207
+          pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+          pr_status: merged
+          pr_merged: true
+          pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
+          build_head: c942971
+          build_head_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          s026_d54_decision: S026-D54
+          phase_c: passed
+          phase_a: passed
+          phase_b: passed
+          gate_a_to_b: passed
+          gate_b_to_c: passed
+          started_at_iso: '2026-08-05T00:45:00Z'
+          completed_at_iso: '2026-08-05T00:45:00Z'
+          askquestion_pending_topic:
+          ci_status: success
+          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
+          updated_at: '2026-08-05T00:45:00Z'
+          required: true
+          session_closed: true
+          session_closed_at: '2026-08-05T00:57:00Z'
+          close_decision: S026-D58
     10-e2e:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -6305,8 +6338,8 @@ project:
       started_at: '2026-08-06'
       started_at_iso: '2026-08-06T16:04:25Z'
       current_stage: 09-qa
-      current_action: awaiting_user_continue_09_qa
-      next_action: 09-qa (pending until user continues)
+      current_action: 09-qa_in_progress
+      next_action: 09-qa delta QA F72–F74 → write qa-report.md
       phase_0_status: approved
       phase0_approved: true
       phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -6332,19 +6365,22 @@ project:
       askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
       close_cycle_pending: false
       session_closed: false
-      handoff: '08-verify-build COMPLETE PASS → next 09-qa (pending until user continues); tip@44f03da'
+      handoff: '09-qa STARTED after user continue (y) post-08 PASS; tip@1332dc1 (synced from 44f03da); report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
       s028_d23_decision: S028-D23
       s028_d23_status: already_done
       s028_d24_pending: false
       s028_d25_decision: S028-D25
       s028_d26_decision: S028-D26
       s028_d27_decision: S028-D27
-      tip_sha: 44f03da
+      s028_d28_decision: S028-D28
+      tip_sha: 1332dc1
+      tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      tip_prev: 44f03da
       phase_c: passed
       gate_c_to_d: passed
       stage_08_result: PASS
-      note: 'S028/EV-026 08-verify-build COMPLETE PASS 2026-08-06T22:16:30Z; current_stage=09-qa (pending); tip@44f03da; security remediations included; [Corpus: feature-list.md §F72–F74]'
-      updated_at: '2026-08-06T22:16:30Z'
+      note: 'S028/EV-026 09-qa STARTED 2026-08-06T22:35:23Z; tip@1332dc1; delta QA F72–F74; [Corpus: feature-list.md §F72–F74]'
+      updated_at: '2026-08-06T22:35:23Z'
       predecessor:
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
@@ -6762,7 +6798,7 @@ active_session:
     - 223
     - 224
   current_stage: 09-qa
-  current_stage_note: '08-verify-build COMPLETE PASS; next 09-qa (pending until user continues); tip@44f03da'
+  current_stage_note: '09-qa in_progress (user continue after 08 PASS); tip@1332dc1; delta QA F72–F74; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
   started_at: '2026-08-06'
   started_at_iso: '2026-08-06T16:01:41Z'
   mode: evolve
@@ -6831,6 +6867,7 @@ active_session:
     - 'T126.3 commit recorded 2026-08-06T21:53:11Z @ 70c4565 — [T126.3] docs: Phase 29 gate checklist + #222-224 closeout notes; tip advanced; askquestion_pending Gate C→D remains true'
     - 'S028-D26 2026-08-06T22:04:00Z: Gate C→D PASS (option 1) — proceed to 08-verify-build; checkpoints.phase_c=passed; gates.c_to_d=passed; askquestion_pending=false; tip@70c4565; dirty workflow-state tip sync from T126.3 rides with 08 artifacts'
     - '08-verify-build COMPLETE PASS 2026-08-06T22:16:30Z — report=docs/sessions/S028-chat-source-ux/reports/verification-report.md; security remediations included; tip@44f03da; next 09-qa pending (do not start until user continues)'
+    - 'S028-D28 2026-08-06T22:35:23Z: User approved continue (y) after 08 PASS — start 09-qa; routing_plan 09-qa=in_progress; tip synced 44f03da→1332dc1; askquestion_pending=false; [Corpus: feature-list.md §F72–F74]'
   routing_plan:
     - stage: 00-context
       required: true
@@ -6999,7 +7036,7 @@ active_session:
       completed_at: '2026-08-06T22:16:30Z'
       completed: '2026-08-06'
       current_action: completed
-      next_action: 09-qa (pending until user continues)
+      next_action: 09-qa in_progress
       askquestion_pending: false
       askquestion_pending_topic:
       tip_sha: 44f03da
@@ -7023,11 +7060,31 @@ active_session:
         - 44f03da
     - stage: 09-qa
       required: true
-      status: pending
+      status: in_progress
       mode: delta
       skip_rationale:
-      note: 'Awaiting user continue after 08 PASS; do not start yet'
+      started: '2026-08-06'
+      started_at: '2026-08-06T22:35:23Z'
+      current_action: delta_qa_f72_f74
+      next_action: write qa-report.md
       askquestion_pending: false
+      askquestion_pending_topic:
+      tip_sha: 1332dc1
+      tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      tip_prev: 44f03da
+      branch: evolve/EV-026-chat-source-ux
+      report: docs/sessions/S028-chat-source-ux/reports/qa-report.md
+      report_status: pending
+      feature_ids:
+        - F72
+        - F73
+        - F74
+      scope:
+        F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
+        F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
+        F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
+      note: 'S028/EV-026 09-qa STARTED 2026-08-06T22:35:23Z — user continue after 08 PASS (y); delta QA F72–F74; tip@1332dc1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md; [Corpus: feature-list.md §F72–F74]'
+      updated_at: '2026-08-06T22:35:23Z'
     - stage: 10-e2e
       required: true
       status: pending
@@ -7059,16 +7116,18 @@ active_session:
     - docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
     - docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
     - docs/sessions/S028-chat-source-ux/reports/verification-report.md
-  next_action: 09-qa (pending until user continues)
+  next_action: 09-qa delta QA F72–F74 → write qa-report.md
   orchestrator_status: in_progress
-  updated_at: '2026-08-06T22:16:30Z'
+  updated_at: '2026-08-06T22:35:23Z'
   next_recommended: 09-qa
   delta_only: true
   askquestion_pending: false
   askquestion_pending_topic:
   askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
-  handoff: '08-verify-build COMPLETE PASS → next 09-qa (pending until user continues); tip@44f03da'
-  current_action: awaiting_user_continue_09_qa
+  handoff: '09-qa STARTED after user continue (y) post-08 PASS; tip@1332dc1 (synced from 44f03da); report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+  current_action: 09-qa_in_progress
+  s028_d28_decision: S028-D28
+  s028_d28_choice: continue_09_qa_after_08_pass
   citations:
     - '[Corpus: feature-list.md §F72–F74]'
     - '[Spec: docs/adr/ADR-051-display-title-vs-lock-flag.md]'
@@ -7091,10 +7150,10 @@ active_session:
   phase_c: passed
   gate_c_to_d: passed
   checkpoints_phase_c: passed
-  tip_sha: 44f03da
-  tip_full: 44f03da8a99d1e696fc9803cf3a9f0ce51e79291
-  tip_prev: 70c4565
-  bundle_note: workflow-state tip sync committed with 08 verification-report @ 44f03da
+  tip_sha: 1332dc1
+  tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+  tip_prev: 44f03da
+  bundle_note: tip synced at 09-qa start 44f03da→1332dc1 (includes 08 workflow-state sync commit)
   stage_08_result: PASS
   stage_08_security_remediations: included
   session_branch: evolve/EV-026-chat-source-ux
@@ -19800,23 +19859,25 @@ stages:
       evolve_cycle_id: EV-026
       status: completed
       current_action: completed
-      next_action: 09-qa (pending until user continues)
+      next_action: 09-qa in_progress
       branch: evolve/EV-026-chat-source-ux
-      tip_sha: 44f03da
-      tip_full: 44f03da8a99d1e696fc9803cf3a9f0ce51e79291
+      tip_sha: 1332dc1
+      tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      tip_prev: 44f03da
       askquestion_pending: false
       askquestion_pending_topic:
       phase_c: passed
       gate_c_to_d: passed
       s028_d26_decision: S028-D26
       s028_d27_decision: S028-D27
+      s028_d28_decision: S028-D28
       report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
       report_status: completed
       result: PASS
       overall_result: PASS
       security_remediations: included
-      note: '08-verify-build COMPLETE PASS; tip@44f03da; next 09-qa pending'
-      updated_at: '2026-08-06T22:16:30Z'
+      note: '08 PASS complete; 09-qa STARTED; tip@1332dc1'
+      updated_at: '2026-08-06T22:35:23Z'
     report_status: completed
     s026_baseline:
       status: completed
@@ -20661,456 +20722,487 @@ stages:
       m118_verify_at: '2026-08-05T00:45:00Z'
       m118_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
   09-qa:
-    status: completed
-    session_id: S027-multilingual-embeddings
-    evolve_cycle_id: EV-025
-    started_at: '2026-08-05'
-    started: '2026-08-05'
-    completed: '2026-08-05'
-    completed_at: '2026-08-05'
-    branch: main
-    mode: delta
+    status: in_progress
+    started_at: '2026-08-06'
+    started_at_iso: '2026-08-06T22:35:23Z'
+    session_id: S028-chat-source-ux
+    branch: evolve/EV-026-chat-source-ux
+    session_branch: evolve/EV-026-chat-source-ux
+    evolve_cycle_id: EV-026
+    mode: evolve
     delta_only: true
     feature_ids:
-      - F70
-      - F71
-    tip_sha: 4b7231b
-    commit_deployed: 4b7231b
-    current_action: completed
+      - F72
+      - F73
+      - F74
+    current_action: delta_qa_f72_f74
+    next_action: write qa-report.md
     askquestion_pending: false
-    note: S027/EV-025 09-qa COMPLETE (S027-D64 reconcile) — 
-      report=docs/sessions/S027-multilingual-embeddings/reports/qa-report.md.
-    updated_at: '2026-08-06T14:46:45Z'
-    s027_d64_decision: S027-D64
-    reconciled_from: S027-D63
-    session_closed: true
-    session_closed_at: '2026-08-06T14:46:45Z'
-    close_decision: S027-D64
-    report: docs/sessions/S027-multilingual-embeddings/reports/qa-report.md
-    report_status: completed
-    s026_baseline:
+    askquestion_pending_topic:
+    tip_sha: 1332dc1
+    tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+    tip_prev: 44f03da
+    report: docs/sessions/S028-chat-source-ux/reports/qa-report.md
+    report_status: pending
+    s028_d28_decision: S028-D28
+    scope:
+      F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
+      F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
+      F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
+    prior_09_notes: 'No prior S028 09-qa report. Prior S027/EV-025 09-qa COMPLETE (docs/sessions/S027-multilingual-embeddings/reports/qa-report.md @ tip 4b7231b).'
+    note: 'S028/EV-026 09-qa STARTED 2026-08-06T22:35:23Z — user continue (y) after 08 PASS; delta QA F72–F74; tip@1332dc1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+    updated_at: '2026-08-06T22:35:23Z'
+    s027_baseline:
       status: completed
-      started: '2026-08-05'
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
       started_at: '2026-08-05'
-      session_id: S026-frontend-ux-polish
-      evolve_cycle_id: EV-024
+      started: '2026-08-05'
+      completed: '2026-08-05'
+      completed_at: '2026-08-05'
       branch: main
       mode: delta
       delta_only: true
       feature_ids:
-        - F64
-        - F65
-        - F66
-        - F67
-        - F68
-        - F69
-      feature: F59+F60+F61
-      phase: Phase 26 (M108-M111)
-      parallel_with: 10-e2e
-      gate_c_to_d: passed
-      checkpoints_phase_c: passed
-      s024_d42_decision: S024-D42
+        - F70
+        - F71
+      tip_sha: 4b7231b
+      commit_deployed: 4b7231b
       current_action: completed
-      next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
       askquestion_pending: false
-      note: 'S026/EV-024 09-qa COMPLETE 2026-08-05 — overall=pass_with_advisories; report=docs/sessions/S026-frontend-ux-polish/reports/qa-report.md;
-        main @c942971; CI+preflight green; advisories: staging H4–H5 deferred; SUPABASE_SECRET_KEY live sync deferred'
-      s023_baseline:
+      note: S027/EV-025 09-qa COMPLETE (S027-D64 reconcile) — 
+        report=docs/sessions/S027-multilingual-embeddings/reports/qa-report.md.
+      updated_at: '2026-08-06T14:46:45Z'
+      s027_d64_decision: S027-D64
+      reconciled_from: S027-D63
+      session_closed: true
+      session_closed_at: '2026-08-06T14:46:45Z'
+      close_decision: S027-D64
+      report: docs/sessions/S027-multilingual-embeddings/reports/qa-report.md
+      report_status: completed
+      s026_baseline:
         status: completed
-        started_at: '2026-08-03'
-        started: '2026-08-03'
-        completed_at: '2026-08-03'
-        completed: '2026-08-03'
-        session_id: S023-retrieval-topk-packing
-        branch: evolve/EV-020-retrieval-topk-packing
-        evolve_cycle_id: EV-020
-        mode: evolve
+        started: '2026-08-05'
+        started_at: '2026-08-05'
+        session_id: S026-frontend-ux-polish
+        evolve_cycle_id: EV-024
+        branch: main
+        mode: delta
         delta_only: true
         feature_ids:
-          - F50
-          - F51
-        feature: F50+F51
-        phase: Phase 25 (M105-M107)
+          - F64
+          - F65
+          - F66
+          - F67
+          - F68
+          - F69
+        feature: F59+F60+F61
+        phase: Phase 26 (M108-M111)
         parallel_with: 10-e2e
-        current_action: completed
-        next_action: 11-verify-impl
-        head: 4ea0c62
         gate_c_to_d: passed
         checkpoints_phase_c: passed
-        overall: pass_with_advisories
-        overall_result: PASS_WITH_ADVISORIES
-        report: docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md
-        s023_d15_decision: S023-D15
-        note: S023/EV-020 09-qa COMPLETE 2026-08-03 — overall pass_with_advisories; report 
-          docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md; Phase D next → 11-verify-impl
-        s022_baseline:
+        s024_d42_decision: S024-D42
+        current_action: completed
+        next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
+        askquestion_pending: false
+        note: 'S026/EV-024 09-qa COMPLETE 2026-08-05 — overall=pass_with_advisories; report=docs/sessions/S026-frontend-ux-polish/reports/qa-report.md;
+          main @c942971; CI+preflight green; advisories: staging H4–H5 deferred; SUPABASE_SECRET_KEY live sync deferred'
+        s023_baseline:
           status: completed
-          started_at: '2026-08-02'
-          started: '2026-08-02'
-          session_id: S022-ingest-resilience
-          branch: evolve/EV-019-ingest-resilience
-          evolve_cycle_id: EV-019
+          started_at: '2026-08-03'
+          started: '2026-08-03'
+          completed_at: '2026-08-03'
+          completed: '2026-08-03'
+          session_id: S023-retrieval-topk-packing
+          branch: evolve/EV-020-retrieval-topk-packing
+          evolve_cycle_id: EV-020
           mode: evolve
           delta_only: true
           feature_ids:
-            - F47
-            - F48
-            - F49
-          feature: F47-F49
-          phase: Phase 24 (M101-M104)
-          commits_head: 307e0d3
+            - F50
+            - F51
+          feature: F50+F51
+          phase: Phase 25 (M105-M107)
           parallel_with: 10-e2e
           current_action: completed
-          note: S022/EV-019 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
-            docs/sessions/S022-ingest-resilience/reports/qa-report.md committed @ 60179b9; Docker unavailable advisory; 
-            delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress
-          s021_baseline:
+          next_action: 11-verify-impl
+          head: 4ea0c62
+          gate_c_to_d: passed
+          checkpoints_phase_c: passed
+          overall: pass_with_advisories
+          overall_result: PASS_WITH_ADVISORIES
+          report: docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md
+          s023_d15_decision: S023-D15
+          note: S023/EV-020 09-qa COMPLETE 2026-08-03 — overall pass_with_advisories; report 
+            docs/sessions/S023-retrieval-topk-packing/reports/qa-report.md; Phase D next → 11-verify-impl
+          s022_baseline:
             status: completed
             started_at: '2026-08-02'
             started: '2026-08-02'
-            completed_at: '2026-08-02'
-            completed: '2026-08-02'
-            session_id: S021-retrieval-follow-on
-            branch: evolve/EV-018-retrieval-follow-on
-            evolve_cycle_id: EV-018
+            session_id: S022-ingest-resilience
+            branch: evolve/EV-019-ingest-resilience
+            evolve_cycle_id: EV-019
             mode: evolve
             delta_only: true
             feature_ids:
-              - F46
-              - F45
-            feature: F46+F45
-            phase: Phase 23 (M99-M100)
-            current_action: completed
-            overall: pass_with_advisories
-            overall_result: PASS_WITH_ADVISORIES
+              - F47
+              - F48
+              - F49
+            feature: F47-F49
+            phase: Phase 24 (M101-M104)
+            commits_head: 307e0d3
             parallel_with: 10-e2e
-            report: docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
-            note: 'S021/EV-018 09-qa COMPLETE 2026-08-02 — pass_with_advisories; report docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
-              S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
-            s020_baseline:
+            current_action: completed
+            note: S022/EV-019 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
+              docs/sessions/S022-ingest-resilience/reports/qa-report.md committed @ 60179b9; Docker unavailable advisory; 
+              delta pytest 48 passed; H0c PASS; phase_d pending until 11+12; next → 11-verify-impl in_progress
+            s021_baseline:
               status: completed
               started_at: '2026-08-02'
               started: '2026-08-02'
               completed_at: '2026-08-02'
               completed: '2026-08-02'
-              partial_rerun_at: '2026-08-02'
-              partial_rerun_note: EV-017/S020 — 09-qa COMPLETE; prior S019 nested under s019_baseline
-              session_id: S020-retrieval-batch-b
-              branch: evolve/EV-017-retrieval-batch-b
-              evolve_cycle_id: EV-017
+              session_id: S021-retrieval-follow-on
+              branch: evolve/EV-018-retrieval-follow-on
+              evolve_cycle_id: EV-018
               mode: evolve
               delta_only: true
               feature_ids:
-                - F43
-                - F44
+                - F46
                 - F45
-              feature: F43-F45
-              phase: Phase 22 (M94-M98)
+              feature: F46+F45
+              phase: Phase 23 (M99-M100)
               current_action: completed
               overall: pass_with_advisories
               overall_result: PASS_WITH_ADVISORIES
               parallel_with: 10-e2e
-              report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
-              pr_number: 173
-              pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
-              pr_plan_id: PR-56
-              note: S020/EV-017 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
-                docs/sessions/S020-retrieval-batch-b/reports/qa-report.md; Phase D await 11 (not started); 
-                checkpoints.phase_d pending
-              s019_baseline:
+              report: docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
+              note: 'S021/EV-018 09-qa COMPLETE 2026-08-02 — pass_with_advisories; report docs/sessions/S021-retrieval-follow-on/reports/qa-report.md
+                S021 CLOSED 2026-08-02 after RET-001 PR #177 MERGED @ 6e3207d; follow_up_retro=after_next_evolve_hotfix; active_session=null.'
+              s020_baseline:
                 status: completed
-                started_at: '2026-08-01'
-                completed_at: '2026-08-02T01:13:21Z'
+                started_at: '2026-08-02'
+                started: '2026-08-02'
+                completed_at: '2026-08-02'
+                completed: '2026-08-02'
                 partial_rerun_at: '2026-08-02'
-                partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall 
-                  pass_with_advisories; prior fail nested
-                session_id: S019-retrieval-quality
-                branch: evolve/EV-016-retrieval-quality
-                evolve_cycle_id: EV-016
+                partial_rerun_note: EV-017/S020 — 09-qa COMPLETE; prior S019 nested under s019_baseline
+                session_id: S020-retrieval-batch-b
+                branch: evolve/EV-017-retrieval-batch-b
+                evolve_cycle_id: EV-017
                 mode: evolve
                 delta_only: true
                 feature_ids:
-                  - F42
-                feature: F42
+                  - F43
+                  - F44
+                  - F45
+                feature: F43-F45
+                phase: Phase 22 (M94-M98)
+                current_action: completed
                 overall: pass_with_advisories
                 overall_result: PASS_WITH_ADVISORIES
-                report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
-                remediation: completed
-                remediation_decision: S019-D47
-                remediation_started_at: '2026-08-02T01:08:35Z'
-                remediation_completed_at: '2026-08-02T01:13:21Z'
-                remediation_note: 'B01 spike ruff cleared; B02 basedpyright cleared (Protocols + UJ-055/ISS-008 typing); B03
-                  nltk held <3.10 with documented CVE ignores. Re-check: full ruff PASS, basedpyright 0 errors, make audit
-                  PASS, spike+UJ-055+F42 tests PASS. Advisories A01–A06 remain for 11. Remediation files uncommitted (user
-                  has not asked to commit).'
-                note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after 
-                  fix-in-place B01–B03; 10-e2e PASS; ready for 11-verify-impl; AC-RQ6/ISS-008 ship-path deferred; 
-                  advisories A01–A06 for 11
-              s017_baseline:
-                status: completed
-                started_at: '2026-07-30'
-                completed_at: '2026-07-30'
-                partial_rerun_at: '2026-07-30'
-                partial_rerun_note: EV-015/S017 COMPLETE — 09-qa overall PASS after QA-S017-B01 remediation (DM FE 
-                  coverage lines 100% 2814/2814, branches 98.11% 1817/1852); F41 Rebuild* covered; prior baseline nested
-                session_id: S017-corpus-reembed-migration
-                branch: evolve/EV-015-corpus-reembed-migration
-                evolve_cycle_id: EV-015
-                mode: delta
-                feature: F41
-                overall: pass
-                overall_result: PASS
-                report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
-                report_amended: true
-                blocking:
-                  - id: QA-S017-B01
-                    category: coverage_gate
-                    summary: DM FE coverage gate FAIL — lines 99.78% / branches 97.46% (need 100% / 98%) — RESOLVED
-                    status: resolved
-                    blocking_for: []
-                    remediation_note: 'RESOLVED 2026-07-30 — qa-report.md amended (overall pass); make test-coverage-fe FE_APP=data-management-frontend
-                      PASS (lines 100% 2814/2814, branches 98.11% 1817/1852) via test_rebuild_form.test.tsx + test_backfill_form.test.tsx.
-                      Committed @ 1c2e46e (committed: true).'
-                    local_coverage:
-                      lines: 100% (2814/2814)
-                      branches: 98.11% (1817/1852)
-                      command: make test-coverage-fe FE_APP=data-management-frontend
-                      committed: true
-                      commit: 1c2e46e
-                results:
-                  lint: PASS
-                  format: PASS
-                  typecheck: PASS
-                  python_tests: PASS_scoped
-                  frontend: DM Vitest 688/688 — PASS
-                  playwright_uj053_054: PASS
-                  coverage_gate: PASS
-                  coverage_gate_detail: lines 100% (2814/2814), branches 98.11% (1817/1852)
-                  security: PASS
-                  rebuild_coverage: F41 Rebuild* covered
-                next_action: run 12-verify-deploy
-                note: S017/EV-015 09-qa PASS 2026-07-30 — QA-S017-B01 resolved; qa-report.md amended (overall pass); 
-                  coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852) via test_rebuild_form.test.tsx +
-                  test_backfill_form.test.tsx; B01 committed @ 1c2e46e; next → complete 11-verify-impl sign-off 
-                  (UJ-053/UJ-054 + F41 AC-RB1–10)
-                s009_baseline:
+                parallel_with: 10-e2e
+                report: docs/sessions/S020-retrieval-batch-b/reports/qa-report.md
+                pr_number: 173
+                pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/173
+                pr_plan_id: PR-56
+                note: S020/EV-017 09-qa COMPLETE 2026-08-02 — overall pass_with_advisories; report 
+                  docs/sessions/S020-retrieval-batch-b/reports/qa-report.md; Phase D await 11 (not started); 
+                  checkpoints.phase_d pending
+                s019_baseline:
                   status: completed
-                  started_at: '2026-07-07'
-                  completed_at: '2026-07-07'
-                  partial_rerun_at: '2026-07-07'
-                  partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; 
-                    prior F38 blockers resolved
-                  session_id: S009-playground-model-download
-                  branch: feat/S009-playground-model-download
-                  evolve_cycle_id: EV-010
-                  report: docs/sessions/S009-playground-model-download/reports/qa-report.md
-                  overall: fail
-                  note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 
-                    blockers resolved
-                  s008_baseline:
+                  started_at: '2026-08-01'
+                  completed_at: '2026-08-02T01:13:21Z'
+                  partial_rerun_at: '2026-08-02'
+                  partial_rerun_note: S019/EV-016 S019-D47 remediation COMPLETE — B01–B03 cleared; overall 
+                    pass_with_advisories; prior fail nested
+                  session_id: S019-retrieval-quality
+                  branch: evolve/EV-016-retrieval-quality
+                  evolve_cycle_id: EV-016
+                  mode: evolve
+                  delta_only: true
+                  feature_ids:
+                    - F42
+                  feature: F42
+                  overall: pass_with_advisories
+                  overall_result: PASS_WITH_ADVISORIES
+                  report: docs/sessions/S019-retrieval-quality/reports/qa-report.md
+                  remediation: completed
+                  remediation_decision: S019-D47
+                  remediation_started_at: '2026-08-02T01:08:35Z'
+                  remediation_completed_at: '2026-08-02T01:13:21Z'
+                  remediation_note: 'B01 spike ruff cleared; B02 basedpyright cleared (Protocols + UJ-055/ISS-008 typing); B03
+                    nltk held <3.10 with documented CVE ignores. Re-check: full ruff PASS, basedpyright 0 errors, make audit
+                    PASS, spike+UJ-055+F42 tests PASS. Advisories A01–A06 remain for 11. Remediation files uncommitted (user
+                    has not asked to commit).'
+                  note: S019/EV-016 09-qa COMPLETE 2026-08-02T01:13:21Z (S019-D47) — overall pass_with_advisories after 
+                    fix-in-place B01–B03; 10-e2e PASS; ready for 11-verify-impl; AC-RQ6/ISS-008 ship-path deferred; 
+                    advisories A01–A06 for 11
+                s017_baseline:
+                  status: completed
+                  started_at: '2026-07-30'
+                  completed_at: '2026-07-30'
+                  partial_rerun_at: '2026-07-30'
+                  partial_rerun_note: EV-015/S017 COMPLETE — 09-qa overall PASS after QA-S017-B01 remediation (DM FE 
+                    coverage lines 100% 2814/2814, branches 98.11% 1817/1852); F41 Rebuild* covered; prior baseline nested
+                  session_id: S017-corpus-reembed-migration
+                  branch: evolve/EV-015-corpus-reembed-migration
+                  evolve_cycle_id: EV-015
+                  mode: delta
+                  feature: F41
+                  overall: pass
+                  overall_result: PASS
+                  report: docs/sessions/S017-corpus-reembed-migration/reports/qa-report.md
+                  report_amended: true
+                  blocking:
+                    - id: QA-S017-B01
+                      category: coverage_gate
+                      summary: DM FE coverage gate FAIL — lines 99.78% / branches 97.46% (need 100% / 98%) — RESOLVED
+                      status: resolved
+                      blocking_for: []
+                      remediation_note: 'RESOLVED 2026-07-30 — qa-report.md amended (overall pass); make test-coverage-fe FE_APP=data-management-frontend
+                        PASS (lines 100% 2814/2814, branches 98.11% 1817/1852) via test_rebuild_form.test.tsx + test_backfill_form.test.tsx.
+                        Committed @ 1c2e46e (committed: true).'
+                      local_coverage:
+                        lines: 100% (2814/2814)
+                        branches: 98.11% (1817/1852)
+                        command: make test-coverage-fe FE_APP=data-management-frontend
+                        committed: true
+                        commit: 1c2e46e
+                  results:
+                    lint: PASS
+                    format: PASS
+                    typecheck: PASS
+                    python_tests: PASS_scoped
+                    frontend: DM Vitest 688/688 — PASS
+                    playwright_uj053_054: PASS
+                    coverage_gate: PASS
+                    coverage_gate_detail: lines 100% (2814/2814), branches 98.11% (1817/1852)
+                    security: PASS
+                    rebuild_coverage: F41 Rebuild* covered
+                  next_action: run 12-verify-deploy
+                  note: S017/EV-015 09-qa PASS 2026-07-30 — QA-S017-B01 resolved; qa-report.md amended (overall pass); 
+                    coverage_gate PASS lines 100% (2814/2814) branches 98.11% (1817/1852) via test_rebuild_form.test.tsx +
+                    test_backfill_form.test.tsx; B01 committed @ 1c2e46e; next → complete 11-verify-impl sign-off 
+                    (UJ-053/UJ-054 + F41 AC-RB1–10)
+                  s009_baseline:
                     status: completed
-                    started_at: '2026-07-03'
-                    completed_at: '2026-07-03'
-                    session_id: S008-eval-ux-playground
-                    branch: feat/S008-eval-ux-playground
-                    evolve_cycle_id: EV-009
-                    report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+                    started_at: '2026-07-07'
+                    completed_at: '2026-07-07'
+                    partial_rerun_at: '2026-07-07'
+                    partial_rerun_note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; 
+                      prior F38 blockers resolved
+                    session_id: S009-playground-model-download
+                    branch: feat/S009-playground-model-download
+                    evolve_cycle_id: EV-010
+                    report: docs/sessions/S009-playground-model-download/reports/qa-report.md
                     overall: fail
-                    note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage 
-                      gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking
-                  s007:
-                    status: completed
-                    started_at: '2026-07-01'
-                    completed_at: '2026-07-01'
-                    partial_rerun_at: '2026-07-01'
-                    session_id: S007-rag-eval
-                    branch: feat/S007-rag-eval
-                    feature: F36
-                    evolve_cycle_id: EV-008
-                    overall: fail
-                    report: docs/sessions/S007-rag-eval/reports/qa-report.md
-                    reports:
-                      - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      - docs/sessions/S007-rag-eval/reports/qa-report.md
-                    blocking:
-                      - id: QA-S007-B05
-                        category: coverage_gate
-                        summary: internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8% below thresholds
-                    results:
-                      lint: PASS
-                      format: PASS
-                      typecheck: PASS
-                      python_tests: PASS
-                      frontend: all green — PASS
-                      coverage_gate: FAIL
-                    note: Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate
-                  s006:
-                    status: completed
-                    started_at: '2026-06-30'
-                    completed_at: '2026-06-30'
-                    session_id: S006-invite-acceptance
-                    branch: feat/S006-invite-acceptance
-                    feature: F35
-                    overall: pass_with_advisories
-                    report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
-                    reports:
-                      - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      - docs/sessions/S006-invite-acceptance/reports/qa-report.md
-                    results:
-                      python: 729 passed — PASS
-                      frontend: all green — PASS
-                      coverage_gate: PASS
-                    note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729
-                      passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
-                  s005:
-                    status: completed
-                    started_at: '2026-06-30'
-                    completed_at: '2026-06-30'
-                    session_id: S005-user-mgmt-auth
-                    branch: feat/S005-user-mgmt-auth
-                    feature: F35
-                    overall: pass_with_advisories
-                    report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                    reports:
-                      - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
-                    results:
-                      python: 703 passed — PASS
-                      frontend: all green — PASS
-                      coverage_gate: PASS
-                    note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest
-                      passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
-                  s004:
-                    status: completed
-                    started_at: '2026-06-29'
-                    completed_at: '2026-06-29'
-                    session_id: S004-supabase-auth
-                    overall: pass_with_advisories
-                    rerun_at: '2026-06-29'
-                    rerun_overall: fail
-                    remediation_at: '2026-06-29'
-                    remediation_overall: pass_with_advisories
-                    report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                    reports:
-                      - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
-                      - docs/sessions/S004-supabase-auth/reports/qa-report.md
-                    blocking: []
-                    resolved:
-                      - id: QA-S004-010
-                        status: resolved
-                        resolved_at: '2026-06-29'
-                        summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage 
-                          async cleanup
-                        resolution: Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed 
-                          test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test 
-                          test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 
-                          passed); coverage gate PASS combined 100% (1278/1278 branches).
-                      - id: QA-S004-011
-                        status: resolved
-                        resolved_at: '2026-06-29'
-                        summary: Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)
-                        resolution: ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs 
-                          spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md 
-                          (TP-S004-11/ADR-019)/dependency-inventory.md updated.
-                    accepted_or_deferred:
-                      - 'QA-S004-003: resolved (auth hooks split; lint clean)'
-                      - 'QA-S004-004 / QA-S004-012: documented/accepted'
-                      - 'QA-S004-005/006/007/008/009: deferred (env/GPU/ops)'
-                    rerun_results:
-                      python: 603 passed, 33 skipped — PASS
-                      chat_fe: 142/142 — PASS
-                      coverage_gate: PASS (100%)
-                      admin_fe: 230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation
-                    remediation_results:
-                      admin_fe: 242 passed, vitest exit 0 (QA-S004-010 resolved)
-                      coverage_gate: PASS combined 100% (1278/1278 branches)
-                    prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 
-                      10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; 
-                      admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on 
-                      QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
-                    note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED
-                      (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression
-                      test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019).
-                      Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142
-                      PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes
-                      the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md +
-                      docs/sessions/S004-supabase-auth/reports/qa-report.md.'
-            next_action: none_session_closed
+                    note: Re-run on main@b0d1223 with audit WIP — 13 pytest failures; FE+Playwright PASS; prior F38 
+                      blockers resolved
+                    s008_baseline:
+                      status: completed
+                      started_at: '2026-07-03'
+                      completed_at: '2026-07-03'
+                      session_id: S008-eval-ux-playground
+                      branch: feat/S008-eval-ux-playground
+                      evolve_cycle_id: EV-009
+                      report: docs/sessions/S008-eval-ux-playground/reports/qa-report.md
+                      overall: fail
+                      note: S008/EV-009 F36+F37 09-qa @ 24eff9f — 940 pytest + 754 Vitest + 30 Playwright PASS; coverage 
+                        gate FAIL (internal-write-api + chat-rag-backend below 95%); QA-S008-B05 blocking
+                    s007:
+                      status: completed
+                      started_at: '2026-07-01'
+                      completed_at: '2026-07-01'
+                      partial_rerun_at: '2026-07-01'
+                      session_id: S007-rag-eval
+                      branch: feat/S007-rag-eval
+                      feature: F36
+                      evolve_cycle_id: EV-008
+                      overall: fail
+                      report: docs/sessions/S007-rag-eval/reports/qa-report.md
+                      reports:
+                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        - docs/sessions/S007-rag-eval/reports/qa-report.md
+                      blocking:
+                        - id: QA-S007-B05
+                          category: coverage_gate
+                          summary: internal-write-api 87.9%/82.8%, data-management-frontend 94.3%/85.8% below thresholds
+                      results:
+                        lint: PASS
+                        format: PASS
+                        typecheck: PASS
+                        python_tests: PASS
+                        frontend: all green — PASS
+                        coverage_gate: FAIL
+                      note: Rerun @ 9361e4a — B01-B04 resolved; blocking QA-S007-B05 coverage gate
+                    s006:
+                      status: completed
+                      started_at: '2026-06-30'
+                      completed_at: '2026-06-30'
+                      session_id: S006-invite-acceptance
+                      branch: feat/S006-invite-acceptance
+                      feature: F35
+                      overall: pass_with_advisories
+                      report: docs/sessions/S006-invite-acceptance/reports/qa-report.md
+                      reports:
+                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        - docs/sessions/S006-invite-acceptance/reports/qa-report.md
+                      results:
+                        python: 729 passed — PASS
+                        frontend: all green — PASS
+                        coverage_gate: PASS
+                      note: 'S006/EV-007 F35 ext full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 729
+                        passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        + docs/sessions/S006-invite-acceptance/reports/qa-report.md. Handoff to 10-e2e.'
+                    s005:
+                      status: completed
+                      started_at: '2026-06-30'
+                      completed_at: '2026-06-30'
+                      session_id: S005-user-mgmt-auth
+                      branch: feat/S005-user-mgmt-auth
+                      feature: F35
+                      overall: pass_with_advisories
+                      report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                      reports:
+                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        - docs/sessions/S005-user-mgmt-auth/reports/qa-report.md
+                      results:
+                        python: 703 passed — PASS
+                        frontend: all green — PASS
+                        coverage_gate: PASS
+                      note: 'S005/EV-006 F35 full-repo QA COMPLETE 2026-06-30 — overall pass_with_advisories. Python 703 pytest
+                        passed; all frontend Vitest suites green; coverage gate PASS. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        + docs/sessions/S005-user-mgmt-auth/reports/qa-report.md. Handoff to 10-e2e.'
+                    s004:
+                      status: completed
+                      started_at: '2026-06-29'
+                      completed_at: '2026-06-29'
+                      session_id: S004-supabase-auth
+                      overall: pass_with_advisories
+                      rerun_at: '2026-06-29'
+                      rerun_overall: fail
+                      remediation_at: '2026-06-29'
+                      remediation_overall: pass_with_advisories
+                      report: docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                      reports:
+                        - docs/sessions/S000-internal-docs-archive/reports/qa-report.md
+                        - docs/sessions/S004-supabase-auth/reports/qa-report.md
+                      blocking: []
+                      resolved:
+                        - id: QA-S004-010
+                          status: resolved
+                          resolved_at: '2026-06-29'
+                          summary: admin FE vitest exit 1 despite 230/230 assertions; unhandled errors in DashboardPage 
+                            async cleanup
+                          resolution: Added isActive() unmount guards to DashboardPage/HealthPage/AuditPage; fixed 
+                            test_auth_login_protected_routes.test.tsx (cleanup + stubbed fetch); added regression test 
+                            test_bug_2026_06_29_admin_page_unmount_during_load.test.tsx. Admin FE Vitest now exits 0 (242 
+                            passed); coverage gate PASS combined 100% (1278/1278 branches).
+                        - id: QA-S004-011
+                          status: resolved
+                          resolved_at: '2026-06-29'
+                          summary: Node 20 -> 24 LTS bump (TP-S004-11 / ADR-019)
+                          resolution: ci.yml setup-node x3, .nvmrc, root engines.node>=24; docs 
+                            spec.md/execution-plan.md/LOCAL_DEV.md/decisions.md 
+                            (TP-S004-11/ADR-019)/dependency-inventory.md updated.
+                      accepted_or_deferred:
+                        - 'QA-S004-003: resolved (auth hooks split; lint clean)'
+                        - 'QA-S004-004 / QA-S004-012: documented/accepted'
+                        - 'QA-S004-005/006/007/008/009: deferred (env/GPU/ops)'
+                      rerun_results:
+                        python: 603 passed, 33 skipped — PASS
+                        chat_fe: 142/142 — PASS
+                        coverage_gate: PASS (100%)
+                        admin_fe: 230/230 assertions pass but vitest exit 1 (QA-S004-010) — pre-remediation
+                      remediation_results:
+                        admin_fe: 242 passed, vitest exit 0 (QA-S004-010 resolved)
+                        coverage_gate: PASS combined 100% (1278/1278 branches)
+                      prior_reconciliation_note: Earlier in-session 09-qa was reconciled to pass_with_remediation during 
+                        10-e2e (initial FAIL on admin nav test + coverage gate remediated per qa-report QA-S004-001/002; 
+                        admin FE 223/223 + chat FE 134/134 Vitest). The 2026-06-29 re-run superseded that with a FAIL on 
+                        QA-S004-010; the 2026-06-29 remediation now supersedes the re-run.
+                      note: 'S004 F34 09-qa REMEDIATION (2026-06-29) overall pass_with_advisories — blocking QA-S004-010 RESOLVED
+                        (isActive() unmount guards on DashboardPage/HealthPage/AuditPage + fixed protected-routes test + regression
+                        test; admin FE Vitest now exits 0, 242 passed) and QA-S004-011 RESOLVED (Node 20->24 LTS, TP-S004-11/ADR-019).
+                        Coverage gate PASS combined 100% (1278/1278 branches); Python 603 passed/33 skipped PASS; chat FE 142/142
+                        PASS. QA-S004-003 resolved; QA-S004-004/012 accepted; QA-S004-005-009 deferred (env/GPU/ops). Supersedes
+                        the 2026-06-29 RE-RUN FAIL. Reports: docs/sessions/S000-internal-docs-archive/reports/qa-report.md +
+                        docs/sessions/S004-supabase-auth/reports/qa-report.md.'
+              next_action: none_session_closed
+              session_closed: true
+              session_closed_at: '2026-08-02'
+            completed_at: '2026-08-02'
+            completed: '2026-08-02'
+            overall: pass_with_advisories
+            overall_result: PASS_WITH_ADVISORIES
+            report: docs/sessions/S022-ingest-resilience/reports/qa-report.md
             session_closed: true
             session_closed_at: '2026-08-02'
-          completed_at: '2026-08-02'
-          completed: '2026-08-02'
-          overall: pass_with_advisories
-          overall_result: PASS_WITH_ADVISORIES
-          report: docs/sessions/S022-ingest-resilience/reports/qa-report.md
-          session_closed: true
-          session_closed_at: '2026-08-02'
-          next_action: none_session_closed
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      overall: pass_with_advisories
-      overall_result: pass_with_advisories
-      report: docs/sessions/S026-frontend-ux-polish/reports/qa-report.md
-      pr_207: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-      pr_207_status: merged
-      pr_207_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
-      pr_207_head_branch: evolve/EV-024-frontend-ux-polish
-      pr_207_tip: c942971
-      pr_207_tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      pr_207_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      pr_207_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      pr_207_merge_sha_short: c942971
-      pr_207_merged: true
-      pr_207_merged_at: '2026-08-05T00:15:11Z'
-      pr_207_merge_approved: true
-      pr_207_merge_approved_decision: S026-D54
-      pr_207_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
-        merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
-        deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
-      m118_pr: 207
-      m118_pr_status: merged
-      m118_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-      m118_pr_merged: true
-      m118_pr_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
-        merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
-        deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
-      m118_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      m118_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      m118_merge_sha_short: c942971
-      m118_merged_at: '2026-08-05T00:15:11Z'
-      m118_status: completed_merged
-      m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-      m118_ci_status: success
-      main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-      main_ci: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-      main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
-      deploy_preflight_status: success
-      merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      merged_at: '2026-08-05T00:15:11Z'
-      pr_number: 207
-      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-      pr_status: merged
-      pr_merged: true
-      pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
-      build_head: c942971
-      build_head_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-      s026_d54_decision: S026-D54
-      phase_c: passed
-      phase_a: passed
-      phase_b: passed
-      gate_a_to_b: passed
-      gate_b_to_c: passed
-      started_at_iso: '2026-08-05T00:45:00Z'
-      completed_at_iso: '2026-08-05T00:45:00Z'
-      askquestion_pending_topic:
-      ci_status: success
-      ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-      deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
-      updated_at: '2026-08-05T00:45:00Z'
-      required: true
+            next_action: none_session_closed
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
+        overall: pass_with_advisories
+        overall_result: pass_with_advisories
+        report: docs/sessions/S026-frontend-ux-polish/reports/qa-report.md
+        pr_207: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+        pr_207_status: merged
+        pr_207_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
+        pr_207_head_branch: evolve/EV-024-frontend-ux-polish
+        pr_207_tip: c942971
+        pr_207_tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        pr_207_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        pr_207_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        pr_207_merge_sha_short: c942971
+        pr_207_merged: true
+        pr_207_merged_at: '2026-08-05T00:15:11Z'
+        pr_207_merge_approved: true
+        pr_207_merge_approved_decision: S026-D54
+        pr_207_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
+          merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
+          deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
+        m118_pr: 207
+        m118_pr_status: merged
+        m118_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+        m118_pr_merged: true
+        m118_pr_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
+          merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
+          deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
+        m118_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        m118_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        m118_merge_sha_short: c942971
+        m118_merged_at: '2026-08-05T00:15:11Z'
+        m118_status: completed_merged
+        m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+        m118_ci_status: success
+        main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+        main_ci: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+        main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
+        deploy_preflight_status: success
+        merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        merged_at: '2026-08-05T00:15:11Z'
+        pr_number: 207
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+        pr_status: merged
+        pr_merged: true
+        pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
+        build_head: c942971
+        build_head_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
+        s026_d54_decision: S026-D54
+        phase_c: passed
+        phase_a: passed
+        phase_b: passed
+        gate_a_to_b: passed
+        gate_b_to_c: passed
+        started_at_iso: '2026-08-05T00:45:00Z'
+        completed_at_iso: '2026-08-05T00:45:00Z'
+        askquestion_pending_topic:
+        ci_status: success
+        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+        deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
+        updated_at: '2026-08-05T00:45:00Z'
+        required: true
   10-e2e:
     status: completed
     session_id: S027-multilingual-embeddings
@@ -23792,8 +23884,8 @@ stages:
     started_at: '2026-08-06'
     started_at_iso: '2026-08-06T16:04:25Z'
     current_stage: 09-qa
-    current_action: awaiting_user_continue_09_qa
-    next_action: 09-qa (pending until user continues)
+    current_action: 09-qa_in_progress
+    next_action: 09-qa delta QA F72–F74 → write qa-report.md
     phase_0_status: approved
     phase0_approved: true
     phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -23819,19 +23911,22 @@ stages:
     askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
     close_cycle_pending: false
     session_closed: false
-    handoff: '08-verify-build COMPLETE PASS → next 09-qa (pending until user continues); tip@44f03da'
+    handoff: '09-qa STARTED after user continue (y) post-08 PASS; tip@1332dc1 (synced from 44f03da); report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
     s028_d23_decision: S028-D23
     s028_d23_status: already_done
     s028_d24_pending: false
     s028_d25_decision: S028-D25
     s028_d26_decision: S028-D26
     s028_d27_decision: S028-D27
-    tip_sha: 44f03da
+    s028_d28_decision: S028-D28
+    tip_sha: 1332dc1
+    tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+    tip_prev: 44f03da
     phase_c: passed
     gate_c_to_d: passed
     stage_08_result: PASS
-    note: 'S028/EV-026 08-verify-build COMPLETE PASS 2026-08-06T22:16:30Z; current_stage=09-qa (pending); tip@44f03da; security remediations included; [Corpus: feature-list.md §F72–F74]'
-    updated_at: '2026-08-06T22:16:30Z'
+    note: 'S028/EV-026 09-qa STARTED 2026-08-06T22:35:23Z; tip@1332dc1; delta QA F72–F74; [Corpus: feature-list.md §F72–F74]'
+    updated_at: '2026-08-06T22:35:23Z'
     predecessor:
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
@@ -24423,9 +24518,9 @@ evolve_cycles:
     routing_preset: feature
     preset: feature
     current_stage: 09-qa
-    current_action: awaiting_user_continue_09_qa
-    next_action: 09-qa (pending until user continues)
-    current_stage_note: '08-verify-build COMPLETE PASS; next 09-qa pending; tip@44f03da'
+    current_action: 09-qa_in_progress
+    next_action: 09-qa delta QA F72–F74 → write qa-report.md
+    current_stage_note: '09-qa in_progress (user continue after 08 PASS); tip@1332dc1; delta QA F72–F74; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
     branch: evolve/EV-026-chat-source-ux
     session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
@@ -24687,13 +24782,14 @@ evolve_cycles:
         updated_at: '2026-08-06T22:16:30Z'
         note: '08-verify-build COMPLETE PASS; security remediations included; tip@44f03da'
     issues: []
-    updated_at: '2026-08-06T22:16:30Z'
-    note: '08-verify-build COMPLETE PASS — report=docs/sessions/S028-chat-source-ux/reports/verification-report.md; security remediations included; tip@44f03da; next 09-qa pending (do not start until user continues)'
-    tip_sha: 44f03da
-    tip_full: 44f03da8a99d1e696fc9803cf3a9f0ce51e79291
-    tip_prev: 70c4565
-    bundle_note: workflow-state tip sync committed with 08 verification-report @ 44f03da
+    updated_at: '2026-08-06T22:35:23Z'
+    note: 'S028/EV-026 09-qa STARTED 2026-08-06T22:35:23Z; tip@1332dc1; delta QA F72–F74; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md; [Corpus: feature-list.md §F72–F74]'
+    tip_sha: 1332dc1
+    tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+    tip_prev: 44f03da
+    bundle_note: tip synced at 09-qa start 44f03da→1332dc1 (includes 08 workflow-state sync commit)
     stage_08_result: PASS
+    s028_d28_decision: S028-D28
     phase1_approved: true
     phase1_approved_at: '2026-08-06T16:36:58Z'
     phase_1_status: approved
@@ -25017,7 +25113,7 @@ evolve_cycles:
           - F73
           - F74
         current_action: completed
-        next_action: 09-qa (pending until user continues)
+        next_action: 09-qa in_progress
         askquestion_pending: false
         askquestion_pending_topic:
         tip_sha: 44f03da
@@ -25039,11 +25135,35 @@ evolve_cycles:
         note: '08-verify-build COMPLETE PASS — report=docs/sessions/S028-chat-source-ux/reports/verification-report.md; security remediations included; tip@44f03da; next 09-qa pending'
         updated_at: '2026-08-06T22:16:30Z'
       09-qa:
-        status: pending
+        status: in_progress
+        started: '2026-08-06'
+        started_at: '2026-08-06T22:35:23Z'
         session_id: S028-chat-source-ux
         evolve_cycle_id: EV-026
-        note: 'Awaiting user continue after 08 PASS; do not start yet'
+        mode: evolve
+        delta_only: true
+        feature_ids:
+          - F72
+          - F73
+          - F74
+        branch: evolve/EV-026-chat-source-ux
+        current_action: delta_qa_f72_f74
+        next_action: write qa-report.md
         askquestion_pending: false
+        askquestion_pending_topic:
+        tip_sha: 1332dc1
+        tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+        tip_prev: 44f03da
+        report: docs/sessions/S028-chat-source-ux/reports/qa-report.md
+        report_status: pending
+        s028_d28_decision: S028-D28
+        scope:
+          F72: 'Citation UI — validate URLs before href (#222); ChatRAG SourceList / frontend-ui helper'
+          F73: 'Dynamic relevance-gated sources (no fixed pad) (#223); packages/rag + chat-rag-backend'
+          F74: 'Operator-settable display_title (#224); DB + internal-write + admin FE + citation packing'
+        prior_09_notes: 'No prior S028 09-qa report. Prior S027/EV-025 09-qa COMPLETE (docs/sessions/S027-multilingual-embeddings/reports/qa-report.md @ tip 4b7231b).'
+        note: 'S028/EV-026 09-qa STARTED 2026-08-06T22:35:23Z — user continue (y) after 08 PASS; delta QA F72–F74; tip@1332dc1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+        updated_at: '2026-08-06T22:35:23Z'
     docs_touched:
       - docs/feature-list.md
       - docs/user-journeys.md
@@ -25066,7 +25186,8 @@ evolve_cycles:
     tp_lock: TP1–TP4
     phase: Phase 29 M123–M126
     rd_range: RD-322..RD-324
-    handoff: '08-verify-build COMPLETE PASS → next 09-qa (pending until user continues); tip@44f03da'
+    handoff: '09-qa STARTED after user continue (y) post-08 PASS; tip@1332dc1 (synced from 44f03da); report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+    s028_d28_decision: S028-D28
     s028_d24_decision: S028-D24
     s028_d24_choices:
       M1: 1
@@ -48236,6 +48357,25 @@ decisions_log:
     status: confirmed
     note: 'Do not start 09-qa until user continues; [Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/verification-report.md]'
   - 'S028-D27 / EV-026: 08-verify-build COMPLETE PASS 2026-08-06T22:16:30Z — tip@44f03da; next 09-qa pending'
+  - id: S028-D28
+    skill: 09-qa
+    skill_id: 09-qa
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    decision: 'S028-D28: User approved continue (y) after 08-verify-build PASS — start 09-qa; tip synced 44f03da→1332dc1; askquestion_pending=false'
+    summary: 'S028/EV-026 09-qa STARTED; delta QA F72–F74; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md'
+    topic: continue_09_qa_after_08_pass
+    choice: continue_y
+    tip_sha: 1332dc1
+    tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+    tip_prev: 44f03da
+    report: docs/sessions/S028-chat-source-ux/reports/qa-report.md
+    next_action: 09-qa delta QA F72–F74 → write qa-report.md
+    recorded_at: '2026-08-06T22:35:23Z'
+    approved: '2026-08-06'
+    status: confirmed
+    note: '[Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/verification-report.md]'
+  - 'S028-D28 / EV-026: User continue (y) after 08 PASS — 09-qa in_progress; tip@1332dc1'
 artifacts:
   - path: docs/sessions/S027-multilingual-embeddings/reports/deploy-smoke.md
     kind: deploy-smoke
@@ -51575,12 +51715,12 @@ git_history:
       renamed_at: '2026-08-06T19:09:30Z'
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
-      head_sha: 44f03da8a99d1e696fc9803cf3a9f0ce51e79291
-      tip: 44f03da
-      tip_sha: 44f03da
-      tip_full: 44f03da8a99d1e696fc9803cf3a9f0ce51e79291
-      tip_note: 'tip@44f03da after 08-verify-build PASS; next 09-qa pending'
-      note: 'M123–M126 + 08-verify-build COMPLETE PASS; tip@44f03da; next 09-qa pending (do not start until user continues)'
+      head_sha: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      tip: 1332dc1
+      tip_sha: 1332dc1
+      tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      tip_note: 'tip@1332dc1 at 09-qa start (synced from 44f03da)'
+      note: 'M123–M126 + 08 PASS; 09-qa in_progress; tip@1332dc1'
       m123_status: completed
       m124_status: completed
       m125_status: completed
@@ -51591,7 +51731,7 @@ git_history:
       next_milestone: none
       next_task: 09-qa
       task_status: completed
-      current_action: awaiting_user_continue_09_qa
+      current_action: 09-qa_in_progress
       t126_1_status: completed
       t126_1_completed_at: '2026-08-06T21:46:44Z'
       t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
@@ -56927,6 +57067,19 @@ git_history:
       report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
       result: PASS
       note: '08-verify-build COMPLETE PASS'
+    - sha: 1332dc1
+      sha_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      full_sha: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+      short: 1332dc1
+      branch: evolve/EV-026-chat-source-ux
+      message: 'chore: sync workflow-state after 08-verify-build PASS'
+      stage: 08-verify-build
+      skill_id: 08-verify-build
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      files_changed: 1
+      timestamp: '2026-08-06T22:35:23Z'
+      note: 'Recorded at 09-qa start tip sync (was missing from git_history.commits)'
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
