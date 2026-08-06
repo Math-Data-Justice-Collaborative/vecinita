@@ -1,0 +1,43 @@
+# Cursor ignore — keep secrets + ephemeral noise out of indexing / Agent context.
+# Syntax matches .gitignore. Cursor also respects .gitignore automatically.
+
+# Secrets / operator exports (defense in depth; also listed in .gitignore)
+.env
+.env.*
+*.env
+!.env.example
+!**/*.env.example
+.deploy-keys.local
+prod.env
+admin-fe-spec.yaml
+internal-write-api-spec.yaml
+chat-rag-spec.yaml
+
+# Agent scratch (WSM one-shots, local drafts)
+.cursor/tmp/
+
+# Local tool / report dumps
+.tools/security/
+.security-reports/
+.tmp/
+.wiki-build/
+supabase/.temp/
+
+# Heavy / generated (redundant with defaults + gitignore; explicit for clarity)
+node_modules/
+.venv/
+venv/
+dist/
+.next/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage-data/
+htmlcov/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+data/eval-experiments/
