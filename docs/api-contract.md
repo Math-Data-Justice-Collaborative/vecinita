@@ -831,6 +831,8 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 
 - **Purpose**: Single-document metadata edit (discoverable rename without bulk-select).
 - **Auth**: Internal API key + admin JWT (same as other write routes).
+- **OpenAPI**: `openapi/internal-write.yaml` — `DocumentPatchRequest` + `display_title` on
+  document DTOs (M126 / T126.2 confirmed; ADR-011 SoT).
 - **Request**:
 
 ```json
@@ -842,7 +844,7 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 ```
 
 - **Behavior**: Partial update; `display_title: null` clears override. Citations/admin lists
-  use `COALESCE(display_title, title)`.
+  use `COALESCE(display_title, title)` ([ADR-051](adr/ADR-051-display-title-vs-lock-flag.md)).
 - **Response** `200`: Updated document DTO including `title`, `display_title`, `url`, ids.
 - **Side effects**: `document.edited` audit + version row (same as bulk metadata).
 - **Errors**: `404` missing document; `400` validation; `401`/`403` auth.

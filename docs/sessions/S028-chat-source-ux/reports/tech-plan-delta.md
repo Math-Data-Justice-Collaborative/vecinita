@@ -46,7 +46,7 @@
 
 | Artifact | Path |
 |----------|------|
-| ADR-051 | `docs/adr/ADR-051-display-title-vs-lock-flag.md` (Proposed → Accepted at gate) |
+| ADR-051 | `docs/adr/ADR-051-display-title-vs-lock-flag.md` (Accepted at M126 / T126.2) |
 | Execution plan | Phase 29 in `docs/sessions/S000-internal-docs-archive/execution-plan.md` |
 | Roadmap | `docs/sessions/S028-chat-source-ux/roadmap.md` |
 | This delta | `docs/sessions/S028-chat-source-ux/reports/tech-plan-delta.md` |

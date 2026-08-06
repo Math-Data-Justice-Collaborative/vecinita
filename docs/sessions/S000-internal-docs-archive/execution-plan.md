@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 07-build |
 | **Active milestone** | M126 — Phase 29 gate (TC suite + docs closeout) |
-| **Active task** | T126.1 done — next T126.2 ADR-051 Accepted |
+| **Active task** | T126.2 done — next T126.3 Phase 29 gate docs |
 | **Last updated** | 2026-08-06 |
 | **Evolve cycle** | EV-026 — Standard; Phase C build |
 | **Git branch** | `evolve/EV-026-chat-source-ux` |
@@ -2446,7 +2446,7 @@ H4–H5 regression note for **13-deploy-smoke**; #159 closeout notes after 13.
 > [#223](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/223),
 > [#224](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/224)  
 > **Decisions:** RD-309–321; S028-D1–D22; TP1–TP4 locked (S028-D22); Gate A→B PASS (S028-D20)  
-> **ADRs:** [ADR-051](../../../adr/ADR-051-display-title-vs-lock-flag.md) (Proposed → Accepted at M126)  
+> **ADRs:** [ADR-051](../../../adr/ADR-051-display-title-vs-lock-flag.md) (Accepted at M126 / T126.2)  
 > **Out of scope:** Ingest `title`→`display_title` (RD-321 deferred); new deps / 06; required
 > Playwright; new CORS origins/secrets; #94/#217 source-add
 
@@ -2501,7 +2501,7 @@ for 13; issue closeout notes after verify/deploy gates.
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
 | T126.1 | Test: confirm unit + API e2e + Vitest TC-242–251 green (Playwright only if added) | Test | completed | e2e-coverage, RD-317 | T123.5, T124.3, T125.6 | 2026-08-06 | S028 | F72–F74 |
-| T126.2 | Docs/Config: ADR-051 Accepted; api-contract/OpenAPI notes; inventory unchanged (no new deps) | Docs | pending | TP4, ADR-051 | T126.1 | — | S028 | F72–F74 |
+| T126.2 | Docs/Config: ADR-051 Accepted; api-contract/OpenAPI notes; inventory unchanged (no new deps) | Docs | completed | TP4, ADR-051 | T126.1 | 2026-08-06 | S028 | F72–F74 |
 | T126.3 | Docs: Phase 29 gate + Current State; H4–H5 at 13 note; #222–#224 closeout notes | Docs | pending | Phase 29 gate, connectivity-gates | T126.2 | — | S028 | F72–F74 |
 
 #### Phase 29 Gate Check
@@ -3395,7 +3395,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T125.7 | M125 | 29 | Config | completed | T125.3 | — | S028 | F74 | OpenAPI |
 | T125.8 | M125 | 29 | Test | completed | T125.3 | — | S028 | F74 | CORS H0c |
 | T126.1 | M126 | 29 | Test | completed | T123.5, T124.3, T125.6 | — | S028 | F72–F74 | — |
-| T126.2 | M126 | 29 | Docs | pending | T126.1 | — | S028 | F72–F74 | — |
+| T126.2 | M126 | 29 | Docs | completed | T126.1 | — | S028 | F72–F74 | ADR-051 |
 | T126.3 | M126 | 29 | Docs | pending | T126.2 | — | S028 | F72–F74 | — |
 
 ## Phase Gate Log

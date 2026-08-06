@@ -1,6 +1,6 @@
 # ADR-051: `display_title` column vs title lock-flag
 
-**Status:** Proposed (04-tech-plan EV-026 / S028) — promote to Accepted at M126 / Gate B→C  
+**Status:** Accepted (M126 / T126.2 — 2026-08-06)  
 **Date:** 2026-08-06  
 **Related:** F74, RD-312, RD-320, RD-321; GitHub #224  
 **Corpus:** [Corpus: feature-list.md §F74] [Corpus: adr]
