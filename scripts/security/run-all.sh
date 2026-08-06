@@ -86,6 +86,7 @@ run 2ms 2ms filesystem --path "${ROOT}" \
   --ignore-pattern '*.env' \
   --ignore-pattern 'prod.env' \
   --ignore-pattern '.deploy-keys.local' \
+  --ignore-pattern '.tmp' \
   --ignore-pattern 'admin-fe-spec.yaml' \
   --ignore-pattern 'internal-write-api-spec.yaml' \
   --ignore-pattern 'chat-rag-spec.yaml' \

@@ -10,10 +10,10 @@ ignore:
     reason: RSC-mode advisory; SPA on React 18 / react-router 7.18.1 (RR8 needs React 19)
 
   # GHSA-mh99-v99m-4gvg publishes a single range "<= 5.0.7" which incorrectly
-  # includes the patched 1.1.16 line (1.x fix is 1.1.16; 5.x fix is 5.0.8).
-  # We pin brace-expansion@1 to 1.1.16 and @5 to 5.0.8 via package.json overrides.
+  # includes the patched 1.x line. Pins: brace-expansion 1.1.18 / 2.1.4 / 5.0.9
+  # (also cover GHSA-rgw5-rvv9-x895 / CVE-2026-69152).
   - vulnerability: GHSA-mh99-v99m-4gvg
     package:
       name: brace-expansion
-      version: 1.1.16
-    reason: Advisory range <=5.0.7 falsely includes patched 1.1.16; 1.x fix is 1.1.16
+      version: 1.1.18
+    reason: Advisory range <=5.0.7 falsely includes patched 1.x; 1.x fix >=1.1.16 (we pin 1.1.18)
