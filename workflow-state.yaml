@@ -5925,18 +5925,31 @@ project:
     17-retrospective:
       status: completed
       started_at: '2026-08-02'
-      completed_at: '2026-08-02'
-      session_id: S021-retrieval-follow-on
+      completed_at: '2026-08-06'
+      session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-018
-      retrospective_cycle_id: RET-001
-      report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
+      retrospective_cycle_id: RET-002
+      report: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
       pr_number: 177
       pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/177
       merge_sha: 6e3207d
       merge_sha_full: 6e3207d06ba22898080e6d5da73b946d87fbcabb
       follow_up_retro: after_next_evolve_hotfix
       close_choice: option_1_open_pr_then_close_session
-      note: 'RET-001 COMPLETE 2026-08-02 — PR #177 MERGED @ 6e3207d; S021 archived; follow_up_retro=after_next_evolve_hotfix'
+      note: 'RET-002 Phase 7 COMPLETE 2026-08-06 — restored after workflow-state.yaml git HEAD restore wiped RET-002. Report + skill patches @3e97b3f. 17-retrospective completed. Session kept open. Open actions: RA-012, RA-015, RA-018, RA-020. follow_up_retro=after_next_evolve_hotfix. last_report=docs/retrospectives/2026-08-06-ret002-post-ev025-window.md'
+      last_report: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
+      current_phase: phase7_complete
+      current_action: ret002_pushed_pending_or_complete
+      actions_open:
+      - RA-012
+      - RA-015
+      - RA-018
+      - RA-020
+      notes: 'RET-002 Phase 7 COMPLETE 2026-08-06 — restored after workflow-state.yaml git HEAD restore wiped RET-002. Report + skill patches @3e97b3f. 17-retrospective completed. Session kept open. Open actions: RA-012, RA-015, RA-018, RA-020. follow_up_retro=after_next_evolve_hotfix. last_report=docs/retrospectives/2026-08-06-ret002-post-ev025-window.md'
+      updated_at: '2026-08-06T14:34:59Z'
+      next_action: 'RET-002 / 17 completed @3e97b3f. AskQuestion 00-context close when ready (or push confirmation). [Corpus: sessions] [Spec: .cursor/skills/17-retrospective/SKILL.md §Phase 7]'
+      askquestion_pending: false
+      commit_sha: 3e97b3f
     16-evolve:
       status: completed
       session_id: S026-frontend-ux-polish
@@ -6201,7 +6214,7 @@ active_session:
   status: in_progress
   branch: evolve/EV-025-multilingual-embeddings
   session_branch: feat/S027-multilingual-embeddings
-  orchestrator: 16-evolve
+  orchestrator: 17-retrospective
   evolve_cycle_id: EV-025
   artifacts_dir: docs/sessions/S027-multilingual-embeddings/
   github_issue: 159
@@ -7083,13 +7096,25 @@ active_session:
     status: pending
     mode: delta
     skip_rationale:
-  current_stage: 07-build
+  - stage: 17-retrospective
+    mode: scoped
+    required: true
+    status: completed
+    completed: '2026-08-06'
+    completed_at: '2026-08-06'
+    current_action: ret002_pushed_pending_or_complete
+    last_report: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
+    note: 'RET-002 Phase 7 COMPLETE 2026-08-06 — restored after workflow-state.yaml git HEAD restore wiped RET-002. Report + skill patches @3e97b3f. 17-retrospective completed. Session kept open. Open actions: RA-012, RA-015, RA-018, RA-020. follow_up_retro=after_next_evolve_hotfix. last_report=docs/retrospectives/2026-08-06-ret002-post-ev025-window.md'
+    updated_at: '2026-08-06T14:34:59Z'
+    askquestion_pending: false
+    skip_rationale:
+  current_stage: 17-retrospective
   note: 'EV-025 Phase C — T120.3b completed @e7fa2b6; current_action=t120_4_in_progress; active_milestone=M120; T120.4 in_progress; PR #210 (PR-68) open; tip @e7fa2b6; ahead 2; Gate C→D / phase_c remain pending'
   started_at: '2026-08-05'
   context_briefs: []
-  current_action: t120_4_in_progress
-  next_action: 'Continue M120 T120.4. T120.1–T120.3b completed; tip @e7fa2b6; PR #210 (PR-68) open https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210; branch ahead of origin by 2 (c945aad + e7fa2b6). Gate C→D / phase_c remain pending.'
-  updated_at: '2026-08-05T16:32:05Z'
+  current_action: ret002_pushed_pending_or_complete
+  next_action: 'RET-002 / 17 completed @3e97b3f. AskQuestion 00-context close when ready (or push confirmation). [Corpus: sessions] [Spec: .cursor/skills/17-retrospective/SKILL.md §Phase 7]'
+  updated_at: '2026-08-06T14:34:59Z'
   report: docs/sessions/S027-multilingual-embeddings/reports/05-verify-tech-audit.md
   askquestion_pending: false
   askquestion_pending_topic:
@@ -7418,6 +7443,11 @@ active_session:
   branch_ahead_of_origin: 2
   commits_ahead_of_origin: 2
   ahead_shas: *id002
+  current_action_detail: phase7_complete_restored_after_git_restore
+  17_retrospective_status: completed
+  follow_up_retro: after_next_evolve_hotfix
+  retrospective_cycle_id: RET-002
+  last_report: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
 sessions:
 - id: S026-frontend-ux-polish
   type: feature
@@ -21941,15 +21971,27 @@ stages:
   17-retrospective:
     status: completed
     started: '2026-08-02'
-    completed: '2026-08-02'
-    last_report: docs/retrospectives/2026-08-02-ev018-retrieval-follow-on.md
-    cycles_completed: 1
-    session_id: S021-retrieval-follow-on
-    retrospective_cycle_id: RET-001
+    completed: '2026-08-06'
+    last_report: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
+    cycles_completed: 2
+    session_id: S027-multilingual-embeddings
+    retrospective_cycle_id: RET-002
     pr_number: 177
     merge_sha: 6e3207d
     follow_up_retro: after_next_evolve_hotfix
-    note: 'RET-001 COMPLETE; PR #177 MERGED @ 6e3207d; S021 closed'
+    note: 'RET-002 Phase 7 COMPLETE 2026-08-06 — restored after workflow-state.yaml git HEAD restore wiped RET-002. Report + skill patches @3e97b3f. 17-retrospective completed. Session kept open. Open actions: RA-012, RA-015, RA-018, RA-020. follow_up_retro=after_next_evolve_hotfix. last_report=docs/retrospectives/2026-08-06-ret002-post-ev025-window.md'
+    current_phase: phase7_complete
+    current_action: ret002_pushed_pending_or_complete
+    actions_open:
+    - RA-012
+    - RA-015
+    - RA-018
+    - RA-020
+    notes: 'RET-002 Phase 7 COMPLETE 2026-08-06 — restored after workflow-state.yaml git HEAD restore wiped RET-002. Report + skill patches @3e97b3f. 17-retrospective completed. Session kept open. Open actions: RA-012, RA-015, RA-018, RA-020. follow_up_retro=after_next_evolve_hotfix. last_report=docs/retrospectives/2026-08-06-ret002-post-ev025-window.md'
+    updated_at: '2026-08-06T14:34:59Z'
+    next_action: 'RET-002 / 17 completed @3e97b3f. AskQuestion 00-context close when ready (or push confirmation). [Corpus: sessions] [Spec: .cursor/skills/17-retrospective/SKILL.md §Phase 7]'
+    askquestion_pending: false
+    commit_sha: 3e97b3f
   18-pr-review:
     status: completed
     started: '2026-06-30'
@@ -37371,6 +37413,350 @@ retrospective_cycles:
     status: completed
     note: 'Session closed after PR #177 merge'
   note: 'RET-001 COMPLETE — Phase 7; PR #177 MERGED @ 6e3207d; PR #176 closed superseded; follow_up_retro=after_next_evolve_hotfix; S021 archived'
+- id: RET-002
+  title: S027/EV-025 multilingual embeddings retrospective (post–RET-001 window)
+  status: completed
+  started: '2026-08-06'
+  completed: '2026-08-06'
+  completed_at: '2026-08-06'
+  session_id: S027-multilingual-embeddings
+  evolve_cycle_id: EV-025
+  feature_ids:
+  - F70
+  - F71
+  tip_sha: 4b7231b
+  queued_themes:
+  - prod_bugs_this_cycle
+  - flaky_security_install_S027_D41
+  scope:
+    mode: evolve_hotfix
+    stages:
+    - 16-evolve
+    - 14-hotfix
+    - 15-service-health
+    - 12-verify-deploy
+    - 13-deploy-smoke
+    - 09-qa
+    - 10-e2e
+    - 11-verify-impl
+    - 07-build
+    - 08-verify-build
+    notes: User chose evolve+hotfix focus; include related verify/deploy/build as supporting evidence
+  time_window: since_last_retro
+  since_retro_id: RET-001
+  since_date:
+  depth: standard
+  transcript_consent: full
+  phase0_answers:
+    scope: 1a evolve_hotfix
+    time_window: 2b since_last_retro
+    depth: 3a standard
+    transcript_consent: 4b full_available_in_window
+  current_phase: phase7_complete
+  phase7_completed_at: '2026-08-06T14:34:59Z'
+  evidence_digest_path: docs/sessions/S027-multilingual-embeddings/reports/retrospective-evidence.md
+  evidence_summary: '6 evolve cycles in ~4 days (EV-019–025). Mid-evolve hotfixes #220/#221. Compose waive class S027-D35. CI split S027-D34. Staging-as-live D61. Flaky security-install. AskQuestion markdown fallback persists.'
+  interview:
+    stages_completed:
+    - 16-evolve
+    - 14-hotfix
+    - pipeline
+    - 12-verify-deploy
+    - 13-deploy-smoke
+    - cross_cutting
+    next_batch: []
+    themes_confirmed:
+    - env_truth_prod
+    - ci_cd_block_deploy
+    - auto_ops_approval_cli
+    - smoke_ask_hang_runtime_pin
+    - mid_evolve_interrupt
+    - markdown_askquestion_fallback
+    responses:
+      16-evolve:
+        went_well:
+        - continue_resume_handoff
+        - multi_fn_standard_closed
+        - decisions_log_auditable
+        improve: 'User free-text: CI and CD failures deployed to prod is an issue; discrepancy that agents treat environment as stage while there is currently only one environment which is prod (staging-as-live / naming mismatch).'
+        friction: major_pain
+        friction_code: c
+      14-hotfix:
+        went_well:
+        - 220_221_recovered_ask_embed
+        - ops_then_code_D55
+        - bug_reports_layered_verify
+        went_well_note: Could automate some of the ops with approval and CLI tools
+        improve:
+        - mid_evolve_interrupt_from_13_15
+        - runtime_pin_validation_before_cutover
+        - health_neq_ready_when_ask_hangs
+        friction: some_friction
+        friction_code: b
+    responses_batch2:
+      pipeline:
+        went_well:
+        - continue_handoff_resume
+        - explicit_merge_promote_askquestion
+        improve:
+        - env_naming_staging_is_prod
+        - red_ci_cd_block_deploy
+        - formalize_markdown_askquestion_fallback
+        friction: some_friction
+      12-verify-deploy:
+        went_well:
+        - checklists_secrets_modal
+        - D60_D61_prod_target_ambiguity
+        improve:
+        - single_env_staging_as_live_path
+        - failed_cd_as_deploy_blockers
+        - what_is_live_matrix
+        friction: some_friction
+      13-deploy-smoke:
+        went_well:
+        - H3_H4_H5_caught_prod_bugs
+        improve:
+        - assume_env_is_prod_when_single_stack
+        - auto_ops_approval_cli
+        - fail_smoke_if_ask_hangs_health_green
+        friction: major_pain
+    cross_cutting:
+      went_well:
+      - continue_handoff
+      - hotfix_recovery
+      - H3_H4_H5_caught_bugs
+      - multi_fn_shipped
+      improve:
+      - env_truth_prod
+      - ci_cd_block_deploy
+      - auto_ops_approval_cli
+      - smoke_ask_hang_runtime_pin
+      - mid_evolve_interrupt
+      - markdown_askquestion_fallback
+      biggest_surprise:
+      - ci_cd_landed_bad_on_live
+      - staging_was_prod
+      - fastembed_e1_gap
+      - askquestion_mcp_thrash
+  brainstorm:
+    status: completed
+    completed_themes:
+    - env_truth_prod
+    - ci_cd_block_deploy
+    - auto_ops_approval_cli
+    - smoke_ask_hang_runtime_pin
+    - mid_evolve_interrupt
+    - markdown_askquestion_fallback
+    next_themes: []
+  phase5_routing:
+    workshop: p1_p2_skill_doc
+    adrs: yes_env_prod_and_ci_cd_gate
+    follow_up_retro: after_next_evolve_hotfix
+  skill_workshop:
+    status: completed
+    completed_at: '2026-08-06T14:34:59Z'
+    queue: all
+    edit_scope: project_and_personal_generalized
+    batching: related_pairs
+    personal_note: Org-wide ~/.cursor/skills patches must be project-agnostic; no vecinita-specific wording
+  actions:
+  - id: RA-008
+    priority: P1
+    description: Single-env / staging-as-live path in 12-verify-deploy + 13-deploy-smoke (call live stack prod when only one env)
+    target: .cursor/skills/12-verify-deploy/SKILL.md + .cursor/skills/13-deploy-smoke/SKILL.md
+    theme: env_truth_prod
+    status: done
+  - id: RA-009
+    priority: P1
+    description: Hard-stop deploy/promote on red CI/CD tip SHA unless waiver AskQuestion
+    target: .cursor/skills/12-verify-deploy/SKILL.md + .cursor/skills/13-deploy-smoke/SKILL.md + .cursor/skills/16-evolve/SKILL.md
+    theme: ci_cd_block_deploy
+    status: done
+  - id: RA-010
+    priority: P1
+    description: Require watch_github_ci / wrapper non-zero before promote CLI; document branch-protection required checks in runbook
+    target: scripts/ci/ + docs/staging-runbook.md
+    theme: ci_cd_block_deploy
+    status: done
+  - id: RA-011
+    priority: P1
+    description: Approved-ops checklist (AskQuestion → dry-run → CLI) in 13/14/15 + thin wrapper scripts with --dry-run/--approve
+    target: .cursor/skills/13-deploy-smoke/SKILL.md + .cursor/skills/14-hotfix/SKILL.md + scripts/ops/
+    theme: auto_ops_approval_cli
+    status: done
+  - id: RA-012
+    priority: P2
+    description: 'Backlog product Fn: Admin approved-ops UI (route to future 16-evolve)'
+    target: docs/retrospective-actions.md + docs/feature-list.md (future)
+    theme: auto_ops_approval_cli
+    status: open
+  - id: RA-013
+    priority: P1
+    description: H3 hard FAIL when ask hangs; health ≠ ask-ready in 13 + 15
+    target: .cursor/skills/13-deploy-smoke/SKILL.md + .cursor/skills/15-service-health/SKILL.md
+    theme: smoke_ask_hang_runtime_pin
+    status: done
+  - id: RA-014
+    priority: P1
+    description: Pre-cutover embed pin ∈ runtime checklist in 07/13/14
+    target: .cursor/skills/07-build/SKILL.md + .cursor/skills/13-deploy-smoke/SKILL.md + .cursor/skills/14-hotfix/SKILL.md
+    theme: smoke_ask_hang_runtime_pin
+    status: done
+  - id: RA-015
+    priority: P2
+    description: 'Product guard/test: unsupported embed pin fails health/smoke (14-hotfix or small evolve)'
+    target: infra/modal/embedding_app.py + tests/ (future hotfix/evolve)
+    theme: smoke_ask_hang_runtime_pin
+    status: open
+  - id: RA-016
+    priority: P1
+    description: 'Mid-evolve interrupt: H3/P0 → AskQuestion pause 16 → 14; interrupted_by_hotfix state + HANDOFF'
+    target: .cursor/skills/16-evolve/SKILL.md + workflow-state-reference + sessions-reference
+    theme: mid_evolve_interrupt
+    status: done
+  - id: RA-017
+    priority: P1
+    description: Formalize markdown numbered AskQuestion fallback in considerations + pipeline/16/14
+    target: .cursor/skills/considerations.md + pipeline + 16-evolve + 14-hotfix
+    theme: markdown_askquestion_fallback
+    status: done
+  - id: RA-018
+    priority: P3
+    description: Investigate restoring Cursor MCP AskQuestion tool reliability
+    target: docs/retrospective-actions.md (ops/tooling)
+    theme: markdown_askquestion_fallback
+    status: open
+  - id: RA-019
+    priority: P2
+    description: 'Standing doc/ADR: current DO stack is prod; staging label legacy until second env'
+    target: docs/staging-runbook.md + docs/adr/ (optional companion to RA-008)
+    theme: env_truth_prod
+    status: done
+  - id: RA-020
+    priority: P3
+    description: Flaky security-install CI (S027-D41)
+    target: .github/workflows / CI
+    theme: flaky_security_install_S027_D41
+    status: open
+  actions_open:
+  - RA-012
+  - RA-015
+  - RA-018
+  - RA-020
+  workshop_queue_ids:
+  - RA-008
+  - RA-009
+  - RA-010
+  - RA-011
+  - RA-013
+  - RA-014
+  - RA-016
+  - RA-017
+  - RA-019
+  backlog_only_ids:
+  - RA-012
+  - RA-015
+  - RA-018
+  - RA-020
+  skill_patches:
+  - path: .cursor/skills/12-verify-deploy/SKILL.md
+    summary: Single-env env_role + CI/CD tip hard-stop (RA-008/009)
+    status: applied
+  - path: .cursor/skills/13-deploy-smoke/SKILL.md
+    summary: Single-env live + CI tip + health≠ask-ready H3 hard FAIL (RA-008/009/013)
+    status: applied
+  - path: ~/.cursor/skills/12-verify-deploy/SKILL.md
+    summary: Generalized single-env + CI tip gate
+    status: applied
+  - path: ~/.cursor/skills/13-deploy-smoke/SKILL.md
+    summary: Generalized single-env + CI tip + health≠journey-ready
+    status: applied
+  - path: docs/adr/ADR-049-single-env-staging-as-live.md
+    summary: Accepted ADR single-env = prod
+    status: applied
+  - path: docs/adr/ADR-050-ci-cd-blocks-live-deploy.md
+    summary: Accepted ADR CI/CD blocks live deploy
+    status: applied
+  - path: .cursor/skills/15-service-health/SKILL.md
+    summary: Health≠ask-ready + single-env live label (RA-013/008)
+    status: applied
+  - path: .cursor/skills/16-evolve/SKILL.md
+    summary: Mid-evolve interrupt→14; deploy gates ADR-049/050; AskQuestion fallback (RA-016/017)
+    status: applied
+  - path: .cursor/skills/16-evolve/reference.md
+    summary: interrupted_by_hotfix schema fields
+    status: applied
+  - path: .cursor/skills/sessions-reference.md
+    summary: HANDOFF Interrupt section when hotfix pause
+    status: applied
+  - path: ~/.cursor/skills/15-service-health/SKILL.md
+    summary: Generalized health≠journey-ready + single-env
+    status: applied
+  - path: ~/.cursor/skills/16-evolve/SKILL.md
+    summary: Generalized mid-evolve interrupt→14
+    status: applied
+  - path: ~/.cursor/skills/16-evolve/reference.md
+    summary: interrupted_by_hotfix schema fields
+    status: applied
+  - path: .cursor/skills/07-build/SKILL.md
+    summary: Runtime pin readiness before deploy-ready (RA-014)
+    status: applied
+  - path: .cursor/skills/14-hotfix/SKILL.md
+    summary: Mid-evolve entry + approved-ops CLI + pin check; AskQuestion fallback (RA-011/014/016/017)
+    status: applied
+  - path: ~/.cursor/skills/07-build/SKILL.md
+    summary: Generalized runtime pin readiness
+    status: applied
+  - path: ~/.cursor/skills/14-hotfix/SKILL.md
+    summary: Generalized mid-evolve entry + approved-ops + pin check
+    status: applied
+  - path: .cursor/skills/considerations.md
+    summary: Markdown AskQuestion fallback (RA-017)
+    status: applied
+  - path: ~/.cursor/skills/considerations.md
+    summary: Generalized markdown AskQuestion fallback
+    status: applied
+  - path: .cursor/skills/pipeline/SKILL.md
+    summary: AskQuestion protocol output rule
+    status: applied
+  - path: ~/.cursor/skills/pipeline/SKILL.md
+    summary: AskQuestion protocol orchestration rule
+    status: applied
+  - path: docs/staging-runbook.md
+    summary: Env-as-prod + CI/CD before promote (RA-019/010)
+    status: applied
+  - path: scripts/ops/
+    summary: require_ci_green + modal embed wrappers --dry-run/--approve (RA-010/011)
+    status: applied
+  artifacts:
+  - path: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
+    status: complete
+    kind: phase7_report
+    recorded_at: '2026-08-06T14:34:59Z'
+  - path: docs/sessions/S027-multilingual-embeddings/reports/retrospective.md
+    status: complete
+    kind: session_retrospective
+    recorded_at: '2026-08-06T14:34:59Z'
+  - path: docs/sessions/S027-multilingual-embeddings/reports/retrospective-evidence.md
+    status: complete
+    kind: evidence_digest
+    recorded_at: '2026-08-06T14:34:59Z'
+  - path: docs/retrospective-actions.md
+    status: complete
+    kind: actions_tracker
+    recorded_at: '2026-08-06T14:34:59Z'
+  last_report: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
+  follow_up_retro: after_next_evolve_hotfix
+  commit_sha: 3e97b3f
+  commit_sha_full: 3e97b3fd6732240dc412531cb31a28366a2fb309
+  current_action: ret002_pushed_pending_or_complete
+  current_action_detail: phase7_complete_restored_after_git_restore
+  next_action: 'RET-002 / 17 completed @3e97b3f. AskQuestion 00-context close when ready (or push confirmation). [Corpus: sessions] [Spec: .cursor/skills/17-retrospective/SKILL.md §Phase 7]'
+  note: 'RET-002 Phase 7 COMPLETE 2026-08-06 — restored after workflow-state.yaml git HEAD restore wiped RET-002. Report + skill patches @3e97b3f. 17-retrospective completed. Session kept open. Open actions: RA-012, RA-015, RA-018, RA-020. follow_up_retro=after_next_evolve_hotfix. last_report=docs/retrospectives/2026-08-06-ret002-post-ev025-window.md'
+  updated_at: '2026-08-06T14:34:59Z'
+  askquestion_pending: false
+  restored_at: '2026-08-06T14:34:59Z'
+  restore_note: Recreated after workflow-state.yaml restored from git HEAD
 pr_review_cycles:
 - id: PRR-001
   pr_number: 60
@@ -42612,6 +42998,7 @@ decisions_log:
   updated_at: '2026-08-05T15:09:39Z'
 - '2026-08-05T15:20:42Z S027-D34 applied @11ef43a: CI split chore landed; ci_policy_implemented=true; main@2c884bd CI+preflight green; M120 T120.1 in_progress; watching CI on 11ef43a'
 - '2026-08-05T15:27:19Z S027/EV-025: T120.1 completed (red @72fb57d + xfail @5346ec3 for remote unit CI); next T120.2; PR-68 M120 minor PR opening (parent will record URL); askquestion_pending=false'
+- RET-002 Phase 7 restored 2026-08-06 after workflow-state.yaml git HEAD restore — cycle recreated completed; 17-retrospective completed; commit 3e97b3f recorded; session kept open
 artifacts:
 - path: CHANGELOG.md
   kind: changelog
@@ -45735,6 +46122,21 @@ artifacts:
   overall: conditional_pass
   m119_verify: conditional_pass_await_pr_decision
   note: M119 CONDITIONAL PASS — scoped unit+static gates green; full pytest blocked by Docker Postgres userns; S027-D32 AskQuestion pending
+- path: docs/retrospectives/2026-08-06-ret002-post-ev025-window.md
+  session_id: S027-multilingual-embeddings
+  stage: 17-retrospective
+  status: complete
+  recorded_at: '2026-08-06'
+- path: docs/sessions/S027-multilingual-embeddings/reports/retrospective.md
+  session_id: S027-multilingual-embeddings
+  stage: 17-retrospective
+  status: complete
+  recorded_at: '2026-08-06'
+- path: docs/sessions/S027-multilingual-embeddings/reports/retrospective-evidence.md
+  session_id: S027-multilingual-embeddings
+  stage: 17-retrospective
+  status: complete
+  recorded_at: '2026-08-06'
 git_history:
   current_branch: evolve/EV-025-multilingual-embeddings
   branches:
@@ -50752,6 +51154,15 @@ git_history:
     - tests/unit/internal_write_api/test_f71_embed_promote_report.py
     - tests/unit/shared_schemas/test_f71_embed_promote_report.py
     - workflow-state.yaml
+  - sha: 3e97b3f
+    sha_full: 3e97b3fd6732240dc412531cb31a28366a2fb309
+    branch: evolve/EV-025-multilingual-embeddings
+    message: 'chore(RET-002): env-as-prod, CI deploy gate, AskQuestion fallback'
+    stage: 17-retrospective
+    session_id: S027-multilingual-embeddings
+    retrospective_cycle_id: RET-002
+    files_changed: 21
+    timestamp: '2026-08-06T14:34:59Z'
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1 | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394); askquestion_pending=true EXPLICIT merge approval; ci_policy_intent pending (not implemented); NOT merged; M120 not started; current_action=askquestion_explicit_merge_approval_pr208 | 2026-08-05T15:01:54Z S027/EV-025: PR #208 CI green @8e81ad3 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113); m119_verify=ci_green; m119_pr_status=open_ci_green; askquestion_pending=true (M119 PR #208 CI green @8e81ad3 — continue M120 T120.1 vs pause vs merge #208?); current_action=askquestion_m120_continue_vs_pause_merge; next=AskQuestion M120 T120.1 — continue build vs pause vs merge #208 first (merge still needs explicit approval) | 2026-08-05T14:56:48Z S027/EV-025: PR #208 CI coverage fix pushed @8e81ad3 ([T119.5] test: cover embed prefix env/default branches for 95% gate); also recorded ce06b2e; m119_verify=ci_coverage_fix_pushed; askquestion_pending=false; current_action=m119_08_await_ci_after_coverage_fix; next=Watch GitHub CI on #208 after coverage fix @8e81ad3; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval) | 2026-08-05T14:48:00Z S027/EV-025: PR #208 OPEN (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208); tip @16f4d06; recorded commit 16f4d06 ([M119] docs: S027-D32 open PR-67; CI/F62 gate for full pytest); m119_verify=pr_open_await_ci; askquestion_pending=false; current_action=m119_08_await_ci; next=Watch GitHub CI on #208; then AskQuestion continue M120 T120.1 (merge #208 still needs explicit approval) | 2026-08-05T00:20:00Z S026/EV-024: PR #207 CI green @2b8e8cd (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032); pr_207_status=open_ci_green; current_action=present_gate_c_to_d; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207 CI green); phase_c/c_to_d pending (NOT passed); next=User AskQuestion Gate C→D; on pass → 08-verify-build closeout / 09-qa; merge #207 needs explicit approval | 2026-08-05T00:12:00Z S026/EV-024: recorded commit 2b8e8cd ([T118.3] docs: Phase 27 gate + issue closeout notes); PR #207 OPEN; CI watching; T118.3 committed @2b8e8cd; M118 completed; PR #207 OPEN; CI watching; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207); phase_c/c_to_d remain pending. Issue closeout comments posted on #104/#106/#93/#186/#170/#193; do not auto-close. #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193. #87 already CLOSED. build_head=2b8e8cd; current_action=await_ci_207_gate_c_to_d; next=Await CI on #207; AskQuestion Gate C→D; then 08-verify / 09-qa; askquestion_pending=true; phase_c/c_to_d pending on evolve/EV-024-frontend-ux-polish. | PR #206 merged to main @ eb65837; evolve tip has Brewfile/secrets docs commit | 2026-08-05T02:00:00Z S026/EV-024 S026-D56: 12 COMPLETE APPROVED → 13 in_progress (validate_or_redeploy); main_tip=c942971; evolve_tip=d429d39; PR #207 merged; evolve CI watch waived_n_a; checkpoints.deploy=pending; CD Modal+DO green | 2026-08-05T02:15:00Z S026/EV-024 S026-D57: 13 validate_existing_smokes (option 1); no force redeploy; H1–H5 vs staging @c942971; prod.env still missing / F69 enrich deferred; 13 remains in_progress | 2026-08-05T00:51:00Z S026/EV-024 13 validate-existing smokes PASS pending accept; await_smoke_accept; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md; deploy gate pending | 2026-08-05T00:54:00Z S026/EV-024 S026-D58: Accept 13 PASS; deploy gate+Phase D closed; write_evolve_summary; cycle in_progress; summary=docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md
     | 2026-08-05T00:59:44Z S026/EV-024: recorded closeout commit d12c37a ([M118] docs: close EV-024 / S026 after deploy gate PASS); evolve tip @d12c37a; cycle remains completed; session closed'
   pull_requests:
