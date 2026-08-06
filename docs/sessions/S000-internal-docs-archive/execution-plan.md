@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 07-build |
-| **Active milestone** | M125 — F74 display_title (complete) → next M126 |
-| **Active task** | T125.8 done — next T126.1 Phase 29 gate |
+| **Active milestone** | M126 — Phase 29 gate (TC suite + docs closeout) |
+| **Active task** | T126.1 done — next T126.2 ADR-051 Accepted |
 | **Last updated** | 2026-08-06 |
 | **Evolve cycle** | EV-026 — Standard; Phase C build |
 | **Git branch** | `evolve/EV-026-chat-source-ux` |
@@ -2500,7 +2500,7 @@ for 13; issue closeout notes after verify/deploy gates.
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T126.1 | Test: confirm unit + API e2e + Vitest TC-242–251 green (Playwright only if added) | Test | pending | e2e-coverage, RD-317 | T123.5, T124.3, T125.6 | — | S028 | F72–F74 |
+| T126.1 | Test: confirm unit + API e2e + Vitest TC-242–251 green (Playwright only if added) | Test | completed | e2e-coverage, RD-317 | T123.5, T124.3, T125.6 | 2026-08-06 | S028 | F72–F74 |
 | T126.2 | Docs/Config: ADR-051 Accepted; api-contract/OpenAPI notes; inventory unchanged (no new deps) | Docs | pending | TP4, ADR-051 | T126.1 | — | S028 | F72–F74 |
 | T126.3 | Docs: Phase 29 gate + Current State; H4–H5 at 13 note; #222–#224 closeout notes | Docs | pending | Phase 29 gate, connectivity-gates | T126.2 | — | S028 | F72–F74 |
 
@@ -3394,7 +3394,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T125.6 | M125 | 29 | Test | completed | T125.4, T125.5 | — | S028 | F74 | — |
 | T125.7 | M125 | 29 | Config | completed | T125.3 | — | S028 | F74 | OpenAPI |
 | T125.8 | M125 | 29 | Test | completed | T125.3 | — | S028 | F74 | CORS H0c |
-| T126.1 | M126 | 29 | Test | pending | T123.5, T124.3, T125.6 | — | S028 | F72–F74 | — |
+| T126.1 | M126 | 29 | Test | completed | T123.5, T124.3, T125.6 | — | S028 | F72–F74 | — |
 | T126.2 | M126 | 29 | Docs | pending | T126.1 | — | S028 | F72–F74 | — |
 | T126.3 | M126 | 29 | Docs | pending | T126.2 | — | S028 | F72–F74 | — |
 
