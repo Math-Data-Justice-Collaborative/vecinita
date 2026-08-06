@@ -491,3 +491,5 @@ Pipeline Complete.
 6. **Cross-stage issues**: Issues spanning multiple skills are the pipeline's responsibility.
 7. **Fix in place**: Never re-run entire phases. Targeted patches only.
 8. **Gates are blocking**: Phase gates must pass before the next phase begins.
+9. **AskQuestion protocol** (RET-002 RA-017): Prefer the AskQuestion tool; if unavailable, use
+   numbered markdown options per [considerations.md](considerations.md) §7 — do not invent answers.

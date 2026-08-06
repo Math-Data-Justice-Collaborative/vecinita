@@ -67,6 +67,9 @@ docs/sessions/
 safe-stops and on 00/16 resume. Suggested sections: Current stage/action · Branch/SHA · Next
 AskQuestion or stage · Material flags · Links to latest reports. Keep under ~40 lines.
 
+When `evolve_cycles[].interrupted_by_hotfix` is true (RET-002 RA-016), include an **Interrupt**
+section: symptom, tip SHA, `hotfix_ref`, and next = `14-hotfix` (do not resume 16 until cleared).
+
 **00→01 handoff:** When the routing plan includes `01-requirements`, **00-context Phase 4.5**
 writes `checkpoints/01-requirements-seed.md` and links it from `session-brief.md` +
 `routing-plan.md`. **01-requirements Phase 0C** loads that seed first (locked decisions =

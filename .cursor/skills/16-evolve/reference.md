@@ -16,6 +16,9 @@ evolve_cycles:
     feature_id: null              # deprecated; use feature_ids
     title: "Add batch export API" # Short label from intake
     status: in_progress           # pending | in_progress | completed | cancelled
+    interrupted_by_hotfix: false  # RET-002 RA-016 — true while paused for 14-hotfix
+    interrupt_reason: null        # short symptom / H3 fail note
+    hotfix_ref: null              # BUG path or PR number when known
     started: "2026-05-17"
     completed: null
     scope_summary: |              # Verbatim approved scope from Phase 0

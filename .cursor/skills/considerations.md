@@ -116,6 +116,17 @@ RAG services need schema, seed corpus, and eval fixtures before integration test
 5. **Advisory issues** proceed with recommended option if user doesn't respond, marked `⚠️ Assumed:`.
 6. **Evidence required**: Cite the source (spec section, code path, user answer).
 
+### Markdown fallback (RET-002 RA-017)
+
+Prefer the **AskQuestion tool** when available. If the tool / MCP is **unavailable** in the
+session:
+
+1. Post the same content as a **numbered markdown** options list in chat.
+2. Keep the same rules: first option = recommendation; last = explain; batch **2–4** questions.
+3. Ask the user to reply with codes (e.g. `1a / 2b`) — do not invent answers.
+4. Skills that say “must use AskQuestion tool” mean **must use this protocol**; markdown is an
+   allowed transport when the tool is missing.
+
 ## 8. ADR logging
 
 Every decision surfaced via AskQuestion that selects between multiple valid approaches

@@ -90,6 +90,21 @@ Record every commit in `workflow-state.yaml` §`git_history.commits` with
 
 Record **Infra overall**, **E2E overall**, and **Overall** separately in the report.
 
+## Health ≠ ask-ready (RET-002 RA-013)
+
+`/health` and Modal dependency probes can be green while **ask / primary RAG** fails (hang,
+timeout, wrong embed runtime).
+
+- If H3 is in scope: **H3 fail or hang ⇒ Overall FAIL** (and Behavior FAIL) even when H1 is PASS.
+- Do not report Overall PASS on infra-only evidence when the user asked for post-deploy /
+  post-hotfix depth that includes H3.
+- On H3 P0 during an active evolve cycle: recommend pause **16-evolve** → **14-hotfix**.
+
+## Single-env / live role (RET-002 RA-008)
+
+If only one deployed stack exists (`env_role: staging_as_live`), label checks and reports as
+**live/prod** — do not imply a safer non-prod target. Cite [ADR-049](../../docs/adr/ADR-049-single-env-staging-as-live.md).
+
 ## Health tiers (default recommendations)
 
 | Tier | Scope | Example |

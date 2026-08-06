@@ -40,6 +40,28 @@ Classify failures before coding:
 Repro tests in `tests/bugs/` may import `tests.helpers.connectivity`. After fix, run
 `verify_connectivity.sh` if deployables changed. See connectivity-gates §Stage 14.
 
+## Mid-evolve entry (RET-002 RA-016)
+
+When opened because **16-evolve** paused on live H3/P0 (`interrupted_by_hotfix: true`):
+
+1. Read `HANDOFF.md` **Interrupt** section + BUG path; do not restart evolve intake.
+2. Fix under 14; clear interrupt only after close AskQuestion (16 resumes separately).
+3. Keep corpus/promote rules: no silent live corpus writes.
+
+## Approved ops with CLI (RET-002 RA-011)
+
+For Modal secret stage/redeploy, DO promote, or similar **live** ops during a hotfix:
+
+1. **AskQuestion** — dry-run only · apply with approval · abort · explain (first = dry-run).
+2. Prefer project wrappers under `scripts/ops/` with `--dry-run` / `--approve` when present;
+   otherwise document exact CLI in the AskQuestion.
+3. **Never** run live-mutating ops without explicit approval in the current turn.
+
+## Runtime pin check (RET-002 RA-014)
+
+If the hotfix changes an embed/LLM **pin** or runtime: verify pin ∈ supported runtime before
+declare fixed (same rule as 07-build). Prefer failing closed over “health green, ask hangs.”
+
 ## Main CI (GitHub Actions)
 
 Hotfixes that merge to `main` must not leave **main CI red**. Source of truth:
@@ -141,9 +163,9 @@ docs) — record waiver in bug report via AskQuestion.
 
 ## Interactive questions (required)
 
-**Every user-facing question in this skill must use the AskQuestion tool.** Do not post
-interview prompts as markdown bullets, numbered lists, or fenced `prompt:` blocks in chat
-and expect inline replies.
+**Every user-facing question in this skill must use the AskQuestion tool.** Prefer the tool;
+if unavailable, use the **markdown numbered-options fallback** in
+[considerations.md](../considerations.md) §7 (RET-002 RA-017). Do not invent answers.
 
 Reference: [considerations.md](../considerations.md) §7 (Uncertainty / AskQuestion protocol).
 

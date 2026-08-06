@@ -20,6 +20,30 @@ Deploy the application and verify it works with smoke tests and health checks.
 Mandatory sequence: **H0c** (pre) → deploy → **H1–H3** → **`verify_connectivity.sh`** (H4–H5).
 Do not mark `deployed` without H4–H5 pass or user-waived checklist entry. See connectivity-gates §Stage 13.
 
+## Single-env / live role (RET-002 RA-008)
+
+Inherit `env_role` from 12 (or re-resolve). If `staging_as_live` / sole stack:
+
+- Smokes and promotes target **production traffic** — say so in every AskQuestion and report.
+- Do not describe the cutover as “staging-only” when no distinct prod stack exists.
+- Prefer labeling results as **live** even when hostnames still contain `staging`.
+
+Cite [ADR-049](../../docs/adr/ADR-049-single-env-staging-as-live.md).
+
+## CI/CD tip gate (RET-002 RA-009)
+
+Before deploy, promote, or cutover CLI: tip SHA required workflows must be **green**
+(`watch_github_ci.sh` or equivalent). Red/cancelled → **hard stop** unless user explicitly
+waives via AskQuestion. See [ADR-050](../../docs/adr/ADR-050-ci-cd-blocks-live-deploy.md).
+
+## Health ≠ ask-ready (RET-002 RA-013)
+
+`/health` (and Modal dependency `ok`) can pass while the primary user journey fails.
+
+- **H3** (ask / primary RAG path): timeout, hang, or hard error = **FAIL** even if H1 health is green.
+- Do not mark `health_tiers.h3: pass` on health-only evidence.
+- On H3 P0 failure during an evolve cycle: recommend pause **16-evolve** → **14-hotfix** (see 16 mid-evolve interrupt).
+
 ## Prerequisites
 
 1. **12-verify-deploy** must be `completed` — deploy checklist approved
@@ -122,13 +146,14 @@ Record every commit in `workflow-state.yaml` §`git_history.commits` with
 
 ### Phase 1.5 — Pre-deploy integration (T1)
 
-Before production deploy:
+Before production / live deploy (`env_role: prod` or `staging_as_live`):
 
 1. T0 green: `pytest tests/e2e/ -m "e2e and not live"`
 2. **H0c green:** `pytest tests/unit/test_cors_policy.py` (browser CORS on all FastAPI apps)
-3. Migrations apply on staging DB: `alembic upgrade head`
+3. Migrations apply on **target** DB (the live stack when single-env): `alembic upgrade head`
 4. Optional: `scripts/rag_smoke.py` against local TestClient
 5. **Connectivity readiness (12):** `docs/deploy-checklist.md` includes H0c + `VITE_*` / `VECINITA_CORS_ORIGINS` rows per [connectivity-gates.md](../connectivity-gates.md)
+6. **CI/CD tip green** (RA-009): `bash scripts/ci/watch_github_ci.sh [branch]` for tip SHA — hard stop if red
 
 **Deploy gate**: T1 fail → 14-hotfix or fix-in-place; do not deploy.
 
@@ -158,23 +183,26 @@ Capture full stdout/stderr.
 Run **backend** smokes first, then **browser connectivity** (H4–H5). Backend-only pass is **not**
 sufficient for Vecinita hybrid deploys — see [connectivity-gates.md](../connectivity-gates.md).
 
-**Operator env (staging):**
+**Operator env (live stack — often still named “staging”):**
 
 ```bash
 uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --frontend
-# Set VECINITA_STAGING_ADMIN_API_URL from Modal deploy output
+# Set VECINITA_STAGING_ADMIN_API_URL from Modal deploy output (live when single-env)
 export VECINITA_STAGING_ADMIN_API_URL=https://vecinita--vecinita-data-management-fastapi-app.modal.run
 ```
+
+When `env_role` is `staging_as_live` / sole stack, state in the report: **these URLs are production**.
 
 **Agent 1 — API connectivity (H1)**:
 - `bash scripts/deploy/staging_smoke.sh` or `tests/smoke/test_staging_health.py -m live`
 - Verify TLS, `/health` 200 on ChatRAG + write API; ChatRAG `dependencies.modal_embed` and `modal_llm` are `ok`
 - `bash scripts/infra/do_verify_required_secrets.sh` when Modal URLs changed (see [do-secrets-sync](../do-secrets-sync/SKILL.md))
-- Return: pass/fail, response times
+- Return: pass/fail, response times — **H1 green alone does not pass the stage**
 
 **Agent 2 — Functional smoke (H2–H3)**:
 - H2: DB pool + Alembic head (`staging_h2.py`)
 - H3: `POST /api/v1/ask` with fixture question (warm LLM first if cold — see deploy-report)
+- **H3 timeout / hang / error = FAIL** even if H1 `/health` and Modal deps are `ok` (RA-013)
 - Negative API paths per test-plan / config-spec where applicable
 - Return: pass/fail, response details
 
