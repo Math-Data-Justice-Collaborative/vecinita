@@ -2586,8 +2586,8 @@ project:
         evolve_cycle_id: EV-026
         status: in_progress
         build_status: completed
-        current_action: 'Gate C→D / 08-verify-build'
-        next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
+        current_action: completed
+        next_action: 08-verify-build
         branch: evolve/EV-026-chat-source-ux
         planned_evolve_branch: evolve/EV-026-chat-source-ux
         branch_rename_status: completed
@@ -2600,14 +2600,17 @@ project:
         m126_status: completed
         task_status: completed
         implementation_complete: true
-        tip_sha: 49217b3
-        tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
-        tip_note: 'tip@49217b3 after T126.2 commit; T126.3 commit pending'
-        askquestion_pending: true
-        askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
+        tip_sha: 70c4565
+        tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+        tip_note: 'tip@70c4565 after T126.3; Gate C→D PASS (S028-D26); next 08-verify-build'
+        t126_3_commit: 70c4565
+        askquestion_pending: false
+        askquestion_pending_topic:
+        askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
         s028_d25_decision: S028-D25
-        updated_at: '2026-08-06T21:51:30Z'
-        note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
+        s028_d26_decision: S028-D26
+        updated_at: '2026-08-06T22:04:00Z'
+        note: '07-build COMPLETE — M123–M126 done; tip@70c4565; Gate C→D PASS (S028-D26); handoff → 08-verify-build; dirty workflow-state tip sync rides with 08 artifacts'
         t126_1_status: completed
         t126_1_started_at: '2026-08-06T21:44:33Z'
         t126_1_completed_at: '2026-08-06T21:46:44Z'
@@ -2622,8 +2625,8 @@ project:
         t126_3_status: completed
         t126_3_completed_at: '2026-08-06T21:51:30Z'
         t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
-        phase_c: pending
-        gate_c_to_d: pending
+        phase_c: passed
+        gate_c_to_d: passed
         substeps:
           current_task: completed
           task_status: completed
@@ -2656,6 +2659,24 @@ project:
       session_closed_at: '2026-08-06T14:46:45Z'
       close_decision: S027-D64
       report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
+      active_session_overlay:
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        status: in_progress
+        current_action: verification_start
+        next_action: write verification-report.md
+        branch: evolve/EV-026-chat-source-ux
+        tip_sha: 70c4565
+        tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+        askquestion_pending: false
+        askquestion_pending_topic:
+        phase_c: passed
+        gate_c_to_d: passed
+        s028_d26_decision: S028-D26
+        report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
+        report_status: pending
+        note: 'S028-D26 Gate C→D PASS → 08-verify-build STARTED; tip@70c4565; dirty workflow-state tip sync rides with 08 artifacts'
+        updated_at: '2026-08-06T22:04:00Z'
       report_status: completed
       s026_baseline:
         status: completed
@@ -6279,9 +6300,9 @@ project:
       evolve_cycle_id: EV-026
       started_at: '2026-08-06'
       started_at_iso: '2026-08-06T16:04:25Z'
-      current_stage: 05-verify-tech
-      current_action: statement_review
-      next_action: AskQuestion M1 AC-SU cites / M2 F72 surfaces / L1 package name then surgical fixes
+      current_stage: 08-verify-build
+      current_action: 08-verify-build in_progress
+      next_action: run 08-verify-build (verification-report.md)
       phase_0_status: approved
       phase0_approved: true
       phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -6297,24 +6318,27 @@ project:
         - 222
         - 223
         - 224
-      branch: feat/S028-chat-source-ux
-      session_branch: feat/S028-chat-source-ux
+      branch: evolve/EV-026-chat-source-ux
+      session_branch: evolve/EV-026-chat-source-ux
       evolve_branch_planned: evolve/EV-026-chat-source-ux
-      branch_note: currently feat/S028-chat-source-ux; will rename/create evolve/EV-026-chat-source-ux at Phase 1 or 
-        when code starts per convention
+      branch_note: 'Renamed feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux at 07-build (S028-D25)'
       mode: evolve
-      askquestion_pending: true
-      askquestion_pending_topic: 05_M1_AC-SU_cites / M2_F72_surfaces / L1_package_name (S028-D24 pending)
+      askquestion_pending: false
+      askquestion_pending_topic:
+      askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
       close_cycle_pending: false
       session_closed: false
-      handoff: 05 statement_review — M1/M2/L1 AskQuestion (S028-D24); Gate B→C pending
+      handoff: 'Gate C→D PASS (S028-D26) → 08-verify-build in_progress; tip@70c4565'
       s028_d23_decision: S028-D23
       s028_d23_status: already_done
-      s028_d24_pending: true
-      note: 'S028/EV-026 05 statement_review 2026-08-06T18:53:18Z; S028-D23 already done; audit=docs/sessions/S028-chat-source-ux/reports/05-verify-tech-audit.md;
-        askquestion_pending M1/M2/L1 (S028-D24); phase_b/b_to_c pending — do NOT complete 05 or Gate B→C yet; HANDOFF refreshed;
-        [Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/05-verify-tech-audit.md]'
-      updated_at: '2026-08-06T18:53:18Z'
+      s028_d24_pending: false
+      s028_d25_decision: S028-D25
+      s028_d26_decision: S028-D26
+      tip_sha: 70c4565
+      phase_c: passed
+      gate_c_to_d: passed
+      note: 'S028/EV-026 Gate C→D PASS (S028-D26) 2026-08-06T22:04:00Z; current_stage=08-verify-build; tip@70c4565; dirty workflow-state tip sync rides with 08 artifacts; [Corpus: feature-list.md §F72–F74]'
+      updated_at: '2026-08-06T22:04:00Z'
       predecessor:
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
@@ -6731,8 +6755,8 @@ active_session:
     - 222
     - 223
     - 224
-  current_stage: 07-build
-  current_stage_note: '07-build implementation COMPLETE; awaiting Gate C→D then 08-verify-build'
+  current_stage: 08-verify-build
+  current_stage_note: 'Gate C→D PASS (S028-D26); 08-verify-build in_progress; tip@70c4565'
   started_at: '2026-08-06'
   started_at_iso: '2026-08-06T16:01:41Z'
   mode: evolve
@@ -6798,6 +6822,8 @@ active_session:
     - 'T126.2 STARTED 2026-08-06T21:48:09Z — tip@0cf33fa ([T126.1] test: confirm TC-242-251 green gate (F72-F74)); t126_1 commit recorded; askquestion_pending=false'
     - 'T126.2 COMPLETE 2026-08-06T21:49:39Z — ADR-051 Accepted; report=docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md; current_action=T126.3; M126 still in_progress'
     - 'T126.3 + M126 COMPLETE 2026-08-06T21:51:30Z — Phase 29 07-build PASS; report=docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md; tip@49217b3; T126.3 commit pending; Gate C→D AskQuestion pending (Standard)'
+    - 'T126.3 commit recorded 2026-08-06T21:53:11Z @ 70c4565 — [T126.3] docs: Phase 29 gate checklist + #222-224 closeout notes; tip advanced; askquestion_pending Gate C→D remains true'
+    - 'S028-D26 2026-08-06T22:04:00Z: Gate C→D PASS (option 1) — proceed to 08-verify-build; checkpoints.phase_c=passed; gates.c_to_d=passed; askquestion_pending=false; tip@70c4565; dirty workflow-state tip sync from T126.3 rides with 08 artifacts'
   routing_plan:
     - stage: 00-context
       required: true
@@ -6903,15 +6929,17 @@ active_session:
       started_at: '2026-08-06T19:04:21Z'
       completed_at: '2026-08-06T21:51:30Z'
       completed: '2026-08-06'
-      current_action: 'Gate C→D / 08-verify-build'
-      next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
-      askquestion_pending: true
-      askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
+      current_action: completed
+      next_action: 08-verify-build
+      askquestion_pending: false
+      askquestion_pending_topic:
+      askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
       s028_d25_decision: S028-D25
+      s028_d26_decision: S028-D26
       gate_b_to_c: passed
       phase_b: passed
-      phase_c: pending
-      gate_c_to_d: pending
+      phase_c: passed
+      gate_c_to_d: passed
       milestone: M126
       task: T126.3
       active_feature: F72-F74
@@ -6924,15 +6952,17 @@ active_session:
       m123_tip: af18200
       m124_tip: 08dd6a7
       m125_tip: aecb764
-      tip_sha: 49217b3
-      tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
-      tip_note: 'tip@49217b3 after T126.2; T126.3 commit pending'
+      tip_sha: 70c4565
+      tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      tip_note: 'tip@70c4565 after T126.3; Gate C→D PASS (S028-D26); next 08-verify-build'
+      t126_3_commit: 70c4565
       substeps:
         current_task: completed
         task_status: completed
         feature_id: F72-F74
         milestone: M126
-      note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
+      note: '07-build COMPLETE — M123–M126 done; tip@70c4565; Gate C→D PASS (S028-D26); handoff → 08-verify-build; dirty workflow-state tip sync rides with 08 artifacts'
+      updated_at_gate_c: '2026-08-06T22:04:00Z'
       t126_1_status: completed
       t126_1_started_at: '2026-08-06T21:44:33Z'
       t126_1_completed_at: '2026-08-06T21:46:44Z'
@@ -6954,9 +6984,25 @@ active_session:
       report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
     - stage: 08-verify-build
       required: true
-      status: pending
+      status: in_progress
       mode: delta
       skip_rationale:
+      started_at: '2026-08-06T22:04:00Z'
+      started: '2026-08-06'
+      current_action: verification_start
+      next_action: write verification-report.md
+      askquestion_pending: false
+      askquestion_pending_topic:
+      tip_sha: 70c4565
+      tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      branch: evolve/EV-026-chat-source-ux
+      report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
+      report_status: pending
+      s028_d26_decision: S028-D26
+      gate_c_to_d: passed
+      phase_c: passed
+      note: 'S028-D26 Gate C→D PASS → 08-verify-build STARTED; tip@70c4565; bundle dirty workflow-state tip sync with 08 report commit'
+      updated_at: '2026-08-06T22:04:00Z'
     - stage: 09-qa
       required: true
       status: pending
@@ -6992,15 +7038,16 @@ active_session:
     - docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
     - docs/sessions/S028-chat-source-ux/reports/t126_2_adr051_docs.md
     - docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
-  next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
+  next_action: run 08-verify-build (verification-report.md)
   orchestrator_status: in_progress
-  updated_at: '2026-08-06T21:51:30Z'
+  updated_at: '2026-08-06T22:04:00Z'
   next_recommended: 08-verify-build
   delta_only: true
-  askquestion_pending: true
-  askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
-  handoff: '07-build complete (M123–M126) → Gate C→D AskQuestion → 08-verify-build'
-  current_action: 'Gate C→D / 08-verify-build'
+  askquestion_pending: false
+  askquestion_pending_topic:
+  askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
+  handoff: 'Gate C→D PASS (S028-D26) → 08-verify-build in_progress; tip@70c4565; dirty workflow-state tip sync from T126.3 rides with 08 artifacts'
+  current_action: 08-verify-build in_progress
   citations:
     - '[Corpus: feature-list.md §F72–F74]'
     - '[Spec: docs/adr/ADR-051-display-title-vs-lock-flag.md]'
@@ -7017,7 +7064,15 @@ active_session:
   phase_b: passed
   s028_d25_decision: S028-D25
   s028_d25_choice: option_1_proceed_07
-  session_branch: feat/S028-chat-source-ux
+  s028_d26_decision: S028-D26
+  s028_d26_choice: option_1_pass_gate_c_to_d_run_08
+  phase_c: passed
+  gate_c_to_d: passed
+  checkpoints_phase_c: passed
+  tip_sha: 70c4565
+  tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+  bundle_note: dirty workflow-state tip sync from T126.3 will ride with 08 artifacts / verification-report.md commit
+  session_branch: evolve/EV-026-chat-source-ux
 sessions:
   - id: S027-multilingual-embeddings
     type: feature
@@ -19642,8 +19697,8 @@ stages:
       evolve_cycle_id: EV-026
       status: in_progress
       build_status: completed
-      current_action: 'Gate C→D / 08-verify-build'
-      next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
+      current_action: completed
+      next_action: 08-verify-build
       branch: evolve/EV-026-chat-source-ux
       planned_evolve_branch: evolve/EV-026-chat-source-ux
       branch_rename_status: completed
@@ -19656,14 +19711,17 @@ stages:
       m126_status: completed
       task_status: completed
       implementation_complete: true
-      tip_sha: 49217b3
-      tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
-      tip_note: 'tip@49217b3 after T126.2 commit; T126.3 commit pending'
-      askquestion_pending: true
-      askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
+      tip_sha: 70c4565
+      tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      tip_note: 'tip@70c4565 after T126.3; Gate C→D PASS (S028-D26); next 08-verify-build'
+      t126_3_commit: 70c4565
+      askquestion_pending: false
+      askquestion_pending_topic:
+      askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
       s028_d25_decision: S028-D25
-      updated_at: '2026-08-06T21:51:30Z'
-      note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
+      s028_d26_decision: S028-D26
+      updated_at: '2026-08-06T22:04:00Z'
+      note: '07-build COMPLETE — M123–M126 done; tip@70c4565; Gate C→D PASS (S028-D26); handoff → 08-verify-build; dirty workflow-state tip sync rides with 08 artifacts'
       t126_1_status: completed
       t126_1_started_at: '2026-08-06T21:44:33Z'
       t126_1_completed_at: '2026-08-06T21:46:44Z'
@@ -19678,8 +19736,8 @@ stages:
       t126_3_status: completed
       t126_3_completed_at: '2026-08-06T21:51:30Z'
       t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
-      phase_c: pending
-      gate_c_to_d: pending
+      phase_c: passed
+      gate_c_to_d: passed
       substeps:
         current_task: completed
         task_status: completed
@@ -19712,6 +19770,24 @@ stages:
     session_closed_at: '2026-08-06T14:46:45Z'
     close_decision: S027-D64
     report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
+    active_session_overlay:
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      status: in_progress
+      current_action: verification_start
+      next_action: write verification-report.md
+      branch: evolve/EV-026-chat-source-ux
+      tip_sha: 70c4565
+      tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      askquestion_pending: false
+      askquestion_pending_topic:
+      phase_c: passed
+      gate_c_to_d: passed
+      s028_d26_decision: S028-D26
+      report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
+      report_status: pending
+      note: 'S028-D26 Gate C→D PASS → 08-verify-build STARTED; tip@70c4565; dirty workflow-state tip sync rides with 08 artifacts'
+      updated_at: '2026-08-06T22:04:00Z'
     report_status: completed
     s026_baseline:
       status: completed
@@ -23686,9 +23762,9 @@ stages:
     evolve_cycle_id: EV-026
     started_at: '2026-08-06'
     started_at_iso: '2026-08-06T16:04:25Z'
-    current_stage: 05-verify-tech
-    current_action: statement_review
-    next_action: AskQuestion M1 AC-SU cites / M2 F72 surfaces / L1 package name then surgical fixes
+    current_stage: 08-verify-build
+    current_action: 08-verify-build in_progress
+    next_action: run 08-verify-build (verification-report.md)
     phase_0_status: approved
     phase0_approved: true
     phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -23704,23 +23780,27 @@ stages:
       - 222
       - 223
       - 224
-    branch: feat/S028-chat-source-ux
-    session_branch: feat/S028-chat-source-ux
+    branch: evolve/EV-026-chat-source-ux
+    session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
-    branch_note: currently feat/S028-chat-source-ux; will rename/create evolve/EV-026-chat-source-ux at Phase 1 or when 
-      code starts per convention
+    branch_note: 'Renamed feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux at 07-build (S028-D25)'
     mode: evolve
-    askquestion_pending: true
-    askquestion_pending_topic: 05_M1_AC-SU_cites / M2_F72_surfaces / L1_package_name (S028-D24 pending)
+    askquestion_pending: false
+    askquestion_pending_topic:
+    askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
     close_cycle_pending: false
     session_closed: false
-    handoff: 05 statement_review — M1/M2/L1 AskQuestion (S028-D24); Gate B→C pending
+    handoff: 'Gate C→D PASS (S028-D26) → 08-verify-build in_progress; tip@70c4565'
     s028_d23_decision: S028-D23
     s028_d23_status: already_done
-    s028_d24_pending: true
-    note: S028/EV-026 05 statement_review 2026-08-06T18:53:18Z; S028-D23 already done; askquestion_pending M1/M2/L1 
-      (S028-D24); phase_b/b_to_c pending — do NOT complete 05 or Gate B→C yet; HANDOFF refreshed
-    updated_at: '2026-08-06T18:53:18Z'
+    s028_d24_pending: false
+    s028_d25_decision: S028-D25
+    s028_d26_decision: S028-D26
+    tip_sha: 70c4565
+    phase_c: passed
+    gate_c_to_d: passed
+    note: 'S028/EV-026 Gate C→D PASS (S028-D26) 2026-08-06T22:04:00Z; current_stage=08-verify-build; tip@70c4565; dirty workflow-state tip sync rides with 08 artifacts; [Corpus: feature-list.md §F72–F74]'
+    updated_at: '2026-08-06T22:04:00Z'
     predecessor:
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
@@ -24311,10 +24391,10 @@ evolve_cycles:
         06-tech-tooling: no new deps expected
     routing_preset: feature
     preset: feature
-    current_stage: 07-build
-    current_action: 'Gate C→D / 08-verify-build'
-    next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
-    current_stage_note: '07-build implementation COMPLETE (M123–M126); Gate C→D pending'
+    current_stage: 08-verify-build
+    current_action: 08-verify-build in_progress
+    next_action: run 08-verify-build (verification-report.md)
+    current_stage_note: 'Gate C→D PASS (S028-D26); 08-verify-build in_progress; tip@70c4565'
     branch: evolve/EV-026-chat-source-ux
     session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
@@ -24366,8 +24446,9 @@ evolve_cycles:
         - S028-D14
         - S028-D15
         - S028-D16
-    askquestion_pending: true
-    askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
+    askquestion_pending: false
+    askquestion_pending_topic:
+    askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
     decisions:
       - 'S028-D1: routing + open approved (1a/2a); feature preset'
       - 'S028-D2: prod-only deploy posture; AskQuestion before 12–13'
@@ -24405,6 +24486,7 @@ evolve_cycles:
       - 'S028-D25: Gate B→C PASS (option 1) — proceed to 07-build M123/T123.1; 06 remains skipped; checkpoints.phase_b=passed;
         gates.b_to_c=passed; askquestion_pending=false; planned branch rename feat/S028-chat-source-ux → evolve/EV-026-chat-source-ux
         at 07 start (record when created); 2026-08-06T19:04:21Z'
+      - 'S028-D26: Gate C→D PASS (option 1) — proceed to 08-verify-build; checkpoints.phase_c=passed; gates.c_to_d=passed; askquestion_pending=false; tip@70c4565; dirty workflow-state tip sync rides with 08 artifacts; 2026-08-06T22:04:00Z'
     feature_map:
       F72:
         issue: 222
@@ -24418,16 +24500,16 @@ evolve_cycles:
     gates:
       a_to_b: passed
       b_to_c: passed
-      c_to_d: pending
+      c_to_d: passed
       deploy: pending
     checkpoints:
       phase_a: passed
       phase_b: passed
-      phase_c: pending
-      phase_c_note: ready_for_askquestion — Phase 29 07-build complete; Standard Gate C→D
+      phase_c: passed
+      phase_c_note: 'Gate C→D PASS (S028-D26 option 1) — proceed 08-verify-build'
       phase_d: pending
       deploy: pending
-      updated_at: '2026-08-06T21:51:30Z'
+      updated_at: '2026-08-06T22:04:00Z'
     adrs:
       - path: docs/adr/ADR-051-display-title-vs-lock-flag.md
         id: ADR-051
@@ -24562,8 +24644,11 @@ evolve_cycles:
         updated_at: '2026-08-06T21:51:30Z'
         note: 'Phase 29 gate closeout; 07-build PASS (partial — verify deferred)'
     issues: []
-    updated_at: '2026-08-06T21:51:30Z'
-    note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
+    updated_at: '2026-08-06T22:04:00Z'
+    note: 'Gate C→D PASS (S028-D26) — phase_c/c_to_d passed; 08-verify-build in_progress; tip@70c4565; dirty workflow-state tip sync from T126.3 rides with 08 artifacts'
+    tip_sha: 70c4565
+    tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+    bundle_note: dirty workflow-state tip sync from T126.3 will ride with 08 artifacts / verification-report.md commit
     phase1_approved: true
     phase1_approved_at: '2026-08-06T16:36:58Z'
     phase_1_status: approved
@@ -24806,10 +24891,11 @@ evolve_cycles:
           - F72
           - F73
           - F74
-        current_action: 'Gate C→D / 08-verify-build'
-        next_action: 'AskQuestion Gate C→D (phase_c) then start 08-verify-build'
-        askquestion_pending: true
-        askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
+        current_action: completed
+        next_action: 08-verify-build
+        askquestion_pending: false
+        askquestion_pending_topic:
+        askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
         milestone: M126
         task: T126.3
         active_feature: F72-F74
@@ -24828,9 +24914,9 @@ evolve_cycles:
         m123_tip: af18200
         m124_tip: 08dd6a7
         m125_tip: aecb764
-        tip_sha: 49217b3
-        tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
-        tip_note: 'tip@49217b3 after T126.2; T126.3 commit pending'
+        tip_sha: 70c4565
+        tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+        tip_note: 'tip@70c4565 after T126.3; Gate C→D PASS (S028-D26); next 08-verify-build'
         commits:
           - dbd34da
           - af18200
@@ -24838,18 +24924,21 @@ evolve_cycles:
           - aecb764
           - 0cf33fa
           - 49217b3
+          - 70c4565
         substeps:
           current_task: completed
           task_status: completed
           feature_id: F72-F74
         gate_b_to_c: passed
         phase_b: passed
-        phase_c: pending
-        gate_c_to_d: pending
+        phase_c: passed
+        gate_c_to_d: passed
         s028_d25_decision: S028-D25
         s028_d25_choice: option_1
+        s028_d26_decision: S028-D26
+        s028_d26_choice: option_1_pass_gate_c_to_d_run_08
         handoff_updated: true
-        note: '07-build COMPLETE — M123–M126 done; T126.3 Phase 29 gate PASS (partial); tip@49217b3 (T126.2 commit); T126.3 commit pending; askquestion_pending Gate C→D / phase_c; next 08-verify-build'
+        note: '07-build COMPLETE — M123–M126 done; tip@70c4565; Gate C→D PASS (S028-D26); handoff → 08-verify-build'
         t126_1_status: completed
         t126_1_started_at: '2026-08-06T21:44:33Z'
         t126_1_completed_at: '2026-08-06T21:46:44Z'
@@ -24864,8 +24953,35 @@ evolve_cycles:
         t126_3_status: completed
         t126_3_completed_at: '2026-08-06T21:51:30Z'
         t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+        t126_3_commit: 70c4565
         report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
-        updated_at: '2026-08-06T21:51:30Z'
+        updated_at: '2026-08-06T22:04:00Z'
+      08-verify-build:
+        status: in_progress
+        started: '2026-08-06'
+        started_at: '2026-08-06T22:04:00Z'
+        session_id: S028-chat-source-ux
+        branch: evolve/EV-026-chat-source-ux
+        evolve_cycle_id: EV-026
+        mode: evolve
+        delta_only: true
+        feature_ids:
+          - F72
+          - F73
+          - F74
+        current_action: verification_start
+        next_action: write verification-report.md
+        askquestion_pending: false
+        askquestion_pending_topic:
+        tip_sha: 70c4565
+        tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+        report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
+        report_status: pending
+        gate_c_to_d: passed
+        phase_c: passed
+        s028_d26_decision: S028-D26
+        note: 'S028-D26 Gate C→D PASS → 08 STARTED; tip@70c4565; bundle dirty workflow-state tip sync with 08 report commit'
+        updated_at: '2026-08-06T22:04:00Z'
     docs_touched:
       - docs/feature-list.md
       - docs/user-journeys.md
@@ -24888,7 +25004,7 @@ evolve_cycles:
     tp_lock: TP1–TP4
     phase: Phase 29 M123–M126
     rd_range: RD-322..RD-324
-    handoff: '07-build complete (M123–M126) → Gate C→D AskQuestion → 08-verify-build'
+    handoff: 'Gate C→D PASS (S028-D26) → 08-verify-build in_progress; tip@70c4565'
     s028_d24_decision: S028-D24
     s028_d24_choices:
       M1: 1
@@ -24897,8 +25013,12 @@ evolve_cycles:
     s028_d24_status: confirmed_applied
     s028_d25_decision: S028-D25
     s028_d25_choice: option_1_proceed_07
+    s028_d26_decision: S028-D26
+    s028_d26_choice: option_1_pass_gate_c_to_d_run_08
     gate_b_to_c: passed
     phase_b: passed
+    gate_c_to_d: passed
+    phase_c: passed
   - id: EV-025
     session_id: S027-multilingual-embeddings
     cycle_type: feature
@@ -48009,6 +48129,29 @@ decisions_log:
     T123.1; 06 remains skipped; HANDOFF: Gate B→C passed → 07 T123.1'
   - S028-D25 confirmed 2026-08-06T19:04:21Z — Gate B→C AskQuestion cleared; askquestion_pending=false; 
     next_action=07-build T123.1 Vitest red for URL helper in vecinita-frontend-ui
+  - id: S028-D26
+    skill: 16-evolve
+    skill_id: 08-verify-build
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    decision: 'S028-D26: Gate C→D PASS (option 1 / user AskQuestion choice 1) — proceed to 08-verify-build; checkpoints.phase_c=passed; gates.c_to_d=passed; askquestion_pending=false'
+    summary: 'S028-D26: Gate C→D PASS → 08-verify-build; phase_c/c_to_d passed; tip@70c4565; dirty workflow-state tip sync rides with 08 artifacts'
+    topic: gate_c_to_d
+    choice: option_1_pass_gate_c_to_d_run_08
+    checkpoints_phase_c: passed
+    gates_c_to_d: passed
+    handoff: Gate C→D PASS → 08-verify-build
+    next_action: run 08-verify-build (verification-report.md)
+    tip_sha: 70c4565
+    tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+    report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
+    bundle_note: dirty workflow-state tip sync from T126.3 will ride with 08 artifacts / verification-report.md commit
+    recorded_at: '2026-08-06T22:04:00Z'
+    approved: '2026-08-06'
+    status: confirmed
+    note: 'Clears Gate C→D AskQuestion; current_stage=08-verify-build; orchestrator remains 16-evolve; [Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md]'
+  - 'S028-D26 / EV-026: Gate C→D PASS (option 1) 2026-08-06T22:04:00Z — phase_c=passed; c_to_d=passed; 08-verify-build in_progress; tip@70c4565; HANDOFF: Gate C→D passed → 08'
+  - S028-D26 confirmed 2026-08-06T22:04:00Z — Gate C→D AskQuestion cleared; askquestion_pending=false; next_action=08-verify-build
 artifacts:
   - path: docs/sessions/S027-multilingual-embeddings/reports/deploy-smoke.md
     kind: deploy-smoke
@@ -51337,12 +51480,12 @@ git_history:
       renamed_at: '2026-08-06T19:09:30Z'
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
-      head_sha: 49217b3fb074ab6b467cc456daff73d648577bcd
-      tip: 49217b3
-      tip_sha: 49217b3
-      tip_full: 49217b3fb074ab6b467cc456daff73d648577bcd
-      tip_note: 'tip@49217b3 after T126.2; T126.3 commit pending'
-      note: 'M123–M126 COMPLETE; tip@49217b3; Gate C→D AskQuestion pending; next 08-verify-build'
+      head_sha: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      tip: 70c4565
+      tip_sha: 70c4565
+      tip_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      tip_note: 'tip@70c4565 after T126.3; Gate C→D PASS (S028-D26); 08-verify-build in_progress'
+      note: 'M123–M126 COMPLETE; tip@70c4565; Gate C→D PASS (S028-D26); 08-verify-build in_progress; dirty workflow-state tip sync rides with 08 artifacts'
       m123_status: completed
       m124_status: completed
       m125_status: completed
@@ -51351,9 +51494,9 @@ git_history:
       m124_tip: 08dd6a7
       m125_tip: aecb764
       next_milestone: none
-      next_task: Gate C→D / 08-verify-build
+      next_task: 08-verify-build
       task_status: completed
-      current_action: 'Gate C→D / 08-verify-build'
+      current_action: 08-verify-build in_progress
       t126_1_status: completed
       t126_1_completed_at: '2026-08-06T21:46:44Z'
       t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
@@ -51367,11 +51510,14 @@ git_history:
       t126_3_status: completed
       t126_3_completed_at: '2026-08-06T21:51:30Z'
       t126_3_report: docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
-      askquestion_pending: true
-      askquestion_pending_topic: 'Gate C→D / phase_c — Phase 29 M123–M126 07-build complete; proceed 08-verify-build?'
-      phase_c: pending
-      gate_c_to_d: pending
-      updated_at: '2026-08-06T21:51:30Z'
+      t126_3_commit: 70c4565
+      askquestion_pending: false
+      askquestion_pending_topic:
+      askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
+      phase_c: passed
+      gate_c_to_d: passed
+      s028_d26_decision: S028-D26
+      updated_at: '2026-08-06T22:04:00Z'
     - name: feat/S028-chat-source-ux
       purpose: 'S028/EV-026 chat source UX (#222 #223 #224) — session branch (renamed)'
       base: main
@@ -56617,6 +56763,32 @@ git_history:
         - workflow-state.yaml
       timestamp: '2026-08-06T21:51:30Z'
       note: 'T126.2 COMPLETE — ADR-051 Accepted + OpenAPI/inventory notes'
+    - sha: 70c4565
+      sha_full: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      full_sha: 70c45658cbeea986eb01bb77da7fee3958c6058a
+      short: 70c4565
+      branch: evolve/EV-026-chat-source-ux
+      message: '[T126.3] docs: Phase 29 gate checklist + #222-224 closeout notes'
+      stage: 07-build
+      skill_id: 07-build
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      milestone: M126
+      task: T126.3
+      feature_ids:
+        - F72
+        - F73
+        - F74
+      files_changed: 6
+      files:
+        - docs/sessions/S000-internal-docs-archive/execution-plan.md
+        - docs/sessions/S028-chat-source-ux/HANDOFF.md
+        - docs/sessions/S028-chat-source-ux/reports/t126_3_phase29_gate.md
+        - docs/sessions/S028-chat-source-ux/roadmap.md
+        - docs/sessions/S028-chat-source-ux/routing-plan.md
+        - workflow-state.yaml
+      timestamp: '2026-08-06T21:53:11Z'
+      note: 'T126.3 COMPLETE — Phase 29 gate checklist + #222-224 closeout notes'
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
