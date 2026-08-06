@@ -1,25 +1,25 @@
 # HANDOFF — S028-chat-source-ux
 
 **Updated:** 2026-08-06  
-**Stage:** 09-qa remediated → next **10-e2e** (then 11)  
+**Stage:** 12-verify-deploy **in_progress** (not ready — tip CI)  
 **Branch:** `evolve/EV-026-chat-source-ux`  
-**Cycle:** EV-026 · F72 / F73 / F74
+**Tip:** `8537690` (+ uncommitted 10/11 docs)  
+**Cycle:** EV-026 · F72 / F73 / F74  
+**env_role:** `staging_as_live` (live = prod) — ADR-049 / S028-D2
 
 ## Status
 
-- Gate B→C / C→D PASS; M123–M126 complete; ADR-051 Accepted
-- 08 PASS; 09 pass_with_advisories; **QA remediation done**
-- QA-S028-001 **Fixed** (UJ-076); QA-S028-002 **Fixed** (h2); 003–005 accepted carry
-- Prod-careful: no 12–13 without AskQuestion (S028-D2)
+- 11 PASS (S028-D32); #222–#224 closed
+- 12 started (S028-D33); checklist drafted — **blocked on push/CI** (RA-009)
+- Live stack still @ `c942971`; H4–H5 → 13 (QA-S028-003)
 
 ## Next
 
-1. **10-e2e** — UJ-077–079 / TC-242–251
-2. **11-verify-impl** — AC-SU + remaining advisories (H4–H5, issue close)
-3. PR-75 / CI watch; close #222–#224 after 11
+1. Commit + push tip → green `ci.yml`
+2. Approve mitigations + rollback AskQuestion
+3. Then **13-deploy-smoke** (separate AskQuestion)
 
 ## Links
 
-- [qa-report](./reports/qa-report.md) · [qa-remediation](./reports/qa-remediation.md)
-- [verification-report](./reports/verification-report.md)
-- [ADR-051](../../adr/ADR-051-display-title-vs-lock-flag.md)
+- [deploy-checklist](./reports/deploy-checklist.md)
+- [verify-impl](./reports/verify-impl.md) · [e2e-report](./reports/e2e-report.md)

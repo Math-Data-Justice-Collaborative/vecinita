@@ -985,6 +985,16 @@ Chat source UX in one cycle:
 | S028-D23 | 04 close | Phase 29 plan approved (TP5=1) |
 | S028-D24 | 05 M1–L1 | AC-SU cite fix; F72 surfaces; package name `vecinita-frontend-ui` |
 
+### Verify (09–11)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S028-D30 | 09 remediation | QA-S028-001/002 Fixed; 003→13; 004 accepted; 005→11 |
+| S028-D31 | 11 journeys | Approve UJ-077/078/079 (T0; T3→13); staging inspect preferred; no local UI preview |
+| S028-D32 | 11 features | Staging tip drift (`c942971` ≠ `8537690`) → approve F72–F74 from T0/OpenAPI only; live UI/API @ 13; close #222–#224 |
+| S028-D33 | 12 start | Proceed to 12-verify-deploy (S028-D2 option 1) |
+| S028-D34 | 12 gate | GHA outage → RA-009 remote CI **waived**; full local `make ci-push` + **CLI deploy**; `env_role=staging_as_live`; mitigations 1–6 + rollback **approved** |
+
 ### Feature map
 
 | Fn | Issue | Title |

@@ -321,17 +321,17 @@
 
 ### EV-026 — Chat source UX (F72–F74) — S028 / #222 #223 #224
 
-- [ ] **AC-SU1**: Citation UI only uses `<a href>` for absolute `http:`/`https:` URLs (TC-242–243, UJ-077, F72).
-- [ ] **AC-SU2**: Invalid/missing URL → title/label plain text; no ingest/job URL rejection (TC-243–244, S028-D6).
-- [ ] **AC-SU3**: `sources[]` length is 0…`top_k` by relevance; no pad to a fixed count (TC-245–246, UJ-078, F73).
-- [ ] **AC-SU4**: Hits below `min_retrieval_score` (and CE threshold when CE on) omitted; synth + UI same set (TC-245–246, S028-D9).
-- [ ] **AC-SU5**: Zero qualified hits → empty `sources[]` is valid (TC-247).
-- [ ] **AC-SU6**: Operator can set single-document `display_title` without bulk-select (TC-248, UJ-079, F74).
-- [ ] **AC-SU7**: Title/`display_title` edits emit `document.edited` with before/after (TC-248).
-- [ ] **AC-SU8**: ChatRAG `sources[].title` and packing use `COALESCE(display_title, title)` (TC-249).
-- [ ] **AC-SU9**: Rescrape/re-ingest updates raw `title` but preserves `display_title` (TC-250, S028-D10).
-- [ ] **AC-SU10**: Clearing `display_title` (null) falls back to scraped `title` (TC-251).
-- [ ] **AC-SU11**: Out of EV-026 without unlock: #94/#217 source-add; LLM titles; community title edit; ingest URL rejection; major version only if breaking (S028-D15).
+- [x] **AC-SU1**: Citation UI only uses `<a href>` for absolute `http:`/`https:` URLs (TC-242–243, UJ-077, F72). *(11-verify-impl S028-D32 — T0 Vitest)*
+- [x] **AC-SU2**: Invalid/missing URL → title/label plain text; no ingest/job URL rejection (TC-243–244, S028-D6). *(11-verify-impl S028-D32)*
+- [x] **AC-SU3**: `sources[]` length is 0…`top_k` by relevance; no pad to a fixed count (TC-245–246, UJ-078, F73). *(11-verify-impl S028-D32 — T0 e2e)*
+- [x] **AC-SU4**: Hits below `min_retrieval_score` (and CE threshold when CE on) omitted; synth + UI same set (TC-245–246, S028-D9). *(11-verify-impl S028-D32)*
+- [x] **AC-SU5**: Zero qualified hits → empty `sources[]` is valid (TC-247). *(11-verify-impl S028-D32)*
+- [x] **AC-SU6**: Operator can set single-document `display_title` without bulk-select (TC-248, UJ-079, F74). *(11-verify-impl S028-D32)*
+- [x] **AC-SU7**: Title/`display_title` edits emit `document.edited` with before/after (TC-248). *(11-verify-impl S028-D32)*
+- [x] **AC-SU8**: ChatRAG `sources[].title` and packing use `COALESCE(display_title, title)` (TC-249). *(11-verify-impl S028-D32)*
+- [x] **AC-SU9**: Rescrape/re-ingest updates raw `title` but preserves `display_title` (TC-250, S028-D10). *(11-verify-impl S028-D32)*
+- [x] **AC-SU10**: Clearing `display_title` (null) falls back to scraped `title` (TC-251). *(11-verify-impl S028-D32)*
+- [x] **AC-SU11**: Out of EV-026 without unlock: #94/#217 source-add; LLM titles; community title edit; ingest URL rejection; major version only if breaking (S028-D15). *(11-verify-impl S028-D32 — scope held; live UI @ 13)*
 
 
 ## Quantitative benchmarks

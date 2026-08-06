@@ -74,8 +74,8 @@
 | F69 | Admin audit actor username (read-time) | Implemented | Data Management | data-management-backend/frontend | S026/EV-024 #170/#193 |
 | F70 | Multilingual embedding runtime + model pin | Implemented | Cross-cutting | Modal embed, `packages/embedding-client`, ChatRAG + ingest | S027/EV-025 #159 |
 | F71 | Corpus re-embed + prod cutover (multilingual pin) | Implemented | Data Management | F41 rebuild/promote, Modal, internal-write, Admin Jobs | S027/EV-025 #159 |
-| F72 | Citation UI — validate URLs before href | Planned | ChatRAG | chat-rag-frontend `SourceList` | S028/EV-026 #222 |
-| F73 | Dynamic relevance-gated sources (no fixed pad) | Planned | ChatRAG | packages/rag, chat-rag-backend | S028/EV-026 #223 |
+| F72 | Citation UI — validate URLs before href | Implemented | ChatRAG | chat-rag-frontend `SourceList` | S028/EV-026 #222 |
+| F73 | Dynamic relevance-gated sources (no fixed pad) | Implemented | ChatRAG | packages/rag, chat-rag-backend | S028/EV-026 #223 |
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
@@ -1347,7 +1347,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `packages/frontend-ui` (`vecinita-frontend-ui`) | Shared `isSafeHttpUrl` / citation href helper + Vitest |
   | `apps/chat-rag-frontend` | `SourceList` consumes helper (Vitest) |
 - **Out of scope**: Ingest/job URL rejection; corpus cleanup; admin ingest forms this cycle (helper reusable later).
-- **Status**: Planned (S028/EV-026).
+- **Status**: Implemented (S028/EV-026; 11-verify-impl S028-D32).
 - **Source**: S028 / EV-026; GitHub #222; RD-310 / RD-317 / RD-323.
 
 ### F73: Dynamic relevance-gated sources (no fixed pad) (#223)
@@ -1367,7 +1367,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `apps/chat-rag-backend` | Ask/stream `sources[]` assembly |
   | config-spec / api-contract | Document max vs quota semantics |
 - **Out of scope**: Corpus curation (#94/#217); groundedness (#84) except citation-filter overlap; changing default `top_k=8` as a *target*.
-- **Status**: Planned (S028/EV-026).
+- **Status**: Implemented (S028/EV-026; 11-verify-impl S028-D32).
 - **Source**: S028 / EV-026; GitHub #223; F50; RD-311.
 
 ### F74: Operator-settable `display_title` (#224)

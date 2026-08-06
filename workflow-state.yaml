@@ -3739,35 +3739,84 @@ project:
           close_decision: S026-D58
     10-e2e:
       status: completed
-      session_id: S027-multilingual-embeddings
-      evolve_cycle_id: EV-025
-      started_at: '2026-08-05'
-      started: '2026-08-05'
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      branch: main
-      mode: delta
+      started_at: '2026-08-06'
+      started_at_iso: '2026-08-06T22:52:00Z'
+      started: '2026-08-06'
+      completed: '2026-08-06'
+      completed_at: '2026-08-06T22:57:00Z'
+      session_id: S028-chat-source-ux
+      branch: evolve/EV-026-chat-source-ux
+      session_branch: evolve/EV-026-chat-source-ux
+      evolve_cycle_id: EV-026
+      mode: evolve
       delta_only: true
       feature_ids:
-        - F70
-        - F71
-      tip_sha: 4b7231b
-      commit_deployed: 4b7231b
+        - F72
+        - F73
+        - F74
       current_action: completed
+      next_action: 11-verify-impl (starting)
       askquestion_pending: false
-      note: S027/EV-025 10-e2e COMPLETE (S027-D64 reconcile) — 
-        report=docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md.
-      updated_at: '2026-08-06T14:46:45Z'
-      s027_d64_decision: S027-D64
-      reconciled_from: S027-D63
-      session_closed: true
-      session_closed_at: '2026-08-06T14:46:45Z'
-      close_decision: S027-D64
-      report: docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md
+      askquestion_pending_topic:
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      tip_prev: 'c8b25e1'
+      tip_at_start: '8537690'
+      report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
       report_status: completed
+      overall: PASS
+      overall_result: PASS
       result: PASS
-      overall: pass
-      s026_baseline:
+      overall_t0: PASS
+      t0_result: PASS
+      t0_summary: 'UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4'
+      t2_t3_deferred: true
+      t2_t3_defer_to: 13-deploy-smoke
+      t2_t3_note: 'T2/T3 deferred to 13 (QA-S028-003)'
+      carry_forward:
+        - 'QA-S028-005: close #222–#224 at 11-verify-impl (13 if deploy)'
+        - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+        - 'AC-SU1–10 for sign-off at 11-verify-impl'
+      citations:
+        - '[Corpus: feature-list.md §F72–F74]'
+        - '[Spec: docs/user-journeys.md §UJ-077]'
+        - '[Spec: docs/user-journeys.md §UJ-078]'
+        - '[Spec: docs/user-journeys.md §UJ-079]'
+        - '[Spec: docs/user-journeys.md §UJ-076]'
+        - '[Corpus: decisions.md §RD-309–324]'
+      note: 'S028/EV-026 10-e2e COMPLETE — overall T0 PASS; UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4; T2/T3 deferred to 13 (QA-S028-003); report=docs/sessions/S028-chat-source-ux/reports/e2e-report.md; tip@8537690; next 11-verify-impl; phase_d still pending'
+      updated_at: '2026-08-06T22:57:00Z'
+      s027_baseline:
+        status: completed
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
+        started_at: '2026-08-05'
+        started: '2026-08-05'
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
+        branch: main
+        mode: delta
+        delta_only: true
+        feature_ids:
+          - F70
+          - F71
+        tip_sha: 4b7231b
+        commit_deployed: 4b7231b
+        current_action: completed
+        askquestion_pending: false
+        note: S027/EV-025 10-e2e COMPLETE (S027-D64 reconcile) — 
+          report=docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md.
+        updated_at: '2026-08-06T14:46:45Z'
+        s027_d64_decision: S027-D64
+        reconciled_from: S027-D63
+        session_closed: true
+        session_closed_at: '2026-08-06T14:46:45Z'
+        close_decision: S027-D64
+        report: docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md
+        report_status: completed
+        result: PASS
+        overall: pass
+        s026_baseline:
         status: completed
         started_at: '2026-08-05'
         started: '2026-08-05'
@@ -4188,32 +4237,109 @@ project:
         required: true
     11-verify-impl:
       status: completed
-      session_id: S027-multilingual-embeddings
-      evolve_cycle_id: EV-025
-      started_at: '2026-08-05'
-      started: '2026-08-05'
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      branch: main
-      mode: delta
+      started_at: '2026-08-06'
+      started_at_iso: '2026-08-06T22:57:00Z'
+      started: '2026-08-06'
+      completed: '2026-08-06'
+      completed_at: '2026-08-06T23:14:50Z'
+      session_id: S028-chat-source-ux
+      branch: evolve/EV-026-chat-source-ux
+      session_branch: evolve/EV-026-chat-source-ux
+      evolve_cycle_id: EV-026
+      mode: evolve
       delta_only: true
       feature_ids:
-        - F70
-        - F71
-      tip_sha: 4b7231b
-      commit_deployed: 4b7231b
+        - F72
+        - F73
+        - F74
+      approved_features:
+        - F72
+        - F73
+        - F74
+      overall: approved
+      overall_result: approved
       current_action: completed
+      next_action: 12-verify-deploy in_progress (S028-D33)
       askquestion_pending: false
-      note: S027/EV-025 11-verify-impl COMPLETE (S027-D64 reconcile) — 
-        report=docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md; phase_d passed (S027-D61/S027-D63).
-      updated_at: '2026-08-06T14:46:45Z'
-      s027_d64_decision: S027-D64
-      reconciled_from: S027-D63
-      session_closed: true
-      session_closed_at: '2026-08-06T14:46:45Z'
-      close_decision: S027-D64
-      report: docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md
+      askquestion_pending_topic:
+      askquestion_cleared: '11-verify-impl batch2 — S028-D32 T0/OpenAPI inspect + approve F72–F74'
+      s028_d31_decision: S028-D31
+      s028_d32_decision: S028-D32
+      batch1_status: answered
+      batch1_decision: S028-D31
+      batch2_status: answered
+      batch2_decision: S028-D32
+      uj_077_status: approved_t0
+      uj_078_status: approved_t0
+      uj_079_status: approved
+      inspection_env: staging
+      inspection_basis: t0_openapi_only
+      inspection_disposition: approve_t0_openapi_live_at_13
+      ui_preview: none_non_deployed
+      staging_tip_drift: true
+      staging_commit_deployed: c942971
+      tip_on_staging: false
+      visual_verify_blocked: true
+      visual_verify_blocked_until: 13-deploy-smoke
+      visual_verify_waiver: t0_openapi_only_live_at_13
+      h4_h5_note: 'H4–H5 still gated (QA-S028-003 / S028-D2) until 13-deploy-smoke'
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      tip_prev: 'c8b25e1'
+      tip_at_start: '8537690'
+      carry_forward:
+        - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+        - 'Live visual verify F72–F74 at 13 (S028-D32)'
+      e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+      e2e_overall_t0: PASS
+      phase_d: passed
+      checkpoints_phase_d: passed
+      report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
       report_status: completed
+      ac_checked: AC-SU1-11
+      issues_closed:
+        - 222
+        - 223
+        - 224
+      qa_s028_005_status: closed
+      citations:
+        - '[Corpus: feature-list.md §F72–F74]'
+        - '[Corpus: acceptance-criteria.md §AC-SU1–11]'
+        - '[Spec: docs/user-journeys.md §UJ-077]'
+        - '[Spec: docs/user-journeys.md §UJ-078]'
+        - '[Spec: docs/user-journeys.md §UJ-079]'
+        - '[Spec: docs/sessions/S028-chat-source-ux/reports/e2e-report.md]'
+        - '[Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
+      note: 'S028/EV-026 11-verify-impl COMPLETE APPROVED 2026-08-06T23:14:50Z — S028-D32 batch2: T0/OpenAPI only (live@13); Approve all F72 F73 F74; AC-SU1–11 checked; #222–#224 closed (QA-S028-005); phase_d=passed; report=docs/sessions/S028-chat-source-ux/reports/verify-impl.md; next AskQuestion 12 (S028-D2)'
+      updated_at: '2026-08-06T23:14:50Z'
+      s027_baseline:
+        status: completed
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
+        started_at: '2026-08-05'
+        started: '2026-08-05'
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
+        branch: main
+        mode: delta
+        delta_only: true
+        feature_ids:
+          - F70
+          - F71
+        tip_sha: 4b7231b
+        commit_deployed: 4b7231b
+        current_action: completed
+        askquestion_pending: false
+        note: S027/EV-025 11-verify-impl COMPLETE (S027-D64 reconcile) — 
+          report=docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md; phase_d passed (S027-D61/S027-D63).
+        updated_at: '2026-08-06T14:46:45Z'
+        s027_d64_decision: S027-D64
+        reconciled_from: S027-D63
+        session_closed: true
+        session_closed_at: '2026-08-06T14:46:45Z'
+        close_decision: S027-D64
+        report: docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md
+        report_status: completed
       s026_baseline:
         status: completed
         started_at: '2026-08-05'
@@ -4906,33 +5032,83 @@ project:
         session_closed_at: '2026-08-05T00:57:00Z'
         close_decision: S026-D58
     12-verify-deploy:
-      status: completed
-      session_id: S027-multilingual-embeddings
-      evolve_cycle_id: EV-025
-      started_at: '2026-08-05'
-      started: '2026-08-05'
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      branch: main
-      mode: delta
+      status: in_progress
+      checklist_blockers: 'tip not pushed; no CI runs; uncommitted docs'
+      checklist_status: not_ready
+      env_role: staging_as_live
+      report_status: not_ready
+      report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+      started_at: '2026-08-06'
+      started_at_iso: '2026-08-06T23:21:00Z'
+      started: '2026-08-06'
+      session_id: S028-chat-source-ux
+      branch: evolve/EV-026-chat-source-ux
+      session_branch: evolve/EV-026-chat-source-ux
+      evolve_cycle_id: EV-026
+      mode: evolve
       delta_only: true
       feature_ids:
-        - F70
-        - F71
-      tip_sha: 4b7231b
-      commit_deployed: 4b7231b
-      current_action: completed
+        - F72
+        - F73
+        - F74
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      current_action: local_ci_parity_then_complete_12
+      next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
       askquestion_pending: false
-      note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — 
-        report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
-      updated_at: '2026-08-06T14:46:45Z'
-      s027_d64_decision: S027-D64
-      reconciled_from: S027-D63
-      session_closed: true
-      session_closed_at: '2026-08-06T14:46:45Z'
-      close_decision: S027-D64
-      report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
-      report_status: completed
+      askquestion_pending_topic:
+      askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+      s028_d33_decision: S028-D33
+      s028_d33_choice: option_1_proceed_12
+      s028_d34_decision: S028-D34
+      s028_d34_choices:
+        ci_path: commit_local_ci_push_then_cli_deploy
+        ra009_remote_ci: waived_local_make_ci_push
+        env_role: staging_as_live_confirmed_live_prod
+        mitigations_1_to_6: approved
+        rollback_plan: approved
+      ra009_remote_ci_waived: true
+      ra009_waiver_reason: 'GitHub Actions outage — local make ci-push parity; do not block on gh run watch'
+      env_role_confirmed: true
+      env_role_live: prod
+      mitigations_1_to_6: approved
+      rollback_plan: approved
+      staging_tip_drift: true
+      staging_commit_deployed: c942971
+      tip_on_staging: false
+      carry_forward:
+        - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+        - '13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready'
+      note: 'S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34) — risk AskQuestion answered: RA-009 remote CI waived (GitHub Actions outage; local make ci-push parity; do not block on gh run watch); env_role=staging_as_live confirmed (live=prod ADR-049/S028-D2); mitigations 1–6 approved; rollback plan approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; next=commit artifacts + make ci-push then finalize checklist; 13 AskQuestion-gated for CLI deploy after 12 ready; tip@8537690; staging@c942971 drift=true; H4–H5 carry QA-S028-003; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+      updated_at: '2026-08-06T23:26:00Z'
+      s027_baseline:
+        status: completed
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
+        started_at: '2026-08-05'
+        started: '2026-08-05'
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
+        branch: main
+        mode: delta
+        delta_only: true
+        feature_ids:
+          - F70
+          - F71
+        tip_sha: 4b7231b
+        commit_deployed: 4b7231b
+        current_action: completed
+        askquestion_pending: false
+        note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — 
+          report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
+        updated_at: '2026-08-06T14:46:45Z'
+        s027_d64_decision: S027-D64
+        reconciled_from: S027-D63
+        session_closed: true
+        session_closed_at: '2026-08-06T14:46:45Z'
+        close_decision: S027-D64
+        report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
+        report_status: completed
       s026_baseline:
         status: completed
         started_at: '2026-08-05'
@@ -6374,13 +6550,14 @@ project:
       close_decision: S027-D64
     16-evolve:
       status: in_progress
+      env_role: staging_as_live
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
       started_at: '2026-08-06'
       started_at_iso: '2026-08-06T16:04:25Z'
-      current_stage: 10-e2e
-      current_action: awaiting_10_e2e
-      next_action: 10-e2e (pending)
+      current_stage: 12-verify-deploy
+      current_action: local_ci_parity_then_complete_12
+      next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
       phase_0_status: approved
       phase0_approved: true
       phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -6403,10 +6580,15 @@ project:
       mode: evolve
       askquestion_pending: false
       askquestion_pending_topic:
-      askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
+      askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+      staging_tip_drift: true
+      staging_commit_deployed: c942971
+      tip_on_staging: false
+      visual_verify_blocked: true
+      visual_verify_blocked_until: 13-deploy-smoke
       close_cycle_pending: false
       session_closed: false
-      handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
+      handoff: '12 mid-stage (S028-D34): local_ci_parity_then_complete_12; commit+make ci-push; then complete 12; 13 AskQuestion-gated for CLI deploy; tip@8537690'
       s028_d23_decision: S028-D23
       s028_d23_status: already_done
       s028_d24_pending: false
@@ -6416,15 +6598,26 @@ project:
       s028_d28_decision: S028-D28
       s028_d29_decision: S028-D29
       s028_d30_decision: S028-D30
-      tip_sha: c8b25e1
-      tip_full: c8b25e14f2edf125781b2704a80f60ebecb83e41
-      tip_prev: 1332dc1
+      s028_d31_decision: S028-D31
+      s028_d32_decision: S028-D32
+      s028_d33_decision: S028-D33
+      s028_d34_decision: S028-D34
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      tip_prev: 'c8b25e1'
       phase_c: passed
       gate_c_to_d: passed
       stage_08_result: PASS
       stage_09_result: pass_with_advisories
-      note: 'S028/EV-026 QA remediation 2026-08-06T22:47:07Z — 001/002 FIXED; 003–005 accepted; current_stage=10-e2e (pending, not started); tip@c8b25e1; [Corpus: feature-list.md §F72–F74]'
-      updated_at: '2026-08-06T22:47:07Z'
+      stage_10_result: PASS
+      stage_10_overall_t0: PASS
+      stage_11_result: approved
+      stage_11_status: completed
+      e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+      verify_impl_report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+      phase_d: passed
+      note: 'S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34) — risk AskQuestion answered: RA-009 remote CI waived (GitHub Actions outage; local make ci-push parity; do not block on gh run watch); env_role=staging_as_live confirmed (live=prod ADR-049/S028-D2); mitigations 1–6 approved; rollback plan approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; next=commit artifacts + make ci-push then finalize checklist; 13 AskQuestion-gated for CLI deploy after 12 ready; tip@8537690; staging@c942971 drift=true; H4–H5 carry QA-S028-003; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+      updated_at: '2026-08-06T23:26:00Z'
       predecessor:
         session_id: S027-multilingual-embeddings
         evolve_cycle_id: EV-025
@@ -6841,8 +7034,8 @@ active_session:
     - 222
     - 223
     - 224
-  current_stage: 10-e2e
-  current_stage_note: 'QA remediation done (001/002 fixed; 003–005 accepted); next 10-e2e pending (not started); tip@c8b25e1'
+  current_stage: 12-verify-deploy
+  current_stage_note: 'S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34); current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; env_role=staging_as_live confirmed (live=prod); RA-009 remote CI waived; mitigations 1–6 + rollback approved; tip@8537690; 13 AskQuestion-gated after 12 ready; [Corpus: feature-list.md §F72–F74]'
   started_at: '2026-08-06'
   started_at_iso: '2026-08-06T16:01:41Z'
   mode: evolve
@@ -6914,6 +7107,15 @@ active_session:
     - 'S028-D28 2026-08-06T22:35:23Z: User approved continue (y) after 08 PASS — start 09-qa; routing_plan 09-qa=in_progress; tip synced 44f03da→1332dc1; askquestion_pending=false; [Corpus: feature-list.md §F72–F74]'
     - 'S028-D29 2026-08-06T22:40:28Z: 09-qa COMPLETE overall=pass_with_advisories; F72–F74 delta all green; QA-S028-001: blocking out-of-cycle UJ-076 TC-239 (e0_revisions; EV-025/F71) — disposition at 11-verify-impl; QA-S028-002: advisory h2 CVE-2026-71554 (4.3.0→4.4.1); H4–H5 deferred to 13 (staging FE URLs unset); F72–F74 delta checks all green (TC-242–251, CORS H0c, FE Vitest, Playwright T0-ui); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md; current_stage=10-e2e (pending); askquestion_pending=false; [Corpus: feature-list.md §F72–F74]'
     - 'S028-D30 2026-08-06T22:47:07Z: QA remediation — user asked address advisories+blocking; QA-S028-001/002 FIXED; QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing coverage; QA-S028-005 accepted→11; artifact=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md; current_stage remains 10-e2e pending (not started); askquestion_pending=false; [Corpus: feature-list.md §F72–F74]'
+    - '10-e2e STARTED 2026-08-06T22:52:00Z: mode=evolve/delta_only; feature_ids F72–F74; QA remediation complete; tip synced c8b25e1→8537690; current_action=running_10_e2e; proceeding to T0 e2e; [Corpus: feature-list.md §F72–F74] [Spec: docs/user-journeys.md §UJ-063] [Corpus: decisions.md §RD-309–324]'
+    - '10-e2e COMPLETE 2026-08-06T22:57:00Z: overall T0 PASS — UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4; T2/T3 deferred to 13 (QA-S028-003); report=docs/sessions/S028-chat-source-ux/reports/e2e-report.md; tip@8537690; phase_d still pending (needs 11); carry QA-S028-005 issue close #222–#224 + AC-SU1–10 sign-off; next 11-verify-impl; [Corpus: feature-list.md §F72–F74]'
+    - '11-verify-impl 2026-08-06T22:59:33Z: draft verify-impl.md written (in_progress, awaiting user); current_action=awaiting_user_signoff_batch1; askquestion_pending=true; topic=11-verify-impl journey signoff + inspection env + UI preview (UJ-077/078/079, F72-F74); [Corpus: feature-list.md §F72–F74] [Spec: docs/user-journeys.md §UJ-077]'
+    - 'S028-D31 2026-08-06T23:03:52Z: 11-verify-impl batch1 — Approve UJ-077+UJ-078 (T0 enough; T3→13); Approve UJ-079; staging feature inspection; no UI preview (non-deployed); H4–H5 still gated (QA-S028-003 / S028-D2); current_action=feature_inspection_staging; askquestion_pending topic→feature inspection staging + F72-F74 approve; [Corpus: feature-list.md §F72–F74] [Spec: docs/user-journeys.md §UJ-077]'
+    - '2026-08-06T23:09:12Z: staging tip drift — tip@8537690 NOT on staging (commit_deployed=c942971); cannot visually verify F72–F74 on staging FE/API until 12/13; current_action=awaiting_inspection_disposition_batch2; askquestion_pending topic→staging tip drift — inspect disposition + F72-F74 approve; [Corpus: feature-list.md §F72–F74] [Spec: docs/user-journeys.md §UJ-077]'
+    - 'S028-D32 2026-08-06T23:14:50Z: 11-verify-impl batch2 — (1) Approve inspection from T0/OpenAPI only (live visual at 13); (2) Approve all F72 F73 F74; AC-SU1–11 checked; issues #222 #223 #224 closed (QA-S028-005); 11 COMPLETE; phase_d=passed; current_stage→12-verify-deploy pending; askquestion_pending topic=proceed to 12-verify-deploy? (S028-D2); current_action=awaiting_12_gate_askquestion (S028-D2); [Corpus: feature-list.md §F72–F74] [Corpus: acceptance-criteria.md §AC-SU1–11]'
+    - 'S028-D33 2026-08-06T23:21:00Z: User approved S028-D2 gate option 1 — proceed to 12-verify-deploy; current_action=running_12_verify_deploy; tip@8537690; 13 still AskQuestion-gated after 12; H4–H5 carry QA-S028-003; [Corpus: feature-list.md §F72–F74]'
+    - '12-verify-deploy mid 2026-08-06T23:24:30Z: current_action=awaiting_ci_and_risk_askquestion; askquestion_pending topic=12 RA-009 tip CI + env_role + mitigations/rollback (S028); env_role=staging_as_live (ADR-049 / S028-D2); checklist=docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md status=not_ready (tip not pushed, no CI runs, uncommitted docs); 12 NOT completed; [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+    - 'S028-D34 2026-08-06T23:26:00Z: 12 risk AskQuestion — (1) Commit + full LOCAL verify (GHA outage) then CLI deploy; RA-009 remote CI waived with local make ci-push parity; do not block on gh run watch; (2) Confirm env_role=staging_as_live (live=prod); (3) Approve mitigations 1–6; (4) Approve rollback plan; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; 13 remains AskQuestion-gated after 12 ready; [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
   routing_plan:
     - stage: 00-context
       required: true
@@ -7174,26 +7376,153 @@ active_session:
       s028_d29_decision: S028-D29
     - stage: 10-e2e
       required: true
-      status: pending
+      status: completed
       mode: delta
       skip_rationale:
-      note: 'Not started; next after 09-qa COMPLETE (parallel optional)'
+      started: '2026-08-06'
+      started_at: '2026-08-06T22:52:00Z'
+      completed: '2026-08-06'
+      completed_at: '2026-08-06T22:57:00Z'
+      current_action: completed
+      next_action: 11-verify-impl (starting)
       askquestion_pending: false
+      askquestion_pending_topic:
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      tip_prev: 'c8b25e1'
+      tip_at_start: '8537690'
+      branch: evolve/EV-026-chat-source-ux
+      feature_ids:
+        - F72
+        - F73
+        - F74
+      delta_only: true
+      report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+      report_status: completed
+      overall: PASS
+      overall_result: PASS
+      result: PASS
+      overall_t0: PASS
+      t0_result: PASS
+      t0_summary: 'UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4'
+      t2_t3_deferred: true
+      t2_t3_defer_to: 13-deploy-smoke
+      t2_t3_note: 'T2/T3 deferred to 13 (QA-S028-003)'
+      carry_forward:
+        - 'QA-S028-005: close #222–#224 at 11-verify-impl (13 if deploy)'
+        - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+        - 'AC-SU1–10 for sign-off at 11-verify-impl'
+      note: 'S028/EV-026 10-e2e COMPLETE — overall T0 PASS; UJ-077/078/079/076 green; T2/T3→13 (QA-S028-003); report=docs/sessions/S028-chat-source-ux/reports/e2e-report.md; tip@8537690; phase_d pending'
+      updated_at: '2026-08-06T22:57:00Z'
     - stage: 11-verify-impl
       required: true
-      status: pending
+      status: completed
       mode: delta
       skip_rationale:
+      started: '2026-08-06'
+      started_at: '2026-08-06T22:57:00Z'
+      completed: '2026-08-06'
+      completed_at: '2026-08-06T23:14:50Z'
+      current_action: completed
+      next_action: 12-verify-deploy in_progress (S028-D33)
+      askquestion_pending: false
+      askquestion_pending_topic:
+      askquestion_cleared: '11-verify-impl batch2 — S028-D32 T0/OpenAPI inspect + approve F72–F74; batch1 S028-D31'
+      s028_d31_decision: S028-D31
+      s028_d32_decision: S028-D32
+      batch1_status: answered
+      batch1_decision: S028-D31
+      batch2_status: answered
+      batch2_decision: S028-D32
+      uj_077_status: approved_t0
+      uj_078_status: approved_t0
+      uj_079_status: approved
+      inspection_env: staging
+      inspection_basis: t0_openapi_only
+      inspection_disposition: approve_t0_openapi_live_at_13
+      ui_preview: none_non_deployed
+      staging_tip_drift: true
+      staging_commit_deployed: c942971
+      tip_on_staging: false
+      visual_verify_blocked: true
+      visual_verify_blocked_until: 13-deploy-smoke
+      visual_verify_waiver: t0_openapi_only_live_at_13
+      h4_h5_note: 'H4–H5 still gated (QA-S028-003 / S028-D2) until 13-deploy-smoke'
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      branch: evolve/EV-026-chat-source-ux
+      feature_ids:
+        - F72
+        - F73
+        - F74
+      approved_features:
+        - F72
+        - F73
+        - F74
+      overall: approved
+      overall_result: approved
+      delta_only: true
+      e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+      e2e_overall_t0: PASS
+      phase_d: passed
+      report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+      report_status: completed
+      ac_checked: AC-SU1-11
+      issues_closed:
+        - 222
+        - 223
+        - 224
+      qa_s028_005_status: closed
+      carry_forward:
+        - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+        - 'Live visual verify F72–F74 at 13 (S028-D32 T0/OpenAPI now)'
+      note: 'S028/EV-026 11-verify-impl COMPLETE APPROVED 2026-08-06T23:14:50Z — S028-D32 batch2: T0/OpenAPI inspect only (live@13); Approve all F72 F73 F74; AC-SU1–11 checked; #222–#224 closed (QA-S028-005); phase_d=passed; report=docs/sessions/S028-chat-source-ux/reports/verify-impl.md; handoff → AskQuestion 12-verify-deploy (S028-D2)'
+      updated_at: '2026-08-06T23:14:50Z'
     - stage: 12-verify-deploy
       required: true
-      status: pending
+      status: in_progress
       mode: delta
       skip_rationale:
+      started: '2026-08-06'
+      started_at: '2026-08-06T23:21:00Z'
+      current_action: local_ci_parity_then_complete_12
+      next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
+      askquestion_pending: false
+      askquestion_pending_topic:
+      askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+      s028_d33_decision: S028-D33
+      s028_d33_choice: option_1_proceed_12
+      s028_d34_decision: S028-D34
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      branch: evolve/EV-026-chat-source-ux
+      feature_ids:
+        - F72
+        - F73
+        - F74
+      delta_only: true
+      staging_tip_drift: true
+      staging_commit_deployed: c942971
+      tip_on_staging: false
+      ra009_remote_ci_waived: true
+      env_role_confirmed: true
+      mitigations_1_to_6: approved
+      rollback_plan: approved
+      carry_forward:
+        - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+        - '13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready'
+        - 'Live visual verify F72–F74 at 13'
+      note: 'S028 12 mid-stage (S028-D34): local_ci_parity_then_complete_12; RA-009 remote CI waived; env_role=staging_as_live confirmed; mitigations 1–6 + rollback approved; tip@8537690'
+      updated_at: '2026-08-06T23:26:00Z'
+      report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+      report_status: not_ready
+      env_role: staging_as_live
     - stage: 13-deploy-smoke
       required: true
       status: pending
       mode: delta
       skip_rationale:
+      note: 'Still AskQuestion-gated after 12 (S028-D2); H4–H5 carry QA-S028-003; do not start until 12 complete + user confirms'
   context_briefs: []
   session_artifacts:
     - docs/sessions/S028-chat-source-ux/session-brief.md
@@ -7207,20 +7536,32 @@ active_session:
     - docs/sessions/S028-chat-source-ux/reports/verification-report.md
     - docs/sessions/S028-chat-source-ux/reports/qa-report.md
     - docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
-  next_action: 10-e2e (pending)
+    - docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+    - docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+    - docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+  next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
   orchestrator_status: in_progress
-  updated_at: '2026-08-06T22:47:07Z'
-  next_recommended: 10-e2e
+  updated_at: '2026-08-06T23:26:00Z'
+  next_recommended: 'Commit session artifacts; run make ci-push (RA-009 remote CI waived); complete 12 checklist; then AskQuestion for 13 CLI deploy'
   delta_only: true
   askquestion_pending: false
   askquestion_pending_topic:
-  askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build)'
-  handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
-  current_action: awaiting_10_e2e
+  askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+  staging_tip_drift: true
+  staging_commit_deployed: c942971
+  tip_on_staging: false
+  visual_verify_blocked: true
+  visual_verify_blocked_until: 13-deploy-smoke
+  handoff: '12 mid-stage (S028-D34): local_ci_parity_then_complete_12; commit+make ci-push; finalize checklist; 13 AskQuestion-gated for CLI deploy; tip@8537690'
+  current_action: local_ci_parity_then_complete_12
   s028_d28_decision: S028-D28
   s028_d28_choice: continue_09_qa_after_08_pass
   s028_d29_decision: S028-D29
   s028_d30_decision: S028-D30
+  s028_d31_decision: S028-D31
+  s028_d32_decision: S028-D32
+  s028_d33_decision: S028-D33
+  s028_d33_note: 'S028-D33 2026-08-06T23:21:00Z: User approved S028-D2 gate option 1 — proceed to 12-verify-deploy; askquestion cleared; 13 remains AskQuestion-gated; H4–H5 carry QA-S028-003; tip@8537690'
   stage_09_result: pass_with_advisories
   stage_09_overall: pass_with_advisories
   citations:
@@ -7245,14 +7586,35 @@ active_session:
   phase_c: passed
   gate_c_to_d: passed
   checkpoints_phase_c: passed
-  tip_sha: c8b25e1
-  tip_full: c8b25e14f2edf125781b2704a80f60ebecb83e41
-  tip_prev: 1332dc1
-  bundle_note: tip synced at 09-qa complete 1332dc1→c8b25e1 (qa-report commit)
+  tip_sha: '8537690'
+  tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+  tip_prev: 'c8b25e1'
+  tip_at_start_10_e2e: '8537690'
+  bundle_note: tip synced at 10-e2e start c8b25e1→8537690 (workflow-state QA remediation sync commit)
   stage_08_result: PASS
   stage_08_security_remediations: included
   session_branch: evolve/EV-026-chat-source-ux
   qa_findings: 'QA-S028-001 FIXED (LEGACY_E0); QA-S028-002 FIXED (h2>=4.4.1); QA-S028-003 accepted→13; QA-S028-004 accepted pre-existing coverage; QA-S028-005 accepted→11; remediation=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
+  s028_d31_note: '10-e2e started after QA remediation; tip@8537690'
+  stage_10_result: PASS
+  stage_10_overall_t0: PASS
+  e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+  phase_d: passed
+  carry_forward_note: 'QA-S028-003 H4–H5 at 13; live visual F72–F74 at 13 (S028-D32 T0/OpenAPI now); QA-S028-005 closed with #222–#224'
+  s028_d32_note: 'S028-D32 11-verify-impl batch2 COMPLETE — T0/OpenAPI inspect; Approve F72 F73 F74; AC-SU1–11; #222–#224 closed; phase_d=passed; 12 gate answered by S028-D33'
+  s028_d32_prior_note: 'Earlier s028_d32_note was 10-e2e COMPLETE transition marker (2026-08-06T22:57:00Z); formal decision id S028-D32 allocated to 11 batch2'
+  stage_11_result: approved
+  stage_11_status: completed
+  verify_impl_report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+  approved_features:
+    - F72
+    - F73
+    - F74
+  env_role: staging_as_live
+  env_role_confirmed: true
+  env_role_live: prod
+  s028_d34_decision: S028-D34
+  s028_d34_note: 'S028-D34 2026-08-06T23:26:00Z: RA-009 remote CI waived (local make ci-push); env_role staging_as_live confirmed (live=prod); mitigations 1–6 + rollback approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; 13 still AskQuestion-gated for CLI deploy after 12 ready'
 sessions:
   - id: S027-multilingual-embeddings
     type: feature
@@ -21342,35 +21704,84 @@ stages:
         required: true
   10-e2e:
     status: completed
-    session_id: S027-multilingual-embeddings
-    evolve_cycle_id: EV-025
-    started_at: '2026-08-05'
-    started: '2026-08-05'
-    completed: '2026-08-05'
-    completed_at: '2026-08-05'
-    branch: main
-    mode: delta
+    started_at: '2026-08-06'
+    started_at_iso: '2026-08-06T22:52:00Z'
+    started: '2026-08-06'
+    completed: '2026-08-06'
+    completed_at: '2026-08-06T22:57:00Z'
+    session_id: S028-chat-source-ux
+    branch: evolve/EV-026-chat-source-ux
+    session_branch: evolve/EV-026-chat-source-ux
+    evolve_cycle_id: EV-026
+    mode: evolve
     delta_only: true
     feature_ids:
-      - F70
-      - F71
-    tip_sha: 4b7231b
-    commit_deployed: 4b7231b
+      - F72
+      - F73
+      - F74
     current_action: completed
+    next_action: 11-verify-impl (starting)
     askquestion_pending: false
-    note: S027/EV-025 10-e2e COMPLETE (S027-D64 reconcile) — 
-      report=docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md.
-    updated_at: '2026-08-06T14:46:45Z'
-    s027_d64_decision: S027-D64
-    reconciled_from: S027-D63
-    session_closed: true
-    session_closed_at: '2026-08-06T14:46:45Z'
-    close_decision: S027-D64
-    report: docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md
+    askquestion_pending_topic:
+    tip_sha: '8537690'
+    tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    tip_prev: 'c8b25e1'
+    tip_at_start: '8537690'
+    report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
     report_status: completed
+    overall: PASS
+    overall_result: PASS
     result: PASS
-    overall: pass
-    s026_baseline:
+    overall_t0: PASS
+    t0_result: PASS
+    t0_summary: 'UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4'
+    t2_t3_deferred: true
+    t2_t3_defer_to: 13-deploy-smoke
+    t2_t3_note: 'T2/T3 deferred to 13 (QA-S028-003)'
+    carry_forward:
+      - 'QA-S028-005: close #222–#224 at 11-verify-impl (13 if deploy)'
+      - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+      - 'AC-SU1–10 for sign-off at 11-verify-impl'
+    citations:
+      - '[Corpus: feature-list.md §F72–F74]'
+      - '[Spec: docs/user-journeys.md §UJ-077]'
+      - '[Spec: docs/user-journeys.md §UJ-078]'
+      - '[Spec: docs/user-journeys.md §UJ-079]'
+      - '[Spec: docs/user-journeys.md §UJ-076]'
+      - '[Corpus: decisions.md §RD-309–324]'
+    note: 'S028/EV-026 10-e2e COMPLETE — overall T0 PASS; UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4; T2/T3 deferred to 13 (QA-S028-003); report=docs/sessions/S028-chat-source-ux/reports/e2e-report.md; tip@8537690; next 11-verify-impl; phase_d still pending'
+    updated_at: '2026-08-06T22:57:00Z'
+    s027_baseline:
+      status: completed
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
+      started_at: '2026-08-05'
+      started: '2026-08-05'
+      completed: '2026-08-05'
+      completed_at: '2026-08-05'
+      branch: main
+      mode: delta
+      delta_only: true
+      feature_ids:
+        - F70
+        - F71
+      tip_sha: 4b7231b
+      commit_deployed: 4b7231b
+      current_action: completed
+      askquestion_pending: false
+      note: S027/EV-025 10-e2e COMPLETE (S027-D64 reconcile) — 
+        report=docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md.
+      updated_at: '2026-08-06T14:46:45Z'
+      s027_d64_decision: S027-D64
+      reconciled_from: S027-D63
+      session_closed: true
+      session_closed_at: '2026-08-06T14:46:45Z'
+      close_decision: S027-D64
+      report: docs/sessions/S027-multilingual-embeddings/reports/e2e-report.md
+      report_status: completed
+      result: PASS
+      overall: pass
+      s026_baseline:
       status: completed
       started_at: '2026-08-05'
       started: '2026-08-05'
@@ -21786,32 +22197,109 @@ stages:
       required: true
   11-verify-impl:
     status: completed
-    session_id: S027-multilingual-embeddings
-    evolve_cycle_id: EV-025
-    started_at: '2026-08-05'
-    started: '2026-08-05'
-    completed: '2026-08-05'
-    completed_at: '2026-08-05'
-    branch: main
-    mode: delta
+    started_at: '2026-08-06'
+    started_at_iso: '2026-08-06T22:57:00Z'
+    started: '2026-08-06'
+    completed: '2026-08-06'
+    completed_at: '2026-08-06T23:14:50Z'
+    session_id: S028-chat-source-ux
+    branch: evolve/EV-026-chat-source-ux
+    session_branch: evolve/EV-026-chat-source-ux
+    evolve_cycle_id: EV-026
+    mode: evolve
     delta_only: true
     feature_ids:
-      - F70
-      - F71
-    tip_sha: 4b7231b
-    commit_deployed: 4b7231b
+      - F72
+      - F73
+      - F74
+    approved_features:
+      - F72
+      - F73
+      - F74
+    overall: approved
+    overall_result: approved
     current_action: completed
+    next_action: 12-verify-deploy in_progress (S028-D33)
     askquestion_pending: false
-    note: S027/EV-025 11-verify-impl COMPLETE (S027-D64 reconcile) — 
-      report=docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md; phase_d passed (S027-D61/S027-D63).
-    updated_at: '2026-08-06T14:46:45Z'
-    s027_d64_decision: S027-D64
-    reconciled_from: S027-D63
-    session_closed: true
-    session_closed_at: '2026-08-06T14:46:45Z'
-    close_decision: S027-D64
-    report: docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md
+    askquestion_pending_topic:
+    askquestion_cleared: '11-verify-impl batch2 — S028-D32 T0/OpenAPI inspect + approve F72–F74'
+    s028_d31_decision: S028-D31
+    s028_d32_decision: S028-D32
+    batch1_status: answered
+    batch1_decision: S028-D31
+    batch2_status: answered
+    batch2_decision: S028-D32
+    uj_077_status: approved_t0
+    uj_078_status: approved_t0
+    uj_079_status: approved
+    inspection_env: staging
+    inspection_basis: t0_openapi_only
+    inspection_disposition: approve_t0_openapi_live_at_13
+    ui_preview: none_non_deployed
+    staging_tip_drift: true
+    staging_commit_deployed: c942971
+    tip_on_staging: false
+    visual_verify_blocked: true
+    visual_verify_blocked_until: 13-deploy-smoke
+    visual_verify_waiver: t0_openapi_only_live_at_13
+    h4_h5_note: 'H4–H5 still gated (QA-S028-003 / S028-D2) until 13-deploy-smoke'
+    tip_sha: '8537690'
+    tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    tip_prev: 'c8b25e1'
+    tip_at_start: '8537690'
+    carry_forward:
+      - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+      - 'Live visual verify F72–F74 at 13 (S028-D32)'
+    e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+    e2e_overall_t0: PASS
+    phase_d: passed
+    checkpoints_phase_d: passed
+    report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
     report_status: completed
+    ac_checked: AC-SU1-11
+    issues_closed:
+      - 222
+      - 223
+      - 224
+    qa_s028_005_status: closed
+    citations:
+      - '[Corpus: feature-list.md §F72–F74]'
+      - '[Corpus: acceptance-criteria.md §AC-SU1–11]'
+      - '[Spec: docs/user-journeys.md §UJ-077]'
+      - '[Spec: docs/user-journeys.md §UJ-078]'
+      - '[Spec: docs/user-journeys.md §UJ-079]'
+      - '[Spec: docs/sessions/S028-chat-source-ux/reports/e2e-report.md]'
+      - '[Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
+    note: 'S028/EV-026 11-verify-impl COMPLETE APPROVED 2026-08-06T23:14:50Z — S028-D32 batch2: T0/OpenAPI only (live@13); Approve all F72 F73 F74; AC-SU1–11 checked; #222–#224 closed (QA-S028-005); phase_d=passed; report=docs/sessions/S028-chat-source-ux/reports/verify-impl.md; next AskQuestion 12 (S028-D2)'
+    updated_at: '2026-08-06T23:14:50Z'
+    s027_baseline:
+      status: completed
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
+      started_at: '2026-08-05'
+      started: '2026-08-05'
+      completed: '2026-08-05'
+      completed_at: '2026-08-05'
+      branch: main
+      mode: delta
+      delta_only: true
+      feature_ids:
+        - F70
+        - F71
+      tip_sha: 4b7231b
+      commit_deployed: 4b7231b
+      current_action: completed
+      askquestion_pending: false
+      note: S027/EV-025 11-verify-impl COMPLETE (S027-D64 reconcile) — 
+        report=docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md; phase_d passed (S027-D61/S027-D63).
+      updated_at: '2026-08-06T14:46:45Z'
+      s027_d64_decision: S027-D64
+      reconciled_from: S027-D63
+      session_closed: true
+      session_closed_at: '2026-08-06T14:46:45Z'
+      close_decision: S027-D64
+      report: docs/sessions/S027-multilingual-embeddings/reports/verify-impl.md
+      report_status: completed
     s026_baseline:
       status: completed
       started_at: '2026-08-05'
@@ -22501,33 +22989,83 @@ stages:
       overall: approved
       overall_result: approved
   12-verify-deploy:
-    status: completed
-    session_id: S027-multilingual-embeddings
-    evolve_cycle_id: EV-025
-    started_at: '2026-08-05'
-    started: '2026-08-05'
-    completed: '2026-08-05'
-    completed_at: '2026-08-05'
-    branch: main
-    mode: delta
+    status: in_progress
+    checklist_blockers: 'tip not pushed; no CI runs; uncommitted docs'
+    checklist_status: not_ready
+    env_role: staging_as_live
+    report_status: not_ready
+    report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+    started_at: '2026-08-06'
+    started_at_iso: '2026-08-06T23:21:00Z'
+    started: '2026-08-06'
+    session_id: S028-chat-source-ux
+    branch: evolve/EV-026-chat-source-ux
+    session_branch: evolve/EV-026-chat-source-ux
+    evolve_cycle_id: EV-026
+    mode: evolve
     delta_only: true
     feature_ids:
-      - F70
-      - F71
-    tip_sha: 4b7231b
-    commit_deployed: 4b7231b
-    current_action: completed
+      - F72
+      - F73
+      - F74
+    tip_sha: '8537690'
+    tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    current_action: local_ci_parity_then_complete_12
+    next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
     askquestion_pending: false
-    note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — 
-      report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
-    updated_at: '2026-08-06T14:46:45Z'
-    s027_d64_decision: S027-D64
-    reconciled_from: S027-D63
-    session_closed: true
-    session_closed_at: '2026-08-06T14:46:45Z'
-    close_decision: S027-D64
-    report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
-    report_status: completed
+    askquestion_pending_topic:
+    askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+    s028_d33_decision: S028-D33
+    s028_d33_choice: option_1_proceed_12
+    s028_d34_decision: S028-D34
+    s028_d34_choices:
+      ci_path: commit_local_ci_push_then_cli_deploy
+      ra009_remote_ci: waived_local_make_ci_push
+      env_role: staging_as_live_confirmed_live_prod
+      mitigations_1_to_6: approved
+      rollback_plan: approved
+    ra009_remote_ci_waived: true
+    ra009_waiver_reason: 'GitHub Actions outage — local make ci-push parity; do not block on gh run watch'
+    env_role_confirmed: true
+    env_role_live: prod
+    mitigations_1_to_6: approved
+    rollback_plan: approved
+    staging_tip_drift: true
+    staging_commit_deployed: c942971
+    tip_on_staging: false
+    carry_forward:
+      - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+      - '13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready'
+    note: 'S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34) — risk AskQuestion answered: RA-009 remote CI waived (GitHub Actions outage; local make ci-push parity; do not block on gh run watch); env_role=staging_as_live confirmed (live=prod ADR-049/S028-D2); mitigations 1–6 approved; rollback plan approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; next=commit artifacts + make ci-push then finalize checklist; 13 AskQuestion-gated for CLI deploy after 12 ready; tip@8537690; staging@c942971 drift=true; H4–H5 carry QA-S028-003; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+    updated_at: '2026-08-06T23:26:00Z'
+    s027_baseline:
+      status: completed
+      session_id: S027-multilingual-embeddings
+      evolve_cycle_id: EV-025
+      started_at: '2026-08-05'
+      started: '2026-08-05'
+      completed: '2026-08-05'
+      completed_at: '2026-08-05'
+      branch: main
+      mode: delta
+      delta_only: true
+      feature_ids:
+        - F70
+        - F71
+      tip_sha: 4b7231b
+      commit_deployed: 4b7231b
+      current_action: completed
+      askquestion_pending: false
+      note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — 
+        report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
+      updated_at: '2026-08-06T14:46:45Z'
+      s027_d64_decision: S027-D64
+      reconciled_from: S027-D63
+      session_closed: true
+      session_closed_at: '2026-08-06T14:46:45Z'
+      close_decision: S027-D64
+      report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
+      report_status: completed
     s026_baseline:
       status: completed
       started_at: '2026-08-05'
@@ -24020,9 +24558,9 @@ stages:
     evolve_cycle_id: EV-026
     started_at: '2026-08-06'
     started_at_iso: '2026-08-06T16:04:25Z'
-    current_stage: 10-e2e
-    current_action: awaiting_10_e2e
-    next_action: 10-e2e (pending)
+    current_stage: 12-verify-deploy
+    current_action: local_ci_parity_then_complete_12
+    next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
     phase_0_status: approved
     phase0_approved: true
     phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -24045,10 +24583,15 @@ stages:
     mode: evolve
     askquestion_pending: false
     askquestion_pending_topic:
-    askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
+    askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+    staging_tip_drift: true
+    staging_commit_deployed: c942971
+    tip_on_staging: false
+    visual_verify_blocked: true
+    visual_verify_blocked_until: 13-deploy-smoke
     close_cycle_pending: false
     session_closed: false
-    handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
+    handoff: '12 mid-stage (S028-D34): local_ci_parity_then_complete_12; commit+make ci-push; finalize checklist; 13 AskQuestion-gated for CLI deploy; tip@8537690; [Corpus: feature-list.md §F72–F74]'
     s028_d23_decision: S028-D23
     s028_d23_status: already_done
     s028_d24_pending: false
@@ -24057,15 +24600,27 @@ stages:
     s028_d27_decision: S028-D27
     s028_d28_decision: S028-D28
     s028_d29_decision: S028-D29
-    tip_sha: c8b25e1
-    tip_full: c8b25e14f2edf125781b2704a80f60ebecb83e41
-    tip_prev: 1332dc1
+    s028_d30_decision: S028-D30
+    s028_d31_decision: S028-D31
+    s028_d32_decision: S028-D32
+    s028_d33_decision: S028-D33
+    s028_d34_decision: S028-D34
+    tip_sha: '8537690'
+    tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    tip_prev: 'c8b25e1'
     phase_c: passed
     gate_c_to_d: passed
     stage_08_result: PASS
     stage_09_result: pass_with_advisories
-    note: 'S028/EV-026 09-qa COMPLETE 2026-08-06T22:40:28Z — overall=pass_with_advisories; current_stage=10-e2e (pending); tip@c8b25e1; [Corpus: feature-list.md §F72–F74]'
-    updated_at: '2026-08-06T22:40:28Z'
+    stage_10_result: PASS
+    stage_10_overall_t0: PASS
+    stage_11_result: approved
+    stage_11_status: completed
+    e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+    verify_impl_report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+    phase_d: passed
+    note: 'S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34) — risk AskQuestion answered: RA-009 remote CI waived (GitHub Actions outage; local make ci-push parity; do not block on gh run watch); env_role=staging_as_live confirmed (live=prod ADR-049/S028-D2); mitigations 1–6 approved; rollback plan approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; next=commit artifacts + make ci-push then finalize checklist; 13 AskQuestion-gated for CLI deploy after 12 ready; tip@8537690; staging@c942971 drift=true; H4–H5 carry QA-S028-003; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+    updated_at: '2026-08-06T23:26:00Z'
     predecessor:
       session_id: S027-multilingual-embeddings
       evolve_cycle_id: EV-025
@@ -24165,6 +24720,8 @@ stages:
     phase1_approved_at: '2026-08-06T16:36:58Z'
     s028_d20_decision: S028-D20
 deployment:
+  env_role: staging_as_live
+  env_role_note: 'S028/EV-026 12-verify-deploy (S028-D34) — env_role=staging_as_live confirmed (live=prod ADR-049 / S028-D2); hostnames may still say staging'
   local_build:
     status: green
     last_verified: '2026-08-05'
@@ -24186,20 +24743,22 @@ deployment:
       note: superseded by S022 T0 for 11-verify-impl
   staging:
     status: deployed
+    env_role: staging_as_live
     last_verified: '2026-08-05'
     commit_deployed: c942971
     commit_deployed_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-    commit_head: c942971
-    commit_head_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-    drift: false
+    commit_head: '8537690'
+    commit_head_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    drift: true
+    drift_note: '2026-08-06T23:26:00Z S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34): tip@8537690 still not on staging (commit_deployed=c942971); local CI parity then complete 12; live cutover remains 13 AskQuestion-gated for CLI deploy'
     branch: main
     commit_deployed_note: S026/EV-024 S026-D58 validate-existing smokes ACCEPTED @ c942971 — H0c/H1–H5/T3 PASS; F68 
       feedback PASS; F69 admin SKIP; enrich deferred; health_tiers confirmed accepted; report 
       docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md
     prior_commit_deployed_note: 'S023/EV-020 PR #180 MERGED @ 726e7fc — Path A H1/H3/H4/H5 PASS; H2 SKIP; live TOP_K=8 confirmed;
       AC-RQ8/RQ9 met live; AC-RQ10 held; CE false'
-    staging_note: S026/EV-024 S026-D58 smokes accepted @ c942971; Modal CD 30962875942 + DO CD 30962940376 success; 
-      gates.deploy=passed; checkpoints.deploy=passed; drift=false
+    staging_note: S026/EV-024 S026-D58 smokes accepted @ c942971; Modal CD 30962875942 + DO CD 30962940376 success;
+      gates.deploy=passed; checkpoints.deploy=passed; drift=true as of S028/EV-026 11-verify-impl tip@8537690 not deployed
     modal_data_management:
       redeployed_at: '2026-07-31'
       commit: a6c39e57e856e75d149b1ac1af82d6e92243af19
@@ -24332,6 +24891,8 @@ deployment:
       confirmed_at: '2026-08-05T00:54:00Z'
       confirmed_decision: S026-D58
     notes:
+      - 'S028/EV-026 2026-08-06T23:26:00Z 12-verify-deploy S028-D34: RA-009 remote CI waived (local make ci-push; GHA outage; do not block on gh run watch); env_role=staging_as_live confirmed (live=prod); mitigations 1–6 + rollback approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; 13 AskQuestion-gated for CLI deploy after 12 ready; tip@8537690 drift vs commit_deployed=c942971'
+      - 'S028/EV-026 2026-08-06T23:24:30Z 12-verify-deploy: env_role=staging_as_live (ADR-049 / S028-D2); checklist=docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md status=not_ready (tip not pushed, no CI runs, uncommitted docs); askquestion_pending=12 RA-009 tip CI + env_role + mitigations/rollback (S028); tip@8537690 drift vs commit_deployed=c942971'
       - S026/EV-024 2026-08-05 S026-D58 Accept 13 validate-existing PASS @ c942971 — deploy gate + Phase D closed; 
         health_tiers confirmed accepted; H0c/H1/H2/H3(+energy_estimate)/H3b/T3-EV-002/H4/H5 PASS; F68 ChatRAG+write 
         feedback 201 PASS; F69 admin SKIP JWT; enrich deferred; report 
@@ -24621,6 +25182,7 @@ evolve_cycles:
     started: '2026-08-06'
     started_at: '2026-08-06T16:04:25Z'
     completed:
+    env_role: staging_as_live
     predecessor_evolve_cycle_id: EV-025
     predecessor_session_id: S027-multilingual-embeddings
     github_issues:
@@ -24656,10 +25218,10 @@ evolve_cycles:
         06-tech-tooling: no new deps expected
     routing_preset: feature
     preset: feature
-    current_stage: 10-e2e
-    current_action: awaiting_10_e2e
-    next_action: 10-e2e (pending)
-    current_stage_note: 'QA remediation done (001/002 fixed; 003–005 accepted); next 10-e2e pending (not started); tip@c8b25e1'
+    current_stage: 12-verify-deploy
+    current_action: local_ci_parity_then_complete_12
+    next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
+    current_stage_note: 'S028/EV-026 12 IN_PROGRESS (S028-D34); local_ci_parity_then_complete_12; askquestion_pending=false during local CI; env_role=staging_as_live confirmed; RA-009 waived; mitigations 1–6 + rollback approved; tip@8537690; 13 gated after 12 ready'
     branch: evolve/EV-026-chat-source-ux
     session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
@@ -24713,7 +25275,12 @@ evolve_cycles:
         - S028-D16
     askquestion_pending: false
     askquestion_pending_topic:
-    askquestion_cleared: 'Gate C→D / phase_c — user option 1 (pass → 08-verify-build) S028-D26'
+    askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+    staging_tip_drift: true
+    staging_commit_deployed: c942971
+    tip_on_staging: false
+    visual_verify_blocked: true
+    visual_verify_blocked_until: 13-deploy-smoke
     decisions:
       - 'S028-D1: routing + open approved (1a/2a); feature preset'
       - 'S028-D2: prod-only deploy posture; AskQuestion before 12–13'
@@ -24755,6 +25322,15 @@ evolve_cycles:
       - 'S028-D27: 08-verify-build COMPLETE PASS — report=docs/sessions/S028-chat-source-ux/reports/verification-report.md; security remediations included; tip@44f03da; next 09-qa pending; 2026-08-06T22:16:30Z'
       - 'S028-D29: 09-qa COMPLETE pass_with_advisories — tip@c8b25e1; next 10-e2e pending'
       - 'S028-D30: QA remediation — 001/002 FIXED; 003 accepted→13; 004 accepted pre-existing; 005 accepted→11; 10-e2e remains pending; 2026-08-06T22:47:07Z'
+      - '10-e2e STARTED 2026-08-06T22:52:00Z: running_10_e2e; tip@8537690; proceed T0 e2e (F72–F74 chat source UX)'
+      - '10-e2e COMPLETE 2026-08-06T22:57:00Z: overall T0 PASS; UJ-077/078/079/076 green; T2/T3→13 (QA-S028-003); report=docs/sessions/S028-chat-source-ux/reports/e2e-report.md; tip@8537690; phase_d pending until 11; → 11-verify-impl starting_11_verify_impl'
+      - '11-verify-impl 2026-08-06T22:59:33Z: draft verify-impl.md written (in_progress, awaiting user); current_action=awaiting_user_signoff_batch1; askquestion_pending=true; topic=11-verify-impl journey signoff + inspection env + UI preview (UJ-077/078/079, F72-F74)'
+      - 'S028-D31 2026-08-06T23:03:52Z: 11-verify-impl batch1 — Approve UJ-077+UJ-078 (T0 enough; T3→13); Approve UJ-079; staging feature inspection; no UI preview (non-deployed); H4–H5 still gated (QA-S028-003 / S028-D2); current_action=feature_inspection_staging; askquestion_pending topic→feature inspection staging + F72-F74 approve'
+      - '11-verify-impl 2026-08-06T23:09:12Z: staging tip drift — tip@8537690 NOT on staging (commit_deployed=c942971); S028-D31 staging inspection cannot visually verify F72–F74 until 12/13 deploy; current_action=awaiting_inspection_disposition_batch2; askquestion_pending topic→staging tip drift — inspect disposition + F72-F74 approve'
+      - 'S028-D32 2026-08-06T23:14:50Z: 11-verify-impl batch2 — (1) Approve inspection from T0/OpenAPI only (live visual at 13); (2) Approve all F72 F73 F74; AC-SU1–11 checked; issues #222 #223 #224 closed (QA-S028-005); 11 COMPLETE; phase_d=passed; current_stage→12-verify-deploy pending; askquestion_pending topic=proceed to 12-verify-deploy? (S028-D2); current_action=awaiting_12_gate_askquestion (S028-D2)'
+      - 'S028-D33 2026-08-06T23:21:00Z: User approved S028-D2 gate option 1 — proceed to 12-verify-deploy; current_action=running_12_verify_deploy; tip@8537690; 13 still AskQuestion-gated after 12; H4–H5 carry QA-S028-003'
+      - '12-verify-deploy mid 2026-08-06T23:24:30Z: env_role=staging_as_live recorded (ADR-049 / S028-D2); current_action=awaiting_ci_and_risk_askquestion; askquestion_pending topic=12 RA-009 tip CI + env_role + mitigations/rollback (S028); checklist=docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md status=not_ready (tip not pushed, no CI runs, uncommitted docs); 12 remains in_progress'
+      - 'S028-D34 2026-08-06T23:26:00Z: 12 risk AskQuestion — (1) Commit + full LOCAL verify (GHA outage) then CLI deploy; RA-009 remote CI waived with local make ci-push parity; do not block on gh run watch; (2) Confirm env_role=staging_as_live (live=prod); (3) Approve mitigations 1–6; (4) Approve rollback plan; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; 13 remains AskQuestion-gated after 12 ready'
     feature_map:
       F72:
         issue: 222
@@ -24775,9 +25351,10 @@ evolve_cycles:
       phase_b: passed
       phase_c: passed
       phase_c_note: 'Gate C→D PASS (S028-D26 option 1) — proceed 08-verify-build'
-      phase_d: pending
+      phase_d: passed
+      phase_d_note: '09+10+11 complete (S028-D32); 12 in_progress (S028-D34 local CI parity); 13 AskQuestion-gated for CLI deploy'
       deploy: pending
-      updated_at: '2026-08-06T22:04:00Z'
+      updated_at: '2026-08-06T23:26:00Z'
     adrs:
       - path: docs/adr/ADR-051-display-title-vs-lock-flag.md
         id: ADR-051
@@ -24922,13 +25499,96 @@ evolve_cycles:
         recorded_at: '2026-08-06T22:16:30Z'
         updated_at: '2026-08-06T22:16:30Z'
         note: '08-verify-build COMPLETE PASS; security remediations included; tip@44f03da'
-    issues: []
-    updated_at: '2026-08-06T22:40:28Z'
-    note: 'S028/EV-026 09-qa COMPLETE 2026-08-06T22:40:28Z — overall=pass_with_advisories; F72–F74 delta all green; current_stage=10-e2e (pending); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-report.md; [Corpus: feature-list.md §F72–F74]'
-    tip_sha: c8b25e1
-    tip_full: c8b25e14f2edf125781b2704a80f60ebecb83e41
-    tip_prev: 1332dc1
-    bundle_note: tip synced at 09-qa complete 1332dc1→c8b25e1 (qa-report commit)
+      - path: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
+        kind: qa-remediation
+        status: completed
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        stage: 09-qa
+        skill_id: 09-qa
+        recorded_at: '2026-08-06T22:47:07Z'
+        updated_at: '2026-08-06T22:47:07Z'
+        note: 'QA remediation — 001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted'
+      - path: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+        kind: stage_report
+        status: completed
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        stage: 10-e2e
+        skill_id: 10-e2e
+        result: PASS
+        overall_t0: PASS
+        recorded_at: '2026-08-06T22:57:00Z'
+        updated_at: '2026-08-06T22:57:00Z'
+        note: '10-e2e COMPLETE T0 PASS; UJ-077/078/079/076 green; T2/T3→13'
+      - path: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+        kind: stage_report
+        status: completed
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        stage: 11-verify-impl
+        skill_id: 11-verify-impl
+        report_status: completed
+        recorded_at: '2026-08-06T22:59:33Z'
+        updated_at: '2026-08-06T23:14:50Z'
+        completed_at: '2026-08-06T23:14:50Z'
+        note: 'S028-D32 batch2 complete — T0/OpenAPI inspect; F72–F74 approved; AC-SU1–11; #222–#224 closed'
+      - path: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+        kind: deploy-checklist
+        status: not_ready
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        stage: 12-verify-deploy
+        skill_id: 12-verify-deploy
+        recorded_at: '2026-08-06T23:24:30Z'
+        updated_at: '2026-08-06T23:24:30Z'
+        env_role: staging_as_live
+        note: 'Drafted; not_ready — tip not pushed / uncommitted docs; S028-D34 approved local make ci-push path (RA-009 remote CI waived); mitigations 1–6 + rollback approved; completing local CI then finalize checklist'
+        updated_at: '2026-08-06T23:26:00Z'
+        s028_d34_decision: S028-D34
+    issues:
+      - id: 222
+        status: closed
+        feature_id: F72
+        closed_at: '2026-08-06T23:14:50Z'
+        closed_by: S028-D32
+        note: 'QA-S028-005 — closed at 11-verify-impl'
+      - id: 223
+        status: closed
+        feature_id: F73
+        closed_at: '2026-08-06T23:14:50Z'
+        closed_by: S028-D32
+        note: 'QA-S028-005 — closed at 11-verify-impl'
+      - id: 224
+        status: closed
+        feature_id: F74
+        closed_at: '2026-08-06T23:14:50Z'
+        closed_by: S028-D32
+        note: 'QA-S028-005 — closed at 11-verify-impl'
+    updated_at: '2026-08-06T23:26:00Z'
+    note: 'S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34) — risk AskQuestion answered: RA-009 remote CI waived (GitHub Actions outage; local make ci-push parity; do not block on gh run watch); env_role=staging_as_live confirmed (live=prod ADR-049/S028-D2); mitigations 1–6 approved; rollback plan approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; next=commit artifacts + make ci-push then finalize checklist; 13 AskQuestion-gated for CLI deploy after 12 ready; tip@8537690; staging@c942971 drift=true; H4–H5 carry QA-S028-003; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+    tip_sha: '8537690'
+    tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    s028_d33_decision: S028-D33
+    s028_d33_choice: option_1_proceed_12
+    s028_d33_at: '2026-08-06T23:21:00Z'
+    s028_d34_decision: S028-D34
+    s028_d34_at: '2026-08-06T23:26:00Z'
+    s028_d34_choices:
+      ci_path: commit_local_ci_push_then_cli_deploy
+      ra009_remote_ci: waived_local_make_ci_push
+      env_role: staging_as_live_confirmed_live_prod
+      mitigations_1_to_6: approved
+      rollback_plan: approved
+    ra009_remote_ci_waived: true
+    ra009_waiver_reason: 'GitHub Actions outage — local make ci-push parity; do not block on gh run watch'
+    env_role_confirmed: true
+    env_role_live: prod
+    mitigations_1_to_6: approved
+    rollback_plan: approved
+    tip_prev: 'c8b25e1'
+    tip_at_start_10_e2e: '8537690'
+    bundle_note: 'tip synced at 10-e2e start c8b25e1→8537690 (chore sync workflow-state after QA remediation)'
     stage_08_result: PASS
     stage_09_result: pass_with_advisories
     s028_d28_decision: S028-D28
@@ -25293,7 +25953,7 @@ evolve_cycles:
           - F74
         branch: evolve/EV-026-chat-source-ux
         current_action: completed
-        next_action: 10-e2e (pending)
+        next_action: 10-e2e in_progress
         askquestion_pending: false
         askquestion_pending_topic:
         tip_sha: c8b25e1
@@ -25349,22 +26009,175 @@ evolve_cycles:
           QA-S028-005: accepted_carry_11
         updated_at: '2026-08-06T22:47:07Z'
       10-e2e:
-        status: pending
-        session_id: S028-chat-source-ux
-        evolve_cycle_id: EV-026
-        mode: delta
-        note: 'Not started; next after 09-qa COMPLETE (parallel optional)'
-        askquestion_pending: false
-      - path: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
-        kind: qa-remediation
         status: completed
+        started: '2026-08-06'
+        started_at: '2026-08-06T22:52:00Z'
+        completed: '2026-08-06'
+        completed_at: '2026-08-06T22:57:00Z'
         session_id: S028-chat-source-ux
         evolve_cycle_id: EV-026
-        stage: 09-qa
-        skill_id: 09-qa
-        recorded_at: '2026-08-06T22:47:07Z'
-        updated_at: '2026-08-06T22:47:07Z'
-        note: 'QA remediation — 001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted'
+        mode: evolve
+        delta_only: true
+        feature_ids:
+          - F72
+          - F73
+          - F74
+        branch: evolve/EV-026-chat-source-ux
+        current_action: completed
+        next_action: 11-verify-impl (starting)
+        askquestion_pending: false
+        askquestion_pending_topic:
+        tip_sha: '8537690'
+        tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+        tip_prev: 'c8b25e1'
+        tip_at_start: '8537690'
+        report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+        report_status: completed
+        overall: PASS
+        overall_result: PASS
+        result: PASS
+        overall_t0: PASS
+        t0_result: PASS
+        t0_summary: 'UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4'
+        t2_t3_deferred: true
+        t2_t3_defer_to: 13-deploy-smoke
+        t2_t3_note: 'T2/T3 deferred to 13 (QA-S028-003)'
+        carry_forward:
+          - 'QA-S028-005: close #222–#224 at 11-verify-impl (13 if deploy)'
+          - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+          - 'AC-SU1–10 for sign-off at 11-verify-impl'
+        citations:
+          - '[Corpus: feature-list.md §F72–F74]'
+          - '[Spec: docs/user-journeys.md §UJ-077]'
+          - '[Spec: docs/user-journeys.md §UJ-078]'
+          - '[Spec: docs/user-journeys.md §UJ-079]'
+          - '[Spec: docs/user-journeys.md §UJ-076]'
+          - '[Corpus: decisions.md §RD-309–324]'
+          - '[Spec: docs/adr/ADR-051-display-title-vs-lock-flag.md]'
+        note: 'S028/EV-026 10-e2e COMPLETE — overall T0 PASS; UJ-077/078/079/076 green; T2/T3→13 (QA-S028-003); report=docs/sessions/S028-chat-source-ux/reports/e2e-report.md; tip@8537690; phase_d pending'
+        updated_at: '2026-08-06T22:57:00Z'
+      11-verify-impl:
+        status: completed
+        started: '2026-08-06'
+        started_at: '2026-08-06T22:57:00Z'
+        completed: '2026-08-06'
+        completed_at: '2026-08-06T23:14:50Z'
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        mode: evolve
+        delta_only: true
+        feature_ids:
+          - F72
+          - F73
+          - F74
+        approved_features:
+          - F72
+          - F73
+          - F74
+        overall: approved
+        overall_result: approved
+        branch: evolve/EV-026-chat-source-ux
+        current_action: completed
+        next_action: 12-verify-deploy in_progress (S028-D33)
+        askquestion_pending: false
+        askquestion_pending_topic:
+        askquestion_cleared: '11-verify-impl batch2 — S028-D32 T0/OpenAPI inspect + approve F72–F74'
+        s028_d31_decision: S028-D31
+        s028_d32_decision: S028-D32
+        batch1_status: answered
+        batch1_decision: S028-D31
+        batch2_status: answered
+        batch2_decision: S028-D32
+        uj_077_status: approved_t0
+        uj_078_status: approved_t0
+        uj_079_status: approved
+        inspection_env: staging
+        inspection_basis: t0_openapi_only
+        inspection_disposition: approve_t0_openapi_live_at_13
+        ui_preview: none_non_deployed
+        staging_tip_drift: true
+        staging_commit_deployed: c942971
+        tip_on_staging: false
+        visual_verify_blocked: true
+        visual_verify_blocked_until: 13-deploy-smoke
+        visual_verify_waiver: t0_openapi_only_live_at_13
+        h4_h5_note: 'H4–H5 still gated (QA-S028-003 / S028-D2) until 13-deploy-smoke'
+        tip_sha: '8537690'
+        tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+        tip_at_start: '8537690'
+        e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+        e2e_overall_t0: PASS
+        phase_d: passed
+        report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+        report_status: completed
+        ac_checked: AC-SU1-11
+        issues_closed:
+          - 222
+          - 223
+          - 224
+        qa_s028_005_status: closed
+        carry_forward:
+          - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+          - 'Live visual verify F72–F74 at 13 (S028-D32)'
+        citations:
+          - '[Corpus: feature-list.md §F72–F74]'
+          - '[Corpus: acceptance-criteria.md §AC-SU1–11]'
+          - '[Spec: docs/user-journeys.md §UJ-077]'
+          - '[Spec: docs/user-journeys.md §UJ-078]'
+          - '[Spec: docs/user-journeys.md §UJ-079]'
+          - '[Spec: docs/sessions/S028-chat-source-ux/reports/e2e-report.md]'
+          - '[Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
+        note: 'S028/EV-026 11-verify-impl COMPLETE APPROVED 2026-08-06T23:14:50Z — S028-D32 batch2: T0/OpenAPI only (live@13); Approve all F72 F73 F74; AC-SU1–11; #222–#224 closed; phase_d=passed'
+        updated_at: '2026-08-06T23:14:50Z'
+      12-verify-deploy:
+        status: in_progress
+        checklist_blockers: 'tip not pushed; no CI runs; uncommitted docs'
+        checklist_status: not_ready
+        env_role: staging_as_live
+        report_status: not_ready
+        report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+        started: '2026-08-06'
+        started_at: '2026-08-06T23:21:00Z'
+        mode: evolve
+        delta_only: true
+        session_id: S028-chat-source-ux
+        evolve_cycle_id: EV-026
+        branch: evolve/EV-026-chat-source-ux
+        feature_ids:
+          - F72
+          - F73
+          - F74
+        current_action: local_ci_parity_then_complete_12
+        next_action: 'Commit artifacts + make ci-push (RA-009 remote CI waived); finalize 12 checklist; then AskQuestion for 13 CLI deploy'
+        askquestion_pending: false
+        askquestion_pending_topic:
+        askquestion_cleared: 'S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved'
+        s028_d33_decision: S028-D33
+        s028_d33_choice: option_1_proceed_12
+        s028_d34_decision: S028-D34
+        s028_d34_choices:
+          ci_path: commit_local_ci_push_then_cli_deploy
+          ra009_remote_ci: waived_local_make_ci_push
+          env_role: staging_as_live_confirmed_live_prod
+          mitigations_1_to_6: approved
+          rollback_plan: approved
+        ra009_remote_ci_waived: true
+        ra009_waiver_reason: 'GitHub Actions outage — local make ci-push parity; do not block on gh run watch'
+        env_role_confirmed: true
+        env_role_live: prod
+        mitigations_1_to_6: approved
+        rollback_plan: approved
+        tip_sha: '8537690'
+        tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+        staging_tip_drift: true
+        staging_commit_deployed: c942971
+        tip_on_staging: false
+        carry_forward:
+          - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+          - '13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready'
+          - 'Live visual verify F72–F74 at 13'
+        note: 'S028/EV-026 12-verify-deploy IN_PROGRESS (S028-D34) — risk AskQuestion answered: RA-009 remote CI waived (GitHub Actions outage; local make ci-push parity; do not block on gh run watch); env_role=staging_as_live confirmed (live=prod ADR-049/S028-D2); mitigations 1–6 approved; rollback plan approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false during local CI; next=commit artifacts + make ci-push then finalize checklist; 13 AskQuestion-gated for CLI deploy after 12 ready; tip@8537690; staging@c942971 drift=true; H4–H5 carry QA-S028-003; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+        updated_at: '2026-08-06T23:26:00Z'
     docs_touched:
       - docs/feature-list.md
       - docs/user-journeys.md
@@ -25387,10 +26200,21 @@ evolve_cycles:
     tp_lock: TP1–TP4
     phase: Phase 29 M123–M126
     rd_range: RD-322..RD-324
-    handoff: 'QA remediation COMPLETE (001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted) → next 10-e2e (pending, not started); tip@c8b25e1; report=docs/sessions/S028-chat-source-ux/reports/qa-remediation.md'
+    handoff: '12 mid-stage (S028-D34): local_ci_parity_then_complete_12; commit+make ci-push; finalize checklist; 13 AskQuestion-gated for CLI deploy; tip@8537690'
     s028_d28_decision: S028-D28
     s028_d29_decision: S028-D29
+    s028_d30_decision: S028-D30
+    s028_d31_decision: S028-D31
+    s028_d32_decision: S028-D32
     stage_09_result: pass_with_advisories
+    stage_10_status: completed
+    stage_10_result: PASS
+    stage_10_overall_t0: PASS
+    e2e_report: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+    stage_11_status: completed
+    stage_11_result: approved
+    verify_impl_report: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+    phase_d: passed
     s028_d24_decision: S028-D24
     s028_d24_choices:
       M1: 1
@@ -42925,13 +43749,19 @@ issue_log:
   - id: QA-S028-005
     category: issue_closeout
     summary: 'Close GitHub #222–#224 after 11-verify-impl (13 if deploy)'
-    status: accepted
+    status: closed
     severity: advisory
     carry_to: 11-verify-impl
     session_id: S028-chat-source-ux
     evolve_cycle_id: EV-026
     recorded_at: '2026-08-06T22:47:07Z'
-    note: 'Accepted carry to 11; [Spec: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md]'
+    closed_at: '2026-08-06T23:14:50Z'
+    closed_by: S028-D32
+    issues_closed:
+      - 222
+      - 223
+      - 224
+    note: 'Closed at 11-verify-impl (S028-D32); #222 #223 #224 closed; [Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
 
 decisions_log:
   - id: S028-D1
@@ -48683,6 +49513,90 @@ decisions_log:
     status: confirmed
     note: '[Corpus: feature-list.md §F72–F74] [Spec: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md]'
   - 'S028-D30 / EV-026: QA remediation 2026-08-06T22:47:07Z — 001/002 fixed; 003–005 accepted; 10-e2e pending'
+  - id: S028-D31
+    skill: 11-verify-impl
+    skill_id: 11-verify-impl
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    decision: 'S028-D31: 11-verify-impl batch1 AskQuestion — (1) Approve UJ-077 and UJ-078 (T0 enough; T3→13); (2) Approve UJ-079; (3) Staging environment for feature inspection; (4) No UI preview (non-deployed). H4–H5 remain gated (QA-S028-003 / S028-D2). current_action=feature_inspection_staging; askquestion_pending topic→feature inspection staging + F72-F74 approve.'
+    summary: 'S028-D31: UJ-077/078/079 journey signoff + staging inspection + no UI preview'
+    topic: 11_verify_impl_batch1_signoff
+    choices:
+      uj_077_078: approve_t0_t3_to_13
+      uj_079: approve
+      inspection_env: staging
+      ui_preview: none_non_deployed
+    recorded_at: '2026-08-06T23:03:52Z'
+    approved: '2026-08-06'
+    status: confirmed
+    note: 'H4–H5 still gated (QA-S028-003 / S028-D2). Staging URLs from deployment.staging (S026 last verified @ c942971; F72–F74 tip 8537690 not deployed). [Corpus: feature-list.md §F72–F74] [Spec: docs/user-journeys.md §UJ-077]'
+  - 'S028-D31 / EV-026: 11-verify-impl batch1 2026-08-06T23:03:52Z — UJ-077/078/079 approved; staging inspection; no UI preview; H4–H5 gated'
+  - id: S028-D31b
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    stage: 11-verify-impl
+    decision: '11-verify-impl tip drift — tip@8537690 NOT on staging (commit_deployed=c942971); cannot visually verify F72–F74 until 12/13; current_action=awaiting_inspection_disposition_batch2; askquestion_pending_topic=staging tip drift — inspect disposition + F72-F74 approve'
+    recorded_at: '2026-08-06T23:09:12Z'
+    status: superseded
+    superseded_by: S028-D32
+    note: 'Superseded by S028-D32 batch2 — T0/OpenAPI only (live@13) + approve F72–F74'
+  - id: S028-D32
+    skill: 11-verify-impl
+    skill_id: 11-verify-impl
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    decision: 'S028-D32: 11-verify-impl batch2 AskQuestion — (1) Approve inspection from T0/OpenAPI only (live visual verification at 13); (2) Approve all F72 F73 F74. AC-SU1–11 checked in acceptance-criteria. Issues #222 #223 #224 closed (QA-S028-005). 11-verify-impl COMPLETE; checkpoints.phase_d=passed (09+10+11); current_stage→12-verify-deploy pending; askquestion_pending topic=proceed to 12-verify-deploy? (S028-D2); current_action=awaiting_12_gate_askquestion (S028-D2). Do not mark 12 in_progress until user confirms.'
+    summary: 'S028-D32: T0/OpenAPI inspect + approve F72–F74; phase_d passed; await 12 gate (S028-D2)'
+    topic: 11_verify_impl_batch2_disposition_and_feature_approve
+    choices:
+      inspection_disposition: approve_t0_openapi_live_at_13
+      features: approve_all_f72_f73_f74
+    recorded_at: '2026-08-06T23:14:50Z'
+    approved: '2026-08-06'
+    status: confirmed
+    note: 'Staging tip@8537690 still not deployed (c942971); visual deferred to 13. [Corpus: feature-list.md §F72–F74] [Corpus: acceptance-criteria.md §AC-SU1–11] [Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
+  - 'S028-D32 / EV-026: 11-verify-impl COMPLETE 2026-08-06T23:14:50Z — T0/OpenAPI; F72–F74 approved; phase_d=passed; awaiting_12_gate_askquestion (S028-D2)'
+  - id: S028-D33
+    skill: 12-verify-deploy
+    skill_id: 12-verify-deploy
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    decision: 'S028-D33: User approved S028-D2 gate option 1 — proceed to 12-verify-deploy. Cleared awaiting_12_gate_askquestion; current_stage=12-verify-deploy; current_action=running_12_verify_deploy; routing_plan + EV-026.stages.12-verify-deploy=in_progress. Tip remains 8537690 on evolve/EV-026-chat-source-ux. Stage 13-deploy-smoke remains AskQuestion-gated after 12; H4–H5 carry QA-S028-003. Mode evolve/delta_only; feature_ids F72 F73 F74.'
+    summary: 'S028-D33: proceed to 12-verify-deploy (S028-D2 option 1); 13 still gated; H4–H5→13'
+    topic: s028_d2_gate_proceed_12_verify_deploy
+    choice: option_1_proceed_12
+    references:
+      - S028-D2
+      - S028-D32
+    recorded_at: '2026-08-06T23:21:00Z'
+    approved: '2026-08-06'
+    status: confirmed
+    note: 'Staging tip drift remains (commit_deployed=c942971 vs tip@8537690). [Corpus: feature-list.md §F72–F74] [Corpus: acceptance-criteria.md §AC-SU1–11]'
+  - 'S028-D33 / EV-026: 12-verify-deploy STARTED 2026-08-06T23:21:00Z — S028-D2 option 1; tip@8537690; running_12_verify_deploy; 13 AskQuestion-gated; H4–H5 carry QA-S028-003'
+  - id: S028-D34
+    skill: 12-verify-deploy
+    skill_id: 12-verify-deploy
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    decision: 'S028-D34: 12-verify-deploy risk AskQuestion answered — (1) Commit + full LOCAL verify (GitHub Actions outage) then CLI deploy; RA-009 remote CI waived with local make ci-push parity; do not block on gh run watch; (2) Confirm env_role=staging_as_live (live=prod); (3) Approve all failure mitigations 1–6; (4) Approve rollback plan. current_action=local_ci_parity_then_complete_12; askquestion_pending=false temporarily during local CI; 13-deploy-smoke remains AskQuestion-gated for CLI deploy after 12 ready. Will commit artifacts and run make ci-push.'
+    summary: 'S028-D34: RA-009 local CI waiver; env_role confirmed; mitigations 1–6 + rollback approved; local_ci_parity_then_complete_12'
+    topic: 12_verify_deploy_risk_ci_env_mitigations_rollback
+    choices:
+      ci_path: commit_local_ci_push_then_cli_deploy
+      ra009_remote_ci: waived_local_make_ci_push
+      env_role: staging_as_live_confirmed_live_prod
+      mitigations_1_to_6: approved
+      rollback_plan: approved
+    references:
+      - S028-D2
+      - S028-D33
+      - RA-009
+      - ADR-049
+    recorded_at: '2026-08-06T23:26:00Z'
+    approved: '2026-08-06'
+    status: confirmed
+    note: '12 remains in_progress until local CI + checklist ready. Do not start 13 CLI deploy without further AskQuestion. [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+  - 'S028-D34 / EV-026: 12 risk AskQuestion 2026-08-06T23:26:00Z — RA-009 remote CI waived (local make ci-push); env_role staging_as_live confirmed; mitigations 1–6 + rollback approved; current_action=local_ci_parity_then_complete_12; askquestion_pending=false; 13 still gated'
 artifacts:
   - path: docs/sessions/S027-multilingual-embeddings/reports/deploy-smoke.md
     kind: deploy-smoke
@@ -52033,6 +52947,48 @@ artifacts:
     recorded_at: '2026-08-06T22:47:07Z'
     updated_at: '2026-08-06T22:47:07Z'
     note: 'QA remediation — 001/002 fixed; 003→13, 004 pre-existing, 005→11 accepted; 10-e2e still pending'
+  - path: docs/sessions/S028-chat-source-ux/reports/e2e-report.md
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    kind: stage_report
+    status: completed
+    stage: 10-e2e
+    skill_id: 10-e2e
+    result: PASS
+    overall_t0: PASS
+    tip_sha: '8537690'
+    tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    recorded_at: '2026-08-06T22:57:00Z'
+    updated_at: '2026-08-06T22:57:00Z'
+    note: '10-e2e COMPLETE T0 PASS; UJ-077 Vitest 8/8; UJ-078 API 2/2; UJ-079 API 1/1 + DocumentAdmin Vitest; UJ-076 regression 4/4; T2/T3 deferred to 13 (QA-S028-003)'
+  - path: docs/sessions/S028-chat-source-ux/reports/verify-impl.md
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    kind: stage_report
+    status: completed
+    stage: 11-verify-impl
+    skill_id: 11-verify-impl
+    report_status: completed
+    tip_sha: '8537690'
+    tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+    recorded_at: '2026-08-06T22:59:33Z'
+    updated_at: '2026-08-06T23:14:50Z'
+    completed_at: '2026-08-06T23:14:50Z'
+    s028_d32_decision: S028-D32
+    note: 'S028-D32 COMPLETE — T0/OpenAPI inspect; F72–F74 approved; AC-SU1–11; #222–#224 closed; phase_d=passed'
+  - path: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+    kind: deploy-checklist
+    status: not_ready
+    session_id: S028-chat-source-ux
+    evolve_cycle_id: EV-026
+    stage: 12-verify-deploy
+    skill_id: 12-verify-deploy
+    recorded_at: '2026-08-06T23:24:30Z'
+    updated_at: '2026-08-06T23:24:30Z'
+    env_role: staging_as_live
+    note: 'Drafted; not_ready — tip not pushed / uncommitted docs; S028-D34 approved local make ci-push (RA-009 remote CI waived); mitigations 1–6 + rollback approved; completing local CI then finalize'
+    updated_at: '2026-08-06T23:26:00Z'
+    s028_d34_decision: S028-D34
 git_history:
   current_branch: evolve/EV-026-chat-source-ux
   branches:
@@ -52046,12 +53002,13 @@ git_history:
       renamed_at: '2026-08-06T19:09:30Z'
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
-      head_sha: c8b25e14f2edf125781b2704a80f60ebecb83e41
-      tip: c8b25e1
-      tip_sha: c8b25e1
-      tip_full: c8b25e14f2edf125781b2704a80f60ebecb83e41
-      tip_note: 'tip@c8b25e1 after 09-qa COMPLETE pass_with_advisories'
-      note: 'M123–M126 + 08 PASS + 09-qa COMPLETE pass_with_advisories; next 10-e2e pending; tip@c8b25e1'
+      head_sha: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      tip: '8537690'
+      tip_sha: '8537690'
+      tip_full: 853769054e09a5722ea3e4954d21c46d328c0dfd
+      tip_prev: 'c8b25e1'
+      tip_note: 'tip@8537690 unchanged; 12-verify-deploy in_progress (S028-D33)'
+      note: 'M123–M126 + 08–11 complete; 12-verify-deploy in_progress (S028-D33); tip@8537690'
       m123_status: completed
       m124_status: completed
       m125_status: completed
@@ -52060,12 +53017,15 @@ git_history:
       m124_tip: 08dd6a7
       m125_tip: aecb764
       next_milestone: none
-      next_task: 10-e2e
-      task_status: completed
-      current_action: awaiting_10_e2e
+      next_task: 10-e2e T0
+      task_status: in_progress
+      current_action: running_10_e2e
       stage_09_result: pass_with_advisories
+      stage_10_status: in_progress
       s028_d29_decision: S028-D29
+      s028_d30_decision: S028-D30
       qa_report: docs/sessions/S028-chat-source-ux/reports/qa-report.md
+      qa_remediation: docs/sessions/S028-chat-source-ux/reports/qa-remediation.md
       t126_1_status: completed
       t126_1_completed_at: '2026-08-06T21:46:44Z'
       t126_1_report: docs/sessions/S028-chat-source-ux/reports/t126_1_tc_green_gate.md
@@ -52089,7 +53049,7 @@ git_history:
       s028_d27_decision: S028-D27
       stage_08_result: PASS
       report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
-      updated_at: '2026-08-06T22:16:30Z'
+      updated_at: '2026-08-06T22:52:00Z'
     - name: feat/S028-chat-source-ux
       purpose: 'S028/EV-026 chat source UX (#222 #223 #224) — session branch (renamed)'
       base: main
