@@ -88,7 +88,9 @@ describe("SourceList", () => {
       url: "fixture://corpus/doc-1",
       score: 0.8,
     };
-    const { container } = render(<SourceList sources={[fixture]} locale="en" />);
+    const { container } = render(
+      <SourceList sources={[fixture]} locale="en" />,
+    );
     expect(container.querySelector("a")).toBeNull();
     expect(screen.getByText("Fixture doc")).toBeInTheDocument();
   });
