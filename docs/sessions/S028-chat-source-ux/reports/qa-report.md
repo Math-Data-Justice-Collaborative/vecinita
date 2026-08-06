@@ -113,13 +113,15 @@ PASS. Pre-existing: `test_modal_url_validate.py` missing-module warning; DM esli
 
 ## Findings for 11-verify-impl
 
-| ID | Severity | Finding | Suggested action |
-|----|----------|---------|------------------|
-| QA-S028-001 | **Blocking** (out of EV-026 Fn) | UJ-076 TC-239: promote leaves `e0_revisions == 0` | Fix promote/revision retention (EV-025/F71) or explicit waive + BUG; do not merge blind |
-| QA-S028-002 | Advisory | `h2` 4.3.0 CVE-2026-71554 (fix 4.4.1) | Bump transitive / add ignore with reason; not introduced by F72–F74 |
-| QA-S028-003 | Advisory | H4–H5 live not run | Required at **13-deploy-smoke** after AskQuestion (S028-D2) |
-| QA-S028-004 | Advisory | Full FE/Python coverage gate not re-run locally | Run `make test-unit-coverage` / `make ci-push` before PR-ready |
-| QA-S028-005 | Advisory | #222–#224 close after 11 (13 if deploy) | Carry from M126 closeout |
+| ID | Severity | Finding | Suggested action | Disposition (remediation) |
+|----|----------|---------|------------------|---------------------------|
+| QA-S028-001 | **Blocking** (out of EV-026 Fn) | UJ-076 TC-239: promote leaves `e0_revisions == 0` | Fix promote/revision retention | **Fixed** — LEGACY_E0 archive on first cutover; UJ-076 4/4 green ([qa-remediation](./qa-remediation.md)) |
+| QA-S028-002 | Advisory | `h2` 4.3.0 CVE-2026-71554 (fix 4.4.1) | Bump transitive | **Fixed** — `h2>=4.4.1` uv override; `make audit` clean |
+| QA-S028-003 | Advisory | H4–H5 live not run | Required at **13** after AskQuestion (S028-D2) | **Accepted → 13** |
+| QA-S028-004 | Advisory | Coverage gate | Run `make test-unit-coverage` | **Accepted (pre-existing)** — ran locally; DM gaps in Evaluation/Jobs (not F74); DocumentAdmin 100% |
+| QA-S028-005 | Advisory | #222–#224 close after 11 (13 if deploy) | Carry from M126 closeout | **Accepted → 11** |
+
+Remediation note: `reports/qa-remediation.md` (2026-08-06).
 
 ## Phase / plan alignment
 
