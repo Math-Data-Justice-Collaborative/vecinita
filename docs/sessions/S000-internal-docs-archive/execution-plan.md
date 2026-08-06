@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 07-build |
-| **Active milestone** | M123 — F72 citation URL (in progress → complete) |
-| **Active task** | T123.5 green — next M124 / T124.1 |
+| **Active milestone** | M124 — F73 relevance sources (complete) → next M125 |
+| **Active task** | T124.4 done — next T125.1 display_title tests |
 | **Last updated** | 2026-08-06 |
 | **Evolve cycle** | EV-026 — Standard; Phase C build |
 | **Git branch** | `evolve/EV-026-chat-source-ux` |
@@ -2471,10 +2471,10 @@ text (AC-SU1–SU2; TC-242–244; UJ-077). Helper lives in `packages/frontend-ui
 
 | Task | Description | Type | Status | Spec Source | Depends On | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|---------|---------|
-| T124.1 | Test: unit red — filter/no-pad; empty above threshold; cap at `top_k`; CE path when enabled (TC-245–247) | Test | pending | AC-SU3–SU5, F73, RD-311 | T123.5 | — | S028 | F73 |
-| T124.2 | Code: verify/wire chat-rag ask + synth to pass `score_threshold=min_retrieval_score`; drop below-threshold; no pad | Code | pending | api-contract §sources, config-spec | T124.1 | — | S028 | F73 |
-| T124.3 | Test: API e2e UJ-078 / TC-245–247 green | Test | pending | e2e-coverage, test-plan | T124.2 | — | S028 | F73 |
-| T124.4 | Docs: eval note — few-strong vs many-weak sources (RD-317) | Docs | pending | test-plan / eval notes | T124.3 | — | S028 | F73 |
+| T124.1 | Test: unit red — filter/no-pad; empty above threshold; cap at `top_k`; CE path when enabled (TC-245–247) | Test | completed | AC-SU3–SU5, F73, RD-311 | T123.5 | 2026-08-06 | S028 | F73 |
+| T124.2 | Code: verify/wire chat-rag ask + synth to pass `score_threshold=min_retrieval_score`; drop below-threshold; no pad | Code | completed | api-contract §sources, config-spec | T124.1 | 2026-08-06 | S028 | F73 |
+| T124.3 | Test: API e2e UJ-078 / TC-245–247 green | Test | completed | e2e-coverage, test-plan | T124.2 | 2026-08-06 | S028 | F73 |
+| T124.4 | Docs: eval note — few-strong vs many-weak sources (RD-317) | Docs | completed | test-plan / eval notes | T124.3 | 2026-08-06 | S028 | F73 |
 
 #### M125: F74 — `display_title` migration + PATCH + admin + packing
 
@@ -3382,10 +3382,10 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 | T123.3 | M123 | 29 | Test | completed | T123.2 | 2026-08-06 | S028 | F72 | — |
 | T123.4 | M123 | 29 | Code | completed | T123.3 | 2026-08-06 | S028 | F72 | — |
 | T123.5 | M123 | 29 | Test | completed | T123.4 | 2026-08-06 | S028 | F72 | — |
-| T124.1 | M124 | 29 | Test | pending | T123.5 | — | S028 | F73 | — |
-| T124.2 | M124 | 29 | Code | pending | T124.1 | — | S028 | F73 | TP4 |
-| T124.3 | M124 | 29 | Test | pending | T124.2 | — | S028 | F73 | — |
-| T124.4 | M124 | 29 | Docs | pending | T124.3 | — | S028 | F73 | — |
+| T124.1 | M124 | 29 | Test | completed | T123.5 | 2026-08-06 | S028 | F73 | — |
+| T124.2 | M124 | 29 | Code | completed | T124.1 | 2026-08-06 | S028 | F73 | TP4 |
+| T124.3 | M124 | 29 | Test | completed | T124.2 | 2026-08-06 | S028 | F73 | — |
+| T124.4 | M124 | 29 | Docs | completed | T124.3 | 2026-08-06 | S028 | F73 | — |
 | T125.1 | M125 | 29 | Test | pending | T124.4 | — | S028 | F74 | — |
 | T125.2 | M125 | 29 | Config | pending | T125.1 | — | S028 | F74 | ADR-051 |
 | T125.3 | M125 | 29 | Code | pending | T125.1, T125.2 | — | S028 | F74 | — |

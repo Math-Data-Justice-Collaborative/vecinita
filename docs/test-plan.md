@@ -1508,7 +1508,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 ### TC-246: Weak hits filtered out (UJ-078, F73)
 
 - **Objective**: Many candidates below threshold → omitted from `sources[]` and synthesis set.
-- **Expected**: AC-SU3; eval note few-strong vs many-weak.
+- **Expected**: AC-SU3; eval note — prefer few-strong over many-weak filler (no pad to `top_k`).
 
 ### TC-247: Empty sources valid when none clear bar (UJ-078, F73)
 
