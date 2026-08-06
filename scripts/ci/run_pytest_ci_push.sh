@@ -5,6 +5,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
+UV="${UV:-uv}"
+
 PYTEST_PATHS=(
 	tests/unit
 	tests/integration
