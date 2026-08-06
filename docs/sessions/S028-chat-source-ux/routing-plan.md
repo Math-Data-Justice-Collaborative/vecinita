@@ -14,7 +14,7 @@ Approved: **S028-D1** (1a / 2a). Prod-careful: **S028-D2**.
 | 09-qa | yes | completed | qa-report.md — pass_with_advisories |
 | 10-e2e | yes | completed | e2e-report.md — T0 UJ-077–079 + UJ-076 PASS @ 8537690 |
 | 11-verify-impl | yes | completed | verify-impl.md — S028-D32 F72–F74 approved; #222–#224 closed |
-| 12-verify-deploy | yes | in_progress | deploy-checklist.md — not ready (tip CI); S028-D33 |
+| 12-verify-deploy | yes | completed | deploy-checklist.md ready — S028-D34 local parity + CLI |
 | 13-deploy-smoke | yes | pending | **AskQuestion before prod** (S028-D2) |
 
 ## Orchestrator

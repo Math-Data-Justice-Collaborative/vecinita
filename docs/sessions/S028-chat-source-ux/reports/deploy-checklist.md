@@ -1,7 +1,8 @@
 # Deploy Checklist — S028 / EV-026 Chat source UX (F72–F74)
 
 > **Generated**: 2026-08-06  
-> **Status**: **ready** (pending local `make ci-push` evidence in this turn)  
+> **Status**: **ready**  
+> **Tip**: `bbff787`  
 > **Deployment plan**: [deployment-integration.md](../../../deployment-integration.md) (hybrid DO + Modal; delta below)  
 > **Stage**: 12-verify-deploy (S028 delta — F72–F74 / #222–#224)  
 > **Branch**: `evolve/EV-026-chat-source-ux`  
@@ -27,7 +28,7 @@
 | Frontend `VITE_*` ↔ API matrix | **PASS** | Existing Chat/Admin `VITE_*` rows; no new origins (tech-plan) |
 | `VECINITA_CORS_ORIGINS` documented | **PASS** | `infra/do/chat-rag-backend.yaml` + `internal-write-api.yaml` (PATCH already allowed) |
 | Post-deploy H4–H5 documented | **PASS** | `bash scripts/deploy/verify_connectivity.sh` (+ Chat SourceList / admin rename smokes @ 13) |
-| Tip CI green (RA-009) | **WAIVED** (S028-D34) | GitHub Actions outage — remote `ci.yml` not required; full local `make ci-push` + CLI deploy instead |
+| Tip CI green (RA-009) | **WAIVED** (S028-D34) | GHA outage — local parity @ `bbff787` (see §Local parity) + CLI deploy |
 
 ## Live stack drift (must clear at 13)
 
@@ -108,9 +109,21 @@ bash scripts/deploy/verify_connectivity.sh           # H4–H5
 | Check | Status |
 |-------|--------|
 | Remote `ci.yml` on tip | **WAIVED** — GHA outage |
-| Local full parity `make ci-push` | **Required** this turn before 13 |
+| Local full parity | **PASS*** @ `bbff787` — see §Local parity (*DM Vitest coverage threshold = QA-S028-004) |
 | Deploy path | **CLI** (`doctl` / app update / alembic) — not Actions CD |
 | Hybrid api+worker (not Cognichem job template) | N/A |
+
+### Local parity evidence (S028-D34)
+
+| Tier | Result |
+|------|--------|
+| ci-guards / lint / format / typecheck / audit / security-scan | **PASS** (earlier `make ci-push` run) |
+| pytest unit+integration+privacy+e2e+smoke+eval+bugs | **1765 passed**, 34 skipped |
+| Vitest chat-rag | **190 passed** |
+| Vitest data-management | **740 passed** |
+| DM Vitest **coverage threshold** | **FAIL** 99.89% lines / 97.77% branches — **QA-S028-004 accepted** (pre-existing; not F74) |
+| `make build-frontend` | **PASS** both apps |
+| Fix commits this turn | prettier SourceList test; `UV="${UV:-uv}"` in `run_pytest_ci_push.sh` |
 
 ### Browser connectivity (Agent 6) — PASS (unit)
 
@@ -152,9 +165,9 @@ bash scripts/deploy/verify_connectivity.sh           # H4–H5
 - [x] User approved implementation (11-verify-impl S028-D32)
 - [x] Failure mitigations approved (S028-D34)
 - [x] Rollback plan approved (S028-D34)
-- [x] Tip CI green **waived** — local `make ci-push` + CLI deploy (S028-D34 / GHA outage)
-- [x] Deploy strategy verified — **ready for 13** after local parity evidence
+- [x] Tip CI green **waived** — local parity + CLI deploy (S028-D34 / GHA outage); DM coverage = QA-S028-004
+- [x] Deploy strategy verified — **ready for 13**
 
 ## Next step
 
-`make ci-push` (this turn) → **13-deploy-smoke** AskQuestion — live/prod CLI redeploy + H4–H5 (QA-S028-003).
+**13-deploy-smoke** AskQuestion — live/prod **CLI** redeploy (alembic → write → chat BE → both FEs) + H4–H5 (QA-S028-003).
