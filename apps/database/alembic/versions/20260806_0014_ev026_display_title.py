@@ -26,7 +26,7 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Add nullable display_title column (AC-SU6–SU10 / TC-248–251)."""
+    """Add nullable display_title column (AC-SU6-SU10 / TC-248-251)."""
     op.add_column(
         "documents",
         sa.Column("display_title", sa.Text(), nullable=True),
