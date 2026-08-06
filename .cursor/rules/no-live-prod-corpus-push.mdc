@@ -1,0 +1,47 @@
+---
+description: Never push or mutate live production corpus without explicit user approval
+alwaysApply: true
+---
+
+# No live prod corpus push
+
+Do **not** write, promote, seed, re-embed, or otherwise mutate the **live production**
+corpus unless the user explicitly approves via AskQuestion in the current turn.
+
+Staging work is allowed under [corpus-db-safety.mdc](corpus-db-safety.mdc). Live prod is not.
+
+## Never do against live prod (without approval)
+
+- `load_corpus()`, `seed_eval_corpus()`, `reset_corpus_tables()`, `attach_embeddings()`,
+  `clear_embeddings()`, or any TRUNCATE/DELETE on corpus tables
+- F41 rebuild **promote** (`POST …/promote`) or shadow→live cutover
+- Bulk ingest / retag / delete jobs pointed at prod `DATABASE_URL` or prod DO apps
+- Syncing corpus-changing secrets then triggering rebuild/promote on prod
+- Running scripts that UPSERT/DELETE embeddings while prod env is sourced
+
+## Do instead
+
+| Intent | Safe path |
+|--------|-----------|
+| Develop / test | Local Postgres (`localhost`) only |
+| Validate cutover | Staging shadow → F36 → **operator** promote first |
+| Prod cutover | Present runbook steps; wait for explicit Approve |
+| Read-only health | SELECT / smoke H1–H5 — no corpus writers |
+
+## Gate
+
+Before any prod corpus mutation:
+
+1. Confirm target is **not** live prod, **or**
+2. AskQuestion `[Decision]` with staging evidence + recommended “defer / runbook only”
+3. Proceed only after the user picks an explicit approve option
+
+```bash
+# ❌ BAD — agent promotes to live prod unprompted
+curl -X POST "$PROD_API/internal/v1/rebuild/$id/promote"
+
+# ✅ GOOD — staging only; prod waits for AskQuestion Approve
+# staging shadow → F36 → operator promote; then ask before prod repeat
+```
+
+Refs: `docs/staging-runbook.md` §EV-025 prod cutover; `.cursor/skills/corpus-db-safety/SKILL.md`.
