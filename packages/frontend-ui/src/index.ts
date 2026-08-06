@@ -4,6 +4,7 @@ export {
   type ActionIconMotion,
   type ActionIconProps,
 } from "./ActionIcon";
+export { citationHref, isSafeHttpUrl } from "./isSafeHttpUrl";
 export { LanguageToggle } from "./LanguageToggle";
 export { LocaleProvider } from "./LocaleProvider";
 export { PaginationControls } from "./PaginationControls";
