@@ -934,4 +934,215 @@ describe("DocumentAdmin", () => {
       DOC.title,
     );
   });
+
+  it("saves empty display_title as null PATCH body", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockResolvedValueOnce(
+        jsonOk({
+          document_id: DOC.document_id,
+          url: DOC.url,
+          title: DOC.title,
+          display_title: null,
+          language: "en",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin
+          document={{ ...DOC, display_title: "Old Display" }}
+          onClose={vi.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("display-title-input")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("display-title-input"), {
+      target: { value: "   " },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: /save display title/i }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(
+        /display title saved/i,
+      );
+    });
+    const patchCall = fetchMock.mock.calls.find(
+      (call) =>
+        typeof call[0] === "string" &&
+        call[0].includes(`/documents/${DOC.document_id}`) &&
+        (call[1] as RequestInit | undefined)?.method === "PATCH",
+    );
+    expect(patchCall).toBeDefined();
+    const init = patchCall?.[1] as RequestInit;
+    expect(JSON.parse(init.body as string)).toEqual({ display_title: null });
+    expect(screen.getByTestId("display-title-input")).toHaveValue("");
+  });
+
+  it("shows save display_title error", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockRejectedValueOnce(new Error("display title patch failed"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAdmin();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("display-title-input")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("display-title-input"), {
+      target: { value: "Broken title" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: /save display title/i }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "display title patch failed",
+      );
+    });
+  });
+
+  it("shows clear display_title error", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockRejectedValueOnce(new Error("clear display title failed"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin
+          document={{ ...DOC, display_title: "Old Display" }}
+          onClose={vi.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("clear-display-title")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("clear-display-title"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "clear display title failed",
+      );
+    });
+  });
+
+  it("shows generic save display_title error for non-Error failures", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockRejectedValueOnce("display boom");
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAdmin();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("display-title-input")).toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /save display title/i }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Failed to save display title",
+      );
+    });
+  });
+
+  it("shows generic clear display_title error for non-Error failures", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonOk([
+          {
+            chunk_id: "chunk-1",
+            chunk_index: 0,
+            text: "text",
+            tags: [],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonOk({ tags: [] }))
+      .mockRejectedValueOnce("clear boom");
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin
+          document={{ ...DOC, display_title: "Old Display" }}
+          onClose={vi.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("clear-display-title")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("clear-display-title"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Failed to save display title",
+      );
+    });
+  });
 });

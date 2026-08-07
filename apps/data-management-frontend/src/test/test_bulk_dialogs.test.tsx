@@ -223,13 +223,11 @@ describe("Bulk dialog components", () => {
   describe("BulkMetadataDialog", () => {
     it("updates metadata when fields are provided", async () => {
       const onComplete = vi.fn();
-      vi.stubGlobal(
-        "fetch",
-        vi.fn().mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ successes: ["d1"], failures: [] }),
-        }),
-      );
+      const fetchMock = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ successes: ["d1"], failures: [] }),
+      });
+      vi.stubGlobal("fetch", fetchMock);
 
       renderWithTheme(
         <BulkMetadataDialog
@@ -243,6 +241,9 @@ describe("Bulk dialog components", () => {
       fireEvent.change(screen.getByLabelText(/^title$/i), {
         target: { value: "New title" },
       });
+      fireEvent.change(screen.getByLabelText(/^display title$/i), {
+        target: { value: "Neighbor pantry" },
+      });
       fireEvent.change(screen.getByLabelText(/^language$/i), {
         target: { value: "es" },
       });
@@ -250,6 +251,20 @@ describe("Bulk dialog components", () => {
 
       await waitFor(() => {
         expect(onComplete).toHaveBeenCalled();
+      });
+      const body = JSON.parse(
+        (fetchMock.mock.calls[0]?.[1] as RequestInit).body as string,
+      ) as {
+        updates: {
+          title?: string;
+          display_title?: string;
+          language?: string;
+        };
+      };
+      expect(body.updates).toEqual({
+        title: "New title",
+        display_title: "Neighbor pantry",
+        language: "es",
       });
     });
 
