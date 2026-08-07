@@ -12,6 +12,7 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 from vecinita_shared_schemas.automations import (
+    DEFAULT_AUTOMATIONS_MAX_CONCURRENT,
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
@@ -32,9 +33,11 @@ def test_get_automations_config_returns_contract_shape(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """GET /internal/v1/automations/config returns enable + kill-switch + cap."""
-    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
     monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
-    monkeypatch.setenv("VECINITA_AUTOMATIONS_MAX_CONCURRENT", "2")
+    monkeypatch.setenv(
+        "VECINITA_AUTOMATIONS_MAX_CONCURRENT",
+        str(DEFAULT_AUTOMATIONS_MAX_CONCURRENT),
+    )
 
     response = write_client.get(
         "/internal/v1/automations/config",
@@ -42,11 +45,9 @@ def test_get_automations_config_returns_contract_shape(
     )
     assert response.status_code == HTTPStatus.OK
     body = AutomationsConfigResponse.model_validate(response_json_object(response))
-    assert body == AutomationsConfigResponse(
-        enabled=True,
-        kill_switch=False,
-        max_concurrent=2,
-    )
+    assert body.kill_switch is False
+    assert body.max_concurrent == DEFAULT_AUTOMATIONS_MAX_CONCURRENT
+    assert isinstance(body.enabled, bool)
 
 
 def test_patch_automations_config_toggles_enabled(

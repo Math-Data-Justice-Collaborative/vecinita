@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M127: F75 — Automation framework |
-| **Active task** | T127.3 (pending) |
+| **Active task** | T127.5 (pending) |
 | **Last updated** | 2026-08-07 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
@@ -2543,8 +2543,8 @@ for 13; issue closeout notes after verify/deploy gates.
 |------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
 | T127.1 | Test: unit red — kill-switch blocks enqueue; idempotent key; catch-up skips complete embeds (TC-252+) | Test | completed | AC-AU*, F75, RD-334–335 | — | — | 2026-08-07 | S030 | F75 |
 | T127.2 | Test: unit/API red — `automation_runs` CRUD shape + config GET/PATCH (api-contract EV-027) | Test | completed | RD-341, TP3 | T127.1 | — | 2026-08-07 | S030 | F75 |
-| T127.3 | Config: Alembic `automation_runs` table + indexes | Config | in_progress | ADR-052, TP3 | T127.2 | — | | S030 | F75 |
-| T127.4 | Code: write-API automations config + runs endpoints; enqueue helpers | Code | pending | api-contract §Automations | T127.2, T127.3 | — | | S030 | F75 |
+| T127.3 | Config: Alembic `automation_runs` table + indexes | Config | completed | ADR-052, TP3 | T127.2 | — | 2026-08-07 | S030 | F75 |
+| T127.4 | Code: write-API automations config + runs endpoints; enqueue helpers | Code | completed | api-contract §Automations | T127.2, T127.3 | — | 2026-08-07 | S030 | F75 |
 | T127.5 | Code: Modal DM `job_type=automation_catchup` worker + concurrency/kill-switch | Code | pending | ADR-052, config-spec | T127.4 | — | | S030 | F75 |
 | T127.6 | Code: triggers — job completion + doc CRUD enqueue (async only) | Code | pending | RD-326, RD-335 | T127.5 | — | | S030 | F75 |
 | T127.7 | Config: `schedule=modal.Period(days=1)` on `vecinita-data-management` dispatching catch-up (F76 branch in M128) | Config | pending | TP2, RD-336, TC-264, S030-D31 M2 | T127.5 | — | | S030 | F75 |

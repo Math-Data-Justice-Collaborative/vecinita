@@ -32,6 +32,11 @@ from vecinita_shared_schemas.auth import (
     require_service,
     require_super_admin,
 )
+from vecinita_shared_schemas.automations import (
+    AutomationRunListResponse,
+    AutomationsConfigPatchRequest,
+    AutomationsConfigResponse,
+)
 from vecinita_shared_schemas.chat_rag import FeedbackCreateResponse
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import CorpusTreeResponse
@@ -138,6 +143,11 @@ from vecinita_internal_write_api.audit import (
     cleanup_audit_log,
     create_document_version,
     emit_audit_event,
+)
+from vecinita_internal_write_api.automations import (
+    get_automations_config,
+    list_automation_runs,
+    set_automations_enabled,
 )
 from vecinita_internal_write_api.corpus_tree import build_corpus_tree
 from vecinita_internal_write_api.embed_promote_report import (
@@ -1853,6 +1863,36 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             page_size=page_size,
             category=category,
         )
+
+    @app.get(
+        "/internal/v1/automations/config",
+        response_model=AutomationsConfigResponse,
+    )
+    def get_automations_config_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+    ) -> AutomationsConfigResponse:
+        return get_automations_config(engine)
+
+    @app.patch(
+        "/internal/v1/automations/config",
+        response_model=AutomationsConfigResponse,
+    )
+    def patch_automations_config_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        body: AutomationsConfigPatchRequest,
+    ) -> AutomationsConfigResponse:
+        return set_automations_enabled(engine, enabled=body.enabled)
+
+    @app.get(
+        "/internal/v1/automations/runs",
+        response_model=AutomationRunListResponse,
+    )
+    def list_automations_runs_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        page: Annotated[int, Query(ge=1)] = 1,
+        page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+    ) -> AutomationRunListResponse:
+        return list_automation_runs(engine, page=page, page_size=page_size)
 
     @app.get(
         "/internal/v1/documents/{document_id}/history",
