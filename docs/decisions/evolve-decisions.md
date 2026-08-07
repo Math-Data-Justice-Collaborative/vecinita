@@ -994,6 +994,10 @@ Chat source UX in one cycle:
 | S028-D32 | 11 features | Staging tip drift (`c942971` ≠ `8537690`) → approve F72–F74 from T0/OpenAPI only; live UI/API @ 13; close #222–#224 |
 | S028-D33 | 12 start | Proceed to 12-verify-deploy (S028-D2 option 1) |
 | S028-D34 | 12 gate | GHA outage → RA-009 remote CI **waived**; full local `make ci-push` + **CLI deploy**; `env_role=staging_as_live`; mitigations 1–6 + rollback **approved** |
+| S028-D35 | 13 Path A | CLI deploy + Alembic `20260806_0014`; H1–H5 PASS @ `da7cf8b` (#229) |
+| S028-D36 | Closeout interrupt | GHA returned → restore remote coverage before close (do not close on docs-only #230 skip) |
+| S028-D37 | Coverage restore | PR [#231](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/231) — FE display_title Vitest + write-api branch tests; tip `ad15667` |
+| S028-D38 | Cycle close | User option **1** — merge #231, watch main CI + deploy-preflight, **close EV-026**; skip optional 15-service-health |
 
 ### Feature map
 
@@ -1002,3 +1006,9 @@ Chat source UX in one cycle:
 | F72 | #222 | Citation UI — validate URLs before href |
 | F73 | #223 | Dynamic relevance-gated sources (no fixed pad) |
 | F74 | #224 | Operator-settable `display_title` (durable vs scrape) |
+
+### Close (2026-08-07)
+
+**Tip:** `ad15667` — [CI](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31136499387) + [deploy-preflight](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31136805324) success.  
+**Artifacts:** `docs/sessions/S028-chat-source-ux/reports/evolve-summary.md` · `docs/evolve-report-EV-026.md`  
+**RA-009:** superseded (remote coverage green).
