@@ -1,6 +1,6 @@
 # BUG-2026-08-06 — Security install-tools GitHub API flake
 
-> Status: **fixed** (local; pending PR / merge)  
+> Status: **resolved**  
 > Feature: tooling / CI (no Fn — [Corpus: WAIVED — no Fn yet; reason: tooling CI flake from RET-002; decided: 2026-08-06 issue triage])  
 > Component: `scripts/security/install-tools.sh` · Husky pre-commit · `.github/workflows/ci.yml` `security` job  
 > GitHub: [#227](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/227) · `S027-FLAKY-SECURITY-INSTALL` / RA-020  
@@ -114,4 +114,4 @@ from GitHub.”) abort the script under `set -e`.
 |--------|--------|
 | Retries + repro test | Done (`a215220` / #233) |
 | Pin 2ms / KICS / sbom-tool tags | Done (`config/security/tool-pins.conf` + install-tools) |
-| Cursor rule | Pending Phase 5.1 AskQuestion |
+| Cursor rule | Declined (S029 Phase 5.1 — docs + pins + retries enough) |

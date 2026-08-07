@@ -4,15 +4,21 @@
 |-------|--------|
 | Session | S029-security-install-tools-flake |
 | Type | hotfix |
-| Branch | `fix/S029-security-install-tools-flake` |
-| Issue | https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/227 |
-| Bug | `docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md` |
-| Stage | 14-hotfix Phase 1.25 (repro) |
+| Status | **closed** |
+| Issue | [#227](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/227) **CLOSED** |
+| Bug | `docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md` → **resolved** |
 
-## Interrupt
+## Landed
 
-None (`interrupted_by_hotfix` N/A — this *is* the hotfix).
+| PR | SHA | What |
+|----|-----|------|
+| [#233](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/233) | `a215220` | Retries + repro test |
+| [#234](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234) | `2da98e9` | Release pins (`tool-pins.conf`) |
 
-## Next action
+## Prevention
 
-Confirm red repro matches #227 symptom, then apply retries/backoff in `install-tools.sh`.
+No Cursor rule (Phase 5.1 declined). Pins + retries + CI security job.
+
+## Next
+
+None — session complete. Drop optional stash `S029 workflow-state post-PR bookkeeping` if still present.
