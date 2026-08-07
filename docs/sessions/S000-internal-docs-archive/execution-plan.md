@@ -1,22 +1,22 @@
 # Execution Plan
 
 > **Project**: Vecinita  
-> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; S024 Phase 26 delta 2026-08-03; S026 Phase 27 delta 2026-08-04; S027 Phase 28 delta 2026-08-05; **S028 Phase 29 delta 2026-08-06**)  
+> **Generated**: 2026-05-19 (EV-001 delta 2026-05-24; EV-002 delta 2026-05-26; EV-004 delta 2026-06-13; S003 delta 2026-06-26; S007 delta 2026-07-01; S008 delta 2026-07-02; S009 delta 2026-07-05; S010 delta 2026-07-08; S010 Phase 18 delta 2026-07-10; S013 Phase 19 delta 2026-07-28; S017 Phase 20 delta 2026-07-30; S019 Phase 21 delta 2026-08-01; S020 Phase 22 delta 2026-08-02; S021 Phase 23 delta 2026-08-02; S022 Phase 24 delta 2026-08-02; S023 Phase 25 delta 2026-08-03; S024 Phase 26 delta 2026-08-03; S026 Phase 27 delta 2026-08-04; S027 Phase 28 delta 2026-08-05; S028 Phase 29 delta 2026-08-06; **S030 Phase 30 delta 2026-08-07**)  
 > **Skill**: 04-tech-plan  
-> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**051**
+> **Specs consumed**: feature-list.md, spec.md, user-journeys.md, test-plan.md, config-spec.md, api-contract.md, data-management-plan.md, deployment-integration.md, dependency-inventory.md, acceptance-criteria.md, eval-golden-set.md, ADR-001–**053**
 
 ## Current State
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 29: EV-026 — Chat source UX (F72–F74) — 10-e2e |
-| **Active milestone** | M126 complete; 08 PASS; 09 pass_with_advisories |
-| **Active task** | Next: 10-e2e (then 11-verify-impl) |
-| **Last updated** | 2026-08-06 |
-| **Evolve cycle** | EV-026 — Standard; Phase C build |
-| **Git branch** | `evolve/EV-026-chat-source-ux` |
-| **Active session** | S028-chat-source-ux — 07-build; Gate B→C PASS |
-| **Scope addition** | 2026-08-06 — F72–F74 citation URLs, relevance sources, `display_title` (#222–#224). |
+| **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
+| **Active milestone** | M127: F75 — Automation framework |
+| **Active task** | T127.2 (pending) |
+| **Last updated** | 2026-08-07 |
+| **Evolve cycle** | EV-027 — Full; Phase C build |
+| **Git branch** | `evolve/EV-027-corpus-automations` |
+| **Active session** | S030-corpus-automations — 04-tech-plan; Gate A→B PASS |
+| **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
 
@@ -2519,6 +2519,102 @@ for 13; issue closeout notes after verify/deploy gates.
 
 ---
 
+## Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77)
+
+> **Session:** S030 · **Cycle:** EV-027 · **Branch:** `evolve/EV-027-corpus-automations`  
+> **Issues:** [#73](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/73),
+> [#219](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/219),
+> [#72](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/72)  
+> **Decisions:** RD-325–348; S030-D0–D29; TP1–TP10 locked (S030-D29); Gate A→B PASS (S030-D26)  
+> **ADRs:** [ADR-052](../../../adr/ADR-052-corpus-automation-orchestration.md),
+> [ADR-053](../../../adr/ADR-053-modal-lora-finetune.md)  
+> **Out of scope:** #192 dashboard widgets; auto F41 rebuild; antibody F8 FT; GPU-hour
+> metering; live prod mutation/promote without AskQuestion  
+> **evolve_cycle_id:** EV-027 · **feature_ids:** F75, F76, F77
+
+#### M127: F75 — Automation framework (catch-up + history + schedule hook)
+
+**Goal:** Catch-up-only enqueue (failed/partial/missing embed); idempotent
+`document_id`+`revision`; kill-switch + `VECINITA_AUTOMATIONS_MAX_CONCURRENT`;
+`automation_runs` Postgres + config GET/PATCH; DM enable/history UI; job_type
+`automation_catchup`; shared daily `Period(days=1)` schedule stub on DM (AC-AU*; TC-252+; UJ-080).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Data Deps | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
+| T127.1 | Test: unit red — kill-switch blocks enqueue; idempotent key; catch-up skips complete embeds (TC-252+) | Test | completed | AC-AU*, F75, RD-334–335 | — | — | 2026-08-07 | S030 | F75 |
+| T127.2 | Test: unit/API red — `automation_runs` CRUD shape + config GET/PATCH (api-contract EV-027) | Test | in_progress | RD-341, TP3 | T127.1 | — | | S030 | F75 |
+| T127.3 | Config: Alembic `automation_runs` table + indexes | Config | pending | ADR-052, TP3 | T127.2 | — | | S030 | F75 |
+| T127.4 | Code: write-API automations config + runs endpoints; enqueue helpers | Code | pending | api-contract §Automations | T127.2, T127.3 | — | | S030 | F75 |
+| T127.5 | Code: Modal DM `job_type=automation_catchup` worker + concurrency/kill-switch | Code | pending | ADR-052, config-spec | T127.4 | — | | S030 | F75 |
+| T127.6 | Code: triggers — job completion + doc CRUD enqueue (async only) | Code | pending | RD-326, RD-335 | T127.5 | — | | S030 | F75 |
+| T127.7 | Config: `schedule=modal.Period(days=1)` on `vecinita-data-management` dispatching catch-up (F76 branch in M128) | Config | pending | TP2, RD-336, TC-264, S030-D31 M2 | T127.5 | — | | S030 | F75 |
+| T127.8 | Code: DM Automations UI — enable/disable + run history | Code | pending | UJ-080, RD-327 | T127.4 | — | | S030 | F75 |
+| T127.9 | Test: API e2e UJ-080 + Vitest Automations panel green | Test | pending | e2e-coverage, TP8 | T127.6, T127.8 | — | | S030 | F75 |
+| T127.10 | Test: Playwright T0-ui UJ-080 (`tests/ui/`) | Test | pending | TP8, connectivity-gates | T127.8 | — | | S030 | F75 |
+
+#### M128: F76 — Corpus freshness
+
+**Goal:** Stale default 30d; hash-aware refresh; bump `last_checked_at` even when
+unchanged; `refresh_enabled`; Refresh now; schedule branch `freshness_refresh`;
+stale list UX (AC-FR*; TC freshness; UJ-081).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Data Deps | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
+| T128.1 | Test: unit red — stale threshold; hash skip; last_checked bump; kill-switch (TC freshness) | Test | pending | AC-FR*, F76, RD-337 | T127.7 | — | | S030 | F76 |
+| T128.2 | Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`) | Config | pending | TP7, api-contract | T128.1 | — | | S030 | F76 |
+| T128.3 | Code: write-API PATCH/list stale fields; Refresh now → enqueue | Code | pending | api-contract §Freshness | T128.1, T128.2 | — | | S030 | F76 |
+| T128.4 | Code: Modal `job_type=freshness_refresh` + periodic schedule branch (shared with F75) | Code | pending | TP2, ADR-052 | T128.3, T127.7 | — | | S030 | F76 |
+| T128.5 | Code: ingest/hash-aware re-fetch path for URL sources | Code | pending | RD-329, packages/ingest | T128.4 | — | | S030 | F76 |
+| T128.6 | Code: DM freshness UI — stale list, enable, Refresh now | Code | pending | UJ-081 | T128.3 | — | | S030 | F76 |
+| T128.7 | Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081 | Test | pending | TP8, TC-264 | T128.4, T128.6 | — | | S030 | F76 |
+
+#### M129: F77 — LoRA FT + human promote
+
+**Goal:** `infra/modal/finetune_app.py` (`vecinita-llm-finetune` + `llm-finetune-adapters`);
+SFT pairs from chunks; manual approve before GPU; eval report; human promote/rollback;
+prod `llm_app` loads adapter only after promote; FT caps (AC-FT*; TC-252–265; UJ-082).
+
+| Task | Description | Type | Status | Spec Source | Depends On | Data Deps | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
+| T129.1 | Test: unit red — approve gate; kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY; no auto-promote (TC-263+) | Test | pending | AC-FT7, TP5, RD-338 | T128.7 | — | | S030 | F77 |
+| T129.2 | Test: unit red — SFT pair builder from chunks; adapter id pin/clear rollback (TC-265) | Test | pending | RD-340, AC-FT9 | T129.1 | — | | S030 | F77 |
+| T129.3 | Config: Modal `finetune_app.py` scaffold + volume + secrets docs (**blocked until 06** PEFT/TRL pins complete) | Config | pending | TP4, ADR-053, S030-D31 M3 | T129.1 | PEFT/TRL pins (06) | | S030 | F77 |
+| T129.4 | Code: `job_type=finetune_train` + `POST /jobs/{id}/approve` (admin JWT) | Code | pending | TP6, api-contract | T129.1 | — | | S030 | F77 |
+| T129.5 | Code: train worker (LoRA/PEFT SFT) writes adapter to volume; run metadata | Code | pending | ADR-053, TP4 | T129.3, T129.4 | llm-models base | | S030 | F77 |
+| T129.6 | Code: `GET …/finetune/runs/{id}/eval` base vs adapter report (F36 golden) | Code | pending | RD-338, UJ-082 | T129.5 | eval fixtures | | S030 | F77 |
+| T129.7 | Code: `POST …/finetune/promote` + clear pin rollback; set `VECINITA_FINETUNE_ADAPTER_ID` | Code | pending | RD-339, AC-FT9 | T129.6 | — | | S030 | F77 |
+| T129.8 | Code: `llm_app` load promoted adapter; playground candidate load path | Code | pending | ADR-037, ADR-053 | T129.7 | — | | S030 | F77 |
+| T129.9 | Code: DM FT UI — approve train, eval evidence, promote (human only) | Code | pending | UJ-082 | T129.6, T129.7 | — | | S030 | F77 |
+| T129.10 | Test: API e2e UJ-082 + Vitest + Playwright T0-ui UJ-082 | Test | pending | TP8, e2e-coverage | T129.8, T129.9 | — | | S030 | F77 |
+
+#### M130: Phase 30 gate — TC suite + docs / OpenAPI closeout
+
+**Goal:** Confirm TC-252–265 + AC-AU/FR/FT; OpenAPI mirrors; secrets matrix; ADR-052/053
+Accepted; Phase 30 Current State; H4–H5 note for 13; issue closeout notes after verify.
+
+| Task | Description | Type | Status | Spec Source | Depends On | Data Deps | Completed | Session | Feature |
+|------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
+| T130.1 | Test: confirm unit + API e2e + Vitest + Playwright TC-252–265 green | Test | pending | e2e-coverage, TP8 | T127.10, T128.7, T129.10 | — | | S030 | F75–F77 |
+| T130.2 | Config: OpenAPI yaml mirrors for automations/freshness/FT; CORS H0c for new routes | Config | pending | ADR-011, connectivity-gates | T130.1 | — | | S030 | F75–F77 |
+| T130.3 | Docs: staging-secrets-matrix + Modal secrets for FT/automation envs (TP5/TP9) | Docs | pending | TP9, deploy-integration | T130.2 | — | | S030 | F75–F77 |
+| T130.4 | Docs: confirm ADR-052/053 already Accepted + closeout notes only; Phase 30 gate + Current State; #73/#219/#72 closeout | Docs | pending | Phase 30 gate, S030-D31 M4 | T130.3 | — | | S030 | F75–F77 |
+
+#### Phase 30 Gate Check
+
+- [ ] All M127–M130 tasks completed (T127.1–T130.4)
+- [ ] AC-AU* / AC-FR* / AC-FT* mapped + unit/API e2e/Vitest/Playwright green at 07–11
+- [ ] ADR-052 / ADR-053 Accepted; TP path locks documented
+- [ ] OpenAPI + CORS H0c for new internal routes; secrets matrix updated
+- [ ] 06-tech-tooling completed (PEFT/TRL pins) before M129 train worker
+- [ ] Live prod automation enable / FT promote only after AskQuestion (S030-D10 / TP9) — **deferred to 13**
+
+**Tech-plan delta:** `docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md`  
+**ADRs:** [ADR-052](../../../adr/ADR-052-corpus-automation-orchestration.md),
+[ADR-053](../../../adr/ADR-053-modal-lora-finetune.md)  
+**Roadmap:** `docs/sessions/S030-corpus-automations/roadmap.md`
+
+---
+
 ## Git Strategy
 
 ### Commit rules
@@ -2656,6 +2752,11 @@ main
 | PR-74 | Minor | M125 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F74/#224 |
 | PR-75 | Minor | M126 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — open (M123–M126 on branch) |
 | PR-76 | Major | Phase 29 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — after Gate C→D / verify |
+| PR-77 | Minor | M127 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F75/#73 |
+| PR-78 | Minor | M128 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F76/#219 |
+| PR-79 | Minor | M129 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F77/#72 |
+| PR-80 | Minor | M130 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — Phase 30 gate |
+| PR-81 | Major | Phase 30 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — after Gate C→D / verify |
 
 S028 (EV-026) is evolve Standard: M123–M126 on `evolve/EV-026-chat-source-ux`
 (one PR per Fn/gate; major PR-76 to `main`). Gate A→B passed (S028-D20); TP1–TP4 locked
