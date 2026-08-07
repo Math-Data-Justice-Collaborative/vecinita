@@ -25,6 +25,22 @@ scans.
 
 CI already exposes `GITHUB_TOKEN` to Actions; local commits may set `GH_TOKEN` from `gh auth token` when rate-limited.
 
+## Tool version pins (#227 Phase 5)
+
+`config/security/tool-pins.conf` pins GitHub release tags for **2ms**, **KICS**, and
+**sbom-tool** so installs use `…/releases/download/<tag>/…` instead of `/latest` or empty
+draft “latest” releases. Bump pins after verifying assets exist on the tag.
+
+| Env | Default | Role |
+|-----|---------|------|
+| `SEC_PIN_2MS_TAG` | from `tool-pins.conf` | 2ms release tag |
+| `SEC_PIN_KICS_TAG` | from `tool-pins.conf` | KICS release tag (must include platform tarballs) |
+| `SEC_PIN_SBOM_TOOL_TAG` | from `tool-pins.conf` | sbom-tool release tag |
+| `SEC_TOOLS_UNPIN` | `0` | `1` = ignore pins; use API / `/latest` (tests + emergency) |
+| `SEC_TOOLS_PINS_FILE` | `config/security/tool-pins.conf` | Alternate pins file path |
+
+OpenGrep and Grype still use vendor installers (not tag-pinned here).
+
 ## Tools
 
 | Tool | Role | Fail threshold (strictest hard-block) |

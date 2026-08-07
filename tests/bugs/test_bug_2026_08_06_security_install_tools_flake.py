@@ -124,6 +124,8 @@ exit 2
     # Contract expected by fix (#227): retries + zero delay for tests.
     env["SEC_GITHUB_API_RETRIES"] = "3"
     env["SEC_GITHUB_API_RETRY_DELAY"] = "0"
+    # Exercise API retry path (pins would skip api.github.com version resolve).
+    env["SEC_TOOLS_UNPIN"] = "1"
     env["HOME"] = str(tmp_path / "home")
     (tmp_path / "home").mkdir()
 
@@ -144,3 +146,111 @@ exit 2
     assert installed.is_file(), "2ms binary was not installed"
     assert os.access(installed, os.X_OK), "2ms binary is not executable"
     assert int(counter.read_text(encoding="utf-8")) >= _MIN_GITHUB_API_CALLS
+
+
+def test_install_tools_uses_pinned_2ms_download_without_api(tmp_path: Path) -> None:
+    """Pinned SEC_PIN_2MS_TAG downloads release asset URL; no api.github.com latest call."""
+    tools = tmp_path / "tools"
+    bin_dir = tools / "bin"
+    assets = tools / "assets" / "kics" / "assets" / "queries"
+    bin_dir.mkdir(parents=True)
+    assets.mkdir(parents=True)
+    for name in ("opengrep", "kics", "grype", "sbom-tool"):
+        stub = bin_dir / name
+        stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        stub.chmod(stub.stat().st_mode | stat.S_IXUSR)
+
+    asset = _2ms_asset_name()
+    pin_tag = "v9.9.9-pin"
+    zip_path = tmp_path / asset
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        info = zipfile.ZipInfo("2ms")
+        info.external_attr = 0o755 << 16
+        zf.writestr(info, b"#!/bin/sh\necho 2ms-pinned\n")
+
+    api_counter = tmp_path / "github_api_calls"
+    api_counter.write_text("0", encoding="utf-8")
+    pin_hits = tmp_path / "pin_download_hits"
+    pin_hits.write_text("0", encoding="utf-8")
+    pins_file = tmp_path / "tool-pins.conf"
+    pins_file.write_text(f"SEC_PIN_2MS_TAG={pin_tag}\n", encoding="utf-8")
+
+    fake_bin = tmp_path / "fake-bin"
+    fake_bin.mkdir()
+    fake_curl = fake_bin / "curl"
+    fake_curl.write_text(
+        f"""#!/usr/bin/env bash
+set -euo pipefail
+API_COUNTER="{api_counter}"
+PIN_HITS="{pin_hits}"
+ZIP="{zip_path}"
+ASSET="{asset}"
+PIN_TAG="{pin_tag}"
+out=""
+url=""
+args=("$@")
+i=0
+while [[ $i -lt ${{#args[@]}} ]]; do
+  a="${{args[$i]}}"
+  if [[ "$a" == "-o" || "$a" == "--output" ]]; then
+    i=$((i + 1))
+    out="${{args[$i]}}"
+  elif [[ "$a" == http://* || "$a" == https://* ]]; then
+    url="$a"
+  fi
+  i=$((i + 1))
+done
+if [[ -z "$url" ]]; then
+  echo "curl-fixture: missing url: $*" >&2
+  exit 2
+fi
+if [[ "$url" == *api.github.com* ]]; then
+  n=$(cat "$API_COUNTER")
+  echo $((n + 1)) > "$API_COUNTER"
+  echo "curl-fixture: unexpected API call $url" >&2
+  exit 22
+fi
+if [[ "$url" == *"/checkmarx/2ms/releases/download/${{PIN_TAG}}/$ASSET"* ]]; then
+  n=$(cat "$PIN_HITS")
+  echo $((n + 1)) > "$PIN_HITS"
+  if [[ -z "$out" ]]; then
+    echo "curl-fixture: download needs -o" >&2
+    exit 2
+  fi
+  cp "$ZIP" "$out"
+  exit 0
+fi
+echo "curl-fixture: unexpected url $url" >&2
+exit 2
+""",
+        encoding="utf-8",
+    )
+    fake_curl.chmod(0o755)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{fake_bin}:{env.get('PATH', '')}"
+    env["SEC_TOOLS_DIR"] = str(tools)
+    env["SEC_FORCE"] = "0"
+    env["SEC_TOOLS_UNPIN"] = "0"
+    env["SEC_TOOLS_PINS_FILE"] = str(pins_file)
+    env["SEC_GITHUB_API_RETRIES"] = "2"
+    env["SEC_GITHUB_API_RETRY_DELAY"] = "0"
+    env["HOME"] = str(tmp_path / "home")
+    (tmp_path / "home").mkdir()
+
+    result = subprocess.run(  # noqa: S603
+        ["bash", str(REPO_ROOT / "scripts/security/install-tools.sh")],  # noqa: S607
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, (
+        f"pinned install failed\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+    assert (bin_dir / "2ms").is_file()
+    assert int(api_counter.read_text(encoding="utf-8")) == 0
+    assert int(pin_hits.read_text(encoding="utf-8")) >= 1
+    assert f"2ms pin {pin_tag}" in result.stdout
