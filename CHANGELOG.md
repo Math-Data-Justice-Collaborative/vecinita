@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### EV-026: Chat source UX (F72–F74) — S028 / #222 #223 #224
+
+- **F72**: Citation hrefs only for absolute `http(s)` URLs (`SourceList` + `isSafeHttpUrl`)
+- **F73**: Relevance-gated `sources[]` (no pad-to-top_k)
+- **F74**: Operator `display_title` (Alembic `20260806_0014` + PATCH + admin rename; COALESCE packing) — ADR-051
+- **Deploy:** PR [#229](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/229) → `main` @ `da7cf8b`; CLI Alembic + DO force_build (GHA outage / RA-009 waived); H1–H5 PASS
+
 ### EV-025: Multilingual embeddings (F70–F71) — S027 / #159
 
 - **F70**: Pin `intfloat/multilingual-e5-small` @ 384-d; Modal embed ST runtime (+ FastEmbed→ST fallback)
