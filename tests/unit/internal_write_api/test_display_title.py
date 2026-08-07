@@ -258,3 +258,53 @@ def test_patch_display_title_404_unknown(write_client: TestClient) -> None:
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_patch_document_metadata_empty_body_400(write_client: TestClient) -> None:
+    """F74: PATCH with no metadata fields returns 400."""
+    document_id = _upsert_with_title(write_client, title=_SCRAPED)
+    response = write_client.patch(
+        f"/internal/v1/documents/{document_id}",
+        json={},
+        headers=auth_headers(),
+    )
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    detail = response_json_object(response)["detail"]
+    assert isinstance(detail, str)
+    assert "display_title" in detail.lower()
+
+
+def test_patch_document_metadata_title_and_language_without_display_title(
+    write_client: TestClient, engine: Engine
+) -> None:
+    """F74: PATCH title/language alone leaves display_title untouched."""
+    document_id = _upsert_with_title(write_client, title=_SCRAPED)
+    write_client.patch(
+        f"/internal/v1/documents/{document_id}",
+        json={"display_title": _DISPLAY},
+        headers=auth_headers(),
+    )
+
+    response = write_client.patch(
+        f"/internal/v1/documents/{document_id}",
+        json={"title": "Edited title", "language": "es"},
+        headers=auth_headers(),
+    )
+    assert response.status_code == HTTPStatus.OK
+    body = response_json_object(response)
+    assert json_str_optional(body, "title") == "Edited title"
+    assert json_str_optional(body, "language") == "es"
+    assert json_str_optional(body, "display_title") == _DISPLAY
+
+    with engine.connect() as conn:
+        row = (
+            conn.execute(
+                text("SELECT title, display_title, language FROM documents WHERE id = :id"),
+                {"id": document_id},
+            )
+            .mappings()
+            .one()
+        )
+    assert row["title"] == "Edited title"
+    assert row["display_title"] == _DISPLAY
+    assert row["language"] == "es"
