@@ -4,14 +4,18 @@
 [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
 [Spec: docs/config-spec.md §VECINITA_AUTOMATIONS_*]
 [Spec: docs/acceptance-criteria.md §AC-AU1-AU3]
+[Spec: docs/api-contract.md §EV-027 Automations]
 """
 
 from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
 
 AUTOMATIONS_ENABLED_ENV = "VECINITA_AUTOMATIONS_ENABLED"
 AUTOMATIONS_KILL_SWITCH_ENV = "VECINITA_AUTOMATIONS_KILL_SWITCH"
@@ -110,3 +114,69 @@ def decide_catchup_enqueue(request: CatchupEnqueueRequest) -> CatchupEnqueueDeci
     if request.running_count >= request.max_concurrent:
         return "skip_at_capacity"
     return "enqueue"
+
+
+AutomationJobType = Literal["automation_catchup", "freshness_refresh"]
+AutomationRunStatus = Literal[
+    "pending",
+    "running",
+    "completed",
+    "failed",
+    "skipped",
+    "blocked",
+]
+
+
+class AutomationsConfigResponse(BaseModel):
+    """GET /internal/v1/automations/config (api-contract EV-027)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool
+    kill_switch: bool
+    max_concurrent: int = Field(..., ge=1)
+
+
+class AutomationsConfigPatchRequest(BaseModel):
+    """PATCH /internal/v1/automations/config — enable/disable (admin)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool
+
+
+class AutomationRun(BaseModel):
+    """One ``automation_runs`` row (TP3 / RD-341)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: UUID
+    job_type: AutomationJobType
+    status: AutomationRunStatus
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    error: str | None = None
+    document_id: UUID | None = None
+    revision: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class AutomationRunListResponse(BaseModel):
+    """GET /internal/v1/automations/runs paginated history."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[AutomationRun]
+    page: int = Field(..., ge=1)
+    page_size: int = Field(..., ge=1)
+    total_count: int = Field(..., ge=0)
+
+
+def load_automations_config_from_env() -> AutomationsConfigResponse:
+    """Build config response from env (kill-switch + caps always env-backed)."""
+    return AutomationsConfigResponse(
+        enabled=is_automations_enabled(),
+        kill_switch=is_automations_kill_switch_on(),
+        max_concurrent=parse_automations_max_concurrent(),
+    )
