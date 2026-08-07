@@ -5245,15 +5245,16 @@ project:
         - F72
         - F73
         - F74
-      tip_sha: '1cfa0a3'
-      tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-      tip_prev: '0367eeb'
+      tip_sha: 'c74a8ed'
+      tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+      tip_prev: '1cfa0a3'
       local_parity_tip: 'bbff787'
+      local_ci_push_note: 'local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived'
       env_role: staging_as_live
       env_role_live: prod
       deploy_path: A_cli
-      current_action: 13_local_verify_then_push_merge_cli
-      next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO'
+      current_action: 13_push_pr_merge_then_cli
+      next_action: 'push evolve → PR → merge main → CLI Alembic+DO'
       askquestion_pending: false
       askquestion_pending_topic:
       askquestion_topic:
@@ -5277,7 +5278,7 @@ project:
         - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
         - 'Live visual verify F72–F74 after cutover'
         - 'S028-D36: .env authorized — proceed Alembic→DO→H4–H5'
-      notes: 'S028-D37 tip path: local ci-push → push/PR/merge → CLI; S028-D36 .env; RA-009 waived'
+      notes: 'local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived; tip@c74a8ed; next push/PR/merge→CLI'
       note: 'S028/EV-026 13-deploy-smoke in_progress 2026-08-07T00:03:57Z — S028-D36 authorize .env as prod.env substitute; tip@1cfa0a3; env_role staging_as_live=live/prod; RA-009 waived S028-D34; current_action=13_cli_deploy_in_progress; Path A: Alembic → write API → chat BE → both FEs → H4–H5; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
       updated_at: '2026-08-06T23:55:00Z'
       s027_baseline:
@@ -6621,8 +6622,8 @@ project:
       started_at: '2026-08-06'
       started_at_iso: '2026-08-06T16:04:25Z'
       current_stage: 13-deploy-smoke
-      current_action: 13_local_ci_push_then_merge
-      next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO'
+      current_action: 13_push_pr_merge
+      next_action: 'push evolve → PR → merge main → CLI Alembic+DO'
       phase_0_status: approved
       phase0_approved: true
       phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -6654,7 +6655,7 @@ project:
       visual_verify_blocked_until: 13-deploy-smoke
       close_cycle_pending: false
       session_closed: false
-      handoff: '13 S028-D37: local ci→push/PR/merge→CLI; tip@1cfa0a3; S028-D36 .env; RA-009'
+      handoff: '13 local ci-push @c74a8ed pass_with_accepted_QA-S028-004; next push/PR/merge→CLI; tip@c74a8ed'
       s028_d35_decision: S028-D35
       blocker:
       s028_d36_decision: S028-D36
@@ -6676,9 +6677,9 @@ project:
       s028_d32_decision: S028-D32
       s028_d33_decision: S028-D33
       s028_d34_decision: S028-D34
-      tip_sha: '1cfa0a3'
-      tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-      tip_prev: '0367eeb'
+      tip_sha: 'c74a8ed'
+      tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+      tip_prev: '1cfa0a3'
       local_parity_tip: 'bbff787'
       phase_c: passed
       gate_c_to_d: passed
@@ -7113,7 +7114,7 @@ active_session:
     - 223
     - 224
   current_stage: 13-deploy-smoke
-  current_stage_note: 'S028/EV-026 13 S028-D37 tip path approved; tip@1cfa0a3; current_action=13_local_verify_then_push_merge_cli; askquestion_pending=false; RA-009 local verify; [Corpus: feature-list.md §F72–F74]'
+  current_stage_note: 'S028/EV-026 13 local ci-push @c74a8ed pass_with_accepted_QA-S028-004; current_action=13_push_pr_merge_then_cli; askquestion_pending=false; RA-009 waived; [Corpus: feature-list.md §F72–F74]'
   started_at: '2026-08-06'
   started_at_iso: '2026-08-06T16:01:41Z'
   mode: evolve
@@ -7199,6 +7200,7 @@ active_session:
     - 'S028-D36 2026-08-07T00:03:57Z: User chose 1 — authorize .env as prod.env substitute; askquestion_pending=false; current_action=13_cli_deploy_in_progress; proceed Alembic→DO→H4–H5; tip@1cfa0a3; [Corpus: feature-list.md §F72–F74]'
     - '2026-08-07T00:05:39Z: HARD-STOP tip@1cfa0a3 not on origin/main; evolve/EV-026-chat-source-ux not pushed; DO apps github.branch=main; current_action=blocked_tip_not_on_main; askquestion_pending tip placement before force_build/Alembic; S028-D36 .env still authorized; [Corpus: feature-list.md §F72–F74]'
     - 'S028-D37 2026-08-07T00:07:32Z: option 1 push evolve→PR→merge main→CLI; GHA outage → make ci-push + CLI only (RA-009); askquestion_pending=false; current_action=13_local_verify_then_push_merge_cli; tip@1cfa0a3; [Corpus: feature-list.md §F72–F74]'
+    - '2026-08-07T00:18:33Z: local make ci-push @c74a8ed — pytest 1765 PASS; Vitest 190+740 PASS; security PASS; DM coverage FAIL accepted QA-S028-004 (S028-D34); current_action=13_push_pr_merge_then_cli; tip 1cfa0a3→c74a8ed; proceed push/PR/merge+CLI; [Corpus: feature-list.md §F72–F74]'
   routing_plan:
     - stage: 00-context
       required: true
@@ -7579,9 +7581,9 @@ active_session:
       s028_d33_choice: option_1_proceed_12
       s028_d34_decision: S028-D34
       s028_d35_decision: S028-D35
-      tip_sha: '1cfa0a3'
-      tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-      tip_prev: '0367eeb'
+      tip_sha: 'c74a8ed'
+      tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+      tip_prev: '1cfa0a3'
       local_parity_tip: 'bbff787'
       local_parity:
         tip: 'bbff787'
@@ -7625,10 +7627,10 @@ active_session:
       askquestion_pending: false
       askquestion_pending_topic:
       askquestion_cleared: 'S028-D37 — push evolve → PR → merge main → CLI Alembic+DO (RA-009 local verify; GHA outage)'
-      current_action: 13_local_verify_then_push_merge_cli
-      next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO'
-      tip_sha: '1cfa0a3'
-      tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
+      current_action: 13_push_pr_merge_then_cli
+      next_action: 'push evolve → PR → merge main → CLI Alembic+DO'
+      tip_sha: 'c74a8ed'
+      tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
       local_parity_tip: 'bbff787'
       s028_d35_decision: S028-D35
       s028_d36_decision: S028-D36
@@ -7640,7 +7642,7 @@ active_session:
       do_apps_github_branch: main
       tip_placement_path: push_pr_merge_cli
       ra009_remote_ci_waived: true
-      notes: 'S028-D37 tip path; local ci-push then push/PR/merge then CLI; S028-D36 .env'
+      notes: 'local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived; next push/PR/merge then CLI'
       note: 'S028-D37 2026-08-07T00:07:32Z: push evolve→PR→merge→CLI; RA-009 local verify; tip@1cfa0a3 not yet on main'
       updated_at: '2026-08-07T00:07:32Z'
   context_briefs: []
@@ -7659,10 +7661,10 @@ active_session:
     - docs/sessions/S028-chat-source-ux/reports/e2e-report.md
     - docs/sessions/S028-chat-source-ux/reports/verify-impl.md
     - docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
-  next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO (source .env)'
+  next_action: 'push evolve → PR → merge main → CLI Alembic+DO (source .env); local ci-push done @c74a8ed'
   orchestrator_status: in_progress
   updated_at: '2026-08-06T23:55:00Z'
-  next_recommended: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO (source .env)'
+  next_recommended: 'push evolve → PR → merge main → CLI Alembic+DO (source .env)'
   delta_only: true
   askquestion_pending: false
   askquestion_pending_topic:
@@ -7673,8 +7675,8 @@ active_session:
   tip_on_staging: false
   visual_verify_blocked: true
   visual_verify_blocked_until: 13-deploy-smoke
-  handoff: '13 S028-D37: local ci-push → push evolve → PR → merge main → CLI Alembic+DO; .env authorized (S028-D36); RA-009 waived; tip@1cfa0a3'
-  current_action: 13_local_verify_then_push_merge_cli
+  handoff: '13 local ci-push @c74a8ed PASS w/ QA-S028-004 accepted; next push/PR/merge then CLI; S028-D36 .env; RA-009 waived'
+  current_action: 13_push_pr_merge_then_cli
   blocker:
   s028_d35_decision: S028-D35
   s028_d35_choice: yes_start_13_cli_deploy
@@ -7716,10 +7718,27 @@ active_session:
   phase_c: passed
   gate_c_to_d: passed
   checkpoints_phase_c: passed
-  tip_sha: '1cfa0a3'
-  tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-  tip_prev: '0367eeb'
+  tip_sha: 'c74a8ed'
+  tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+  tip_prev: '1cfa0a3'
   local_parity_tip: 'bbff787'
+  local_ci_push_tip: 'c74a8ed'
+  local_ci_push_note: 'local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived'
+  local_ci_push:
+    tip: 'c74a8ed'
+    pytest: 1765
+    pytest_result: PASS
+    vitest_chat_rag: 190
+    vitest_chat_rag_result: PASS
+    vitest_data_management: 740
+    vitest_data_management_result: PASS
+    security: PASS
+    dm_coverage: FAIL
+    dm_coverage_detail: '99.89%/97.77% threshold'
+    dm_coverage_disposition: QA-S028-004_accepted
+    overall: pass_with_accepted_QA-S028-004
+    ra009_remote_ci: waived_S028-D34
+  updated_at: '2026-08-07T00:18:33Z'
   tip_at_start_10_e2e: '8537690'
   bundle_note: tip synced at 10-e2e start c8b25e1→8537690 (workflow-state QA remediation sync commit)
   stage_08_result: PASS
@@ -23336,15 +23355,15 @@ stages:
       - F72
       - F73
       - F74
-    tip_sha: '1cfa0a3'
-    tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-    tip_prev: '0367eeb'
+    tip_sha: 'c74a8ed'
+    tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+    tip_prev: '1cfa0a3'
     local_parity_tip: 'bbff787'
     env_role: staging_as_live
     env_role_live: prod
     deploy_path: A_cli
-    current_action: 13_local_verify_then_push_merge_cli
-    next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO'
+    current_action: 13_push_pr_merge_then_cli
+    next_action: 'push evolve → PR → merge main → CLI Alembic+DO'
     askquestion_pending: false
     askquestion_pending_topic:
     askquestion_topic:
@@ -23368,7 +23387,7 @@ stages:
       - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
       - 'Live visual verify F72–F74 after cutover'
       - 'S028-D36: .env authorized — proceed Alembic→DO→H4–H5'
-    notes: 'S028-D37 tip path: local ci-push → push/PR/merge → CLI; S028-D36 .env; RA-009 waived'
+    notes: 'local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived; tip@c74a8ed; next push/PR/merge→CLI'
     note: 'S028/EV-026 13-deploy-smoke in_progress 2026-08-07T00:03:57Z — S028-D36 authorize .env as prod.env substitute; tip@1cfa0a3; env_role staging_as_live=live/prod; RA-009 waived S028-D34; current_action=13_cli_deploy_in_progress; Path A: Alembic → write API → chat BE → both FEs → H4–H5; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
     updated_at: '2026-08-06T23:55:00Z'
     s027_baseline:
@@ -24761,8 +24780,8 @@ stages:
     started_at: '2026-08-06'
     started_at_iso: '2026-08-06T16:04:25Z'
     current_stage: 13-deploy-smoke
-    current_action: 13_local_ci_push_then_merge
-    next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO'
+    current_action: 13_push_pr_merge
+    next_action: 'push evolve → PR → merge main → CLI Alembic+DO'
     phase_0_status: approved
     phase0_approved: true
     phase0_approved_at: '2026-08-06T16:28:29Z'
@@ -24794,7 +24813,7 @@ stages:
     visual_verify_blocked_until: 13-deploy-smoke
     close_cycle_pending: false
     session_closed: false
-    handoff: '13 S028-D37: local ci→push/PR/merge→CLI; tip@1cfa0a3; S028-D36 .env; RA-009'
+    handoff: '13 local ci-push @c74a8ed pass_with_accepted_QA-S028-004; next push/PR/merge→CLI; tip@c74a8ed'
     s028_d35_decision: S028-D35
     s028_d36_decision: S028-D36
     s028_d37_decision: S028-D37
@@ -24816,9 +24835,9 @@ stages:
     s028_d32_decision: S028-D32
     s028_d33_decision: S028-D33
     s028_d34_decision: S028-D34
-    tip_sha: '1cfa0a3'
-    tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-    tip_prev: '0367eeb'
+    tip_sha: 'c74a8ed'
+    tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+    tip_prev: '1cfa0a3'
     local_parity_tip: 'bbff787'
     phase_c: passed
     gate_c_to_d: passed
@@ -24962,10 +24981,10 @@ deployment:
     last_verified: '2026-08-05'
     commit_deployed: c942971
     commit_deployed_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-    commit_head: '1cfa0a3'
-    commit_head_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
+    commit_head: 'c74a8ed'
+    commit_head_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
     drift: true
-    drift_note: '2026-08-07T00:07:32Z S028/EV-026 13 S028-D37 tip path approved; tip@1cfa0a3 not yet on origin/main (commit_deployed=c942971); proceed local ci-push→push/PR/merge→CLI'
+    drift_note: '2026-08-07T00:18:33Z S028/EV-026 tip@c74a8ed local ci-push done; not yet on origin/main (commit_deployed=c942971); proceed push/PR/merge→CLI'
     branch: main
     commit_deployed_note: S026/EV-024 S026-D58 validate-existing smokes ACCEPTED @ c942971 — H0c/H1–H5/T3 PASS; F68 
       feedback PASS; F69 admin SKIP; enrich deferred; health_tiers confirmed accepted; report 
@@ -25106,6 +25125,7 @@ deployment:
       confirmed_at: '2026-08-05T00:54:00Z'
       confirmed_decision: S026-D58
     notes:
+      - 'S028/EV-026 2026-08-07T00:18:33Z local make ci-push @c74a8ed pass_with_accepted_QA-S028-004 (pytest 1765, Vitest 190+740, security PASS; DM coverage FAIL=QA-S028-004); tip@c74a8ed; proceed push/PR/merge+CLI; RA-009 waived'
       - 'S028/EV-026 2026-08-07T00:07:32Z S028-D37: tip path push evolve→PR→merge main→CLI; RA-009 local make ci-push (GHA outage); tip@1cfa0a3 not yet on main; S028-D36 .env authorized'
       - 'S028/EV-026 2026-08-07T00:05:39Z 13 blocked: tip not deployable from main; Alembic not started pending tip placement AskQuestion; tip@1cfa0a3 local evolve only; DO apps github.branch=main; S028-D36 .env still authorized'
       - 'S028/EV-026 2026-08-07T00:03:57Z S028-D36: authorize .env as prod.env substitute; 13_cli_deploy_alembic_then_do; tip@1cfa0a3; env_role staging_as_live=live/prod'
@@ -25439,10 +25459,10 @@ evolve_cycles:
     routing_preset: feature
     preset: feature
     current_stage: 13-deploy-smoke
-    current_action: 13_local_ci_push_then_merge
-    next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO'
-    current_stage_note: 'S028/EV-026 13 S028-D37 tip path; tip@1cfa0a3; 13_local_ci_push_then_merge; askquestion_pending=false'
-    notes: 'S028-D37: no reliance on Actions; make ci-push then push/PR/merge then CLI cutover'
+    current_action: 13_push_pr_merge
+    next_action: 'push evolve → PR → merge main → CLI Alembic+DO'
+    current_stage_note: 'S028/EV-026 13 local ci-push @c74a8ed pass_with_accepted_QA-S028-004; 13_push_pr_merge; tip@c74a8ed'
+    notes: 'S028-D37 path; local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived; tip@c74a8ed'
     branch: evolve/EV-026-chat-source-ux
     session_branch: evolve/EV-026-chat-source-ux
     evolve_branch_planned: evolve/EV-026-chat-source-ux
@@ -25506,9 +25526,9 @@ evolve_cycles:
     tip_placement_path: push_pr_merge_cli
     visual_verify_blocked: true
     visual_verify_blocked_until: 13-deploy-smoke
-    tip_sha: '1cfa0a3'
-    tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-    tip_prev: '0367eeb'
+    tip_sha: 'c74a8ed'
+    tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+    tip_prev: '1cfa0a3'
     local_parity_tip: 'bbff787'
     s028_d35_decision: S028-D35
     s028_d36_decision: S028-D36
@@ -25572,6 +25592,7 @@ evolve_cycles:
       - 'S028-D36 2026-08-07T00:03:57Z: authorize .env as prod.env substitute; current_action=13_cli_deploy_alembic_then_do; askquestion_pending=false; tip@1cfa0a3'
       - '2026-08-07T00:05:39Z: HARD-STOP tip@1cfa0a3 not on origin/main; evolve unpushed; DO apps branch=main; current_action=blocked_tip_not_on_main; AskQuestion push/merge/retarget before force_build'
       - 'S028-D37 2026-08-07T00:07:32Z: option 1 push→PR→merge→CLI; RA-009 local verify; askquestion_pending=false; tip@1cfa0a3'
+      - '2026-08-07T00:18:33Z: local make ci-push @c74a8ed pass_with_accepted_QA-S028-004; tip 1cfa0a3→c74a8ed; current_action=13_push_pr_merge'
     feature_map:
       F72:
         issue: 222
@@ -25593,7 +25614,7 @@ evolve_cycles:
       phase_c: passed
       phase_c_note: 'Gate C→D PASS (S028-D26 option 1) — proceed 08-verify-build'
       phase_d: passed
-      phase_d_note: '09+10+11+12 complete; 13 S028-D37 tip path @1cfa0a3 (local ci→push/PR/merge→CLI); deploy pending'
+      phase_d_note: '09+10+11+12 complete; 13 local ci-push @c74a8ed pass_with_accepted_QA-S028-004; next push/PR/merge→CLI; deploy pending'
       deploy: pending
       updated_at: '2026-08-06T23:55:00Z'
     adrs:
@@ -25808,9 +25829,9 @@ evolve_cycles:
         note: 'QA-S028-005 — closed at 11-verify-impl'
     updated_at: '2026-08-06T23:45:30Z'
     note: 'S028/EV-026 13-deploy-smoke STARTED 2026-08-06T23:55:00Z — S028-D35 Yes CLI deploy; tip@1cfa0a3; blocked_missing_prod_env; askquestion_pending=Provide prod.env / authorize .env; H4–H5 carry QA-S028-003; staging@c942971 drift=true; [Corpus: feature-list.md §F72–F74]'
-    tip_sha: '1cfa0a3'
-    tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-    tip_prev: '0367eeb'
+    tip_sha: 'c74a8ed'
+    tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+    tip_prev: '1cfa0a3'
     local_parity_tip: 'bbff787'
     s028_d33_decision: S028-D33
     s028_d33_choice: option_1_proceed_12
@@ -26447,15 +26468,15 @@ evolve_cycles:
           - F72
           - F73
           - F74
-        tip_sha: '1cfa0a3'
-        tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
+        tip_sha: 'c74a8ed'
+        tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
         local_parity_tip: 'bbff787'
         started_at: '2026-08-06T23:55:00Z'
         askquestion_pending: false
         askquestion_pending_topic:
         askquestion_cleared: 'S028-D37 — push evolve → PR → merge main → CLI Alembic+DO (RA-009 local verify; GHA outage)'
-        current_action: 13_local_ci_push_then_merge
-        next_action: 'make ci-push → push evolve → PR → merge main → CLI Alembic+DO'
+        current_action: 13_push_pr_merge
+        next_action: 'push evolve → PR → merge main → CLI Alembic+DO'
         s028_d35_decision: S028-D35
         s028_d36_decision: S028-D36
         s028_d37_decision: S028-D37
@@ -49946,6 +49967,7 @@ decisions_log:
       - RA-009
     note: 'No reliance on GitHub Actions; make ci-push then push/PR/merge then CLI cutover. [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
   - 'S028-D37 / EV-026: 2026-08-07T00:07:32Z — push evolve→PR→merge main→CLI; RA-009 local verify; askquestion_pending=false; tip@1cfa0a3'
+  - 'S028/EV-026 2026-08-07T00:18:33Z: local make ci-push @c74a8ed pass_with_accepted_QA-S028-004; tip→c74a8ed; current_action=13_push_pr_merge_then_cli; proceed push/PR/merge+CLI; RA-009 waived'
 artifacts:
   - path: docs/sessions/S027-multilingual-embeddings/reports/deploy-smoke.md
     kind: deploy-smoke
@@ -53363,17 +53385,18 @@ git_history:
       renamed_at: '2026-08-06T19:09:30Z'
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
-      head_sha: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-      tip: '1cfa0a3'
-      tip_sha: '1cfa0a3'
-      tip_full: 1cfa0a325ca8740d49bd4ea8157761fd475139ad
-      tip_prev: '0367eeb'
+      head_sha: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+      tip: 'c74a8ed'
+      tip_sha: 'c74a8ed'
+      tip_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+      tip_prev: '1cfa0a3'
       local_parity_tip: 'bbff787'
-      tip_note: 'tip@1cfa0a3; S028-D37 push/PR/merge path; not yet on origin/main'
-      note: '13 S028-D37: local ci-push then push/PR/merge then CLI; tip@1cfa0a3'
+      tip_note: 'tip@c74a8ed; local ci-push pass_with_accepted_QA-S028-004; next push/PR/merge'
+      note: '13 tip@c74a8ed; local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived; proceed push/PR/merge→CLI'
+      local_ci_push_note: 'local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived'
       askquestion_pending: false
       askquestion_pending_topic:
-      updated_at: '2026-08-07T00:07:32Z'
+      updated_at: '2026-08-07T00:18:33Z'
       s028_d36_decision: S028-D36
       s028_d37_decision: S028-D37
       tip_on_origin_main: false
@@ -53933,6 +53956,16 @@ git_history:
       evolve_cycle_id: EV-024
       note: 'Merged via PR #205 @0c1d838; tip @7f086c3; #204 closed as superseded'
   commits:
+    - sha: c74a8ed
+      sha_full: c74a8ed7b32fd28e6b4c11d55b9b381458b3b273
+      branch: evolve/EV-026-chat-source-ux
+      message: 'chore: sync workflow-state for 13 CLI deploy path (S028-D35–D37)'
+      stage: 13-deploy-smoke
+      skill_id: 13-deploy-smoke
+      session_id: S028-chat-source-ux
+      evolve_cycle_id: EV-026
+      timestamp: '2026-08-07T00:18:33Z'
+      note: 'local_ci_push: pass_with_accepted_QA-S028-004; RA-009 still waived'
     - sha: 2c884bd
       full_sha: 2c884bd202524605d96e4d0d510e69e5a100a3a7
       sha_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
