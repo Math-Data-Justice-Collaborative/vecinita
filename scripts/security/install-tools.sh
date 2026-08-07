@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Portable install: OpenGrep, 2ms, KICS, Grype, Microsoft SBOM Tool.
 # Installs to ~/.local/share/security-static-analysis/{bin,assets}
+#
+# GitHub Releases API + downloads retry on transient failures (#227 / BUG-2026-08-06).
+# Optional GH_TOKEN / GITHUB_TOKEN raises api.github.com quota (never commit tokens).
 set -euo pipefail
 
 PREFIX="${SEC_TOOLS_DIR:-${HOME}/.local/share/security-static-analysis}"
@@ -8,6 +11,10 @@ BIN_DIR="${PREFIX}/bin"
 ASSETS_DIR="${PREFIX}/assets"
 mkdir -p "${BIN_DIR}" "${ASSETS_DIR}"
 export PATH="${BIN_DIR}:${PATH}"
+
+# Retries for api.github.com + asset downloads (CI flake: rate limit / empty / timeout).
+SEC_GITHUB_API_RETRIES="${SEC_GITHUB_API_RETRIES:-5}"
+SEC_GITHUB_API_RETRY_DELAY="${SEC_GITHUB_API_RETRY_DELAY:-2}"
 
 log() { printf '[security] %s\n' "$*"; }
 err() { printf '[security] ERROR: %s\n' "$*" >&2; }
@@ -20,7 +27,44 @@ case "${ARCH_RAW}" in
   *) err "unsupported arch ${ARCH_RAW}"; exit 1 ;;
 esac
 
-download() { curl -fsSL "$1" -o "$2"; }
+# Retry curl until success or attempts exhausted. Hard-fail after N — never soft-skip.
+_curl_retry() {
+  local max="${SEC_GITHUB_API_RETRIES}"
+  local delay="${SEC_GITHUB_API_RETRY_DELAY}"
+  local attempt=1
+  local rc=0
+
+  while ((attempt <= max)); do
+    if curl "$@"; then
+      return 0
+    fi
+    rc=$?
+    if ((attempt < max)); then
+      log "fetch attempt ${attempt}/${max} failed (rc=${rc}); retry in ${delay}s..."
+      sleep "${delay}"
+    fi
+    attempt=$((attempt + 1))
+  done
+  return "${rc}"
+}
+
+# Authenticated GitHub API GET when GH_TOKEN / GITHUB_TOKEN is set (stdout body).
+_github_api_get() {
+  local url="$1"
+  local -a hdr=(
+    -H "Accept: application/vnd.github+json"
+    -H "User-Agent: vecinita-ci"
+  )
+  local token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
+  if [[ -n "${token}" ]]; then
+    hdr+=(-H "Authorization: Bearer ${token}" -H "X-GitHub-Api-Version: 2022-11-28")
+  fi
+  _curl_retry -fsSL "${hdr[@]}" "${url}"
+}
+
+download() {
+  _curl_retry -fsSL "$1" -o "$2"
+}
 
 log "installing → ${BIN_DIR} (${OS}/${ARCH})"
 
@@ -45,7 +89,7 @@ if [[ ! -x "${BIN_DIR}/2ms" || "${SEC_FORCE:-0}" == "1" ]]; then
   esac
   tmp="$(mktemp -d)"
   asset_url="$(
-    curl -fsSL https://api.github.com/repos/checkmarx/2ms/releases/latest \
+    _github_api_get "https://api.github.com/repos/checkmarx/2ms/releases/latest" \
       | sed -n "s/.*\"browser_download_url\": *\"\\([^\"]*${A}\\)\".*/\\1/p" \
       | head -1
   )"
@@ -65,25 +109,60 @@ if [[ ! -x "${BIN_DIR}/kics" || ! -d "${ASSETS_DIR}/kics/assets/queries" || "${S
   tmp="$(mktemp -d)"
   # Prints: tag_name|browser_download_url|asset_name
   kics_meta="$(
-    python3 - "${osn}" "${ARCH}" <<'PY'
-import json, sys, urllib.request
+    SEC_GITHUB_API_RETRIES="${SEC_GITHUB_API_RETRIES}" \
+      SEC_GITHUB_API_RETRY_DELAY="${SEC_GITHUB_API_RETRY_DELAY}" \
+      GH_TOKEN="${GH_TOKEN:-}" \
+      GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
+      python3 - "${osn}" "${ARCH}" <<'PY'
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
 
 osn, arch = sys.argv[1], sys.argv[2]
 suffix = f"_{osn}_{arch}.tar.gz"
-req = urllib.request.Request(
-    "https://api.github.com/repos/Checkmarx/kics/releases?per_page=30",
-    headers={"Accept": "application/vnd.github+json", "User-Agent": "vecinita-ci"},
-)
-with urllib.request.urlopen(req, timeout=60) as resp:
-    releases = json.load(resp)
+url = "https://api.github.com/repos/Checkmarx/kics/releases?per_page=30"
+retries = int(os.environ.get("SEC_GITHUB_API_RETRIES", "5"))
+delay = float(os.environ.get("SEC_GITHUB_API_RETRY_DELAY", "2"))
+token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or ""
+headers = {
+    "Accept": "application/vnd.github+json",
+    "User-Agent": "vecinita-ci",
+}
+if token:
+    headers["Authorization"] = f"Bearer {token}"
+    headers["X-GitHub-Api-Version"] = "2022-11-28"
+
+releases = None
+last_err = None
+for attempt in range(1, retries + 1):
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            releases = json.load(resp)
+        break
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+        last_err = exc
+        if attempt < retries:
+            time.sleep(delay)
+        else:
+            raise SystemExit(
+                f"GitHub API failed after {retries} attempts: {exc}"
+            ) from exc
+
+if not isinstance(releases, list):
+    raise SystemExit(f"unexpected GitHub releases payload: {last_err!r}")
+
 for rel in releases:
     tag = rel.get("tag_name") or ""
     for asset in rel.get("assets") or []:
         name = asset.get("name") or ""
         if name.startswith("kics_") and name.endswith(suffix):
-            url = asset.get("browser_download_url") or ""
-            if tag and url:
-                print(f"{tag}|{url}|{name}")
+            asset_url = asset.get("browser_download_url") or ""
+            if tag and asset_url:
+                print(f"{tag}|{asset_url}|{name}")
                 raise SystemExit(0)
 raise SystemExit("no KICS release asset found for " + suffix)
 PY
@@ -112,7 +191,7 @@ fi
 if [[ ! -x "${BIN_DIR}/grype" || "${SEC_FORCE:-0}" == "1" ]]; then
   # Official installer downloaded to a temp file (avoids curl|sh); -b sets install dir.
   _grype_install="$(mktemp)"
-  curl -sSfL https://get.anchore.io/grype -o "${_grype_install}"
+  _curl_retry -sSfL https://get.anchore.io/grype -o "${_grype_install}"
   sh "${_grype_install}" -b "${BIN_DIR}"
   rm -f "${_grype_install}"
 fi

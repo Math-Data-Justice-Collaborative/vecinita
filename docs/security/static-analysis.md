@@ -11,6 +11,20 @@ make security-scan           # hard-fail; also on husky pre-commit + make ci / c
 
 Reports land in `.security-reports/` (gitignored). Binaries in `.tools/security/` (gitignored).
 
+## Tool install retries (#227)
+
+`scripts/security/install-tools.sh` retries GitHub API and asset downloads on transient
+failures (rate limit / empty latest / network). Hard-fail after N attempts — do not skip
+scans.
+
+| Env | Default | Role |
+|-----|---------|------|
+| `SEC_GITHUB_API_RETRIES` | `5` | Max attempts for API + downloads |
+| `SEC_GITHUB_API_RETRY_DELAY` | `2` | Seconds between attempts (`0` in tests) |
+| `GH_TOKEN` / `GITHUB_TOKEN` | unset | Optional Bearer auth for `api.github.com` (higher quota). **Never commit tokens.** |
+
+CI already exposes `GITHUB_TOKEN` to Actions; local commits may set `GH_TOKEN` from `gh auth token` when rate-limited.
+
 ## Tools
 
 | Tool | Role | Fail threshold (strictest hard-block) |
