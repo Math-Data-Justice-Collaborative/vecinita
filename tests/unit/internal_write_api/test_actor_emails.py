@@ -120,3 +120,15 @@ def test_actor_email_resolver_negative_cache() -> None:
     assert resolver.resolve([_UID]) == {}
     assert resolver.resolve([_UID]) == {}
     assert len(calls) == 1
+
+
+def test_resolve_actor_emails_omits_user_with_empty_email() -> None:
+    """GoTrue user without email is treated as unresolved (omit from map)."""
+    reset_actor_email_cache_for_tests()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        return httpx.Response(200, json=_gotrue_user(email=""))
+
+    result = resolve_actor_emails([_UID], client=_admin(handler))
+    assert result == {}
