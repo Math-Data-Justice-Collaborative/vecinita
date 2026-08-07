@@ -6390,30 +6390,43 @@ project:
       started: '2026-07-07'
       last_cycle: PRM-011
     14-hotfix:
-      status: in_progress
+      status: completed
       started_at: '2026-08-06'
       started_at_iso: '2026-08-07T01:30:43Z'
+      completed_at: '2026-08-07'
+      completed: '2026-08-07'
+      completed_at_iso: '2026-08-07T12:26:00Z'
       session_id: S029-security-install-tools-flake
       branch: fix/S029-security-install-tools-flake
       github_issue: 227
+      github_issue_status: closed
       bugs:
         - id: BUG-2026-08-06-security-install-tools-flake
           summary: scripts/security/install-tools.sh flaky GitHub API version fetch (S027-FLAKY-SECURITY-INSTALL /
             RA-020 / #227)
-          status: open
+          status: resolved
           order: 1
           seen_on: ci_and_local
           severity: critical
           bug_report: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md
-          bug_report_status: written
+          bug_report_status: resolved
           repro_test: tests/bugs/test_bug_2026_08_06_security_install_tools_flake.py
-          repro_status: red
+          repro_status: green
           remediation_path: land_on_main_asap
           tracker:
             github_issue: 227
+            github_issue_status: closed
             s027_id: S027-FLAKY-SECURITY-INSTALL
             ra_id: RA-020
-          note: 'OPEN — Phase 1.25 awaiting AskQuestion repro confirmation; bug report written; repro RED locally; no code fix yet'
+          note: 'RESOLVED 2026-08-07 — PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); #227 closed; Phase 5 no Cursor rule (retries+pins+CI security job); main CI+deploy-preflight green for both merges'
+          fix_summary: Retry GitHub API version fetch in install-tools.sh (#233) + pin security scanner release tags (#234)
+          fix_committed: true
+          merge_sha: 2da98e9
+          merge_sha_retries: a215220
+          merge_sha_pins: 2da98e9
+          prs:
+            - 233
+            - 234
         # --- prior S018 bug retained ---
         - id: BUG-2026-07-31-eval-job-dispatch
           summary: Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with 
@@ -6436,48 +6449,92 @@ project:
           fix_committed: true
           fix_commit: 207df88
           merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
-      note: 'S029 Phase 1.25 awaiting AskQuestion repro confirmation — bug report + repro RED locally; branch fix/S029-security-install-tools-flake; current_bug=BUG-2026-08-06-security-install-tools-flake; no code fix until confirmed. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
-      phase: '1.25'
-      phase_action: 'Phase 1.25 awaiting repro confirmation'
+      note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+      phase: '5'
+      phase_action: 'Phase 5 complete — no Cursor rule; prevention = retries + pins + CI security job'
+      phase5:
+        cursor_rule: none
+        prevention: retries_plus_pins_plus_ci_security_job
+        note: 'Phase 5: no Cursor rule; prevention = retries + pins + CI security job'
       s018_closed_note: 'S018 CLOSED 2026-07-31 — PR #169 MERGED @ a6c39e5; CD + live smoke PASS; Phase 5 prevention @ 8a8cd48; bug resolved;
         user option 2 close + prevention push/PR; Batch A paused (00-context later).'
-      current_bug: BUG-2026-08-06-security-install-tools-flake
-      current_action: phase_1_25_awaiting_repro_confirmation
-      next_action: askquestion_phase_1_25_then_code_fix
+      current_bug:
+      current_action:
+      next_action: none_session_closed
       phase0_complete: true
       phase1_bug_report: written
-      phase1_repro_status: red
-      askquestion_pending: true
-      askquestion_pending_topic: phase_1_25_repro_confirmation
-      updated_at: '2026-08-07T01:36:44Z'
-      bug_status: open
-      prevention_commit: 8a8cd48
+      phase1_repro_status: green
+      askquestion_pending: false
+      askquestion_pending_topic:
+      updated_at: '2026-08-07T12:26:00Z'
+      bug_status: resolved
+      session_closed: true
+      session_closed_at: '2026-08-07'
+      prs:
+        - number: 233
+          merge_sha: a215220
+          url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/233
+          status: merged
+          role: retries
+          ci_deploy_preflight: green
+        - number: 234
+          merge_sha: 2da98e9
+          url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+          status: merged
+          role: pins
+          ci_deploy_preflight: green
+      pr_number: 234
+      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+      pr_status: merged
+      merge_sha: 2da98e9
+      merge_sha_full: 2da98e9f54183694742d05abf11851906d5a77a8
+      merge_sha_retries: a215220
+      merge_sha_pins: 2da98e9
+      merged_at: '2026-08-07T12:21:22Z'
+      head_sha: 2da98e9
+      main_ci_deploy_preflight: green_both_merges
+      main_ci_note: 'main CI+deploy-preflight green for both #233 and #234 merges; parent watching docs push separately'
+      docs_closeout_tip: ee29890
+      parent_watching_docs_push: true
       prevention_plan_confirmed: true
       prevention_implemented: true
-      prevention_pa:
-        recurrence_risk: possible_on_similar_changes
-        detect_earlier: local_husky_precommit_bug_repro
-      prevention_pc:
-        when: now_same_session
-        who: agent_now
-      post_deploy_monitoring: none
-      layer4_production_verified: true
-      cd:
-        status: success
-        merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
-        ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30633805272
-        deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634041609
-        deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634088059
-        deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634163306
-      live_smoke:
-        status: pass
-        report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
-        adhoc_run_id: eb76b740-4aa5-4977-b519-0b133cd48b5c
-        modal_job_id: d0a9f39c-df25-445f-87ac-9e07a1c7429d
-        note: both completed; no ValidationError ingest fall-through
+      prevention_cursor_rule: none
+      prevention_summary: retries_plus_pins_plus_ci_security_job
       prior_session_id: S018-eval-job-dispatch
-      updated_at: '2026-08-07T01:30:43Z'
+      summary: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+
       history:
+        - status: completed
+          started_at: '2026-08-06'
+          completed_at: '2026-08-07'
+          session_id: S029-security-install-tools-flake
+          branch: fix/S029-security-install-tools-flake
+          bugs:
+            - id: BUG-2026-08-06-security-install-tools-flake
+              status: resolved
+              github_issue: 227
+              bug_report: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md
+              repro_test: tests/bugs/test_bug_2026_08_06_security_install_tools_flake.py
+              fix_summary: Retry GitHub API in install-tools (#233) + pin scanner tags (#234)
+              merge_sha_retries: a215220
+              merge_sha_pins: 2da98e9
+              note: 'RESOLVED — #227 closed; Phase 5 no Cursor rule'
+          note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+          pr: 234
+          pr_number: 234
+          pr_status: merged
+          pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+          prs:
+            - 233
+            - 234
+          merge_sha: 2da98e9
+          merge_sha_retries: a215220
+          merged_at: '2026-08-07T12:21:22Z'
+          next_action: none_session_closed
+          prior_session_id: S018-eval-job-dispatch
+          phase5:
+            cursor_rule: none
+            prevention: retries_plus_pins_plus_ci_security_job
         - status: completed
           started_at: '2026-07-29'
           completed_at: '2026-07-29'
@@ -7179,73 +7236,131 @@ project:
         evolve_cycle_id: EV-020
         note: S023 CLOSED 2026-08-03 — EV-020 cycle closed (done)
 session_counter: 29
-active_session:
-  id: S029-security-install-tools-flake
-  type: hotfix
-  slug: security-install-tools-flake
-  intent: Harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL /
-    RA-020)
-  status: in_progress
-  branch: fix/S029-security-install-tools-flake
-  orchestrator: 14-hotfix
-  evolve_cycle_id:
-  artifacts_dir: docs/sessions/S029-security-install-tools-flake/
-  github_issue: 227
-  github_issues:
-    - 227
-  related_issues:
-    - 227
-  bug_id: BUG-2026-08-06-security-install-tools-flake
-  current_stage: 14-hotfix
-  started_at: '2026-08-06'
-  started_at_iso: '2026-08-07T01:30:43Z'
-  mode: hotfix
-  routing_plan_status: approved
-  routing_approval: 14-hotfix Step 0.4 Proceed + plan including open_session; Phase 0 interview complete
-  phase0:
-    status: completed
-    completed_at: '2026-08-06'
-    intent: new_issue
-    symptom: wrong_output
-    env: ci_and_local
-    reproducibility: intermittent_since_S027
-    severity: critical_merges_blocked
-    evidence: partial
-    prior_mitigation: nothing_beyond_rerun
-    remediation: land_on_main_asap
-    verification: retries_pin_green_plus_full_ci_parity_plus_watch_main_ci
-    tracker_refs:
-      - 'github#227'
-      - S027-FLAKY-SECURITY-INSTALL
-      - RA-020
-    note: 'Phase 0 interview complete — user chose: new issue, wrong output, CI+local, intermittent since S027, critical
-      merges blocked, partial evidence, nothing beyond rerun, remediation=land on main ASAP, verification=retries/pin green
-      + full CI parity + watch main CI'
-  routing_plan:
-    - stage: 14-hotfix
-      required: true
-      status: in_progress
-      skip_rationale:
-      started_at: '2026-08-06'
-      note: 'Phase 1.25 awaiting AskQuestion repro confirmation — report written; repro RED; branch fix/S029-security-install-tools-flake; current_bug=BUG-2026-08-06-security-install-tools-flake; GitHub #227'
-    - stage: 15-service-health
-      required: false
-      status: pending
-      skip_rationale:
-      note: Optional hotfix preset — decide after merge/CI green on main
-  context_briefs: []
-  notes:
-    - 'S029-security-install-tools-flake OPEN 2026-08-07T01:30:43Z — hotfix for scripts/security/install-tools.sh GitHub API version fetch (#227).
-      Branch fix/S029-security-install-tools-flake to be created by agent separately. [Corpus: bug-investigation] [Spec: docs/bug-reports/]'
-    - Phase 0 interview recorded on open; routing approved via 14-hotfix Step 0.4 Proceed
-    - 'Phase 1.25 2026-08-07T01:36:44Z — bug report written (docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md); repro test RED locally (tests/bugs/test_bug_2026_08_06_security_install_tools_flake.py);
-      branch fix/S029-security-install-tools-flake checked out @ c19dd6c; awaiting AskQuestion Phase 1.25 before code fix'
-  next_action: askquestion_phase_1_25_then_code_fix
-  phase: '1.25'
-  phase_action: 'Phase 1.25 awaiting repro confirmation'
-  current_bug: BUG-2026-08-06-security-install-tools-flake
-  updated_at: '2026-08-07T01:36:44Z'
+active_session: null
 sessions:
+  - id: S029-security-install-tools-flake
+    type: hotfix
+    slug: security-install-tools-flake
+    intent: Harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL /
+      RA-020)
+    status: completed
+    branch: fix/S029-security-install-tools-flake
+    orchestrator: 14-hotfix
+    evolve_cycle_id:
+    artifacts_dir: docs/sessions/S029-security-install-tools-flake/
+    artifacts:
+      - docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md
+      - tests/bugs/test_bug_2026_08_06_security_install_tools_flake.py
+      - docs/sessions/S029-security-install-tools-flake/session-brief.md
+      - docs/sessions/S029-security-install-tools-flake/routing-plan.md
+      - docs/sessions/S029-security-install-tools-flake/HANDOFF.md
+    github_issue: 227
+    github_issues:
+      - 227
+    related_issues:
+      - 227
+    bug_id: BUG-2026-08-06-security-install-tools-flake
+    current_stage: completed
+    current_stage_note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+    started_at: '2026-08-06'
+    started_at_iso: '2026-08-07T01:30:43Z'
+    completed_at: '2026-08-07'
+    completed_at_iso: '2026-08-07T12:26:00Z'
+    mode: hotfix
+    routing_plan_status: approved
+    routing_approval: 14-hotfix Step 0.4 Proceed + plan including open_session; Phase 0 interview complete
+    phase0:
+      status: completed
+      completed_at: '2026-08-06'
+      intent: new_issue
+      symptom: wrong_output
+      env: ci_and_local
+      reproducibility: intermittent_since_S027
+      severity: critical_merges_blocked
+      evidence: partial
+      prior_mitigation: nothing_beyond_rerun
+      remediation: land_on_main_asap
+      verification: retries_pin_green_plus_full_ci_parity_plus_watch_main_ci
+      tracker_refs:
+        - 'github#227'
+        - S027-FLAKY-SECURITY-INSTALL
+        - RA-020
+    routing_plan:
+      - stage: 14-hotfix
+        required: true
+        status: completed
+        skip_rationale:
+        started_at: '2026-08-06'
+        completed_at: '2026-08-07'
+        note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+      - stage: 15-service-health
+        required: false
+        status: skipped
+        skip_rationale: Hotfix closed after main CI+deploy-preflight green on #233/#234; optional 15 not required for install-tools flake remediation
+        note: Skipped — prevention is retries + pins + CI security job; no post-deploy service-health follow-up needed
+    context_briefs: []
+    notes:
+      - 'S029-security-install-tools-flake OPEN 2026-08-07T01:30:43Z — hotfix for scripts/security/install-tools.sh GitHub API version fetch (#227).'
+      - Phase 0 interview recorded on open; routing approved via 14-hotfix Step 0.4 Proceed
+      - 'Phase 1.25 2026-08-07T01:36:44Z — bug report + repro RED; branch fix/S029-security-install-tools-flake @ c19dd6c'
+      - 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+    prs:
+      - number: 233
+        merge_sha: a215220
+        merge_sha_full: a21522077a498ad959cb34f3e0e3566ff1b17134
+        title: retries GitHub API in security install-tools
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/233
+        status: merged
+        merged_at: '2026-08-07T12:09:35Z'
+        ci_deploy_preflight: green
+      - number: 234
+        merge_sha: 2da98e9
+        merge_sha_full: 2da98e9f54183694742d05abf11851906d5a77a8
+        title: pin security scanner release tags
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+        status: merged
+        merged_at: '2026-08-07T12:21:22Z'
+        ci_deploy_preflight: green
+    pr_number: 234
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+    pr_status: merged
+    merge_sha: 2da98e9
+    merge_sha_full: 2da98e9f54183694742d05abf11851906d5a77a8
+    merge_sha_retries: a215220
+    merge_sha_pins: 2da98e9
+    merged_at: '2026-08-07T12:21:22Z'
+    github_issue_status: closed
+    bug_status: resolved
+    phase5:
+      cursor_rule: none
+      prevention: retries_plus_pins_plus_ci_security_job
+      note: 'Phase 5: no Cursor rule; prevention = retries + pins + CI security job'
+    session_closed: true
+    close_note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+    summary: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+    next_action: none_session_closed
+    handoff:
+      cleared: true
+      next_skill:
+      next_action: none_session_closed
+      bug_status: resolved
+      bugs_order:
+        - BUG-2026-08-06-security-install-tools-flake
+      bugs_status:
+        BUG-2026-08-06-security-install-tools-flake: resolved
+      bug_reports:
+        BUG-2026-08-06-security-install-tools-flake: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md
+      github_issue: 227
+      github_issue_status: closed
+      prs:
+        - 233
+        - 234
+      merge_shas:
+        '233': a215220
+        '234': 2da98e9
+      session_closed: true
+      docs_closeout_tip: ee29890
+      parent_watching_docs_push: true
   - id: S028-chat-source-ux
     type: feature
     slug: chat-source-ux
@@ -24646,30 +24761,43 @@ stages:
           evolve-history + CHANGELOG updated; session archived; active_session=null.'
     s028_d38_decision: S028-D38
   14-hotfix:
-    status: in_progress
+    status: completed
     started_at: '2026-08-06'
     started_at_iso: '2026-08-07T01:30:43Z'
+    completed_at: '2026-08-07'
+    completed: '2026-08-07'
+    completed_at_iso: '2026-08-07T12:26:00Z'
     session_id: S029-security-install-tools-flake
     branch: fix/S029-security-install-tools-flake
     github_issue: 227
+    github_issue_status: closed
     bugs:
       - id: BUG-2026-08-06-security-install-tools-flake
         summary: scripts/security/install-tools.sh flaky GitHub API version fetch (S027-FLAKY-SECURITY-INSTALL /
           RA-020 / #227)
-        status: open
+        status: resolved
         order: 1
         seen_on: ci_and_local
         severity: critical
         bug_report: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md
-        bug_report_status: written
+        bug_report_status: resolved
         repro_test: tests/bugs/test_bug_2026_08_06_security_install_tools_flake.py
-        repro_status: red
+        repro_status: green
         remediation_path: land_on_main_asap
         tracker:
           github_issue: 227
+          github_issue_status: closed
           s027_id: S027-FLAKY-SECURITY-INSTALL
           ra_id: RA-020
-        note: 'OPEN — Phase 1.25 awaiting AskQuestion repro confirmation; bug report written; repro RED locally; no code fix yet'
+        note: 'RESOLVED 2026-08-07 — PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); #227 closed; Phase 5 no Cursor rule (retries+pins+CI security job); main CI+deploy-preflight green for both merges'
+        fix_summary: Retry GitHub API version fetch in install-tools.sh (#233) + pin security scanner release tags (#234)
+        fix_committed: true
+        merge_sha: 2da98e9
+        merge_sha_retries: a215220
+        merge_sha_pins: 2da98e9
+        prs:
+          - 233
+          - 234
       # --- prior S018 bug retained ---
       - id: BUG-2026-07-31-eval-job-dispatch
         summary: Admin Evaluation Modal job_type=eval — run_job falls through to ingest and fails with 
@@ -24692,49 +24820,92 @@ stages:
         fix_committed: true
         fix_commit: 207df88
         merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
-    note: 'S029 Phase 1.25 awaiting AskQuestion repro confirmation — bug report + repro RED locally; branch fix/S029-security-install-tools-flake; current_bug=BUG-2026-08-06-security-install-tools-flake; no code fix until confirmed. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
-    phase: '1.25'
-    phase_action: 'Phase 1.25 awaiting repro confirmation'
+    note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+    phase: '5'
+    phase_action: 'Phase 5 complete — no Cursor rule; prevention = retries + pins + CI security job'
+    phase5:
+      cursor_rule: none
+      prevention: retries_plus_pins_plus_ci_security_job
+      note: 'Phase 5: no Cursor rule; prevention = retries + pins + CI security job'
     s018_closed_note: 'S018 CLOSED 2026-07-31 — PR #169 MERGED @ a6c39e5; CD + live smoke PASS; Phase 5 prevention @ 8a8cd48; bug resolved;
       user option 2 close + prevention push/PR; Batch A paused (00-context later).'
-    current_bug: BUG-2026-08-06-security-install-tools-flake
-    current_action: phase_1_25_awaiting_repro_confirmation
-    next_action: askquestion_phase_1_25_then_code_fix
+    current_bug:
+    current_action:
+    next_action: none_session_closed
     phase0_complete: true
     phase1_bug_report: written
-    phase1_repro_status: red
-    askquestion_pending: true
-    askquestion_pending_topic: phase_1_25_repro_confirmation
-    updated_at: '2026-08-07T01:36:44Z'
-    prevention_commit: 8a8cd48
+    phase1_repro_status: green
+    askquestion_pending: false
+    askquestion_pending_topic:
+    updated_at: '2026-08-07T12:26:00Z'
+    bug_status: resolved
+    session_closed: true
+    session_closed_at: '2026-08-07'
+    prs:
+      - number: 233
+        merge_sha: a215220
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/233
+        status: merged
+        role: retries
+        ci_deploy_preflight: green
+      - number: 234
+        merge_sha: 2da98e9
+        url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+        status: merged
+        role: pins
+        ci_deploy_preflight: green
+    pr_number: 234
+    pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+    pr_status: merged
+    merge_sha: 2da98e9
+    merge_sha_full: 2da98e9f54183694742d05abf11851906d5a77a8
+    merge_sha_retries: a215220
+    merge_sha_pins: 2da98e9
+    merged_at: '2026-08-07T12:21:22Z'
+    head_sha: 2da98e9
+    main_ci_deploy_preflight: green_both_merges
+    main_ci_note: 'main CI+deploy-preflight green for both #233 and #234 merges; parent watching docs push separately'
+    docs_closeout_tip: ee29890
+    parent_watching_docs_push: true
     prevention_plan_confirmed: true
     prevention_implemented: true
-    bug_status: open
-    s018_bug_status: resolved
-    prevention_pa:
-      recurrence_risk: possible_on_similar_changes
-      detect_earlier: local_husky_precommit_bug_repro
-    prevention_pc:
-      when: now_same_session
-      who: agent_now
-    post_deploy_monitoring: none
-    layer4_production_verified: true
-    cd:
-      status: success
-      merge_sha: a6c39e57e856e75d149b1ac1af82d6e92243af19
-      ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30633805272
-      deploy_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634041609
-      deploy_modal: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634088059
-      deploy_digitalocean: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30634163306
-    live_smoke:
-      status: pass
-      report: docs/sessions/S018-eval-job-dispatch/reports/deploy-smoke.md
-      adhoc_run_id: eb76b740-4aa5-4977-b519-0b133cd48b5c
-      modal_job_id: d0a9f39c-df25-445f-87ac-9e07a1c7429d
-      note: both completed; no ValidationError ingest fall-through
+    prevention_cursor_rule: none
+    prevention_summary: retries_plus_pins_plus_ci_security_job
     prior_session_id: S018-eval-job-dispatch
-    updated_at: '2026-08-07T01:30:43Z'
+    summary: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+
     history:
+      - status: completed
+        started_at: '2026-08-06'
+        completed_at: '2026-08-07'
+        session_id: S029-security-install-tools-flake
+        branch: fix/S029-security-install-tools-flake
+        bugs:
+          - id: BUG-2026-08-06-security-install-tools-flake
+            status: resolved
+            github_issue: 227
+            bug_report: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md
+            repro_test: tests/bugs/test_bug_2026_08_06_security_install_tools_flake.py
+            fix_summary: Retry GitHub API in install-tools (#233) + pin scanner tags (#234)
+            merge_sha_retries: a215220
+            merge_sha_pins: 2da98e9
+            note: 'RESOLVED — #227 closed; Phase 5 no Cursor rule'
+        note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+        pr: 234
+        pr_number: 234
+        pr_status: merged
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/234
+        prs:
+          - 233
+          - 234
+        merge_sha: 2da98e9
+        merge_sha_retries: a215220
+        merged_at: '2026-08-07T12:21:22Z'
+        next_action: none_session_closed
+        prior_session_id: S018-eval-job-dispatch
+        phase5:
+          cursor_rule: none
+          prevention: retries_plus_pins_plus_ci_security_job
       - status: completed
         started_at: '2026-07-29'
         completed_at: '2026-07-29'
@@ -44573,6 +44744,14 @@ issue_log:
     note: 'Closed at 11-verify-impl (S028-D32); #222 #223 #224 closed; [Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
 
 decisions_log:
+  - date: '2026-08-07'
+    skill: 14-hotfix
+    skill_id: 14-hotfix
+    session_id: S029-security-install-tools-flake
+    decision: 'close_session S029-security-install-tools-flake — BUG resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); #227 closed; Phase 5 no Cursor rule (retries+pins+CI security job); optional 15 skipped; main CI+deploy-preflight green both merges; parent watching docs push separately'
+    note: 'active_session=null; stages.14-hotfix completed; session archived; pipeline idle; no solo workflow-state commit (parent may bundle with docs closeout)'
+    recorded_at: '2026-08-07T12:26:00Z'
+    status: confirmed
   - date: '2026-08-06'
     skill: 14-hotfix
     session_id: S029-security-install-tools-flake
@@ -50570,6 +50749,21 @@ decisions_log:
   - 'S028-D38 / EV-026: CLOSED 2026-08-07T01:10:00Z — #231 @ad15667; CI+preflight green; RA-009 superseded; skip optional
     15; session archived; active_session=null; pipeline idle'
 artifacts:
+  - path: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md
+    session_id: S029-security-install-tools-flake
+    stage: 14-hotfix
+    note: 'BUG resolved — closed with #233/#234'
+    recorded_at: '2026-08-07T12:26:00Z'
+  - path: tests/bugs/test_bug_2026_08_06_security_install_tools_flake.py
+    session_id: S029-security-install-tools-flake
+    stage: 14-hotfix
+    note: 'repro/regression for install-tools flake'
+    recorded_at: '2026-08-07T12:26:00Z'
+  - path: docs/sessions/S029-security-install-tools-flake/
+    session_id: S029-security-install-tools-flake
+    stage: 14-hotfix
+    note: 'S029 session archived on close'
+    recorded_at: '2026-08-07T12:26:00Z'
   - path: docs/sessions/S029-security-install-tools-flake/
     session_id: S029-security-install-tools-flake
     stage: 14-hotfix
@@ -54066,24 +54260,39 @@ artifacts:
       13 AskQuestion'
     s028_d34_decision: S028-D34
 git_history:
-  current_branch: fix/S029-security-install-tools-flake
+  current_branch: main
   branches:
     - name: fix/S029-security-install-tools-flake
       purpose: 'S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL / RA-020)'
       base: main
-      status: open
+      status: merged_to_main
       created_at: '2026-08-06'
       created_from: main @ c19dd6c
       session_id: S029-security-install-tools-flake
-      head_sha: c19dd6c8dde87f1b9769b034df9376179c9f9a36
-      tip: 'c19dd6c'
-      tip_sha: 'c19dd6c'
-      tip_full: c19dd6c8dde87f1b9769b034df9376179c9f9a36
-      pushed: false
-      askquestion_pending: true
-      askquestion_pending_topic: phase_1_25_repro_confirmation
-      note: 'Phase 1.25 — repro RED locally; awaiting AskQuestion before code fix; branch checked out @ c19dd6c (matches origin/main tip)'
-      updated_at: '2026-08-07T01:36:44Z'
+      head_sha: 2da98e9f54183694742d05abf11851906d5a77a8
+      tip: '2da98e9'
+      tip_sha: '2da98e9'
+      tip_full: 2da98e9f54183694742d05abf11851906d5a77a8
+      tip_retries: 'a215220'
+      tip_pins: '2da98e9'
+      tip_on_origin_main: true
+      pushed: true
+      askquestion_pending: false
+      askquestion_pending_topic:
+      pr_number: 234
+      pr_numbers:
+        - 233
+        - 234
+      merge_sha: 2da98e9
+      merge_sha_retries: a215220
+      merge_sha_pins: 2da98e9
+      merged_at: '2026-08-07T12:21:22Z'
+      note: 'S029 CLOSED 2026-08-07 — BUG-2026-08-06-security-install-tools-flake resolved; PR #233 @ a215220 (retries) + PR #234 @ 2da98e9 (pins); GitHub #227 closed; Phase 5: no Cursor rule — prevention = retries + pins + CI security job; main CI+deploy-preflight green for both merges (parent watching docs push separately); optional 15 skipped; active_session=null; pipeline idle. [Corpus: bug-investigation] [Spec: docs/bug-reports/BUG-2026-08-06-security-install-tools-flake.md]'
+      updated_at: '2026-08-07T12:26:00Z'
+      main_ci_deploy_preflight: green_both_merges
+      parent_watching_docs_push: true
+      docs_closeout_tip: ee29890
+
     - name: evolve/EV-026-chat-source-ux
       purpose: 'S028/EV-026 chat source UX (#222 #223 #224) — F72–F74 Phase 29 build'
       base: main
@@ -54670,6 +54879,28 @@ git_history:
       evolve_cycle_id: EV-024
       note: 'Merged via PR #205 @0c1d838; tip @7f086c3; #204 closed as superseded'
   commits:
+    - sha: 2da98e9
+      sha_full: 2da98e9f54183694742d05abf11851906d5a77a8
+      branch: main
+      message: 'chore: pin security scanner release tags (#227) (#234)'
+      stage: 14-hotfix
+      skill_id: 14-hotfix
+      session_id: S029-security-install-tools-flake
+      pr_number: 234
+      merge_commit: true
+      timestamp: '2026-08-07T12:21:22Z'
+      note: 'PR #234 MERGED — pins; main CI+deploy-preflight green; S029 Phase 5 prevention (no Cursor rule)'
+    - sha: a215220
+      sha_full: a21522077a498ad959cb34f3e0e3566ff1b17134
+      branch: main
+      message: 'hotfix: retry GitHub API in security install-tools (#227) (#233)'
+      stage: 14-hotfix
+      skill_id: 14-hotfix
+      session_id: S029-security-install-tools-flake
+      pr_number: 233
+      merge_commit: true
+      timestamp: '2026-08-07T12:09:35Z'
+      note: 'PR #233 MERGED — retries; main CI+deploy-preflight green'
     - sha: ad15667
       sha_full: ad156678a633e89b1fc9aa88cfea8e149259ca34
       branch: main
