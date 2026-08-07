@@ -99,4 +99,19 @@ from GitHub.”) abort the script under `set -e`.
 
 ## Prevention & countermeasures
 
-Pending Phase 5.
+| Gate | Answer |
+|------|--------|
+| recurrence_risk | Possible on similar unauthenticated GitHub fetches; unlikely for this script once fixed |
+| detect_earlier | Main CI `security` job on PR |
+| automated | Bug repro test only (done) |
+| code_hardening | Pin known-good release tags (`config/security/tool-pins.conf`) — shipped same session |
+| process | None — `static-analysis.md` updated |
+| when / who | Now / agent |
+
+### Planned actions
+
+| Action | Status |
+|--------|--------|
+| Retries + repro test | Done (`a215220` / #233) |
+| Pin 2ms / KICS / sbom-tool tags | Done (`config/security/tool-pins.conf` + install-tools) |
+| Cursor rule | Pending Phase 5.1 AskQuestion |

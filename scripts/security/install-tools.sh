@@ -4,7 +4,11 @@
 #
 # GitHub Releases API + downloads retry on transient failures (#227 / BUG-2026-08-06).
 # Optional GH_TOKEN / GITHUB_TOKEN raises api.github.com quota (never commit tokens).
+# Default: pinned tags from config/security/tool-pins.conf (SEC_TOOLS_UNPIN=1 → API/latest).
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 PREFIX="${SEC_TOOLS_DIR:-${HOME}/.local/share/security-static-analysis}"
 BIN_DIR="${PREFIX}/bin"
@@ -15,6 +19,16 @@ export PATH="${BIN_DIR}:${PATH}"
 # Retries for api.github.com + asset downloads (CI flake: rate limit / empty / timeout).
 SEC_GITHUB_API_RETRIES="${SEC_GITHUB_API_RETRIES:-5}"
 SEC_GITHUB_API_RETRY_DELAY="${SEC_GITHUB_API_RETRY_DELAY:-2}"
+
+# Load release pins unless SEC_TOOLS_UNPIN=1 or SEC_TOOLS_PINS_FILE points elsewhere.
+_PINS_FILE="${SEC_TOOLS_PINS_FILE:-${REPO_ROOT}/config/security/tool-pins.conf}"
+if [[ "${SEC_TOOLS_UNPIN:-0}" != "1" && -f "${_PINS_FILE}" ]]; then
+  # shellcheck disable=SC1090
+  set -a
+  # shellcheck source=/dev/null
+  source "${_PINS_FILE}"
+  set +a
+fi
 
 log() { printf '[security] %s\n' "$*"; }
 err() { printf '[security] ERROR: %s\n' "$*" >&2; }
@@ -78,7 +92,7 @@ if [[ ! -x "${BIN_DIR}/opengrep" || "${SEC_FORCE:-0}" == "1" ]]; then
   ln -sfn "${HOME}/.opengrep/cli/latest/opengrep" "${BIN_DIR}/opengrep"
 fi
 
-# 2ms — resolve asset URL via GitHub API (avoids /latest/download 404 races)
+# 2ms — pinned tag download, or GitHub API when SEC_TOOLS_UNPIN=1 / pin unset
 if [[ ! -x "${BIN_DIR}/2ms" || "${SEC_FORCE:-0}" == "1" ]]; then
   case "${OS}-${ARCH}" in
     linux-amd64) A=linux-amd64.zip ;;
@@ -88,13 +102,18 @@ if [[ ! -x "${BIN_DIR}/2ms" || "${SEC_FORCE:-0}" == "1" ]]; then
     *) err "no 2ms asset"; exit 1 ;;
   esac
   tmp="$(mktemp -d)"
-  asset_url="$(
-    _github_api_get "https://api.github.com/repos/checkmarx/2ms/releases/latest" \
-      | sed -n "s/.*\"browser_download_url\": *\"\\([^\"]*${A}\\)\".*/\\1/p" \
-      | head -1
-  )"
-  if [[ -z "${asset_url}" ]]; then
-    asset_url="https://github.com/checkmarx/2ms/releases/latest/download/${A}"
+  if [[ -n "${SEC_PIN_2MS_TAG:-}" && "${SEC_TOOLS_UNPIN:-0}" != "1" ]]; then
+    asset_url="https://github.com/checkmarx/2ms/releases/download/${SEC_PIN_2MS_TAG}/${A}"
+    log "2ms pin ${SEC_PIN_2MS_TAG}"
+  else
+    asset_url="$(
+      _github_api_get "https://api.github.com/repos/checkmarx/2ms/releases/latest" \
+        | sed -n "s/.*\"browser_download_url\": *\"\\([^\"]*${A}\\)\".*/\\1/p" \
+        | head -1
+    )"
+    if [[ -z "${asset_url}" ]]; then
+      asset_url="https://github.com/checkmarx/2ms/releases/latest/download/${A}"
+    fi
   fi
   download "${asset_url}" "${tmp}/${A}"
   unzip -qo "${tmp}/${A}" -d "${tmp}/out"
@@ -103,17 +122,24 @@ if [[ ! -x "${BIN_DIR}/2ms" || "${SEC_FORCE:-0}" == "1" ]]; then
   rm -rf "${tmp}"
 fi
 
-# KICS — skip draft/empty "latest" releases; pick newest tag with a linux/darwin tarball
+# KICS — pinned tag, or walk releases when unpinned (skip empty "latest")
 if [[ ! -x "${BIN_DIR}/kics" || ! -d "${ASSETS_DIR}/kics/assets/queries" || "${SEC_FORCE:-0}" == "1" ]]; then
   case "${OS}" in linux) osn=linux ;; darwin) osn=darwin ;; esac
   tmp="$(mktemp -d)"
-  # Prints: tag_name|browser_download_url|asset_name
-  kics_meta="$(
-    SEC_GITHUB_API_RETRIES="${SEC_GITHUB_API_RETRIES}" \
-      SEC_GITHUB_API_RETRY_DELAY="${SEC_GITHUB_API_RETRY_DELAY}" \
-      GH_TOKEN="${GH_TOKEN:-}" \
-      GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
-      python3 - "${osn}" "${ARCH}" <<'PY'
+  if [[ -n "${SEC_PIN_KICS_TAG:-}" && "${SEC_TOOLS_UNPIN:-0}" != "1" ]]; then
+    ver="${SEC_PIN_KICS_TAG}"
+    ver_num="${ver#v}"
+    asset="kics_${ver_num}_${osn}_${ARCH}.tar.gz"
+    asset_url="https://github.com/Checkmarx/kics/releases/download/${ver}/${asset}"
+    log "kics pin ${ver}"
+  else
+    # Prints: tag_name|browser_download_url|asset_name
+    kics_meta="$(
+      SEC_GITHUB_API_RETRIES="${SEC_GITHUB_API_RETRIES}" \
+        SEC_GITHUB_API_RETRY_DELAY="${SEC_GITHUB_API_RETRY_DELAY}" \
+        GH_TOKEN="${GH_TOKEN:-}" \
+        GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
+        python3 - "${osn}" "${ARCH}" <<'PY'
 import json
 import os
 import sys
@@ -166,11 +192,12 @@ for rel in releases:
                 raise SystemExit(0)
 raise SystemExit("no KICS release asset found for " + suffix)
 PY
-  )"
-  ver="${kics_meta%%|*}"
-  rest="${kics_meta#*|}"
-  asset_url="${rest%%|*}"
-  asset="${rest##*|}"
+    )"
+    ver="${kics_meta%%|*}"
+    rest="${kics_meta#*|}"
+    asset_url="${rest%%|*}"
+    asset="${rest##*|}"
+  fi
   download "${asset_url}" "${tmp}/${asset}"
   tar -xzf "${tmp}/${asset}" -C "${tmp}"
   bin="$(find "${tmp}" -type f -name kics | head -1)"
@@ -196,7 +223,7 @@ if [[ ! -x "${BIN_DIR}/grype" || "${SEC_FORCE:-0}" == "1" ]]; then
   rm -f "${_grype_install}"
 fi
 
-# SBOM Tool
+# SBOM Tool — pinned tag download when set
 if [[ ! -x "${BIN_DIR}/sbom-tool" || "${SEC_FORCE:-0}" == "1" ]]; then
   case "${OS}-${ARCH}" in
     linux-amd64) A=sbom-tool-linux-x64 ;;
@@ -204,7 +231,12 @@ if [[ ! -x "${BIN_DIR}/sbom-tool" || "${SEC_FORCE:-0}" == "1" ]]; then
     darwin-arm64) A=sbom-tool-osx-arm64 ;;
     *) err "no sbom-tool asset for ${OS}-${ARCH}"; exit 1 ;;
   esac
-  download "https://github.com/microsoft/sbom-tool/releases/latest/download/${A}" "${BIN_DIR}/sbom-tool"
+  if [[ -n "${SEC_PIN_SBOM_TOOL_TAG:-}" && "${SEC_TOOLS_UNPIN:-0}" != "1" ]]; then
+    download "https://github.com/microsoft/sbom-tool/releases/download/${SEC_PIN_SBOM_TOOL_TAG}/${A}" "${BIN_DIR}/sbom-tool"
+    log "sbom-tool pin ${SEC_PIN_SBOM_TOOL_TAG}"
+  else
+    download "https://github.com/microsoft/sbom-tool/releases/latest/download/${A}" "${BIN_DIR}/sbom-tool"
+  fi
   chmod 0755 "${BIN_DIR}/sbom-tool"
 fi
 
