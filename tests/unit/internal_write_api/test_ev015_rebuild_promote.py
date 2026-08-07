@@ -13,6 +13,10 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import text
 from vecinita_embedding_client import EMBEDDING_DIMENSION
+from vecinita_embedding_client.modal_pins import (
+    DEFAULT_EMBEDDING_MODEL_ID,
+    LEGACY_E0_EMBEDDING_MODEL_ID,
+)
 from vecinita_shared_schemas.db_mapping import mapping_row, row_int, row_str
 from vecinita_shared_schemas.json_types import as_json_object
 
@@ -26,6 +30,8 @@ if TYPE_CHECKING:
 _EMBEDDING = [0.03] * EMBEDDING_DIMENSION
 _SHADOW_TEXT = "promoted-shadow-chunk-text"
 _PROMOTE_MODULE = "vecinita_internal_write_api.rebuild_promote"
+_E1 = DEFAULT_EMBEDDING_MODEL_ID
+_E0 = LEGACY_E0_EMBEDDING_MODEL_ID
 
 
 def test_promote_rebuild_run_service_is_importable() -> None:
@@ -249,3 +255,133 @@ def test_promote_copies_shadow_to_live_and_returns_counts(
                 {"id": rebuild_run_id},
             )
             conn.execute(text("DELETE FROM rebuild_runs WHERE id = :id"), {"id": rebuild_run_id})
+
+
+def test_promote_first_cutover_archives_legacy_e0_revision(
+    write_client: TestClient,
+    engine: Engine,
+    seeded_document: UUID,
+) -> None:
+    """TC-239 / AC-ME9: first E1 promote retains a LEGACY_E0 revision for unstamped docs.
+
+    [Spec: docs/test-plan.md §TC-239] [Corpus: feature-list.md §F71]
+    """
+    with engine.connect() as conn:
+        url = row_str(
+            mapping_row(
+                conn.execute(
+                    text("SELECT url FROM documents WHERE id = :id"),
+                    {"id": seeded_document},
+                )
+                .mappings()
+                .one()
+            ),
+            "url",
+        )
+        prior = row_int(
+            mapping_row(
+                conn.execute(
+                    text(
+                        """
+                        SELECT COUNT(*) AS c FROM document_revisions
+                        WHERE document_id = :id
+                        """
+                    ),
+                    {"id": seeded_document},
+                )
+                .mappings()
+                .one()
+            ),
+            "c",
+        )
+    assert prior == 0
+
+    create = write_client.post(
+        "/internal/v1/rebuild/runs",
+        json={
+            "mode": "rechunk",
+            "dry_run": True,
+            "force": True,
+            "status": "running",
+            "embedding_model_id": _E1,
+            "embedding_dim": EMBEDDING_DIMENSION,
+            "chunk_size_tokens": 64,
+            "chunk_tokenizer_id": _E1,
+        },
+        headers=auth_headers(),
+    )
+    assert create.status_code == HTTPStatus.OK, create.text
+    rebuild_run_id = UUID(json_str(as_json_object(cast("object", create.json())), "rebuild_run_id"))
+
+    shadow = write_client.post(
+        f"/internal/v1/rebuild/{rebuild_run_id}/shadow/batch",
+        json={
+            "documents": [
+                {
+                    "url": url,
+                    "rebuild_run_id": str(rebuild_run_id),
+                    "chunks": [
+                        {
+                            "chunk_index": 0,
+                            "text": _SHADOW_TEXT,
+                            "embedding": _EMBEDDING,
+                        }
+                    ],
+                }
+            ]
+        },
+        headers=auth_headers(),
+    )
+    assert shadow.status_code == HTTPStatus.OK, shadow.text
+    assert (
+        write_client.patch(
+            f"/internal/v1/rebuild/{rebuild_run_id}",
+            json={"status": "completed"},
+            headers=auth_headers(),
+        ).status_code
+        == HTTPStatus.OK
+    )
+    promote = write_client.post(
+        f"/internal/v1/rebuild/{rebuild_run_id}/promote",
+        headers=auth_headers(),
+    )
+    assert promote.status_code == HTTPStatus.OK, promote.text
+
+    with engine.connect() as conn:
+        e0 = row_int(
+            mapping_row(
+                conn.execute(
+                    text(
+                        """
+                        SELECT COUNT(*) AS c FROM document_revisions
+                        WHERE document_id = :id
+                          AND embedding_model_id = :e0
+                        """
+                    ),
+                    {"id": seeded_document, "e0": _E0},
+                )
+                .mappings()
+                .one()
+            ),
+            "c",
+        )
+        e1 = row_int(
+            mapping_row(
+                conn.execute(
+                    text(
+                        """
+                        SELECT COUNT(*) AS c FROM document_revisions
+                        WHERE document_id = :id
+                          AND embedding_model_id = :e1
+                          AND chunk_tokenizer_id = :e1
+                        """
+                    ),
+                    {"id": seeded_document, "e1": _E1},
+                )
+                .mappings()
+                .one()
+            ),
+            "c",
+        )
+    assert e0 >= 1
+    assert e1 >= 1

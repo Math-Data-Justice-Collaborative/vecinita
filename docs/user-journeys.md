@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — UJ-075–076 multilingual embed cutover; prior S025 UJ-067–068)
+> **Last updated**: 2026-08-06 (S028/EV-026 F72–F74 — UJ-077–079 chat source UX; prior S027 UJ-075–076)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -76,6 +76,9 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-068 | Auto release tag after main CD | Maintainer / CD | DO deploy workflow → release job | F63 EV-023 #103 | local |
 | UJ-075 | Ask after multilingual embed cutover | Community member | ChatRAG → `POST /api/v1/ask` / stream | F70–F71 EV-025 #159 | local (+ staging/prod smoke) |
 | UJ-076 | F36 EN/ES compare for embed pin promote | Admin operator | F36 eval / shadow rebuild report | F71 EV-025 #159 | local (+ staging) |
+| UJ-077 | Citation link only for valid http(s) URLs | Community member | ChatRAG SourceList | F72 EV-026 #222 | local (Vitest) |
+| UJ-078 | Ask sources length 0…top_k by relevance | Community member | ChatRAG → `POST /api/v1/ask` / stream | F73 EV-026 #223 | local |
+| UJ-079 | Operator sets document display_title | Admin operator | DocumentAdmin rename + ask citation | F74 EV-026 #224 | local |
 
 ## Visual journey maps
 
@@ -897,14 +900,18 @@ char budget) using production defaults — no request overrides.
 
 **Steps**:
 
-1. Call `POST /api/v1/ask` (or stream) with a community question that has ≥8 distinct corpus hits.
-2. Observe `sources[]` length ≤ 8 and equals retrieve `top_k` (no separate FE truncation).
+1. Call `POST /api/v1/ask` (or stream) with a community question that has ≥8 distinct corpus
+   hits **above** `min_retrieval_score` (strong-hit fixture — see UJ-078 / F73 for filtered cases).
+2. Observe `sources[]` length ≤ 8 after relevance filter; equals `top_k` only when ≥`top_k`
+   hits clear the bar (no separate FE truncation; no pad). RD-231 “sources = retrieve count”
+   is superseded by RD-311 / F73 for length semantics.
 3. Confirm synthesis path uses P3 packing (unit/e2e via packer mode or observable dedupe when
    multiple chunks share a `document_id`).
 4. Repeat for a Spanish question (language match still holds).
 
-**Acceptance**: Defaults are 8 + p3 without client overrides; sources count ≤ 8; P3 dedupe keeps
-≤1 chunk per document_id before budget truncate; response shape unchanged (UJ-001 / UJ-055).
+**Acceptance**: Defaults are 8 + p3 without client overrides; sources count ≤ 8 (0…`top_k`);
+P3 dedupe keeps ≤1 chunk per document_id before budget truncate; response shape unchanged
+(UJ-001 / UJ-055). Filtered/sparse sources: **UJ-078**.
 
 **Automated tests**: Unit defaults + P3 (TC-193–194); API e2e
 `tests/e2e/test_uj063_topk_p3_ask.py` (TC-195). No new Playwright (no UI change).
@@ -1230,6 +1237,82 @@ golden available; E0 baseline metrics recorded or re-runnable.
 **Acceptance**: AC-ME3–ME6, AC-ME9–ME10; TC-232–236, TC-239–240.
 
 **E2E tier**: API e2e for rebuild stamp + report artifact shape; live F36 at staging/ops.
+
+---
+
+### UJ-077: Citation link only for valid http(s) URLs (F72)
+
+**Actor**: Community member (no account)
+
+**Goal**: See source citations with clickable links only when the URL is a valid absolute
+`http:` / `https:` URL; otherwise see the title (or corpus-chunk label) as plain text.
+
+**Preconditions**: ChatRAG UI with `SourceList`; ask response may include valid and invalid URLs.
+
+**Steps**:
+
+1. Ask a question that returns sources including a valid `https://…` URL — citation is an
+   `<a href>` to that URL; title visible.
+2. With a source whose `url` is invalid (`fixture://…`, relative path, empty, `javascript:`) —
+   title/label shown **without** an `<a href>`.
+3. Confirm backend/fixtures may still *store* invalid URLs (no ingest change).
+
+**Acceptance**: AC-SU1–SU2; TC-242–244.
+
+**Automated tests**: Vitest `SourceList` / URL helper (`apps/chat-rag-frontend`).
+
+**E2E tier**: local (Vitest). Playwright optional (no required cross-component shell change).
+
+---
+
+### UJ-078: Ask sources length 0…top_k by relevance (F73)
+
+**Actor**: Community member (no account)
+
+**Goal**: Receive only relevance-qualified sources — not a padded list to fill `top_k`.
+
+**Preconditions**: Corpus with mixed strong/weak hits; `top_k` and `min_retrieval_score` configured.
+
+**Steps**:
+
+1. Ask an in-corpus question with few strong hits above threshold — `sources[]` length is
+   small (e.g. 1–3), not forced to 8.
+2. Ask with many weak hits only — `sources[]` may be empty or few; answer path still valid
+   (aligns with empty-retrieval UX where applicable).
+3. Confirm synthesis and UI use the same filtered set; length ≤ `top_k`.
+
+**Acceptance**: AC-SU3–SU5; TC-245–247.
+
+**Automated tests**: Unit retrieval filter; API e2e `tests/e2e/test_uj078_relevance_sources.py`.
+
+**E2E tier**: local (API TestClient).
+
+---
+
+### UJ-079: Operator sets document display_title (F74)
+
+**Actor**: Admin operator
+
+**Goal**: Rename a single document’s display name so ChatRAG citations and admin lists show
+the human-chosen name; rescrape updates raw `title` but preserves `display_title`.
+
+**Preconditions**: Admin authenticated; document exists with scraped `title`; DocumentAdmin UI.
+
+**Steps**:
+
+1. Open DocumentAdmin for one document; set **display title** (rename) and save.
+2. Confirm list/detail shows new display name; audit `document.edited` with before/after.
+3. Ask ChatRAG a question that cites that document — `sources[].title` equals display name.
+4. Re-ingest/rescrape body (force as needed) — raw `title` may change; `display_title` remains
+   until operator clears it (null → fall back to `title`).
+5. Optional: bulk metadata `display_title` for multi-select (F27 path).
+
+**Acceptance**: AC-SU6–SU10; TC-248–251.
+
+**Automated tests**: Integration PATCH + coalesce; API e2e citation; Vitest DocumentAdmin rename.
+Playwright optional if list↔detail cross-panel.
+
+**E2E tier**: local.
 
 ---
 

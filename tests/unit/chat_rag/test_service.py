@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 _EXPECTED_RETRIEVER_CALLS = 2
 _CHUNK_SCORE = 0.88
 _CE_TOP_K = 2
+_STRONG_SOURCE_COUNT = 2
 
 
 def _chunk(
@@ -61,12 +62,16 @@ class StubRetriever:
         top_k: int | None = None,
         score_threshold: float | None = None,
     ) -> list[RetrievedChunk]:
-        """Retrieve chunks."""
-        _ = (top_k, score_threshold)
+        """Retrieve chunks (honors top_k + score_threshold for F73 stubs)."""
         self.calls.append((question, tag_slugs, language))
         if tag_slugs and not self.chunks:
             return []
-        return self.chunks
+        out = list(self.chunks)
+        if score_threshold is not None:
+            out = [chunk for chunk in out if chunk.score >= score_threshold]
+        if top_k is not None:
+            out = out[:top_k]
+        return out
 
 
 class EmptySameLangStubRetriever:
@@ -368,6 +373,7 @@ def test_retrieve_ce_flag_on_reranks_with_scorer() -> None:
     settings = ChatRagSettings(
         database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
         top_k=_CE_TOP_K,
+        min_retrieval_score=0.2,
         embed_url="http://embed.test",
         llm_url="http://llm.test",
         request_timeout_s=30.0,
@@ -386,6 +392,136 @@ def test_retrieve_ce_flag_on_reranks_with_scorer() -> None:
         sources = service.retrieve_sources(AskRequest(question="clinic hours", language="en"))
     assert len(sources) == _CE_TOP_K
     assert [source.title for source in sources] == ["high", "mid"]
+
+
+def test_retrieve_dense_score_threshold_no_pad() -> None:
+    """F73 / TC-245: only hits ≥ min_retrieval_score; do not pad to top_k."""
+    top_k = 8
+    strong_a = RetrievedChunk(
+        chunk_id=uuid4(),
+        document_id=uuid4(),
+        title="A",
+        url="https://example.com/a",
+        text="a",
+        score=0.9,
+        language="en",
+    )
+    strong_b = RetrievedChunk(
+        chunk_id=uuid4(),
+        document_id=uuid4(),
+        title="B",
+        url="https://example.com/b",
+        text="b",
+        score=0.85,
+        language="en",
+    )
+    weak = RetrievedChunk(
+        chunk_id=uuid4(),
+        document_id=uuid4(),
+        title="Weak",
+        url="https://example.com/weak",
+        text="weak",
+        score=0.05,
+        language="en",
+    )
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=top_k,
+        min_retrieval_score=0.2,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_rerank_ce=False,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=StubRetriever([strong_a, strong_b, weak]),  # type: ignore[arg-type]
+        llm_client=StubLlm(),  # type: ignore[arg-type]
+        settings=settings,
+    )
+    with patch.object(
+        service,
+        "_production_config",
+        return_value=EvalConfig(top_k=top_k, min_retrieval_score=0.2),
+    ):
+        sources = service.retrieve_sources(AskRequest(question="clinic hours", language="en"))
+    assert len(sources) == _STRONG_SOURCE_COUNT
+    assert [source.title for source in sources] == ["A", "B"]
+
+
+def test_retrieve_all_below_threshold_returns_empty_sources() -> None:
+    """F73 / TC-247: empty sources[] when nothing clears min_retrieval_score."""
+    weak = RetrievedChunk(
+        chunk_id=uuid4(),
+        document_id=uuid4(),
+        title="Weak",
+        url="https://example.com/weak",
+        text="weak",
+        score=0.01,
+        language="en",
+    )
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=8,
+        min_retrieval_score=0.2,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_rerank_ce=False,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=StubRetriever([weak]),  # type: ignore[arg-type]
+        llm_client=StubLlm(),  # type: ignore[arg-type]
+        settings=settings,
+    )
+    with patch.object(
+        service,
+        "_production_config",
+        return_value=EvalConfig(top_k=8, min_retrieval_score=0.2),
+    ):
+        sources = service.retrieve_sources(AskRequest(question="clinic hours", language="en"))
+    assert sources == []
+
+
+def test_retrieve_ce_threshold_no_pad_to_top_k() -> None:
+    """F73 / AC-SU4: CE-on path drops low CE scores; may return fewer than top_k."""
+    a = _chunk(text="a", title="a")
+    b = _chunk(text="b", title="b")
+    c = _chunk(text="c", title="c")
+
+    def _score(_query: str, passages: Sequence[str]) -> list[float]:
+        weights = {"a": 0.9, "b": 0.05, "c": 0.04}
+        return [weights.get(text, 0.0) for text in passages]
+
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=_CE_TOP_K,
+        min_retrieval_score=0.2,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_rerank_ce=True,
+        rag_rerank_ce_top_n=3,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=StubRetriever([a, b, c]),  # type: ignore[arg-type]
+        llm_client=StubLlm(),  # type: ignore[arg-type]
+        settings=settings,
+        ce_scorer=CallableCrossEncoderScorer(_score),
+    )
+    with patch.object(
+        service,
+        "_production_config",
+        return_value=EvalConfig(top_k=_CE_TOP_K, min_retrieval_score=0.2),
+    ):
+        sources = service.retrieve_sources(AskRequest(question="clinic hours", language="en"))
+    assert len(sources) == 1
+    assert sources[0].title == "a"
 
 
 def _cache_settings(*, semantic: bool = False) -> ChatRagSettings:

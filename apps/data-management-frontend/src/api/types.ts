@@ -67,12 +67,27 @@ export interface DocumentSummary {
   document_id: string;
   url: string;
   title: string | null;
+  display_title?: string | null;
   language: string | null;
   tags?: TagInput[];
   source_domain?: string | null;
   source_path?: string | null;
   parent_url?: string | null;
   canonical_url?: string | null;
+}
+
+export interface DocumentMetadataPatch {
+  display_title?: string | null;
+  title?: string | null;
+  language?: string | null;
+}
+
+export interface DocumentMetadataResponse {
+  document_id: string;
+  url: string;
+  title: string | null;
+  display_title: string | null;
+  language: string | null;
 }
 
 export type TreeNodeKind = "domain" | "path" | "document" | "chunk";

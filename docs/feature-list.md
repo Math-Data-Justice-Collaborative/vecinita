@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-05 (S027/EV-025 — F70–F71 multilingual embeddings #159; prior S026/EV-024 F64–F69)
+> **Last updated**: 2026-08-06 (S028/EV-026 — F72–F74 chat source UX #222–#224; prior S027/EV-025 F70–F71)
 
 ## Summary
 
@@ -74,6 +74,9 @@
 | F69 | Admin audit actor username (read-time) | Implemented | Data Management | data-management-backend/frontend | S026/EV-024 #170/#193 |
 | F70 | Multilingual embedding runtime + model pin | Implemented | Cross-cutting | Modal embed, `packages/embedding-client`, ChatRAG + ingest | S027/EV-025 #159 |
 | F71 | Corpus re-embed + prod cutover (multilingual pin) | Implemented | Data Management | F41 rebuild/promote, Modal, internal-write, Admin Jobs | S027/EV-025 #159 |
+| F72 | Citation UI — validate URLs before href | Implemented | ChatRAG | chat-rag-frontend `SourceList` | S028/EV-026 #222 |
+| F73 | Dynamic relevance-gated sources (no fixed pad) | Implemented | ChatRAG | packages/rag, chat-rag-backend | S028/EV-026 #223 |
+| F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -87,7 +90,7 @@
 - **Key parameters**:
   | Parameter | Default | Range | Description |
   |-----------|---------|-------|-------------|
-  | `top_k` | `8` (`VECINITA_TOP_K`) | 1–50 | Retrieved chunks per query (F50; was 5) |
+  | `top_k` | `8` (`VECINITA_TOP_K`) | 1–50 | Max retrieved chunks per query (F50; F73 upper bound — not a pad target; was 5) |
   | `chunk_size` | `256` tokens (`VECINITA_CHUNK_SIZE_TOKENS`) | ≥ 64 | Chunk size at ingest (HF tokenizer; F49) |
   | `chunk_overlap` | `32` tokens (`VECINITA_CHUNK_OVERLAP_TOKENS`) | 0 … &lt; size | Overlap between chunks (F49 / ADR-044) |
 - **Limitations**: No server-side conversation memory across requests (F3). Auto-detect query language and respond in the same language.
@@ -1328,6 +1331,68 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   standalone F72.
 - **Status**: Implemented (11-verify-impl S027-D47 2026-08-05; live staging→prod cutover confirm @ 13).
 - **Source**: S027 / EV-025; GitHub #159; F41 / ADR-040; S027-D1–D25; 02 M2b.
+
+### F72: Citation UI — validate URLs before href (#222)
+
+- **What it does**: In ChatRAG `SourceList` (and sibling citation UI), only render a clickable
+  `<a href>` when `source.url` is a valid absolute **`http:` / `https:`** URL. Invalid,
+  relative, `fixture://`, `javascript:`, or empty values show **title / label as plain text**
+  (no href). **Display filter only** — ingest, scrape, and job acceptance are unchanged;
+  backend may still store fixture/malformed URLs for tests (S028-D6).
+- **Inputs**: `sources[].url` / `sources[].title` from ask/stream.
+- **Outputs**: Link only when validator passes; otherwise plain-text title.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/frontend-ui` (`vecinita-frontend-ui`) | Shared `isSafeHttpUrl` / citation href helper + Vitest |
+  | `apps/chat-rag-frontend` | `SourceList` consumes helper (Vitest) |
+- **Out of scope**: Ingest/job URL rejection; corpus cleanup; admin ingest forms this cycle (helper reusable later).
+- **Status**: Implemented (S028/EV-026; 11-verify-impl S028-D32).
+- **Source**: S028 / EV-026; GitHub #222; RD-310 / RD-317 / RD-323.
+
+### F73: Dynamic relevance-gated sources (no fixed pad) (#223)
+
+- **What it does**: Treat `top_k` as an **upper bound**, not a display quota. After retrieve
+  (and CE/rerank when enabled), **omit** hits below `min_retrieval_score` (dense score when
+  CE off — S028-D9 / OQ6). Do **not** pad `sources[]` to a fixed count. Synthesis context and
+  UI citations use the **same** filtered set. Length is **0…top_k**. Empty/few sources remain
+  valid when nothing clears the bar. Follow-on to F50 (adaptive / retrieve-N-show-K was OOS
+  in EV-020).
+- **Inputs**: Existing retrieve knobs (`VECINITA_TOP_K`, `min_retrieval_score`; CE flags if on).
+- **Outputs**: `sources[]` length 0…top_k by relevance; no FE pad.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | Filter helper / retrieve post-process |
+  | `apps/chat-rag-backend` | Ask/stream `sources[]` assembly |
+  | config-spec / api-contract | Document max vs quota semantics |
+- **Out of scope**: Corpus curation (#94/#217); groundedness (#84) except citation-filter overlap; changing default `top_k=8` as a *target*.
+- **Status**: Implemented (S028/EV-026; 11-verify-impl S028-D32).
+- **Source**: S028 / EV-026; GitHub #223; F50; RD-311.
+
+### F74: Operator-settable `display_title` (#224)
+
+- **What it does**: Adds nullable **`documents.display_title`**. Scrape/re-ingest always
+  updates raw **`title`**. Operators set/override **display name** via DocumentAdmin
+  single-doc rename and F27 bulk metadata. Citations, packing headers, and admin lists use
+  **`COALESCE(display_title, title)`**. Clearing `display_title` (null) resets to scraped
+  `title`. Chunk-facing titles **inherit** the document display name. Ingest/job
+  `title` → `display_title` **deferred** (RD-321 / S028-D22 TP2). Audit: `document.edited`
+  with before/after including `display_title` (S028-D10/D11).
+- **Inputs**: Operator PATCH / bulk metadata; scrape title.
+- **Outputs**: Durable human display name; ChatRAG `sources[].title` = display string
+  (compatible field name — S028-D12).
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/database` | Alembic: `documents.display_title` |
+  | internal-write-api | `PATCH /internal/v1/documents/{id}`; bulk metadata accepts `display_title` |
+  | data-management-frontend | DocumentAdmin single-doc rename |
+  | `packages/rag` / ChatRAG | Packing + `sources[].title` from display coalesce |
+- **Out of scope**: LLM title generation; community end-user edit; #94/#217 source-add curation.
+- **API/version**: Prefer compatible nullable column; if breaking unavoidable → major bump (S028-D15).
+- **Status**: Implemented (S028/EV-026 M125).
+- **Source**: S028 / EV-026; GitHub #224; F27; RD-312–RD-315.
 
 ## Planned / Deferred (post-v1)
 

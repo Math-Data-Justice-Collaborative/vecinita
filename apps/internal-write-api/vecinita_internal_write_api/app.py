@@ -80,6 +80,8 @@ from vecinita_shared_schemas.internal_write import (
     DocumentDetail,
     DocumentHistoryResponse,
     DocumentListPage,
+    DocumentMetadataResponse,
+    DocumentPatchRequest,
     DocumentSummary,
     DocumentVersionEntry,
     EmbedPromoteReportResponse,
@@ -1001,11 +1003,15 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         successes = 0
         failures: list[BulkFailure] = []
         request_id = _uuid.uuid4()
+        fields_set = body.updates.model_fields_set
         for doc_id in body.document_ids:
             with engine.begin() as conn:
                 doc_row = (
                     conn.execute(
-                        text("SELECT id, title, language FROM documents WHERE id = :id"),
+                        text(
+                            "SELECT id, title, display_title, language FROM documents "
+                            "WHERE id = :id"
+                        ),
                         {"id": doc_id},
                     )
                     .mappings()
@@ -1017,13 +1023,21 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 doc = mapping_row(doc_row)
                 set_clauses: list[str] = ["updated_at = now()"]
                 params: dict[str, object] = {"id": doc_id}
-                new_title = row_str_optional(doc, "title")
-                new_language = row_str_optional(doc, "language")
-                if body.updates.title is not None:
+                before_title = row_str_optional(doc, "title")
+                before_display = row_str_optional(doc, "display_title")
+                before_language = row_str_optional(doc, "language")
+                new_title = before_title
+                new_display = before_display
+                new_language = before_language
+                if "title" in fields_set and body.updates.title is not None:
                     set_clauses.append("title = :title")
                     params["title"] = body.updates.title
                     new_title = body.updates.title
-                if body.updates.language is not None:
+                if "display_title" in fields_set:
+                    set_clauses.append("display_title = :display_title")
+                    params["display_title"] = body.updates.display_title
+                    new_display = body.updates.display_title
+                if "language" in fields_set and body.updates.language is not None:
                     set_clauses.append("language = :language")
                     params["language"] = body.updates.language
                     new_language = body.updates.language
@@ -1040,7 +1054,18 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     entity_type="document",
                     entity_id=doc_id,
                     request_id=request_id,
-                    payload=body.updates.model_dump(exclude_none=True),
+                    payload={
+                        "before": {
+                            "title": before_title,
+                            "display_title": before_display,
+                            "language": before_language,
+                        },
+                        "after": {
+                            "title": new_title,
+                            "display_title": new_display,
+                            "language": new_language,
+                        },
+                    },
                     actor_id=actor_id,
                     actor_role=actor_role,
                 )
@@ -1098,7 +1123,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 conn.execute(
                     text(
                         """
-                        SELECT id, url, title, language, body_text
+                        SELECT id, url, title, display_title, language, body_text
                         FROM documents
                         WHERE id = :document_id
                         """
@@ -1138,9 +1163,107 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             document_id=row_uuid(doc, "id"),
             url=row_str(doc, "url"),
             title=row_str_optional(doc, "title"),
+            display_title=row_str_optional(doc, "display_title"),
             language=row_str_optional(doc, "language"),
             text=detail_text,
         )
+
+    @app.patch(
+        "/internal/v1/documents/{document_id}",
+        response_model=DocumentMetadataResponse,
+    )
+    def patch_document_metadata(  # pyright: ignore[reportUnusedFunction]
+        document_id: UUID,
+        body: DocumentPatchRequest,
+        actor: WriteActorDep,
+    ) -> DocumentMetadataResponse:
+        """F74: single-document metadata edit (display_title / title / language)."""
+        actor_id, actor_role = actor
+        fields_set = body.model_fields_set
+        if not fields_set:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="At least one of display_title, title, language is required",
+            )
+        request_id = _uuid.uuid4()
+        with engine.begin() as conn:
+            doc_row = (
+                conn.execute(
+                    text(
+                        """
+                        SELECT id, url, title, display_title, language
+                        FROM documents
+                        WHERE id = :document_id
+                        """
+                    ),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .first()
+            )
+            if doc_row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            doc = mapping_row(doc_row)
+            before_title = row_str_optional(doc, "title")
+            before_display = row_str_optional(doc, "display_title")
+            before_language = row_str_optional(doc, "language")
+            new_title = before_title
+            new_display = before_display
+            new_language = before_language
+            set_clauses: list[str] = ["updated_at = now()"]
+            params: dict[str, object] = {"id": document_id}
+            if "title" in fields_set and body.title is not None:
+                set_clauses.append("title = :title")
+                params["title"] = body.title
+                new_title = body.title
+            if "display_title" in fields_set:
+                set_clauses.append("display_title = :display_title")
+                params["display_title"] = body.display_title
+                new_display = body.display_title
+            if "language" in fields_set and body.language is not None:
+                set_clauses.append("language = :language")
+                params["language"] = body.language
+                new_language = body.language
+            conn.execute(
+                text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                    f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
+                ),
+                params,
+            )
+            emit_audit_event(
+                conn,
+                event_type="document.edited",
+                entity_type="document",
+                entity_id=document_id,
+                request_id=request_id,
+                payload={
+                    "before": {
+                        "title": before_title,
+                        "display_title": before_display,
+                        "language": before_language,
+                    },
+                    "after": {
+                        "title": new_title,
+                        "display_title": new_display,
+                        "language": new_language,
+                    },
+                },
+                actor_id=actor_id,
+                actor_role=actor_role,
+            )
+            create_document_version(
+                conn,
+                document_id=document_id,
+                title=new_title,
+                language=new_language,
+            )
+            return DocumentMetadataResponse(
+                document_id=document_id,
+                url=row_str(doc, "url"),
+                title=new_title,
+                display_title=new_display,
+                language=new_language,
+            )
 
     @app.get(
         "/internal/v1/documents/{document_id}/tags",
@@ -1420,7 +1543,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         )
         list_sql = (
             """
-            SELECT id, url, title, language,
+            SELECT id, url, title, display_title, language,
                    source_domain, source_path, parent_url, canonical_url
             FROM documents
             WHERE body_text IS NULL OR btrim(body_text) = ''
@@ -1429,7 +1552,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             """
             if missing_body
             else """
-            SELECT id, url, title, language,
+            SELECT id, url, title, display_title, language,
                    source_domain, source_path, parent_url, canonical_url
             FROM documents
             ORDER BY created_at DESC
@@ -1452,6 +1575,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     document_id=row_uuid(mapping_row(row), "id"),
                     url=row_str(mapping_row(row), "url"),
                     title=row_str_optional(mapping_row(row), "title"),
+                    display_title=row_str_optional(mapping_row(row), "display_title"),
                     language=row_str_optional(mapping_row(row), "language"),
                     source_domain=row_str_optional(mapping_row(row), "source_domain"),
                     source_path=row_str_optional(mapping_row(row), "source_path"),

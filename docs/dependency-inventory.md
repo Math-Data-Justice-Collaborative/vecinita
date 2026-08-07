@@ -103,7 +103,7 @@
 | **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
-| **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI + Tooltip/ActionIcon (EV-024) | — | EV-004 F31; EV-024 F66/F67; depends on frontend-i18n; `@radix-ui/react-tooltip` |
+| **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI + Tooltip/ActionIcon (EV-024); `isSafeHttpUrl` / `citationHref` (EV-026 F72) | — | EV-004 F31; EV-024 F66/F67; EV-026 F72; depends on frontend-i18n; `@radix-ui/react-tooltip` |
 | **@supabase/supabase-js** | `^2.108.2` Supabase Auth browser session (DM frontend SPA) | MIT | **EV-005 F34** (ADR-026/027); admin frontend only; pinned 04-tech-plan (TP-S004-04) |
 
 ### EV-004 workspace packages (F31)
@@ -181,6 +181,11 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
 - **EV-015 F41 (TP-S017-09):** No new **required** runtime deps for document store / rebuild /
   shadow promote (Alembic + existing FastAPI/Modal/Jobs/Playwright). Minor deps may be added
   during 07-build if needed — flag here before merge.
+
+- **EV-026 F72–F74 (M126 / T126.2):** **No new dependencies.** F72 URL helpers live in existing
+  `vecinita-frontend-ui`; F73 wires existing `min_retrieval_score` / CE threshold; F74 adds a
+  nullable Postgres column + shared-schemas DTO / OpenAPI (`openapi/internal-write.yaml`).
+  06-tech-tooling skipped (RD-319 / TP4).
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)
 

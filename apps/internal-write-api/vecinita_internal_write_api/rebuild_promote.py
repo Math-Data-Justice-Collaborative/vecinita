@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from sqlalchemy import text
+from vecinita_embedding_client.modal_pins import LEGACY_E0_EMBEDDING_MODEL_ID
 from vecinita_shared_schemas.db_mapping import mapping_row, row_int, row_str
 from vecinita_shared_schemas.internal_write import RebuildPromoteResponse
 
@@ -145,6 +146,49 @@ def _promote_on_connection(
             """
         ),
         {"id": rebuild_run_id},
+    )
+
+    # First cutover from unstamped live: archive LEGACY_E0 so TC-239 / AC-ME9
+    # retains a restorable prior pin before writing the candidate revision.
+    conn.execute(
+        text(
+            """
+            INSERT INTO document_revisions (
+                document_id,
+                content_hash,
+                body_text,
+                embedding_model_id,
+                embedding_dim,
+                chunk_size_tokens,
+                chunk_tokenizer_id,
+                rebuild_mode,
+                rebuild_run_id
+            )
+            SELECT
+                d.id,
+                d.content_hash,
+                d.body_text,
+                :e0_pin,
+                rr.embedding_dim,
+                rr.chunk_size_tokens,
+                :e0_pin,
+                rr.mode,
+                NULL
+            FROM documents d
+            JOIN (
+                SELECT DISTINCT document_id
+                FROM shadow_chunks
+                WHERE rebuild_run_id = :id
+            ) scoped ON scoped.document_id = d.id
+            JOIN rebuild_runs rr ON rr.id = :id
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM document_revisions dr
+                WHERE dr.document_id = d.id
+            )
+            """
+        ),
+        {"id": rebuild_run_id, "e0_pin": LEGACY_E0_EMBEDDING_MODEL_ID},
     )
 
     conn.execute(

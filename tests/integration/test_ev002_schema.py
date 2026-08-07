@@ -80,8 +80,12 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    assert "20260804_0012" in current.stdout
-    assert "20260804_0012" in heads.stdout
+    # Head advances with later phases (EV-026 display_title = 20260806_0014); EV-002
+    # must remain in history, not as the tip string from `alembic current`/`heads`.
+    assert "20260806_0014" in current.stdout
+    assert "20260806_0014" in heads.stdout
+    assert "20260806_0014" in history.stdout
+    assert "20260804_0012" in history.stdout
     assert "20260803_0011" in history.stdout
     assert "20260730_0010" in history.stdout
     assert "20260728_0009" in history.stdout

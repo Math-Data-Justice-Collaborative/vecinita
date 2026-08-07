@@ -18,6 +18,7 @@ from vecinita_rag.constants import (
     NO_CONTEXT_MESSAGE_EN,
     NO_CONTEXT_MESSAGE_ES,
 )
+from vecinita_rag.display_title import coalesce_document_title
 from vecinita_rag.engine import (
     answer_from_chunks,
     answer_without_context,
@@ -71,6 +72,7 @@ __all__ = [
     "build_query_engine",
     "build_retriever",
     "cascade_lookup",
+    "coalesce_document_title",
     "content_hash",
     "detect_query_language",
     "heuristic_rewrites",

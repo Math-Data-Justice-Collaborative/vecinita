@@ -921,3 +921,84 @@ call must include recorded EN vs ES metrics. Out: dual-index, dim≠384, UI, bge
 |----|-------|-------|
 | F70 | #159 | Multilingual embedding runtime + model pin |
 | F71 | #159 | Corpus re-embed + prod cutover (multilingual pin) |
+
+## Cycle EV-026 — Scope (S028 / #222 #223 #224)
+
+**Intake locked:** 2026-08-06 (Phase 0 approved → Phase 1)
+**Session:** S028-chat-source-ux
+**Issues:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/222 · [#223](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/223) · [#224](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/224)
+**Features:** F72, F73, F74
+**Preset:** Feature (skip 03/06 unless Phase 1 finds need)
+**Branch:** `feat/S028-chat-source-ux` → planned `evolve/EV-026-chat-source-ux`
+
+### Scope summary
+
+Chat source UX in one cycle:
+
+| Fn | Issue | Scope |
+|----|-------|--------|
+| F72 | #222 | ChatRAG FE: only render `<a href>` for valid absolute `http:`/`https:` URLs; invalid/fixture URLs stay in backend for tests; show title/label without link |
+| F73 | #223 | `top_k` is max; drop hits below `min_retrieval_score` (+ CE/rerank threshold if enabled); do not pad; synthesis + UI use same filtered `sources[]` (length 0…top_k) |
+| F74 | #224 | Separate `documents.display_title`; scrape updates raw `title`; admin single-doc rename + bulk metadata; citations/admin prefer `display_title` then `title`; chunks inherit display name; optional ingest title if cheap |
+
+**Out:** #94/#217 source-add curation; LLM title generation; community end-user title edit; ingest/job URL rejection.
+
+**API/version:** Prefer compatible deltas (`display_title` nullable; chat `sources[].title` remains the display string). If any breaking change is unavoidable → **major version bump** (S028-D15). Repo presently `0.1.0`.
+
+**Deploy:** Build + verify fully; stages 12–13 AskQuestion-gated — live DO/Modal is **prod** (S028-D2/D7).
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S028-D1 | Session | Open S028 + feature preset (1a/2a) |
+| S028-D2 | Deploy | Prod-only careful; AskQuestion before 12–13 / corpus mutation |
+| S028-D3 | Cycle | Start EV-026 Phase 0 |
+| S028-D4 | Fn map | F72=#222, F73=#223, F74=#224 |
+| S028-D5 | AC | As written on issues |
+| S028-D6 | #222 URLs | FE display filter only; backend keeps URLs for tests |
+| S028-D7 | Deploy cadence | Build+verify; 12–13 optional gated |
+| S028-D8 | Curation | F74 title/display edits only — not #94/#217 |
+| S028-D9 | #223 filter | top_k max; score filter; no pad; same set synth+UI |
+| S028-D10 | #224 model | Separate `display_title`; scrape → `title` |
+| S028-D11 | #224 UX | DocumentAdmin rename + bulk; optional ingest title; chunks inherit |
+| S028-D12 | Breaking | Compatible API preferred |
+| S028-D13 | Apps | chat-rag FE/BE + rag pkg; internal-write + migration; admin FE |
+| S028-D14 | Tests | Vitest + unit/e2e + admin; eval note; T0 only if 12–13 approved |
+| S028-D15 | Version | Prefer compatible; if breaking → major version change |
+| S028-D16 | Phase 0 close | Allocate F72–F74; enter Phase 1 |
+| S028-D17 | Phase 1 | Impact/routing approved → 01-requirements |
+| S028-D18 | 00→01 seed | `checkpoints/01-requirements-seed.md` |
+| S028-D19 | 01 Phase 0C | Locked + OQ all recommended (1a/2a/3a/4a); RD-309–321; delta specs written |
+| S028-D20 | 02-verify-plan | C1/M1/M2/M3/L1 all recommended (1a×4); UJ-063 + RD-231/F72 cites/AC-ME10 fixed; Gate A→B pass |
+| S028-D21 | 04 start | Gate A→B confirmed; start 04-tech-plan |
+| S028-D22 | 04 TP lock | TP1=Phase 29 M123–M126; TP2=defer ingest title; TP3=frontend-ui helper+SourceList Vitest; TP4=filter+ADR-051+skip 06 |
+
+### Tech plan (04)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| TP1 | Milestones | Phase 29: M123 F72 → M124 F73 → M125 F74 → M126 gate |
+| TP2 | RD-321 | Defer ingest→display_title |
+| TP3 | F72 helper | `vecinita-frontend-ui` + SourceList Vitest |
+| TP4 | F73/ADR/06 | Wire score filter; ADR-051; skip 06; OpenAPI+CORS H0c |
+| S028-D23 | 04 close | Phase 29 plan approved (TP5=1) |
+| S028-D24 | 05 M1–L1 | AC-SU cite fix; F72 surfaces; package name `vecinita-frontend-ui` |
+
+### Verify (09–11)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S028-D30 | 09 remediation | QA-S028-001/002 Fixed; 003→13; 004 accepted; 005→11 |
+| S028-D31 | 11 journeys | Approve UJ-077/078/079 (T0; T3→13); staging inspect preferred; no local UI preview |
+| S028-D32 | 11 features | Staging tip drift (`c942971` ≠ `8537690`) → approve F72–F74 from T0/OpenAPI only; live UI/API @ 13; close #222–#224 |
+| S028-D33 | 12 start | Proceed to 12-verify-deploy (S028-D2 option 1) |
+| S028-D34 | 12 gate | GHA outage → RA-009 remote CI **waived**; full local `make ci-push` + **CLI deploy**; `env_role=staging_as_live`; mitigations 1–6 + rollback **approved** |
+
+### Feature map
+
+| Fn | Issue | Title |
+|----|-------|-------|
+| F72 | #222 | Citation UI — validate URLs before href |
+| F73 | #223 | Dynamic relevance-gated sources (no fixed pad) |
+| F74 | #224 | Operator-settable `display_title` (durable vs scrape) |

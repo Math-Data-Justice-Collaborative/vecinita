@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — multilingual embed pin + runtime; ADR-048)
+> **Last updated**: 2026-08-06 (S028/EV-026 F72–F74 — top_k max + min_score filter notes; prior S027 F70–F71)
 
 ## Precedence
 
@@ -22,8 +22,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 
 | Variable | Type | Default | Required | Description |
 |----------|------|---------|----------|-------------|
-| `VECINITA_TOP_K` | int | `8` | No | Retrieval chunk count (F50; was 5) |
-| `VECINITA_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Minimum pgvector similarity (`1 - distance`); chunks below are dropped |
+| `VECINITA_TOP_K` | int | `8` | No | Max retrieved chunks per query (F50; F73 — upper bound, not a pad target) |
+| `VECINITA_MIN_RETRIEVAL_SCORE` | float | `0.2` | No | Drop chunks below this similarity (`1 - distance`); F73 — when CE off this is the sole relevance gate for `sources[]` |
 | `VECINITA_RAG_MULTI_QUERY` | string | `true` | No | F42 H7 fan-out on/off (`true`/`false`); ChatRAG + F36 eval sandbox |
 | `VECINITA_RAG_MULTI_QUERY_COUNT` | int | `3` | No | H7 rewrite count (clamped 1–5); Spanish-aware when query locale is `es` |
 | `VECINITA_RAG_PACKER` | string | `p3` | No | F42/F51 packer: `p1` (headers only) or `p3` (P1 + doc dedupe + char budget); **default p3** (F51) |

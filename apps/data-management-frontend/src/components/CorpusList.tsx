@@ -373,7 +373,9 @@ export function CorpusList() {
                 <TableBody>
                   {documents.map((doc) => {
                     const displayTitle =
-                      doc.title ?? tr("admin.corpusList.untitled");
+                      doc.display_title ??
+                      doc.title ??
+                      tr("admin.corpusList.untitled");
                     return (
                       <TableRow
                         key={doc.document_id}

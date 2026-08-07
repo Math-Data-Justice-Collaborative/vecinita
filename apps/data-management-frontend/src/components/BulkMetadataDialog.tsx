@@ -30,6 +30,7 @@ export function BulkMetadataDialog({
 }: BulkMetadataDialogProps) {
   const tr = useAdminT();
   const [title, setTitle] = useState("");
+  const [displayTitle, setDisplayTitle] = useState("");
   const [language, setLanguage] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<BulkResult | null>(null);
@@ -38,8 +39,13 @@ export function BulkMetadataDialog({
   const handleSubmit = async () => {
     setBusy(true);
     setError(null);
-    const updates: { title?: string; language?: string } = {};
+    const updates: {
+      title?: string;
+      display_title?: string;
+      language?: string;
+    } = {};
     if (title.trim()) updates.title = title.trim();
+    if (displayTitle.trim()) updates.display_title = displayTitle.trim();
     if (language.trim()) updates.language = language.trim();
 
     try {
@@ -63,6 +69,7 @@ export function BulkMetadataDialog({
     setResult(null);
     setError(null);
     setTitle("");
+    setDisplayTitle("");
     setLanguage("");
     onOpenChange(false);
     if (result && result.successes.length > 0) onComplete();
@@ -90,6 +97,19 @@ export function BulkMetadataDialog({
                 setTitle(e.target.value);
               }}
               placeholder={tr("admin.bulkMetadata.titlePlaceholder")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bulk-display-title">
+              {tr("admin.bulkMetadata.displayTitleLabel")}
+            </Label>
+            <Input
+              id="bulk-display-title"
+              value={displayTitle}
+              onChange={(e) => {
+                setDisplayTitle(e.target.value);
+              }}
+              placeholder={tr("admin.bulkMetadata.displayTitlePlaceholder")}
             />
           </div>
           <div className="space-y-2">

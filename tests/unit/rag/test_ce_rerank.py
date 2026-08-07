@@ -114,3 +114,41 @@ def test_rerank_with_scorer_uses_passage_text() -> None:
     )
     assert len(ranked) == 1
     assert ranked[0].text == "beta"
+
+
+def test_merge_ce_rerank_score_threshold_omits_weak_no_pad() -> None:
+    """F73 / TC-245-246: CE threshold drops weak hits; length may be < top_k."""
+    strong = _chunk(text="strong", score=0.4)
+    weak = _chunk(text="weak", score=0.9)
+    weaker = _chunk(text="weaker", score=0.8)
+
+    def score_fn(_query: str, passages: Sequence[RetrievedChunk]) -> list[float]:
+        weights = {"strong": 0.85, "weak": 0.15, "weaker": 0.05}
+        return [weights[chunk.text] for chunk in passages]
+
+    ranked = merge_ce_rerank(
+        _QUERY,
+        [strong, weak, weaker],
+        top_k=_TOP_K,
+        score_fn=score_fn,
+        score_threshold=0.2,
+    )
+
+    assert len(ranked) == 1
+    assert ranked[0].text == "strong"
+
+
+def test_merge_ce_rerank_score_threshold_all_weak_returns_empty() -> None:
+    """F73 / TC-247: empty result when no CE score clears the bar."""
+
+    def score_fn(_query: str, passages: Sequence[RetrievedChunk]) -> list[float]:
+        return [0.05 for _ in passages]
+
+    ranked = merge_ce_rerank(
+        _QUERY,
+        [_chunk(text="a"), _chunk(text="b")],
+        top_k=_TOP_K,
+        score_fn=score_fn,
+        score_threshold=0.2,
+    )
+    assert ranked == []

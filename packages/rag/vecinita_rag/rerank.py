@@ -45,6 +45,7 @@ def merge_ce_rerank(
     *,
     top_k: int,
     score_fn: CeScoreFn,
+    score_threshold: float | None = None,
 ) -> list[RetrievedChunk]:
     """Rerank ``chunks`` with CE scores and keep at most ``top_k``.
 
@@ -58,6 +59,8 @@ def merge_ce_rerank(
         Maximum passages to return after CE ordering.
     score_fn :
         ``(query, chunks) -> scores`` aligned 1:1 with ``chunks`` (mockable in CI).
+    score_threshold :
+        When set (F73), omit CE scores strictly below this value — do not pad to ``top_k``.
     """
     if top_k <= 0 or not chunks:
         return []
@@ -70,7 +73,14 @@ def merge_ce_rerank(
         key=lambda item: item[0],
         reverse=True,
     )
-    return [chunk for _, chunk in ranked[:top_k]]
+    kept: list[RetrievedChunk] = []
+    for score, chunk in ranked:
+        if score_threshold is not None and score < score_threshold:
+            continue
+        kept.append(chunk)
+        if len(kept) >= top_k:
+            break
+    return kept
 
 
 def rerank_with_scorer(
@@ -79,10 +89,17 @@ def rerank_with_scorer(
     *,
     top_k: int,
     scorer: CrossEncoderScorer,
+    score_threshold: float | None = None,
 ) -> list[RetrievedChunk]:
     """Rerank using a ``CrossEncoderScorer`` (passage text = chunk.text)."""
 
     def score_fn(q: str, candidates: Sequence[RetrievedChunk]) -> Sequence[float]:
         return scorer.score_pairs(q, [chunk.text for chunk in candidates])
 
-    return merge_ce_rerank(query, chunks, top_k=top_k, score_fn=score_fn)
+    return merge_ce_rerank(
+        query,
+        chunks,
+        top_k=top_k,
+        score_fn=score_fn,
+        score_threshold=score_threshold,
+    )

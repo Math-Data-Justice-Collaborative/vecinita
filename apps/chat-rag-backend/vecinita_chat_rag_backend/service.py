@@ -306,6 +306,7 @@ class ChatRagService:
                 chunks,
                 top_k=top_k,
                 scorer=self._ce_scorer,
+                score_threshold=min_retrieval_score,
             )
         return chunks
 

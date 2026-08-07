@@ -72,6 +72,13 @@ def test_cors_bulk_metadata(client: TestClient) -> None:
     assert "PATCH" in hdrs.get("access-control-allow-methods", "").upper()
 
 
+def test_cors_patch_document_metadata(client: TestClient) -> None:
+    """T125.8 H0c: OPTIONS PATCH /documents/{id} from admin origin (F74)."""
+    doc_id = "00000000-0000-4000-8000-000000000001"
+    hdrs = _preflight(client, f"/internal/v1/documents/{doc_id}", "PATCH")
+    assert "PATCH" in hdrs.get("access-control-allow-methods", "").upper()
+
+
 def test_cors_health_all(client: TestClient) -> None:
     """Health-all endpoint allows GET via CORS preflight."""
     _preflight(client, "/internal/v1/health/all", "GET")

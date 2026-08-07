@@ -22,11 +22,24 @@ describe("SourceList", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders linked sources with score", () => {
+  it("renders linked sources with score (TC-242)", () => {
     render(<SourceList sources={[SOURCE]} locale="en" />);
     const link = screen.getByRole("link", { name: /food pantry/i });
     expect(link).toHaveAttribute("href", "https://example.com/pantry");
     expect(screen.getByText("(0.91)")).toBeInTheDocument();
+  });
+
+  it("links absolute http URLs (TC-242)", () => {
+    const httpSource: Source = {
+      ...SOURCE,
+      chunk_id: "c-http",
+      url: "http://example.com/pantry",
+    };
+    render(<SourceList sources={[httpSource]} locale="en" />);
+    expect(screen.getByRole("link", { name: /food pantry/i })).toHaveAttribute(
+      "href",
+      "http://example.com/pantry",
+    );
   });
 
   it("uses the URL as link text when title is missing", () => {
@@ -43,7 +56,7 @@ describe("SourceList", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders plain title when url is missing", () => {
+  it("renders plain title when url is missing (TC-244)", () => {
     const noUrl: Source = {
       chunk_id: "c1",
       document_id: "d1",
@@ -65,5 +78,45 @@ describe("SourceList", () => {
     };
     render(<SourceList sources={[bare]} locale="es" />);
     expect(screen.getByText("Fragmento del corpus")).toBeInTheDocument();
+  });
+
+  it("renders plain title for fixture:// URLs (TC-243)", () => {
+    const fixture: Source = {
+      chunk_id: "c-fix",
+      document_id: "d-fix",
+      title: "Fixture doc",
+      url: "fixture://corpus/doc-1",
+      score: 0.8,
+    };
+    const { container } = render(
+      <SourceList sources={[fixture]} locale="en" />,
+    );
+    expect(container.querySelector("a")).toBeNull();
+    expect(screen.getByText("Fixture doc")).toBeInTheDocument();
+  });
+
+  it("renders plain title for relative and javascript URLs (TC-243)", () => {
+    const relative: Source = {
+      chunk_id: "c-rel",
+      document_id: "d-rel",
+      title: "Relative",
+      url: "/local/path",
+      score: 0.7,
+    };
+    const js: Source = {
+      chunk_id: "c-js",
+      document_id: "d-js",
+      title: "JS",
+      url: "javascript:alert(1)",
+      score: 0.6,
+    };
+    const { container, rerender } = render(
+      <SourceList sources={[relative]} locale="en" />,
+    );
+    expect(container.querySelector("a")).toBeNull();
+    expect(screen.getByText("Relative")).toBeInTheDocument();
+    rerender(<SourceList sources={[js]} locale="en" />);
+    expect(container.querySelector("a")).toBeNull();
+    expect(screen.getByText("JS")).toBeInTheDocument();
   });
 });
