@@ -2002,10 +2002,10 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: eb951fd
-      tip_sha: eb951fd
-      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-      tip_prev: 59ac29d
+      tip: 73a6571
+      tip_sha: 73a6571
+      tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+      tip_prev: eb951fd
       updated_at: '2026-08-12T22:41:12Z'
       active_milestone: M130
       current_milestone: M130
@@ -3755,10 +3755,10 @@ project:
         interim; will re-open after M130. [Corpus: feature-list.md §F77]'
       started_at: '2026-08-12'
       started_at_iso: '2026-08-12T22:25:00Z'
-      tip: eb951fd
-      tip_sha: eb951fd
-      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-      tip_prev: 59ac29d
+      tip: 73a6571
+      tip_sha: 73a6571
+      tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+      tip_prev: eb951fd
       handoff: docs/sessions/S030-corpus-automations/HANDOFF.md
       s030_d51_decision: S030-D51
       updated_at: '2026-08-12T22:41:12Z'
@@ -8652,10 +8652,10 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: eb951fd
-    tip_sha: eb951fd
-    tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-    tip_prev: 59ac29d
+    tip: 73a6571
+    tip_sha: 73a6571
+    tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+    tip_prev: eb951fd
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
     updated_at: '2026-08-12T22:41:12Z'
@@ -8928,10 +8928,10 @@ active_session:
       interim; will re-open after M130. [Corpus: feature-list.md §F77]'
     askquestion_pending: false
     s030_d51_decision: S030-D51
-    tip: eb951fd
-    tip_sha: eb951fd
-    tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-    tip_prev: 59ac29d
+    tip: 73a6571
+    tip_sha: 73a6571
+    tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+    tip_prev: eb951fd
     updated_at: '2026-08-12T22:41:12Z'
     security_gate: PASSED
     security_gate_decision: S030-D53
@@ -9064,28 +9064,29 @@ active_session:
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
   askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
-  tip: eb951fd
-  tip_sha: eb951fd
-  tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-  tip_prev: 59ac29d
+  tip: 73a6571
+  tip_sha: 73a6571
+  tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+  tip_prev: eb951fd
   handoff_tip: '6107037'
   current_action: Start T130.1 / M130 (Phase 30 gate TC suite)
   current_task: T130.1
   handoff_sync_needed:
     path: docs/sessions/S030-corpus-automations/HANDOFF.md
-    tip_pending_parent_commit: true
+    tip_pending_parent_commit: false
     prior_tip: eb951fd
     position: M129 08 PASS; start T130.1 / M130
     pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     updated_needed: true
     suggested_blurb: 'M129 08-verify-build boundary PASS (S030-D54). report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
       Security clean (D52+D53). Next: **T130.1 / M130**. PR #238 open. phase_c / Gate C→D still pending.'
+    tip: 73a6571
   expected_report: docs/sessions/S030-corpus-automations/reports/verification-report.md
   m129_08_status: passed
   active_milestone: M130
   session_artifacts:
   - docs/sessions/S030-corpus-automations/reports/verification-report.md
-  tip_pending_parent_commit: true
+  tip_pending_parent_commit: false
 sessions:
 - id: S029-security-install-tools-flake
   type: hotfix
@@ -28685,10 +28686,10 @@ evolve_cycles:
   current_task: T130.1
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: eb951fd
-  tip_sha: eb951fd
-  tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-  tip_prev: 59ac29d
+  tip: 73a6571
+  tip_sha: 73a6571
+  tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+  tip_prev: eb951fd
   current_stage_note: 'M129 08-verify-build boundary PASS (S030-D54); report=docs/sessions/S030-corpus-automations/reports/verification-report.md;
     resume 07-build M130/T130.1; tip pending parent commit (was eb951fd); PR #238 open; phase_c / Gate C→D pending until M130'
   notes: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
@@ -29042,10 +29043,10 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: eb951fd
-      tip_sha: eb951fd
-      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-      tip_prev: 59ac29d
+      tip: 73a6571
+      tip_sha: 73a6571
+      tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+      tip_prev: eb951fd
       s030_d31_decision: S030-D31
       s030_d43_decision: S030-D43
       s030_d44_decision: S030-D44
@@ -29471,10 +29472,10 @@ evolve_cycles:
       started_at_iso: '2026-08-12T22:25:00Z'
       s030_d51_decision: S030-D51
       updated_at: '2026-08-12T22:41:12Z'
-      tip: eb951fd
-      tip_sha: eb951fd
-      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-      tip_prev: 59ac29d
+      tip: 73a6571
+      tip_sha: 73a6571
+      tip_full: 73a6571ee13966f75c8f3804a40533562cad59df
+      tip_prev: eb951fd
       security_gate: PASSED
       security_gate_decision: S030-D53
       security_gate_note: make security-scan PASSED @ eb951fd; Grype HIGH 0; npm audit 0; react-router@7.18.2; cleared GHSA-qwww-vcr4-c8h2;
@@ -29501,7 +29502,7 @@ evolve_cycles:
       pr_238_status: open
       phase_c: pending
       gate_c_to_d: pending
-      tip_pending_parent_commit: true
+      tip_pending_parent_commit: false
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -29668,7 +29669,7 @@ evolve_cycles:
     suggested_blurb: 'Tip `eb951fd` — security PASS (react-router@7.18.2; npm audit 0; Grype HIGH 0). Next: finish 08-verify-build
       M129 (verification-report), then T130.1 / M130. PR #238 open.'
   m129_08_status: passed
-  tip_pending_parent_commit: true
+  tip_pending_parent_commit: false
 - id: EV-026
   session_id: S028-chat-source-ux
   cycle_type: feature
@@ -65176,6 +65177,23 @@ git_history:
     decision: S030-D53
     note: Security re-scan PASS; react-router/react-router-dom 7.18.2; Grype HIGH 0; npm audit 0; cleared GHSA-qwww-vcr4-c8h2;
       S030-D52 advisory resolved
+    corpus: '[Corpus: feature-list.md §F77]'
+  - sha: 73a6571
+    sha_full: 73a6571ee13966f75c8f3804a40533562cad59df
+    full_sha: 73a6571ee13966f75c8f3804a40533562cad59df
+    branch: evolve/EV-027-corpus-automations
+    message: 'docs: record M129 08-verify-build PASS (F77)'
+    stage: 08-verify-build
+    skill_id: 08-verify-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M129
+    feature_ids:
+    - F77
+    timestamp: '2026-08-12T22:41:46Z'
+    recorded_at: '2026-08-12T22:41:46Z'
+    decision: S030-D54
+    note: 'docs: M129 08-verify-build PASS report+handoff+format+workflow-state bundle'
     corpus: '[Corpus: feature-list.md §F77]'
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1

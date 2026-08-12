@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** (pending commit) — M129 08-verify-build PASS  
+**Tip:** `73a6571` — M129 08-verify-build PASS  
 **Issues:** #73 · #72 · #219  
 
 ## Position
