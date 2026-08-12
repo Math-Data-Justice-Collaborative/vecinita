@@ -134,6 +134,8 @@ def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
             job_id,
             store=store,
             write_client=write_client,
+            embed_client=embed_client,
+            fetch_document=fetch_document,
         ),
     }
     handler = handlers.get(record.job_type)

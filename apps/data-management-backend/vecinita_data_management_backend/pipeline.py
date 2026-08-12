@@ -13,7 +13,12 @@ import httpx
 from pydantic import HttpUrl
 from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClientError
 from vecinita_embedding_client.modal_pins import DEFAULT_EMBEDDING_MODEL_ID
-from vecinita_ingest import chunk_text, fetch_url
+from vecinita_ingest import (
+    DEFAULT_CHUNK_OVERLAP_TOKENS,
+    DEFAULT_CHUNK_SIZE_TOKENS,
+    chunk_text,
+    fetch_url,
+)
 from vecinita_ingest.chunk import resolve_tokenizer_id
 from vecinita_ingest.crawl import CrawlPlan, discover_crawl_urls
 from vecinita_ingest.models import ScrapedDocument
@@ -233,6 +238,41 @@ def _ingest_one_url(  # noqa: PLR0913  # mirrors run_ingest_job stage branches
         ),
         False,
     )
+
+
+def rechunk_and_upsert_scraped_url(  # noqa: PLR0913  # mirrors ingest dependency surface for F76
+    url: str,
+    *,
+    scraped: ScrapedDocument,
+    write_client: InternalWriteClient,
+    embed_client: EmbeddingClient,
+    chunk_size_tokens: int = DEFAULT_CHUNK_SIZE_TOKENS,
+    chunk_overlap_tokens: int = DEFAULT_CHUNK_OVERLAP_TOKENS,
+) -> DocumentUpsert:
+    """F76: force rechunk/embed/upsert from an already-fetched scrape (hash changed).
+
+    Uses ``force=True`` so F47 content_hash skip cannot short-circuit after probe.
+    """
+
+    def _fetcher(url: str) -> ScrapedDocument:
+        _ = url
+        return scraped
+
+    doc, _skipped = _ingest_one_url(
+        url,
+        fetcher=_fetcher,
+        write_client=write_client,
+        embed_client=embed_client,
+        chunk_size=chunk_size_tokens,
+        chunk_overlap=chunk_overlap_tokens,
+        force=True,
+        tag_client=None,
+        vocabulary=[],
+        slug_vocab=[],
+        max_document_tags=10,
+    )
+    write_client.upsert_batch(BatchUpsertRequest(documents=[doc]))
+    return doc
 
 
 def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + crawl/F47/F48 branches

@@ -475,10 +475,10 @@ def test_freshness_worker_failure_marks_failed(
     }
 
 
-def test_freshness_worker_default_perform_refresh_bumps_checked(
+def test_freshness_worker_default_requires_embed_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Default perform_refresh loads detail and bumps last_checked when available."""
+    """Hash-aware default path requires embed_client (T128.5)."""
     monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
     monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
     store = InMemoryJobStore()
@@ -487,29 +487,25 @@ def test_freshness_worker_default_perform_refresh_bumps_checked(
         job_type="freshness_refresh",
         options=_freshness_options(force=True, is_stale=False),
     )
-    bumped: list[UUID] = []
-    detailed: list[UUID] = []
 
     class _Write(_StubWriteClient):
         def get_document_detail(self, document_id: UUID) -> object:
-            detailed.append(document_id)
+            _ = document_id
             return object()
 
-        def bump_document_last_checked(self, document_id: UUID) -> None:
-            bumped.append(document_id)
-
-    run_freshness_refresh_job(
-        record.job_id,
-        store=store,
-        write_client=_Write(),  # type: ignore[arg-type]
-    )
-    assert detailed == [DOC_ID]
-    assert bumped == [DOC_ID]
+    with pytest.raises(RuntimeError, match="embed_client is required"):
+        run_freshness_refresh_job(
+            record.job_id,
+            store=store,
+            write_client=_Write(),  # type: ignore[arg-type]
+        )
     final = store.get_job(record.job_id)
     assert final is not None
+    assert final.status == "failed"
+    assert final.error_code == "RuntimeError"
     assert final.metrics == {
-        "freshness_outcome": "refreshed",
-        "documents_processed": 1,
+        "freshness_outcome": "failed",
+        "documents_processed": 0,
     }
 
 

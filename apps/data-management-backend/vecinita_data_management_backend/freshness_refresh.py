@@ -1,15 +1,15 @@
 """F76 Modal DM worker for ``job_type=freshness_refresh`` + schedule enqueue.
 
 Gates: shared kill-switch, master freshness enable, per-source ``refresh_enabled``,
-stale vs force (Refresh now). Default ``perform_refresh`` verifies the document and
-bumps ``last_checked_at`` when the write client supports it; T128.5 adds hash-aware
-re-fetch / rechunk.
+stale vs force (Refresh now). Default refresh re-fetches the URL via packages/ingest,
+applies hash-aware skip (AC-FR2 / TC-257), and always bumps ``last_checked_at``.
 
 [Corpus: feature-list.md §F76]
 [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
 [Spec: docs/config-spec.md §VECINITA_FRESHNESS_*]
 [Spec: docs/acceptance-criteria.md §AC-FR1-FR5]
 [Spec: docs/test-plan.md §TC-256-TC-259 §TC-264]
+[Spec: docs/decisions.md §RD-329]
 """
 
 from __future__ import annotations
@@ -18,16 +18,25 @@ import logging
 from typing import TYPE_CHECKING, Literal, Protocol
 from uuid import UUID
 
+from vecinita_ingest.freshness import refetch_url_source
 from vecinita_shared_schemas.automations import is_automations_kill_switch_on
 from vecinita_shared_schemas.freshness import (
     FreshnessEnqueueRequest,
     decide_freshness_enqueue,
+    decide_hash_aware_refresh,
     is_freshness_enabled,
+    should_bump_last_checked_after_refresh,
+)
+
+from vecinita_data_management_backend.pipeline import (
+    DocumentFetcher,
+    rechunk_and_upsert_scraped_url,
 )
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from vecinita_embedding_client import EmbeddingClient
     from vecinita_shared_schemas.internal_write import DocumentSummary
 
     from vecinita_data_management_backend.store import JobStore
@@ -37,6 +46,8 @@ _logger = logging.getLogger(__name__)
 
 FreshnessWorkerOutcome = Literal[
     "refreshed",
+    "verified_unchanged",
+    "rechunked",
     "skipped_kill_switch",
     "skipped_disabled",
     "skipped_refresh_disabled",
@@ -44,11 +55,18 @@ FreshnessWorkerOutcome = Literal[
     "failed",
 ]
 
+FreshnessHashOutcome = Literal["verified_unchanged", "rechunked"]
+
 _DECISION_TO_OUTCOME: dict[str, FreshnessWorkerOutcome] = {
     "skip_kill_switch": "skipped_kill_switch",
     "skip_disabled": "skipped_disabled",
     "skip_refresh_disabled": "skipped_refresh_disabled",
     "skip_not_stale": "skipped_not_stale",
+}
+
+_HASH_OUTCOME_TO_DECISION: dict[FreshnessHashOutcome, str] = {
+    "verified_unchanged": "skip_rechunk",
+    "rechunked": "rechunk",
 }
 
 
@@ -79,26 +97,51 @@ def _document_id_from_options(options: dict[str, object]) -> UUID:
     return UUID(str(raw))
 
 
-def _default_perform_refresh(
+def _require_embed_client(embed_client: EmbeddingClient | None) -> EmbeddingClient:
+    if embed_client is None:
+        msg = "embed_client is required for hash-aware freshness_refresh"
+        raise RuntimeError(msg)
+    return embed_client
+
+
+def perform_hash_aware_url_refresh(
     document_id: UUID,
     *,
     write_client: InternalWriteClient,
-) -> None:
-    """T128.4 default: confirm document exists; bump last_checked when available.
+    embed_client: EmbeddingClient,
+    fetch_document: DocumentFetcher | None = None,
+) -> FreshnessHashOutcome:
+    """Re-fetch URL, skip rechunk when hash matches, always bump last_checked (TC-257)."""
+    detail = write_client.get_document_detail(document_id)
+    stored_hash = write_client.get_content_hash_by_url(detail.url)
+    probe = refetch_url_source(detail.url, fetch=fetch_document)
+    decision = decide_hash_aware_refresh(
+        stored_hash=stored_hash,
+        fetched_hash=probe.content_hash,
+    )
+    if decision == "skip_rechunk":
+        if should_bump_last_checked_after_refresh(decision):
+            write_client.bump_document_last_checked(document_id)
+        return "verified_unchanged"
 
-    Hash-aware re-fetch / rechunk lands in T128.5 (packages/ingest path).
-    """
-    _ = write_client.get_document_detail(document_id)
-    bumper = getattr(write_client, "bump_document_last_checked", None)
-    if callable(bumper):
-        bumper(document_id)
+    rechunk_and_upsert_scraped_url(
+        detail.url,
+        scraped=probe.scraped,
+        write_client=write_client,
+        embed_client=embed_client,
+    )
+    if should_bump_last_checked_after_refresh(decision):
+        write_client.bump_document_last_checked(document_id)
+    return "rechunked"
 
 
-def run_freshness_refresh_job(
+def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' dependency surface
     job_id: UUID,
     *,
     store: JobStore,
     write_client: InternalWriteClient,
+    embed_client: EmbeddingClient | None = None,
+    fetch_document: DocumentFetcher | None = None,
     perform_refresh: Callable[[UUID], None] | None = None,
 ) -> None:
     """Run one ``freshness_refresh`` job with kill-switch + stale/force gates."""
@@ -147,16 +190,23 @@ def run_freshness_refresh_job(
     try:
         if perform_refresh is not None:
             perform_refresh(document_id)
-        else:
-            _default_perform_refresh(document_id, write_client=write_client)
-        store.update_job(
-            job_id,
-            status="completed",
-            metrics={
+            metrics: dict[str, object] = {
                 "freshness_outcome": "refreshed",
                 "documents_processed": 1,
-            },
-        )
+            }
+        else:
+            hash_outcome = perform_hash_aware_url_refresh(
+                document_id,
+                write_client=write_client,
+                embed_client=_require_embed_client(embed_client),
+                fetch_document=fetch_document,
+            )
+            metrics = {
+                "freshness_outcome": hash_outcome,
+                "documents_processed": 1,
+                "hash_decision": _HASH_OUTCOME_TO_DECISION[hash_outcome],
+            }
+        store.update_job(job_id, status="completed", metrics=metrics)
     except Exception as exc:
         store.update_job(
             job_id,

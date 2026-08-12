@@ -11,6 +11,11 @@ from vecinita_ingest.chunk import (
     estimate_tokens,
 )
 from vecinita_ingest.crawl import CrawlPlan, CrawlResult, discover_crawl_urls, normalize_url
+from vecinita_ingest.freshness import (
+    UrlRefetchResult,
+    content_hash_for_text,
+    refetch_url_source,
+)
 from vecinita_ingest.js_render import JsRenderMode, parse_js_render_mode, should_js_render
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.nested_source import NestedSourceFields, derive_nested_source
@@ -32,7 +37,9 @@ __all__ = [
     "PdfExtractError",
     "RateLimiter",
     "ScrapedDocument",
+    "UrlRefetchResult",
     "chunk_text",
+    "content_hash_for_text",
     "count_tokens",
     "derive_nested_source",
     "discover_crawl_urls",
@@ -44,6 +51,7 @@ __all__ = [
     "normalize_url",
     "parse_html",
     "parse_js_render_mode",
+    "refetch_url_source",
     "robots_allows",
     "should_js_render",
 ]

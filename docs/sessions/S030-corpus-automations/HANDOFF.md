@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** local T128.4 ready to commit (prior tip includes T128.2/T128.3)  
+**Tip:** `2bf2dca` — T128.4 done (worker @`ac8fca7` + coverage/typecheck follow-up); implementing T128.5  
 **Issues:** #73 · #72 · #219  
 
 ## Position
@@ -14,8 +14,8 @@
 - Done: **T128.1** — F76 freshness policy helpers + unit tests (TC-256–259)
 - Done: **T128.2** — Alembic `documents.refresh_enabled` + `last_checked_at` (reuse `content_hash`) `@7b1aa87`
 - Done: **T128.3** — write-API PATCH/list stale fields; Refresh now → enqueue `@e86290e`
-- Done: **T128.4** — Modal `freshness_refresh` worker + real schedule branch (shared F75 Period)
-- Next: **T128.5** — ingest/hash-aware re-fetch path for URL sources
+- Done: **T128.4** — Modal `freshness_refresh` worker + schedule `@ac8fca7`; coverage/typecheck follow-up `@2bf2dca`
+- **In progress: T128.5** — ingest/hash-aware re-fetch path for URL sources
 
 ## Key locks
 
