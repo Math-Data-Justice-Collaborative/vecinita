@@ -1,7 +1,7 @@
 ---
 description: >-
-  Developer-facing text (commits, PRs, READMEs, changelogs, skill summaries) uses
-  clear short English; opaque tracking codes are citations only
+  Human-readable git history, issues, milestones, PRs, deploys, and agent summaries —
+  feature/behavior English first; tracking codes are citations only
 alwaysApply: true
 ---
 
@@ -9,45 +9,52 @@ alwaysApply: true
 
 ## Principle
 
-Anything a human reads as **git history, PR review, README, changelog, or agent status
-summary** must make sense in short plain English without decoding internal codes.
+Anything a human reads in **git history, GitHub issues/milestones/PRs, project board,
+deploy/release notes, changelogs, or agent status** must make sense in short plain English
+**without decoding** session/evolve/task codes.
 
-Tracking IDs remain valid in **session docs, execution plans, workflow-state, ADRs, and
-corpus citations**. When they appear in developer-facing prose, pair them with English
-(or put them in parentheses after the English).
+Name by **feature, fix, or user-visible behavior** — not by planning bucket (`W1`, `Post-027`)
+or opaque IDs alone.
 
-## Where this applies
+Tracking IDs stay valid in session docs, execution plans, `workflow-state`, ADRs, and corpus
+cites. In developer-facing text, put them **after** English (parentheses) or in the body.
+
+## Surfaces (always)
 
 | Surface | Do | Do not |
 |---------|----|--------|
-| Commit subject | `feat: enqueue catch-up for failed embeds (F75)` | `[T127.5] feat: …` / `T01: …` |
-| PR title | `Corpus automations catch-up (F75)` | `[M127] F75 catch-up` as the only readable title |
-| PR / changelog body | English bullets; cite `F75`, `ADR-052`, task ids | Bullets that are only codes |
-| README / LOCAL_DEV / ops docs | Explain what and why in English | Lead sections with opaque codes alone |
-| Agent “completed” reports | `Completed: add export endpoint. Next: …` | `Completed T3.2` with no English |
-| Session / plan tables | IDs as keys + English intent columns | Rewriting historical IDs away |
+| Commit subject | `feat: enqueue catch-up for failed embeds (F75)` | `[T127.5] feat: …` / `[EV-027] …` as the subject |
+| PR title | `Corpus automations catch-up (F75)` | `[EV-027][M127] F75` as the only readable title |
+| Issue title | `[data] Add Providence ESL class sources` | `[Post-027 W1] …` / bare `T03` / `EV-027 item 2` |
+| GH milestone | `Corpus coverage — sources, ESL, food banks, Drive` | `Post-027 W1` / `M128` / `S030 batch` |
+| Epic title | `[epic] Corpus coverage — sources, ESL, food banks, Drive` | `[epic] Post-027 W1 sprint` |
+| Branch | `evolve/EV-027-corpus-automations` (slug required) | `evolve/EV-027` with no English slug |
+| Deploy / release notes | English bullets by behavior shipped | Bullets that are only `EV-…` / `T…` / `M…` |
+| Agent “completed” lines | `Completed: add export endpoint. Next: …` | `Completed T3.2` with no English |
 
-## Keep as citations (with English)
+## Self-check before publishing
 
-- Features: `F75`, `F77`
-- ADRs: `ADR-052`
-- Sessions / decisions: `S030`, `S030-D29`, `RD-334`
-- Tests / journeys: `TC-264`, `UJ-012`
-- Bugs / issues: `BUG-2026-…`, `#192`
-- Evolve cycles: `EV-027` (fine in branch names; PR title still needs English)
+Ask: *If someone removed every `EV-` / `S0` / `T` / `F` / `W` token, would the title still
+say what changed?* If no → rewrite.
 
-## Avoid as the primary message
+```text
+❌ Post-027 W2 — RAG quality
+✅ Retrieval and answer quality
 
-- Task / milestone leads: `T1.1`, `[T{id}]`, `[M1]`, `EBO1`-style opaque prefixes
-- Status lines that are only codes (`PRR-001`, `PRM-001`, `RET-001`) without a short English gloss
-- Changelogs grouped solely by bare `[T…]` / `[M…]` prefixes
+❌ [EV-026] M112 F66
+✅ Action icon micro-interactions on admin and chat
 
-## Session and plan docs
+❌ feat: T128.3 wire Modal schedule
+✅ feat: share Modal schedule for catch-up and freshness jobs (F75)
+```
 
-Internal IDs in paths, tables, and cross-links are fine. Prefer:
+## Citations (optional, never the lead)
 
-> Catch-up enqueues residual embeds only (`job_type=automation_catchup`) — [Corpus: feature-list.md §F75], ADR-052.
+Features `F75`, ADRs `ADR-052`, sessions `S030`, tests `TC-264` / `UJ-012`, bugs
+`BUG-2026-…` / `#192`, evolve `EV-027` (OK in **branch** names; PR/issue/milestone titles
+still need English).
 
-Not:
+## Still OK internally
 
-> F75 / RD-334 / T127.5 done.
+Paths, tables, and cross-links in session/plan docs may use IDs as keys — always pair with
+an English intent column when a human will skim the row.

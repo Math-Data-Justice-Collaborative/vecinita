@@ -50,13 +50,16 @@ The default pipeline is **linear**, but **recovery** is allowed when validation 
 
 Atomic commits and PRs use clear short English subjects (optional ID cites), but **nothing
 automatically becomes** user-facing **release notes**. See
-`developer-facing-language.mdc`.
+`developer-facing-language.mdc` — same rule for **deploy reports, GH release bodies, and
+smoke closeout notes**.
 
 **Convention** (when cutting a release or completing 13-deploy-smoke):
 - Append a release section to `docs/sessions/S000-internal-docs-archive/deploy-report.md` or maintain `docs/CHANGELOG.md`
 - Aggregate merge commits and PR titles since the last deploy tag into **readable English** bullets
-- Include: version/date, deployment URL, merged milestones (by name), notable decisions
-  (cite feature/ADR IDs alongside English)
+  grouped by **shipped behavior** (e.g. “multilingual embeddings cutover”, not “EV-025”)
+- Include: version/date, deployment URL, merged milestones (**behavior names**), notable
+  decisions (cite feature/ADR IDs alongside English)
+- Reject release/deploy prose that is only tracking codes (`EV-…`, `T…`, `M…`, `W1`)
 
 ## 4. Performance testing
 

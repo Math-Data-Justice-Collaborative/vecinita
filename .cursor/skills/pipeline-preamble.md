@@ -220,8 +220,9 @@ skill to “just start.”
 - **Block** until the proceed gate is answered (or the user selects exit/pause).
 - **Resume mid-session:** still AskQuestion — resume recommended path · re-interview · close —
   unless the user already said continue-with-recommended in this turn.
-- **English-first prompts and digests** — feature/cycle/task codes are citations, not the
-  primary message ([developer-facing-language.mdc](../rules/developer-facing-language.mdc)).
+- **English-first prompts, digests, git titles, issues, milestones, PRs, and deploy notes** —
+  name by feature/fix/behavior; tracking codes are citations only
+  ([developer-facing-language.mdc](../rules/developer-facing-language.mdc)).
 - Skill-specific batches (hotfix symptom intake, evolve feature intake, health tiers) **add
   to** this minimum; they do not replace it.
 

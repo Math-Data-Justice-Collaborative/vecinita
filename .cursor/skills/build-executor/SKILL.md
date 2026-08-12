@@ -185,7 +185,7 @@ When all tasks in a milestone are `completed`:
    typecheck, tests) via parallel agents. If failures exist, verify-build walks the user
    through approve/deny/modify for each. Wait for all checks to pass.
 2. **Create minor PR** from the milestone branch to the phase branch:
-   - Title: short English milestone name (optional cite; not `[M{N}] …`)
+   - Title: short English **behavior** name (optional cite; not `[M{N}]` / `[EV-…]` / `W1` alone)
    - Body: auto-generated English summaries from task list, spec references, check results
    - Include the PR checklist from §Git Strategy
 3. **Present to the user** (PR URL and checklist in the session summary). Do **not** stop the
