@@ -188,6 +188,7 @@ def test_data_management_cors_preflight_on_jobs() -> None:
     ("path", "method"),
     [
         ("/jobs/00000000-0000-4000-8000-000000000001/cancel", "POST"),
+        ("/jobs/00000000-0000-4000-8000-000000000001/approve", "POST"),
         ("/jobs/00000000-0000-4000-8000-000000000001/retry", "POST"),
         ("/jobs/00000000-0000-4000-8000-000000000001", "DELETE"),
         ("/jobs/events", "GET"),
@@ -197,7 +198,7 @@ def test_data_management_cors_preflight_on_job_mutate_and_events(
     path: str,
     method: str,
 ) -> None:
-    """H0c / T85.4: CORS preflight for cancel, retry, delete, and SSE events (EV-012)."""
+    """H0c / T85.4: CORS preflight for cancel, approve, retry, delete, and SSE events."""
     client = TestClient(create_data_mgmt_app(require_proxy_auth=False))
     response = client.options(
         path,

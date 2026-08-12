@@ -221,6 +221,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
         auth: AuthPrincipal = Depends(write_auth_dep),
     ) -> CreateJobResponse:
         job_type, options = _store_options_from_request(body.options)
+        if job_type == "finetune_train":
+            options = {**options, "approved": False}
         record = job_store.create_job(
             urls=[str(url) for url in body.urls],
             options=options,
@@ -244,7 +246,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
             )
         except Exception:  # noqa: BLE001  # audit is best-effort; never fail job enqueue
             _logger.warning("audit emit failed for job.created", exc_info=True)
-        if runner is not None:
+        # F77: do not start GPU train until POST /jobs/{id}/approve (TC-260 / TP6).
+        if runner is not None and job_type != "finetune_train":
             background.add_task(runner, record.job_id)
         return CreateJobResponse(job_id=record.job_id, status="pending")
 
@@ -337,6 +340,36 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
         updated = job_store.update_job(job_id, status="cancelled")
         return job_record_to_schema(updated)
 
+    @app.post("/jobs/{job_id}/approve", response_model=Job)
+    def approve_job(  # pyright: ignore[reportUnusedFunction]
+        job_id: UUID,
+        background: BackgroundTasks,
+        _auth: AuthPrincipal = Depends(write_auth_dep),
+    ) -> Job:
+        """Manual approve for finetune_train only (F77 / TP6 / TC-260)."""
+        record = job_store.get_job(job_id)
+        if record is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if record.job_type != "finetune_train":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Approve is only valid for finetune_train jobs",
+            )
+        if record.status != "pending":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cannot approve job in status {record.status}",
+            )
+        if record.options.get("approved") is True:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Job already approved",
+            )
+        updated = job_store.update_job(job_id, options_patch={"approved": True})
+        if runner is not None:
+            background.add_task(runner, job_id)
+        return job_record_to_schema(updated)
+
     @app.post(
         "/jobs/{job_id}/retry",
         status_code=status.HTTP_202_ACCEPTED,
@@ -355,14 +388,18 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes +
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Cannot retry job in status {record.status}",
             )
+        retry_options = dict(record.options)
+        if record.job_type == "finetune_train":
+            retry_options["approved"] = False
         new_record = job_store.create_job(
             urls=list(record.urls),
-            options=dict(record.options),
+            options=retry_options,
             job_type=record.job_type,
             initiated_by_user_id=auth.sub,
             initiated_by_role=auth.role,
         )
-        if runner is not None:
+        # finetune_train still requires a fresh approve before GPU (ADR-053).
+        if runner is not None and record.job_type != "finetune_train":
             background.add_task(runner, new_record.job_id)
         return CreateJobResponse(job_id=new_record.job_id, status="pending")
 

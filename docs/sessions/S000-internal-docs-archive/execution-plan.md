@@ -11,11 +11,11 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M129: F77 — LoRA FT + human promote |
-| **Active task** | T129.4 (pending) |
+| **Active task** | T129.5 (pending) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
-| **Active session** | S030-corpus-automations — 07-build; T129.3 complete — next T129.4 finetune_train + approve |
+| **Active session** | S030-corpus-automations — 07-build; T129.4 complete — next T129.5 LoRA train worker |
 | **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
@@ -2581,7 +2581,7 @@ prod `llm_app` loads adapter only after promote; FT caps (AC-FT*; TC-252–265; 
 | T129.1 | Test: unit red — approve gate; kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY; no auto-promote (TC-263+) | Test | completed | AC-FT7, TP5, RD-338 | T128.7 | — | 2026-08-12 | S030 | F77 |
 | T129.2 | Test: unit red — SFT pair builder from chunks; adapter id pin/clear rollback (TC-265) | Test | completed | RD-340, AC-FT9 | T129.1 | — | 2026-08-12 | S030 | F77 |
 | T129.3 | Config: Modal `finetune_app.py` scaffold + volume + secrets docs (**blocked until 06** PEFT/TRL pins complete) | Config | completed | TP4, ADR-053, S030-D31 M3 | T129.1 | PEFT/TRL pins (06) — done S030-D33 | 2026-08-12 | S030 | F77 |
-| T129.4 | Code: `job_type=finetune_train` + `POST /jobs/{id}/approve` (admin JWT) | Code | pending | TP6, api-contract | T129.1 | — | | S030 | F77 |
+| T129.4 | Code: `job_type=finetune_train` + `POST /jobs/{id}/approve` (admin JWT) | Code | completed | TP6, api-contract | T129.1 | — | 2026-08-12 | S030 | F77 |
 | T129.5 | Code: train worker (LoRA/PEFT SFT) writes adapter to volume; run metadata | Code | pending | ADR-053, TP4 | T129.3, T129.4 | llm-models base | | S030 | F77 |
 | T129.6 | Code: `GET …/finetune/runs/{id}/eval` base vs adapter report (F36 golden) | Code | pending | RD-338, UJ-082 | T129.5 | eval fixtures | | S030 | F77 |
 | T129.7 | Code: `POST …/finetune/promote` + clear pin rollback; set `VECINITA_FINETUNE_ADAPTER_ID` | Code | pending | RD-339, AC-FT9 | T129.6 | — | | S030 | F77 |

@@ -20,6 +20,7 @@ JobType = Literal[
     "rebuild",
     "automation_catchup",
     "freshness_refresh",
+    "finetune_train",
 ]
 RebuildMode = Literal["reembed", "rechunk", "rescrape"]
 BackfillSource = Literal["rescrape", "from_chunks"]
@@ -139,6 +140,7 @@ class CreateJobRequest(BaseModel):
         ):
             msg = "document_id required for freshness_refresh jobs"
             raise ValueError(msg)
+        # finetune_train: empty urls allowed; approve gate before GPU (TP6 / TC-260).
         return self
 
 
@@ -180,6 +182,10 @@ class JobMetrics(BaseModel):
         ge=0,
         description="Documents processed by F75 catch-up or F76 freshness (0 when skipped).",
     )
+    finetune_outcome: str | None = Field(
+        default=None,
+        description="F77 finetune_train worker outcome (approve gate / stub / train).",
+    )
 
 
 class Job(BaseModel):
@@ -196,6 +202,10 @@ class Job(BaseModel):
     error_code: str | None = None
     error_message: str | None = None
     metrics: JobMetrics | None = None
+    approved: bool | None = Field(
+        default=None,
+        description="F77 finetune_train only — False until POST /jobs/{id}/approve (TC-260).",
+    )
     created_at: datetime
     updated_at: datetime
     initiated_by_user_id: UUID | None = None
