@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
+  Bot,
   FileText,
   FlaskConical,
   Heart,
@@ -120,6 +121,11 @@ function NavItems({ onClick }: { onClick?: () => void }) {
     },
     ...(isAdmin
       ? [
+          {
+            to: "/automations",
+            label: tr("admin.nav.automations"),
+            icon: Bot,
+          } as const,
           {
             to: "/feedback",
             label: tr("admin.nav.feedback"),

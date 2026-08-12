@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M127: F75 — Automation framework |
-| **Active task** | T127.8 (pending) |
+| **Active task** | T127.9 (pending) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
@@ -2548,7 +2548,7 @@ for 13; issue closeout notes after verify/deploy gates.
 | T127.5 | Code: Modal DM `job_type=automation_catchup` worker + concurrency/kill-switch | Code | completed | ADR-052, config-spec | T127.4 | — | 2026-08-12 | S030 | F75 |
 | T127.6 | Code: triggers — job completion + doc CRUD enqueue (async only) | Code | completed | RD-326, RD-335 | T127.5 | — | 2026-08-12 | S030 | F75 |
 | T127.7 | Config: `schedule=modal.Period(days=1)` on `vecinita-data-management` dispatching catch-up (F76 branch in M128) | Config | completed | TP2, RD-336, TC-264, S030-D31 M2 | T127.5 | — | 2026-08-12 | S030 | F75 |
-| T127.8 | Code: DM Automations UI — enable/disable + run history | Code | pending | UJ-080, RD-327 | T127.4 | — | | S030 | F75 |
+| T127.8 | Code: DM Automations UI — enable/disable + run history | Code | completed | UJ-080, RD-327 | T127.4 | — | 2026-08-12 | S030 | F75 |
 | T127.9 | Test: API e2e UJ-080 + Vitest Automations panel green | Test | pending | e2e-coverage, TP8 | T127.6, T127.8 | — | | S030 | F75 |
 | T127.10 | Test: Playwright T0-ui UJ-080 (`tests/ui/`) | Test | pending | TP8, connectivity-gates | T127.8 | — | | S030 | F75 |
 
@@ -2619,7 +2619,13 @@ Accepted; Phase 30 Current State; H4–H5 note for 13; issue closeout notes afte
 
 ### Commit rules
 
-Atomic commits per task: `[T1.1] type: description`. Post-commit: ruff, basedpyright, full pytest (see `docs/typing-policy.md`).
+Atomic commits per task: `{type}: short English summary` (optional cites like `(F75)`;
+do not lead with `[T1.1]`). See `.cursor/rules/atomic-commits.mdc` and
+`.cursor/rules/developer-facing-language.mdc`. Post-commit: ruff, basedpyright, full pytest
+(see `docs/typing-policy.md`).
+
+PR titles use the English milestone or phase name (optional ID cite). Historical branch
+names below may still use `feat/M{N}-…`; new branches prefer `feat/{english-slug}`.
 
 ### Branch workflow
 

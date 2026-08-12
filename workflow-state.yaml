@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: T127.5 Modal DM automation_catchup worker
-      next_action: 07-build Task Loop T127.5 (M127)
+      current_action: T127.9 pending (API e2e + Vitest)
+      next_action: T127.9 pending (API e2e + Vitest)
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1981,11 +1981,20 @@ project:
       - M128
       - M129
       - M130
-      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-07T15:03:16Z — T127.1–T127.4 COMPLETE (@d355f29/@141d558/@9ae6309/@2172d2e); current T127.5
-        (Modal DM automation_catchup worker); status remains in_progress; active_milestone M127; Phase A/B uncommitted artifacts
-        pending user decision; Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
+      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:00:34Z — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; current_task T127.9 pending (API e2e + Vitest); Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
         §Phase 30]'
-      updated_at: '2026-08-07T15:03:16Z'
+      updated_at: '2026-08-12T17:00:34Z'
+      phase_ab_docs_committed: true
+      phase_ab_docs_commit: 3cadd8b
+      t127_5_status: completed
+      t127_5_commit: 5d31dcf
+      t127_6_status: completed
+      t127_6_commit: 93e87ce
+      t127_6_fix_commit: 081ecf2
+      t127_7_status: completed
+      t127_7_commit: f4e8373
+      t127_8_status: completed
+      t127_9_status: pending
       s026_baseline:
         status: completed
         started_at: '2026-08-04'
@@ -2722,16 +2731,35 @@ project:
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M127
-      current_task: T127.5
+      current_task: T127.9
+      t127_5_status: completed
+      t127_5_commit: 5d31dcf
+      t127_6_status: completed
+      t127_6_commit: 93e87ce
+      t127_6_fix_commit: 081ecf2
+      t127_7_status: completed
+      t127_7_commit: f4e8373
+      t127_8_status: completed
+      t127_9_status: pending
+      phase_ab_docs_committed: true
+      phase_ab_docs_commit: 3cadd8b
+      tip_sha: f4e8373
       s030_d31_decision: S030-D31
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T127.5
+        current_task: T127.9
         active_milestone: M127
         mode: task_loop
         build_plan_card: waived_S030-D31
+        t127_5_status: completed
+        t127_6_status: completed
+        t127_6_fix_commit: 081ecf2
+        t127_7_status: completed
+        t127_8_status: completed
+        t127_9_status: pending
+        phase_ab_docs_committed: true
     08-verify-build:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -7481,9 +7509,8 @@ active_session:
   - 72
   - 219
   current_stage: 07-build
-  current_stage_note: 07-build in_progress — M127 T127.5 (Modal DM automation_catchup worker); T127.1–T127.4 complete
-    @d355f29/@141d558/@9ae6309/@2172d2e; Phase A/B uncommitted artifacts pending user decision; Build Plan Card waived (S030-D31)
-  next_action: 07-build Task Loop T127.5 (M127)
+  current_stage_note: 07-build in_progress — M127 T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav); T127.9 pending (API e2e + Vitest); T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; T127.1–T127.4 complete; Build Plan Card waived (S030-D31)
+  next_action: T127.9 pending (API e2e + Vitest)
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -7521,6 +7548,14 @@ active_session:
     Loop'
   - 'S030 T127.1 COMPLETE 2026-08-07T14:57:31Z: commit @d355f29 on evolve/EV-027-corpus-automations; advance to T127.2 (automation_runs + config GET/PATCH red tests); 07-build remains in_progress'
   - 'S030 T127.2–T127.4 COMPLETE 2026-08-07T15:03:16Z: commits @141d558 (T127.2), @9ae6309 (T127.3), @2172d2e (T127.4) on evolve/EV-027-corpus-automations; advance to T127.5 (Modal DM automation_catchup worker); 07-build remains in_progress M127; Phase A/B uncommitted artifacts still pending user decision'
+  - 'S030 Phase A/B docs COMMITTED 2026-08-12T14:46:25Z: @3cadd8b docs(S030) Phase A/B corpus automations specs on evolve/EV-027-corpus-automations; advisory cleared; T127.5 about to start coding (mark in_progress when coding begins)'
+  - 'S030 T127.5 START 2026-08-12T14:49:02Z: T127.5 in_progress (Modal DM automation_catchup worker); current_task=T127.5; active_milestone=M127; 07-build remains in_progress; Phase A/B docs @3cadd8b confirmed committed (stale uncommitted advisory cleared); T127.5 NOT completed'
+  - 'S030 T127.5 COMPLETE 2026-08-12T14:53:42Z: commit @5d31dcf on evolve/EV-027-corpus-automations; Modal DM automation_catchup worker + kill-switch; advance to T127.6 (triggers) pending; HANDOFF synced next=T127.6; 07-build remains in_progress M127'
+  - 'S030 T127.6 COMPLETE 2026-08-12T14:59:32Z: commit @93e87ce on evolve/EV-027-corpus-automations; async catch-up enqueue on job completion + CRUD; advance to T127.7 pending; HANDOFF next=T127.7; 07-build remains in_progress M127'
+  - 'S030 T127.6 FIX 2026-08-12T15:00:41Z: commit @081ecf2 on evolve/EV-027-corpus-automations; stub catch-up enqueue on test clients; tip @081ecf2; T127.6 remains completed; current_task T127.7 pending; 07-build remains in_progress M127'
+  - 'S030 T127.7 COMPLETE 2026-08-12T15:04:15Z: commit @f4e8373 on evolve/EV-027-corpus-automations; shared daily Period(days=1) schedule on DM; advance to T127.8 (DM Automations UI) pending; HANDOFF next=T127.8; 07-build remains in_progress M127'
+  - 'S030 T127.8 START 2026-08-12T16:56:09Z: T127.8 in_progress (DM Automations UI — enable/disable + run history); current_task=T127.8; active_milestone=M127; 07-build remains in_progress; T127.7 COMPLETE @f4e8373; tip @f4e8373'
+  - 'S030 T127.8 COMPLETE 2026-08-12T17:00:34Z: T127.8 DM Automations UI done (enable/disable + run history, /automations nav); no commit yet — parent will commit; advance to T127.9 pending (API e2e + Vitest); NOT marking T127.9 in_progress; HANDOFF next=T127.9 pending; 07-build remains in_progress M127'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -7850,19 +7885,31 @@ active_session:
     mode: delta
     skip_rationale: null
     ready: true
-    updated_at: '2026-08-07T15:03:16Z'
-    current_action: T127.5 Modal DM automation_catchup worker
-    next_action: 07-build Task Loop T127.5 (M127)
+    current_action: T127.9 pending (API e2e + Vitest)
+    next_action: T127.9 pending (API e2e + Vitest)
+    s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
     milestone_hint: M127
-    note: IN_PROGRESS — M127 T127.5 (Modal DM automation_catchup worker); T127.1–T127.4 complete @d355f29/@141d558/@9ae6309/@2172d2e; Phase A/B uncommitted artifacts pending user decision; Build Plan Card waived (S030-D31)
+    note: IN_PROGRESS — M127 T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; parent will commit); T127.9 pending (API e2e + Vitest); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; Build Plan Card waived (S030-D31)
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M127
-    current_task: T127.5
-    s030_d31_decision: S030-D31
+    current_task: T127.9
+    t127_5_status: completed
+    t127_5_commit: 5d31dcf
+    t127_6_status: completed
+    t127_6_commit: 93e87ce
+    t127_6_fix_commit: 081ecf2
+    t127_7_status: completed
+    t127_7_commit: f4e8373
+    t127_8_status: completed
+    t127_9_status: pending
+    phase_ab_docs_committed: true
+    phase_ab_docs_commit: 3cadd8b
+    tip_sha: f4e8373
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
+    updated_at: '2026-08-12T17:00:34Z'
   - stage: 08-verify-build
     required: true
     status: pending
@@ -7895,7 +7942,7 @@ active_session:
     skip_rationale: null
   handoff:
     next_skill: 07-build
-    next_action: 07-build Task Loop T127.5 (M127)
+    next_action: T127.9 pending (API e2e + Vitest)
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -7907,7 +7954,7 @@ active_session:
     gate_b_to_c: passed
     phase_b: passed
     phase_c: pending
-    phase_note: 07-build in_progress M127 T127.5; T127.1–T127.4 complete @d355f29/@141d558/@9ae6309/@2172d2e; Phase A/B uncommitted artifacts pending user decision; Build Plan Card waived S030-D31
+    phase_note: 07-build in_progress M127 T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav); T127.9 pending (API e2e + Vitest); T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; tip @f4e8373; Build Plan Card waived S030-D31; T127.8 completed 2026-08-12T17:00:34Z
     decision: S030-D33
     s030_d31_decision: S030-D31
     s030_d32_decision: S030-D32
@@ -7919,11 +7966,24 @@ active_session:
     - M129
     - M130
     active_milestone: M127
-    current_task: T127.5
+    current_task: T127.9
+    t127_5_status: completed
+    t127_5_commit: 5d31dcf
+    t127_6_status: completed
+    t127_6_commit: 93e87ce
+    t127_6_fix_commit: 081ecf2
+    t127_7_status: completed
+    t127_7_commit: f4e8373
+    t127_8_status: completed
+    t127_9_status: pending
+    phase_ab_docs_committed: true
+    phase_ab_docs_commit: 3cadd8b
+    tip_sha: f4e8373
     askquestion_pending: false
     askquestion_pending_topic: null
     handoff_md: docs/sessions/S030-corpus-automations/HANDOFF.md
-    updated_at: '2026-08-07T15:03:16Z'
+    handoff_next: T127.9 pending
+    updated_at: '2026-08-12T17:00:34Z'
   askquestion_pending: false
   askquestion_pending_topic: null
   artifacts:
@@ -21250,8 +21310,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: T127.5 Modal DM automation_catchup worker
-    next_action: 07-build Task Loop T127.5 (M127)
+    current_action: T127.9 pending (API e2e + Vitest)
+    next_action: T127.9 pending (API e2e + Vitest)
     askquestion_pending: false
     askquestion_pending_topic: null
     gate_a_to_b: passed
@@ -21267,11 +21327,20 @@ stages:
     - M128
     - M129
     - M130
-    note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-07T15:03:16Z — T127.1–T127.4 COMPLETE (@d355f29/@141d558/@9ae6309/@2172d2e); current T127.5
-      (Modal DM automation_catchup worker); status remains in_progress; active_milestone M127; Phase A/B uncommitted artifacts
-      pending user decision; Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
+    note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:00:34Z — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; current_task T127.9 pending (API e2e + Vitest); Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
       §Phase 30]'
-    updated_at: '2026-08-07T15:03:16Z'
+    updated_at: '2026-08-12T17:00:34Z'
+    phase_ab_docs_committed: true
+    phase_ab_docs_commit: 3cadd8b
+    t127_5_status: completed
+    t127_5_commit: 5d31dcf
+    t127_6_status: completed
+    t127_6_commit: 93e87ce
+    t127_6_fix_commit: 081ecf2
+    t127_7_status: completed
+    t127_7_commit: f4e8373
+    t127_8_status: completed
+    t127_9_status: pending
     s026_baseline:
       status: completed
       started_at: '2026-08-04'
@@ -22113,16 +22182,36 @@ stages:
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M127
-    current_task: T127.5
+    current_task: T127.9
+    t127_5_status: completed
+    t127_5_commit: 5d31dcf
+    t127_6_status: completed
+    t127_6_commit: 93e87ce
+    t127_6_fix_commit: 081ecf2
+    t127_7_status: completed
+    t127_7_commit: f4e8373
+    t127_8_status: completed
+    t127_9_status: pending
+    phase_ab_docs_committed: true
+    phase_ab_docs_commit: 3cadd8b
+    tip_sha: f4e8373
     s030_d31_decision: S030-D31
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
     build_plan_card_sot: tech-plan-delta + Phase 30
     substeps:
-      current_task: T127.5
+      current_task: T127.9
       active_milestone: M127
       mode: task_loop
       build_plan_card: waived_S030-D31
+      t127_5_status: completed
+      t127_6_status: completed
+      t127_6_fix_commit: 081ecf2
+      t127_7_status: completed
+      t127_7_commit: f4e8373
+      t127_8_status: completed
+      t127_9_status: pending
+      phase_ab_docs_committed: true
   08-verify-build:
     status: completed
     session_id: S027-multilingual-embeddings
@@ -27249,11 +27338,10 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 07-build
-  current_action: T127.5 Modal DM automation_catchup worker
-  next_action: 07-build Task Loop T127.5 (M127)
-  current_stage_note: 07-build in_progress — T127.1–T127.4 COMPLETE @d355f29/@141d558/@9ae6309/@2172d2e; current T127.5 (Modal DM automation_catchup worker); Phase A/B uncommitted artifacts pending user decision
-  notes: 'S030-D29 — TP1–TP10 locked; ADR-052/053 Accepted; Phase 30 M127–M130 pending; 04 COMPLETE; handoff → 05-verify-tech;
-    phase_b remains in_progress (Gate B→C). [Corpus: feature-list.md §F75–F77]'
+  current_action: T127.9 pending (API e2e + Vitest)
+  next_action: T127.9 pending (API e2e + Vitest)
+  current_stage_note: 07-build in_progress — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav); T127.9 pending (API e2e + Vitest); T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b
+  notes: 'S030-D29 — TP1–TP10 locked; ADR-052/053 Accepted; Phase 30 M127–M130; Phase A/B @3cadd8b; T127.5 @5d31dcf; T127.6 @93e87ce + fix @081ecf2; T127.7 COMPLETE @f4e8373; T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit) 2026-08-12T17:00:34Z; T127.9 pending (API e2e + Vitest). [Corpus: feature-list.md §F75–F77]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -27501,31 +27589,49 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: T127.5 Modal DM automation_catchup worker
-      next_action: 07-build Task Loop T127.5 (M127)
+      current_action: T127.9 pending (API e2e + Vitest)
+      next_action: T127.9 pending (API e2e + Vitest)
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
       milestone_hint: M127
-      updated_at: '2026-08-07T14:57:31Z'
-      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-07T14:57:31Z — T127.1 COMPLETE @d355f29; current T127.2 (automation_runs +
-        config GET/PATCH red tests); status remains in_progress; Build Plan Card waived per S030-D31. [Corpus: feature-list.md
+      updated_at: '2026-08-12T17:00:34Z'
+      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:00:34Z — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; current_task T127.9 pending (API e2e + Vitest); Build Plan Card waived per S030-D31. [Corpus: feature-list.md
         §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md §Phase 30]'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M127
-      current_task: T127.5
+      current_task: T127.9
+      t127_5_status: completed
+      t127_5_commit: 5d31dcf
+      t127_6_status: completed
+      t127_6_commit: 93e87ce
+      t127_6_fix_commit: 081ecf2
+      t127_7_status: completed
+      t127_7_commit: f4e8373
+      t127_8_status: completed
+      t127_9_status: pending
+      phase_ab_docs_committed: true
+      phase_ab_docs_commit: 3cadd8b
+      tip_sha: f4e8373
       s030_d31_decision: S030-D31
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T127.5
+        current_task: T127.9
         active_milestone: M127
         mode: task_loop
         build_plan_card: waived_S030-D31
+        t127_5_status: completed
+        t127_6_status: completed
+        t127_6_fix_commit: 081ecf2
+        t127_7_status: completed
+        t127_8_status: completed
+        t127_9_status: pending
+        phase_ab_docs_committed: true
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -56366,12 +56472,13 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: 2172d2e
-    tip_sha: 2172d2e
-    tip_full: 2172d2e619ada27933cfb690ef83231d780f6466
-    head_sha: 2172d2e619ada27933cfb690ef83231d780f6466
-    updated_at: '2026-08-07T15:03:16Z'
-    note: 'T127.2–T127.4 COMPLETE @141d558/@9ae6309/@2172d2e; next T127.5 (Modal DM automation_catchup worker); Phase A/B uncommitted artifacts pending user decision'
+    tip: f4e8373
+    tip_sha: f4e8373
+    tip_full: f4e83736766b7a20d8e3e5eec5be223579a84bee
+    head_sha: f4e83736766b7a20d8e3e5eec5be223579a84bee
+    tip_prev: 081ecf2
+    updated_at: '2026-08-12T17:00:34Z'
+    note: 'T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.9 pending (API e2e + Vitest); prior T127.7 COMPLETE @f4e8373; @081ecf2 (T127.6 fix) @93e87ce (T127.6) @5d31dcf (T127.5) @3cadd8b (Phase A/B docs)'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
       / RA-020)
@@ -56994,6 +57101,126 @@ git_history:
     evolve_cycle_id: EV-024
     note: 'Merged via PR #205 @0c1d838; tip @7f086c3; #204 closed as superseded'
   commits:
+  - sha: f4e8373
+    sha_full: f4e83736766b7a20d8e3e5eec5be223579a84bee
+    short: f4e8373
+    branch: evolve/EV-027-corpus-automations
+    message: '[T127.7] config: shared daily Period(days=1) schedule on DM'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M127
+    task: T127.7
+    feature_ids:
+    - F75
+    files_changed: 5
+    files:
+    - apps/data-management-backend/vecinita_data_management_backend/schedule_dispatch.py
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - infra/modal/data_management_app.py
+    - tests/unit/data_management/test_schedule_dispatch.py
+    timestamp: '2026-08-12T15:04:00Z'
+    recorded_at: '2026-08-12T15:04:15Z'
+    note: 'T127.7 COMPLETE — shared daily Period(days=1) schedule on DM; advance to T127.8 (DM Automations UI)'
+  - sha: 081ecf2
+    sha_full: 081ecf2ca7a6ab5810538a89a4b63c71e81edf34
+    short: 081ecf2
+    branch: evolve/EV-027-corpus-automations
+    message: '[T127.6] fix: stub catch-up enqueue on test clients'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M127
+    task: T127.6
+    feature_ids:
+    - F75
+    files_changed: 4
+    files:
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - tests/helpers/jobs_client_stub.py
+    - tests/unit/internal_write_api/conftest.py
+    - tests/unit/internal_write_api/test_catchup_crud.py
+    timestamp: '2026-08-12T15:00:11Z'
+    recorded_at: '2026-08-12T15:00:41Z'
+    note: 'T127.6 follow-up fix — stub catch-up enqueue on test clients; tip after T127.6 COMPLETE; next T127.7 pending'
+  - sha: 93e87ce
+    sha_full: 93e87ce8496bccb1b9dc3540258bf84240a55de5
+    short: 93e87ce
+    branch: evolve/EV-027-corpus-automations
+    message: '[T127.6] feat: async catch-up enqueue on job completion and CRUD'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M127
+    task: T127.6
+    feature_ids:
+    - F75
+    files_changed: 11
+    files:
+    - apps/data-management-backend/vecinita_data_management_backend/catchup_triggers.py
+    - apps/data-management-backend/vecinita_data_management_backend/jobs.py
+    - apps/data-management-backend/vecinita_data_management_backend/modal_jobs_client.py
+    - apps/internal-write-api/vecinita_internal_write_api/app.py
+    - apps/internal-write-api/vecinita_internal_write_api/catchup_crud.py
+    - apps/internal-write-api/vecinita_internal_write_api/jobs_client.py
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - packages/shared-schemas/vecinita_shared_schemas/automations.py
+    - tests/unit/data_management/test_catchup_triggers.py
+    - tests/unit/internal_write_api/test_catchup_crud.py
+    timestamp: '2026-08-12T14:59:19Z'
+    recorded_at: '2026-08-12T14:59:32Z'
+    note: 'T127.6 COMPLETE — async catch-up enqueue on job completion + CRUD; advance to T127.7 pending'
+  - sha: 5d31dcf
+    sha_full: 5d31dcf88e22e02c805b98161bbaaa343386bed5
+    short: 5d31dcf
+    branch: evolve/EV-027-corpus-automations
+    message: '[T127.5] feat: Modal DM automation_catchup worker with kill-switch'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M127
+    task: T127.5
+    feature_ids:
+    - F75
+    files_changed: 8
+    files:
+    - apps/data-management-backend/vecinita_data_management_backend/app.py
+    - apps/data-management-backend/vecinita_data_management_backend/automation_catchup.py
+    - apps/data-management-backend/vecinita_data_management_backend/jobs.py
+    - apps/data-management-backend/vecinita_data_management_backend/pipeline.py
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - packages/shared-schemas/vecinita_shared_schemas/data_management.py
+    - tests/unit/data_management/test_automation_catchup.py
+    timestamp: '2026-08-12T14:53:24Z'
+    recorded_at: '2026-08-12T14:53:42Z'
+    note: 'T127.5 COMPLETE — Modal DM automation_catchup worker + kill-switch; advance to T127.6 (triggers)'
+  - sha: 3cadd8b
+    sha_full: 3cadd8b9b2ab2e7622034aede703824b42217668
+    short: 3cadd8b
+    branch: evolve/EV-027-corpus-automations
+    message: 'docs(S030): commit EV-027 Phase A/B corpus automations specs'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M127
+    task: docs-phase-ab
+    feature_ids:
+    - F75
+    - F76
+    - F77
+    files_changed: 40
+    files_summary: ADR-052/053, S030 session docs, standing docs, rules/skills, finetune_pins, workflow-state
+    timestamp: '2026-08-12T14:46:13Z'
+    recorded_at: '2026-08-12T14:46:25Z'
+    note: 'Phase A/B docs committed before T127.5 coding; clears uncommitted-artifacts advisory'
   - sha: 2172d2e
     sha_full: 2172d2e619ada27933cfb690ef83231d780f6466
     short: 2172d2e
