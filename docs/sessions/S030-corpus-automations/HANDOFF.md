@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** (pending T129.10 commit) — UJ-082 e2e + Playwright  
+**Tip:** `6107037` — T129.10 UJ-082 e2e + Playwright  
 **Issues:** #73 · #72 · #219  
 
 ## Position

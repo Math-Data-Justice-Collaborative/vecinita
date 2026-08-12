@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: T129.10 API e2e UJ-082 + Vitest + Playwright
-      next_action: Implement T129.10 — API e2e UJ-082 + Vitest + Playwright
+      current_action: 08-verify-build for M129 then M130 Phase 30 gate
+      next_action: 08-verify-build M129 boundary then T130.1
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1974,14 +1974,16 @@ project:
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
-      milestone_hint: M129
+      milestone_hint: M129→M130
       phase: Phase 30 M127–M130
       phase_30_milestones:
       - M127
       - M128
       - M129
       - M130
-      note: 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). T129.8 completed @c8b5b96. AskQuestion none. Advance to T129.10 API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. HANDOFF tip f48a7e7.'
+      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -2001,15 +2003,15 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: f48a7e7
-      tip_sha: f48a7e7
-      tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-      tip_prev: c8b5b96
-      updated_at: '2026-08-12T22:06:15Z'
-      active_milestone: M129
-      current_milestone: M129
-      current_task: T129.10
-      current_task_status: in_progress
+      tip: '6107037'
+      tip_sha: '6107037'
+      tip_full: 61070374986b17408b270d25b403cac66cf176dd
+      tip_prev: f48a7e7
+      updated_at: '2026-08-12T22:25:00Z'
+      active_milestone: M130
+      current_milestone: M130
+      current_task: T130.1
+      current_task_status: pending
       t128_2_status: completed
       t128_2_commit: 7b1aa87
       t128_3_status: completed
@@ -2758,10 +2760,10 @@ project:
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T129.10
-        active_milestone: M129
-        current_task_status: in_progress
-        mode: m129_task_loop
+        current_task: T130.1
+        active_milestone: M130
+        current_task_status: pending
+        mode: m129_closed_08_then_m130
         build_plan_card: waived_S030-D31
         t127_5_status: completed
         t127_6_status: completed
@@ -2777,7 +2779,7 @@ project:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: f48a7e7
+        tip_sha: '6107037'
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -2800,12 +2802,12 @@ project:
         t128_7_started_at: '2026-08-12T20:24:30Z'
         m128_status: completed
         t128_7_commit: bdaec9d
-        m129_status: in_progress
+        m129_status: completed
         t129_3_status: completed
         t129_4_status: completed
         t129_4_sha: 4ef663b
         t129_5_status: completed
-        tip: f48a7e7
+        tip: '6107037'
         coding_blocked: false
         ci_gate: cleared_local_coverage
         ci_status: local_green_tip_pending_push_watch
@@ -2831,8 +2833,8 @@ project:
         t129_6_status: completed
         t129_6_started_at: '2026-08-12T21:36:28Z'
         t129_6_description: 'Code: GET …/finetune/runs/{id}/eval base vs adapter report (F36 golden)'
-        tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-        tip_prev: c8b5b96
+        tip_full: 61070374986b17408b270d25b403cac66cf176dd
+        tip_prev: f48a7e7
         coverage_local_dm_branch: 453/476
         coverage_local_dm_branch_pct: 95.2%
         askquestion_pending: false
@@ -2865,7 +2867,6 @@ project:
         t129_8_completed: '2026-08-12'
         t129_8_completed_at: '2026-08-12T21:50:46Z'
         t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
-        s030_d49_decision: S030-D49
         t129_9_status: completed
         t129_9_started_at: '2026-08-12T21:50:46Z'
         t129_9_description: 'UI: DM FT approve / eval evidence / promote'
@@ -2875,16 +2876,34 @@ project:
         t129_9_completed_at: '2026-08-12T22:06:15Z'
         t129_9_note: DM FT UI approve/eval/human promote; FinetunePage + UJ-082 Vitest
         s030_d50_decision: S030-D50
-        t129_10_status: in_progress
+        t129_10_status: completed
         t129_10_started_at: '2026-08-12T22:06:15Z'
         t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      execution_plan_sync_note: 'T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed'
+        m130_status: pending
+        t129_10_commit: '6107037'
+        t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
+        t129_10_completed: '2026-08-12'
+        t129_10_completed_at: '2026-08-12T22:25:00Z'
+        t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
+          @6107037
+        m129_completed: '2026-08-12'
+        m129_completed_at: '2026-08-12T22:25:00Z'
+        m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
+        s030_d51_decision: S030-D51
+        updated_at: '2026-08-12T22:25:00Z'
+        handoff_next: '**08-verify-build** for M129 boundary, then **T130.1** (M130). Tip 6107037. PR #238 open.'
+        recommended_next: 08-verify-build M129 boundary then T130.1
+        phase_note: 'M129 COMPLETE @6107037 (S030-D51); interim 08-verify-build then M130/T130.1; PR #238 open'
+        execution_plan_sync_note: T129.10 COMPLETE @6107037; M129 completed; Active task T130.1 after 08-verify-build — parent
+          syncs execution-plan.md if needed
+      execution_plan_sync_note: T129.10 COMPLETE @6107037; M129 completed; Active task T130.1 after 08-verify-build — parent
+        syncs execution-plan.md if needed
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
       ci_fix_commit: 5fc2d21
       ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-      askquestion_cleared: S030-D34 continue recommended M129 after CI green
+      askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
       t128_2_completed_at: '2026-08-12T19:11:44Z'
       t128_2_description: 'Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`)'
       t128_2_spec_source: TP7, api-contract
@@ -2914,9 +2933,9 @@ project:
       t128_5_depends_on: T128.4
       t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
       t128_6_status: completed
-      execution_plan_active_task: M129 / T129.10 — API e2e UJ-082 + Vitest + Playwright
-      handoff_next: '**T129.10** — API e2e UJ-082 + Vitest + Playwright (F77). Tip f48a7e7.'
-      phase_note: 'M129/T129.10 in_progress; tip f48a7e7; T129.9 COMPLETE (S030-D50); PR #238 open'
+      execution_plan_active_task: M130 / T130.1 — after 08-verify-build M129 boundary
+      handoff_next: '**08-verify-build** for M129 boundary, then **T130.1** (M130). Tip 6107037. PR #238 open.'
+      phase_note: 'M129 COMPLETE @6107037 (S030-D51); interim 08-verify-build then M130/T130.1; PR #238 open'
       t128_6_started_at: '2026-08-12T20:18:53Z'
       tip_pushed: true
       tip_pushed_to: origin/evolve/EV-027-corpus-automations
@@ -2946,9 +2965,9 @@ project:
       t128_7_spec_source: TP8, TC-264
       t128_7_depends_on: T128.4, T128.6
       t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
-      m129_status: in_progress
+      m129_status: completed
       askquestion_next_topic: null
-      recommended_next: 'Implement T129.10 — API e2e UJ-082 + Vitest + Playwright (F77)'
+      recommended_next: 08-verify-build M129 boundary then T130.1
       m129_path_confirmed: true
       m129_path_confirmed_at: '2026-08-12T20:32:06Z'
       m129_path_decision: S030-D34
@@ -2967,7 +2986,7 @@ project:
       tip_ci_green: true
       first_m129_task: T129.1
       first_m129_task_status: completed
-      mode_boundary: m129_task_loop
+      mode_boundary: m129_closed_08_then_m130
       ci_fix_decision: S030-D35
       ci_fix_focus: dm_fe_coverage_f76_freshness_ui
       s030_d35_decision: S030-D35
@@ -3103,7 +3122,6 @@ project:
       t129_8_completed: '2026-08-12'
       t129_8_completed_at: '2026-08-12T21:50:46Z'
       t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
-      s030_d49_decision: S030-D49
       t129_9_status: completed
       t129_9_started_at: '2026-08-12T21:50:46Z'
       t129_9_description: 'UI: DM FT approve / eval evidence / promote'
@@ -3113,585 +3131,640 @@ project:
       t129_9_completed_at: '2026-08-12T22:06:15Z'
       t129_9_note: DM FT UI approve/eval/human promote; FinetunePage + UJ-082 Vitest
       s030_d50_decision: S030-D50
-      t129_10_status: in_progress
+      t129_10_status: completed
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      execution_plan_sync_note: 'T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed'
+      tasks:
+        T129.10: completed
+        T130.1: pending
+      t129_10_commit: '6107037'
+      t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
+      t129_10_completed: '2026-08-12'
+      t129_10_completed_at: '2026-08-12T22:25:00Z'
+      t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
+        @6107037
+      m129_completed: '2026-08-12'
+      m129_completed_at: '2026-08-12T22:25:00Z'
+      m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
+      m130_status: pending
+      s030_d51_decision: S030-D51
     08-verify-build:
-      status: completed
-      session_id: S027-multilingual-embeddings
-      evolve_cycle_id: EV-025
-      started_at: '2026-08-05'
-      started: '2026-08-05'
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      branch: main
-      mode: delta
-      delta_only: true
-      feature_ids:
-      - F70
-      - F71
-      tip_sha: 4b7231b
-      commit_deployed: 4b7231b
-      current_action: completed
-      askquestion_pending: false
-      note: S027/EV-025 08-verify-build COMPLETE (S027-D64 reconcile) — report=docs/sessions/S027-multilingual-embeddings/reports/verification-report.md;
-        Gate C→D passed per S027-D63.
-      updated_at: '2026-08-06T14:46:45Z'
-      s027_d64_decision: S027-D64
-      reconciled_from: S027-D63
-      session_closed: true
-      session_closed_at: '2026-08-06T14:46:45Z'
-      close_decision: S027-D64
-      report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
-      active_session_overlay:
-        session_id: S028-chat-source-ux
-        evolve_cycle_id: EV-026
+      s027_baseline:
         status: completed
-        current_action: completed
-        next_action: 09-qa in_progress
-        branch: evolve/EV-026-chat-source-ux
-        tip_sha: 1332dc1
-        tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
-        tip_prev: 44f03da
-        askquestion_pending: false
-        askquestion_pending_topic: null
-        phase_c: passed
-        gate_c_to_d: passed
-        s028_d26_decision: S028-D26
-        s028_d27_decision: S028-D27
-        s028_d28_decision: S028-D28
-        report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
-        report_status: completed
-        result: PASS
-        overall_result: PASS
-        security_remediations: included
-        note: 08 PASS complete; 09-qa STARTED; tip@1332dc1
-        updated_at: '2026-08-06T22:35:23Z'
-      report_status: completed
-      s026_baseline:
-        status: completed
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
         started_at: '2026-08-05'
         started: '2026-08-05'
-        started_at_iso: '2026-08-05T00:30:00Z'
-        session_id: S026-frontend-ux-polish
-        branch: evolve/EV-024-frontend-ux-polish
-        session_branch: feat/S026-frontend-ux-polish
-        evolve_cycle_id: EV-024
-        mode: evolve
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
+        branch: main
+        mode: delta
         delta_only: true
         feature_ids:
-        - F64
-        - F65
-        - F66
-        - F67
-        - F68
-        - F69
-        phase: 27
-        milestones:
-        - M112
-        - M113
-        - M114
-        - M115
-        - M116
-        - M117
-        - M118
-        active_milestone: M118
-        active_feature: F64-F69
-        active_issue: 193
+        - F70
+        - F71
+        tip_sha: 4b7231b
+        commit_deployed: 4b7231b
         current_action: completed
-        next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
         askquestion_pending: false
-        askquestion_pending_topic: null
-        gate_a_to_b: passed
-        gate_b_to_c: passed
-        phase_a: passed
-        phase_b: passed
-        phase_c: passed
-        gate_c_to_d: passed
-        s026_d28_decision: S026-D28
-        build_head: c942971
-        build_commits:
-        - 47a618e
-        - 18c8dc8
-        - 760a85b
-        - 6b171ab
-        - 7c04b49
-        - 8c81e65
-        - 0942ef9
-        m112_status: completed
-        note: 'S026/EV-024 08-verify-build COMPLETE PASS (M118) 2026-08-05 — PR #207 merged @c942971; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
-          deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007); report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md;
-          handoff → Phase D 09+10 (now complete) → 11-verify-impl'
-        handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
-        rd_range: RD-272..RD-289
-        updated_at: '2026-08-05T00:45:00Z'
-        s025_baseline:
+        note: S027/EV-025 08-verify-build COMPLETE (S027-D64 reconcile) — report=docs/sessions/S027-multilingual-embeddings/reports/verification-report.md;
+          Gate C→D passed per S027-D63.
+        updated_at: '2026-08-06T14:46:45Z'
+        s027_d64_decision: S027-D64
+        reconciled_from: S027-D63
+        session_closed: true
+        session_closed_at: '2026-08-06T14:46:45Z'
+        close_decision: S027-D64
+        report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
+        active_session_overlay:
+          session_id: S028-chat-source-ux
+          evolve_cycle_id: EV-026
           status: completed
-          started_at: '2026-08-03'
-          started: '2026-08-03'
-          session_id: S025-ci-release-automation
-          branch: evolve/EV-023-ci-release-automation
-          evolve_cycle_id: EV-023
+          current_action: completed
+          next_action: 09-qa in_progress
+          branch: evolve/EV-026-chat-source-ux
+          tip_sha: 1332dc1
+          tip_full: 1332dc1a5c54f8f4723fab3a0184c7a24ef768bf
+          tip_prev: 44f03da
+          askquestion_pending: false
+          askquestion_pending_topic: null
+          phase_c: passed
+          gate_c_to_d: passed
+          s028_d26_decision: S028-D26
+          s028_d27_decision: S028-D27
+          s028_d28_decision: S028-D28
+          report: docs/sessions/S028-chat-source-ux/reports/verification-report.md
+          report_status: completed
+          result: PASS
+          overall_result: PASS
+          security_remediations: included
+          note: 08 PASS complete; 09-qa STARTED; tip@1332dc1
+          updated_at: '2026-08-06T22:35:23Z'
+        report_status: completed
+        s026_baseline:
+          status: completed
+          started_at: '2026-08-05'
+          started: '2026-08-05'
+          started_at_iso: '2026-08-05T00:30:00Z'
+          session_id: S026-frontend-ux-polish
+          branch: evolve/EV-024-frontend-ux-polish
+          session_branch: feat/S026-frontend-ux-polish
+          evolve_cycle_id: EV-024
           mode: evolve
           delta_only: true
           feature_ids:
-          - F62
-          - F63
-          current_action: completed
-          next_action: 10-e2e (Phase D)
-          askquestion_pending: false
-          gate_a_to_b: passed
-          s025_d13_decision: S025-D13
-          build_head: fedf1f7
-          build_commits:
-          - 2cad110
-          - fedf1f7
-          note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c
-            waived (Lean+build skipped 04); handoff → 10-e2e Phase D
-          rd_range: RD-264..RD-271
-          s024_baseline:
-            status: completed
-            started: '2026-08-03'
-            started_at: '2026-08-03T20:15:45Z'
-            session_id: S024-website-scrape-crawl
-            evolve_cycle_id: EV-022
-            branch: evolve/EV-022-website-scrape-crawl
-            mode: evolve
-            delta_only: true
-            feature_ids:
-            - F59
-            - F60
-            - F61
-            current_action: completed
-            next_action: Phase D 09-qa + 10-e2e in progress
-            askquestion_pending: false
-            s024_d41_decision: S024-D41
-            note: Gate C→D PASS (S024-D42); Phase C approved; Phase D started
-            s023_baseline:
-              status: completed
-              completed: '2026-08-03'
-              session_id: S023-retrieval-topk-packing
-              evolve_cycle_id: EV-020
-              report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
-              result: pass
-              note: S023/EV-020 08 PASS 2026-08-03 @ bb4c400 — Gate C→D PASS; Phase D 09+10 COMPLETE (S023-D15); next → 11-verify-impl
-              gate_c_to_d: passed
-              checkpoints_phase_c: passed
-              phase_c_status: passed
-              current_action: completed
-              next_action: 11-verify-impl
-            result: pass
-            completed: '2026-08-03'
-            completed_at: '2026-08-03'
-            report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
-            gate_c_to_d: passed
-            checkpoints_phase_c: passed
-            phase_c_status: passed
-            phase: Phase 26 (M108-M111)
-            feature: F59+F60+F61
-            s024_d42_decision: S024-D42
-          completed: '2026-08-03'
-          completed_at: '2026-08-03'
-          result: pass
-          report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
-          commit: 23f9f71
-          commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
-          verification_commit: 23f9f71
-          gate_c_to_d: passed
-          checkpoints_phase_c: passed
-          phase_c_status: passed
-          gate_b_to_c: waived
-          checkpoints_phase_b: waived
-          s025_d14_decision: S025-D14
-          session_closed: true
-          session_closed_at: '2026-08-04'
-          close_decision: S025-D16
-        completed: '2026-08-05'
-        completed_at: '2026-08-05'
-        completed_at_iso: '2026-08-05T00:45:00Z'
-        overall_result: PASS
-        result_scope: milestone
-        milestone_verified: M118
-        build_head_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        m112_verify: PASS
-        report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-        ci_status: success
-        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        minor_pr:
-          number: 206
-          status: merged
-          merged: true
-          title: '[M117] F69 audit actor email read-time (#170)'
-          url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
-          branch: evolve/EV-024-frontend-ux-polish
-          head: evolve/EV-024-frontend-ux-polish
-          base: main
-          head_sha: ecc7412
-          head_sha_full: ecc741251d812434476eddebb95543135ec8b369
-          verify_head: 1719b3b
-          green_sha: 1719b3b
-          milestone: M117
-          features:
-          - F69
-          issues:
-          - 170
-          merge_policy: approved
-          session_id: S026-frontend-ux-polish
-          evolve_cycle_id: EV-024
-          opened_at: '2026-08-04'
-          recorded_at: '2026-08-04T23:49:00Z'
-          updated_at: '2026-08-04T23:56:04Z'
-          ci_status: success
-          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-          note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
-            merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1
-            @21ed50e'
-          merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-          merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-          merged_at: '2026-08-04T23:56:04Z'
-        may_reopen_next_milestone: true
-        s026_d29_decision: S026-D29
-        prior_minor_pr_m112:
-          number: 200
-          url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
-          title: '[M112] F66 ActionIcon micro-interactions (#104)'
-          status: merged
-          merge_policy: approved
-          head_sha: 0942ef9
-          ci_status: success
-          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
-          merge_approved_by: user
-          merge_approved_decision: S026-D29
-          merge_approved_at: '2026-08-04T19:16:24Z'
-          merged: true
-          note: MERGED to main @ e1ccf9e; CI green on main after HF Hub 429 flake rerun; deploy-preflight watching
-          merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
-          merge_commit_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
-          merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
-          merge_sha_short: e1ccf9e
-          merged_at: '2026-08-04T19:24:00Z'
-          head_sha_full: 0942ef940d7651a659687adda361cc37144a36c3
-          main_ci_status: success
-          main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
-          deploy_preflight_status: watching
-          deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
-        m113_status: completed
-        m113_verify: PASS
-        s026_d46_decision: S026-D46
-        s026_d47_decision: S026-D47
-        m113_pr_merged: true
-        m113_merge_sha: 9eaedb0
-        m114_pr_merged: true
-        m114_merge_sha: f3f7dec
-        m115_verify: PASS
-        m115_verify_at: '2026-08-04T21:35:14Z'
-        m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-        m115_pr_status: merged
-        m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205;
-          continuing M117 T117.4 (PR #206 open)'
-        m115_pr: 205
-        m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-        m115_head: 605fce9
-        s026_d49_decision: S026-D49
-        m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
-        m115_ci_status: success
-        s026_d50_decision: S026-D50
-        m116_status: completed
-        note_detail: 'S026/EV-024 08-verify-build COMPLETE PASS (M117) 2026-08-04 — F69 actor_email #170 @ 1719b3b; report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md;
-          GitHub CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473; PR #206
-          open_ci_green; docs commit ecc7412; milestone verify done — stage may re-open at next milestone boundary'
-        verify_head: 1719b3b
-        m116_verify: PASS
-        m116_verify_at: '2026-08-04T23:14:30Z'
-        m116_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-        m116_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30958904809
-        m116_ci_status: success
-        pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
-        pr_204_status: closed_superseded
-        pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116
-          @7f086c3'
-        m116_pr: 205
-        m116_pr_status: merged
-        m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205;
-          continuing M117 T117.4 (PR #206 open)'
-        m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-        active_task: null
-        current_milestone: M118
-        current_task: null
-        m115_pr_merged: true
-        m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
-        m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
-        m115_merge_sha_short: 0c1d838
-        m115_tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
-        m115_merged_at: '2026-08-04T23:24:43Z'
-        m116_pr_merged: true
-        m116_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
-        m116_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
-        m116_merge_sha_short: 0c1d838
-        m116_tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
-        m116_merged_at: '2026-08-04T23:24:43Z'
-        pr_205: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-        pr_205_status: merged
-        pr_205_title: '[M115+M116] F65 energy estimate + F68 anonymous feedback (#93/#186)'
-        pr_205_head_branch: feat/M115-M116
-        pr_205_tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
-        pr_205_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
-        pr_205_merged_at: '2026-08-04T23:24:43Z'
-        pr_204_superseded_by: 205
-        ci_note: 'PR #207 OPEN_CI_GREEN for M118 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207); tip
-          @2b8e8cd; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032); Gate
-          C→D AskQuestion now; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193.
-          #87 already CLOSED.'
-        resume_note: 'PR #207 OPEN_CI_GREEN @2b8e8cd; M112–M118 tasks done; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
-          AskQuestion Gate C→D now; phase_c/c_to_d still pending; Issue closeout comments posted on #104/#106/#93/#186/#170/#193;
-          do not auto-close. #87 already CLOSED.'
-        s026_d52_decision: S026-D52
-        t117_2_status: completed
-        t117_2_note: T117.2 completed @3c428c6 — enrich GET /internal/v1/audit with actor_email via Supabase Admin lookup/cache
-        minor_pr_m115_m116:
-          number: 205
-          status: merged
-          merged: true
-          title: '[M115+M116] F65 energy estimate + F68 anonymous feedback (#93/#186)'
-          url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
-          branch: feat/M115-M116
-          head: feat/M115-M116
-          base: main
-          head_sha: 7f086c3
-          head_sha_full: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
-          tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
-          merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
-          merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
-          merge_sha_short: 0c1d838
-          merged_at: '2026-08-04T23:24:43Z'
-          milestone: M115+M116
-          features:
-          - F65
-          - F68
-          issues:
-          - 93
-          - 186
-          merge_policy: approved
-          session_id: S026-frontend-ux-polish
-          evolve_cycle_id: EV-024
-          note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205;
-            continuing M117 T117.2'
-          updated_at: '2026-08-04T23:24:43Z'
-        t117_3_status: completed
-        t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
-        t117_3_commit: c5b635a
-        t117_4_status: completed
-        t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
-        pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
-        pr_206_status: merged
-        pr_206_title: '[M117] F69 audit actor email read-time (#170)'
-        pr_206_head_branch: evolve/EV-024-frontend-ux-polish
-        pr_206_tip_sha: ecc741251d812434476eddebb95543135ec8b369
-        pr_206_tip: ecc7412
-        pr_206_note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
-          merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1 @21ed50e'
-        m117_pr: 206
-        m117_pr_status: merged
-        m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
-        m117_pr_note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
-          merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1 @21ed50e'
-        minor_pr_m117:
-          number: 206
-          status: merged
-          merged: true
-          title: '[M117] F69 audit actor email read-time (#170)'
-          url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
-          branch: evolve/EV-024-frontend-ux-polish
-          head: evolve/EV-024-frontend-ux-polish
-          base: main
-          head_sha: ecc7412
-          tip: ecc7412
-          tip_sha: ecc741251d812434476eddebb95543135ec8b369
-          head_sha_full: ecc741251d812434476eddebb95543135ec8b369
-          green_sha: 1719b3b
-          green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
-          verify_head: 1719b3b
-          merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-          merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-          merge_sha_short: eb65837
-          merged_at: '2026-08-04T23:56:04Z'
-          milestone: M117
-          features:
-          - F69
-          issues:
-          - 170
-          merge_policy: approved
-          session_id: S026-frontend-ux-polish
-          evolve_cycle_id: EV-024
-          note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
-            merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1
-            @21ed50e'
-          opened_at: '2026-08-04'
-          updated_at: '2026-08-04T23:56:04Z'
-          ci_status: success
-          ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-        m117_status: completed_merged
-        m117_verify: PASS
-        m117_verify_at: '2026-08-04T23:49:00Z'
-        m117_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-        m117_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-        m117_ci_status: success
-        pr_206_green_sha: 1719b3b
-        pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
-        handoff_active_milestone: M118
-        handoff_active_task: null
-        t117_4_commit: 1719b3b
-        pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
-        pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-        pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-        pr_206_merge_sha_short: eb65837
-        pr_206_merged_at: '2026-08-04T23:56:04Z'
-        pr_206_merged: true
-        m117_pr_merged: true
-        m117_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-        m117_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
-        m117_merge_sha_short: eb65837
-        m117_merged_at: '2026-08-04T23:56:04Z'
-        t118_1_status: completed
-        t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2
-          OpenAPI/secrets
-        task_status:
-          T118.1: completed
-          T118.2: completed
-          T118.3: completed
-        s026_d53_decision: S026-D53
-        execution_plan_note: execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 — confirm
-          UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets
-        branch_ahead_of_origin: 0
-        branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
-        notes: 'T118.3 committed @2b8e8cd; M118 completed; PR #207 OPEN_CI_GREEN; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
-          askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207 CI green); phase_c/c_to_d remain
-          pending (NOT passed until user approves). Issue closeout comments posted on #104/#106/#93/#186/#170/#193; do not
-          auto-close. #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193.
-          #87 already CLOSED.'
-        supabase_cli:
-          linked_project_ref: cfuvghdsuwactfeamtym
-          brewfile: supabase added (=2.111.0)
-          note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env →
-            do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
-          linked_at: '2026-08-04T23:56:04Z'
-          reminder_at: '2026-08-05T00:02:08Z'
-          session_id: S026-frontend-ux-polish
-          evolve_cycle_id: EV-024
-          operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
-        t118_2_status: completed
-        t118_3_status: completed
-        m118_status: completed_merged
-        pr_207: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-        pr_207_status: merged
-        pr_207_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
-        pr_207_head_branch: evolve/EV-024-frontend-ux-polish
-        pr_207_tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        pr_207_tip: c942971
-        pr_207_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
-          merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
-          deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
-        m118_pr: 207
-        m118_pr_status: merged
-        m118_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-        m118_pr_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
-          merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
-          deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
-        m118_verify: PASS
-        m118_note: 'M118 completed (T118.1–T118.3); PR #207 OPEN_CI_GREEN @2b8e8cd; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
-          m118_verify=pending_user_gate_c_to_d; Gate C→D AskQuestion pending (Gate C→D / phase_c — Phase 27 build complete;
-          M118 PR #207 CI green)'
-        minor_pr_m118:
-          number: 207
-          status: merged
-          merged: true
-          title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
-          url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-          branch: evolve/EV-024-frontend-ux-polish
-          head: evolve/EV-024-frontend-ux-polish
-          base: main
-          head_sha: c942971
-          tip: c942971
-          tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-          head_sha_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-          milestone: M118
-          features:
           - F64
           - F65
           - F66
           - F67
           - F68
           - F69
-          issues:
-          - 193
-          - 104
-          - 106
-          - 93
-          - 186
-          - 170
-          merge_policy: approved
-          session_id: S026-frontend-ux-polish
-          evolve_cycle_id: EV-024
-          note: 'PR #207 MERGED to main @c942971; main CI+preflight green; 08 M118 PASS; Phase D 09+10 complete'
-          opened_at: '2026-08-04'
-          recorded_at: '2026-08-05T00:12:00Z'
+          phase: 27
+          milestones:
+          - M112
+          - M113
+          - M114
+          - M115
+          - M116
+          - M117
+          - M118
+          active_milestone: M118
+          active_feature: F64-F69
+          active_issue: 193
+          current_action: completed
+          next_action: 11-verify-impl AskQuestion (UI preview + AC sign-off)
+          askquestion_pending: false
+          askquestion_pending_topic: null
+          gate_a_to_b: passed
+          gate_b_to_c: passed
+          phase_a: passed
+          phase_b: passed
+          phase_c: passed
+          gate_c_to_d: passed
+          s026_d28_decision: S026-D28
+          build_head: c942971
+          build_commits:
+          - 47a618e
+          - 18c8dc8
+          - 760a85b
+          - 6b171ab
+          - 7c04b49
+          - 8c81e65
+          - 0942ef9
+          m112_status: completed
+          note: 'S026/EV-024 08-verify-build COMPLETE PASS (M118) 2026-08-05 — PR #207 merged @c942971; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
+            deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007);
+            report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md; handoff → Phase D 09+10 (now complete)
+            → 11-verify-impl'
+          handoff_seed: docs/sessions/S026-frontend-ux-polish/checkpoints/01-requirements-seed.md
+          rd_range: RD-272..RD-289
           updated_at: '2026-08-05T00:45:00Z'
+          s025_baseline:
+            status: completed
+            started_at: '2026-08-03'
+            started: '2026-08-03'
+            session_id: S025-ci-release-automation
+            branch: evolve/EV-023-ci-release-automation
+            evolve_cycle_id: EV-023
+            mode: evolve
+            delta_only: true
+            feature_ids:
+            - F62
+            - F63
+            current_action: completed
+            next_action: 10-e2e (Phase D)
+            askquestion_pending: false
+            gate_a_to_b: passed
+            s025_d13_decision: S025-D13
+            build_head: fedf1f7
+            build_commits:
+            - 2cad110
+            - fedf1f7
+            note: S025/EV-023 08-verify-build COMPLETE PASS @ 23f9f71 — Gate C→D PASS (S025-D14); phase_c=passed; phase_b/b_to_c
+              waived (Lean+build skipped 04); handoff → 10-e2e Phase D
+            rd_range: RD-264..RD-271
+            s024_baseline:
+              status: completed
+              started: '2026-08-03'
+              started_at: '2026-08-03T20:15:45Z'
+              session_id: S024-website-scrape-crawl
+              evolve_cycle_id: EV-022
+              branch: evolve/EV-022-website-scrape-crawl
+              mode: evolve
+              delta_only: true
+              feature_ids:
+              - F59
+              - F60
+              - F61
+              current_action: completed
+              next_action: Phase D 09-qa + 10-e2e in progress
+              askquestion_pending: false
+              s024_d41_decision: S024-D41
+              note: Gate C→D PASS (S024-D42); Phase C approved; Phase D started
+              s023_baseline:
+                status: completed
+                completed: '2026-08-03'
+                session_id: S023-retrieval-topk-packing
+                evolve_cycle_id: EV-020
+                report: docs/sessions/S023-retrieval-topk-packing/reports/verification-report.md
+                result: pass
+                note: S023/EV-020 08 PASS 2026-08-03 @ bb4c400 — Gate C→D PASS; Phase D 09+10 COMPLETE (S023-D15); next →
+                  11-verify-impl
+                gate_c_to_d: passed
+                checkpoints_phase_c: passed
+                phase_c_status: passed
+                current_action: completed
+                next_action: 11-verify-impl
+              result: pass
+              completed: '2026-08-03'
+              completed_at: '2026-08-03'
+              report: docs/sessions/S024-website-scrape-crawl/reports/verification-report.md
+              gate_c_to_d: passed
+              checkpoints_phase_c: passed
+              phase_c_status: passed
+              phase: Phase 26 (M108-M111)
+              feature: F59+F60+F61
+              s024_d42_decision: S024-D42
+            completed: '2026-08-03'
+            completed_at: '2026-08-03'
+            result: pass
+            report: docs/sessions/S025-ci-release-automation/reports/verification-report.md
+            commit: 23f9f71
+            commit_full: 23f9f71c3c9ac3e212a94c4480097cdd73199f11
+            verification_commit: 23f9f71
+            gate_c_to_d: passed
+            checkpoints_phase_c: passed
+            phase_c_status: passed
+            gate_b_to_c: waived
+            checkpoints_phase_b: waived
+            s025_d14_decision: S025-D14
+            session_closed: true
+            session_closed_at: '2026-08-04'
+            close_decision: S025-D16
+          completed: '2026-08-05'
+          completed_at: '2026-08-05'
+          completed_at_iso: '2026-08-05T00:45:00Z'
+          overall_result: PASS
+          result_scope: milestone
+          milestone_verified: M118
+          build_head_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          m112_verify: PASS
+          report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
           ci_status: success
-          reason_pr_opened: M118 minor PR — OpenAPI + UJ e2e suite + Phase 27 gate; CI via PR (evolve/** push does not trigger
-            ci.yml alone)
           ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-          ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
-          green_sha: c942971
-          green_sha_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
-          ci_recorded_at: '2026-08-05T00:20:00Z'
+          minor_pr:
+            number: 206
+            status: merged
+            merged: true
+            title: '[M117] F69 audit actor email read-time (#170)'
+            url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+            branch: evolve/EV-024-frontend-ux-polish
+            head: evolve/EV-024-frontend-ux-polish
+            base: main
+            head_sha: ecc7412
+            head_sha_full: ecc741251d812434476eddebb95543135ec8b369
+            verify_head: 1719b3b
+            green_sha: 1719b3b
+            milestone: M117
+            features:
+            - F69
+            issues:
+            - 170
+            merge_policy: approved
+            session_id: S026-frontend-ux-polish
+            evolve_cycle_id: EV-024
+            opened_at: '2026-08-04'
+            recorded_at: '2026-08-04T23:49:00Z'
+            updated_at: '2026-08-04T23:56:04Z'
+            ci_status: success
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
+            note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
+              merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1
+              @21ed50e'
+            merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+            merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+            merged_at: '2026-08-04T23:56:04Z'
+          may_reopen_next_milestone: true
+          s026_d29_decision: S026-D29
+          prior_minor_pr_m112:
+            number: 200
+            url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/200
+            title: '[M112] F66 ActionIcon micro-interactions (#104)'
+            status: merged
+            merge_policy: approved
+            head_sha: 0942ef9
+            ci_status: success
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30939564361
+            merge_approved_by: user
+            merge_approved_decision: S026-D29
+            merge_approved_at: '2026-08-04T19:16:24Z'
+            merged: true
+            note: MERGED to main @ e1ccf9e; CI green on main after HF Hub 429 flake rerun; deploy-preflight watching
+            merge_commit: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+            merge_commit_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+            merge_sha: e1ccf9e1b333d01d26f0f3cbc3ed477fcd40672a
+            merge_sha_short: e1ccf9e
+            merged_at: '2026-08-04T19:24:00Z'
+            head_sha_full: 0942ef940d7651a659687adda361cc37144a36c3
+            main_ci_status: success
+            main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30942598208
+            deploy_preflight_status: watching
+            deploy_preflight_note: deploy-preflight watching after merge (may still be in progress)
+          m113_status: completed
+          m113_verify: PASS
+          s026_d46_decision: S026-D46
+          s026_d47_decision: S026-D47
+          m113_pr_merged: true
+          m113_merge_sha: 9eaedb0
+          m114_pr_merged: true
+          m114_merge_sha: f3f7dec
+          m115_verify: PASS
+          m115_verify_at: '2026-08-04T21:35:14Z'
+          m115_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+          m115_pr_status: merged
+          m115_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205;
+            continuing M117 T117.4 (PR #206 open)'
+          m115_pr: 205
+          m115_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
+          m115_head: 605fce9
+          s026_d49_decision: S026-D49
+          m115_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30954116658
+          m115_ci_status: success
+          s026_d50_decision: S026-D50
+          m116_status: completed
+          note_detail: 'S026/EV-024 08-verify-build COMPLETE PASS (M117) 2026-08-04 — F69 actor_email #170 @ 1719b3b; report=docs/sessions/S026-frontend-ux-polish/reports/verification-report.md;
+            GitHub CI success https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473; PR #206
+            open_ci_green; docs commit ecc7412; milestone verify done — stage may re-open at next milestone boundary'
+          verify_head: 1719b3b
+          m116_verify: PASS
+          m116_verify_at: '2026-08-04T23:14:30Z'
+          m116_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+          m116_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30958904809
+          m116_ci_status: success
+          pr_204: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/204
+          pr_204_status: closed_superseded
+          pr_204_note: 'Closed superseded by #205: evolve tip included T117.1 red tests; merge used tip-locked feat/M115-M116
+            @7f086c3'
+          m116_pr: 205
+          m116_pr_status: merged
+          m116_pr_note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205;
+            continuing M117 T117.4 (PR #206 open)'
+          m116_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
+          active_task: null
+          current_milestone: M118
+          current_task: null
+          m115_pr_merged: true
+          m115_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
+          m115_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
+          m115_merge_sha_short: 0c1d838
+          m115_tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
+          m115_merged_at: '2026-08-04T23:24:43Z'
+          m116_pr_merged: true
+          m116_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
+          m116_merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
+          m116_merge_sha_short: 0c1d838
+          m116_tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
+          m116_merged_at: '2026-08-04T23:24:43Z'
+          pr_205: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
+          pr_205_status: merged
+          pr_205_title: '[M115+M116] F65 energy estimate + F68 anonymous feedback (#93/#186)'
+          pr_205_head_branch: feat/M115-M116
+          pr_205_tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
+          pr_205_merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
+          pr_205_merged_at: '2026-08-04T23:24:43Z'
+          pr_204_superseded_by: 205
+          ci_note: 'PR #207 OPEN_CI_GREEN for M118 (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
+            tip @2b8e8cd; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
+            Gate C→D AskQuestion now; Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193.
+            #87 already CLOSED.'
+          resume_note: 'PR #207 OPEN_CI_GREEN @2b8e8cd; M112–M118 tasks done; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
+            AskQuestion Gate C→D now; phase_c/c_to_d still pending; Issue closeout comments posted on #104/#106/#93/#186/#170/#193;
+            do not auto-close. #87 already CLOSED.'
+          s026_d52_decision: S026-D52
+          t117_2_status: completed
+          t117_2_note: T117.2 completed @3c428c6 — enrich GET /internal/v1/audit with actor_email via Supabase Admin lookup/cache
+          minor_pr_m115_m116:
+            number: 205
+            status: merged
+            merged: true
+            title: '[M115+M116] F65 energy estimate + F68 anonymous feedback (#93/#186)'
+            url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/205
+            branch: feat/M115-M116
+            head: feat/M115-M116
+            base: main
+            head_sha: 7f086c3
+            head_sha_full: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
+            tip_sha: 7f086c313e8b2a28b7db8fbfac0ac017160bf457
+            merge_commit: 0c1d838b63561fe9d2c50c07a21000ab20046b79
+            merge_sha: 0c1d838b63561fe9d2c50c07a21000ab20046b79
+            merge_sha_short: 0c1d838
+            merged_at: '2026-08-04T23:24:43Z'
+            milestone: M115+M116
+            features:
+            - F65
+            - F68
+            issues:
+            - 93
+            - 186
+            merge_policy: approved
+            session_id: S026-frontend-ux-polish
+            evolve_cycle_id: EV-024
+            note: 'PR #205 MERGED to main @0c1d838 (tip-locked feat/M115-M116 @7f086c3 for #93+#186); #204 closed_superseded_by_205;
+              continuing M117 T117.2'
+            updated_at: '2026-08-04T23:24:43Z'
+          t117_3_status: completed
+          t117_3_note: T117.3 completed @c5b635a — Admin Audit UI actor_email / truncated UUID fallback
+          t117_3_commit: c5b635a
+          t117_4_status: completed
+          t117_4_note: 'T117.4 in_progress — watch CI on PR #206 @c5b635a; verify green + 08-verify M117'
+          pr_206: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+          pr_206_status: merged
+          pr_206_title: '[M117] F69 audit actor email read-time (#170)'
+          pr_206_head_branch: evolve/EV-024-frontend-ux-polish
+          pr_206_tip_sha: ecc741251d812434476eddebb95543135ec8b369
+          pr_206_tip: ecc7412
+          pr_206_note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
+            merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1
+            @21ed50e'
+          m117_pr: 206
+          m117_pr_status: merged
+          m117_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+          m117_pr_note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
+            merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1
+            @21ed50e'
+          minor_pr_m117:
+            number: 206
+            status: merged
+            merged: true
+            title: '[M117] F69 audit actor email read-time (#170)'
+            url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206
+            branch: evolve/EV-024-frontend-ux-polish
+            head: evolve/EV-024-frontend-ux-polish
+            base: main
+            head_sha: ecc7412
+            tip: ecc7412
+            tip_sha: ecc741251d812434476eddebb95543135ec8b369
+            head_sha_full: ecc741251d812434476eddebb95543135ec8b369
+            green_sha: 1719b3b
+            green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
+            verify_head: 1719b3b
+            merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+            merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+            merge_sha_short: eb65837
+            merged_at: '2026-08-04T23:56:04Z'
+            milestone: M117
+            features:
+            - F69
+            issues:
+            - 170
+            merge_policy: approved
+            session_id: S026-frontend-ux-polish
+            evolve_cycle_id: EV-024
+            note: 'PR #206 MERGED to main @eb65837 [M117] F69 audit actor email read-time (#170) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/206);
+              merge_commit=eb65837b5b52c53891a4871207cf8e9404e8f2a9; merged_at=2026-08-04T23:56:04Z; continuing M118 T118.1
+              @21ed50e'
+            opened_at: '2026-08-04'
+            updated_at: '2026-08-04T23:56:04Z'
+            ci_status: success
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
+          m117_status: completed_merged
+          m117_verify: PASS
+          m117_verify_at: '2026-08-04T23:49:00Z'
+          m117_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+          m117_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
+          m117_ci_status: success
+          pr_206_green_sha: 1719b3b
+          pr_206_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30960947473
+          handoff_active_milestone: M118
+          handoff_active_task: null
+          t117_4_commit: 1719b3b
+          pr_206_green_sha_full: 1719b3b878626e290f2dee36752095474601d9de
+          pr_206_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+          pr_206_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+          pr_206_merge_sha_short: eb65837
+          pr_206_merged_at: '2026-08-04T23:56:04Z'
+          pr_206_merged: true
+          m117_pr_merged: true
+          m117_merge_commit: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+          m117_merge_sha: eb65837b5b52c53891a4871207cf8e9404e8f2a9
+          m117_merge_sha_short: eb65837
+          m117_merged_at: '2026-08-04T23:56:04Z'
+          t118_1_status: completed
+          t118_1_note: T118.1 in_progress — confirm API e2e UJ-069/070/073/074 + Playwright suite green (F64–F69); then T118.2
+            OpenAPI/secrets
+          task_status:
+            T118.1: completed
+            T118.2: completed
+            T118.3: completed
+          s026_d53_decision: S026-D53
+          execution_plan_note: execution-plan.md should show T117.4 completed / T118.1 in_progress; next 07-build T118.1 —
+            confirm UJ e2e + Playwright suite green; then T118.2 OpenAPI/secrets
+          branch_ahead_of_origin: 0
+          branch_unpushed_note: synced with origin/evolve/EV-024-frontend-ux-polish @21ed50e
+          notes: 'T118.3 committed @2b8e8cd; M118 completed; PR #207 OPEN_CI_GREEN; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
+            askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR #207 CI green); phase_c/c_to_d
+            remain pending (NOT passed until user approves). Issue closeout comments posted on #104/#106/#93/#186/#170/#193;
+            do not auto-close. #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close
+            #104/#106/#93/#186/#170/#193. #87 already CLOSED.'
+          supabase_cli:
+            linked_project_ref: cfuvghdsuwactfeamtym
+            brewfile: supabase added (=2.111.0)
+            note: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api (source prod.env
+              → do_apps.py sync-secrets / sync_modal_secret.sh --merge --apply)
+            linked_at: '2026-08-04T23:56:04Z'
+            reminder_at: '2026-08-05T00:02:08Z'
+            session_id: S026-frontend-ux-polish
+            evolve_cycle_id: EV-024
+            operator_action: Sync SUPABASE_SECRET_KEY from prod.env to DO write-api (and Modal if required)
+          t118_2_status: completed
+          t118_3_status: completed
+          m118_status: completed_merged
+          pr_207: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+          pr_207_status: merged
+          pr_207_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
+          pr_207_head_branch: evolve/EV-024-frontend-ux-polish
+          pr_207_tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          pr_207_tip: c942971
+          pr_207_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
+            merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
+            deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
+          m118_pr: 207
+          m118_pr_status: merged
+          m118_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+          m118_pr_note: 'PR #207 MERGED to main @c942971 [M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024) (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207);
+            merge_commit=c9429715d188f4dc6e31ff8ae38085d2b1587576; merged_at=2026-08-05T00:15:11Z; main CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485);
+            deploy-preflight green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007)'
+          m118_verify: PASS
+          m118_note: 'M118 completed (T118.1–T118.3); PR #207 OPEN_CI_GREEN @2b8e8cd; CI success (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
+            m118_verify=pending_user_gate_c_to_d; Gate C→D AskQuestion pending (Gate C→D / phase_c — Phase 27 build complete;
+            M118 PR #207 CI green)'
+          minor_pr_m118:
+            number: 207
+            status: merged
+            merged: true
+            title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
+            url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+            branch: evolve/EV-024-frontend-ux-polish
+            head: evolve/EV-024-frontend-ux-polish
+            base: main
+            head_sha: c942971
+            tip: c942971
+            tip_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+            head_sha_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
+            milestone: M118
+            features:
+            - F64
+            - F65
+            - F66
+            - F67
+            - F68
+            - F69
+            issues:
+            - 193
+            - 104
+            - 106
+            - 93
+            - 186
+            - 170
+            merge_policy: approved
+            session_id: S026-frontend-ux-polish
+            evolve_cycle_id: EV-024
+            note: 'PR #207 MERGED to main @c942971; main CI+preflight green; 08 M118 PASS; Phase D 09+10 complete'
+            opened_at: '2026-08-04'
+            recorded_at: '2026-08-05T00:12:00Z'
+            updated_at: '2026-08-05T00:45:00Z'
+            ci_status: success
+            reason_pr_opened: M118 minor PR — OpenAPI + UJ e2e suite + Phase 27 gate; CI via PR (evolve/** push does not trigger
+              ci.yml alone)
+            ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+            ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
+            green_sha: c942971
+            green_sha_full: c9429715d188f4dc6e31ff8ae38085d2b1587576
+            ci_recorded_at: '2026-08-05T00:20:00Z'
+            merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+            merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+            merge_sha_short: c942971
+            merged_at: '2026-08-05T00:15:11Z'
+            main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+            deploy_preflight_status: success
+            deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
+          pr_207_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
+          pr_207_ci_status: success
+          pr_207_green_sha: 2b8e8cd
+          pr_207_green_sha_full: 2b8e8cd5c496cd41ed3b861fc04e87cecbe61b44
+          m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          m118_ci_status: success
+          ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          askquestion_cleared: 'Gate C→D / phase_c — user option 2 (pass + merge #207)'
+          checkpoints_phase_c: passed
+          s026_d54_decision: S026-D54
+          pr_207_merge_approved: true
+          pr_207_merge_approved_at: '2026-08-05T00:30:00Z'
+          pr_207_merge_approved_decision: S026-D54
+          pr_207_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          pr_207_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          pr_207_merge_sha_short: c942971
+          pr_207_merged: true
+          pr_207_merged_at: '2026-08-05T00:15:11Z'
+          m118_pr_merged: true
+          m118_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          m118_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
+          m118_merge_sha_short: c942971
+          m118_merged_at: '2026-08-05T00:15:11Z'
+          main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          main_ci: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
+          main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
+          deploy_preflight_status: success
           merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
           merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-          merge_sha_short: c942971
           merged_at: '2026-08-05T00:15:11Z'
-          main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-          deploy_preflight_status: success
-          deploy_preflight_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
-        pr_207_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032
-        pr_207_ci_status: success
-        pr_207_green_sha: 2b8e8cd
-        pr_207_green_sha_full: 2b8e8cd5c496cd41ed3b861fc04e87cecbe61b44
-        m118_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        m118_ci_status: success
-        ci_run: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        askquestion_cleared: 'Gate C→D / phase_c — user option 2 (pass + merge #207)'
-        checkpoints_phase_c: passed
-        s026_d54_decision: S026-D54
-        pr_207_merge_approved: true
-        pr_207_merge_approved_at: '2026-08-05T00:30:00Z'
-        pr_207_merge_approved_decision: S026-D54
-        pr_207_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        pr_207_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        pr_207_merge_sha_short: c942971
-        pr_207_merged: true
-        pr_207_merged_at: '2026-08-05T00:15:11Z'
-        m118_pr_merged: true
-        m118_merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        m118_merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        m118_merge_sha_short: c942971
-        m118_merged_at: '2026-08-05T00:15:11Z'
-        main_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        main_ci: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962701485
-        main_preflight: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962838007
-        deploy_preflight_status: success
-        merge_commit: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        merge_sha: c9429715d188f4dc6e31ff8ae38085d2b1587576
-        merged_at: '2026-08-05T00:15:11Z'
-        pr_number: 207
-        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-        pr_status: merged
-        pr_merged: true
-        pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
-        m118_verify_at: '2026-08-05T00:45:00Z'
-        m118_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-        session_closed: true
-        session_closed_at: '2026-08-05T00:57:00Z'
-        close_decision: S026-D58
+          pr_number: 207
+          pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+          pr_status: merged
+          pr_merged: true
+          pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
+          m118_verify_at: '2026-08-05T00:45:00Z'
+          m118_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+          session_closed: true
+          session_closed_at: '2026-08-05T00:57:00Z'
+          close_decision: S026-D58
+      status: in_progress
+      ready: true
+      session_id: S030-corpus-automations
+      branch: evolve/EV-027-corpus-automations
+      session_branch: evolve/EV-027-corpus-automations
+      evolve_cycle_id: EV-027
+      mode: evolve
+      delta_only: true
+      feature_ids:
+      - F75
+      - F76
+      - F77
+      github_issues:
+      - 73
+      - 72
+      - 219
+      current_action: Verify M129 build (milestone boundary)
+      next_action: 08-verify-build M129 boundary then T130.1
+      askquestion_pending: false
+      askquestion_pending_topic: null
+      milestone_hint: M129
+      m129_status: completed
+      m130_status: pending
+      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+      started_at: '2026-08-12'
+      started_at_iso: '2026-08-12T22:25:00Z'
+      tip: '6107037'
+      tip_sha: '6107037'
+      tip_full: 61070374986b17408b270d25b403cac66cf176dd
+      tip_prev: f48a7e7
+      handoff: docs/sessions/S030-corpus-automations/HANDOFF.md
+      s030_d51_decision: S030-D51
+      updated_at: '2026-08-12T22:25:00Z'
+      pr_238_status: open
+      pr_238_merge: deferred_no_merge
     09-qa:
       status: completed
       started_at: '2026-08-06'
@@ -7865,9 +7938,10 @@ active_session:
   - 73
   - 72
   - 219
-  current_stage: 07-build
-  current_stage_note: Phase C 07-build; M129; T129.9 COMPLETE @f48a7e7; next T129.10 (S030-D50)
-  next_action: Implement T129.10 — API e2e UJ-082 + Vitest + Playwright
+  current_stage: 08-verify-build
+  current_stage_note: 'Phase C interim 08-verify-build for M129 boundary; M129 COMPLETE @6107037 (S030-D51); then M130 T130.1;
+    PR #238 open'
+  next_action: 08-verify-build M129 boundary then T130.1
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -8004,9 +8078,17 @@ active_session:
   - 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /finetune/promote + GET /finetune/adapter + clear-pin
     rollback (TC-262/265). Advance to T129.8 llm_app load promoted adapter; playground candidate load. PR #238 remains open.
     AskQuestion none. HANDOFF tip b2a25e5. execution_plan Active task synced to T129.8.'
-  - 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. AskQuestion none. HANDOFF tip c8b5b96. execution_plan Active task synced to T129.9.'
-  - 'S030 T129.9 IN_PROGRESS 2026-08-12T21:56:09Z: current_action=implementing T129.9 DM FT UI; current_stage=07-build; t129_9_status already in_progress; execution-plan.md still shows T129.9 pending — parent will sync. No other task completions invented.'
-  - 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). Advance to T129.10 API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. AskQuestion none. HANDOFF tip f48a7e7. execution_plan Active task synced to T129.10.'
+  - 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters;
+    playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains
+    open. AskQuestion none. HANDOFF tip c8b5b96. execution_plan Active task synced to T129.9.'
+  - 'S030 T129.9 IN_PROGRESS 2026-08-12T21:56:09Z: current_action=implementing T129.9 DM FT UI; current_stage=07-build; t129_9_status
+    already in_progress; execution-plan.md still shows T129.9 pending — parent will sync. No other task completions invented.'
+  - 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). Advance to T129.10
+    API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. AskQuestion none. HANDOFF tip f48a7e7. execution_plan Active
+    task synced to T129.10.'
+  - 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265) + Playwright
+    uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build (milestone boundary),
+    then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -8264,6 +8346,10 @@ active_session:
     summary: 'T129.9 COMPLETE @f48a7e7; start T129.10; AskQuestion none; PR #238 open'
     recorded_at: '2026-08-12T22:06:15Z'
     choice: complete_t129_9_start_t129_10
+  - id: S030-D51
+    summary: 'T129.10 COMPLETE @6107037; M129 completed; start 08-verify-build then T130.1; AskQuestion none; PR #238 open'
+    recorded_at: '2026-08-12T22:25:00Z'
+    choice: complete_t129_10_m129_start_08_then_m130
   context_briefs: []
   routing_plan:
   - stage: 00-context
@@ -8450,17 +8536,19 @@ active_session:
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: T129.10 API e2e UJ-082 + Vitest + Playwright
-    next_action: Implement T129.10 — API e2e UJ-082 + Vitest + Playwright
+    current_action: 08-verify-build for M129 then M130 Phase 30 gate
+    next_action: 08-verify-build M129 boundary then T130.1
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
-    milestone_hint: M129
-    note: 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). T129.8 completed @c8b5b96. AskQuestion none. Advance to T129.10 API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. HANDOFF tip f48a7e7.'
+    milestone_hint: M129→M130
+    note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+      + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+      (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
-    active_milestone: M129
-    current_task: T129.10
-    current_task_status: in_progress
+    active_milestone: M130
+    current_task: T130.1
+    current_task_status: pending
     t127_5_status: completed
     t127_5_commit: 5d31dcf
     t127_6_status: completed
@@ -8480,13 +8568,13 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: f48a7e7
-    tip_sha: f48a7e7
-    tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-    tip_prev: c8b5b96
+    tip: '6107037'
+    tip_sha: '6107037'
+    tip_full: 61070374986b17408b270d25b403cac66cf176dd
+    tip_prev: f48a7e7
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T21:50:46Z'
+    updated_at: '2026-08-12T22:25:00Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -8516,9 +8604,9 @@ active_session:
     t128_4_spec_source: TP2, ADR-052
     t128_4_depends_on: T128.3, T127.7
     substeps:
-      current_task: T129.10
-      active_milestone: M129
-      current_task_status: in_progress
+      current_task: T130.1
+      active_milestone: M130
+      current_task_status: pending
       mode: m129_task_loop
       t128_1_status: completed
       t128_1_commit: 92912be
@@ -8530,7 +8618,7 @@ active_session:
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
       t128_5_status: completed
-      tip_sha: f48a7e7
+      tip_sha: '6107037'
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
@@ -8548,16 +8636,16 @@ active_session:
       m128_status: completed
       t128_7_commit: bdaec9d
       t128_7_completed_at: '2026-08-12T20:27:11Z'
-      m129_status: in_progress
+      m129_status: completed
       t129_3_status: completed
       t129_3_sha: a75af50
       t129_4_status: completed
       t129_4_sha: 4ef663b
       t129_5_status: completed
       t129_5_started_at: '2026-08-12T21:16:39Z'
-      tip: f48a7e7
-      tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-      tip_prev: c8b5b96
+      tip: '6107037'
+      tip_full: 61070374986b17408b270d25b403cac66cf176dd
+      tip_prev: f48a7e7
       coding_blocked: false
       ci_gate: cleared_local_coverage
       ci_status: local_green_tip_pending_push_watch
@@ -8618,7 +8706,6 @@ active_session:
       t129_8_completed: '2026-08-12'
       t129_8_completed_at: '2026-08-12T21:50:46Z'
       t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
-      s030_d49_decision: S030-D49
       t129_9_status: completed
       t129_9_started_at: '2026-08-12T21:50:46Z'
       t129_9_description: 'UI: DM FT approve / eval evidence / promote'
@@ -8628,15 +8715,27 @@ active_session:
       t129_9_completed_at: '2026-08-12T22:06:15Z'
       t129_9_note: DM FT UI approve/eval/human promote; FinetunePage + UJ-082 Vitest
       s030_d50_decision: S030-D50
-      t129_10_status: in_progress
+      t129_10_status: completed
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      execution_plan_sync_note: 'T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed'
+      execution_plan_sync_note: T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed
+      m130_status: pending
+      t129_10_commit: '6107037'
+      t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
+      t129_10_completed: '2026-08-12'
+      t129_10_completed_at: '2026-08-12T22:25:00Z'
+      t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
+        @6107037
+      m129_completed: '2026-08-12'
+      m129_completed_at: '2026-08-12T22:25:00Z'
+      m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
+      s030_d51_decision: S030-D51
+      updated_at: '2026-08-12T22:25:00Z'
     askquestion_pending: false
-    askquestion_cleared: 'S030-D50: none — T129.9 done; starting T129.10; PR #238 remains open'
-    phase_note: 'M129/T129.10 in_progress; tip f48a7e7; T129.9 COMPLETE (S030-D50); PR #238 open'
-    handoff_next: '**T129.10** — API e2e UJ-082 + Vitest + Playwright (F77). Tip f48a7e7.'
-    execution_plan_active_task: M129 / T129.10 — API e2e UJ-082 + Vitest + Playwright
+    askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
+    phase_note: 'M129 COMPLETE @6107037 (S030-D51); interim 08-verify-build then M130/T130.1; PR #238 open'
+    handoff_next: '**08-verify-build** for M129 boundary, then **T130.1**. Tip 6107037.'
+    execution_plan_active_task: M130 / T130.1 — after 08-verify-build
     t128_5_started_at: '2026-08-12T20:04:26Z'
     t128_4_followup_commit: 2bf2dca
     t128_4_followup_note: coverage + typecheck follow-up after T128.4 @2bf2dca
@@ -8678,9 +8777,9 @@ active_session:
     t128_7_spec_source: TP8, TC-264
     t128_7_depends_on: T128.4, T128.6
     t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
-    m129_status: in_progress
+    m129_status: completed
     askquestion_next_topic: Phase C / 08-verify-build vs continue M129 F77
-    recommended_next: 'Implement T129.10 — API e2e UJ-082 + Vitest + Playwright (F77)'
+    recommended_next: 08-verify-build M129 boundary then T130.1
     ci_gate: cleared_local_coverage
     ci_status: local_green_tip_pending_push_watch
     askquestion_pending_topic: null
@@ -8713,11 +8812,43 @@ active_session:
     t129_8_status: completed
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+    m130_status: pending
+    t129_10_status: completed
+    t129_10_commit: '6107037'
+    t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
+    t129_10_completed: '2026-08-12'
+    t129_10_completed_at: '2026-08-12T22:25:00Z'
+    t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
+      @6107037
+    t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
+    t129_10_started_at: '2026-08-12T22:06:15Z'
+    m129_completed: '2026-08-12'
+    m129_completed_at: '2026-08-12T22:25:00Z'
+    m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
+    s030_d51_decision: S030-D51
   - stage: 08-verify-build
     required: true
-    status: pending
+    status: in_progress
     mode: delta
     skip_rationale: null
+    ready: true
+    current_action: Verify M129 build (milestone boundary)
+    next_action: 08-verify-build M129 boundary then T130.1
+    started_at: '2026-08-12'
+    started_at_iso: '2026-08-12T22:25:00Z'
+    milestone_hint: M129
+    m129_status: completed
+    m130_status: pending
+    note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+      + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+      (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+    askquestion_pending: false
+    s030_d51_decision: S030-D51
+    tip: '6107037'
+    tip_sha: '6107037'
+    tip_full: 61070374986b17408b270d25b403cac66cf176dd
+    tip_prev: f48a7e7
+    updated_at: '2026-08-12T22:25:00Z'
   - stage: 09-qa
     required: true
     status: pending
@@ -8744,8 +8875,8 @@ active_session:
     mode: delta
     skip_rationale: null
   handoff:
-    next_skill: 07-build
-    next_action: T128.4 Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)
+    next_skill: 08-verify-build
+    next_action: 08-verify-build M129 boundary then T130.1
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -8757,60 +8888,24 @@ active_session:
     gate_b_to_c: passed
     phase_b: passed
     phase_c: pending
-    phase_note: '07-build in_progress M128 PR #238; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
-    decision: S030-D33
-    s030_d31_decision: S030-D31
-    s030_d32_decision: S030-D32
-    s030_d33_decision: S030-D33
-    build_plan_card: waived_S030-D31
-    phase_30_milestones:
-    - M127
-    - M128
-    - M129
-    - M130
-    active_milestone: M128
-    current_task: T128.5
-    current_task_status: pending
-    t127_5_status: completed
-    t127_5_commit: 5d31dcf
-    t127_6_status: completed
-    t127_6_commit: 93e87ce
-    t127_6_fix_commit: 081ecf2
-    t127_7_status: completed
-    t127_7_commit: f4e8373
-    t127_8_status: completed
-    t127_8_commit: 6323ece
-    t127_9_status: completed
-    t127_9_commit: 6dc0117
-    t127_10_status: completed
-    t127_10_commit: 92f1f30
-    t127_10_note: Playwright uj080-automations.spec.ts green; committed @92f1f30
-    m127_status: completed
-    m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
-    m127_pr_number: 238
-    phase_ab_docs_committed: true
-    phase_ab_docs_commit: 3cadd8b
-    tip: ac8fca7
-    tip_sha: ac8fca7
-    tip_full: ac8fca7e8d1f8c19aa68f3d363608067bf16d728
-    tip_prev: e86290e
-    askquestion_pending: false
-    askquestion_pending_topic: null
+    phase_note: 'M129 COMPLETE @6107037; 08-verify-build M129 boundary then M130/T130.1; PR #238 open'
+    decision: S030-D51
+    s030_d51_decision: S030-D51
     handoff_md: docs/sessions/S030-corpus-automations/HANDOFF.md
-    handoff_next: T128.4 in_progress
-    execution_plan_active_task: T128.4 in_progress
-    updated_at: '2026-08-12T19:40:00Z'
-    t128_1_status: completed
-    t128_1_commit: 92912be
-    t128_2_status: completed
-    t128_2_commit: 7b1aa87
-    t128_3_status: completed
-    t128_3_commit: e86290e
-    t128_4_status: completed
-    t128_4_commit: ac8fca7
-    t128_4_completed_at: '2026-08-12T19:40:00Z'
-    t128_5_status: pending
-    ci_fix_commit: 5fc2d21
+    active_milestone: M130
+    current_task: T130.1
+    current_task_status: pending
+    m129_status: completed
+    m130_status: pending
+    t129_10_status: completed
+    t129_10_commit: '6107037'
+    tip: '6107037'
+    tip_sha: '6107037'
+    tip_full: 61070374986b17408b270d25b403cac66cf176dd
+    tip_prev: f48a7e7
+    askquestion_pending: false
+    updated_at: '2026-08-12T22:25:00Z'
+    pr_238_status: open
   askquestion_pending: false
   askquestion_pending_topic: null
   artifacts:
@@ -8873,14 +8968,14 @@ active_session:
   build_plan_card: waived
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
-  askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
+  askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
   tip: f48a7e7
   tip_sha: f48a7e7
   tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
   tip_prev: c8b5b96
-  handoff_tip: f48a7e7
-  current_action: T129.10 API e2e UJ-082 + Vitest + Playwright
-  current_task: T129.10
+  handoff_tip: '6107037'
+  current_action: 08-verify-build for M129 then M130 Phase 30 gate
+  current_task: T130.1
 sessions:
 - id: S029-security-install-tools-flake
   type: hotfix
@@ -22162,8 +22257,10 @@ stages:
     - M128
     - M129
     - M130
-    note: 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). T129.8 completed @c8b5b96. AskQuestion none. Advance to T129.10 API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. HANDOFF tip f48a7e7.'
-    updated_at: '2026-08-12T22:06:15Z'
+    note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+      + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+      (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+    updated_at: '2026-08-12T22:25:00Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     t127_5_status: completed
@@ -22183,13 +22280,13 @@ stages:
     m127_status: completed
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    tip: f48a7e7
-    tip_sha: f48a7e7
-    tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-    tip_prev: c8b5b96
+    tip: '6107037'
+    tip_sha: '6107037'
+    tip_full: 61070374986b17408b270d25b403cac66cf176dd
+    tip_prev: f48a7e7
     active_milestone: M129
     current_milestone: M129
-    current_task: T129.10
+    current_task: T130.1
     current_task_status: in_progress
     t128_2_status: completed
     t128_2_commit: 7b1aa87
@@ -23153,7 +23250,6 @@ stages:
       t129_8_completed: '2026-08-12'
       t129_8_completed_at: '2026-08-12T21:50:46Z'
       t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
-      s030_d49_decision: S030-D49
       t129_9_status: completed
       t129_9_started_at: '2026-08-12T21:50:46Z'
       t129_9_description: 'UI: DM FT approve / eval evidence / promote'
@@ -23166,7 +23262,7 @@ stages:
       t129_10_status: in_progress
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      execution_plan_sync_note: 'T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed'
+      execution_plan_sync_note: T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -23234,7 +23330,7 @@ stages:
     t128_7_spec_source: TP8, TC-264
     t128_7_depends_on: T128.4, T128.6
     t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
-    m129_status: in_progress
+    m129_status: completed
     askquestion_next_topic: null
     recommended_next: 'Continue T129.3: scaffold infra/modal/finetune_app.py, vecinita-llm-finetune + llm-finetune-adapters,
       secrets docs; wire FINETUNE_IMAGE_PIPS from finetune_pins.py'
@@ -23337,9 +23433,9 @@ stages:
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
   08-verify-build:
-    status: completed
-    session_id: S027-multilingual-embeddings
-    evolve_cycle_id: EV-025
+    status: in_progress
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
     started_at: '2026-08-05'
     started: '2026-08-05'
     completed: '2026-08-05'
@@ -23350,13 +23446,14 @@ stages:
     feature_ids:
     - F70
     - F71
-    tip_sha: 4b7231b
+    tip_sha: '6107037'
     commit_deployed: 4b7231b
     current_action: completed
     askquestion_pending: false
-    note: S027/EV-025 08-verify-build COMPLETE (S027-D64 reconcile) — report=docs/sessions/S027-multilingual-embeddings/reports/verification-report.md;
-      Gate C→D passed per S027-D63.
-    updated_at: '2026-08-06T14:46:45Z'
+    note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+      + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+      (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+    updated_at: '2026-08-12T22:25:00Z'
     s027_d64_decision: S027-D64
     reconciled_from: S027-D63
     session_closed: true
@@ -24222,6 +24319,9 @@ stages:
       pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
       m118_verify_at: '2026-08-05T00:45:00Z'
       m118_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
+    tip: '6107037'
+    tip_full: 61070374986b17408b270d25b403cac66cf176dd
+    tip_prev: f48a7e7
   09-qa:
     status: completed
     started_at: '2026-08-06'
@@ -28461,19 +28561,22 @@ evolve_cycles:
     upgrade_note: S030-D9 — restored 03-plan-tooling and 06-tech-tooling as required (Full preset)
   routing_preset: Full
   preset: Full
-  current_stage: 07-build
-  current_action: T129.10 API e2e UJ-082 + Vitest + Playwright
-  next_action: Implement T129.10 — API e2e UJ-082 + Vitest + Playwright
-  active_milestone: M129
-  current_task: T129.10
+  current_stage: 08-verify-build
+  current_action: Verify M129 build; then continue M130
+  next_action: 08-verify-build M129 boundary then T130.1
+  active_milestone: M130
+  current_task: T130.1
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: f48a7e7
-  tip_sha: f48a7e7
-  tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-  tip_prev: c8b5b96
-  current_stage_note: Phase C 07-build; M129; T129.9 COMPLETE @f48a7e7; next T129.10 (S030-D50)
-  notes: 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). T129.8 completed @c8b5b96. AskQuestion none. Advance to T129.10 API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. HANDOFF tip f48a7e7.'
+  tip: '6107037'
+  tip_sha: '6107037'
+  tip_full: 61070374986b17408b270d25b403cac66cf176dd
+  tip_prev: f48a7e7
+  current_stage_note: 'Phase C interim 08-verify-build for M129 boundary; M129 COMPLETE @6107037 (S030-D51); then M130 T130.1;
+    PR #238 open'
+  notes: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265) +
+    Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build (milestone
+    boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -28574,6 +28677,8 @@ evolve_cycles:
   - id: S030-D50
     summary: T129.9 COMPLETE @f48a7e7; start T129.10
     recorded_at: '2026-08-12T22:06:15Z'
+  - 'S030-D51: T129.10 COMPLETE @6107037; M129 completed; start 08-verify-build then M130 T130.1; PR #238 open; AskQuestion
+    none'
   stages:
     00-context:
       status: completed
@@ -28761,21 +28866,23 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: T129.10 API e2e UJ-082 + Vitest + Playwright
-      next_action: Implement T129.10 — API e2e UJ-082 + Vitest + Playwright
+      current_action: 08-verify-build for M129 then M130 Phase 30 gate
+      next_action: 08-verify-build M129 boundary then T130.1
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
-      milestone_hint: M129
-      updated_at: '2026-08-12T21:50:46Z'
-      note: 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). T129.8 completed @c8b5b96. AskQuestion none. Advance to T129.10 API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. HANDOFF tip f48a7e7.'
+      milestone_hint: M129→M130
+      updated_at: '2026-08-12T22:25:00Z'
+      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
-      active_milestone: M129
-      current_milestone: M129
-      current_task: T129.10
+      active_milestone: M130
+      current_milestone: M130
+      current_task: T130.1
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -28795,10 +28902,10 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: f48a7e7
-      tip_sha: f48a7e7
-      tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-      tip_prev: c8b5b96
+      tip: '6107037'
+      tip_sha: '6107037'
+      tip_full: 61070374986b17408b270d25b403cac66cf176dd
+      tip_prev: f48a7e7
       s030_d31_decision: S030-D31
       s030_d43_decision: S030-D43
       s030_d44_decision: S030-D44
@@ -28807,14 +28914,14 @@ evolve_cycles:
       t129_4_status: completed
       t129_4_sha: 4ef663b
       t129_5_status: completed
-      m129_status: in_progress
+      m129_status: completed
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T129.10
-        active_milestone: M129
-        current_task_status: in_progress
+        current_task: T130.1
+        active_milestone: M130
+        current_task_status: pending
         mode: m129_task_loop
         build_plan_card: waived_S030-D31
         t129_3_status: completed
@@ -28836,7 +28943,7 @@ evolve_cycles:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: f48a7e7
+        tip_sha: '6107037'
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -28860,10 +28967,10 @@ evolve_cycles:
         t128_7_started_at: '2026-08-12T20:24:30Z'
         m128_status: completed
         t128_7_commit: bdaec9d
-        m129_status: in_progress
-        tip: f48a7e7
-        tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-        tip_prev: c8b5b96
+        m129_status: completed
+        tip: '6107037'
+        tip_full: 61070374986b17408b270d25b403cac66cf176dd
+        tip_prev: f48a7e7
         tip_pushed_to: origin/evolve/EV-027-corpus-automations
         pr_238_ci_watching: true
         pr_238_ci_status: in_progress
@@ -28887,15 +28994,15 @@ evolve_cycles:
         ci_failed_at: null
         ci_fix_decision: S030-D35
         ci_fix_focus: dm_fe_coverage_f76_freshness_ui
-        handoff_next: '**T129.10** — API e2e UJ-082 + Vitest + Playwright (F77). Tip f48a7e7.'
+        handoff_next: '**08-verify-build** for M129 boundary, then **T130.1**. Tip 6107037.'
         recommended_next: 'Continue T129.3: scaffold infra/modal/finetune_app.py, vecinita-llm-finetune + llm-finetune-adapters,
           secrets docs; wire FINETUNE_IMAGE_PIPS from finetune_pins.py'
         s030_d35_decision: S030-D35
-        phase_note: 'M129/T129.10 in_progress; tip f48a7e7; T129.9 COMPLETE (S030-D50); PR #238 open'
+        phase_note: 'M129 COMPLETE @6107037 (S030-D51); 08-verify-build M129 boundary then M130/T130.1; PR #238 open'
         note: 'S030-D42 2026-08-12T21:06:16Z: Tip 932c036 (fix: retry gitleaks download on GitHub Releases 503) — CI GREEN
           run 31640505267. Cleared S030-D41 gitleaks flake gate / coding_blocked. T129.3 remains in_progress as next coding
           task (T129.1+T129.2 done).'
-        updated_at: '2026-08-12T21:50:46Z'
+        updated_at: '2026-08-12T22:25:00Z'
         tip_pushed_at: '2026-08-12T20:39:07Z'
         coverage_fix_decision: S030-D36
         prior_ci_tip: 0fff625
@@ -29044,7 +29151,6 @@ evolve_cycles:
         t129_8_completed: '2026-08-12'
         t129_8_completed_at: '2026-08-12T21:50:46Z'
         t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
-        s030_d49_decision: S030-D49
         t129_9_status: completed
         t129_9_started_at: '2026-08-12T21:50:46Z'
         t129_9_description: 'UI: DM FT approve / eval evidence / promote'
@@ -29054,16 +29160,27 @@ evolve_cycles:
         t129_9_completed_at: '2026-08-12T22:06:15Z'
         t129_9_note: DM FT UI approve/eval/human promote; FinetunePage + UJ-082 Vitest
         s030_d50_decision: S030-D50
-        t129_10_status: in_progress
+        t129_10_status: completed
         t129_10_started_at: '2026-08-12T22:06:15Z'
         t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      execution_plan_sync_note: 'T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed'
+        m130_status: pending
+        t129_10_commit: '6107037'
+        t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
+        t129_10_completed: '2026-08-12'
+        t129_10_completed_at: '2026-08-12T22:25:00Z'
+        t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
+          @6107037
+        m129_completed: '2026-08-12'
+        m129_completed_at: '2026-08-12T22:25:00Z'
+        m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
+        s030_d51_decision: S030-D51
+      execution_plan_sync_note: T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
       ci_fix_commit: 5fc2d21
       ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-      current_task_status: in_progress
+      current_task_status: pending
       askquestion_pending_topic: null
       askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
       t128_2_status: completed
@@ -29168,7 +29285,6 @@ evolve_cycles:
       t129_8_completed: '2026-08-12'
       t129_8_completed_at: '2026-08-12T21:50:46Z'
       t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
-      s030_d49_decision: S030-D49
       t129_9_status: completed
       t129_9_started_at: '2026-08-12T21:50:46Z'
       t129_9_description: 'UI: DM FT approve / eval evidence / promote'
@@ -29178,10 +29294,47 @@ evolve_cycles:
       t129_9_completed_at: '2026-08-12T22:06:15Z'
       t129_9_note: DM FT UI approve/eval/human promote; FinetunePage + UJ-082 Vitest
       s030_d50_decision: S030-D50
-      t129_10_status: in_progress
+      t129_10_status: completed
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      execution_plan_sync_note: 'T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed'
+      m130_status: pending
+      s030_d51_decision: S030-D51
+      t129_10_commit: '6107037'
+      t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
+      t129_10_completed: '2026-08-12'
+      t129_10_completed_at: '2026-08-12T22:25:00Z'
+      t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
+        @6107037
+      m129_completed: '2026-08-12'
+      m129_completed_at: '2026-08-12T22:25:00Z'
+      m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
+    08-verify-build:
+      status: in_progress
+      ready: true
+      mode: delta
+      session_id: S030-corpus-automations
+      evolve_cycle_id: EV-027
+      feature_ids:
+      - F75
+      - F76
+      - F77
+      current_action: Verify M129 build (milestone boundary)
+      next_action: 08-verify-build M129 boundary then T130.1
+      askquestion_pending: false
+      milestone_hint: M129
+      m129_status: completed
+      m130_status: pending
+      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+      started_at: '2026-08-12'
+      started_at_iso: '2026-08-12T22:25:00Z'
+      s030_d51_decision: S030-D51
+      updated_at: '2026-08-12T22:25:00Z'
+      tip: '6107037'
+      tip_sha: '6107037'
+      tip_full: 61070374986b17408b270d25b403cac66cf176dd
+      tip_prev: f48a7e7
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -29279,12 +29432,12 @@ evolve_cycles:
     updated_at: '2026-08-12T19:40:00Z'
     note: 'Synced Phase C 07-build M128; M127 PR #238 open; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout wiped uncommitted S030 state
-  phase_note: 'M129/T129.10 in_progress; tip f48a7e7; T129.9 COMPLETE (S030-D50); PR #238 open'
+  phase_note: 'M129 COMPLETE @6107037 (S030-D51); 08-verify-build M129 boundary then M130/T130.1; PR #238 open'
   s030_d30_decision: S030-D30
-  updated_at: '2026-08-12T21:50:46Z'
-  current_task_status: in_progress
-  askquestion_cleared: 'S030-D50: none — T129.9 done; starting T129.10; PR #238 remains open'
-  next_child_stage: 07-build — M129 F77 T129.10 in_progress
+  updated_at: '2026-08-12T22:25:00Z'
+  current_task_status: pending
+  askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
+  next_child_stage: 08-verify-build
   s030_d34_decision: S030-D34
   s030_d35_decision: S030-D35
   s030_d36_decision: S030-D36
@@ -29298,18 +29451,24 @@ evolve_cycles:
   s030_d41_decision: S030-D41
   s030_d42_decision: S030-D42
   s030_d45_decision: S030-D45
-  handoff_tip_should_be: f48a7e7
+  handoff_tip_should_be: '6107037'
   ci_gate: cleared_local_coverage
   ci_status: local_green_tip_pending_push_watch
   pr_238_ci_watching: true
   pr_238_ci_status: in_progress
   pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
   s030_d46_decision: S030-D46
-  handoff_tip: f48a7e7
+  handoff_tip: '6107037'
   coverage_local_dm_branch: 453/476 (95.2%)
   s030_d47_decision: S030-D47
   s030_d48_decision: S030-D48
   s030_d49_decision: S030-D49
+  s030_d51_decision: S030-D51
+  milestones:
+    M127: completed
+    M128: completed
+    M129: completed
+    M130: pending
 - id: EV-026
   session_id: S028-chat-source-ux
   cycle_type: feature
@@ -54473,7 +54632,33 @@ decisions_log:
 - 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /finetune/promote + GET /finetune/adapter + clear-pin rollback
   (TC-262/265). Advance to T129.8 llm_app load promoted adapter; playground candidate load. PR #238 remains open. AskQuestion
   none. HANDOFF tip b2a25e5. execution_plan Active task synced to T129.8.'
-- 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. AskQuestion none. HANDOFF tip c8b5b96. execution_plan Active task synced to T129.9.'
+- 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters;
+  playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains
+  open. AskQuestion none. HANDOFF tip c8b5b96. execution_plan Active task synced to T129.9.'
+- 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). Advance to T129.10
+  API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. AskQuestion none. HANDOFF tip f48a7e7. execution_plan Active
+  task synced to T129.10.'
+- 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265) + Playwright
+  uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build (milestone boundary),
+  then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+- date: '2026-08-12'
+  skill: 07-build
+  skill_id: 07-build
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  id: S030-D51
+  decision: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
+    + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
+    (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+  choice: complete_t129_10_m129_start_08_then_m130
+  recorded_at: '2026-08-12T22:25:00Z'
+  status: confirmed
+  askquestion_pending: false
+  next_skill: 08-verify-build
+  tip: '6107037'
+  m129_status: completed
+  m130_status: pending
+  pr_238: open_no_merge
 artifacts:
 - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
   session_id: S030-corpus-automations
@@ -58241,7 +58426,7 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: f48a7e7
+    tip: '6107037'
     tip_sha: f48a7e7
     tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
     head_sha: f48a7e78eaba92e207dee87026b248ddcc5ec74b
@@ -58251,8 +58436,9 @@ git_history:
     local_ahead: unknown
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    updated_at: '2026-08-12T22:06:15Z'
-    note: 'branch tip @f48a7e7 T129.9 COMPLETE (S030-D50); next T129.10; PR #238 open; do not merge without approval'
+    updated_at: '2026-08-12T22:25:00Z'
+    note: 'branch tip @6107037 T129.10/M129 COMPLETE (S030-D51); next 08-verify-build then T130.1; PR #238 open; do not merge
+      without approval'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
       / RA-020)
@@ -64715,8 +64901,31 @@ git_history:
     - workflow-state.yaml
     timestamp: '2026-08-12T22:06:15Z'
     recorded_at: '2026-08-12T22:06:15Z'
-    note: T129.9 COMPLETE; DM FT UI approve/eval/human promote; advance T129.10; PR #238 open
+    note: T129.9 COMPLETE; DM FT UI approve/eval/human promote; advance T129.10; PR
     decision: S030-D50
+  - sha: '6107037'
+    sha_full: 61070374986b17408b270d25b403cac66cf176dd
+    full_sha: 61070374986b17408b270d25b403cac66cf176dd
+    branch: evolve/EV-027-corpus-automations
+    message: 'test: add UJ-082 API e2e and Playwright for FT approve/promote (F77)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T129.10
+    milestone: M129
+    feature_ids:
+    - F77
+    files_changed: 4
+    files:
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - tests/e2e/test_uj082_finetune.py
+    - tests/ui/admin/uj082-finetune.spec.ts
+    timestamp: '2026-08-12T22:25:00Z'
+    recorded_at: '2026-08-12T22:25:00Z'
+    note: 'T129.10 COMPLETE; UJ-082 API e2e + Playwright; M129 closed; advance 08-verify-build then T130.1; PR #238 open'
+    decision: S030-D51
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
@@ -65051,3 +65260,4 @@ pull_requests:
 notes: '2026-08-05T15:28:00Z S027/EV-025: PR #210 (PR-68) OPEN_AWAIT_CI (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210);
   tip @5346ec3; m120_pr_status=open_await_ci; T120.2 in_progress; parent watching CI then continue T120.2; Gate C→D / phase_c
   remain pending'
+askquestion_pending: false
