@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M128: F76 — Corpus freshness |
-| **Active task** | T128.1 (pending) |
+| **Active task** | T128.2 (pending) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
@@ -2534,7 +2534,7 @@ for 13; issue closeout notes after verify/deploy gates.
 
 #### M127: F75 — Automation framework (catch-up + history + schedule hook)
 
-**Status:** completed (2026-08-12) — all T127.1–T127.10 done; next M128 / T128.1 pending.
+**Status:** completed (2026-08-12) — all T127.1–T127.10 done; minor PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open @`92f1f30`.
 
 **Goal:** Catch-up-only enqueue (failed/partial/missing embed); idempotent
 `document_id`+`revision`; kill-switch + `VECINITA_AUTOMATIONS_MAX_CONCURRENT`;
@@ -2562,7 +2562,7 @@ stale list UX (AC-FR*; TC freshness; UJ-081).
 
 | Task | Description | Type | Status | Spec Source | Depends On | Data Deps | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
-| T128.1 | Test: unit red — stale threshold; hash skip; last_checked bump; kill-switch (TC freshness) | Test | pending | AC-FR*, F76, RD-337 | T127.7 | — | | S030 | F76 |
+| T128.1 | Test: unit red — stale threshold; hash skip; last_checked bump; kill-switch (TC freshness) | Test | completed | AC-FR*, F76, RD-337 | T127.7 | — | 2026-08-12 | S030 | F76 |
 | T128.2 | Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`) | Config | pending | TP7, api-contract | T128.1 | — | | S030 | F76 |
 | T128.3 | Code: write-API PATCH/list stale fields; Refresh now → enqueue | Code | pending | api-contract §Freshness | T128.1, T128.2 | — | | S030 | F76 |
 | T128.4 | Code: Modal `job_type=freshness_refresh` + periodic schedule branch (shared with F75) | Code | pending | TP2, ADR-052 | T128.3, T127.7 | — | | S030 | F76 |
@@ -2760,7 +2760,7 @@ main
 | PR-74 | Minor | M125 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — F74/#224 |
 | PR-75 | Minor | M126 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — open (M123–M126 on branch) |
 | PR-76 | Major | Phase 29 / S028 (EV-026) | evolve/EV-026-chat-source-ux | main | pending — after Gate C→D / verify |
-| PR-77 | Minor | M127 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F75/#73 |
+| PR-77 | Minor | M127 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | open — [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) @`92f1f30` — F75/#73 |
 | PR-78 | Minor | M128 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F76/#219 |
 | PR-79 | Minor | M129 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F77/#72 |
 | PR-80 | Minor | M130 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — Phase 30 gate |
