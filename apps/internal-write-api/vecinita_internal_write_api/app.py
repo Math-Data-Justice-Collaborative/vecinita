@@ -64,6 +64,7 @@ from vecinita_shared_schemas.eval_config import (
     RagConfigPromoteRequest,
     RagConfigPromoteResponse,
 )
+from vecinita_shared_schemas.freshness import parse_freshness_stale_days
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
     AuditEventRequest,
@@ -187,6 +188,10 @@ from vecinita_internal_write_api.feedback import (
     cleanup_feedback,
     insert_feedback,
     list_feedback,
+)
+from vecinita_internal_write_api.freshness_crud import (
+    document_is_stale_now,
+    enqueue_document_refresh,
 )
 from vecinita_internal_write_api.jobs_client import (
     DataManagementJobsClient,
@@ -1209,13 +1214,15 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         body: DocumentPatchRequest,
         actor: WriteActorDep,
     ) -> DocumentMetadataResponse:
-        """F74: single-document metadata edit (display_title / title / language)."""
+        """F74/F76: metadata edit (display_title / title / language / refresh_enabled)."""
         actor_id, actor_role = actor
         fields_set = body.model_fields_set
         if not fields_set:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="At least one of display_title, title, language is required",
+                detail=(
+                    "At least one of display_title, title, language, refresh_enabled is required"
+                ),
             )
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
@@ -1223,7 +1230,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 conn.execute(
                     text(
                         """
-                        SELECT id, url, title, display_title, language
+                        SELECT id, url, title, display_title, language,
+                               refresh_enabled, last_checked_at
                         FROM documents
                         WHERE id = :document_id
                         """
@@ -1239,9 +1247,20 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             before_title = row_str_optional(doc, "title")
             before_display = row_str_optional(doc, "display_title")
             before_language = row_str_optional(doc, "language")
+            before_refresh_raw = row_value(doc, "refresh_enabled")
+            before_refresh = (
+                before_refresh_raw
+                if isinstance(before_refresh_raw, bool)
+                else bool(before_refresh_raw)
+            )
+            before_checked_raw = doc.get("last_checked_at")
+            before_checked = (
+                before_checked_raw if isinstance(before_checked_raw, datetime) else None
+            )
             new_title = before_title
             new_display = before_display
             new_language = before_language
+            new_refresh = before_refresh
             set_clauses: list[str] = ["updated_at = now()"]
             params: dict[str, object] = {"id": document_id}
             if "title" in fields_set and body.title is not None:
@@ -1256,6 +1275,10 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 set_clauses.append("language = :language")
                 params["language"] = body.language
                 new_language = body.language
+            if "refresh_enabled" in fields_set and body.refresh_enabled is not None:
+                set_clauses.append("refresh_enabled = :refresh_enabled")
+                params["refresh_enabled"] = body.refresh_enabled
+                new_refresh = body.refresh_enabled
             conn.execute(
                 text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                     f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
@@ -1273,11 +1296,13 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         "title": before_title,
                         "display_title": before_display,
                         "language": before_language,
+                        "refresh_enabled": before_refresh,
                     },
                     "after": {
                         "title": new_title,
                         "display_title": new_display,
                         "language": new_language,
+                        "refresh_enabled": new_refresh,
                     },
                 },
                 actor_id=actor_id,
@@ -1295,7 +1320,42 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 title=new_title,
                 display_title=new_display,
                 language=new_language,
+                refresh_enabled=new_refresh,
+                last_checked_at=before_checked,
             )
+
+    @app.post(
+        "/internal/v1/documents/{document_id}/refresh",
+        response_model=RetagJobResponse,
+    )
+    def refresh_document(  # pyright: ignore[reportUnusedFunction]
+        document_id: UUID,
+        actor: WriteActorDep,
+        request: Request,
+    ) -> RetagJobResponse:
+        """F76 Refresh now — enqueue freshness_refresh with force (TC-259)."""
+        _ = actor
+        authorization = request.headers.get("Authorization")
+        outcome, job_id = enqueue_document_refresh(
+            engine=engine,
+            jobs_client=retag_jobs,
+            document_id=document_id,
+            force=True,
+            authorization=authorization,
+        )
+        if outcome == "not_found":
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        if outcome == "skip_refresh_disabled":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="refresh_enabled is false for this document",
+            )
+        if outcome != "enqueue" or job_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"freshness refresh not enqueued ({outcome})",
+            )
+        return RetagJobResponse(job_id=job_id)
 
     @app.get(
         "/internal/v1/documents/{document_id}/tags",
@@ -1566,56 +1626,65 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         page: Annotated[int, Query(ge=1)] = 1,
         page_size: Annotated[int, Query(ge=1, le=100)] = 50,
         missing_body: Annotated[bool, Query()] = False,  # noqa: FBT002  # FastAPI Query bool default
+        stale: Annotated[bool | None, Query()] = None,
     ) -> DocumentListPage:
         offset = (page - 1) * page_size
-        count_sql = (
-            "SELECT COUNT(*) FROM documents WHERE body_text IS NULL OR btrim(body_text) = ''"
-            if missing_body
-            else "SELECT COUNT(*) FROM documents"
-        )
-        list_sql = (
-            """
+        stale_days = parse_freshness_stale_days() if stale is True else None
+        where_clauses: list[str] = []
+        params: dict[str, object] = {"limit": page_size, "offset": offset}
+        if missing_body:
+            where_clauses.append("(body_text IS NULL OR btrim(body_text) = '')")
+        if stale is True:
+            where_clauses.append(
+                "(last_checked_at IS NULL OR last_checked_at <= (now() - make_interval(days => :stale_days)))"
+            )
+            params["stale_days"] = stale_days
+        where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+        count_sql = f"SELECT COUNT(*) FROM documents{where_sql}"  # noqa: S608  # whitelisted clauses only
+        list_sql = f"""
             SELECT id, url, title, display_title, language,
-                   source_domain, source_path, parent_url, canonical_url
+                   source_domain, source_path, parent_url, canonical_url,
+                   refresh_enabled, last_checked_at
             FROM documents
-            WHERE body_text IS NULL OR btrim(body_text) = ''
+            {where_sql}
             ORDER BY created_at DESC
             LIMIT :limit OFFSET :offset
-            """
-            if missing_body
-            else """
-            SELECT id, url, title, display_title, language,
-                   source_domain, source_path, parent_url, canonical_url
-            FROM documents
-            ORDER BY created_at DESC
-            LIMIT :limit OFFSET :offset
-            """
-        )
+            """  # noqa: S608  # whitelisted clauses only
         with engine.connect() as conn:
-            total = scalar_int(sqlalchemy_scalar_one(conn.execute(text(count_sql))))
+            total = scalar_int(sqlalchemy_scalar_one(conn.execute(text(count_sql), params)))
             rows = (
                 conn.execute(
                     text(list_sql),
-                    {"limit": page_size, "offset": offset},
+                    params,
                 )
                 .mappings()
                 .all()
             )
-        return DocumentListPage(
-            items=[
+        items: list[DocumentSummary] = []
+        for row in rows:
+            mapped = mapping_row(row)
+            refresh_raw = row_value(mapped, "refresh_enabled")
+            refresh_enabled = refresh_raw if isinstance(refresh_raw, bool) else bool(refresh_raw)
+            checked_raw = mapped.get("last_checked_at")
+            last_checked = checked_raw if isinstance(checked_raw, datetime) else None
+            items.append(
                 DocumentSummary(
-                    document_id=row_uuid(mapping_row(row), "id"),
-                    url=row_str(mapping_row(row), "url"),
-                    title=row_str_optional(mapping_row(row), "title"),
-                    display_title=row_str_optional(mapping_row(row), "display_title"),
-                    language=row_str_optional(mapping_row(row), "language"),
-                    source_domain=row_str_optional(mapping_row(row), "source_domain"),
-                    source_path=row_str_optional(mapping_row(row), "source_path"),
-                    parent_url=row_str_optional(mapping_row(row), "parent_url"),
-                    canonical_url=row_str_optional(mapping_row(row), "canonical_url"),
+                    document_id=row_uuid(mapped, "id"),
+                    url=row_str(mapped, "url"),
+                    title=row_str_optional(mapped, "title"),
+                    display_title=row_str_optional(mapped, "display_title"),
+                    language=row_str_optional(mapped, "language"),
+                    source_domain=row_str_optional(mapped, "source_domain"),
+                    source_path=row_str_optional(mapped, "source_path"),
+                    parent_url=row_str_optional(mapped, "parent_url"),
+                    canonical_url=row_str_optional(mapped, "canonical_url"),
+                    refresh_enabled=refresh_enabled,
+                    last_checked_at=last_checked,
+                    stale=document_is_stale_now(last_checked),
                 )
-                for row in rows
-            ],
+            )
+        return DocumentListPage(
+            items=items,
             page=page,
             page_size=page_size,
             total=total,

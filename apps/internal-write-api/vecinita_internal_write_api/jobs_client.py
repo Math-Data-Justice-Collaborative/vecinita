@@ -111,6 +111,28 @@ class DataManagementJobsClient:
             operation="enqueue_automation_catchup",
         )
 
+    def enqueue_freshness_refresh(
+        self,
+        document_id: UUID,
+        *,
+        force: bool = True,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Enqueue F76 ``freshness_refresh`` (Refresh now / schedule; RD-337)."""
+        body = CreateJobRequest(
+            urls=[],
+            options=JobOptions(
+                job_type="freshness_refresh",
+                document_id=document_id,
+                force=force,
+            ),
+        )
+        return self._post_job(
+            body,
+            authorization=authorization,
+            operation="enqueue_freshness_refresh",
+        )
+
     def _post_job(
         self,
         body: CreateJobRequest,

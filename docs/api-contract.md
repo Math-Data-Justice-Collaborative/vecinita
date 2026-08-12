@@ -1205,8 +1205,9 @@ CRUD hooks enqueue with idempotent key `document_id` + `revision` (RD-335).
 | Method | Path | Notes |
 |--------|------|-------|
 | `POST` | `/jobs` (`job_type=freshness_refresh`) | Manual or scheduled refresh |
+| `POST` | `/internal/v1/documents/{id}/refresh` | Refresh now — write-API enqueues `freshness_refresh` with `force=true` (TC-259) |
 | `PATCH` | `/internal/v1/documents/{id}` | Fields: `refresh_enabled` (bool), `last_checked_at` (timestamptz, read/bump); reuse `content_hash` (TP7) |
-| `GET` | `/internal/v1/documents` (admin list) | Query/filter stale URL sources (`last_checked_at` older than `VECINITA_FRESHNESS_STALE_DAYS`) |
+| `GET` | `/internal/v1/documents` (admin list) | Query/filter stale URL sources (`stale=true`; `last_checked_at` older than `VECINITA_FRESHNESS_STALE_DAYS`) |
 
 Default stale threshold: **30 days** (`VECINITA_FRESHNESS_STALE_DAYS`).
 

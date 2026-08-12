@@ -13,7 +13,14 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 AssignableRole = Literal["admin", "viewer"]
 Role = Literal["admin", "viewer", "super-admin"]
 UserStatus = Literal["active", "invited", "disabled"]
-JobType = Literal["ingest", "retag", "eval", "rebuild", "automation_catchup"]
+JobType = Literal[
+    "ingest",
+    "retag",
+    "eval",
+    "rebuild",
+    "automation_catchup",
+    "freshness_refresh",
+]
 RebuildMode = Literal["reembed", "rechunk", "rescrape"]
 BackfillSource = Literal["rescrape", "from_chunks"]
 CrawlScope = Literal["same_domain", "path_prefix"]
@@ -117,6 +124,11 @@ class CreateJobRequest(BaseModel):
             self.options is None or self.options.document_id is None
         ):
             msg = "document_id required for automation_catchup jobs"
+            raise ValueError(msg)
+        if job_type == "freshness_refresh" and (
+            self.options is None or self.options.document_id is None
+        ):
+            msg = "document_id required for freshness_refresh jobs"
             raise ValueError(msg)
         return self
 

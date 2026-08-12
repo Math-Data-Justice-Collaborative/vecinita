@@ -11,7 +11,7 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M128: F76 — Corpus freshness |
-| **Active task** | T128.3 (pending) |
+| **Active task** | T128.4 (pending) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
@@ -2564,7 +2564,7 @@ stale list UX (AC-FR*; TC freshness; UJ-081).
 |------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
 | T128.1 | Test: unit red — stale threshold; hash skip; last_checked bump; kill-switch (TC freshness) | Test | completed | AC-FR*, F76, RD-337 | T127.7 | — | 2026-08-12 | S030 | F76 |
 | T128.2 | Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`) | Config | completed | TP7, api-contract | T128.1 | — | 2026-08-12 | S030 | F76 |
-| T128.3 | Code: write-API PATCH/list stale fields; Refresh now → enqueue | Code | pending | api-contract §Freshness | T128.1, T128.2 | — | | S030 | F76 |
+| T128.3 | Code: write-API PATCH/list stale fields; Refresh now → enqueue | Code | completed | api-contract §Freshness | T128.1, T128.2 | — | 2026-08-12 | S030 | F76 |
 | T128.4 | Code: Modal `job_type=freshness_refresh` + periodic schedule branch (shared with F75) | Code | pending | TP2, ADR-052 | T128.3, T127.7 | — | | S030 | F76 |
 | T128.5 | Code: ingest/hash-aware re-fetch path for URL sources | Code | pending | RD-329, packages/ingest | T128.4 | — | | S030 | F76 |
 | T128.6 | Code: DM freshness UI — stale list, enable, Refresh now | Code | pending | UJ-081 | T128.3 | — | | S030 | F76 |

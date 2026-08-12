@@ -60,6 +60,7 @@ class StubJobsClient:
         self.enqueued: list[UUID] = []
         self.enqueued_eval_runs: list[UUID] = []
         self.enqueued_catchup: list[tuple[UUID, str, str]] = []
+        self.enqueued_freshness: list[tuple[UUID, bool]] = []
 
     def enqueue_retag(
         self,
@@ -95,6 +96,18 @@ class StubJobsClient:
         """Record an F75 catch-up enqueue and return a synthetic job id."""
         _ = authorization
         self.enqueued_catchup.append((document_id, revision, embed_status))
+        return uuid.uuid4()
+
+    def enqueue_freshness_refresh(
+        self,
+        document_id: UUID,
+        *,
+        force: bool = True,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Record an F76 freshness refresh enqueue and return a synthetic job id."""
+        _ = authorization
+        self.enqueued_freshness.append((document_id, force))
         return uuid.uuid4()
 
 

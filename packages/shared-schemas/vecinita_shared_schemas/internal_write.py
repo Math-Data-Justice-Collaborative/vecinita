@@ -188,6 +188,9 @@ class DocumentSummary(BaseModel):
     source_path: str | None = None
     parent_url: str | None = None
     canonical_url: str | None = None
+    refresh_enabled: bool = True
+    last_checked_at: datetime | None = None
+    stale: bool = False
 
 
 class DocumentContentHashResponse(BaseModel):
@@ -221,23 +224,26 @@ class DocumentDetail(BaseModel):
 
 
 class DocumentPatchRequest(BaseModel):
-    """PATCH /internal/v1/documents/{id} — partial metadata update (F74)."""
+    """PATCH /internal/v1/documents/{id} — partial metadata update (F74 / F76)."""
 
     model_config = ConfigDict(extra="forbid")
 
     display_title: str | None = None
     title: str | None = None
     language: str | None = None
+    refresh_enabled: bool | None = None
 
 
 class DocumentMetadataResponse(BaseModel):
-    """Updated document metadata after PATCH (F74)."""
+    """Updated document metadata after PATCH (F74 / F76)."""
 
     document_id: UUID
     url: str
     title: str | None = None
     display_title: str | None = None
     language: str | None = None
+    refresh_enabled: bool = True
+    last_checked_at: datetime | None = None
 
 
 class TagPatchRequest(BaseModel):
