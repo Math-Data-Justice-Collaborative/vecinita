@@ -7,13 +7,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-import pytest
 from vecinita_internal_write_api.catchup_crud import (
     maybe_enqueue_catchup_after_document_change,
 )
 from vecinita_shared_schemas.automations import AutomationsConfigResponse
+
+if TYPE_CHECKING:
+    import pytest
 
 DOC_ID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 

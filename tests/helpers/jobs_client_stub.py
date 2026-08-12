@@ -21,6 +21,7 @@ class StubJobsClient:
         """Initialize empty enqueue logs."""
         self.enqueued_retag: list[UUID] = []
         self.enqueued_eval: list[UUID] = []
+        self.enqueued_catchup: list[tuple[UUID, str, str]] = []
 
     def enqueue_retag(
         self,
@@ -43,6 +44,19 @@ class StubJobsClient:
         """Record an eval enqueue and return a synthetic job id."""
         _ = (authorization, question)
         self.enqueued_eval.append(eval_run_id)
+        return uuid4()
+
+    def enqueue_automation_catchup(
+        self,
+        document_id: UUID,
+        *,
+        revision: str,
+        embed_status: str,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Record an F75 catch-up enqueue and return a synthetic job id."""
+        _ = authorization
+        self.enqueued_catchup.append((document_id, revision, embed_status))
         return uuid4()
 
 
