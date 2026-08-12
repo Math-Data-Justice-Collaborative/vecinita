@@ -6,7 +6,7 @@
 | `vecinita-data-management` | `data_management_app.py` | `modal deploy infra/modal/data_management_app.py` | `modal serve infra/modal/data_management_app.py` |
 | `vecinita-llm` | `llm_app.py` | `modal deploy infra/modal/llm_app.py` | `modal serve infra/modal/llm_app.py` |
 | `vecinita-llm-playground` | `llm_playground_app.py` | `modal deploy infra/modal/llm_playground_app.py` | `modal serve infra/modal/llm_playground_app.py` |
-| `vecinita-llm-finetune` (planned) | `finetune_app.py` | — | Pins: `finetune_pins.py` (ADR-053) |
+| `vecinita-llm-finetune` | `finetune_app.py` | `modal deploy infra/modal/finetune_app.py` | Volume `llm-finetune-adapters`; pins: `finetune_pins.py` (ADR-053 / F77) |
 
 Run commands from the **repo root** with Modal CLI authenticated (`modal token new`).
 
@@ -100,9 +100,18 @@ residual failed/partial/missing embeds only. Freshness default stale threshold i
 (`VECINITA_FRESHNESS_STALE_DAYS`). Kill-switch: `VECINITA_AUTOMATIONS_KILL_SWITCH`
 (ADR-052; feature-list §F75–F76).
 
-**LoRA fine-tune (planned):** separate app `vecinita-llm-finetune` + volume
-`llm-finetune-adapters`; pins in `finetune_pins.py` (ADR-053). Manual train approve; human
-promote only — never auto-load latest adapter on prod.
+### LoRA fine-tune (`vecinita-llm-finetune`, F77 / ADR-053)
+
+```bash
+modal serve infra/modal/finetune_app.py
+# Modal secret: vecinita-llm-finetune (see docs/staging-secrets-matrix.md §EV-027)
+```
+
+App `vecinita-llm-finetune` mounts volume **`llm-finetune-adapters`** (adapters) and shared
+**`llm-models`** (pinned Qwen base). Image pins: `FINETUNE_IMAGE_PIPS` in `finetune_pins.py`.
+Manual train approve; human promote only — never auto-load latest adapter on prod
+(`VECINITA_FINETUNE_ADAPTER_ID` on `vecinita-llm` after promote). Train worker lands in
+later M129 tasks — scaffold exposes `health()` only.
 
 **Note:** `pytest` and most CI jobs **do not** require Modal — HTTP clients are mocked. Use `serve` when exercising real embed/LLM/GPU paths.
 

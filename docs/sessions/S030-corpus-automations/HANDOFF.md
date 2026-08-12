@@ -4,33 +4,21 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** `7971c16` (pushed) — **implementing T128.7** (UJ-081 API e2e + Vitest + Playwright); watch tip CI  
 **Issues:** #73 · #72 · #219  
 
 ## Position
 
-- Phase C **07-build** in progress — **M128 F76** (freshness)
-- Done: **M127 F75** (T127.1–T127.10) — PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open (leave open; no merge)
-- Done: **T128.1** — F76 freshness policy helpers + unit tests (TC-256–259)
-- Done: **T128.2** — Alembic `documents.refresh_enabled` + `last_checked_at` (reuse `content_hash`) `@7b1aa87`
-- Done: **T128.3** — write-API PATCH/list stale fields; Refresh now → enqueue `@e86290e`
-- Done: **T128.4** — Modal `freshness_refresh` worker + schedule `@ac8fca7`; coverage/typecheck follow-up `@2bf2dca`
-- Done: **T128.5** — ingest/hash-aware re-fetch for URL sources `@fdf68af`
-- Done: **T128.6** — DM freshness UI (stale list, enable, Refresh now) `@eac398d`; UJ-081 Vitest `@7971c16`
-- **In progress: T128.7** — API e2e + Vitest + Playwright T0-ui UJ-081
+- Phase C **07-build** in progress — **M129 F77** in progress
+- Done: **T129.1** @`67ac92b` · **T129.2** @`0fff625` · **T129.3** scaffold `finetune_app.py`
+- **Active:** **T129.4** — `job_type=finetune_train` + `POST /jobs/{id}/approve`
+- PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open
 
 ## Key locks
 
-- F75 catch-up policy + `enqueue_catchup_targets`: shared-schemas automations
-- Write-API: config/runs + CRUD hook after batch upsert; mark-checked bump
-- Modal DM: `automation_catchup` + `freshness_refresh` workers; job-completion triggers
-- Shared schedule: `daily_corpus_automations` with `schedule=modal.Period(days=1)`
-  (catch-up tick + real freshness enqueue for stale `refresh_enabled` docs)
-- Hash-aware freshness re-fetch: `packages/ingest` + `freshness_refresh` / `rechunk_and_upsert_scraped_url`
-- DM freshness UI: CorpusList / DocumentAdmin stale + Refresh now (UJ-081)
-- FT pins locked (S030-D33) for M129: `infra/modal/finetune_pins.py`
-- PR #238 open; tip `7971c16` — keep CI green (`fdf68af` run cancelled/superseded)
+- FT pins: `infra/modal/finetune_pins.py` (S030-D33)
+- FT app: `infra/modal/finetune_app.py` / `vecinita-llm-finetune` / `llm-finetune-adapters` (T129.3)
+- Not `src/finetune/` (F8)
 
 ## Next
 
-Continue **07-build** **T128.7** (API e2e + Vitest + Playwright T0-ui UJ-081). Leave PR #238 open; do not merge without approval.
+**T129.4** — wire `job_type=finetune_train` + admin JWT `POST /jobs/{id}/approve` (TP6 / api-contract). Leave PR #238 open.

@@ -347,13 +347,16 @@ EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy c
 | `VECINITA_FINETUNE_MAX_CONCURRENT` | No | F77 max concurrent trains (default `1`) |
 | `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` | No | F77 max train starts per UTC day (default `3`) |
 
-### Modal — `vecinita-llm-finetune` (new app, TP4)
+### Modal — `vecinita-llm-finetune` (app + secret name, TP4 / T129.3)
+
+Modal secret name: **`vecinita-llm-finetune`** (`infra/modal/finetune_app.py`).
 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | Same FT + kill-switch envs as above | Yes (when FT enabled) | Train image secret |
 | `VECINITA_INTERNAL_WRITE_URL` / `VECINITA_INTERNAL_API_KEY` | Yes | Run metadata + corpus read for SFT pairs |
 | Volume `llm-finetune-adapters` | Yes | Adapter artifacts (Modal Volume, not env) |
+| Volume `llm-models` | Yes | Pinned Qwen base (shared with `vecinita-llm`) |
 
 ### Modal — `vecinita-llm` (promote pin)
 
