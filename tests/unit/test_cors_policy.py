@@ -487,6 +487,41 @@ def test_internal_write_cors_preflight_on_finetune_promote_and_adapter(
         assert method in allow_methods
 
 
+def test_internal_write_cors_preflight_on_ev027_automations_freshness_ft(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """T130.2 / H0c: CORS for automations, Refresh now, and FT eval (F75-F77)."""
+    if not os.environ.get("DATABASE_URL"):
+        pytest.skip("DATABASE_URL required for internal write app import")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "test-key")
+    client = TestClient(create_write_app())
+    for path, method in (
+        ("/internal/v1/automations/config", "GET"),
+        ("/internal/v1/automations/config", "PATCH"),
+        ("/internal/v1/automations/runs", "GET"),
+        (
+            "/internal/v1/documents/00000000-0000-4000-8000-000000000001/refresh",
+            "POST",
+        ),
+        (
+            "/internal/v1/finetune/runs/00000000-0000-4000-8000-000000000002/eval",
+            "GET",
+        ),
+    ):
+        response = client.options(
+            path,
+            headers={
+                "Origin": ADMIN_ORIGIN,
+                "Access-Control-Request-Method": method,
+                "Access-Control-Request-Headers": "authorization, content-type",
+            },
+        )
+        assert response.status_code == HTTPStatus.OK
+        assert response.headers.get("access-control-allow-origin") == ADMIN_ORIGIN
+        allow_methods = header_str(response.headers, "access-control-allow-methods").upper()
+        assert method in allow_methods
+
+
 def test_internal_write_cors_preflight_on_rebuild_promote(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

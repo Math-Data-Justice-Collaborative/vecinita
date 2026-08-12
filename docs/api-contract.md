@@ -1230,7 +1230,8 @@ FT Modal app: `infra/modal/finetune_app.py` / **`vecinita-llm-finetune`**; volum
 **`llm-finetune-adapters`** (TP4). Caps: `VECINITA_FINETUNE_MAX_CONCURRENT`,
 `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (TP5).
 
-OpenAPI yaml updates in **07-build**.
+OpenAPI yaml mirrors: `openapi/internal-write.yaml` + `openapi/data-management.yaml`
+(T130.2 / 07-build).
 
 ### Automations run history (F75)
 
