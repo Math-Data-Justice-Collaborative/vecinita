@@ -33,6 +33,11 @@ Vecinita has **two** Modal LLM deployables sharing volume **`llm-models`**:
 - Wire **real vLLM token streaming** into SSE (RD-164) — do not fake stream by word-chunking
   a completed reply.
 - Pin prod to `qwen2.5:1.5b-instruct` / `Qwen/Qwen2.5-1.5B-Instruct` (RD-169, TP-S010-25).
+- **F77 LoRA (ADR-053):** Load a promoted LoRA adapter on **prod `vecinita-llm` only after
+  human promote** (`VECINITA_FINETUNE_ADAPTER_ID` or equivalent). Playground may load
+  candidate adapters for pre-promote eval. Do **not** auto-load the latest adapter on prod.
+  Train runs on a **separate Modal FT app/module** — not via ChatRAG’s generate URL.
+  Manual train approve; promote is human judgment after eval evidence (RD-338).
 
 ## Do not
 
@@ -43,11 +48,14 @@ Vecinita has **two** Modal LLM deployables sharing volume **`llm-models`**:
 - Build a **provider ABC** / multi-provider plugin framework (RD-171) unless a second backend
   is explicitly reintroduced.
 - Point ChatRAG at the playground app URL.
+- Auto-promote or auto-load LoRA adapters onto prod `vecinita-llm` without operator promote
+  + AskQuestion for live cutover (F77 / ADR-053).
 
 ## Model switching
 
 One vLLM engine per GPU class instance; changing `model_id` reloads the engine (~60–120s).
 Use `/warm` before eval batches. Playground reloads must not stomp the **prod** app.
+Adapter pin changes on prod follow promote/rollback only (F77).
 
 ## Build slices (F39 follow-on) — Phase 18
 
@@ -62,6 +70,8 @@ Use `/warm` before eval batches. Playground reloads must not stomp the **prod** 
 ## References
 
 - `docs/adr/ADR-037-unified-vecinita-llm-modal-app.md`
+- `docs/adr/ADR-053-modal-lora-finetune.md` (F77)
 - `docs/deployment-integration.md` §EV-010
-- RD-163–RD-172, TP-S010-17–31
+- RD-163–RD-172, TP-S010-17–31; RD-330–339, RD-346
 - ADR-009 (vLLM primary)
+- `.cursor/rules/corpus-automations-ft.mdc`

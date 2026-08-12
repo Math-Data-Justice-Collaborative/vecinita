@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
 > **Project**: Vecinita v1  
-> **Last updated**: 2026-08-05 (S027/EV-025 F70–F71 — AC-ME1–ME10 multilingual embeds; prior S025 AC-CI/REL)
+> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — AC-AU/FR/FT; prior S028 AC-SU)
 
 ## Per-feature criteria
 
@@ -362,3 +362,35 @@
 ## Sign-off
 
 v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** interview and deploy smoke (13) records cost estimate ≤ $50/mo.
+
+### EV-027 — Corpus automations + freshness + LoRA FT (F75–F77) — S030 / #73 #72 #219
+
+#### F75 automations (AC-AU*)
+
+- [ ] **AC-AU1**: Automations can be enabled/disabled from DM UI; disabled → no new automation jobs (UJ-080, TC-252).
+- [ ] **AC-AU2**: Kill-switch and concurrency/cost caps prevent enqueue when tripped (TC-253, RD-328).
+- [ ] **AC-AU3**: Job-completion and doc CRUD enqueue catch-up work with idempotent keys; no re-embed when complete (TC-254, RD-334–335).
+- [ ] **AC-AU4**: Cron catch-up shares one Modal schedule with F76 as a distinct job type (RD-336, TC-264).
+- [ ] **AC-AU5**: Run history persisted in Postgres via write-API; UI shows status, last run, errors (TC-255, RD-341).
+- [ ] **AC-AU6**: Out of F75 without unlock: #192 dashboard widgets; auto F41 on every change.
+
+#### F76 freshness (AC-FR*)
+
+- [ ] **AC-FR1**: Default stale threshold is 30 days (configurable) (RD-337, TC-256).
+- [ ] **AC-FR2**: Scheduled or manual refresh re-fetches URL sources; unchanged hash skips rechunk work but updates last_checked (TC-257).
+- [ ] **AC-FR3**: Stale / last_checked visible in Admin for URL-backed docs (UJ-081, TC-258).
+- [ ] **AC-FR4**: Per-source enable/disable + Refresh now (TC-259).
+- [ ] **AC-FR5**: Freshness job type does not incorrectly fire F75 catch-up side effects beyond shared schedule infra.
+- [ ] **AC-FR6**: Out of F76: fine-tune; third-party uptime guarantees.
+
+#### F77 LoRA FT (AC-FT*)
+
+- [ ] **AC-FT1**: Train uses LoRA/PEFT on pinned Qwen; SFT pairs from chunks (RD-330, RD-340, ADR-053).
+- [ ] **AC-FT2**: Each train requires explicit operator approve before GPU start (RD-328, TC-260).
+- [ ] **AC-FT3**: Eval report compares base vs adapter and is shown to operator (TC-261).
+- [ ] **AC-FT4**: Promote is **human judgment only** — no automated numeric abort (RD-338, S030-D20).
+- [ ] **AC-FT5**: Operator should promote only when they judge better than base; AskQuestion before prod cutover (RD-331).
+- [ ] **AC-FT6**: Prod `vecinita-llm` loads adapter only after promote; playground may pre-promote (RD-339, TC-262).
+- [ ] **AC-FT7**: Kill-switch/caps apply to FT train jobs (TC-263). Shared `VECINITA_AUTOMATIONS_KILL_SWITCH` plus `VECINITA_FINETUNE_MAX_CONCURRENT` (default 1) and `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (default 3) — TP5 / RD-348 / S030-D29.
+- [ ] **AC-FT8**: Out of F77 without unlock: full-weight FT default; auto-load latest on prod; blind promote without operator review.
+- [ ] **AC-FT9**: Rollback path: operator can revert prod to base pin (clear promoted adapter) (UJ-082, TC-265).

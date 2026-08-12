@@ -1184,6 +1184,57 @@ Base path: `/internal/v1/models/ollama` (admin JWT for list; pull requires `supe
 
 ---
 
+
+## EV-027 — Corpus automations, freshness, LoRA FT (F75–F77)
+
+Compatible deltas unless noted. Auth: admin JWT (+ Modal proxy on Modal routes).
+
+### Automations (F75)
+
+| Method | Path | Notes |
+|--------|------|-------|
+| `GET` | `/internal/v1/automations/config` | enable flags, kill-switch, caps (read) |
+| `PATCH` | `/internal/v1/automations/config` | enable/disable; admin only |
+| `GET` | `/internal/v1/automations/runs` | Paginated run history (status, timestamps, error) |
+| `POST` | `/jobs` (`job_type=automation_catchup`) | Enqueue catch-up (also from schedule / hooks) |
+
+CRUD hooks enqueue with idempotent key `document_id` + `revision` (RD-335).
+
+### Freshness (F76)
+
+| Method | Path | Notes |
+|--------|------|-------|
+| `POST` | `/jobs` (`job_type=freshness_refresh`) | Manual or scheduled refresh |
+| `PATCH` | `/internal/v1/documents/{id}` | Fields: `refresh_enabled` (bool), `last_checked_at` (timestamptz, read/bump); reuse `content_hash` (TP7) |
+| `GET` | `/internal/v1/documents` (admin list) | Query/filter stale URL sources (`last_checked_at` older than `VECINITA_FRESHNESS_STALE_DAYS`) |
+
+Default stale threshold: **30 days** (`VECINITA_FRESHNESS_STALE_DAYS`).
+
+Shared schedule: one `schedule=modal.Period(days=1)` on `vecinita-data-management` (TP2 / S030-D31 M2).
+
+### Fine-tune (F77)
+
+| Method | Path | Notes |
+|--------|------|-------|
+| `POST` | `/jobs` (`job_type=finetune_train`) | Creates pending train; **approve** required before GPU |
+| `POST` | `/jobs/{id}/approve` | Manual train approve for `finetune_train` only (TP6); admin JWT |
+| `GET` | `/internal/v1/finetune/runs/{id}/eval` | Base vs adapter eval report |
+| `POST` | `/internal/v1/finetune/promote` | Human promote → prod adapter pin (RD-338–339) |
+
+Prod `vecinita-llm` loads adapter **only after promote**. Playground may load candidates.
+
+FT Modal app: `infra/modal/finetune_app.py` / **`vecinita-llm-finetune`**; volume
+**`llm-finetune-adapters`** (TP4). Caps: `VECINITA_FINETUNE_MAX_CONCURRENT`,
+`VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (TP5).
+
+OpenAPI yaml updates in **07-build**.
+
+### Automations run history (F75)
+
+Postgres table **`automation_runs`** (TP3): `id`, `job_type`, `status`, `started_at`,
+`finished_at`, `error`, optional `document_id` / `revision`, timestamps.
+
+
 ## Data models (summary)
 
 ### Source

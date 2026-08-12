@@ -1,4 +1,4 @@
-"""T127.2 — Automations write-API routes (config GET/PATCH + runs list) — expect red until T127.4.
+"""T127.2/T127.4 — Automations write-API routes (config GET/PATCH + runs list).
 
 [Corpus: feature-list.md §F75]
 [Spec: docs/api-contract.md §EV-027 Automations]

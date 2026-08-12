@@ -5,13 +5,20 @@ Consolidated decision logs from requirements, product, tech, and evolve cycles.
 ## Product decisions (02-verify-plan)
 
 > **Stage**: 02-verify-plan  
-> **Last updated**: 2026-08-06 (EV-026 F72–F74 S028-D22 TP lock)
+> **Last updated**: 2026-08-07 (EV-027 F75–F77 S030-D25 product audit)
 
 Chronological verdicts from product plan verification. Auto-approved entries trace to
 `docs/decisions.md#requirements-decisions-01-requirements` (interview).
 
 | Timestamp | Stmt ID | Verdict | Notes |
 |-----------|---------|---------|-------|
+| 2026-08-07 | EV027-H1–H18 | auto-approved | F75–F77 locked RD-325–342 / S030-D15–D23 |
+| 2026-08-07 | EV027-C1 | approved (fix) | evolve-decisions F75 → catch-up only (RD-334); S030-D25 |
+| 2026-08-07 | EV027-C2 | approved (fix) | “eval-gated” / “eval better” = human judgment + eval evidence (RD-338); S030-D25 |
+| 2026-08-07 | EV027-M1 | approved (fix) | Idempotent key → `document_id`+`revision` |
+| 2026-08-07 | EV027-M2 | approved (fix) | Added TC-264 for AC-AU4 one schedule / two job types |
+| 2026-08-07 | EV027-M3 | approved (fix) | Added AC-FT9 + TC-265 FT rollback to base |
+| 2026-08-07 | EV027-M4 | approved (fix) | FT caps named in 04: MAX_CONCURRENT + MAX_RUNS_PER_DAY (TP5) |
 | 2026-08-06 | EV026-H1–H17 | auto-approved | F72–F74 locked RD-309–321 / S028-D* |
 | 2026-08-06 | EV026-C1 | approved (fix) | UJ-063 ≤ top_k after filter; RD-231 superseded by RD-311 (S028-D20) |
 | 2026-08-06 | EV026-M1 | approved (fix) | F72 Source → RD-310 / RD-317 (not RD-320) |
@@ -1364,3 +1371,70 @@ Out of scope: enabling basedpyright `reportAny` or ESLint `strictTypeChecked` pr
 | 07-build | Config already landed; doc sync only |
 | 09-qa | Verify commands in qa skill |
 | Deploy | Not required (docs/tooling only) |
+
+### EV-027 requirements decisions (2026-08-07) — S030 / #73 #72 #219
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| RD-325 | Fn scope | Allocate **F75** (#73), **F76** (#219), **F77** (#72) | S030-D13/D15 |
+| RD-326 | F75 triggers | Job completion + cron catch-up + doc CRUD hooks | S030-D6 |
+| RD-327 | F75 DM UI | Automation run history + enable/disable | S030-D8 |
+| RD-328 | Guardrails | Kill-switch + cost/concurrency caps; F77 train = manual approve each run | S030-D11 |
+| RD-329 | F76 freshness | Scheduled refresh, stale detection, hash-aware ingest, operator refresh | S030-D7 |
+| RD-330 | F77 approach | LoRA/PEFT on pinned Qwen (not full FT default) | S030-D12 |
+| RD-331 | F77 promote | Prod path only when operator judges better than base; AskQuestion before cutover | S030-D10 |
+| RD-332 | Routing | Preset **Full** (03 + 06 required) | S030-D9 |
+| RD-333 | #72 depth | Full fine-tune workflow this cycle (not stub) | S030-D5 |
+| RD-334 | F75 residual | Catch-up only: failed/partial/missing embed; optional retag; no re-embed if complete | S030-D16 |
+| RD-335 | CRUD hooks | Enqueue async Modal job; idempotent key `doc_id+revision` | S030-D17 |
+| RD-336 | Cron | One Modal schedule, two job types (F75 catch-up + F76 refresh) | S030-D18 |
+| RD-337 | Stale default | **30 days** | S030-D19 |
+| RD-338 | Promote gate | **Human operator judgment** (no automated metric abort); present eval evidence | S030-D20 |
+| RD-339 | FT serve | Prod `vecinita-llm` only after promote; playground optional pre-promote | S030-D21 |
+| RD-340 | Train data | Instruction/QA SFT pairs from chunks | S030-D22 |
+| RD-341 | Run history | Postgres via write-API (durable DM UI) | S030-D23 |
+| RD-342 | ADRs | **ADR-052** automation orchestration; **ADR-053** Modal LoRA FT | 01-requirements |
+| RD-343 | Journeys/tests | UJ-080–082; TC-252–263; AC-AU*/FR*/FT* | 01-requirements |
+| RD-344 | Sequencing | F75 → F76 → F77 (04 locks milestones) | impact-analysis |
+| RD-345 | 02 audit C1 | evolve-decisions F75 wording = catch-up only (align RD-334) | S030-D25 |
+| RD-346 | 02 audit C2 | “Eval-gated” = human promote after eval evidence; no auto-abort (align RD-338) | S030-D25 |
+| RD-347 | 02 audit M2–M3 | TC-264 (shared schedule); AC-FT9 + TC-265 (rollback) | S030-D25 |
+| RD-348 | 02 audit M4 → 04 | FT caps: `VECINITA_FINETUNE_MAX_CONCURRENT=1`, `VECINITA_FINETUNE_MAX_RUNS_PER_DAY=3` (TP5 / S030-D29) | S030-D25 → D29 |
+
+### EV-027 tech-plan decisions (2026-08-07) — TP1–TP10 / S030
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S030-01 | Phase / milestones | **Phase 30**: M127 F75 → M128 F76 → M129 F77 → M130 gate | TP1 / S030-D29 |
+| TP-S030-02 | Shared schedule | One `schedule=modal.Period(days=1)` on `vecinita-data-management`; job types `automation_catchup` + `freshness_refresh` | TP2 / RD-336 / S030-D31 M2 |
+| TP-S030-03 | Run history | Postgres table **`automation_runs`** via write-API | TP3 / RD-341 |
+| TP-S030-04 | FT Modal path | `infra/modal/finetune_app.py` / app **`vecinita-llm-finetune`** / volume **`llm-finetune-adapters`**; prod load in `llm_app.py` after promote | TP4 / ADR-053 |
+| TP-S030-05 | FT cost caps | `VECINITA_FINETUNE_MAX_CONCURRENT=1`; `VECINITA_FINETUNE_MAX_RUNS_PER_DAY=3`; shared kill-switch; no GPU-hour metering | TP5 / RD-348 |
+| TP-S030-06 | FT approve API | `POST /jobs/{id}/approve` for `finetune_train` | TP6 |
+| TP-S030-07 | Freshness fields | `refresh_enabled`, `last_checked_at`; reuse `content_hash` | TP7 |
+| TP-S030-08 | Tests | Unit + API e2e + Vitest + Playwright T0-ui for UJ-080–082 | TP8 |
+| TP-S030-09 | Deploy / secrets | Staging first; AskQuestion before live prod automation enable / FT promote | TP9 |
+| TP-S030-10 | 06-tech-tooling | **Required** — PEFT/TRL (+ train stack) inventory before M129 | TP10 / S030-D9 |
+
+### EV-027 05-verify-tech resolutions (2026-08-07) — S030-D31
+
+| ID | Topic | Decision | Stmt | Source docs updated |
+|----|-------|----------|------|---------------------|
+| TV-S030-01 | Playwright UJ-080–082 | Mark **required** T0-ui paths under `tests/ui/admin/` | M1 | test-plan.md |
+| TV-S030-02 | Modal schedule API | `schedule=modal.Period(days=1)` (not `@modal.periodic` / hours=24) | M2 | ADR-052, tech-plan-delta, execution-plan T127.7, api-contract, decisions TP-S030-02 |
+| TV-S030-03 | T129.3 deps | Depends On = **T129.1**; blocked until **06**; Data Deps PEFT/TRL | M3 | execution-plan.md |
+| TV-S030-04 | T130.4 ADR wording | Confirm already Accepted + closeout notes only | M4 | execution-plan.md |
+| TV-S030-05 | deployment-integration | Add **EV-027** stub (apps, volume, schedule, AskQ prod) | M5 | deployment-integration.md |
+| TV-S030-06 | Build Plan Card | **Waive** this cycle; SoT = tech-plan-delta + Phase 30 | L1 | evolve-decisions.md (waiver cite) |
+
+### EV-027 06-tech-tooling (2026-08-07) — S030-D33
+
+| ID | Topic | Decision | Source |
+|----|-------|----------|--------|
+| TP-S030-11 | FT train pins (exact) | Modal image only: `peft==0.20.0`, `trl==1.9.2`, `transformers==4.57.6`, `accelerate==1.14.0`, `datasets==4.8.5`; bitsandbytes deferred; SoT `infra/modal/finetune_pins.py` | TP10 / S030-D33 |
+| TP-S030-12 | Serve vs train transformers | Keep llm serve `transformers==4.51.3`; train uses `4.57.6` — no silent serve bump | ADR-037 / ADR-053 |
+
+**Audit / report:** `docs/sessions/S030-corpus-automations/reports/06-tech-tooling.md`
+
+
+

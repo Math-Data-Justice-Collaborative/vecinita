@@ -1012,3 +1012,95 @@ Chat source UX in one cycle:
 **Tip:** `ad15667` — [CI](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31136499387) + [deploy-preflight](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31136805324) success.  
 **Artifacts:** `docs/sessions/S028-chat-source-ux/reports/evolve-summary.md` · `docs/evolve-report-EV-026.md`  
 **RA-009:** superseded (remote coverage green).
+
+## Cycle EV-027 — Scope (S030 / #73 #72 #219)
+
+**Intake locked:** 2026-08-07 (Phase 0 approved → Phase 1)  
+**Session:** S030-corpus-automations  
+**Issues:** [#73](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/73) · [#72](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/72) · [#219](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/219)  
+**Features:** F75, F76, F77  
+**Preset:** **Full** (03 + 06 required; S030-D9)  
+**Branch:** `evolve/EV-027-corpus-automations`
+
+### Scope summary
+
+| Fn | Issue | Scope |
+|----|-------|--------|
+| F75 | #73 | Corpus change automations: job completion + cron + doc CRUD hooks; **catch-up only** (failed/partial/missing embed; optional retag — RD-334); idempotency/retries; kill-switch + cost caps; DM run history + enable/disable |
+| F76 | #219 | Corpus freshness: scheduled refresh, stale detection, change-aware ingest (hash skip), operator refresh controls |
+| F77 | #72 | Modal LoRA/PEFT on pinned Qwen; train data from corpus; versioned adapters; serve via llm_app; **manual train approve**; **human promote** after eval evidence (no auto metric abort — RD-338); operator should promote only when they judge better than base |
+
+**Out:** #192 full dashboard widgets; blind FT promote without operator review of eval evidence; casual prod corpus mutation without AskQuestion.
+
+**Deploy:** Prod FT serve only after human promote judgment + AskQuestion (S030-D10 / RD-331/338). Live DO/Modal is prod-careful.
+
+**02-verify-plan (S030-D25):** C1 amended F75 catch-up wording; C2 clarified “eval better” / “eval-gated” = human judgment + eval evidence (not automated abort).
+
+**Corpus cites:** [Corpus: product] [Corpus: system-spec] [Corpus: deploy-integration] [Corpus: data] [Corpus: api] [Corpus: journeys] [Corpus: tests] [Corpus: acceptance]
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S030-D0 | Session | Open S030 feature session for #73 |
+| S030-D1 | Routing | Standard initially |
+| S030-D2 | Intent Q1 | Full #73 checklist this cycle |
+| S030-D3 | Intent Q2 | All gaps equal (follow-ons, cron, DM observability) |
+| S030-D4 | Intent Q3 | Fine-tune in scope if #72 pulled |
+| S030-D5 | Scope Q4 | Pull **full #72** into EV-027 |
+| S030-D6 | Scope Q5 | Triggers = job complete + cron + doc CRUD |
+| S030-D7 | Scope Q6 | Fold **#219** into EV-027 |
+| S030-D8 | Scope Q7 | DM UI = run history + enable/disable |
+| S030-D9 | Constraints Q8 | One cycle; upgrade to **Full** (03+06) |
+| S030-D10 | Constraints Q9 | Prod FT path; promote when operator judges better than base (clarified S030-D25 / RD-338: human gate + eval evidence, not auto-abort) |
+| S030-D11 | Constraints Q10 | Kill-switch + caps; **manual approve** each train |
+| S030-D12 | Constraints Q11 | Prefer **LoRA/PEFT** on pinned Qwen |
+| S030-D13 | Phase 0 close | Allocate **F75–F77**; enter Phase 1 |
+
+### Feature map
+
+| Fn | Issue | Title |
+|----|-------|-------|
+| F75 | #73 | Corpus change automations |
+| F76 | #219 | Corpus freshness automation |
+| F77 | #72 | Modal LoRA fine-tune + human promote (eval evidence) |
+
+### Phase 1
+
+| Artifact | Path |
+|----------|------|
+| Evolve Plan Card | `docs/sessions/S030-corpus-automations/evolve-plan-card.md` |
+| Impact analysis | `docs/sessions/S030-corpus-automations/impact-analysis.md` |
+| Routing | `docs/sessions/S030-corpus-automations/routing-plan.md` (Full) |
+| 01 seed | `docs/sessions/S030-corpus-automations/checkpoints/01-requirements-seed.md` |
+
+**Next:** 01-requirements (delta) after Phase 1 confirm.
+
+### 04-tech-plan (2026-08-07) — TP1–TP10 locked
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S030-D28 | Phase B start | Start **04-tech-plan** after 03 complete |
+| S030-D29 | TP lock | Approve TP1–TP10 (Phase 30; schedule `Period(days=1)` amended S030-D31 M2; `automation_runs`; `finetune_app.py` / `vecinita-llm-finetune` / `llm-finetune-adapters`; FT max concurrent=1 + max runs/day=3; approve API; freshness fields; Playwright T0-ui; staging-first; 06 required) |
+
+### 05-verify-tech (2026-08-07) — M1–M5 + L1 approved
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S030-D30 | Phase B verify | Start **05-verify-tech** after 04 |
+| S030-D31 | Medium/low verdicts | **Approve all recommended** — M1 Playwright required UJ-080–082; M2 `schedule=modal.Period(days=1)`; M3 T129.3 Depends On = T129.1 + blocked-until-06 note; M4 T130.4 confirm Accepted + closeout only; M5 deployment-integration EV-027 stub; **L1 waive** Build Plan Card (SoT = tech-plan-delta + Phase 30) |
+
+**Waiver (L1):** `[Corpus: WAIVED — Build Plan Card; reason: evolve SoT is tech-plan-delta + Phase 30 Task Tracking; decided: S030-D31]`
+
+**Artifacts:** `reports/05-verify-tech-audit.md` · surgical updates to test-plan, ADR-052, execution-plan, deployment-integration, api-contract, tech-plan-delta.
+
+### Gate B→C + 06-tech-tooling (2026-08-07)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S030-D32 | Gate B→C | **PASS** → start 06 |
+| S030-D33 | 06 FT pins | Approve all + **exact** Modal FT pins: `peft==0.20.0`, `trl==1.9.2`, `transformers==4.57.6` (train), `accelerate==1.14.0`, `datasets==4.8.5`; bitsandbytes deferred; `infra/modal/finetune_pins.py`; inventory updated |
+
+**Artifacts:** `reports/06-tech-tooling.md` · `infra/modal/finetune_pins.py` · `tests/unit/modal/test_finetune_pins.py`
+
+**Next:** **07-build** Phase 30 M127.

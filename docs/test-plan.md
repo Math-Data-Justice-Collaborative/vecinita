@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-06 (S028/EV-026 F72–F74 — TC-242–251 chat source UX; prior S027 TC-232–241)  
+> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — TC-252–263; prior S028 TC-242–251)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -46,6 +46,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
 | UJ-078 Relevance-gated sources | `tests/e2e/test_uj078_relevance_sources.py` + unit | TC-245, TC-246, TC-247 | — |
 | UJ-079 Operator display_title | `tests/e2e/test_uj079_display_title.py` + Vitest admin | TC-248, TC-249, TC-250, TC-251 | opt |
+| UJ-080 Automations enable + history | `tests/e2e/test_uj080_automations.py` + Vitest | TC-252, TC-253, TC-254, TC-255, TC-264 | `tests/ui/admin/uj080-automations.spec.ts` |
+| UJ-081 Freshness refresh / stale | `tests/e2e/test_uj081_freshness.py` | TC-256, TC-257, TC-258, TC-259, TC-264 | `tests/ui/admin/uj081-freshness.spec.ts` |
+| UJ-082 FT approve + human promote | `tests/e2e/test_uj082_finetune.py` + unit | TC-260, TC-261, TC-262, TC-263, TC-265 | `tests/ui/admin/uj082-finetune.spec.ts` |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1577,6 +1580,78 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | F50 top_k default | 8 | TC-193 / AC-RQ8 |
 | F51 packer default | p3 | TC-194 / AC-RQ9 |
 | Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
+
+
+### TC-252: Automations enable/disable (UJ-080, F75)
+
+- **Input**: Toggle automations off → attempt enqueue catch-up.
+- **Expected**: No new automation run; UI shows disabled.
+
+### TC-253: Kill-switch blocks enqueue (UJ-080, F75)
+
+- **Input**: Kill-switch on; job completion / CRUD would trigger.
+- **Expected**: No enqueue; run history may record skipped/blocked.
+
+### TC-254: Catch-up idempotency — no re-embed if complete (UJ-080, F75)
+
+- **Input**: Document with complete embeddings; CRUD/edit triggers hook.
+- **Expected**: Idempotent skip or no-op embed; revision key dedupes.
+
+### TC-255: Run history via write-API (UJ-080, F75)
+
+- **Input**: Completed automation run.
+- **Expected**: Postgres row; GET history lists status, timestamps, error.
+
+### TC-256: Stale threshold default 30d (UJ-081, F76)
+
+- **Input**: Doc last_checked 31 days ago; threshold default.
+- **Expected**: Marked stale; eligible for refresh.
+
+### TC-257: Refresh hash skip + last_checked bump (UJ-081, F76)
+
+- **Input**: Refresh URL with unchanged content_hash.
+- **Expected**: No rechunk; last_checked updated.
+
+### TC-258: Stale / last_checked visible in Admin (UJ-081, F76)
+
+- **Input**: Admin list URL-backed docs.
+- **Expected**: UI/API exposes stale or last_checked fields.
+
+### TC-259: Per-source disable + Refresh now (UJ-081, F76)
+
+- **Input**: Disable source refresh; Refresh now on another.
+- **Expected**: Disabled skipped; Refresh now enqueues job.
+
+### TC-260: FT train requires approve (UJ-082, F77)
+
+- **Input**: Create train job without approve.
+- **Expected**: Remains pending; GPU train not started until approve.
+
+### TC-261: Eval report base vs adapter (UJ-082, F77)
+
+- **Input**: Completed train + eval.
+- **Expected**: Report payload with base and adapter metrics for operator review.
+
+### TC-262: Promote loads prod only after promote (UJ-082, F77)
+
+- **Input**: Adapter trained; not promoted.
+- **Expected**: Prod llm_app still base; playground may load candidate.
+
+### TC-263: FT respects kill-switch/caps (UJ-082, F77)
+
+- **Input**: Kill-switch on or cap exceeded; approve train.
+- **Expected**: Train rejected or not started.
+
+### TC-264: One Modal schedule, two job types (UJ-080/081, F75–F76, AC-AU4)
+
+- **Input**: Shared cron tick dispatches `automation_catchup` and `freshness_refresh` as distinct job types.
+- **Expected**: Both types can be scheduled from one Modal schedule entry; freshness does not incorrectly enqueue F75 catch-up side effects beyond shared infra (AC-FR5).
+
+### TC-265: FT promote rollback to base (UJ-082, F77, AC-FT9)
+
+- **Input**: Promoted adapter on prod; operator triggers rollback / clear pin.
+- **Expected**: Prod `vecinita-llm` reverts to base (empty `VECINITA_FINETUNE_ADAPTER_ID` or equivalent); chat serves without adapter.
+
 
 ### F31 coverage gate — gated components
 

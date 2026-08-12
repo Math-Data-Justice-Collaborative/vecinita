@@ -23,6 +23,20 @@ messages. Sources: `docs/feature-list.md`, `docs/spec.md`, `docs/api-contract.md
 | **VHH** | vhh, Vhh | Variable domain of Heavy chain of Heavy-chain-only antibody |
 | **scFv** | scfv, ScFv | Single-chain variable fragment |
 
+## Vecinita — corpus automations + FT (F75–F77)
+
+| Correct | Incorrect / avoid | Why |
+|---------|-------------------|-----|
+| **catch-up** (failed/partial/missing embed) | re-embed everything; “full reindex on change” | F75 is residual catch-up only (RD-334) |
+| `job_type=automation_catchup` | generic “automation” without type | Distinct from freshness (RD-336) |
+| `job_type=freshness_refresh` | “re-crawl job” as sole name | API/job_type contract (EV-027) |
+| **stale** (default **30 days**) | “expired”, arbitrary default | RD-337 / `VECINITA_FRESHNESS_STALE_DAYS` |
+| `document_id` + `revision` (idempotent key) | `doc_id` alone | RD-335 / ADR-052 |
+| **LoRA** / **PEFT** adapter | full fine-tune (as default) | F77 / ADR-053 |
+| **SFT** (instruction/QA pairs from chunks) | CPT-only / “just train on text” | RD-340 |
+| **human promote** (eval evidence) | “eval-gated” as automated abort | RD-338 / RD-346 |
+| prod **`vecinita-llm`** after promote | auto-load latest adapter | RD-339 |
+
 ## Parameter Names
 
 Use exact parameter names from `docs/config-spec.md`:
@@ -37,6 +51,10 @@ Use exact parameter names from `docs/config-spec.md`:
 | pAE threshold | `rf2_pae_threshold` | `pae_cutoff`, `pae_filter` |
 | RMSD threshold | `rf2_rmsd_threshold` | `rmsd_cutoff`, `rmsd_filter` |
 | TCR mode | `tcr_mode` | `tcr`, `use_tcr`, `tcr_mhc` |
+| Freshness stale days | `VECINITA_FRESHNESS_STALE_DAYS` | `stale_days` alone as env |
+| FT adapter pin | `VECINITA_FINETUNE_ADAPTER_ID` | silent latest-on-disk |
+| FT concurrency cap | `VECINITA_FINETUNE_MAX_CONCURRENT` | shared automations max alone for FT |
+| FT daily run cap | `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` | GPU-hour metering (deferred) |
 
 ## Quality Metrics
 
