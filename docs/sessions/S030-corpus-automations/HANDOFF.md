@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** pending T130.4 commit  
+**Tip:** `ad9d1c4` — M130 / Phase 30 07-build complete  
 **Issues:** #73 · #72 · #219  
 
 ## Position

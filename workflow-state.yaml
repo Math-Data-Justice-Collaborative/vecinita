@@ -1948,7 +1948,7 @@ project:
         - docs/sessions/S000-internal-docs-archive/execution-plan.md
         - docs/sessions/S028-chat-source-ux/HANDOFF.md
     07-build:
-      status: in_progress
+      status: completed
       ready: true
       session_id: S030-corpus-automations
       branch: evolve/EV-027-corpus-automations
@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: Implementing T130.1 / M130 (Phase 30 gate TC-252–265)
-      next_action: Finish T130.1 then M130 closeout / Phase C 08
+      current_action: completed_m130_phase30
+      next_action: 08-verify-build for M130/Phase 30 boundary
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1981,8 +1981,8 @@ project:
       - M128
       - M129
       - M130
-      note: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged. execution-plan.md T128.5–T128.7 rows still pending — parent syncs to completed (M128 done). [Corpus: feature-list.md
-        §F77] [Spec: docs/test-plan.md §TC-252–265]'
+      note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next
+        08-verify-build for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -2002,18 +2002,18 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: c610056
-      tip_sha: c610056
-      tip_full: c6100568b06c14f643405941485eb236de7a90ce
-      tip_prev: 73a6571
-      updated_at: '2026-08-12T22:46:00Z'
+      tip: ad9d1c4
+      tip_sha: ad9d1c4
+      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      tip_prev: 0b7a640
+      updated_at: '2026-08-12T22:56:04Z'
       active_milestone: M130
       current_milestone: M130
-      current_task: T130.1
-      current_task_status: in_progress
-      t130_1_status: in_progress
+      current_task: null
+      current_task_status: completed
+      t130_1_status: completed
       t130_1_started_at: '2026-08-12T22:46:00Z'
-      m130_status: in_progress
+      m130_status: completed
       t128_2_status: completed
       t128_2_commit: 7b1aa87
       t128_3_status: completed
@@ -2762,13 +2762,13 @@ project:
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T130.1
+        current_task: null
         active_milestone: M130
-        current_task_status: in_progress
-        t130_1_status: in_progress
+        current_task_status: completed
+        t130_1_status: completed
         t130_1_started_at: '2026-08-12T22:46:00Z'
-        m130_status: in_progress
-        mode: m130_t130_1_in_progress
+        m130_status: completed
+        mode: m130_complete_handoff_08
         build_plan_card: waived_S030-D31
         t127_5_status: completed
         t127_6_status: completed
@@ -2784,7 +2784,7 @@ project:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: '6107037'
+        tip_sha: ad9d1c4
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -2812,7 +2812,7 @@ project:
         t129_4_status: completed
         t129_4_sha: 4ef663b
         t129_5_status: completed
-        tip: '6107037'
+        tip: ad9d1c4
         coding_blocked: false
         ci_gate: cleared_local_coverage
         ci_status: local_green_tip_pending_push_watch
@@ -2838,8 +2838,8 @@ project:
         t129_6_status: completed
         t129_6_started_at: '2026-08-12T21:36:28Z'
         t129_6_description: 'Code: GET …/finetune/runs/{id}/eval base vs adapter report (F36 golden)'
-        tip_full: 61070374986b17408b270d25b403cac66cf176dd
-        tip_prev: f48a7e7
+        tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+        tip_prev: 0b7a640
         coverage_local_dm_branch: 453/476
         coverage_local_dm_branch_pct: 95.2%
         askquestion_pending: false
@@ -2884,7 +2884,6 @@ project:
         t129_10_status: completed
         t129_10_started_at: '2026-08-12T22:06:15Z'
         t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-        m130_status: pending
         t129_10_commit: '6107037'
         t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
         t129_10_completed: '2026-08-12'
@@ -2895,12 +2894,50 @@ project:
         m129_completed_at: '2026-08-12T22:25:00Z'
         m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
         s030_d51_decision: S030-D51
-        updated_at: '2026-08-12T22:25:00Z'
-        handoff_next: '**T130.1** / M130 — Phase 30 gate TC-252–265 confirmation suite. Tip c610056. PR #238 open (leave unmerged).'
-        recommended_next: T130.1 in_progress (M130 Phase 30 gate)
-        phase_note: 'T130.1 in_progress @ c610056; M129 08 PASS (S030-D54); M128 complete (T128.1–T128.7); PR #238 open; phase_c / Gate C→D pending until M130'
-        execution_plan_sync_note: T130.1 in_progress @c610056; M128 complete in git/workflow (T128.1–T128.7) but execution-plan.md table still shows T128.5–T128.7 pending — parent will sync rows to completed. Active task T130.1 / M130.
-      execution_plan_sync_note: T130.1 in_progress @c610056; M128 complete in git/workflow (T128.1–T128.7) but execution-plan.md table still shows T128.5–T128.7 pending — parent will sync rows to completed. Active task T130.1 / M130.
+        updated_at: '2026-08-12T22:56:04Z'
+        handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+        recommended_next: 08-verify-build for M130/Phase 30 boundary
+        phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+          until 08 PASS; PR #238 open no merge'
+        execution_plan_sync_note: T130.1 in_progress @c610056; M128 complete in git/workflow (T128.1–T128.7) but execution-plan.md
+          table still shows T128.5–T128.7 pending — parent will sync rows to completed. Active task T130.1 / M130.
+        current_milestone: M130
+        m130_completed: '2026-08-12'
+        m130_completed_at: '2026-08-12T22:56:04Z'
+        t130_1_commit: 0e95cd2
+        t130_1_completed: '2026-08-12'
+        t130_1_completed_at: '2026-08-12T22:56:04Z'
+        t130_2_status: completed
+        t130_2_commit: 2a884b3
+        t130_2_completed: '2026-08-12'
+        t130_2_completed_at: '2026-08-12T22:56:04Z'
+        t130_3_status: completed
+        t130_3_commit: 0b7a640
+        t130_3_completed: '2026-08-12'
+        t130_3_completed_at: '2026-08-12T22:56:04Z'
+        t130_4_status: completed
+        t130_4_commit: ad9d1c4
+        t130_4_completed: '2026-08-12'
+        t130_4_completed_at: '2026-08-12T22:56:04Z'
+        t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+        t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+        t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+        t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+        t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+        t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+        t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+        t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+        m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+        m127_pr_status: open
+        m127_pr_merge: deferred_no_merge
+        pr_238_status: open
+        pr_238_merge: deferred_no_merge
+        next_action: 08-verify-build for M130/Phase 30 boundary
+        execution_plan_active_task: M130 completed — next 08-verify-build
+        note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next
+          08-verify-build for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
+      execution_plan_sync_note: T130.1 in_progress @c610056; M128 complete in git/workflow (T128.1–T128.7) but execution-plan.md
+        table still shows T128.5–T128.7 pending — parent will sync rows to completed. Active task T130.1 / M130.
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -2923,7 +2960,7 @@ project:
       t128_4_spec_source: TP2, ADR-052
       t128_4_depends_on: T128.3, T127.7
       m127_pr_status: open
-      m127_pr_merge: deferred_user_option_1
+      m127_pr_merge: deferred_no_merge
       pr_238_ci_status: success
       pr_238_ci_note: tip 932c036 run 31640505267 success (gitleaks retry)
       t128_5_started_at: '2026-08-12T20:04:26Z'
@@ -2936,9 +2973,10 @@ project:
       t128_5_depends_on: T128.4
       t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
       t128_6_status: completed
-      execution_plan_active_task: M130 / T130.1 in_progress — Phase 30 gate TC-252–265
-      handoff_next: '**T130.1** / M130 — Phase 30 gate TC-252–265 confirmation suite. Tip c610056. PR #238 open (leave unmerged).'
-      phase_note: 'T130.1 in_progress @ c610056; M129 08 PASS (S030-D54); M128 complete (T128.1–T128.7); PR #238 open; phase_c / Gate C→D pending until M130'
+      execution_plan_active_task: M130 completed — next 08-verify-build
+      handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+      phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+        until 08 PASS; PR #238 open no merge'
       t128_6_started_at: '2026-08-12T20:18:53Z'
       tip_pushed: true
       tip_pushed_to: origin/evolve/EV-027-corpus-automations
@@ -2970,7 +3008,7 @@ project:
       t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
       m129_status: completed
       askquestion_next_topic: null
-      recommended_next: T130.1 in_progress (M130 Phase 30 gate)
+      recommended_next: 08-verify-build for M130/Phase 30 boundary
       m129_path_confirmed: true
       m129_path_confirmed_at: '2026-08-12T20:32:06Z'
       m129_path_decision: S030-D34
@@ -3149,9 +3187,41 @@ project:
       m129_completed: '2026-08-12'
       m129_completed_at: '2026-08-12T22:25:00Z'
       m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
-      m130_status: in_progress
       s030_d51_decision: S030-D51
       s030_d54_decision: S030-D54
+      completed: '2026-08-12'
+      completed_at: '2026-08-12T22:56:04Z'
+      m130_completed: '2026-08-12'
+      m130_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_commit: 0e95cd2
+      t130_1_completed: '2026-08-12'
+      t130_1_completed_at: '2026-08-12T22:56:04Z'
+      t130_2_status: completed
+      t130_2_commit: 2a884b3
+      t130_2_completed: '2026-08-12'
+      t130_2_completed_at: '2026-08-12T22:56:04Z'
+      t130_3_status: completed
+      t130_3_commit: 0b7a640
+      t130_3_completed: '2026-08-12'
+      t130_3_completed_at: '2026-08-12T22:56:04Z'
+      t130_4_status: completed
+      t130_4_commit: ad9d1c4
+      t130_4_completed: '2026-08-12'
+      t130_4_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+      t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+      t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+      t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+      t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+      t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+      t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+      m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+      pr_238_status: open
+      pr_238_merge: deferred_no_merge
+      result: PASS_partial_phase30_at_07
+      phase_30_07_status: completed
+      phase_30_gate: partial_pass_awaiting_08
     08-verify-build:
       s027_baseline:
         status: completed
@@ -3732,7 +3802,7 @@ project:
           session_closed: true
           session_closed_at: '2026-08-05T00:57:00Z'
           close_decision: S026-D58
-      status: completed
+      status: pending
       ready: true
       session_id: S030-corpus-automations
       branch: evolve/EV-027-corpus-automations
@@ -3748,25 +3818,25 @@ project:
       - 73
       - 72
       - 219
-      current_action: completed_m129_boundary
-      next_action: Re-open after M130 for Phase C / Gate C→D
+      current_action: awaiting_m130_phase30_verify
+      next_action: 08-verify-build for M130/Phase 30 boundary
       askquestion_pending: false
       askquestion_pending_topic: null
-      milestone_hint: M129
+      milestone_hint: M130
       m129_status: completed
-      m130_status: pending
-      note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
-        Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
-        interim; will re-open after M130. [Corpus: feature-list.md §F77]'
+      m130_status: completed
+      note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
+        merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
+        §F75–F77]'
       started_at: '2026-08-12'
       started_at_iso: '2026-08-12T22:25:00Z'
-      tip: c610056
-      tip_sha: c610056
-      tip_full: c6100568b06c14f643405941485eb236de7a90ce
-      tip_prev: 73a6571
+      tip: ad9d1c4
+      tip_sha: ad9d1c4
+      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      tip_prev: 0b7a640
       handoff: docs/sessions/S030-corpus-automations/HANDOFF.md
       s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:41:12Z'
+      updated_at: '2026-08-12T22:56:04Z'
       pr_238_status: open
       pr_238_merge: deferred_no_merge
       security_gate: PASSED
@@ -3776,13 +3846,14 @@ project:
       advisory_react_router: resolved
       report: docs/sessions/S030-corpus-automations/reports/verification-report.md
       m129_boundary_status: passed
-      m130_reopen_expected: true
+      m130_reopen_expected: false
       result: PASS
       completed: '2026-08-12'
       completed_at: '2026-08-12T22:41:12Z'
       s030_d54_decision: S030-D54
       phase_c: pending
       gate_c_to_d: pending
+      recommended_next: 08-verify-build for M130/Phase 30 boundary
     09-qa:
       status: completed
       started_at: '2026-08-06'
@@ -7956,9 +8027,10 @@ active_session:
   - 73
   - 72
   - 219
-  current_stage: 07-build
-  current_stage_note: 'T130.1 in_progress (M130 Phase 30 gate TC-252–265); tip c610056; PR #238 open leave unmerged; M129 08 PASS (S030-D54); phase_c pending; report=docs/sessions/S030-corpus-automations/reports/verification-report.md'
-  next_action: Finish T130.1 then M130 closeout / Phase C 08
+  current_stage: 08-verify-build
+  current_stage_note: 'M130 COMPLETE (T130.1–T130.4) @ ad9d1c4; Phase 30 07-build done; next 08-verify-build; phase_c / Gate
+    C→D pending; PR #238 open leave unmerged (no merge)'
+  next_action: 08-verify-build for M130/Phase 30 boundary
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -8118,9 +8190,13 @@ active_session:
     SKIPPED (bash 3.2/mapfile) — in report; prettier auto-fix test_uj081_freshness_ui.test.tsx. Tip pending parent bundle
     commit (report+format+handoff+workflow-state). Start T130.1/M130. PR #238 open; phase_c/Gate C→D still pending. [Corpus:
     feature-list.md §F77]'
-  - 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged (2026-08-12T22:46:00Z). Tip reconciled 73a6571→c610056. execution-plan.md still shows T128.5–T128.7 pending — parent will
-    mark completed (M128 done in git/workflow). HANDOFF.md next/position: parent updates (WSM owns YAML handoff_* only).
-    [Corpus: feature-list.md §F75–F77] [Spec: docs/test-plan.md §TC-252–265]'
+  - 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged (2026-08-12T22:46:00Z).
+    Tip reconciled 73a6571→c610056. execution-plan.md still shows T128.5–T128.7 pending — parent will mark completed (M128
+    done in git/workflow). HANDOFF.md next/position: parent updates (WSM owns YAML handoff_* only). [Corpus: feature-list.md
+    §F75–F77] [Spec: docs/test-plan.md §TC-252–265]'
+  - 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no merge
+    (2026-08-12T22:56:04Z). Tip ad9d1c4 (T130.1@0e95cd2 T130.2@2a884b3 T130.3@0b7a640 T130.4@ad9d1c4). 07-build completed
+    for Phase 30; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -8640,24 +8716,25 @@ active_session:
       bitsandbytes: deferred
   - stage: 07-build
     required: true
-    status: in_progress
+    status: completed
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: Implementing T130.1 / M130 (Phase 30 gate TC-252–265)
-    next_action: Finish T130.1 then M130 closeout / Phase C 08
+    current_action: completed_m130_phase30
+    next_action: 08-verify-build for M130/Phase 30 boundary
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
     milestone_hint: M130
-    note: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged. execution-plan T128.5–T128.7 pending rows — parent syncs. [Corpus: feature-list.md §F75–F77]'
+    note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next 08-verify-build
+      for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M130
-    current_task: T130.1
-    current_task_status: in_progress
-    t130_1_status: in_progress
+    current_task: null
+    current_task_status: completed
+    t130_1_status: completed
     t130_1_started_at: '2026-08-12T22:46:00Z'
-    m130_status: in_progress
+    m130_status: completed
     t127_5_status: completed
     t127_5_commit: 5d31dcf
     t127_6_status: completed
@@ -8677,13 +8754,13 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: c610056
-    tip_sha: c610056
-    tip_full: c6100568b06c14f643405941485eb236de7a90ce
-    tip_prev: 73a6571
+    tip: ad9d1c4
+    tip_sha: ad9d1c4
+    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip_prev: 0b7a640
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T22:41:12Z'
+    updated_at: '2026-08-12T22:56:04Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -8713,11 +8790,11 @@ active_session:
     t128_4_spec_source: TP2, ADR-052
     t128_4_depends_on: T128.3, T127.7
     substeps:
-      current_task: T130.1
+      current_task: null
       active_milestone: M130
-      current_task_status: in_progress
-      t130_1_status: in_progress
-      mode: m130_t130_1_in_progress
+      current_task_status: completed
+      t130_1_status: completed
+      mode: m130_complete_handoff_08
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
@@ -8728,7 +8805,7 @@ active_session:
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
       t128_5_status: completed
-      tip_sha: '6107037'
+      tip_sha: ad9d1c4
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
@@ -8753,9 +8830,9 @@ active_session:
       t129_4_sha: 4ef663b
       t129_5_status: completed
       t129_5_started_at: '2026-08-12T21:16:39Z'
-      tip: '6107037'
-      tip_full: 61070374986b17408b270d25b403cac66cf176dd
-      tip_prev: f48a7e7
+      tip: ad9d1c4
+      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      tip_prev: 0b7a640
       coding_blocked: false
       ci_gate: cleared_local_coverage
       ci_status: local_green_tip_pending_push_watch
@@ -8829,7 +8906,7 @@ active_session:
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
       execution_plan_sync_note: T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed
-      m130_status: pending
+      m130_status: completed
       t129_10_commit: '6107037'
       t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
       t129_10_completed: '2026-08-12'
@@ -8840,12 +8917,52 @@ active_session:
       m129_completed_at: '2026-08-12T22:25:00Z'
       m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
       s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:25:00Z'
+      updated_at: '2026-08-12T22:56:04Z'
+      current_milestone: M130
+      m130_completed: '2026-08-12'
+      m130_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_commit: 0e95cd2
+      t130_1_completed: '2026-08-12'
+      t130_1_completed_at: '2026-08-12T22:56:04Z'
+      t130_2_status: completed
+      t130_2_commit: 2a884b3
+      t130_2_completed: '2026-08-12'
+      t130_2_completed_at: '2026-08-12T22:56:04Z'
+      t130_3_status: completed
+      t130_3_commit: 0b7a640
+      t130_3_completed: '2026-08-12'
+      t130_3_completed_at: '2026-08-12T22:56:04Z'
+      t130_4_status: completed
+      t130_4_commit: ad9d1c4
+      t130_4_completed: '2026-08-12'
+      t130_4_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+      t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+      t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+      t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+      t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+      t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+      t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+      m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+      m127_pr_status: open
+      m127_pr_merge: deferred_no_merge
+      pr_238_status: open
+      pr_238_merge: deferred_no_merge
+      next_action: 08-verify-build for M130/Phase 30 boundary
+      recommended_next: 08-verify-build for M130/Phase 30 boundary
+      handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+      phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+        until 08 PASS; PR #238 open no merge'
+      execution_plan_active_task: M130 completed — next 08-verify-build
+      note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next
+        08-verify-build for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
     askquestion_pending: false
     askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
-    phase_note: 'M129 COMPLETE @6107037 (S030-D51); interim 08-verify-build then M130/T130.1; PR #238 open'
-    handoff_next: '**08-verify-build** for M129 boundary, then **T130.1**. Tip 6107037.'
-    execution_plan_active_task: M130 / T130.1 — after 08-verify-build
+    phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+      until 08 PASS; PR #238 open no merge'
+    handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+    execution_plan_active_task: M130 completed — next 08-verify-build
     t128_5_started_at: '2026-08-12T20:04:26Z'
     t128_4_followup_commit: 2bf2dca
     t128_4_followup_note: coverage + typecheck follow-up after T128.4 @2bf2dca
@@ -8889,7 +9006,7 @@ active_session:
     t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
     m129_status: completed
     askquestion_next_topic: Phase C / 08-verify-build vs continue M129 F77
-    recommended_next: 08-verify-build M129 boundary then T130.1
+    recommended_next: 08-verify-build for M130/Phase 30 boundary
     ci_gate: cleared_local_coverage
     ci_status: local_green_tip_pending_push_watch
     askquestion_pending_topic: null
@@ -8922,7 +9039,6 @@ active_session:
     t129_8_status: completed
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
-    m130_status: in_progress
     t129_10_status: completed
     t129_10_commit: '6107037'
     t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
@@ -8936,40 +9052,87 @@ active_session:
     m129_completed_at: '2026-08-12T22:25:00Z'
     m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
     s030_d51_decision: S030-D51
+    completed: '2026-08-12'
+    completed_at: '2026-08-12T22:56:04Z'
+    phase: Phase 30 M127–M130
+    phase_30_milestones:
+    - M127
+    - M128
+    - M129
+    - M130
+    current_milestone: M130
+    m130_completed: '2026-08-12'
+    m130_completed_at: '2026-08-12T22:56:04Z'
+    t130_1_commit: 0e95cd2
+    t130_1_completed: '2026-08-12'
+    t130_1_completed_at: '2026-08-12T22:56:04Z'
+    t130_2_status: completed
+    t130_2_commit: 2a884b3
+    t130_2_completed: '2026-08-12'
+    t130_2_completed_at: '2026-08-12T22:56:04Z'
+    t130_3_status: completed
+    t130_3_commit: 0b7a640
+    t130_3_completed: '2026-08-12'
+    t130_3_completed_at: '2026-08-12T22:56:04Z'
+    t130_4_status: completed
+    t130_4_commit: ad9d1c4
+    t130_4_completed: '2026-08-12'
+    t130_4_completed_at: '2026-08-12T22:56:04Z'
+    t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+    t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+    t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+    t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+    t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+    t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+    t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+    m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+    m127_pr_status: open
+    m127_pr_merge: deferred_no_merge
+    pr_238_status: open
+    pr_238_merge: deferred_no_merge
+    result: PASS_partial_phase30_at_07
+    phase_30_07_status: completed
+    phase_30_gate: partial_pass_awaiting_08
   - stage: 08-verify-build
     required: true
-    status: completed
+    status: pending
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: completed_m129_boundary
-    next_action: Re-open after M130 for Phase C / Gate C→D
+    current_action: awaiting_m130_phase30_verify
+    next_action: 08-verify-build for M130/Phase 30 boundary
     started_at: '2026-08-12'
     started_at_iso: '2026-08-12T22:25:00Z'
-    milestone_hint: M129
+    milestone_hint: M130
     m129_status: completed
-    m130_status: pending
-    note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
-      Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
-      interim; will re-open after M130. [Corpus: feature-list.md §F77]'
+    m130_status: completed
+    note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
+      merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
+      §F75–F77]'
     askquestion_pending: false
     s030_d51_decision: S030-D51
-    tip: c610056
-    tip_sha: c610056
-    tip_full: c6100568b06c14f643405941485eb236de7a90ce
-    tip_prev: 73a6571
-    updated_at: '2026-08-12T22:41:12Z'
+    tip: ad9d1c4
+    tip_sha: ad9d1c4
+    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip_prev: 0b7a640
+    updated_at: '2026-08-12T22:56:04Z'
     security_gate: PASSED
     security_gate_decision: S030-D53
     advisory_react_router: resolved
     report: docs/sessions/S030-corpus-automations/reports/verification-report.md
     m129_boundary_status: passed
-    m130_reopen_expected: true
+    m130_reopen_expected: false
     result: PASS
     completed: '2026-08-12'
     completed_at: '2026-08-12T22:41:12Z'
     s030_d54_decision: S030-D54
     pr_238_status: open
+    recommended_next: 08-verify-build for M130/Phase 30 boundary
+    askquestion_pending_topic: null
+    phase_c: pending
+    gate_c_to_d: pending
+    pr_238_merge: deferred_no_merge
   - stage: 09-qa
     required: true
     status: pending
@@ -8997,7 +9160,7 @@ active_session:
     skip_rationale: null
   handoff:
     next_skill: 08-verify-build
-    next_action: 08-verify-build M129 boundary then T130.1
+    next_action: 08-verify-build for M130/Phase 30 boundary
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -9009,25 +9172,27 @@ active_session:
     gate_b_to_c: passed
     phase_b: passed
     phase_c: pending
-    phase_note: 'M129 COMPLETE @6107037; 08-verify-build M129 boundary then M130/T130.1; PR #238 open'
+    phase_note: 'M130 COMPLETE @ad9d1c4; Phase 30 07 done; next 08-verify-build; PR #238 open no merge'
     decision: S030-D51
     s030_d51_decision: S030-D51
     handoff_md: docs/sessions/S030-corpus-automations/HANDOFF.md
     active_milestone: M130
-    current_task: T130.1
-    current_task_status: in_progress
+    current_task: null
+    current_task_status: completed
     m129_status: completed
-    m130_status: in_progress
+    m130_status: completed
     t129_10_status: completed
     t129_10_commit: '6107037'
-    tip: c610056
-    tip_sha: c610056
-    tip_full: c6100568b06c14f643405941485eb236de7a90ce
-    tip_prev: 73a6571
+    tip: ad9d1c4
+    tip_sha: ad9d1c4
+    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip_prev: 0b7a640
     askquestion_pending: false
-    updated_at: '2026-08-12T22:46:00Z'
+    updated_at: '2026-08-12T22:56:04Z'
     pr_238_status: open
-    note: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged'
+    note: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no
+      merge'
+    recommended_next: 08-verify-build for M130/Phase 30 boundary
   askquestion_pending: false
   askquestion_pending_topic: null
   artifacts:
@@ -9080,7 +9245,7 @@ active_session:
   - infra/modal/finetune_pins.py
   - tests/unit/modal/test_finetune_pins.py
   - docs/dependency-inventory.md
-  updated_at: '2026-08-12T22:06:15Z'
+  updated_at: '2026-08-12T22:56:04Z'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout of uncommitted S030 workflow-state
   s030_d31_decision: S030-D31
   s030_d32_decision: S030-D32
@@ -9090,34 +9255,43 @@ active_session:
   build_plan_card: waived
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
-  askquestion_cleared: 'S030-D54/T130.1 START: T130.1 in_progress; PR #238 remains open (no merge)'
-  tip: c610056
-  tip_sha: c610056
-  tip_full: c6100568b06c14f643405941485eb236de7a90ce
-  tip_prev: 73a6571
-  handoff_tip: c610056
-  current_action: Implementing T130.1 / M130 (Phase 30 gate TC-252–265)
-  current_task: T130.1
-  current_task_status: in_progress
+  askquestion_cleared: 'M130 COMPLETE @ ad9d1c4; PR #238 remains open (no merge); next 08-verify-build'
+  tip: ad9d1c4
+  tip_sha: ad9d1c4
+  tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+  tip_prev: 0b7a640
+  handoff_tip: ad9d1c4
+  current_action: handoff_08_verify_build_m130
+  current_task: null
+  current_task_status: completed
   handoff_sync_needed:
     path: docs/sessions/S030-corpus-automations/HANDOFF.md
     tip_pending_parent_commit: false
     prior_tip: 73a6571
-    position: T130.1 in_progress / M130 Phase 30 gate TC-252–265
+    position: M130 COMPLETE — next 08-verify-build / Phase 30 boundary
     pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     updated_needed: true
     owner: parent
     note: WSM does not edit HANDOFF.md; parent should refresh next/position/tip
-    suggested_blurb: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged. M129 08 PASS (S030-D54). report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
-      Next remains **T130.1 / M130**. PR #238 open leave unmerged. phase_c / Gate C→D pending.'
-    tip: c610056
-  updated_at: '2026-08-12T22:46:00Z'
+    suggested_blurb: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR
+      #238 open no merge. Tip ad9d1c4. Next **08-verify-build**. PR #238 open leave unmerged. phase_c / Gate C→D pending.'
+    tip: ad9d1c4
   expected_report: docs/sessions/S030-corpus-automations/reports/verification-report.md
   m129_08_status: passed
   active_milestone: M130
   session_artifacts:
   - docs/sessions/S030-corpus-automations/reports/verification-report.md
   tip_pending_parent_commit: false
+  recommended_next: 08-verify-build for M130/Phase 30 boundary
+  m130_status: completed
+  t130_1_status: completed
+  t130_1_commit: 0e95cd2
+  t130_2_status: completed
+  t130_2_commit: 2a884b3
+  t130_3_status: completed
+  t130_3_commit: 0b7a640
+  t130_4_status: completed
+  t130_4_commit: ad9d1c4
 sessions:
 - id: S029-security-install-tools-flake
   type: hotfix
@@ -22366,7 +22540,7 @@ stages:
       §TP10]'
     updated_at: '2026-08-07T14:47:56Z'
   07-build:
-    status: in_progress
+    status: completed
     ready: true
     session_id: S030-corpus-automations
     branch: evolve/EV-027-corpus-automations
@@ -22382,8 +22556,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: Implementing T130.1 / M130 (Phase 30 gate TC-252–265)
-    next_action: Finish T130.1 then M130 closeout / Phase C 08
+    current_action: completed_m130_phase30
+    next_action: 08-verify-build for M130/Phase 30 boundary
     askquestion_pending: false
     askquestion_pending_topic: null
     gate_a_to_b: passed
@@ -22399,8 +22573,9 @@ stages:
     - M128
     - M129
     - M130
-    note: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged. [Corpus: feature-list.md §F75–F77]'
-    updated_at: '2026-08-12T22:46:00Z'
+    note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next 08-verify-build
+      for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
+    updated_at: '2026-08-12T22:56:04Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     t127_5_status: completed
@@ -22420,17 +22595,17 @@ stages:
     m127_status: completed
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    tip: c610056
-    tip_sha: c610056
-    tip_full: c6100568b06c14f643405941485eb236de7a90ce
-    tip_prev: 73a6571
+    tip: ad9d1c4
+    tip_sha: ad9d1c4
+    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip_prev: 0b7a640
     active_milestone: M130
     current_milestone: M130
-    current_task: T130.1
-    current_task_status: in_progress
-    t130_1_status: in_progress
+    current_task: null
+    current_task_status: completed
+    t130_1_status: completed
     t130_1_started_at: '2026-08-12T22:46:00Z'
-    m130_status: in_progress
+    m130_status: completed
     t128_2_status: completed
     t128_2_commit: 7b1aa87
     t128_3_status: completed
@@ -23284,10 +23459,10 @@ stages:
     build_plan_card_waiver: S030-D31
     build_plan_card_sot: tech-plan-delta + Phase 30
     substeps:
-      current_task: T129.10
-      active_milestone: M129
-      current_task_status: in_progress
-      mode: m129_task_loop
+      current_task: null
+      active_milestone: M130
+      current_task_status: completed
+      mode: m130_complete_handoff_08
       build_plan_card: waived_S030-D31
       t127_5_status: completed
       t127_6_status: completed
@@ -23305,7 +23480,7 @@ stages:
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
       phase_ab_docs_committed: true
-      tip_sha: f48a7e7
+      tip_sha: ad9d1c4
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
@@ -23328,12 +23503,12 @@ stages:
       t128_7_started_at: '2026-08-12T20:24:30Z'
       m128_status: completed
       t128_7_commit: bdaec9d
-      m129_status: in_progress
+      m129_status: completed
       t129_3_status: completed
       t129_4_status: completed
       t129_4_sha: 4ef663b
       t129_5_status: completed
-      tip: f48a7e7
+      tip: ad9d1c4
       coding_blocked: false
       ci_gate: cleared_local_coverage
       ci_status: local_green_tip_pending_push_watch
@@ -23359,8 +23534,8 @@ stages:
       t129_6_status: completed
       t129_6_started_at: '2026-08-12T21:36:28Z'
       t129_6_description: 'Code: GET …/finetune/runs/{id}/eval base vs adapter report (F36 golden)'
-      tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-      tip_prev: c8b5b96
+      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      tip_prev: 0b7a640
       coverage_local_dm_branch: 453/476
       coverage_local_dm_branch_pct: 95.2%
       askquestion_pending: false
@@ -23406,6 +23581,48 @@ stages:
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
       execution_plan_sync_note: T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed
+      current_milestone: M130
+      m130_status: completed
+      m130_completed: '2026-08-12'
+      m130_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_status: completed
+      t130_1_commit: 0e95cd2
+      t130_1_completed: '2026-08-12'
+      t130_1_completed_at: '2026-08-12T22:56:04Z'
+      t130_2_status: completed
+      t130_2_commit: 2a884b3
+      t130_2_completed: '2026-08-12'
+      t130_2_completed_at: '2026-08-12T22:56:04Z'
+      t130_3_status: completed
+      t130_3_commit: 0b7a640
+      t130_3_completed: '2026-08-12'
+      t130_3_completed_at: '2026-08-12T22:56:04Z'
+      t130_4_status: completed
+      t130_4_commit: ad9d1c4
+      t130_4_completed: '2026-08-12'
+      t130_4_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+      t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+      t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+      t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+      t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+      t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+      t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+      m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+      m127_pr_status: open
+      m127_pr_merge: deferred_no_merge
+      pr_238_status: open
+      pr_238_merge: deferred_no_merge
+      updated_at: '2026-08-12T22:56:04Z'
+      next_action: 08-verify-build for M130/Phase 30 boundary
+      recommended_next: 08-verify-build for M130/Phase 30 boundary
+      handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+      phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+        until 08 PASS; PR #238 open no merge'
+      execution_plan_active_task: M130 completed — next 08-verify-build
+      note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next
+        08-verify-build for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -23428,7 +23645,7 @@ stages:
     t128_4_spec_source: TP2, ADR-052
     t128_4_depends_on: T128.3, T127.7
     m127_pr_status: open
-    m127_pr_merge: deferred_user_option_1
+    m127_pr_merge: deferred_no_merge
     pr_238_ci_status: in_progress
     pr_238_ci_note: tip 932c036 run 31640505267 success (gitleaks retry)
     t128_5_started_at: '2026-08-12T20:04:26Z'
@@ -23441,9 +23658,10 @@ stages:
     t128_5_depends_on: T128.4
     t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
     t128_6_status: completed
-    execution_plan_active_task: M129 / T129.10 — API e2e UJ-082 + Vitest + Playwright
-    handoff_next: '**T129.10** — API e2e UJ-082 + Vitest + Playwright (F77). Tip f48a7e7.'
-    phase_note: 'M129/T129.10 in_progress; tip f48a7e7; T129.9 COMPLETE (S030-D50); PR #238 open'
+    execution_plan_active_task: M130 completed — next 08-verify-build
+    handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+    phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+      until 08 PASS; PR #238 open no merge'
     t128_6_started_at: '2026-08-12T20:18:53Z'
     tip_pushed: true
     tip_pushed_to: origin/evolve/EV-027-corpus-automations
@@ -23475,8 +23693,7 @@ stages:
     t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
     m129_status: completed
     askquestion_next_topic: null
-    recommended_next: 'Continue T129.3: scaffold infra/modal/finetune_app.py, vecinita-llm-finetune + llm-finetune-adapters,
-      secrets docs; wire FINETUNE_IMAGE_PIPS from finetune_pins.py'
+    recommended_next: 08-verify-build for M130/Phase 30 boundary
     m129_path_confirmed: true
     m129_path_confirmed_at: '2026-08-12T20:32:06Z'
     m129_path_decision: S030-D34
@@ -23575,8 +23792,41 @@ stages:
     t129_8_status: completed
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+    completed: '2026-08-12'
+    completed_at: '2026-08-12T22:56:04Z'
+    m130_completed: '2026-08-12'
+    m130_completed_at: '2026-08-12T22:56:04Z'
+    t130_1_commit: 0e95cd2
+    t130_1_completed: '2026-08-12'
+    t130_1_completed_at: '2026-08-12T22:56:04Z'
+    t130_2_status: completed
+    t130_2_commit: 2a884b3
+    t130_2_completed: '2026-08-12'
+    t130_2_completed_at: '2026-08-12T22:56:04Z'
+    t130_3_status: completed
+    t130_3_commit: 0b7a640
+    t130_3_completed: '2026-08-12'
+    t130_3_completed_at: '2026-08-12T22:56:04Z'
+    t130_4_status: completed
+    t130_4_commit: ad9d1c4
+    t130_4_completed: '2026-08-12'
+    t130_4_completed_at: '2026-08-12T22:56:04Z'
+    t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+    t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+    t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+    t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+    t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+    t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+    t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+    m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+    pr_238_status: open
+    pr_238_merge: deferred_no_merge
+    result: PASS_partial_phase30_at_07
+    phase_30_07_status: completed
+    phase_30_gate: partial_pass_awaiting_08
   08-verify-build:
-    status: completed
+    status: pending
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
     started_at: '2026-08-05'
@@ -23589,14 +23839,14 @@ stages:
     feature_ids:
     - F70
     - F71
-    tip_sha: eb951fd
+    tip_sha: ad9d1c4
     commit_deployed: 4b7231b
-    current_action: Finish 08-verify-build M129 boundary (verification-report) then T130.1
+    current_action: awaiting_m130_phase30_verify
     askquestion_pending: false
-    note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
-      Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
-      interim; will re-open after M130. [Corpus: feature-list.md §F77]'
-    updated_at: '2026-08-12T22:41:12Z'
+    note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
+      merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
+      §F75–F77]'
+    updated_at: '2026-08-12T22:56:04Z'
     s027_d64_decision: S027-D64
     reconciled_from: S027-D63
     session_closed: true
@@ -24462,16 +24712,27 @@ stages:
       pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
       m118_verify_at: '2026-08-05T00:45:00Z'
       m118_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-    tip: eb951fd
-    tip_full: eb951fdde5285fb1acbde72633aa45383420528d
-    tip_prev: 59ac29d
-    next_action: 08-verify-build M129 verification-report then T130.1
+    tip: ad9d1c4
+    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip_prev: 0b7a640
+    next_action: 08-verify-build for M130/Phase 30 boundary
     security_gate: PASSED
     security_gate_decision: S030-D53
     advisory_react_router: resolved
     m129_boundary_status: passed
     result: PASS
     s030_d54_decision: S030-D54
+    ready: true
+    recommended_next: 08-verify-build for M130/Phase 30 boundary
+    milestone_hint: M130
+    m129_status: completed
+    m130_status: completed
+    m130_reopen_expected: false
+    askquestion_pending_topic: null
+    phase_c: pending
+    gate_c_to_d: pending
+    pr_238_status: open
+    pr_238_merge: deferred_no_merge
   09-qa:
     status: completed
     started_at: '2026-08-06'
@@ -28711,24 +28972,25 @@ evolve_cycles:
     upgrade_note: S030-D9 — restored 03-plan-tooling and 06-tech-tooling as required (Full preset)
   routing_preset: Full
   preset: Full
-  current_stage: 07-build
-  current_action: Implementing T130.1 / M130 (Phase 30 gate TC-252–265)
-  next_action: Finish T130.1 then M130 closeout / Phase C 08
+  current_stage: 08-verify-build
+  current_action: handoff_08_verify_build_m130
+  next_action: 08-verify-build for M130/Phase 30 boundary
   active_milestone: M130
-  current_task: T130.1
-  current_task_status: in_progress
-  t130_1_status: in_progress
+  current_task: null
+  current_task_status: completed
+  t130_1_status: completed
   t130_1_started_at: '2026-08-12T22:46:00Z'
-  m130_status: in_progress
+  m130_status: completed
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: c610056
-  tip_sha: c610056
-  tip_full: c6100568b06c14f643405941485eb236de7a90ce
-  tip_prev: 73a6571
-  current_stage_note: 'T130.1 in_progress (M130 Phase 30 gate TC-252–265); tip c610056; PR #238 open leave unmerged; M129 08 PASS (S030-D54); phase_c pending'
-  notes: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged (2026-08-12T22:46:00Z). Prior S030-D54 M129 08 PASS. Tip 73a6571→c610056. execution-plan T128.5–T128.7 pending rows
-    — parent syncs (M128 done). PR #238 open leave unmerged. [Corpus: feature-list.md §F75–F77]'
+  tip: ad9d1c4
+  tip_sha: ad9d1c4
+  tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+  tip_prev: 0b7a640
+  current_stage_note: 'M130 COMPLETE (T130.1–T130.4); Phase 30 07-build done @ ad9d1c4; next 08-verify-build; phase_c pending;
+    PR #238 open leave unmerged (no merge)'
+  notes: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no
+    merge (2026-08-12T22:56:04Z). Tip ad9d1c4. [Corpus: feature-list.md §F75–F77]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -29037,7 +29299,7 @@ evolve_cycles:
         S030-D31]'
       s030_d32_decision: S030-D32
     07-build:
-      status: in_progress
+      status: completed
       ready: true
       mode: delta
       session_id: S030-corpus-automations
@@ -29046,25 +29308,26 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: Implementing T130.1 / M130 (Phase 30 gate TC-252–265)
-      next_action: Finish T130.1 then M130 closeout / Phase C 08
+      current_action: completed_m130_phase30
+      next_action: 08-verify-build for M130/Phase 30 boundary
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
       milestone_hint: M130
-      updated_at: '2026-08-12T22:46:00Z'
-      note: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged. [Corpus: feature-list.md §F75–F77]'
+      updated_at: '2026-08-12T22:56:04Z'
+      note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next
+        08-verify-build for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M130
       current_milestone: M130
-      current_task: T130.1
-      current_task_status: in_progress
-      t130_1_status: in_progress
+      current_task: null
+      current_task_status: completed
+      t130_1_status: completed
       t130_1_started_at: '2026-08-12T22:46:00Z'
-      m130_status: in_progress
+      m130_status: completed
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -29084,10 +29347,10 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: c610056
-      tip_sha: c610056
-      tip_full: c6100568b06c14f643405941485eb236de7a90ce
-      tip_prev: 73a6571
+      tip: ad9d1c4
+      tip_sha: ad9d1c4
+      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      tip_prev: 0b7a640
       s030_d31_decision: S030-D31
       s030_d43_decision: S030-D43
       s030_d44_decision: S030-D44
@@ -29101,11 +29364,11 @@ evolve_cycles:
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T130.1
+        current_task: null
         active_milestone: M130
-        current_task_status: in_progress
-        t130_1_status: in_progress
-        mode: m130_t130_1_in_progress
+        current_task_status: completed
+        t130_1_status: completed
+        mode: m130_complete_handoff_08
         build_plan_card: waived_S030-D31
         t129_3_status: completed
         t129_3_sha: a75af50
@@ -29126,7 +29389,7 @@ evolve_cycles:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: '6107037'
+        tip_sha: ad9d1c4
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -29151,9 +29414,9 @@ evolve_cycles:
         m128_status: completed
         t128_7_commit: bdaec9d
         m129_status: completed
-        tip: '6107037'
-        tip_full: 61070374986b17408b270d25b403cac66cf176dd
-        tip_prev: f48a7e7
+        tip: ad9d1c4
+        tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+        tip_prev: 0b7a640
         tip_pushed_to: origin/evolve/EV-027-corpus-automations
         pr_238_ci_watching: true
         pr_238_ci_status: in_progress
@@ -29177,15 +29440,14 @@ evolve_cycles:
         ci_failed_at: null
         ci_fix_decision: S030-D35
         ci_fix_focus: dm_fe_coverage_f76_freshness_ui
-        handoff_next: '**08-verify-build** for M129 boundary, then **T130.1**. Tip 6107037.'
-        recommended_next: 'Continue T129.3: scaffold infra/modal/finetune_app.py, vecinita-llm-finetune + llm-finetune-adapters,
-          secrets docs; wire FINETUNE_IMAGE_PIPS from finetune_pins.py'
+        handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+        recommended_next: 08-verify-build for M130/Phase 30 boundary
         s030_d35_decision: S030-D35
-        phase_note: 'M129 COMPLETE @6107037 (S030-D51); 08-verify-build M129 boundary then M130/T130.1; PR #238 open'
-        note: 'S030-D42 2026-08-12T21:06:16Z: Tip 932c036 (fix: retry gitleaks download on GitHub Releases 503) — CI GREEN
-          run 31640505267. Cleared S030-D41 gitleaks flake gate / coding_blocked. T129.3 remains in_progress as next coding
-          task (T129.1+T129.2 done).'
-        updated_at: '2026-08-12T22:25:00Z'
+        phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+          until 08 PASS; PR #238 open no merge'
+        note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next
+          08-verify-build for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
+        updated_at: '2026-08-12T22:56:04Z'
         tip_pushed_at: '2026-08-12T20:39:07Z'
         coverage_fix_decision: S030-D36
         prior_ci_tip: 0fff625
@@ -29346,7 +29608,7 @@ evolve_cycles:
         t129_10_status: completed
         t129_10_started_at: '2026-08-12T22:06:15Z'
         t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-        m130_status: in_progress
+        m130_status: completed
         t129_10_commit: '6107037'
         t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
         t129_10_completed: '2026-08-12'
@@ -29357,13 +29619,45 @@ evolve_cycles:
         m129_completed_at: '2026-08-12T22:25:00Z'
         m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
         s030_d51_decision: S030-D51
+        current_milestone: M130
+        m130_completed: '2026-08-12'
+        m130_completed_at: '2026-08-12T22:56:04Z'
+        t130_1_commit: 0e95cd2
+        t130_1_completed: '2026-08-12'
+        t130_1_completed_at: '2026-08-12T22:56:04Z'
+        t130_2_status: completed
+        t130_2_commit: 2a884b3
+        t130_2_completed: '2026-08-12'
+        t130_2_completed_at: '2026-08-12T22:56:04Z'
+        t130_3_status: completed
+        t130_3_commit: 0b7a640
+        t130_3_completed: '2026-08-12'
+        t130_3_completed_at: '2026-08-12T22:56:04Z'
+        t130_4_status: completed
+        t130_4_commit: ad9d1c4
+        t130_4_completed: '2026-08-12'
+        t130_4_completed_at: '2026-08-12T22:56:04Z'
+        t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+        t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+        t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+        t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+        t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+        t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+        t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+        t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+        m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+        m127_pr_status: open
+        m127_pr_merge: deferred_no_merge
+        pr_238_status: open
+        pr_238_merge: deferred_no_merge
+        next_action: 08-verify-build for M130/Phase 30 boundary
+        execution_plan_active_task: M130 completed — next 08-verify-build
       execution_plan_sync_note: T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
       ci_fix_commit: 5fc2d21
       ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-      current_task_status: in_progress
       askquestion_pending_topic: null
       askquestion_cleared: 'S030-D54/T130.1 START: T130.1 in_progress; PR #238 remains open (no merge)'
       t128_2_status: completed
@@ -29402,9 +29696,10 @@ evolve_cycles:
       t128_5_depends_on: T128.4
       t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
       t128_6_status: completed
-      execution_plan_active_task: M129 / T129.10 — API e2e UJ-082 + Vitest + Playwright
-      handoff_next: '**T129.10** — API e2e UJ-082 + Vitest + Playwright (F77). Tip f48a7e7.'
-      phase_note: 'M129/T129.10 in_progress; tip f48a7e7; T129.9 COMPLETE (S030-D50); PR #238 open'
+      execution_plan_active_task: M130 completed — next 08-verify-build
+      handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
+      phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
+        until 08 PASS; PR #238 open no merge'
       t128_6_started_at: '2026-08-12T20:18:53Z'
       tip_pushed: true
       tip_pushed_to: origin/evolve/EV-027-corpus-automations
@@ -29435,8 +29730,7 @@ evolve_cycles:
       t128_7_depends_on: T128.4, T128.6
       t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
       askquestion_next_topic: Phase C / 08-verify-build vs continue M129 F77
-      recommended_next: Continue 07-build M129 F77 per Phase 30 plan after parent confirm; Gate C→D / 08-verify-build after
-        M129–M130 (or interim verify if parent waives)
+      recommended_next: 08-verify-build for M130/Phase 30 boundary
       pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
       s030_d45_decision: S030-D45
       branch: evolve/EV-027-corpus-automations
@@ -29480,7 +29774,6 @@ evolve_cycles:
       t129_10_status: completed
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      m130_status: in_progress
       s030_d51_decision: S030-D51
       t129_10_commit: '6107037'
       t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
@@ -29491,8 +29784,49 @@ evolve_cycles:
       m129_completed: '2026-08-12'
       m129_completed_at: '2026-08-12T22:25:00Z'
       m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
+      completed: '2026-08-12'
+      completed_at: '2026-08-12T22:56:04Z'
+      phase: Phase 30 M127–M130
+      phase_30_milestones:
+      - M127
+      - M128
+      - M129
+      - M130
+      m130_completed: '2026-08-12'
+      m130_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_commit: 0e95cd2
+      t130_1_completed: '2026-08-12'
+      t130_1_completed_at: '2026-08-12T22:56:04Z'
+      t130_2_status: completed
+      t130_2_commit: 2a884b3
+      t130_2_completed: '2026-08-12'
+      t130_2_completed_at: '2026-08-12T22:56:04Z'
+      t130_3_status: completed
+      t130_3_commit: 0b7a640
+      t130_3_completed: '2026-08-12'
+      t130_3_completed_at: '2026-08-12T22:56:04Z'
+      t130_4_status: completed
+      t130_4_commit: ad9d1c4
+      t130_4_completed: '2026-08-12'
+      t130_4_completed_at: '2026-08-12T22:56:04Z'
+      t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
+      t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+      t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
+      t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
+      t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
+      t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
+      t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
+      m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
+      m127_pr_status: open
+      m127_pr_merge: deferred_no_merge
+      pr_238_status: open
+      pr_238_merge: deferred_no_merge
+      result: PASS_partial_phase30_at_07
+      phase_30_07_status: completed
+      phase_30_gate: partial_pass_awaiting_08
     08-verify-build:
-      status: completed
+      status: pending
       ready: true
       mode: delta
       session_id: S030-corpus-automations
@@ -29501,23 +29835,23 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: completed_m129_boundary
-      next_action: Re-open after M130 for Phase C / Gate C→D
+      current_action: awaiting_m130_phase30_verify
+      next_action: 08-verify-build for M130/Phase 30 boundary
       askquestion_pending: false
-      milestone_hint: M129
+      milestone_hint: M130
       m129_status: completed
-      m130_status: pending
-      note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
-        Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
-        interim; will re-open after M130. [Corpus: feature-list.md §F77]'
+      m130_status: completed
+      note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
+        merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
+        §F75–F77]'
       started_at: '2026-08-12'
       started_at_iso: '2026-08-12T22:25:00Z'
       s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:41:12Z'
-      tip: c610056
-      tip_sha: c610056
-      tip_full: c6100568b06c14f643405941485eb236de7a90ce
-      tip_prev: 73a6571
+      updated_at: '2026-08-12T22:56:04Z'
+      tip: ad9d1c4
+      tip_sha: ad9d1c4
+      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+      tip_prev: 0b7a640
       security_gate: PASSED
       security_gate_decision: S030-D53
       security_gate_note: make security-scan PASSED @ eb951fd; Grype HIGH 0; npm audit 0; react-router@7.18.2; cleared GHSA-qwww-vcr4-c8h2;
@@ -29530,7 +29864,7 @@ evolve_cycles:
       completed_at_iso: '2026-08-12T22:41:12Z'
       report: docs/sessions/S030-corpus-automations/reports/verification-report.md
       m129_boundary_status: passed
-      m130_reopen_expected: true
+      m130_reopen_expected: false
       result: PASS
       verdict: PASS
       evidence:
@@ -29545,6 +29879,9 @@ evolve_cycles:
       phase_c: pending
       gate_c_to_d: pending
       tip_pending_parent_commit: false
+      recommended_next: 08-verify-build for M130/Phase 30 boundary
+      askquestion_pending_topic: null
+      pr_238_merge: deferred_no_merge
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -29642,18 +29979,10 @@ evolve_cycles:
     updated_at: '2026-08-12T19:40:00Z'
     note: 'Synced Phase C 07-build M128; M127 PR #238 open; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout wiped uncommitted S030 state
-  phase_note: 'T130.1 in_progress @ c610056; M129 08 PASS (S030-D54); M128 complete (T128.1–T128.7); PR #238 open; phase_c / Gate C→D pending until M130'
+  phase_note: 'T130.1 in_progress @ c610056; M129 08 PASS (S030-D54); M128 complete (T128.1–T128.7); PR #238 open; phase_c
+    / Gate C→D pending until M130'
   s030_d30_decision: S030-D30
-  updated_at: '2026-08-12T22:46:00Z'
-  current_task_status: in_progress
-  current_task: T130.1
-  active_milestone: M130
-  t130_1_status: in_progress
-  m130_status: in_progress
-  tip: c610056
-  tip_sha: c610056
-  tip_full: c6100568b06c14f643405941485eb236de7a90ce
-  tip_prev: 73a6571
+  updated_at: '2026-08-12T22:56:04Z'
   askquestion_cleared: 'S030-D54/T130.1 START: T130.1 in_progress; PR #238 remains open (no merge)'
   progress_note: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged'
   next_child_stage: 08-verify-build
@@ -29721,6 +30050,32 @@ evolve_cycles:
       M129 (verification-report), then T130.1 / M130. PR #238 open.'
   m129_08_status: passed
   tip_pending_parent_commit: false
+  recommended_next: 08-verify-build for M130/Phase 30 boundary
+  m130_completed: '2026-08-12'
+  m130_completed_at: '2026-08-12T22:56:04Z'
+  t130_1_commit: 0e95cd2
+  t130_1_completed_at: '2026-08-12T22:56:04Z'
+  t130_2_status: completed
+  t130_2_commit: 2a884b3
+  t130_2_completed_at: '2026-08-12T22:56:04Z'
+  t130_3_status: completed
+  t130_3_commit: 0b7a640
+  t130_3_completed_at: '2026-08-12T22:56:04Z'
+  t130_4_status: completed
+  t130_4_commit: ad9d1c4
+  t130_4_completed_at: '2026-08-12T22:56:04Z'
+  m127_pr_status: open
+  m127_pr_merge: deferred_no_merge
+  pr_238_status: open
+  pr_238_merge: deferred_no_merge
+  progress_notes:
+  - at: '2026-08-12T22:56:04Z'
+    note: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no
+      merge'
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M130
+    tip: ad9d1c4
 - id: EV-026
   session_id: S028-chat-source-ux
   cycle_type: feature
@@ -54924,8 +55279,8 @@ decisions_log:
   evolve_cycle_id: EV-027
   id: S030-T130-1-START
   decision: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged'
-  note: 'Tip c610056 (prev 73a6571). execution-plan.md T128.5–T128.7 still pending — parent syncs completed (M128 done in
-    git/workflow). HANDOFF.md next/position owned by parent; YAML handoff_* updated.'
+  note: Tip c610056 (prev 73a6571). execution-plan.md T128.5–T128.7 still pending — parent syncs completed (M128 done in git/workflow).
+    HANDOFF.md next/position owned by parent; YAML handoff_* updated.
   tip: c610056
   milestone: M130
   current_task: T130.1
@@ -58708,18 +59063,19 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: c610056
-    tip_sha: c610056
-    tip_full: c6100568b06c14f643405941485eb236de7a90ce
-    head_sha: c6100568b06c14f643405941485eb236de7a90ce
-    tip_prev: 73a6571
+    tip: ad9d1c4
+    tip_sha: ad9d1c4
+    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    head_sha: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip_prev: 0b7a640
     pushed: false
     origin_tip: unknown
     local_ahead: unknown
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    updated_at: '2026-08-12T22:46:00Z'
-    note: 'branch tip @c610056 T130.1 in_progress / M130; M129 08 PASS (S030-D54); PR #238 open; do not merge without approval'
+    updated_at: '2026-08-12T22:56:04Z'
+    note: 'branch tip @ad9d1c4 M130 COMPLETE (T130.1–T130.4); Phase 30 07 done; next 08-verify-build; PR #238 open leave unmerged
+      (no merge)'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
       / RA-020)
@@ -65280,39 +65636,48 @@ git_history:
     decision: S030-T130-1-START
     note: tip recorded at T130.1 START; parent may have committed before this state update
     corpus: '[Corpus: feature-list.md §F75–F77]'
-  notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
-    approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
-    | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
-    askquestion_pending=true EXPLICIT merge approval; ci_policy_intent pending (not implemented); NOT merged; M120 not started;
-    current_action=askquestion_explicit_merge_approval_pr208 | 2026-08-05T15:01:54Z S027/EV-025: PR #208 CI green @8e81ad3
-    (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31017760113); m119_verify=ci_green; m119_pr_status=open_ci_green;
-    askquestion_pending=true (M119 PR #208 CI green @8e81ad3 — continue M120 T120.1 vs pause vs merge #208?); current_action=askquestion_m120_continue_vs_pause_merge;
-    next=AskQuestion M120 T120.1 — continue build vs pause vs merge #208 first (merge still needs explicit approval) | 2026-08-05T14:56:48Z
-    S027/EV-025: PR #208 CI coverage fix pushed @8e81ad3 ([T119.5] test: cover embed prefix env/default branches for 95% gate);
-    also recorded ce06b2e; m119_verify=ci_coverage_fix_pushed; askquestion_pending=false; current_action=m119_08_await_ci_after_coverage_fix;
-    next=Watch GitHub CI on #208 after coverage fix @8e81ad3; then AskQuestion continue M120 T120.1 (merge #208 still needs
-    explicit approval) | 2026-08-05T14:48:00Z S027/EV-025: PR #208 OPEN (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/208);
-    tip @16f4d06; recorded commit 16f4d06 ([M119] docs: S027-D32 open PR-67; CI/F62 gate for full pytest); m119_verify=pr_open_await_ci;
-    askquestion_pending=false; current_action=m119_08_await_ci; next=Watch GitHub CI on #208; then AskQuestion continue M120
-    T120.1 (merge #208 still needs explicit approval) | 2026-08-05T00:20:00Z S026/EV-024: PR #207 CI green @2b8e8cd (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/30962353032);
-    pr_207_status=open_ci_green; current_action=present_gate_c_to_d; askquestion_pending=true (Gate C→D / phase_c — Phase
-    27 build complete; M118 PR #207 CI green); phase_c/c_to_d pending (NOT passed); next=User AskQuestion Gate C→D; on pass
-    → 08-verify-build closeout / 09-qa; merge #207 needs explicit approval | 2026-08-05T00:12:00Z S026/EV-024: recorded commit
-    2b8e8cd ([T118.3] docs: Phase 27 gate + issue closeout notes); PR #207 OPEN; CI watching; T118.3 committed @2b8e8cd; M118
-    completed; PR #207 OPEN; CI watching; askquestion_pending=true (Gate C→D / phase_c — Phase 27 build complete; M118 PR
-    #207); phase_c/c_to_d remain pending. Issue closeout comments posted on #104/#106/#93/#186/#170/#193; do not auto-close.
-    #87 already CLOSED. Live SUPABASE_SECRET_KEY sync still deferred (no prod.env). Do not auto-close #104/#106/#93/#186/#170/#193.
-    #87 already CLOSED. build_head=2b8e8cd; current_action=await_ci_207_gate_c_to_d; next=Await CI on #207; AskQuestion Gate
-    C→D; then 08-verify / 09-qa; askquestion_pending=true; phase_c/c_to_d pending on evolve/EV-024-frontend-ux-polish. | PR
-    #206 merged to main @ eb65837; evolve tip has Brewfile/secrets docs commit | 2026-08-05T02:00:00Z S026/EV-024 S026-D56:
-    12 COMPLETE APPROVED → 13 in_progress (validate_or_redeploy); main_tip=c942971; evolve_tip=d429d39; PR #207 merged; evolve
-    CI watch waived_n_a; checkpoints.deploy=pending; CD Modal+DO green | 2026-08-05T02:15:00Z S026/EV-024 S026-D57: 13 validate_existing_smokes
-    (option 1); no force redeploy; H1–H5 vs staging @c942971; prod.env still missing / F69 enrich deferred; 13 remains in_progress
-    | 2026-08-05T00:51:00Z S026/EV-024 13 validate-existing smokes PASS pending accept; await_smoke_accept; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-smoke.md;
-    deploy gate pending | 2026-08-05T00:54:00Z S026/EV-024 S026-D58: Accept 13 PASS; deploy gate+Phase D closed; write_evolve_summary;
-    cycle in_progress; summary=docs/sessions/S026-frontend-ux-polish/reports/evolve-summary.md | 2026-08-05T00:59:44Z S026/EV-024:
-    recorded closeout commit d12c37a ([M118] docs: close EV-024 / S026 after deploy gate PASS); evolve tip @d12c37a; cycle
-    remains completed; session closed'
+  - sha: 0e95cd2
+    sha_full: 0e95cd280746026eedd100ee77d31c5610c94242
+    branch: evolve/EV-027-corpus-automations
+    message: 'test: confirm TC-252–265 suite green for Phase 30 gate (F75–F77)'
+    stage: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M130
+    task: T130.1
+    timestamp: '2026-08-12T22:52:10Z'
+  - sha: 2a884b3
+    sha_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
+    branch: evolve/EV-027-corpus-automations
+    message: 'feat: mirror F75–F77 routes in internal-write OpenAPI (T130.2)'
+    stage: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M130
+    task: T130.2
+    timestamp: '2026-08-12T22:53:23Z'
+  - sha: 0b7a640
+    sha_full: 0b7a640a21a3377703820923fa67c13ada906396
+    branch: evolve/EV-027-corpus-automations
+    message: 'docs: confirm EV-027 secrets matrix and Modal FT secret names (T130.3)'
+    stage: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M130
+    task: T130.3
+    timestamp: '2026-08-12T22:53:45Z'
+  - sha: ad9d1c4
+    sha_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    branch: evolve/EV-027-corpus-automations
+    message: 'docs: close Phase 30 M130 gate notes for corpus automations (T130.4)'
+    stage: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M130
+    task: T130.4
+    timestamp: '2026-08-12T22:54:16Z'
+  notes: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no
+    merge; tip ad9d1c4; PR #238 open leave unmerged (no merge)'
   pull_requests:
     '195':
       number: 195
@@ -65402,12 +65767,12 @@ git_history:
         head was @c574f58; mergeCommit @2c884bd (2c884bd202524605d96e4d0d510e69e5a100a3a7) into main at 2026-08-05T15:11:52Z;
         S027-D34 merge approved + CI policy approved; prior PR CI green (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
         parent watching main CI on @2c884bd'
-  updated_at: '2026-08-05T00:54:00Z'
+  updated_at: '2026-08-12T22:56:04Z'
   main_tip: 2c884bd
   main_tip_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-  tip: c042f57
-  build_head: e7fa2b6
-  branch_ahead_of_origin: 2
+  tip: ad9d1c4
+  build_head: ad9d1c4
+  branch_ahead_of_origin: true
 constraints:
   cost:
     target_usd_per_month: 25
@@ -65613,5 +65978,8 @@ pull_requests:
     updated_at: '2026-08-07T01:10:00Z'
 notes: '2026-08-05T15:28:00Z S027/EV-025: PR #210 (PR-68) OPEN_AWAIT_CI (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/210);
   tip @5346ec3; m120_pr_status=open_await_ci; T120.2 in_progress; parent watching CI then continue T120.2; Gate C→D / phase_c
-  remain pending'
+  remain pending
+
+  2026-08-12T22:56:04Z S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR
+  #238 open no merge'
 askquestion_pending: false
