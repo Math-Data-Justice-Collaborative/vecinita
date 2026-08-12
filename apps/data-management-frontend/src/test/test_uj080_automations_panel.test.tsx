@@ -290,6 +290,7 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
   it("shows loadFailed when load rejects a non-Error value", async () => {
     vi.stubGlobal(
       "fetch",
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
       vi.fn().mockRejectedValue("backend down"),
     );
 
@@ -306,6 +307,7 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
       vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
         const url = fetchInputUrl(input);
         if (url.includes("/automations/config") && init?.method === "PATCH") {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
           return Promise.reject("patch refused");
         }
         if (url.includes("/automations/config")) {
