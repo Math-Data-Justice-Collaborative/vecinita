@@ -1,24 +1,31 @@
-"""F77 LoRA fine-tune policy helpers (approve gate, caps, no auto-promote).
+"""F77 LoRA fine-tune policy helpers (approve gate, caps, SFT pairs, promote pin).
 
 [Corpus: feature-list.md §F77]
 [Spec: docs/adr/ADR-053-modal-lora-finetune.md]
 [Spec: docs/config-spec.md §VECINITA_FINETUNE_*]
-[Spec: docs/acceptance-criteria.md §AC-FT2 §AC-FT4 §AC-FT6 §AC-FT7]
+[Spec: docs/acceptance-criteria.md §AC-FT1 §AC-FT2 §AC-FT4 §AC-FT6 §AC-FT7 §AC-FT9]
 [Spec: docs/api-contract.md §EV-027 Fine-tune]
-[Spec: docs/test-plan.md §TC-260 §TC-262 §TC-263]
+[Spec: docs/test-plan.md §TC-260 §TC-262 §TC-263 §TC-265]
+[Spec: docs/decisions.md §RD-340]
 """
 
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
 FINETUNE_MAX_CONCURRENT_ENV = "VECINITA_FINETUNE_MAX_CONCURRENT"
 FINETUNE_MAX_RUNS_PER_DAY_ENV = "VECINITA_FINETUNE_MAX_RUNS_PER_DAY"
+FINETUNE_ADAPTER_ID_ENV = "VECINITA_FINETUNE_ADAPTER_ID"
 
 DEFAULT_FINETUNE_MAX_CONCURRENT = 1
 DEFAULT_FINETUNE_MAX_RUNS_PER_DAY = 3
+
+DEFAULT_SFT_INSTRUCTION = (
+    "Answer the user's question using only the provided context from the Vecinita corpus."
+)
 
 TrainStartDecision = Literal[
     "start",
@@ -109,3 +116,77 @@ def decide_prod_adapter_pin(
     if not pin:
         return None
     return pin
+
+
+@dataclass(frozen=True, slots=True)
+class CorpusChunkText:
+    """Minimal chunk surface for SFT pair construction (RD-340)."""
+
+    chunk_id: str
+    text: str
+    title: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SftPair:
+    """One instruction/QA SFT training example derived from a corpus chunk."""
+
+    instruction: str
+    input: str
+    output: str
+    source_chunk_id: str
+
+
+def build_sft_pairs_from_chunks(
+    chunks: Sequence[CorpusChunkText],
+    *,
+    instruction: str = DEFAULT_SFT_INSTRUCTION,
+) -> list[SftPair]:
+    """Build instruction/QA SFT pairs from chunk text (AC-FT1 / RD-340).
+
+    Empty / whitespace-only chunks are skipped. Each kept chunk becomes one pair:
+    instruction (shared), input = titled context, output = chunk body.
+    """
+    pairs: list[SftPair] = []
+    for chunk in chunks:
+        body = chunk.text.strip()
+        if not body:
+            continue
+        title = (chunk.title or "").strip()
+        context = f"Title: {title}\n\n{body}" if title else body
+        pairs.append(
+            SftPair(
+                instruction=instruction,
+                input=(
+                    f"Context:\n{context}\n\nQuestion: What information does this source provide?"
+                ),
+                output=body,
+                source_chunk_id=chunk.chunk_id,
+            ),
+        )
+    return pairs
+
+
+def parse_finetune_adapter_id() -> str | None:
+    """Read promoted prod adapter pin from env (empty → base / None)."""
+    raw = os.environ.get(FINETUNE_ADAPTER_ID_ENV)
+    if raw is None:
+        return None
+    pin = raw.strip()
+    if not pin:
+        return None
+    return pin
+
+
+def decide_adapter_pin_after_promote(adapter_id: str) -> str:
+    """Normalize a human-promoted adapter id for ``VECINITA_FINETUNE_ADAPTER_ID``."""
+    pin = adapter_id.strip()
+    if not pin:
+        msg = "promote requires a non-empty adapter_id"
+        raise ValueError(msg)
+    return pin
+
+
+def decide_adapter_pin_after_rollback() -> None:
+    """Clear promoted pin → prod serves base model (TC-265 / AC-FT9)."""
+    return
