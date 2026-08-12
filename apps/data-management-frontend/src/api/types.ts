@@ -74,12 +74,20 @@ export interface DocumentSummary {
   source_path?: string | null;
   parent_url?: string | null;
   canonical_url?: string | null;
+  /** F76 — per-source freshness enable (default true when omitted). */
+  refresh_enabled?: boolean;
+  /** F76 — last successful freshness check (ISO timestamptz). */
+  last_checked_at?: string | null;
+  /** F76 — older than stale threshold (TC-258). */
+  stale?: boolean;
 }
 
 export interface DocumentMetadataPatch {
   display_title?: string | null;
   title?: string | null;
   language?: string | null;
+  /** F76 — enable/disable scheduled freshness for this URL source. */
+  refresh_enabled?: boolean;
 }
 
 export interface DocumentMetadataResponse {
@@ -88,6 +96,8 @@ export interface DocumentMetadataResponse {
   title: string | null;
   display_title: string | null;
   language: string | null;
+  refresh_enabled?: boolean;
+  last_checked_at?: string | null;
 }
 
 export type TreeNodeKind = "domain" | "path" | "document" | "chunk";

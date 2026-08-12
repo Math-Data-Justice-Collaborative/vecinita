@@ -9,6 +9,7 @@ import {
   patchChunkTags,
   patchDocumentMetadata,
   patchDocumentTags,
+  refreshDocument,
   retagDocument,
 } from "./corpus";
 import { mockFetchUrl } from "../test/fetch-mock";
@@ -78,6 +79,23 @@ describe("corpus api", () => {
     );
 
     await expect(listDocuments(options)).rejects.toThrow("forbidden");
+  });
+
+  it("listDocuments appends stale=true when filtering (F76 / TC-258)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ items: [], page: 1, page_size: 50, total: 0 }),
+        ),
+    );
+
+    await listDocuments(options, { stale: true });
+
+    const url = mockFetchUrl(0);
+    expect(url).toContain("stale=true");
+    expect(url).toContain("page=1");
   });
 
   it("listDocuments uses the status fallback when the error body is empty", async () => {
@@ -184,6 +202,59 @@ describe("corpus api", () => {
     await expect(
       patchDocumentMetadata(options, "missing", { display_title: "x" }),
     ).rejects.toThrow(/Patch document metadata failed \(404\)/);
+  });
+
+  it("patchDocumentMetadata sends refresh_enabled (F76 / TC-259)", async () => {
+    const dto = {
+      document_id: "doc-1",
+      url: "https://example.com/doc",
+      title: "Scraped",
+      display_title: null,
+      language: "en",
+      refresh_enabled: false,
+      last_checked_at: "2026-07-01T00:00:00Z",
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(dto)));
+
+    await expect(
+      patchDocumentMetadata(options, "doc-1", { refresh_enabled: false }),
+    ).resolves.toEqual(dto);
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({ refresh_enabled: false });
+  });
+
+  it("refreshDocument POSTs Refresh now and returns job_id (F76 / TC-259)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse({ job_id: "fresh-job-1" })),
+    );
+
+    await expect(refreshDocument(options, "doc-1")).resolves.toBe(
+      "fresh-job-1",
+    );
+
+    const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/documents/doc-1/refresh");
+    expect(init.method).toBe("POST");
+  });
+
+  it("refreshDocument surfaces HTTP error detail", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("disabled", { status: 409 })),
+    );
+    await expect(refreshDocument(options, "doc-1")).rejects.toThrow("disabled");
+  });
+
+  it("refreshDocument uses status fallback when body empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+    await expect(refreshDocument(options, "doc-1")).rejects.toThrow(
+      "Refresh document failed (500)",
+    );
   });
 
   it("patchDocumentTags uses the status fallback when the error body is empty", async () => {

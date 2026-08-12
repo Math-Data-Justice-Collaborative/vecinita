@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: implementing T128.5
-      next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
+      current_action: implementing T128.6
+      next_action: T128.6 — DM freshness UI — stale list, enable, Refresh now
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1981,7 +1981,7 @@ project:
       - M128
       - M129
       - M130
-      note: M128 T128.5 in_progress — hash-aware re-fetch; tip @2bf2dca
+      note: 'IN_PROGRESS — T128.6 DM freshness UI; tip @fdf68af pushed to origin; PR #238 CI watching'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -2001,13 +2001,13 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: 2bf2dca
-      tip_sha: 2bf2dca
-      tip_full: 2bf2dcac40ba1fda775088159ba2c963c155a3da
-      tip_prev: ac8fca7
-      updated_at: '2026-08-12T20:04:26Z'
+      tip: fdf68af
+      tip_sha: fdf68af
+      tip_full: fdf68afa3d4dcc54cbd0f998432c05f3dfa50eea
+      tip_prev: 2bf2dca
+      updated_at: '2026-08-12T20:18:53Z'
       active_milestone: M128
-      current_task: T128.5
+      current_task: T128.6
       current_task_status: in_progress
       t128_2_status: completed
       t128_2_commit: 7b1aa87
@@ -2016,7 +2016,7 @@ project:
       t128_4_status: completed
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
-      t128_5_status: in_progress
+      t128_5_status: completed
       s026_baseline:
         status: completed
         started_at: '2026-08-04'
@@ -2757,7 +2757,7 @@ project:
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T128.5
+        current_task: T128.6
         active_milestone: M128
         current_task_status: in_progress
         mode: task_loop
@@ -2776,7 +2776,7 @@ project:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: 2bf2dca
+        tip_sha: fdf68af
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -2786,8 +2786,13 @@ project:
         t128_4_status: completed
         t128_4_commit: ac8fca7
         t128_4_completed_at: '2026-08-12T19:40:00Z'
-        t128_5_status: in_progress
+        t128_5_status: completed
         t128_5_started_at: '2026-08-12T20:04:26Z'
+        t128_5_commit: fdf68af
+        t128_5_completed_at: '2026-08-12T20:11:03Z'
+        t128_6_status: in_progress
+        t128_6_started_at: '2026-08-12T20:18:53Z'
+        tip_pushed: true
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -2812,9 +2817,25 @@ project:
       m127_pr_status: open
       m127_pr_merge: deferred_user_option_1
       pr_238_ci_status: green
-      pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @e86290e local ahead 2 not pushed'
+      pr_238_ci_note: 'fdf68af pushed to origin; watching PR #238 CI'
       t128_5_started_at: '2026-08-12T20:04:26Z'
       t128_4_followup_commit: 2bf2dca
+      t128_5_commit: fdf68af
+      t128_5_completed_at: '2026-08-12T20:11:03Z'
+      t128_5_completed: '2026-08-12'
+      t128_5_description: 'Code: ingest/hash-aware re-fetch path for URL sources'
+      t128_5_spec_source: RD-329, packages/ingest
+      t128_5_depends_on: T128.4
+      t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
+      t128_6_status: in_progress
+      execution_plan_active_task: T128.6 in_progress
+      handoff_next: T128.6 in_progress — DM freshness UI
+      phase_note: '07-build in_progress M128 F76; tip fdf68af pushed; watching PR #238 CI; implementing T128.6'
+      t128_6_started_at: '2026-08-12T20:18:53Z'
+      tip_pushed: true
+      tip_pushed_to: origin/evolve/EV-027-corpus-automations
+      tip_pushed_at: '2026-08-12T20:18:53Z'
+      pr_238_ci_watching: true
     08-verify-build:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -7985,16 +8006,16 @@ active_session:
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: implementing T128.5
-    next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
+    current_action: implementing T128.6
+    next_action: T128.6 — DM freshness UI — stale list, enable, Refresh now
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
     milestone_hint: M128
-    note: 'IN_PROGRESS — M127 PR #238 open; T128.1–T128.4 COMPLETE; tip @2bf2dca; implementing T128.5'
+    note: 'IN_PROGRESS — T128.6 DM freshness UI; tip @fdf68af pushed to origin; PR #238 CI watching'
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M128
-    current_task: T128.5
+    current_task: T128.6
     current_task_status: in_progress
     t127_5_status: completed
     t127_5_commit: 5d31dcf
@@ -8015,13 +8036,13 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: 2bf2dca
-    tip_sha: 2bf2dca
-    tip_full: 2bf2dcac40ba1fda775088159ba2c963c155a3da
-    tip_prev: ac8fca7
+    tip: fdf68af
+    tip_sha: fdf68af
+    tip_full: fdf68afa3d4dcc54cbd0f998432c05f3dfa50eea
+    tip_prev: 2bf2dca
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T20:04:26Z'
+    updated_at: '2026-08-12T20:18:53Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -8045,13 +8066,13 @@ active_session:
     t128_4_status: completed
     t128_4_commit: ac8fca7
     t128_4_completed_at: '2026-08-12T19:40:00Z'
-    t128_5_status: in_progress
+    t128_5_status: completed
     t128_4_started_at: '2026-08-12T19:17:43Z'
     t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
     t128_4_spec_source: TP2, ADR-052
     t128_4_depends_on: T128.3, T127.7
     substeps:
-      current_task: T128.5
+      current_task: T128.6
       active_milestone: M128
       current_task_status: in_progress
       mode: task_loop
@@ -8064,21 +8085,40 @@ active_session:
       t128_4_status: completed
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
-      t128_5_status: in_progress
-      tip_sha: 2bf2dca
+      t128_5_status: completed
+      tip_sha: fdf68af
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
       t128_5_started_at: '2026-08-12T20:04:26Z'
+      t128_5_commit: fdf68af
+      t128_5_completed_at: '2026-08-12T20:11:03Z'
+      t128_6_status: in_progress
+      t128_6_started_at: '2026-08-12T20:18:53Z'
+      tip_pushed: true
     askquestion_pending: false
     askquestion_pending_topic: null
     askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
-    phase_note: 07-build in_progress M128 F76; T128.4 COMPLETE @ac8fca7 + follow-up @2bf2dca; T128.5 in_progress
-    handoff_next: T128.5 in_progress — hash-aware re-fetch
-    execution_plan_active_task: T128.5 in_progress
+    phase_note: '07-build in_progress M128 F76; tip fdf68af pushed; watching PR #238 CI; implementing T128.6'
+    handoff_next: T128.6 in_progress — DM freshness UI
+    execution_plan_active_task: T128.6 in_progress
     t128_5_started_at: '2026-08-12T20:04:26Z'
     t128_4_followup_commit: 2bf2dca
     t128_4_followup_note: coverage + typecheck follow-up after T128.4 @2bf2dca
+    t128_5_commit: fdf68af
+    t128_5_completed_at: '2026-08-12T20:11:03Z'
+    t128_5_completed: '2026-08-12'
+    t128_5_description: 'Code: ingest/hash-aware re-fetch path for URL sources'
+    t128_5_spec_source: RD-329, packages/ingest
+    t128_5_depends_on: T128.4
+    t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
+    t128_6_status: in_progress
+    t128_6_started_at: '2026-08-12T20:18:53Z'
+    tip_pushed: true
+    tip_pushed_to: origin/evolve/EV-027-corpus-automations
+    tip_pushed_at: '2026-08-12T20:18:53Z'
+    pr_238_ci_watching: true
+    pr_238_ci_note: 'fdf68af pushed to origin; watching PR #238 CI'
   - stage: 08-verify-build
     required: true
     status: pending
@@ -21504,8 +21544,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: implementing T128.5
-    next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
+    current_action: implementing T128.6
+    next_action: T128.6 — DM freshness UI — stale list, enable, Refresh now
     askquestion_pending: false
     askquestion_pending_topic: null
     gate_a_to_b: passed
@@ -21521,8 +21561,8 @@ stages:
     - M128
     - M129
     - M130
-    note: M128 T128.5 in_progress — hash-aware re-fetch; tip @2bf2dca
-    updated_at: '2026-08-12T20:04:26Z'
+    note: 'IN_PROGRESS — T128.6 DM freshness UI; tip @fdf68af pushed to origin; PR #238 CI watching'
+    updated_at: '2026-08-12T20:18:53Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     t127_5_status: completed
@@ -21542,12 +21582,12 @@ stages:
     m127_status: completed
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    tip: 2bf2dca
-    tip_sha: 2bf2dca
-    tip_full: 2bf2dcac40ba1fda775088159ba2c963c155a3da
-    tip_prev: ac8fca7
+    tip: fdf68af
+    tip_sha: fdf68af
+    tip_full: fdf68afa3d4dcc54cbd0f998432c05f3dfa50eea
+    tip_prev: 2bf2dca
     active_milestone: M128
-    current_task: T128.5
+    current_task: T128.6
     current_task_status: in_progress
     t128_2_status: completed
     t128_2_commit: 7b1aa87
@@ -21556,7 +21596,7 @@ stages:
     t128_4_status: completed
     t128_4_commit: ac8fca7
     t128_4_completed_at: '2026-08-12T19:40:00Z'
-    t128_5_status: in_progress
+    t128_5_status: completed
     s026_baseline:
       status: completed
       started_at: '2026-08-04'
@@ -22402,7 +22442,7 @@ stages:
     build_plan_card_waiver: S030-D31
     build_plan_card_sot: tech-plan-delta + Phase 30
     substeps:
-      current_task: T128.5
+      current_task: T128.6
       active_milestone: M128
       current_task_status: in_progress
       mode: task_loop
@@ -22423,7 +22463,7 @@ stages:
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
       phase_ab_docs_committed: true
-      tip_sha: 2bf2dca
+      tip_sha: fdf68af
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
@@ -22433,8 +22473,13 @@ stages:
       t128_4_status: completed
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
-      t128_5_status: in_progress
+      t128_5_status: completed
       t128_5_started_at: '2026-08-12T20:04:26Z'
+      t128_5_commit: fdf68af
+      t128_5_completed_at: '2026-08-12T20:11:03Z'
+      t128_6_status: in_progress
+      t128_6_started_at: '2026-08-12T20:18:53Z'
+      tip_pushed: true
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -22459,9 +22504,25 @@ stages:
     m127_pr_status: open
     m127_pr_merge: deferred_user_option_1
     pr_238_ci_status: green
-    pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @e86290e local ahead 2 not pushed'
+    pr_238_ci_note: 'fdf68af pushed to origin; watching PR #238 CI'
     t128_5_started_at: '2026-08-12T20:04:26Z'
     t128_4_followup_commit: 2bf2dca
+    t128_5_commit: fdf68af
+    t128_5_completed_at: '2026-08-12T20:11:03Z'
+    t128_5_completed: '2026-08-12'
+    t128_5_description: 'Code: ingest/hash-aware re-fetch path for URL sources'
+    t128_5_spec_source: RD-329, packages/ingest
+    t128_5_depends_on: T128.4
+    t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
+    t128_6_status: in_progress
+    execution_plan_active_task: T128.6 in_progress
+    handoff_next: T128.6 in_progress — DM freshness UI
+    phase_note: '07-build in_progress M128 F76; tip fdf68af pushed; watching PR #238 CI; implementing T128.6'
+    t128_6_started_at: '2026-08-12T20:18:53Z'
+    tip_pushed: true
+    tip_pushed_to: origin/evolve/EV-027-corpus-automations
+    tip_pushed_at: '2026-08-12T20:18:53Z'
+    pr_238_ci_watching: true
   08-verify-build:
     status: completed
     session_id: S027-multilingual-embeddings
@@ -27588,8 +27649,8 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 07-build
-  current_action: implementing T128.5
-  next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
+  current_action: implementing T128.6
+  next_action: T128.6 — DM freshness UI — stale list, enable, Refresh now
   active_milestone: M128
   current_task: T128.5
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
@@ -27852,20 +27913,20 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: implementing T128.5
-      next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
+      current_action: implementing T128.6
+      next_action: T128.6 — DM freshness UI — stale list, enable, Refresh now
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
       milestone_hint: M128
-      updated_at: '2026-08-12T20:04:26Z'
-      note: M128 T128.5 in_progress — hash-aware re-fetch; tip @2bf2dca (T128.4 @ac8fca7 + coverage follow-up)
+      updated_at: '2026-08-12T20:18:53Z'
+      note: 'IN_PROGRESS — T128.6 DM freshness UI; tip @fdf68af pushed to origin; PR #238 CI watching'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M128
-      current_task: T128.5
+      current_task: T128.6
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -27885,16 +27946,16 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: 2bf2dca
-      tip_sha: 2bf2dca
-      tip_full: 2bf2dcac40ba1fda775088159ba2c963c155a3da
-      tip_prev: ac8fca7
+      tip: fdf68af
+      tip_sha: fdf68af
+      tip_full: fdf68afa3d4dcc54cbd0f998432c05f3dfa50eea
+      tip_prev: 2bf2dca
       s030_d31_decision: S030-D31
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T128.5
+        current_task: T128.6
         active_milestone: M128
         current_task_status: in_progress
         mode: task_loop
@@ -27913,7 +27974,7 @@ evolve_cycles:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: 2bf2dca
+        tip_sha: fdf68af
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -27923,8 +27984,13 @@ evolve_cycles:
         t128_4_status: completed
         t128_4_commit: ac8fca7
         t128_4_completed_at: '2026-08-12T19:40:00Z'
-        t128_5_status: in_progress
+        t128_5_status: completed
         t128_5_started_at: '2026-08-12T20:04:26Z'
+        t128_5_commit: fdf68af
+        t128_5_completed_at: '2026-08-12T20:11:03Z'
+        t128_6_status: in_progress
+        t128_6_started_at: '2026-08-12T20:18:53Z'
+        tip_pushed: true
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -27951,16 +28017,32 @@ evolve_cycles:
       t128_4_status: completed
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
-      t128_5_status: in_progress
+      t128_5_status: completed
       t128_4_started_at: '2026-08-12T19:17:43Z'
       t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
       t128_4_spec_source: TP2, ADR-052
       t128_4_depends_on: T128.3, T127.7
       pr_238_ci_status: green
-      pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @e86290e local ahead 2 not pushed'
+      pr_238_ci_note: 'fdf68af pushed to origin; watching PR #238 CI'
       current_stage: 07-build
       t128_5_started_at: '2026-08-12T20:04:26Z'
       t128_4_followup_commit: 2bf2dca
+      t128_5_commit: fdf68af
+      t128_5_completed_at: '2026-08-12T20:11:03Z'
+      t128_5_completed: '2026-08-12'
+      t128_5_description: 'Code: ingest/hash-aware re-fetch path for URL sources'
+      t128_5_spec_source: RD-329, packages/ingest
+      t128_5_depends_on: T128.4
+      t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
+      t128_6_status: in_progress
+      execution_plan_active_task: T128.6 in_progress
+      handoff_next: T128.6 in_progress — DM freshness UI
+      phase_note: '07-build in_progress M128 F76; tip fdf68af pushed; watching PR #238 CI; implementing T128.6'
+      t128_6_started_at: '2026-08-12T20:18:53Z'
+      tip_pushed: true
+      tip_pushed_to: origin/evolve/EV-027-corpus-automations
+      tip_pushed_at: '2026-08-12T20:18:53Z'
+      pr_238_ci_watching: true
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -62881,6 +62963,22 @@ git_history:
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
     note: 'T128.4 follow-up: freshness_refresh coverage + typechecks'
+  - sha: fdf68af
+    branch: evolve/EV-027-corpus-automations
+    message: 'feat: hash-aware URL re-fetch for freshness_refresh (F76)'
+    stage: 07-build
+    orchestrator: 16-evolve
+    files_changed: 10
+    timestamp: '2026-08-12T20:10:48Z'
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T128.5
+    note: T128.5 complete — hash-aware URL re-fetch for freshness_refresh (F76)
+    pushed: true
+    pushed_to: origin/evolve/EV-027-corpus-automations
+    pushed_at: '2026-08-12T20:18:53Z'
+    pr_number: 238
+    ci_watching: true
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);

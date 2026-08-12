@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** `2bf2dca` — T128.4 done (worker @`ac8fca7` + coverage/typecheck follow-up); implementing T128.5  
+**Tip:** `fdf68af` (pushed to origin) — T128.5 done; **T128.6 in progress**; watching PR #238 CI  
 **Issues:** #73 · #72 · #219  
 
 ## Position
@@ -15,7 +15,8 @@
 - Done: **T128.2** — Alembic `documents.refresh_enabled` + `last_checked_at` (reuse `content_hash`) `@7b1aa87`
 - Done: **T128.3** — write-API PATCH/list stale fields; Refresh now → enqueue `@e86290e`
 - Done: **T128.4** — Modal `freshness_refresh` worker + schedule `@ac8fca7`; coverage/typecheck follow-up `@2bf2dca`
-- **In progress: T128.5** — ingest/hash-aware re-fetch path for URL sources
+- Done: **T128.5** — ingest/hash-aware re-fetch for URL sources `@fdf68af` (pushed; CI watching)
+- **In progress: T128.6** — DM freshness UI (stale list, enable, Refresh now)
 
 ## Key locks
 
@@ -24,9 +25,10 @@
 - Modal DM: `automation_catchup` + `freshness_refresh` workers; job-completion triggers
 - Shared schedule: `daily_corpus_automations` with `schedule=modal.Period(days=1)`
   (catch-up tick + real freshness enqueue for stale `refresh_enabled` docs)
+- Hash-aware freshness re-fetch: `packages/ingest` + `freshness_refresh` / `rechunk_and_upsert_scraped_url`
 - FT pins locked (S030-D33) for M129: `infra/modal/finetune_pins.py`
-- PR #238 open; tip CI must stay green after push
+- PR #238 open; tip `fdf68af` pushed — keep CI green
 
 ## Next
 
-Continue **07-build** **T128.5** (ingest/hash-aware re-fetch for URL sources). Leave PR #238 open; do not merge without approval.
+Continue **07-build** **T128.6** (DM freshness UI — stale list, enable, Refresh now). Leave PR #238 open; do not merge without approval.

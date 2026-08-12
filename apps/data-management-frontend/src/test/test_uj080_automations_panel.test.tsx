@@ -288,10 +288,7 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
   });
 
   it("shows loadFailed when load rejects a non-Error value", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockRejectedValue("backend down"),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue("backend down"));
 
     renderAutomations();
 
@@ -303,31 +300,33 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
   it("shows toggleFailed when PATCH rejects a non-Error value", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        if (url.includes("/automations/config") && init?.method === "PATCH") {
-          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
-          return Promise.reject("patch refused");
-        }
-        if (url.includes("/automations/config")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => CONFIG_ENABLED,
-          });
-        }
-        if (url.includes("/automations/runs")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              items: [],
-              page: 1,
-              page_size: 20,
-              total_count: 0,
-            }),
-          });
-        }
-        return Promise.resolve({ ok: true, json: async () => ({}) });
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          if (url.includes("/automations/config") && init?.method === "PATCH") {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- branch: non-Error catch fallback
+            return Promise.reject("patch refused");
+          }
+          if (url.includes("/automations/config")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => CONFIG_ENABLED,
+            });
+          }
+          if (url.includes("/automations/runs")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                items: [],
+                page: 1,
+                page_size: 20,
+                total_count: 0,
+              }),
+            });
+          }
+          return Promise.resolve({ ok: true, json: async () => ({}) });
+        }),
     );
 
     renderAutomations();
@@ -342,30 +341,32 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
   it("shows Error message when PATCH rejects an Error", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = fetchInputUrl(input);
-        if (url.includes("/automations/config") && init?.method === "PATCH") {
-          return Promise.reject(new Error("patch blew up"));
-        }
-        if (url.includes("/automations/config")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => CONFIG_ENABLED,
-          });
-        }
-        if (url.includes("/automations/runs")) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({
-              items: [],
-              page: 1,
-              page_size: 20,
-              total_count: 0,
-            }),
-          });
-        }
-        return Promise.resolve({ ok: true, json: async () => ({}) });
-      }),
+      vi
+        .fn()
+        .mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+          const url = fetchInputUrl(input);
+          if (url.includes("/automations/config") && init?.method === "PATCH") {
+            return Promise.reject(new Error("patch blew up"));
+          }
+          if (url.includes("/automations/config")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => CONFIG_ENABLED,
+            });
+          }
+          if (url.includes("/automations/runs")) {
+            return Promise.resolve({
+              ok: true,
+              json: async () => ({
+                items: [],
+                page: 1,
+                page_size: 20,
+                total_count: 0,
+              }),
+            });
+          }
+          return Promise.resolve({ ok: true, json: async () => ({}) });
+        }),
     );
 
     renderAutomations();
@@ -441,12 +442,10 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
     const { unmount } = renderAutomations();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
     unmount();
-    resolveConfig?.(
-      {
-        ok: true,
-        json: async () => CONFIG_ENABLED,
-      } as Response,
-    );
+    resolveConfig?.({
+      ok: true,
+      json: async () => CONFIG_ENABLED,
+    } as Response);
     await Promise.resolve();
   });
 
