@@ -21,6 +21,14 @@ if TYPE_CHECKING:
 DOC_ID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 
 
+def _enabled_config(_engine: object) -> AutomationsConfigResponse:
+    return AutomationsConfigResponse(
+        enabled=True,
+        kill_switch=False,
+        max_concurrent=2,
+    )
+
+
 def test_crud_hook_enqueues_when_missing_and_enabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -43,11 +51,7 @@ def test_crud_hook_enqueues_when_missing_and_enabled(
 
     monkeypatch.setattr(
         "vecinita_internal_write_api.catchup_crud.get_automations_config",
-        lambda _engine: AutomationsConfigResponse(
-            enabled=True,
-            kill_switch=False,
-            max_concurrent=2,
-        ),
+        _enabled_config,
     )
 
     decision = maybe_enqueue_catchup_after_document_change(
@@ -76,11 +80,7 @@ def test_crud_hook_skips_complete_without_post(
 
     monkeypatch.setattr(
         "vecinita_internal_write_api.catchup_crud.get_automations_config",
-        lambda _engine: AutomationsConfigResponse(
-            enabled=True,
-            kill_switch=False,
-            max_concurrent=2,
-        ),
+        _enabled_config,
     )
 
     decision = maybe_enqueue_catchup_after_document_change(

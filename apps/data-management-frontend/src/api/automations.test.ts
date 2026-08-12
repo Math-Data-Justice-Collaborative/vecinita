@@ -149,4 +149,42 @@ describe("automations API client (UJ-080 / TC-252 / TC-255)", () => {
       /Automation runs failed \(500\)/,
     );
   });
+
+  it("fetchAutomationRuns uses default pagination when params omitted", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          items: [],
+          page: 1,
+          page_size: 20,
+          total_count: 0,
+        }),
+      ),
+    );
+
+    await fetchAutomationRuns(CLIENT);
+    expect(mockFetchUrl()).toBe(
+      "http://localhost:8002/internal/v1/automations/runs?page=1&page_size=20",
+    );
+  });
+
+  it("auth falls back to empty bearer when no token or apiKey", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          enabled: false,
+          kill_switch: false,
+          max_concurrent: 2,
+        }),
+      ),
+    );
+
+    await fetchAutomationsConfig({ baseUrl: "http://localhost:8002" });
+    const init = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]?.[1] as
+      RequestInit | undefined;
+    const headers = init?.headers as Record<string, string> | undefined;
+    expect(headers?.["Authorization"]).toBe("Bearer ");
+  });
 });

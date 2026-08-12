@@ -286,4 +286,214 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
     });
   });
+
+  it("shows loadFailed when load rejects a non-Error value", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue("backend down"),
+    );
+
+    renderAutomations();
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/failed to load/i);
+    });
+  });
+
+  it("shows toggleFailed when PATCH rejects a non-Error value", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/automations/config") && init?.method === "PATCH") {
+          return Promise.reject("patch refused");
+        }
+        if (url.includes("/automations/config")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => CONFIG_ENABLED,
+          });
+        }
+        if (url.includes("/automations/runs")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: [],
+              page: 1,
+              page_size: 20,
+              total_count: 0,
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    renderAutomations();
+    const toggle = await screen.findByTestId("automations-enabled-toggle");
+    fireEvent.click(toggle);
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/failed to update/i);
+    });
+  });
+
+  it("shows Error message when PATCH rejects an Error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/automations/config") && init?.method === "PATCH") {
+          return Promise.reject(new Error("patch blew up"));
+        }
+        if (url.includes("/automations/config")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => CONFIG_ENABLED,
+          });
+        }
+        if (url.includes("/automations/runs")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: [],
+              page: 1,
+              page_size: 20,
+              total_count: 0,
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    renderAutomations();
+    fireEvent.click(await screen.findByTestId("automations-enabled-toggle"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent("patch blew up");
+    });
+  });
+
+  it("refresh button reloads config and runs", async () => {
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = fetchInputUrl(input);
+      if (url.includes("/automations/config")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => CONFIG_ENABLED,
+        });
+      }
+      if (url.includes("/automations/runs")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            items: [],
+            page: 1,
+            page_size: 20,
+            total_count: 0,
+          }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderAutomations();
+    await screen.findByTestId("automations-enabled-toggle");
+    const before = fetchMock.mock.calls.length;
+
+    fireEvent.click(screen.getByRole("button", { name: /refresh/i }));
+
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.length).toBeGreaterThan(before);
+    });
+  });
+
+  it("ignores late load results after unmount", async () => {
+    let resolveConfig: ((value: Response) => void) | undefined;
+    const configPromise = new Promise<Response>((resolve) => {
+      resolveConfig = resolve;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/automations/config")) {
+          return configPromise;
+        }
+        if (url.includes("/automations/runs")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: [],
+              page: 1,
+              page_size: 20,
+              total_count: 0,
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    const { unmount } = renderAutomations();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    unmount();
+    resolveConfig?.(
+      {
+        ok: true,
+        json: async () => CONFIG_ENABLED,
+      } as Response,
+    );
+    await Promise.resolve();
+  });
+
+  it("renders pending run with emDash timestamps and secondary badge", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/automations/config")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => CONFIG_ENABLED,
+          });
+        }
+        if (url.includes("/automations/runs")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              items: [
+                {
+                  id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+                  job_type: "freshness_refresh",
+                  status: "pending",
+                  started_at: null,
+                  finished_at: null,
+                  error: null,
+                  document_id: null,
+                  revision: null,
+                  created_at: "2026-08-07T11:00:00.000Z",
+                  updated_at: "2026-08-07T11:00:00.000Z",
+                },
+              ],
+              page: 1,
+              page_size: 20,
+              total_count: 1,
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    renderAutomations();
+
+    await waitFor(() => {
+      expect(screen.getByText("pending")).toBeInTheDocument();
+    });
+    expect(screen.getByText("freshness_refresh")).toBeInTheDocument();
+    expect(screen.getAllByText("—").length).toBeGreaterThanOrEqual(2);
+  });
 });
