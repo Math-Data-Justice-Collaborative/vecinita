@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** (pending commit) — T129.8 llm_app LoRA serve  
+**Tip:** `c8b5b96` — T129.8 llm_app LoRA serve  
 **Issues:** #73 · #72 · #219  
 
 ## Position

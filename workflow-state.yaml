@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: T129.8 llm_app load promoted adapter
-      next_action: Implement T129.8 — llm_app load promoted adapter; playground candidate load
+      current_action: T129.9 DM FT UI
+      next_action: Implement T129.9 — DM FT UI approve/eval/promote
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1981,9 +1981,7 @@ project:
       - M128
       - M129
       - M130
-      note: 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter
-        + clear-pin rollback (TC-262/265). T129.6 completed @bb391b1. AskQuestion none. Advance to T129.8 llm_app load promoted
-        adapter; playground candidate load. PR #238 remains open. HANDOFF tip b2a25e5.'
+      note: 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. T129.7 completed @b2a25e5. AskQuestion none. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. HANDOFF tip c8b5b96.'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -2003,14 +2001,14 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: b2a25e5
-      tip_sha: b2a25e5
-      tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-      tip_prev: bb391b1
-      updated_at: '2026-08-12T21:45:20Z'
+      tip: c8b5b96
+      tip_sha: c8b5b96
+      tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+      tip_prev: b2a25e5
+      updated_at: '2026-08-12T21:50:46Z'
       active_milestone: M129
       current_milestone: M129
-      current_task: T129.8
+      current_task: T129.9
       current_task_status: in_progress
       t128_2_status: completed
       t128_2_commit: 7b1aa87
@@ -2760,7 +2758,7 @@ project:
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T129.8
+        current_task: T129.9
         active_milestone: M129
         current_task_status: in_progress
         mode: m129_task_loop
@@ -2779,7 +2777,7 @@ project:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: b2a25e5
+        tip_sha: c8b5b96
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -2807,7 +2805,7 @@ project:
         t129_4_status: completed
         t129_4_sha: 4ef663b
         t129_5_status: completed
-        tip: b2a25e5
+        tip: c8b5b96
         coding_blocked: false
         ci_gate: cleared_local_coverage
         ci_status: local_green_tip_pending_push_watch
@@ -2833,13 +2831,13 @@ project:
         t129_6_status: completed
         t129_6_started_at: '2026-08-12T21:36:28Z'
         t129_6_description: 'Code: GET …/finetune/runs/{id}/eval base vs adapter report (F36 golden)'
-        tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-        tip_prev: bb391b1
+        tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+        tip_prev: b2a25e5
         coverage_local_dm_branch: 453/476
         coverage_local_dm_branch_pct: 95.2%
         askquestion_pending: false
         s030_d46_decision: S030-D46
-        handoff_tip: b2a25e5
+        handoff_tip: c8b5b96
         t129_5_ci_watch_run: '31643301747'
         t129_5_ci_watch_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31643301747
         t129_5_ci_note: watching 31643301747; may be superseded by T129.6 push @bb391b1
@@ -2853,14 +2851,24 @@ project:
         t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
         s030_d47_decision: S030-D47
         s030_d48_decision: S030-D48
+        s030_d49_decision: S030-D49
         t129_7_commit: b2a25e5
         t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
         t129_7_completed: '2026-08-12'
         t129_7_completed_at: '2026-08-12T21:45:20Z'
         t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-        t129_8_status: in_progress
+        t129_8_status: completed
         t129_8_started_at: '2026-08-12T21:45:20Z'
         t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+        t129_8_commit: c8b5b96
+        t129_8_commit_full: c8b5b96bea725fe0002106067ba5e20188403076
+        t129_8_completed: '2026-08-12'
+        t129_8_completed_at: '2026-08-12T21:50:46Z'
+        t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
+        s030_d49_decision: S030-D49
+        t129_9_status: in_progress
+        t129_9_started_at: '2026-08-12T21:50:46Z'
+        t129_9_description: 'UI: DM FT approve / eval evidence / promote'
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -2896,9 +2904,9 @@ project:
       t128_5_depends_on: T128.4
       t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
       t128_6_status: completed
-      execution_plan_active_task: M129 / T129.8 — llm_app load promoted adapter; playground candidate load
-      handoff_next: '**T129.8** — llm_app load promoted adapter; playground candidate load (F77). Tip b2a25e5.'
-      phase_note: 'M129/T129.8 in_progress; tip b2a25e5; T129.7 COMPLETE (S030-D48); PR #238 open'
+      execution_plan_active_task: M129 / T129.9 — DM FT UI approve/eval/promote
+      handoff_next: '**T129.9** — DM FT UI approve/eval/promote (F77). Tip c8b5b96.'
+      phase_note: 'M129/T129.9 in_progress; tip c8b5b96; T129.8 COMPLETE (S030-D49); PR #238 open'
       t128_6_started_at: '2026-08-12T20:18:53Z'
       tip_pushed: true
       tip_pushed_to: origin/evolve/EV-027-corpus-automations
@@ -2930,7 +2938,7 @@ project:
       t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
       m129_status: in_progress
       askquestion_next_topic: null
-      recommended_next: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
+      recommended_next: 'Implement T129.9 — DM FT UI approve/eval/promote (F77)'
       m129_path_confirmed: true
       m129_path_confirmed_at: '2026-08-12T20:32:06Z'
       m129_path_decision: S030-D34
@@ -3057,28 +3065,38 @@ project:
       s030_d45_decision: S030-D45
       tip_ci_green_sha: c042f57
       tip_ci_green_run: 31642681501
-      handoff_tip_should_be: b2a25e5
+      handoff_tip_should_be: c8b5b96
       t129_4_followup_openapi: 4e8fc15
       t129_4_followup_coverage: c042f57
       t129_5_commit: 23113da
       t129_6_status: completed
       coverage_local_dm_branch: 453/476 (95.2%)
       s030_d46_decision: S030-D46
-      handoff_tip: b2a25e5
+      handoff_tip: c8b5b96
       t129_5_ci_watch_run: '31643301747'
       t129_6_commit: bb391b1
       t129_7_status: completed
       s030_d47_decision: S030-D47
       s030_d48_decision: S030-D48
+      s030_d49_decision: S030-D49
       t129_7_commit: b2a25e5
       t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
       t129_7_completed: '2026-08-12'
       t129_7_completed_at: '2026-08-12T21:45:20Z'
       t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
       t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-      t129_8_status: in_progress
+      t129_8_status: completed
       t129_8_started_at: '2026-08-12T21:45:20Z'
       t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+      t129_8_commit: c8b5b96
+      t129_8_commit_full: c8b5b96bea725fe0002106067ba5e20188403076
+      t129_8_completed: '2026-08-12'
+      t129_8_completed_at: '2026-08-12T21:50:46Z'
+      t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
+      s030_d49_decision: S030-D49
+      t129_9_status: in_progress
+      t129_9_started_at: '2026-08-12T21:50:46Z'
+      t129_9_description: 'UI: DM FT approve / eval evidence / promote'
     08-verify-build:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -7828,8 +7846,8 @@ active_session:
   - 72
   - 219
   current_stage: 07-build
-  current_stage_note: Phase C 07-build; M129; T129.7 COMPLETE @b2a25e5; next T129.8 (S030-D48)
-  next_action: Implement T129.8 — llm_app load promoted adapter; playground candidate load
+  current_stage_note: Phase C 07-build; M129; T129.8 COMPLETE @c8b5b96; next T129.9 (S030-D49)
+  next_action: Implement T129.9 — DM FT UI approve/eval/promote
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -7966,6 +7984,7 @@ active_session:
   - 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /finetune/promote + GET /finetune/adapter + clear-pin
     rollback (TC-262/265). Advance to T129.8 llm_app load promoted adapter; playground candidate load. PR #238 remains open.
     AskQuestion none. HANDOFF tip b2a25e5. execution_plan Active task synced to T129.8.'
+  - 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. AskQuestion none. HANDOFF tip c8b5b96. execution_plan Active task synced to T129.9.'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -8215,6 +8234,10 @@ active_session:
     summary: 'T129.7 COMPLETE @b2a25e5; start T129.8; AskQuestion none; PR #238 open'
     recorded_at: '2026-08-12T21:45:20Z'
     choice: complete_t129_7_start_t129_8
+  - id: S030-D49
+    summary: 'T129.8 COMPLETE @c8b5b96; start T129.9; AskQuestion none; PR #238 open'
+    recorded_at: '2026-08-12T21:50:46Z'
+    choice: complete_t129_8_start_t129_9
   context_briefs: []
   routing_plan:
   - stage: 00-context
@@ -8401,18 +8424,16 @@ active_session:
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: T129.8 llm_app load promoted adapter
-    next_action: Implement T129.8 — llm_app load promoted adapter; playground candidate load
+    current_action: T129.9 DM FT UI
+    next_action: Implement T129.9 — DM FT UI approve/eval/promote
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
     milestone_hint: M129
-    note: 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter
-      + clear-pin rollback (TC-262/265). T129.6 completed @bb391b1. AskQuestion none. Advance to T129.8 llm_app load promoted
-      adapter; playground candidate load. PR #238 remains open. HANDOFF tip b2a25e5.'
+    note: 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. T129.7 completed @b2a25e5. AskQuestion none. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. HANDOFF tip c8b5b96.'
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M129
-    current_task: T129.8
+    current_task: T129.9
     current_task_status: in_progress
     t127_5_status: completed
     t127_5_commit: 5d31dcf
@@ -8433,13 +8454,13 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: b2a25e5
-    tip_sha: b2a25e5
-    tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-    tip_prev: bb391b1
+    tip: c8b5b96
+    tip_sha: c8b5b96
+    tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+    tip_prev: b2a25e5
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T21:45:20Z'
+    updated_at: '2026-08-12T21:50:46Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -8469,7 +8490,7 @@ active_session:
     t128_4_spec_source: TP2, ADR-052
     t128_4_depends_on: T128.3, T127.7
     substeps:
-      current_task: T129.8
+      current_task: T129.9
       active_milestone: M129
       current_task_status: in_progress
       mode: m129_task_loop
@@ -8483,7 +8504,7 @@ active_session:
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
       t128_5_status: completed
-      tip_sha: b2a25e5
+      tip_sha: c8b5b96
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
@@ -8508,9 +8529,9 @@ active_session:
       t129_4_sha: 4ef663b
       t129_5_status: completed
       t129_5_started_at: '2026-08-12T21:16:39Z'
-      tip: b2a25e5
-      tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-      tip_prev: bb391b1
+      tip: c8b5b96
+      tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+      tip_prev: b2a25e5
       coding_blocked: false
       ci_gate: cleared_local_coverage
       ci_status: local_green_tip_pending_push_watch
@@ -8543,7 +8564,7 @@ active_session:
       coverage_local_dm_branch_pct: 95.2%
       askquestion_pending: false
       s030_d46_decision: S030-D46
-      handoff_tip: b2a25e5
+      handoff_tip: c8b5b96
       t129_5_ci_watch_run: '31643301747'
       t129_5_ci_watch_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31643301747
       t129_5_ci_note: watching 31643301747; may be superseded by T129.6 push @bb391b1
@@ -8557,19 +8578,29 @@ active_session:
       t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
       s030_d47_decision: S030-D47
       s030_d48_decision: S030-D48
+      s030_d49_decision: S030-D49
       t129_7_commit: b2a25e5
       t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
       t129_7_completed: '2026-08-12'
       t129_7_completed_at: '2026-08-12T21:45:20Z'
       t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-      t129_8_status: in_progress
+      t129_8_status: completed
       t129_8_started_at: '2026-08-12T21:45:20Z'
       t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+      t129_8_commit: c8b5b96
+      t129_8_commit_full: c8b5b96bea725fe0002106067ba5e20188403076
+      t129_8_completed: '2026-08-12'
+      t129_8_completed_at: '2026-08-12T21:50:46Z'
+      t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
+      s030_d49_decision: S030-D49
+      t129_9_status: in_progress
+      t129_9_started_at: '2026-08-12T21:50:46Z'
+      t129_9_description: 'UI: DM FT approve / eval evidence / promote'
     askquestion_pending: false
-    askquestion_cleared: 'S030-D48: none — T129.7 done; starting T129.8; PR #238 remains open'
-    phase_note: 'M129/T129.8 in_progress; tip b2a25e5; T129.7 COMPLETE (S030-D48); PR #238 open'
-    handoff_next: '**T129.8** — llm_app load promoted adapter; playground candidate load (F77). Tip b2a25e5.'
-    execution_plan_active_task: M129 / T129.8 — llm_app load promoted adapter; playground candidate load
+    askquestion_cleared: 'S030-D49: none — T129.8 done; starting T129.9; PR #238 remains open'
+    phase_note: 'M129/T129.9 in_progress; tip c8b5b96; T129.8 COMPLETE (S030-D49); PR #238 open'
+    handoff_next: '**T129.9** — DM FT UI approve/eval/promote (F77). Tip c8b5b96.'
+    execution_plan_active_task: M129 / T129.9 — DM FT UI approve/eval/promote
     t128_5_started_at: '2026-08-12T20:04:26Z'
     t128_4_followup_commit: 2bf2dca
     t128_4_followup_note: coverage + typecheck follow-up after T128.4 @2bf2dca
@@ -8613,7 +8644,7 @@ active_session:
     t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
     m129_status: in_progress
     askquestion_next_topic: Phase C / 08-verify-build vs continue M129 F77
-    recommended_next: 'Start T129.7: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
+    recommended_next: 'Implement T129.9 — DM FT UI approve/eval/promote (F77)'
     ci_gate: cleared_local_coverage
     ci_status: local_green_tip_pending_push_watch
     askquestion_pending_topic: null
@@ -8623,26 +8654,27 @@ active_session:
     prior_tip_ci_run: '31641875827'
     prior_tip_ci_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31641875827
     prior_tip_ci_note: coverage DM branch 92.1%; fixed during T129.5 (c042f57/ffcbf94)
-    handoff_tip_should_be: b2a25e5
+    handoff_tip_should_be: c8b5b96
     s030_d45_decision: S030-D45
     t129_5_status: completed
     t129_5_commit: 23113da
     t129_6_status: completed
     coverage_local_dm_branch: 453/476 (95.2%)
-    handoff_tip: b2a25e5
+    handoff_tip: c8b5b96
     s030_d46_decision: S030-D46
     t129_5_ci_watch_run: '31643301747'
     t129_6_commit: bb391b1
     t129_7_status: completed
     s030_d47_decision: S030-D47
     s030_d48_decision: S030-D48
+    s030_d49_decision: S030-D49
     t129_7_commit: b2a25e5
     t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
     t129_7_completed: '2026-08-12'
     t129_7_completed_at: '2026-08-12T21:45:20Z'
     t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
     t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-    t129_8_status: in_progress
+    t129_8_status: completed
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
   - stage: 08-verify-build
@@ -8795,7 +8827,7 @@ active_session:
   - infra/modal/finetune_pins.py
   - tests/unit/modal/test_finetune_pins.py
   - docs/dependency-inventory.md
-  updated_at: '2026-08-12T21:45:20Z'
+  updated_at: '2026-08-12T21:50:46Z'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout of uncommitted S030 workflow-state
   s030_d31_decision: S030-D31
   s030_d32_decision: S030-D32
@@ -8806,13 +8838,13 @@ active_session:
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
   askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
-  tip: b2a25e5
-  tip_sha: b2a25e5
-  tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-  tip_prev: bb391b1
-  handoff_tip: b2a25e5
-  current_action: T129.8 llm_app load promoted adapter
-  current_task: T129.8
+  tip: c8b5b96
+  tip_sha: c8b5b96
+  tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+  tip_prev: b2a25e5
+  handoff_tip: c8b5b96
+  current_action: T129.9 DM FT UI
+  current_task: T129.9
 sessions:
 - id: S029-security-install-tools-flake
   type: hotfix
@@ -22077,8 +22109,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: T129.8 llm_app load promoted adapter
-    next_action: Implement T129.8 — llm_app load promoted adapter; playground candidate load
+    current_action: T129.9 DM FT UI
+    next_action: Implement T129.9 — DM FT UI approve/eval/promote
     askquestion_pending: false
     askquestion_pending_topic: null
     gate_a_to_b: passed
@@ -22094,10 +22126,8 @@ stages:
     - M128
     - M129
     - M130
-    note: 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter
-      + clear-pin rollback (TC-262/265). T129.6 completed @bb391b1. AskQuestion none. Advance to T129.8 llm_app load promoted
-      adapter; playground candidate load. PR #238 remains open. HANDOFF tip b2a25e5.'
-    updated_at: '2026-08-12T21:45:20Z'
+    note: 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. T129.7 completed @b2a25e5. AskQuestion none. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. HANDOFF tip c8b5b96.'
+    updated_at: '2026-08-12T21:50:46Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     t127_5_status: completed
@@ -22117,13 +22147,13 @@ stages:
     m127_status: completed
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    tip: b2a25e5
-    tip_sha: b2a25e5
-    tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-    tip_prev: bb391b1
+    tip: c8b5b96
+    tip_sha: c8b5b96
+    tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+    tip_prev: b2a25e5
     active_milestone: M129
     current_milestone: M129
-    current_task: T129.8
+    current_task: T129.9
     current_task_status: in_progress
     t128_2_status: completed
     t128_2_commit: 7b1aa87
@@ -22978,7 +23008,7 @@ stages:
     build_plan_card_waiver: S030-D31
     build_plan_card_sot: tech-plan-delta + Phase 30
     substeps:
-      current_task: T129.8
+      current_task: T129.9
       active_milestone: M129
       current_task_status: in_progress
       mode: m129_task_loop
@@ -22999,7 +23029,7 @@ stages:
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
       phase_ab_docs_committed: true
-      tip_sha: b2a25e5
+      tip_sha: c8b5b96
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
@@ -23027,7 +23057,7 @@ stages:
       t129_4_status: completed
       t129_4_sha: 4ef663b
       t129_5_status: completed
-      tip: b2a25e5
+      tip: c8b5b96
       coding_blocked: false
       ci_gate: cleared_local_coverage
       ci_status: local_green_tip_pending_push_watch
@@ -23053,13 +23083,13 @@ stages:
       t129_6_status: completed
       t129_6_started_at: '2026-08-12T21:36:28Z'
       t129_6_description: 'Code: GET …/finetune/runs/{id}/eval base vs adapter report (F36 golden)'
-      tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-      tip_prev: bb391b1
+      tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+      tip_prev: b2a25e5
       coverage_local_dm_branch: 453/476
       coverage_local_dm_branch_pct: 95.2%
       askquestion_pending: false
       s030_d46_decision: S030-D46
-      handoff_tip: b2a25e5
+      handoff_tip: c8b5b96
       t129_5_ci_watch_run: '31643301747'
       t129_5_ci_watch_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31643301747
       t129_5_ci_note: watching 31643301747; may be superseded by T129.6 push @bb391b1
@@ -23073,14 +23103,24 @@ stages:
       t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
       s030_d47_decision: S030-D47
       s030_d48_decision: S030-D48
+      s030_d49_decision: S030-D49
       t129_7_commit: b2a25e5
       t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
       t129_7_completed: '2026-08-12'
       t129_7_completed_at: '2026-08-12T21:45:20Z'
       t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-      t129_8_status: in_progress
+      t129_8_status: completed
       t129_8_started_at: '2026-08-12T21:45:20Z'
       t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+      t129_8_commit: c8b5b96
+      t129_8_commit_full: c8b5b96bea725fe0002106067ba5e20188403076
+      t129_8_completed: '2026-08-12'
+      t129_8_completed_at: '2026-08-12T21:50:46Z'
+      t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
+      s030_d49_decision: S030-D49
+      t129_9_status: in_progress
+      t129_9_started_at: '2026-08-12T21:50:46Z'
+      t129_9_description: 'UI: DM FT approve / eval evidence / promote'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -23116,9 +23156,9 @@ stages:
     t128_5_depends_on: T128.4
     t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
     t128_6_status: completed
-    execution_plan_active_task: M129 / T129.8 — llm_app load promoted adapter; playground candidate load
-    handoff_next: '**T129.8** — llm_app load promoted adapter; playground candidate load (F77). Tip b2a25e5.'
-    phase_note: 'M129/T129.8 in_progress; tip b2a25e5; T129.7 COMPLETE (S030-D48); PR #238 open'
+    execution_plan_active_task: M129 / T129.9 — DM FT UI approve/eval/promote
+    handoff_next: '**T129.9** — DM FT UI approve/eval/promote (F77). Tip c8b5b96.'
+    phase_note: 'M129/T129.9 in_progress; tip c8b5b96; T129.8 COMPLETE (S030-D49); PR #238 open'
     t128_6_started_at: '2026-08-12T20:18:53Z'
     tip_pushed: true
     tip_pushed_to: origin/evolve/EV-027-corpus-automations
@@ -23229,24 +23269,25 @@ stages:
     t129_5_status: completed
     ci_gate: cleared_local_coverage
     s030_d45_decision: S030-D45
-    handoff_tip_should_be: b2a25e5
+    handoff_tip_should_be: c8b5b96
     t129_5_commit: 23113da
     t129_6_status: completed
     coverage_local_dm_branch: 453/476 (95.2%)
     s030_d46_decision: S030-D46
-    handoff_tip: b2a25e5
+    handoff_tip: c8b5b96
     t129_5_ci_watch_run: '31643301747'
     t129_6_commit: bb391b1
     t129_7_status: completed
     s030_d47_decision: S030-D47
     s030_d48_decision: S030-D48
+    s030_d49_decision: S030-D49
     t129_7_commit: b2a25e5
     t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
     t129_7_completed: '2026-08-12'
     t129_7_completed_at: '2026-08-12T21:45:20Z'
     t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
     t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-    t129_8_status: in_progress
+    t129_8_status: completed
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
   08-verify-build:
@@ -28375,20 +28416,18 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 07-build
-  current_action: T129.8 llm_app load promoted adapter
-  next_action: Implement T129.8 — llm_app load promoted adapter; playground candidate load
+  current_action: T129.9 DM FT UI
+  next_action: Implement T129.9 — DM FT UI approve/eval/promote
   active_milestone: M129
-  current_task: T129.8
+  current_task: T129.9
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: b2a25e5
-  tip_sha: b2a25e5
-  tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-  tip_prev: bb391b1
-  current_stage_note: Phase C 07-build; M129; T129.7 COMPLETE @b2a25e5; next T129.8 (S030-D48)
-  notes: 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter
-    + clear-pin rollback (TC-262/265). T129.6 completed @bb391b1. AskQuestion none. Advance to T129.8 llm_app load promoted
-    adapter; playground candidate load. PR #238 remains open. HANDOFF tip b2a25e5.'
+  tip: c8b5b96
+  tip_sha: c8b5b96
+  tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+  tip_prev: b2a25e5
+  current_stage_note: Phase C 07-build; M129; T129.8 COMPLETE @c8b5b96; next T129.9 (S030-D49)
+  notes: 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. T129.7 completed @b2a25e5. AskQuestion none. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. HANDOFF tip c8b5b96.'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -28483,6 +28522,9 @@ evolve_cycles:
   - id: S030-D48
     summary: T129.7 COMPLETE @b2a25e5; start T129.8
     recorded_at: '2026-08-12T21:45:20Z'
+  - id: S030-D49
+    summary: T129.8 COMPLETE @c8b5b96; start T129.9
+    recorded_at: '2026-08-12T21:50:46Z'
   stages:
     00-context:
       status: completed
@@ -28670,23 +28712,21 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: T129.8 llm_app load promoted adapter
-      next_action: Implement T129.8 — llm_app load promoted adapter; playground candidate load
+      current_action: T129.9 DM FT UI
+      next_action: Implement T129.9 — DM FT UI approve/eval/promote
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
       milestone_hint: M129
-      updated_at: '2026-08-12T21:45:20Z'
-      note: 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter
-        + clear-pin rollback (TC-262/265). T129.6 completed @bb391b1. AskQuestion none. Advance to T129.8 llm_app load promoted
-        adapter; playground candidate load. PR #238 remains open. HANDOFF tip b2a25e5.'
+      updated_at: '2026-08-12T21:50:46Z'
+      note: 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. T129.7 completed @b2a25e5. AskQuestion none. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. HANDOFF tip c8b5b96.'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M129
       current_milestone: M129
-      current_task: T129.8
+      current_task: T129.9
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -28706,10 +28746,10 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: b2a25e5
-      tip_sha: b2a25e5
-      tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-      tip_prev: bb391b1
+      tip: c8b5b96
+      tip_sha: c8b5b96
+      tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+      tip_prev: b2a25e5
       s030_d31_decision: S030-D31
       s030_d43_decision: S030-D43
       s030_d44_decision: S030-D44
@@ -28723,7 +28763,7 @@ evolve_cycles:
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T129.8
+        current_task: T129.9
         active_milestone: M129
         current_task_status: in_progress
         mode: m129_task_loop
@@ -28747,7 +28787,7 @@ evolve_cycles:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: b2a25e5
+        tip_sha: c8b5b96
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -28772,9 +28812,9 @@ evolve_cycles:
         m128_status: completed
         t128_7_commit: bdaec9d
         m129_status: in_progress
-        tip: b2a25e5
-        tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-        tip_prev: bb391b1
+        tip: c8b5b96
+        tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+        tip_prev: b2a25e5
         tip_pushed_to: origin/evolve/EV-027-corpus-automations
         pr_238_ci_watching: true
         pr_238_ci_status: in_progress
@@ -28798,15 +28838,15 @@ evolve_cycles:
         ci_failed_at: null
         ci_fix_decision: S030-D35
         ci_fix_focus: dm_fe_coverage_f76_freshness_ui
-        handoff_next: '**T129.8** — llm_app load promoted adapter; playground candidate load (F77). Tip b2a25e5.'
+        handoff_next: '**T129.9** — DM FT UI approve/eval/promote (F77). Tip c8b5b96.'
         recommended_next: 'Continue T129.3: scaffold infra/modal/finetune_app.py, vecinita-llm-finetune + llm-finetune-adapters,
           secrets docs; wire FINETUNE_IMAGE_PIPS from finetune_pins.py'
         s030_d35_decision: S030-D35
-        phase_note: 'M129/T129.8 in_progress; tip b2a25e5; T129.7 COMPLETE (S030-D48); PR #238 open'
+        phase_note: 'M129/T129.9 in_progress; tip c8b5b96; T129.8 COMPLETE (S030-D49); PR #238 open'
         note: 'S030-D42 2026-08-12T21:06:16Z: Tip 932c036 (fix: retry gitleaks download on GitHub Releases 503) — CI GREEN
           run 31640505267. Cleared S030-D41 gitleaks flake gate / coding_blocked. T129.3 remains in_progress as next coding
           task (T129.1+T129.2 done).'
-        updated_at: '2026-08-12T21:45:20Z'
+        updated_at: '2026-08-12T21:50:46Z'
         tip_pushed_at: '2026-08-12T20:39:07Z'
         coverage_fix_decision: S030-D36
         prior_ci_tip: 0fff625
@@ -28927,7 +28967,7 @@ evolve_cycles:
         coverage_local_dm_branch: 453/476
         coverage_local_dm_branch_pct: 95.2%
         s030_d46_decision: S030-D46
-        handoff_tip: b2a25e5
+        handoff_tip: c8b5b96
         t129_5_ci_watch_run: '31643301747'
         t129_5_ci_watch_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31643301747
         t129_5_ci_note: watching 31643301747; may be superseded by T129.6 push @bb391b1
@@ -28941,14 +28981,24 @@ evolve_cycles:
         t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
         s030_d47_decision: S030-D47
         s030_d48_decision: S030-D48
+        s030_d49_decision: S030-D49
         t129_7_commit: b2a25e5
         t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
         t129_7_completed: '2026-08-12'
         t129_7_completed_at: '2026-08-12T21:45:20Z'
         t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-        t129_8_status: in_progress
+        t129_8_status: completed
         t129_8_started_at: '2026-08-12T21:45:20Z'
         t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+        t129_8_commit: c8b5b96
+        t129_8_commit_full: c8b5b96bea725fe0002106067ba5e20188403076
+        t129_8_completed: '2026-08-12'
+        t129_8_completed_at: '2026-08-12T21:50:46Z'
+        t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
+        s030_d49_decision: S030-D49
+        t129_9_status: in_progress
+        t129_9_started_at: '2026-08-12T21:50:46Z'
+        t129_9_description: 'UI: DM FT approve / eval evidence / promote'
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -28993,9 +29043,9 @@ evolve_cycles:
       t128_5_depends_on: T128.4
       t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
       t128_6_status: completed
-      execution_plan_active_task: M129 / T129.8 — llm_app load promoted adapter; playground candidate load
-      handoff_next: '**T129.8** — llm_app load promoted adapter; playground candidate load (F77). Tip b2a25e5.'
-      phase_note: 'M129/T129.8 in_progress; tip b2a25e5; T129.7 COMPLETE (S030-D48); PR #238 open'
+      execution_plan_active_task: M129 / T129.9 — DM FT UI approve/eval/promote
+      handoff_next: '**T129.9** — DM FT UI approve/eval/promote (F77). Tip c8b5b96.'
+      phase_note: 'M129/T129.9 in_progress; tip c8b5b96; T129.8 COMPLETE (S030-D49); PR #238 open'
       t128_6_started_at: '2026-08-12T20:18:53Z'
       tip_pushed: true
       tip_pushed_to: origin/evolve/EV-027-corpus-automations
@@ -29037,22 +29087,32 @@ evolve_cycles:
       ci_status: local_green_tip_pending_push_watch
       coverage_local_dm_branch: 453/476 (95.2%)
       s030_d46_decision: S030-D46
-      handoff_tip: b2a25e5
-      handoff_tip_should_be: b2a25e5
+      handoff_tip: c8b5b96
+      handoff_tip_should_be: c8b5b96
       t129_5_ci_watch_run: '31643301747'
       t129_6_commit: bb391b1
       t129_7_status: completed
       s030_d47_decision: S030-D47
       s030_d48_decision: S030-D48
+      s030_d49_decision: S030-D49
       t129_7_commit: b2a25e5
       t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
       t129_7_completed: '2026-08-12'
       t129_7_completed_at: '2026-08-12T21:45:20Z'
       t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
       t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-      t129_8_status: in_progress
+      t129_8_status: completed
       t129_8_started_at: '2026-08-12T21:45:20Z'
       t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
+      t129_8_commit: c8b5b96
+      t129_8_commit_full: c8b5b96bea725fe0002106067ba5e20188403076
+      t129_8_completed: '2026-08-12'
+      t129_8_completed_at: '2026-08-12T21:50:46Z'
+      t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
+      s030_d49_decision: S030-D49
+      t129_9_status: in_progress
+      t129_9_started_at: '2026-08-12T21:50:46Z'
+      t129_9_description: 'UI: DM FT approve / eval evidence / promote'
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -29150,12 +29210,12 @@ evolve_cycles:
     updated_at: '2026-08-12T19:40:00Z'
     note: 'Synced Phase C 07-build M128; M127 PR #238 open; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout wiped uncommitted S030 state
-  phase_note: 'M129/T129.8 in_progress; tip b2a25e5; T129.7 COMPLETE (S030-D48); PR #238 open'
+  phase_note: 'M129/T129.9 in_progress; tip c8b5b96; T129.8 COMPLETE (S030-D49); PR #238 open'
   s030_d30_decision: S030-D30
-  updated_at: '2026-08-12T21:45:20Z'
+  updated_at: '2026-08-12T21:50:46Z'
   current_task_status: in_progress
-  askquestion_cleared: 'S030-D48: none — T129.7 done; starting T129.8; PR #238 remains open'
-  next_child_stage: 07-build — M129 F77 T129.7 in_progress
+  askquestion_cleared: 'S030-D49: none — T129.8 done; starting T129.9; PR #238 remains open'
+  next_child_stage: 07-build — M129 F77 T129.9 in_progress
   s030_d34_decision: S030-D34
   s030_d35_decision: S030-D35
   s030_d36_decision: S030-D36
@@ -29169,17 +29229,18 @@ evolve_cycles:
   s030_d41_decision: S030-D41
   s030_d42_decision: S030-D42
   s030_d45_decision: S030-D45
-  handoff_tip_should_be: b2a25e5
+  handoff_tip_should_be: c8b5b96
   ci_gate: cleared_local_coverage
   ci_status: local_green_tip_pending_push_watch
   pr_238_ci_watching: true
   pr_238_ci_status: in_progress
   pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
   s030_d46_decision: S030-D46
-  handoff_tip: b2a25e5
+  handoff_tip: c8b5b96
   coverage_local_dm_branch: 453/476 (95.2%)
   s030_d47_decision: S030-D47
   s030_d48_decision: S030-D48
+  s030_d49_decision: S030-D49
 - id: EV-026
   session_id: S028-chat-source-ux
   cycle_type: feature
@@ -54343,6 +54404,7 @@ decisions_log:
 - 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /finetune/promote + GET /finetune/adapter + clear-pin rollback
   (TC-262/265). Advance to T129.8 llm_app load promoted adapter; playground candidate load. PR #238 remains open. AskQuestion
   none. HANDOFF tip b2a25e5. execution_plan Active task synced to T129.8.'
+- 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters; playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains open. AskQuestion none. HANDOFF tip c8b5b96. execution_plan Active task synced to T129.9.'
 artifacts:
 - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
   session_id: S030-corpus-automations
@@ -58110,18 +58172,18 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: b2a25e5
-    tip_sha: b2a25e5
-    tip_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-    head_sha: b2a25e591d0b6246e6059f4a6d59b337f012938f
-    tip_prev: bb391b1
+    tip: c8b5b96
+    tip_sha: c8b5b96
+    tip_full: c8b5b96bea725fe0002106067ba5e20188403076
+    head_sha: c8b5b96bea725fe0002106067ba5e20188403076
+    tip_prev: b2a25e5
     pushed: false
     origin_tip: unknown
     local_ahead: unknown
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    updated_at: '2026-08-12T21:45:20Z'
-    note: 'branch tip @b2a25e5 T129.7 COMPLETE (S030-D48); next T129.8; PR #238 open; do not merge without approval'
+    updated_at: '2026-08-12T21:50:46Z'
+    note: 'branch tip @c8b5b96 T129.8 COMPLETE (S030-D49); next T129.9; PR #238 open; do not merge without approval'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
       / RA-020)
@@ -64537,6 +64599,21 @@ git_history:
     timestamp: '2026-08-12T21:45:20Z'
     note: T129.7 COMPLETE; promote + clear-pin rollback (TC-262/265)
     decision: S030-D48
+  - sha: c8b5b96
+    sha_full: c8b5b96bea725fe0002106067ba5e20188403076
+    branch: evolve/EV-027-corpus-automations
+    message: 'feat: load promoted LoRA adapters on prod and playground LLM (F77)'
+    stage: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T129.8
+    milestone: M129
+    feature_ids:
+    - F77
+    files_changed: 10
+    timestamp: '2026-08-12T21:50:46Z'
+    note: T129.8 COMPLETE; llm_app/playground load adapters; VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
+    decision: S030-D49
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
