@@ -2,15 +2,16 @@
 name: 00-context
 description: >
   Recommended entry for every work session. Classifies session type (greenfield, feature,
-  hotfix, integration, new_service, ops, process), allocates SNNN-slug, writes session-brief
-  and routing-plan, and sets active_session. Also analyzes any existing codebase, documentation,
-  research paper, or prior work the user provides, producing a context brief plus a mandatory
-  checkpoints/01-requirements-seed.md handoff (Phase 4.5) that Stage 01 loads first. Runs
-  paper-analyst and repo-researcher agents in parallel when applicable, cross-references
-  findings, and surfaces contradictions/ambiguities/decisions. When the project belongs to a
-  multi-repo organization, scans sibling repos to discover integration patterns, API contracts,
-  deployment conventions, and shared dependencies. Use before requirements, features, live E2E,
-  integrations, or evolve cycles.
+  hotfix, integration, new_service, ops, process), runs a mandatory thorough AskQuestion
+  startup interview (intent, scope, constraints, evidence, proceed gate), allocates SNNN-slug,
+  writes session-brief and routing-plan, and sets active_session. Also analyzes any existing
+  codebase, documentation, research paper, or prior work the user provides, producing a context
+  brief plus a mandatory checkpoints/01-requirements-seed.md handoff (Phase 4.5) that Stage 01
+  loads first. Runs paper-analyst and repo-researcher agents in parallel when applicable,
+  cross-references findings, and surfaces contradictions/ambiguities/decisions. When the project
+  belongs to a multi-repo organization, scans sibling repos to discover integration patterns,
+  API contracts, deployment conventions, and shared dependencies. Use before requirements,
+  features, live E2E, integrations, or evolve cycles.
 ---
 
 # 00 — Context Gathering
@@ -35,30 +36,43 @@ artifacts and writes `docs/` context — it does **not** write product/feature s
 
 Run **before** context gathering when user intent implies bounded work (almost always).
 
+**Mandatory thorough interview** ([pipeline-preamble.md](../pipeline-preamble.md) §8): do not
+allocate a session or write artifacts until AskQuestion batches cover intent, scope,
+constraints, evidence/risks, and an explicit proceed gate. English-first prompts; tracking
+IDs are optional citations only.
+
 1. If `active_session` exists:
    - Emit a **one-screen mid-cycle digest** (ADR-043): session id, stage/action, branch+SHA,
      next AskQuestion/stage, material flags, link to `HANDOFF.md` + latest report.
+     Digest prose is English first (e.g. “Corpus freshness Refresh now”); cite cycle/feature
+     codes in parentheses if useful.
    - Refresh `docs/sessions/{id}/HANDOFF.md`.
-   - Then AskQuestion — resume / close and start new / abandon — unless the user already said
-     continue-with-recommended (then resume immediately).
+   - Then AskQuestion — resume / close and start new / abandon / **re-interview goals** —
+     unless the user already said continue-with-recommended (then resume immediately).
 2. Classify **session type** per [sessions-reference.md](../sessions-reference.md) §11.
-3. Propose the routing plan from default presets (§12); document skip rationale per omitted stage.
-4. **AskQuestion** — user approves or edits the routing plan.
-5. Agent `open_session` (a single call, **after** approval): increment `session_counter`,
+3. **Startup interview batches** (AskQuestion, 2–4 questions each; wait between batches):
+   - **Intent** — session goal and success criteria
+   - **Scope** — in/out of scope; apps/packages/surfaces
+   - **Constraints** — local vs staging vs prod; corpus/FT safety; time/cost caps
+   - **Evidence** — issues, open PRs, known blockers
+4. Propose the routing plan from default presets (§12); document skip rationale per omitted stage.
+5. **AskQuestion** — user approves or edits the routing plan (**proceed gate**).
+6. Agent `open_session` (a single call, **after** approval): increment `session_counter`,
    allocate `S{NNN}-{slug}`, and set `active_session` with the approved `routing_plan` and
    `artifacts_dir: docs/sessions/SNNN-slug/`. The agent rejects this call if an `active_session`
    already exists (handle the existing one via step 1 first).
-6. Create `docs/sessions/SNNN-slug/` with `session-brief.md` (intent, type, scope) and
+7. Create `docs/sessions/SNNN-slug/` with `session-brief.md` (intent, type, scope) and
    `routing-plan.md` (the approved plan).
-7. Create branch `feat/SNNN-slug` (or `fix/`, `evolve/` per type).
-8. Route to orchestrator when applicable:
+8. Create branch `feat/SNNN-slug` (or `fix/`, `evolve/` per type).
+9. Route to orchestrator when applicable:
    - `greenfield` → [pipeline](../pipeline/SKILL.md)
    - `feature` / `new_service` → [16-evolve](../16-evolve/SKILL.md)
    - `hotfix` → [14-hotfix](../14-hotfix/SKILL.md)
    - others → first stage in routing plan
 
-Skip Phase 0 only when resuming an existing `active_session` or the user explicitly waived
-session orchestration (record via agent `decisions_log`).
+Skip Phase 0 only when resuming an existing `active_session` **after** the resume AskQuestion
+(or the user explicitly waived session orchestration — record via agent `decisions_log`).
+Waiving the **thorough interview** itself requires an explicit AskQuestion waiver.
 
 ## Connectivity (stage 00)
 

@@ -165,12 +165,17 @@ Phase 7 — Report + state complete
 
 ## Phase 0 — Intake
 
-**AskQuestion** (one call, 2–4 questions):
+**Mandatory thorough interview** ([pipeline-preamble.md](../pipeline-preamble.md) §8) before
+evidence digest or skill edits. English-first prompts.
+
+**AskQuestion** (one call, 2–4 questions; add a proceed batch if answers leave goals unclear):
 
 1. **Scope**: Full pipeline 00–13 · Maintenance 14–15 only · Evolve/hotfix only · Custom stage list
 2. **Time window**: All time · Since last retro · Since date · This session only
 3. **Depth**: Deep (per-stage interview) · Standard · Light (themes only)
 4. **Transcript consent**: Full · Range · Exclude current · None (artifacts only)
+
+Then AskQuestion proceed gate: Start retrospective with this scope · Adjust · Pause.
 
 Record answers on the new `retrospective_cycles[]` entry (`scope`, `time_window`, `depth`).
 

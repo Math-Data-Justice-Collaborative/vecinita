@@ -1,10 +1,8 @@
 # Feature List
 
 > **Project**: Vecinita  
-> **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-06-13  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-07 (S030/EV-027 — F75–F77 corpus automations #73, freshness #219, LoRA FT #72; prior S028/EV-026 F72–F74)
+> **Last updated**: 2026-08-12 (docs sync — corpus automations / freshness / LoRA FT in build; prior S030/EV-027 F75–F77)  
+> **Source**: Standing product specs + evolve deltas; cite [ADR index](adr/README.md) and session decision logs for cycle history.
 
 ## Summary
 
@@ -19,7 +17,7 @@
 | F7 | URL scrape → chunk → embed → store | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
 | F8 | Ingest job queue & status API | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
 | F9 | Corpus list / delete (admin) | Implemented (+ EV-013 polish) | Data Management | data-management-backend, data-management-frontend | 11-verify-impl 2026-05-19; EV-013 #148 density/truncation |
-| F10 | Multilingual 384-d embeddings on Modal | Planned (EV-025 evolve) | Data Management / Cross-cutting | Modal embed, embedding-client | S027/EV-025 #159; was FastEmbed-en |
+| F10 | Multilingual 384-d embeddings on Modal | Implemented (via F70) | Data Management / Cross-cutting | Modal embed, embedding-client | S027 #159; was FastEmbed-en |
 | F11 | ChatRAG web UI (React/Vite) | Implemented | ChatRAG | chat-rag-frontend | Vitest smoke; UI E2E waived v1 |
 | F12 | Data management admin UI | Implemented (+ EV-013 polish) | Data Management | data-management-frontend | Vitest smoke; EV-013 #148 shared table density |
 | F13 | Database migrations & pgvector | Implemented | Database | apps/database | 11-verify-impl 2026-05-19 |
@@ -40,7 +38,7 @@
 | F28 | Source serving statistics | Implemented | Cross-cutting | chat-rag-backend, internal-write-api, database | 11-verify-impl 2026-05-27 |
 | F29 | Audit log & version history | Implemented | Data Management | internal-write-api, data-management-frontend, database | 11-verify-impl 2026-05-27 |
 | F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
-| F31 | Admin + shared frontend bilingual UI (en/es) | Planned | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | EV-004 2026-06-13 |
+| F31 | Admin + shared frontend bilingual UI (en/es) | Implemented | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | Shared packages shipped |
 | F32 | Admin Job Management tab (list jobs) | Implemented → Evolving (EV-012) | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89); S013/EV-012 #116 |
 | F33 | Browser-local persistent chat history (localStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26; ADR-025 2026-06-28 |
 | F34 | Supabase Auth for admin surfaces (invite-only, admin+viewer) | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, internal-write-api | S004/EV-005 2026-06-28; ADR-026 (#75) |
@@ -77,11 +75,11 @@
 | F72 | Citation UI — validate URLs before href | Implemented | ChatRAG | chat-rag-frontend `SourceList` | S028/EV-026 #222 |
 | F73 | Dynamic relevance-gated sources (no fixed pad) | Implemented | ChatRAG | packages/rag, chat-rag-backend | S028/EV-026 #223 |
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
-| F75 | Corpus change automations | Planned | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030/EV-027 #73 |
-| F76 | Corpus freshness automation | Planned | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030/EV-027 #219 |
-| F77 | Modal LoRA fine-tune + human promote | Planned | Cross-cutting (LLM) | new Modal FT app, llm_app, llm-client, eval, admin FE | S030/EV-027 #72 |
+| F75 | Corpus change automations | In progress (catch-up build; PR open) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73 |
+| F76 | Corpus freshness automation | In progress (write-API + schema; Modal job next) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219 |
+| F77 | Modal LoRA fine-tune + human promote | Planned | Cross-cutting (LLM) | new Modal FT app, llm_app, llm-client, eval, admin FE | S030 #72 |
 
-**Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
+**Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
 ## Feature Details
 

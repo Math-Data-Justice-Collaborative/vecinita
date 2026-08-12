@@ -59,13 +59,22 @@ uv run uvicorn vecinita_internal_write_api.app:create_app --factory --host 0.0.0
 ```bash
 export DATABASE_URL=postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
 export VECINITA_MODAL_EMBED_URL=http://localhost:8003   # after modal serve embedding
-export VECINITA_MODAL_LLM_URL=http://localhost:8004     # after modal serve llm
+export VECINITA_MODAL_LLM_URL=http://localhost:8004     # after modal serve llm (prod ChatRAG)
 
 # Staging/prod (vecinita Modal workspace — see infra/modal/.env.example):
 # export VECINITA_MODAL_EMBED_URL=https://vecinita--vecinita-embedding-embedding-api.modal.run
 # export VECINITA_MODAL_LLM_URL=https://vecinita--vecinita-llm-fastapi-app.modal.run
 uv run uvicorn vecinita_chat_rag_backend.app:create_app --factory --host 0.0.0.0 --port 8000
 ```
+
+**Playground LLM** (admin / eval sandbox only — never ChatRAG):
+
+```bash
+# After: modal serve infra/modal/llm_playground_app.py
+export VECINITA_MODAL_LLM_PLAYGROUND_URL=http://localhost:8005
+```
+
+ChatRAG must use `VECINITA_MODAL_LLM_URL` (prod `vecinita-llm`), not the playground URL.
 
 For API-only work without Modal, use **`uv run pytest`** (or `bash scripts/run_tests.sh`) — integration tests mock embed/LLM HTTP. Bare `pytest` will not resolve workspace packages.
 
@@ -89,7 +98,26 @@ npm install && npm run dev
 
 ## 5. Modal `serve` (optional)
 
-See [infra/modal/README.md](../infra/modal/README.md) for `modal serve` commands per app.
+See [infra/modal/README.md](../infra/modal/README.md) for `modal serve` commands per app
+(embedding, data-management, `vecinita-llm`, `vecinita-llm-playground`). LoRA fine-tune
+(`vecinita-llm-finetune`) is planned — pins live in `infra/modal/finetune_pins.py`.
+
+### Corpus automations / freshness / FT (local knobs)
+
+Defaults are off. Full reference: [config-spec.md](config-spec.md).
+
+| Env | Default | Role |
+|-----|---------|------|
+| `VECINITA_AUTOMATIONS_KILL_SWITCH` | `false` | Hard stop — no new catch-up or FT train enqueue when `true` |
+| `VECINITA_AUTOMATIONS_ENABLED` | `false` | Catch-up enqueue enable |
+| `VECINITA_FRESHNESS_ENABLED` | `false` | Scheduled freshness refresh |
+| `VECINITA_FRESHNESS_STALE_DAYS` | `30` | Stale threshold |
+| `VECINITA_FINETUNE_ENABLED` | `false` | Fine-tune feature flag |
+| `VECINITA_FINETUNE_ADAPTER_ID` | empty | Promoted LoRA pin on prod LLM (empty = base) |
+
+Do **not** enable automations or promote adapters against live prod without an explicit
+AskQuestion approval. Admin Automations / freshness UI journeys: see `docs/user-journeys.md`
+(UJ-080+).
 
 ## 6. Smoke checks
 
@@ -153,7 +181,9 @@ VECINITA_SKIP_PRE_PUSH=1 git push
 
 ## Unit coverage gate (F31 / ADR-019)
 
-Per-component **≥95% line and branch** coverage on all twelve `packages/*` and `apps/*` components. Enforced locally and in CI via `scripts/test/print_unit_coverage_summary.py --enforce`.
+Per-component **≥95% line and branch** coverage on all **fifteen** components
+(6 `apps/*` + 9 `packages/*`). Enforced locally and in CI via
+`scripts/test/print_unit_coverage_summary.py --enforce`.
 
 **Run (same as CI `coverage` job):**
 
@@ -182,3 +212,19 @@ See `docs/adr/ADR-019-per-component-coverage-95.md` and `docs/test-plan.md` §F3
 | `docs/config-spec.md` | Full `VECINITA_*` / `VITE_*` reference |
 
 Precedence: env vars > `vecinita.yaml` > documented defaults.
+
+## Commits and PRs
+
+Developer-facing git text uses short plain English. Tracking IDs (features, ADRs, tasks)
+are optional citations after the English — not the subject by themselves.
+
+Examples:
+
+```text
+feat: enqueue catch-up for failed embeds (F75)
+fix: restore admin pagination (#112)
+```
+
+PR titles: `Corpus automations catch-up (F75)` — not `[M127] …`.
+
+Details: `.cursor/rules/atomic-commits.mdc`, `.cursor/rules/developer-facing-language.mdc`.

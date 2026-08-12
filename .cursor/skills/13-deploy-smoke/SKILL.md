@@ -237,7 +237,7 @@ Record monitoring baseline.
 Aggregate commits and PRs into a structured changelog:
 
 1. `git log --oneline [last-deploy-tag]..HEAD`
-2. Group by phase and milestone using `[T{id}]` and `[M{id}]` prefixes
+2. Group by theme / feature name (English); optional cites for feature, ADR, or PR
 3. Write `CHANGELOG.md`:
 
 ```markdown
@@ -245,12 +245,15 @@ Aggregate commits and PRs into a structured changelog:
 
 ## [version] — [date]
 
-### Phase 1: [Phase Name]
-- **M1**: [milestone] ([PR link])
-  - [T1.1] test: [description]
-  - [T1.2] feat: [description]
+### Foundation
+- **Monorepo scaffold** ([PR link])
+  - Add preprocessing unit coverage
+  - Wire ingest input validation
 ...
 ```
+
+Do not require `[T{id}]` / `[M{id}]` prefixes in changelog bullets
+(see `developer-facing-language.mdc`).
 
 4. Tag: `git tag v[version]-deploy`
 

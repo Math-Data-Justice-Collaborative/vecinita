@@ -3,7 +3,8 @@ name: 14-hotfix
 description: >
   Surgical post-deployment edits: bug fixes, patches, small behavioral changes, and
   dependency updates applied to a deployed codebase without re-running the pipeline.
-  Test-driven investigation: one bug = docs/bug-reports/BUG-*.md (logs + investigation MD),
+  Mandatory thorough AskQuestion Phase 0 interview (Steps 0.1–0.5) before investigation or
+  code. Test-driven investigation: one bug = docs/bug-reports/BUG-*.md (logs + investigation MD),
   tests/bugs/test_bug_*.py (red then green), one fix. AskQuestion interviews at each gate,
   including Phase 5 prevention/countermeasures and optional Cursor rule creation. See
   bug-investigation skill. Interview, verification plan, spec checks, main CI parity before
@@ -204,7 +205,7 @@ Read the rows relevant to the affected component / symptom. Skip only when clear
 
 | Document | Check for |
 |----------|-----------|
-| `docs/feature-list.md` | Map symptom to **F1–F9**; reject out-of-scope hotfix work |
+| `docs/feature-list.md` | Map symptom to the relevant feature (through current Fn); reject out-of-scope hotfix work |
 | `docs/spec.md` | Component behavior, constraints, hard limits (§Constraints) |
 | `docs/config-spec.md` | Parameter names, defaults, validation rules |
 | `docs/api-contract.md` | Payload shape, errors, return types |
@@ -232,7 +233,7 @@ Read the rows relevant to the affected component / symptom. Skip only when clear
 | Code matches spec but behavior wrong | **Spec mismatch** or **Spec bug** | `[Ambiguity]` or `[Contradiction]` — user picks spec vs code fix |
 | Two spec sections disagree | **Spec contradiction** | `[Contradiction]` — user resolves before patch |
 | Spec under-defined for this case | **Spec ambiguity** | `[Ambiguity]` — user clarifies; back-add to spec on resolve |
-| Fix needs new feature (not F1–F9) | **Scope drift** | `[Decision]` — defer to pipeline, not hotfix |
+| Fix needs new feature (not a surgical patch) | **Scope drift** | `[Decision]` — defer to evolve/pipeline, not hotfix |
 | Implementation ≠ `deployment-integration.md` | Deploy/config drift | Note in report; 15-service-health may have already filed |
 | Code ≠ template-registry | **Template drift** | Advisory per considerations §9; ADR if user approves change |
 
@@ -369,7 +370,11 @@ and whether to add a **Cursor rule**.
 
 ### Phase 0 — User interview (required)
 
-Conduct a short, structured interview before Phase 1. **Only AskQuestion** — batch with
+**Mandatory thorough interview** ([pipeline-preamble.md](../pipeline-preamble.md) §8): complete
+Steps 0.1–0.5 (or exit) before Phase 1. Do not start investigation or code from a one-line
+bug report alone. Prompts and digests are English first; BUG-/feature codes are citations.
+
+Conduct a structured interview before Phase 1. **Only AskQuestion** — batch with
 2–4 `questions` per tool call where noted below.
 
 #### Step 0.1 — What do you want to do next?

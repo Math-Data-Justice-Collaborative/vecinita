@@ -1,10 +1,12 @@
 # Vecinita Data Flow Diagrams
 
-> **Status:** Draft (issue #58)  
-> **Last updated:** 2026-07-03  
+> **Status:** Companion to architecture  
+> **Last updated:** 2026-08-12  
 > **Format:** Mermaid in `docs/` — render on GitHub or in VS Code Mermaid preview.
 
 Companion to [architecture.md](architecture.md). Covers C4-style overview, sequences, ERD, state machines, class diagrams, requirement traceability, user journeys, and flowcharts. **ADR-004** zero-PII boundaries annotated.
+
+**Also see (newer paths, may not have dedicated Mermaid yet):** corpus catch-up / freshness schedule (ADR-052), playground LLM vs prod LLM (ADR-037), LoRA train → human promote → prod adapter pin (ADR-053). Operator narrative: [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md).
 
 ---
 

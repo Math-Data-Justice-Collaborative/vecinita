@@ -170,7 +170,7 @@ pr_remediation_cycles:
     pr_number: 123
     pr_url: https://github.com/org/repo/pull/123
     linked_review_cycle_id: PRR-001   # optional; from pr_review_cycles[]
-    title: "[M1] Example milestone"
+    title: "Example milestone"
     status: completed                 # in_progress | completed | blocked
     started: "2026-06-12"
     completed: "2026-06-12"

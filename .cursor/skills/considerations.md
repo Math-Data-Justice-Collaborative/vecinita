@@ -48,12 +48,15 @@ The default pipeline is **linear**, but **recovery** is allowed when validation 
 
 ## 3. Release notes and changelog
 
-Atomic commits and PRs use structured messages, but **nothing automatically becomes** user-facing **release notes**.
+Atomic commits and PRs use clear short English subjects (optional ID cites), but **nothing
+automatically becomes** user-facing **release notes**. See
+`developer-facing-language.mdc`.
 
 **Convention** (when cutting a release or completing 13-deploy-smoke):
 - Append a release section to `docs/sessions/S000-internal-docs-archive/deploy-report.md` or maintain `docs/CHANGELOG.md`
-- Aggregate merge commits and PR titles since the last deploy tag
-- Include: version/date, deployment URL, merged milestones, notable decisions
+- Aggregate merge commits and PR titles since the last deploy tag into **readable English** bullets
+- Include: version/date, deployment URL, merged milestones (by name), notable decisions
+  (cite feature/ADR IDs alongside English)
 
 ## 4. Performance testing
 
@@ -97,6 +100,18 @@ RAG services need schema, seed corpus, and eval fixtures before integration test
 
 ## 7. Uncertainty / AskQuestion protocol
 
+### Mandatory session-startup interview
+
+Entry skills (**00-context**, **pipeline**, **14-hotfix**, **15-service-health**,
+**16-evolve**, **17-retrospective**, and PR review skills) **must** run a thorough
+AskQuestion interview at session start before investigation or code. Shared checklist:
+[pipeline-preamble.md](pipeline-preamble.md) §8 **Mandatory session-startup interview**.
+
+Do not treat a one-line “run 16” / “hotfix this” as sufficient intake. Cover intent, scope,
+constraints, evidence/risks, then an explicit proceed gate. Prompts and digests are
+**English first**; tracking IDs are optional citations
+([developer-facing-language.mdc](../rules/developer-facing-language.mdc)).
+
 ### Categories
 
 | Category | Blocking? | Example |
@@ -115,6 +130,8 @@ RAG services need schema, seed corpus, and eval fixtures before integration test
 4. **Last option** = "Let me explain / provide more context" escape hatch.
 5. **Advisory issues** proceed with recommended option if user doesn't respond, marked `⚠️ Assumed:`.
 6. **Evidence required**: Cite the source (spec section, code path, user answer).
+7. **Startup interview** is blocking for entry skills — no Phase 1+ / live checks / build
+   until the proceed gate is answered (or the user exits).
 
 ### Markdown fallback (RET-002 RA-017)
 

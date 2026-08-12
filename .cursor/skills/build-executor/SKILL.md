@@ -151,15 +151,16 @@ After implementing the task:
 
 #### Step 4 — Commit & record
 
-1. Verify correct branch is checked out (create `feat/M{N}-{slug}` if needed).
+1. Verify correct branch is checked out (create `feat/{english-slug}` if needed).
 2. Stage all files related to this task.
-3. Commit with the format: `[T{id}] {type}: {description}` (per `atomic-commits.mdc`).
+3. Commit with `{type}: {short English summary}` (per `atomic-commits.mdc` /
+   `developer-facing-language.mdc`). Optional cite in parentheses; do not lead with `[T{id}]`.
 4. Verify the commit is clean: no untracked files, no unstaged changes for this task.
 5. Append to `workflow-state.yaml` §`git_history.commits`:
    ```yaml
    - sha: <short-sha>
      branch: <current-branch>
-     message: "[T{id}] {type}: {description}"
+     message: "{type}: {short English summary}"
      stage: "07-build"
      files_changed: <count>
      timestamp: "<ISO-8601>"
@@ -174,7 +175,7 @@ is imminent, commit first. Progress lost to uncommitted work is unrecoverable.
 1. Set the task to `completed` in the Task Tracking table, record the date.
 2. Advance Current State to the next pending task.
 3. Update TodoWrite.
-4. Report to the user: `Completed T{id}: {description}. Next: T{next_id}: {next_description}`
+4. Report to the user: `Completed: {description}. Next: {next_description}` (optional task-id cite).
 
 ### Milestone Boundary
 
@@ -184,8 +185,8 @@ When all tasks in a milestone are `completed`:
    typecheck, tests) via parallel agents. If failures exist, verify-build walks the user
    through approve/deny/modify for each. Wait for all checks to pass.
 2. **Create minor PR** from the milestone branch to the phase branch:
-   - Title: `[M{N}] {Milestone Name}`
-   - Body: auto-generated from task list, spec references, check results
+   - Title: short English milestone name (optional cite; not `[M{N}] …`)
+   - Body: auto-generated English summaries from task list, spec references, check results
    - Include the PR checklist from §Git Strategy
 3. **Present to the user** (PR URL and checklist in the session summary). Do **not** stop the
    implementation session here waiting for merge unless the user asked for that or the next
@@ -204,8 +205,8 @@ When all milestones in a phase are `completed`:
 3. **Record in Phase Gate Log**: Date, result, notes (include verification report reference).
 4. If any gate criterion is not met, surface as `[Decision]`: proceed or resolve first.
 5. **Create major PR** from the phase branch to main:
-   - Title: `Phase {N}: {Phase Name}`
-   - Body: gate check results, milestone summaries, full check results
+   - Title: short English phase name (e.g. `Foundation phase`; optional cycle cite)
+   - Body: gate check results, milestone summaries, full check results — English first
 6. **Present to the user** (URL and highlights). Do **not** treat this as the mandatory end of
    the session; merge only on explicit approval, never auto-merge.
 7. Update the PR Plan table. Advance Current State to the next phase's first milestone and

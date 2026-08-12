@@ -86,14 +86,18 @@ and [01-requirements](01-requirements/SKILL.md) Phase 0C.
 ### Open (00-context recommended)
 
 1. User provides intent (prompt, feature, bug, integration goal).
-2. **00-context** (or resume) classifies **session type** and magnitude.
+2. **00-context** (or resume) runs the **mandatory thorough session-startup interview**
+   ([pipeline-preamble.md](pipeline-preamble.md) §8): intent, scope, constraints, evidence,
+   then classifies **session type** and magnitude. English-first prompts.
 3. Allocate next `S{NNN}`; create folder + `session-brief.md`.
 4. Propose `routing-plan.md` (explicit stages + skip rationale).
-5. **AskQuestion** — user approves routing plan.
+5. **AskQuestion** — user approves routing plan (**proceed gate**).
 6. Agent sets `active_session`; create branch if code changes expected.
 
 **Entry without 00:** Allowed when recent context exists (project brief or scoped brief covers
 work). Stage checks `active_session`; if missing, block and recommend **00-context**.
+Entry skills **14 / 15 / 16 / 17 / 18 / 19** still run their own mandatory startup interview
+even when a session already exists.
 
 ### During
 
@@ -226,11 +230,13 @@ Every stage **00–19** (except 00 when opening a session):
 5. On completion: update `active_session.routing_plan` entry status; advance `current_stage`.
 6. Update `project.stages.{key}` when stage completes (project baseline).
 
-**00-context** additionally: session open, type classification, routing plan proposal, and
-`active_session` creation after user approval.
+**00-context** additionally: **mandatory thorough session-startup interview**, session open,
+type classification, routing plan proposal, and `active_session` creation after user approval
+([pipeline-preamble.md](pipeline-preamble.md) §8).
 
 **Orchestrators** (pipeline, 16-evolve): ensure routing plan stages run in order; enforce phase
-checkpoints for feature/greenfield types.
+checkpoints for feature/greenfield types. On invoke, run or confirm the startup interview
+proceed gate before child stages.
 
 ---
 

@@ -173,7 +173,7 @@ git_history:
   commits:
     - sha: abc1234
       branch: evolve/EV-002-batch-export
-      message: "[T3.2] feat: add export endpoint"
+      message: "feat: add export endpoint"
       stage: "07-build"
       files_changed: 4
       timestamp: "2026-05-24T12:00:00Z"

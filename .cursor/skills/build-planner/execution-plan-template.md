@@ -142,10 +142,14 @@ linting, typechecking, and all existing tests after every commit.
 
 | Commit type | Scope | Naming convention |
 |-------------|-------|-------------------|
-| Task commit | One task (T1.1, T1.2, ...) | `[T1.1] test: add tests for [component]` |
-| Fix commit | Fix within a task | `[T1.2] fix: correct [description]` |
+| Task commit | One plan task | `test: add tests for [component]` |
+| Fix commit | Fix within a task | `fix: correct [description]` |
 | Config commit | Tooling / config change | `chore: configure [tool]` |
-| Refactor commit | Cleanup within a milestone | `[M1] refactor: [description]` |
+| Refactor commit | Cleanup within a milestone | `refactor: [description]` |
+
+Subjects are short English (`type: summary`). Optional cites like `(F75)` or `(task 1.1)`
+after the English are fine; do not lead with `[T…]` / `[M…]`. See
+`.cursor/rules/developer-facing-language.mdc`.
 
 ### PR Structure
 
@@ -153,16 +157,17 @@ PRs map to milestones and phases. Two levels:
 
 | PR type | Scope | Branch pattern | Review gate |
 |---------|-------|----------------|-------------|
-| **Minor PR** | One milestone | `feat/M1-[slug]` | All milestone tasks complete, tests pass, lint clean |
-| **Major PR** | One phase (rolls up minor PRs) | `phase/1-foundation` | Phase gate check passed |
+| **Minor PR** | One milestone | `feat/{english-slug}` | All milestone tasks complete, tests pass, lint clean |
+| **Major PR** | One phase (rolls up minor PRs) | `phase/{n}-{english-slug}` | Phase gate check passed |
 
 #### Minor PRs (per milestone)
 
 Each milestone produces one minor PR. The PR:
 - Contains all atomic commits for that milestone's tasks
-- Targets the phase branch (`phase/N-[slug]`)
-- Title: `[M1] [Milestone Name]`
+- Targets the phase branch (`phase/{n}-{english-slug}`)
+- Title: short English milestone name (optional cite; not `[M1] …`)
 - Body auto-generated from the milestone's task list, spec references, and test results
+  (English summaries; IDs as citations)
 - Presented to the user for review before merge (merge requires explicit approval)
 - **Agent sessions** do not stop here by default: after the PR exists and is recorded, continue
   the next milestone when branch policy allows (see `.cursor/skills/build-executor/SKILL.md`
@@ -173,8 +178,9 @@ Each milestone produces one minor PR. The PR:
 Each phase produces one major PR that rolls up all minor PRs. The PR:
 - Contains all merged minor PRs for that phase
 - Targets the main branch
-- Title: `Phase N: [Phase Name]`
+- Title: short English phase name (e.g. `Foundation phase`)
 - Body includes: phase gate check results, milestone summaries, test/lint/typecheck results
+  (English first; IDs as citations)
 - Presented to the user for review before merge (merge requires explicit approval)
 - Same **session throughput** expectation as minor PRs when the next phase is not blocked on
   `main` updating
@@ -188,20 +194,24 @@ Each phase produces one major PR that rolls up all minor PRs. The PR:
 - [ ] Linter clean
 - [ ] Typechecker clean
 - [ ] Spec references verified
+- [ ] Commit subjects are short English (`type: summary`; optional ID cites)
+- [ ] PR title is clear English (optional cite; not code-only)
 - [ ] No unresolved `⚠️` markers in changed files
 - [ ] Audit decisions respected (no denied statements reintroduced)
 ```
 
 ### Branch Workflow
 
+Prefer English slugs for new branches. Example (illustrative; older plans may use `feat/M{N}-…`):
+
 ```
 main
  └── phase/1-foundation
-      ├── feat/M1-project-setup       → minor PR → phase/1-foundation
-      ├── feat/M2-core-dependencies    → minor PR → phase/1-foundation
-      └── (all M merged)              → major PR → main
+      ├── feat/project-setup           → minor PR → phase/1-foundation
+      ├── feat/core-dependencies       → minor PR → phase/1-foundation
+      └── (all milestone PRs merged)   → major PR → main
  └── phase/2-core-pipeline
-      ├── feat/M3-preprocessing        → minor PR → phase/2-core-pipeline
+      ├── feat/preprocessing           → minor PR → phase/2-core-pipeline
       └── ...
 ```
 
@@ -209,10 +219,10 @@ main
 
 | PR | Type | Milestone/Phase | Branch | Target | Status |
 |----|------|-----------------|--------|--------|--------|
-| PR-1 | Minor | M1 | feat/M1-[slug] | phase/1-foundation | pending |
-| PR-2 | Minor | M2 | feat/M2-[slug] | phase/1-foundation | pending |
-| PR-3 | Major | Phase 1 | phase/1-foundation | main | pending |
-| PR-4 | Minor | M3 | feat/M3-[slug] | phase/2-core-pipeline | pending |
+| PR-1 | Minor | Project setup | feat/project-setup | phase/1-foundation | pending |
+| PR-2 | Minor | Core dependencies | feat/core-dependencies | phase/1-foundation | pending |
+| PR-3 | Major | Foundation phase | phase/1-foundation | main | pending |
+| PR-4 | Minor | Preprocessing | feat/preprocessing | phase/2-core-pipeline | pending |
 | ... | ... | ... | ... | ... | ... |
 
 ## Task Tracking

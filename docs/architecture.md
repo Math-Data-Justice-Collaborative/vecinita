@@ -1,23 +1,23 @@
 # Vecinita Architecture
 
-> **Status:** Draft (issues #56, #92)  
-> **Last updated:** 2026-07-03  
+> **Status:** Current overview  
+> **Last updated:** 2026-08-12  
 > **Canonical overview** — links live deploy state, infra specs, and ADRs without duplicating operator runbooks.
 
 ## Purpose
 
 This document is the **single architecture overview** for Vecinita: what runs where, how environments differ, how deploy and secrets work, and known gaps. For step-by-step operator procedures see [staging-runbook.md](staging-runbook.md). For data/corpus workflows see [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md).
 
-**Related issues:** [#56](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/56) backend/hosting spec · [#58](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/58) data flow diagrams · [#92](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/92) OSCAR offload review · [#55](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/55) Brown migration questions
+**Related issues:** [#56](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/56) backend/hosting spec · [#58](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/58) data flow diagrams · [#92](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/92) OSCAR offload review · [#55](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/55) Brown migration questions · [#73](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/73) corpus automations · [#219](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/219) freshness · [#72](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/72) LoRA FT
 
 ---
 
 ## System summary
 
-Vecinita is a **five-application monorepo** (ADR-001) delivering:
+Vecinita is a **six-app monorepo** under `apps/` (ADR-001 described the original five-app product split; `internal-write-api` is the sixth tree) delivering:
 
 1. **ChatRAG** — bilingual (EN/ES) community Q&A with retrieval-augmented generation
-2. **Data management** — operator-driven URL ingest, corpus admin, evaluation tooling
+2. **Data management** — operator-driven URL ingest, corpus admin, evaluation tooling, automations
 
 Deployment is **hybrid**:
 
@@ -25,7 +25,7 @@ Deployment is **hybrid**:
 |----------|------|
 | **DigitalOcean App Platform** (US `nyc`) | HTTP APIs that touch Postgres, both React frontends |
 | **DigitalOcean Managed Postgres** | Corpus DB + pgvector (384-dim) |
-| **Modal** (US workspace `vecinita`) | GPU/CPU inference: FastEmbed, vLLM, ingest workers, data-mgmt ASGI |
+| **Modal** (US workspace `vecinita`) | Embedding (multilingual e5-small), vLLM prod + playground, ingest/DM workers, shared catch-up/freshness schedule; LoRA FT app planned |
 | **Supabase** (separate project) | Admin operator auth only — identity **not** in corpus DB (ADR-026) |
 
 **Critical boundary (ADR-007):** Only DO services hold `DATABASE_URL`. Modal workers persist data via the **internal write API** using `VECINITA_INTERNAL_API_KEY`.
@@ -34,7 +34,7 @@ Deployment is **hybrid**:
 
 ## Service map
 
-### Deploy units (8 runtime services + 2 data stores)
+### Deploy units (runtime services + data stores)
 
 | # | Service | Repo path | Platform | Holds `DATABASE_URL` | Public? |
 |---|---------|-----------|----------|----------------------|---------|
@@ -43,9 +43,11 @@ Deployment is **hybrid**:
 | 3 | Internal write API | `apps/internal-write-api` | DO App Platform | Yes (read/write) | No — JWT + service key |
 | 4 | Data mgmt frontend | `apps/data-management-frontend` | DO static | No | Yes — admin UI (Supabase login) |
 | 5 | Data mgmt ASGI | `apps/data-management-backend` | Modal `@asgi_app` | **No** | No — proxy auth |
-| 6 | Ingest workers | Modal `@function` queue | Modal | **No** | No |
-| 7 | FastEmbed | `infra/modal/embedding_app.py` | Modal CPU | No | No — service HTTP |
-| 8 | vLLM (Qwen2.5-1.5B) | `infra/modal/llm_app.py` | Modal GPU T4 | No | No — service HTTP |
+| 6 | Ingest / automation workers | Modal `@function` + schedule | Modal | **No** | No — catch-up + freshness job types |
+| 7 | Embedding | `infra/modal/embedding_app.py` | Modal CPU | No | No — `intfloat/multilingual-e5-small` |
+| 8 | vLLM prod | `infra/modal/llm_app.py` | Modal GPU | No | No — ChatRAG / ingest (`vecinita-llm`) |
+| 9 | vLLM playground | `infra/modal/llm_playground_app.py` | Modal GPU | No | No — admin/eval sandbox only |
+| — | LoRA fine-tune (planned) | `infra/modal/finetune_app.py` (future) | Modal GPU | No | No — train; promote pins prod LLM |
 | — | Corpus Postgres | `apps/database` (migrations) | DO Managed Postgres | — | No |
 | — | Supabase Auth | `supabase/` config | Supabase cloud | Separate DB | Admin login only |
 
@@ -55,12 +57,13 @@ Deployment is **hybrid**:
 |---------|---------|
 | `packages/rag` | LlamaIndex RAG orchestration |
 | `packages/ingest` | Scrape/chunk helpers |
-| `packages/embedding-client` | HTTP client → Modal FastEmbed |
-| `packages/llm-client` | HTTP client → Modal vLLM |
+| `packages/embedding-client` | HTTP client → Modal embedding |
+| `packages/llm-client` | HTTP client → Modal vLLM (prod + playground URLs) |
 | `packages/tagging` | LLM/human tag vocabulary |
 | `packages/frontend-i18n` | EN/ES locale + messages |
 | `packages/frontend-ui` | Shared React UI primitives |
-| `packages/shared-schemas` | OpenAPI-aligned types, CORS helpers |
+| `packages/shared-schemas` | OpenAPI-aligned types, CORS helpers, automations helpers |
+| `packages/eval` | Golden eval harness |
 
 **Rule:** `packages/*` must not import `apps/*` (ADR-012).
 
@@ -311,9 +314,9 @@ Detail: [deployment-integration.md](deployment-integration.md) §Cost estimation
 | Diagrams | [data-flow.md](data-flow.md) | Mermaid: C4, ERD, state, class, requirement, journey, sequence, flowchart |
 | Hosting migration | **NEW** [hosting-migration-summary.md](hosting-migration-summary.md) | Brown / OSCAR discovery (#55, #92) |
 | API schemas | [api-contract.md](api-contract.md), OpenAPI in repo | Keep in sync on route changes |
-| Feature scope | [feature-list.md](feature-list.md) | F1–F37 feature IDs |
+| Feature scope | [feature-list.md](feature-list.md) | Features through F77 (automations, freshness, LoRA FT) |
 | Test acceptance | [test-plan.md](test-plan.md), [acceptance-criteria.md](acceptance-criteria.md) | — |
-| ADR decisions | [adr/README.md](adr/README.md) | 35 ADRs; read before topology changes |
+| ADR decisions | [adr/README.md](adr/README.md) | Through ADR-053; read before topology changes |
 
 **Known open items (not doc gaps — product/infra decisions):**
 

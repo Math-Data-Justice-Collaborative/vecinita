@@ -1,22 +1,18 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — TC-252–263; prior S028 TC-242–251)  
+> **Last updated**: 2026-08-12 (docs sync — scope blurb; TC-252–265 corpus automations / FT)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
 
-Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Management (scrape→embed→store via Modal + DO write API), Database migrations/seeds, privacy enforcement, and local E2E mapped to UJ-001–UJ-012.
+Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (scrape→embed→store via Modal + DO write API), Database migrations/seeds, privacy enforcement, local E2E mapped to user journeys, and corpus automations / freshness / LoRA FT cases (TC-252+).
 
-**EV-001 (planned):** Corpus browse (F19), LLM/human tagging (F20–F21), tag-filtered RAG (F22).
+**Shipped (do not treat as “planned”):** Corpus browse and tagging, admin dashboard suite, shared frontend i18n/UI packages (bilingual chrome), multilingual embedding pin.
 
-**EV-002 (planned):** Admin UI overhaul (F23), tag display (F24), admin dashboard (F25), health check (F26), bulk ops (F27), serving stats (F28), audit log & versions (F29).
+**Still building / planned:** Browser-local chat history, some admin auth polish items, website scrape/crawl tree, corpus catch-up + freshness (in progress), LoRA fine-tune + human promote.
 
-**EV-004 (planned):** Shared frontend i18n/UI packages (F31); admin bilingual UI; ChatRAG migration to shared packages + Tailwind; Vitest mirror of ChatRAG language-toggle tests.
-
-**S003 (planned):** Browser-local persistent chat history (F33) — `localStorage` rehydration of the active conversation across refresh/tab-away/tab-close/new-tab (UJ-024, ADR-025) and a previous-chats list with new-chat archival, cap/eviction, label derivation, select-to-restore, and clear/delete semantics (UJ-025). Frontend-only (Vitest + jsdom `localStorage`); no API/CORS changes.
-
-**Excludes (v1):** Real Modal invocations in CI, multimodal ingest, fine-tuning.
+**Excludes (CI default):** Real Modal GPU invocations in GitHub Actions, multimodal ingest.
 
 **UI E2E (T0-ui, Playwright):** Browser smoke against `vite preview` with route mocks — `tests/ui/`, `make test-ui`. Complements Vitest (jsdom) and pytest API E2E. Live browser UJ on staging (T3-ui) remains env-gated per `connectivity-gates.md` H6.
 
