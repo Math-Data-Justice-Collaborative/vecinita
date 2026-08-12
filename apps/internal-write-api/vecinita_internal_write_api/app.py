@@ -65,6 +65,11 @@ from vecinita_shared_schemas.eval_config import (
     RagConfigPromoteResponse,
 )
 from vecinita_shared_schemas.finetune_eval import FinetuneEvalReportResponse
+from vecinita_shared_schemas.finetune_promote import (
+    FinetuneAdapterPinResponse,
+    FinetunePromoteRequest,
+    FinetunePromoteResponse,
+)
 from vecinita_shared_schemas.freshness import parse_freshness_stale_days
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
@@ -193,6 +198,10 @@ from vecinita_internal_write_api.feedback import (
 from vecinita_internal_write_api.finetune_eval import (
     FinetuneEvalReportNotFoundError,
     get_finetune_eval_store,
+)
+from vecinita_internal_write_api.finetune_promote import (
+    apply_finetune_promote,
+    get_finetune_adapter_pin,
 )
 from vecinita_internal_write_api.freshness_crud import (
     document_is_stale_now,
@@ -878,6 +887,27 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=str(exc),
             ) from exc
+
+    @app.get(
+        "/internal/v1/finetune/adapter",
+        response_model=FinetuneAdapterPinResponse,
+    )
+    def get_finetune_adapter(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+    ) -> FinetuneAdapterPinResponse:
+        """F77 current prod adapter pin (write-read parity / TC-262)."""
+        return get_finetune_adapter_pin()
+
+    @app.post(
+        "/internal/v1/finetune/promote",
+        response_model=FinetunePromoteResponse,
+    )
+    def post_finetune_promote(  # pyright: ignore[reportUnusedFunction]
+        body: FinetunePromoteRequest,
+        _actor: WriteActorDep,
+    ) -> FinetunePromoteResponse:
+        """F77 human promote or clear-pin rollback (UJ-082 / TC-262 / TC-265)."""
+        return apply_finetune_promote(body)
 
     @app.delete(
         "/internal/v1/documents/bulk",

@@ -1,7 +1,7 @@
 """F77 finetune eval report store + lookup (T129.6 / TC-261).
 
-In-process store for unit tests and early wiring; Postgres persistence can land
-with promote (T129.7) if operators need cross-replica history.
+In-process store for unit tests and early wiring. Adapter pin persistence for
+promote/rollback lives in ``finetune_promote`` (T129.7).
 
 [Corpus: feature-list.md §F77]
 [Spec: docs/api-contract.md §EV-027 Fine-tune]

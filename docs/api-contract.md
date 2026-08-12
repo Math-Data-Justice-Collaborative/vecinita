@@ -1220,9 +1220,11 @@ Shared schedule: one `schedule=modal.Period(days=1)` on `vecinita-data-managemen
 | `POST` | `/jobs` (`job_type=finetune_train`) | Creates pending train; **approve** required before GPU |
 | `POST` | `/jobs/{id}/approve` | Manual train approve for `finetune_train` only (TP6); admin JWT |
 | `GET` | `/internal/v1/finetune/runs/{id}/eval` | Base vs adapter eval report |
-| `POST` | `/internal/v1/finetune/promote` | Human promote → prod adapter pin (RD-338–339) |
+| `GET` | `/internal/v1/finetune/adapter` | Current prod pin (`adapter_id` or base) — write-read parity |
+| `POST` | `/internal/v1/finetune/promote` | Human promote (`adapter_id`) or clear-pin rollback (`rollback: true`) (RD-338–339, AC-FT9) |
 
 Prod `vecinita-llm` loads adapter **only after promote**. Playground may load candidates.
+Rollback clears `VECINITA_FINETUNE_ADAPTER_ID` → base (TC-265).
 
 FT Modal app: `infra/modal/finetune_app.py` / **`vecinita-llm-finetune`**; volume
 **`llm-finetune-adapters`** (TP4). Caps: `VECINITA_FINETUNE_MAX_CONCURRENT`,
