@@ -35,7 +35,15 @@ def test_openapi_job_options_include_eval_and_document_fields() -> None:
     option_props = as_json_object(_job_options_schema(spec)["properties"])
     assert "job_type" in option_props
     job_type = as_json_object(option_props["job_type"])
-    assert set(cast("list[str]", job_type["enum"])) == {"ingest", "retag", "eval", "rebuild"}
+    assert set(cast("list[str]", job_type["enum"])) == {
+        "ingest",
+        "retag",
+        "eval",
+        "rebuild",
+        "automation_catchup",
+        "freshness_refresh",
+        "finetune_train",
+    }
     assert "document_id" in option_props
     assert "eval_run_id" in option_props
     assert "chunk_size_tokens" in option_props
@@ -43,6 +51,14 @@ def test_openapi_job_options_include_eval_and_document_fields() -> None:
     assert "backfill" in option_props
     assert "backfill_source" in option_props
     assert "ack_reconstruct_from_chunks" in option_props
+
+
+def test_openapi_approve_job_path_exists() -> None:
+    """POST /jobs/{job_id}/approve is documented for F77 finetune_train (TP6)."""
+    spec = _load_spec()
+    paths = as_json_object(spec["paths"])
+    approve = as_json_object(paths["/jobs/{job_id}/approve"])
+    assert "post" in approve
 
 
 def test_openapi_create_job_allows_empty_urls_for_non_ingest() -> None:
