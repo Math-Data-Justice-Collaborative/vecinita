@@ -451,27 +451,29 @@ Micros locked in `packages/embedding-client/vecinita_embedding_client/modal_pins
 **ADR:** ADR-052 (schedule + catch-up/freshness) · ADR-053 (LoRA FT) · **Tech:** Phase 30
 M127–M130 · **Issues:** #73 #219 #72  
 **Deploy posture:** staging first (TP9); **AskQuestion** before live prod automation enable /
-FT promote (S030-D10). Detail + secrets matrix expansion remains **T130.3** / 07-build.
+FT promote (S030-D10). Secrets matrix + Modal secret names locked in **T130.3**.
 
-### Deploy units touched (stub)
+### Deploy units touched
 
 | Unit | Change |
 |------|--------|
 | Modal `vecinita-data-management` | `schedule=modal.Period(days=1)` dispatching `automation_catchup` + `freshness_refresh` (TP2 / S030-D31 M2); catch-up + freshness workers |
-| Modal `vecinita-llm-finetune` | New app (`infra/modal/finetune_app.py`); volume **`llm-finetune-adapters`** (TP4) |
+| Modal `vecinita-llm-finetune` | New app (`infra/modal/finetune_app.py`); volume **`llm-finetune-adapters`**; Modal secret **`vecinita-llm-finetune`** (TP4) |
 | Modal `vecinita-llm` / playground | Load promoted adapter only after human promote; playground may load candidates |
-| DO internal-write-api | `automation_runs`, automations/freshness/FT routes |
+| DO internal-write-api | `automation_runs`, automations/freshness/FT routes (OpenAPI v0.5.0) |
 | DO chat-rag / DM frontend | Automations / Freshness / FT panels (UJ-080–082) |
 
 ### Secrets / config (pointer)
 
 See `docs/staging-secrets-matrix.md` §EV-027 and `docs/config-spec.md` —
-`VECINITA_AUTOMATIONS_*`, `VECINITA_FRESHNESS_STALE_DAYS`, `VECINITA_FINETUNE_*`.
+`VECINITA_AUTOMATIONS_*`, `VECINITA_FRESHNESS_*`, `VECINITA_FINETUNE_*`,
+`VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID`. Caps: `VECINITA_FINETUNE_MAX_CONCURRENT=1`,
+`VECINITA_FINETUNE_MAX_RUNS_PER_DAY=3` (TP5).
 
 ### Redeploy order (staging → prod)
 
 1. Modal DM (schedule + catch-up/freshness) → write-API → DM frontend
-2. Modal `vecinita-llm-finetune` (+ volume) → write-API FT routes → `llm_app` promote pin
+2. Modal `vecinita-llm-finetune` (+ volume + secret) → write-API FT routes → `llm_app` promote pin
 3. Staging enable/smoke; **AskQuestion** before prod automation enable / FT promote
 
 ## Open questions

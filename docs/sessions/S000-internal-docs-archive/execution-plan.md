@@ -11,11 +11,11 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M130: Phase 30 gate — TC suite + docs / OpenAPI closeout |
-| **Active task** | T130.3 (in_progress) |
+| **Active task** | T130.4 (in_progress) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
-| **Active session** | S030-corpus-automations — 07-build; M130 T130.3 secrets matrix closeout |
+| **Active session** | S030-corpus-automations — 07-build; M130 T130.4 Phase 30 closeout |
 | **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
@@ -2598,8 +2598,8 @@ Accepted; Phase 30 Current State; H4–H5 note for 13; issue closeout notes afte
 |------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
 | T130.1 | Test: confirm unit + API e2e + Vitest + Playwright TC-252–265 green | Test | completed | e2e-coverage, TP8 | T127.10, T128.7, T129.10 | — | 2026-08-12 | S030 | F75–F77 |
 | T130.2 | Config: OpenAPI yaml mirrors for automations/freshness/FT; CORS H0c for new routes | Config | completed | ADR-011, connectivity-gates | T130.1 | — | 2026-08-12 | S030 | F75–F77 |
-| T130.3 | Docs: staging-secrets-matrix + Modal secrets for FT/automation envs (TP5/TP9) | Docs | in_progress | TP9, deploy-integration | T130.2 | — | | S030 | F75–F77 |
-| T130.4 | Docs: confirm ADR-052/053 already Accepted + closeout notes only; Phase 30 gate + Current State; #73/#219/#72 closeout | Docs | pending | Phase 30 gate, S030-D31 M4 | T130.3 | — | | S030 | F75–F77 |
+| T130.3 | Docs: staging-secrets-matrix + Modal secrets for FT/automation envs (TP5/TP9) | Docs | completed | TP9, deploy-integration | T130.2 | — | 2026-08-12 | S030 | F75–F77 |
+| T130.4 | Docs: confirm ADR-052/053 already Accepted + closeout notes only; Phase 30 gate + Current State; #73/#219/#72 closeout | Docs | in_progress | Phase 30 gate, S030-D31 M4 | T130.3 | — | | S030 | F75–F77 |
 
 #### Phase 30 Gate Check
 

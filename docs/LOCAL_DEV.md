@@ -100,7 +100,8 @@ npm install && npm run dev
 
 See [infra/modal/README.md](../infra/modal/README.md) for `modal serve` commands per app
 (embedding, data-management, `vecinita-llm`, `vecinita-llm-playground`). LoRA fine-tune
-(`vecinita-llm-finetune`) is planned — pins live in `infra/modal/finetune_pins.py`.
+(`vecinita-llm-finetune`) is implemented (`infra/modal/finetune_app.py`); pins in
+`infra/modal/finetune_pins.py`.
 
 ### Corpus automations / freshness / FT (local knobs)
 

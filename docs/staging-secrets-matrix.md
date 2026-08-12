@@ -327,10 +327,12 @@ Verify Dashboard → Authentication → URL Configuration after every `config pu
 
 EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy changes (AC-F6). Existing `VITE_*` rows for both DO static frontends and `VECINITA_CORS_ORIGINS` on backends remain sufficient. Re-run H4/H5 after redeploying both frontends (AC-F7).
 
-## EV-027 (F75–F77) — planned secrets (04-tech-plan / TP9)
+## EV-027 (F75–F77) — secrets (T130.3 / TP9)
 
-> Wire values in **07-build** (T130.3). Defaults in [config-spec.md](config-spec.md).
+> Confirmed in **07-build** (T130.3). Defaults in [config-spec.md](config-spec.md).
 > Staging first; AskQuestion before live prod automation enable / FT promote.
+> Sync via `scripts/deploy/sync_modal_secret.sh --merge --apply` for Modal secrets;
+> DO apps via `do_apps.py sync-secrets` (never commit operator specs).
 
 ### DigitalOcean — Internal write API / Modal DM (add)
 
