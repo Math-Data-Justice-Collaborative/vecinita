@@ -11,11 +11,11 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M130: Phase 30 gate — TC suite + docs / OpenAPI closeout |
-| **Active task** | T130.1 (pending) |
+| **Active task** | T130.2 (in_progress) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
-| **Active session** | S030-corpus-automations — 07-build; M129 complete — next M130 T130.1 TC suite green + 08-verify-build |
+| **Active session** | S030-corpus-automations — 07-build; M130 T130.2 OpenAPI + CORS H0c |
 | **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
@@ -2566,9 +2566,9 @@ stale list UX (AC-FR*; TC freshness; UJ-081).
 | T128.2 | Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`) | Config | completed | TP7, api-contract | T128.1 | — | 2026-08-12 | S030 | F76 |
 | T128.3 | Code: write-API PATCH/list stale fields; Refresh now → enqueue | Code | completed | api-contract §Freshness | T128.1, T128.2 | — | 2026-08-12 | S030 | F76 |
 | T128.4 | Code: Modal `job_type=freshness_refresh` + periodic schedule branch (shared with F75) | Code | completed | TP2, ADR-052 | T128.3, T127.7 | — | 2026-08-12 | S030 | F76 |
-| T128.5 | Code: ingest/hash-aware re-fetch path for URL sources | Code | pending | RD-329, packages/ingest | T128.4 | — | | S030 | F76 |
-| T128.6 | Code: DM freshness UI — stale list, enable, Refresh now | Code | pending | UJ-081 | T128.3 | — | | S030 | F76 |
-| T128.7 | Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081 | Test | pending | TP8, TC-264 | T128.4, T128.6 | — | | S030 | F76 |
+| T128.5 | Code: ingest/hash-aware re-fetch path for URL sources | Code | completed | RD-329, packages/ingest | T128.4 | — | 2026-08-12 | S030 | F76 |
+| T128.6 | Code: DM freshness UI — stale list, enable, Refresh now | Code | completed | UJ-081 | T128.3 | — | 2026-08-12 | S030 | F76 |
+| T128.7 | Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081 | Test | completed | TP8, TC-264 | T128.4, T128.6 | — | 2026-08-12 | S030 | F76 |
 
 #### M129: F77 — LoRA FT + human promote
 
@@ -2596,8 +2596,8 @@ Accepted; Phase 30 Current State; H4–H5 note for 13; issue closeout notes afte
 
 | Task | Description | Type | Status | Spec Source | Depends On | Data Deps | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
-| T130.1 | Test: confirm unit + API e2e + Vitest + Playwright TC-252–265 green | Test | pending | e2e-coverage, TP8 | T127.10, T128.7, T129.10 | — | | S030 | F75–F77 |
-| T130.2 | Config: OpenAPI yaml mirrors for automations/freshness/FT; CORS H0c for new routes | Config | pending | ADR-011, connectivity-gates | T130.1 | — | | S030 | F75–F77 |
+| T130.1 | Test: confirm unit + API e2e + Vitest + Playwright TC-252–265 green | Test | completed | e2e-coverage, TP8 | T127.10, T128.7, T129.10 | — | 2026-08-12 | S030 | F75–F77 |
+| T130.2 | Config: OpenAPI yaml mirrors for automations/freshness/FT; CORS H0c for new routes | Config | in_progress | ADR-011, connectivity-gates | T130.1 | — | | S030 | F75–F77 |
 | T130.3 | Docs: staging-secrets-matrix + Modal secrets for FT/automation envs (TP5/TP9) | Docs | pending | TP9, deploy-integration | T130.2 | — | | S030 | F75–F77 |
 | T130.4 | Docs: confirm ADR-052/053 already Accepted + closeout notes only; Phase 30 gate + Current State; #73/#219/#72 closeout | Docs | pending | Phase 30 gate, S030-D31 M4 | T130.3 | — | | S030 | F75–F77 |
 
