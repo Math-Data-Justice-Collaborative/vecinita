@@ -37,6 +37,8 @@ orchestration model that is idempotent, cost-capped, and observable in the DM UI
 - Shared schedule reduces Modal cron sprawl; job-type dispatch must be explicit.
 - Write-API schema for `automation_runs` is required for DM UI.
 - Catch-up-only residual work avoids duplicate embed cost on healthy ingest.
+- **Implemented** in Phase 30 / S030 07-build (M127–M128 + M130 OpenAPI/secrets);
+  live prod enable remains AskQuestion-gated (TP9 / 13).
 
 ## Alternatives considered
 

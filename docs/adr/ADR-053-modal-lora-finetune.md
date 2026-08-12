@@ -44,6 +44,8 @@ promote-to-prod must not regress chat quality.
 - Aligns promote culture with F71/RD-296 (operator judgment after evidence).
 - PEFT/TRL pins locked in **06-tech-tooling** (TP10 / S030-D33): exact micros in
   `infra/modal/finetune_pins.py` (`FINETUNE_IMAGE_PIPS`) before 07 train worker.
+- **Implemented** in Phase 30 / S030 07-build (M129 + M130); prod promote remains
+  AskQuestion-gated (TP9 / 13).
 
 ## Alternatives considered
 

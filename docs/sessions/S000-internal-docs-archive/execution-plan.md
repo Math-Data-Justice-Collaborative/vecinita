@@ -9,13 +9,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
-| **Active milestone** | M130: Phase 30 gate — TC suite + docs / OpenAPI closeout |
-| **Active task** | T130.4 (in_progress) |
+| **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build complete; next 08-verify-build |
+| **Active milestone** | M130: Phase 30 gate — **completed** (awaiting 08-verify-build) |
+| **Active task** | — (M130 T130.1–T130.4 completed; next stage 08-verify-build) |
 | **Last updated** | 2026-08-12 |
-| **Evolve cycle** | EV-027 — Full; Phase C build |
+| **Evolve cycle** | EV-027 — Full; Phase C → 08-verify-build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
-| **Active session** | S030-corpus-automations — 07-build; M130 T130.4 Phase 30 closeout |
+| **Active session** | S030-corpus-automations — M130 complete; invoke 08-verify-build |
 | **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
@@ -2599,20 +2599,21 @@ Accepted; Phase 30 Current State; H4–H5 note for 13; issue closeout notes afte
 | T130.1 | Test: confirm unit + API e2e + Vitest + Playwright TC-252–265 green | Test | completed | e2e-coverage, TP8 | T127.10, T128.7, T129.10 | — | 2026-08-12 | S030 | F75–F77 |
 | T130.2 | Config: OpenAPI yaml mirrors for automations/freshness/FT; CORS H0c for new routes | Config | completed | ADR-011, connectivity-gates | T130.1 | — | 2026-08-12 | S030 | F75–F77 |
 | T130.3 | Docs: staging-secrets-matrix + Modal secrets for FT/automation envs (TP5/TP9) | Docs | completed | TP9, deploy-integration | T130.2 | — | 2026-08-12 | S030 | F75–F77 |
-| T130.4 | Docs: confirm ADR-052/053 already Accepted + closeout notes only; Phase 30 gate + Current State; #73/#219/#72 closeout | Docs | in_progress | Phase 30 gate, S030-D31 M4 | T130.3 | — | | S030 | F75–F77 |
+| T130.4 | Docs: confirm ADR-052/053 already Accepted + closeout notes only; Phase 30 gate + Current State; #73/#219/#72 closeout | Docs | completed | Phase 30 gate, S030-D31 M4 | T130.3 | — | 2026-08-12 | S030 | F75–F77 |
 
 #### Phase 30 Gate Check
 
-- [ ] All M127–M130 tasks completed (T127.1–T130.4)
-- [ ] AC-AU* / AC-FR* / AC-FT* mapped + unit/API e2e/Vitest/Playwright green at 07–11
-- [ ] ADR-052 / ADR-053 Accepted; TP path locks documented
-- [ ] OpenAPI + CORS H0c for new internal routes; secrets matrix updated
-- [ ] 06-tech-tooling completed (PEFT/TRL pins) before M129 train worker
+- [x] All M127–M130 tasks completed (T127.1–T130.4)
+- [x] AC-AU* / AC-FR* / AC-FT* mapped + unit/API e2e/Vitest/Playwright green at 07 (T130.1); live AC verify 09–11
+- [x] ADR-052 / ADR-053 Accepted; TP path locks documented
+- [x] OpenAPI + CORS H0c for new internal routes; secrets matrix updated
+- [x] 06-tech-tooling completed (PEFT/TRL pins) before M129 train worker
 - [ ] Live prod automation enable / FT promote only after AskQuestion (S030-D10 / TP9) — **deferred to 13**
 
 **Tech-plan delta:** `docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md`  
 **ADRs:** [ADR-052](../../../adr/ADR-052-corpus-automation-orchestration.md),
 [ADR-053](../../../adr/ADR-053-modal-lora-finetune.md)  
+**Closeout:** `docs/sessions/S030-corpus-automations/reports/t130-4-phase30-closeout.md`  
 **Roadmap:** `docs/sessions/S030-corpus-automations/roadmap.md`
 
 ---
@@ -2763,7 +2764,7 @@ main
 | PR-77 | Minor | M127 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | open — [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) @`92f1f30` — F75/#73 |
 | PR-78 | Minor | M128 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F76/#219 |
 | PR-79 | Minor | M129 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — F77/#72 |
-| PR-80 | Minor | M130 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — Phase 30 gate |
+| PR-80 | Minor | M130 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | open — [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) — Phase 30 gate (await 08) |
 | PR-81 | Major | Phase 30 / S030 (EV-027) | evolve/EV-027-corpus-automations | main | pending — after Gate C→D / verify |
 
 S028 (EV-026) is evolve Standard: M123–M126 on `evolve/EV-026-chat-source-ux`
@@ -3511,6 +3512,7 @@ Statuses: `pending` | `in_progress` | `completed` | `blocked` | `deferred`
 
 | Phase | Gate Check Date | Result | Notes |
 |-------|----------------|--------|-------|
+| 30 | 2026-08-12 | **partial (07-build PASS)** | S030/EV-027 M127–M130 complete (T127.1–T130.4). ADR-052/053 Accepted; TC-252–265 unit+e2e+Vitest+Playwright green ([t130-1](../../S030-corpus-automations/reports/t130-1-tc-gate.md); [t130-4](../../S030-corpus-automations/reports/t130-4-phase30-closeout.md)). OpenAPI v0.5.0 + secrets matrix T130.2–T130.3. **Deferred:** 08 formal verify; AC live verify 09–11; **live prod automation enable / FT promote AskQuestion at 13**; #73/#219/#72 close after 11 (13 if deploy). |
 | 29 | 2026-08-06 | **partial (07-build PASS)** | S028/EV-026 M123–M126 complete (T123.1–T126.3). ADR-051 Accepted; TC-242–251 unit+e2e+Vitest+CORS H0c green ([t126_1](../../S028-chat-source-ux/reports/t126_1_tc_green_gate.md); [t126_3](../../S028-chat-source-ux/reports/t126_3_phase29_gate.md)). **Deferred:** 08 formal verify; AC-SU live verify 09–11; **live H4–H5 at 13** (AskQuestion S028-D2); #222–#224 close after 11 (13 if deploy). |
 | 28 | 2026-08-05 | **partial (07-build PASS)** | S027/EV-025 M119–M122 tasks complete (T120.5 conditional S027-D35; T121.3 skipped S027-D39). ADR-048 Accepted; TC-232–241 unit+stub green ([t122_1](../../S027-multilingual-embeddings/reports/t122_1_tc_green_gate.md); [t122_3](../../S027-multilingual-embeddings/reports/t122_3_phase28_gate.md)). **Deferred:** 08 formal verify; AC-ME live verify 09–11; **live prod cutover H4–H5 at 13**; #159 close after 13. |
 | 27 | 2026-08-04 | **partial (build PASS)** | S026/EV-024 M112–M118 tasks complete; OpenAPI/infra/secrets mirror PASS; Playwright UJ-069/070/073 PASS ([t118-3](../../S026-frontend-ux-polish/reports/t118-3-phase-27-gate.md)). **Deferred:** AC-UX T2 suite + full lint matrix to 08/09–11; live `SUPABASE_SECRET_KEY` sync (no prod.env); issue closes + epic #193 after 13 H1–H5. Gate C→D AskQuestion pending. |
