@@ -8,9 +8,17 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
+import pytest
+from vecinita_internal_write_api.automations import (
+    _row_datetime,  # pyright: ignore[reportPrivateUsage]
+    _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
+    _run_from_row,  # pyright: ignore[reportPrivateUsage]
+)
 from vecinita_shared_schemas.automations import (
     DEFAULT_AUTOMATIONS_MAX_CONCURRENT,
     AutomationRunListResponse,
@@ -22,7 +30,6 @@ from tests.helpers.json_response import response_json_object
 from tests.unit.internal_write_api.conftest import auth_headers
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi.testclient import TestClient
 
 _PAGE_SIZE = 20
@@ -79,3 +86,31 @@ def test_list_automations_runs_returns_paginated_history(
     assert body.page_size == _PAGE_SIZE
     assert body.total_count >= 0
     assert isinstance(body.items, list)
+
+
+def test_automation_row_datetime_helpers_cover_type_branches() -> None:
+    """Cover datetime coercion helpers used by automation_runs mapping (TP3)."""
+    now = datetime.now(UTC)
+    assert _row_datetime({"started_at": now}, "started_at") == now
+    with pytest.raises(TypeError, match="Expected datetime"):
+        _row_datetime({"started_at": "not-a-datetime"}, "started_at")
+    assert _row_datetime_optional({"finished_at": None}, "finished_at") is None
+    assert _row_datetime_optional({"finished_at": now}, "finished_at") == now
+
+    run_id = uuid4()
+    row = {
+        "id": run_id,
+        "job_type": "automation_catchup",
+        "status": "completed",
+        "started_at": now,
+        "finished_at": None,
+        "error": None,
+        "document_id": None,
+        "revision": None,
+        "created_at": now,
+        "updated_at": now,
+    }
+    run = _run_from_row(row)
+    assert run.id == run_id
+    assert run.finished_at is None
+    assert run.started_at == now
