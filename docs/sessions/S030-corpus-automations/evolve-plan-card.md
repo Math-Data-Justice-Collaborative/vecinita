@@ -1,6 +1,6 @@
 # Evolve Plan Card
 
-> Cycle: EV-027 | Session: S030-corpus-automations | Updated: 2026-08-07
+> Cycle: EV-027 | Session: S030-corpus-automations | Updated: 2026-08-12
 
 ## Goal
 
@@ -27,7 +27,7 @@ eval evidence (no auto-abort), and corpus freshness (#219) in one Full-preset cy
 
 ## Next child stage
 
-**07-build** — Phase 30 M127 (F75); FT pins ready for M129
+**07-build** — Phase 30 M128 (F76) T128.2 in progress; M127 PR #238 open (no merge); FT pins ready for M129
 
 ## Risks / open decisions
 
