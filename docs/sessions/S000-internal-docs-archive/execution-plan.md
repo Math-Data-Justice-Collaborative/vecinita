@@ -11,11 +11,11 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M129: F77 — LoRA FT + human promote |
-| **Active task** | T129.6 (pending) |
+| **Active task** | T129.7 (pending) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
-| **Active session** | S030-corpus-automations — 07-build; T129.5 complete — next T129.6 eval report |
+| **Active session** | S030-corpus-automations — 07-build; T129.6 complete — next T129.7 promote |
 | **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
@@ -2583,7 +2583,7 @@ prod `llm_app` loads adapter only after promote; FT caps (AC-FT*; TC-252–265; 
 | T129.3 | Config: Modal `finetune_app.py` scaffold + volume + secrets docs (**blocked until 06** PEFT/TRL pins complete) | Config | completed | TP4, ADR-053, S030-D31 M3 | T129.1 | PEFT/TRL pins (06) — done S030-D33 | 2026-08-12 | S030 | F77 |
 | T129.4 | Code: `job_type=finetune_train` + `POST /jobs/{id}/approve` (admin JWT) | Code | completed | TP6, api-contract | T129.1 | — | 2026-08-12 | S030 | F77 |
 | T129.5 | Code: train worker (LoRA/PEFT SFT) writes adapter to volume; run metadata | Code | completed | ADR-053, TP4 | T129.3, T129.4 | llm-models base | 2026-08-12 | S030 | F77 |
-| T129.6 | Code: `GET …/finetune/runs/{id}/eval` base vs adapter report (F36 golden) | Code | pending | RD-338, UJ-082 | T129.5 | eval fixtures | | S030 | F77 |
+| T129.6 | Code: `GET …/finetune/runs/{id}/eval` base vs adapter report (F36 golden) | Code | completed | RD-338, UJ-082 | T129.5 | eval fixtures | 2026-08-12 | S030 | F77 |
 | T129.7 | Code: `POST …/finetune/promote` + clear pin rollback; set `VECINITA_FINETUNE_ADAPTER_ID` | Code | pending | RD-339, AC-FT9 | T129.6 | — | | S030 | F77 |
 | T129.8 | Code: `llm_app` load promoted adapter; playground candidate load path | Code | pending | ADR-037, ADR-053 | T129.7 | — | | S030 | F77 |
 | T129.9 | Code: DM FT UI — approve train, eval evidence, promote (human only) | Code | pending | UJ-082 | T129.6, T129.7 | — | | S030 | F77 |

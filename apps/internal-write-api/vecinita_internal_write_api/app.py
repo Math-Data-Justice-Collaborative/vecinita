@@ -64,6 +64,7 @@ from vecinita_shared_schemas.eval_config import (
     RagConfigPromoteRequest,
     RagConfigPromoteResponse,
 )
+from vecinita_shared_schemas.finetune_eval import FinetuneEvalReportResponse
 from vecinita_shared_schemas.freshness import parse_freshness_stale_days
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
@@ -188,6 +189,10 @@ from vecinita_internal_write_api.feedback import (
     cleanup_feedback,
     insert_feedback,
     list_feedback,
+)
+from vecinita_internal_write_api.finetune_eval import (
+    FinetuneEvalReportNotFoundError,
+    get_finetune_eval_store,
 )
 from vecinita_internal_write_api.freshness_crud import (
     document_is_stale_now,
@@ -852,6 +857,23 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         try:
             return build_embed_promote_report(engine, rebuild_run_id=rebuild_run_id)
         except EmbedPromoteReportNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc),
+            ) from exc
+
+    @app.get(
+        "/internal/v1/finetune/runs/{run_id}/eval",
+        response_model=FinetuneEvalReportResponse,
+    )
+    def get_finetune_eval_report(  # pyright: ignore[reportUnusedFunction]
+        run_id: UUID,
+        _actor: WriteActorDep,
+    ) -> FinetuneEvalReportResponse:
+        """F77 base vs adapter eval evidence for human promote (UJ-082 / TC-261)."""
+        try:
+            return get_finetune_eval_store().get(run_id)
+        except FinetuneEvalReportNotFoundError as exc:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=str(exc),
