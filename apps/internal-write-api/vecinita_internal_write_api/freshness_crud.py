@@ -83,6 +83,8 @@ def enqueue_document_refresh(
         job_id = jobs_client.enqueue_freshness_refresh(
             document_id,
             force=force,
+            refresh_enabled=refresh_enabled,
+            is_stale=document_is_stale_now(last_checked_at),
             authorization=authorization,
         )
     except Exception:  # noqa: BLE001  # Refresh now must surface skip, not 500

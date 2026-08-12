@@ -1,4 +1,4 @@
-"""Dispatch ingest, retag, rebuild, eval, or automation_catchup jobs based on job_type."""
+"""Dispatch ingest, retag, rebuild, eval, automation_catchup, or freshness_refresh jobs."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from vecinita_shared_schemas.internal_write import AuditEventRequest
 
 from vecinita_data_management_backend.automation_catchup import run_automation_catchup_job
 from vecinita_data_management_backend.catchup_triggers import maybe_enqueue_after_job
+from vecinita_data_management_backend.freshness_refresh import run_freshness_refresh_job
 from vecinita_data_management_backend.modal_jobs_client import (
     ModalJobsEnqueueClient,
     ModalJobsEnqueueError,
@@ -37,7 +38,7 @@ _logger = logging.getLogger(__name__)
 
 # Explicit registry — unknown job_type must fail closed (BUG-2026-07-31).
 _KNOWN_JOB_TYPES: frozenset[str] = frozenset(
-    {"ingest", "retag", "rebuild", "eval", "automation_catchup"}
+    {"ingest", "retag", "rebuild", "eval", "automation_catchup", "freshness_refresh"}
 )
 
 
@@ -129,6 +130,11 @@ def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
             write_client=write_client,
             fetch_document=fetch_document,
         ),
+        "freshness_refresh": lambda: run_freshness_refresh_job(
+            job_id,
+            store=store,
+            write_client=write_client,
+        ),
     }
     handler = handlers.get(record.job_type)
     if handler is None:
@@ -146,7 +152,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
     fetch_document: DocumentFetcher | None = None,
     tag_client: LlmTagClient | None = None,
 ) -> None:
-    """Run ingest, retag, rebuild, eval, or automation_catchup for a queued job."""
+    """Run ingest, retag, rebuild, eval, automation_catchup, or freshness_refresh."""
     record = store.get_job(job_id)
     if record is None:
         raise KeyError(job_id)

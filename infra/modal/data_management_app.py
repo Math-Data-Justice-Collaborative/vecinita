@@ -104,10 +104,48 @@ def _run_scheduled_catchup_tick() -> str:
     return "automation_catchup_tick"
 
 
-def _run_scheduled_freshness_tick() -> str:
-    """F76 freshness branch stub — implemented in M128 (T128.4)."""
-    logger.info("daily schedule tick: job_type=freshness_refresh stub (M128)")
-    return "freshness_refresh_stub"
+def _run_scheduled_freshness_tick() -> dict[str, object]:
+    """F76 freshness branch — enqueue refresh for stale refresh-enabled sources."""
+    from uuid import UUID
+
+    from vecinita_data_management_backend.freshness_refresh import run_scheduled_freshness_tick
+    from vecinita_data_management_backend.modal_jobs_client import ModalJobsEnqueueClient
+    from vecinita_data_management_backend.write_client import InternalWriteClient
+    from vecinita_shared_schemas.internal_write import DocumentSummary
+
+    write = InternalWriteClient()
+    jobs = ModalJobsEnqueueClient()
+
+    def list_stale() -> list[DocumentSummary]:
+        items: list[DocumentSummary] = []
+        page = 1
+        while True:
+            listing = write.list_documents(page=page, page_size=100, stale=True)
+            items.extend(listing.items)
+            if page * listing.page_size >= listing.total or not listing.items:
+                break
+            page += 1
+        return items
+
+    def enqueue(document_id: UUID, *, force: bool = False) -> UUID:
+        return jobs.enqueue_freshness_refresh(
+            document_id,
+            force=force,
+            refresh_enabled=True,
+            is_stale=True,
+        )
+
+    result = run_scheduled_freshness_tick(
+        list_stale_documents=list_stale,
+        enqueue_freshness=enqueue,
+    )
+    logger.info(
+        "daily schedule tick: job_type=freshness_refresh enqueued=%s skipped=%s outcome=%s",
+        result.get("enqueued"),
+        result.get("skipped"),
+        result.get("outcome"),
+    )
+    return result
 
 
 @app.function(

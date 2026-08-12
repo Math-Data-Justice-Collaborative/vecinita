@@ -1357,6 +1357,49 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             )
         return RetagJobResponse(job_id=job_id)
 
+    @app.post(
+        "/internal/v1/documents/{document_id}/mark-checked",
+        response_model=DocumentMetadataResponse,
+        dependencies=[Depends(require_authenticated)],
+    )
+    def mark_document_checked(  # pyright: ignore[reportUnusedFunction]
+        document_id: UUID,
+    ) -> DocumentMetadataResponse:
+        """F76: bump ``last_checked_at`` after a freshness check (RD-337 / TC-257)."""
+        with engine.begin() as conn:
+            row = (
+                conn.execute(
+                    text(
+                        """
+                        UPDATE documents
+                        SET last_checked_at = now()
+                        WHERE id = :document_id
+                        RETURNING id, url, title, display_title, language,
+                                  refresh_enabled, last_checked_at
+                        """
+                    ),
+                    {"document_id": document_id},
+                )
+                .mappings()
+                .first()
+            )
+            if row is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+            doc = mapping_row(row)
+            refresh_raw = doc.get("refresh_enabled")
+            refresh_enabled = refresh_raw if isinstance(refresh_raw, bool) else bool(refresh_raw)
+            checked_raw = doc.get("last_checked_at")
+            last_checked = checked_raw if isinstance(checked_raw, datetime) else None
+            return DocumentMetadataResponse(
+                document_id=row_uuid(doc, "id"),
+                url=row_str(doc, "url"),
+                title=row_str_optional(doc, "title"),
+                display_title=row_str_optional(doc, "display_title"),
+                language=row_str_optional(doc, "language"),
+                refresh_enabled=refresh_enabled,
+                last_checked_at=last_checked,
+            )
+
     @app.get(
         "/internal/v1/documents/{document_id}/tags",
         response_model=TagPatchResponse,
@@ -1651,10 +1694,21 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             LIMIT :limit OFFSET :offset
             """  # noqa: S608  # whitelisted clauses only
         with engine.connect() as conn:
-            total = scalar_int(sqlalchemy_scalar_one(conn.execute(text(count_sql), params)))
+            total = scalar_int(
+                sqlalchemy_scalar_one(
+                    conn.execute(
+                        text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                            count_sql
+                        ),
+                        params,
+                    )
+                )
+            )
             rows = (
                 conn.execute(
-                    text(list_sql),
+                    text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                        list_sql
+                    ),
                     params,
                 )
                 .mappings()

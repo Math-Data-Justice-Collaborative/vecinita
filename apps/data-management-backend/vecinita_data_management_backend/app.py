@@ -63,6 +63,10 @@ def _store_options_from_request(job_options: JobOptions | None) -> tuple[str, di
     }
     if job_options.force:
         options["force"] = True
+    if job_options.refresh_enabled is not None:
+        options["refresh_enabled"] = job_options.refresh_enabled
+    if job_options.is_stale is not None:
+        options["is_stale"] = job_options.is_stale
     if job_options.dry_run:
         options["dry_run"] = True
     if job_options.document_ids is not None:

@@ -89,3 +89,36 @@ class ModalJobsEnqueueClient:
             msg = f"enqueue_automation_catchup failed: {response.status_code} {response.text}"
             raise ModalJobsEnqueueError(msg)
         return CreateJobResponse.model_validate(response.json()).job_id
+
+    def enqueue_freshness_refresh(
+        self,
+        document_id: UUID,
+        *,
+        force: bool = False,
+        refresh_enabled: bool = True,
+        is_stale: bool = True,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Enqueue F76 ``freshness_refresh`` (schedule / Refresh now; RD-337)."""
+        body = CreateJobRequest(
+            urls=[],
+            options=JobOptions(
+                job_type="freshness_refresh",
+                document_id=document_id,
+                force=force,
+                refresh_enabled=refresh_enabled,
+                is_stale=is_stale,
+            ),
+        )
+        headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
+        if authorization:
+            headers["Authorization"] = authorization
+        response = self._client.post(
+            "/jobs",
+            json=body.model_dump(mode="json"),
+            headers=headers,
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"enqueue_freshness_refresh failed: {response.status_code} {response.text}"
+            raise ModalJobsEnqueueError(msg)
+        return CreateJobResponse.model_validate(response.json()).job_id

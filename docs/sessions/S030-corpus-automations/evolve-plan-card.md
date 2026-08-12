@@ -27,7 +27,7 @@ eval evidence (no auto-abort), and corpus freshness (#219) in one Full-preset cy
 
 ## Next child stage
 
-**07-build** — Phase 30 M128 (F76) T128.3 in progress; T128.2 done @7b1aa87; M127 PR #238 open (no merge); FT pins ready for M129
+**07-build** — Phase 30 M128 (F76) T128.4 done; next T128.5 hash-aware re-fetch; M127 PR #238 open (no merge); FT pins ready for M129
 
 ## Risks / open decisions
 

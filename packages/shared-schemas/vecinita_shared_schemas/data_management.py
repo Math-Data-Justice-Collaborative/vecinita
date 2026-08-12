@@ -59,8 +59,17 @@ class JobOptions(BaseModel):
         default=False,
         description=(
             "Bypass content_hash skip on ingest (F47) and rebuild (F41). "
-            "When true, re-chunk and re-embed even if scraped hash matches stored hash."
+            "When true, re-chunk and re-embed even if scraped hash matches stored hash. "
+            "For freshness_refresh, Refresh now sets force=true to bypass stale (TC-259)."
         ),
+    )
+    refresh_enabled: bool | None = Field(
+        default=None,
+        description="F76 per-source refresh gate snapshot for freshness_refresh jobs.",
+    )
+    is_stale: bool | None = Field(
+        default=None,
+        description="F76 stale snapshot at enqueue time for freshness_refresh jobs.",
     )
     dry_run: bool = False
     document_ids: list[UUID] | None = None
@@ -162,10 +171,14 @@ class JobMetrics(BaseModel):
         default=None,
         description="F75 automation_catchup worker outcome (ADR-052).",
     )
+    freshness_outcome: str | None = Field(
+        default=None,
+        description="F76 freshness_refresh worker outcome (ADR-052).",
+    )
     documents_processed: int | None = Field(
         default=None,
         ge=0,
-        description="Documents processed by F75 catch-up (0 when skipped).",
+        description="Documents processed by F75 catch-up or F76 freshness (0 when skipped).",
     )
 
 

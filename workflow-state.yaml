@@ -1977,8 +1977,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: T128.3 in_progress
-      next_action: T128.3 in_progress — write-API PATCH/list stale; Refresh now enqueue
+      current_action: T128.5 pending
+      next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
       askquestion_pending: false
       askquestion_pending_topic:
       gate_a_to_b: passed
@@ -1994,10 +1994,7 @@ project:
       - M128
       - M129
       - M130
-      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T19:11:44Z — T128.2 COMPLETE @7b1aa87 (Alembic refresh_enabled + last_checked_at);
-        T128.3 in_progress (write-API PATCH/list stale; Refresh now enqueue). PR #238 open; tip @7b1aa87 local not pushed.
-        Do not merge #238 without approval. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md §Phase
-        30]'
+      note: 'M128 T128.4 completed — freshness_refresh worker + real schedule branch; next T128.5'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -2017,17 +2014,21 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: 7b1aa87
-      tip_sha: 7b1aa87
-      tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-      tip_prev: 87cf4d2
-      updated_at: '2026-08-12T19:11:44Z'
+      tip: e86290e
+      tip_sha: e86290e
+      tip_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+      tip_prev: 7b1aa87
+      updated_at: '2026-08-12T19:40:00Z'
       active_milestone: M128
-      current_task: T128.3
-      current_task_status: in_progress
+      current_task: T128.5
+      current_task_status: pending
       t128_2_status: completed
       t128_2_commit: 7b1aa87
-      t128_3_status: in_progress
+      t128_3_status: completed
+      t128_3_commit: e86290e
+      t128_4_status: completed
+      t128_4_completed_at: '2026-08-12T19:40:00Z'
+      t128_5_status: pending
       s026_baseline:
         status: completed
         started_at: '2026-08-04'
@@ -2769,15 +2770,15 @@ project:
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M128
-      current_task: T128.3
+      current_task: T128.5
       s030_d31_decision: S030-D31
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T128.3
+        current_task: T128.5
         active_milestone: M128
-        current_task_status: in_progress
+        current_task_status: pending
         mode: task_loop
         build_plan_card: waived_S030-D31
         t127_5_status: completed
@@ -2794,18 +2795,22 @@ project:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: 7b1aa87
+        tip_sha: e86290e
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
         t128_2_commit: 7b1aa87
-        t128_3_status: in_progress
+        t128_3_status: completed
+        t128_3_commit: e86290e
+        t128_4_status: completed
+        t128_4_completed_at: '2026-08-12T19:40:00Z'
+        t128_5_status: pending
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
       ci_fix_commit: 5fc2d21
       ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-      current_task_status: in_progress
+      current_task_status: pending
       askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
       t128_2_status: completed
       t128_2_commit: 7b1aa87
@@ -2814,15 +2819,25 @@ project:
       t128_2_spec_source: TP7, api-contract
       t128_2_depends_on: T128.1
       t128_2_note: 'Alembic refresh_enabled + last_checked_at; reuse content_hash; committed @7b1aa87'
-      t128_3_status: in_progress
+      t128_3_status: completed
       t128_3_started_at: '2026-08-12T19:11:44Z'
+      t128_3_completed_at: '2026-08-12T19:17:43Z'
+      t128_3_commit: e86290e
       t128_3_description: 'Code: write-API PATCH/list stale fields; Refresh now → enqueue'
       t128_3_spec_source: api-contract §Freshness
       t128_3_depends_on: T128.1, T128.2
+      t128_3_note: 'write-API freshness PATCH/list stale + Refresh now enqueue; committed @e86290e'
+      t128_4_status: completed
+      t128_4_completed_at: '2026-08-12T19:40:00Z'
+      t128_5_status: pending
+      t128_4_started_at: '2026-08-12T19:17:43Z'
+      t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
+      t128_4_spec_source: TP2, ADR-052
+      t128_4_depends_on: T128.3, T127.7
       m127_pr_status: open
       m127_pr_merge: deferred_user_option_1
       pr_238_ci_status: green
-      pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @7b1aa87 local not pushed'
+      pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @e86290e local ahead 2 not pushed'
     08-verify-build:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -7615,9 +7630,8 @@ active_session:
   - 72
   - 219
   current_stage: 07-build
-  current_stage_note: 'Phase C 07-build; M127 done PR #238 open; T128.1–T128.2 done; T128.3 in_progress; tip @7b1aa87; PR
-    #238 open (local ahead, not pushed)'
-  next_action: T128.3 in_progress — write-API PATCH/list stale fields; Refresh now → enqueue (F76/M128)
+  current_stage_note: 'Phase C 07-build; M127 done PR #238 open; T128.1–T128.4 done; T128.5 pending (hash-aware re-fetch)'
+  next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -7701,6 +7715,8 @@ active_session:
     @87cf4d2 (CI green on #238 incl. security/Opengrep re-run); T128.2 in_progress — Alembic freshness fields refresh_enabled
     + last_checked_at (F76/M128); askquestion_pending cleared'
   - 'S030 T128.2 COMPLETE 2026-08-12T19:11:44Z: commit @7b1aa87 on evolve/EV-027-corpus-automations; Alembic documents.refresh_enabled + last_checked_at (reuse content_hash); advance to T128.3 in_progress (write-API PATCH/list stale fields; Refresh now → enqueue); PR #238 still open (not pushed). [Corpus: feature-list.md §F76]'
+  - 'S030 T128.3 COMPLETE 2026-08-12T19:17:43Z: commit @e86290e on evolve/EV-027-corpus-automations; write-API freshness PATCH/list stale + Refresh now enqueue (F76); advance to T128.4 in_progress (Modal job_type=freshness_refresh + periodic schedule branch shared with F75); PR #238 still open (not pushed). [Corpus: feature-list.md §F76]'
+  - 'S030 T128.4 COMPLETE 2026-08-12T19:40:00Z: freshness_refresh worker + real schedule branch (F76); about to commit; advance to T128.5 pending (ingest/hash-aware re-fetch); 07-build remains in_progress M128. [Corpus: feature-list.md §F76]'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -8033,18 +8049,18 @@ active_session:
     mode: delta
     skip_rationale:
     ready: true
-    current_action: T128.3 in_progress
-    next_action: T128.3 in_progress — write-API PATCH/list stale; Refresh now enqueue
+    current_action: T128.5 pending
+    next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
     milestone_hint: M128
-    note: 'IN_PROGRESS — M127 PR #238 open; T128.1 COMPLETE @92912be; T128.2 COMPLETE @7b1aa87; T128.3
-      in_progress; tip @7b1aa87 (local, not pushed)'
+    note: 'IN_PROGRESS — M127 PR #238 open; T128.1–T128.3 COMPLETE (@e86290e); T128.4
+      in_progress; tip @e86290e (local ahead 2, not pushed)'
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M128
-    current_task: T128.3
-    current_task_status: in_progress
+    current_task: T128.5
+    current_task_status: pending
     t127_5_status: completed
     t127_5_commit: 5d31dcf
     t127_6_status: completed
@@ -8064,13 +8080,13 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: 7b1aa87
-    tip_sha: 7b1aa87
-    tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-    tip_prev: 87cf4d2
+    tip: e86290e
+    tip_sha: e86290e
+    tip_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+    tip_prev: 7b1aa87
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T19:11:44Z'
+    updated_at: '2026-08-12T19:40:00Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -8083,31 +8099,45 @@ active_session:
     t128_2_spec_source: TP7, api-contract
     t128_2_depends_on: T128.1
     t128_2_note: 'Alembic refresh_enabled + last_checked_at; reuse content_hash; committed @7b1aa87'
-    t128_3_status: in_progress
+    t128_3_status: completed
     t128_3_started_at: '2026-08-12T19:11:44Z'
+    t128_3_completed_at: '2026-08-12T19:17:43Z'
+    t128_3_commit: e86290e
     t128_3_description: 'Code: write-API PATCH/list stale fields; Refresh now → enqueue'
     t128_3_spec_source: api-contract §Freshness
     t128_3_depends_on: T128.1, T128.2
+    t128_3_note: 'write-API freshness PATCH/list stale + Refresh now enqueue; committed @e86290e'
+    t128_4_status: completed
+    t128_4_completed_at: '2026-08-12T19:40:00Z'
+    t128_5_status: pending
+    t128_4_started_at: '2026-08-12T19:17:43Z'
+    t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
+    t128_4_spec_source: TP2, ADR-052
+    t128_4_depends_on: T128.3, T127.7
     substeps:
-      current_task: T128.3
+      current_task: T128.5
       active_milestone: M128
-      current_task_status: in_progress
+      current_task_status: pending
       mode: task_loop
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
       t128_2_commit: 7b1aa87
-      t128_3_status: in_progress
-      tip_sha: 7b1aa87
+      t128_3_status: completed
+      t128_3_commit: e86290e
+      t128_4_status: completed
+      t128_4_completed_at: '2026-08-12T19:40:00Z'
+      t128_5_status: pending
+      tip_sha: e86290e
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
     askquestion_pending: false
     askquestion_pending_topic:
     askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
-    phase_note: '07-build in_progress M128 F76; M127 PR #238 open; T128.2 COMPLETE @7b1aa87; T128.3 in_progress; tip @7b1aa87'
-    handoff_next: T128.3 in_progress
-    execution_plan_active_task: T128.3 in_progress
+    phase_note: '07-build in_progress M128 F76; M127 PR #238 open; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
+    handoff_next: T128.4 in_progress
+    execution_plan_active_task: T128.4 in_progress
   - stage: 08-verify-build
     required: true
     status: pending
@@ -8140,7 +8170,7 @@ active_session:
     skip_rationale:
   handoff:
     next_skill: 07-build
-    next_action: T128.3 write-API PATCH/list stale; Refresh now enqueue
+    next_action: T128.4 Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -8152,7 +8182,7 @@ active_session:
     gate_b_to_c: passed
     phase_b: passed
     phase_c: pending
-    phase_note: '07-build in_progress M128 PR #238; T128.2 COMPLETE @7b1aa87; T128.3 in_progress; tip @7b1aa87'
+    phase_note: '07-build in_progress M128 PR #238; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
     decision: S030-D33
     s030_d31_decision: S030-D31
     s030_d32_decision: S030-D32
@@ -8164,8 +8194,8 @@ active_session:
     - M129
     - M130
     active_milestone: M128
-    current_task: T128.3
-    current_task_status: in_progress
+    current_task: T128.5
+    current_task_status: pending
     t127_5_status: completed
     t127_5_commit: 5d31dcf
     t127_6_status: completed
@@ -8185,21 +8215,25 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: 7b1aa87
-    tip_sha: 7b1aa87
-    tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-    tip_prev: 87cf4d2
+    tip: e86290e
+    tip_sha: e86290e
+    tip_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+    tip_prev: 7b1aa87
     askquestion_pending: false
     askquestion_pending_topic:
     handoff_md: docs/sessions/S030-corpus-automations/HANDOFF.md
-    handoff_next: T128.3 in_progress
-    execution_plan_active_task: T128.3 in_progress
-    updated_at: '2026-08-12T19:11:44Z'
+    handoff_next: T128.4 in_progress
+    execution_plan_active_task: T128.4 in_progress
+    updated_at: '2026-08-12T19:40:00Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_2_status: completed
     t128_2_commit: 7b1aa87
-    t128_3_status: in_progress
+    t128_3_status: completed
+    t128_3_commit: e86290e
+    t128_4_status: completed
+    t128_4_completed_at: '2026-08-12T19:40:00Z'
+    t128_5_status: pending
     ci_fix_commit: 5fc2d21
   askquestion_pending: false
   askquestion_pending_topic:
@@ -21613,8 +21647,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: T128.3 in_progress
-    next_action: T128.3 in_progress — write-API PATCH/list stale; Refresh now enqueue
+    current_action: T128.5 pending
+    next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
     askquestion_pending: false
     askquestion_pending_topic:
     gate_a_to_b: passed
@@ -21630,10 +21664,7 @@ stages:
     - M128
     - M129
     - M130
-    note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T19:11:44Z — T128.2 COMPLETE @7b1aa87 (Alembic refresh_enabled + last_checked_at);
-      T128.3 in_progress (write-API PATCH/list stale; Refresh now enqueue). PR #238 open; tip @7b1aa87 local not pushed.
-      Do not merge #238 without approval. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md §Phase
-      30]'
+    note: 'M128 T128.4 completed — freshness_refresh worker + real schedule branch; next T128.5'
     updated_at: '2026-08-12T19:09:18Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
@@ -21654,16 +21685,20 @@ stages:
     m127_status: completed
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    tip: 7b1aa87
-    tip_sha: 7b1aa87
-    tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-    tip_prev: 87cf4d2
+    tip: e86290e
+    tip_sha: e86290e
+    tip_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+    tip_prev: 7b1aa87
     active_milestone: M128
-    current_task: T128.3
-    current_task_status: in_progress
+    current_task: T128.5
+    current_task_status: pending
     t128_2_status: completed
     t128_2_commit: 7b1aa87
-    t128_3_status: in_progress
+    t128_3_status: completed
+    t128_3_commit: e86290e
+    t128_4_status: completed
+    t128_4_completed_at: '2026-08-12T19:40:00Z'
+    t128_5_status: pending
     s026_baseline:
       status: completed
       started_at: '2026-08-04'
@@ -22514,9 +22549,9 @@ stages:
     build_plan_card_waiver: S030-D31
     build_plan_card_sot: tech-plan-delta + Phase 30
     substeps:
-      current_task: T128.3
+      current_task: T128.5
       active_milestone: M128
-      current_task_status: in_progress
+      current_task_status: pending
       mode: task_loop
       build_plan_card: waived_S030-D31
       t127_5_status: completed
@@ -22535,12 +22570,16 @@ stages:
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
       phase_ab_docs_committed: true
-      tip_sha: 7b1aa87
+      tip_sha: e86290e
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
       t128_2_commit: 7b1aa87
-      t128_3_status: in_progress
+      t128_3_status: completed
+      t128_3_commit: e86290e
+      t128_4_status: completed
+      t128_4_completed_at: '2026-08-12T19:40:00Z'
+      t128_5_status: pending
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -22554,15 +22593,25 @@ stages:
     t128_2_spec_source: TP7, api-contract
     t128_2_depends_on: T128.1
     t128_2_note: 'Alembic refresh_enabled + last_checked_at; reuse content_hash; committed @7b1aa87'
-    t128_3_status: in_progress
+    t128_3_status: completed
     t128_3_started_at: '2026-08-12T19:11:44Z'
+    t128_3_completed_at: '2026-08-12T19:17:43Z'
+    t128_3_commit: e86290e
     t128_3_description: 'Code: write-API PATCH/list stale fields; Refresh now → enqueue'
     t128_3_spec_source: api-contract §Freshness
     t128_3_depends_on: T128.1, T128.2
+    t128_3_note: 'write-API freshness PATCH/list stale + Refresh now enqueue; committed @e86290e'
+    t128_4_status: completed
+    t128_4_completed_at: '2026-08-12T19:40:00Z'
+    t128_5_status: pending
+    t128_4_started_at: '2026-08-12T19:17:43Z'
+    t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
+    t128_4_spec_source: TP2, ADR-052
+    t128_4_depends_on: T128.3, T127.7
     m127_pr_status: open
     m127_pr_merge: deferred_user_option_1
     pr_238_ci_status: green
-    pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @7b1aa87 local not pushed'
+    pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @e86290e local ahead 2 not pushed'
   08-verify-build:
     status: completed
     session_id: S027-multilingual-embeddings
@@ -27733,19 +27782,18 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 07-build
-  current_action: T128.3 in_progress
-  next_action: T128.3 in_progress — write-API PATCH/list stale; Refresh now enqueue (F76/M128)
+  current_action: T128.5 pending
+  next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
   active_milestone: M128
-  current_task: T128.3
+  current_task: T128.5
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: 7b1aa87
-  tip_sha: 7b1aa87
-  current_stage_note: '07-build in_progress — M127 PR #238 open; T128.1 COMPLETE @92912be; T128.2 COMPLETE
-    @7b1aa87; T128.3 in_progress (M128 F76); tip @7b1aa87 (local, not pushed)'
-  notes: 'S030-D29 — TP1–TP10 locked; ADR-052/053 Accepted; Phase 30 M127–M130; Phase A/B @3cadd8b; T127.5–T127.10 COMPLETE;
-    M127 COMPLETE; PR #238 open; T128.1 COMPLETE @92912be; T128.2 COMPLETE @7b1aa87; current_task=T128.3 in_progress;
-    tip @7b1aa87 local ahead of origin (not pushed). [Corpus: feature-list.md §F75–F77]'
+  tip: e86290e
+  tip_sha: e86290e
+  tip_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+  tip_prev: 7b1aa87
+  current_stage_note: '07-build in_progress — M128; T128.4 COMPLETE (freshness_refresh worker + schedule); current_task=T128.5 pending (hash-aware re-fetch)'
+  notes: 'T128.4 done; continue T128.5 hash-aware re-fetch'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -27808,6 +27856,7 @@ evolve_cycles:
     30 M127–M130 pending; handoff → 05-verify-tech'
   - 'S030 resume: user option 1 — Continue T128.2; leave PR #238 open (no merge); tip @87cf4d2; CI green incl. security/Opengrep'
   - 'S030 T128.2 COMPLETE @7b1aa87: Alembic freshness fields; T128.3 in_progress; PR #238 open (not pushed)'
+  - 'S030 T128.3 COMPLETE @e86290e: write-API freshness PATCH/list stale + Refresh now; T128.4 in_progress; PR #238 open (not pushed)'
   stages:
     00-context:
       status: completed
@@ -27996,23 +28045,20 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: T128.3 in_progress
-      next_action: T128.3 in_progress — write-API PATCH/list stale; Refresh now enqueue
+      current_action: T128.5 pending
+      next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
       milestone_hint: M128
-      updated_at: '2026-08-12T19:11:44Z'
-      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T19:11:44Z — T128.2 COMPLETE @7b1aa87 (Alembic refresh_enabled + last_checked_at);
-        T128.3 in_progress (write-API PATCH/list stale; Refresh now enqueue). PR #238 open; tip @7b1aa87 local not pushed.
-        Do not merge #238 without approval. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md §Phase
-        30]'
+      updated_at: '2026-08-12T19:40:00Z'
+      note: 'M128 T128.4 completed — freshness_refresh worker + real schedule branch; next T128.5'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M128
-      current_task: T128.3
+      current_task: T128.5
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -28032,18 +28078,18 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: 7b1aa87
-      tip_sha: 7b1aa87
-      tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-      tip_prev: 87cf4d2
+      tip: e86290e
+      tip_sha: e86290e
+      tip_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+      tip_prev: 7b1aa87
       s030_d31_decision: S030-D31
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T128.3
+        current_task: T128.5
         active_milestone: M128
-        current_task_status: in_progress
+        current_task_status: pending
         mode: task_loop
         build_plan_card: waived_S030-D31
         t127_5_status: completed
@@ -28060,18 +28106,22 @@ evolve_cycles:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: 7b1aa87
+        tip_sha: e86290e
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
         t128_2_commit: 7b1aa87
-        t128_3_status: in_progress
+        t128_3_status: completed
+        t128_3_commit: e86290e
+        t128_4_status: completed
+        t128_4_completed_at: '2026-08-12T19:40:00Z'
+        t128_5_status: pending
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
       ci_fix_commit: 5fc2d21
       ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-      current_task_status: in_progress
+      current_task_status: pending
       askquestion_pending_topic:
       askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
       t128_2_status: completed
@@ -28081,13 +28131,23 @@ evolve_cycles:
       t128_2_spec_source: TP7, api-contract
       t128_2_depends_on: T128.1
       t128_2_note: 'Alembic refresh_enabled + last_checked_at; reuse content_hash; committed @7b1aa87'
-      t128_3_status: in_progress
+      t128_3_status: completed
       t128_3_started_at: '2026-08-12T19:11:44Z'
+      t128_3_completed_at: '2026-08-12T19:17:43Z'
+      t128_3_commit: e86290e
       t128_3_description: 'Code: write-API PATCH/list stale fields; Refresh now → enqueue'
       t128_3_spec_source: api-contract §Freshness
       t128_3_depends_on: T128.1, T128.2
+      t128_3_note: 'write-API freshness PATCH/list stale + Refresh now enqueue; committed @e86290e'
+      t128_4_status: completed
+      t128_4_completed_at: '2026-08-12T19:40:00Z'
+      t128_5_status: pending
+      t128_4_started_at: '2026-08-12T19:17:43Z'
+      t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
+      t128_4_spec_source: TP2, ADR-052
+      t128_4_depends_on: T128.3, T127.7
       pr_238_ci_status: green
-      pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @7b1aa87 local not pushed'
+      pr_238_ci_note: 'PR #238 CI last green @87cf4d2; tip @e86290e local ahead 2 not pushed'
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -28106,7 +28166,7 @@ evolve_cycles:
     milestone: M127
     tip: 7b1aa87
     merge_policy: needs_user_approval
-    note: M127 minor PR Corpus automations catch-up (F75); tip @7b1aa87 local (not pushed); leave open 
+    note: M127 minor PR Corpus automations catch-up (F75); tip @e86290e local ahead 2 (not pushed); leave open 
       (user option 1)
     recorded_at: '2026-08-12T17:19:37Z'
     updated_at: '2026-08-12T19:09:18Z'
@@ -28182,16 +28242,16 @@ evolve_cycles:
     stage: 07-build
     skill_id: 04-tech-plan
     recorded_at: '2026-08-07T14:34:39Z'
-    updated_at: '2026-08-12T19:11:44Z'
-    note: 'Synced Phase C 07-build M128; M127 PR #238 open; T128.2 COMPLETE @7b1aa87; T128.3 in_progress; tip @7b1aa87'
+    updated_at: '2026-08-12T19:40:00Z'
+    note: 'Synced Phase C 07-build M128; M127 PR #238 open; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout wiped uncommitted S030 state
   phase_note: Phase B tech plan locked (S030-D29); 05-verify-tech in_progress (S030-D30); Gate B→C / phase_b still 
     in_progress until 05 passes + user confirms
   s030_d30_decision: S030-D30
-  updated_at: '2026-08-12T19:11:44Z'
+  updated_at: '2026-08-12T19:40:00Z'
   tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
   tip_prev: 87cf4d2
-  current_task_status: in_progress
+  current_task_status: pending
   askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
   next_child_stage: 07-build — Phase 30 M128 (F76) T128.3
 - id: EV-026
@@ -57133,18 +57193,18 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: 7b1aa87
-    tip_sha: 7b1aa87
-    tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-    head_sha: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-    tip_prev: 87cf4d2
+    tip: e86290e
+    tip_sha: e86290e
+    tip_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+    head_sha: e86290ee25300a20d57b4a1463e737ce6efeff7e
+    tip_prev: 7b1aa87
     pushed: false
     origin_tip: 87cf4d2
-    local_ahead: 1
+    local_ahead: 2
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    updated_at: '2026-08-12T19:11:44Z'
-    note: 'branch tip @7b1aa87 (local, not pushed); PR #238 open; T128.2 COMPLETE; T128.3 in_progress; do
+    updated_at: '2026-08-12T19:40:00Z'
+    note: 'branch tip @e86290e (local, not pushed; ahead 2); PR #238 open; T128.3 COMPLETE; T128.4 in_progress; do
       not merge without approval'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / 
@@ -57768,6 +57828,37 @@ git_history:
     evolve_cycle_id: EV-024
     note: 'Merged via PR #205 @0c1d838; tip @7f086c3; #204 closed as superseded'
   commits:
+  - sha: e86290e
+    sha_full: e86290ee25300a20d57b4a1463e737ce6efeff7e
+    short: e86290e
+    message: 'feat: add write-API freshness PATCH, stale list, and Refresh now (F76)'
+    stage: 07-build
+    skill_id: 07-build
+    branch: evolve/EV-027-corpus-automations
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M128
+    task: T128.3
+    feature_ids:
+    - F76
+    files_changed: 13
+    files:
+    - apps/internal-write-api/vecinita_internal_write_api/app.py
+    - apps/internal-write-api/vecinita_internal_write_api/freshness_crud.py
+    - apps/internal-write-api/vecinita_internal_write_api/jobs_client.py
+    - docs/api-contract.md
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - docs/sessions/S030-corpus-automations/evolve-plan-card.md
+    - packages/shared-schemas/vecinita_shared_schemas/data_management.py
+    - packages/shared-schemas/vecinita_shared_schemas/internal_write.py
+    - tests/helpers/json_response.py
+    - tests/unit/internal_write_api/conftest.py
+    - tests/unit/internal_write_api/test_freshness_routes.py
+    - workflow-state.yaml
+    timestamp: '2026-08-12T19:17:26Z'
+    recorded_at: '2026-08-12T19:17:43Z'
+    note: 'T128.3 COMPLETE — write-API freshness PATCH/list stale + Refresh now enqueue; tip @e86290e; advance T128.4 in_progress; PR #238 open (not pushed)'
   - sha: 7b1aa87
     sha_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
     short: 7b1aa87

@@ -116,6 +116,8 @@ class DataManagementJobsClient:
         document_id: UUID,
         *,
         force: bool = True,
+        refresh_enabled: bool = True,
+        is_stale: bool = True,
         authorization: str | None = None,
     ) -> UUID:
         """Enqueue F76 ``freshness_refresh`` (Refresh now / schedule; RD-337)."""
@@ -125,6 +127,8 @@ class DataManagementJobsClient:
                 job_type="freshness_refresh",
                 document_id=document_id,
                 force=force,
+                refresh_enabled=refresh_enabled,
+                is_stale=is_stale,
             ),
         )
         return self._post_job(

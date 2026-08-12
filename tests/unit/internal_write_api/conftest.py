@@ -103,10 +103,12 @@ class StubJobsClient:
         document_id: UUID,
         *,
         force: bool = True,
+        refresh_enabled: bool = True,
+        is_stale: bool = True,
         authorization: str | None = None,
     ) -> UUID:
         """Record an F76 freshness refresh enqueue and return a synthetic job id."""
-        _ = authorization
+        _ = (authorization, refresh_enabled, is_stale)
         self.enqueued_freshness.append((document_id, force))
         return uuid.uuid4()
 
