@@ -343,6 +343,7 @@ EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy c
 | `VECINITA_FRESHNESS_STALE_DAYS` | No | Stale threshold days (default `30`) |
 | `VECINITA_FINETUNE_ENABLED` | No | F77 feature flag (default `false`) |
 | `VECINITA_FINETUNE_ADAPTER_ID` | No | Promoted LoRA adapter id on prod `vecinita-llm` (empty = base) |
+| `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | No | Pre-promote candidate adapter on playground only |
 | `VECINITA_FINETUNE_REQUIRE_APPROVE` | No | Require approve before GPU (default `true`) |
 | `VECINITA_FINETUNE_MAX_CONCURRENT` | No | F77 max concurrent trains (default `1`) |
 | `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` | No | F77 max train starts per UTC day (default `3`) |
@@ -363,3 +364,9 @@ Modal secret name: **`vecinita-llm-finetune`** (`infra/modal/finetune_app.py`).
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `VECINITA_FINETUNE_ADAPTER_ID` | No | Load adapter after human promote only |
+
+### Modal — `vecinita-llm-playground` (pre-promote candidate)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | No | Optional candidate adapter for playground eval only |

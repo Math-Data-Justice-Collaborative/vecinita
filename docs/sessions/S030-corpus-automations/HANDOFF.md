@@ -4,23 +4,22 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** `b2a25e5` — T129.7 finetune promote + rollback  
+**Tip:** (pending commit) — T129.8 llm_app LoRA serve  
 **Issues:** #73 · #72 · #219  
 
 ## Position
 
 - Phase C **07-build** — **M129 F77** in progress
-- Done: **T129.1–T129.7** (promote sets `VECINITA_FINETUNE_ADAPTER_ID`; rollback clears → base)
-- **Next:** **T129.8** — `llm_app` load promoted adapter; playground candidate load
+- Done: **T129.1–T129.8** (promote pin + prod/playground adapter load)
+- **Next:** **T129.9** — DM FT UI (approve, eval evidence, promote)
 - PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open (no merge)
 
 ## Key locks
 
-- FT train: `infra/modal/finetune_train_core.py` + `train_lora` → `llm-finetune-adapters`
-- Eval report: `GET /internal/v1/finetune/runs/{id}/eval` (`auto_promote` always false)
 - Promote/rollback: `POST /internal/v1/finetune/promote` + `GET /internal/v1/finetune/adapter`
-  (in-process pin store mirrors env; DO secret sync at deploy / AskQuestion for live prod)
+- Prod load: `VECINITA_FINETUNE_ADAPTER_ID` → `/adapters/{id}` on `llm-finetune-adapters`
+- Playground candidate: `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` (never auto-loads on prod)
 
 ## Next
 
-**T129.8** — load promoted adapter on prod `vecinita-llm`; playground candidates. Leave PR #238 open.
+**T129.9** — DM FT UI. Leave PR #238 open.

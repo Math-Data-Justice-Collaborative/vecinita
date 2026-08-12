@@ -53,6 +53,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_FRESHNESS_ENABLED` | string | `false` | No | F76 schedule refresh enable |
 | `VECINITA_FINETUNE_ENABLED` | string | `false` | No | F77 feature flag |
 | `VECINITA_FINETUNE_ADAPTER_ID` | string | — | No | Promoted LoRA adapter id for prod `vecinita-llm` (empty = base; clear to rollback) |
+| `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | string | — | No | Optional pre-promote LoRA candidate on `vecinita-llm-playground` only (ADR-053; never auto-loads on prod) |
 | `VECINITA_FINETUNE_REQUIRE_APPROVE` | string | `true` | No | F77 train must be approved before GPU (RD-328) |
 | `VECINITA_FINETUNE_MAX_CONCURRENT` | int | `1` | No | F77 max concurrent GPU train jobs (TP5 / RD-348) |
 | `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` | int | `3` | No | F77 max train starts per UTC day (TP5 / RD-348); no GPU-hour metering in v1 |

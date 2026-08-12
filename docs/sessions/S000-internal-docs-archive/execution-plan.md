@@ -11,11 +11,11 @@
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
 | **Active milestone** | M129: F77 — LoRA FT + human promote |
-| **Active task** | T129.8 (pending) |
+| **Active task** | T129.9 (pending) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
-| **Active session** | S030-corpus-automations — 07-build; T129.7 complete — next T129.8 llm_app adapter load |
+| **Active session** | S030-corpus-automations — 07-build; T129.8 complete — next T129.9 DM FT UI |
 | **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
@@ -2585,7 +2585,7 @@ prod `llm_app` loads adapter only after promote; FT caps (AC-FT*; TC-252–265; 
 | T129.5 | Code: train worker (LoRA/PEFT SFT) writes adapter to volume; run metadata | Code | completed | ADR-053, TP4 | T129.3, T129.4 | llm-models base | 2026-08-12 | S030 | F77 |
 | T129.6 | Code: `GET …/finetune/runs/{id}/eval` base vs adapter report (F36 golden) | Code | completed | RD-338, UJ-082 | T129.5 | eval fixtures | 2026-08-12 | S030 | F77 |
 | T129.7 | Code: `POST …/finetune/promote` + clear pin rollback; set `VECINITA_FINETUNE_ADAPTER_ID` | Code | completed | RD-339, AC-FT9 | T129.6 | — | 2026-08-12 | S030 | F77 |
-| T129.8 | Code: `llm_app` load promoted adapter; playground candidate load path | Code | pending | ADR-037, ADR-053 | T129.7 | — | | S030 | F77 |
+| T129.8 | Code: `llm_app` load promoted adapter; playground candidate load path | Code | completed | ADR-037, ADR-053 | T129.7 | — | 2026-08-12 | S030 | F77 |
 | T129.9 | Code: DM FT UI — approve train, eval evidence, promote (human only) | Code | pending | UJ-082 | T129.6, T129.7 | — | | S030 | F77 |
 | T129.10 | Test: API e2e UJ-082 + Vitest + Playwright T0-ui UJ-082 | Test | pending | TP8, e2e-coverage | T129.8, T129.9 | — | | S030 | F77 |
 

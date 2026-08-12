@@ -114,6 +114,7 @@ Defaults are off. Full reference: [config-spec.md](config-spec.md).
 | `VECINITA_FRESHNESS_STALE_DAYS` | `30` | Stale threshold |
 | `VECINITA_FINETUNE_ENABLED` | `false` | Fine-tune feature flag |
 | `VECINITA_FINETUNE_ADAPTER_ID` | empty | Promoted LoRA pin on prod LLM (empty = base) |
+| `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | empty | Optional pre-promote candidate on playground only |
 
 Do **not** enable automations or promote adapters against live prod without an explicit
 AskQuestion approval. Admin Automations / freshness UI journeys: see `docs/user-journeys.md`

@@ -19,9 +19,12 @@ from typing import Literal
 FINETUNE_MAX_CONCURRENT_ENV = "VECINITA_FINETUNE_MAX_CONCURRENT"
 FINETUNE_MAX_RUNS_PER_DAY_ENV = "VECINITA_FINETUNE_MAX_RUNS_PER_DAY"
 FINETUNE_ADAPTER_ID_ENV = "VECINITA_FINETUNE_ADAPTER_ID"
+PLAYGROUND_FINETUNE_ADAPTER_ID_ENV = "VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID"
+ADAPTERS_MOUNT_DEFAULT = "/adapters"
 
 DEFAULT_FINETUNE_MAX_CONCURRENT = 1
 DEFAULT_FINETUNE_MAX_RUNS_PER_DAY = 3
+DEFAULT_LORA_MAX_RANK = 64
 
 DEFAULT_SFT_INSTRUCTION = (
     "Answer the user's question using only the provided context from the Vecinita corpus."
@@ -34,6 +37,8 @@ TrainStartDecision = Literal[
     "skip_at_capacity",
     "skip_daily_cap",
 ]
+
+ServeAdapterRole = Literal["prod", "playground"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -190,3 +195,58 @@ def decide_adapter_pin_after_promote(adapter_id: str) -> str:
 def decide_adapter_pin_after_rollback() -> None:
     """Clear promoted pin → prod serves base model (TC-265 / AC-FT9)."""
     return
+
+
+def parse_playground_finetune_adapter_id() -> str | None:
+    """Read playground pre-promote candidate adapter id (empty → None)."""
+    raw = os.environ.get(PLAYGROUND_FINETUNE_ADAPTER_ID_ENV)
+    if raw is None:
+        return None
+    pin = raw.strip()
+    if not pin:
+        return None
+    return pin
+
+
+def decide_serve_adapter_id(*, role: ServeAdapterRole) -> str | None:
+    """Resolve which adapter id (if any) the LLM serve role should load.
+
+    Prod uses only the human-promoted pin (TC-262). Playground uses a separate
+    candidate env so pre-promote eval cannot stomp prod (ADR-053).
+    """
+    if role == "prod":
+        return decide_prod_adapter_pin(
+            promoted_adapter_id=parse_finetune_adapter_id(),
+            latest_adapter_id=None,
+        )
+    return parse_playground_finetune_adapter_id()
+
+
+def resolve_finetune_adapter_dir(
+    *,
+    adapter_id: str | None,
+    mount: str = ADAPTERS_MOUNT_DEFAULT,
+) -> str | None:
+    """Map an adapter id to ``{mount}/{adapter_id}``, or None for base."""
+    if adapter_id is None:
+        return None
+    pin = adapter_id.strip()
+    if not pin:
+        return None
+    root = mount.rstrip("/") or ADAPTERS_MOUNT_DEFAULT
+    return f"{root}/{pin}"
+
+
+def merge_lora_engine_kwargs(
+    base: dict[str, object],
+    *,
+    adapter_dir: str | None,
+) -> dict[str, object]:
+    """Enable vLLM LoRA when an adapter dir is selected; otherwise return base."""
+    if adapter_dir is None:
+        return dict(base)
+    kwargs = dict(base)
+    kwargs["enable_lora"] = True
+    kwargs["max_loras"] = 1
+    kwargs["max_lora_rank"] = DEFAULT_LORA_MAX_RANK
+    return kwargs
