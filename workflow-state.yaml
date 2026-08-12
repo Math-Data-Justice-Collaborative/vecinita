@@ -3033,7 +3033,7 @@ project:
       s030_d35_decision: S030-D35
       ci_conclusion: success
       ci_failed_at: null
-      ci_jobs: &id001
+      ci_jobs: &id003
         python:
           conclusion: failure
           detail: Install gitleaks curl 503 (infra flake)
@@ -3074,7 +3074,7 @@ project:
       s030_d38_decision: S030-D38
       coverage_fix_confirmed: true
       awaiting_ci_green: false
-      ft_module_paths: &id002
+      ft_module_paths: &id004
         finetune_pins: infra/modal/finetune_pins.py
         finetune_pins_tests: tests/unit/modal/test_finetune_pins.py
         finetune_app_planned: infra/modal/finetune_app.py
@@ -3802,7 +3802,7 @@ project:
           session_closed: true
           session_closed_at: '2026-08-05T00:57:00Z'
           close_decision: S026-D58
-      status: pending
+      status: completed
       ready: true
       session_id: S030-corpus-automations
       branch: evolve/EV-027-corpus-automations
@@ -3818,42 +3818,64 @@ project:
       - 73
       - 72
       - 219
-      current_action: awaiting_m130_phase30_verify
-      next_action: 08-verify-build for M130/Phase 30 boundary
-      askquestion_pending: false
-      askquestion_pending_topic: null
+      current_action: awaiting_gate_c_to_d_askquestion
+      next_action: Gate C→D AskQuestion (phase_c pending)
+      askquestion_pending: true
+      askquestion_pending_topic: Gate C→D (phase_c) after 08 PASS M130/Phase 30
       milestone_hint: M130
       m129_status: completed
       m130_status: completed
-      note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
-        merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
-        §F75–F77]'
-      started_at: '2026-08-12'
-      started_at_iso: '2026-08-12T22:25:00Z'
-      tip: ad9d1c4
-      tip_sha: ad9d1c4
-      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-      tip_prev: 0b7a640
+      scope: M130/Phase 30 F75–F77 closeout
+      notes: 08 PASS at M130 tip; OpenAPI AutomationRunListResponse maxItems:100 fixed KICS MEDIUM
+      note: '08-verify-build PASS for M130/Phase 30 F75–F77 closeout @ af07de4. OpenAPI AutomationRunListResponse maxItems:100
+        fixed KICS MEDIUM. PR #238 open leave unmerged (no merge); phase_c / Gate C→D pending AskQuestion. Prior M129 boundary
+        PASS retained (S030-D54). [Corpus: feature-list.md §F75–F77]'
+      started_at: '2026-08-12T18:58:00-04:00'
+      started_at_iso: '2026-08-12T22:58:00Z'
+      tip: af07de4
+      tip_sha: af07de4
+      tip_full: af07de437d67364af8aa72180a7525d237aaff6f
+      tip_prev: ad9d1c4
       handoff: docs/sessions/S030-corpus-automations/HANDOFF.md
       s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:56:04Z'
+      updated_at: '2026-08-13T00:05:00Z'
       pr_238_status: open
       pr_238_merge: deferred_no_merge
       security_gate: PASSED
       security_gate_decision: S030-D53
-      current_stage_note: 'Phase C interim 08-verify-build for M129; security gate PASS @59ac29d (S030-D52); finish verification-report
-        then T130.1; PR #238 open'
+      current_stage_note: M130/Phase 30 boundary 08-verify-build running @ af07de4; prior M129 PASS retained; phase_c pending
       advisory_react_router: resolved
       report: docs/sessions/S030-corpus-automations/reports/verification-report.md
       m129_boundary_status: passed
       m130_reopen_expected: false
+      m129_result_retained: PASS
       result: PASS
       completed: '2026-08-12'
-      completed_at: '2026-08-12T22:41:12Z'
+      completed_at: '2026-08-12T19:05:00-04:00'
       s030_d54_decision: S030-D54
       phase_c: pending
       gate_c_to_d: pending
-      recommended_next: 08-verify-build for M130/Phase 30 boundary
+      recommended_next: Present Gate C→D AskQuestion; do not start 09-qa until passed
+      verdict: PASS
+      completed_at_iso: '2026-08-13T00:05:00Z'
+      tip_pre_fix: af07de4
+      findings: &id001
+        unit_passed: 1565
+        unit_skipped: 17
+        dm_vitest: 813
+        chat_vitest: 190
+        security: PASS
+        kics_fix: openapi/internal-write.yaml AutomationRunListResponse maxItems:100
+      evidence: &id002
+        unit: 1565 passed, 17 skipped
+        fe_dm: 813 passed
+        fe_chat_rag: 190 passed
+        security: PASS
+        kics_fix: openapi/internal-write.yaml AutomationRunListResponse maxItems:100
+        m129_boundary: retained_pass_S030-D54
+        m130_boundary: passed
+      m130_boundary_status: passed
+      phase_30_gate: pass_awaiting_c_to_d
     09-qa:
       status: completed
       started_at: '2026-08-06'
@@ -8028,9 +8050,8 @@ active_session:
   - 72
   - 219
   current_stage: 08-verify-build
-  current_stage_note: 'M130 COMPLETE (T130.1–T130.4) @ ad9d1c4; Phase 30 07-build done; next 08-verify-build; phase_c / Gate
-    C→D pending; PR #238 open leave unmerged (no merge)'
-  next_action: 08-verify-build for M130/Phase 30 boundary
+  current_stage_note: 08 PASS at M130 tip; OpenAPI AutomationRunListResponse maxItems:100 fixed KICS MEDIUM
+  next_action: Gate C→D AskQuestion (phase_c pending)
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -8197,6 +8218,8 @@ active_session:
   - 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no merge
     (2026-08-12T22:56:04Z). Tip ad9d1c4 (T130.1@0e95cd2 T130.2@2a884b3 T130.3@0b7a640 T130.4@ad9d1c4). 07-build completed
     for Phase 30; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
+  - 'S030 08-verify-build START 2026-08-12T22:58:00Z: M130/Phase 30 boundary verify in_progress @ af07de4; prior M129 interim
+    PASS retained; scope=M130/Phase 30 F75–F77 closeout'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -9096,27 +9119,27 @@ active_session:
     phase_30_gate: partial_pass_awaiting_08
   - stage: 08-verify-build
     required: true
-    status: pending
+    status: completed
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: awaiting_m130_phase30_verify
-    next_action: 08-verify-build for M130/Phase 30 boundary
+    current_action: awaiting_gate_c_to_d_askquestion
+    next_action: Gate C→D AskQuestion (phase_c pending)
     started_at: '2026-08-12'
     started_at_iso: '2026-08-12T22:25:00Z'
     milestone_hint: M130
     m129_status: completed
     m130_status: completed
-    note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
-      merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
-      §F75–F77]'
-    askquestion_pending: false
+    note: '08-verify-build PASS for M130/Phase 30 F75–F77 closeout @ af07de4. OpenAPI AutomationRunListResponse maxItems:100
+      fixed KICS MEDIUM. PR #238 open leave unmerged (no merge); phase_c / Gate C→D pending AskQuestion. Prior M129 boundary
+      PASS retained (S030-D54). [Corpus: feature-list.md §F75–F77]'
+    askquestion_pending: true
     s030_d51_decision: S030-D51
-    tip: ad9d1c4
-    tip_sha: ad9d1c4
-    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip: af07de4
+    tip_sha: af07de4
+    tip_full: af07de437d67364af8aa72180a7525d237aaff6f
     tip_prev: 0b7a640
-    updated_at: '2026-08-12T22:56:04Z'
+    updated_at: '2026-08-13T00:05:00Z'
     security_gate: PASSED
     security_gate_decision: S030-D53
     advisory_react_router: resolved
@@ -9125,14 +9148,29 @@ active_session:
     m130_reopen_expected: false
     result: PASS
     completed: '2026-08-12'
-    completed_at: '2026-08-12T22:41:12Z'
+    completed_at: '2026-08-12T19:05:00-04:00'
     s030_d54_decision: S030-D54
     pr_238_status: open
-    recommended_next: 08-verify-build for M130/Phase 30 boundary
-    askquestion_pending_topic: null
+    recommended_next: Present Gate C→D AskQuestion; do not start 09-qa until passed
+    askquestion_pending_topic: Gate C→D (phase_c) after 08 PASS M130/Phase 30
     phase_c: pending
     gate_c_to_d: pending
     pr_238_merge: deferred_no_merge
+    verdict: PASS
+    completed_at_iso: '2026-08-13T00:05:00Z'
+    scope: M130/Phase 30 F75–F77 closeout
+    tip_pre_fix: af07de4
+    findings: *id001
+    evidence: *id002
+    m130_boundary_status: passed
+    phase_30_gate: pass_awaiting_c_to_d
+    notes: 08 PASS at M130 tip; OpenAPI AutomationRunListResponse maxItems:100 fixed KICS MEDIUM
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    feature_ids:
+    - F75
+    - F76
+    - F77
   - stage: 09-qa
     required: true
     status: pending
@@ -9193,8 +9231,8 @@ active_session:
     note: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no
       merge'
     recommended_next: 08-verify-build for M130/Phase 30 boundary
-  askquestion_pending: false
-  askquestion_pending_topic: null
+  askquestion_pending: true
+  askquestion_pending_topic: Gate C→D (phase_c) after 08 PASS M130/Phase 30
   artifacts:
   - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
     session_id: S030-corpus-automations
@@ -9245,7 +9283,8 @@ active_session:
   - infra/modal/finetune_pins.py
   - tests/unit/modal/test_finetune_pins.py
   - docs/dependency-inventory.md
-  updated_at: '2026-08-12T22:56:04Z'
+  - docs/sessions/S030-corpus-automations/reports/verification-report.md
+  updated_at: '2026-08-13T00:05:00Z'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout of uncommitted S030 workflow-state
   s030_d31_decision: S030-D31
   s030_d32_decision: S030-D32
@@ -9256,12 +9295,12 @@ active_session:
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
   askquestion_cleared: 'M130 COMPLETE @ ad9d1c4; PR #238 remains open (no merge); next 08-verify-build'
-  tip: ad9d1c4
-  tip_sha: ad9d1c4
-  tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+  tip: af07de4
+  tip_sha: af07de4
+  tip_full: af07de437d67364af8aa72180a7525d237aaff6f
   tip_prev: 0b7a640
   handoff_tip: ad9d1c4
-  current_action: handoff_08_verify_build_m130
+  current_action: awaiting_gate_c_to_d_askquestion
   current_task: null
   current_task_status: completed
   handoff_sync_needed:
@@ -9282,7 +9321,7 @@ active_session:
   session_artifacts:
   - docs/sessions/S030-corpus-automations/reports/verification-report.md
   tip_pending_parent_commit: false
-  recommended_next: 08-verify-build for M130/Phase 30 boundary
+  recommended_next: Present Gate C→D AskQuestion; do not start 09-qa until passed
   m130_status: completed
   t130_1_status: completed
   t130_1_commit: 0e95cd2
@@ -23716,7 +23755,7 @@ stages:
     s030_d35_decision: S030-D35
     ci_conclusion: success
     ci_failed_at: null
-    ci_jobs: *id001
+    ci_jobs: *id003
     coverage_fix_decision: S030-D36
     s030_d36_decision: S030-D36
     prior_ci_tip: bb872c0
@@ -23742,7 +23781,7 @@ stages:
     ci_green_at: '2026-08-12T21:06:16Z'
     coverage_fix_confirmed: true
     awaiting_ci_green: false
-    ft_module_paths: *id002
+    ft_module_paths: *id004
     t129_1_completed: '2026-08-12'
     t129_1_completed_at: '2026-08-12T20:49:06Z'
     t129_1_commit: 67ac92b
@@ -23826,27 +23865,33 @@ stages:
     phase_30_07_status: completed
     phase_30_gate: partial_pass_awaiting_08
   08-verify-build:
-    status: pending
+    status: completed
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    started_at: '2026-08-05'
-    started: '2026-08-05'
-    completed: '2026-08-05'
-    completed_at: '2026-08-05'
-    branch: main
-    mode: delta
+    started_at: '2026-08-12T18:58:00-04:00'
+    started: '2026-08-12'
+    completed: '2026-08-12'
+    completed_at: '2026-08-12T19:05:00-04:00'
+    branch: evolve/EV-027-corpus-automations
+    mode: evolve
     delta_only: true
     feature_ids:
-    - F70
-    - F71
-    tip_sha: ad9d1c4
+    - F75
+    - F76
+    - F77
+    scope: M130/Phase 30 F75–F77 closeout
+    notes: 08 PASS at M130 tip; OpenAPI AutomationRunListResponse maxItems:100 fixed KICS MEDIUM
+    tip: af07de4
+    tip_sha: af07de4
+    tip_full: af07de437d67364af8aa72180a7525d237aaff6f
+    tip_prev: ad9d1c4
     commit_deployed: 4b7231b
-    current_action: awaiting_m130_phase30_verify
-    askquestion_pending: false
-    note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
-      merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
-      §F75–F77]'
-    updated_at: '2026-08-12T22:56:04Z'
+    current_action: awaiting_gate_c_to_d_askquestion
+    askquestion_pending: true
+    note: '08-verify-build PASS for M130/Phase 30 F75–F77 closeout @ af07de4. OpenAPI AutomationRunListResponse maxItems:100
+      fixed KICS MEDIUM. PR #238 open leave unmerged (no merge); phase_c / Gate C→D pending AskQuestion. Prior M129 boundary
+      PASS retained (S030-D54). [Corpus: feature-list.md §F75–F77]'
+    updated_at: '2026-08-13T00:05:00Z'
     s027_d64_decision: S027-D64
     reconciled_from: S027-D63
     session_closed: true
@@ -24712,27 +24757,33 @@ stages:
       pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
       m118_verify_at: '2026-08-05T00:45:00Z'
       m118_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-    tip: ad9d1c4
-    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-    tip_prev: 0b7a640
-    next_action: 08-verify-build for M130/Phase 30 boundary
+    next_action: Gate C→D AskQuestion (phase_c pending)
     security_gate: PASSED
     security_gate_decision: S030-D53
     advisory_react_router: resolved
     m129_boundary_status: passed
+    m129_result_retained: PASS
     result: PASS
     s030_d54_decision: S030-D54
     ready: true
-    recommended_next: 08-verify-build for M130/Phase 30 boundary
+    recommended_next: Present Gate C→D AskQuestion; do not start 09-qa until passed
     milestone_hint: M130
     m129_status: completed
     m130_status: completed
     m130_reopen_expected: false
-    askquestion_pending_topic: null
+    askquestion_pending_topic: Gate C→D (phase_c) after 08 PASS M130/Phase 30
     phase_c: pending
     gate_c_to_d: pending
     pr_238_status: open
     pr_238_merge: deferred_no_merge
+    verdict: PASS
+    completed_at_iso: '2026-08-13T00:05:00Z'
+    tip_pre_fix: af07de4
+    findings: *id001
+    evidence: *id002
+    m130_boundary_status: passed
+    phase_30_gate: pass_awaiting_c_to_d
+    session_branch: evolve/EV-027-corpus-automations
   09-qa:
     status: completed
     started_at: '2026-08-06'
@@ -28973,8 +29024,8 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 08-verify-build
-  current_action: handoff_08_verify_build_m130
-  next_action: 08-verify-build for M130/Phase 30 boundary
+  current_action: awaiting_gate_c_to_d_askquestion
+  next_action: Gate C→D AskQuestion (phase_c pending)
   active_milestone: M130
   current_task: null
   current_task_status: completed
@@ -28983,14 +29034,12 @@ evolve_cycles:
   m130_status: completed
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: ad9d1c4
-  tip_sha: ad9d1c4
-  tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-  tip_prev: 0b7a640
-  current_stage_note: 'M130 COMPLETE (T130.1–T130.4); Phase 30 07-build done @ ad9d1c4; next 08-verify-build; phase_c pending;
-    PR #238 open leave unmerged (no merge)'
-  notes: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no
-    merge (2026-08-12T22:56:04Z). Tip ad9d1c4. [Corpus: feature-list.md §F75–F77]'
+  tip: af07de4
+  tip_sha: af07de4
+  tip_full: af07de437d67364af8aa72180a7525d237aaff6f
+  tip_prev: ad9d1c4
+  current_stage_note: 08 PASS at M130 tip; OpenAPI AutomationRunListResponse maxItems:100 fixed KICS MEDIUM
+  notes: 08 PASS at M130 tip; OpenAPI AutomationRunListResponse maxItems:100 fixed KICS MEDIUM
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -29005,8 +29054,8 @@ evolve_cycles:
   phase1_approved: true
   phase1_approved_at: '2026-08-07T13:10:00Z'
   phase_1_status: approved
-  askquestion_pending: false
-  askquestion_pending_topic: null
+  askquestion_pending: true
+  askquestion_pending_topic: Gate C→D (phase_c) after 08 PASS M130/Phase 30
   checkpoints:
     phase_0: passed
     phase_a: passed
@@ -29458,7 +29507,7 @@ evolve_cycles:
         coverage_fix_commit: 2190b8e
         coverage_fix_note: UJ-081 freshness UI tests close DocumentAdmin/CorpusList line gaps
         s030_d36_decision: S030-D36
-        ci_jobs_prior_bb872c0: &id003
+        ci_jobs_prior_bb872c0: &id006
           coverage:
             conclusion: failure
             detail: DM FE lines 99.86% (need 100%), branches 97.83% (need 98%)
@@ -29506,7 +29555,7 @@ evolve_cycles:
         s030_d37_gate: closed_by_ci_green
         s030_d38_decision: S030-D38
         awaiting_ci_green: false
-        ft_module_paths: *id002
+        ft_module_paths: *id004
         t129_1_completed: '2026-08-12'
         t129_1_completed_at: '2026-08-12T20:49:06Z'
         t129_1_commit: 67ac92b
@@ -29826,7 +29875,7 @@ evolve_cycles:
       phase_30_07_status: completed
       phase_30_gate: partial_pass_awaiting_08
     08-verify-build:
-      status: pending
+      status: completed
       ready: true
       mode: delta
       session_id: S030-corpus-automations
@@ -29835,23 +29884,25 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: awaiting_m130_phase30_verify
-      next_action: 08-verify-build for M130/Phase 30 boundary
-      askquestion_pending: false
+      current_action: awaiting_gate_c_to_d_askquestion
+      next_action: Gate C→D AskQuestion (phase_c pending)
+      askquestion_pending: true
       milestone_hint: M130
       m129_status: completed
       m130_status: completed
-      note: 'Re-open 08-verify-build for M130/Phase 30 boundary after 07 COMPLETE @ ad9d1c4. PR #238 open leave unmerged (no
-        merge); phase_c / Gate C→D pending until 08 PASS. Prior M129 boundary PASS retained (S030-D54). [Corpus: feature-list.md
-        §F75–F77]'
-      started_at: '2026-08-12'
-      started_at_iso: '2026-08-12T22:25:00Z'
+      scope: M130/Phase 30 F75–F77 closeout
+      notes: 08 PASS at M130 tip; OpenAPI AutomationRunListResponse maxItems:100 fixed KICS MEDIUM
+      note: '08-verify-build PASS for M130/Phase 30 F75–F77 closeout @ af07de4. OpenAPI AutomationRunListResponse maxItems:100
+        fixed KICS MEDIUM. PR #238 open leave unmerged (no merge); phase_c / Gate C→D pending AskQuestion. Prior M129 boundary
+        PASS retained (S030-D54). [Corpus: feature-list.md §F75–F77]'
+      started_at: '2026-08-12T18:58:00-04:00'
+      started_at_iso: '2026-08-12T22:58:00Z'
       s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:56:04Z'
-      tip: ad9d1c4
-      tip_sha: ad9d1c4
-      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-      tip_prev: 0b7a640
+      updated_at: '2026-08-13T00:05:00Z'
+      tip: af07de4
+      tip_sha: af07de4
+      tip_full: af07de437d67364af8aa72180a7525d237aaff6f
+      tip_prev: ad9d1c4
       security_gate: PASSED
       security_gate_decision: S030-D53
       security_gate_note: make security-scan PASSED @ eb951fd; Grype HIGH 0; npm audit 0; react-router@7.18.2; cleared GHSA-qwww-vcr4-c8h2;
@@ -29860,28 +29911,27 @@ evolve_cycles:
       handoff_sync_needed: true
       advisory_react_router: resolved
       completed: '2026-08-12'
-      completed_at: '2026-08-12T22:41:12Z'
-      completed_at_iso: '2026-08-12T22:41:12Z'
+      completed_at: '2026-08-12T19:05:00-04:00'
+      completed_at_iso: '2026-08-13T00:05:00Z'
       report: docs/sessions/S030-corpus-automations/reports/verification-report.md
       m129_boundary_status: passed
       m130_reopen_expected: false
+      m129_result_retained: PASS
       result: PASS
       verdict: PASS
-      evidence:
-        unit: 1562 passed, 16 skipped
-        fe_dm: 813 passed
-        fe_chat_rag: 190 passed
-        security: PASSED
-        test_fast: SKIPPED (bash 3.2/mapfile)
-        format_autofix: apps/.../test_uj081_freshness_ui.test.tsx
+      evidence: *id002
       s030_d54_decision: S030-D54
       pr_238_status: open
       phase_c: pending
       gate_c_to_d: pending
       tip_pending_parent_commit: false
-      recommended_next: 08-verify-build for M130/Phase 30 boundary
-      askquestion_pending_topic: null
+      recommended_next: Present Gate C→D AskQuestion; do not start 09-qa until passed
+      askquestion_pending_topic: Gate C→D (phase_c) after 08 PASS M130/Phase 30
       pr_238_merge: deferred_no_merge
+      tip_pre_fix: af07de4
+      findings: *id001
+      m130_boundary_status: passed
+      phase_30_gate: pass_awaiting_c_to_d
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -29978,13 +30028,24 @@ evolve_cycles:
     recorded_at: '2026-08-07T14:34:39Z'
     updated_at: '2026-08-12T19:40:00Z'
     note: 'Synced Phase C 07-build M128; M127 PR #238 open; T128.3 COMPLETE @e86290e; T128.4 in_progress; tip @e86290e'
+  - &id005
+    path: docs/sessions/S030-corpus-automations/reports/verification-report.md
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    kind: report
+    stage: 08-verify-build
+    skill_id: 08-verify-build
+    milestone: M130
+    recorded_at: '2026-08-13T00:05:00Z'
+    note: M130/Phase 30 08-verify-build PASS verification-report; Gate C→D AskQuestion pending
+    result: PASS
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout wiped uncommitted S030 state
-  phase_note: 'T130.1 in_progress @ c610056; M129 08 PASS (S030-D54); M128 complete (T128.1–T128.7); PR #238 open; phase_c
-    / Gate C→D pending until M130'
+  phase_note: Phase 30 M127–M130 08 PASS @ af07de4; phase_c / Gate C→D pending AskQuestion
   s030_d30_decision: S030-D30
-  updated_at: '2026-08-12T22:56:04Z'
-  askquestion_cleared: 'S030-D54/T130.1 START: T130.1 in_progress; PR #238 remains open (no merge)'
-  progress_note: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged'
+  updated_at: '2026-08-13T00:05:00Z'
+  askquestion_cleared: false
+  progress_note: S030 08-verify-build PASS — M130/Phase 30 F75–F77 @ af07de4; Gate C→D AskQuestion pending (phase_c/c_to_d
+    still pending)
   next_child_stage: 08-verify-build
   s030_d34_decision: S030-D34
   s030_d35_decision: S030-D35
@@ -29993,7 +30054,7 @@ evolve_cycles:
   askquestion_tool_available: null
   s030_d37_decision: S030-D37
   s030_d38_decision: S030-D38
-  ft_module_paths: *id002
+  ft_module_paths: *id004
   s030_d39_decision: S030-D39
   s030_d40_decision: S030-D40
   s030_d41_decision: S030-D41
@@ -30050,7 +30111,7 @@ evolve_cycles:
       M129 (verification-report), then T130.1 / M130. PR #238 open.'
   m129_08_status: passed
   tip_pending_parent_commit: false
-  recommended_next: 08-verify-build for M130/Phase 30 boundary
+  recommended_next: Present Gate C→D AskQuestion; do not start 09-qa until passed
   m130_completed: '2026-08-12'
   m130_completed_at: '2026-08-12T22:56:04Z'
   t130_1_commit: 0e95cd2
@@ -55288,6 +55349,7 @@ decisions_log:
   pr_238: open_leave_unmerged
   recorded_at: '2026-08-12T22:46:00Z'
   status: confirmed
+- 'S030 2026-08-12: 08-verify-build PASS M130/Phase 30 @ af07de4; phase_c/c_to_d remain pending until Gate C→D AskQuestion'
 artifacts:
 - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
   session_id: S030-corpus-automations
@@ -59053,6 +59115,7 @@ artifacts:
   milestone: M129
   recorded_at: '2026-08-12T22:41:12Z'
   note: M129 08-verify-build verification-report (S030-D54)
+- *id005
 git_history:
   current_branch: evolve/EV-027-corpus-automations
   branches:
@@ -65204,7 +65267,7 @@ git_history:
     follows: bdaec9d
     ci_conclusion: failure
     ci_failed_at: '2026-08-12T20:34:58Z'
-    ci_jobs: *id003
+    ci_jobs: *id006
     ci_fix_next: dm_fe_coverage_then_repush
     superseded_by: 2190b8e
     ci_fix_followup_commit: 2190b8e
@@ -65309,7 +65372,7 @@ git_history:
     ci_status: failure
     ci_run_id: 31640006502
     ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640006502
-    ci_jobs: *id001
+    ci_jobs: *id003
     ci_flake: true
     ci_flake_detail: python Install gitleaks curl 503
     superseded_by: 932c036
