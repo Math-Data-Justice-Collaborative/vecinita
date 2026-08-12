@@ -15,12 +15,13 @@ from uuid import UUID
 
 import pytest  # noqa: TC002  # runtime fixture typing (MonkeyPatch)
 from vecinita_data_management_backend.freshness_refresh import (
+    DocumentFetcher,
     perform_hash_aware_url_refresh,
     run_freshness_refresh_job,
 )
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_ingest.models import ScrapedDocument
-from vecinita_shared_schemas.internal_write import DocumentDetail
+from vecinita_shared_schemas.internal_write import BatchUpsertRequest, DocumentDetail
 
 DOC_ID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 DOC_URL = "https://example.com/freshness-doc"
@@ -47,7 +48,7 @@ class _StubWriteClient:
         self.url = url
         self.stored_hash = stored_hash
         self.bumped: list[UUID] = []
-        self.upserts: list[object] = []
+        self.upserts: list[BatchUpsertRequest] = []
         self.detail_calls: list[UUID] = []
 
     def with_audit_actor(
@@ -77,9 +78,17 @@ class _StubWriteClient:
     def bump_document_last_checked(self, document_id: UUID) -> None:
         self.bumped.append(document_id)
 
-    def upsert_batch(self, body: object) -> object:
+    def upsert_batch(self, body: BatchUpsertRequest) -> BatchUpsertRequest:
         self.upserts.append(body)
         return body
+
+
+def _fetch_scraped(scraped: ScrapedDocument) -> DocumentFetcher:
+    def _fetch(url: str) -> ScrapedDocument:
+        _ = url
+        return scraped
+
+    return _fetch
 
 
 def _options(*, force: bool = False) -> dict[str, object]:
@@ -106,7 +115,7 @@ def test_hash_unchanged_skips_rechunk_and_bumps_last_checked() -> None:
         DOC_ID,
         write_client=write,  # type: ignore[arg-type]
         embed_client=embed,  # type: ignore[arg-type]
-        fetch_document=lambda _u: scraped,
+        fetch_document=_fetch_scraped(scraped),
     )
 
     assert outcome == "verified_unchanged"
@@ -126,7 +135,7 @@ def test_hash_changed_rechunks_embeds_and_bumps() -> None:
         DOC_ID,
         write_client=write,  # type: ignore[arg-type]
         embed_client=embed,  # type: ignore[arg-type]
-        fetch_document=lambda _u: scraped,
+        fetch_document=_fetch_scraped(scraped),
     )
 
     assert outcome == "rechunked"
@@ -134,11 +143,10 @@ def test_hash_changed_rechunks_embeds_and_bumps() -> None:
     assert len(write.upserts) == 1
     assert embed.calls  # at least one embed_batch
     upsert = write.upserts[0]
-    docs = getattr(upsert, "documents", None)
-    assert docs is not None
-    assert len(docs) == 1
-    assert docs[0].content_hash == sha256(new_body.encode("utf-8")).hexdigest()
-    assert docs[0].chunks  # rechunk produced chunks
+    assert len(upsert.documents) == 1
+    doc0 = upsert.documents[0]
+    assert doc0.content_hash == sha256(new_body.encode("utf-8")).hexdigest()
+    assert doc0.chunks  # rechunk produced chunks
 
 
 def test_freshness_job_default_path_reports_verified_unchanged(
@@ -161,7 +169,7 @@ def test_freshness_job_default_path_reports_verified_unchanged(
         store=store,
         write_client=write,  # type: ignore[arg-type]
         embed_client=embed,  # type: ignore[arg-type]
-        fetch_document=lambda _u: scraped,
+        fetch_document=_fetch_scraped(scraped),
     )
 
     final = store.get_job(record.job_id)
@@ -201,7 +209,7 @@ def test_freshness_job_default_path_reports_rechunked(
         store=store,
         write_client=write,  # type: ignore[arg-type]
         embed_client=embed,  # type: ignore[arg-type]
-        fetch_document=lambda _u: scraped,
+        fetch_document=_fetch_scraped(scraped),
     )
 
     final = store.get_job(record.job_id)
@@ -227,7 +235,7 @@ def test_refresh_now_force_still_hash_skips_when_unchanged() -> None:
         DOC_ID,
         write_client=write,  # type: ignore[arg-type]
         embed_client=embed,  # type: ignore[arg-type]
-        fetch_document=lambda _u: scraped,
+        fetch_document=_fetch_scraped(scraped),
     )
 
     assert outcome == "verified_unchanged"
