@@ -4,14 +4,15 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** `6107037` — T129.10 UJ-082 e2e + Playwright  
+**Tip:** (pending commit) — M129 08-verify-build PASS  
 **Issues:** #73 · #72 · #219  
 
 ## Position
 
-- Phase C **07-build** — **M129 F77** complete; **M130** next
-- Done: **T129.1–T129.10** (API e2e + Vitest + Playwright UJ-082)
-- **Next:** **08-verify-build** (M129 boundary) then **T130.1** Phase 30 gate TC suite
+- Phase C **08-verify-build** — M129 boundary **PASS** (security + lint/format/type/unit/FE)
+- Security: nanoid 3.3.17 · js-yaml 4.3.1 · react-router 7.18.2 (S030-D52/D53)
+- Report: `docs/sessions/S030-corpus-automations/reports/verification-report.md`
+- **Next:** **T130.1** / M130 Phase 30 gate
 - PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open (no merge)
 
 ## Key locks
@@ -24,4 +25,4 @@
 
 ## Next
 
-**08-verify-build** for M129, then M130 T130.1. Leave PR #238 open.
+Start **T130.1** / M130. Leave PR #238 open.

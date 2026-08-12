@@ -472,6 +472,4 @@ describe("UJ-081 freshness UI (T128.6)", () => {
       ).toHaveTextContent(/not-a-timestamp/);
     });
   });
-
-
 });

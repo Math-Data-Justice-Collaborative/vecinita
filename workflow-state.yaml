@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: 08-verify-build for M129 then M130 Phase 30 gate
-      next_action: 08-verify-build M129 boundary then T130.1
+      current_action: Start T130.1 / M130 (Phase 30 gate TC suite)
+      next_action: T130.1 in_progress then M130 closeout / Phase C 08
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1981,9 +1981,8 @@ project:
       - M128
       - M129
       - M130
-      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
-        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
-        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+      note: 'S030-D54: M129 08 PASS; resume 07-build for T130.1/M130. Tip pending parent bundle. [Corpus: feature-list.md
+        §F77]'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -2003,11 +2002,11 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: '6107037'
-      tip_sha: '6107037'
-      tip_full: 61070374986b17408b270d25b403cac66cf176dd
-      tip_prev: f48a7e7
-      updated_at: '2026-08-12T22:25:00Z'
+      tip: eb951fd
+      tip_sha: eb951fd
+      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+      tip_prev: 59ac29d
+      updated_at: '2026-08-12T22:41:12Z'
       active_milestone: M130
       current_milestone: M130
       current_task: T130.1
@@ -3728,7 +3727,7 @@ project:
           session_closed: true
           session_closed_at: '2026-08-05T00:57:00Z'
           close_decision: S026-D58
-      status: in_progress
+      status: completed
       ready: true
       session_id: S030-corpus-automations
       branch: evolve/EV-027-corpus-automations
@@ -3744,27 +3743,41 @@ project:
       - 73
       - 72
       - 219
-      current_action: Verify M129 build (milestone boundary)
-      next_action: 08-verify-build M129 boundary then T130.1
+      current_action: completed_m129_boundary
+      next_action: Re-open after M130 for Phase C / Gate C→D
       askquestion_pending: false
       askquestion_pending_topic: null
       milestone_hint: M129
       m129_status: completed
       m130_status: pending
-      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
-        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
-        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+      note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
+        Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
+        interim; will re-open after M130. [Corpus: feature-list.md §F77]'
       started_at: '2026-08-12'
       started_at_iso: '2026-08-12T22:25:00Z'
-      tip: '6107037'
-      tip_sha: '6107037'
-      tip_full: 61070374986b17408b270d25b403cac66cf176dd
-      tip_prev: f48a7e7
+      tip: eb951fd
+      tip_sha: eb951fd
+      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+      tip_prev: 59ac29d
       handoff: docs/sessions/S030-corpus-automations/HANDOFF.md
       s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:25:00Z'
+      updated_at: '2026-08-12T22:41:12Z'
       pr_238_status: open
       pr_238_merge: deferred_no_merge
+      security_gate: PASSED
+      security_gate_decision: S030-D53
+      current_stage_note: 'Phase C interim 08-verify-build for M129; security gate PASS @59ac29d (S030-D52); finish verification-report
+        then T130.1; PR #238 open'
+      advisory_react_router: resolved
+      report: docs/sessions/S030-corpus-automations/reports/verification-report.md
+      m129_boundary_status: passed
+      m130_reopen_expected: true
+      result: PASS
+      completed: '2026-08-12'
+      completed_at: '2026-08-12T22:41:12Z'
+      s030_d54_decision: S030-D54
+      phase_c: pending
+      gate_c_to_d: pending
     09-qa:
       status: completed
       started_at: '2026-08-06'
@@ -7938,10 +7951,10 @@ active_session:
   - 73
   - 72
   - 219
-  current_stage: 08-verify-build
-  current_stage_note: 'Phase C interim 08-verify-build for M129 boundary; M129 COMPLETE @6107037 (S030-D51); then M130 T130.1;
-    PR #238 open'
-  next_action: 08-verify-build M129 boundary then T130.1
+  current_stage: 07-build
+  current_stage_note: 'M129 08-verify-build boundary PASS (S030-D54); report=docs/sessions/S030-corpus-automations/reports/verification-report.md;
+    resume 07-build M130/T130.1; tip pending parent commit (was eb951fd); PR #238 open; phase_c / Gate C→D pending until M130'
+  next_action: T130.1 in_progress then M130 closeout / Phase C 08
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -8089,6 +8102,18 @@ active_session:
   - 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265) + Playwright
     uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build (milestone boundary),
     then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+  - 'S030-D52 2026-08-12T22:29:20Z: User option 1 — bump nanoid@3.3.17 + js-yaml@4.3.1 overrides; commit @59ac29d; make security-scan
+    PASSED (Grype HIGH: 0); cleared GHSA-2v37-7h3g-55p8 (nanoid) + GHSA-5p4m-2wfm-xmqj (js-yaml). Advisory (non-blocking):
+    npm audit react-router high needing 7.18.2 (override 7.18.1). Stage remains 08-verify-build; next after 08 PASS = T130.1/M130.
+    [Corpus: feature-list.md §F77]'
+  - 'S030-D53 2026-08-12T22:37:53Z: User option 3 — bump react-router/react-router-dom to 7.18.2; commit @eb951fd; make security-scan
+    PASSED (Grype HIGH 0); npm audit 0 vulnerabilities; cleared GHSA-qwww-vcr4-c8h2. Prior S030-D52 react-router advisory
+    resolved. Stage remains 08-verify-build; finish verification-report then T130.1. [Corpus: feature-list.md §F77]'
+  - 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
+    Unit 1562 passed / 16 skipped; FE DM 813 + chat-rag 190; security PASSED (Grype HIGH 0; npm audit 0; S030-D52+D53). test-fast
+    SKIPPED (bash 3.2/mapfile) — in report; prettier auto-fix test_uj081_freshness_ui.test.tsx. Tip pending parent bundle
+    commit (report+format+handoff+workflow-state). Start T130.1/M130. PR #238 open; phase_c/Gate C→D still pending. [Corpus:
+    feature-list.md §F77]'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -8350,6 +8375,67 @@ active_session:
     summary: 'T129.10 COMPLETE @6107037; M129 completed; start 08-verify-build then T130.1; AskQuestion none; PR #238 open'
     recorded_at: '2026-08-12T22:25:00Z'
     choice: complete_t129_10_m129_start_08_then_m130
+  - id: S030-D52
+    summary: 'Security gate PASS — npm overrides nanoid@3.3.17 + js-yaml@4.3.1; make security-scan PASSED (Grype HIGH: 0);
+      cleared GHSA-2v37-7h3g-55p8 + GHSA-5p4m-2wfm-xmqj; advisory: npm audit react-router high needs 7.18.2 (override 7.18.1,
+      Grype did not fail). Continue 08-verify-build M129 boundary then T130.1.'
+    choice: option_1_bump_nanoid_js_yaml_overrides
+    recorded_at: '2026-08-12T22:29:20Z'
+    skill_id: 08-verify-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    tip: 59ac29d
+    security_scan: PASSED
+    grype_high: 0
+    cleared_advisories:
+    - GHSA-2v37-7h3g-55p8
+    - GHSA-5p4m-2wfm-xmqj
+    overrides:
+      nanoid: 3.3.17
+      js-yaml: 4.3.1
+    advisory_nonblocking: npm audit react-router high needs 7.18.2 (override 7.18.1); Grype did not fail
+    corpus: '[Corpus: feature-list.md §F77]'
+  - id: S030-D53
+    summary: Bump react-router/react-router-dom overrides to 7.18.2 before 08 closeout (option 3); make security-scan PASSED
+      (Grype HIGH 0); npm audit 0 vulnerabilities; cleared GHSA-qwww-vcr4-c8h2; continue 08-verify-build verification-report
+      then T130.1.
+    choice: option_3_bump_react_router_7_18_2_before_08_closeout
+    recorded_at: '2026-08-12T22:37:53Z'
+    skill_id: 08-verify-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    tip: eb951fd
+    security_scan: PASSED
+    grype_high: 0
+    npm_audit: 0 vulnerabilities
+    cleared_advisories:
+    - GHSA-qwww-vcr4-c8h2
+    overrides:
+      react-router: 7.18.2
+      react-router-dom: 7.18.2
+    resolves_advisory_from: S030-D52
+    corpus: '[Corpus: feature-list.md §F77]'
+  - id: S030-D54
+    summary: 'M129 08-verify-build boundary PASS — verification-report written; unit 1562 passed/16 skipped; FE DM 813 + chat-rag
+      190; security PASSED (Grype HIGH 0, npm audit 0 after S030-D52/D53); test-fast skipped on host (bash 3.2/mapfile) —
+      documented; format auto-fix freshness Vitest. Advance to T130.1 / M130; PR #238 open; phase_c / Gate C→D pending until
+      M130.'
+    choice: m129_08_verify_build_boundary_pass
+    recorded_at: '2026-08-12T22:41:12Z'
+    skill_id: 08-verify-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M129
+    report: docs/sessions/S030-corpus-automations/reports/verification-report.md
+    evidence:
+      unit: 1562 passed, 16 skipped
+      fe_dm: 813 passed
+      fe_chat_rag: 190 passed
+      security: PASSED (Grype HIGH 0; npm audit 0)
+      test_fast: SKIPPED host bash 3.2/mapfile — documented in report
+      format_autofix: test_uj081_freshness_ui.test.tsx
+    tip_note: tip will update after parent bundles report+format+handoff+workflow-state
+    corpus: '[Corpus: feature-list.md §F77]'
   context_briefs: []
   routing_plan:
   - stage: 00-context
@@ -8536,14 +8622,12 @@ active_session:
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: 08-verify-build for M129 then M130 Phase 30 gate
-    next_action: 08-verify-build M129 boundary then T130.1
+    current_action: Start T130.1 / M130 (Phase 30 gate TC suite)
+    next_action: T130.1 in_progress then M130 closeout / Phase C 08
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
     milestone_hint: M129→M130
-    note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
-      + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
-      (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+    note: 'S030-D54: M129 08 PASS; resume 07-build for T130.1/M130. Tip pending parent bundle. [Corpus: feature-list.md §F77]'
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M130
@@ -8568,13 +8652,13 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: '6107037'
-    tip_sha: '6107037'
-    tip_full: 61070374986b17408b270d25b403cac66cf176dd
-    tip_prev: f48a7e7
+    tip: eb951fd
+    tip_sha: eb951fd
+    tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+    tip_prev: 59ac29d
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T22:25:00Z'
+    updated_at: '2026-08-12T22:41:12Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -8812,7 +8896,7 @@ active_session:
     t129_8_status: completed
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
-    m130_status: pending
+    m130_status: in_progress
     t129_10_status: completed
     t129_10_commit: '6107037'
     t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
@@ -8828,27 +8912,38 @@ active_session:
     s030_d51_decision: S030-D51
   - stage: 08-verify-build
     required: true
-    status: in_progress
+    status: completed
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: Verify M129 build (milestone boundary)
-    next_action: 08-verify-build M129 boundary then T130.1
+    current_action: completed_m129_boundary
+    next_action: Re-open after M130 for Phase C / Gate C→D
     started_at: '2026-08-12'
     started_at_iso: '2026-08-12T22:25:00Z'
     milestone_hint: M129
     m129_status: completed
     m130_status: pending
-    note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
-      + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
-      (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+    note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
+      Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
+      interim; will re-open after M130. [Corpus: feature-list.md §F77]'
     askquestion_pending: false
     s030_d51_decision: S030-D51
-    tip: '6107037'
-    tip_sha: '6107037'
-    tip_full: 61070374986b17408b270d25b403cac66cf176dd
-    tip_prev: f48a7e7
-    updated_at: '2026-08-12T22:25:00Z'
+    tip: eb951fd
+    tip_sha: eb951fd
+    tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+    tip_prev: 59ac29d
+    updated_at: '2026-08-12T22:41:12Z'
+    security_gate: PASSED
+    security_gate_decision: S030-D53
+    advisory_react_router: resolved
+    report: docs/sessions/S030-corpus-automations/reports/verification-report.md
+    m129_boundary_status: passed
+    m130_reopen_expected: true
+    result: PASS
+    completed: '2026-08-12'
+    completed_at: '2026-08-12T22:41:12Z'
+    s030_d54_decision: S030-D54
+    pr_238_status: open
   - stage: 09-qa
     required: true
     status: pending
@@ -8969,13 +9064,28 @@ active_session:
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
   askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
-  tip: f48a7e7
-  tip_sha: f48a7e7
-  tip_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-  tip_prev: c8b5b96
+  tip: eb951fd
+  tip_sha: eb951fd
+  tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+  tip_prev: 59ac29d
   handoff_tip: '6107037'
-  current_action: 08-verify-build for M129 then M130 Phase 30 gate
+  current_action: Start T130.1 / M130 (Phase 30 gate TC suite)
   current_task: T130.1
+  handoff_sync_needed:
+    path: docs/sessions/S030-corpus-automations/HANDOFF.md
+    tip_pending_parent_commit: true
+    prior_tip: eb951fd
+    position: M129 08 PASS; start T130.1 / M130
+    pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
+    updated_needed: true
+    suggested_blurb: 'M129 08-verify-build boundary PASS (S030-D54). report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
+      Security clean (D52+D53). Next: **T130.1 / M130**. PR #238 open. phase_c / Gate C→D still pending.'
+  expected_report: docs/sessions/S030-corpus-automations/reports/verification-report.md
+  m129_08_status: passed
+  active_milestone: M130
+  session_artifacts:
+  - docs/sessions/S030-corpus-automations/reports/verification-report.md
+  tip_pending_parent_commit: true
 sessions:
 - id: S029-security-install-tools-flake
   type: hotfix
@@ -22240,8 +22350,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: T129.10 API e2e UJ-082 + Vitest + Playwright
-    next_action: Implement T129.10 — API e2e UJ-082 + Vitest + Playwright
+    current_action: Start T130.1 / M130 (Phase 30 gate TC suite)
+    next_action: T130.1 in_progress then M130 closeout / Phase C 08
     askquestion_pending: false
     askquestion_pending_topic: null
     gate_a_to_b: passed
@@ -22260,7 +22370,7 @@ stages:
     note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
       + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
       (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
-    updated_at: '2026-08-12T22:25:00Z'
+    updated_at: '2026-08-12T22:41:12Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     t127_5_status: completed
@@ -22280,11 +22390,11 @@ stages:
     m127_status: completed
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    tip: '6107037'
-    tip_sha: '6107037'
-    tip_full: 61070374986b17408b270d25b403cac66cf176dd
-    tip_prev: f48a7e7
-    active_milestone: M129
+    tip: eb951fd
+    tip_sha: eb951fd
+    tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+    tip_prev: 59ac29d
+    active_milestone: M130
     current_milestone: M129
     current_task: T130.1
     current_task_status: in_progress
@@ -23433,7 +23543,7 @@ stages:
     t129_8_started_at: '2026-08-12T21:45:20Z'
     t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
   08-verify-build:
-    status: in_progress
+    status: completed
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
     started_at: '2026-08-05'
@@ -23446,20 +23556,20 @@ stages:
     feature_ids:
     - F70
     - F71
-    tip_sha: '6107037'
+    tip_sha: eb951fd
     commit_deployed: 4b7231b
-    current_action: completed
+    current_action: Finish 08-verify-build M129 boundary (verification-report) then T130.1
     askquestion_pending: false
-    note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
-      + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
-      (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
-    updated_at: '2026-08-12T22:25:00Z'
+    note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
+      Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
+      interim; will re-open after M130. [Corpus: feature-list.md §F77]'
+    updated_at: '2026-08-12T22:41:12Z'
     s027_d64_decision: S027-D64
     reconciled_from: S027-D63
     session_closed: true
     session_closed_at: '2026-08-06T14:46:45Z'
     close_decision: S027-D64
-    report: docs/sessions/S027-multilingual-embeddings/reports/verification-report.md
+    report: docs/sessions/S030-corpus-automations/reports/verification-report.md
     active_session_overlay:
       session_id: S028-chat-source-ux
       evolve_cycle_id: EV-026
@@ -24319,9 +24429,16 @@ stages:
       pr_title: '[M118] OpenAPI + UJ e2e suite + Phase 27 gate (EV-024)'
       m118_verify_at: '2026-08-05T00:45:00Z'
       m118_verify_report: docs/sessions/S026-frontend-ux-polish/reports/verification-report.md
-    tip: '6107037'
-    tip_full: 61070374986b17408b270d25b403cac66cf176dd
-    tip_prev: f48a7e7
+    tip: eb951fd
+    tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+    tip_prev: 59ac29d
+    next_action: 08-verify-build M129 verification-report then T130.1
+    security_gate: PASSED
+    security_gate_decision: S030-D53
+    advisory_react_router: resolved
+    m129_boundary_status: passed
+    result: PASS
+    s030_d54_decision: S030-D54
   09-qa:
     status: completed
     started_at: '2026-08-06'
@@ -28561,22 +28678,24 @@ evolve_cycles:
     upgrade_note: S030-D9 — restored 03-plan-tooling and 06-tech-tooling as required (Full preset)
   routing_preset: Full
   preset: Full
-  current_stage: 08-verify-build
-  current_action: Verify M129 build; then continue M130
-  next_action: 08-verify-build M129 boundary then T130.1
+  current_stage: 07-build
+  current_action: Start T130.1 / M130 (Phase 30 gate TC suite)
+  next_action: T130.1 in_progress then M130 closeout / Phase C 08
   active_milestone: M130
   current_task: T130.1
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: '6107037'
-  tip_sha: '6107037'
-  tip_full: 61070374986b17408b270d25b403cac66cf176dd
-  tip_prev: f48a7e7
-  current_stage_note: 'Phase C interim 08-verify-build for M129 boundary; M129 COMPLETE @6107037 (S030-D51); then M130 T130.1;
-    PR #238 open'
-  notes: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265) +
-    Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build (milestone
-    boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+  tip: eb951fd
+  tip_sha: eb951fd
+  tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+  tip_prev: 59ac29d
+  current_stage_note: 'M129 08-verify-build boundary PASS (S030-D54); report=docs/sessions/S030-corpus-automations/reports/verification-report.md;
+    resume 07-build M130/T130.1; tip pending parent commit (was eb951fd); PR #238 open; phase_c / Gate C→D pending until M130'
+  notes: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
+    Unit 1562 passed / 16 skipped; FE DM 813 + chat-rag 190; security PASSED (Grype HIGH 0; npm audit 0; S030-D52+D53). test-fast
+    SKIPPED (bash 3.2/mapfile) — in report; prettier auto-fix test_uj081_freshness_ui.test.tsx. Tip pending parent bundle
+    commit (report+format+handoff+workflow-state). Start T130.1/M130. PR #238 open; phase_c/Gate C→D still pending. [Corpus:
+    feature-list.md §F77]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -28679,6 +28798,28 @@ evolve_cycles:
     recorded_at: '2026-08-12T22:06:15Z'
   - 'S030-D51: T129.10 COMPLETE @6107037; M129 completed; start 08-verify-build then M130 T130.1; PR #238 open; AskQuestion
     none'
+  - id: S030-D52
+    summary: 'Security gate PASS — npm overrides nanoid@3.3.17 + js-yaml@4.3.1; make security-scan PASSED (Grype HIGH: 0);
+      cleared GHSA-2v37-7h3g-55p8 + GHSA-5p4m-2wfm-xmqj; advisory: npm audit react-router high needs 7.18.2 (override 7.18.1,
+      Grype did not fail). Continue 08-verify-build M129 boundary then T130.1.'
+    recorded_at: '2026-08-12T22:29:20Z'
+    tip: 59ac29d
+    choice: option_1_bump_nanoid_js_yaml_overrides
+  - id: S030-D53
+    summary: Bump react-router/react-router-dom overrides to 7.18.2 before 08 closeout (option 3); make security-scan PASSED
+      (Grype HIGH 0); npm audit 0 vulnerabilities; cleared GHSA-qwww-vcr4-c8h2; continue 08-verify-build verification-report
+      then T130.1.
+    recorded_at: '2026-08-12T22:37:53Z'
+    tip: eb951fd
+    choice: option_3_bump_react_router_7_18_2_before_08_closeout
+  - id: S030-D54
+    summary: 'M129 08-verify-build boundary PASS — verification-report written; unit 1562 passed/16 skipped; FE DM 813 + chat-rag
+      190; security PASSED (Grype HIGH 0, npm audit 0 after S030-D52/D53); test-fast skipped on host (bash 3.2/mapfile) —
+      documented; format auto-fix freshness Vitest. Advance to T130.1 / M130; PR #238 open; phase_c / Gate C→D pending until
+      M130.'
+    recorded_at: '2026-08-12T22:41:12Z'
+    choice: m129_08_verify_build_boundary_pass
+    report: docs/sessions/S030-corpus-automations/reports/verification-report.md
   stages:
     00-context:
       status: completed
@@ -28866,18 +29007,17 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: 08-verify-build for M129 then M130 Phase 30 gate
-      next_action: 08-verify-build M129 boundary then T130.1
+      current_action: Start T130.1 / M130 (Phase 30 gate TC suite)
+      next_action: T130.1 in_progress then M130 closeout / Phase C 08
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
       milestone_hint: M129→M130
-      updated_at: '2026-08-12T22:25:00Z'
-      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
-        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
-        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+      updated_at: '2026-08-12T22:41:12Z'
+      note: 'S030-D54: M129 08 PASS; resume 07-build for T130.1/M130. Tip pending parent bundle. [Corpus: feature-list.md
+        §F77]'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M130
@@ -28902,10 +29042,10 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: '6107037'
-      tip_sha: '6107037'
-      tip_full: 61070374986b17408b270d25b403cac66cf176dd
-      tip_prev: f48a7e7
+      tip: eb951fd
+      tip_sha: eb951fd
+      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+      tip_prev: 59ac29d
       s030_d31_decision: S030-D31
       s030_d43_decision: S030-D43
       s030_d44_decision: S030-D44
@@ -28922,7 +29062,7 @@ evolve_cycles:
         current_task: T130.1
         active_milestone: M130
         current_task_status: pending
-        mode: m129_task_loop
+        mode: m130_task_loop
         build_plan_card: waived_S030-D31
         t129_3_status: completed
         t129_3_sha: a75af50
@@ -29163,7 +29303,7 @@ evolve_cycles:
         t129_10_status: completed
         t129_10_started_at: '2026-08-12T22:06:15Z'
         t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-        m130_status: pending
+        m130_status: in_progress
         t129_10_commit: '6107037'
         t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
         t129_10_completed: '2026-08-12'
@@ -29297,7 +29437,7 @@ evolve_cycles:
       t129_10_status: completed
       t129_10_started_at: '2026-08-12T22:06:15Z'
       t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      m130_status: pending
+      m130_status: in_progress
       s030_d51_decision: S030-D51
       t129_10_commit: '6107037'
       t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
@@ -29309,7 +29449,7 @@ evolve_cycles:
       m129_completed_at: '2026-08-12T22:25:00Z'
       m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
     08-verify-build:
-      status: in_progress
+      status: completed
       ready: true
       mode: delta
       session_id: S030-corpus-automations
@@ -29318,23 +29458,50 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: Verify M129 build (milestone boundary)
-      next_action: 08-verify-build M129 boundary then T130.1
+      current_action: completed_m129_boundary
+      next_action: Re-open after M130 for Phase C / Gate C→D
       askquestion_pending: false
       milestone_hint: M129
       m129_status: completed
       m130_status: pending
-      note: 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265)
-        + Playwright uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build
-        (milestone boundary), then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
+      note: 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
+        Unit 1562p/16s; FE DM813 + chat190; security PASS (D52+D53). test-fast skipped (documented). Stage completed for M129
+        interim; will re-open after M130. [Corpus: feature-list.md §F77]'
       started_at: '2026-08-12'
       started_at_iso: '2026-08-12T22:25:00Z'
       s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:25:00Z'
-      tip: '6107037'
-      tip_sha: '6107037'
-      tip_full: 61070374986b17408b270d25b403cac66cf176dd
-      tip_prev: f48a7e7
+      updated_at: '2026-08-12T22:41:12Z'
+      tip: eb951fd
+      tip_sha: eb951fd
+      tip_full: eb951fdde5285fb1acbde72633aa45383420528d
+      tip_prev: 59ac29d
+      security_gate: PASSED
+      security_gate_decision: S030-D53
+      security_gate_note: make security-scan PASSED @ eb951fd; Grype HIGH 0; npm audit 0; react-router@7.18.2; cleared GHSA-qwww-vcr4-c8h2;
+        S030-D52 advisory resolved
+      handoff: docs/sessions/S030-corpus-automations/HANDOFF.md
+      handoff_sync_needed: true
+      advisory_react_router: resolved
+      completed: '2026-08-12'
+      completed_at: '2026-08-12T22:41:12Z'
+      completed_at_iso: '2026-08-12T22:41:12Z'
+      report: docs/sessions/S030-corpus-automations/reports/verification-report.md
+      m129_boundary_status: passed
+      m130_reopen_expected: true
+      result: PASS
+      verdict: PASS
+      evidence:
+        unit: 1562 passed, 16 skipped
+        fe_dm: 813 passed
+        fe_chat_rag: 190 passed
+        security: PASSED
+        test_fast: SKIPPED (bash 3.2/mapfile)
+        format_autofix: apps/.../test_uj081_freshness_ui.test.tsx
+      s030_d54_decision: S030-D54
+      pr_238_status: open
+      phase_c: pending
+      gate_c_to_d: pending
+      tip_pending_parent_commit: true
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -29469,6 +29636,39 @@ evolve_cycles:
     M128: completed
     M129: completed
     M130: pending
+  security_gate:
+    status: PASSED
+    decision: S030-D53
+    tip: eb951fd
+    grype_high: 0
+    cleared:
+    - GHSA-2v37-7h3g-55p8
+    - GHSA-5p4m-2wfm-xmqj
+    - GHSA-qwww-vcr4-c8h2
+    overrides:
+      nanoid: 3.3.17
+      js-yaml: 4.3.1
+      react-router: 7.18.2
+      react-router-dom: 7.18.2
+    advisory_nonblocking: null
+    recorded_at: '2026-08-12T22:37:53Z'
+    paths:
+      npm_overrides: package.json
+      grype_ignore: config/security/grype-ignore.yaml
+    prior_decision: S030-D52
+    npm_audit: 0 vulnerabilities
+    advisory_react_router: resolved
+    advisory_react_router_ghsa: GHSA-qwww-vcr4-c8h2
+  handoff_sync_needed:
+    path: docs/sessions/S030-corpus-automations/HANDOFF.md
+    tip: eb951fd
+    position: 08-verify-build M129 boundary; security PASS incl. react-router 7.18.2; next verification-report then T130.1
+    pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
+    updated_needed: true
+    suggested_blurb: 'Tip `eb951fd` — security PASS (react-router@7.18.2; npm audit 0; Grype HIGH 0). Next: finish 08-verify-build
+      M129 (verification-report), then T130.1 / M130. PR #238 open.'
+  m129_08_status: passed
+  tip_pending_parent_commit: true
 - id: EV-026
   session_id: S028-chat-source-ux
   cycle_type: feature
@@ -54659,6 +54859,12 @@ decisions_log:
   m129_status: completed
   m130_status: pending
   pr_238: open_no_merge
+- 'S030-D52: EV-027/S030 security gate PASS @59ac29d — nanoid@3.3.17 + js-yaml@4.3.1; Grype HIGH 0; continue 08-verify-build
+  then T130.1'
+- 'S030-D53: EV-027/S030 react-router 7.18.2 bump @eb951fd — security-scan PASS; npm audit 0; GHSA-qwww-vcr4-c8h2 cleared;
+  continue 08-verify-build then T130.1'
+- 'S030-D54: EV-027/S030 M129 08-verify-build boundary PASS — report=docs/sessions/S030-corpus-automations/reports/verification-report.md;
+  start T130.1/M130; PR #238 open; phase_c pending'
 artifacts:
 - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
   session_id: S030-corpus-automations
@@ -58416,6 +58622,14 @@ artifacts:
   note: M127 minor PR Corpus automations catch-up (F75); do not merge without approval
   recorded_at: '2026-08-12T17:19:37Z'
   updated_at: '2026-08-12T17:19:37Z'
+- path: docs/sessions/S030-corpus-automations/reports/verification-report.md
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  stage: 08-verify-build
+  skill_id: 08-verify-build
+  milestone: M129
+  recorded_at: '2026-08-12T22:41:12Z'
+  note: M129 08-verify-build verification-report (S030-D54)
 git_history:
   current_branch: evolve/EV-027-corpus-automations
   branches:
@@ -64926,6 +65140,43 @@ git_history:
     recorded_at: '2026-08-12T22:25:00Z'
     note: 'T129.10 COMPLETE; UJ-082 API e2e + Playwright; M129 closed; advance 08-verify-build then T130.1; PR #238 open'
     decision: S030-D51
+  - sha: 59ac29d
+    sha_full: 59ac29d1c146897ffd784788dbeb0b06eb567bc3
+    full_sha: 59ac29d1c146897ffd784788dbeb0b06eb567bc3
+    branch: evolve/EV-027-corpus-automations
+    message: 'fix: bump nanoid and js-yaml overrides for Grype High CVEs'
+    stage: 08-verify-build
+    skill_id: 08-verify-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M129
+    feature_ids:
+    - F77
+    files_changed: null
+    timestamp: '2026-08-12T22:29:20Z'
+    recorded_at: '2026-08-12T22:29:20Z'
+    decision: S030-D52
+    note: Security gate PASS; nanoid@3.3.17 + js-yaml@4.3.1; Grype HIGH 0; cleared GHSA-2v37-7h3g-55p8 + GHSA-5p4m-2wfm-xmqj;
+      advisory react-router 7.18.2
+    corpus: '[Corpus: feature-list.md §F77]'
+  - sha: eb951fd
+    sha_full: eb951fdde5285fb1acbde72633aa45383420528d
+    full_sha: eb951fdde5285fb1acbde72633aa45383420528d
+    branch: evolve/EV-027-corpus-automations
+    message: 'fix: bump react-router overrides to 7.18.2'
+    stage: 08-verify-build
+    skill_id: 08-verify-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M129
+    feature_ids:
+    - F77
+    timestamp: '2026-08-12T22:37:53Z'
+    recorded_at: '2026-08-12T22:37:53Z'
+    decision: S030-D53
+    note: Security re-scan PASS; react-router/react-router-dom 7.18.2; Grype HIGH 0; npm audit 0; cleared GHSA-qwww-vcr4-c8h2;
+      S030-D52 advisory resolved
+    corpus: '[Corpus: feature-list.md §F77]'
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
