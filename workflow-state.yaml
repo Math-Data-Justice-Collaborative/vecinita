@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: T127.9 pending (API e2e + Vitest)
-      next_action: T127.9 pending (API e2e + Vitest)
+      current_action: T127.10 pending
+      next_action: T127.10 pending
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1981,9 +1981,9 @@ project:
       - M128
       - M129
       - M130
-      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:00:34Z — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; current_task T127.9 pending (API e2e + Vitest); Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
+      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:03:15Z — T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; T127.9 COMPLETE (API e2e UJ-080 + Vitest Automations panel green); no commit yet — parent will commit; T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
         §Phase 30]'
-      updated_at: '2026-08-12T17:00:34Z'
+      updated_at: '2026-08-12T17:06:57Z'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -1994,7 +1994,8 @@ project:
       t127_7_status: completed
       t127_7_commit: f4e8373
       t127_8_status: completed
-      t127_9_status: pending
+      t127_8_commit: 6323ece
+      t127_9_status: completed
       s026_baseline:
         status: completed
         started_at: '2026-08-04'
@@ -2731,7 +2732,7 @@ project:
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M127
-      current_task: T127.9
+      current_task: T127.10
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -2740,16 +2741,17 @@ project:
       t127_7_status: completed
       t127_7_commit: f4e8373
       t127_8_status: completed
-      t127_9_status: pending
+      t127_8_commit: 6323ece
+      t127_9_status: completed
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip_sha: f4e8373
+      tip_sha: 6323ece
       s030_d31_decision: S030-D31
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T127.9
+        current_task: T127.10
         active_milestone: M127
         mode: task_loop
         build_plan_card: waived_S030-D31
@@ -2758,7 +2760,7 @@ project:
         t127_6_fix_commit: 081ecf2
         t127_7_status: completed
         t127_8_status: completed
-        t127_9_status: pending
+        t127_9_status: completed
         phase_ab_docs_committed: true
     08-verify-build:
       status: completed
@@ -7509,8 +7511,8 @@ active_session:
   - 72
   - 219
   current_stage: 07-build
-  current_stage_note: 07-build in_progress — M127 T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav); T127.9 pending (API e2e + Vitest); T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; T127.1–T127.4 complete; Build Plan Card waived (S030-D31)
-  next_action: T127.9 pending (API e2e + Vitest)
+  current_stage_note: 07-build in_progress — M127 T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav); T127.9 COMPLETE (API e2e + Vitest green); no commit yet — parent will commit; T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; T127.8 COMPLETE @6323ece; T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; T127.1–T127.4 complete; Build Plan Card waived (S030-D31)
+  next_action: T127.10 pending
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -7556,6 +7558,9 @@ active_session:
   - 'S030 T127.7 COMPLETE 2026-08-12T15:04:15Z: commit @f4e8373 on evolve/EV-027-corpus-automations; shared daily Period(days=1) schedule on DM; advance to T127.8 (DM Automations UI) pending; HANDOFF next=T127.8; 07-build remains in_progress M127'
   - 'S030 T127.8 START 2026-08-12T16:56:09Z: T127.8 in_progress (DM Automations UI — enable/disable + run history); current_task=T127.8; active_milestone=M127; 07-build remains in_progress; T127.7 COMPLETE @f4e8373; tip @f4e8373'
   - 'S030 T127.8 COMPLETE 2026-08-12T17:00:34Z: T127.8 DM Automations UI done (enable/disable + run history, /automations nav); no commit yet — parent will commit; advance to T127.9 pending (API e2e + Vitest); NOT marking T127.9 in_progress; HANDOFF next=T127.9 pending; 07-build remains in_progress M127'
+  - 'S030 T127.8 COMMITTED 2026-08-12T17:03:15Z: commit @6323ece on evolve/EV-027-corpus-automations; DM Automations UI enable/disable + run history; tip @6323ece; current_action remains T127.9 pending (API e2e + Vitest); NOT marking T127.9 in_progress; 07-build remains in_progress M127'
+  - 'S030 T127.9 START 2026-08-12T17:04:27Z: T127.9 in_progress — starting API e2e UJ-080 (+ Vitest Automations panel); current_task=T127.9; active_milestone=M127; 07-build remains in_progress; tip @6323ece'
+  - 'S030 T127.9 COMPLETE 2026-08-12T17:06:57Z: T127.9 API e2e UJ-080 + Vitest Automations panel green; no commit yet — parent will commit; advance to T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; HANDOFF next=T127.10 pending; 07-build remains in_progress M127'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -7885,16 +7890,16 @@ active_session:
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: T127.9 pending (API e2e + Vitest)
-    next_action: T127.9 pending (API e2e + Vitest)
+    current_action: T127.10 pending
+    next_action: T127.10 pending
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
     milestone_hint: M127
-    note: IN_PROGRESS — M127 T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; parent will commit); T127.9 pending (API e2e + Vitest); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; Build Plan Card waived (S030-D31)
+    note: IN_PROGRESS — M127 T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav); T127.9 COMPLETE (API e2e + Vitest green); T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; T127.8 @6323ece; T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; Build Plan Card waived (S030-D31)
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M127
-    current_task: T127.9
+    current_task: T127.10
     t127_5_status: completed
     t127_5_commit: 5d31dcf
     t127_6_status: completed
@@ -7903,13 +7908,14 @@ active_session:
     t127_7_status: completed
     t127_7_commit: f4e8373
     t127_8_status: completed
-    t127_9_status: pending
+    t127_8_commit: 6323ece
+    t127_9_status: completed
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip_sha: f4e8373
+    tip_sha: 6323ece
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T17:00:34Z'
+    updated_at: '2026-08-12T17:06:57Z'
   - stage: 08-verify-build
     required: true
     status: pending
@@ -7942,7 +7948,7 @@ active_session:
     skip_rationale: null
   handoff:
     next_skill: 07-build
-    next_action: T127.9 pending (API e2e + Vitest)
+    next_action: T127.10 pending
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -7954,7 +7960,7 @@ active_session:
     gate_b_to_c: passed
     phase_b: passed
     phase_c: pending
-    phase_note: 07-build in_progress M127 T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav); T127.9 pending (API e2e + Vitest); T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; tip @f4e8373; Build Plan Card waived S030-D31; T127.8 completed 2026-08-12T17:00:34Z
+    phase_note: 07-build in_progress M127 T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav); T127.9 COMPLETE (API e2e + Vitest green); no commit yet — parent will commit; T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; T127.8 COMPLETE @6323ece; T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; tip @6323ece; Build Plan Card waived S030-D31
     decision: S030-D33
     s030_d31_decision: S030-D31
     s030_d32_decision: S030-D32
@@ -7966,7 +7972,7 @@ active_session:
     - M129
     - M130
     active_milestone: M127
-    current_task: T127.9
+    current_task: T127.10
     t127_5_status: completed
     t127_5_commit: 5d31dcf
     t127_6_status: completed
@@ -7975,15 +7981,16 @@ active_session:
     t127_7_status: completed
     t127_7_commit: f4e8373
     t127_8_status: completed
-    t127_9_status: pending
+    t127_8_commit: 6323ece
+    t127_9_status: completed
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip_sha: f4e8373
+    tip_sha: 6323ece
     askquestion_pending: false
     askquestion_pending_topic: null
     handoff_md: docs/sessions/S030-corpus-automations/HANDOFF.md
-    handoff_next: T127.9 pending
-    updated_at: '2026-08-12T17:00:34Z'
+    handoff_next: T127.10 pending
+    updated_at: '2026-08-12T17:06:57Z'
   askquestion_pending: false
   askquestion_pending_topic: null
   artifacts:
@@ -21310,8 +21317,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: T127.9 pending (API e2e + Vitest)
-    next_action: T127.9 pending (API e2e + Vitest)
+    current_action: T127.10 pending
+    next_action: T127.10 pending
     askquestion_pending: false
     askquestion_pending_topic: null
     gate_a_to_b: passed
@@ -21327,9 +21334,9 @@ stages:
     - M128
     - M129
     - M130
-    note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:00:34Z — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; current_task T127.9 pending (API e2e + Vitest); Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
+    note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:03:15Z — T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; T127.9 COMPLETE (API e2e UJ-080 + Vitest Automations panel green); no commit yet — parent will commit; T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; Build Plan Card waived per S030-D31. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md
       §Phase 30]'
-    updated_at: '2026-08-12T17:00:34Z'
+    updated_at: '2026-08-12T17:06:57Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     t127_5_status: completed
@@ -21340,7 +21347,8 @@ stages:
     t127_7_status: completed
     t127_7_commit: f4e8373
     t127_8_status: completed
-    t127_9_status: pending
+    t127_8_commit: 6323ece
+    t127_9_status: completed
     s026_baseline:
       status: completed
       started_at: '2026-08-04'
@@ -22182,7 +22190,7 @@ stages:
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
     active_milestone: M127
-    current_task: T127.9
+    current_task: T127.10
     t127_5_status: completed
     t127_5_commit: 5d31dcf
     t127_6_status: completed
@@ -22191,7 +22199,7 @@ stages:
     t127_7_status: completed
     t127_7_commit: f4e8373
     t127_8_status: completed
-    t127_9_status: pending
+    t127_9_status: completed
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     tip_sha: f4e8373
@@ -22200,7 +22208,7 @@ stages:
     build_plan_card_waiver: S030-D31
     build_plan_card_sot: tech-plan-delta + Phase 30
     substeps:
-      current_task: T127.9
+      current_task: T127.10
       active_milestone: M127
       mode: task_loop
       build_plan_card: waived_S030-D31
@@ -22210,7 +22218,7 @@ stages:
       t127_7_status: completed
       t127_7_commit: f4e8373
       t127_8_status: completed
-      t127_9_status: pending
+      t127_9_status: completed
       phase_ab_docs_committed: true
   08-verify-build:
     status: completed
@@ -27338,10 +27346,10 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 07-build
-  current_action: T127.9 pending (API e2e + Vitest)
-  next_action: T127.9 pending (API e2e + Vitest)
-  current_stage_note: 07-build in_progress — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav); T127.9 pending (API e2e + Vitest); T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b
-  notes: 'S030-D29 — TP1–TP10 locked; ADR-052/053 Accepted; Phase 30 M127–M130; Phase A/B @3cadd8b; T127.5 @5d31dcf; T127.6 @93e87ce + fix @081ecf2; T127.7 COMPLETE @f4e8373; T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit) 2026-08-12T17:00:34Z; T127.9 pending (API e2e + Vitest). [Corpus: feature-list.md §F75–F77]'
+  current_action: T127.10 pending
+  next_action: T127.10 pending
+  current_stage_note: 07-build in_progress — T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav); T127.9 COMPLETE (API e2e + Vitest green); T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; T127.8 COMPLETE @6323ece; T127.7 COMPLETE @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b
+  notes: 'S030-D29 — TP1–TP10 locked; ADR-052/053 Accepted; Phase 30 M127–M130; Phase A/B @3cadd8b; T127.5 @5d31dcf; T127.6 @93e87ce + fix @081ecf2; T127.7 COMPLETE @f4e8373; T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav) 2026-08-12T17:03:15Z; T127.9 COMPLETE (API e2e UJ-080 + Vitest Automations panel green) 2026-08-12T17:06:57Z — no commit yet (parent will commit); T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress. [Corpus: feature-list.md §F75–F77]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -27589,21 +27597,21 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: T127.9 pending (API e2e + Vitest)
-      next_action: T127.9 pending (API e2e + Vitest)
+      current_action: T127.10 pending
+      next_action: T127.10 pending
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
       milestone_hint: M127
-      updated_at: '2026-08-12T17:00:34Z'
-      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:00:34Z — T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; current_task T127.9 pending (API e2e + Vitest); Build Plan Card waived per S030-D31. [Corpus: feature-list.md
+      updated_at: '2026-08-12T17:06:57Z'
+      note: 'S030/EV-027 07-build IN_PROGRESS 2026-08-12T17:03:15Z — T127.8 COMPLETE @6323ece (DM Automations UI — enable/disable + run history, /automations nav); T127.7 @f4e8373; T127.6 @93e87ce + fix @081ecf2; T127.5 @5d31dcf; Phase A/B @3cadd8b; T127.9 COMPLETE (API e2e UJ-080 + Vitest Automations panel green); no commit yet — parent will commit; T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; Build Plan Card waived per S030-D31. [Corpus: feature-list.md
         §F75–F77] [Spec: docs/sessions/S000-internal-docs-archive/execution-plan.md §Phase 30]'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
       active_milestone: M127
-      current_task: T127.9
+      current_task: T127.10
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -27612,16 +27620,17 @@ evolve_cycles:
       t127_7_status: completed
       t127_7_commit: f4e8373
       t127_8_status: completed
-      t127_9_status: pending
+      t127_8_commit: 6323ece
+      t127_9_status: completed
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip_sha: f4e8373
+      tip_sha: 6323ece
       s030_d31_decision: S030-D31
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T127.9
+        current_task: T127.10
         active_milestone: M127
         mode: task_loop
         build_plan_card: waived_S030-D31
@@ -27630,7 +27639,7 @@ evolve_cycles:
         t127_6_fix_commit: 081ecf2
         t127_7_status: completed
         t127_8_status: completed
-        t127_9_status: pending
+        t127_9_status: completed
         phase_ab_docs_committed: true
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
@@ -56472,13 +56481,13 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: f4e8373
-    tip_sha: f4e8373
-    tip_full: f4e83736766b7a20d8e3e5eec5be223579a84bee
-    head_sha: f4e83736766b7a20d8e3e5eec5be223579a84bee
-    tip_prev: 081ecf2
-    updated_at: '2026-08-12T17:00:34Z'
-    note: 'T127.8 COMPLETE (DM Automations UI — enable/disable + run history, /automations nav; no commit yet — parent will commit); T127.9 pending (API e2e + Vitest); prior T127.7 COMPLETE @f4e8373; @081ecf2 (T127.6 fix) @93e87ce (T127.6) @5d31dcf (T127.5) @3cadd8b (Phase A/B docs)'
+    tip: 6323ece
+    tip_sha: 6323ece
+    tip_full: 6323eced1b57ba021953b7685693c61b60bdb621
+    head_sha: 6323eced1b57ba021953b7685693c61b60bdb621
+    tip_prev: f4e8373
+    updated_at: '2026-08-12T17:06:57Z'
+    note: 'T127.9 START in_progress — starting API e2e UJ-080; tip @6323ece; prior T127.8 COMMITTED @6323ece (DM Automations UI); T127.7 @f4e8373; @081ecf2 (T127.6 fix) @93e87ce (T127.6) @5d31dcf (T127.5) @3cadd8b (Phase A/B docs)'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
       / RA-020)
@@ -57101,6 +57110,34 @@ git_history:
     evolve_cycle_id: EV-024
     note: 'Merged via PR #205 @0c1d838; tip @7f086c3; #204 closed as superseded'
   commits:
+  - sha: 6323ece
+    sha_full: 6323eced1b57ba021953b7685693c61b60bdb621
+    short: 6323ece
+    branch: evolve/EV-027-corpus-automations
+    message: '[T127.8] feat: DM Automations UI enable/disable and run history'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    milestone: M127
+    task: T127.8
+    feature_ids:
+    - F75
+    files_changed: 10
+    files:
+    - apps/data-management-frontend/src/App.tsx
+    - apps/data-management-frontend/src/api/automations.test.ts
+    - apps/data-management-frontend/src/api/automations.ts
+    - apps/data-management-frontend/src/components/AdminLayout.tsx
+    - apps/data-management-frontend/src/pages/AutomationsPage.tsx
+    - apps/data-management-frontend/src/test/test_admin_nav.test.tsx
+    - apps/data-management-frontend/src/test/test_uj080_automations_panel.test.tsx
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - packages/frontend-i18n/src/messages.ts
+    - workflow-state.yaml
+    timestamp: '2026-08-12T17:02:20Z'
+    recorded_at: '2026-08-12T17:03:15Z'
+    note: 'T127.8 COMPLETE — DM Automations UI enable/disable + run history; tip @6323ece; current_action remains T127.9 pending (API e2e + Vitest)'
   - sha: f4e8373
     sha_full: f4e83736766b7a20d8e3e5eec5be223579a84bee
     short: f4e8373
