@@ -1,4 +1,11 @@
-"""HTTP client for Modal data-management /jobs API."""
+"""HTTP client to enqueue jobs on vecinita-data-management (self / peer URL).
+
+Used by F75 job-completion catch-up triggers so DM workers can POST /jobs without
+depending on the DO write-API package.
+
+[Corpus: feature-list.md §F75]
+[Spec: docs/decisions.md §RD-326 RD-335]
+"""
 
 from __future__ import annotations
 
@@ -21,12 +28,12 @@ _ENV_DATA_MGMT_URL: Final[str] = "VECINITA_MODAL_DATA_MGMT_URL"
 _ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
 
 
-class DataManagementJobsClientError(RuntimeError):
-    """Raised when Modal data-management job API requests fail."""
+class ModalJobsEnqueueError(RuntimeError):
+    """Raised when Modal data-management job enqueue fails or is misconfigured."""
 
 
-class DataManagementJobsClient:
-    """Enqueue ingest or retag jobs on vecinita-data-management."""
+class ModalJobsEnqueueClient:
+    """POST /jobs against Modal DM (automation_catchup and related)."""
 
     def __init__(
         self,
@@ -36,12 +43,12 @@ class DataManagementJobsClient:
         http_client: httpx.Client | None = None,
         timeout: float = 60.0,
     ) -> None:
-        """Resolve Modal data-management URL and proxy key from args or environment."""
+        """Resolve Modal DM URL + proxy key from args or environment."""
         resolved_url = base_url or os.environ.get(_ENV_DATA_MGMT_URL)
         resolved_key = proxy_key or os.environ.get(_ENV_PROXY_KEY)
         if not resolved_url or not resolved_key:
             msg = f"{_ENV_DATA_MGMT_URL} and {_ENV_PROXY_KEY} are required"
-            raise DataManagementJobsClientError(msg)
+            raise ModalJobsEnqueueError(msg)
         self._base_url = resolved_url.rstrip("/")
         self._proxy_key = resolved_key
         self._owns = http_client is None
@@ -52,41 +59,6 @@ class DataManagementJobsClient:
         if self._owns:
             self._client.close()
 
-    def enqueue_retag(
-        self,
-        document_id: UUID,
-        *,
-        authorization: str | None = None,
-    ) -> UUID:
-        """Enqueue a retag job for one document.
-
-        Modal ``POST /jobs`` requires the proxy key and an admin JWT (F34). Forward the
-        caller's ``Authorization`` bearer when present so write-API→Modal enqueue succeeds.
-        """
-        body = CreateJobRequest(
-            urls=[],
-            options=JobOptions(job_type="retag", document_id=document_id),
-        )
-        return self._post_job(body, authorization=authorization)
-
-    def enqueue_eval(
-        self,
-        eval_run_id: UUID,
-        *,
-        authorization: str | None = None,
-        question: str | None = None,
-    ) -> UUID:
-        """Enqueue a Modal eval job linked to a DO ``eval_runs`` row (EV-012 / TP-S013-06)."""
-        body = CreateJobRequest(
-            urls=[],
-            options=JobOptions(
-                job_type="eval",
-                eval_run_id=eval_run_id,
-                question=question,
-            ),
-        )
-        return self._post_job(body, authorization=authorization, operation="enqueue_eval")
-
     def enqueue_automation_catchup(
         self,
         document_id: UUID,
@@ -95,7 +67,7 @@ class DataManagementJobsClient:
         embed_status: str,
         authorization: str | None = None,
     ) -> UUID:
-        """Enqueue F75 ``automation_catchup`` (async Modal worker; RD-335)."""
+        """Enqueue F75 ``automation_catchup`` (async; RD-335)."""
         body = CreateJobRequest(
             urls=[],
             options=JobOptions(
@@ -105,19 +77,6 @@ class DataManagementJobsClient:
                 embed_status=cast("EmbedStatusOption", embed_status),
             ),
         )
-        return self._post_job(
-            body,
-            authorization=authorization,
-            operation="enqueue_automation_catchup",
-        )
-
-    def _post_job(
-        self,
-        body: CreateJobRequest,
-        *,
-        authorization: str | None,
-        operation: str = "enqueue_retag",
-    ) -> UUID:
         headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
         if authorization:
             headers["Authorization"] = authorization
@@ -127,6 +86,6 @@ class DataManagementJobsClient:
             headers=headers,
         )
         if response.status_code >= HTTPStatus.BAD_REQUEST:
-            msg = f"{operation} failed: {response.status_code} {response.text}"
-            raise DataManagementJobsClientError(msg)
+            msg = f"enqueue_automation_catchup failed: {response.status_code} {response.text}"
+            raise ModalJobsEnqueueError(msg)
         return CreateJobResponse.model_validate(response.json()).job_id

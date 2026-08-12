@@ -36,6 +36,7 @@ from vecinita_shared_schemas.automations import (
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
+    EmbedStatus,
 )
 from vecinita_shared_schemas.chat_rag import FeedbackCreateResponse
 from vecinita_shared_schemas.cors import configure_cors
@@ -148,6 +149,9 @@ from vecinita_internal_write_api.automations import (
     get_automations_config,
     list_automation_runs,
     set_automations_enabled,
+)
+from vecinita_internal_write_api.catchup_crud import (
+    maybe_enqueue_catchup_after_document_change,
 )
 from vecinita_internal_write_api.corpus_tree import build_corpus_tree
 from vecinita_internal_write_api.embed_promote_report import (
@@ -453,6 +457,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         actor_id, actor_role = actor
         upserted = 0
         request_id = _uuid.uuid4()
+        pending_catchups: list[tuple[_uuid.UUID, str, EmbedStatus]] = []
         with engine.begin() as conn:
             for document in body.documents:
                 nested = derive_nested_source(
@@ -620,6 +625,23 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     language=document.language,
                     tags_snapshot=tag_slugs,
                 )
+                # F75 RD-335: async catch-up only when residual (no chunks → missing).
+                pending_catchups.append(
+                    (
+                        doc_id,
+                        document.content_hash or "0",
+                        "complete" if document.chunks else "missing",
+                    )
+                )
+
+        for doc_id, revision, embed_status in pending_catchups:
+            maybe_enqueue_catchup_after_document_change(
+                engine=engine,
+                jobs_client=retag_jobs,
+                document_id=doc_id,
+                revision=revision,
+                embed_status=embed_status,
+            )
 
         return BatchUpsertResponse(upserted_chunks=upserted)
 

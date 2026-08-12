@@ -12,7 +12,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -114,6 +114,64 @@ def decide_catchup_enqueue(request: CatchupEnqueueRequest) -> CatchupEnqueueDeci
     if request.running_count >= request.max_concurrent:
         return "skip_at_capacity"
     return "enqueue"
+
+
+class CatchupJobsClient(Protocol):
+    """Minimal Modal jobs client surface for catch-up enqueue (RD-335)."""
+
+    def enqueue_automation_catchup(
+        self,
+        document_id: UUID,
+        *,
+        revision: str,
+        embed_status: EmbedStatus,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Enqueue ``job_type=automation_catchup`` (async Modal worker)."""
+        ...
+
+
+def enqueue_catchup_targets(  # noqa: PLR0913  # gate inputs mirror CatchupEnqueueRequest
+    jobs_client: CatchupJobsClient,
+    *,
+    targets: list[tuple[UUID, str, EmbedStatus]],
+    enabled: bool,
+    kill_switch: bool,
+    running_count: int,
+    max_concurrent: int,
+    seen_keys: frozenset[str],
+    authorization: str | None = None,
+) -> list[tuple[CatchupEnqueueDecision, UUID | None]]:
+    """Decide + optionally enqueue catch-up for each document revision (async only)."""
+    results: list[tuple[CatchupEnqueueDecision, UUID | None]] = []
+    seen = set(seen_keys)
+    running = running_count
+    for document_id, revision, embed_status in targets:
+        key = catchup_idempotency_key(document_id=document_id, revision=revision)
+        decision = decide_catchup_enqueue(
+            CatchupEnqueueRequest(
+                enabled=enabled,
+                kill_switch=kill_switch,
+                embed_status=embed_status,
+                idempotency_key=key,
+                seen_keys=frozenset(seen),
+                running_count=running,
+                max_concurrent=max_concurrent,
+            )
+        )
+        if decision != "enqueue":
+            results.append((decision, None))
+            continue
+        job_id = jobs_client.enqueue_automation_catchup(
+            document_id,
+            revision=revision,
+            embed_status=embed_status,
+            authorization=authorization,
+        )
+        seen.add(key)
+        running += 1
+        results.append((decision, job_id))
+    return results
 
 
 AutomationJobType = Literal["automation_catchup", "freshness_refresh"]

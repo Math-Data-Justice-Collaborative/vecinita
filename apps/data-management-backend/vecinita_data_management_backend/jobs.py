@@ -8,6 +8,11 @@ from typing import TYPE_CHECKING
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 
 from vecinita_data_management_backend.automation_catchup import run_automation_catchup_job
+from vecinita_data_management_backend.catchup_triggers import maybe_enqueue_after_job
+from vecinita_data_management_backend.modal_jobs_client import (
+    ModalJobsEnqueueClient,
+    ModalJobsEnqueueError,
+)
 from vecinita_data_management_backend.pipeline import (
     run_backfill_job,
     run_eval_job,
@@ -21,6 +26,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from vecinita_embedding_client import EmbeddingClient
+    from vecinita_shared_schemas.automations import CatchupJobsClient
     from vecinita_tagging.llm_client import LlmTagClient
 
     from vecinita_data_management_backend.pipeline import DocumentFetcher
@@ -33,6 +39,15 @@ _logger = logging.getLogger(__name__)
 _KNOWN_JOB_TYPES: frozenset[str] = frozenset(
     {"ingest", "retag", "rebuild", "eval", "automation_catchup"}
 )
+
+
+def _catchup_jobs_client() -> CatchupJobsClient | None:
+    """Best-effort Modal jobs client for post-job catch-up enqueue (RD-326)."""
+    try:
+        return ModalJobsEnqueueClient()
+    except ModalJobsEnqueueError:
+        _logger.debug("catch-up jobs client unavailable", exc_info=True)
+        return None
 
 
 def _require_tag_client(tag_client: LlmTagClient | None) -> LlmTagClient:
@@ -63,6 +78,10 @@ def _emit_job_terminal_audit(
         )
     except Exception:  # noqa: BLE001  # audit is best-effort; never fail the job runner
         _logger.warning("audit emit failed for %s", event_type, exc_info=True)
+
+
+def _maybe_trigger_catchup(record: JobRecord) -> None:
+    maybe_enqueue_after_job(record, jobs_client=_catchup_jobs_client())
 
 
 def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
@@ -156,6 +175,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
         final = store.get_job(job_id)
         if final is not None and final.status == "failed":
             _emit_job_terminal_audit(scoped_write, final, "job.failed")
+            _maybe_trigger_catchup(final)
         if final is not None and final.status not in ("completed", "failed"):
             store.update_job(
                 job_id,
@@ -166,8 +186,10 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
             failed = store.get_job(job_id)
             if failed is not None:
                 _emit_job_terminal_audit(scoped_write, failed, "job.failed")
+                _maybe_trigger_catchup(failed)
         raise
 
     final = store.get_job(job_id)
     if final is not None and final.status == "completed":
         _emit_job_terminal_audit(scoped_write, final, "job.completed")
+        _maybe_trigger_catchup(final)
