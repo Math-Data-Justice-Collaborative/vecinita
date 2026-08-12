@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** (pending commit) — T129.9 DM FT UI  
+**Tip:** `f48a7e7` — T129.9 DM FT UI  
 **Issues:** #73 · #72 · #219  
 
 ## Position
