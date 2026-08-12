@@ -98,6 +98,38 @@ image = (
 )
 
 
+def _run_scheduled_catchup_tick() -> str:
+    """F75 daily catch-up branch (job/CRUD enqueue residual; cron records tick)."""
+    logger.info("daily schedule tick: job_type=automation_catchup (shared Period(days=1))")
+    return "automation_catchup_tick"
+
+
+def _run_scheduled_freshness_tick() -> str:
+    """F76 freshness branch stub — implemented in M128 (T128.4)."""
+    logger.info("daily schedule tick: job_type=freshness_refresh stub (M128)")
+    return "freshness_refresh_stub"
+
+
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_name("vecinita-data-management")],
+    schedule=modal.Period(days=1),
+    timeout=600,
+)
+def daily_corpus_automations() -> dict[str, object]:
+    """Shared F75/F76 daily schedule (ADR-052 / TP2 / TC-264 / S030-D31 M2).
+
+    Dispatches ``automation_catchup`` then ``freshness_refresh`` as distinct job types
+    from one ``schedule=modal.Period(days=1)`` entry.
+    """
+    from vecinita_data_management_backend.schedule_dispatch import run_daily_dispatch
+
+    return run_daily_dispatch(
+        run_catchup=_run_scheduled_catchup_tick,
+        run_freshness=_run_scheduled_freshness_tick,
+    )
+
+
 @app.function(
     image=image,
     secrets=[modal.Secret.from_name("vecinita-data-management")],

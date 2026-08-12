@@ -9,26 +9,18 @@
 ## Position
 
 - Phase C **07-build** in progress — M127 F75
-- Done: **T127.1–T127.6** (Phase A/B `3cadd8b`; T127.5 `5d31dcf`)
-- Next: **T127.7** shared `schedule=modal.Period(days=1)` catch-up dispatch stub
+- Done: **T127.1–T127.7**
+- Next: **T127.8** DM Automations UI — enable/disable + run history
 
 ## Key locks
 
-- F75 catch-up policy + `enqueue_catchup_targets`: `packages/shared-schemas/.../automations.py`
-- Write-API: config/runs + CRUD hook `catchup_crud.py` after batch upsert
-- Modal DM: `automation_catchup` worker + job-completion trigger in `jobs.py`
-- Alembic `20260807_0015`: `automation_runs` + `automation_settings`
+- F75 catch-up policy + `enqueue_catchup_targets`: shared-schemas automations
+- Write-API: config/runs + CRUD hook after batch upsert
+- Modal DM: `automation_catchup` worker + job-completion triggers
+- Shared schedule: `daily_corpus_automations` with `schedule=modal.Period(days=1)`
+  (catch-up + freshness stub; F76 fills freshness in M128)
 - FT pins locked (S030-D33) for M129: `infra/modal/finetune_pins.py`
 
-## Artifacts
+## Next
 
-- `tests/unit/data_management/test_automation_catchup.py`
-- `tests/unit/data_management/test_catchup_triggers.py`
-- `tests/unit/internal_write_api/test_catchup_crud.py`
-- `apps/data-management-backend/.../automation_catchup.py`
-- `apps/data-management-backend/.../catchup_triggers.py`
-- ADR-052 / ADR-053 · tech-plan-delta · Phase 30 execution-plan
-
-## Next AskQuestion / stage
-
-Continue **07-build** T127.7 (shared daily schedule).
+Continue **07-build** T127.8 (DM Automations UI).
