@@ -85,10 +85,25 @@ log "installing → ${BIN_DIR} (${OS}/${ARCH})"
 # OpenGrep
 if [[ ! -x "${BIN_DIR}/opengrep" || "${SEC_FORCE:-0}" == "1" ]]; then
   # Official installer; downloaded to a temp file (not curl|bash) then executed.
-  _og_install="$(mktemp)"
-  download "https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh" "${_og_install}"
-  bash "${_og_install}"
-  rm -f "${_og_install}"
+  # Outer retry: install.sh's own curl hits GitHub Releases 503s (same class as gitleaks).
+  _og_ok=0
+  for _og_attempt in 1 2 3 4 5; do
+    _og_install="$(mktemp)"
+    if download "https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh" "${_og_install}" \
+      && bash "${_og_install}"; then
+      rm -f "${_og_install}"
+      _og_ok=1
+      break
+    fi
+    rm -f "${_og_install}"
+    rm -rf "${HOME}/.opengrep/cli/v1.27.0" "${HOME}/.opengrep/cli/latest" 2>/dev/null || true
+    log "opengrep install attempt ${_og_attempt}/5 failed; retry in $((_og_attempt * 2))s..."
+    sleep $((_og_attempt * 2))
+  done
+  if [[ "${_og_ok}" -ne 1 ]]; then
+    err "opengrep install failed after 5 attempts"
+    exit 1
+  fi
   ln -sfn "${HOME}/.opengrep/cli/latest/opengrep" "${BIN_DIR}/opengrep"
 fi
 
