@@ -186,6 +186,23 @@ class JobMetrics(BaseModel):
         default=None,
         description="F77 finetune_train worker outcome (approve gate / stub / train).",
     )
+    adapter_id: str | None = Field(
+        default=None,
+        description="F77 LoRA adapter id written by finetune_train (UJ-082 / TC-262).",
+    )
+    adapter_path: str | None = Field(
+        default=None,
+        description="F77 volume path for the trained adapter (ADR-053).",
+    )
+    pair_count: int | None = Field(
+        default=None,
+        ge=0,
+        description="F77 SFT pair count used for the train run.",
+    )
+    base_model_id: str | None = Field(
+        default=None,
+        description="F77 pinned base model id for the train run.",
+    )
 
 
 class Job(BaseModel):

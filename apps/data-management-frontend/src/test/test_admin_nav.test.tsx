@@ -80,6 +80,9 @@ describe("Admin navigation", () => {
     expect(
       screen.getByRole("link", { name: /automations/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /fine-tune/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /health/i })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /audit log/i }),
@@ -92,6 +95,40 @@ describe("Admin navigation", () => {
     fireEvent.click(screen.getByRole("link", { name: /automations/i }));
     await waitFor(() => {
       expect(screen.getByTestId("automations-admin-page")).toBeInTheDocument();
+    });
+  });
+
+  it("navigates to fine-tune page (UJ-082)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => STATS_BODY,
+          });
+        }
+        if (url.includes("/internal/v1/finetune/adapter")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ adapter_id: null, base: true }),
+          });
+        }
+        if (url.includes("/jobs")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ jobs: [] }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+    await renderApp();
+
+    fireEvent.click(screen.getByRole("link", { name: /fine-tune/i }));
+    await waitFor(() => {
+      expect(screen.getByTestId("finetune-admin-page")).toBeInTheDocument();
     });
   });
 

@@ -1,8 +1,33 @@
 export type JobStatus =
   "pending" | "running" | "completed" | "failed" | "cancelled";
-export type JobType = "ingest" | "retag" | "eval" | "rebuild";
+export type JobType =
+  | "ingest"
+  | "retag"
+  | "eval"
+  | "rebuild"
+  | "finetune_train"
+  | "automation_catchup"
+  | "freshness_refresh";
 export type RebuildMode = "reembed" | "rechunk" | "rescrape";
 export type BackfillSource = "rescrape" | "from_chunks";
+
+/** Optional job metrics — F75–F77 outcomes + F77 adapter pin fields. */
+export interface JobMetrics {
+  skipped_unchanged?: number;
+  urls_failed_embed?: number;
+  pages_fetched?: number;
+  pages_failed?: number;
+  pages_skipped_robots?: number;
+  crawl_stopped_reason?: string | null;
+  catchup_outcome?: string | null;
+  freshness_outcome?: string | null;
+  documents_processed?: number | null;
+  finetune_outcome?: string | null;
+  adapter_id?: string | null;
+  adapter_path?: string | null;
+  pair_count?: number | null;
+  base_model_id?: string | null;
+}
 
 export interface Job {
   job_id: string;
@@ -15,6 +40,9 @@ export interface Job {
   dashboard_url?: string | null | undefined;
   error_code?: string | null | undefined;
   error_message?: string | null | undefined;
+  /** F77 finetune_train — false until POST /jobs/{id}/approve (TC-260). */
+  approved?: boolean | null | undefined;
+  metrics?: JobMetrics | null | undefined;
   created_at: string;
   updated_at: string;
 }

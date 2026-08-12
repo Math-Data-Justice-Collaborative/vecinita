@@ -7,6 +7,7 @@ import { CorpusPage } from "@/pages/CorpusPage";
 import { JobDetailPage } from "@/pages/JobDetailPage";
 import { JobsPage } from "@/pages/JobsPage";
 import { AutomationsPage } from "@/pages/AutomationsPage";
+import { FinetunePage } from "@/pages/FinetunePage";
 import { HealthPage } from "@/pages/HealthPage";
 import { AuditPage } from "@/pages/AuditPage";
 import { FeedbackPage } from "@/pages/FeedbackPage";
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/jobs/:jobId" element={<JobDetailPage />} />
         <Route path="/automations" element={<AutomationsPage />} />
+        <Route path="/finetune" element={<FinetunePage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/audit" element={<AuditPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />

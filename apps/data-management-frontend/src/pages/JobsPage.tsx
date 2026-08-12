@@ -45,11 +45,12 @@ const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
   cancelled: "admin.jobs.status.cancelled",
 };
 
-const TYPE_KEY: Record<JobType, StringMessageKey> = {
+const TYPE_KEY: Partial<Record<JobType, StringMessageKey>> = {
   ingest: "admin.jobs.type.ingest",
   retag: "admin.jobs.type.retag",
   eval: "admin.jobs.type.eval",
   rebuild: "admin.jobs.type.rebuild",
+  finetune_train: "admin.jobs.type.finetune_train",
 };
 
 function contextCell(job: Job, emDash: string): string {
@@ -289,6 +290,7 @@ export function JobsPage() {
               <TableBody>
                 {jobs.map((job) => {
                   const jobType: JobType = job.job_type ?? "ingest";
+                  const typeKey = TYPE_KEY[jobType];
                   return (
                     <TableRow
                       key={job.job_id}
@@ -305,7 +307,7 @@ export function JobsPage() {
                           {job.job_id.slice(0, 8)}
                         </code>
                       </TableCell>
-                      <TableCell>{tr(TYPE_KEY[jobType])}</TableCell>
+                      <TableCell>{typeKey ? tr(typeKey) : jobType}</TableCell>
                       <TableCell>
                         <Badge variant={STATUS_VARIANT[job.status]}>
                           {tr(STATUS_KEY[job.status])}

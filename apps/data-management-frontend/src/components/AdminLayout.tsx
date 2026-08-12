@@ -9,6 +9,7 @@ import {
   MessageSquareText,
   ScrollText,
   Menu,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -125,6 +126,11 @@ function NavItems({ onClick }: { onClick?: () => void }) {
             to: "/automations",
             label: tr("admin.nav.automations"),
             icon: Bot,
+          } as const,
+          {
+            to: "/finetune",
+            label: tr("admin.nav.finetune"),
+            icon: Sparkles,
           } as const,
           {
             to: "/feedback",
