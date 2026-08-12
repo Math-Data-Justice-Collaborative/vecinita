@@ -13,16 +13,17 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 AssignableRole = Literal["admin", "viewer"]
 Role = Literal["admin", "viewer", "super-admin"]
 UserStatus = Literal["active", "invited", "disabled"]
-JobType = Literal["ingest", "retag", "eval", "rebuild"]
+JobType = Literal["ingest", "retag", "eval", "rebuild", "automation_catchup"]
 RebuildMode = Literal["reembed", "rechunk", "rescrape"]
 BackfillSource = Literal["rescrape", "from_chunks"]
 CrawlScope = Literal["same_domain", "path_prefix"]
 TreeNodeKind = Literal["domain", "path", "document", "chunk"]
 CrawlStoppedReason = Literal["max_pages", "max_depth", "complete"]
+EmbedStatusOption = Literal["complete", "missing", "partial", "failed"]
 
 
 class JobOptions(BaseModel):
-    """Optional ingest, retag, eval, or rebuild tuning parameters for a job."""
+    """Optional ingest, retag, eval, rebuild, or automation_catchup job parameters."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -35,6 +36,15 @@ class JobOptions(BaseModel):
     )
     job_type: JobType = "ingest"
     document_id: UUID | None = None
+    revision: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Document revision for F75 automation_catchup idempotency (RD-335).",
+    )
+    embed_status: EmbedStatusOption | None = Field(
+        default=None,
+        description="Embedding residual status for F75 catch-up (RD-334).",
+    )
     eval_run_id: UUID | None = None
     question: str | None = Field(default=None, min_length=1, max_length=2000)
     mode: RebuildMode | None = None
@@ -83,7 +93,7 @@ class JobOptions(BaseModel):
 
 
 class CreateJobRequest(BaseModel):
-    """POST /jobs request to enqueue URL ingestion, LLM retag, eval, or rebuild."""
+    """POST /jobs request to enqueue URL ingestion, LLM retag, eval, rebuild, or catch-up."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -102,6 +112,11 @@ class CreateJobRequest(BaseModel):
             raise ValueError(msg)
         if job_type == "eval" and (self.options is None or self.options.eval_run_id is None):
             msg = "eval_run_id required for eval jobs"
+            raise ValueError(msg)
+        if job_type == "automation_catchup" and (
+            self.options is None or self.options.document_id is None
+        ):
+            msg = "document_id required for automation_catchup jobs"
             raise ValueError(msg)
         return self
 
@@ -130,6 +145,15 @@ class JobMetrics(BaseModel):
     crawl_stopped_reason: CrawlStoppedReason | None = Field(
         default=None,
         description="Why crawl stopped: max_pages | max_depth | complete (F60).",
+    )
+    catchup_outcome: str | None = Field(
+        default=None,
+        description="F75 automation_catchup worker outcome (ADR-052).",
+    )
+    documents_processed: int | None = Field(
+        default=None,
+        ge=0,
+        description="Documents processed by F75 catch-up (0 when skipped).",
     )
 
 

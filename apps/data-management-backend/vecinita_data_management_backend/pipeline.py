@@ -659,6 +659,46 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
     return documents
 
 
+def reembed_documents(  # noqa: PLR0913  # mirrors rebuild dependency surface for F75 catch-up
+    document_ids: list[UUID],
+    *,
+    write_client: InternalWriteClient,
+    embed_client: EmbeddingClient,
+    fetch_document: DocumentFetcher | None = None,
+    chunk_size: int | None = None,
+    chunk_overlap: int | None = None,
+) -> int:
+    """Store-backed re-embed for F75 catch-up (mode=reembed; no shadow/rebuild_run).
+
+    Returns the number of documents upserted.
+    """
+    if not document_ids:
+        return 0
+    options: dict[str, object] = {
+        "mode": "reembed",
+        "document_ids": [str(doc_id) for doc_id in document_ids],
+        "force": True,
+    }
+    if chunk_size is not None:
+        options["chunk_size_tokens"] = chunk_size
+    if chunk_overlap is not None:
+        options["chunk_overlap_tokens"] = chunk_overlap
+    documents = _build_rebuild_documents(
+        mode="reembed",
+        targets=_rebuild_targets(write_client, options),
+        write_client=write_client,
+        fetcher=fetch_document or fetch_url,
+        embed_client=embed_client,
+        chunk_size=_chunk_size_from_options(options),
+        chunk_overlap=_chunk_overlap_from_options(options),
+        model_id=_embedding_model_id(),
+        tokenizer_id=_chunk_tokenizer_id(),
+        rebuild_run_id=None,
+    )
+    _write_rebuild_batch(write_client, documents, dry_run=False)
+    return len(documents)
+
+
 def run_rebuild_job(
     job_id: UUID,
     *,
