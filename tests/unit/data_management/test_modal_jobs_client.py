@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+import json
+from typing import cast
 from uuid import UUID, uuid4
 
 import httpx
@@ -14,6 +16,7 @@ from vecinita_data_management_backend.modal_jobs_client import (
     ModalJobsEnqueueClient,
     ModalJobsEnqueueError,
 )
+from vecinita_shared_schemas.json_types import as_json_object
 
 DOC_ID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 
@@ -127,3 +130,93 @@ def test_modal_jobs_client_owned_close_does_not_raise(
     client = ModalJobsEnqueueClient()
     client.close()
     client.close()
+
+
+def test_modal_jobs_client_enqueue_freshness_refresh_success() -> None:
+    """F76 enqueue_freshness_refresh POSTs job_type and force/refresh flags."""
+    job_id = uuid4()
+    bodies: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+
+        decoded = cast("object", json.loads(request.content.decode()))
+        bodies.append(as_json_object(decoded))
+        return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
+
+    transport = httpx.MockTransport(handler)
+    http_client = httpx.Client(transport=transport, base_url="https://dm.example")
+    client = ModalJobsEnqueueClient(
+        base_url="https://dm.example",
+        proxy_key="proxy",
+        http_client=http_client,
+    )
+    try:
+        result = client.enqueue_freshness_refresh(
+            DOC_ID,
+            force=False,
+            refresh_enabled=True,
+            is_stale=True,
+        )
+    finally:
+        client.close()
+        http_client.close()
+
+    assert result == job_id
+    assert len(bodies) == 1
+    options = as_json_object(bodies[0]["options"])
+    assert options["job_type"] == "freshness_refresh"
+    assert options["document_id"] == str(DOC_ID)
+    assert options["refresh_enabled"] is True
+    assert options["is_stale"] is True
+    assert options["force"] is False
+
+
+def test_modal_jobs_client_enqueue_freshness_forwards_authorization() -> None:
+    """Optional Authorization header is forwarded on freshness enqueue."""
+    job_id = uuid4()
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
+
+    transport = httpx.MockTransport(handler)
+    http_client = httpx.Client(transport=transport, base_url="https://dm.example")
+    client = ModalJobsEnqueueClient(
+        base_url="https://dm.example",
+        proxy_key="proxy",
+        http_client=http_client,
+    )
+    try:
+        result = client.enqueue_freshness_refresh(
+            DOC_ID,
+            force=True,
+            authorization="Bearer jwt-token",
+        )
+    finally:
+        client.close()
+        http_client.close()
+
+    assert result == job_id
+    assert seen[0].headers["Authorization"] == "Bearer jwt-token"
+
+
+def test_modal_jobs_client_enqueue_freshness_http_error_raises() -> None:
+    """Non-2xx freshness enqueue becomes ModalJobsEnqueueError."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(502, text="bad gateway")
+
+    transport = httpx.MockTransport(handler)
+    http_client = httpx.Client(transport=transport, base_url="https://dm.example")
+    client = ModalJobsEnqueueClient(
+        base_url="https://dm.example",
+        proxy_key="proxy",
+        http_client=http_client,
+    )
+    try:
+        with pytest.raises(ModalJobsEnqueueError, match="enqueue_freshness_refresh"):
+            client.enqueue_freshness_refresh(DOC_ID, force=True)
+    finally:
+        client.close()
+        http_client.close()

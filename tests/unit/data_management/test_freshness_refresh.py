@@ -352,9 +352,13 @@ def test_scheduled_freshness_tick_respects_kill_switch(
         called = True
         return []
 
+    def enqueue_unused(document_id: UUID, *, force: bool = False) -> UUID:
+        _ = (document_id, force)
+        return DOC_ID
+
     result = run_scheduled_freshness_tick(
         list_stale_documents=list_stale,
-        enqueue_freshness=lambda *_a, **_k: DOC_ID,
+        enqueue_freshness=enqueue_unused,
     )
     assert called is False
     assert result == {
@@ -372,6 +376,10 @@ def test_scheduled_freshness_tick_respects_master_disable(
     monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "false")
     monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
 
+    def enqueue_unused(document_id: UUID, *, force: bool = False) -> UUID:
+        _ = (document_id, force)
+        return DOC_ID
+
     result = run_scheduled_freshness_tick(
         list_stale_documents=lambda: [
             DocumentSummary(
@@ -381,7 +389,7 @@ def test_scheduled_freshness_tick_respects_master_disable(
                 stale=True,
             )
         ],
-        enqueue_freshness=lambda *_a, **_k: DOC_ID,
+        enqueue_freshness=enqueue_unused,
     )
     assert result["outcome"] == "skipped_disabled"
     assert result["enqueued"] == 0
@@ -465,3 +473,184 @@ def test_freshness_worker_failure_marks_failed(
         "freshness_outcome": "failed",
         "documents_processed": 0,
     }
+
+
+def test_freshness_worker_default_perform_refresh_bumps_checked(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Default perform_refresh loads detail and bumps last_checked when available."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options=_freshness_options(force=True, is_stale=False),
+    )
+    bumped: list[UUID] = []
+    detailed: list[UUID] = []
+
+    class _Write(_StubWriteClient):
+        def get_document_detail(self, document_id: UUID) -> object:
+            detailed.append(document_id)
+            return object()
+
+        def bump_document_last_checked(self, document_id: UUID) -> None:
+            bumped.append(document_id)
+
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_Write(),  # type: ignore[arg-type]
+    )
+    assert detailed == [DOC_ID]
+    assert bumped == [DOC_ID]
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.metrics == {
+        "freshness_outcome": "refreshed",
+        "documents_processed": 1,
+    }
+
+
+def test_freshness_worker_rejects_wrong_job_type(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-freshness job_type raises ValueError."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com"], job_type="ingest")
+    with pytest.raises(ValueError, match="not a freshness_refresh"):
+        run_freshness_refresh_job(
+            record.job_id,
+            store=store,
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+            perform_refresh=lambda _doc: None,
+        )
+
+
+def test_freshness_worker_missing_job_raises_key_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Unknown job_id raises KeyError."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    store = InMemoryJobStore()
+    with pytest.raises(KeyError):
+        run_freshness_refresh_job(
+            DOC_ID,
+            store=store,
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+            perform_refresh=lambda _doc: None,
+        )
+
+
+def test_freshness_worker_requires_document_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Missing document_id in options raises ValueError."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options={"force": True, "refresh_enabled": True, "is_stale": True},
+    )
+    with pytest.raises(ValueError, match="document_id required"):
+        run_freshness_refresh_job(
+            record.job_id,
+            store=store,
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+            perform_refresh=lambda _doc: None,
+        )
+
+
+def test_freshness_worker_parses_string_bool_options(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """String bool option values are accepted for force / refresh_enabled / is_stale."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options={
+            "document_id": str(DOC_ID),
+            "force": "true",
+            "refresh_enabled": "yes",
+            "is_stale": "0",
+        },
+    )
+    called: list[UUID] = []
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_StubWriteClient(),  # type: ignore[arg-type]
+        perform_refresh=called.append,
+    )
+    assert called == [DOC_ID]
+
+
+def test_freshness_worker_option_defaults_and_int_bool(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Missing option keys use defaults; non-str/non-bool values use bool()."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options={"document_id": str(DOC_ID), "force": 1},
+    )
+    called: list[UUID] = []
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_StubWriteClient(),  # type: ignore[arg-type]
+        perform_refresh=called.append,
+    )
+    assert called == [DOC_ID]
+
+
+def test_scheduled_freshness_tick_noop_when_no_stale_docs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Enabled schedule with empty stale list returns noop."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+
+    def enqueue_unused(document_id: UUID, *, force: bool = False) -> UUID:
+        _ = (document_id, force)
+        return DOC_ID
+
+    result = run_scheduled_freshness_tick(
+        list_stale_documents=list,
+        enqueue_freshness=enqueue_unused,
+    )
+    assert result == {
+        "job_type": "freshness_refresh",
+        "enqueued": 0,
+        "skipped": 0,
+        "outcome": "noop",
+    }
+
+
+def test_create_job_request_stores_freshness_option_flags() -> None:
+    """JobOptions refresh_enabled / is_stale round-trip on CreateJobRequest."""
+    body = CreateJobRequest.model_validate(
+        {
+            "urls": [],
+            "options": {
+                "job_type": "freshness_refresh",
+                "document_id": str(DOC_ID),
+                "force": False,
+                "refresh_enabled": False,
+                "is_stale": True,
+            },
+        }
+    )
+    assert body.options is not None
+    assert body.options.refresh_enabled is False
+    assert body.options.is_stale is True
