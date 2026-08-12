@@ -38,7 +38,8 @@ bash scripts/run_tests.sh
 | UJ-003 Delete | `test_uj003_corpus_delete.py` | API-only | — |
 | UJ-009 Browse corpus | `test_uj009_corpus_browse.py` | Corpus tests | `tests/ui/chat/uj009-corpus-navigation.spec.ts` |
 | UJ-026 Admin login | `test_uj028_unauthenticated_admin.py` | login tests | `tests/ui/admin/uj026-login-page.spec.ts` |
-| UJ-050 Job detail + CRUD | `test_uj050_job_detail_crud.py` | `test_uj050_job_detail_crud.test.tsx` | `tests/ui/admin/uj050-job-detail.spec.ts` |
+| UJ-080 Automations | `test_uj080_automations.py` | `test_uj080_automations_panel.test.tsx` | `tests/ui/admin/uj080-automations.spec.ts` |
+| UJ-081 Freshness | `test_uj081_freshness.py` | `test_uj081_freshness_ui.test.tsx` | `tests/ui/admin/uj081-freshness.spec.ts` |
 
 **T0-ui** runs in CI (`ui-e2e` job). **T3-ui** (live staging browser) is tracked for 13-deploy-smoke / H6.
 

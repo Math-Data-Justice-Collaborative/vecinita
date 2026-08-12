@@ -4,7 +4,7 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** `fdf68af` (pushed to origin) — T128.5 done; **T128.6 in progress**; watching PR #238 CI  
+**Tip:** `7971c16` (pushed) — **implementing T128.7** (UJ-081 API e2e + Vitest + Playwright); watch tip CI  
 **Issues:** #73 · #72 · #219  
 
 ## Position
@@ -15,8 +15,9 @@
 - Done: **T128.2** — Alembic `documents.refresh_enabled` + `last_checked_at` (reuse `content_hash`) `@7b1aa87`
 - Done: **T128.3** — write-API PATCH/list stale fields; Refresh now → enqueue `@e86290e`
 - Done: **T128.4** — Modal `freshness_refresh` worker + schedule `@ac8fca7`; coverage/typecheck follow-up `@2bf2dca`
-- Done: **T128.5** — ingest/hash-aware re-fetch for URL sources `@fdf68af` (pushed; CI watching)
-- **In progress: T128.6** — DM freshness UI (stale list, enable, Refresh now)
+- Done: **T128.5** — ingest/hash-aware re-fetch for URL sources `@fdf68af`
+- Done: **T128.6** — DM freshness UI (stale list, enable, Refresh now) `@eac398d`; UJ-081 Vitest `@7971c16`
+- **In progress: T128.7** — API e2e + Vitest + Playwright T0-ui UJ-081
 
 ## Key locks
 
@@ -26,9 +27,10 @@
 - Shared schedule: `daily_corpus_automations` with `schedule=modal.Period(days=1)`
   (catch-up tick + real freshness enqueue for stale `refresh_enabled` docs)
 - Hash-aware freshness re-fetch: `packages/ingest` + `freshness_refresh` / `rechunk_and_upsert_scraped_url`
+- DM freshness UI: CorpusList / DocumentAdmin stale + Refresh now (UJ-081)
 - FT pins locked (S030-D33) for M129: `infra/modal/finetune_pins.py`
-- PR #238 open; tip `fdf68af` pushed — keep CI green
+- PR #238 open; tip `7971c16` — keep CI green (`fdf68af` run cancelled/superseded)
 
 ## Next
 
-Continue **07-build** **T128.6** (DM freshness UI — stale list, enable, Refresh now). Leave PR #238 open; do not merge without approval.
+Continue **07-build** **T128.7** (API e2e + Vitest + Playwright T0-ui UJ-081). Leave PR #238 open; do not merge without approval.
