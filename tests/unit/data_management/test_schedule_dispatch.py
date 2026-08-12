@@ -9,12 +9,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from vecinita_data_management_backend.schedule_dispatch import (
     DAILY_AUTOMATION_JOB_TYPES,
     plan_daily_dispatch,
     run_daily_dispatch,
 )
+
+if TYPE_CHECKING:
+    import pytest
 
 
 def test_plan_daily_dispatch_orders_catchup_then_freshness() -> None:
@@ -41,6 +45,26 @@ def test_run_daily_dispatch_invokes_both_branches() -> None:
         "automation_catchup": "catchup_ok",
         "freshness_refresh": "freshness_stub",
     }
+
+
+def test_run_daily_dispatch_skips_unknown_planned_types(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Unknown planned job types are ignored (covers elif fall-through)."""
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.schedule_dispatch.plan_daily_dispatch",
+        lambda: ("automation_catchup", "unknown_type", "freshness_refresh"),
+    )
+    called: list[str] = []
+
+    results = run_daily_dispatch(
+        run_catchup=lambda: called.append("c") or "c",
+        run_freshness=lambda: called.append("f") or "f",
+    )
+    assert called == ["c", "f"]
+    assert "unknown_type" not in results
+    assert results["automation_catchup"] == "c"
+    assert results["freshness_refresh"] == "f"
 
 
 def test_data_management_app_has_period_days_1_schedule() -> None:

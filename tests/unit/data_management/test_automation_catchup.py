@@ -321,3 +321,141 @@ def test_create_job_request_requires_document_id_for_catchup() -> None:
                 "options": {"job_type": "automation_catchup", "revision": "1"},
             }
         )
+
+
+def test_catchup_missing_job_raises_key_error() -> None:
+    """Unknown job_id → KeyError before any catch-up work."""
+    store = InMemoryJobStore()
+    with pytest.raises(KeyError):
+        run_automation_catchup_job(
+            UUID("ffffffff-ffff-4fff-8fff-ffffffffffff"),
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+        )
+
+
+def test_catchup_wrong_job_type_raises() -> None:
+    """Non-catch-up job_type → ValueError."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com"], job_type="ingest")
+    with pytest.raises(ValueError, match="not an automation_catchup"):
+        run_automation_catchup_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+        )
+
+
+def test_catchup_options_validation_errors() -> None:
+    """Missing/invalid options raise ValueError with clear messages."""
+    store = InMemoryJobStore()
+    cases: list[tuple[dict[str, object], str]] = [
+        ({"revision": "1", "embed_status": "missing"}, "document_id"),
+        ({"document_id": str(DOC_ID), "embed_status": "missing"}, "revision"),
+        (
+            {"document_id": str(DOC_ID), "revision": "1", "embed_status": "bogus"},
+            "embed_status",
+        ),
+        (
+            {"document_id": str(DOC_ID), "revision": "1", "embed_status": "   "},
+            "embed_status",
+        ),
+    ]
+    for options, match in cases:
+        record = store.create_job(
+            urls=[],
+            job_type="automation_catchup",
+            options=options,
+        )
+        with pytest.raises(ValueError, match=match):
+            run_automation_catchup_job(
+                record.job_id,
+                store=store,
+                embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+                write_client=_StubWriteClient(),  # type: ignore[arg-type]
+            )
+
+
+def test_catchup_default_perform_calls_reembed_documents(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When perform_catchup is omitted, reembed_documents runs for the document."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options=_catchup_options(embed_status="missing"),
+    )
+    called: list[list[UUID]] = []
+
+    def _fake_reembed(
+        document_ids: list[UUID],
+        *,
+        write_client: object,
+        embed_client: object,
+        fetch_document: object = None,
+    ) -> None:
+        _ = (write_client, embed_client, fetch_document)
+        called.append(list(document_ids))
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.automation_catchup.reembed_documents",
+        _fake_reembed,
+    )
+
+    run_automation_catchup_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_StubWriteClient(),  # type: ignore[arg-type]
+    )
+
+    assert called == [[DOC_ID]]
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.metrics == {
+        "catchup_outcome": "reembedded",
+        "documents_processed": 1,
+    }
+
+
+def test_catchup_perform_failure_marks_job_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Exceptions during re-embed mark the job failed and re-raise."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options=_catchup_options(embed_status="failed"),
+    )
+
+    def _boom(_document_id: UUID) -> None:
+        msg = "embed boom"
+        raise RuntimeError(msg)
+
+    with pytest.raises(RuntimeError, match="embed boom"):
+        run_automation_catchup_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+            perform_catchup=_boom,
+        )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "failed"
+    assert final.error_code == "RuntimeError"
+    assert final.error_message == "embed boom"
+    assert final.metrics == {
+        "catchup_outcome": "failed",
+        "documents_processed": 0,
+    }

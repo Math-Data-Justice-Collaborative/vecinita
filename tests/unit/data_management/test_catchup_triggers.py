@@ -13,7 +13,10 @@ from uuid import UUID, uuid4
 
 import httpx
 import pytest
-from vecinita_data_management_backend.catchup_triggers import targets_from_completed_job
+from vecinita_data_management_backend.catchup_triggers import (
+    maybe_enqueue_after_job,
+    targets_from_completed_job,
+)
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_internal_write_api.jobs_client import DataManagementJobsClient
@@ -280,3 +283,94 @@ def test_decide_catchup_still_skips_complete_before_post() -> None:
     )
     assert body.options is not None
     assert body.options.job_type == "automation_catchup"
+
+
+def test_targets_from_completed_job_skips_unknown_and_healthy() -> None:
+    """Unknown job types and healthy completes yield no targets."""
+    store = InMemoryJobStore()
+    unknown = store.create_job(urls=["https://example.com"], job_type="finetune_train")
+    store.update_job(unknown.job_id, status="completed")
+    unknown_final = store.get_job(unknown.job_id)
+    assert unknown_final is not None
+    assert targets_from_completed_job(unknown_final) == []
+
+    healthy = store.create_job(
+        urls=[],
+        job_type="ingest",
+        options={"document_id": str(DOC_ID), "revision": "rev-9"},
+    )
+    store.update_job(healthy.job_id, status="completed", metrics={"urls_failed_embed": 0})
+    healthy_final = store.get_job(healthy.job_id)
+    assert healthy_final is not None
+    assert targets_from_completed_job(healthy_final) == []
+
+
+def test_targets_from_completed_job_uses_revision_and_dedupes_ids() -> None:
+    """Revision from options; document_id already in document_ids is not duplicated."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="rebuild",
+        options={
+            "document_ids": [str(DOC_ID)],
+            "document_id": str(DOC_ID),
+            "revision": "rev-77",
+        },
+    )
+    store.update_job(
+        record.job_id,
+        status="completed",
+        metrics={"urls_failed_embed": 2},
+    )
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert targets_from_completed_job(final) == [(DOC_ID, "rev-77", "failed")]
+
+
+def test_targets_from_completed_job_requires_document_ids() -> None:
+    """Failed ingest without document ids → empty targets."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com"], job_type="ingest")
+    store.update_job(record.job_id, status="failed")
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert targets_from_completed_job(final) == []
+
+
+def test_maybe_enqueue_after_job_none_client_and_exceptions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """None client is a no-op; enqueue exceptions are swallowed."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="retag",
+        options={"document_id": str(DOC_ID)},
+    )
+    store.update_job(record.job_id, status="failed")
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert maybe_enqueue_after_job(final, jobs_client=None) == []
+
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+
+    class _BoomClient:
+        def enqueue_automation_catchup(self, *_a: object, **_k: object) -> UUID:
+            msg = "modal down"
+            raise RuntimeError(msg)
+
+    assert maybe_enqueue_after_job(final, jobs_client=_BoomClient()) == []  # type: ignore[arg-type]
+
+    healthy = store.create_job(
+        urls=[],
+        job_type="ingest",
+        options={"document_id": str(DOC_ID)},
+    )
+    store.update_job(healthy.job_id, status="completed")
+    healthy_final = store.get_job(healthy.job_id)
+    assert healthy_final is not None
+    assert (
+        maybe_enqueue_after_job(healthy_final, jobs_client=_BoomClient())  # type: ignore[arg-type]
+        == []
+    )
