@@ -1964,8 +1964,8 @@ project:
       - 73
       - 72
       - 219
-      current_action: implementing T128.7
-      next_action: T128.7 — API e2e + Vitest + Playwright T0-ui UJ-081
+      current_action: T129.5 in_progress — LoRA/PEFT SFT train worker → llm-finetune-adapters
+      next_action: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
       askquestion_pending: false
       askquestion_pending_topic: null
       gate_a_to_b: passed
@@ -1974,14 +1974,15 @@ project:
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
-      milestone_hint: M128
+      milestone_hint: M129
       phase: Phase 30 M127–M130
       phase_30_milestones:
       - M127
       - M128
       - M129
       - M130
-      note: IN_PROGRESS — T128.7 UJ-081 API e2e + Vitest + Playwright; tip @7971c16
+      note: 'S030-D45 2026-08-12T21:33:12Z: Tip CI GREEN @c042f57 (run 31642681501). T129.4 follow-ups: OpenAPI enum assert
+        @4e8fc15; finetune_train worker branch coverage @c042f57. coding_blocked=false. Next: T129.5 LoRA train worker.'
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
       t127_5_status: completed
@@ -2001,13 +2002,14 @@ project:
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
-      tip: 7971c16
-      tip_sha: 7971c16
-      tip_full: 7971c162354445d05e1989886d99a6ce1000eac5
-      tip_prev: eac398d
-      updated_at: '2026-08-12T20:24:30Z'
-      active_milestone: M128
-      current_task: T128.7
+      tip: c042f57
+      tip_sha: c042f57
+      tip_full: c042f57627fb52953476b65a92be06fa0b858d56
+      tip_prev: 4e8fc15
+      updated_at: '2026-08-12T21:33:12Z'
+      active_milestone: M129
+      current_milestone: M129
+      current_task: T129.5
       current_task_status: in_progress
       t128_2_status: completed
       t128_2_commit: 7b1aa87
@@ -2757,10 +2759,10 @@ project:
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T128.7
-        active_milestone: M128
+        current_task: T129.5
+        active_milestone: M129
         current_task_status: in_progress
-        mode: task_loop
+        mode: m129_task_loop
         build_plan_card: waived_S030-D31
         t127_5_status: completed
         t127_6_status: completed
@@ -2776,7 +2778,7 @@ project:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: 7971c16
+        tip_sha: c042f57
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -2795,14 +2797,29 @@ project:
         tip_pushed: true
         t128_6_commit: eac398d
         t128_6_vitest_followup_commit: 7971c16
-        t128_7_status: in_progress
+        t128_7_status: completed
         t128_7_started_at: '2026-08-12T20:24:30Z'
+        m128_status: completed
+        t128_7_commit: bdaec9d
+        m129_status: in_progress
+        t129_3_status: completed
+        t129_4_status: completed
+        t129_4_sha: 4ef663b
+        t129_5_status: in_progress
+        tip: c042f57
+        coding_blocked: false
+        ci_gate: cleared
+        ci_status: success
+        pr_238_ci_watching: false
+        pr_238_ci_status: success
+        pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642681501
+        s030_d45_decision: S030-D45
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
       ci_fix_commit: 5fc2d21
       ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-      askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
+      askquestion_cleared: S030-D34 continue recommended M129 after CI green
       t128_2_completed_at: '2026-08-12T19:11:44Z'
       t128_2_description: 'Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`)'
       t128_2_spec_source: TP7, api-contract
@@ -2820,8 +2837,8 @@ project:
       t128_4_depends_on: T128.3, T127.7
       m127_pr_status: open
       m127_pr_merge: deferred_user_option_1
-      pr_238_ci_status: green
-      pr_238_ci_note: 'fdf68af CI cancelled (superseded); watching tip 7971c16 on PR #238'
+      pr_238_ci_status: in_progress
+      pr_238_ci_note: tip 932c036 run 31640505267 success (gitleaks retry)
       t128_5_started_at: '2026-08-12T20:04:26Z'
       t128_4_followup_commit: 2bf2dca
       t128_5_commit: fdf68af
@@ -2832,13 +2849,13 @@ project:
       t128_5_depends_on: T128.4
       t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
       t128_6_status: completed
-      execution_plan_active_task: T128.7 in_progress
-      handoff_next: T128.7 in_progress — UJ-081 e2e suite
-      phase_note: 07-build M128 F76; implementing T128.7; tip @7971c16
+      execution_plan_active_task: M129 / T129.5 — LoRA/PEFT SFT train worker
+      handoff_next: '**T129.5** — LoRA/PEFT SFT train worker → volume `llm-finetune-adapters` (F77). Tip c042f57 CI green.'
+      phase_note: M129/T129.5 in_progress; tip c042f57 CI green (S030-D45)
       t128_6_started_at: '2026-08-12T20:18:53Z'
       tip_pushed: true
       tip_pushed_to: origin/evolve/EV-027-corpus-automations
-      tip_pushed_at: '2026-08-12T20:23:22Z'
+      tip_pushed_at: '2026-08-12T20:39:07Z'
       pr_238_ci_watching: true
       t128_6_commit: eac398d
       t128_6_commit_full: eac398d7fb5037d726b3c151a9991f6f9242913c
@@ -2850,9 +2867,157 @@ project:
       t128_6_note: admin freshness UI @eac398d; UJ-081 Vitest follow-up @7971c16; chore titles @1cadd43
       t128_6_vitest_followup_commit: 7971c16
       t128_6_vitest_followup_note: test_uj081_freshness_ui.test.tsx
-      t128_7_status: in_progress
+      t128_7_status: completed
       fdf68af_ci_status: cancelled_superseded
       t128_7_started_at: '2026-08-12T20:24:30Z'
+      m128_status: completed
+      m128_completed: '2026-08-12'
+      m128_completed_at: '2026-08-12T20:27:11Z'
+      m128_note: T128.1–T128.7 all completed; F76 freshness milestone done
+      t128_7_commit: bdaec9d
+      t128_7_completed: '2026-08-12'
+      t128_7_completed_at: '2026-08-12T20:27:11Z'
+      t128_7_description: 'Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081'
+      t128_7_spec_source: TP8, TC-264
+      t128_7_depends_on: T128.4, T128.6
+      t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
+      m129_status: in_progress
+      askquestion_next_topic: null
+      recommended_next: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
+      m129_path_confirmed: true
+      m129_path_confirmed_at: '2026-08-12T20:32:06Z'
+      m129_path_decision: S030-D34
+      s030_d34_decision: S030-D34
+      pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642681501
+      pr_238_ci_run_id: 31642681501
+      pr_238_ci_head_sha: c042f57627fb52953476b65a92be06fa0b858d56
+      pr_238_ci_status: success
+      pr_238_ci_watching: false
+      bdaec9d_ci_status: cancelled_aborted_superseded_by_bb872c0
+      bdaec9d_ci_aborted_at: '2026-08-12T20:32:06Z'
+      ci_watching: false
+      ci_status: success
+      ci_run_id: 31642681501
+      ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642681501
+      ci_head_sha: c042f57627fb52953476b65a92be06fa0b858d56
+      ci_green_at: '2026-08-12T21:33:12Z'
+      tip_ci_green: true
+      first_m129_task: T129.1
+      first_m129_task_status: completed
+      mode_boundary: m129_task_loop
+      ci_fix_decision: S030-D35
+      ci_fix_focus: dm_fe_coverage_f76_freshness_ui
+      s030_d35_decision: S030-D35
+      ci_conclusion: success
+      ci_failed_at: null
+      ci_jobs: &id001
+        python:
+          conclusion: failure
+          detail: Install gitleaks curl 503 (infra flake)
+          product_code: false
+          flake: true
+          rerunning: true
+        coverage:
+          conclusion: success
+        security:
+          conclusion: success
+        frontend:
+          conclusion: success
+        ui-e2e:
+          conclusion: success
+        packages:
+          conclusion: unknown_or_pending
+      coverage_fix_decision: S030-D36
+      s030_d36_decision: S030-D36
+      prior_ci_tip: bb872c0
+      prior_ci_status: failure
+      prior_ci_run_id: 31637893050
+      prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+      coverage_fix_commit: 2190b8e
+      s030_d37_decision: S030-D37
+      askquestion_channel: null
+      askquestion_tool_available: false
+      product_ci_status: success
+      coverage_dm_fe_lines: 100%
+      coverage_dm_fe_branches: 98.07%
+      ci_security_flake: false
+      ci_security_flake_class: BUG-2026-08-06
+      ci_security_requeued: true
+      m129_started_at: '2026-08-12T20:46:10Z'
+      t129_1_status: completed
+      t129_1_started_at: '2026-08-12T20:46:10Z'
+      t129_1_description: unit red — approve gate; kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY; no auto-promote (TC-263+)
+      s030_d37_gate: closed_by_ci_green
+      s030_d38_decision: S030-D38
+      ci_green_at: '2026-08-12T21:06:16Z'
+      coverage_fix_confirmed: true
+      awaiting_ci_green: false
+      ft_module_paths: &id002
+        finetune_pins: infra/modal/finetune_pins.py
+        finetune_pins_tests: tests/unit/modal/test_finetune_pins.py
+        finetune_app_planned: infra/modal/finetune_app.py
+        modal_app_name: vecinita-llm-finetune
+        adapters_volume: llm-finetune-adapters
+        prod_llm_app: infra/modal/llm_app.py
+        playground_app: infra/modal/llm_playground_app.py
+        adr: docs/adr/ADR-053-modal-lora-finetune.md
+        not_f77: src/finetune/ (antibody F8 — do not use)
+      t129_1_completed: '2026-08-12'
+      t129_1_completed_at: '2026-08-12T20:49:06Z'
+      t129_1_commit: 67ac92b
+      t129_1_commit_full: 67ac92b5aea4c32096a2579c772d3ce723e03628
+      t129_2_status: completed
+      t129_2_started_at: '2026-08-12T20:49:06Z'
+      t129_2_description: unit red — SFT pair builder from chunks; adapter id pin/clear rollback (TC-265)
+      s030_d39_decision: S030-D39
+      t129_2_completed: '2026-08-12'
+      t129_2_completed_at: '2026-08-12T20:55:19Z'
+      t129_2_commit: 0fff625
+      t129_2_commit_full: 0fff62560cda83f69040d9c2057d0f70439275df
+      t129_3_status: completed
+      t129_3_started_at: '2026-08-12T20:55:19Z'
+      t129_3_description: Modal finetune_app.py scaffold + volume + secrets docs (06 PEFT/TRL pins already done — unblocked)
+      t129_3_unblocked: true
+      s030_d40_decision: S030-D40
+      coding_blocked: false
+      coding_blocked_reason: null
+      t129_3_coding_paused: false
+      s030_d41_decision: S030-D41
+      ci_flake: false
+      ci_rerunning_failed_jobs: false
+      s030_d41_gate: cleared_by_ci_green
+      s030_d42_decision: S030-D42
+      t129_3_completed: '2026-08-12'
+      t129_3_completed_at: '2026-08-12T21:10:31Z'
+      t129_3_commit: a75af50
+      t129_3_sha: a75af50
+      t129_3_commit_full: a75af50006002aee31f720acc752e3fa85eb829c
+      t129_3_note: scaffold finetune_app.py APP_NAME=vecinita-llm-finetune VOLUME=llm-finetune-adapters BASE=llm-models; FINETUNE_IMAGE_PIPS;
+        health stub; secrets docs; tests/unit/modal/test_finetune_app_scaffold.py 5 passed
+      s030_d43_decision: S030-D43
+      t129_4_status: completed
+      t129_4_started_at: '2026-08-12T21:10:31Z'
+      t129_4_description: job_type=finetune_train + POST /jobs/{id}/approve (F77)
+      t129_4_completed: '2026-08-12'
+      t129_4_completed_at: '2026-08-12T21:16:39Z'
+      t129_4_commit: 4ef663b
+      t129_4_sha: 4ef663b
+      t129_4_commit_full: 4ef663b6c0d96ef9159994d0ac52f28c4acb5168
+      t129_4_note: finetune_train job_type + POST /jobs/{id}/approve (admin JWT); create skips runner until approve; stub
+        worker decide_train_start; OpenAPI + CORS H0c; test_finetune_train_approve.py green
+      s030_d44_decision: S030-D44
+      t129_5_status: in_progress
+      t129_5_started_at: '2026-08-12T21:16:39Z'
+      t129_5_description: LoRA/PEFT SFT train worker → llm-finetune-adapters volume (F77)
+      ci_gate: cleared
+      coding_blocked: false
+      coding_blocked_reason: null
+      s030_d45_decision: S030-D45
+      tip_ci_green_sha: c042f57
+      tip_ci_green_run: 31642681501
+      handoff_tip_should_be: c042f57
+      t129_4_followup_openapi: 4e8fc15
+      t129_4_followup_coverage: c042f57
     08-verify-build:
       status: completed
       session_id: S027-multilingual-embeddings
@@ -7602,8 +7767,8 @@ active_session:
   - 72
   - 219
   current_stage: 07-build
-  current_stage_note: 'Phase C 07-build; M127 done PR #238 open; T128.1–T128.4 done; T128.5 pending (hash-aware re-fetch)'
-  next_action: T128.5 — ingest/hash-aware re-fetch path for URL sources
+  current_stage_note: Phase C 07-build; M129/T129.5; tip c042f57 CI green (S030-D45)
+  next_action: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -7694,6 +7859,41 @@ active_session:
     branch shared with F75); PR #238 still open (not pushed). [Corpus: feature-list.md §F76]'
   - 'S030 T128.4 COMPLETE 2026-08-12T19:40:00Z: freshness_refresh worker + real schedule branch (F76); about to commit; advance
     to T128.5 pending (ingest/hash-aware re-fetch); 07-build remains in_progress M128. [Corpus: feature-list.md §F76]'
+  - 'S030-D34 2026-08-12T20:32:06Z: User chose continue recommended = M129 F77 after tip CI green (not interim 08). Tip bb872c0
+    supersedes bdaec9d; bdaec9d CI watch aborted/cancelled. Watching https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+    (in_progress). M129 NOT started — await CI then T129.1.'
+  - 'S030-D35 2026-08-12T20:34:58Z: Tip CI FAILED run 31637893050 @bb872c0. coverage job: DM FE lines 99.86% (need 100%),
+    branches 97.83% (need 98%). security job: flaky curl died downloading supabase CLI tarball (exit 2), not product. python/frontend/ui-e2e/packages:
+    success. Path remains fix-CI-in-place then M129 (S030-D34; AskQuestion unavailable). M129 NOT started.'
+  - 'S030-D36 2026-08-12T20:39:07Z: Coverage fix pushed @2190b8e (test: close DM FE freshness UI coverage gaps (F76)) — closes
+    bb872c0 DM FE coverage red (DocumentAdmin/CorpusList line gaps). Prior bb872c0 CI FAILED (S030-D35, run 31637893050);
+    security was flaky supabase CLI curl. Watching https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+    (in_progress). M129 NOT started until tip CI green.'
+  - 'S030-D37 2026-08-12T20:43:10Z: Tip 2190b8e product CI green — python, coverage (DM FE lines 100% / branches 98.07%),
+    frontend, ui-e2e, packages success. Only security failed: OpenGrep vendor installer curl connection died / GitHub 503
+    (infra flake, BUG-2026-08-06 class). Run 31638576143 requeued/rerunning. AskQuestion tool unavailable — parent markdown
+    fallback options 1–4. M129 NOT started.'
+  - 'S030-D38 2026-08-12T20:46:10Z: Tip 2190b8e CI GREEN run 31638576143 — all jobs success including security (rerun cleared
+    OpenGrep flake). S030-D37 gate closed by success; askQ cleared. Start M129 F77 / T129.1 in_progress. Coverage fix confirmed.'
+  - 'S030-D39 2026-08-12T20:49:06Z: T129.1 COMPLETE @67ac92b (feat: add F77 finetune approve gate and cap policy helpers (F77)).
+    Advance to T129.2 in_progress (SFT pair builder + adapter pin/clear rollback). M129 remains in_progress.'
+  - 'S030-D40 2026-08-12T20:55:19Z: T129.2 COMPLETE @0fff625 (feat: add F77 SFT pair builder and adapter pin rollback helpers
+    (F77)). Start T129.3 in_progress — finetune_app scaffold (06 pins done, unblocked). M129 remains in_progress.'
+  - 'S030-D41 2026-08-12T20:59:59Z: Tip 0fff625 CI — only python Install gitleaks curl 503 (infra flake); coverage/security/frontend/ui-e2e
+    green. Failed jobs rerunning (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640006502). T129.3
+    remains in_progress but coding paused until CI green or user waives.'
+  - 'S030-D42 2026-08-12T21:06:16Z: Tip 932c036 (fix: retry gitleaks download on GitHub Releases 503) — CI GREEN run 31640505267.
+    Cleared S030-D41 gitleaks flake gate / coding_blocked. T129.3 remains in_progress as next coding task (T129.1+T129.2 done).'
+  - 'S030-D43 2026-08-12T21:10:31Z: T129.3 COMPLETE @a75af50 — finetune_app scaffold (vecinita-llm-finetune + llm-finetune-adapters
+    + FINETUNE_IMAGE_PIPS; unit tests 5 passed). Start T129.4 in_progress — job_type=finetune_train + POST /jobs/{id}/approve.'
+  - 'S030-D44 2026-08-12T21:16:39Z: T129.4 COMPLETE @4ef663b — finetune_train + POST /jobs/{id}/approve (admin JWT); OpenAPI
+    + CORS. Start T129.5 in_progress — LoRA/PEFT SFT train worker → llm-finetune-adapters.'
+  - 'S030-D45 2026-08-12T21:25:26Z: Resume digest acknowledged — continue-with-recommended. Tip 4e8fc15 OpenAPI job_type enum
+    fix after 3d25fc1 CI failure (run 31641875827: OpenAPI enum + opengrep curl flake). Tip 4e8fc15 CI run 31642169420 — python
+    job success; full run still watching. current_task T129.5 in_progress — LoRA/PEFT SFT train worker. AskQuestion none;
+    proceeding with T129.5 build. HANDOFF tip should become 4e8fc15 (parent writes HANDOFF).'
+  - 'S030-D45 2026-08-12T21:33:12Z: Tip CI GREEN @c042f57 (run 31642681501). T129.4 follow-ups @4e8fc15 OpenAPI enum + @c042f57
+    coverage. coding_blocked=false. Continue T129.5 LoRA train worker.'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -7837,6 +8037,100 @@ active_session:
     - infra/modal/finetune_pins.py
     - docs/dependency-inventory.md
     - docs/sessions/S030-corpus-automations/reports/06-tech-tooling.md
+  - id: S030-D34
+    summary: 'Continue with recommended: start M129 F77 after tip CI green (not interim Phase C / 08-verify-build)'
+    choice: continue_recommended_m129_after_ci_green
+    recorded_at: '2026-08-12T20:32:06Z'
+    tip: bb872c0
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+  - id: S030-D35
+    summary: Tip CI red on bb872c0 — fix DM FE coverage in place, re-push, re-watch; then M129 (path unchanged)
+    choice: fix_ci_in_place_then_m129
+    recorded_at: '2026-08-12T20:34:58Z'
+    tip: bb872c0
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+    ci_run_id: 31637893050
+  - id: S030-D36
+    summary: Coverage fix @2190b8e pushed; await tip CI green then start M129 T129.1
+    choice: coverage_fix_pushed_await_ci_then_m129
+    recorded_at: '2026-08-12T20:39:07Z'
+    tip: 2190b8e
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+    ci_run_id: 31638576143
+  - id: S030-D37
+    summary: Product CI green @2190b8e; security OpenGrep flake — markdown AskQuestion gate (1 harden / 2 rerun / 3 waive+M129
+      / 4 explain); M129 not started
+    choice: pending_markdown_askquestion
+    recommended: 1
+    recorded_at: '2026-08-12T20:43:10Z'
+    tip: 2190b8e
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+    ci_run_id: 31638576143
+  - id: S030-D38
+    summary: Tip CI GREEN @2190b8e; S030-D37 closed; start M129 F77 / T129.1 in_progress
+    choice: ci_green_start_t129_1
+    recorded_at: '2026-08-12T20:46:10Z'
+    tip: 2190b8e
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+    ci_run_id: 31638576143
+    task: T129.1
+  - id: S030-D39
+    summary: T129.1 COMPLETE @67ac92b; start T129.2 in_progress
+    choice: t129_1_complete_start_t129_2
+    recorded_at: '2026-08-12T20:49:06Z'
+    tip: 67ac92b
+    task_completed: T129.1
+    task_started: T129.2
+  - id: S030-D40
+    summary: T129.2 COMPLETE @0fff625; start T129.3 in_progress (06 pins done — unblocked)
+    choice: t129_2_complete_start_t129_3
+    recorded_at: '2026-08-12T20:55:19Z'
+    tip: 0fff625
+    task_completed: T129.2
+    task_started: T129.3
+  - id: S030-D41
+    summary: Tip 0fff625 CI gitleaks curl 503 flake; rerunning; T129.3 coding gated until green/waive
+    choice: await_ci_rerun_gate_t129_3_coding
+    recorded_at: '2026-08-12T20:59:59Z'
+    tip: 0fff625
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640006502
+  - id: S030-D42
+    summary: Tip 932c036 CI GREEN; clear coding_blocked; resume T129.3 scaffold
+    choice: ci_green_resume_t129_3
+    recorded_at: '2026-08-12T21:06:16Z'
+    tip: 932c036
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640505267
+  - id: S030-D43
+    summary: T129.3 COMPLETE @a75af50; start T129.4 in_progress (finetune_train + approve API)
+    choice: t129_3_complete_start_t129_4
+    recorded_at: '2026-08-12T21:10:31Z'
+    tip: a75af50
+    task_completed: T129.3
+    task_started: T129.4
+    commit: a75af50
+    files_changed: 7
+  - id: S030-D44
+    summary: T129.4 COMPLETE @4ef663b; start T129.5 in_progress (LoRA/PEFT SFT train worker)
+    choice: t129_4_complete_start_t129_5
+    recorded_at: '2026-08-12T21:16:39Z'
+    tip: 4ef663b
+    task_completed: T129.4
+    task_started: T129.5
+    commit: 4ef663b
+    files_changed: 10
+  - id: S030-D45
+    summary: Tip CI GREEN @c042f57 (run 31642681501); T129.4 follow-ups @4e8fc15 OpenAPI + @c042f57 coverage; coding_blocked=false;
+      continue T129.5 LoRA train worker (supersedes earlier D45 resume/watching @4e8fc15)
+    recorded_at: '2026-08-12T21:33:12Z'
+    choice: tip_ci_green_continue_t129_5
+    tip: c042f57
+    prior_tip: 4e8fc15
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642681501
+    ci_run_id: 31642681501
+    ci_status: success
+    coding_blocked: false
+    current_task: T129.5
+    resume_recorded_at: '2026-08-12T21:25:26Z'
   context_briefs: []
   routing_plan:
   - stage: 00-context
@@ -8023,16 +8317,19 @@ active_session:
     mode: delta
     skip_rationale: null
     ready: true
-    current_action: implementing T128.7
-    next_action: T128.7 — API e2e + Vitest + Playwright T0-ui UJ-081
+    current_action: T129.5 in_progress — LoRA/PEFT SFT train worker → llm-finetune-adapters
+    next_action: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
     s030_d31_decision: S030-D31
     s030_d33_decision: S030-D33
-    milestone_hint: M128
-    note: IN_PROGRESS — T128.7 UJ-081 API e2e + Vitest + Playwright; tip @7971c16
+    milestone_hint: M129
+    note: 'S030-D45 2026-08-12T21:25:26Z: Resume digest acknowledged — continue-with-recommended. Tip 4e8fc15 OpenAPI job_type
+      enum fix after 3d25fc1 CI failure (run 31641875827: OpenAPI enum + opengrep curl flake). Tip 4e8fc15 CI run 31642169420
+      — python job success; full run still watching. current_task T129.5 in_progress — LoRA/PEFT SFT train worker. AskQuestion
+      none; proceeding with T129.5 build. HANDOFF tip should become 4e8fc15 (parent writes HANDOFF).'
     started_at: '2026-08-07'
     started_at_iso: '2026-08-07T14:53:54Z'
-    active_milestone: M128
-    current_task: T128.7
+    active_milestone: M129
+    current_task: T129.5
     current_task_status: in_progress
     t127_5_status: completed
     t127_5_commit: 5d31dcf
@@ -8053,13 +8350,13 @@ active_session:
     m127_pr_number: 238
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
-    tip: 7971c16
-    tip_sha: 7971c16
-    tip_full: 7971c162354445d05e1989886d99a6ce1000eac5
-    tip_prev: eac398d
+    tip: c042f57
+    tip_sha: c042f57
+    tip_full: c042f57627fb52953476b65a92be06fa0b858d56
+    tip_prev: 4e8fc15
     build_plan_card: waived
     build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T20:24:30Z'
+    updated_at: '2026-08-12T21:25:26Z'
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
@@ -8089,10 +8386,10 @@ active_session:
     t128_4_spec_source: TP2, ADR-052
     t128_4_depends_on: T128.3, T127.7
     substeps:
-      current_task: T128.7
-      active_milestone: M128
+      current_task: T129.5
+      active_milestone: M129
       current_task_status: in_progress
-      mode: task_loop
+      mode: m129_task_loop
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
@@ -8103,7 +8400,7 @@ active_session:
       t128_4_commit: ac8fca7
       t128_4_completed_at: '2026-08-12T19:40:00Z'
       t128_5_status: completed
-      tip_sha: 7971c16
+      tip_sha: 4e8fc15
       m127_status: completed
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
@@ -8116,14 +8413,37 @@ active_session:
       t128_6_commit: eac398d
       t128_6_completed_at: '2026-08-12T20:23:22Z'
       t128_6_vitest_followup_commit: 7971c16
-      t128_7_status: in_progress
+      t128_7_status: completed
       t128_7_started_at: '2026-08-12T20:24:30Z'
+      m128_status: completed
+      t128_7_commit: bdaec9d
+      t128_7_completed_at: '2026-08-12T20:27:11Z'
+      m129_status: in_progress
+      t129_3_status: completed
+      t129_3_sha: a75af50
+      t129_4_status: completed
+      t129_4_sha: 4ef663b
+      t129_5_status: in_progress
+      t129_5_started_at: '2026-08-12T21:16:39Z'
+      tip: 4e8fc15
+      tip_full: 4e8fc15a6a9b00f5d57267f758a099cfeb5ff2d7
+      tip_prev: 3d25fc1
+      coding_blocked: false
+      ci_gate: cleared
+      ci_status: in_progress
+      pr_238_ci_watching: true
+      pr_238_ci_status: in_progress
+      pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
+      pr_238_ci_note: tip c042f57 run 31642681501 success (S030-D45); prior 4e8fc15/3d25fc1 superseded
+      prior_tip_3d25fc1_ci: failure
+      prior_tip_3d25fc1_run: '31641875827'
+      s030_d45_decision: S030-D45
     askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
-    phase_note: 07-build M128 F76; implementing T128.7; tip @7971c16
-    handoff_next: T128.7 in_progress — UJ-081 e2e suite
-    execution_plan_active_task: T128.7 in_progress
+    askquestion_cleared: 'S030-D45: none open — proceeding T129.5 build'
+    phase_note: 07-build M128 F76 COMPLETE (T128.1–7); M129/M130 remain before full Phase C gate; ask parent before starting
+      M129
+    handoff_next: T129.5
+    execution_plan_active_task: M128 complete — next confirm (M129 or Phase C/08)
     t128_5_started_at: '2026-08-12T20:04:26Z'
     t128_4_followup_commit: 2bf2dca
     t128_4_followup_note: coverage + typecheck follow-up after T128.4 @2bf2dca
@@ -8138,9 +8458,9 @@ active_session:
     t128_6_started_at: '2026-08-12T20:18:53Z'
     tip_pushed: true
     tip_pushed_to: origin/evolve/EV-027-corpus-automations
-    tip_pushed_at: '2026-08-12T20:23:22Z'
+    tip_pushed_at: '2026-08-12T20:27:11Z'
     pr_238_ci_watching: true
-    pr_238_ci_note: 'fdf68af CI cancelled (superseded); watching tip 7971c16 on PR #238'
+    pr_238_ci_note: tip c042f57 run 31642681501 success (S030-D45); prior 4e8fc15/3d25fc1 superseded
     t128_6_commit: eac398d
     t128_6_commit_full: eac398d7fb5037d726b3c151a9991f6f9242913c
     t128_6_completed: '2026-08-12'
@@ -8151,9 +8471,34 @@ active_session:
     t128_6_note: admin freshness UI @eac398d; UJ-081 Vitest follow-up @7971c16; chore titles @1cadd43
     t128_6_vitest_followup_commit: 7971c16
     t128_6_vitest_followup_note: test_uj081_freshness_ui.test.tsx
-    t128_7_status: in_progress
+    t128_7_status: completed
     fdf68af_ci_status: cancelled_superseded
     t128_7_started_at: '2026-08-12T20:24:30Z'
+    m128_status: completed
+    m128_completed: '2026-08-12'
+    m128_completed_at: '2026-08-12T20:27:11Z'
+    m128_note: T128.1–T128.7 all completed; F76 freshness milestone done
+    t128_7_commit: bdaec9d
+    t128_7_completed: '2026-08-12'
+    t128_7_completed_at: '2026-08-12T20:27:11Z'
+    t128_7_description: 'Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081'
+    t128_7_spec_source: TP8, TC-264
+    t128_7_depends_on: T128.4, T128.6
+    t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
+    m129_status: in_progress
+    askquestion_next_topic: Phase C / 08-verify-build vs continue M129 F77
+    recommended_next: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
+    ci_gate: cleared
+    ci_status: in_progress
+    askquestion_pending_topic: null
+    pr_238_ci_status: in_progress
+    pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
+    prior_tip_ci_failed: 3d25fc1
+    prior_tip_ci_run: '31641875827'
+    prior_tip_ci_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31641875827
+    prior_tip_ci_note: OpenAPI job_type enum + opengrep curl flake
+    handoff_tip_should_be: 4e8fc15
+    s030_d45_decision: S030-D45
   - stage: 08-verify-build
     required: true
     status: pending
@@ -8315,6 +8660,10 @@ active_session:
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
   askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
+  tip: 4e8fc15
+  tip_sha: 4e8fc15
+  tip_full: 4e8fc15a6a9b00f5d57267f758a099cfeb5ff2d7
+  tip_prev: 3d25fc1
 sessions:
 - id: S029-security-install-tools-flake
   type: hotfix
@@ -21579,8 +21928,8 @@ stages:
     - 73
     - 72
     - 219
-    current_action: implementing T128.7
-    next_action: T128.7 — API e2e + Vitest + Playwright T0-ui UJ-081
+    current_action: T129.5 in_progress — LoRA/PEFT SFT train worker → llm-finetune-adapters
+    next_action: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
     askquestion_pending: false
     askquestion_pending_topic: null
     gate_a_to_b: passed
@@ -21589,15 +21938,15 @@ stages:
     gate_b_to_c: passed
     s030_d32_decision: S030-D32
     s030_d33_decision: S030-D33
-    milestone_hint: M128
+    milestone_hint: M129
     phase: Phase 30 M127–M130
     phase_30_milestones:
     - M127
     - M128
     - M129
     - M130
-    note: IN_PROGRESS — T128.7 UJ-081 API e2e + Vitest + Playwright; tip @7971c16
-    updated_at: '2026-08-12T20:24:30Z'
+    note: 'S030-D45 2026-08-12T21:33:12Z: Tip CI GREEN @c042f57 (run 31642681501). T129.4 follow-ups @4e8fc15 + @c042f57. Continue T129.5.'
+    updated_at: '2026-08-12T21:33:12Z'
     phase_ab_docs_committed: true
     phase_ab_docs_commit: 3cadd8b
     t127_5_status: completed
@@ -21617,12 +21966,13 @@ stages:
     m127_status: completed
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    tip: 7971c16
-    tip_sha: 7971c16
-    tip_full: 7971c162354445d05e1989886d99a6ce1000eac5
-    tip_prev: eac398d
-    active_milestone: M128
-    current_task: T128.7
+    tip: c042f57
+    tip_sha: c042f57
+    tip_full: c042f57627fb52953476b65a92be06fa0b858d56
+    tip_prev: 4e8fc15
+    active_milestone: M129
+    current_milestone: M129
+    current_task: T129.5
     current_task_status: in_progress
     t128_2_status: completed
     t128_2_commit: 7b1aa87
@@ -22477,10 +22827,10 @@ stages:
     build_plan_card_waiver: S030-D31
     build_plan_card_sot: tech-plan-delta + Phase 30
     substeps:
-      current_task: T128.7
-      active_milestone: M128
+      current_task: T129.5
+      active_milestone: M129
       current_task_status: in_progress
-      mode: task_loop
+      mode: m129_task_loop
       build_plan_card: waived_S030-D31
       t127_5_status: completed
       t127_6_status: completed
@@ -22498,7 +22848,7 @@ stages:
       m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
       m127_pr_number: 238
       phase_ab_docs_committed: true
-      tip_sha: 7971c16
+      tip_sha: 4e8fc15
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_2_status: completed
@@ -22517,14 +22867,29 @@ stages:
       tip_pushed: true
       t128_6_commit: eac398d
       t128_6_vitest_followup_commit: 7971c16
-      t128_7_status: in_progress
+      t128_7_status: completed
       t128_7_started_at: '2026-08-12T20:24:30Z'
+      m128_status: completed
+      t128_7_commit: bdaec9d
+      m129_status: in_progress
+      t129_3_status: completed
+      t129_4_status: completed
+      t129_4_sha: 4ef663b
+      t129_5_status: in_progress
+      tip: 4e8fc15
+      coding_blocked: false
+      ci_gate: cleared
+      ci_status: in_progress
+      pr_238_ci_watching: true
+      pr_238_ci_status: in_progress
+      pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
+      s030_d45_decision: S030-D45
     t128_1_status: completed
     t128_1_commit: 92912be
     t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
     ci_fix_commit: 5fc2d21
     ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-    askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
+    askquestion_cleared: S030-D34 continue recommended M129 after CI green
     t128_2_completed_at: '2026-08-12T19:11:44Z'
     t128_2_description: 'Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`)'
     t128_2_spec_source: TP7, api-contract
@@ -22542,8 +22907,8 @@ stages:
     t128_4_depends_on: T128.3, T127.7
     m127_pr_status: open
     m127_pr_merge: deferred_user_option_1
-    pr_238_ci_status: green
-    pr_238_ci_note: 'fdf68af CI cancelled (superseded); watching tip 7971c16 on PR #238'
+    pr_238_ci_status: in_progress
+    pr_238_ci_note: tip 932c036 run 31640505267 success (gitleaks retry)
     t128_5_started_at: '2026-08-12T20:04:26Z'
     t128_4_followup_commit: 2bf2dca
     t128_5_commit: fdf68af
@@ -22554,13 +22919,14 @@ stages:
     t128_5_depends_on: T128.4
     t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
     t128_6_status: completed
-    execution_plan_active_task: T128.7 in_progress
-    handoff_next: T128.7 in_progress — UJ-081 e2e suite
-    phase_note: 07-build M128 F76; implementing T128.7; tip @7971c16
+    execution_plan_active_task: M128 complete — next confirm (M129 or Phase C/08)
+    handoff_next: '**T129.3** — scaffold `infra/modal/finetune_app.py` + volume `llm-finetune-adapters` + secrets docs; wire
+      `FINETUNE_IMAGE_PIPS`. Tip 932c036 CI green.'
+    phase_note: M129/T129.3 coding resumed; tip 932c036 CI green
     t128_6_started_at: '2026-08-12T20:18:53Z'
     tip_pushed: true
     tip_pushed_to: origin/evolve/EV-027-corpus-automations
-    tip_pushed_at: '2026-08-12T20:23:22Z'
+    tip_pushed_at: '2026-08-12T20:39:07Z'
     pr_238_ci_watching: true
     t128_6_commit: eac398d
     t128_6_commit_full: eac398d7fb5037d726b3c151a9991f6f9242913c
@@ -22572,9 +22938,102 @@ stages:
     t128_6_note: admin freshness UI @eac398d; UJ-081 Vitest follow-up @7971c16; chore titles @1cadd43
     t128_6_vitest_followup_commit: 7971c16
     t128_6_vitest_followup_note: test_uj081_freshness_ui.test.tsx
-    t128_7_status: in_progress
+    t128_7_status: completed
     fdf68af_ci_status: cancelled_superseded
     t128_7_started_at: '2026-08-12T20:24:30Z'
+    m128_status: completed
+    m128_completed: '2026-08-12'
+    m128_completed_at: '2026-08-12T20:27:11Z'
+    m128_note: T128.1–T128.7 all completed; F76 freshness milestone done
+    t128_7_commit: bdaec9d
+    t128_7_completed: '2026-08-12'
+    t128_7_completed_at: '2026-08-12T20:27:11Z'
+    t128_7_description: 'Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081'
+    t128_7_spec_source: TP8, TC-264
+    t128_7_depends_on: T128.4, T128.6
+    t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
+    m129_status: in_progress
+    askquestion_next_topic: null
+    recommended_next: 'Continue T129.3: scaffold infra/modal/finetune_app.py, vecinita-llm-finetune + llm-finetune-adapters,
+      secrets docs; wire FINETUNE_IMAGE_PIPS from finetune_pins.py'
+    m129_path_confirmed: true
+    m129_path_confirmed_at: '2026-08-12T20:32:06Z'
+    m129_path_decision: S030-D34
+    s030_d34_decision: S030-D34
+    pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
+    pr_238_ci_run_id: 31640505267
+    pr_238_ci_head_sha: 2190b8e8bcddef5be146b2b0f4c6a0a957a5e1f9
+    bdaec9d_ci_status: cancelled_aborted_superseded_by_bb872c0
+    bdaec9d_ci_aborted_at: '2026-08-12T20:32:06Z'
+    ci_watching: false
+    ci_status: in_progress
+    ci_run_id: 31640505267
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640505267
+    ci_head_sha: 932c03617fc37eddbdd245cded16e68da99674c1
+    first_m129_task: T129.1
+    first_m129_task_status: in_progress
+    mode_boundary: m129_task_loop
+    ci_fix_decision: S030-D35
+    ci_fix_focus: dm_fe_coverage_f76_freshness_ui
+    s030_d35_decision: S030-D35
+    ci_conclusion: success
+    ci_failed_at: null
+    ci_jobs: *id001
+    coverage_fix_decision: S030-D36
+    s030_d36_decision: S030-D36
+    prior_ci_tip: bb872c0
+    prior_ci_status: failure
+    prior_ci_run_id: 31637893050
+    prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+    coverage_fix_commit: 2190b8e
+    s030_d37_decision: S030-D37
+    askquestion_channel: null
+    askquestion_tool_available: false
+    product_ci_status: success
+    coverage_dm_fe_lines: 100%
+    coverage_dm_fe_branches: 98.07%
+    ci_security_flake: false
+    ci_security_flake_class: BUG-2026-08-06
+    ci_security_requeued: true
+    m129_started_at: '2026-08-12T20:46:10Z'
+    t129_1_status: completed
+    t129_1_started_at: '2026-08-12T20:46:10Z'
+    t129_1_description: unit red — approve gate; kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY; no auto-promote (TC-263+)
+    s030_d37_gate: closed_by_ci_green
+    s030_d38_decision: S030-D38
+    ci_green_at: '2026-08-12T21:06:16Z'
+    coverage_fix_confirmed: true
+    awaiting_ci_green: false
+    ft_module_paths: *id002
+    t129_1_completed: '2026-08-12'
+    t129_1_completed_at: '2026-08-12T20:49:06Z'
+    t129_1_commit: 67ac92b
+    t129_1_commit_full: 67ac92b5aea4c32096a2579c772d3ce723e03628
+    t129_2_status: completed
+    t129_2_started_at: '2026-08-12T20:49:06Z'
+    t129_2_description: unit red — SFT pair builder from chunks; adapter id pin/clear rollback (TC-265)
+    s030_d39_decision: S030-D39
+    t129_2_completed: '2026-08-12'
+    t129_2_completed_at: '2026-08-12T20:55:19Z'
+    t129_2_commit: 0fff625
+    t129_2_commit_full: 0fff62560cda83f69040d9c2057d0f70439275df
+    t129_3_status: in_progress
+    t129_3_started_at: '2026-08-12T20:55:19Z'
+    t129_3_description: Modal finetune_app.py scaffold + volume + secrets docs (06 PEFT/TRL pins already done — unblocked)
+    t129_3_unblocked: true
+    s030_d40_decision: S030-D40
+    coding_blocked: false
+    coding_blocked_reason: null
+    t129_3_coding_paused: false
+    s030_d41_decision: S030-D41
+    ci_flake: false
+    ci_rerunning_failed_jobs: true
+    s030_d41_gate: cleared_by_ci_green
+    s030_d42_decision: S030-D42
+    t129_5_status: in_progress
+    ci_gate: cleared
+    s030_d45_decision: S030-D45
+    handoff_tip_should_be: 4e8fc15
   08-verify-build:
     status: completed
     session_id: S027-multilingual-embeddings
@@ -27701,19 +28160,19 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 07-build
-  current_action: implementing T128.7
-  next_action: T128.7 — API e2e + Vitest + Playwright T0-ui UJ-081
-  active_milestone: M128
-  current_task: T128.5
+  current_action: T129.5 LoRA train worker
+  next_action: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
+  active_milestone: M129
+  current_task: T129.5
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: ac8fca7
-  tip_sha: ac8fca7
-  tip_full: 7b1aa87adf7c9d29718695e4e3afee4116af0a18
-  tip_prev: 87cf4d2
-  current_stage_note: 07-build in_progress — M128; T128.4 COMPLETE (freshness_refresh worker + schedule); current_task=T128.5
-    pending (hash-aware re-fetch)
-  notes: T128.4 done; continue T128.5 hash-aware re-fetch
+  tip: c042f57
+  tip_sha: c042f57
+  tip_full: c042f57627fb52953476b65a92be06fa0b858d56
+  tip_prev: 4e8fc15
+  current_stage_note: Phase C 07-build; M129/T129.5; tip c042f57 CI green (S030-D45)
+  notes: 'S030-D45 2026-08-12T21:33:12Z: Tip CI GREEN @c042f57 (run 31642681501). T129.4 follow-ups @4e8fc15 OpenAPI enum +
+    @c042f57 coverage. coding_blocked=false. Next: T129.5 LoRA train worker.'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -27778,6 +28237,27 @@ evolve_cycles:
   - 'S030 T128.2 COMPLETE @7b1aa87: Alembic freshness fields; T128.3 in_progress; PR #238 open (not pushed)'
   - 'S030 T128.3 COMPLETE @e86290e: write-API freshness PATCH/list stale + Refresh now; T128.4 in_progress; PR #238 open (not
     pushed)'
+  - 'S030-D34 2026-08-12T20:32:06Z: User continue recommended = start M129 F77 after tip CI green (not interim 08); tip bb872c0;
+    CI watching https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050'
+  - 'S030-D35 2026-08-12T20:34:58Z: Tip CI FAILED @bb872c0 run 31637893050; fix DM FE coverage in place then M129 (path unchanged
+    from S030-D34)'
+  - 'S030-D36 2026-08-12T20:39:07Z: Coverage fix @2190b8e pushed; await CI green then M129 (prior bb872c0 CI failed S030-D35)'
+  - 'S030-D37 2026-08-12T20:43:10Z: Product CI green @2190b8e; security OpenGrep flake; markdown AskQuestion 1–4 before M129
+    (tool unavailable)'
+  - 'S030-D38 2026-08-12T20:46:10Z: Tip CI GREEN @2190b8e run 31638576143; S030-D37 closed; start M129/T129.1 in_progress'
+  - 'S030-D39 2026-08-12T20:49:06Z: T129.1 COMPLETE @67ac92b; start T129.2 in_progress'
+  - 'S030-D40 2026-08-12T20:55:19Z: T129.2 COMPLETE @0fff625; start T129.3 in_progress (06 pins done — unblocked)'
+  - 'S030-D41 2026-08-12T20:59:59Z: Tip 0fff625 CI gitleaks curl 503 flake; rerunning; T129.3 coding gated until green/waive'
+  - 'S030-D42 2026-08-12T21:06:16Z: Tip 932c036 CI GREEN; clear coding_blocked; resume T129.3 finetune_app scaffold'
+  - 'S030-D43 2026-08-12T21:10:31Z: T129.3 COMPLETE @a75af50; start T129.4 in_progress (finetune_train + approve)'
+  - 'S030-D44 2026-08-12T21:16:39Z: T129.4 COMPLETE @4ef663b; start T129.5 in_progress (LoRA/PEFT SFT train worker)'
+  - id: S030-D45
+    summary: Tip CI GREEN @c042f57 (run 31642681501); continue T129.5 (supersedes resume/watching @4e8fc15)
+    recorded_at: '2026-08-12T21:33:12Z'
+    tip: c042f57
+    ci_status: success
+    ci_run_id: 31642681501
+  - 'S030-D45 2026-08-12T21:33:12Z: Tip CI GREEN @c042f57 (run 31642681501); continue T129.5'
   stages:
     00-context:
       status: completed
@@ -27965,20 +28445,24 @@ evolve_cycles:
       - F75
       - F76
       - F77
-      current_action: implementing T128.7
-      next_action: T128.7 — API e2e + Vitest + Playwright T0-ui UJ-081
+      current_action: T129.5 in_progress — LoRA/PEFT SFT train worker → llm-finetune-adapters
+      next_action: 'Continue T129.5: LoRA/PEFT SFT train worker writing adapters to llm-finetune-adapters (F77)'
       askquestion_pending: false
       phase_b: passed
       gate_b_to_c: passed
       s030_d32_decision: S030-D32
       s030_d33_decision: S030-D33
-      milestone_hint: M128
-      updated_at: '2026-08-12T20:24:30Z'
-      note: IN_PROGRESS — T128.7 UJ-081 API e2e + Vitest + Playwright; tip @7971c16
+      milestone_hint: M129
+      updated_at: '2026-08-12T21:25:26Z'
+      note: 'S030-D45 2026-08-12T21:25:26Z: Resume digest acknowledged — continue-with-recommended. Tip 4e8fc15 OpenAPI job_type
+        enum fix after 3d25fc1 CI failure (run 31641875827: OpenAPI enum + opengrep curl flake). Tip 4e8fc15 CI run 31642169420
+        — python job success; full run still watching. current_task T129.5 in_progress — LoRA/PEFT SFT train worker. AskQuestion
+        none; proceeding with T129.5 build. HANDOFF tip should become 4e8fc15 (parent writes HANDOFF).'
       started_at: '2026-08-07'
       started_at_iso: '2026-08-07T14:53:54Z'
-      active_milestone: M128
-      current_task: T128.7
+      active_milestone: M129
+      current_milestone: M129
+      current_task: T129.5
       t127_5_status: completed
       t127_5_commit: 5d31dcf
       t127_6_status: completed
@@ -27998,20 +28482,33 @@ evolve_cycles:
       m127_pr_number: 238
       phase_ab_docs_committed: true
       phase_ab_docs_commit: 3cadd8b
-      tip: 7971c16
-      tip_sha: 7971c16
-      tip_full: 7971c162354445d05e1989886d99a6ce1000eac5
-      tip_prev: eac398d
+      tip: c042f57
+      tip_sha: c042f57
+      tip_full: c042f57627fb52953476b65a92be06fa0b858d56
+      tip_prev: 4e8fc15
       s030_d31_decision: S030-D31
+      s030_d43_decision: S030-D43
+      s030_d44_decision: S030-D44
+      t129_3_status: completed
+      t129_3_sha: a75af50
+      t129_4_status: completed
+      t129_4_sha: 4ef663b
+      t129_5_status: in_progress
+      m129_status: in_progress
       build_plan_card: waived
       build_plan_card_waiver: S030-D31
       build_plan_card_sot: tech-plan-delta + Phase 30
       substeps:
-        current_task: T128.7
-        active_milestone: M128
+        current_task: T129.5
+        active_milestone: M129
         current_task_status: in_progress
-        mode: task_loop
+        mode: m129_task_loop
         build_plan_card: waived_S030-D31
+        t129_3_status: completed
+        t129_3_sha: a75af50
+        t129_4_status: completed
+        t129_4_sha: 4ef663b
+        t129_5_status: in_progress
         t127_5_status: completed
         t127_6_status: completed
         t127_6_fix_commit: 081ecf2
@@ -28026,7 +28523,7 @@ evolve_cycles:
         m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
         m127_pr_number: 238
         phase_ab_docs_committed: true
-        tip_sha: 7971c16
+        tip_sha: 4e8fc15
         t128_1_status: completed
         t128_1_commit: 92912be
         t128_2_status: completed
@@ -28046,14 +28543,152 @@ evolve_cycles:
         t128_6_commit: eac398d
         t128_6_completed_at: '2026-08-12T20:23:22Z'
         t128_6_vitest_followup_commit: 7971c16
-        t128_7_status: in_progress
+        t128_7_status: completed
         t128_7_started_at: '2026-08-12T20:24:30Z'
+        m128_status: completed
+        t128_7_commit: bdaec9d
+        m129_status: in_progress
+        tip: 4e8fc15
+        tip_full: 4e8fc15a6a9b00f5d57267f758a099cfeb5ff2d7
+        tip_prev: 3d25fc1
+        tip_pushed_to: origin/evolve/EV-027-corpus-automations
+        pr_238_ci_watching: true
+        pr_238_ci_status: in_progress
+        pr_238_ci_note: tip c042f57 run 31642681501 success (S030-D45); prior 4e8fc15/3d25fc1 superseded
+        pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
+        pr_238_ci_run_id: 31640505267
+        pr_238_ci_head_sha: 932c03617fc37eddbdd245cded16e68da99674c1
+        bdaec9d_ci_status: cancelled_aborted_superseded_by_bb872c0
+        bdaec9d_ci_aborted_at: '2026-08-12T20:32:06Z'
+        m129_path_confirmed: true
+        m129_path_confirmed_at: '2026-08-12T20:32:06Z'
+        m129_path_decision: S030-D34
+        ci_watching: false
+        ci_status: in_progress
+        ci_run_id: 31640505267
+        ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640505267
+        ci_head_sha: 932c03617fc37eddbdd245cded16e68da99674c1
+        first_m129_task: T129.1
+        first_m129_task_status: completed
+        ci_conclusion: success
+        ci_failed_at: null
+        ci_fix_decision: S030-D35
+        ci_fix_focus: dm_fe_coverage_f76_freshness_ui
+        handoff_next: '**T129.3** — scaffold `infra/modal/finetune_app.py` + volume `llm-finetune-adapters` + secrets docs;
+          wire `FINETUNE_IMAGE_PIPS`. Tip 932c036 CI green.'
+        recommended_next: 'Continue T129.3: scaffold infra/modal/finetune_app.py, vecinita-llm-finetune + llm-finetune-adapters,
+          secrets docs; wire FINETUNE_IMAGE_PIPS from finetune_pins.py'
+        s030_d35_decision: S030-D35
+        phase_note: M129/T129.3 coding resumed; tip 932c036 CI green
+        note: 'S030-D42 2026-08-12T21:06:16Z: Tip 932c036 (fix: retry gitleaks download on GitHub Releases 503) — CI GREEN
+          run 31640505267. Cleared S030-D41 gitleaks flake gate / coding_blocked. T129.3 remains in_progress as next coding
+          task (T129.1+T129.2 done).'
+        updated_at: '2026-08-12T21:06:16Z'
+        tip_pushed_at: '2026-08-12T20:39:07Z'
+        coverage_fix_decision: S030-D36
+        prior_ci_tip: 0fff625
+        prior_ci_status: failure
+        prior_ci_run_id: 31640006502
+        prior_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+        prior_ci_note: S030-D41 gitleaks curl 503; fixed by retry in ci.yml @932c036
+        coverage_fix_commit: 2190b8e
+        coverage_fix_note: UJ-081 freshness UI tests close DocumentAdmin/CorpusList line gaps
+        s030_d36_decision: S030-D36
+        ci_jobs_prior_bb872c0: &id003
+          coverage:
+            conclusion: failure
+            detail: DM FE lines 99.86% (need 100%), branches 97.83% (need 98%)
+            likely_cause: F76 freshness UI coverage gap
+          security:
+            conclusion: failure
+            detail: flaky — curl died downloading supabase CLI tarball (exit 2)
+            product_code: false
+          python:
+            conclusion: success
+          frontend:
+            conclusion: success
+          ui-e2e:
+            conclusion: success
+          packages:
+            conclusion: success
+        product_ci_status: success
+        product_ci_jobs:
+        - python
+        - coverage
+        - frontend
+        - ui-e2e
+        - packages
+        coverage_dm_fe_lines: 100%
+        coverage_dm_fe_branches: 98.07%
+        ci_security_flake: false
+        ci_security_flake_class: BUG-2026-08-06
+        ci_security_requeued: true
+        askquestion_pending: false
+        askquestion_pending_topic: null
+        askquestion_channel: null
+        askquestion_recommended_option: 1
+        s030_d37_decision: S030-D37
+        current_task_description: Modal finetune_app.py scaffold + volume + secrets docs (06 pins done; CI gate cleared)
+        m129_started_at: '2026-08-12T20:46:10Z'
+        t129_1_status: completed
+        t129_1_started_at: '2026-08-12T20:46:10Z'
+        t129_1_description: unit red — approve gate; kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY; no auto-promote (TC-263+)
+        t129_1_spec_source: AC-FT7, TP5, RD-338
+        t129_1_depends_on: T128.7
+        ci_green_at: '2026-08-12T21:06:16Z'
+        ci_security_flake_cleared_at: '2026-08-12T20:46:10Z'
+        ci_security_cleared_by: rerun
+        coverage_fix_confirmed: true
+        s030_d37_gate: closed_by_ci_green
+        s030_d38_decision: S030-D38
+        awaiting_ci_green: false
+        ft_module_paths: *id002
+        t129_1_completed: '2026-08-12'
+        t129_1_completed_at: '2026-08-12T20:49:06Z'
+        t129_1_commit: 67ac92b
+        t129_1_commit_full: 67ac92b5aea4c32096a2579c772d3ce723e03628
+        t129_1_note: approve gate + kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY + no auto-promote helpers @67ac92b
+        t129_2_status: completed
+        t129_2_started_at: '2026-08-12T20:49:06Z'
+        t129_2_description: unit red — SFT pair builder from chunks; adapter id pin/clear rollback (TC-265)
+        t129_2_spec_source: RD-340, AC-FT9
+        t129_2_depends_on: T129.1
+        s030_d39_decision: S030-D39
+        t129_2_completed: '2026-08-12'
+        t129_2_completed_at: '2026-08-12T20:55:19Z'
+        t129_2_commit: 0fff625
+        t129_2_commit_full: 0fff62560cda83f69040d9c2057d0f70439275df
+        t129_2_note: SFT pair builder + adapter pin/clear rollback helpers @{TIP}
+        t129_3_started_at: '2026-08-12T20:55:19Z'
+        t129_3_description: Modal finetune_app.py scaffold + volume + secrets docs (06 PEFT/TRL pins already done — unblocked)
+        t129_3_spec_source: TP4, ADR-053, S030-D31 M3
+        t129_3_depends_on: T129.1
+        t129_3_data_deps: PEFT/TRL pins (06) — satisfied S030-D33
+        t129_3_unblocked: true
+        t129_3_unblocked_note: 06-tech-tooling / finetune_pins.py complete
+        s030_d40_decision: S030-D40
+        coding_blocked: false
+        coding_blocked_reason: null
+        t129_3_coding_paused: false
+        ci_flake: false
+        ci_flake_job: python_install_gitleaks
+        ci_flake_detail: curl 503 downloading gitleaks
+        ci_flake_class: infra_curl_503
+        ci_rerunning_failed_jobs: false
+        s030_d41_decision: S030-D41
+        s030_d41_gate: cleared_by_ci_green
+        s030_d42_decision: S030-D42
+        ci_gate: cleared
+        prior_tip_3d25fc1_ci: failure
+        prior_tip_3d25fc1_run: '31641875827'
+        prior_tip_3d25fc1_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31641875827
+        s030_d45_decision: S030-D45
       t128_1_status: completed
       t128_1_commit: 92912be
       t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
       ci_fix_commit: 5fc2d21
       ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-      current_task_status: in_progress
+      current_task_status: idle_awaiting_confirm
       askquestion_pending_topic: null
       askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
       t128_2_status: completed
@@ -28079,8 +28714,8 @@ evolve_cycles:
       t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
       t128_4_spec_source: TP2, ADR-052
       t128_4_depends_on: T128.3, T127.7
-      pr_238_ci_status: green
-      pr_238_ci_note: 'fdf68af CI cancelled (superseded); watching tip 7971c16 on PR #238'
+      pr_238_ci_status: in_progress
+      pr_238_ci_note: 'watching tip bdaec9d on PR #238 (7971c16 watch superseded)'
       current_stage: 07-build
       t128_5_started_at: '2026-08-12T20:04:26Z'
       t128_4_followup_commit: 2bf2dca
@@ -28092,13 +28727,14 @@ evolve_cycles:
       t128_5_depends_on: T128.4
       t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
       t128_6_status: completed
-      execution_plan_active_task: T128.7 in_progress
-      handoff_next: T128.7 in_progress — UJ-081 e2e suite
-      phase_note: 07-build M128 F76; implementing T128.7; tip @7971c16
+      execution_plan_active_task: M128 complete — next confirm (M129 or Phase C/08)
+      handoff_next: M128 complete; confirm M129 F77 vs Phase C / 08-verify-build
+      phase_note: 07-build M128 F76 COMPLETE (T128.1–7); M129/M130 remain before full Phase C gate; ask parent before starting
+        M129
       t128_6_started_at: '2026-08-12T20:18:53Z'
       tip_pushed: true
       tip_pushed_to: origin/evolve/EV-027-corpus-automations
-      tip_pushed_at: '2026-08-12T20:23:22Z'
+      tip_pushed_at: '2026-08-12T20:27:11Z'
       pr_238_ci_watching: true
       t128_6_commit: eac398d
       t128_6_commit_full: eac398d7fb5037d726b3c151a9991f6f9242913c
@@ -28110,9 +28746,25 @@ evolve_cycles:
       t128_6_note: admin freshness UI @eac398d; UJ-081 Vitest follow-up @7971c16; chore titles @1cadd43
       t128_6_vitest_followup_commit: 7971c16
       t128_6_vitest_followup_note: test_uj081_freshness_ui.test.tsx
-      t128_7_status: in_progress
+      t128_7_status: completed
       fdf68af_ci_status: cancelled_superseded
       t128_7_started_at: '2026-08-12T20:24:30Z'
+      m128_status: completed
+      m128_completed: '2026-08-12'
+      m128_completed_at: '2026-08-12T20:27:11Z'
+      m128_note: T128.1–T128.7 all completed; F76 freshness milestone done
+      t128_7_commit: bdaec9d
+      t128_7_completed: '2026-08-12'
+      t128_7_completed_at: '2026-08-12T20:27:11Z'
+      t128_7_description: 'Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081'
+      t128_7_spec_source: TP8, TC-264
+      t128_7_depends_on: T128.4, T128.6
+      t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
+      askquestion_next_topic: Phase C / 08-verify-build vs continue M129 F77
+      recommended_next: Continue 07-build M129 F77 per Phase 30 plan after parent confirm; Gate C→D / 08-verify-build after
+        M129–M130 (or interim verify if parent waives)
+      pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
+      s030_d45_decision: S030-D45
   artifacts:
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
@@ -28213,10 +28865,29 @@ evolve_cycles:
   phase_note: Phase B tech plan locked (S030-D29); 05-verify-tech in_progress (S030-D30); Gate B→C / phase_b still in_progress
     until 05 passes + user confirms
   s030_d30_decision: S030-D30
-  updated_at: '2026-08-12T19:40:00Z'
-  current_task_status: pending
-  askquestion_cleared: 'user option 1 continue T128.2; leave PR #238 open (no merge)'
-  next_child_stage: 07-build — Phase 30 M128 (F76) T128.3
+  updated_at: '2026-08-12T21:25:26Z'
+  current_task_status: in_progress
+  askquestion_cleared: 'S030-D45: AskQuestion none; proceeding T129.5 build'
+  next_child_stage: 07-build — M129 F77 T129.5 in_progress
+  s030_d34_decision: S030-D34
+  s030_d35_decision: S030-D35
+  s030_d36_decision: S030-D36
+  askquestion_channel: null
+  askquestion_tool_available: null
+  s030_d37_decision: S030-D37
+  s030_d38_decision: S030-D38
+  ft_module_paths: *id002
+  s030_d39_decision: S030-D39
+  s030_d40_decision: S030-D40
+  s030_d41_decision: S030-D41
+  s030_d42_decision: S030-D42
+  s030_d45_decision: S030-D45
+  handoff_tip_should_be: 4e8fc15
+  ci_gate: cleared
+  ci_status: in_progress
+  pr_238_ci_watching: true
+  pr_238_ci_status: in_progress
+  pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
 - id: EV-026
   session_id: S028-chat-source-ux
   cycle_type: feature
@@ -53234,6 +53905,145 @@ decisions_log:
     tip @87cf4d2; CI green on #238 incl. security/Opengrep re-run; T128.2 set in_progress'
   choice: option_1_continue_t128_2_leave_pr_238_open
   recorded_at: '2026-08-12T19:09:18Z'
+- id: S030-D34
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: User chose continue with recommended = start M129 F77 after tip CI green (not interim 08). Tip bb872c0 supersedes
+    bdaec9d; watching https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050.
+  choice: continue_recommended_m129_after_ci_green
+  recorded_at: '2026-08-12T20:32:06Z'
+  tip: bb872c0
+  ci_run_id: 31637893050
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+- id: S030-D35
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 'Tip CI FAILED on bb872c0 run 31637893050: DM FE coverage gap (lines 99.86%/branches 97.83%); security supabase
+    CLI curl flake (non-product); python/frontend/ui-e2e/packages success. Fix CI in place then M129 (S030-D34 path unchanged;
+    AskQuestion unavailable).'
+  choice: fix_ci_in_place_then_m129
+  recorded_at: '2026-08-12T20:34:58Z'
+  tip: bb872c0
+  ci_run_id: 31637893050
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+- id: S030-D36
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 'Coverage fix pushed @2190b8e (test: close DM FE freshness UI coverage gaps (F76)) closing bb872c0 DM FE coverage
+    red (DocumentAdmin/CorpusList). Watching CI https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143.
+    M129 still not started until tip CI green (path S030-D34).'
+  choice: coverage_fix_pushed_await_ci_then_m129
+  recorded_at: '2026-08-12T20:39:07Z'
+  tip: 2190b8e
+  ci_run_id: 31638576143
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+  supersedes_tip: bb872c0
+- id: S030-D37
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 'Tip 2190b8e product CI green (python/coverage 100%+98.07%/frontend/ui-e2e/packages). Security failed: OpenGrep
+    vendor installer curl / GitHub 503 (BUG-2026-08-06 class). Run requeued. AskQuestion tool unavailable — markdown fallback
+    options: (1) harden OpenGrep retries+push [recommended]; (2) rerun security only; (3) waive and start M129 with recorded
+    risk; (4) explain. M129 coding not started.'
+  choice: pending_markdown_askquestion
+  recommended_option: 1
+  askquestion_channel: markdown_fallback
+  recorded_at: '2026-08-12T20:43:10Z'
+  tip: 2190b8e
+  ci_run_id: 31638576143
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+  bug_class: BUG-2026-08-06
+- id: S030-D38
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: Tip 2190b8e CI GREEN (run 31638576143) — all jobs success including security (rerun cleared OpenGrep flake). S030-D37
+    gate closed by success; askQ cleared. Start M129 F77 / T129.1 in_progress (approve/kill-switch/caps/no auto-promote).
+  choice: ci_green_start_t129_1
+  recorded_at: '2026-08-12T20:46:10Z'
+  tip: 2190b8e
+  ci_run_id: 31638576143
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+  task: T129.1
+  milestone: M129
+- id: S030-D39
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 'T129.1 COMPLETE @67ac92b (feat: add F77 finetune approve gate and cap policy helpers (F77)) — finetune approve
+    gate + cap policy helpers. Start T129.2 in_progress (SFT pair builder + adapter pin/clear rollback).'
+  choice: t129_1_complete_start_t129_2
+  recorded_at: '2026-08-12T20:49:06Z'
+  tip: 67ac92b
+  task_completed: T129.1
+  task_started: T129.2
+  milestone: M129
+  commit: 67ac92b
+  files_changed: 3
+- id: S030-D40
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 'T129.2 COMPLETE @0fff625 (feat: add F77 SFT pair builder and adapter pin rollback helpers (F77)). Start T129.3
+    in_progress — finetune_app scaffold + volume + secrets; 06 PEFT/TRL pins already done (S030-D33), T129.3 unblocked.'
+  choice: t129_2_complete_start_t129_3
+  recorded_at: '2026-08-12T20:55:19Z'
+  tip: 0fff625
+  task_completed: T129.2
+  task_started: T129.3
+  milestone: M129
+  commit: 0fff625
+  files_changed: 2
+- id: S030-D41
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 'Tip 0fff625 CI: only python Install gitleaks curl 503 (infra flake); coverage/security/frontend/ui-e2e green.
+    Rerunning failed jobs. T129.3 still in_progress — do not code until CI green or user waives.'
+  choice: await_ci_rerun_gate_t129_3_coding
+  recorded_at: '2026-08-12T20:59:59Z'
+  tip: 0fff625
+  ci_run_id: 31640006502
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640006502
+  task: T129.3
+- id: S030-D42
+  date: '2026-08-12'
+  skill: 16-evolve
+  skill_id: 16-evolve
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 'Tip 932c036 (fix: retry gitleaks download on GitHub Releases 503) CI GREEN (run 31640505267). S030-D41 gitleaks
+    flake gate cleared; coding_blocked=false. T129.3 remains in_progress — resume finetune_app scaffold.'
+  choice: ci_green_resume_t129_3
+  recorded_at: '2026-08-12T21:06:16Z'
+  tip: 932c036
+  ci_run_id: 31640505267
+  ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640505267
+  task: T129.3
+  commit: 932c036
+- 'S030-D45 2026-08-12T21:25:26Z: S030/EV-027 resume — continue-with-recommended; tip 4e8fc15; T129.5 in_progress; AskQuestion
+  none; CI watch https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420 (python green, full
+  run watching). Prior 3d25fc1 failed https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31641875827.'
 artifacts:
 - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
   session_id: S030-corpus-automations
@@ -57001,18 +57811,18 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: ac8fca7
-    tip_sha: ac8fca7
-    tip_full: ac8fca7e8d1f8c19aa68f3d363608067bf16d728
-    head_sha: ac8fca7e8d1f8c19aa68f3d363608067bf16d728
-    tip_prev: e86290e
-    pushed: true
-    origin_tip: ac8fca7
-    local_ahead: 0
+    tip: c042f57
+    tip_sha: c042f57
+    tip_full: c042f57627fb52953476b65a92be06fa0b858d56
+    head_sha: c042f57627fb52953476b65a92be06fa0b858d56
+    tip_prev: 4e8fc15
+    pushed: false
+    origin_tip: unknown
+    local_ahead: unknown
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    updated_at: '2026-08-12T19:41:00Z'
-    note: 'branch tip @ac8fca7 (synced with origin); PR #238 open; T128.4 COMPLETE; do not merge without approval'
+    updated_at: '2026-08-12T21:33:12Z'
+    note: 'branch tip @c042f57 CI green (S030-D45); T129.5 next; PR #238 open; do not merge without approval'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
       / RA-020)
@@ -63092,7 +63902,297 @@ git_history:
     pushed: true
     pushed_to: origin/evolve/EV-027-corpus-automations
     pr_number: 238
-    ci_watching: true
+    ci_watching: false
+    ci_status: superseded_by_bdaec9d
+  - sha: bdaec9d
+    branch: evolve/EV-027-corpus-automations
+    message: 'test: add UJ-081 API e2e and Playwright freshness coverage (F76)'
+    stage: 07-build
+    orchestrator: 16-evolve
+    files_changed: 5
+    timestamp: '2026-08-12T20:26:33Z'
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T128.7
+    milestone: M128
+    note: T128.7 / M128 complete — UJ-081 API e2e + Playwright freshness
+    pushed: true
+    pushed_to: origin/evolve/EV-027-corpus-automations
+    pushed_at: '2026-08-12T20:27:11Z'
+    pr_number: 238
+    ci_watching: false
+    ci_status: cancelled_aborted_superseded_by_bb872c0
+    ci_aborted_at: '2026-08-12T20:32:06Z'
+    ci_abort_reason: aborted on purpose to follow newer tip bb872c0 (basedpyright fix)
+    superseded_by: bb872c0
+  - sha: bb872c0
+    sha_full: bb872c0de3960e7c7ca994a0d54479eef423e914
+    full_sha: bb872c0de3960e7c7ca994a0d54479eef423e914
+    short: bb872c0
+    branch: evolve/EV-027-corpus-automations
+    message: 'fix: satisfy basedpyright in freshness hash-aware unit tests'
+    stage: 07-build
+    orchestrator: 16-evolve
+    skill_id: 16-evolve
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    files_changed: 1
+    timestamp: '2026-08-12T20:28:00Z'
+    note: basedpyright tip after M128; CI FAILED — DM FE coverage + flaky security curl; fix in place before M129
+    pushed: true
+    pushed_to: origin/evolve/EV-027-corpus-automations
+    pr_number: 238
+    ci_watching: false
+    ci_status: failure
+    ci_run_id: 31637893050
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
+    ci_head_sha: bb872c0de3960e7c7ca994a0d54479eef423e914
+    milestone: M128
+    follows: bdaec9d
+    ci_conclusion: failure
+    ci_failed_at: '2026-08-12T20:34:58Z'
+    ci_jobs: *id003
+    ci_fix_next: dm_fe_coverage_then_repush
+    superseded_by: 2190b8e
+    ci_fix_followup_commit: 2190b8e
+  - sha: 2190b8e
+    sha_full: 2190b8e8bcddef5be146b2b0f4c6a0a957a5e1f9
+    full_sha: 2190b8e8bcddef5be146b2b0f4c6a0a957a5e1f9
+    short: 2190b8e
+    branch: evolve/EV-027-corpus-automations
+    message: 'test: close DM FE freshness UI coverage gaps (F76)'
+    stage: 07-build
+    orchestrator: 16-evolve
+    skill_id: 16-evolve
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    files_changed: 1
+    timestamp: '2026-08-12T20:37:26Z'
+    note: S030-D36 coverage fix; S030-D38 tip CI green (security rerun cleared flake)
+    pushed: true
+    pushed_to: origin/evolve/EV-027-corpus-automations
+    pr_number: 238
+    ci_watching: false
+    ci_status: success
+    ci_run_id: 31638576143
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
+    ci_head_sha: 2190b8e8bcddef5be146b2b0f4c6a0a957a5e1f9
+    decision: S030-D36
+    follows: bb872c0
+    task: ci_fix_coverage
+    ci_jobs:
+      python:
+        conclusion: success
+      coverage:
+        conclusion: success
+        detail: DM FE lines 100%, branches 98.07%
+      frontend:
+        conclusion: success
+      ui-e2e:
+        conclusion: success
+      packages:
+        conclusion: success
+      security:
+        conclusion: success
+        detail: rerun cleared OpenGrep flake
+        product_code: false
+        flake_cleared_by_rerun: true
+    product_ci_status: success
+    ci_security_flake: false
+    ci_security_flake_class: BUG-2026-08-06
+    ci_security_requeued: true
+    ci_conclusion: success
+    ci_green_at: '2026-08-12T20:46:10Z'
+  - sha: 67ac92b
+    sha_full: 67ac92b5aea4c32096a2579c772d3ce723e03628
+    full_sha: 67ac92b5aea4c32096a2579c772d3ce723e03628
+    short: 67ac92b
+    branch: evolve/EV-027-corpus-automations
+    message: 'feat: add F77 finetune approve gate and cap policy helpers (F77)'
+    stage: 07-build
+    orchestrator: 16-evolve
+    skill_id: 16-evolve
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T129.1
+    milestone: M129
+    files_changed: 3
+    timestamp: '2026-08-12T20:48:34Z'
+    note: T129.1 — F77 finetune approve gate + kill-switch/caps/no-auto-promote helpers in shared-schemas
+    decision: S030-D39
+    follows: 2190b8e
+    paths:
+    - packages/shared-schemas/vecinita_shared_schemas/finetune.py
+    - tests/unit/shared_schemas/test_finetune.py
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    pushed: true
+    pushed_to: origin/evolve/EV-027-corpus-automations
+    pr_number: 238
+  - sha: 0fff625
+    sha_full: 0fff62560cda83f69040d9c2057d0f70439275df
+    full_sha: 0fff62560cda83f69040d9c2057d0f70439275df
+    short: 0fff625
+    branch: evolve/EV-027-corpus-automations
+    message: 'feat: add F77 SFT pair builder and adapter pin rollback helpers (F77)'
+    stage: 07-build
+    orchestrator: 16-evolve
+    skill_id: 16-evolve
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T129.2
+    milestone: M129
+    files_changed: 2
+    timestamp: '2026-08-12T20:54:50Z'
+    note: T129.2 — F77 SFT pair builder + adapter pin/clear rollback helpers
+    decision: S030-D40
+    follows: 67ac92b
+    pushed: true
+    pushed_to: origin/evolve/EV-027-corpus-automations
+    pr_number: 238
+    paths:
+    - packages/shared-schemas/vecinita_shared_schemas/finetune.py
+    - tests/unit/shared_schemas/test_finetune_sft.py
+    ci_watching: false
+    ci_status: failure
+    ci_run_id: 31640006502
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640006502
+    ci_jobs: *id001
+    ci_flake: true
+    ci_flake_detail: python Install gitleaks curl 503
+    superseded_by: 932c036
+    ci_fix_followup_commit: 932c036
+  - sha: 932c036
+    sha_full: 932c03617fc37eddbdd245cded16e68da99674c1
+    full_sha: 932c03617fc37eddbdd245cded16e68da99674c1
+    short: 932c036
+    branch: evolve/EV-027-corpus-automations
+    message: 'fix: retry gitleaks download on GitHub Releases 503'
+    stage: 07-build
+    orchestrator: 16-evolve
+    skill_id: 16-evolve
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: ci_fix_gitleaks
+    milestone: M129
+    files_changed: 1
+    timestamp: '2026-08-12T21:00:51Z'
+    note: 'S030-D42: retry gitleaks download on GitHub Releases 503; CI green'
+    decision: S030-D42
+    follows: 0fff625
+    pushed: true
+    pushed_to: origin/evolve/EV-027-corpus-automations
+    pr_number: 238
+    ci_watching: false
+    ci_status: success
+    ci_conclusion: success
+    ci_run_id: 31640505267
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640505267
+    ci_head_sha: 932c03617fc37eddbdd245cded16e68da99674c1
+    ci_green_at: '2026-08-12T21:06:16Z'
+    paths:
+    - .github/workflows/ci.yml
+  - sha: a75af50
+    sha_full: a75af50006002aee31f720acc752e3fa85eb829c
+    full_sha: a75af50006002aee31f720acc752e3fa85eb829c
+    short: a75af50
+    branch: evolve/EV-027-corpus-automations
+    message: 'feat: scaffold Modal LoRA finetune app and adapter volume (F77)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T129.3
+    milestone: M129
+    feature_ids:
+    - F77
+    files_changed: 7
+    timestamp: '2026-08-12T21:10:13Z'
+    recorded_at: '2026-08-12T21:10:31Z'
+    note: 'S030-D43: T129.3 COMPLETE — finetune_app scaffold; advance T129.4'
+    decision: S030-D43
+    follows: 932c036
+    paths:
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - docs/staging-secrets-matrix.md
+    - infra/modal/.env.example
+    - infra/modal/README.md
+    - infra/modal/finetune_app.py
+    - tests/unit/modal/test_finetune_app_scaffold.py
+  - sha: 4ef663b
+    sha_full: 4ef663b6c0d96ef9159994d0ac52f28c4acb5168
+    full_sha: 4ef663b6c0d96ef9159994d0ac52f28c4acb5168
+    short: 4ef663b
+    branch: evolve/EV-027-corpus-automations
+    message: 'feat: add finetune_train job type and admin approve gate (F77)'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T129.4
+    milestone: M129
+    feature_ids:
+    - F77
+    files_changed: 10
+    timestamp: '2026-08-12T21:16:28Z'
+    recorded_at: '2026-08-12T21:16:39Z'
+    note: 'S030-D44: T129.4 COMPLETE — finetune_train + approve; advance T129.5'
+    decision: S030-D44
+    follows: a75af50
+    paths:
+    - apps/data-management-backend/src/vecinita_data_management_backend/app.py
+    - apps/data-management-backend/src/vecinita_data_management_backend/finetune_train.py
+    - apps/data-management-backend/src/vecinita_data_management_backend/jobs.py
+    - apps/data-management-backend/src/vecinita_data_management_backend/store.py
+    - docs/sessions/S000-internal-docs-archive/execution-plan.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - openapi/data-management.yaml
+    - packages/shared-schemas/src/vecinita_shared_schemas/data_management.py
+    - tests/unit/data_management/test_finetune_train_approve.py
+    - tests/unit/test_cors_policy.py
+  - sha: 3d25fc1
+    sha_full: 3d25fc19d358890390e7f8c993730a3a970e14bc
+    branch: evolve/EV-027-corpus-automations
+    message: 'docs: refresh S030 HANDOFF after T129.4 push'
+    stage: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    files_changed: 1
+    timestamp: '2026-08-12T21:17:56Z'
+  - sha: 4e8fc15
+    sha_full: 4e8fc15a6a9b00f5d57267f758a099cfeb5ff2d7
+    branch: evolve/EV-027-corpus-automations
+    message: 'test: expect F75–F77 job_type enums in OpenAPI JobOptions'
+    stage: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    files_changed: 1
+    timestamp: '2026-08-12T21:21:44Z'
+  - sha: c042f57
+    sha_full: c042f57627fb52953476b65a92be06fa0b858d56
+    full_sha: c042f57627fb52953476b65a92be06fa0b858d56
+    short: c042f57
+    branch: evolve/EV-027-corpus-automations
+    message: 'test: cover finetune_train stub worker branches for coverage gate'
+    stage: 07-build
+    skill_id: 07-build
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    task: T129.4_ci_coverage_followup
+    milestone: M129
+    feature_ids:
+    - F77
+    files_changed: 1
+    timestamp: '2026-08-12T21:28:19Z'
+    recorded_at: '2026-08-12T21:33:12Z'
+    note: 'S030-D45: tip CI green @c042f57 run 31642681501; continue T129.5'
+    decision: S030-D45
+    follows: 4e8fc15
+    ci_status: success
+    ci_run_id: 31642681501
+    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642681501
+    paths:
+    - tests/unit/data_management/test_finetune_train_worker.py
   notes: '2026-08-05T15:12:00Z S027/EV-025: S027-D34 — PR #208 MERGED @2c884bd (head c574f58); merge approved + CI split policy
     approved; askquestion_pending=false; active_milestone=M120; Gate C→D / phase_c NOT passed; current_action=watch_main_ci_2c884bd_then_ci_split_then_t120_1
     | 2026-08-05T15:09:39Z S027/EV-025: S027-D33 option 3 (merge #208 first then M120); PR #208 tip/CI green @c574f58 (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31018373394);
@@ -63218,7 +64318,7 @@ git_history:
   updated_at: '2026-08-05T00:54:00Z'
   main_tip: 2c884bd
   main_tip_full: 2c884bd202524605d96e4d0d510e69e5a100a3a7
-  tip: 87cf4d2
+  tip: c042f57
   build_head: e7fa2b6
   branch_ahead_of_origin: 2
 constraints:

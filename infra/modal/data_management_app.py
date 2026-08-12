@@ -15,6 +15,7 @@ See infra/modal/.env.example and docs/staging-secrets-matrix.md.
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -202,6 +203,9 @@ def fastapi_app():
             exc_info=True,
         )
         tag_client = None
+
+    # F77: approved finetune_train jobs call vecinita-llm-finetune::train_lora (T129.5).
+    os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
 
     def runner(job_id: UUID) -> None:
         run_job(

@@ -163,3 +163,33 @@ def test_double_approve_returns_409() -> None:
 
     response = client.post(f"/jobs/{job_id}/approve")
     assert response.status_code == HTTPStatus.CONFLICT
+
+
+def test_approve_without_runner_sets_approved_only() -> None:
+    """Approve with no pipeline runner still marks approved (no schedule)."""
+    store = InMemoryJobStore()
+    client = _client_with_principal(store, _ADMIN, runner=None)
+    create = client.post("/jobs", json={"options": {"job_type": "finetune_train"}})
+    job_id = UUID(json_str(response_json_object(create), "job_id"))
+    response = client.post(f"/jobs/{job_id}/approve")
+    assert response.status_code == HTTPStatus.OK
+    body = response_json_object(response)
+    assert body["approved"] is True
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.options.get("approved") is True
+    assert record.status == "pending"
+
+
+def test_approve_non_pending_returns_409() -> None:
+    """Cannot approve a finetune job that already left pending."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="finetune_train",
+        options={"approved": False},
+    )
+    store.update_job(record.job_id, status="running")
+    client = _client_with_principal(store, _ADMIN)
+    response = client.post(f"/jobs/{record.job_id}/approve")
+    assert response.status_code == HTTPStatus.CONFLICT
