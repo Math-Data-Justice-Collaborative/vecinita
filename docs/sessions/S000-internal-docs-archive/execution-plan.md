@@ -10,8 +10,8 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
-| **Active milestone** | M127: F75 — Automation framework |
-| **Active task** | T127.10 (pending) |
+| **Active milestone** | M128: F76 — Corpus freshness |
+| **Active task** | T128.1 (pending) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
@@ -2534,6 +2534,8 @@ for 13; issue closeout notes after verify/deploy gates.
 
 #### M127: F75 — Automation framework (catch-up + history + schedule hook)
 
+**Status:** completed (2026-08-12) — all T127.1–T127.10 done; next M128 / T128.1 pending.
+
 **Goal:** Catch-up-only enqueue (failed/partial/missing embed); idempotent
 `document_id`+`revision`; kill-switch + `VECINITA_AUTOMATIONS_MAX_CONCURRENT`;
 `automation_runs` Postgres + config GET/PATCH; DM enable/history UI; job_type
@@ -2550,7 +2552,7 @@ for 13; issue closeout notes after verify/deploy gates.
 | T127.7 | Config: `schedule=modal.Period(days=1)` on `vecinita-data-management` dispatching catch-up (F76 branch in M128) | Config | completed | TP2, RD-336, TC-264, S030-D31 M2 | T127.5 | — | 2026-08-12 | S030 | F75 |
 | T127.8 | Code: DM Automations UI — enable/disable + run history | Code | completed | UJ-080, RD-327 | T127.4 | — | 2026-08-12 | S030 | F75 |
 | T127.9 | Test: API e2e UJ-080 + Vitest Automations panel green | Test | completed | e2e-coverage, TP8 | T127.6, T127.8 | — | 2026-08-12 | S030 | F75 |
-| T127.10 | Test: Playwright T0-ui UJ-080 (`tests/ui/`) | Test | pending | TP8, connectivity-gates | T127.8 | — | | S030 | F75 |
+| T127.10 | Test: Playwright T0-ui UJ-080 (`tests/ui/`) | Test | completed | TP8, connectivity-gates | T127.8 | — | 2026-08-12 | S030 | F75 |
 
 #### M128: F76 — Corpus freshness
 
