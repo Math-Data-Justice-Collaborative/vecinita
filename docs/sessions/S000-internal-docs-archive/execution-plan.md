@@ -10,12 +10,12 @@
 | Field | Value |
 |-------|-------|
 | **Active phase** | Phase 30: EV-027 — Corpus automations + LoRA FT (F75–F77) — 07-build |
-| **Active milestone** | M128: F76 — Corpus freshness |
-| **Active task** | T128.5 (pending) |
+| **Active milestone** | M129: F77 — LoRA FT + human promote |
+| **Active task** | T129.1 (in_progress) |
 | **Last updated** | 2026-08-12 |
 | **Evolve cycle** | EV-027 — Full; Phase C build |
 | **Git branch** | `evolve/EV-027-corpus-automations` |
-| **Active session** | S030-corpus-automations — 04-tech-plan; Gate A→B PASS |
+| **Active session** | S030-corpus-automations — 07-build; tip `2190b8e` CI green (S030-D38) |
 | **Scope addition** | 2026-08-07 — F75–F77 automations, freshness, LoRA FT (#73 #219 #72). |
 
 ## Template
@@ -2578,7 +2578,7 @@ prod `llm_app` loads adapter only after promote; FT caps (AC-FT*; TC-252–265; 
 
 | Task | Description | Type | Status | Spec Source | Depends On | Data Deps | Completed | Session | Feature |
 |------|-------------|------|--------|-------------|------------|-----------|-----------|---------|---------|
-| T129.1 | Test: unit red — approve gate; kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY; no auto-promote (TC-263+) | Test | pending | AC-FT7, TP5, RD-338 | T128.7 | — | | S030 | F77 |
+| T129.1 | Test: unit red — approve gate; kill-switch + MAX_CONCURRENT/MAX_RUNS_PER_DAY; no auto-promote (TC-263+) | Test | in_progress | AC-FT7, TP5, RD-338 | T128.7 | — | | S030 | F77 |
 | T129.2 | Test: unit red — SFT pair builder from chunks; adapter id pin/clear rollback (TC-265) | Test | pending | RD-340, AC-FT9 | T129.1 | — | | S030 | F77 |
 | T129.3 | Config: Modal `finetune_app.py` scaffold + volume + secrets docs (**blocked until 06** PEFT/TRL pins complete) | Config | pending | TP4, ADR-053, S030-D31 M3 | T129.1 | PEFT/TRL pins (06) | | S030 | F77 |
 | T129.4 | Code: `job_type=finetune_train` + `POST /jobs/{id}/approve` (admin JWT) | Code | pending | TP6, api-contract | T129.1 | — | | S030 | F77 |
