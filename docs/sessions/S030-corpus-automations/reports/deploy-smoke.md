@@ -1,8 +1,8 @@
 # Deploy Smoke — EV-027 / S030 (F75–F77)
 
 > Date: 2026-08-13  
-> Status: **baseline smoke in progress** (H2 disposition pending AskQuestion)  
-> Path: **S030-D60** `baseline_only_flags_off`  
+> Status: **PASS** — baseline-only (`passed_baseline_only`)  
+> Path: **S030-D60** `baseline_only_flags_off` · **S030-D61** accept H2 tip-drift  
 > `env_role`: **`staging_as_live`** = **live/prod** [ADR-049]
 
 [Corpus: feature-list.md §F75–F77]  
@@ -15,16 +15,17 @@
 | Do | Do not |
 |----|--------|
 | Push tip → tip CI green | EV-027 live cutover |
-| H0c + H1–H5 on **current live** stack | Flip `*_ENABLED` / kill-switch off |
+| H0c + H1–H5 on **current live** stack | Flip `*_ENABLED` / kill-switch |
 | Keep F75–F77 **off** | Live FT promote / prod corpus mutation |
 
 ## Tip / CI (RA-009)
 
 | Field | Value |
 |-------|--------|
-| Tip | `588dab6` |
+| Smoke tip | `588dab6` |
+| Report tip | `fee4d12` (this report / state) |
 | Branch | `evolve/EV-027-corpus-automations` |
-| CI | **PASS** — [run 31709704821](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821) |
+| CI @ `588dab6` | **PASS** — [run 31709704821](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821) |
 | Live commit | Pre-EV-027 (EV-027 **not** on live stack) |
 
 ## Live URLs (production traffic)
@@ -45,7 +46,7 @@
 | H1 ChatRAG `/health` | **PASS** | `status=ok`; `postgres` / `modal_embed` / `modal_llm` = `ok` |
 | H1 Write `/health` | **PASS** | `status=ok` |
 | H2 DB pool | **PASS** | DO Postgres connect `SELECT 1` |
-| H2 Alembic head | **FAIL (expected)** | live `20260806_0014` ≠ tip head `20260812_0016` — tip migrations not cut over |
+| H2 Alembic head | **EXPECTED FAIL (accepted)** | live `20260806_0014` ≠ tip head `20260812_0016` — **S030-D61** |
 | H3 `POST /api/v1/ask` | **PASS** | answer returned (`en`, 303 chars); latency ~85.9s (cold LLM) |
 | H3b browse | **PASS** | docs 5/61; tags 12 facets |
 | H4–H5 connectivity | **PASS** | `scripts/deploy/verify_connectivity.sh` |
@@ -55,18 +56,33 @@
 
 | Flag / action | Status |
 |---------------|--------|
-| `VECINITA_AUTOMATIONS_ENABLED` | **unchanged / off path** (no enable) |
+| `VECINITA_AUTOMATIONS_ENABLED` | **unchanged / off** (no enable) |
 | Freshness enable | **unchanged** |
 | FT train / promote | **not run** |
 
+## Decisions
+
+| ID | Choice |
+|----|--------|
+| S030-D60 | Baseline live smoke only; push tip; flags off |
+| S030-D61 | Accept H2 alembic tip-drift as advisory; stage **PASS** |
+
+## Gate honesty
+
+| Gate | Result |
+|------|--------|
+| Deploy (baseline) | **`passed_baseline_only`** |
+| EV-027 on live | **false** — cutover / enable / FT promote still AskQuestion-gated |
+
 ## Rollback (unused this path)
 
-No live cutover — no rollback required. Prior plan remains in `deploy-checklist.md` (S030-D59).
-
-## Disposition pending
-
-**[Decision] S030-D61** — treat H2 alembic mismatch as **expected** for baseline-only (pool OK), or hard-fail stage.
+No live cutover — no rollback required. Plan remains in `deploy-checklist.md` (S030-D59).
 
 ## Next
 
-Await S030-D61; then close baseline 13 or choose ship path (separate AskQuestion).
+```
+Enter this into the chat to continue:
+@.cursor/skills/15-service-health/SKILL.md
+```
+
+Or stop here if deploy closure is enough; use `@.cursor/skills/14-hotfix/SKILL.md` only when a production defect needs a surgical patch.
