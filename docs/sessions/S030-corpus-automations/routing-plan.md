@@ -12,12 +12,12 @@ Session open: **S030-D0**. Issues: **#73, #72, #219**.
 | 04-tech-plan | yes | completed | S030-D28/D29; TP1–TP10; Phase 30; `reports/tech-plan-delta.md` |
 | 05-verify-tech | yes | completed | S030-D30/D31; Gate B→C PASS (S030-D32) |
 | 06-tech-tooling | yes | completed | S030-D33; exact FT pins; `reports/06-tech-tooling.md` |
-| 07-build | yes | pending | Phase 30 M127–M130 |
-| 08-verify-build | yes | pending | |
-| 09-qa | yes | pending | |
-| 10-e2e | yes | pending | automations + freshness + fine-tune path |
-| 11-verify-impl | yes | pending | |
-| 12-verify-deploy | yes | pending | |
+| 07-build | yes | completed | Phase 30 M127–M130 |
+| 08-verify-build | yes | completed | PASS @ 3466b2b; Gate C→D PASS |
+| 09-qa | yes | completed | FAIL QA-S030-001 (disposed at 11 tip pin) |
+| 10-e2e | yes | completed | PASS — `reports/e2e-report.md` |
+| 11-verify-impl | yes | completed | PASS — `reports/verify-impl.md`; F75–F77 + UJ-080–082 approved |
+| 12-verify-deploy | yes | pending | next |
 | 13-deploy-smoke | yes | pending | AskQuestion before prod; FT promote = human judgment after eval evidence (S030-D10 / RD-338) |
 
 ## Orchestrator
@@ -33,4 +33,4 @@ Orchestrator: **16-evolve**.
 
 ## Next
 
-**07-build** (M127) → 08 → …
+**12-verify-deploy** (after 11-verify-impl PASS)

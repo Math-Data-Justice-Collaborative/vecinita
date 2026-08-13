@@ -4,23 +4,30 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** M130 / Phase 30 **08-verify-build PASS** (OpenAPI `maxItems` KICS fix)  
+**Tip:** post-11 (QA-S030-001 tip pin + verify-impl)  
 **Issues:** #73 · #72 · #219  
 
 ## Position
 
-- Phase C **07-build** — M127–M130 complete
-- Phase C **08-verify-build** — **PASS** (Phase 30 / M130 boundary)
-- Report: `docs/sessions/S030-corpus-automations/reports/verification-report.md`
+- Phase C **07+08** complete; Gate C→D **PASS** (S030-D55)
+- **09-qa** COMPLETE — FAIL disposed via tip pin at 11
+- **10-e2e** COMPLETE **PASS** — `reports/e2e-report.md`
+- **11-verify-impl** COMPLETE **PASS** — `reports/verify-impl.md` (UJ-080–082 + F75–F77 approved)
+- **Next:** **12-verify-deploy**
 - PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open (no merge)
 
-## Key locks
+## Decisions (11)
 
-- Promote/rollback: `POST /internal/v1/finetune/promote` + `GET /internal/v1/finetune/adapter`
-- Prod load: `VECINITA_FINETUNE_ADAPTER_ID` → `/adapters/{id}` on `llm-finetune-adapters`
-- OpenAPI: `openapi/internal-write.yaml` v0.5.0 (automations / freshness / FT; list `maxItems: 100`)
-- Secrets: `docs/staging-secrets-matrix.md` §EV-027 (T130.3)
+| ID | Choice |
+|----|--------|
+| S030-D56 | Resume 11; journeys approved; UI preview → login wall → continue without live UI |
+| S030-D57 | Approve F75–F77; commit tip pin + close 11 |
 
 ## Next
 
-**Gate C→D** AskQuestion → **09-qa** (Full routing). Leave PR #238 open.
+```
+Enter this into the chat to continue:
+@.cursor/skills/12-verify-deploy/SKILL.md
+```
+
+Leave PR #238 open until deploy path decides merge.
