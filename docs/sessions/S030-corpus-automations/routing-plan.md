@@ -17,8 +17,8 @@ Session open: **S030-D0**. Issues: **#73, #72, #219**.
 | 09-qa | yes | completed | FAIL QA-S030-001 (disposed at 11 tip pin) |
 | 10-e2e | yes | completed | PASS — `reports/e2e-report.md` |
 | 11-verify-impl | yes | completed | PASS — `reports/verify-impl.md`; F75–F77 + UJ-080–082 approved |
-| 12-verify-deploy | yes | pending | next |
-| 13-deploy-smoke | yes | pending | AskQuestion before prod; FT promote = human judgment after eval evidence (S030-D10 / RD-338) |
+| 12-verify-deploy | yes | completed | ready flags-off — `reports/deploy-checklist.md` (S030-D59) |
+| 13-deploy-smoke | yes | pending | next; AskQuestion before enable/promote; FT promote = human judgment (S030-D10 / RD-338) |
 
 ## Orchestrator
 
@@ -33,4 +33,4 @@ Orchestrator: **16-evolve**.
 
 ## Next
 
-**12-verify-deploy** (after 11-verify-impl PASS)
+**13-deploy-smoke** (after 12-verify-deploy ready, flags off)

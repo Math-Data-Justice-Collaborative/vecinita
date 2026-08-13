@@ -5810,7 +5810,7 @@ project:
       - F76
       - F77
       current_action: completed
-      next_action: 'Invoke 12-verify-deploy (pending; not started)'
+      next_action: Invoke 12-verify-deploy (pending; not started)
       askquestion_pending: false
       askquestion_pending_topic: null
       tip: 3466b2b
@@ -5827,10 +5827,11 @@ project:
       e2e_report: docs/sessions/S030-corpus-automations/reports/e2e-report.md
       e2e_overall: PASS
       scope: EV-027 F75–F77 dispose QA-S030-001 + signoff
-      notes: '11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.'
-      note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components); Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md; handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-        non-deployed local UI preview for feature inspection. tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md
-        §UJ-080–UJ-082]'
+      notes: 11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.
+      note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components);
+        Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed;
+        report=docs/sessions/S030-corpus-automations/reports/verify-impl.md; handoff → 12-verify-deploy (leave pending). tip
+        @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
       updated_at: '2026-08-13T01:11:00Z'
       report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
       report_status: completed
@@ -5869,207 +5870,311 @@ project:
       - F76
       - F77
     12-verify-deploy:
-      status: completed
-      checklist_blockers: null
-      checklist_status: ready
-      env_role: staging_as_live
-      report_status: ready
-      report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
-      started_at: '2026-08-06'
-      started_at_iso: '2026-08-06T23:21:00Z'
-      started: '2026-08-06'
-      completed: '2026-08-06'
-      completed_at: '2026-08-06'
-      completed_at_iso: '2026-08-06T23:45:30Z'
-      session_id: S028-chat-source-ux
-      branch: evolve/EV-026-chat-source-ux
-      session_branch: evolve/EV-026-chat-source-ux
-      evolve_cycle_id: EV-026
-      mode: evolve
-      delta_only: true
-      feature_ids:
-      - F72
-      - F73
-      - F74
-      tip_sha: 0367eeb
-      tip_full: 0367eeb174ffd9166f1833a62e0cd8090cfa0bfa
-      tip_prev: bbff787
-      local_parity_tip: bbff787
-      local_parity:
-        tip: bbff787
-        pytest: 1765
-        vitest_chat_rag: 190
-        vitest_data_management: 740
-        build_frontend: PASS
-        typecheck: PASS
-        dm_coverage: FAIL
-        dm_coverage_disposition: QA-S028-004_accepted
-        ra009_remote_ci: waived_S028-D34
-      current_action: completed_handoff_13
-      next_action: 13-deploy-smoke in_progress (S028-D35); blocked_missing_prod_env
-      askquestion_pending: false
-      askquestion_pending_topic: null
-      askquestion_cleared: S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved
-      s028_d33_decision: S028-D33
-      s028_d33_choice: option_1_proceed_12
-      s028_d34_decision: S028-D34
-      s028_d34_choices:
-        ci_path: commit_local_ci_push_then_cli_deploy
-        ra009_remote_ci: waived_local_make_ci_push
-        env_role: staging_as_live_confirmed_live_prod
-        mitigations_1_to_6: approved
-        rollback_plan: approved
-      ra009_remote_ci_waived: true
-      ra009_waiver_reason: GitHub Actions outage — local make ci-push parity; do not block on gh run watch
-      env_role_confirmed: true
-      env_role_live: prod
-      mitigations_1_to_6: approved
-      rollback_plan: approved
-      staging_tip_drift: true
-      staging_commit_deployed: c942971
-      tip_on_staging: false
-      carry_forward:
-      - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
-      - 13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready
-      note: 'S028/EV-026 12-verify-deploy COMPLETE 2026-08-06T23:45:30Z — checklist ready; tip@0367eeb (local parity tip @bbff787);
-        local_parity@bbff787: pytest 1765; Vitest 190+740; build-frontend PASS; typecheck PASS; DM coverage FAIL accepted
-        QA-S028-004; RA-009 remote waived S028-D34; askquestion_pending=true topic=proceed to 13-deploy-smoke CLI deploy live/prod?
-        (S028-D2/D34); current_action=awaiting_13_cli_deploy_askquestion; 13 remains pending (NOT in_progress); H4–H5 carry
-        QA-S028-003; staging@c942971 drift=true; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
-      updated_at: '2026-08-06T23:45:30Z'
-      s027_baseline:
+      s028_baseline:
         status: completed
-        session_id: S027-multilingual-embeddings
-        evolve_cycle_id: EV-025
-        started_at: '2026-08-05'
-        started: '2026-08-05'
-        completed: '2026-08-05'
-        completed_at: '2026-08-05'
-        branch: main
-        mode: delta
-        delta_only: true
-        feature_ids:
-        - F70
-        - F71
-        tip_sha: 4b7231b
-        commit_deployed: 4b7231b
-        current_action: completed
-        askquestion_pending: false
-        note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
-        updated_at: '2026-08-06T14:46:45Z'
-        s027_d64_decision: S027-D64
-        reconciled_from: S027-D63
-        session_closed: true
-        session_closed_at: '2026-08-06T14:46:45Z'
-        close_decision: S027-D64
-        report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
-        report_status: completed
-      s026_baseline:
-        status: completed
-        started_at: '2026-08-05'
-        started: '2026-08-05'
-        started_at_iso: '2026-08-05T01:30:00Z'
-        partial_rerun_at: '2026-08-05'
-        partial_rerun_note: S026/EV-024 — 12-verify-deploy STARTED (delta F64–F69); prior S024 COMPLETE nested under s024_baseline;
-          after S026-D55 11 PASS
-        session_id: S026-frontend-ux-polish
-        branch: evolve/EV-024-frontend-ux-polish
-        session_branch: feat/S026-frontend-ux-polish
-        evolve_cycle_id: EV-024
+        checklist_blockers: null
+        checklist_status: ready
+        env_role: staging_as_live
+        report_status: ready
+        report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+        started_at: '2026-08-06'
+        started_at_iso: '2026-08-06T23:21:00Z'
+        started: '2026-08-06'
+        completed: '2026-08-06'
+        completed_at: '2026-08-06'
+        completed_at_iso: '2026-08-06T23:45:30Z'
+        session_id: S028-chat-source-ux
+        branch: evolve/EV-026-chat-source-ux
+        session_branch: evolve/EV-026-chat-source-ux
+        evolve_cycle_id: EV-026
         mode: evolve
         delta_only: true
         feature_ids:
-        - F64
-        - F65
-        - F66
-        - F67
-        - F68
-        - F69
-        feature: F64+F65+F66+F67+F68+F69
-        phase: Phase 27 (M112-M118)
-        build_head: c942971
-        required: true
-        current_action: completed
-        next_action: run 13-deploy-smoke
+        - F72
+        - F73
+        - F74
+        tip_sha: 0367eeb
+        tip_full: 0367eeb174ffd9166f1833a62e0cd8090cfa0bfa
+        tip_prev: bbff787
+        local_parity_tip: bbff787
+        local_parity:
+          tip: bbff787
+          pytest: 1765
+          vitest_chat_rag: 190
+          vitest_data_management: 740
+          build_frontend: PASS
+          typecheck: PASS
+          dm_coverage: FAIL
+          dm_coverage_disposition: QA-S028-004_accepted
+          ra009_remote_ci: waived_S028-D34
+        current_action: completed_handoff_13
+        next_action: 13-deploy-smoke in_progress (S028-D35); blocked_missing_prod_env
         askquestion_pending: false
         askquestion_pending_topic: null
-        askquestion_topic: null
-        s026_d55_decision: S026-D55
-        decision: S026-D56
-        checkpoints_phase_d: passed
-        deploy_checkpoint: approved
-        standing_checklist: docs/deploy-checklist.md
-        report: docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md
-        report_status: approved
-        secret_sync_advisory: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api before/with
-          deploy smokes
-        note: 'S026/EV-024 12-verify-deploy COMPLETE APPROVED 2026-08-05 — S026-D56 option 1 (Approve deploy checklist → start
-          13); mitigations+rollback approved; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md; deploy_checkpoint=approved;
-          cycle deploy gate still pending until 13; evolve CI watch waived_n_a — no ci.yml without open PR after #207 merge;
-          product gate satisfied by main@c942971 CI + deploy-preflight green; handoff → 13'
-        updated_at: '2026-08-05T02:00:00Z'
-        s024_baseline:
+        askquestion_cleared: S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved
+        s028_d33_decision: S028-D33
+        s028_d33_choice: option_1_proceed_12
+        s028_d34_decision: S028-D34
+        s028_d34_choices:
+          ci_path: commit_local_ci_push_then_cli_deploy
+          ra009_remote_ci: waived_local_make_ci_push
+          env_role: staging_as_live_confirmed_live_prod
+          mitigations_1_to_6: approved
+          rollback_plan: approved
+        ra009_remote_ci_waived: true
+        ra009_waiver_reason: GitHub Actions outage — local make ci-push parity; do not block on gh run watch
+        env_role_confirmed: true
+        env_role_live: prod
+        mitigations_1_to_6: approved
+        rollback_plan: approved
+        staging_tip_drift: true
+        staging_commit_deployed: c942971
+        tip_on_staging: false
+        carry_forward:
+        - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+        - 13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready
+        note: 'S028/EV-026 12-verify-deploy COMPLETE 2026-08-06T23:45:30Z — checklist ready; tip@0367eeb (local parity tip
+          @bbff787); local_parity@bbff787: pytest 1765; Vitest 190+740; build-frontend PASS; typecheck PASS; DM coverage FAIL
+          accepted QA-S028-004; RA-009 remote waived S028-D34; askquestion_pending=true topic=proceed to 13-deploy-smoke CLI
+          deploy live/prod? (S028-D2/D34); current_action=awaiting_13_cli_deploy_askquestion; 13 remains pending (NOT in_progress);
+          H4–H5 carry QA-S028-003; staging@c942971 drift=true; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+        updated_at: '2026-08-06T23:45:30Z'
+        s027_baseline:
           status: completed
-          started_at: '2026-08-03T21:16:29Z'
-          started: '2026-08-03'
-          partial_rerun_at: '2026-08-03'
-          partial_rerun_note: S024/EV-022 — 12-verify-deploy STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline;
-            after S024-D46 Approve all UJ-064–066 + F59–F61
-          session_id: S024-website-scrape-crawl
-          branch: evolve/EV-022-website-scrape-crawl
-          evolve_cycle_id: EV-022
+          session_id: S027-multilingual-embeddings
+          evolve_cycle_id: EV-025
+          started_at: '2026-08-05'
+          started: '2026-08-05'
+          completed: '2026-08-05'
+          completed_at: '2026-08-05'
+          branch: main
+          mode: delta
+          delta_only: true
+          feature_ids:
+          - F70
+          - F71
+          tip_sha: 4b7231b
+          commit_deployed: 4b7231b
+          current_action: completed
+          askquestion_pending: false
+          note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
+          updated_at: '2026-08-06T14:46:45Z'
+          s027_d64_decision: S027-D64
+          reconciled_from: S027-D63
+          session_closed: true
+          session_closed_at: '2026-08-06T14:46:45Z'
+          close_decision: S027-D64
+          report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
+          report_status: completed
+        s026_baseline:
+          status: completed
+          started_at: '2026-08-05'
+          started: '2026-08-05'
+          started_at_iso: '2026-08-05T01:30:00Z'
+          partial_rerun_at: '2026-08-05'
+          partial_rerun_note: S026/EV-024 — 12-verify-deploy STARTED (delta F64–F69); prior S024 COMPLETE nested under s024_baseline;
+            after S026-D55 11 PASS
+          session_id: S026-frontend-ux-polish
+          branch: evolve/EV-024-frontend-ux-polish
+          session_branch: feat/S026-frontend-ux-polish
+          evolve_cycle_id: EV-024
           mode: evolve
           delta_only: true
           feature_ids:
-          - F59
-          - F60
-          - F61
-          feature: F59+F60+F61
-          phase: Phase 26 (M108-M111)
+          - F64
+          - F65
+          - F66
+          - F67
+          - F68
+          - F69
+          feature: F64+F65+F66+F67+F68+F69
+          phase: Phase 27 (M112-M118)
+          build_head: c942971
+          required: true
           current_action: completed
           next_action: run 13-deploy-smoke
-          s024_d46_decision: S024-D46
-          checkpoints_phase_d: passed
-          deploy_checkpoint: pending
-          standing_checklist: docs/deploy-checklist.md
-          prior_checklist: docs/sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md
           askquestion_pending: false
-          note: S024/EV-022 12-verify-deploy COMPLETE APPROVED 2026-08-03 — S024-D47 approved mitigations + rollback + JS
-            Decision A (ship static; JS-render follow-up); standing docs/deploy-checklist.md updated; handoff → 13-deploy-smoke
-            Path A
-          completed: '2026-08-03'
-          completed_at: '2026-08-03T21:29:58Z'
-          s024_d47_decision: S024-D47
-          js_render_decision: A_ship_static_js_render_follow_up
+          askquestion_pending_topic: null
+          askquestion_topic: null
+          s026_d55_decision: S026-D55
+          decision: S026-D56
+          checkpoints_phase_d: passed
+          deploy_checkpoint: approved
+          standing_checklist: docs/deploy-checklist.md
+          report: docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md
+          report_status: approved
+          secret_sync_advisory: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api before/with
+            deploy smokes
+          note: 'S026/EV-024 12-verify-deploy COMPLETE APPROVED 2026-08-05 — S026-D56 option 1 (Approve deploy checklist →
+            start 13); mitigations+rollback approved; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md;
+            deploy_checkpoint=approved; cycle deploy gate still pending until 13; evolve CI watch waived_n_a — no ci.yml without
+            open PR after #207 merge; product gate satisfied by main@c942971 CI + deploy-preflight green; handoff → 13'
+          updated_at: '2026-08-05T02:00:00Z'
+          s024_baseline:
+            status: completed
+            started_at: '2026-08-03T21:16:29Z'
+            started: '2026-08-03'
+            partial_rerun_at: '2026-08-03'
+            partial_rerun_note: S024/EV-022 — 12-verify-deploy STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline;
+              after S024-D46 Approve all UJ-064–066 + F59–F61
+            session_id: S024-website-scrape-crawl
+            branch: evolve/EV-022-website-scrape-crawl
+            evolve_cycle_id: EV-022
+            mode: evolve
+            delta_only: true
+            feature_ids:
+            - F59
+            - F60
+            - F61
+            feature: F59+F60+F61
+            phase: Phase 26 (M108-M111)
+            current_action: completed
+            next_action: run 13-deploy-smoke
+            s024_d46_decision: S024-D46
+            checkpoints_phase_d: passed
+            deploy_checkpoint: pending
+            standing_checklist: docs/deploy-checklist.md
+            prior_checklist: docs/sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md
+            askquestion_pending: false
+            note: S024/EV-022 12-verify-deploy COMPLETE APPROVED 2026-08-03 — S024-D47 approved mitigations + rollback + JS
+              Decision A (ship static; JS-render follow-up); standing docs/deploy-checklist.md updated; handoff → 13-deploy-smoke
+              Path A
+            completed: '2026-08-03'
+            completed_at: '2026-08-03T21:29:58Z'
+            s024_d47_decision: S024-D47
+            js_render_decision: A_ship_static_js_render_follow_up
+            overall: approved
+            overall_result: approved
+            report: docs/sessions/S024-website-scrape-crawl/reports/deploy-checklist.md
+            report_status: approved
+            phase_1: pass
+            phase1_checks: completed
+            updated_at: '2026-08-03T21:29:58Z'
+          completed: '2026-08-05'
+          completed_at: '2026-08-05'
+          completed_at_iso: '2026-08-05T02:00:00Z'
+          main_tip: c942971
+          evolve_tip: d429d39
+          askquestion_cleared: 12-verify-deploy sign-off — user option 1 (Approve deploy checklist → start 13-deploy-smoke);
+            waive evolve docs CI watch
+          s026_d56_decision: S026-D56
+          user_choice: option_1_approve_checklist_start_13
           overall: approved
           overall_result: approved
-          report: docs/sessions/S024-website-scrape-crawl/reports/deploy-checklist.md
-          report_status: approved
-          phase_1: pass
-          phase1_checks: completed
-          updated_at: '2026-08-03T21:29:58Z'
-        completed: '2026-08-05'
-        completed_at: '2026-08-05'
-        completed_at_iso: '2026-08-05T02:00:00Z'
-        main_tip: c942971
-        evolve_tip: d429d39
-        askquestion_cleared: 12-verify-deploy sign-off — user option 1 (Approve deploy checklist → start 13-deploy-smoke);
-          waive evolve docs CI watch
-        s026_d56_decision: S026-D56
-        user_choice: option_1_approve_checklist_start_13
-        overall: approved
-        overall_result: approved
-        deploy_checklist_approved: true
-        ci_watch_evolve: waived_n_a
-        ci_watch_note: 'waived_n_a — no ci.yml without open PR after #207 merge; product gate satisfied by main@c942971 CI
-          + deploy-preflight green'
-        pr_number: 207
-        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-        pr_status: merged
-        pr_merged: true
-        session_closed: true
-        session_closed_at: '2026-08-05T00:57:00Z'
-        close_decision: S026-D58
+          deploy_checklist_approved: true
+          ci_watch_evolve: waived_n_a
+          ci_watch_note: 'waived_n_a — no ci.yml without open PR after #207 merge; product gate satisfied by main@c942971
+            CI + deploy-preflight green'
+          pr_number: 207
+          pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+          pr_status: merged
+          pr_merged: true
+          session_closed: true
+          session_closed_at: '2026-08-05T00:57:00Z'
+          close_decision: S026-D58
+      status: completed
+      mode: delta
+      delta_only: true
+      session_id: S030-corpus-automations
+      branch: evolve/EV-027-corpus-automations
+      session_branch: evolve/EV-027-corpus-automations
+      evolve_cycle_id: EV-027
+      feature_ids:
+      - F75
+      - F76
+      - F77
+      current_action: completed_handoff_13
+      next_action: Invoke 13-deploy-smoke
+      askquestion_pending: false
+      askquestion_pending_topic: null
+      tip: e9e2629
+      tip_sha: e9e2629
+      tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+      env_role: staging_as_live
+      env_role_live: prod
+      env_role_note: staging_as_live = live/prod; only ONE environment today; labels may say staging but it is live/prod;
+        separate staging later, not now (ADR-049)
+      staging_tip_drift: true
+      tip_on_live_stack: false
+      ev027_on_live_stack: false
+      pr_238_status: open
+      pr_238_head: b3da843
+      pr_238_merge: deferred_no_merge
+      ra009_status: tip_ci_pass
+      ready: true
+      ready_note: Checklist ready for 13-deploy-smoke with *_ENABLED false; no live cutover/enable/promote (S030-D59)
+      checklist_blockers: null
+      note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
+        ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+        tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
+        remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z.
+        [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]
+        [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
+      updated_at: '2026-08-13T14:06:25Z'
+      startup_interview_status: answered
+      started_at: '2026-08-13'
+      started_at_iso: '2026-08-13T13:55:28Z'
+      started: '2026-08-13'
+      askquestion_cleared: S030-D59 — mitigations 1–4 + rollback + checklist ready for 13 (flags off)
+      s030_d58_decision: S030-D58
+      startup_answers: &id002
+        resume: resume_12_predeploy_agents_checklist
+        env_role: staging_as_live
+        env_role_note: only ONE environment today; labels may say staging but it is live/prod; separate staging later, not
+          now (ADR-049)
+        ci_path: push_branch_watch_ci_tip_e9e2629
+        ra009: push_watch_ci_before_continuing_checks
+        scope_mode: checklist_only
+        no_live_cutover: true
+        no_enable_automations: true
+        no_ft_promote: true
+        scope_delta: none_f75_f76_f77_only
+        feature_ids:
+        - F75
+        - F76
+        - F77
+      env_role_confirmed: true
+      scope_mode: checklist_only
+      scope_delta: none
+      no_live_cutover: true
+      no_enable_automations: true
+      no_ft_promote: true
+      ra009_action: tip_ci_pass_e9e2629_run_31707365293
+      startup_blockers_cleared_into_notes: &id003
+      - 'Local tip e9e2629 is 14 commits ahead of origin; PR #238 head b3da843 has CI green but tip SHA has no remote CI yet
+        (RA-009)'
+      - env_role staging_as_live = live/prod (ADR-049)
+      - Staging drift true; EV-027 not on live stack
+      - F75/F76 enable and F77 promote need AskQuestion before live mutation
+      s030_d59_decision: S030-D59
+      tip_ci_gate: PASS
+      tip_ci_status: success
+      tip_ci_sha: e9e2629
+      tip_ci_run_id: '31707365293'
+      tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
+      checklist_status: ready
+      report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+      report_status: completed
+      deploy_checkpoint: approved
+      mitigations_1_to_4: approved
+      rollback_plan: approved
+      flags_enabled: false
+      predeploy_agent_results: &id001
+        agent1_config: FAIL
+        agent1_note: FT CD wiring gap for enable-path; checklist-only safe-off OK — mitigation accepted S030-D59
+        agent2: ADVISORY
+        agent2_note: secret sync gaps
+        agent3_volumes: PASS_ADVISORY
+        agent4_volumes: PASS_ADVISORY
+        agent6_cors: PASS
+        agent7: ADVISORY
+        agent7_note: secret sync gaps
+      completed: '2026-08-13'
+      completed_at: '2026-08-13'
+      completed_at_iso: '2026-08-13T14:06:25Z'
+      overall: approved
+      overall_result: approved
+      result: PASS
     13-deploy-smoke:
       status: completed
       started_at: '2026-08-06'
@@ -8226,10 +8331,10 @@ active_session:
   - 73
   - 72
   - 219
-  current_stage: 12-verify-deploy
-  current_stage_note: '11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.'
-  current_action: 11_complete_ready_12
-  next_action: 'Invoke 12-verify-deploy (pending; not started)'
+  current_stage: 13-deploy-smoke
+  current_stage_note: 12-verify-deploy COMPLETE (S030-D59); ready for 13-deploy-smoke (flags off; no live cutover/enable/promote).
+  current_action: ready_for_13_deploy_smoke
+  next_action: Invoke 13-deploy-smoke
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -8413,7 +8518,19 @@ active_session:
     Awaiting AskQuestion signoff for UJ-080–082 / F75–F77.'
   - 'S030 11-verify-impl 2026-08-13T01:05:11Z: Phase 1 evidence collected; presenting startup + journey AskQuestion; QA-S030-001
     tip pin still uncommitted (20260812_0016). status remains in_progress (NOT completed). [Corpus: feature-list.md §F75–F77]'
-  - 'S030-D57 2026-08-13T01:11:00Z: 11-verify-impl COMPLETE APPROVED — continue without live UI (login wall; T0+OpenAPI+components); Approve F75/F76/F77; UJ-080–082 already approved; QA-S030-001 tip pin being committed; phase_d=passed; report=verify-impl.md; handoff → 12-verify-deploy (pending). askquestion_pending=false. [Corpus: feature-list.md §F75–F77]'
+  - 'S030-D57 2026-08-13T01:11:00Z: 11-verify-impl COMPLETE APPROVED — continue without live UI (login wall; T0+OpenAPI+components);
+    Approve F75/F76/F77; UJ-080–082 already approved; QA-S030-001 tip pin being committed; phase_d=passed; report=verify-impl.md;
+    handoff → 12-verify-deploy (pending). askquestion_pending=false. [Corpus: feature-list.md §F75–F77]'
+  - 'S030 12-verify-deploy 2026-08-13T13:48:00Z: startup AskQuestion pending — do NOT mark in_progress. current_action=12_startup_interview_awaiting;
+    askquestion_pending=true topic=12_startup_interview. Blockers: tip e9e2629 14 ahead of origin / PR #238 head b3da843 CI
+    green but tip no remote CI (RA-009); env_role staging_as_live=live/prod (ADR-049); staging drift true / EV-027 not on
+    live stack; F75/F76 enable + F77 promote need AskQuestion before live mutation. [Corpus: feature-list.md §F75–F77]'
+  - 'S030 12 tip CI PASS 2026-08-13T10:00:24-04:00: tip@e9e2629 CI run 31707365293 success; then risk/rollback AskQuestion
+    answered as S030-D59.'
+  - 'S030-D59 2026-08-13T14:06:25Z: 12-verify-deploy COMPLETE APPROVED — mitigations 1–4 + rollback approved; checklist ready
+    for 13 smoke (*_ENABLED false); no live cutover/enable/promote; report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+    tip@e9e2629; env_role staging_as_live; current_stage→13-deploy-smoke; askquestion_pending=false; deploy gate still pending;
+    recommended_next=Invoke 13-deploy-smoke. [Corpus: feature-list.md §F75–F77]'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -8780,13 +8897,46 @@ active_session:
     evolve_cycle_id: EV-027
     ui_preview: continue_without_live_ui_login_wall
     inspection_basis: t0_openapi_components
-    approved_features: [F75, F76, F77]
-    journeys_approved: [UJ-080, UJ-081, UJ-082]
+    approved_features:
+    - F75
+    - F76
+    - F77
+    journeys_approved:
+    - UJ-080
+    - UJ-081
+    - UJ-082
     qa_s030_001_status: tip_pin_being_committed
     checkpoints_phase_d: passed
     next_stage: 12-verify-deploy
     report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
     corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
+  - id: S030-D59
+    summary: 12-verify-deploy close — approve mitigations 1–4 + rollback + checklist ready for 13 (*_ENABLED false; no live
+      cutover/enable/promote)
+    choice: approve_mitigations_rollback_checklist_ready_13
+    user_choice: 1–4 mitigations approved; 5 rollback approved; 6 checklist ready for 13 smoke with *_ENABLED false; no live
+      cutover/enable/promote
+    recorded_at: '2026-08-13T14:06:25Z'
+    skill_id: 12-verify-deploy
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+    tip: e9e2629
+    tip_ci_run_id: '31707365293'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
+    tip_ci_gate: PASS
+    env_role: staging_as_live
+    mitigations_1_to_4: approved
+    rollback_plan: approved
+    checklist_status: ready
+    flags_enabled: false
+    no_live_cutover: true
+    no_enable_automations: true
+    no_ft_promote: true
+    next_stage: 13-deploy-smoke
+    checkpoints_deploy: pending
+    gates_deploy: pending
+    corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md]'
   context_briefs: []
   routing_plan:
   - stage: 00-context
@@ -9489,7 +9639,7 @@ active_session:
     started_at: '2026-08-12'
     started_at_iso: '2026-08-13T00:52:00Z'
     current_action: completed
-    next_action: 'Invoke 12-verify-deploy (pending; not started)'
+    next_action: Invoke 12-verify-deploy (pending; not started)
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
     tip: 3466b2b
@@ -9498,9 +9648,10 @@ active_session:
     qa_s030_001_status: tip_pin_being_committed
     qa_s030_001_tip: '20260812_0016'
     qa_carry_forward: []
-    note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components); Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md; handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-      non-deployed local UI preview for feature inspection. tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md
-      §UJ-080–UJ-082]'
+    note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components);
+      Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md;
+      handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md
+      §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
     report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
     report_status: completed
     updated_at: '2026-08-13T01:11:00Z'
@@ -9544,19 +9695,93 @@ active_session:
     - F77
   - stage: 12-verify-deploy
     required: true
-    status: pending
+    status: completed
     mode: delta
-    skip_rationale: null
+    delta_only: true
+    session_id: S030-corpus-automations
+    branch: evolve/EV-027-corpus-automations
+    session_branch: evolve/EV-027-corpus-automations
+    evolve_cycle_id: EV-027
+    feature_ids:
+    - F75
+    - F76
+    - F77
+    current_action: completed_handoff_13
+    next_action: Invoke 13-deploy-smoke
+    askquestion_pending: false
+    askquestion_pending_topic: null
+    askquestion_cleared: S030-D59 — mitigations 1–4 + rollback + checklist ready for 13 (flags off)
+    s030_d58_decision: S030-D58
+    s030_d59_decision: S030-D59
+    tip: e9e2629
+    tip_sha: e9e2629
+    tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    tip_ci_gate: PASS
+    tip_ci_status: success
+    tip_ci_sha: e9e2629
+    tip_ci_run_id: '31707365293'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
+    env_role: staging_as_live
+    env_role_live: prod
+    env_role_confirmed: true
+    env_role_note: staging_as_live = live/prod; only ONE environment today; labels may say staging but it is live/prod; separate
+      staging later, not now (ADR-049)
+    staging_tip_drift: true
+    tip_on_live_stack: false
+    ev027_on_live_stack: false
+    pr_238_status: open
+    pr_238_head: b3da843
+    pr_238_merge: deferred_no_merge
+    ra009_status: tip_ci_pass
+    ra009_action: tip_ci_pass_e9e2629_run_31707365293
     ready: true
-    ready_note: 11-verify-impl COMPLETE APPROVED (S030-D57); invoke 12-verify-deploy when parent starts
+    ready_note: Checklist ready for 13-deploy-smoke with *_ENABLED false; no live cutover/enable/promote (S030-D59)
+    checklist_status: ready
+    checklist_blockers: null
+    report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+    report_status: completed
+    deploy_checkpoint: approved
+    mitigations_1_to_4: approved
+    rollback_plan: approved
+    flags_enabled: false
+    scope_mode: checklist_only
+    scope_delta: none
+    no_live_cutover: true
+    no_enable_automations: true
+    no_ft_promote: true
+    predeploy_agent_results: *id001
+    note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
+      ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+      tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
+      remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z.
+      [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]
+      [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
+    updated_at: '2026-08-13T14:06:25Z'
+    completed: '2026-08-13'
+    completed_at: '2026-08-13'
+    completed_at_iso: '2026-08-13T14:06:25Z'
+    startup_interview_status: answered
+    started_at: '2026-08-13'
+    started_at_iso: '2026-08-13T13:55:28Z'
+    started: '2026-08-13'
+    startup_answers: *id002
+    startup_blockers_cleared_into_notes: *id003
+    overall: approved
+    overall_result: approved
+    result: PASS
   - stage: 13-deploy-smoke
     required: true
     status: pending
     mode: delta
     skip_rationale: null
+    ready: true
+    ready_note: 12 COMPLETE (S030-D59); invoke with *_ENABLED false; no live cutover/enable/promote
+    prior_report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+    tip: e9e2629
+    env_role: staging_as_live
   handoff:
-    next_skill: 12-verify-deploy
-    next_action: 'Invoke 12-verify-deploy (pending; not started)'
+    next_skill: 13-deploy-smoke
+    next_action: Invoke 13-deploy-smoke
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -9568,12 +9793,12 @@ active_session:
     gate_b_to_c: passed
     phase_b: passed
     phase_c: passed
-    phase_note: '11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.'
-    prior_stage: 11-verify-impl
+    phase_note: 12 COMPLETE (S030-D59); checklist ready for 13 (*_ENABLED false); deploy gate pending until 13.
+    prior_stage: 12-verify-deploy
     prior_result: PASS
     e2e_report: docs/sessions/S030-corpus-automations/reports/e2e-report.md
-    report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
-    decision: S030-D57
+    report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+    decision: S030-D59
     s030_d51_decision: S030-D51
     handoff_md: docs/sessions/S030-corpus-automations/HANDOFF.md
     active_milestone: M130
@@ -9583,20 +9808,26 @@ active_session:
     m130_status: completed
     t129_10_status: completed
     t129_10_commit: '6107037'
-    tip: 3466b2b
-    tip_sha: 3466b2b
-    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
+    tip: e9e2629
+    tip_sha: e9e2629
+    tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
     tip_prev: 0b7a640
     askquestion_pending: false
-    updated_at: '2026-08-13T01:11:00Z'
+    updated_at: '2026-08-13T14:06:25Z'
     pr_238_status: open
-    note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components); Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md; handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-      user; QA-S030-001 tip pin still uncommitted (20260812_0016). tip @3466b2b. [Corpus: feature-list.md §F75–F77]'
-    recommended_next: 'Invoke 12-verify-deploy'
+    note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
+      ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+      tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
+      remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z.
+      [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]
+      [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
+    recommended_next: Invoke 13-deploy-smoke
     gate_c_to_d: passed
     s030_d55_decision: S030-D55
     phase_d: passed
     s030_d57_decision: S030-D57
+    checkpoints_deploy: pending
+    gates_deploy: pending
   askquestion_pending: false
   askquestion_pending_topic: null
   artifacts:
@@ -9666,7 +9897,16 @@ active_session:
     result: PASS
     tip: 3466b2b
     updated_at: '2026-08-13T01:11:00Z'
-  updated_at: '2026-08-13T01:11:00Z'
+  - path: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+    session_id: S030-corpus-automations
+    kind: report
+    stage: 12-verify-deploy
+    status: completed
+    result: PASS
+    tip: e9e2629
+    tip_ci_run_id: '31707365293'
+    updated_at: '2026-08-13T14:06:25Z'
+  updated_at: '2026-08-13T14:06:25Z'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout of uncommitted S030 workflow-state
   s030_d31_decision: S030-D31
   s030_d32_decision: S030-D32
@@ -9677,9 +9917,9 @@ active_session:
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
   askquestion_cleared: Gate C→D / phase_c — user A/option_1 (S030-D55)
-  tip: 3466b2b
-  tip_sha: 3466b2b
-  tip_full: 3466b2b540ffdaeb4bfaa813976b752cfacb72e2
+  tip: e9e2629
+  tip_sha: e9e2629
+  tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
   tip_prev: af07de4
   handoff_tip: ad9d1c4
   current_task: null
@@ -9692,7 +9932,8 @@ active_session:
     updated_needed: false
     owner: parent
     note: HANDOFF.md already points to 12-verify-deploy; parent commits tip pin + workflow-state
-    suggested_blurb: 'S030 11-verify-impl COMPLETE APPROVED (S030-D57) — F75–F77 approved; continue without live UI; next **12-verify-deploy**. PR #238 open no merge.'
+    suggested_blurb: 'S030 11-verify-impl COMPLETE APPROVED (S030-D57) — F75–F77 approved; continue without live UI; next
+      **12-verify-deploy**. PR #238 open no merge.'
     tip: 3466b2b
   expected_report: docs/sessions/S030-corpus-automations/reports/verification-report.md
   m129_08_status: passed
@@ -9700,7 +9941,7 @@ active_session:
   session_artifacts:
   - docs/sessions/S030-corpus-automations/reports/verification-report.md
   tip_pending_parent_commit: false
-  recommended_next: 'Invoke 12-verify-deploy'
+  recommended_next: Invoke 13-deploy-smoke
   m130_status: completed
   t130_1_status: completed
   t130_1_commit: 0e95cd2
@@ -9715,6 +9956,8 @@ active_session:
   s030_d55_decision: S030-D55
   s030_d56_decision: S030-D56
   s030_d57_decision: S030-D57
+  s030_d58_decision: S030-D58
+  s030_d59_decision: S030-D59
 sessions:
 - id: S029-security-install-tools-flake
   type: hotfix
@@ -27123,7 +27366,7 @@ stages:
     - F76
     - F77
     current_action: completed
-    next_action: 'Invoke 12-verify-deploy (pending; not started)'
+    next_action: Invoke 12-verify-deploy (pending; not started)
     tip: 3466b2b
     tip_sha: 3466b2b
     tip_full: 3466b2b540ffdaeb4bfaa813976b752cfacb72e2
@@ -27139,10 +27382,11 @@ stages:
     qa_carry_forward: []
     e2e_report: docs/sessions/S030-corpus-automations/reports/e2e-report.md
     e2e_overall: PASS
-    notes: '11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.'
-    note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components); Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md; handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-      non-deployed local UI preview for feature inspection. tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md
-      §UJ-080–UJ-082]'
+    notes: 11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.
+    note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components);
+      Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md;
+      handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md
+      §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
     updated_at: '2026-08-13T01:11:00Z'
     report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
     report_status: completed
@@ -27181,204 +27425,279 @@ stages:
     - F76
     - F77
   12-verify-deploy:
-    status: completed
-    checklist_blockers: null
-    checklist_status: ready
-    env_role: staging_as_live
-    report_status: ready
-    report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
-    started_at: '2026-08-06'
-    started_at_iso: '2026-08-06T23:21:00Z'
-    started: '2026-08-06'
-    completed: '2026-08-06'
-    completed_at: '2026-08-06'
-    completed_at_iso: '2026-08-06T23:45:30Z'
-    session_id: S028-chat-source-ux
-    branch: evolve/EV-026-chat-source-ux
-    session_branch: evolve/EV-026-chat-source-ux
-    evolve_cycle_id: EV-026
-    mode: evolve
-    delta_only: true
-    feature_ids:
-    - F72
-    - F73
-    - F74
-    tip_sha: 0367eeb
-    tip_full: 0367eeb174ffd9166f1833a62e0cd8090cfa0bfa
-    tip_prev: bbff787
-    local_parity_tip: bbff787
-    local_parity:
-      tip: bbff787
-      pytest: 1765
-      vitest_chat_rag: 190
-      vitest_data_management: 740
-      build_frontend: PASS
-      typecheck: PASS
-      dm_coverage: FAIL
-      dm_coverage_disposition: QA-S028-004_accepted
-      ra009_remote_ci: waived_S028-D34
-    current_action: completed_handoff_13
-    next_action: 13-deploy-smoke in_progress (S028-D35); blocked_missing_prod_env
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved
-    s028_d33_decision: S028-D33
-    s028_d33_choice: option_1_proceed_12
-    s028_d34_decision: S028-D34
-    s028_d34_choices:
-      ci_path: commit_local_ci_push_then_cli_deploy
-      ra009_remote_ci: waived_local_make_ci_push
-      env_role: staging_as_live_confirmed_live_prod
-      mitigations_1_to_6: approved
-      rollback_plan: approved
-    ra009_remote_ci_waived: true
-    ra009_waiver_reason: GitHub Actions outage — local make ci-push parity; do not block on gh run watch
-    env_role_confirmed: true
-    env_role_live: prod
-    mitigations_1_to_6: approved
-    rollback_plan: approved
-    staging_tip_drift: true
-    staging_commit_deployed: c942971
-    tip_on_staging: false
-    carry_forward:
-    - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
-    - 13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready
-    note: 'S028/EV-026 12-verify-deploy COMPLETE 2026-08-06T23:45:30Z — checklist ready; tip@0367eeb (local parity tip @bbff787);
-      local_parity@bbff787: pytest 1765; Vitest 190+740; build-frontend PASS; typecheck PASS; DM coverage FAIL accepted QA-S028-004;
-      RA-009 remote waived S028-D34; askquestion_pending=true topic=proceed to 13-deploy-smoke CLI deploy live/prod? (S028-D2/D34);
-      current_action=awaiting_13_cli_deploy_askquestion; 13 remains pending (NOT in_progress); H4–H5 carry QA-S028-003; staging@c942971
-      drift=true; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
-    updated_at: '2026-08-06T23:45:30Z'
-    s027_baseline:
+    s028_baseline:
       status: completed
-      session_id: S027-multilingual-embeddings
-      evolve_cycle_id: EV-025
-      started_at: '2026-08-05'
-      started: '2026-08-05'
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      branch: main
-      mode: delta
-      delta_only: true
-      feature_ids:
-      - F70
-      - F71
-      tip_sha: 4b7231b
-      commit_deployed: 4b7231b
-      current_action: completed
-      askquestion_pending: false
-      note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
-      updated_at: '2026-08-06T14:46:45Z'
-      s027_d64_decision: S027-D64
-      reconciled_from: S027-D63
-      session_closed: true
-      session_closed_at: '2026-08-06T14:46:45Z'
-      close_decision: S027-D64
-      report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
-      report_status: completed
-    s026_baseline:
-      status: completed
-      started_at: '2026-08-05'
-      started: '2026-08-05'
-      started_at_iso: '2026-08-05T01:30:00Z'
-      partial_rerun_at: '2026-08-05'
-      partial_rerun_note: S026/EV-024 — 12-verify-deploy STARTED (delta F64–F69); prior S024 COMPLETE nested under s024_baseline;
-        after S026-D55 11 PASS
-      session_id: S026-frontend-ux-polish
-      branch: evolve/EV-024-frontend-ux-polish
-      session_branch: feat/S026-frontend-ux-polish
-      evolve_cycle_id: EV-024
+      checklist_blockers: null
+      checklist_status: ready
+      env_role: staging_as_live
+      report_status: ready
+      report: docs/sessions/S028-chat-source-ux/reports/deploy-checklist.md
+      started_at: '2026-08-06'
+      started_at_iso: '2026-08-06T23:21:00Z'
+      started: '2026-08-06'
+      completed: '2026-08-06'
+      completed_at: '2026-08-06'
+      completed_at_iso: '2026-08-06T23:45:30Z'
+      session_id: S028-chat-source-ux
+      branch: evolve/EV-026-chat-source-ux
+      session_branch: evolve/EV-026-chat-source-ux
+      evolve_cycle_id: EV-026
       mode: evolve
       delta_only: true
       feature_ids:
-      - F64
-      - F65
-      - F66
-      - F67
-      - F68
-      - F69
-      feature: F64+F65+F66+F67+F68+F69
-      phase: Phase 27 (M112-M118)
-      build_head: c942971
-      required: true
-      current_action: completed
-      next_action: run 13-deploy-smoke
+      - F72
+      - F73
+      - F74
+      tip_sha: 0367eeb
+      tip_full: 0367eeb174ffd9166f1833a62e0cd8090cfa0bfa
+      tip_prev: bbff787
+      local_parity_tip: bbff787
+      local_parity:
+        tip: bbff787
+        pytest: 1765
+        vitest_chat_rag: 190
+        vitest_data_management: 740
+        build_frontend: PASS
+        typecheck: PASS
+        dm_coverage: FAIL
+        dm_coverage_disposition: QA-S028-004_accepted
+        ra009_remote_ci: waived_S028-D34
+      current_action: completed_handoff_13
+      next_action: 13-deploy-smoke in_progress (S028-D35); blocked_missing_prod_env
       askquestion_pending: false
       askquestion_pending_topic: null
-      askquestion_topic: null
-      s026_d55_decision: S026-D55
-      decision: S026-D56
-      checkpoints_phase_d: passed
-      deploy_checkpoint: approved
-      standing_checklist: docs/deploy-checklist.md
-      report: docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md
-      report_status: approved
-      secret_sync_advisory: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api before/with
-        deploy smokes
-      note: 'S026/EV-024 12-verify-deploy COMPLETE APPROVED 2026-08-05 — S026-D56 option 1 (Approve deploy checklist → start
-        13); mitigations+rollback approved; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md; deploy_checkpoint=approved;
-        cycle deploy gate still pending until 13; evolve CI watch waived_n_a — no ci.yml without open PR after #207 merge;
-        product gate satisfied by main@c942971 CI + deploy-preflight green; handoff → 13'
-      updated_at: '2026-08-05T02:00:00Z'
-      s024_baseline:
+      askquestion_cleared: S028-D34 — RA-009 local CI waiver + env_role + mitigations 1–6 + rollback approved
+      s028_d33_decision: S028-D33
+      s028_d33_choice: option_1_proceed_12
+      s028_d34_decision: S028-D34
+      s028_d34_choices:
+        ci_path: commit_local_ci_push_then_cli_deploy
+        ra009_remote_ci: waived_local_make_ci_push
+        env_role: staging_as_live_confirmed_live_prod
+        mitigations_1_to_6: approved
+        rollback_plan: approved
+      ra009_remote_ci_waived: true
+      ra009_waiver_reason: GitHub Actions outage — local make ci-push parity; do not block on gh run watch
+      env_role_confirmed: true
+      env_role_live: prod
+      mitigations_1_to_6: approved
+      rollback_plan: approved
+      staging_tip_drift: true
+      staging_commit_deployed: c942971
+      tip_on_staging: false
+      carry_forward:
+      - 'QA-S028-003: H4–H5 at 13-deploy-smoke'
+      - 13-deploy-smoke AskQuestion-gated (S028-D2) after 12 ready
+      note: 'S028/EV-026 12-verify-deploy COMPLETE 2026-08-06T23:45:30Z — checklist ready; tip@0367eeb (local parity tip @bbff787);
+        local_parity@bbff787: pytest 1765; Vitest 190+740; build-frontend PASS; typecheck PASS; DM coverage FAIL accepted
+        QA-S028-004; RA-009 remote waived S028-D34; askquestion_pending=true topic=proceed to 13-deploy-smoke CLI deploy live/prod?
+        (S028-D2/D34); current_action=awaiting_13_cli_deploy_askquestion; 13 remains pending (NOT in_progress); H4–H5 carry
+        QA-S028-003; staging@c942971 drift=true; [Corpus: feature-list.md §F72–F74] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+      updated_at: '2026-08-06T23:45:30Z'
+      s027_baseline:
         status: completed
-        started_at: '2026-08-03T21:16:29Z'
-        started: '2026-08-03'
-        partial_rerun_at: '2026-08-03'
-        partial_rerun_note: S024/EV-022 — 12-verify-deploy STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline;
-          after S024-D46 Approve all UJ-064–066 + F59–F61
-        session_id: S024-website-scrape-crawl
-        branch: evolve/EV-022-website-scrape-crawl
-        evolve_cycle_id: EV-022
+        session_id: S027-multilingual-embeddings
+        evolve_cycle_id: EV-025
+        started_at: '2026-08-05'
+        started: '2026-08-05'
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
+        branch: main
+        mode: delta
+        delta_only: true
+        feature_ids:
+        - F70
+        - F71
+        tip_sha: 4b7231b
+        commit_deployed: 4b7231b
+        current_action: completed
+        askquestion_pending: false
+        note: S027/EV-025 12-verify-deploy COMPLETE (S027-D64 reconcile) — report=docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md.
+        updated_at: '2026-08-06T14:46:45Z'
+        s027_d64_decision: S027-D64
+        reconciled_from: S027-D63
+        session_closed: true
+        session_closed_at: '2026-08-06T14:46:45Z'
+        close_decision: S027-D64
+        report: docs/sessions/S027-multilingual-embeddings/reports/deploy-checklist.md
+        report_status: completed
+      s026_baseline:
+        status: completed
+        started_at: '2026-08-05'
+        started: '2026-08-05'
+        started_at_iso: '2026-08-05T01:30:00Z'
+        partial_rerun_at: '2026-08-05'
+        partial_rerun_note: S026/EV-024 — 12-verify-deploy STARTED (delta F64–F69); prior S024 COMPLETE nested under s024_baseline;
+          after S026-D55 11 PASS
+        session_id: S026-frontend-ux-polish
+        branch: evolve/EV-024-frontend-ux-polish
+        session_branch: feat/S026-frontend-ux-polish
+        evolve_cycle_id: EV-024
         mode: evolve
         delta_only: true
         feature_ids:
-        - F59
-        - F60
-        - F61
-        feature: F59+F60+F61
-        phase: Phase 26 (M108-M111)
+        - F64
+        - F65
+        - F66
+        - F67
+        - F68
+        - F69
+        feature: F64+F65+F66+F67+F68+F69
+        phase: Phase 27 (M112-M118)
+        build_head: c942971
+        required: true
         current_action: completed
         next_action: run 13-deploy-smoke
-        s024_d46_decision: S024-D46
-        checkpoints_phase_d: passed
-        deploy_checkpoint: pending
-        standing_checklist: docs/deploy-checklist.md
-        prior_checklist: docs/sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md
         askquestion_pending: false
-        note: S024/EV-022 12-verify-deploy COMPLETE APPROVED 2026-08-03 — S024-D47 approved mitigations + rollback + JS Decision
-          A (ship static; JS-render follow-up); standing docs/deploy-checklist.md updated; handoff → 13-deploy-smoke Path
-          A
-        completed: '2026-08-03'
-        completed_at: '2026-08-03T21:29:58Z'
-        s024_d47_decision: S024-D47
-        js_render_decision: A_ship_static_js_render_follow_up
+        askquestion_pending_topic: null
+        askquestion_topic: null
+        s026_d55_decision: S026-D55
+        decision: S026-D56
+        checkpoints_phase_d: passed
+        deploy_checkpoint: approved
+        standing_checklist: docs/deploy-checklist.md
+        report: docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md
+        report_status: approved
+        secret_sync_advisory: prod.env missing — operator must sync SUPABASE_SECRET_KEY with prod.env to DO write-api before/with
+          deploy smokes
+        note: 'S026/EV-024 12-verify-deploy COMPLETE APPROVED 2026-08-05 — S026-D56 option 1 (Approve deploy checklist → start
+          13); mitigations+rollback approved; report=docs/sessions/S026-frontend-ux-polish/reports/deploy-checklist.md; deploy_checkpoint=approved;
+          cycle deploy gate still pending until 13; evolve CI watch waived_n_a — no ci.yml without open PR after #207 merge;
+          product gate satisfied by main@c942971 CI + deploy-preflight green; handoff → 13'
+        updated_at: '2026-08-05T02:00:00Z'
+        s024_baseline:
+          status: completed
+          started_at: '2026-08-03T21:16:29Z'
+          started: '2026-08-03'
+          partial_rerun_at: '2026-08-03'
+          partial_rerun_note: S024/EV-022 — 12-verify-deploy STARTED (delta F59–F61); prior S023 COMPLETE nested under s023_baseline;
+            after S024-D46 Approve all UJ-064–066 + F59–F61
+          session_id: S024-website-scrape-crawl
+          branch: evolve/EV-022-website-scrape-crawl
+          evolve_cycle_id: EV-022
+          mode: evolve
+          delta_only: true
+          feature_ids:
+          - F59
+          - F60
+          - F61
+          feature: F59+F60+F61
+          phase: Phase 26 (M108-M111)
+          current_action: completed
+          next_action: run 13-deploy-smoke
+          s024_d46_decision: S024-D46
+          checkpoints_phase_d: passed
+          deploy_checkpoint: pending
+          standing_checklist: docs/deploy-checklist.md
+          prior_checklist: docs/sessions/S023-retrieval-topk-packing/reports/deploy-checklist.md
+          askquestion_pending: false
+          note: S024/EV-022 12-verify-deploy COMPLETE APPROVED 2026-08-03 — S024-D47 approved mitigations + rollback + JS
+            Decision A (ship static; JS-render follow-up); standing docs/deploy-checklist.md updated; handoff → 13-deploy-smoke
+            Path A
+          completed: '2026-08-03'
+          completed_at: '2026-08-03T21:29:58Z'
+          s024_d47_decision: S024-D47
+          js_render_decision: A_ship_static_js_render_follow_up
+          overall: approved
+          overall_result: approved
+          report: docs/sessions/S024-website-scrape-crawl/reports/deploy-checklist.md
+          report_status: approved
+          phase_1: pass
+          phase1_checks: completed
+          updated_at: '2026-08-03T21:29:58Z'
+        completed: '2026-08-05'
+        completed_at: '2026-08-05'
+        completed_at_iso: '2026-08-05T02:00:00Z'
+        main_tip: c942971
+        evolve_tip: d429d39
+        askquestion_cleared: 12-verify-deploy sign-off — user option 1 (Approve deploy checklist → start 13-deploy-smoke);
+          waive evolve docs CI watch
+        s026_d56_decision: S026-D56
+        user_choice: option_1_approve_checklist_start_13
         overall: approved
         overall_result: approved
-        report: docs/sessions/S024-website-scrape-crawl/reports/deploy-checklist.md
-        report_status: approved
-        phase_1: pass
-        phase1_checks: completed
-        updated_at: '2026-08-03T21:29:58Z'
-      completed: '2026-08-05'
-      completed_at: '2026-08-05'
-      completed_at_iso: '2026-08-05T02:00:00Z'
-      main_tip: c942971
-      evolve_tip: d429d39
-      askquestion_cleared: 12-verify-deploy sign-off — user option 1 (Approve deploy checklist → start 13-deploy-smoke); waive
-        evolve docs CI watch
-      s026_d56_decision: S026-D56
-      user_choice: option_1_approve_checklist_start_13
-      overall: approved
-      overall_result: approved
-      deploy_checklist_approved: true
-      ci_watch_evolve: waived_n_a
-      ci_watch_note: 'waived_n_a — no ci.yml without open PR after #207 merge; product gate satisfied by main@c942971 CI +
-        deploy-preflight green'
-      pr_number: 207
-      pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
-      pr_status: merged
-      pr_merged: true
+        deploy_checklist_approved: true
+        ci_watch_evolve: waived_n_a
+        ci_watch_note: 'waived_n_a — no ci.yml without open PR after #207 merge; product gate satisfied by main@c942971 CI
+          + deploy-preflight green'
+        pr_number: 207
+        pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/207
+        pr_status: merged
+        pr_merged: true
+    status: completed
+    mode: delta
+    delta_only: true
+    session_id: S030-corpus-automations
+    branch: evolve/EV-027-corpus-automations
+    session_branch: evolve/EV-027-corpus-automations
+    evolve_cycle_id: EV-027
+    feature_ids:
+    - F75
+    - F76
+    - F77
+    current_action: completed_handoff_13
+    next_action: Invoke 13-deploy-smoke
+    askquestion_pending: false
+    askquestion_pending_topic: null
+    tip: e9e2629
+    tip_sha: e9e2629
+    tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    env_role: staging_as_live
+    env_role_live: prod
+    env_role_note: staging_as_live = live/prod; only ONE environment today; labels may say staging but it is live/prod; separate
+      staging later, not now (ADR-049)
+    staging_tip_drift: true
+    tip_on_live_stack: false
+    ev027_on_live_stack: false
+    pr_238_status: open
+    pr_238_head: b3da843
+    pr_238_merge: deferred_no_merge
+    ra009_status: tip_ci_pass
+    ready: true
+    ready_note: Checklist ready for 13-deploy-smoke with *_ENABLED false; no live cutover/enable/promote (S030-D59)
+    checklist_blockers: null
+    note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
+      ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+      tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
+      remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z.
+      [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]
+      [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
+    updated_at: '2026-08-13T14:06:25Z'
+    startup_interview_status: answered
+    started_at: '2026-08-13'
+    started_at_iso: '2026-08-13T13:55:28Z'
+    started: '2026-08-13'
+    askquestion_cleared: S030-D59 — mitigations 1–4 + rollback + checklist ready for 13 (flags off)
+    s030_d58_decision: S030-D58
+    startup_answers: *id002
+    env_role_confirmed: true
+    scope_mode: checklist_only
+    scope_delta: none
+    no_live_cutover: true
+    no_enable_automations: true
+    no_ft_promote: true
+    ra009_action: tip_ci_pass_e9e2629_run_31707365293
+    startup_blockers_cleared_into_notes: *id003
+    s030_d59_decision: S030-D59
+    tip_ci_gate: PASS
+    tip_ci_status: success
+    tip_ci_sha: e9e2629
+    tip_ci_run_id: '31707365293'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
+    checklist_status: ready
+    report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+    report_status: completed
+    deploy_checkpoint: approved
+    mitigations_1_to_4: approved
+    rollback_plan: approved
+    flags_enabled: false
+    predeploy_agent_results: *id001
+    completed: '2026-08-13'
+    completed_at: '2026-08-13'
+    completed_at_iso: '2026-08-13T14:06:25Z'
+    overall: approved
+    overall_result: approved
+    result: PASS
   13-deploy-smoke:
     status: completed
     started_at: '2026-08-06'
@@ -29615,9 +29934,9 @@ evolve_cycles:
     upgrade_note: S030-D9 — restored 03-plan-tooling and 06-tech-tooling as required (Full preset)
   routing_preset: Full
   preset: Full
-  current_stage: 12-verify-deploy
-  current_action: 11_complete_ready_12
-  next_action: 'Invoke 12-verify-deploy (pending; not started)'
+  current_stage: 13-deploy-smoke
+  current_action: ready_for_13_deploy_smoke
+  next_action: Invoke 13-deploy-smoke
   active_milestone: M130
   current_task: null
   current_task_status: completed
@@ -29626,12 +29945,17 @@ evolve_cycles:
   m130_status: completed
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: 3466b2b
-  tip_sha: 3466b2b
-  tip_full: 3466b2b540ffdaeb4bfaa813976b752cfacb72e2
+  tip: e9e2629
+  tip_sha: e9e2629
+  tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
   tip_prev: af07de4
-  current_stage_note: '11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.'
-  notes: '11-verify-impl COMPLETE APPROVED (S030-D57); phase_d=passed; next 12-verify-deploy pending.'
+  current_stage_note: 12-verify-deploy COMPLETE (S030-D59); ready for 13-deploy-smoke (flags off).
+  notes: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
+    ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+    tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
+    remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z. [Corpus:
+    feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push] [Spec:
+    docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -29771,7 +30095,11 @@ evolve_cycles:
   - 'S030-D55: EV-027/S030 Gate C→D PASS (user A/option_1) after M130 08 PASS @3466b2b; phase_c=passed; gates.c_to_d=passed;
     proceed 09-qa'
   - 'S030-D56: 11-verify-impl startup AskQuestion — resume journey+feature sign-off; UJ-080–082 T0; UI preview'
-  - 'S030-D57: 11-verify-impl COMPLETE APPROVED — continue without live UI (login wall; T0+OpenAPI+components); Approve F75/F76/F77; QA-S030-001 tip pin committing; phase_d=passed; handoff → 12-verify-deploy'
+  - 'S030-D57: 11-verify-impl COMPLETE APPROVED — continue without live UI (login wall; T0+OpenAPI+components); Approve F75/F76/F77;
+    QA-S030-001 tip pin committing; phase_d=passed; handoff → 12-verify-deploy'
+  - 'S030-12-TIP-CI-PASS: tip CI PASS @e9e2629 run 31707365293'
+  - 'S030-D59 2026-08-13T14:06:25Z: 12 COMPLETE — mitigations 1–4 + rollback + checklist ready for 13 (*_ENABLED false); deploy
+    gate pending; next Invoke 13-deploy-smoke'
   stages:
     00-context:
       status: completed
@@ -30657,7 +30985,7 @@ evolve_cycles:
       - F76
       - F77
       current_action: completed
-      next_action: 'Invoke 12-verify-deploy (pending; not started)'
+      next_action: Invoke 12-verify-deploy (pending; not started)
       tip: 3466b2b
       tip_sha: 3466b2b
       gate_c_to_d: passed
@@ -30674,9 +31002,10 @@ evolve_cycles:
       report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
       report_status: completed
       scope: EV-027 F75–F77 dispose QA-S030-001 + signoff
-      note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components); Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md; handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-        non-deployed local UI preview for feature inspection. tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md
-        §UJ-080–UJ-082]'
+      note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components);
+        Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed;
+        report=docs/sessions/S030-corpus-automations/reports/verify-impl.md; handoff → 12-verify-deploy (leave pending). tip
+        @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
       updated_at: '2026-08-13T01:11:00Z'
       s030_d56_decision: S030-D56
       startup_answers:
@@ -30716,18 +31045,105 @@ evolve_cycles:
       - F76
       - F77
     12-verify-deploy:
-      status: pending
+      status: completed
       mode: delta
-      ready: true
-      ready_note: 11-verify-impl COMPLETE APPROVED (S030-D57); invoke when parent starts — not auto-started
+      delta_only: true
       session_id: S030-corpus-automations
+      branch: evolve/EV-027-corpus-automations
+      session_branch: evolve/EV-027-corpus-automations
       evolve_cycle_id: EV-027
+      feature_ids:
+      - F75
+      - F76
+      - F77
+      current_action: completed_handoff_13
+      next_action: Invoke 13-deploy-smoke
+      askquestion_pending: false
+      askquestion_pending_topic: null
+      tip: e9e2629
+      tip_sha: e9e2629
+      tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+      env_role: staging_as_live
+      env_role_live: prod
+      env_role_note: staging_as_live = live/prod; only ONE environment today; labels may say staging but it is live/prod;
+        separate staging later, not now (ADR-049)
+      staging_tip_drift: true
+      tip_on_live_stack: false
+      ev027_on_live_stack: false
+      pr_238_status: open
+      pr_238_head: b3da843
+      pr_238_merge: deferred_no_merge
+      ra009_status: tip_ci_pass
+      ready: true
+      ready_note: Checklist ready for 13-deploy-smoke with *_ENABLED false; no live cutover/enable/promote (S030-D59)
+      checklist_blockers: null
+      note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
+        ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+        tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
+        remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z.
+        [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]
+        [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
+      updated_at: '2026-08-13T14:06:25Z'
+      startup_interview_status: answered
+      started_at: '2026-08-13'
+      started_at_iso: '2026-08-13T13:55:28Z'
+      started: '2026-08-13'
+      askquestion_cleared: S030-D59 — mitigations 1–4 + rollback + checklist ready for 13 (flags off)
+      s030_d58_decision: S030-D58
+      startup_answers: *id002
+      env_role_confirmed: true
+      scope_mode: checklist_only
+      scope_delta: none
+      no_live_cutover: true
+      no_enable_automations: true
+      no_ft_promote: true
+      ra009_action: tip_ci_pass_e9e2629_run_31707365293
+      startup_blockers_cleared_into_notes: *id003
+      s030_d59_decision: S030-D59
+      tip_ci_gate: PASS
+      tip_ci_status: success
+      tip_ci_sha: e9e2629
+      tip_ci_run_id: '31707365293'
+      tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
+      checklist_status: ready
+      report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+      report_status: completed
+      deploy_checkpoint: approved
+      mitigations_1_to_4: approved
+      rollback_plan: approved
+      flags_enabled: false
+      predeploy_agent_results: *id001
+      completed: '2026-08-13'
+      completed_at: '2026-08-13'
+      completed_at_iso: '2026-08-13T14:06:25Z'
+      overall: approved
+      overall_result: approved
+      result: PASS
     13-deploy-smoke:
       status: pending
       mode: delta
       session_id: S030-corpus-automations
       evolve_cycle_id: EV-027
+      ready: true
+      ready_note: 12 COMPLETE (S030-D59); invoke with *_ENABLED false; no live cutover/enable/promote
+      prior_report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+      tip: e9e2629
+      env_role: staging_as_live
+      updated_at: '2026-08-13T14:06:25Z'
   artifacts:
+  - path: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+    kind: stage-report
+    type: report
+    status: completed
+    stage: 12-verify-deploy
+    skill_id: 12-verify-deploy
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    result: PASS
+    tip: e9e2629
+    tip_ci_run_id: '31707365293'
+    recorded_at: '2026-08-13T14:06:25Z'
+    note: S030-D59 12 COMPLETE — checklist ready for 13 (flags off)
   - path: docs/sessions/S030-corpus-automations/
     kind: session_dir
     status: created
@@ -30870,7 +31286,7 @@ evolve_cycles:
   phase_note: Phase D — 11-verify-impl in_progress; Phase 1 evidence collected; presenting 11 startup + journey AskQuestion;
     QA-S030-001 tip pin still uncommitted in working tree (20260812_0016).
   s030_d30_decision: S030-D30
-  updated_at: '2026-08-13T01:05:11Z'
+  updated_at: '2026-08-13T14:06:25Z'
   askquestion_cleared: Gate C→D / phase_c — user A/option_1 (S030-D55)
   progress_note: S030/EV-027 11-verify-impl in_progress — Phase 1 evidence collected; presenting 11 startup + journey AskQuestion;
     QA-S030-001 tip pin still uncommitted in working tree (20260812_0016).
@@ -30945,10 +31361,11 @@ evolve_cycles:
     pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     updated_needed: false
     note: HANDOFF.md already synced to 12-verify-deploy; parent commits tip pin + workflow-state
-    suggested_blurb: 'S030 11-verify-impl COMPLETE APPROVED (S030-D57) — F75–F77 approved; next **12-verify-deploy**. PR #238 open.'
+    suggested_blurb: 'S030 11-verify-impl COMPLETE APPROVED (S030-D57) — F75–F77 approved; next **12-verify-deploy**. PR #238
+      open.'
   m129_08_status: passed
   tip_pending_parent_commit: false
-  recommended_next: 'Invoke 12-verify-deploy'
+  recommended_next: Invoke 13-deploy-smoke
   m130_completed: '2026-08-12'
   m130_completed_at: '2026-08-12T22:56:04Z'
   t130_1_commit: 0e95cd2
@@ -56230,7 +56647,132 @@ decisions_log:
   next_stage: 12-verify-deploy
   report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
   note: QA-S030-001 tip pin being committed; leave 12–13 pending; no commit from WSM
+- id: S030-12-STARTUP-INTERVIEW
+  date: '2026-08-13'
+  skill: 12-verify-deploy
+  skill_id: 12-verify-deploy
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 12-verify-deploy startup interview pending — do not mark in_progress
+  status: superseded_by_S030-D58
+  askquestion_pending: false
+  askquestion_pending_topic: 12_startup_interview
+  current_action: 12_startup_interview_awaiting
+  tip: e9e2629
+  pr_238_head: b3da843
+  blockers:
+  - 'Local tip e9e2629 is 14 commits ahead of origin; PR #238 head b3da843 has CI green but tip SHA has no remote CI yet (RA-009)'
+  - env_role staging_as_live = live/prod (ADR-049)
+  - Staging drift true; EV-027 not on live stack
+  - F75/F76 enable and F77 promote need AskQuestion before live mutation
+  recorded_at: '2026-08-13T13:48:00Z'
+  note: 'S030/EV-027 12-verify-deploy STARTUP INTERVIEW AWAITING — status remains pending (NOT in_progress). askquestion_pending=true
+    topic=12_startup_interview; current_action=12_startup_interview_awaiting. Blockers for interview context: (1) Local tip
+    e9e2629 is 14 commits ahead of origin; PR #238 head b3da843 has CI green but tip SHA has no remote CI yet (RA-009); (2)
+    env_role staging_as_live = live/prod (ADR-049); (3) Staging drift true; EV-027 not on live stack; (4) F75/F76 enable and
+    F77 promote need AskQuestion before live mutation. updated_at=2026-08-13T13:48:00Z. [Corpus: feature-list.md §F75–F77]
+    [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]'
+  superseded_at: '2026-08-13T13:55:28Z'
+- id: S030-D58
+  date: '2026-08-13'
+  skill: 12-verify-deploy
+  skill_id: 12-verify-deploy
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 12-verify-deploy startup AskQuestion answered — mark in_progress; current_action=12_push_watch_ci; askquestion_pending=false
+  user_choice: 1 resume_12_predeploy_agents_checklist; 2 env_role=staging_as_live (ADR-049 single env=live/prod); 3 push+watch
+    CI tip e9e2629 (RA-009); 4 checklist_only no live cutover/enable automations/FT promote; 5 scope F75–F77 only (no delta)
+  status: confirmed
+  decided_at: '2026-08-13T09:54:00-04:00'
+  recorded_at: '2026-08-13T13:55:28Z'
+  startup_answers:
+    resume: resume_12_predeploy_agents_checklist
+    env_role: staging_as_live
+    env_role_note: only ONE environment today; labels may say staging but it is live/prod; separate staging later, not now
+      (ADR-049)
+    ci_path: push_branch_watch_ci_tip_e9e2629
+    ra009: push_watch_ci_before_continuing_checks
+    scope_mode: checklist_only
+    no_live_cutover: true
+    no_enable_automations: true
+    no_ft_promote: true
+    scope_delta: none_f75_f76_f77_only
+    feature_ids:
+    - F75
+    - F76
+    - F77
+  prior_startup_blockers_cleared_into_notes:
+  - 'Local tip e9e2629 is 14 commits ahead of origin; PR #238 head b3da843 has CI green but tip SHA has no remote CI yet (RA-009)'
+  - env_role staging_as_live = live/prod (ADR-049)
+  - Staging drift true; EV-027 not on live stack
+  - F75/F76 enable and F77 promote need AskQuestion before live mutation
+  current_action: 12_push_watch_ci
+  askquestion_pending: false
+  tip: e9e2629
+  note: 'S030/EV-027 12-verify-deploy IN_PROGRESS (S030-D58) — startup AskQuestion answered; current_action=12_push_watch_ci;
+    askquestion_pending=false. Answers: (1) Resume 12 — pre-deploy agents + checklist; (2) env_role=staging_as_live (single
+    env today = live/prod; separate staging later — ADR-049); (3) Push branch + watch CI on tip e9e2629 before continuing
+    checks (RA-009); (4) Checklist only — no live cutover / no enable automations / no FT promote in 12; (5) Scope F75–F77
+    only (no delta). Prior startup interview blockers cleared into notes (acknowledged, not blocking start): Local tip e9e2629
+    is 14 commits ahead of origin; PR #238 head b3da843 has CI green but tip SHA has no remote CI yet (RA-009); env_role staging_as_live
+    = live/prod (ADR-049); Staging drift true; EV-027 not on live stack; F75/F76 enable and F77 promote need AskQuestion before
+    live mutation. tip@e9e2629; PR #238 open head b3da843 merge deferred. updated_at=2026-08-13T13:55:28Z. [Corpus: feature-list.md
+    §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push] [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
+    [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
+- id: S030-D59
+  date: '2026-08-13'
+  skill: 12-verify-deploy
+  skill_id: 12-verify-deploy
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  decision: 12-verify-deploy COMPLETE — approve mitigations 1–4 + rollback + checklist ready for 13-deploy-smoke (*_ENABLED
+    false; no live cutover/enable/promote)
+  user_choice: 1–4 mitigations approved; 5 rollback approved; 6 checklist ready for 13 smoke with *_ENABLED false; no live
+    cutover/enable/promote
+  status: confirmed
+  recorded_at: '2026-08-13T14:06:25Z'
+  tip: e9e2629
+  tip_ci_gate: PASS
+  tip_ci_status: success
+  tip_ci_run_id: '31707365293'
+  tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
+  env_role: staging_as_live
+  mitigations_1_to_4: approved
+  rollback_plan: approved
+  checklist_status: ready
+  flags_enabled: false
+  no_live_cutover: true
+  no_enable_automations: true
+  no_ft_promote: true
+  report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+  stage_12_status: completed
+  stage_12_completed: true
+  stage_13_status: pending
+  checkpoints_deploy: pending
+  gates_deploy: pending
+  askquestion_pending: false
+  current_stage: 13-deploy-smoke
+  current_action: ready_for_13_deploy_smoke
+  recommended_next: Invoke 13-deploy-smoke
+  commit: none
+  note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
+    ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
+    tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
+    remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z. [Corpus:
+    feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push] [Spec:
+    docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
 artifacts:
+- path: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
+  session_id: S030-corpus-automations
+  kind: report
+  stage: 12-verify-deploy
+  status: completed
+  result: PASS
+  tip: e9e2629
+  tip_ci_run_id: '31707365293'
+  evolve_cycle_id: EV-027
+  updated_at: '2026-08-13T14:06:25Z'
+  note: S030-D59 12-verify-deploy COMPLETE — checklist ready for 13
 - path: docs/sessions/S030-corpus-automations/reports/qa-report.md
   session_id: S030-corpus-automations
   stage: 09-qa
@@ -60053,18 +60595,19 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: ad9d1c4
-    tip_sha: ad9d1c4
-    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-    head_sha: ad9d1c4207fd192894117f80804cb499f9dca3bc
-    tip_prev: 0b7a640
+    tip: e9e2629
+    tip_sha: e9e2629
+    tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    head_sha: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    tip_prev: 8986300
+    tip_prev_full: 8986300fe3e80d94c2cb74e2f891fd728eac9a87
     pushed: false
     origin_tip: unknown
     local_ahead: unknown
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    updated_at: '2026-08-12T22:56:04Z'
-    note: 'branch tip @ad9d1c4 M130 COMPLETE (T130.1–T130.4); Phase 30 07 done; next 08-verify-build; PR #238 open leave unmerged
+    updated_at: '2026-08-13T01:18:53Z'
+    note: 'branch tip @e9e2629 (11-verify-impl; 8986300 QA-S030-001 + e9e2629 verify-impl docs); PR #238 open leave unmerged
       (no merge)'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
@@ -66724,8 +67267,56 @@ git_history:
     note: 08-verify-build PASS commit after OpenAPI AutomationRunListResponse maxItems:100 KICS fix; phase_c / Gate C→D remain
       pending
     corpus: '[Corpus: feature-list.md §F75–F77]'
-  notes: 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no
-    merge; tip ad9d1c4; PR #238 open leave unmerged (no merge)'
+  - sha: 8986300
+    sha_full: 8986300fe3e80d94c2cb74e2f891fd728eac9a87
+    full_sha: 8986300fe3e80d94c2cb74e2f891fd728eac9a87
+    branch: evolve/EV-027-corpus-automations
+    message: 'fix: pin alembic head assert to freshness migration (QA-S030-001)'
+    stage: 11-verify-impl
+    skill_id: 11-verify-impl
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    feature_ids:
+    - F75
+    - F76
+    - F77
+    files_changed:
+    - tests/integration/test_ev002_schema.py
+    files_changed_count: 1
+    timestamp: '2026-08-12T21:18:33-04:00'
+    recorded_at: '2026-08-13T01:18:53Z'
+    pushed: false
+    note: QA-S030-001 alembic head assert pinned to freshness migration 20260812_0016
+    corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/test-plan.md]'
+  - sha: e9e2629
+    sha_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    full_sha: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    branch: evolve/EV-027-corpus-automations
+    message: 'docs: complete implementation verification for corpus automations (F75–F77)'
+    stage: 11-verify-impl
+    skill_id: 11-verify-impl
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    feature_ids:
+    - F75
+    - F76
+    - F77
+    files_changed:
+    - docs/acceptance-criteria.md
+    - docs/sessions/S030-corpus-automations/HANDOFF.md
+    - docs/sessions/S030-corpus-automations/reports/e2e-report.md
+    - docs/sessions/S030-corpus-automations/reports/qa-report.md
+    - docs/sessions/S030-corpus-automations/reports/verify-impl.md
+    - docs/sessions/S030-corpus-automations/routing-plan.md
+    - workflow-state.yaml
+    files_changed_count: 7
+    timestamp: '2026-08-12T21:18:33-04:00'
+    recorded_at: '2026-08-13T01:18:53Z'
+    pushed: false
+    note: 11-verify-impl docs/signoff commit; tip advanced to e9e2629
+    corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
+  notes: 'S030/EV-027 tip @e9e2629 (11-verify-impl); prior M130 tip ad9d1c4; commits 8986300 + e9e2629 recorded; PR #238 open
+    leave unmerged (no merge)'
   pull_requests:
     '195':
       number: 195
@@ -67030,4 +67621,5 @@ notes: '2026-08-05T15:28:00Z S027/EV-025: PR #210 (PR-68) OPEN_AWAIT_CI (https:/
 
   2026-08-12T22:56:04Z S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR
   #238 open no merge'
-askquestion_pending: false
+askquestion_pending: true
+askquestion_pending_topic: 12_startup_interview

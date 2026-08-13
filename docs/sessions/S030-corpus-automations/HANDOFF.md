@@ -1,33 +1,34 @@
 # HANDOFF — S030-corpus-automations
 
-**Updated:** 2026-08-12  
+**Updated:** 2026-08-13  
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** post-11 (QA-S030-001 tip pin + verify-impl)  
+**Tip:** `e9e2629` (CI green)  
 **Issues:** #73 · #72 · #219  
 
 ## Position
 
-- Phase C **07+08** complete; Gate C→D **PASS** (S030-D55)
-- **09-qa** COMPLETE — FAIL disposed via tip pin at 11
-- **10-e2e** COMPLETE **PASS** — `reports/e2e-report.md`
-- **11-verify-impl** COMPLETE **PASS** — `reports/verify-impl.md` (UJ-080–082 + F75–F77 approved)
-- **Next:** **12-verify-deploy**
+- Phase D verify complete (09–11)
+- **12-verify-deploy** COMPLETE **ready** — `reports/deploy-checklist.md`
+- **env_role:** `staging_as_live` = **live/prod** (sole stack; separate staging later)
+- **Next:** **13-deploy-smoke** (flags off; AskQuestion before enable/promote)
 - PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open (no merge)
 
-## Decisions (11)
+## Decisions (12)
 
 | ID | Choice |
 |----|--------|
-| S030-D56 | Resume 11; journeys approved; UI preview → login wall → continue without live UI |
-| S030-D57 | Approve F75–F77; commit tip pin + close 11 |
+| S030-D58 | Resume 12; staging_as_live; push+CI; checklist-only; F75–F77 scope |
+| S030-D59 | Approve mitigations 1–4 + rollback; checklist **ready** (flags off) |
+
+## Tip CI
+
+https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
 
 ## Next
 
 ```
 Enter this into the chat to continue:
-@.cursor/skills/12-verify-deploy/SKILL.md
+@.cursor/skills/13-deploy-smoke/SKILL.md
 ```
-
-Leave PR #238 open until deploy path decides merge.
