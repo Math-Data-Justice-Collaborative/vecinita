@@ -8331,10 +8331,10 @@ active_session:
   - 73
   - 72
   - 219
-  current_stage: 13-deploy-smoke
-  current_stage_note: Baseline 13 COMPLETE PASS (S030-D61) — H2 alembic expected_fail_accepted; EV-027 NOT deployed; cutover still pending.
-  current_action: baseline_13_complete
-  next_action: AskQuestion close/15/ship-path (do not invent ship/enable answers)
+  current_stage: 15-service-health
+  current_stage_note: 15-service-health COMPLETE OVERALL PASS; awaiting S030-D64 (close vs ship-path). Phase D verify/deploy baseline done; ship still optional. Flags OFF; EV-027 NOT deployed.
+  current_action: await_s030_d64_close_or_ship
+  next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -8550,6 +8550,29 @@ active_session:
     NO cutover, NO enable, NO FT promote; askquestion_pending=false; current_action=baseline_13_complete; next=AskQuestion
     close/15/ship-path; tip note local fee4d12 may be ahead of origin 588dab6; deploy gate passed_baseline_only (cutover still
     pending; EV-027 NOT deployed). Do not invent ship/enable answers. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
+  - 'S030 13 finalize 2026-08-13T15:08:00Z: deploy-smoke.md / HANDOFF / routing-plan confirmed COMPLETE PASS baseline_only;
+    S030-D61 approved; stages.13 remains completed; askquestion_pending=true topic=S030-D62_next_after_baseline_13; current_action=await_s030_d62_next;
+    S030-D62 PENDING — close vs 15 vs ship-path; do not invent D62 answer. [Corpus: feature-list.md §F75–F77]'
+  - 'S030-D62 2026-08-13T15:41:00Z: APPROVED option_1_15_service_health (user "go" after AskQuestion recommended option 1) —
+    next=15-service-health; flags remain OFF; NO cutover/enable/FT promote; askquestion_pending=false; current_stage→15-service-health;
+    current_action=15_startup; env_role staging_as_live=live/prod; tip note local 0411feb/fee4d12 2 ahead of origin 588dab6
+    (may push as part of 15 prep if skill requires tip CI). Do not invent further answers. [Corpus: feature-list.md §F75–F77]
+    [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]'
+  - 'S030 15-service-health START 2026-08-13T15:43:00Z: in_progress; current_action=15_startup_interview; askquestion_pending=true topic=S030-D63_15_interview;
+    env_role staging_as_live=live/prod already known; prior 13 baseline smoke evidence available (H0c/H1/H3/H4/H5 PASS; H2 alembic
+    accepted as expected tip-drift; H2 pool PASS; tip_smoke 588dab6 CI PASS). Flags remain OFF; no cutover/enable/FT promote.
+    Do NOT invent S030-D63 interview answers. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
+    [Corpus: no-live-prod-corpus-push]'
+  - 'S030-D63 2026-08-13T22:36:00Z: APPROVED (user "Proceed with recommended please") — D63a option_1 post-baseline package (H0ci main advisory
+    + H1 + H2 pool + H3 + H4–H5; H2 alembic known advisory; no ingest; no enable); D63b option_1 lean (one H3 ask; no H6; no
+    corpus write); D63c option_1 proceed now on live URLs from .env (do not require push tip first). askquestion_pending=false;
+    current_action=15_run_checks; stages.15 remains in_progress. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
+    [Corpus: no-live-prod-corpus-push]'
+  - 'S030 15-service-health COMPLETE 2026-08-13T22:40:00Z: OVERALL PASS — H0ci advisory PASS (main run 31178547214 @8ae9d17); H1 PASS chat+write;
+    H2 pool PASS / alembic advisory 20260806_0014 vs 20260812_0016; H3 PASS ~74.2s en; H4–H5 PASS; Infra PASS; Behavior PASS;
+    remediation none; no enable/cutover/FT promote; report=docs/sessions/S030-corpus-automations/reports/service-health.md; stages.15 completed PASS; current_action=await_s030_d64_close_or_ship;
+    askquestion_pending=true topic=S030-D64; Phase D verify/deploy baseline done — ship still optional. Do not invent D64.
+    [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -9022,6 +9045,163 @@ active_session:
     baseline_13_result: PASS
     report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
     note: 'S030-D61 APPROVED — accept H2 alembic mismatch as EXPECTED tip-drift advisory; baseline 13 COMPLETE PASS; cutover still pending. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
+  - id: S030-D62
+    summary: 'Next after baseline 13 COMPLETE — run 15-service-health (flags off; no cutover/enable/promote)'
+    status: approved
+    decided: true
+    recorded_at: '2026-08-13T15:08:00Z'
+    decided_at: '2026-08-13T15:41:00Z'
+    skill_id: 16-evolve
+    prior_skill_id: 13-deploy-smoke
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    topic: S030-D62_next_after_baseline_13
+    choice: option_1_15_service_health
+    user_choice: option_1_15_service_health
+    user_utterance: go
+    askquestion_pending: false
+    askquestion_pending_topic: null
+    askquestion_cleared: S030-D62
+    options_hint:
+    - close_session
+    - run_15_service_health
+    - ship_path_cutover
+    selected_option: run_15_service_health
+    baseline_13_result: PASS
+    s030_d61_status: approved
+    flags_enabled: false
+    no_cutover: true
+    no_enable: true
+    no_ft_promote: true
+    enable_promote_still_gated: true
+    ev027_deployed: false
+    env_role: staging_as_live
+    env_role_live: prod
+    next_stage: 15-service-health
+    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+    note: 'S030-D62 APPROVED — option_1_15_service_health; invoke 15 with flags OFF; no cutover/enable/promote. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
+  - id: S030-D63
+    summary: '15-service-health startup interview — recommended package/lean/proceed-now approved'
+    status: approved
+    decided: true
+    recorded_at: '2026-08-13T15:43:00Z'
+    decided_at: '2026-08-13T22:36:00Z'
+    skill_id: 15-service-health
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    topic: S030-D63_15_interview
+    user_utterance: Proceed with recommended please
+    askquestion_pending: false
+    askquestion_pending_topic: null
+    askquestion_cleared: S030-D63
+    env_role: staging_as_live
+    env_role_live: prod
+    env_role_known: true
+    prior_13_baseline:
+      result: PASS
+      path_label: baseline_only_flags_off
+      tip_smoke: 588dab6
+      tip_ci_run_id: '31709704821'
+      h0c: pass
+      h1: pass
+      h2_pool: pass
+      h2_alembic: expected_fail_accepted
+      h3: pass
+      h3b: pass
+      h4: pass
+      h5: pass
+      report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+      s030_d61_choice: accept_h2_expected_tip_drift
+    flags_enabled: false
+    enable_promote_still_gated: true
+    ev027_deployed: false
+    d63a:
+      id: S030-D63a
+      status: approved
+      choice: option_1_post_baseline_package
+      package:
+      - H0ci_main_advisory
+      - H1
+      - H2_pool
+      - H3
+      - H4
+      - H5
+      h2_alembic: known_advisory
+      no_ingest: true
+      no_enable: true
+    d63b:
+      id: S030-D63b
+      status: approved
+      choice: option_1_lean
+      one_h3_ask: true
+      h6: false
+      no_corpus_write: true
+    d63c:
+      id: S030-D63c
+      status: approved
+      choice: option_1_proceed_now_live_env
+      require_push_tip_first: false
+      live_urls_from: .env
+    note: 'S030-D63 APPROVED — D63a/b/c option 1 recommended; proceed 15_run_checks. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
+  - id: S030-D63a
+    summary: '15 package — post-baseline H0ci(advisory)+H1+H2pool+H3+H4–H5; H2 alembic advisory; no ingest/enable'
+    status: approved
+    decided: true
+    recorded_at: '2026-08-13T22:36:00Z'
+    decided_at: '2026-08-13T22:36:00Z'
+    parent: S030-D63
+    choice: option_1_post_baseline_package
+    skill_id: 15-service-health
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+  - id: S030-D63b
+    summary: '15 lean — one H3 ask; no H6; no corpus write'
+    status: approved
+    decided: true
+    recorded_at: '2026-08-13T22:36:00Z'
+    decided_at: '2026-08-13T22:36:00Z'
+    parent: S030-D63
+    choice: option_1_lean
+    skill_id: 15-service-health
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+  - id: S030-D63c
+    summary: '15 proceed now on live URLs from .env — do not require push tip first'
+    status: approved
+    decided: true
+    recorded_at: '2026-08-13T22:36:00Z'
+    decided_at: '2026-08-13T22:36:00Z'
+    parent: S030-D63
+    choice: option_1_proceed_now_live_env
+    require_push_tip_first: false
+    live_urls_from: .env
+    skill_id: 15-service-health
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+  - id: S030-D64
+    summary: 'Next after 15 COMPLETE PASS — close session vs ship-path (pending)'
+    status: pending
+    recorded_at: '2026-08-13T22:40:00Z'
+    skill_id: 15-service-health
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    topic: S030-D64_close_vs_ship
+    askquestion_pending: true
+    askquestion_pending_topic: S030-D64
+    options_hint:
+    - close_session
+    - ship_path_cutover
+    stage_15_result: PASS
+    overall: pass
+    infra: pass
+    behavior: pass
+    remediation: none
+    enable_promote_still_gated: true
+    ev027_deployed: false
+    phase_d_baseline_done: true
+    ship_still_optional: true
+    report: docs/sessions/S030-corpus-automations/reports/service-health.md
+    note: 'S030-D64 PENDING — do not invent answer; AskQuestion close vs ship-path. Phase D verify/deploy baseline done; ship still optional. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
   context_briefs: []
   routing_plan:
   - stage: 00-context
@@ -9868,8 +10048,8 @@ active_session:
     completed: '2026-08-13'
     completed_at: '2026-08-13'
     completed_at_iso: '2026-08-13T15:05:00Z'
-    current_action: baseline_13_complete
-    next_action: AskQuestion close/15/ship-path (do not invent ship/enable answers)
+    current_action: completed
+    next_action: handoff_15_service_health
     tip: fee4d12
     tip_sha: fee4d12
     tip_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
@@ -9886,12 +10066,15 @@ active_session:
     env_role_live: prod
     askquestion_pending: false
     askquestion_pending_topic: null
-    askquestion_cleared: S030-D61
+    askquestion_cleared: S030-D62
     s030_d60_decision: S030-D60
     s030_d60_status: approved
     s030_d61_decision: S030-D61
     s030_d61_status: approved
     s030_d61_choice: accept_h2_expected_tip_drift
+    s030_d62_decision: S030-D62
+    s030_d62_status: approved
+    s030_d62_choice: option_1_15_service_health
     report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
     report_status: completed
     smoke:
@@ -9910,11 +10093,122 @@ active_session:
     ev027_deployed: false
     deploy_gate: passed_baseline_only
     cutover_pending: true
-    updated_at: '2026-08-13T15:05:00Z'
+    updated_at: '2026-08-13T15:08:00Z'
+    s030_d62_status: approved
+    s030_d62_choice: option_1_15_service_health
+    askquestion_pending: false
+    askquestion_pending_topic: null
+    askquestion_cleared: S030-D62
+    current_action: completed
+    next_action: handoff_15_service_health
+  - stage: 15-service-health
+    required: true
+    status: completed
+    mode: delta
+    skip_rationale: null
+    started_at: '2026-08-13'
+    started_at_iso: '2026-08-13T15:43:00Z'
+    started: '2026-08-13'
+    completed: '2026-08-13'
+    completed_at: '2026-08-13'
+    completed_at_iso: '2026-08-13T22:40:00Z'
+    ready_to_invoke: false
+    invoke_readiness: completed
+    current_action: await_s030_d64_close_or_ship
+    next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
+    result: PASS
+    overall: pass
+    infra: pass
+    behavior: pass
+    remediation: none
+    s030_d62_decision: S030-D62
+    s030_d62_status: approved
+    s030_d62_choice: option_1_15_service_health
+    s030_d63_decision: S030-D63
+    s030_d63_status: approved
+    s030_d63a_choice: option_1_post_baseline_package
+    s030_d63b_choice: option_1_lean
+    s030_d63c_choice: option_1_proceed_now_live_env
+    path_label: baseline_only_flags_off
+    package: post_baseline
+    package_tiers:
+    - H0ci_main_advisory
+    - H1
+    - H2_pool
+    - H3
+    - H4
+    - H5
+    h2_alembic: known_advisory
+    no_ingest: true
+    lean: true
+    one_h3_ask: true
+    h6: false
+    no_corpus_write: true
+    require_push_tip_first: false
+    live_urls_from: .env
+    flags_enabled: false
+    no_cutover: true
+    no_enable_automations: true
+    no_ft_promote: true
+    enable_promote_still_gated: true
+    ev027_deployed: false
+    env_role: staging_as_live
+    env_role_live: prod
+    env_role_known: true
+    askquestion_pending: true
+    askquestion_pending_topic: S030-D64
+    askquestion_cleared: S030-D63
+    s030_d64_decision: S030-D64
+    s030_d64_status: pending
+    health_tiers:
+      h0ci: pass
+      h0ci_advisory: true
+      h0ci_run_id: '31178547214'
+      h0ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31178547214
+      h0ci_sha: 8ae9d17
+      h1: pass
+      h1_chat: pass
+      h1_write: pass
+      h2_pool: pass
+      h2_alembic: advisory
+      h2_alembic_live: '20260806_0014'
+      h2_alembic_tip_head: '20260812_0016'
+      h3: pass
+      h3_duration_s: 74.2
+      h3_lang: en
+      h4: pass
+      h5: pass
+    tip: 0411feb
+    tip_sha: 0411feb
+    tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
+    tip_docs: fee4d12
+    tip_smoke: 588dab6
+    tip_drift: pending_push
+    local_ahead: 2
+    origin_tip: 588dab6
+    tip_ci_status: success
+    tip_ci_run_id: '31709704821'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+    tip_ci_sha: 588dab6
+    tip_note: 'D63c proceeded on live .env without tip push; 15 PASS recorded'
+    prior_13_baseline_available: true
+    prior_13_h0c: pass
+    prior_13_h1: pass
+    prior_13_h2_pool: pass
+    prior_13_h2_alembic: expected_fail_accepted
+    prior_13_h3: pass
+    prior_13_h4: pass
+    prior_13_h5: pass
+    report: docs/sessions/S030-corpus-automations/reports/service-health.md
+    report_status: completed
+    phase_d_baseline_done: true
+    ship_still_optional: true
+    note: 'S030 15 COMPLETE OVERALL PASS; awaiting S030-D64 close vs ship-path; Phase D baseline done; ship optional. [Corpus: feature-list.md §F75–F77]'
+    updated_at: '2026-08-13T22:40:00Z'
 
   handoff:
-    next_skill: 13-deploy-smoke
-    next_action: AskQuestion close/15/ship-path (do not invent ship/enable answers)
+    next_skill: 16-evolve
+    next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -9956,22 +10250,35 @@ active_session:
     tip_ci_status: success
     tip_ci_run_id: '31709704821'
     tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
-    tip: fee4d12
-    tip_sha: fee4d12
-    tip_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
+    tip: 0411feb
+    tip_sha: 0411feb
+    tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
+    tip_docs: fee4d12
+    tip_docs_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
     tip_smoke: 588dab6
-    tip_prev: 588dab6
+    tip_prev: fee4d12
     tip_drift: pending_push
-    local_ahead: 1
+    local_ahead: 2
     origin_tip: 588dab6
     tip_ci_status: success
     tip_ci_run_id: '31709704821'
     tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
     tip_ci_sha: 588dab6
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D61
-    updated_at: '2026-08-13T15:05:00Z'
+    tip_note: 'local 0411feb/fee4d12 2 ahead of origin 588dab6; may push for tip CI as part of 15 prep if skill requires'
+    askquestion_pending: true
+    askquestion_pending_topic: S030-D64
+    askquestion_cleared: S030-D63 — D63a/b/c option 1 recommended
+    s030_d63_decision: S030-D63
+    s030_d63_status: approved
+    s030_d63a_choice: option_1_post_baseline_package
+    s030_d63b_choice: option_1_lean
+    s030_d63c_choice: option_1_proceed_now_live_env
+    s030_d64_decision: S030-D64
+    s030_d64_status: pending
+    stage_15_result: PASS
+    phase_d_baseline_done: true
+    ship_still_optional: true
+    updated_at: '2026-08-13T22:40:00Z'
     pr_238_status: open
     path_label: baseline_only_flags_off
     report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
@@ -9979,15 +10286,25 @@ active_session:
     baseline_13_result: PASS
     deploy_gate: passed_baseline_only
     cutover_pending: true
-    note: 'S030/EV-027 baseline 13 COMPLETE PASS (S030-D61 accept_h2_expected_tip_drift); H2 alembic expected_fail_accepted;
-      EV-027 NOT deployed; cutover still pending; next AskQuestion close/15/ship-path. tip fee4d12 ahead of origin 588dab6.
-      updated_at=2026-08-13T15:05:00Z. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-    recommended_next: AskQuestion close session / run 15-service-health / ship-path (no invent ship/enable)
+    flags_enabled: false
+    no_cutover: true
+    no_enable_automations: true
+    no_ft_promote: true
+    env_role: staging_as_live
+    env_role_live: prod
+    note: 'S030 15 COMPLETE OVERALL PASS; awaiting S030-D64 (close vs ship-path); Phase D verify/deploy baseline done; ship
+      still optional; no enable/cutover/FT promote; report=docs/sessions/S030-corpus-automations/reports/service-health.md. updated_at=2026-08-13T22:40:00Z. [Corpus: feature-list.md §F75–F77]
+      [Corpus: no-live-prod-corpus-push]'
+    recommended_next: Present AskQuestion S030-D64 close vs ship-path (do not invent answer)
+    report: docs/sessions/S030-corpus-automations/reports/service-health.md
     s030_d60_decision: S030-D60
     s030_d60_status: approved
     s030_d61_decision: S030-D61
     s030_d61_status: approved
     s030_d61_choice: accept_h2_expected_tip_drift
+    s030_d62_decision: S030-D62
+    s030_d62_status: approved
+    s030_d62_choice: option_1_15_service_health
     enable_promote_still_gated: true
     ev027_deployed: false
     gate_c_to_d: passed
@@ -9996,27 +10313,78 @@ active_session:
     s030_d57_decision: S030-D57
     checkpoints_deploy: pending
     gates_deploy: pending
-  askquestion_pending: false
-  askquestion_pending_topic: null
-  askquestion_cleared: S030-D61 — accept_h2_expected_tip_drift; baseline 13 COMPLETE PASS
+  askquestion_pending: true
+  askquestion_pending_topic: S030-D64
+  askquestion_cleared: S030-D63 — D63a/b/c option 1 recommended
   path_label: baseline_only_flags_off
+  flags_enabled: false
+  no_cutover: true
+  no_enable_automations: true
+  no_ft_promote: true
+  no_ingest: true
+  no_corpus_write: true
+  env_role: staging_as_live
+  env_role_live: prod
+  env_role_known: true
+  env_role_note: staging_as_live = live/prod (ADR-049); only ONE environment today
   s030_d60_decision: S030-D60
   s030_d60_status: approved
   s030_d61_decision: S030-D61
   s030_d61_status: approved
   s030_d61_choice: accept_h2_expected_tip_drift
-  tip: fee4d12
-  tip_sha: fee4d12
-  tip_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-  tip_prev: 588dab6
-  tip_prev_full: 588dab62bc41d56fc0792c736eb630529cc01687
+  s030_d62_decision: S030-D62
+  s030_d62_status: approved
+  s030_d62_choice: option_1_15_service_health
+  s030_d63_decision: S030-D63
+  s030_d63_status: approved
+  s030_d63a_choice: option_1_post_baseline_package
+  s030_d63b_choice: option_1_lean
+  s030_d63c_choice: option_1_proceed_now_live_env
+  s030_d64_decision: S030-D64
+  s030_d64_status: pending
+  package: post_baseline
+  lean: true
+  require_push_tip_first: false
+  live_urls_from: .env
+  stage_15_result: PASS
+  stage_15_overall: pass
+  stage_15_infra: pass
+  stage_15_behavior: pass
+  stage_15_remediation: none
+  phase_d_baseline_done: true
+  ship_still_optional: true
+  health_tiers:
+    h0ci: pass
+    h0ci_advisory: true
+    h0ci_run_id: '31178547214'
+    h0ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31178547214
+    h0ci_sha: 8ae9d17
+    h1: pass
+    h1_chat: pass
+    h1_write: pass
+    h2_pool: pass
+    h2_alembic: advisory
+    h2_alembic_live: '20260806_0014'
+    h2_alembic_tip_head: '20260812_0016'
+    h3: pass
+    h3_duration_s: 74.2
+    h3_lang: en
+    h4: pass
+    h5: pass
+  prior_13_baseline_available: true
+  tip: 0411feb
+  tip_sha: 0411feb
+  tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
+  tip_prev: fee4d12
+  tip_prev_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
+  tip_docs: fee4d12
   tip_smoke: 588dab6
   tip_drift: pending_push
   tip_pushed: partial
-  local_ahead: 1
+  local_ahead: 2
   origin_tip: 588dab6
   origin_tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
-  tip_note: 'local fee4d12 (docs: record baseline live smoke) ahead of origin 588dab6; smoke evidence tip 588dab6 CI PASS'
+  tip_note: 'local 0411feb/fee4d12 2 ahead of origin 588dab6; smoke CI tip 588dab6 PASS; may push as part of 15 prep if skill requires tip CI'
   tip_ci_status: success
   tip_ci_run_id: '31709704821'
   tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
@@ -10024,9 +10392,27 @@ active_session:
   enable_promote_still_gated: true
   ev027_deployed: false
   baseline_13_result: PASS
-  report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+  invoke_15_readiness: completed
+  stage_15_status: completed
+  report: docs/sessions/S030-corpus-automations/reports/service-health.md
   report_status: completed
   artifacts:
+  - path: docs/sessions/S030-corpus-automations/reports/service-health.md
+    kind: stage-report
+    type: report
+    status: completed
+    stage: 15-service-health
+    skill_id: 15-service-health
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    result: PASS
+    overall: pass
+    infra: pass
+    behavior: pass
+    remediation: none
+    recorded_at: '2026-08-13T22:40:00Z'
+    completed_at: '2026-08-13T22:40:00Z'
+    note: 15-service-health COMPLETE OVERALL PASS; awaiting S030-D64
   - path: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
     kind: stage-report
     type: report
@@ -10041,19 +10427,24 @@ active_session:
     result: PASS
     recorded_at: '2026-08-13T14:28:00Z'
     completed_at: '2026-08-13T15:05:00Z'
-    note: Baseline 13 COMPLETE PASS (S030-D61); H2 alembic expected_fail_accepted; EV-027 NOT deployed
+    finalized_at: '2026-08-13T15:08:00Z'
+    note: Baseline 13 COMPLETE PASS finalized; S030-D62 approved → 15
   - path: docs/sessions/S030-corpus-automations/HANDOFF.md
     kind: handoff
     status: updated
     session_id: S030-corpus-automations
-    stage: 13-deploy-smoke
+    stage: 15-service-health
     recorded_at: '2026-08-13T14:28:00Z'
+    updated_at: '2026-08-13T22:40:00Z'
+    note: 15 COMPLETE PASS; next AskQuestion S030-D64 close vs ship-path; Phase D baseline done; ship optional
   - path: docs/sessions/S030-corpus-automations/routing-plan.md
     kind: routing-plan
     status: updated
     session_id: S030-corpus-automations
-    stage: 13-deploy-smoke
+    stage: 15-service-health
     recorded_at: '2026-08-13T14:28:00Z'
+    updated_at: '2026-08-13T22:40:00Z'
+    note: 15-service-health completed PASS; awaiting S030-D64 close vs ship-path
   - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
     session_id: S030-corpus-automations
     stage: 01-requirements
@@ -30216,14 +30607,15 @@ evolve_cycles:
     - 11-verify-impl
     - 12-verify-deploy
     - 13-deploy-smoke
+    - 15-service-health
     skipped_stages: []
     skipped_rationale: {}
-    upgrade_note: S030-D9 — restored 03-plan-tooling and 06-tech-tooling as required (Full preset)
+    upgrade_note: S030-D9 — restored 03-plan-tooling and 06-tech-tooling as required (Full preset); S030-D62 added 15-service-health
   routing_preset: Full
   preset: Full
-  current_stage: 13-deploy-smoke
-  current_action: baseline_13_complete
-  next_action: AskQuestion close/15/ship-path (do not invent ship/enable answers)
+  current_stage: 15-service-health
+  current_action: await_s030_d64_close_or_ship
+  next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
   active_milestone: M130
   current_task: null
   current_task_status: completed
@@ -30232,29 +30624,30 @@ evolve_cycles:
   m130_status: completed
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: fee4d12
-  tip_sha: fee4d12
-  tip_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-  tip_prev: 588dab6
-  tip_prev_full: 588dab62bc41d56fc0792c736eb630529cc01687
+  tip: 0411feb
+  tip_sha: 0411feb
+  tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
+  tip_prev: fee4d12
+  tip_prev_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
+  tip_docs: fee4d12
   tip_smoke: 588dab6
   tip_drift: pending_push
   tip_pushed: partial
-  local_ahead: 1
+  local_ahead: 2
   origin_tip: 588dab6
   origin_tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
-  tip_note: 'local fee4d12 ahead of origin 588dab6 (docs record baseline smoke); smoke CI tip 588dab6'
+  tip_note: 'local 0411feb/fee4d12 2 ahead of origin 588dab6; smoke CI tip 588dab6; may push as part of 15 prep if skill requires tip CI'
   tip_ci_status: success
   tip_ci_run_id: '31709704821'
   tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
   tip_ci_sha: 588dab6
-  current_stage_note: Baseline 13 COMPLETE PASS (S030-D61); deploy gate passed_baseline_only; EV-027 NOT deployed; cutover pending.
+  current_stage_note: 15 COMPLETE OVERALL PASS; awaiting S030-D64 close vs ship-path; Phase D baseline done; ship still optional.
   path_label: baseline_only_flags_off
   baseline_13_result: PASS
-  notes: 'S030/EV-027 baseline 13 COMPLETE PASS 2026-08-13T15:05:00Z — S030-D61 accept_h2_expected_tip_drift; H2 alembic expected_fail_accepted;
-    H0c/H1/H2_pool/H3/H4/H5 PASS; report=deploy-smoke.md completed; EV-027 NOT deployed; checkpoints.deploy/gates.deploy=passed_baseline_only
-    (cutover still pending); askquestion_pending=false; next AskQuestion close/15/ship-path; tip fee4d12 ahead of origin 588dab6.
-    Do not invent ship/enable answers. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
+  stage_15_result: PASS
+  notes: 'S030 15 COMPLETE 2026-08-13T22:40:00Z — OVERALL PASS; health_tiers H0ci/H1/H2pool/H3/H4–H5 PASS (H2 alembic advisory); remediation none;
+    askquestion_pending=true topic=S030-D64; current_action=await_s030_d64_close_or_ship; Phase D verify/deploy baseline done;
+    ship still optional; no enable/cutover/FT promote. Do not invent D64. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -30269,9 +30662,36 @@ evolve_cycles:
   phase1_approved: true
   phase1_approved_at: '2026-08-07T13:10:00Z'
   phase_1_status: approved
-  askquestion_pending: false
-  askquestion_pending_topic: null
-  askquestion_cleared: S030-D61 — accept_h2_expected_tip_drift; baseline 13 COMPLETE PASS
+  askquestion_pending: true
+  askquestion_pending_topic: S030-D64
+  askquestion_cleared: S030-D63 — D63a/b/c option 1 recommended
+  s030_d62_decision: S030-D62
+  s030_d62_status: approved
+  s030_d62_choice: option_1_15_service_health
+  s030_d63_decision: S030-D63
+  s030_d63_status: approved
+  s030_d63a_choice: option_1_post_baseline_package
+  s030_d63b_choice: option_1_lean
+  s030_d63c_choice: option_1_proceed_now_live_env
+  s030_d64_decision: S030-D64
+  s030_d64_status: pending
+  flags_enabled: false
+  no_cutover: true
+  no_enable_automations: true
+  no_ft_promote: true
+  no_ingest: true
+  no_corpus_write: true
+  enable_promote_still_gated: true
+  env_role_live: prod
+  env_role_known: true
+  package: post_baseline
+  lean: true
+  require_push_tip_first: false
+  live_urls_from: .env
+  prior_13_baseline_available: true
+  phase_d_baseline_done: true
+  ship_still_optional: true
+  invoke_15_readiness: completed
   checkpoints:
     phase_0: passed
     phase_a: passed
@@ -30279,6 +30699,7 @@ evolve_cycles:
     phase_c: passed
     phase_d: passed
     deploy: passed_baseline_only
+  phase_d_note: 'Phase D verify/deploy baseline done (12+13 baseline + 15 health PASS); ship/cutover still optional pending S030-D64. updated_at=2026-08-13T22:40:00Z'
   gates:
     a_to_b: passed
     b_to_c: passed
@@ -30411,6 +30832,11 @@ evolve_cycles:
     baseline smoke @588dab6; AskQuestion disposition; do not invent answer; EV-027 NOT deployed'
   - 'S030-D61 APPROVED 2026-08-13T15:05:00Z: option_1 accept_h2_expected_tip_drift; baseline 13 COMPLETE PASS; no migrate/cutover/enable/promote;
     deploy gate passed_baseline_only; next AskQuestion close/15/ship-path'
+  - 'S030-D62 PENDING 2026-08-13T15:08:00Z: next after baseline 13 — close vs 15-service-health vs ship-path; do not invent answer'
+  - 'S030-D62 APPROVED 2026-08-13T15:41:00Z: option_1_15_service_health (user go); invoke 15-service-health; flags OFF; no cutover/enable/promote'
+  - 'S030-D63 PENDING 2026-08-13T15:43:00Z: 15-service-health startup interview; env_role known; prior 13 baseline evidence available; do not invent answers'
+  - 'S030-D63 APPROVED 2026-08-13T22:36:00Z: D63a/b/c option 1 recommended (user Proceed with recommended please); 15_run_checks; no ingest/enable'
+  - 'S030 15 COMPLETE 2026-08-13T22:40:00Z: OVERALL PASS; S030-D64 PENDING close vs ship-path; Phase D baseline done; ship still optional; do not invent D64'
 
   stages:
     00-context:
@@ -31452,15 +31878,16 @@ evolve_cycles:
       completed: '2026-08-13'
       completed_at: '2026-08-13'
       completed_at_iso: '2026-08-13T15:05:00Z'
-      current_action: baseline_13_complete
-      next_action: AskQuestion close/15/ship-path (do not invent ship/enable answers)
-      tip: fee4d12
-      tip_sha: fee4d12
-      tip_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
+      current_action: completed
+      next_action: handoff_15_service_health
+      tip: 0411feb
+      tip_sha: 0411feb
+      tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
+      tip_docs: fee4d12
       tip_smoke: 588dab6
-      tip_prev: 588dab6
+      tip_prev: fee4d12
       tip_drift: pending_push
-      local_ahead: 1
+      local_ahead: 2
       origin_tip: 588dab6
       tip_ci_status: success
       tip_ci_run_id: '31709704821'
@@ -31471,13 +31898,16 @@ evolve_cycles:
       flags_enabled: false
       askquestion_pending: false
       askquestion_pending_topic: null
-      askquestion_cleared: S030-D61
+      askquestion_cleared: S030-D62
       s030_d59_decision: S030-D59
       s030_d60_decision: S030-D60
       s030_d60_status: approved
       s030_d61_decision: S030-D61
       s030_d61_status: approved
       s030_d61_choice: accept_h2_expected_tip_drift
+      s030_d62_decision: S030-D62
+      s030_d62_status: approved
+      s030_d62_choice: option_1_15_service_health
       no_live_migrate: true
       no_ev027_cutover: true
       no_enable_automations: true
@@ -31503,11 +31933,145 @@ evolve_cycles:
         h4_h5_via: verify_connectivity.sh
         automations_status: '404'
         automations_note: pre-cutover
-      note: 'S030/EV-027 baseline 13 COMPLETE PASS (S030-D61); H2 alembic expected_fail_accepted; EV-027 NOT deployed; cutover
-        pending. [Corpus: feature-list.md §F75–F77]'
-      updated_at: '2026-08-13T15:05:00Z'
+      note: 'S030/EV-027 baseline 13 COMPLETE PASS (S030-D61); S030-D62 approved → 15-service-health; stages.13 remains
+        completed; EV-027 NOT deployed. [Corpus: feature-list.md §F75–F77]'
+      updated_at: '2026-08-13T15:41:00Z'
+
+    15-service-health:
+      status: completed
+      mode: delta
+      delta_only: true
+      session_id: S030-corpus-automations
+      evolve_cycle_id: EV-027
+      branch: evolve/EV-027-corpus-automations
+      session_branch: evolve/EV-027-corpus-automations
+      feature_ids:
+      - F75
+      - F76
+      - F77
+      started_at: '2026-08-13'
+      started_at_iso: '2026-08-13T15:43:00Z'
+      started: '2026-08-13'
+      completed: '2026-08-13'
+      completed_at: '2026-08-13'
+      completed_at_iso: '2026-08-13T22:40:00Z'
+      ready_to_invoke: false
+      invoke_readiness: completed
+      current_action: await_s030_d64_close_or_ship
+      next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
+      result: PASS
+      overall: pass
+      infra: pass
+      behavior: pass
+      remediation: none
+      path_label: baseline_only_flags_off
+      flags_enabled: false
+      no_cutover: true
+      no_enable_automations: true
+      no_ft_promote: true
+      enable_promote_still_gated: true
+      ev027_deployed: false
+      cutover_pending: true
+      deploy_gate: passed_baseline_only
+      env_role: staging_as_live
+      env_role_live: prod
+      env_role_known: true
+      tip: 0411feb
+      tip_sha: 0411feb
+      tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
+      tip_docs: fee4d12
+      tip_smoke: 588dab6
+      tip_drift: pending_push
+      local_ahead: 2
+      origin_tip: 588dab6
+      tip_ci_status: success
+      tip_ci_run_id: '31709704821'
+      tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+      tip_ci_sha: 588dab6
+      tip_note: 'local 0411feb/fee4d12 2 ahead of origin 588dab6; may push for tip CI as part of 15 prep if skill requires'
+      s030_d62_decision: S030-D62
+      s030_d62_status: approved
+      s030_d62_choice: option_1_15_service_health
+      s030_d63_decision: S030-D63
+      s030_d63_status: approved
+      s030_d63a_choice: option_1_post_baseline_package
+      s030_d63b_choice: option_1_lean
+      s030_d63c_choice: option_1_proceed_now_live_env
+      package: post_baseline
+      package_tiers:
+      - H0ci_main_advisory
+      - H1
+      - H2_pool
+      - H3
+      - H4
+      - H5
+      h2_alembic: known_advisory
+      no_ingest: true
+      lean: true
+      one_h3_ask: true
+      h6: false
+      no_corpus_write: true
+      require_push_tip_first: false
+      live_urls_from: .env
+      askquestion_pending: true
+      askquestion_pending_topic: S030-D64
+      askquestion_cleared: S030-D63
+      s030_d64_decision: S030-D64
+      s030_d64_status: pending
+      prior_stage: 13-deploy-smoke
+      prior_result: PASS
+      prior_13_baseline_available: true
+      prior_13_smoke:
+        tip_smoke: 588dab6
+        tip_ci_run_id: '31709704821'
+        h0c: pass
+        h1: pass
+        h2_pool: pass
+        h2_alembic: expected_fail_accepted
+        h3: pass
+        h3b: pass
+        h4: pass
+        h5: pass
+        report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+      health_tiers:
+        h0ci: pass
+        h0ci_advisory: true
+        h0ci_run_id: '31178547214'
+        h0ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31178547214
+        h0ci_sha: 8ae9d17
+        h1: pass
+        h1_chat: pass
+        h1_write: pass
+        h2_pool: pass
+        h2_alembic: advisory
+        h2_alembic_live: '20260806_0014'
+        h2_alembic_tip_head: '20260812_0016'
+        h3: pass
+        h3_duration_s: 74.2
+        h3_lang: en
+        h4: pass
+        h5: pass
+      report: docs/sessions/S030-corpus-automations/reports/service-health.md
+      report_status: completed
+      phase_d_baseline_done: true
+      ship_still_optional: true
+      note: 'S030 15 COMPLETE OVERALL PASS; awaiting S030-D64 close vs ship-path; Phase D baseline done; ship optional; no
+        enable/cutover/FT promote. Do not invent D64. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
+      updated_at: '2026-08-13T22:40:00Z'
 
   artifacts:
+  - path: docs/sessions/S030-corpus-automations/reports/service-health.md
+    kind: stage-report
+    type: report
+    status: completed
+    stage: 15-service-health
+    skill_id: 15-service-health
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    result: PASS
+    overall: pass
+    recorded_at: '2026-08-13T22:40:00Z'
+    completed_at: '2026-08-13T22:40:00Z'
   - path: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
     kind: stage-report
     type: report
@@ -31522,19 +32086,22 @@ evolve_cycles:
     result: PASS
     recorded_at: '2026-08-13T14:28:00Z'
     completed_at: '2026-08-13T15:05:00Z'
-    note: Baseline 13 COMPLETE PASS (S030-D61); H2 alembic expected_fail_accepted; EV-027 NOT deployed
+    finalized_at: '2026-08-13T15:08:00Z'
+    note: Baseline 13 COMPLETE PASS finalized; awaiting S030-D62
   - path: docs/sessions/S030-corpus-automations/HANDOFF.md
     kind: handoff
     status: updated
     session_id: S030-corpus-automations
     stage: 13-deploy-smoke
     recorded_at: '2026-08-13T14:28:00Z'
+    updated_at: '2026-08-13T15:08:00Z'
   - path: docs/sessions/S030-corpus-automations/routing-plan.md
     kind: routing-plan
     status: updated
     session_id: S030-corpus-automations
     stage: 13-deploy-smoke
     recorded_at: '2026-08-13T14:28:00Z'
+    updated_at: '2026-08-13T15:08:00Z'
   - path: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
     kind: stage-report
     type: report
@@ -50706,6 +51273,100 @@ issue_log:
   - 224
   note: 'Closed at 11-verify-impl (S028-D32); #222 #223 #224 closed; [Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
 decisions_log:
+- id: S030-D64
+  summary: 'Next after 15 COMPLETE PASS — close vs ship-path (pending)'
+  status: pending
+  recorded_at: '2026-08-13T22:40:00Z'
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 15-service-health
+  topic: S030-D64
+  stage_15_result: PASS
+  phase_d_baseline_done: true
+  ship_still_optional: true
+  report: docs/sessions/S030-corpus-automations/reports/service-health.md
+  note: Do not invent answer; AskQuestion required.
+- id: S030-D63c
+  summary: '15 proceed now on live URLs from .env — do not require push tip first'
+  status: approved
+  decided: true
+  recorded_at: '2026-08-13T22:36:00Z'
+  decided_at: '2026-08-13T22:36:00Z'
+  parent: S030-D63
+  choice: option_1_proceed_now_live_env
+  require_push_tip_first: false
+  live_urls_from: .env
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 15-service-health
+- id: S030-D63b
+  summary: '15 lean — one H3 ask; no H6; no corpus write'
+  status: approved
+  decided: true
+  recorded_at: '2026-08-13T22:36:00Z'
+  decided_at: '2026-08-13T22:36:00Z'
+  parent: S030-D63
+  choice: option_1_lean
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 15-service-health
+- id: S030-D63a
+  summary: '15 package — post-baseline H0ci(advisory)+H1+H2pool+H3+H4–H5; H2 alembic advisory; no ingest/enable'
+  status: approved
+  decided: true
+  recorded_at: '2026-08-13T22:36:00Z'
+  decided_at: '2026-08-13T22:36:00Z'
+  parent: S030-D63
+  choice: option_1_post_baseline_package
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 15-service-health
+- id: S030-D63
+  summary: '15-service-health startup interview — recommended package/lean/proceed-now approved'
+  status: approved
+  decided: true
+  recorded_at: '2026-08-13T15:43:00Z'
+  decided_at: '2026-08-13T22:36:00Z'
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 15-service-health
+  topic: S030-D63_15_interview
+  user_utterance: Proceed with recommended please
+  d63a: option_1_post_baseline_package
+  d63b: option_1_lean
+  d63c: option_1_proceed_now_live_env
+  env_role: staging_as_live
+  env_role_known: true
+  prior_13_baseline_available: true
+  note: 'Approved recommended options; current_action=15_run_checks; askquestion_pending=false.'
+- id: S030-D62
+  summary: 'Next after baseline 13 COMPLETE — run 15-service-health (flags off; no cutover/enable/promote)'
+  status: approved
+  decided: true
+  recorded_at: '2026-08-13T15:08:00Z'
+  decided_at: '2026-08-13T15:41:00Z'
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 16-evolve
+  prior_skill_id: 13-deploy-smoke
+  topic: S030-D62_next_after_baseline_13
+  choice: option_1_15_service_health
+  user_choice: option_1_15_service_health
+  user_utterance: go
+  flags_enabled: false
+  no_cutover: true
+  no_enable: true
+  no_ft_promote: true
+  enable_promote_still_gated: true
+  ev027_deployed: false
+  env_role: staging_as_live
+  env_role_live: prod
+  next_stage: 15-service-health
+  tip: 0411feb
+  tip_docs: fee4d12
+  origin_tip: 588dab6
+  local_ahead: 2
+  note: 'S030-D62 APPROVED — option_1_15_service_health; invoke 15; do not invent further answers.'
 - id: S030-D61
   summary: '13 baseline smoke H2 accepted as expected tip-drift — baseline 13 COMPLETE PASS'
   status: approved

@@ -4,33 +4,32 @@
 **Session:** S030-corpus-automations (`feature`)  
 **Cycle:** EV-027 · F75 F76 F77  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** `fee4d12` (report); smoke CI @ `588dab6`  
+**Tip:** local ahead of origin (`0411feb`+)  
 **Issues:** #73 · #72 · #219  
 
 ## Position
 
-- **13-deploy-smoke** **COMPLETE PASS** — `baseline_only_flags_off` (`passed_baseline_only`)
-- Report: `reports/deploy-smoke.md`
-- EV-027 **not** on live; flags off; enable/promote still gated
-- PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open (no merge)
-- Next: AskQuestion — 15-service-health / close / ship-path
+- **13-deploy-smoke** COMPLETE PASS — `passed_baseline_only`
+- **15-service-health** COMPLETE **PASS** — `reports/service-health.md`
+- Live stack healthy; EV-027 **not** cut over; flags **off**
+- PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open
+- Next: AskQuestion — close cycle / ship-path / other
 
 ## Decisions
 
 | ID | Choice |
 |----|--------|
-| S030-D58 | Resume 12; staging_as_live; push+CI; checklist-only; F75–F77 scope |
-| S030-D59 | Approve mitigations 1–4 + rollback; checklist **ready** (flags off) |
-| S030-D60 | Baseline live smoke only; push tip; flags off; no cutover/enable/promote |
-| S030-D61 | Accept H2 alembic tip-drift as advisory; baseline 13 **PASS** |
+| S030-D60 | Baseline live smoke only; flags off |
+| S030-D61 | Accept H2 alembic tip-drift |
+| S030-D62 | Continue to 15-service-health |
+| S030-D63 | Recommended post-baseline health package |
 
-## Tip CI (smoke)
+## Reports
 
-https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+- `reports/deploy-smoke.md`
+- `reports/service-health.md`
+- `reports/deploy-checklist.md`
 
 ## Next
 
-```
-Enter this into the chat to continue:
-@.cursor/skills/15-service-health/SKILL.md
-```
+Await close / ship-path AskQuestion (or `@.cursor/skills/16-evolve/SKILL.md` for cycle close).

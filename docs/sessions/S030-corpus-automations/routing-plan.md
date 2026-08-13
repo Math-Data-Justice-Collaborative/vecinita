@@ -19,6 +19,7 @@ Session open: **S030-D0**. Issues: **#73, #72, #219**.
 | 11-verify-impl | yes | completed | PASS — `reports/verify-impl.md`; F75–F77 + UJ-080–082 approved |
 | 12-verify-deploy | yes | completed | ready flags-off — `reports/deploy-checklist.md` (S030-D59) |
 | 13-deploy-smoke | yes | completed | PASS baseline_only (S030-D60/D61); H2 tip-drift accepted; enable/promote still gated |
+| 15-service-health | yes | completed | PASS post-baseline (S030-D62/D63); `reports/service-health.md` |
 
 ## Orchestrator
 
@@ -33,4 +34,4 @@ Orchestrator: **16-evolve**.
 
 ## Next
 
-**13 complete** (`passed_baseline_only`). Optional: **15-service-health**, cycle close, or ship-path AskQuestion.
+**15 complete PASS.** AskQuestion: close S030/EV-027 · ship-path · or other.
