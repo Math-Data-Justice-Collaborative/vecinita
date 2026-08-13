@@ -8305,16 +8305,14 @@ project:
         §TP10]'
       updated_at: '2026-08-07T14:47:56Z'
 session_counter: 30
-active_session:
-  id: S030-corpus-automations
+active_session: null
+sessions:
+- id: S030-corpus-automations
   type: feature
   slug: corpus-automations
   intent: 'Open feature session for GitHub #73 corpus automations; then 16-evolve EV-027'
-  status: in_progress
+  status: completed
   branch: evolve/EV-027-corpus-automations
-  session_branch: evolve/EV-027-corpus-automations
-  planned_evolve_branch: evolve/EV-027-corpus-automations
-  branch_create_status: created_checked_out
   orchestrator: 16-evolve
   evolve_cycle_id: EV-027
   feature_ids:
@@ -8327,2257 +8325,41 @@ active_session:
   - 73
   - 72
   - 219
-  related_issues:
-  - 73
-  - 72
-  - 219
-  current_stage: 15-service-health
-  current_stage_note: 15-service-health COMPLETE OVERALL PASS; awaiting S030-D64 (close vs ship-path). Phase D verify/deploy baseline done; ship still optional. Flags OFF; EV-027 NOT deployed.
-  current_action: await_s030_d64_close_or_ship
-  next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
+  current_stage: completed
+  current_stage_note: 'S030/EV-027 CLOSED (S030-D64) — close artifacts recorded; awaiting S030-D65 (stop vs 17-retrospective); cutover deferred; PR #238 open'
+  current_action: await_s030_d65_optional_next
+  askquestion_pending: true
+  askquestion_pending_topic: S030-D65_optional_next
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
+  completed_at: '2026-08-13'
+  completed_at_iso: '2026-08-13T22:47:00Z'
   mode: evolve
-  routing_plan_status: approved
-  routing_approval: S030-D1 Standard → S030-D9 upgraded to Full (03+06 required)
-  routing_preset: Full
-  notes:
-  - 'S030-D0 2026-08-07: Open S030 feature session for #73 (user option 1)'
-  - 'S030-D1 2026-08-07: Approved Standard routing (later Full via S030-D9)'
-  - 'S030-D9 2026-08-07: Upgrade preset to Full (03+06 required)'
-  - 'S030-D13 2026-08-07: Phase 0 close — F75/F76/F77 allocated; enter Phase 1'
-  - 'S030-D14 2026-08-07: Phase 1 confirm; start 01-requirements'
-  - 'S030-D24 2026-08-07: User approved 01 deltas; start 02-verify-plan'
-  - 'S030-D25 2026-08-07: User approved 02 fixes; ready Gate A→B'
-  - 'S030-D26 2026-08-07: Gate A→B PASS; start 03-plan-tooling'
-  - 'S030-D27 2026-08-07: 03-plan-tooling COMPLETE — installed R1–R4, H1, S1; Phase A tooling done; AskQuestion → start 04-tech-plan'
-  - 'S030-D28 2026-08-07: User chose AskQuestion option 1 — Yes start 04-tech-plan (Phase B)'
-  - 'RECOVERY 2026-08-07: workflow-state.yaml reconstructed after accidental git checkout wiped uncommitted S030 state; rebuilt
-    through S030-D27 from session artifacts + prior WSM reads'
-  - 'S030-D29 2026-08-07: TP1–TP10 locked (user approved plan; Agent wrote artifacts); 04-tech-plan COMPLETE; handoff → 05-verify-tech'
-  - 'S030-D30 2026-08-07: User confirmed y after 04 COMPLETE — start 05-verify-tech delta audit'
-  - '05-verify-tech 2026-08-07T14:38:42Z: draft audit written (awaiting M1–M5+L1 verdicts); askquestion_pending=true topic=05_medium_low_verdicts;
-    Gate B→C NOT passed'
-  - 'S030-D31 2026-08-07T14:42:24Z: Approve all recommended M1–M5 + L1 (option 1); fixes applied; 05-verify-tech COMPLETE;
-    Gate B→C / phase_b AskQuestion pending (NOT passed). L1 waiver: Build Plan Card. [Corpus: WAIVED — Build Plan Card; reason:
-    evolve SoT is tech-plan-delta + Phase 30 Task Tracking; decided: S030-D31]'
-  - 'S030-D32 2026-08-07T14:43:54Z: Gate B→C PASS (option 1); checkpoints.phase_b=passed; gates.b_to_c=passed; askquestion
-    gate_b_to_c cleared; start 06-tech-tooling (Full / S030-D9) — PEFT/TRL (+ train stack) pins per TP10. [Corpus: feature-list.md
-    §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md §TP10]'
-  - 'S030-D33 2026-08-07T14:47:56Z: 06-tech-tooling COMPLETE — approve all 06 plan + exact FT pins (peft==0.20.0, trl==1.9.2,
-    transformers==4.57.6 train, accelerate==1.14.0, datasets==4.8.5; bitsandbytes deferred); finetune_pins.py + inventory;
-    connectivity present; pytest test_finetune_pins 3 passed; handoff → 07-build M127 ready (Plan mode). [Corpus: feature-list.md
-    §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md §TP10]'
-  - 'S030 07-build start 2026-08-07T14:53:54Z: in_progress M127 T127.1; Build Plan Card waived S030-D31; proceeding to Task
-    Loop'
-  - 'S030 T127.1 COMPLETE 2026-08-07T14:57:31Z: commit @d355f29 on evolve/EV-027-corpus-automations; advance to T127.2 (automation_runs
-    + config GET/PATCH red tests); 07-build remains in_progress'
-  - 'S030 T127.2–T127.4 COMPLETE 2026-08-07T15:03:16Z: commits @141d558 (T127.2), @9ae6309 (T127.3), @2172d2e (T127.4) on
-    evolve/EV-027-corpus-automations; advance to T127.5 (Modal DM automation_catchup worker); 07-build remains in_progress
-    M127; Phase A/B uncommitted artifacts still pending user decision'
-  - 'S030 Phase A/B docs COMMITTED 2026-08-12T14:46:25Z: @3cadd8b docs(S030) Phase A/B corpus automations specs on evolve/EV-027-corpus-automations;
-    advisory cleared; T127.5 about to start coding (mark in_progress when coding begins)'
-  - 'S030 T127.5 START 2026-08-12T14:49:02Z: T127.5 in_progress (Modal DM automation_catchup worker); current_task=T127.5;
-    active_milestone=M127; 07-build remains in_progress; Phase A/B docs @3cadd8b confirmed committed (stale uncommitted advisory
-    cleared); T127.5 NOT completed'
-  - 'S030 T127.5 COMPLETE 2026-08-12T14:53:42Z: commit @5d31dcf on evolve/EV-027-corpus-automations; Modal DM automation_catchup
-    worker + kill-switch; advance to T127.6 (triggers) pending; HANDOFF synced next=T127.6; 07-build remains in_progress M127'
-  - 'S030 T127.6 COMPLETE 2026-08-12T14:59:32Z: commit @93e87ce on evolve/EV-027-corpus-automations; async catch-up enqueue
-    on job completion + CRUD; advance to T127.7 pending; HANDOFF next=T127.7; 07-build remains in_progress M127'
-  - 'S030 T127.6 FIX 2026-08-12T15:00:41Z: commit @081ecf2 on evolve/EV-027-corpus-automations; stub catch-up enqueue on test
-    clients; tip @081ecf2; T127.6 remains completed; current_task T127.7 pending; 07-build remains in_progress M127'
-  - 'S030 T127.7 COMPLETE 2026-08-12T15:04:15Z: commit @f4e8373 on evolve/EV-027-corpus-automations; shared daily Period(days=1)
-    schedule on DM; advance to T127.8 (DM Automations UI) pending; HANDOFF next=T127.8; 07-build remains in_progress M127'
-  - 'S030 T127.8 START 2026-08-12T16:56:09Z: T127.8 in_progress (DM Automations UI — enable/disable + run history); current_task=T127.8;
-    active_milestone=M127; 07-build remains in_progress; T127.7 COMPLETE @f4e8373; tip @f4e8373'
-  - 'S030 T127.8 COMPLETE 2026-08-12T17:00:34Z: T127.8 DM Automations UI done (enable/disable + run history, /automations
-    nav); no commit yet — parent will commit; advance to T127.9 pending (API e2e + Vitest); NOT marking T127.9 in_progress;
-    HANDOFF next=T127.9 pending; 07-build remains in_progress M127'
-  - 'S030 T127.8 COMMITTED 2026-08-12T17:03:15Z: commit @6323ece on evolve/EV-027-corpus-automations; DM Automations UI enable/disable
-    + run history; tip @6323ece; current_action remains T127.9 pending (API e2e + Vitest); NOT marking T127.9 in_progress;
-    07-build remains in_progress M127'
-  - 'S030 T127.9 START 2026-08-12T17:04:27Z: T127.9 in_progress — starting API e2e UJ-080 (+ Vitest Automations panel); current_task=T127.9;
-    active_milestone=M127; 07-build remains in_progress; tip @6323ece'
-  - 'S030 T127.9 COMPLETE 2026-08-12T17:06:57Z: T127.9 API e2e UJ-080 + Vitest Automations panel green; no commit yet — parent
-    will commit; advance to T127.10 pending (Playwright UJ-080); NOT marking T127.10 in_progress; HANDOFF next=T127.10 pending;
-    07-build remains in_progress M127'
-  - 'S030 T127.9 COMMITTED 2026-08-12T17:08:36Z: commit @6dc0117 on evolve/EV-027-corpus-automations; API e2e UJ-080 automations
-    enable and run history; tip @6dc0117'
-  - 'S030 T127.10 START 2026-08-12T17:08:36Z: T127.10 in_progress — starting Playwright UJ-080; current_task=T127.10; active_milestone=M127;
-    07-build remains in_progress; tip @6dc0117'
-  - 'S030 T127.10 COMPLETE 2026-08-12T17:14:13Z: T127.10 Playwright uj080-automations.spec.ts green; M127 COMPLETE (T127.1–T127.10);
-    no commit yet — parent will commit; advance to T128.1 pending (M128 Freshness); NOT marking T128.1 in_progress; 07-build
-    remains in_progress'
-  - 'S030 T127.10 COMMITTED + M127 PR 2026-08-12T17:19:37Z: tip @92f1f30 pushed; PR #238 open (https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238)
-    Corpus automations catch-up (F75); tip reconcile 6dc0117→92f1f30; T128.1 in_progress (M128 Freshness); do not merge without
-    approval'
-  - 'S030 T128.1 COMPLETE 2026-08-12T17:27:38Z: commit @92912be on evolve/EV-027-corpus-automations; F76 freshness policy
-    helpers + unit tests (TC-256–259); CI fix @5fc2d21 on PR #238; advance to T128.2 pending (Alembic refresh_enabled + last_checked_at);
-    NOT marking T128.2 in_progress until coding starts; 07-build remains in_progress M128'
-  - 'S030 resume 07-build 2026-08-12T19:09:18Z: user option 1 — Continue T128.2; leave PR #238 open (no merge); tip synced
-    @87cf4d2 (CI green on #238 incl. security/Opengrep re-run); T128.2 in_progress — Alembic freshness fields refresh_enabled
-    + last_checked_at (F76/M128); askquestion_pending cleared'
-  - 'S030 T128.2 COMPLETE 2026-08-12T19:11:44Z: commit @7b1aa87 on evolve/EV-027-corpus-automations; Alembic documents.refresh_enabled
-    + last_checked_at (reuse content_hash); advance to T128.3 in_progress (write-API PATCH/list stale fields; Refresh now
-    → enqueue); PR #238 still open (not pushed). [Corpus: feature-list.md §F76]'
-  - 'S030 T128.3 COMPLETE 2026-08-12T19:17:43Z: commit @e86290e on evolve/EV-027-corpus-automations; write-API freshness PATCH/list
-    stale + Refresh now enqueue (F76); advance to T128.4 in_progress (Modal job_type=freshness_refresh + periodic schedule
-    branch shared with F75); PR #238 still open (not pushed). [Corpus: feature-list.md §F76]'
-  - 'S030 T128.4 COMPLETE 2026-08-12T19:40:00Z: freshness_refresh worker + real schedule branch (F76); about to commit; advance
-    to T128.5 pending (ingest/hash-aware re-fetch); 07-build remains in_progress M128. [Corpus: feature-list.md §F76]'
-  - 'S030-D34 2026-08-12T20:32:06Z: User chose continue recommended = M129 F77 after tip CI green (not interim 08). Tip bb872c0
-    supersedes bdaec9d; bdaec9d CI watch aborted/cancelled. Watching https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
-    (in_progress). M129 NOT started — await CI then T129.1.'
-  - 'S030-D35 2026-08-12T20:34:58Z: Tip CI FAILED run 31637893050 @bb872c0. coverage job: DM FE lines 99.86% (need 100%),
-    branches 97.83% (need 98%). security job: flaky curl died downloading supabase CLI tarball (exit 2), not product. python/frontend/ui-e2e/packages:
-    success. Path remains fix-CI-in-place then M129 (S030-D34; AskQuestion unavailable). M129 NOT started.'
-  - 'S030-D36 2026-08-12T20:39:07Z: Coverage fix pushed @2190b8e (test: close DM FE freshness UI coverage gaps (F76)) — closes
-    bb872c0 DM FE coverage red (DocumentAdmin/CorpusList line gaps). Prior bb872c0 CI FAILED (S030-D35, run 31637893050);
-    security was flaky supabase CLI curl. Watching https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
-    (in_progress). M129 NOT started until tip CI green.'
-  - 'S030-D37 2026-08-12T20:43:10Z: Tip 2190b8e product CI green — python, coverage (DM FE lines 100% / branches 98.07%),
-    frontend, ui-e2e, packages success. Only security failed: OpenGrep vendor installer curl connection died / GitHub 503
-    (infra flake, BUG-2026-08-06 class). Run 31638576143 requeued/rerunning. AskQuestion tool unavailable — parent markdown
-    fallback options 1–4. M129 NOT started.'
-  - 'S030-D38 2026-08-12T20:46:10Z: Tip 2190b8e CI GREEN run 31638576143 — all jobs success including security (rerun cleared
-    OpenGrep flake). S030-D37 gate closed by success; askQ cleared. Start M129 F77 / T129.1 in_progress. Coverage fix confirmed.'
-  - 'S030-D39 2026-08-12T20:49:06Z: T129.1 COMPLETE @67ac92b (feat: add F77 finetune approve gate and cap policy helpers (F77)).
-    Advance to T129.2 in_progress (SFT pair builder + adapter pin/clear rollback). M129 remains in_progress.'
-  - 'S030-D40 2026-08-12T20:55:19Z: T129.2 COMPLETE @0fff625 (feat: add F77 SFT pair builder and adapter pin rollback helpers
-    (F77)). Start T129.3 in_progress — finetune_app scaffold (06 pins done, unblocked). M129 remains in_progress.'
-  - 'S030-D41 2026-08-12T20:59:59Z: Tip 0fff625 CI — only python Install gitleaks curl 503 (infra flake); coverage/security/frontend/ui-e2e
-    green. Failed jobs rerunning (https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640006502). T129.3
-    remains in_progress but coding paused until CI green or user waives.'
-  - 'S030-D42 2026-08-12T21:06:16Z: Tip 932c036 (fix: retry gitleaks download on GitHub Releases 503) — CI GREEN run 31640505267.
-    Cleared S030-D41 gitleaks flake gate / coding_blocked. T129.3 remains in_progress as next coding task (T129.1+T129.2 done).'
-  - 'S030-D43 2026-08-12T21:10:31Z: T129.3 COMPLETE @a75af50 — finetune_app scaffold (vecinita-llm-finetune + llm-finetune-adapters
-    + FINETUNE_IMAGE_PIPS; unit tests 5 passed). Start T129.4 in_progress — job_type=finetune_train + POST /jobs/{id}/approve.'
-  - 'S030-D44 2026-08-12T21:16:39Z: T129.4 COMPLETE @4ef663b — finetune_train + POST /jobs/{id}/approve (admin JWT); OpenAPI
-    + CORS. Start T129.5 in_progress — LoRA/PEFT SFT train worker → llm-finetune-adapters.'
-  - 'S030-D45 2026-08-12T21:25:26Z: Resume digest acknowledged — continue-with-recommended. Tip 4e8fc15 OpenAPI job_type enum
-    fix after 3d25fc1 CI failure (run 31641875827: OpenAPI enum + opengrep curl flake). Tip 4e8fc15 CI run 31642169420 — python
-    job success; full run still watching. current_task T129.5 in_progress — LoRA/PEFT SFT train worker. AskQuestion none;
-    proceeding with T129.5 build. HANDOFF tip should become 4e8fc15 (parent writes HANDOFF).'
-  - 'S030-D45 2026-08-12T21:33:12Z: Tip CI GREEN @c042f57 (run 31642681501). T129.4 follow-ups @4e8fc15 OpenAPI enum + @c042f57
-    coverage. coding_blocked=false. Continue T129.5 LoRA train worker.'
-  - 'S030-D46 2026-08-12T21:36:28Z: T129.5 COMPLETE @23113da — feat: LoRA SFT train worker writes adapters to volume (F77).
-    Deliverables: infra/modal/finetune_train_core.py; finetune_app.train_lora GPU+volumes; run_finetune_train_job train invoker;
-    metrics finetune_outcome=trained + adapter_id. Tip CI on 4e8fc15 FAILED coverage (DM branch 92.1%) — fixed during T129.5
-    (intermediate tips c042f57, ffcbf94). Coverage gate local green: DM branch 453/476 (95.2%). AskQuestion none. Advance
-    to T129.6 (eval report base vs adapter). HANDOFF tip 23113da.'
-  - 'S030-D47 2026-08-12T21:39:38Z: T129.6 COMPLETE @bb391b1 — GET /internal/v1/finetune/runs/{id}/eval base vs adapter; auto_promote
-    always false. T129.5 completed @23113da; tip CI was watching 31643301747 (may be superseded by T129.6 push). AskQuestion
-    none. Advance to T129.7 promote + rollback. HANDOFF tip bb391b1.'
-  - 'S030-D48 2026-08-12T21:45:20Z: T129.7 COMPLETE @b2a25e5 — POST /finetune/promote + GET /finetune/adapter + clear-pin
-    rollback (TC-262/265). Advance to T129.8 llm_app load promoted adapter; playground candidate load. PR #238 remains open.
-    AskQuestion none. HANDOFF tip b2a25e5. execution_plan Active task synced to T129.8.'
-  - 'S030-D49 2026-08-12T21:50:46Z: T129.8 COMPLETE @c8b5b96 — llm_app/playground load adapters from llm-finetune-adapters;
-    playground uses VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID. Advance to T129.9 DM FT UI approve/eval/promote. PR #238 remains
-    open. AskQuestion none. HANDOFF tip c8b5b96. execution_plan Active task synced to T129.9.'
-  - 'S030 T129.9 IN_PROGRESS 2026-08-12T21:56:09Z: current_action=implementing T129.9 DM FT UI; current_stage=07-build; t129_9_status
-    already in_progress; execution-plan.md still shows T129.9 pending — parent will sync. No other task completions invented.'
-  - 'S030-D50 2026-08-12T22:06:15Z: T129.9 COMPLETE @f48a7e7 — DM FT UI approve/eval/human promote (F77). Advance to T129.10
-    API e2e UJ-082 + Vitest + Playwright. PR #238 remains open. AskQuestion none. HANDOFF tip f48a7e7. execution_plan Active
-    task synced to T129.10.'
-  - 'S030-D51 2026-08-12T22:25:00Z: T129.10 COMPLETE @6107037 — API e2e test_uj082_finetune.py (TC-260–263, TC-265) + Playwright
-    uj082-finetune.spec.ts; Vitest already green from T129.9. M129 all tasks completed. Next: 08-verify-build (milestone boundary),
-    then M130 T130.1. PR #238 stays open (no merge). AskQuestion none.'
-  - 'S030-D52 2026-08-12T22:29:20Z: User option 1 — bump nanoid@3.3.17 + js-yaml@4.3.1 overrides; commit @59ac29d; make security-scan
-    PASSED (Grype HIGH: 0); cleared GHSA-2v37-7h3g-55p8 (nanoid) + GHSA-5p4m-2wfm-xmqj (js-yaml). Advisory (non-blocking):
-    npm audit react-router high needing 7.18.2 (override 7.18.1). Stage remains 08-verify-build; next after 08 PASS = T130.1/M130.
-    [Corpus: feature-list.md §F77]'
-  - 'S030-D53 2026-08-12T22:37:53Z: User option 3 — bump react-router/react-router-dom to 7.18.2; commit @eb951fd; make security-scan
-    PASSED (Grype HIGH 0); npm audit 0 vulnerabilities; cleared GHSA-qwww-vcr4-c8h2. Prior S030-D52 react-router advisory
-    resolved. Stage remains 08-verify-build; finish verification-report then T130.1. [Corpus: feature-list.md §F77]'
-  - 'S030-D54 2026-08-12T22:41:12Z: M129 08-verify-build boundary PASS. report=docs/sessions/S030-corpus-automations/reports/verification-report.md.
-    Unit 1562 passed / 16 skipped; FE DM 813 + chat-rag 190; security PASSED (Grype HIGH 0; npm audit 0; S030-D52+D53). test-fast
-    SKIPPED (bash 3.2/mapfile) — in report; prettier auto-fix test_uj081_freshness_ui.test.tsx. Tip pending parent bundle
-    commit (report+format+handoff+workflow-state). Start T130.1/M130. PR #238 open; phase_c/Gate C→D still pending. [Corpus:
-    feature-list.md §F77]'
-  - 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged (2026-08-12T22:46:00Z).
-    Tip reconciled 73a6571→c610056. execution-plan.md still shows T128.5–T128.7 pending — parent will mark completed (M128
-    done in git/workflow). HANDOFF.md next/position: parent updates (WSM owns YAML handoff_* only). [Corpus: feature-list.md
-    §F75–F77] [Spec: docs/test-plan.md §TC-252–265]'
-  - 'S030 M130 COMPLETE — T130.1–T130.4 done; Phase 30 gate partial PASS at 07; next 08-verify-build; PR #238 open no merge
-    (2026-08-12T22:56:04Z). Tip ad9d1c4 (T130.1@0e95cd2 T130.2@2a884b3 T130.3@0b7a640 T130.4@ad9d1c4). 07-build completed
-    for Phase 30; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
-  - 'S030 08-verify-build START 2026-08-12T22:58:00Z: M130/Phase 30 boundary verify in_progress @ af07de4; prior M129 interim
-    PASS retained; scope=M130/Phase 30 F75–F77 closeout'
-  - 'S030-D55 2026-08-12T20:00:00-04:00: Gate C→D passed (user A/option_1) after M130 08 PASS; proceed 09-qa. tip @3466b2b.
-    [Corpus: feature-list.md §F75–F77]'
-  - 'S030 09-qa COMPLETE 2026-08-12T20:12:00-04:00: overall FAIL — QA-S030-001 alembic tip pin (asserts 20260806_0014; head
-    20260812_0016); in-cycle F75–F77 PASS; report=qa-report.md; tip @3466b2b; handoff ready → 10-e2e (not started). [Corpus:
-    feature-list.md §F75–F77]'
-  - 'S030 10-e2e START 2026-08-12T20:42:00-04:00: Gate C→D passed; 09 FAIL QA-S030-001 carry-forward; starting 10-e2e T0 for
-    UJ-080–082'
-  - 'S030 10-e2e COMPLETE 2026-08-12T20:50:00-04:00: 10-e2e PASS — UJ-080–082 API 7 + Playwright 6; full T0 e2e 145. Carry
-    QA-S030-001 to 11. report=docs/sessions/S030-corpus-automations/reports/e2e-report.md'
-  - 'S030 11-verify-impl START 2026-08-12T20:52:00-04:00: 11 start after 09 FAIL + 10 PASS; dispose QA-S030-001 tip pin →
-    20260812_0016'
-  - 'S030 11-verify-impl 2026-08-12T20:55:00-04:00: QA-S030-001 fixed in working tree (tip 20260812_0016); pytest green; uncommitted.
-    Awaiting AskQuestion signoff for UJ-080–082 / F75–F77.'
-  - 'S030 11-verify-impl 2026-08-13T01:05:11Z: Phase 1 evidence collected; presenting startup + journey AskQuestion; QA-S030-001
-    tip pin still uncommitted (20260812_0016). status remains in_progress (NOT completed). [Corpus: feature-list.md §F75–F77]'
-  - 'S030-D57 2026-08-13T01:11:00Z: 11-verify-impl COMPLETE APPROVED — continue without live UI (login wall; T0+OpenAPI+components);
-    Approve F75/F76/F77; UJ-080–082 already approved; QA-S030-001 tip pin being committed; phase_d=passed; report=verify-impl.md;
-    handoff → 12-verify-deploy (pending). askquestion_pending=false. [Corpus: feature-list.md §F75–F77]'
-  - 'S030 12-verify-deploy 2026-08-13T13:48:00Z: startup AskQuestion pending — do NOT mark in_progress. current_action=12_startup_interview_awaiting;
-    askquestion_pending=true topic=12_startup_interview. Blockers: tip e9e2629 14 ahead of origin / PR #238 head b3da843 CI
-    green but tip no remote CI (RA-009); env_role staging_as_live=live/prod (ADR-049); staging drift true / EV-027 not on
-    live stack; F75/F76 enable + F77 promote need AskQuestion before live mutation. [Corpus: feature-list.md §F75–F77]'
-  - 'S030 12 tip CI PASS 2026-08-13T10:00:24-04:00: tip@e9e2629 CI run 31707365293 success; then risk/rollback AskQuestion
-    answered as S030-D59.'
-  - 'S030-D59 2026-08-13T14:06:25Z: 12-verify-deploy COMPLETE APPROVED — mitigations 1–4 + rollback approved; checklist ready
-    for 13 smoke (*_ENABLED false); no live cutover/enable/promote; report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
-    tip@e9e2629; env_role staging_as_live; current_stage→13-deploy-smoke; askquestion_pending=false; deploy gate still pending;
-    recommended_next=Invoke 13-deploy-smoke. [Corpus: feature-list.md §F75–F77]'
-  - 'S030 13-deploy-smoke START 2026-08-13T14:15:30Z: in_progress; current_action=13_startup_interview; tip reconciled @588dab6
-    (docs: complete deploy strategy verification; 1 ahead of origin e9e2629; tip drift pending push); askquestion_pending=true
-    topic=13_startup_interview; S030-D60 pending — env_role staging_as_live, flags off, awaiting user deploy-path choice. Do
-    NOT invent answers. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
-  - 'S030-D60 2026-08-13T14:20:00Z: 13 startup APPROVED — Q1 option_1 baseline_only_flags_off (push tip if needed → tip CI →
-    H0c+H1–H5 against CURRENT LIVE stack; F75–F77 OFF; no EV-027 cutover/enable/FT promote; env_role staging_as_live=live/prod);
-    Q2 option_1 push 588dab6 and watch CI before live smoke. askquestion_pending=false; current_action=push_tip_watch_ci;
-    enable/promote still gated for later AskQuestion. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
-    [Corpus: no-live-prod-corpus-push]'
-  - 'S030 13 baseline smoke 2026-08-13T14:28:00Z: tip 588dab6 pushed; CI PASS run 31709704821; path baseline_only_flags_off;
-    H0c PASS; H1 PASS; H2 pool PASS / H2 alembic FAIL expected (live 20260806_0014 vs tip head 20260812_0016); H3 PASS (~85.9s);
-    H3b PASS; H4–H5 PASS (verify_connectivity.sh); automations status 404 pre-cutover; report=deploy-smoke.md; EV-027 NOT
-    deployed; current_action=await_s030_d61_h2_disposition; askquestion_pending=true topic=S030-D61; tip_drift cleared (origin@588dab6).
-    Do not invent D61 answer. [Corpus: feature-list.md §F75–F77]'
-  - 'S030-D61 2026-08-13T15:05:00Z: APPROVED option_1 accept_h2_expected_tip_drift — H2 alembic mismatch accepted as EXPECTED
-    tip-drift advisory for baseline_only_flags_off; H2 pool PASS stands; baseline 13-deploy-smoke COMPLETE PASS; NO live migrate,
-    NO cutover, NO enable, NO FT promote; askquestion_pending=false; current_action=baseline_13_complete; next=AskQuestion
-    close/15/ship-path; tip note local fee4d12 may be ahead of origin 588dab6; deploy gate passed_baseline_only (cutover still
-    pending; EV-027 NOT deployed). Do not invent ship/enable answers. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-  - 'S030 13 finalize 2026-08-13T15:08:00Z: deploy-smoke.md / HANDOFF / routing-plan confirmed COMPLETE PASS baseline_only;
-    S030-D61 approved; stages.13 remains completed; askquestion_pending=true topic=S030-D62_next_after_baseline_13; current_action=await_s030_d62_next;
-    S030-D62 PENDING — close vs 15 vs ship-path; do not invent D62 answer. [Corpus: feature-list.md §F75–F77]'
-  - 'S030-D62 2026-08-13T15:41:00Z: APPROVED option_1_15_service_health (user "go" after AskQuestion recommended option 1) —
-    next=15-service-health; flags remain OFF; NO cutover/enable/FT promote; askquestion_pending=false; current_stage→15-service-health;
-    current_action=15_startup; env_role staging_as_live=live/prod; tip note local 0411feb/fee4d12 2 ahead of origin 588dab6
-    (may push as part of 15 prep if skill requires tip CI). Do not invent further answers. [Corpus: feature-list.md §F75–F77]
-    [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]'
-  - 'S030 15-service-health START 2026-08-13T15:43:00Z: in_progress; current_action=15_startup_interview; askquestion_pending=true topic=S030-D63_15_interview;
-    env_role staging_as_live=live/prod already known; prior 13 baseline smoke evidence available (H0c/H1/H3/H4/H5 PASS; H2 alembic
-    accepted as expected tip-drift; H2 pool PASS; tip_smoke 588dab6 CI PASS). Flags remain OFF; no cutover/enable/FT promote.
-    Do NOT invent S030-D63 interview answers. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
-    [Corpus: no-live-prod-corpus-push]'
-  - 'S030-D63 2026-08-13T22:36:00Z: APPROVED (user "Proceed with recommended please") — D63a option_1 post-baseline package (H0ci main advisory
-    + H1 + H2 pool + H3 + H4–H5; H2 alembic known advisory; no ingest; no enable); D63b option_1 lean (one H3 ask; no H6; no
-    corpus write); D63c option_1 proceed now on live URLs from .env (do not require push tip first). askquestion_pending=false;
-    current_action=15_run_checks; stages.15 remains in_progress. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
-    [Corpus: no-live-prod-corpus-push]'
-  - 'S030 15-service-health COMPLETE 2026-08-13T22:40:00Z: OVERALL PASS — H0ci advisory PASS (main run 31178547214 @8ae9d17); H1 PASS chat+write;
-    H2 pool PASS / alembic advisory 20260806_0014 vs 20260812_0016; H3 PASS ~74.2s en; H4–H5 PASS; Infra PASS; Behavior PASS;
-    remediation none; no enable/cutover/FT promote; report=docs/sessions/S030-corpus-automations/reports/service-health.md; stages.15 completed PASS; current_action=await_s030_d64_close_or_ship;
-    askquestion_pending=true topic=S030-D64; Phase D verify/deploy baseline done — ship still optional. Do not invent D64.
-    [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-  decisions:
-  - id: S030-D0
-    summary: 'Open S030 feature session for #73'
-    recorded_at: '2026-08-07T12:41:34Z'
-  - id: S030-D1
-    summary: Approved Standard routing (later upgraded Full S030-D9)
-    recorded_at: '2026-08-07T12:41:34Z'
-  - id: S030-D2
-    summary: 'Phase 0 Intent Q1: Full #73 checklist'
-    recorded_at: '2026-08-07T12:49:18Z'
-  - id: S030-D3
-    summary: 'Phase 0 Intent Q2: All gaps equal'
-    recorded_at: '2026-08-07T12:49:18Z'
-  - id: S030-D4
-    summary: 'Phase 0 Intent Q3: Fine-tune if Modal issue pulled in'
-    recorded_at: '2026-08-07T12:49:18Z'
-  - id: S030-D5
-    summary: 'Phase 0 Scope Q4: Pull full #72 into EV-027'
-    recorded_at: '2026-08-07T12:51:47Z'
-  - id: S030-D6
-    summary: 'Phase 0 Scope Q5: job completion + cron + doc CRUD'
-    recorded_at: '2026-08-07T12:51:47Z'
-  - id: S030-D7
-    summary: 'Phase 0 Scope Q6: Fold #219 freshness'
-    recorded_at: '2026-08-07T12:51:47Z'
-  - id: S030-D8
-    summary: 'Phase 0 Scope Q7: DM run history + enable/disable'
-    recorded_at: '2026-08-07T12:51:47Z'
-  - id: S030-D9
-    summary: 'Phase 0 Constraints Q8: One Full cycle (03+06)'
-    recorded_at: '2026-08-07T12:54:38Z'
-  - id: S030-D10
-    summary: 'Phase 0 Constraints Q9: Prod cutover if eval better (amended by D20)'
-    recorded_at: '2026-08-07T12:54:38Z'
-  - id: S030-D11
-    summary: 'Phase 0 Constraints Q10: Kill-switch + caps; manual train approve'
-    recorded_at: '2026-08-07T12:54:38Z'
-  - id: S030-D12
-    summary: 'Phase 0 Constraints Q11: LoRA/PEFT on pinned Qwen'
-    recorded_at: '2026-08-07T12:54:38Z'
-  - id: S030-D13
-    summary: 'Phase 0 close: allocate F75=#73, F76=#219, F77=#72'
-    recorded_at: '2026-08-07T13:06:00Z'
-  - id: S030-D14
-    summary: 'Phase 1 confirm: impact + Full routing; start 01'
-    recorded_at: '2026-08-07T13:10:00Z'
-  - id: S030-D15
-    summary: '01 Phase 0C: approve locked seeds S1-S9 (RD-325–333)'
-    recorded_at: '2026-08-07T13:26:02Z'
-  - id: S030-D16
-    summary: 'OQ1: F75 catch-up only'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D17
-    summary: 'OQ2: Doc CRUD async Modal; idempotent doc_id+revision'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D18
-    summary: 'OQ3: One Modal schedule, two job types'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D19
-    summary: 'OQ4: Stale threshold default 30 days'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D20
-    summary: 'OQ5: F77 promote = human judgment only'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D21
-    summary: 'OQ6: FT adapter on prod only after promote'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D22
-    summary: 'OQ7: Training data = instruction/QA SFT pairs'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D23
-    summary: 'OQ8: Automation run history in Postgres via write-API'
-    recorded_at: '2026-08-07T13:28:25Z'
-  - id: S030-D24
-    summary: Approve 01 deltas; start 02-verify-plan
-    recorded_at: '2026-08-07T13:35:00Z'
-  - id: S030-D25
-    summary: Approve 02 fixes C1–C2 M1–M4; RD-345–348
-    recorded_at: '2026-08-07T13:42:00Z'
-  - id: S030-D26
-    summary: Gate A→B PASS; start 03-plan-tooling
-    recorded_at: '2026-08-07T13:44:30Z'
-  - id: S030-D27
-    summary: 03-plan-tooling COMPLETE — R1–R4/H1/S1; Phase A tooling done; AskQuestion → 04
-    recorded_at: '2026-08-07T13:58:37Z'
-  - id: S030-D28
-    summary: AskQuestion option 1 — Yes start 04-tech-plan (Phase B)
-    recorded_at: '2026-08-07T14:01:24Z'
-    choice: option_1_yes_start_04_tech_plan
-  - id: S030-D29
-    summary: TP1–TP10 locked (user approved plan; Agent wrote artifacts); 04-tech-plan COMPLETE; handoff → 05-verify-tech
-    recorded_at: '2026-08-07T14:34:39Z'
-    choice: approve_tp1_tp10_lock
-  - id: S030-D30
-    summary: User confirmed y after 04 COMPLETE — start 05-verify-tech delta audit (Phase 30 / TP locks)
-    recorded_at: '2026-08-07T14:37:01Z'
-    choice: y_start_05_verify_tech
-  - id: S030-D31
-    summary: Approve all recommended 05-verify-tech fixes M1–M5 + L1 (option 1)
-    recorded_at: '2026-08-07T14:42:24Z'
-    choice: option_1_approve_all_m1_m5_l1
-    skill_id: 05-verify-tech
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    details:
-      M1: Playwright required for UJ-080–082 in test-plan
-      M2: schedule=modal.Period(days=1)
-      M3: T129.3 Depends On = T129.1 + blocked until 06 note
-      M4: T130.4 confirm Accepted + closeout only
-      M5: deployment-integration EV-027 stub
-      L1: waive Build Plan Card; SoT = tech-plan-delta + Phase 30
-    waiver: '[Corpus: WAIVED — Build Plan Card; reason: evolve SoT is tech-plan-delta + Phase 30 Task Tracking; decided: S030-D31]'
-  - id: S030-D32
-    summary: Gate B→C PASS (option 1) — start 06-tech-tooling (Full)
-    recorded_at: '2026-08-07T14:43:54Z'
-    choice: option_1_gate_b_to_c_pass
-    skill_id: 05-verify-tech
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    gates:
-      b_to_c: passed
-    checkpoints:
-      phase_b: passed
-    next_stage: 06-tech-tooling
-  - id: S030-D33
-    summary: 'Approve all 06 plan + exact FT pins: peft==0.20.0, trl==1.9.2, transformers==4.57.6 (train), accelerate==1.14.0,
-      datasets==4.8.5; bitsandbytes deferred; infra/modal/finetune_pins.py; inventory updated'
-    recorded_at: '2026-08-07T14:47:56Z'
-    choice: approve_all_06_plan_exact_ft_pins
-    skill_id: 06-tech-tooling
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    pins:
-      peft: 0.20.0
-      trl: 1.9.2
-      transformers: 4.57.6
-      accelerate: 1.14.0
-      datasets: 4.8.5
-      bitsandbytes: deferred
-    artifacts:
-    - infra/modal/finetune_pins.py
-    - docs/dependency-inventory.md
-    - docs/sessions/S030-corpus-automations/reports/06-tech-tooling.md
-  - id: S030-D34
-    summary: 'Continue with recommended: start M129 F77 after tip CI green (not interim Phase C / 08-verify-build)'
-    choice: continue_recommended_m129_after_ci_green
-    recorded_at: '2026-08-12T20:32:06Z'
-    tip: bb872c0
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
-  - id: S030-D35
-    summary: Tip CI red on bb872c0 — fix DM FE coverage in place, re-push, re-watch; then M129 (path unchanged)
-    choice: fix_ci_in_place_then_m129
-    recorded_at: '2026-08-12T20:34:58Z'
-    tip: bb872c0
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31637893050
-    ci_run_id: 31637893050
-  - id: S030-D36
-    summary: Coverage fix @2190b8e pushed; await tip CI green then start M129 T129.1
-    choice: coverage_fix_pushed_await_ci_then_m129
-    recorded_at: '2026-08-12T20:39:07Z'
-    tip: 2190b8e
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
-    ci_run_id: 31638576143
-  - id: S030-D37
-    summary: Product CI green @2190b8e; security OpenGrep flake — markdown AskQuestion gate (1 harden / 2 rerun / 3 waive+M129
-      / 4 explain); M129 not started
-    choice: pending_markdown_askquestion
-    recommended: 1
-    recorded_at: '2026-08-12T20:43:10Z'
-    tip: 2190b8e
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
-    ci_run_id: 31638576143
-  - id: S030-D38
-    summary: Tip CI GREEN @2190b8e; S030-D37 closed; start M129 F77 / T129.1 in_progress
-    choice: ci_green_start_t129_1
-    recorded_at: '2026-08-12T20:46:10Z'
-    tip: 2190b8e
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31638576143
-    ci_run_id: 31638576143
-    task: T129.1
-  - id: S030-D39
-    summary: T129.1 COMPLETE @67ac92b; start T129.2 in_progress
-    choice: t129_1_complete_start_t129_2
-    recorded_at: '2026-08-12T20:49:06Z'
-    tip: 67ac92b
-    task_completed: T129.1
-    task_started: T129.2
-  - id: S030-D40
-    summary: T129.2 COMPLETE @0fff625; start T129.3 in_progress (06 pins done — unblocked)
-    choice: t129_2_complete_start_t129_3
-    recorded_at: '2026-08-12T20:55:19Z'
-    tip: 0fff625
-    task_completed: T129.2
-    task_started: T129.3
-  - id: S030-D41
-    summary: Tip 0fff625 CI gitleaks curl 503 flake; rerunning; T129.3 coding gated until green/waive
-    choice: await_ci_rerun_gate_t129_3_coding
-    recorded_at: '2026-08-12T20:59:59Z'
-    tip: 0fff625
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640006502
-  - id: S030-D42
-    summary: Tip 932c036 CI GREEN; clear coding_blocked; resume T129.3 scaffold
-    choice: ci_green_resume_t129_3
-    recorded_at: '2026-08-12T21:06:16Z'
-    tip: 932c036
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31640505267
-  - id: S030-D43
-    summary: T129.3 COMPLETE @a75af50; start T129.4 in_progress (finetune_train + approve API)
-    choice: t129_3_complete_start_t129_4
-    recorded_at: '2026-08-12T21:10:31Z'
-    tip: a75af50
-    task_completed: T129.3
-    task_started: T129.4
-    commit: a75af50
-    files_changed: 7
-  - id: S030-D44
-    summary: T129.4 COMPLETE @4ef663b; start T129.5 in_progress (LoRA/PEFT SFT train worker)
-    choice: t129_4_complete_start_t129_5
-    recorded_at: '2026-08-12T21:16:39Z'
-    tip: 4ef663b
-    task_completed: T129.4
-    task_started: T129.5
-    commit: 4ef663b
-    files_changed: 10
-  - id: S030-D45
-    summary: Tip CI GREEN @c042f57 (run 31642681501); T129.4 follow-ups @4e8fc15 OpenAPI + @c042f57 coverage; coding_blocked=false;
-      continue T129.5 LoRA train worker (supersedes earlier D45 resume/watching @4e8fc15)
-    recorded_at: '2026-08-12T21:33:12Z'
-    choice: tip_ci_green_continue_t129_5
-    tip: c042f57
-    prior_tip: 4e8fc15
-    ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642681501
-    ci_run_id: 31642681501
-    ci_status: success
-    coding_blocked: false
-    current_task: T129.5
-    resume_recorded_at: '2026-08-12T21:25:26Z'
-  - id: S030-D46
-    summary: T129.5 COMPLETE @23113da; coverage fail on 4e8fc15 fixed in-path; local DM 95.2%; start T129.6; AskQuestion none
-    recorded_at: '2026-08-12T21:36:28Z'
-    choice: complete_t129_5_start_t129_6
-  - id: S030-D47
-    summary: T129.6 COMPLETE @bb391b1; start T129.7; AskQuestion none
-    recorded_at: '2026-08-12T21:39:38Z'
-    choice: complete_t129_6_start_t129_7
-  - id: S030-D48
-    summary: 'T129.7 COMPLETE @b2a25e5; start T129.8; AskQuestion none; PR #238 open'
-    recorded_at: '2026-08-12T21:45:20Z'
-    choice: complete_t129_7_start_t129_8
-  - id: S030-D49
-    summary: 'T129.8 COMPLETE @c8b5b96; start T129.9; AskQuestion none; PR #238 open'
-    recorded_at: '2026-08-12T21:50:46Z'
-    choice: complete_t129_8_start_t129_9
-  - id: S030-D50
-    summary: 'T129.9 COMPLETE @f48a7e7; start T129.10; AskQuestion none; PR #238 open'
-    recorded_at: '2026-08-12T22:06:15Z'
-    choice: complete_t129_9_start_t129_10
-  - id: S030-D51
-    summary: 'T129.10 COMPLETE @6107037; M129 completed; start 08-verify-build then T130.1; AskQuestion none; PR #238 open'
-    recorded_at: '2026-08-12T22:25:00Z'
-    choice: complete_t129_10_m129_start_08_then_m130
-  - id: S030-D52
-    summary: 'Security gate PASS — npm overrides nanoid@3.3.17 + js-yaml@4.3.1; make security-scan PASSED (Grype HIGH: 0);
-      cleared GHSA-2v37-7h3g-55p8 + GHSA-5p4m-2wfm-xmqj; advisory: npm audit react-router high needs 7.18.2 (override 7.18.1,
-      Grype did not fail). Continue 08-verify-build M129 boundary then T130.1.'
-    choice: option_1_bump_nanoid_js_yaml_overrides
-    recorded_at: '2026-08-12T22:29:20Z'
-    skill_id: 08-verify-build
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    tip: 59ac29d
-    security_scan: PASSED
-    grype_high: 0
-    cleared_advisories:
-    - GHSA-2v37-7h3g-55p8
-    - GHSA-5p4m-2wfm-xmqj
-    overrides:
-      nanoid: 3.3.17
-      js-yaml: 4.3.1
-    advisory_nonblocking: npm audit react-router high needs 7.18.2 (override 7.18.1); Grype did not fail
-    corpus: '[Corpus: feature-list.md §F77]'
-  - id: S030-D53
-    summary: Bump react-router/react-router-dom overrides to 7.18.2 before 08 closeout (option 3); make security-scan PASSED
-      (Grype HIGH 0); npm audit 0 vulnerabilities; cleared GHSA-qwww-vcr4-c8h2; continue 08-verify-build verification-report
-      then T130.1.
-    choice: option_3_bump_react_router_7_18_2_before_08_closeout
-    recorded_at: '2026-08-12T22:37:53Z'
-    skill_id: 08-verify-build
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    tip: eb951fd
-    security_scan: PASSED
-    grype_high: 0
-    npm_audit: 0 vulnerabilities
-    cleared_advisories:
-    - GHSA-qwww-vcr4-c8h2
-    overrides:
-      react-router: 7.18.2
-      react-router-dom: 7.18.2
-    resolves_advisory_from: S030-D52
-    corpus: '[Corpus: feature-list.md §F77]'
-  - id: S030-D54
-    summary: 'M129 08-verify-build boundary PASS — verification-report written; unit 1562 passed/16 skipped; FE DM 813 + chat-rag
-      190; security PASSED (Grype HIGH 0, npm audit 0 after S030-D52/D53); test-fast skipped on host (bash 3.2/mapfile) —
-      documented; format auto-fix freshness Vitest. Advance to T130.1 / M130; PR #238 open; phase_c / Gate C→D pending until
-      M130.'
-    choice: m129_08_verify_build_boundary_pass
-    recorded_at: '2026-08-12T22:41:12Z'
-    skill_id: 08-verify-build
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    milestone: M129
-    report: docs/sessions/S030-corpus-automations/reports/verification-report.md
-    evidence:
-      unit: 1562 passed, 16 skipped
-      fe_dm: 813 passed
-      fe_chat_rag: 190 passed
-      security: PASSED (Grype HIGH 0; npm audit 0)
-      test_fast: SKIPPED host bash 3.2/mapfile — documented in report
-      format_autofix: test_uj081_freshness_ui.test.tsx
-    tip_note: tip will update after parent bundles report+format+handoff+workflow-state
-    corpus: '[Corpus: feature-list.md §F77]'
-  - id: S030-T130-1-START
-    summary: 'S030 T130.1 START — Phase 30 gate TC-252–265 confirmation suite; tip c610056; PR #238 open; leave unmerged'
-    recorded_at: '2026-08-12T22:46:00Z'
-    skill_id: 07-build
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    milestone: M130
-    current_task: T130.1
-    tip: c610056
-    tip_prev: 73a6571
-    pr: 238
-    pr_merge: leave_unmerged
-    execution_plan_note: T128.5–T128.7 rows still pending in execution-plan.md; M128 complete in git/workflow — parent syncs
-    handoff_md: parent will update docs/sessions/S030-corpus-automations/HANDOFF.md next/position
-    corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/test-plan.md §TC-252–265]'
-  - id: S030-D55
-    summary: Gate C→D passed — proceed to 09-qa
-    choice: option_1_pass_gate_c_to_d
-    user_choice: A / option_1_pass_gate_c_to_d
-    recorded_at: '2026-08-12T20:00:00-04:00'
-    skill_id: 08-verify-build
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    tip: 3466b2b
-    checkpoints_phase_c: passed
-    gates_c_to_d: passed
-    corpus: '[Corpus: feature-list.md §F75–F77]'
-  - id: S030-D56
-    summary: 11-verify-impl startup — resume journey+feature sign-off; UJ-080–082 T0 approved; UI preview
-    recorded_at: '2026-08-13T01:11:00Z'
-    skill_id: 11-verify-impl
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    corpus: '[Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md §UJ-080–UJ-082]'
-  - id: S030-D57
-    summary: 11-verify-impl close — continue without live UI; approve F75–F77; tip pin committing; phase_d passed
-    choice: continue_without_live_ui_approve_f75_f76_f77
-    user_choice: Continue without live UI (login wall) + Approve F75/F76/F77
-    recorded_at: '2026-08-13T01:11:00Z'
-    skill_id: 11-verify-impl
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    ui_preview: continue_without_live_ui_login_wall
-    inspection_basis: t0_openapi_components
-    approved_features:
-    - F75
-    - F76
-    - F77
-    journeys_approved:
-    - UJ-080
-    - UJ-081
-    - UJ-082
-    qa_s030_001_status: tip_pin_being_committed
-    checkpoints_phase_d: passed
-    next_stage: 12-verify-deploy
-    report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
-    corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-  - id: S030-D59
-    summary: 12-verify-deploy close — approve mitigations 1–4 + rollback + checklist ready for 13 (*_ENABLED false; no live
-      cutover/enable/promote)
-    choice: approve_mitigations_rollback_checklist_ready_13
-    user_choice: 1–4 mitigations approved; 5 rollback approved; 6 checklist ready for 13 smoke with *_ENABLED false; no live
-      cutover/enable/promote
-    recorded_at: '2026-08-13T14:06:25Z'
-    skill_id: 12-verify-deploy
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
-    tip: e9e2629
-    tip_ci_run_id: '31707365293'
-    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
-    tip_ci_gate: PASS
-    env_role: staging_as_live
-    mitigations_1_to_4: approved
-    rollback_plan: approved
-    checklist_status: ready
-    flags_enabled: false
-    no_live_cutover: true
-    no_enable_automations: true
-    no_ft_promote: true
-    next_stage: 13-deploy-smoke
-    checkpoints_deploy: pending
-    gates_deploy: pending
-    corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md]'
-  - id: S030-D60
-    summary: '13-deploy-smoke startup APPROVED — baseline_only_flags_off; push 588dab6 + watch CI then live H0c+H1–H5'
-    status: approved
-    decided: true
-    recorded_at: '2026-08-13T14:15:30Z'
-    decided_at: '2026-08-13T14:20:00Z'
-    skill_id: 13-deploy-smoke
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    tip: 588dab6
-    tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
-    tip_prev: e9e2629
-    tip_drift: pending_push
-    local_ahead: 1
-    origin_tip: e9e2629
-    env_role: staging_as_live
-    env_role_live: prod
-    flags_enabled: false
-    path_label: baseline_only_flags_off
-    q1_choice: option_1_baseline_only
-    q1_path: push_tip_if_needed_confirm_ci_then_H0c_H1_H5_current_live_stack
-    q2_choice: option_1_push_588dab6_watch_ci_before_live_smoke
-    no_ev027_cutover: true
-    no_enable_automations: true
-    no_ft_promote: true
-    f75_f76_f77: off
-    enable_promote_still_gated: true
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D60 — startup interview answered
-    note: 'S030-D60 APPROVED — baseline only against current live stack; F75–F77 remain OFF; enable/promote still gated for later AskQuestion. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]'
-  - id: S030-D61
-    summary: '13 baseline smoke H2 alembic accepted as expected tip-drift — baseline 13 COMPLETE PASS'
-    status: approved
-    decided: true
-    recorded_at: '2026-08-13T14:28:00Z'
-    decided_at: '2026-08-13T15:05:00Z'
-    skill_id: 13-deploy-smoke
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    tip: 588dab6
-    tip_ci_run_id: '31709704821'
-    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
-    tip_ci_status: success
-    tip_docs: fee4d12
-    tip_docs_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-    tip_docs_note: local fee4d12 ahead of origin 588dab6 (docs: record baseline live smoke)
-    path_label: baseline_only_flags_off
-    choice: accept_h2_expected_tip_drift
-    user_choice: option_1_accept_h2_expected_tip_drift
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D61
-    h2_alembic: expected_fail_accepted
-    h2_alembic_advisory: true
-    live_alembic_rev: '20260806_0014'
-    tip_alembic_head: '20260812_0016'
-    h2_pool: pass
-    no_live_migrate: true
-    no_cutover: true
-    no_enable: true
-    no_ft_promote: true
-    ev027_deployed: false
-    baseline_13_result: PASS
-    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
-    note: 'S030-D61 APPROVED — accept H2 alembic mismatch as EXPECTED tip-drift advisory; baseline 13 COMPLETE PASS; cutover still pending. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-  - id: S030-D62
-    summary: 'Next after baseline 13 COMPLETE — run 15-service-health (flags off; no cutover/enable/promote)'
-    status: approved
-    decided: true
-    recorded_at: '2026-08-13T15:08:00Z'
-    decided_at: '2026-08-13T15:41:00Z'
-    skill_id: 16-evolve
-    prior_skill_id: 13-deploy-smoke
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    topic: S030-D62_next_after_baseline_13
-    choice: option_1_15_service_health
-    user_choice: option_1_15_service_health
-    user_utterance: go
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D62
-    options_hint:
-    - close_session
-    - run_15_service_health
-    - ship_path_cutover
-    selected_option: run_15_service_health
-    baseline_13_result: PASS
-    s030_d61_status: approved
-    flags_enabled: false
-    no_cutover: true
-    no_enable: true
-    no_ft_promote: true
-    enable_promote_still_gated: true
-    ev027_deployed: false
-    env_role: staging_as_live
-    env_role_live: prod
-    next_stage: 15-service-health
-    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
-    note: 'S030-D62 APPROVED — option_1_15_service_health; invoke 15 with flags OFF; no cutover/enable/promote. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-  - id: S030-D63
-    summary: '15-service-health startup interview — recommended package/lean/proceed-now approved'
-    status: approved
-    decided: true
-    recorded_at: '2026-08-13T15:43:00Z'
-    decided_at: '2026-08-13T22:36:00Z'
-    skill_id: 15-service-health
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    topic: S030-D63_15_interview
-    user_utterance: Proceed with recommended please
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D63
-    env_role: staging_as_live
-    env_role_live: prod
-    env_role_known: true
-    prior_13_baseline:
-      result: PASS
-      path_label: baseline_only_flags_off
-      tip_smoke: 588dab6
-      tip_ci_run_id: '31709704821'
-      h0c: pass
-      h1: pass
-      h2_pool: pass
-      h2_alembic: expected_fail_accepted
-      h3: pass
-      h3b: pass
-      h4: pass
-      h5: pass
-      report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
-      s030_d61_choice: accept_h2_expected_tip_drift
-    flags_enabled: false
-    enable_promote_still_gated: true
-    ev027_deployed: false
-    d63a:
-      id: S030-D63a
-      status: approved
-      choice: option_1_post_baseline_package
-      package:
-      - H0ci_main_advisory
-      - H1
-      - H2_pool
-      - H3
-      - H4
-      - H5
-      h2_alembic: known_advisory
-      no_ingest: true
-      no_enable: true
-    d63b:
-      id: S030-D63b
-      status: approved
-      choice: option_1_lean
-      one_h3_ask: true
-      h6: false
-      no_corpus_write: true
-    d63c:
-      id: S030-D63c
-      status: approved
-      choice: option_1_proceed_now_live_env
-      require_push_tip_first: false
-      live_urls_from: .env
-    note: 'S030-D63 APPROVED — D63a/b/c option 1 recommended; proceed 15_run_checks. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-  - id: S030-D63a
-    summary: '15 package — post-baseline H0ci(advisory)+H1+H2pool+H3+H4–H5; H2 alembic advisory; no ingest/enable'
-    status: approved
-    decided: true
-    recorded_at: '2026-08-13T22:36:00Z'
-    decided_at: '2026-08-13T22:36:00Z'
-    parent: S030-D63
-    choice: option_1_post_baseline_package
-    skill_id: 15-service-health
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-  - id: S030-D63b
-    summary: '15 lean — one H3 ask; no H6; no corpus write'
-    status: approved
-    decided: true
-    recorded_at: '2026-08-13T22:36:00Z'
-    decided_at: '2026-08-13T22:36:00Z'
-    parent: S030-D63
-    choice: option_1_lean
-    skill_id: 15-service-health
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-  - id: S030-D63c
-    summary: '15 proceed now on live URLs from .env — do not require push tip first'
-    status: approved
-    decided: true
-    recorded_at: '2026-08-13T22:36:00Z'
-    decided_at: '2026-08-13T22:36:00Z'
-    parent: S030-D63
-    choice: option_1_proceed_now_live_env
-    require_push_tip_first: false
-    live_urls_from: .env
-    skill_id: 15-service-health
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-  - id: S030-D64
-    summary: 'Next after 15 COMPLETE PASS — close session vs ship-path (pending)'
-    status: pending
-    recorded_at: '2026-08-13T22:40:00Z'
-    skill_id: 15-service-health
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    topic: S030-D64_close_vs_ship
-    askquestion_pending: true
-    askquestion_pending_topic: S030-D64
-    options_hint:
-    - close_session
-    - ship_path_cutover
-    stage_15_result: PASS
-    overall: pass
-    infra: pass
-    behavior: pass
-    remediation: none
-    enable_promote_still_gated: true
-    ev027_deployed: false
-    phase_d_baseline_done: true
-    ship_still_optional: true
-    report: docs/sessions/S030-corpus-automations/reports/service-health.md
-    note: 'S030-D64 PENDING — do not invent answer; AskQuestion close vs ship-path. Phase D verify/deploy baseline done; ship still optional. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-  context_briefs: []
-  routing_plan:
-  - stage: 00-context
-    required: true
-    status: completed
-    mode: scoped
-    skip_rationale: null
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T12:41:34Z'
-    completed_at: '2026-08-07'
-    completed_at_iso: '2026-08-07T12:41:34Z'
-    note: S030 00-context COMPLETE — Standard→Full; handoff → 16-evolve Phase 0 (EV-027)
-  - stage: 01-requirements
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T13:10:00Z'
-    completed_at: '2026-08-07'
-    completed_at_iso: '2026-08-07T13:31:45Z'
-    report: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
-    note: S030/EV-027 01 COMPLETE — delta F75–F77; report=docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
-  - stage: 02-verify-plan
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T13:35:00Z'
-    completed_at: '2026-08-07'
-    completed_at_iso: '2026-08-07T13:44:30Z'
-    report: docs/sessions/S030-corpus-automations/reports/02-verify-plan-audit.md
-    report_status: completed
-    note: 'S030-D26: Gate A→B PASS; 02 COMPLETE; phase_a/gates.a_to_b passed; handoff → 03'
-    s030_d25_decision: S030-D25
-    s030_d26_decision: S030-D26
-    findings_open: []
-    findings_resolved:
-    - C1
-    - C2
-    - M1
-    - M2
-    - M3
-    - M4
-    consistency_result: pass
-    gate_a_to_b: passed
-    phase_a: passed
-    askquestion_pending: false
-    current_action: completed
-    next_action: none_handoff_to_03
-    updated_at: '2026-08-07T13:44:30Z'
-  - stage: 03-plan-tooling
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T13:44:30Z'
-    completed_at: '2026-08-07'
-    completed_at_iso: '2026-08-07T13:58:37Z'
-    report: docs/sessions/S030-corpus-automations/reports/03-plan-tooling.md
-    report_status: completed
-    note: 'S030-D27: 03 COMPLETE — R1–R4/H1/S1; Phase A tooling done; S030-D28 approved → 04-tech-plan'
-    s030_d26_decision: S030-D26
-    s030_d27_decision: S030-D27
-    s030_d28_decision: S030-D28
-    current_action: completed
-    next_action: none_handoff_to_04
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    tooling_installed:
-      rules:
-      - R1
-      - R2
-      - R3
-      - R4
-      hooks:
-      - H1
-      skills:
-      - S1
-      detail: corpus-automations-ft rule+skill; patched unified-llm, domain-vocab, no-live-prod; scope_check+feature_drift
-    updated_at: '2026-08-07T14:01:24Z'
-  - stage: 04-tech-plan
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T14:01:24Z'
-    current_action: completed
-    next_action: none_handoff_to_05
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    phase_b: in_progress
-    s030_d28_decision: S030-D28
-    note: 'S030-D29: 04 COMPLETE — TP1–TP10 locked; ADR-052/053 Accepted; Phase 30 M127–M130 pending; handoff → 05-verify-tech
-      (Gate B→C pending)'
-    updated_at: '2026-08-07T14:34:39Z'
-    completed_at: '2026-08-07'
-    completed_at_iso: '2026-08-07T14:34:39Z'
-    report: docs/sessions/S030-corpus-automations/reports/04-tech-plan.md
-    report_status: completed
-    gate_b_to_c: pending
-    s030_d29_decision: S030-D29
-    artifacts:
-    - docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md
-    - docs/sessions/S030-corpus-automations/roadmap.md
-    - docs/sessions/S030-corpus-automations/reports/04-tech-plan.md
-    - docs/sessions/S000-internal-docs-archive/execution-plan.md
-    tp_locks: TP1–TP10
-    adrs_accepted:
-    - ADR-052
-    - ADR-053
-    phase_30_milestones:
-    - M127
-    - M128
-    - M129
-    - M130
-  - stage: 05-verify-tech
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    next_action: none_handoff_to_06
-    note: 'S030-D31: 05 COMPLETE — M1–M5+L1 applied; S030-D32: Gate B→C PASS; handoff → 06-tech-tooling'
-    updated_at: '2026-08-07T14:43:54Z'
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T14:37:01Z'
-    current_action: completed
-    s030_d29_decision: S030-D29
-    s030_d30_decision: S030-D30
-    phase_b: passed
-    gate_b_to_c: passed
-    audit_targets:
-    - docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md
-    - docs/sessions/S030-corpus-automations/roadmap.md
-    - docs/sessions/S030-corpus-automations/reports/04-tech-plan.md
-    - docs/sessions/S000-internal-docs-archive/execution-plan.md
-    - docs/adr/ADR-052-corpus-automation-orchestration.md
-    - docs/adr/ADR-053-modal-lora-finetune.md
-    completed: '2026-08-07'
-    completed_at: '2026-08-07'
-    completed_at_iso: '2026-08-07T14:42:24Z'
-    report: docs/sessions/S030-corpus-automations/reports/05-verify-tech-audit.md
-    s030_d31_decision: S030-D31
-    askquestion_pending: false
-    s030_d32_decision: S030-D32
-  - stage: 06-tech-tooling
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    note: 'S030-D33: 06 COMPLETE — FT pins locked; finetune_pins.py; inventory; connectivity present; pytest test_finetune_pins
-      3 passed; handoff → 07 ready'
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T14:43:54Z'
-    updated_at: '2026-08-07T14:47:56Z'
-    current_action: completed
-    next_action: none_handoff_to_07
-    s030_d9_decision: S030-D9
-    s030_d32_decision: S030-D32
-    tp10: true
-    phase_b: passed
-    gate_b_to_c: passed
-    completed: '2026-08-07'
-    completed_at: '2026-08-07'
-    completed_at_iso: '2026-08-07T14:47:56Z'
-    report: docs/sessions/S030-corpus-automations/reports/06-tech-tooling.md
-    s030_d33_decision: S030-D33
-    verification:
-      connectivity: present
-      pytest_test_finetune_pins: 3 passed
-    pins:
-      peft: 0.20.0
-      trl: 1.9.2
-      transformers: 4.57.6
-      accelerate: 1.14.0
-      datasets: 4.8.5
-      bitsandbytes: deferred
-  - stage: 07-build
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    ready: true
-    current_action: completed_m130_phase30
-    next_action: 08-verify-build for M130/Phase 30 boundary
-    s030_d31_decision: S030-D31
-    s030_d33_decision: S030-D33
-    milestone_hint: M130
-    note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next 08-verify-build
-      for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
-    started_at: '2026-08-07'
-    started_at_iso: '2026-08-07T14:53:54Z'
-    active_milestone: M130
-    current_task: null
-    current_task_status: completed
-    t130_1_status: completed
-    t130_1_started_at: '2026-08-12T22:46:00Z'
-    m130_status: completed
-    t127_5_status: completed
-    t127_5_commit: 5d31dcf
-    t127_6_status: completed
-    t127_6_commit: 93e87ce
-    t127_6_fix_commit: 081ecf2
-    t127_7_status: completed
-    t127_7_commit: f4e8373
-    t127_8_status: completed
-    t127_8_commit: 6323ece
-    t127_9_status: completed
-    t127_9_commit: 6dc0117
-    t127_10_status: completed
-    t127_10_commit: 92f1f30
-    t127_10_note: Playwright uj080-automations.spec.ts green; committed @92f1f30
-    m127_status: completed
-    m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
-    m127_pr_number: 238
-    phase_ab_docs_committed: true
-    phase_ab_docs_commit: 3cadd8b
-    tip: ad9d1c4
-    tip_sha: ad9d1c4
-    tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-    tip_prev: 0b7a640
-    build_plan_card: waived
-    build_plan_card_waiver: S030-D31
-    updated_at: '2026-08-12T22:56:04Z'
-    t128_1_status: completed
-    t128_1_commit: 92912be
-    t128_1_note: F76 freshness policy helpers + unit tests (TC-256–259); committed @92912be
-    ci_fix_commit: 5fc2d21
-    ci_fix_note: 'PR #238 CI fix: Automations Vitest coverage + catchup_crud pyright @5fc2d21'
-    t128_2_status: completed
-    t128_2_commit: 7b1aa87
-    t128_2_completed_at: '2026-08-12T19:11:44Z'
-    t128_2_description: 'Config: Alembic document fields `refresh_enabled`, `last_checked_at` (reuse `content_hash`)'
-    t128_2_spec_source: TP7, api-contract
-    t128_2_depends_on: T128.1
-    t128_2_note: Alembic refresh_enabled + last_checked_at; reuse content_hash; committed @7b1aa87
-    t128_3_status: completed
-    t128_3_started_at: '2026-08-12T19:11:44Z'
-    t128_3_completed_at: '2026-08-12T19:17:43Z'
-    t128_3_commit: e86290e
-    t128_3_description: 'Code: write-API PATCH/list stale fields; Refresh now → enqueue'
-    t128_3_spec_source: api-contract §Freshness
-    t128_3_depends_on: T128.1, T128.2
-    t128_3_note: write-API freshness PATCH/list stale + Refresh now enqueue; committed @e86290e
-    t128_4_status: completed
-    t128_4_commit: ac8fca7
-    t128_4_completed_at: '2026-08-12T19:40:00Z'
-    t128_5_status: completed
-    t128_4_started_at: '2026-08-12T19:17:43Z'
-    t128_4_description: 'Code: Modal job_type=freshness_refresh + periodic schedule branch (shared with F75)'
-    t128_4_spec_source: TP2, ADR-052
-    t128_4_depends_on: T128.3, T127.7
-    substeps:
-      current_task: null
-      active_milestone: M130
-      current_task_status: completed
-      t130_1_status: completed
-      mode: m130_complete_handoff_08
-      t128_1_status: completed
-      t128_1_commit: 92912be
-      t128_2_status: completed
-      t128_2_commit: 7b1aa87
-      t128_3_status: completed
-      t128_3_commit: e86290e
-      t128_4_status: completed
-      t128_4_commit: ac8fca7
-      t128_4_completed_at: '2026-08-12T19:40:00Z'
-      t128_5_status: completed
-      tip_sha: ad9d1c4
-      m127_status: completed
-      m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
-      m127_pr_number: 238
-      t128_5_started_at: '2026-08-12T20:04:26Z'
-      t128_5_commit: fdf68af
-      t128_5_completed_at: '2026-08-12T20:11:03Z'
-      t128_6_status: completed
-      t128_6_started_at: '2026-08-12T20:18:53Z'
-      tip_pushed: true
-      t128_6_commit: eac398d
-      t128_6_completed_at: '2026-08-12T20:23:22Z'
-      t128_6_vitest_followup_commit: 7971c16
-      t128_7_status: completed
-      t128_7_started_at: '2026-08-12T20:24:30Z'
-      m128_status: completed
-      t128_7_commit: bdaec9d
-      t128_7_completed_at: '2026-08-12T20:27:11Z'
-      m129_status: completed
-      t129_3_status: completed
-      t129_3_sha: a75af50
-      t129_4_status: completed
-      t129_4_sha: 4ef663b
-      t129_5_status: completed
-      t129_5_started_at: '2026-08-12T21:16:39Z'
-      tip: ad9d1c4
-      tip_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-      tip_prev: 0b7a640
-      coding_blocked: false
-      ci_gate: cleared_local_coverage
-      ci_status: local_green_tip_pending_push_watch
-      pr_238_ci_watching: true
-      pr_238_ci_status: in_progress
-      pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
-      pr_238_ci_note: tip c042f57 run 31642681501 success (S030-D45); prior 4e8fc15/3d25fc1 superseded
-      prior_tip_3d25fc1_ci: failure
-      prior_tip_3d25fc1_run: '31641875827'
-      s030_d45_decision: S030-D45
-      t129_5_commit: 23113da
-      t129_5_commit_full: 23113dafe147cd3f8faac88b4191c495625904ab
-      t129_5_completed: '2026-08-12'
-      t129_5_completed_at: '2026-08-12T21:36:28Z'
-      t129_5_description: 'Code: train worker (LoRA/PEFT SFT) writes adapter to volume; run metadata'
-      t129_5_note: finetune_train_core.py; finetune_app.train_lora; run_finetune_train_job; metrics finetune_outcome=trained
-        + adapter_id
-      t129_5_deliverables:
-      - infra/modal/finetune_train_core.py
-      - finetune_app.train_lora GPU+volumes
-      - run_finetune_train_job train invoker
-      - metrics finetune_outcome=trained + adapter_id
-      t129_5_coverage_note: 4e8fc15 tip CI FAILED DM branch 92.1%; fixed during T129.5 (intermediate c042f57, ffcbf94); local
-        green 453/476 (95.2%)
-      t129_5_prior_tip_ci: 4e8fc15 failure coverage
-      t129_6_status: completed
-      t129_6_started_at: '2026-08-12T21:36:28Z'
-      t129_6_description: 'Code: GET …/finetune/runs/{id}/eval base vs adapter report (F36 golden)'
-      coverage_local_dm_branch: 453/476
-      coverage_local_dm_branch_pct: 95.2%
-      askquestion_pending: false
-      s030_d46_decision: S030-D46
-      handoff_tip: f48a7e7
-      t129_5_ci_watch_run: '31643301747'
-      t129_5_ci_watch_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31643301747
-      t129_5_ci_note: watching 31643301747; may be superseded by T129.6 push @bb391b1
-      t129_6_commit: bb391b1
-      t129_6_commit_full: bb391b12517f0fa77cbb7f9ce8b2590b336c1abf
-      t129_6_completed: '2026-08-12'
-      t129_6_completed_at: '2026-08-12T21:39:38Z'
-      t129_6_note: GET /internal/v1/finetune/runs/{id}/eval; auto_promote always false
-      t129_7_status: completed
-      t129_7_started_at: '2026-08-12T21:39:38Z'
-      t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
-      s030_d47_decision: S030-D47
-      s030_d48_decision: S030-D48
-      s030_d49_decision: S030-D49
-      t129_7_commit: b2a25e5
-      t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-      t129_7_completed: '2026-08-12'
-      t129_7_completed_at: '2026-08-12T21:45:20Z'
-      t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-      t129_8_status: completed
-      t129_8_started_at: '2026-08-12T21:45:20Z'
-      t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
-      t129_8_commit: c8b5b96
-      t129_8_commit_full: c8b5b96bea725fe0002106067ba5e20188403076
-      t129_8_completed: '2026-08-12'
-      t129_8_completed_at: '2026-08-12T21:50:46Z'
-      t129_8_note: llm_app/playground load adapters from llm-finetune-adapters; playground VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID
-      t129_9_status: completed
-      t129_9_started_at: '2026-08-12T21:50:46Z'
-      t129_9_description: 'UI: DM FT approve / eval evidence / promote'
-      t129_9_commit: f48a7e7
-      t129_9_commit_full: f48a7e78eaba92e207dee87026b248ddcc5ec74b
-      t129_9_completed: '2026-08-12'
-      t129_9_completed_at: '2026-08-12T22:06:15Z'
-      t129_9_note: DM FT UI approve/eval/human promote; FinetunePage + UJ-082 Vitest
-      s030_d50_decision: S030-D50
-      t129_10_status: completed
-      t129_10_started_at: '2026-08-12T22:06:15Z'
-      t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-      execution_plan_sync_note: T129.9 COMPLETE @f48a7e7; Active task T129.10 — parent syncs execution-plan.md if needed
-      m130_status: completed
-      t129_10_commit: '6107037'
-      t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
-      t129_10_completed: '2026-08-12'
-      t129_10_completed_at: '2026-08-12T22:25:00Z'
-      t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
-        @6107037
-      m129_completed: '2026-08-12'
-      m129_completed_at: '2026-08-12T22:25:00Z'
-      m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
-      s030_d51_decision: S030-D51
-      updated_at: '2026-08-12T22:56:04Z'
-      current_milestone: M130
-      m130_completed: '2026-08-12'
-      m130_completed_at: '2026-08-12T22:56:04Z'
-      t130_1_commit: 0e95cd2
-      t130_1_completed: '2026-08-12'
-      t130_1_completed_at: '2026-08-12T22:56:04Z'
-      t130_2_status: completed
-      t130_2_commit: 2a884b3
-      t130_2_completed: '2026-08-12'
-      t130_2_completed_at: '2026-08-12T22:56:04Z'
-      t130_3_status: completed
-      t130_3_commit: 0b7a640
-      t130_3_completed: '2026-08-12'
-      t130_3_completed_at: '2026-08-12T22:56:04Z'
-      t130_4_status: completed
-      t130_4_commit: ad9d1c4
-      t130_4_completed: '2026-08-12'
-      t130_4_completed_at: '2026-08-12T22:56:04Z'
-      t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
-      t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
-      t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
-      t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-      t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
-      t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
-      t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
-      t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
-      m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
-      m127_pr_status: open
-      m127_pr_merge: deferred_no_merge
-      pr_238_status: open
-      pr_238_merge: deferred_no_merge
-      next_action: 08-verify-build for M130/Phase 30 boundary
-      recommended_next: 08-verify-build for M130/Phase 30 boundary
-      handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
-      phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
-        until 08 PASS; PR #238 open no merge'
-      execution_plan_active_task: M130 completed — next 08-verify-build
-      note: 'Phase 30 M127–M130 tasks done; tip ad9d1c4 (T130.4 parent HEAD); PR #238 open leave unmerged (no merge); next
-        08-verify-build for M130/Phase 30 boundary; phase_c / Gate C→D pending until 08 PASS. [Corpus: feature-list.md §F75–F77]'
-    askquestion_pending: false
-    askquestion_cleared: 'S030-D51: none — T129.10/M129 done; start 08-verify-build; PR #238 remains open'
-    phase_note: 'M130 COMPLETE @ ad9d1c4; Phase 30 M127–M130 07-build done; next 08-verify-build; phase_c / Gate C→D pending
-      until 08 PASS; PR #238 open no merge'
-    handoff_next: '**08-verify-build** for M130/Phase 30 boundary. Tip ad9d1c4. PR #238 open leave unmerged (no merge).'
-    execution_plan_active_task: M130 completed — next 08-verify-build
-    t128_5_started_at: '2026-08-12T20:04:26Z'
-    t128_4_followup_commit: 2bf2dca
-    t128_4_followup_note: coverage + typecheck follow-up after T128.4 @2bf2dca
-    t128_5_commit: fdf68af
-    t128_5_completed_at: '2026-08-12T20:11:03Z'
-    t128_5_completed: '2026-08-12'
-    t128_5_description: 'Code: ingest/hash-aware re-fetch path for URL sources'
-    t128_5_spec_source: RD-329, packages/ingest
-    t128_5_depends_on: T128.4
-    t128_5_note: hash-aware URL re-fetch for freshness_refresh; committed @fdf68af
-    t128_6_status: completed
-    t128_6_started_at: '2026-08-12T20:18:53Z'
-    tip_pushed: true
-    tip_pushed_to: origin/evolve/EV-027-corpus-automations
-    tip_pushed_at: '2026-08-12T20:27:11Z'
-    pr_238_ci_watching: true
-    pr_238_ci_note: tip c042f57 run 31642681501 success (S030-D45); prior 4e8fc15/3d25fc1 superseded
-    t128_6_commit: eac398d
-    t128_6_commit_full: eac398d7fb5037d726b3c151a9991f6f9242913c
-    t128_6_completed: '2026-08-12'
-    t128_6_completed_at: '2026-08-12T20:23:22Z'
-    t128_6_description: 'Code: DM freshness UI — stale list, enable, Refresh now'
-    t128_6_spec_source: UJ-081
-    t128_6_depends_on: T128.3
-    t128_6_note: admin freshness UI @eac398d; UJ-081 Vitest follow-up @7971c16; chore titles @1cadd43
-    t128_6_vitest_followup_commit: 7971c16
-    t128_6_vitest_followup_note: test_uj081_freshness_ui.test.tsx
-    t128_7_status: completed
-    fdf68af_ci_status: cancelled_superseded
-    t128_7_started_at: '2026-08-12T20:24:30Z'
-    m128_status: completed
-    m128_completed: '2026-08-12'
-    m128_completed_at: '2026-08-12T20:27:11Z'
-    m128_note: T128.1–T128.7 all completed; F76 freshness milestone done
-    t128_7_commit: bdaec9d
-    t128_7_completed: '2026-08-12'
-    t128_7_completed_at: '2026-08-12T20:27:11Z'
-    t128_7_description: 'Test: API e2e UJ-081 + Vitest + Playwright T0-ui UJ-081'
-    t128_7_spec_source: TP8, TC-264
-    t128_7_depends_on: T128.4, T128.6
-    t128_7_note: UJ-081 API e2e + Playwright freshness coverage; committed @bdaec9d
-    m129_status: completed
-    askquestion_next_topic: Phase C / 08-verify-build vs continue M129 F77
-    recommended_next: 08-verify-build for M130/Phase 30 boundary
-    ci_gate: cleared_local_coverage
-    ci_status: local_green_tip_pending_push_watch
-    askquestion_pending_topic: null
-    pr_238_ci_status: in_progress
-    pr_238_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31642169420
-    prior_tip_ci_failed: 4e8fc15
-    prior_tip_ci_run: '31641875827'
-    prior_tip_ci_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31641875827
-    prior_tip_ci_note: coverage DM branch 92.1%; fixed during T129.5 (c042f57/ffcbf94)
-    handoff_tip_should_be: f48a7e7
-    s030_d45_decision: S030-D45
-    t129_5_status: completed
-    t129_5_commit: 23113da
-    t129_6_status: completed
-    coverage_local_dm_branch: 453/476 (95.2%)
-    handoff_tip: f48a7e7
-    s030_d46_decision: S030-D46
-    t129_5_ci_watch_run: '31643301747'
-    t129_6_commit: bb391b1
-    t129_7_status: completed
-    s030_d47_decision: S030-D47
-    s030_d48_decision: S030-D48
-    s030_d49_decision: S030-D49
-    t129_7_commit: b2a25e5
-    t129_7_commit_full: b2a25e591d0b6246e6059f4a6d59b337f012938f
-    t129_7_completed: '2026-08-12'
-    t129_7_completed_at: '2026-08-12T21:45:20Z'
-    t129_7_description: 'Code: POST …/finetune/promote + clear pin rollback; set VECINITA_FINETUNE_ADAPTER_ID'
-    t129_7_note: POST /internal/v1/finetune/promote + GET /internal/v1/finetune/adapter; clear-pin rollback; TC-262/265
-    t129_8_status: completed
-    t129_8_started_at: '2026-08-12T21:45:20Z'
-    t129_8_description: 'Code: llm_app load promoted adapter; playground candidate load'
-    t129_10_status: completed
-    t129_10_commit: '6107037'
-    t129_10_commit_full: 61070374986b17408b270d25b403cac66cf176dd
-    t129_10_completed: '2026-08-12'
-    t129_10_completed_at: '2026-08-12T22:25:00Z'
-    t129_10_note: API e2e UJ-082 (TC-260–263, TC-265) + Playwright uj082-finetune.spec.ts; Vitest green from T129.9; committed
-      @6107037
-    t129_10_description: 'Test: API e2e UJ-082 + Vitest + Playwright'
-    t129_10_started_at: '2026-08-12T22:06:15Z'
-    m129_completed: '2026-08-12'
-    m129_completed_at: '2026-08-12T22:25:00Z'
-    m129_note: T129.1–T129.10 all completed; F77 LoRA FT milestone done
-    s030_d51_decision: S030-D51
-    completed: '2026-08-12'
-    completed_at: '2026-08-12T22:56:04Z'
-    phase: Phase 30 M127–M130
-    phase_30_milestones:
-    - M127
-    - M128
-    - M129
-    - M130
-    current_milestone: M130
-    m130_completed: '2026-08-12'
-    m130_completed_at: '2026-08-12T22:56:04Z'
-    t130_1_commit: 0e95cd2
-    t130_1_completed: '2026-08-12'
-    t130_1_completed_at: '2026-08-12T22:56:04Z'
-    t130_2_status: completed
-    t130_2_commit: 2a884b3
-    t130_2_completed: '2026-08-12'
-    t130_2_completed_at: '2026-08-12T22:56:04Z'
-    t130_3_status: completed
-    t130_3_commit: 0b7a640
-    t130_3_completed: '2026-08-12'
-    t130_3_completed_at: '2026-08-12T22:56:04Z'
-    t130_4_status: completed
-    t130_4_commit: ad9d1c4
-    t130_4_completed: '2026-08-12'
-    t130_4_completed_at: '2026-08-12T22:56:04Z'
-    t130_1_commit_full: 0e95cd280746026eedd100ee77d31c5610c94242
-    t130_2_commit_full: 2a884b368ec35709838d6a92eb0ce97882ef9725
-    t130_3_commit_full: 0b7a640a21a3377703820923fa67c13ada906396
-    t130_4_commit_full: ad9d1c4207fd192894117f80804cb499f9dca3bc
-    t130_1_note: TC-252–265 confirmation suite green; committed @0e95cd2
-    t130_2_note: internal-write OpenAPI F75–F77 routes mirrored; committed @2a884b3
-    t130_3_note: secrets matrix + Modal FT secret names confirmed; committed @0b7a640
-    t130_4_note: Phase 30 M130 gate notes closed; committed @ad9d1c4
-    m130_note: T130.1–T130.4 all completed; Phase 30 gate at 07 partial PASS; next 08-verify-build
-    m127_pr_status: open
-    m127_pr_merge: deferred_no_merge
-    pr_238_status: open
-    pr_238_merge: deferred_no_merge
-    result: PASS_partial_phase30_at_07
-    phase_30_07_status: completed
-    phase_30_gate: partial_pass_awaiting_08
-  - stage: 08-verify-build
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    ready: true
-    current_action: completed
-    next_action: 09-qa
-    started_at: '2026-08-12'
-    started_at_iso: '2026-08-12T22:25:00Z'
-    milestone_hint: M130
-    m129_status: completed
-    m130_status: completed
-    note: '08-verify-build PASS for M130/Phase 30 F75–F77 closeout @ 3466b2b. Gate C→D PASS (S030-D55 / option_1). PR #238
-      open leave unmerged (no merge). Handoff → 09-qa. [Corpus: feature-list.md §F75–F77]'
-    askquestion_pending: false
-    s030_d51_decision: S030-D51
-    tip: 3466b2b
-    tip_sha: 3466b2b
-    tip_full: 3466b2b540ffdaeb4bfaa813976b752cfacb72e2
-    tip_prev: af07de4
-    updated_at: '2026-08-13T00:00:00Z'
-    security_gate: PASSED
-    security_gate_decision: S030-D53
-    advisory_react_router: resolved
-    report: docs/sessions/S030-corpus-automations/reports/verification-report.md
-    m129_boundary_status: passed
-    m130_reopen_expected: false
-    result: PASS
-    completed: '2026-08-12'
-    completed_at: '2026-08-12T19:05:00-04:00'
-    s030_d54_decision: S030-D54
-    pr_238_status: open
-    recommended_next: Invoke 09-qa (Phase D start after Gate C→D)
-    askquestion_pending_topic: null
-    phase_c: passed
-    gate_c_to_d: passed
-    pr_238_merge: deferred_no_merge
-    verdict: PASS
-    completed_at_iso: '2026-08-13T00:05:00Z'
-    scope: M130/Phase 30 F75–F77 closeout
-    tip_pre_fix: af07de4
-    findings:
-      unit_passed: 1565
-      unit_skipped: 17
-      dm_vitest: 813
-      chat_vitest: 190
-      security: PASS
-      kics_fix: openapi/internal-write.yaml AutomationRunListResponse maxItems:100
-    evidence:
-      unit: 1565 passed, 17 skipped
-      fe_dm: 813 passed
-      fe_chat_rag: 190 passed
-      security: PASS
-      kics_fix: openapi/internal-write.yaml AutomationRunListResponse maxItems:100
-      m129_boundary: retained_pass_S030-D54
-      m130_boundary: passed
-    m130_boundary_status: passed
-    phase_30_gate: pass_gate_c_to_d
-    notes: Gate C→D passed (user A/option_1) after M130 08 PASS; proceed 09-qa
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    feature_ids:
-    - F75
-    - F76
-    - F77
-    s030_d55_decision: S030-D55
-  - stage: 09-qa
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    ready: true
-    overall: fail
-    overall_result: FAIL
-    result: FAIL
-    notes: 09-qa overall FAIL — QA-S030-001 alembic tip pin vs 20260812_0016; in-cycle F75-F77 green
-    note: 'S030/EV-027 09-qa COMPLETE overall FAIL — QA-S030-001 alembic tip pin (asserts 20260806_0014; head 20260812_0016
-      EV-027); in-cycle F75–F77 green. tip @3466b2b. Handoff ready → 10-e2e (not started). [Corpus: feature-list.md §F75–F77]'
-    current_action: 09_complete_handoff_10_e2e
-    next_action: Invoke 10-e2e when ready (not started)
-    askquestion_pending: false
-    gate_c_to_d: passed
-    phase_c: passed
-    s030_d55_decision: S030-D55
-    started_at: '2026-08-12T20:00:30-04:00'
-    started_at_iso: '2026-08-13T00:00:30Z'
-    completed_at: '2026-08-12T20:12:00-04:00'
-    completed_at_iso: '2026-08-13T00:12:00Z'
-    scope: EV-027 F75–F77 delta QA after Phase 30
-    report: docs/sessions/S030-corpus-automations/reports/qa-report.md
-    report_status: completed
-    tip: 3466b2b
-    tip_sha: 3466b2b
-    tip_full: 3466b2b540ffdaeb4bfaa813976b752cfacb72e2
-    updated_at: '2026-08-13T00:12:00Z'
-    in_cycle_f75_f77: PASS
-    blocking_findings:
-    - id: QA-S030-001
-      test: tests/integration/test_ev002_schema.py::test_alembic_head_includes_ev002_migration
-      detail: asserts tip 20260806_0014; head is 20260812_0016 (EV-027)
-    advisories:
-    - QA-S030-002
-    - QA-S030-003
-    - QA-S030-004
-    - QA-S030-005
-  - stage: 10-e2e
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    ready: true
-    ready_note: 09-qa COMPLETE overall FAIL (QA-S030-001); invoke 10-e2e when parent starts — not auto-started
-    started_at: '2026-08-12'
-    started_at_iso: '2026-08-13T00:42:00Z'
-    completed: '2026-08-12'
-    completed_at: '2026-08-12T20:50:00-04:00'
-    completed_at_iso: '2026-08-13T00:50:00Z'
-    current_action: 10_e2e_complete
-    next_action: 11-verify-impl — dispose QA-S030-001; journey/feature signoff
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    result: PASS
-    overall: PASS
-    overall_result: PASS
-    report: docs/sessions/S030-corpus-automations/reports/e2e-report.md
-    report_status: completed
-    qa_carry_forward:
-    - QA-S030-001
-    note: 'S030/EV-027 10-e2e COMPLETE PASS — 10-e2e PASS — UJ-080–082 API 7 + Playwright 6; full T0 e2e 145. Carry QA-S030-001
-      to 11. tip @3466b2b. [Corpus: feature-list.md §F75–F77]'
-  - stage: 11-verify-impl
-    required: true
-    status: completed
-    completed_at_iso: '2026-08-13T01:11:00Z'
-    completed_at: '2026-08-12T21:11:00-04:00'
-    completed: '2026-08-12'
-    mode: delta
-    skip_rationale: null
-    started_at: '2026-08-12'
-    started_at_iso: '2026-08-13T00:52:00Z'
-    current_action: completed
-    next_action: Invoke 12-verify-deploy (pending; not started)
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    tip: 3466b2b
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    qa_s030_001_status: tip_pin_being_committed
-    qa_s030_001_tip: '20260812_0016'
-    qa_carry_forward: []
-    note: 'S030/EV-027 11-verify-impl COMPLETE APPROVED (S030-D57) — continue without live UI (login wall; evidence T0+OpenAPI+components);
-      Approve F75/F76/F77; UJ-080–082 already approved (T0; T3→13); QA-S030-001 tip pin being committed; phase_d=passed; report=docs/sessions/S030-corpus-automations/reports/verify-impl.md;
-      handoff → 12-verify-deploy (leave pending). tip @3466b2b. [Corpus: feature-list.md §F75–F77] [Corpus: user-journeys.md
-      §UJ-080–UJ-082] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-    report: docs/sessions/S030-corpus-automations/reports/verify-impl.md
-    report_status: completed
-    updated_at: '2026-08-13T01:11:00Z'
-    s030_d56_decision: S030-D56
-    startup_answers:
-      resume: resume_11_journey_feature_signoff
-      scope_delta: none_f75_f76_f77_only
-      qa_s030_001_commit: after_feature_approve
-      journeys_approved:
-      - UJ-080
-      - UJ-081
-      - UJ-082
-      journey_tier: T0
-      t3_deferred_to: 13-deploy-smoke
-      ui_preview: start_non_deployed_local
-    journeys_approved:
-    - UJ-080
-    - UJ-081
-    - UJ-082
-    journeys_approve_tier: T0
-    t3_deferred_to: 13-deploy-smoke
-    scope_delta: none
-    feature_ids:
-    - F75
-    - F76
-    - F77
-    ui_preview: continue_without_live_ui_login_wall
-    qa_s030_001_commit_policy: committing_with_11_close
-    s030_d57_decision: S030-D57
-    phase_d: passed
-    checkpoints_phase_d: passed
-    overall: approved
-    overall_result: approved
-    result: PASS
-    inspection_basis: t0_openapi_components
-    inspection_disposition: continue_without_live_ui_login_wall
-    ready: true
-    approved_features:
-    - F75
-    - F76
-    - F77
-  - stage: 12-verify-deploy
-    required: true
-    status: completed
-    mode: delta
-    delta_only: true
-    session_id: S030-corpus-automations
-    branch: evolve/EV-027-corpus-automations
-    session_branch: evolve/EV-027-corpus-automations
-    evolve_cycle_id: EV-027
-    feature_ids:
-    - F75
-    - F76
-    - F77
-    current_action: completed_handoff_13
-    next_action: Invoke 13-deploy-smoke
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D59 — mitigations 1–4 + rollback + checklist ready for 13 (flags off)
-    s030_d58_decision: S030-D58
-    s030_d59_decision: S030-D59
-    tip: e9e2629
-    tip_sha: e9e2629
-    tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
-    tip_ci_gate: PASS
-    tip_ci_status: success
-    tip_ci_sha: e9e2629
-    tip_ci_run_id: '31707365293'
-    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31707365293
-    env_role: staging_as_live
-    env_role_live: prod
-    env_role_confirmed: true
-    env_role_note: staging_as_live = live/prod; only ONE environment today; labels may say staging but it is live/prod; separate
-      staging later, not now (ADR-049)
-    staging_tip_drift: true
-    tip_on_live_stack: false
-    ev027_on_live_stack: false
-    pr_238_status: open
-    pr_238_head: b3da843
-    pr_238_merge: deferred_no_merge
-    ra009_status: tip_ci_pass
-    ra009_action: tip_ci_pass_e9e2629_run_31707365293
-    ready: true
-    ready_note: Checklist ready for 13-deploy-smoke with *_ENABLED false; no live cutover/enable/promote (S030-D59)
-    checklist_status: ready
-    checklist_blockers: null
-    report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
-    report_status: completed
-    deploy_checkpoint: approved
-    mitigations_1_to_4: approved
-    rollback_plan: approved
-    flags_enabled: false
-    scope_mode: checklist_only
-    scope_delta: none
-    no_live_cutover: true
-    no_enable_automations: true
-    no_ft_promote: true
-    predeploy_agent_results: *id001
-    note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
-      ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
-      tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
-      remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z.
-      [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]
-      [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
-    updated_at: '2026-08-13T14:06:25Z'
-    completed: '2026-08-13'
-    completed_at: '2026-08-13'
-    completed_at_iso: '2026-08-13T14:06:25Z'
-    startup_interview_status: answered
-    started_at: '2026-08-13'
-    started_at_iso: '2026-08-13T13:55:28Z'
-    started: '2026-08-13'
-    startup_answers: *id002
-    startup_blockers_cleared_into_notes: *id003
-    overall: approved
-    overall_result: approved
-    result: PASS
-  - stage: 13-deploy-smoke
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    path_label: baseline_only_flags_off
-    result: PASS
-    overall: pass
-    started_at: '2026-08-13'
-    started_at_iso: '2026-08-13T14:15:30Z'
-    started: '2026-08-13'
-    completed: '2026-08-13'
-    completed_at: '2026-08-13'
-    completed_at_iso: '2026-08-13T15:05:00Z'
-    current_action: completed
-    next_action: handoff_15_service_health
-    tip: fee4d12
-    tip_sha: fee4d12
-    tip_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-    tip_smoke: 588dab6
-    tip_prev: 588dab6
-    tip_drift: pending_push
-    local_ahead: 1
-    origin_tip: 588dab6
-    tip_ci_status: success
-    tip_ci_run_id: '31709704821'
-    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
-    tip_ci_sha: 588dab6
-    env_role: staging_as_live
-    env_role_live: prod
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D62
-    s030_d60_decision: S030-D60
-    s030_d60_status: approved
-    s030_d61_decision: S030-D61
-    s030_d61_status: approved
-    s030_d61_choice: accept_h2_expected_tip_drift
-    s030_d62_decision: S030-D62
-    s030_d62_status: approved
-    s030_d62_choice: option_1_15_service_health
-    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
-    report_status: completed
-    smoke:
-      h0c: pass
-      h1: pass
-      h2_pool: pass
-      h2_alembic: expected_fail_accepted
-      h3: pass
-      h3_duration_s: 85.9
-      h3b: pass
-      h4: pass
-      h5: pass
-      automations_status: '404'
-      automations_note: pre-cutover
-    enable_promote_still_gated: true
-    ev027_deployed: false
-    deploy_gate: passed_baseline_only
-    cutover_pending: true
-    updated_at: '2026-08-13T15:08:00Z'
-    s030_d62_status: approved
-    s030_d62_choice: option_1_15_service_health
-    askquestion_pending: false
-    askquestion_pending_topic: null
-    askquestion_cleared: S030-D62
-    current_action: completed
-    next_action: handoff_15_service_health
-  - stage: 15-service-health
-    required: true
-    status: completed
-    mode: delta
-    skip_rationale: null
-    started_at: '2026-08-13'
-    started_at_iso: '2026-08-13T15:43:00Z'
-    started: '2026-08-13'
-    completed: '2026-08-13'
-    completed_at: '2026-08-13'
-    completed_at_iso: '2026-08-13T22:40:00Z'
-    ready_to_invoke: false
-    invoke_readiness: completed
-    current_action: await_s030_d64_close_or_ship
-    next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
-    result: PASS
-    overall: pass
-    infra: pass
-    behavior: pass
-    remediation: none
-    s030_d62_decision: S030-D62
-    s030_d62_status: approved
-    s030_d62_choice: option_1_15_service_health
-    s030_d63_decision: S030-D63
-    s030_d63_status: approved
-    s030_d63a_choice: option_1_post_baseline_package
-    s030_d63b_choice: option_1_lean
-    s030_d63c_choice: option_1_proceed_now_live_env
-    path_label: baseline_only_flags_off
-    package: post_baseline
-    package_tiers:
-    - H0ci_main_advisory
-    - H1
-    - H2_pool
-    - H3
-    - H4
-    - H5
-    h2_alembic: known_advisory
-    no_ingest: true
-    lean: true
-    one_h3_ask: true
-    h6: false
-    no_corpus_write: true
-    require_push_tip_first: false
-    live_urls_from: .env
-    flags_enabled: false
-    no_cutover: true
-    no_enable_automations: true
-    no_ft_promote: true
-    enable_promote_still_gated: true
-    ev027_deployed: false
-    env_role: staging_as_live
-    env_role_live: prod
-    env_role_known: true
-    askquestion_pending: true
-    askquestion_pending_topic: S030-D64
-    askquestion_cleared: S030-D63
-    s030_d64_decision: S030-D64
-    s030_d64_status: pending
-    health_tiers:
-      h0ci: pass
-      h0ci_advisory: true
-      h0ci_run_id: '31178547214'
-      h0ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31178547214
-      h0ci_sha: 8ae9d17
-      h1: pass
-      h1_chat: pass
-      h1_write: pass
-      h2_pool: pass
-      h2_alembic: advisory
-      h2_alembic_live: '20260806_0014'
-      h2_alembic_tip_head: '20260812_0016'
-      h3: pass
-      h3_duration_s: 74.2
-      h3_lang: en
-      h4: pass
-      h5: pass
-    tip: 0411feb
-    tip_sha: 0411feb
-    tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
-    tip_docs: fee4d12
-    tip_smoke: 588dab6
-    tip_drift: pending_push
-    local_ahead: 2
-    origin_tip: 588dab6
-    tip_ci_status: success
-    tip_ci_run_id: '31709704821'
-    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
-    tip_ci_sha: 588dab6
-    tip_note: 'D63c proceeded on live .env without tip push; 15 PASS recorded'
-    prior_13_baseline_available: true
-    prior_13_h0c: pass
-    prior_13_h1: pass
-    prior_13_h2_pool: pass
-    prior_13_h2_alembic: expected_fail_accepted
-    prior_13_h3: pass
-    prior_13_h4: pass
-    prior_13_h5: pass
-    report: docs/sessions/S030-corpus-automations/reports/service-health.md
-    report_status: completed
-    phase_d_baseline_done: true
-    ship_still_optional: true
-    note: 'S030 15 COMPLETE OVERALL PASS; awaiting S030-D64 close vs ship-path; Phase D baseline done; ship optional. [Corpus: feature-list.md §F75–F77]'
-    updated_at: '2026-08-13T22:40:00Z'
-
-  handoff:
-    next_skill: 16-evolve
-    next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
-    evolve_cycle_id: EV-027
-    session_id: S030-corpus-automations
-    feature_ids:
-    - F75
-    - F76
-    - F77
-    gate_a_to_b: passed
-    phase_a: passed
-    gate_b_to_c: passed
-    phase_b: passed
-    phase_c: passed
-    phase_note: 12 COMPLETE (S030-D59); checklist ready for 13 (*_ENABLED false); deploy gate pending until 13.
-    prior_stage: 12-verify-deploy
-    prior_result: PASS
-    e2e_report: docs/sessions/S030-corpus-automations/reports/e2e-report.md
-    report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
-    decision: S030-D59
-    s030_d51_decision: S030-D51
-    handoff_md: docs/sessions/S030-corpus-automations/HANDOFF.md
-    active_milestone: M130
-    current_task: null
-    current_task_status: completed
-    m129_status: completed
-    m130_status: completed
-    t129_10_status: completed
-    t129_10_commit: '6107037'
-    tip: 588dab6
-    tip_sha: 588dab6
-    tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
-    tip_prev: e9e2629
-    tip_prev_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
-    tip_drift: pending_push
-    local_ahead: 1
-    origin_tip: e9e2629
-    tip_drift: cleared
-    tip_pushed: true
-    local_ahead: 0
-    origin_tip: 588dab6
-    tip_ci_status: success
-    tip_ci_run_id: '31709704821'
-    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
-    tip: 0411feb
-    tip_sha: 0411feb
-    tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
-    tip_docs: fee4d12
-    tip_docs_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-    tip_smoke: 588dab6
-    tip_prev: fee4d12
-    tip_drift: pending_push
-    local_ahead: 2
-    origin_tip: 588dab6
-    tip_ci_status: success
-    tip_ci_run_id: '31709704821'
-    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
-    tip_ci_sha: 588dab6
-    tip_note: 'local 0411feb/fee4d12 2 ahead of origin 588dab6; may push for tip CI as part of 15 prep if skill requires'
-    askquestion_pending: true
-    askquestion_pending_topic: S030-D64
-    askquestion_cleared: S030-D63 — D63a/b/c option 1 recommended
-    s030_d63_decision: S030-D63
-    s030_d63_status: approved
-    s030_d63a_choice: option_1_post_baseline_package
-    s030_d63b_choice: option_1_lean
-    s030_d63c_choice: option_1_proceed_now_live_env
-    s030_d64_decision: S030-D64
-    s030_d64_status: pending
-    stage_15_result: PASS
-    phase_d_baseline_done: true
-    ship_still_optional: true
-    updated_at: '2026-08-13T22:40:00Z'
-    pr_238_status: open
-    path_label: baseline_only_flags_off
-    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
-    report_status: completed
-    baseline_13_result: PASS
-    deploy_gate: passed_baseline_only
-    cutover_pending: true
-    flags_enabled: false
-    no_cutover: true
-    no_enable_automations: true
-    no_ft_promote: true
-    env_role: staging_as_live
-    env_role_live: prod
-    note: 'S030 15 COMPLETE OVERALL PASS; awaiting S030-D64 (close vs ship-path); Phase D verify/deploy baseline done; ship
-      still optional; no enable/cutover/FT promote; report=docs/sessions/S030-corpus-automations/reports/service-health.md. updated_at=2026-08-13T22:40:00Z. [Corpus: feature-list.md §F75–F77]
-      [Corpus: no-live-prod-corpus-push]'
-    recommended_next: Present AskQuestion S030-D64 close vs ship-path (do not invent answer)
-    report: docs/sessions/S030-corpus-automations/reports/service-health.md
-    s030_d60_decision: S030-D60
-    s030_d60_status: approved
-    s030_d61_decision: S030-D61
-    s030_d61_status: approved
-    s030_d61_choice: accept_h2_expected_tip_drift
-    s030_d62_decision: S030-D62
-    s030_d62_status: approved
-    s030_d62_choice: option_1_15_service_health
-    enable_promote_still_gated: true
-    ev027_deployed: false
-    gate_c_to_d: passed
-    s030_d55_decision: S030-D55
-    phase_d: passed
-    s030_d57_decision: S030-D57
-    checkpoints_deploy: pending
-    gates_deploy: pending
-  askquestion_pending: true
-  askquestion_pending_topic: S030-D64
-  askquestion_cleared: S030-D63 — D63a/b/c option 1 recommended
-  path_label: baseline_only_flags_off
-  flags_enabled: false
-  no_cutover: true
-  no_enable_automations: true
-  no_ft_promote: true
-  no_ingest: true
-  no_corpus_write: true
-  env_role: staging_as_live
-  env_role_live: prod
-  env_role_known: true
-  env_role_note: staging_as_live = live/prod (ADR-049); only ONE environment today
-  s030_d60_decision: S030-D60
-  s030_d60_status: approved
-  s030_d61_decision: S030-D61
-  s030_d61_status: approved
-  s030_d61_choice: accept_h2_expected_tip_drift
-  s030_d62_decision: S030-D62
-  s030_d62_status: approved
-  s030_d62_choice: option_1_15_service_health
-  s030_d63_decision: S030-D63
-  s030_d63_status: approved
-  s030_d63a_choice: option_1_post_baseline_package
-  s030_d63b_choice: option_1_lean
-  s030_d63c_choice: option_1_proceed_now_live_env
-  s030_d64_decision: S030-D64
-  s030_d64_status: pending
-  package: post_baseline
-  lean: true
-  require_push_tip_first: false
-  live_urls_from: .env
+  close_decision: S030-D64
+  close_reason: baseline_health_only_cutover_deferred
+  deploy_gate: passed_baseline_only
+  stage_13_result: PASS
   stage_15_result: PASS
-  stage_15_overall: pass
-  stage_15_infra: pass
-  stage_15_behavior: pass
-  stage_15_remediation: none
-  phase_d_baseline_done: true
-  ship_still_optional: true
-  health_tiers:
-    h0ci: pass
-    h0ci_advisory: true
-    h0ci_run_id: '31178547214'
-    h0ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31178547214
-    h0ci_sha: 8ae9d17
-    h1: pass
-    h1_chat: pass
-    h1_write: pass
-    h2_pool: pass
-    h2_alembic: advisory
-    h2_alembic_live: '20260806_0014'
-    h2_alembic_tip_head: '20260812_0016'
-    h3: pass
-    h3_duration_s: 74.2
-    h3_lang: en
-    h4: pass
-    h5: pass
-  prior_13_baseline_available: true
-  tip: 0411feb
-  tip_sha: 0411feb
-  tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
-  tip_prev: fee4d12
-  tip_prev_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-  tip_docs: fee4d12
-  tip_smoke: 588dab6
-  tip_drift: pending_push
-  tip_pushed: partial
-  local_ahead: 2
+  cutover_deferred: true
+  enable_deferred: true
+  ft_promote_deferred: true
+  no_live_cutover: true
+  pr_238_status: open
+  pr_238_merged: false
+  tip: 7861b47
+  tip_full: 7861b47a7b0f5afee84126b55634bae50d111873
+  tip_drift: pending_push_advisory
+  tip_push_chosen: false
   origin_tip: 588dab6
-  origin_tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
-  tip_note: 'local 0411feb/fee4d12 2 ahead of origin 588dab6; smoke CI tip 588dab6 PASS; may push as part of 15 prep if skill requires tip CI'
-  tip_ci_status: success
-  tip_ci_run_id: '31709704821'
-  tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
-  tip_ci_sha: 588dab6
-  enable_promote_still_gated: true
-  ev027_deployed: false
-  baseline_13_result: PASS
-  invoke_15_readiness: completed
-  stage_15_status: completed
-  report: docs/sessions/S030-corpus-automations/reports/service-health.md
-  report_status: completed
-  artifacts:
-  - path: docs/sessions/S030-corpus-automations/reports/service-health.md
-    kind: stage-report
-    type: report
-    status: completed
-    stage: 15-service-health
-    skill_id: 15-service-health
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    result: PASS
-    overall: pass
-    infra: pass
-    behavior: pass
-    remediation: none
-    recorded_at: '2026-08-13T22:40:00Z'
-    completed_at: '2026-08-13T22:40:00Z'
-    note: 15-service-health COMPLETE OVERALL PASS; awaiting S030-D64
-  - path: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
-    kind: stage-report
-    type: report
-    status: completed
-    stage: 13-deploy-smoke
-    skill_id: 13-deploy-smoke
-    session_id: S030-corpus-automations
-    evolve_cycle_id: EV-027
-    tip: 588dab6
-    tip_docs: fee4d12
-    path_label: baseline_only_flags_off
-    result: PASS
-    recorded_at: '2026-08-13T14:28:00Z'
-    completed_at: '2026-08-13T15:05:00Z'
-    finalized_at: '2026-08-13T15:08:00Z'
-    note: Baseline 13 COMPLETE PASS finalized; S030-D62 approved → 15
-  - path: docs/sessions/S030-corpus-automations/HANDOFF.md
-    kind: handoff
-    status: updated
-    session_id: S030-corpus-automations
-    stage: 15-service-health
-    recorded_at: '2026-08-13T14:28:00Z'
-    updated_at: '2026-08-13T22:40:00Z'
-    note: 15 COMPLETE PASS; next AskQuestion S030-D64 close vs ship-path; Phase D baseline done; ship optional
-  - path: docs/sessions/S030-corpus-automations/routing-plan.md
-    kind: routing-plan
-    status: updated
-    session_id: S030-corpus-automations
-    stage: 15-service-health
-    recorded_at: '2026-08-13T14:28:00Z'
-    updated_at: '2026-08-13T22:40:00Z'
-    note: 15-service-health completed PASS; awaiting S030-D64 close vs ship-path
-  - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
-    session_id: S030-corpus-automations
-    stage: 01-requirements
-    status: completed
-  - path: docs/sessions/S030-corpus-automations/reports/02-verify-plan-audit.md
-    session_id: S030-corpus-automations
-    stage: 02-verify-plan
-    status: completed
-    updated_at: '2026-08-07T13:44:30Z'
-  - path: docs/sessions/S030-corpus-automations/reports/03-plan-tooling.md
-    session_id: S030-corpus-automations
-    stage: 03-plan-tooling
-    status: completed
-    updated_at: '2026-08-07T13:58:37Z'
-  - path: docs/sessions/S030-corpus-automations/HANDOFF.md
-    session_id: S030-corpus-automations
-    stage: 04-tech-plan
-    status: handoff_complete
-    updated_at: '2026-08-07T14:34:39Z'
-  - path: docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md
-    session_id: S030-corpus-automations
-    stage: 04-tech-plan
-    status: completed
-    updated_at: '2026-08-07T14:34:39Z'
-  - path: docs/sessions/S030-corpus-automations/roadmap.md
-    session_id: S030-corpus-automations
-    stage: 04-tech-plan
-    status: completed
-    updated_at: '2026-08-07T14:34:39Z'
-  - path: docs/sessions/S030-corpus-automations/reports/04-tech-plan.md
-    session_id: S030-corpus-automations
-    stage: 04-tech-plan
-    status: completed
-    updated_at: '2026-08-07T14:34:39Z'
-  - path: docs/sessions/S000-internal-docs-archive/execution-plan.md
-    session_id: S030-corpus-automations
-    stage: 04-tech-plan
-    status: completed
-    updated_at: '2026-08-07T14:34:39Z'
-  - path: docs/sessions/S030-corpus-automations/reports/05-verify-tech-audit.md
-    session_id: S030-corpus-automations
-    stage: 05-verify-tech
-    status: awaiting_user_verdicts
-    updated_at: '2026-08-07T14:38:42Z'
-  - docs/deployment-integration.md
-  - docs/sessions/S030-corpus-automations/reports/06-tech-tooling.md
-  - infra/modal/finetune_pins.py
-  - tests/unit/modal/test_finetune_pins.py
-  - docs/dependency-inventory.md
-  - docs/sessions/S030-corpus-automations/reports/verification-report.md
-  - path: docs/sessions/S030-corpus-automations/reports/qa-report.md
-    session_id: S030-corpus-automations
-    kind: report
-    stage: 09-qa
-    status: completed
-    result: FAIL
-    tip: 3466b2b
-    updated_at: '2026-08-13T00:12:00Z'
-  - path: docs/sessions/S030-corpus-automations/reports/verify-impl.md
-    session_id: S030-corpus-automations
-    kind: report
-    stage: 11-verify-impl
-    status: completed
-    result: PASS
-    tip: 3466b2b
-    updated_at: '2026-08-13T01:11:00Z'
-  - path: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
-    session_id: S030-corpus-automations
-    kind: report
-    stage: 12-verify-deploy
-    status: completed
-    result: PASS
-    tip: e9e2629
-    tip_ci_run_id: '31707365293'
-    updated_at: '2026-08-13T14:06:25Z'
-  updated_at: '2026-08-13T14:15:30Z'
-  recovery_note: Reconstructed 2026-08-07 after accidental git checkout of uncommitted S030 workflow-state
-  s030_d31_decision: S030-D31
-  s030_d32_decision: S030-D32
-  gate_b_to_c: passed
-  phase_b: passed
-  s030_d33_decision: S030-D33
-  build_plan_card: waived
-  build_plan_card_waiver: S030-D31
-  build_plan_card_sot: tech-plan-delta + Phase 30
-  askquestion_cleared: Gate C→D / phase_c — user A/option_1 (S030-D55)
-  tip: fee4d12
-  tip_sha: fee4d12
-  tip_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-  tip_prev: 588dab6
-  tip_smoke: 588dab6
-  tip_drift: pending_push
-  tip_pushed: partial
-  local_ahead: 1
-  origin_tip: 588dab6
-  handoff_tip: fee4d12
-  current_task: null
-  current_task_status: completed
-  handoff_sync_needed:
-    path: docs/sessions/S030-corpus-automations/HANDOFF.md
-    tip_pending_parent_commit: true
-    position: 11-verify-impl COMPLETE APPROVED (S030-D57); next 12-verify-deploy
-    pr: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
-    updated_needed: false
-    owner: parent
-    note: HANDOFF.md already points to 12-verify-deploy; parent commits tip pin + workflow-state
-    suggested_blurb: 'S030 11-verify-impl COMPLETE APPROVED (S030-D57) — F75–F77 approved; continue without live UI; next
-      **12-verify-deploy**. PR #238 open no merge.'
-    tip: 3466b2b
-  expected_report: docs/sessions/S030-corpus-automations/reports/verification-report.md
-  m129_08_status: passed
-  active_milestone: M130
-  session_artifacts:
-  - docs/sessions/S030-corpus-automations/reports/verification-report.md
-  tip_pending_parent_commit: false
-  recommended_next: Invoke 13-deploy-smoke
-  m130_status: completed
-  t130_1_status: completed
-  t130_1_commit: 0e95cd2
-  t130_2_status: completed
-  t130_2_commit: 2a884b3
-  t130_3_status: completed
-  t130_3_commit: 0b7a640
-  t130_4_status: completed
-  t130_4_commit: ad9d1c4
-  gate_c_to_d: passed
-  phase_c: passed
-  s030_d55_decision: S030-D55
-  s030_d56_decision: S030-D56
-  s030_d57_decision: S030-D57
-  s030_d58_decision: S030-D58
-  s030_d59_decision: S030-D59
-sessions:
+  local_ahead: 3
+  interrupted_by_hotfix: false
+  report_13: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+  report_15: docs/sessions/S030-corpus-automations/reports/service-health.md
+  notes:
+  - 'S030-D64 2026-08-13T22:47:00Z: close_cycle_defer_cutover — cycle closed; ship/cutover deferred; PR #238 not merged; tip push not chosen'
+  - 'Baseline path: 13 PASS passed_baseline_only; 15 OVERALL PASS; flags OFF throughout close'
+  session_closed: true
+  session_closed_at: '2026-08-13T22:47:00Z'
 - id: S029-security-install-tools-flake
   type: hotfix
   slug: security-install-tools-flake
@@ -30567,7 +28349,11 @@ evolve_cycles:
   - F76
   - F77
   title: 'Corpus automations (GitHub #73 + #72 fine-tune + #219 freshness)'
-  status: in_progress
+  status: completed
+  completed: '2026-08-13'
+  completed_at: '2026-08-13T22:47:00Z'
+  close_decision: S030-D64
+  close_reason: baseline_health_only_cutover_deferred
   interrupted_by_hotfix: false
   interrupt_reason: null
   hotfix_ref: null
@@ -30613,9 +28399,9 @@ evolve_cycles:
     upgrade_note: S030-D9 — restored 03-plan-tooling and 06-tech-tooling as required (Full preset); S030-D62 added 15-service-health
   routing_preset: Full
   preset: Full
-  current_stage: 15-service-health
-  current_action: await_s030_d64_close_or_ship
-  next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
+  current_stage: completed
+  current_action: await_s030_d65_optional_next
+  next_action: optional_stop_or_17_retrospective
   active_milestone: M130
   current_task: null
   current_task_status: completed
@@ -30624,30 +28410,29 @@ evolve_cycles:
   m130_status: completed
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: 0411feb
-  tip_sha: 0411feb
-  tip_full: 0411febf93d98daa870ecf3db966f83660a68ad3
-  tip_prev: fee4d12
-  tip_prev_full: fee4d12705c01d77fbeb5f82d4b79b000967fadb
-  tip_docs: fee4d12
+  tip: 7861b47
+  tip_sha: 7861b47
+  tip_full: 7861b47a7b0f5afee84126b55634bae50d111873
+  tip_prev: 0411feb
+  tip_prev_full: 0411febf93d98daa870ecf3db966f83660a68ad3
+  tip_docs: 7861b47
   tip_smoke: 588dab6
-  tip_drift: pending_push
-  tip_pushed: partial
-  local_ahead: 2
+  tip_drift: pending_push_advisory
+  tip_pushed: false
+  tip_push_chosen: false
+  local_ahead: 3
   origin_tip: 588dab6
   origin_tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
-  tip_note: 'local 0411feb/fee4d12 2 ahead of origin 588dab6; smoke CI tip 588dab6; may push as part of 15 prep if skill requires tip CI'
+  tip_note: 'ADVISORY — tip push not chosen on close; local 7861b47 3 ahead of origin 588dab6'
   tip_ci_status: success
   tip_ci_run_id: '31709704821'
   tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
   tip_ci_sha: 588dab6
-  current_stage_note: 15 COMPLETE OVERALL PASS; awaiting S030-D64 close vs ship-path; Phase D baseline done; ship still optional.
+  current_stage_note: CLOSED S030-D64 — close artifacts recorded; awaiting Phase 4 AskQuestion S030-D65 (stop vs 17-retrospective); cutover deferred; PR #238 open.
   path_label: baseline_only_flags_off
   baseline_13_result: PASS
   stage_15_result: PASS
-  notes: 'S030 15 COMPLETE 2026-08-13T22:40:00Z — OVERALL PASS; health_tiers H0ci/H1/H2pool/H3/H4–H5 PASS (H2 alembic advisory); remediation none;
-    askquestion_pending=true topic=S030-D64; current_action=await_s030_d64_close_or_ship; Phase D verify/deploy baseline done;
-    ship still optional; no enable/cutover/FT promote. Do not invent D64. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
+  notes: 'S030/EV-027 CLOSED 2026-08-13T22:47:00Z (S030-D64 close_cycle_defer_cutover) — baseline 13 PASS (passed_baseline_only); 15 OVERALL PASS; cutover/enable/FT promote deferred; PR #238 remains open; no live cutover; tip push not chosen (7861b47 ahead of 588dab6). Close artifacts recorded 2026-08-13T22:50:00Z (evolve-summary, evolve-report-EV-027, HANDOFF/routing-plan/evolve-plan-card). Awaiting optional Phase 4 AskQuestion S030-D65 (stop vs 17-retrospective). [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -30663,8 +28448,8 @@ evolve_cycles:
   phase1_approved_at: '2026-08-07T13:10:00Z'
   phase_1_status: approved
   askquestion_pending: true
-  askquestion_pending_topic: S030-D64
-  askquestion_cleared: S030-D63 — D63a/b/c option 1 recommended
+  askquestion_pending_topic: S030-D65_optional_next
+  askquestion_cleared: null
   s030_d62_decision: S030-D62
   s030_d62_status: approved
   s030_d62_choice: option_1_15_service_health
@@ -30674,7 +28459,14 @@ evolve_cycles:
   s030_d63b_choice: option_1_lean
   s030_d63c_choice: option_1_proceed_now_live_env
   s030_d64_decision: S030-D64
-  s030_d64_status: pending
+  s030_d64_status: approved
+  s030_d64_choice: close_cycle_defer_cutover
+  s030_d65_decision: S030-D65
+  s030_d65_status: pending
+  s030_d65_topic: S030-D65_optional_next
+  s030_d65_options: [stop, 17-retrospective]
+  phase4_close_askquestion: pending
+  close_artifacts_recorded_at: '2026-08-13T22:50:00Z'
   flags_enabled: false
   no_cutover: true
   no_enable_automations: true
@@ -30691,6 +28483,14 @@ evolve_cycles:
   prior_13_baseline_available: true
   phase_d_baseline_done: true
   ship_still_optional: true
+  ship_deferred: true
+  cutover_deferred: true
+  enable_deferred: true
+  ft_promote_deferred: true
+  no_live_cutover: true
+  pr_238_status: open
+  pr_238_merged: false
+  tip_push_chosen: false
   invoke_15_readiness: completed
   checkpoints:
     phase_0: passed
@@ -30699,15 +28499,16 @@ evolve_cycles:
     phase_c: passed
     phase_d: passed
     deploy: passed_baseline_only
-  phase_d_note: 'Phase D verify/deploy baseline done (12+13 baseline + 15 health PASS); ship/cutover still optional pending S030-D64. updated_at=2026-08-13T22:40:00Z'
+  phase_d_note: 'Phase D verify/deploy baseline done (12+13 baseline + 15 health PASS); S030-D64 closed with cutover/ship deferred. updated_at=2026-08-13T22:47:00Z'
   gates:
     a_to_b: passed
     b_to_c: passed
     c_to_d: passed
     deploy: passed_baseline_only
-  deploy_gate_note: 'Baseline smoke PASS on live stack (flags off); EV-027 cutover/enable/promote still pending — not fully deployed.'
+  deploy_gate_note: 'Baseline+15 PASS; cutover/enable/promote deferred at close (S030-D64); EV-027 not deployed to live flags-on.'
   ev027_deployed: false
   cutover_pending: true
+  cutover_deferred: true
   decisions:
   - 'S030-D0: Open S030 feature session for #73'
   - 'S030-D1: Approved Standard routing (later upgraded Full S030-D9)'
@@ -30837,6 +28638,7 @@ evolve_cycles:
   - 'S030-D63 PENDING 2026-08-13T15:43:00Z: 15-service-health startup interview; env_role known; prior 13 baseline evidence available; do not invent answers'
   - 'S030-D63 APPROVED 2026-08-13T22:36:00Z: D63a/b/c option 1 recommended (user Proceed with recommended please); 15_run_checks; no ingest/enable'
   - 'S030 15 COMPLETE 2026-08-13T22:40:00Z: OVERALL PASS; S030-D64 PENDING close vs ship-path; Phase D baseline done; ship still optional; do not invent D64'
+  - 'S030-D64 APPROVED 2026-08-13T22:47:00Z: close_cycle_defer_cutover — cycle CLOSED; cutover/enable/FT deferred; PR #238 open; tip_drift advisory'
 
   stages:
     00-context:
@@ -31957,8 +29759,8 @@ evolve_cycles:
       completed_at_iso: '2026-08-13T22:40:00Z'
       ready_to_invoke: false
       invoke_readiness: completed
-      current_action: await_s030_d64_close_or_ship
-      next_action: AskQuestion S030-D64 close vs ship-path (do not invent answer)
+      current_action: completed
+      next_action: none_cycle_closed
       result: PASS
       overall: pass
       infra: pass
@@ -32013,11 +29815,12 @@ evolve_cycles:
       no_corpus_write: true
       require_push_tip_first: false
       live_urls_from: .env
-      askquestion_pending: true
-      askquestion_pending_topic: S030-D64
-      askquestion_cleared: S030-D63
+      askquestion_pending: false
+      askquestion_pending_topic: null
+      askquestion_cleared: S030-D64
       s030_d64_decision: S030-D64
-      s030_d64_status: pending
+      s030_d64_status: approved
+      s030_d64_choice: close_cycle_defer_cutover
       prior_stage: 13-deploy-smoke
       prior_result: PASS
       prior_13_baseline_available: true
@@ -32055,11 +29858,63 @@ evolve_cycles:
       report_status: completed
       phase_d_baseline_done: true
       ship_still_optional: true
-      note: 'S030 15 COMPLETE OVERALL PASS; awaiting S030-D64 close vs ship-path; Phase D baseline done; ship optional; no
-        enable/cutover/FT promote. Do not invent D64. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
-      updated_at: '2026-08-13T22:40:00Z'
+      note: 'S030 15 COMPLETE OVERALL PASS; cycle closed S030-D64 (cutover deferred). [Corpus: feature-list.md §F75–F77]
+        [Corpus: no-live-prod-corpus-push]'
+      updated_at: '2026-08-13T22:47:00Z'
 
   artifacts:
+  - path: docs/sessions/S030-corpus-automations/reports/evolve-summary.md
+    kind: evolve-summary
+    type: report
+    status: completed
+    stage: 16-evolve
+    skill_id: 16-evolve
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    close_decision: S030-D64
+    recorded_at: '2026-08-13T22:50:00Z'
+    note: Phase 4 close summary — cycle completed; cutover deferred
+  - path: docs/evolve-report-EV-027.md
+    kind: evolve-report
+    type: report
+    status: completed
+    stage: 16-evolve
+    skill_id: 16-evolve
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    close_decision: S030-D64
+    recorded_at: '2026-08-13T22:50:00Z'
+    note: Standing evolve report for EV-027 close
+  - path: docs/sessions/S030-corpus-automations/HANDOFF.md
+    kind: handoff
+    status: updated
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    stage: 16-evolve
+    close_decision: S030-D64
+    recorded_at: '2026-08-13T22:50:00Z'
+    updated_at: '2026-08-13T22:50:00Z'
+    note: Updated for S030-D64 close; awaiting S030-D65
+  - path: docs/sessions/S030-corpus-automations/routing-plan.md
+    kind: routing-plan
+    status: updated
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    stage: 16-evolve
+    close_decision: S030-D64
+    recorded_at: '2026-08-13T22:50:00Z'
+    updated_at: '2026-08-13T22:50:00Z'
+    note: Updated for S030-D64 close; awaiting S030-D65
+  - path: docs/sessions/S030-corpus-automations/evolve-plan-card.md
+    kind: evolve-plan-card
+    status: updated
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    stage: 16-evolve
+    close_decision: S030-D64
+    recorded_at: '2026-08-13T22:50:00Z'
+    updated_at: '2026-08-13T22:50:00Z'
+    note: Updated for S030-D64 close; awaiting S030-D65
   - path: docs/sessions/S030-corpus-automations/reports/service-health.md
     kind: stage-report
     type: report
@@ -51273,19 +49128,53 @@ issue_log:
   - 224
   note: 'Closed at 11-verify-impl (S028-D32); #222 #223 #224 closed; [Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
 decisions_log:
-- id: S030-D64
-  summary: 'Next after 15 COMPLETE PASS — close vs ship-path (pending)'
+- id: S030-D65
+  summary: 'Optional Phase 4 close AskQuestion — stop here vs start 17-retrospective'
   status: pending
-  recorded_at: '2026-08-13T22:40:00Z'
+  decided: false
+  recorded_at: '2026-08-13T22:50:00Z'
   session_id: S030-corpus-automations
   evolve_cycle_id: EV-027
-  skill_id: 15-service-health
+  skill_id: 16-evolve
+  topic: S030-D65_optional_next
+  options:
+  - stop
+  - 17-retrospective
+  prior_decision: S030-D64
+  cycle_status: completed
+  close_reason: baseline_health_only_cutover_deferred
+  note: 'Cycle already closed (S030-D64); optional next after close artifacts. Prefer AskQuestion before ending 16-evolve Phase 4.'
+- id: S030-D64
+  summary: 'Close S030/EV-027 for now — baseline+15 PASS; cutover/enable/FT promote deferred'
+  status: approved
+  decided: true
+  recorded_at: '2026-08-13T22:40:00Z'
+  decided_at: '2026-08-13T22:47:00Z'
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 16-evolve
+  prior_skill_id: 15-service-health
   topic: S030-D64
+  choice: close_cycle_defer_cutover
+  user_choice: option_1_close_cycle_defer_cutover
   stage_15_result: PASS
+  baseline_13_result: PASS
+  deploy_gate: passed_baseline_only
   phase_d_baseline_done: true
-  ship_still_optional: true
+  ship_deferred: true
+  cutover_deferred: true
+  enable_deferred: true
+  ft_promote_deferred: true
+  no_live_cutover: true
+  pr_238_status: open
+  tip_push_chosen: false
+  tip_drift: pending_push_advisory
+  tip: 7861b47
+  origin_tip: 588dab6
+  local_ahead: 3
+  close_reason: baseline_health_only_cutover_deferred
   report: docs/sessions/S030-corpus-automations/reports/service-health.md
-  note: Do not invent answer; AskQuestion required.
+  note: 'Cycle closed; cutover deferred to later session; PR #238 not merged.'
 - id: S030-D63c
   summary: '15 proceed now on live URLs from .env — do not require push tip first'
   status: approved

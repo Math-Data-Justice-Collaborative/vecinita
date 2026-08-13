@@ -25,13 +25,14 @@ Session open: **S030-D0**. Issues: **#73, #72, #219**.
 
 | Stage | Required | Status | Notes |
 |-------|----------|--------|-------|
-| 16-evolve | yes | in_progress | EV-027; Phase B → C after 05 |
+| 16-evolve | yes | completed | EV-027 closed S030-D64 — cutover deferred |
+| 15-service-health | yes | completed | PASS post-baseline |
 
 ## Preset
 
 **Full** = Standard + `03` + `06` (S030-D9).  
-Orchestrator: **16-evolve**.
+Orchestrator: **16-evolve** (closed).
 
 ## Next
 
-**15 complete PASS.** AskQuestion: close S030/EV-027 · ship-path · or other.
+**Session closed.** Ship-path / enable later via new `00-context` session. Optional: 17-retrospective.

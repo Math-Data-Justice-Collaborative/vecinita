@@ -1,35 +1,31 @@
 # HANDOFF — S030-corpus-automations
 
 **Updated:** 2026-08-13  
-**Session:** S030-corpus-automations (`feature`)  
-**Cycle:** EV-027 · F75 F76 F77  
+**Session:** S030-corpus-automations — **CLOSED**  
+**Cycle:** EV-027 — **completed** (`close_cycle_defer_cutover`)  
 **Branch:** `evolve/EV-027-corpus-automations`  
-**Tip:** local ahead of origin (`0411feb`+)  
+**Tip:** local `7861b47` (3 ahead of origin `588dab6`)  
 **Issues:** #73 · #72 · #219  
 
-## Position
+## Close posture
 
-- **13-deploy-smoke** COMPLETE PASS — `passed_baseline_only`
-- **15-service-health** COMPLETE **PASS** — `reports/service-health.md`
-- Live stack healthy; EV-027 **not** cut over; flags **off**
-- PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open
-- Next: AskQuestion — close cycle / ship-path / other
-
-## Decisions
-
-| ID | Choice |
-|----|--------|
-| S030-D60 | Baseline live smoke only; flags off |
-| S030-D61 | Accept H2 alembic tip-drift |
-| S030-D62 | Continue to 15-service-health |
-| S030-D63 | Recommended post-baseline health package |
+- Spec + Build + Phase D baseline **done**
+- Live stack **healthy** (15 PASS); EV-027 **not** cut over
+- Flags **off**; enable / FT promote **deferred**
+- PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) remains **open**
 
 ## Reports
 
+- `reports/evolve-summary.md`
 - `reports/deploy-smoke.md`
 - `reports/service-health.md`
-- `reports/deploy-checklist.md`
+- `docs/evolve-report-EV-027.md`
 
-## Next
+## Resume later
 
-Await close / ship-path AskQuestion (or `@.cursor/skills/16-evolve/SKILL.md` for cycle close).
+Open a new session (`00-context`) for ship-path / enable, or continue with:
+
+```
+Enter this into the chat to continue:
+@.cursor/skills/17-retrospective/SKILL.md
+```
