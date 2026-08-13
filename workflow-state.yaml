@@ -8332,9 +8332,9 @@ active_session:
   - 72
   - 219
   current_stage: 13-deploy-smoke
-  current_stage_note: 12-verify-deploy COMPLETE (S030-D59); ready for 13-deploy-smoke (flags off; no live cutover/enable/promote).
-  current_action: ready_for_13_deploy_smoke
-  next_action: Invoke 13-deploy-smoke
+  current_stage_note: Baseline smoke ran @588dab6 (CI PASS); H2 alembic FAIL expected — awaiting S030-D61 disposition. EV-027 NOT deployed.
+  current_action: await_s030_d61_h2_disposition
+  next_action: AskQuestion S030-D61 H2 alembic disposition (do not invent answer)
   started_at: '2026-08-07'
   started_at_iso: '2026-08-07T12:41:34Z'
   mode: evolve
@@ -8531,6 +8531,20 @@ active_session:
     for 13 smoke (*_ENABLED false); no live cutover/enable/promote; report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
     tip@e9e2629; env_role staging_as_live; current_stage→13-deploy-smoke; askquestion_pending=false; deploy gate still pending;
     recommended_next=Invoke 13-deploy-smoke. [Corpus: feature-list.md §F75–F77]'
+  - 'S030 13-deploy-smoke START 2026-08-13T14:15:30Z: in_progress; current_action=13_startup_interview; tip reconciled @588dab6
+    (docs: complete deploy strategy verification; 1 ahead of origin e9e2629; tip drift pending push); askquestion_pending=true
+    topic=13_startup_interview; S030-D60 pending — env_role staging_as_live, flags off, awaiting user deploy-path choice. Do
+    NOT invent answers. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]'
+  - 'S030-D60 2026-08-13T14:20:00Z: 13 startup APPROVED — Q1 option_1 baseline_only_flags_off (push tip if needed → tip CI →
+    H0c+H1–H5 against CURRENT LIVE stack; F75–F77 OFF; no EV-027 cutover/enable/FT promote; env_role staging_as_live=live/prod);
+    Q2 option_1 push 588dab6 and watch CI before live smoke. askquestion_pending=false; current_action=push_tip_watch_ci;
+    enable/promote still gated for later AskQuestion. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
+    [Corpus: no-live-prod-corpus-push]'
+  - 'S030 13 baseline smoke 2026-08-13T14:28:00Z: tip 588dab6 pushed; CI PASS run 31709704821; path baseline_only_flags_off;
+    H0c PASS; H1 PASS; H2 pool PASS / H2 alembic FAIL expected (live 20260806_0014 vs tip head 20260812_0016); H3 PASS (~85.9s);
+    H3b PASS; H4–H5 PASS (verify_connectivity.sh); automations status 404 pre-cutover; report=deploy-smoke.md; EV-027 NOT
+    deployed; current_action=await_s030_d61_h2_disposition; askquestion_pending=true topic=S030-D61; tip_drift cleared (origin@588dab6).
+    Do not invent D61 answer. [Corpus: feature-list.md §F75–F77]'
   decisions:
   - id: S030-D0
     summary: 'Open S030 feature session for #73'
@@ -8937,6 +8951,61 @@ active_session:
     checkpoints_deploy: pending
     gates_deploy: pending
     corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md]'
+  - id: S030-D60
+    summary: '13-deploy-smoke startup APPROVED — baseline_only_flags_off; push 588dab6 + watch CI then live H0c+H1–H5'
+    status: approved
+    decided: true
+    recorded_at: '2026-08-13T14:15:30Z'
+    decided_at: '2026-08-13T14:20:00Z'
+    skill_id: 13-deploy-smoke
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    tip: 588dab6
+    tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+    tip_prev: e9e2629
+    tip_drift: pending_push
+    local_ahead: 1
+    origin_tip: e9e2629
+    env_role: staging_as_live
+    env_role_live: prod
+    flags_enabled: false
+    path_label: baseline_only_flags_off
+    q1_choice: option_1_baseline_only
+    q1_path: push_tip_if_needed_confirm_ci_then_H0c_H1_H5_current_live_stack
+    q2_choice: option_1_push_588dab6_watch_ci_before_live_smoke
+    no_ev027_cutover: true
+    no_enable_automations: true
+    no_ft_promote: true
+    f75_f76_f77: off
+    enable_promote_still_gated: true
+    askquestion_pending: false
+    askquestion_pending_topic: null
+    askquestion_cleared: S030-D60 — startup interview answered
+    note: 'S030-D60 APPROVED — baseline only against current live stack; F75–F77 remain OFF; enable/promote still gated for later AskQuestion. [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]'
+  - id: S030-D61
+    summary: '13 baseline smoke H2 alembic disposition pending — live rev 20260806_0014 vs tip head 20260812_0016'
+    status: pending
+    recorded_at: '2026-08-13T14:28:00Z'
+    skill_id: 13-deploy-smoke
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    tip: 588dab6
+    tip_ci_run_id: '31709704821'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+    tip_ci_status: success
+    path_label: baseline_only_flags_off
+    askquestion_pending: true
+    askquestion_pending_topic: S030-D61
+    h2_alembic: fail_expected
+    live_alembic_rev: '20260806_0014'
+    tip_alembic_head: '20260812_0016'
+    h2_pool: pass
+    no_cutover: true
+    no_enable: true
+    no_ft_promote: true
+    ev027_deployed: false
+    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+    note: 'S030-D61 PENDING — do not invent answer; AskQuestion for H2 alembic disposition after baseline smoke. [Corpus: feature-list.md §F75–F77]'
   context_briefs: []
   routing_plan:
   - stage: 00-context
@@ -9771,17 +9840,60 @@ active_session:
     result: PASS
   - stage: 13-deploy-smoke
     required: true
-    status: pending
+    status: in_progress
     mode: delta
     skip_rationale: null
     ready: true
-    ready_note: 12 COMPLETE (S030-D59); invoke with *_ENABLED false; no live cutover/enable/promote
+    ready_note: S030-D60 APPROVED baseline_only_flags_off; push 588dab6 + watch CI then live H0c+H1–H5; F75–F77 OFF
     prior_report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
-    tip: e9e2629
+    tip: 588dab6
+    tip_sha: 588dab6
+    tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+    tip_prev: e9e2629
+    tip_drift: pending_push
+    local_ahead: 1
+    origin_tip: e9e2629
     env_role: staging_as_live
+    env_role_live: prod
+    started_at: '2026-08-13'
+    started_at_iso: '2026-08-13T14:15:30Z'
+    started: '2026-08-13'
+    current_action: await_s030_d61_h2_disposition
+    next_action: AskQuestion S030-D61 H2 alembic disposition (do not invent answer)
+    path_label: baseline_only_flags_off
+    askquestion_pending: true
+    askquestion_pending_topic: S030-D61
+    askquestion_cleared: S030-D60
+    s030_d60_decision: S030-D60
+    s030_d60_status: approved
+    s030_d61_decision: S030-D61
+    s030_d61_status: pending
+    tip_drift: cleared
+    tip_pushed: true
+    local_ahead: 0
+    origin_tip: 588dab6
+    tip_ci_status: success
+    tip_ci_run_id: '31709704821'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+    smoke:
+      h0c: pass
+      h1: pass
+      h2_pool: pass
+      h2_alembic: fail_expected
+      h3: pass
+      h3_duration_s: 85.9
+      h3b: pass
+      h4: pass
+      h5: pass
+      automations_status: '404'
+      automations_note: pre-cutover
+    enable_promote_still_gated: true
+    ev027_deployed: false
+    updated_at: '2026-08-13T14:28:00Z'
   handoff:
     next_skill: 13-deploy-smoke
-    next_action: Invoke 13-deploy-smoke
+    next_action: AskQuestion S030-D61 H2 alembic disposition (do not invent answer)
     evolve_cycle_id: EV-027
     session_id: S030-corpus-automations
     feature_ids:
@@ -9808,29 +9920,93 @@ active_session:
     m130_status: completed
     t129_10_status: completed
     t129_10_commit: '6107037'
-    tip: e9e2629
-    tip_sha: e9e2629
-    tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
-    tip_prev: 0b7a640
-    askquestion_pending: false
-    updated_at: '2026-08-13T14:06:25Z'
+    tip: 588dab6
+    tip_sha: 588dab6
+    tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+    tip_prev: e9e2629
+    tip_prev_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    tip_drift: pending_push
+    local_ahead: 1
+    origin_tip: e9e2629
+    tip_drift: cleared
+    tip_pushed: true
+    local_ahead: 0
+    origin_tip: 588dab6
+    tip_ci_status: success
+    tip_ci_run_id: '31709704821'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+    askquestion_pending: true
+    askquestion_pending_topic: S030-D61
+    askquestion_cleared: S030-D60
+    updated_at: '2026-08-13T14:28:00Z'
     pr_238_status: open
-    note: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
-      ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
-      tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
-      remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z.
-      [Corpus: feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push]
-      [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
-    recommended_next: Invoke 13-deploy-smoke
+    path_label: baseline_only_flags_off
+    report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+    note: 'S030/EV-027 13 baseline smoke @588dab6 CI PASS; H0c/H1/H3/H3b/H4/H5 PASS; H2 alembic FAIL expected; automations
+      404 pre-cutover; EV-027 NOT deployed; awaiting S030-D61. updated_at=2026-08-13T14:28:00Z. [Corpus: feature-list.md §F75–F77]
+      [Corpus: no-live-prod-corpus-push]'
+    recommended_next: Present AskQuestion S030-D61 (do not invent answer)
+    s030_d60_decision: S030-D60
+    s030_d60_status: approved
+    s030_d61_decision: S030-D61
+    s030_d61_status: pending
+    enable_promote_still_gated: true
+    ev027_deployed: false
     gate_c_to_d: passed
     s030_d55_decision: S030-D55
     phase_d: passed
     s030_d57_decision: S030-D57
     checkpoints_deploy: pending
     gates_deploy: pending
-  askquestion_pending: false
-  askquestion_pending_topic: null
+  askquestion_pending: true
+  askquestion_pending_topic: S030-D61
+  askquestion_cleared: S030-D60 — startup interview answered (baseline_only_flags_off)
+  path_label: baseline_only_flags_off
+  s030_d60_decision: S030-D60
+  s030_d60_status: approved
+  s030_d61_decision: S030-D61
+  s030_d61_status: pending
+  tip: 588dab6
+  tip_sha: 588dab6
+  tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+  tip_prev: e9e2629
+  tip_prev_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+  tip_drift: cleared
+  tip_pushed: true
+  local_ahead: 0
+  origin_tip: 588dab6
+  origin_tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+  tip_ci_status: success
+  tip_ci_run_id: '31709704821'
+  tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+  enable_promote_still_gated: true
+  ev027_deployed: false
+  report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
   artifacts:
+  - path: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+    kind: stage-report
+    type: report
+    status: in_progress
+    stage: 13-deploy-smoke
+    skill_id: 13-deploy-smoke
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    tip: 588dab6
+    path_label: baseline_only_flags_off
+    recorded_at: '2026-08-13T14:28:00Z'
+    note: Baseline smoke results; H2 alembic FAIL expected; awaiting S030-D61; EV-027 NOT deployed
+  - path: docs/sessions/S030-corpus-automations/HANDOFF.md
+    kind: handoff
+    status: updated
+    session_id: S030-corpus-automations
+    stage: 13-deploy-smoke
+    recorded_at: '2026-08-13T14:28:00Z'
+  - path: docs/sessions/S030-corpus-automations/routing-plan.md
+    kind: routing-plan
+    status: updated
+    session_id: S030-corpus-automations
+    stage: 13-deploy-smoke
+    recorded_at: '2026-08-13T14:28:00Z'
   - path: docs/sessions/S030-corpus-automations/reports/01-requirements-corpus-automations.md
     session_id: S030-corpus-automations
     stage: 01-requirements
@@ -9906,7 +10082,7 @@ active_session:
     tip: e9e2629
     tip_ci_run_id: '31707365293'
     updated_at: '2026-08-13T14:06:25Z'
-  updated_at: '2026-08-13T14:06:25Z'
+  updated_at: '2026-08-13T14:15:30Z'
   recovery_note: Reconstructed 2026-08-07 after accidental git checkout of uncommitted S030 workflow-state
   s030_d31_decision: S030-D31
   s030_d32_decision: S030-D32
@@ -9917,11 +10093,15 @@ active_session:
   build_plan_card_waiver: S030-D31
   build_plan_card_sot: tech-plan-delta + Phase 30
   askquestion_cleared: Gate C→D / phase_c — user A/option_1 (S030-D55)
-  tip: e9e2629
-  tip_sha: e9e2629
-  tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
-  tip_prev: af07de4
-  handoff_tip: ad9d1c4
+  tip: 588dab6
+  tip_sha: 588dab6
+  tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+  tip_prev: e9e2629
+  tip_drift: cleared
+  tip_pushed: true
+  local_ahead: 0
+  origin_tip: 588dab6
+  handoff_tip: 588dab6
   current_task: null
   current_task_status: completed
   handoff_sync_needed:
@@ -29428,7 +29608,35 @@ deployment:
   staging:
     status: deployed
     env_role: staging_as_live
-    last_verified: '2026-08-07'
+    last_verified: '2026-08-13'
+    s030_baseline_smoke:
+      session_id: S030-corpus-automations
+      evolve_cycle_id: EV-027
+      path_label: baseline_only_flags_off
+      tip: 588dab6
+      tip_ci_run_id: '31709704821'
+      tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+      tip_ci_status: success
+      ev027_deployed: false
+      no_cutover: true
+      no_enable: true
+      no_ft_promote: true
+      report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+      recorded_at: '2026-08-13T14:28:00Z'
+      note: 'Baseline smoke on CURRENT LIVE stack only — EV-027 NOT cut over; live stack tip remains prior deploy (da7cf8b/S028).'
+      h0c: pass
+      h1: pass
+      h2_pool: pass
+      h2_alembic: fail_expected
+      h2_disposition: pending_S030-D61
+      live_alembic_rev: '20260806_0014'
+      tip_alembic_head: '20260812_0016'
+      h3: pass
+      h3_duration_s: 85.9
+      h3b: pass
+      h4: pass
+      h5: pass
+      automations_status: '404'
     commit_deployed: da7cf8b
     commit_deployed_full: da7cf8b7891f1ab735bbde288b2de3adc1d55a08
     commit_head: ad15667
@@ -29556,25 +29764,52 @@ deployment:
       modal_embedding: https://vecinita--vecinita-embedding-embedding-api.modal.run
       modal_llm: https://vecinita--vecinita-llm-fastapi-app.modal.run
     health_tiers:
+      session_id: S030-corpus-automations
+      evolve_cycle_id: EV-027
+      path_label: baseline_only_flags_off
+      tip_checked: 588dab6
+      ev027_deployed: false
       h0c: pass
       h1: pass
       h1_liveness: pass
-      h2: pass
-      h2_db_ready: pass
+      h2: pending_disposition
+      h2_pool: pass
+      h2_alembic: fail_expected
+      h2_db_ready: pending_disposition
+      h2_note: 'FAIL expected — live rev 20260806_0014 vs tip head 20260812_0016; awaiting S030-D61'
       h3: pass
       h3_rag_smoke: pass
+      h3_duration_s: 85.9
+      h3b: pass
       h4: pass
       h4_cors_preflight: pass
       h5: pass
       h5_frontend_bundle: pass
-      h0ci_github_main: pass
-      confirmed: accepted
-      confirmed_at: '2026-08-07T00:35:00Z'
-      confirmed_decision: S028-13-PASS
-      confirmed_session: S028-chat-source-ux
-      confirmed_evolve_cycle: EV-026
-      confirmed_commit: da7cf8b
-      confirmed_pr: 229
+      confirmed: pending_h2_disposition
+      confirmed_at: null
+      confirmed_decision: null
+      confirmed_session: S030-corpus-automations
+      confirmed_evolve_cycle: EV-027
+      prior_s028_confirmed:
+        h0c: pass
+        h1: pass
+        h1_liveness: pass
+        h2: pass
+        h2_db_ready: pass
+        h3: pass
+        h3_rag_smoke: pass
+        h4: pass
+        h4_cors_preflight: pass
+        h5: pass
+        h5_frontend_bundle: pass
+        h0ci_github_main: pass
+        confirmed: accepted
+        confirmed_at: '2026-08-07T00:35:00Z'
+        confirmed_decision: S028-13-PASS
+        confirmed_session: S028-chat-source-ux
+        confirmed_evolve_cycle: EV-026
+        confirmed_commit: da7cf8b
+        confirmed_pr: 229
       prior_s026_d58:
         h0c: pass
         h1_liveness: pass
@@ -29935,8 +30170,8 @@ evolve_cycles:
   routing_preset: Full
   preset: Full
   current_stage: 13-deploy-smoke
-  current_action: ready_for_13_deploy_smoke
-  next_action: Invoke 13-deploy-smoke
+  current_action: await_s030_d61_h2_disposition
+  next_action: AskQuestion S030-D61 H2 alembic disposition (do not invent answer)
   active_milestone: M130
   current_task: null
   current_task_status: completed
@@ -29945,17 +30180,25 @@ evolve_cycles:
   m130_status: completed
   m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
   m127_pr_number: 238
-  tip: e9e2629
-  tip_sha: e9e2629
-  tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
-  tip_prev: af07de4
-  current_stage_note: 12-verify-deploy COMPLETE (S030-D59); ready for 13-deploy-smoke (flags off).
-  notes: 'S030/EV-027 12-verify-deploy COMPLETE APPROVED (S030-D59) — user approved mitigations 1–4 + rollback + checklist
-    ready for 13 with *_ENABLED false; no live cutover/enable/promote. report=docs/sessions/S030-corpus-automations/reports/deploy-checklist.md;
-    tip CI PASS @e9e2629 run 31707365293; env_role=staging_as_live; askquestion_pending=false; checkpoints.deploy/gates.deploy
-    remain pending until 13; handoff → Invoke 13-deploy-smoke (NOT started/completed). updated_at=2026-08-13T14:06:25Z. [Corpus:
-    feature-list.md §F75–F77] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md] [Corpus: no-live-prod-corpus-push] [Spec:
-    docs/adr/ADR-052-corpus-automation-orchestration.md] [Spec: docs/adr/ADR-053-modal-lora-finetune.md]'
+  tip: 588dab6
+  tip_sha: 588dab6
+  tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+  tip_prev: e9e2629
+  tip_prev_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+  tip_drift: cleared
+  tip_pushed: true
+  local_ahead: 0
+  origin_tip: 588dab6
+  origin_tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+  tip_ci_status: success
+  tip_ci_run_id: '31709704821'
+  tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+  current_stage_note: Baseline smoke @588dab6 done; H2 alembic FAIL expected — awaiting S030-D61; EV-027 NOT deployed.
+  path_label: baseline_only_flags_off
+  notes: 'S030/EV-027 13 baseline smoke 2026-08-13T14:28:00Z — tip pushed CI PASS 31709704821; H0c/H1/H3/H3b/H4/H5 PASS; H2
+    pool PASS / H2 alembic FAIL expected (live 20260806_0014 vs tip 20260812_0016); automations 404 pre-cutover; report=deploy-smoke.md;
+    EV-027 NOT deployed; askquestion_pending=true topic=S030-D61; current_action=await_s030_d61_h2_disposition; do not invent
+    D61 answer. updated_at=2026-08-13T14:28:00Z. [Corpus: feature-list.md §F75–F77] [Corpus: no-live-prod-corpus-push]'
   branch: evolve/EV-027-corpus-automations
   session_branch: evolve/EV-027-corpus-automations
   evolve_branch_planned: evolve/EV-027-corpus-automations
@@ -29970,8 +30213,9 @@ evolve_cycles:
   phase1_approved: true
   phase1_approved_at: '2026-08-07T13:10:00Z'
   phase_1_status: approved
-  askquestion_pending: false
-  askquestion_pending_topic: null
+  askquestion_pending: true
+  askquestion_pending_topic: S030-D61
+  askquestion_cleared: S030-D60 — startup interview answered
   checkpoints:
     phase_0: passed
     phase_a: passed
@@ -30100,6 +30344,13 @@ evolve_cycles:
   - 'S030-12-TIP-CI-PASS: tip CI PASS @e9e2629 run 31707365293'
   - 'S030-D59 2026-08-13T14:06:25Z: 12 COMPLETE — mitigations 1–4 + rollback + checklist ready for 13 (*_ENABLED false); deploy
     gate pending; next Invoke 13-deploy-smoke'
+  - 'S030-D60 PENDING 2026-08-13T14:15:30Z: 13-deploy-smoke startup — env_role staging_as_live, flags off, awaiting user
+    deploy-path choice (AskQuestion); tip@588dab6 tip drift pending push; do not invent answers'
+  - 'S030-D60 APPROVED 2026-08-13T14:20:00Z: baseline_only_flags_off; Q1 option_1 + Q2 option_1 push 588dab6 watch CI then
+    live H0c+H1–H5; F75–F77 OFF; enable/promote still gated'
+  - 'S030-D61 PENDING 2026-08-13T14:28:00Z: H2 alembic FAIL expected (live 20260806_0014 vs tip head 20260812_0016) after
+    baseline smoke @588dab6; AskQuestion disposition; do not invent answer; EV-027 NOT deployed'
+
   stages:
     00-context:
       status: completed
@@ -31120,17 +31371,103 @@ evolve_cycles:
       overall_result: approved
       result: PASS
     13-deploy-smoke:
-      status: pending
+      status: in_progress
       mode: delta
+      delta_only: true
       session_id: S030-corpus-automations
       evolve_cycle_id: EV-027
+      branch: evolve/EV-027-corpus-automations
+      session_branch: evolve/EV-027-corpus-automations
+      feature_ids:
+      - F75
+      - F76
+      - F77
       ready: true
-      ready_note: 12 COMPLETE (S030-D59); invoke with *_ENABLED false; no live cutover/enable/promote
+      ready_note: S030-D60 APPROVED baseline_only_flags_off; push 588dab6 + watch CI then live H0c+H1–H5; F75–F77 OFF
       prior_report: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
-      tip: e9e2629
+      tip: 588dab6
+      tip_sha: 588dab6
+      tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+      tip_prev: e9e2629
+      tip_drift: cleared
+      tip_pushed: true
+      local_ahead: 0
+      origin_tip: 588dab6
       env_role: staging_as_live
-      updated_at: '2026-08-13T14:06:25Z'
+      env_role_live: prod
+      flags_enabled: false
+      path_label: baseline_only_flags_off
+      started_at: '2026-08-13'
+      started_at_iso: '2026-08-13T14:15:30Z'
+      started: '2026-08-13'
+      tip_pushed: true
+      local_ahead: 0
+      origin_tip: 588dab6
+      tip_ci_status: success
+      tip_ci_run_id: '31709704821'
+      tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
+      current_action: await_s030_d61_h2_disposition
+      next_action: AskQuestion S030-D61 H2 alembic disposition (do not invent answer)
+      askquestion_pending: true
+      askquestion_pending_topic: S030-D61
+      askquestion_cleared: S030-D60
+      s030_d59_decision: S030-D59
+      s030_d60_decision: S030-D60
+      s030_d60_status: approved
+      s030_d61_decision: S030-D61
+      s030_d61_status: pending
+      q1_choice: option_1_baseline_only
+      q2_choice: option_1_push_588dab6_watch_ci_before_live_smoke
+      no_ev027_cutover: true
+      no_enable_automations: true
+      no_ft_promote: true
+      enable_promote_still_gated: true
+      ev027_deployed: false
+      report: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+      report_status: in_progress
+      smoke:
+        h0c: pass
+        h1: pass
+        h2_pool: pass
+        h2_alembic: fail_expected
+        live_alembic_rev: '20260806_0014'
+        tip_alembic_head: '20260812_0016'
+        h3: pass
+        h3_duration_s: 85.9
+        h3b: pass
+        h4: pass
+        h5: pass
+        h4_h5_via: verify_connectivity.sh
+        automations_status: '404'
+        automations_note: pre-cutover
+      note: 'S030/EV-027 13 baseline smoke @588dab6 — H0c/H1/H3/H3b/H4/H5 PASS; H2 alembic FAIL expected; awaiting S030-D61;
+        EV-027 NOT deployed; no cutover/enable/FT promote. [Corpus: feature-list.md §F75–F77]'
+      updated_at: '2026-08-13T14:28:00Z'
   artifacts:
+  - path: docs/sessions/S030-corpus-automations/reports/deploy-smoke.md
+    kind: stage-report
+    type: report
+    status: in_progress
+    stage: 13-deploy-smoke
+    skill_id: 13-deploy-smoke
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    tip: 588dab6
+    path_label: baseline_only_flags_off
+    recorded_at: '2026-08-13T14:28:00Z'
+    note: Baseline smoke; H2 alembic FAIL expected; awaiting S030-D61; EV-027 NOT deployed
+  - path: docs/sessions/S030-corpus-automations/HANDOFF.md
+    kind: handoff
+    status: updated
+    session_id: S030-corpus-automations
+    stage: 13-deploy-smoke
+    recorded_at: '2026-08-13T14:28:00Z'
+  - path: docs/sessions/S030-corpus-automations/routing-plan.md
+    kind: routing-plan
+    status: updated
+    session_id: S030-corpus-automations
+    stage: 13-deploy-smoke
+    recorded_at: '2026-08-13T14:28:00Z'
   - path: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md
     kind: stage-report
     type: report
@@ -50302,6 +50639,40 @@ issue_log:
   - 224
   note: 'Closed at 11-verify-impl (S028-D32); #222 #223 #224 closed; [Spec: docs/sessions/S028-chat-source-ux/reports/verify-impl.md]'
 decisions_log:
+- id: S030-D61
+  summary: '13 baseline smoke H2 alembic disposition pending — live 20260806_0014 vs tip head 20260812_0016'
+  status: pending
+  recorded_at: '2026-08-13T14:28:00Z'
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 13-deploy-smoke
+  tip: 588dab6
+  tip_ci_run_id: '31709704821'
+  path_label: baseline_only_flags_off
+  h2_alembic: fail_expected
+  ev027_deployed: false
+  note: Do not invent answer; AskQuestion required for H2 disposition.
+- id: S030-D60
+  summary: '13-deploy-smoke startup APPROVED — baseline_only_flags_off; push 588dab6 + watch CI then live H0c+H1–H5'
+  status: approved
+  decided: true
+  recorded_at: '2026-08-13T14:15:30Z'
+  decided_at: '2026-08-13T14:20:00Z'
+  session_id: S030-corpus-automations
+  evolve_cycle_id: EV-027
+  skill_id: 13-deploy-smoke
+  tip: 588dab6
+  tip_drift: pending_push
+  path_label: baseline_only_flags_off
+  q1_choice: option_1_baseline_only
+  q2_choice: option_1_push_588dab6_watch_ci_before_live_smoke
+  env_role: staging_as_live
+  flags_enabled: false
+  no_ev027_cutover: true
+  no_enable_automations: true
+  no_ft_promote: true
+  enable_promote_still_gated: true
+  note: 'Q1 baseline only against CURRENT LIVE stack; Q2 push tip and watch CI before smoke; enable/promote still gated for later AskQuestion.'
 - date: '2026-08-07'
   skill: 16-evolve
   skill_id: 16-evolve
@@ -60595,20 +60966,24 @@ git_history:
     created_at: '2026-08-07'
     session_id: S030-corpus-automations
     evolve_cycle_id: EV-027
-    tip: e9e2629
-    tip_sha: e9e2629
-    tip_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
-    head_sha: e9e26290d435fb59e905eb243f8ae376b7f0b165
-    tip_prev: 8986300
-    tip_prev_full: 8986300fe3e80d94c2cb74e2f891fd728eac9a87
-    pushed: false
-    origin_tip: unknown
-    local_ahead: unknown
+    tip: 588dab6
+    tip_sha: 588dab6
+    tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+    head_sha: 588dab62bc41d56fc0792c736eb630529cc01687
+    tip_prev: e9e2629
+    tip_prev_full: e9e26290d435fb59e905eb243f8ae376b7f0b165
+    pushed: true
+    origin_tip: 588dab6
+    origin_tip_full: 588dab62bc41d56fc0792c736eb630529cc01687
+    local_ahead: 0
+    tip_drift: cleared
+    tip_ci_status: success
+    tip_ci_run_id: '31709704821'
+    tip_ci_run_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31709704821
     m127_pr_url: https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238
     m127_pr_number: 238
-    updated_at: '2026-08-13T01:18:53Z'
-    note: 'branch tip @e9e2629 (11-verify-impl; 8986300 QA-S030-001 + e9e2629 verify-impl docs); PR #238 open leave unmerged
-      (no merge)'
+    updated_at: '2026-08-13T14:28:00Z'
+    note: 'branch tip @588dab6 pushed; CI PASS run 31709704821; tip_drift cleared; PR #238 open leave unmerged (no merge)'
   - name: fix/S029-security-install-tools-flake
     purpose: S029 hotfix — harden flaky scripts/security/install-tools.sh GitHub API version fetch (#227 / S027-FLAKY-SECURITY-INSTALL
       / RA-020)
@@ -67315,8 +67690,31 @@ git_history:
     pushed: false
     note: 11-verify-impl docs/signoff commit; tip advanced to e9e2629
     corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/verify-impl.md]'
-  notes: 'S030/EV-027 tip @e9e2629 (11-verify-impl); prior M130 tip ad9d1c4; commits 8986300 + e9e2629 recorded; PR #238 open
-    leave unmerged (no merge)'
+  - sha: 588dab6
+    sha_full: 588dab62bc41d56fc0792c736eb630529cc01687
+    full_sha: 588dab62bc41d56fc0792c736eb630529cc01687
+    branch: evolve/EV-027-corpus-automations
+    message: 'docs: complete deploy strategy verification for corpus automations (F75–F77)'
+    stage: 12-verify-deploy
+    skill_id: 12-verify-deploy
+    session_id: S030-corpus-automations
+    evolve_cycle_id: EV-027
+    feature_ids:
+    - F75
+    - F76
+    - F77
+    timestamp: '2026-08-13T10:00:00-04:00'
+    recorded_at: '2026-08-13T14:15:30Z'
+    pushed: true
+    tip_drift: cleared
+    local_ahead: 0
+    origin_tip: 588dab6
+    tip_ci_run_id: '31709704821'
+    tip_ci_status: success
+    note: '12-verify-deploy docs/checklist commit; pushed; CI PASS run 31709704821; tip_drift cleared'
+    corpus: '[Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/deploy-checklist.md]'
+  notes: 'S030/EV-027 tip @588dab6 pushed CI PASS 31709704821; tip_drift cleared; baseline smoke ran; awaiting S030-D61; PR #238
+    open leave unmerged; EV-027 NOT deployed'
   pull_requests:
     '195':
       number: 195

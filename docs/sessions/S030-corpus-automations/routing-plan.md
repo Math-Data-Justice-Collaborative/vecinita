@@ -18,7 +18,7 @@ Session open: **S030-D0**. Issues: **#73, #72, #219**.
 | 10-e2e | yes | completed | PASS — `reports/e2e-report.md` |
 | 11-verify-impl | yes | completed | PASS — `reports/verify-impl.md`; F75–F77 + UJ-080–082 approved |
 | 12-verify-deploy | yes | completed | ready flags-off — `reports/deploy-checklist.md` (S030-D59) |
-| 13-deploy-smoke | yes | pending | next; AskQuestion before enable/promote; FT promote = human judgment (S030-D10 / RD-338) |
+| 13-deploy-smoke | yes | in_progress | baseline_only_flags_off (S030-D60); await S030-D61 H2 disposition; enable/promote still gated |
 
 ## Orchestrator
 
