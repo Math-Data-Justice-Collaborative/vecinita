@@ -149,3 +149,6 @@ Sweep knobs map to `EvalConfig` plus **prompt variants** (`--system-prompt-dir` 
 - API: `docs/api-contract.md` §EV-008 eval routes
 - Config: `docs/config-spec.md` §RAG evaluation (F36)
 - Implementation: `docs/adr/ADR-033-ev008-rag-evaluation-implementation.md`
+- **F77 eval evidence:** LoRA promote compares **base vs adapter** on this same golden set
+  (ADR-053 / AC-FT*). Human judgment only — no automated metric abort. Do not invent a
+  second golden product. [Corpus: feature-list.md §F77]

@@ -1,12 +1,12 @@
 # Vecinita Data Flow Diagrams
 
 > **Status:** Companion to architecture  
-> **Last updated:** 2026-08-12  
+> **Last updated:** 2026-08-18  
 > **Format:** Mermaid in `docs/` — render on GitHub or in VS Code Mermaid preview.
 
 Companion to [architecture.md](architecture.md). Covers C4-style overview, sequences, ERD, state machines, class diagrams, requirement traceability, user journeys, and flowcharts. **ADR-004** zero-PII boundaries annotated.
 
-**Also see (newer paths, may not have dedicated Mermaid yet):** corpus catch-up / freshness schedule (ADR-052), playground LLM vs prod LLM (ADR-037), LoRA train → human promote → prod adapter pin (ADR-053). Operator narrative: [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md).
+Operator narrative: [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md). Catch-up / freshness: §18 (ADR-052). LoRA train → human promote: §19 (ADR-053). Playground vs prod LLM: ADR-037.
 
 ---
 
@@ -25,6 +25,8 @@ Companion to [architecture.md](architecture.md). Covers C4-style overview, seque
 | 14 | Requirement | Features → components |
 | 15–16 | Journey / flowchart | Key user journeys |
 | 17 | Flowchart | CI/CD deploy pipeline |
+| 18 | Sequence | Catch-up + freshness schedule (ADR-052) |
+| 19 | Sequence | LoRA train → eval evidence → human promote (ADR-053) |
 
 Narrative journey steps: [user-journeys.md](user-journeys.md).
 
@@ -340,16 +342,16 @@ sequenceDiagram
 |-------|----------|------|--------|
 | DO Postgres | Corpus, embeddings, jobs, audit, eval | No (opaque actor UUID only) | US (DO) |
 | Supabase Auth | Operator accounts, invites | Yes — admin only, separate DB | Supabase project |
-| Modal volumes | Model weights (FastEmbed, Qwen) | No user content | US Modal |
+| Modal volumes | Model weights (embed, Qwen) + **`llm-finetune-adapters`** (F77) | No user content | US Modal |
 | Browser localStorage | `vecinita.locale`, eval dashboard prefs | Device-local only | Client |
 
 ---
 
 ## 8. Entity-relationship diagram (corpus Postgres)
 
-Alembic head includes EV-015 store/shadow (Phase 20 / M86 — revision id assigned at T86.2).
-**Supabase `auth.users` is a separate database** — not shown. `owner_id` / `promoted_by` /
-`actor_id` are opaque UUIDs only (ADR-004, ADR-026).
+Alembic head includes EV-027 automation/freshness (`20260807_0015`, `20260812_0016`) plus
+prior store/shadow revisions. **Supabase `auth.users` is a separate database** — not shown.
+`owner_id` / `promoted_by` / `actor_id` are opaque UUIDs only (ADR-004, ADR-026).
 
 ```mermaid
 erDiagram
@@ -366,6 +368,7 @@ erDiagram
     shadow_chunks ||--o| shadow_embeddings : "vector384"
     eval_runs ||--o{ eval_run_items : "contains"
     eval_config_presets ||--o{ eval_runs : "optional preset"
+    documents ||--o{ automation_runs : "optional catch-up key"
 
     documents {
         uuid id PK
@@ -374,6 +377,8 @@ erDiagram
         text content_hash
         text body_text
         string language
+        boolean refresh_enabled
+        timestamptz last_checked_at
         timestamptz created_at
     }
     document_revisions {
@@ -440,6 +445,21 @@ erDiagram
         string status
         string job_type
         json urls
+    }
+    automation_settings {
+        int id PK
+        bool enabled
+        timestamptz updated_at
+    }
+    automation_runs {
+        uuid id PK
+        string job_type
+        string status
+        uuid document_id FK
+        string revision
+        text error
+        timestamptz started_at
+        timestamptz finished_at
     }
     audit_log {
         uuid id PK
@@ -915,6 +935,84 @@ flowchart LR
     class CI,Preflight,DOD do
     class ModalD modal
     class Supa supabase
+```
+
+---
+
+## 18. Sequence — catch-up + freshness (ADR-052)
+
+Shared Modal **daily** schedule on `vecinita-data-management` dispatches two `job_type`s.
+Catch-up is residual only (failed/partial/missing embed). Freshness bumps `last_checked_at`
+even when `content_hash` is unchanged. Kill-switch and enable flags short-circuit both.
+
+[Corpus: feature-list.md §F75] [Corpus: feature-list.md §F76]
+[Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
+
+```mermaid
+sequenceDiagram
+    actor Op as Operator (Admin UI)
+    participant Sched as Modal schedule<br/>Period days=1
+    participant DM as DM backend dispatch
+    participant IW as Internal write API
+    participant PG as Corpus Postgres
+    participant Emb as Modal embed
+
+    Op->>IW: PATCH automation_settings.enabled
+    Note over IW,PG: default enabled=false (flags-off)
+
+    Sched->>DM: tick
+    alt kill-switch or enabled=false
+        DM-->>Sched: no-op (no enqueue)
+    else enabled
+        DM->>IW: enqueue job_type=automation_catchup<br/>idempotent document_id+revision
+        IW->>PG: insert automation_runs
+        DM->>Emb: embed missing/failed only
+        Emb-->>IW: persist embeddings
+        DM->>IW: enqueue job_type=freshness_refresh
+        IW->>PG: re-fetch URLs; skip if hash match;<br/>always bump last_checked_at
+    end
+    Op->>IW: GET /internal/v1/automations/runs
+    IW-->>Op: history (status, errors)
+```
+
+---
+
+## 19. Sequence — LoRA train → human promote (ADR-053)
+
+Train runs on **`vecinita-llm-finetune`**. Prod **`vecinita-llm`** loads an adapter only
+after operator promote. Playground may load candidates pre-promote. Live cutover still
+requires AskQuestion.
+
+[Corpus: feature-list.md §F77]
+[Spec: docs/adr/ADR-053-modal-lora-finetune.md]
+
+```mermaid
+sequenceDiagram
+    actor Op as Operator
+    participant Admin as Admin Finetune UI
+    participant DM as DM / write API
+    participant FT as vecinita-llm-finetune
+    participant Vol as Volume llm-finetune-adapters
+    participant Eval as F36 golden eval
+    participant Prod as vecinita-llm (prod)
+
+    Op->>Admin: request train (SFT pairs from chunks)
+    Admin->>DM: POST job_type=finetune_train (pending)
+    Op->>Admin: manual approve
+    Admin->>DM: POST /jobs/{id}/approve
+    DM->>FT: start train (caps: concurrent=1, 3/day)
+    FT->>Vol: write adapter version
+    FT->>Eval: base vs adapter report (F36 golden)
+    Eval-->>Op: eval evidence (no auto-abort)
+    alt operator judges better than base
+        Op->>Admin: promote
+        Admin->>DM: pin VECINITA_FINETUNE_ADAPTER_ID
+        Note over Prod: live pin = AskQuestion (S030-D64)
+        DM->>Prod: reload adapter after approve
+    else reject / rollback
+        Op->>Admin: clear pin
+        Prod->>Prod: serve base Qwen
+    end
 ```
 
 ---

@@ -1,7 +1,7 @@
 # Vecinita Architecture
 
 > **Status:** Current overview  
-> **Last updated:** 2026-08-12  
+> **Last updated:** 2026-08-18 (S031 — LoRA FT app is a real deploy unit; live pin deferred)  
 > **Canonical overview** — links live deploy state, infra specs, and ADRs without duplicating operator runbooks.
 
 ## Purpose
@@ -25,7 +25,7 @@ Deployment is **hybrid**:
 |----------|------|
 | **DigitalOcean App Platform** (US `nyc`) | HTTP APIs that touch Postgres, both React frontends |
 | **DigitalOcean Managed Postgres** | Corpus DB + pgvector (384-dim) |
-| **Modal** (US workspace `vecinita`) | Embedding (multilingual e5-small), vLLM prod + playground, ingest/DM workers, shared catch-up/freshness schedule; LoRA FT app planned |
+| **Modal** (US workspace `vecinita`) | Embedding (multilingual e5-small), vLLM prod + playground, ingest/DM workers, shared catch-up/freshness schedule, LoRA FT train app (in-tree; live pin deferred) |
 | **Supabase** (separate project) | Admin operator auth only — identity **not** in corpus DB (ADR-026) |
 
 **Critical boundary (ADR-007):** Only DO services hold `DATABASE_URL`. Modal workers persist data via the **internal write API** using `VECINITA_INTERNAL_API_KEY`.
@@ -47,7 +47,7 @@ Deployment is **hybrid**:
 | 7 | Embedding | `infra/modal/embedding_app.py` | Modal CPU | No | No — `intfloat/multilingual-e5-small` |
 | 8 | vLLM prod | `infra/modal/llm_app.py` | Modal GPU | No | No — ChatRAG / ingest (`vecinita-llm`) |
 | 9 | vLLM playground | `infra/modal/llm_playground_app.py` | Modal GPU | No | No — admin/eval sandbox only |
-| — | LoRA fine-tune (planned) | `infra/modal/finetune_app.py` (future) | Modal GPU | No | No — train; promote pins prod LLM |
+| 10 | LoRA fine-tune | `infra/modal/finetune_app.py` (`vecinita-llm-finetune`) | Modal GPU | No | No — train; prod `vecinita-llm` loads adapter **only after human promote** (F77; live promote deferred) |
 | — | Corpus Postgres | `apps/database` (migrations) | DO Managed Postgres | — | No |
 | — | Supabase Auth | `supabase/` config | Supabase cloud | Separate DB | Admin login only |
 
@@ -88,7 +88,9 @@ flowchart TB
         DM["Data Mgmt ASGI"]
         WQ["Ingest Workers"]
         FE["FastEmbed"]
-        LLM["vLLM Qwen2.5-1.5B"]
+        LLM["vLLM prod Qwen2.5-1.5B"]
+        PGLLM["vLLM playground"]
+        FT["LoRA FT train<br/><i>vecinita-llm-finetune</i>"]
     end
 
     subgraph SB["Supabase — separate DB"]
@@ -109,6 +111,7 @@ flowchart TB
     WQ --> FE
     WQ --> LLM
     WQ -->|VECINITA_INTERNAL_API_KEY| IW
+    FT -.->|adapter volume; promote pin| LLM
     IW -->|write| PG
 
     classDef community fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
@@ -121,7 +124,7 @@ flowchart TB
     class CF community
     class AF operator
     class CB,IW do
-    class DM,WQ,FE,LLM modal
+    class DM,WQ,FE,LLM,PGLLM,FT modal
     class AUTH supabase
     class PG datastore
 ```
@@ -139,6 +142,8 @@ flowchart TB
 | Requirement | Features → components | [data-flow.md §14](data-flow.md#14-requirement-diagram--features-to-components) |
 | Journey + flowchart | UJ-001, UJ-002, UJ-026, UJ-039 | [data-flow.md §15–16](data-flow.md#15-user-journey-maps-mermaid-journey) · [user-journeys.md](user-journeys.md#visual-journey-maps) |
 | Flowchart | CI/CD deploy pipeline | [data-flow.md §17](data-flow.md#17-flowchart--cicd-deploy-pipeline) |
+| Sequence | Catch-up / freshness schedule (ADR-052) | [data-flow.md §18](data-flow.md#18-sequence--catch-up--freshness-adr-052) |
+| Sequence | LoRA train → human promote (ADR-053) | [data-flow.md §19](data-flow.md#19-sequence--lora-train--human-promote-adr-053) |
 
 ---
 
@@ -323,7 +328,8 @@ Detail: [deployment-integration.md](deployment-integration.md) §Cost estimation
 - Budget alerts at 80%/100% of cap (T14.4)
 - vLLM model/GPU sizing proof against $50 cap
 - Dedicated API gateway deferred (R6)
-- Multi-region / multi-machine inference out of scope (F9 = single-container multi-GPU only)
+- Multi-region / multi-machine inference out of scope (hybrid single-region; no extra Modal region)
+- Live F75/F76 enable and F77 adapter pin on prod `vecinita-llm` remain AskQuestion-gated (S030-D64)
 
 ---
 

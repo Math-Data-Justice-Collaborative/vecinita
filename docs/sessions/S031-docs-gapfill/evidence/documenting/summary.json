@@ -1,0 +1,84 @@
+{
+  "phase": "documenting",
+  "when": "2026-08-19T01:09:43Z",
+  "root": "/Users/bigme/Documents/GitHub/vecinita",
+  "results": [
+    {
+      "id": "lint-format-typecheck",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/lint-format-typecheck.log",
+      "scriptable": true
+    },
+    {
+      "id": "tests",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/tests.log",
+      "scriptable": true
+    },
+    {
+      "id": "security",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/security.log",
+      "scriptable": true
+    },
+    {
+      "id": "pii",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/pii.log",
+      "scriptable": true
+    },
+    {
+      "id": "contracts",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/contracts.log",
+      "scriptable": true
+    },
+    {
+      "id": "qa-quality",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/qa-quality.log",
+      "scriptable": true
+    },
+    {
+      "id": "observability",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/observability.log",
+      "scriptable": true
+    },
+    {
+      "id": "adr-raid",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/adr-raid.log",
+      "scriptable": true
+    },
+    {
+      "id": "milestones-planning",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/milestones-planning.log",
+      "scriptable": true
+    },
+    {
+      "id": "human-readable",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/human-readable.log",
+      "scriptable": true
+    },
+    {
+      "id": "database-hygiene",
+      "verdict": "PASS",
+      "exit": 0,
+      "evidence": "/Users/bigme/Documents/GitHub/vecinita/docs/sessions/S031-docs-gapfill/evidence/documenting/database-hygiene.log",
+      "scriptable": true
+    }
+  ]
+}

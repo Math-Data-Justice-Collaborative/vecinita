@@ -1,7 +1,7 @@
 # Data Management Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-06-13 (EV-004 F31 workspace packages)
+> **Last updated**: 2026-08-18 (S031 — F75 `automation_runs` / F76 freshness columns / F77 FT volume)
 
 ## Overview
 
@@ -37,7 +37,7 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 
 | Table | Purpose | PII |
 |-------|---------|-----|
-| `documents` | Source metadata (url, title, hash) | No |
+| `documents` | Source metadata (url, title, hash); F76 `refresh_enabled`, `last_checked_at` | No |
 | `chunks` | Text segments | No |
 | `embeddings` | vector(384) + chunk_id | No |
 | `jobs` | Scrape job status, urls | No |
@@ -46,6 +46,8 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 | `document_tags` | Document ↔ tag assignments (`source`: llm \| human) | No |
 | `chunk_tags` | Chunk ↔ tag assignments (`source`: llm \| human) | No |
 | `feedback` | Anonymous product feedback (category + message; ADR-046 / F68) | No |
+| `automation_settings` | Singleton enable flag for F75 catch-up (id=1; default `enabled=false`) | No |
+| `automation_runs` | F75/F76 run history (`job_type`, status, document_id, revision, error) | No |
 
 **Forbidden:** `users`, `accounts`, `sessions`, `messages`, `profiles`, `invites`, `auth_*`, `created_by`, operator identity columns on tag tables — enforced by migrations + `tests/privacy/`. Visitor email/name/`user_id` on `feedback` is also forbidden (ADR-046).
 
@@ -53,14 +55,14 @@ Vecinita stores **public corpus data only** in DO Postgres: documents, chunks, 3
 
 - **Fixtures:** Committed in repo under `data/fixtures/` (small, public domain or synthetic).
 - **Production corpus:** Public community URLs only; ingested via operator jobs.
-- **Models:** Download scripts in `infra/modal/` (04-tech-plan); volumes `embedding-models`, `llm-models`.
+- **Models:** Download scripts in `infra/modal/` (04-tech-plan); volumes `embedding-models`, `llm-models`, **`llm-finetune-adapters`** (F77 LoRA adapters; not loaded on prod until human promote).
 
 ## Verification
 
 | Asset | Check |
 |-------|-------|
 | Fixtures | SHA256 manifest in `data/fixtures/MANIFEST.json` |
-| Migrations | `alembic upgrade head` on empty DB |
+| Migrations | `alembic upgrade head` on empty DB (tip includes `20260807_0015` + `20260812_0016`) |
 | pgvector | `SELECT extversion FROM pg_extension WHERE extname='vector'` |
 | Embedding dim | `vector_dims(embedding) = 384` sample query |
 
