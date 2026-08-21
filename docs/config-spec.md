@@ -235,7 +235,7 @@ corpus DB stays PII-free.
 | `VECINITA_EMBED_MAX_RETRIES` | int | `3` | No | Retries for transient embed HTTP failures (F48) |
 | `VECINITA_EMBED_RETRY_BACKOFF_S` | float | `0.5` | No | Base backoff seconds (exponential) between embed retries (F48) |
 | `VECINITA_SCRAPE_TIMEOUT_S` | int | `30` | No | Per-URL fetch timeout |
-| `VECINITA_SCRAPE_USER_AGENT` | string | `VecinitaBot/1.0 (+https://github.com/Math-Data-Justice-Collaborative/vecinita)` | No | Descriptive UA (F59) |
+| `VECINITA_SCRAPE_USER_AGENT` | string | Browser-like `Mozilla/5.0 (compatible; VecinitaBot/1.0; +https://github.com/Math-Data-Justice-Collaborative/vecinita) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36` | No | HTML fetch User-Agent (F59 / #243). Default is browser-compatible so community hosts that block empty UA may respond; override for a stricter bot identity if needed. |
 | `VECINITA_SCRAPE_RATE_LIMIT_RPS` | float | `0.5` | No | Max requests/sec per host (F59/F60 politeness) |
 | `VECINITA_SCRAPE_RESPECT_ROBOTS` | string | `true` | No | Honor robots.txt (`true`/`false`) (F59) |
 | `VECINITA_CRAWL_MAX_DEPTH` | int | `2` | No | Default crawl depth when `crawl=true` (F60) |

@@ -286,6 +286,25 @@ export function JobDetailPage() {
                 : (job.error_message ?? tr("shared.emDash"))}
             </p>
           ) : null}
+          {job.metrics?.url_failures && job.metrics.url_failures.length > 0 ? (
+            <div>
+              <p className="text-muted-foreground">
+                Soft-failed URLs (
+                {job.metrics.urls_failed_scrape ??
+                  job.metrics.url_failures.length}
+                ):
+              </p>
+              <ul className="list-disc pl-5 text-sm">
+                {job.metrics.url_failures.map((failure) => (
+                  <li key={`${failure.url}:${failure.error_code}`}>
+                    <code className="font-mono text-xs">{failure.url}</code>
+                    {" — "}
+                    {failure.error_code}: {failure.error_message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {modalCallId ? (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-muted-foreground">

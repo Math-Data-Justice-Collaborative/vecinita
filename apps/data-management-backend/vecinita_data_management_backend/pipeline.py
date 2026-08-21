@@ -16,9 +16,10 @@ from vecinita_embedding_client.modal_pins import DEFAULT_EMBEDDING_MODEL_ID
 from vecinita_ingest import chunk_text, fetch_url
 from vecinita_ingest.chunk import resolve_tokenizer_id
 from vecinita_ingest.crawl import CrawlPlan, discover_crawl_urls
+from vecinita_ingest.drive import DriveFetchError
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.nested_source import derive_nested_source
-from vecinita_ingest.scrape import parse_html
+from vecinita_ingest.scrape import parse_html, scrape_headers
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     ChunkUpsert,
@@ -68,6 +69,33 @@ def _raise_no_documents() -> None:
     raise ValueError(msg)
 
 
+def _exception_error_code(exc: BaseException) -> str:
+    """Prefer explicit ``error_code`` (e.g. DriveFetchError) over type name."""
+    code = getattr(exc, "error_code", None)
+    if isinstance(code, str) and code:
+        return code
+    return type(exc).__name__
+
+
+def _url_failure_entry(url: str, exc: BaseException) -> dict[str, str]:
+    return {
+        "url": url,
+        "error_code": _exception_error_code(exc),
+        "error_message": str(exc)[:500],
+    }
+
+
+def _raise_from_url_failures(url_failures: list[dict[str, str]]) -> None:
+    """Re-raise the first soft-fail so the job surfaces an operator-readable code."""
+    first = url_failures[0]
+    code = first["error_code"]
+    message = first["error_message"]
+    if code in {"drive_auth_required", "drive_unsupported"}:
+        raise DriveFetchError(message, error_code=code)
+    msg = f"all URLs failed; first: {message}"
+    raise ValueError(msg)
+
+
 def _lookup_stored_content_hash(write_client: object, url: str) -> str | None:
     """Return stored content_hash when the write client supports F47 lookup."""
     getter = getattr(write_client, "get_content_hash_by_url", None)
@@ -103,7 +131,11 @@ class TagInferrer(Protocol):
 
 def _default_fetch_html(url: str) -> str:
     """Fetch raw HTML for crawl link discovery."""
-    with httpx.Client(timeout=30.0, follow_redirects=True) as http:
+    with httpx.Client(
+        timeout=30.0,
+        follow_redirects=True,
+        headers=scrape_headers(),
+    ) as http:
         response = http.get(url)
         response.raise_for_status()
         return response.text
@@ -264,8 +296,10 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
     crawl_enabled = _option_bool(record.options, "crawl")
     skipped_unchanged = 0
     urls_failed_embed = 0
+    urls_failed_scrape = 0
     pages_fetched = 0
     pages_failed = 0
+    url_failures: list[dict[str, str]] = []
     crawl_stopped_reason: str | None = None
 
     try:
@@ -289,10 +323,11 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                     slug_vocab=slug_vocab,
                     max_document_tags=max_document_tags,
                 )
-            except EmbeddingClientError:
+            except EmbeddingClientError as embed_exc:
                 urls_failed_embed += 1
                 if crawl_enabled:
                     pages_failed += 1
+                    url_failures.append(_url_failure_entry(url, embed_exc))
                     logger.warning("embed failed for crawl page %s; continuing", url)
                     continue
                 store.update_job(
@@ -303,17 +338,17 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                     metrics={
                         "skipped_unchanged": skipped_unchanged,
                         "urls_failed_embed": urls_failed_embed,
+                        "urls_failed_scrape": urls_failed_scrape,
+                        "url_failures": url_failures,
                     },
                 )
                 raise
-            except Exception:
-                if crawl_enabled:
-                    pages_failed += 1
-                    logger.warning(
-                        "page soft-fail for %s; continuing crawl job", url, exc_info=True
-                    )
-                    continue
-                raise
+            except Exception as page_exc:  # noqa: BLE001  # soft-fail any per-URL ingest error
+                urls_failed_scrape += 1
+                url_failures.append(_url_failure_entry(url, page_exc))
+                pages_failed += 1
+                logger.warning("URL soft-fail for %s; continuing ingest job", url, exc_info=True)
+                continue
 
             if skipped:
                 skipped_unchanged += 1
@@ -322,12 +357,16 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
 
         if documents:
             write_client.upsert_batch(BatchUpsertRequest(documents=documents))
+        elif url_failures and not crawl_enabled:
+            _raise_from_url_failures(url_failures)
         elif not crawl_enabled:
             _raise_no_documents()
 
         metrics: dict[str, object] = {
             "skipped_unchanged": skipped_unchanged,
             "urls_failed_embed": urls_failed_embed,
+            "urls_failed_scrape": urls_failed_scrape,
+            "url_failures": url_failures,
         }
         if crawl_enabled:
             metrics["pages_fetched"] = pages_fetched
@@ -335,6 +374,8 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
             metrics["pages_skipped_robots"] = 0
             if crawl_stopped_reason is not None:
                 metrics["crawl_stopped_reason"] = crawl_stopped_reason
+        elif urls_failed_scrape:
+            metrics["pages_failed"] = pages_failed
         store.update_job(job_id, status="completed", metrics=metrics)
     except EmbeddingClientError:
         raise
@@ -342,6 +383,8 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
         fail_metrics: dict[str, object] = {
             "skipped_unchanged": skipped_unchanged,
             "urls_failed_embed": urls_failed_embed,
+            "urls_failed_scrape": urls_failed_scrape,
+            "url_failures": url_failures,
         }
         if crawl_enabled:
             fail_metrics["pages_fetched"] = pages_fetched
@@ -352,7 +395,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
         store.update_job(
             job_id,
             status="failed",
-            error_code=type(exc).__name__,
+            error_code=_exception_error_code(exc),
             error_message=str(exc)[:500],
             metrics=fail_metrics,
         )

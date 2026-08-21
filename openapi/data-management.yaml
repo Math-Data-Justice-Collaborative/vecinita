@@ -882,6 +882,17 @@ components:
           minimum: 0
           default: 0
           description: URLs that failed after embed retry exhaust (F48)
+        urls_failed_scrape:
+          type: integer
+          minimum: 0
+          default: 0
+          description: URLs that soft-failed during scrape/chunk (#243)
+        url_failures:
+          type: array
+          default: []
+          description: Per-URL soft-fail details (#243)
+          items:
+            $ref: "#/components/schemas/JobUrlFailure"
         pages_fetched:
           type: integer
           minimum: 0
@@ -905,6 +916,20 @@ components:
             - max_depth
             - complete
           description: Why crawl stopped (F60)
+    JobUrlFailure:
+      type: object
+      additionalProperties: false
+      required:
+        - url
+        - error_code
+        - error_message
+      properties:
+        url:
+          type: string
+        error_code:
+          type: string
+        error_message:
+          type: string
     TreeNode:
       type: object
       additionalProperties: false

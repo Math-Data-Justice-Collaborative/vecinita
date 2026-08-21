@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import type { Source } from "../api/types";
 import { SourceList } from "./SourceList";
+import { dedupeSources } from "./dedupeSources";
 
 const SOURCE: Source = {
   chunk_id: "c1",
@@ -22,11 +23,35 @@ describe("SourceList", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders linked sources with score (TC-242)", () => {
+  it("renders linked sources with relevance percent (#240)", () => {
     render(<SourceList sources={[SOURCE]} locale="en" />);
     const link = screen.getByRole("link", { name: /food pantry/i });
     expect(link).toHaveAttribute("href", "https://example.com/pantry");
-    expect(screen.getByText("(0.91)")).toBeInTheDocument();
+    const score = screen.getByText("91% relevant");
+    expect(score).toBeInTheDocument();
+    expect(score).toHaveAttribute(
+      "title",
+      "How closely this source matched your question. Higher % means a stronger match.",
+    );
+  });
+
+  it("dedupes duplicate URLs keeping the highest score (#240)", () => {
+    const dupes: Source[] = [
+      { ...SOURCE, chunk_id: "c-low", score: 0.4 },
+      { ...SOURCE, chunk_id: "c-high", score: 0.91 },
+      {
+        chunk_id: "c-other",
+        document_id: "d2",
+        title: "Rent help",
+        url: "https://example.com/rent",
+        score: 0.5,
+      },
+    ];
+    expect(dedupeSources(dupes)).toHaveLength(2);
+    render(<SourceList sources={dupes} locale="en" />);
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(screen.getByText("91% relevant")).toBeInTheDocument();
+    expect(screen.queryByText("40% relevant")).not.toBeInTheDocument();
   });
 
   it("links absolute http URLs (TC-242)", () => {
