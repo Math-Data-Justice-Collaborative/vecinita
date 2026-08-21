@@ -113,6 +113,16 @@ class CreateJobResponse(BaseModel):
     status: Literal["pending"]
 
 
+class JobUrlFailure(BaseModel):
+    """Per-URL soft-fail detail for multi-URL ingest (#243)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    url: str
+    error_code: str
+    error_message: str
+
+
 class JobMetrics(BaseModel):
     """Optional ingest resilience counters on completed/failed jobs (F47-F48 / M104)."""
 
@@ -120,6 +130,15 @@ class JobMetrics(BaseModel):
 
     skipped_unchanged: int = Field(default=0, ge=0)
     urls_failed_embed: int = Field(default=0, ge=0)
+    urls_failed_scrape: int = Field(
+        default=0,
+        ge=0,
+        description="URLs that soft-failed during scrape/chunk (non-crawl or crawl) (#243).",
+    )
+    url_failures: list[JobUrlFailure] = Field(
+        default_factory=list,
+        description="Per-URL failure details for soft-failed scrapes (#243).",
+    )
     pages_fetched: int = Field(default=0, ge=0, description="Pages fetched during crawl (F60).")
     pages_failed: int = Field(default=0, ge=0, description="Per-page soft failures (F60).")
     pages_skipped_robots: int = Field(

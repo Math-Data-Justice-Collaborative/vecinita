@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from html.parser import HTMLParser
 from typing import Final
@@ -9,13 +10,42 @@ from typing import Final
 import httpx
 import trafilatura
 
+from vecinita_ingest.drive import (
+    DriveFetchError,
+    is_drive_auth_shell,
+    is_google_drive_url,
+    rewrite_drive_fetch_url,
+)
 from vecinita_ingest.models import ScrapedDocument
+from vecinita_ingest.pdf import PdfExtractError, extract_pdf_text
 
 _STRIP_TAGS: Final[frozenset[str]] = frozenset({"script", "style", "noscript"})
 _BOILERPLATE_RE: Final[re.Pattern[str]] = re.compile(
     r"<(nav|footer|aside|header|script|style|noscript)\b[^>]*>.*?</\1>",
     re.IGNORECASE | re.DOTALL,
 )
+
+# Browser-like default so community hosts that block empty/bot UA may respond (#243).
+# Override with VECINITA_SCRAPE_USER_AGENT (config-spec).
+DEFAULT_SCRAPE_USER_AGENT: Final[str] = (
+    "Mozilla/5.0 (compatible; VecinitaBot/1.0; +https://github.com/"
+    "Math-Data-Justice-Collaborative/vecinita) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+)
+
+
+def resolve_scrape_user_agent() -> str:
+    """Resolve scrape User-Agent from env or the documented browser-like default."""
+    configured = os.environ.get("VECINITA_SCRAPE_USER_AGENT", "").strip()
+    return configured or DEFAULT_SCRAPE_USER_AGENT
+
+
+def scrape_headers() -> dict[str, str]:
+    """Minimal headers for public HTML fetch (User-Agent + Accept)."""
+    return {
+        "User-Agent": resolve_scrape_user_agent(),
+        "Accept": "text/html,application/xhtml+xml,application/pdf,text/plain,*/*;q=0.8",
+    }
 
 
 class _TextExtractor(HTMLParser):
@@ -97,6 +127,41 @@ def parse_html(html: str, *, url: str) -> ScrapedDocument:
     return ScrapedDocument(url=url, title=title, text=text)
 
 
+def _reject_drive_shell_if_needed(*, source_url: str, text: str) -> None:
+    if is_google_drive_url(source_url) and is_drive_auth_shell(text):
+        msg = (
+            "Google Drive returned an auth/loading shell "
+            "(e.g. Loading… Sign in) instead of document content"
+        )
+        raise DriveFetchError(msg, error_code="drive_auth_required")
+
+
+def _document_from_response(
+    response: httpx.Response,
+    *,
+    original_url: str,
+) -> ScrapedDocument:
+    content_type = (response.headers.get("content-type") or "").lower()
+    final_url = str(response.url)
+    drive = is_google_drive_url(original_url)
+
+    if drive and ("application/pdf" in content_type or final_url.lower().endswith(".pdf")):
+        try:
+            text = extract_pdf_text(response.content)
+        except PdfExtractError as exc:
+            raise DriveFetchError(str(exc), error_code="drive_unsupported") from exc
+        return ScrapedDocument(url=original_url, title=None, text=text)
+
+    if drive and ("text/plain" in content_type or "text/csv" in content_type):
+        text = response.text.strip()
+        _reject_drive_shell_if_needed(source_url=original_url, text=text)
+        return ScrapedDocument(url=original_url, title=None, text=text)
+
+    doc = parse_html(response.text, url=original_url)
+    _reject_drive_shell_if_needed(source_url=original_url, text=doc.text)
+    return doc
+
+
 def fetch_url(
     url: str,
     *,
@@ -105,11 +170,18 @@ def fetch_url(
 ) -> ScrapedDocument:
     """Fetch a public URL and return normalized title and body text."""
     owns = client is None
-    http = client or httpx.Client(timeout=timeout, follow_redirects=True)
+    http = client or httpx.Client(
+        timeout=timeout,
+        follow_redirects=True,
+        headers=scrape_headers(),
+    )
     try:
-        response = http.get(url)
+        fetch_target = url
+        if is_google_drive_url(url):
+            fetch_target = rewrite_drive_fetch_url(url)
+        response = http.get(fetch_target)
         response.raise_for_status()
-        return parse_html(response.text, url=str(response.url))
+        return _document_from_response(response, original_url=url)
     finally:
         if owns:
             http.close()

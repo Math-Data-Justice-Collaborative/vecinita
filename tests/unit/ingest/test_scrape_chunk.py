@@ -138,6 +138,7 @@ def test_fetch_url_creates_and_closes_owned_client(monkeypatch: pytest.MonkeyPat
             base_url=cast("httpx.URL | str", kwargs.get("base_url", "")),
             timeout=cast("float", kwargs.get("timeout", 30.0)),
             follow_redirects=cast("bool", kwargs.get("follow_redirects", True)),
+            headers=cast("dict[str, str] | None", kwargs.get("headers")),
             transport=httpx.MockTransport(handler),
         )
 

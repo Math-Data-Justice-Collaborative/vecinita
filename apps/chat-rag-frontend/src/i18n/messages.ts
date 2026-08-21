@@ -1,9 +1,8 @@
 import type { Locale } from "../hooks/useLocale.types";
 
 const en = {
-  appTitle: "Vecinita ChatRAG",
-  appSubtitle:
-    "Bilingual community Q&A — answers stay in your browser only (F3).",
+  appTitle: "Vecinita",
+  appSubtitle: "Bilingual community Q&A — answers stay in your browser only.",
   navChat: "Chat",
   navCorpus: "Corpus",
   navFeedback: "Feedback",
@@ -64,6 +63,9 @@ const en = {
   askUnauthorized: "You are not authorized to use the assistant.",
   filterByTopic: "Filter by topic",
   sourcesHeading: "Sources",
+  relevancePercent: "{n}% relevant",
+  relevanceTip:
+    "How closely this source matched what you asked. Higher % means a stronger match.",
   corpusChunk: "Corpus chunk",
   backToChat: "Back to chat",
   corpusBrowseLabel: "Corpus browse",
@@ -90,9 +92,9 @@ const en = {
 } as const;
 
 const es = {
-  appTitle: "Vecinita ChatRAG",
+  appTitle: "Vecinita",
   appSubtitle:
-    "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador (F3).",
+    "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador.",
   navChat: "Chat",
   navCorpus: "Corpus",
   navFeedback: "Comentarios",
@@ -154,6 +156,9 @@ const es = {
   askUnauthorized: "No tienes autorización para usar el asistente.",
   filterByTopic: "Filtrar por tema",
   sourcesHeading: "Fuentes",
+  relevancePercent: "{n}% relevante",
+  relevanceTip:
+    "Qué tan cerca coincidió esta fuente con lo que preguntaste. Un % más alto significa una coincidencia más fuerte.",
   corpusChunk: "Fragmento del corpus",
   backToChat: "Volver al chat",
   corpusBrowseLabel: "Explorar corpus",

@@ -4,6 +4,23 @@ export type JobType = "ingest" | "retag" | "eval" | "rebuild";
 export type RebuildMode = "reembed" | "rechunk" | "rescrape";
 export type BackfillSource = "rescrape" | "from_chunks";
 
+export interface JobUrlFailure {
+  url: string;
+  error_code: string;
+  error_message: string;
+}
+
+export interface JobMetrics {
+  skipped_unchanged?: number;
+  urls_failed_embed?: number;
+  urls_failed_scrape?: number;
+  url_failures?: JobUrlFailure[];
+  pages_fetched?: number;
+  pages_failed?: number;
+  pages_skipped_robots?: number;
+  crawl_stopped_reason?: string | null;
+}
+
 export interface Job {
   job_id: string;
   status: JobStatus;
@@ -15,6 +32,7 @@ export interface Job {
   dashboard_url?: string | null | undefined;
   error_code?: string | null | undefined;
   error_message?: string | null | undefined;
+  metrics?: JobMetrics | null | undefined;
   created_at: string;
   updated_at: string;
 }

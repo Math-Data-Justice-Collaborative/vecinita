@@ -239,38 +239,39 @@ describe("UJ-050 job detail admin CRUD (T84.2 / TC-147)", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows modal call id, copy, and dashboard link on failed jobs (TC-149 / RD-177)", async () => {
+  it("shows soft-failed URL details from job metrics (#243)", async () => {
     installAuthenticatedSupabaseMock();
+    const partialJob = {
+      ...COMPLETED_JOB,
+      metrics: {
+        urls_failed_scrape: 1,
+        url_failures: [
+          {
+            url: "https://example.com/blocked",
+            error_code: "HTTPStatusError",
+            error_message: "403 Forbidden",
+          },
+        ],
+      },
+    };
     vi.stubGlobal(
       "fetch",
       vi.fn((input: RequestInfo | URL) => {
         if (urlOf(input).includes("/jobs/events")) {
           return new Promise(() => undefined);
         }
-        return Promise.resolve(jsonResponse(FAILED_JOB));
+        return Promise.resolve(jsonResponse(partialJob));
       }),
     );
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText },
-    });
 
-    renderDetail(FAILED_JOB_ID);
+    renderDetail(COMPLETED_JOB_ID);
 
     await waitFor(() => {
-      expect(screen.getByText("fc-failed")).toBeInTheDocument();
+      expect(screen.getByText(/Soft-failed URLs/i)).toBeInTheDocument();
     });
-
-    fireEvent.click(screen.getByRole("button", { name: /copy/i }));
-    await waitFor(() => {
-      expect(writeText).toHaveBeenCalledWith("fc-failed");
-    });
-
-    const link = screen.getByRole("link", { name: /modal|dashboard|logs/i });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://modal.com/apps/vecinita/logs/fc-failed",
-    );
+    expect(screen.getByText("https://example.com/blocked")).toBeInTheDocument();
+    expect(
+      screen.getByText(/HTTPStatusError: 403 Forbidden/),
+    ).toBeInTheDocument();
   });
 });

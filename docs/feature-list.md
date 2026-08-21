@@ -146,8 +146,12 @@
 - **What it does**: End-to-end ingest: fetch public URLs, normalize text, chunk, embed with FastEmbed, upsert into Postgres.
 - **Inputs**: URL list or crawl config; job submission via Data Management API.
 - **Outputs**: Documents, chunks, vectors in DB; job status records (URLs, status — no PII).
-- **Limitations**: v1 HTML/text scrape only; multimodal/PDF deferred.
-- **Source**: User interview 01-requirements
+- **Limitations**: Public HTML/text scrape; PDF via F59. **Google Drive / Docs (#235):**
+  public file / Docs / Sheets share links rewrite to export/download; auth/loading shells
+  (`Loading… Sign in`) fail with `drive_auth_required` and are **not** upserted. Private,
+  folder-only, and login-required links are unsupported — upload the file or paste an export
+  URL. Multi-URL ingest soft-fails per URL with a browser-like User-Agent (#243).
+- **Source**: User interview 01-requirements; #235 / #243
 
 ### F8: Ingest job queue & status API
 
