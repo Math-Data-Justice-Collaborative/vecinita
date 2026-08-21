@@ -155,9 +155,6 @@ def _document_from_response(
     if drive and ("text/plain" in content_type or "text/csv" in content_type):
         text = response.text.strip()
         _reject_drive_shell_if_needed(source_url=original_url, text=text)
-        if not text:
-            msg = "Google Drive export returned empty text"
-            raise DriveFetchError(msg, error_code="drive_unsupported")
         return ScrapedDocument(url=original_url, title=None, text=text)
 
     doc = parse_html(response.text, url=original_url)

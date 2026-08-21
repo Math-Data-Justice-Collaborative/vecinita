@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Never, cast
 
 import httpx
@@ -15,7 +16,12 @@ from vecinita_ingest.drive import (
     rewrite_drive_fetch_url,
 )
 from vecinita_ingest.models import ScrapedDocument
-from vecinita_ingest.scrape import DEFAULT_SCRAPE_USER_AGENT, fetch_url, scrape_headers
+from vecinita_ingest.scrape import (
+    DEFAULT_SCRAPE_USER_AGENT,
+    fetch_url,
+    resolve_scrape_user_agent,
+    scrape_headers,
+)
 from vecinita_tagging.vocabulary import SeedTag
 
 _VOCAB = [
@@ -228,3 +234,133 @@ def test_run_ingest_job_all_urls_fail_surfaces_drive_error_code() -> None:
     assert updated is not None
     assert updated.status == "failed"
     assert updated.error_code == "drive_auth_required"
+
+
+def test_is_google_drive_url_rejects_missing_host() -> None:
+    """Relative / host-less URLs are not Drive hosts."""
+    assert not is_google_drive_url("/file/d/abc/view")
+    assert not is_google_drive_url("not-a-url")
+
+
+def test_is_drive_auth_shell_edge_cases() -> None:
+    """Empty, marker-only, and long bodies for shell detection."""
+    assert is_drive_auth_shell("   ")
+    assert is_drive_auth_shell("Loading")
+    assert is_drive_auth_shell("login")
+    assert not is_drive_auth_shell("x" * 500)
+
+
+def test_rewrite_drive_presentation_and_passthrough() -> None:
+    """Presentation rewrite + already-export URLs pass through."""
+    assert (
+        rewrite_drive_fetch_url("https://docs.google.com/presentation/d/PID/edit")
+        == "https://docs.google.com/presentation/d/PID/export/txt"
+    )
+    export = "https://docs.google.com/document/d/DOC/export?format=txt"
+    assert rewrite_drive_fetch_url(export) == export
+    download = "https://drive.google.com/uc?export=download&id=FILE"
+    assert rewrite_drive_fetch_url(download) == download
+
+
+def test_rewrite_drive_folder_raises_unsupported() -> None:
+    """Folder share links are unsupported."""
+    with pytest.raises(DriveFetchError) as exc_info:
+        rewrite_drive_fetch_url("https://drive.google.com/drive/folders/FOLDERID")
+    assert exc_info.value.error_code == "drive_unsupported"
+
+
+def test_resolve_scrape_user_agent_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    """VECINITA_SCRAPE_USER_AGENT overrides the browser-like default."""
+    monkeypatch.setenv("VECINITA_SCRAPE_USER_AGENT", "CustomBot/9.9")
+    assert resolve_scrape_user_agent() == "CustomBot/9.9"
+    assert scrape_headers()["User-Agent"] == "CustomBot/9.9"
+
+
+def test_fetch_url_drive_pdf_success_and_empty() -> None:
+    """Drive download PDF path uses extract_pdf_text; empty PDF fails loud."""
+    fixtures = Path(__file__).resolve().parents[3] / "data" / "fixtures" / "ingest"
+    text_pdf = (fixtures / "sample-text.pdf").read_bytes()
+    empty_pdf = (fixtures / "empty.pdf").read_bytes()
+
+    def ok_handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            content=text_pdf,
+            headers={"content-type": "application/pdf"},
+        )
+
+    client = httpx.Client(
+        transport=httpx.MockTransport(ok_handler),
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    doc = fetch_url("https://drive.google.com/file/d/FILEID/view", client=client)
+    assert "Hello PDF" in doc.text
+
+    def empty_handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            content=empty_pdf,
+            headers={"content-type": "application/pdf"},
+        )
+
+    empty_client = httpx.Client(
+        transport=httpx.MockTransport(empty_handler),
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    with pytest.raises(DriveFetchError) as exc_info:
+        fetch_url("https://drive.google.com/file/d/EMPTY/view", client=empty_client)
+    assert exc_info.value.error_code == "drive_unsupported"
+
+
+def test_fetch_url_drive_empty_text_export_raises() -> None:
+    """Empty text/csv Drive export is treated as an auth/loading shell."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            text="   ",
+            headers={"content-type": "text/csv"},
+        )
+
+    client = httpx.Client(
+        transport=httpx.MockTransport(handler),
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    with pytest.raises(DriveFetchError) as exc_info:
+        fetch_url("https://docs.google.com/spreadsheets/d/SHEET/edit", client=client)
+    assert exc_info.value.error_code == "drive_auth_required"
+
+
+def test_run_ingest_job_all_urls_fail_generic_error_code() -> None:
+    """Non-Drive soft-fail all-URL failure surfaces ValueError error_code."""
+
+    def fetch_doc(url: str) -> Never:
+        _ = url
+        msg = "403 Forbidden"
+        raise RuntimeError(msg)
+
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=["https://example.com/blocked"],
+        options={"chunk_size_tokens": 64},
+    )
+
+    with pytest.raises(ValueError, match="all URLs failed"):
+        run_ingest_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+            fetch_document=fetch_doc,
+            tag_vocabulary=_VOCAB,
+        )
+
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.status == "failed"
+    assert updated.error_code == "ValueError"
+    assert updated.metrics is not None
+    assert updated.metrics.get("urls_failed_scrape") == 1
