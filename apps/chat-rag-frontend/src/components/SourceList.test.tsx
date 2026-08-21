@@ -31,7 +31,7 @@ describe("SourceList", () => {
     expect(score).toBeInTheDocument();
     expect(score).toHaveAttribute(
       "title",
-      "How closely this source matched your question. Higher % means a stronger match.",
+      "How closely this source matched what you asked. Higher % means a stronger match.",
     );
   });
 

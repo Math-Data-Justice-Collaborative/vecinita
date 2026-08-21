@@ -65,7 +65,7 @@ const en = {
   sourcesHeading: "Sources",
   relevancePercent: "{n}% relevant",
   relevanceTip:
-    "How closely this source matched your question. Higher % means a stronger match.",
+    "How closely this source matched what you asked. Higher % means a stronger match.",
   corpusChunk: "Corpus chunk",
   backToChat: "Back to chat",
   corpusBrowseLabel: "Corpus browse",
@@ -158,7 +158,7 @@ const es = {
   sourcesHeading: "Fuentes",
   relevancePercent: "{n}% relevante",
   relevanceTip:
-    "Qué tan cerca coincidió esta fuente con tu pregunta. Un % más alto significa una coincidencia más fuerte.",
+    "Qué tan cerca coincidió esta fuente con lo que preguntaste. Un % más alto significa una coincidencia más fuerte.",
   corpusChunk: "Fragmento del corpus",
   backToChat: "Volver al chat",
   corpusBrowseLabel: "Explorar corpus",

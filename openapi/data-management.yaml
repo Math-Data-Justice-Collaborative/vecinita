@@ -890,6 +890,7 @@ components:
         url_failures:
           type: array
           default: []
+          maxItems: 1000
           description: Per-URL soft-fail details (#243)
           items:
             $ref: "#/components/schemas/JobUrlFailure"
