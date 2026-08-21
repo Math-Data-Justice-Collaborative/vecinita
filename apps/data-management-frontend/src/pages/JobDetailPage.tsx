@@ -289,10 +289,7 @@ export function JobDetailPage() {
           {job.metrics?.url_failures && job.metrics.url_failures.length > 0 ? (
             <div>
               <p className="text-muted-foreground">
-                Soft-failed URLs (
-                {job.metrics.urls_failed_scrape ??
-                  job.metrics.url_failures.length}
-                ):
+                Soft-failed URLs ({job.metrics.url_failures.length}):
               </p>
               <ul className="list-disc pl-5 text-sm">
                 {job.metrics.url_failures.map((failure) => (
