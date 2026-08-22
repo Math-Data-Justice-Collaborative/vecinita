@@ -191,6 +191,12 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Spanish question + Spanish fixture doc.
 - **Expected**: Spanish answer.
 
+### TC-257: Locale-specific system prompt (UJ-001, F1, EV-252 / #252)
+
+- **Objective**: Synthesis uses Spanish system instructions when `language` is `es`, English when `en`.
+- **Input**: Same question + chunks; `POST /api/v1/ask` with `language: "es"` vs `language: "en"` (mock LLM captures prompt).
+- **Expected**: ES request prompt contains `DEFAULT_EVAL_SYSTEM_PROMPT_ES` text; EN request contains `production.system_prompt` (default or promoted).
+
 ### TC-012: Document delete (UJ-003)
 
 - **Objective**: Deleted doc not returned by retriever.

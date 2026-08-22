@@ -119,7 +119,8 @@ defaults (RD-137), not live production DB config until user loads a preset.
 |-------|------|--------|---------|
 | `top_k` | int | 1–50 | 8 |
 | `min_retrieval_score` | float | 0.0–1.0 | 0.2 |
-| `system_prompt` | string | 1–8000 chars | built-in ChatRAG default |
+| `system_prompt` | string | 1–8000 chars | built-in ChatRAG default (English); used for `language=en` synthesis |
+| *(locale resolver)* | — | — | When `AskRequest.language` is `es`, ChatRAG synthesis uses `DEFAULT_EVAL_SYSTEM_PROMPT_ES` from `shared-schemas` (not the promoted `system_prompt` field). v1: no separate promoted ES prompt — see EV-252 / ADR-013. |
 | `max_tokens` | int | 1–1024 | 256 |
 | `temperature` | float | 0.0–2.0 | 0.2 |
 | `corpus_profile` | enum | `fixture` \| `staging` | `fixture` |
