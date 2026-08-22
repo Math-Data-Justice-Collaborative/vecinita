@@ -11,6 +11,8 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from vecinita_shared_schemas.eval_config import EvalConfig, EvalConfigPartial, EvalRunMode
 from vecinita_shared_schemas.json_types import JsonObject
 
+PublishStatus = Literal["published", "draft"]
+
 
 class TagInput(BaseModel):
     """Tag assignment on ingest or admin PATCH."""
@@ -63,6 +65,8 @@ class DocumentUpsert(BaseModel):
     canonical_url: str | None = None
     chunks: list[ChunkUpsert] = Field(default_factory=list)
     tags: list[TagInput] | None = Field(default=None, max_length=10)
+    paired_document_id: UUID | None = None
+    publish_status: PublishStatus = "published"
 
     @model_validator(mode="after")
     def require_chunks_or_body_text(self) -> DocumentUpsert:
@@ -91,10 +95,21 @@ class BatchUpsertRequest(BaseModel):
     documents: list[DocumentUpsert] = Field(..., min_length=1)
 
 
+class BatchUpsertDocumentResult(BaseModel):
+    """One document row written by batch upsert (F75 pairing)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_id: UUID
+    url: str
+    language: str | None = None
+
+
 class BatchUpsertResponse(BaseModel):
     """Count of chunk rows written by a batch upsert."""
 
     upserted_chunks: int = Field(..., ge=0)
+    documents: list[BatchUpsertDocumentResult] = Field(default_factory=list)
 
 
 class RebuildPromoteResponse(BaseModel):
@@ -184,6 +199,8 @@ class DocumentSummary(BaseModel):
     title: str | None = None
     display_title: str | None = None
     language: str | None = None
+    publish_status: PublishStatus | None = None
+    paired_document_id: UUID | None = None
     source_domain: str | None = None
     source_path: str | None = None
     parent_url: str | None = None
@@ -217,17 +234,19 @@ class DocumentDetail(BaseModel):
     title: str | None = None
     display_title: str | None = None
     language: str | None = None
+    publish_status: PublishStatus | None = None
     text: str
 
 
 class DocumentPatchRequest(BaseModel):
-    """PATCH /internal/v1/documents/{id} — partial metadata update (F74)."""
+    """PATCH /internal/v1/documents/{id} — partial metadata update (F74/F75)."""
 
     model_config = ConfigDict(extra="forbid")
 
     display_title: str | None = None
     title: str | None = None
     language: str | None = None
+    publish_status: PublishStatus | None = None
 
 
 class DocumentMetadataResponse(BaseModel):
@@ -238,6 +257,7 @@ class DocumentMetadataResponse(BaseModel):
     title: str | None = None
     display_title: str | None = None
     language: str | None = None
+    publish_status: PublishStatus | None = None
 
 
 class TagPatchRequest(BaseModel):
@@ -405,6 +425,7 @@ class MetadataUpdates(BaseModel):
     title: str | None = None
     display_title: str | None = None
     language: str | None = None
+    publish_status: PublishStatus | None = None
 
 
 class BulkMetadataRequest(BaseModel):

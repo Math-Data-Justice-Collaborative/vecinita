@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-06 (S028/EV-026 — F72–F74 chat source UX #222–#224; prior S027/EV-025 F70–F71)
+> **Last updated**: 2026-08-22 (EV-030 — F75 ingest bilingual translation #251; prior S028/EV-026 F72–F74)
 
 ## Summary
 
@@ -77,6 +77,7 @@
 | F72 | Citation UI — validate URLs before href | Implemented | ChatRAG | chat-rag-frontend `SourceList` | S028/EV-026 #222 |
 | F73 | Dynamic relevance-gated sources (no fixed pad) | Implemented | ChatRAG | packages/rag, chat-rag-backend | S028/EV-026 #223 |
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
+| F75 | Optional ingest bilingual translation | Implemented | Data Management | data-management-backend, internal-write-api, Modal LLM, admin FE | EV-030 #251 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -1397,6 +1398,29 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **API/version**: Prefer compatible nullable column; if breaking unavoidable → major bump (S028-D15).
 - **Status**: Implemented (S028/EV-026 M125).
 - **Source**: S028 / EV-026; GitHub #224; F27; RD-312–RD-315.
+
+### F75: Optional ingest bilingual translation (#251)
+
+- **What it does**: Opt-in **`translate_locales`** on ingest/crawl jobs (default off). After
+  chunking, the pipeline calls **`vecinita-llm`** per-chunk MT and upserts a **locale sibling**
+  document linked via **`paired_document_id`**. Translations default to **`publish_status=draft`**
+  until an operator promotes via **`PATCH /internal/v1/documents/{id}`**. ChatRAG pgvector retrieval
+  excludes drafts. URL uniqueness becomes **`(url, language)`** so EN and ES siblings share the
+  scrape URL.
+- **Inputs**: Ingest job `options.translate_locales` (e.g. `["es"]`); operator promote PATCH.
+- **Outputs**: Draft paired document + job metrics (`translated_documents`, `translated_chunks`).
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `apps/database` | Alembic: `paired_document_id`, `publish_status`, `uq_documents_url_language` |
+  | data-management-backend | Post-chunk translate branch + metrics |
+  | internal-write-api | Batch upsert returns document IDs; PATCH `publish_status` |
+  | `packages/rag` | Retriever filters `publish_status = 'published'` |
+  | data-management-frontend | JobForm “Also create Spanish translation” checkbox |
+- **Out of scope**: #245 dashboard parity badges; auto-translate on all ingests; live prod corpus
+  mutation without operator approval.
+- **Status**: Implemented (EV-030).
+- **Source**: EV-030; GitHub #251; ADR-052.
 
 ## Planned / Deferred (post-v1)
 

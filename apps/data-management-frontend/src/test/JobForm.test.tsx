@@ -385,4 +385,42 @@ describe("JobForm", () => {
     expect(body.options?.crawl).toBeUndefined();
     expect(body.options?.chunk_size_tokens).toBe(256);
   });
+
+  it("includes translate_locales when Spanish translation checkbox is checked", async () => {
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          job_id: "11111111-1111-4111-8111-111111111111",
+          status: "pending",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          job_id: "11111111-1111-4111-8111-111111111111",
+          status: "completed",
+          urls: ["https://example.com/page"],
+          created_at: "2026-05-19T00:00:00Z",
+          updated_at: "2026-05-19T00:00:01Z",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    await renderReadyJobForm();
+
+    fireEvent.change(screen.getByLabelText(/public urls/i), {
+      target: { value: "https://example.com/page" },
+    });
+    fireEvent.click(screen.getByTestId("ingest-translate-es"));
+    fireEvent.click(screen.getByRole("button", { name: /submit ingest/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("job-status")).toHaveTextContent("completed");
+    });
+    const requestInit = fetchMock.mock.calls[0]?.[1];
+    expect(typeof requestInit?.body).toBe("string");
+    const body = JSON.parse(requestInit?.body as string) as {
+      options?: { translate_locales?: string[] };
+    };
+    expect(body.options?.translate_locales).toEqual(["es"]);
+  });
 });

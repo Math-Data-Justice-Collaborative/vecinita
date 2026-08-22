@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from vecinita_embedding_client import EmbeddingClient
     from vecinita_tagging.llm_client import LlmTagClient
 
-    from vecinita_data_management_backend.pipeline import DocumentFetcher
+    from vecinita_data_management_backend.pipeline import ChunkTranslator, DocumentFetcher
     from vecinita_data_management_backend.store import JobRecord, JobStore
     from vecinita_data_management_backend.write_client import InternalWriteClient
 
@@ -70,6 +70,7 @@ def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
     write_client: InternalWriteClient,
     fetch_document: DocumentFetcher | None,
     tag_client: LlmTagClient | None,
+    translate_client: ChunkTranslator | None,
 ) -> None:
     """Run the handler for a registered job_type (backfill handled by caller)."""
     job_id = record.job_id
@@ -81,6 +82,7 @@ def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
             write_client=write_client,
             fetch_document=fetch_document,
             tag_client=tag_client,
+            translate_client=translate_client,
         ),
         "retag": lambda: run_retag_job(
             job_id,
@@ -116,6 +118,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
     write_client: InternalWriteClient,
     fetch_document: DocumentFetcher | None = None,
     tag_client: LlmTagClient | None = None,
+    translate_client: ChunkTranslator | None = None,
 ) -> None:
     """Run ingest, retag, rebuild, or eval pipeline for a queued job."""
     record = store.get_job(job_id)
@@ -141,6 +144,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
                 write_client=scoped_write,
                 fetch_document=fetch_document,
                 tag_client=tag_client,
+                translate_client=translate_client,
             )
     except Exception as exc:
         final = store.get_job(job_id)

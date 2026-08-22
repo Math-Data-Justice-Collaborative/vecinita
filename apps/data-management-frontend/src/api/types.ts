@@ -19,6 +19,10 @@ export interface JobMetrics {
   pages_failed?: number;
   pages_skipped_robots?: number;
   crawl_stopped_reason?: string | null;
+  translated_documents?: number;
+  translated_chunks?: number;
+  translation_skipped?: number;
+  translation_failed?: number;
 }
 
 export interface Job {
@@ -51,6 +55,7 @@ export interface CreateJobOptions {
   max_depth?: number;
   max_pages?: number;
   crawl_scope?: "same_domain" | "path_prefix";
+  translate_locales?: Array<"en" | "es">;
 }
 
 export interface CreateJobResponse {

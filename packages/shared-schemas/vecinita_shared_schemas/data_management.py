@@ -10,6 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+IngestLocale = Literal["en", "es"]
 AssignableRole = Literal["admin", "viewer"]
 Role = Literal["admin", "viewer", "super-admin"]
 UserStatus = Literal["active", "invited", "disabled"]
@@ -60,6 +61,31 @@ class JobOptions(BaseModel):
         default="same_domain",
         description="same_domain | path_prefix (path_prefix stays under seed path).",
     )
+    translate_locales: list[IngestLocale] | None = Field(
+        default=None,
+        max_length=2,
+        description=(
+            "Optional target locales for ingest-time MT (F75 / #251). "
+            "Default off; when set, creates draft paired documents in target language(s)."
+        ),
+    )
+
+    @field_validator("translate_locales")
+    @classmethod
+    def validate_translate_locales(
+        cls, value: list[IngestLocale] | None
+    ) -> list[IngestLocale] | None:
+        """Allow only en/es targets, unique, and never identical to sole source-only noop."""
+        if value is None:
+            return None
+        if not value:
+            msg = "translate_locales must be omitted or contain at least one locale"
+            raise ValueError(msg)
+        deduped: list[IngestLocale] = []
+        for locale in value:
+            if locale not in deduped:
+                deduped.append(locale)
+        return deduped
 
     @model_validator(mode="after")
     def validate_rebuild_and_backfill(self) -> JobOptions:
@@ -149,6 +175,26 @@ class JobMetrics(BaseModel):
     crawl_stopped_reason: CrawlStoppedReason | None = Field(
         default=None,
         description="Why crawl stopped: max_pages | max_depth | complete (F60).",
+    )
+    translated_documents: int = Field(
+        default=0,
+        ge=0,
+        description="Sibling documents created via ingest-time translation (F75).",
+    )
+    translated_chunks: int = Field(
+        default=0,
+        ge=0,
+        description="Chunks written on translated documents (F75).",
+    )
+    translation_skipped: int = Field(
+        default=0,
+        ge=0,
+        description="Translation targets skipped (same locale or unchanged source).",
+    )
+    translation_failed: int = Field(
+        default=0,
+        ge=0,
+        description="Translation targets that failed after source ingest succeeded.",
     )
 
 

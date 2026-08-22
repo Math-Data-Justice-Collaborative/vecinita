@@ -64,6 +64,7 @@ from vecinita_shared_schemas.internal_write import (
     AuditEventResponse,
     AuditLogEntry,
     AuditLogResponse,
+    BatchUpsertDocumentResult,
     BatchUpsertRequest,
     BatchUpsertResponse,
     BulkDeleteRequest,
@@ -442,6 +443,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
     def batch_upsert(body: BatchUpsertRequest, actor: WriteActorDep) -> BatchUpsertResponse:  # pyright: ignore[reportUnusedFunction]
         actor_id, actor_role = actor
         upserted = 0
+        written_documents: list[BatchUpsertDocumentResult] = []
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
             for document in body.documents:
@@ -460,13 +462,15 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 """
                         INSERT INTO documents (
                             url, title, content_hash, language, body_text,
-                            source_domain, source_path, parent_url, canonical_url
+                            source_domain, source_path, parent_url, canonical_url,
+                            paired_document_id, publish_status
                         )
                         VALUES (
                             :url, :title, :content_hash, :language, :body_text,
-                            :source_domain, :source_path, :parent_url, :canonical_url
+                            :source_domain, :source_path, :parent_url, :canonical_url,
+                            :paired_document_id, :publish_status
                         )
-                        ON CONFLICT (url) DO UPDATE
+                        ON CONFLICT (url, language) DO UPDATE
                         SET title = EXCLUDED.title,
                             content_hash = EXCLUDED.content_hash,
                             language = EXCLUDED.language,
@@ -475,6 +479,12 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                             source_path = EXCLUDED.source_path,
                             parent_url = EXCLUDED.parent_url,
                             canonical_url = EXCLUDED.canonical_url,
+                            paired_document_id = COALESCE(
+                                EXCLUDED.paired_document_id, documents.paired_document_id
+                            ),
+                            publish_status = COALESCE(
+                                EXCLUDED.publish_status, documents.publish_status
+                            ),
                             updated_at = now()
                         RETURNING id
                         """
@@ -489,8 +499,17 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 "source_path": nested.source_path,
                                 "parent_url": nested.parent_url,
                                 "canonical_url": nested.canonical_url,
+                                "paired_document_id": document.paired_document_id,
+                                "publish_status": document.publish_status,
                             },
                         ).scalar_one(),
+                    )
+                )
+                written_documents.append(
+                    BatchUpsertDocumentResult(
+                        document_id=doc_id,
+                        url=str(document.url),
+                        language=document.language,
                     )
                 )
 
@@ -611,7 +630,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     tags_snapshot=tag_slugs,
                 )
 
-        return BatchUpsertResponse(upserted_chunks=upserted)
+        return BatchUpsertResponse(upserted_chunks=upserted, documents=written_documents)
 
     @app.post(
         "/internal/v1/rebuild/runs",
@@ -779,7 +798,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         },
                     )
                     upserted += 1
-        return BatchUpsertResponse(upserted_chunks=upserted)
+        return BatchUpsertResponse(upserted_chunks=upserted, documents=[])
 
     @app.post(
         "/internal/v1/rebuild/{rebuild_run_id}/promote",
@@ -1177,13 +1196,13 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         body: DocumentPatchRequest,
         actor: WriteActorDep,
     ) -> DocumentMetadataResponse:
-        """F74: single-document metadata edit (display_title / title / language)."""
+        """F74/F75: single-document metadata edit (display_title / title / language / publish_status)."""
         actor_id, actor_role = actor
         fields_set = body.model_fields_set
         if not fields_set:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="At least one of display_title, title, language is required",
+                detail="At least one of display_title, title, language, publish_status is required",
             )
         request_id = _uuid.uuid4()
         with engine.begin() as conn:
@@ -1191,7 +1210,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 conn.execute(
                     text(
                         """
-                        SELECT id, url, title, display_title, language
+                        SELECT id, url, title, display_title, language, publish_status
                         FROM documents
                         WHERE id = :document_id
                         """
@@ -1207,9 +1226,11 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             before_title = row_str_optional(doc, "title")
             before_display = row_str_optional(doc, "display_title")
             before_language = row_str_optional(doc, "language")
+            before_publish = row_str_optional(doc, "publish_status") or "published"
             new_title = before_title
             new_display = before_display
             new_language = before_language
+            new_publish = before_publish
             set_clauses: list[str] = ["updated_at = now()"]
             params: dict[str, object] = {"id": document_id}
             if "title" in fields_set and body.title is not None:
@@ -1224,6 +1245,10 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 set_clauses.append("language = :language")
                 params["language"] = body.language
                 new_language = body.language
+            if "publish_status" in fields_set and body.publish_status is not None:
+                set_clauses.append("publish_status = :publish_status")
+                params["publish_status"] = body.publish_status
+                new_publish = body.publish_status
             conn.execute(
                 text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                     f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
@@ -1246,6 +1271,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         "title": new_title,
                         "display_title": new_display,
                         "language": new_language,
+                        "publish_status": new_publish,
                     },
                 },
                 actor_id=actor_id,
@@ -1263,6 +1289,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 title=new_title,
                 display_title=new_display,
                 language=new_language,
+                publish_status=new_publish,  # type: ignore[arg-type]
             )
 
     @app.get(
@@ -1543,7 +1570,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         )
         list_sql = (
             """
-            SELECT id, url, title, display_title, language,
+            SELECT id, url, title, display_title, language, publish_status, paired_document_id,
                    source_domain, source_path, parent_url, canonical_url
             FROM documents
             WHERE body_text IS NULL OR btrim(body_text) = ''
@@ -1552,7 +1579,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             """
             if missing_body
             else """
-            SELECT id, url, title, display_title, language,
+            SELECT id, url, title, display_title, language, publish_status, paired_document_id,
                    source_domain, source_path, parent_url, canonical_url
             FROM documents
             ORDER BY created_at DESC
@@ -1577,6 +1604,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     title=row_str_optional(mapping_row(row), "title"),
                     display_title=row_str_optional(mapping_row(row), "display_title"),
                     language=row_str_optional(mapping_row(row), "language"),
+                    publish_status=row_str_optional(mapping_row(row), "publish_status"),  # type: ignore[arg-type]
+                    paired_document_id=row_uuid_optional(mapping_row(row), "paired_document_id"),
                     source_domain=row_str_optional(mapping_row(row), "source_domain"),
                     source_path=row_str_optional(mapping_row(row), "source_path"),
                     parent_url=row_str_optional(mapping_row(row), "parent_url"),

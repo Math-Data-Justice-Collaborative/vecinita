@@ -441,6 +441,8 @@ const enStrings = {
   "admin.ingest.urlsPlaceholder": "https://example.org/community/page",
   "admin.ingest.chunkSizeLabel": "Chunk size (tokens)",
   "admin.ingest.crawlLabel": "Crawl same-site pages from first URL",
+  "admin.ingest.translateEsLabel":
+    "Also create Spanish translation (saved as draft for review)",
   "admin.ingest.maxDepthLabel": "Max depth",
   "admin.ingest.maxPagesLabel": "Max pages",
   "admin.ingest.validation.maxDepthMin": "Max depth must be 0 or greater.",
@@ -1005,6 +1007,8 @@ const esStrings = {
   "admin.ingest.chunkSizeLabel": "Tamaño de fragmento (tokens)",
   "admin.ingest.crawlLabel":
     "Rastrear páginas del mismo sitio desde la primera URL",
+  "admin.ingest.translateEsLabel":
+    "También crear traducción al español (borrador para revisión)",
   "admin.ingest.maxDepthLabel": "Profundidad máxima",
   "admin.ingest.maxPagesLabel": "Máximo de páginas",
   "admin.ingest.validation.maxDepthMin":

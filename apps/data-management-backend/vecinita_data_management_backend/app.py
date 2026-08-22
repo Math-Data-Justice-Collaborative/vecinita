@@ -75,6 +75,8 @@ def _store_options_from_request(job_options: JobOptions | None) -> tuple[str, di
         options["max_depth"] = job_options.max_depth
         options["max_pages"] = job_options.max_pages
         options["crawl_scope"] = job_options.crawl_scope
+    if job_options.translate_locales is not None:
+        options["translate_locales"] = list(job_options.translate_locales)
     return job_options.job_type, options
 
 

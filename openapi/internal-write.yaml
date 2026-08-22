@@ -1308,6 +1308,17 @@ components:
           maxItems: 10
           items:
             $ref: "#/components/schemas/TagInput"
+        paired_document_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Source document for ingest-time translation sibling (F75)
+        publish_status:
+          type: string
+          enum:
+            - published
+            - draft
+          default: published
     TagInput:
       type: object
       required:
@@ -1391,6 +1402,25 @@ components:
         upserted_chunks:
           type: integer
           minimum: 0
+        documents:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/BatchUpsertDocumentResult"
+    BatchUpsertDocumentResult:
+      type: object
+      required:
+        - document_id
+        - url
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        url:
+          type: string
+        language:
+          type: string
+          nullable: true
     DocumentSummary:
       type: object
       required:
@@ -1411,6 +1441,16 @@ components:
           description: Operator display name override (F74); null uses scraped title
         language:
           type: string
+          nullable: true
+        publish_status:
+          type: string
+          enum:
+            - published
+            - draft
+          nullable: true
+        paired_document_id:
+          type: string
+          format: uuid
           nullable: true
         source_domain:
           type: string
@@ -1443,6 +1483,12 @@ components:
         language:
           type: string
           nullable: true
+        publish_status:
+          type: string
+          enum:
+            - published
+            - draft
+          nullable: true
     DocumentMetadataResponse:
       type: object
       required:
@@ -1462,6 +1508,12 @@ components:
           nullable: true
         language:
           type: string
+          nullable: true
+        publish_status:
+          type: string
+          enum:
+            - published
+            - draft
           nullable: true
     TreeNode:
       type: object
