@@ -1032,3 +1032,8 @@ ChatRAG synthesis always used English `production.system_prompt` even when the f
 | EV252-D3 | Scale | Standard (delta docs + unit + API e2e) |
 | EV252-D4 | Success | Issue #252 acceptance criteria |
 | EV252-D5 | Spec gate | Spec-first; Build blocked until operator approves gate |
+
+### Close (2026-08-22)
+
+**Merge:** `6ed408ef` — PR #255 · closes #252  
+**CI:** [ci.yml](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions) + [deploy-preflight](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/32598818761) success on `main`.
