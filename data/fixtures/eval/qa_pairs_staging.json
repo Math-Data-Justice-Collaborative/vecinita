@@ -217,7 +217,7 @@
   {
     "id": "education-esl-free-providence",
     "locale": "en",
-    "domain": "education",
+    "domain": "community",
     "question": "Where can I find free ESL classes in Providence?",
     "expected_doc_urls": [
       "https://provlib.org/education/adults/ri-family-literacy-initiative/",
@@ -235,7 +235,7 @@
   {
     "id": "education-esl-free-providence",
     "locale": "es",
-    "domain": "education",
+    "domain": "community",
     "question": "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
     "expected_doc_urls": [
       "https://provlib.org/education/adults/ri-family-literacy-initiative/",
