@@ -90,6 +90,24 @@ describe("Dashboard page", () => {
     expect(screen.getByText("220")).toBeInTheDocument();
   });
 
+  it("renders empty language coverage state", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        ...MOCK_STATS,
+        language_breakdown: {},
+        chunk_language_breakdown: {},
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText(/no language data yet/i)).toBeInTheDocument();
+    });
+  });
+
   it("renders top served documents widget", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,

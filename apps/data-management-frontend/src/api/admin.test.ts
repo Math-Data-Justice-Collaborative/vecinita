@@ -94,6 +94,22 @@ describe("admin API parsers", () => {
     ]);
   });
 
+  it("parseStatsSummary defaults missing parity fields to zero", () => {
+    const parsed = parseStatsSummary({
+      total_documents: 0,
+      total_chunks: 0,
+      tag_distribution: [],
+      language_breakdown: { en: 1 },
+      recent_activity: [],
+      top_served: [],
+    });
+
+    expect(parsed.parity_gaps).toEqual({ en_only: 0, es_only: 0 });
+    expect(parsed.chunk_language_breakdown).toEqual([
+      { language: "en", count: 0 },
+    ]);
+  });
+
   it("parseHealthAggregate maps up/down to healthy/unhealthy", () => {
     const parsed = parseHealthAggregate({
       status: "degraded",

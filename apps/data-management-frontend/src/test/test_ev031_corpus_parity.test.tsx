@@ -71,4 +71,33 @@ describe("EV-031 corpus parity badges", () => {
     });
     expect(screen.queryByText("Missing Spanish")).not.toBeInTheDocument();
   });
+
+  it("shows Missing English badge for unpaired ES documents", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: [
+            {
+              document_id: "es-only-1",
+              url: "https://example.com/es",
+              title: "Solo español",
+              language: "es",
+              paired_document_id: null,
+            },
+          ],
+          page: 1,
+          page_size: 50,
+          total: 1,
+        }),
+      }),
+    );
+
+    renderWithProviders(<CorpusList />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Missing English")).toBeInTheDocument();
+    });
+  });
 });
