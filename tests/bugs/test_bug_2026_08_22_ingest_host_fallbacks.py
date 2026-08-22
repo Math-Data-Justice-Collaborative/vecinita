@@ -1,113 +1,18 @@
-"""#249 — scrape fallbacks for TLS apex failures and WAF 403 hosts."""
+"""BUG-2026-08-22 — ingest host TLS/WAF fallbacks (#249).
+
+[Spec: docs/bug-reports/BUG-2026-08-22-ingest-host-fallbacks.md]
+[Spec: docs/test-plan.md §TC-258]
+
+Full regression suite: tests/unit/ingest/test_scrape_host_fallbacks_ev249.py
+"""
 
 from __future__ import annotations
 
-import httpx
-import pytest
-from vecinita_ingest.scrape import (
-    ScrapeFetchError,
-    alternate_www_url,
-    fetch_url,
-    scrape_headers,
+from tests.unit.ingest.test_scrape_host_fallbacks_ev249 import (
+    test_fetch_url_retries_www_after_tls_connect_error,
 )
 
-_BODY = (
-    "<html><head><title>Community</title></head>"
-    "<body><p>Resource hours and services for neighbors.</p></body></html>"
-)
-_TLS_HANDSHAKE_MSG = "SSL handshake failure"
-_EXPECTED_UA_RETRY_ATTEMPTS = 2
 
-
-def test_alternate_www_url_adds_www_for_apex_host() -> None:
-    """#249: apex host yields www alternate; www input returns None."""
-    assert alternate_www_url("https://federalhillhouse.org/programs") == (
-        "https://www.federalhillhouse.org/programs"
-    )
-    assert alternate_www_url("https://www.federalhillhouse.org/") is None
-
-
-def test_fetch_url_retries_www_after_tls_connect_error() -> None:
-    """#249: TLS failure on apex retries www host before surfacing error."""
-    calls: list[str] = []
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        calls.append(str(request.url))
-        if request.url.host == "federalhillhouse.org":
-            raise httpx.ConnectError(_TLS_HANDSHAKE_MSG)
-        return httpx.Response(200, text=_BODY)
-
-    transport = httpx.MockTransport(handler)
-    client = httpx.Client(
-        transport=transport,
-        headers=scrape_headers(),
-        follow_redirects=True,
-    )
-    doc = fetch_url("https://federalhillhouse.org/", client=client)
-    assert doc.title == "Community"
-    assert calls == [
-        "https://federalhillhouse.org/",
-        "https://www.federalhillhouse.org/",
-    ]
-
-
-def test_fetch_url_retries_stealth_headers_after_403() -> None:
-    """#249: HTTP 403 retries with alternate browser headers before failing."""
-    attempts: list[tuple[str, str]] = []
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        user_agent = str(request.headers.get("user-agent") or "")
-        attempts.append((str(request.url), user_agent))
-        if "VecinitaBot" in user_agent:
-            return httpx.Response(403, text="Forbidden")
-        return httpx.Response(200, text=_BODY)
-
-    transport = httpx.MockTransport(handler)
-    client = httpx.Client(
-        transport=transport,
-        headers=scrape_headers(),
-        follow_redirects=True,
-    )
-    doc = fetch_url("https://unitedwayri.org/", client=client)
-    assert doc.title == "Community"
-    assert len(attempts) == _EXPECTED_UA_RETRY_ATTEMPTS
-    first_ua = attempts[0][1]
-    second_ua = attempts[1][1]
-    assert "VecinitaBot" in first_ua
-    assert "VecinitaBot" not in second_ua
-
-
-def test_fetch_url_raises_host_waf_blocked_after_exhausted_retries() -> None:
-    """#249: persistent 403 surfaces stable host_waf_blocked error_code."""
-
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(403, text="Forbidden")
-
-    transport = httpx.MockTransport(handler)
-    client = httpx.Client(
-        transport=transport,
-        headers=scrape_headers(),
-        follow_redirects=True,
-    )
-    with pytest.raises(ScrapeFetchError) as exc_info:
-        fetch_url("https://eastprovidenceri.gov/", client=client)
-    assert exc_info.value.error_code == "host_waf_blocked"
-
-
-def test_fetch_url_raises_tls_handshake_failed_without_www_recovery() -> None:
-    """#249: TLS failure on apex without working www yields tls_handshake_failed."""
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.host in {"blocked.example", "www.blocked.example"}:
-            raise httpx.ConnectError(_TLS_HANDSHAKE_MSG)
-        return httpx.Response(200, text=_BODY)
-
-    transport = httpx.MockTransport(handler)
-    client = httpx.Client(
-        transport=transport,
-        headers=scrape_headers(),
-        follow_redirects=True,
-    )
-    with pytest.raises(ScrapeFetchError) as exc_info:
-        fetch_url("https://blocked.example/", client=client)
-    assert exc_info.value.error_code == "tls_handshake_failed"
+def test_bug_2026_08_22_federalhillhouse_www_tls_retry() -> None:
+    """Layer guard: apex TLS failure recovers via www host (#249)."""
+    test_fetch_url_retries_www_after_tls_connect_error()
