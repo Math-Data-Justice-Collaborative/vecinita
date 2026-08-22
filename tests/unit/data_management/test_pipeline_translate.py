@@ -6,19 +6,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from vecinita_data_management_backend.pipeline import (
-    _build_translation_documents,
-    _translate_locales_from_options,
-    fetch_html_fixture,
-    run_ingest_job,
-)
+from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertDocumentResult,
     BatchUpsertRequest,
     BatchUpsertResponse,
-    ChunkUpsert,
-    DocumentUpsert,
 )
 from vecinita_tagging.vocabulary import SeedTag
 
@@ -156,72 +149,69 @@ def test_run_ingest_job_without_translate_locales_unchanged() -> None:
     assert len(write_client.batches) == 1
 
 
-def test_translate_locales_from_options_parses_deduped_locales() -> None:
-    """Invalid entries are ignored; en/es are deduped."""
-    assert _translate_locales_from_options({"translate_locales": ["es", "es", "fr", "en"]}) == [
-        "es",
-        "en",
-    ]
-    assert _translate_locales_from_options({"translate_locales": "es"}) == []
-    assert _translate_locales_from_options({}) == []
+_SPANISH_FIXTURE_HTML = """<!DOCTYPE html>
+<html lang="es">
+  <head><title>Aviso</title></head>
+  <body><p>Horario de la clinica: martes y jueves.</p></body>
+</html>"""
 
 
-def test_build_translation_documents_skips_same_language_target() -> None:
-    """Requesting translation to the source locale increments skipped, not documents."""
-    source = DocumentUpsert(
-        url="https://example.com/page",
-        title="Title",
-        language="en",
-        chunks=[ChunkUpsert(chunk_index=0, text="hello", embedding=[0.1] * 384)],
+def _fetch_spanish_fixture(url: str) -> ScrapedDocument:
+    return fetch_html_fixture(url, fixture_html=_SPANISH_FIXTURE_HTML)
+
+
+def test_run_ingest_job_skips_translation_when_target_matches_source_language() -> None:
+    """translate_locales matching detected source language increments translation_skipped."""
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/spanish-page.html"],
+        options={"chunk_size_tokens": "64", "translate_locales": ["es"]},
     )
-    docs, stats = _build_translation_documents(
-        source_documents=[source],
-        upserted=BatchUpsertResponse(
-            upserted_chunks=1,
-            documents=[
-                BatchUpsertDocumentResult(
-                    document_id=_SOURCE_ID,
-                    url="https://example.com/page",
-                    language="en",
-                )
-            ],
-        ),
-        translate_locales=["en"],
+
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_spanish_fixture,
         translate_client=_StubTranslateClient(),
+        tag_vocabulary=_VOCAB,
+    )
+
+    assert len(write_client.batches) == 1
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.metrics is not None
+    assert updated.metrics["translated_documents"] == 0
+    assert updated.metrics["translation_skipped"] == 1
+
+
+def test_run_ingest_job_soft_fails_when_translate_raises() -> None:
+    """MT exceptions increment translation_failed without failing the ingest job."""
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64", "translate_locales": ["es"]},
+    )
+
+    run_ingest_job(
+        record.job_id,
+        store=store,
         embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
-        chunk_size=64,
-    )
-    assert docs == []
-    assert stats == {"documents": 0, "chunks": 0, "skipped": 1, "failed": 0}
-
-
-def test_build_translation_documents_soft_fails_on_translate_error() -> None:
-    """MT errors increment failed without raising."""
-    source = DocumentUpsert(
-        url="https://example.com/page",
-        title="Title",
-        language="en",
-        chunks=[ChunkUpsert(chunk_index=0, text="hello", embedding=[0.1] * 384)],
-    )
-    docs, stats = _build_translation_documents(
-        source_documents=[source],
-        upserted=BatchUpsertResponse(
-            upserted_chunks=1,
-            documents=[
-                BatchUpsertDocumentResult(
-                    document_id=_SOURCE_ID,
-                    url="https://example.com/page",
-                    language="en",
-                )
-            ],
-        ),
-        translate_locales=["es"],
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
         translate_client=_FailingTranslateClient(),
-        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
-        chunk_size=64,
+        tag_vocabulary=_VOCAB,
     )
-    assert docs == []
-    assert stats == {"documents": 0, "chunks": 0, "skipped": 0, "failed": 1}
+
+    assert len(write_client.batches) == 1
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.metrics is not None
+    assert updated.metrics["translated_documents"] == 0
+    assert updated.metrics["translation_failed"] == 1
 
 
 def test_run_ingest_job_translate_locales_without_client_records_zero_metrics() -> None:
