@@ -46,6 +46,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
 | UJ-078 Relevance-gated sources | `tests/e2e/test_uj078_relevance_sources.py` + unit | TC-245, TC-246, TC-247 | — |
 | UJ-079 Operator display_title | `tests/e2e/test_uj079_display_title.py` + Vitest admin | TC-248, TC-249, TC-250, TC-251 | opt |
+| UJ-080 Ingest bilingual translation | `tests/e2e/test_ev030_ingest_bilingual.py` + Vitest JobForm | TC-252, TC-253, TC-254 | opt |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1535,6 +1536,24 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: Set `display_title` null → coalesce falls back to `title`.
 - **Expected**: AC-SU10.
+
+### TC-252: Ingest with translate_locales creates draft sibling (UJ-080, F75)
+
+- **Objective**: `POST /jobs` with `translate_locales=["es"]` completes; metrics report translation counts; write path creates draft ES document with `paired_document_id`.
+- **Expected**: Job `status=completed`; `metrics.translated_documents=1`; translated doc `publish_status=draft`.
+- **Module**: `tests/e2e/test_ev030_ingest_bilingual.py`
+
+### TC-253: Promote draft translation via PATCH (UJ-080, F75)
+
+- **Objective**: Operator `PATCH /internal/v1/documents/{id}` with `publish_status=published` on draft sibling.
+- **Expected**: Response `publish_status=published`.
+- **Module**: `tests/e2e/test_ev030_ingest_bilingual.py`
+
+### TC-254: Retriever excludes draft documents (UJ-080, F75)
+
+- **Objective**: Draft ES document not returned by `CorpusPgvectorRetriever`; visible after promote.
+- **Expected**: No draft hits before PATCH; at least one hit after promote.
+- **Module**: `tests/e2e/test_ev030_ingest_bilingual.py`
 
 ## Test Data
 

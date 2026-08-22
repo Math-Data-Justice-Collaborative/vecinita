@@ -43,7 +43,7 @@ _BASE_SELECT_SQL = """
             FROM embeddings e
             JOIN chunks c ON c.id = e.chunk_id
             JOIN documents d ON d.id = c.document_id
-            WHERE 1=1
+            WHERE d.publish_status = 'published'
             """
 
 _SHADOW_SELECT_SQL = """
@@ -63,6 +63,7 @@ _SHADOW_SELECT_SQL = """
             JOIN shadow_chunks sc ON sc.id = se.shadow_chunk_id
             JOIN documents d ON d.id = sc.document_id
             WHERE sc.rebuild_run_id = :rebuild_run_id
+              AND d.publish_status = 'published'
             """
 
 _ORDER_LIMIT_SQL = """
