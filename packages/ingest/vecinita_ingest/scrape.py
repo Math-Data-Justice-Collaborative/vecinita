@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import re
 from html.parser import HTMLParser
-from typing import Final
+from typing import Final, Never
 from urllib.parse import urlparse, urlunparse
 
 import httpx
@@ -245,7 +245,7 @@ def _raise_scrape_fetch_failure(
     *,
     last_connect: httpx.ConnectError | None,
     last_forbidden: httpx.HTTPStatusError | None,
-) -> None:
+) -> Never:
     if last_forbidden is not None:
         msg = f"host blocked scrape fetch for {url}: {last_forbidden}"
         raise ScrapeFetchError(msg, error_code="host_waf_blocked") from last_forbidden

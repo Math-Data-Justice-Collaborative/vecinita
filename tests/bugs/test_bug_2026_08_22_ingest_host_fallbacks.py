@@ -56,9 +56,9 @@ def test_fetch_url_retries_stealth_headers_after_403() -> None:
     attempts: list[tuple[str, str | None]] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
-        ua = request.headers.get("user-agent")
-        attempts.append((str(request.url), ua))
-        if "VecinitaBot" in (ua or ""):
+        user_agent = str(request.headers.get("user-agent") or "")
+        attempts.append((str(request.url), user_agent))
+        if "VecinitaBot" in user_agent:
             return httpx.Response(403, text="Forbidden")
         return httpx.Response(200, text=_BODY)
 
@@ -71,8 +71,10 @@ def test_fetch_url_retries_stealth_headers_after_403() -> None:
     doc = fetch_url("https://unitedwayri.org/", client=client)
     assert doc.title == "Community"
     assert len(attempts) == _EXPECTED_UA_RETRY_ATTEMPTS
-    assert "VecinitaBot" in attempts[0][1] or ""
-    assert "VecinitaBot" not in attempts[1][1] or ""
+    first_ua = attempts[0][1]
+    second_ua = attempts[1][1]
+    assert "VecinitaBot" in first_ua
+    assert "VecinitaBot" not in second_ua
 
 
 def test_fetch_url_raises_host_waf_blocked_after_exhausted_retries() -> None:
