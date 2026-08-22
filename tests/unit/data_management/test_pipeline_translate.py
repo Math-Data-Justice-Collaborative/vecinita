@@ -6,12 +6,19 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from vecinita_data_management_backend.pipeline import fetch_html_fixture, run_ingest_job
+from vecinita_data_management_backend.pipeline import (
+    _build_translation_documents,
+    _translate_locales_from_options,
+    fetch_html_fixture,
+    run_ingest_job,
+)
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertDocumentResult,
     BatchUpsertRequest,
     BatchUpsertResponse,
+    ChunkUpsert,
+    DocumentUpsert,
 )
 from vecinita_tagging.vocabulary import SeedTag
 
@@ -41,6 +48,19 @@ class _StubTranslateClient:
     ) -> str:
         _ = source_locale
         return f"[{target_locale}] {text}"
+
+
+class _FailingTranslateClient:
+    def translate_chunk(
+        self,
+        text: str,
+        *,
+        source_locale: str,
+        target_locale: str,
+    ) -> str:
+        _ = (text, source_locale, target_locale)
+        msg = "mt unavailable"
+        raise RuntimeError(msg)
 
 
 class _RecordingWriteClient:
@@ -134,3 +154,97 @@ def test_run_ingest_job_without_translate_locales_unchanged() -> None:
     )
 
     assert len(write_client.batches) == 1
+
+
+def test_translate_locales_from_options_parses_deduped_locales() -> None:
+    """Invalid entries are ignored; en/es are deduped."""
+    assert _translate_locales_from_options({"translate_locales": ["es", "es", "fr", "en"]}) == [
+        "es",
+        "en",
+    ]
+    assert _translate_locales_from_options({"translate_locales": "es"}) == []
+    assert _translate_locales_from_options({}) == []
+
+
+def test_build_translation_documents_skips_same_language_target() -> None:
+    """Requesting translation to the source locale increments skipped, not documents."""
+    source = DocumentUpsert(
+        url="https://example.com/page",
+        title="Title",
+        language="en",
+        chunks=[ChunkUpsert(chunk_index=0, text="hello", embedding=[0.1] * 384)],
+    )
+    docs, stats = _build_translation_documents(
+        source_documents=[source],
+        upserted=BatchUpsertResponse(
+            upserted_chunks=1,
+            documents=[
+                BatchUpsertDocumentResult(
+                    document_id=_SOURCE_ID,
+                    url="https://example.com/page",
+                    language="en",
+                )
+            ],
+        ),
+        translate_locales=["en"],
+        translate_client=_StubTranslateClient(),
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        chunk_size=64,
+    )
+    assert docs == []
+    assert stats == {"documents": 0, "chunks": 0, "skipped": 1, "failed": 0}
+
+
+def test_build_translation_documents_soft_fails_on_translate_error() -> None:
+    """MT errors increment failed without raising."""
+    source = DocumentUpsert(
+        url="https://example.com/page",
+        title="Title",
+        language="en",
+        chunks=[ChunkUpsert(chunk_index=0, text="hello", embedding=[0.1] * 384)],
+    )
+    docs, stats = _build_translation_documents(
+        source_documents=[source],
+        upserted=BatchUpsertResponse(
+            upserted_chunks=1,
+            documents=[
+                BatchUpsertDocumentResult(
+                    document_id=_SOURCE_ID,
+                    url="https://example.com/page",
+                    language="en",
+                )
+            ],
+        ),
+        translate_locales=["es"],
+        translate_client=_FailingTranslateClient(),
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        chunk_size=64,
+    )
+    assert docs == []
+    assert stats == {"documents": 0, "chunks": 0, "skipped": 0, "failed": 1}
+
+
+def test_run_ingest_job_translate_locales_without_client_records_zero_metrics() -> None:
+    """translate_locales set but no client leaves metrics at zero translated counts."""
+    store = InMemoryJobStore()
+    write_client = _RecordingWriteClient()
+    record = store.create_job(
+        urls=["https://example.com/sample-page.html"],
+        options={"chunk_size_tokens": "64", "translate_locales": ["es"]},
+    )
+
+    run_ingest_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=write_client,  # type: ignore[arg-type]
+        fetch_document=_fetch_fixture,
+        tag_vocabulary=_VOCAB,
+    )
+
+    assert len(write_client.batches) == 1
+    updated = store.get_job(record.job_id)
+    assert updated is not None
+    assert updated.metrics is not None
+    assert updated.metrics["translated_documents"] == 0
+    assert updated.metrics["translation_failed"] == 0
