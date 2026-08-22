@@ -54,7 +54,9 @@ export interface CreateJobOptions {
   crawl?: boolean;
   max_depth?: number;
   max_pages?: number;
+  crawl_scope?: "same_domain" | "path_prefix";
   translate_locales?: Array<"en" | "es">;
+}
 
 export interface CreateJobResponse {
   job_id: string;
