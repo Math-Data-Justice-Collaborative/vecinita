@@ -197,6 +197,12 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Input**: Same question + chunks; `POST /api/v1/ask` with `language: "es"` vs `language: "en"` (mock LLM captures prompt).
 - **Expected**: ES request prompt contains `DEFAULT_EVAL_SYSTEM_PROMPT_ES` text; EN request contains `production.system_prompt` (default or promoted).
 
+### TC-258: Scrape host fallbacks (F7, EV-249 / #249)
+
+- **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries alternate browser headers; stable operator `error_code` when blocked.
+- **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with VecinitaBot UA + success with Chrome UA; all 403.
+- **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with `tls_handshake_failed` or `host_waf_blocked` when exhausted.
+
 ### TC-012: Document delete (UJ-003)
 
 - **Objective**: Deleted doc not returned by retriever.

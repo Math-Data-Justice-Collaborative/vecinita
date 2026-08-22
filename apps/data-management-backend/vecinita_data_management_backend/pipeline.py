@@ -19,7 +19,7 @@ from vecinita_ingest.crawl import CrawlPlan, discover_crawl_urls
 from vecinita_ingest.drive import DriveFetchError
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.nested_source import derive_nested_source
-from vecinita_ingest.scrape import parse_html, scrape_headers
+from vecinita_ingest.scrape import ScrapeFetchError, parse_html, scrape_headers
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
     BatchUpsertResponse,
@@ -93,6 +93,8 @@ def _raise_from_url_failures(url_failures: list[dict[str, str]]) -> None:
     message = first["error_message"]
     if code in {"drive_auth_required", "drive_unsupported"}:
         raise DriveFetchError(message, error_code=code)
+    if code in {"host_waf_blocked", "tls_handshake_failed"}:
+        raise ScrapeFetchError(message, error_code=code)
     msg = f"all URLs failed; first: {message}"
     raise ValueError(msg)
 
