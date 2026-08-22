@@ -63,6 +63,8 @@ describe("admin API parsers", () => {
         { slug: "b", label: "", document_count: 2 },
       ],
       language_breakdown: { en: 1, es: 1 },
+      chunk_language_breakdown: { en: 8, es: 2 },
+      parity_gaps: { en_only: 0, es_only: 1 },
       recent_activity: [
         {
           event_type: "document.created",
@@ -85,6 +87,11 @@ describe("admin API parsers", () => {
     expect(parsed.recent_activity[0]?.entity_type).toBe("document");
     expect(parsed.recent_activity[1]?.entity_type).toBe("no_dot_event");
     expect(parsed.recent_activity[1]?.summary).toBeNull();
+    expect(parsed.parity_gaps).toEqual({ en_only: 0, es_only: 1 });
+    expect(parsed.chunk_language_breakdown).toEqual([
+      { language: "en", count: 8 },
+      { language: "es", count: 2 },
+    ]);
   });
 
   it("parseHealthAggregate maps up/down to healthy/unhealthy", () => {

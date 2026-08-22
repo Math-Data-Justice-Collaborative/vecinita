@@ -92,6 +92,8 @@ export interface DocumentSummary {
   title: string | null;
   display_title?: string | null;
   language: string | null;
+  publish_status?: "draft" | "published" | null;
+  paired_document_id?: string | null;
   tags?: TagInput[];
   source_domain?: string | null;
   source_path?: string | null;

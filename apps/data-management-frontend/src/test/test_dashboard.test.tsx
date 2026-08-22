@@ -15,6 +15,8 @@ const MOCK_STATS = {
     { slug: "legal", label: "Legal", document_count: 10 },
   ],
   language_breakdown: { en: 30, es: 12 },
+  chunk_language_breakdown: { en: 220, es: 36 },
+  parity_gaps: { en_only: 18, es_only: 0 },
   recent_activity: [
     {
       event_type: "document.created",
@@ -69,6 +71,23 @@ describe("Dashboard page", () => {
       expect(screen.getByText("42")).toBeInTheDocument();
     });
     expect(screen.getByText("256")).toBeInTheDocument();
+  });
+
+  it("renders language coverage and parity gap widgets", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => MOCK_STATS,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText("Language coverage")).toBeInTheDocument();
+    });
+    expect(screen.getByText("18")).toBeInTheDocument();
+    expect(screen.getByText("30")).toBeInTheDocument();
+    expect(screen.getByText("220")).toBeInTheDocument();
   });
 
   it("renders top served documents widget", async () => {

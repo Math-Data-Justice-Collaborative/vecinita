@@ -1896,6 +1896,22 @@ components:
                 type: string
               count:
                 type: integer
+        chunk_language_breakdown:
+          type: object
+          additionalProperties:
+            type: integer
+        parity_gaps:
+          type: object
+          required:
+            - en_only
+            - es_only
+          properties:
+            en_only:
+              type: integer
+              minimum: 0
+            es_only:
+              type: integer
+              minimum: 0
         recent_activity:
           type: array
           maxItems: 1000

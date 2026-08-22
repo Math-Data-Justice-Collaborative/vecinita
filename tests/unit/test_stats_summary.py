@@ -10,6 +10,8 @@ from fastapi.testclient import TestClient
 from vecinita_shared_schemas.auth import reset_auth_config_for_tests
 
 from tests.helpers.json_response import (
+    json_int,
+    json_object_get,
     response_json_object,
 )
 
@@ -87,3 +89,23 @@ def test_stats_summary_includes_top_served(client: TestClient) -> None:
     data = response_json_object(resp)
     assert "top_served" in data
     assert isinstance(data["top_served"], list)
+
+
+def test_stats_summary_includes_chunk_language_breakdown(client: TestClient) -> None:
+    """EV-031 / F76: stats summary includes chunk counts grouped by document language."""
+    resp = client.get("/internal/v1/stats/summary", headers=_auth())
+    assert resp.status_code == HTTPStatus.OK
+    data = response_json_object(resp)
+    breakdown = json_object_get(data, "chunk_language_breakdown")
+    for lang in breakdown:
+        assert isinstance(lang, str)
+        assert json_int(breakdown, lang) >= 0
+
+
+def test_stats_summary_includes_parity_gaps(client: TestClient) -> None:
+    """EV-031 / F76: stats summary includes published EN-only / ES-only gap counts."""
+    resp = client.get("/internal/v1/stats/summary", headers=_auth())
+    assert resp.status_code == HTTPStatus.OK
+    gaps = json_object_get(response_json_object(resp), "parity_gaps")
+    assert json_int(gaps, "en_only") >= 0
+    assert json_int(gaps, "es_only") >= 0

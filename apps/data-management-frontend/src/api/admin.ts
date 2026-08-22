@@ -7,6 +7,8 @@ export interface StatsSummaryApiResponse {
   total_chunks: number;
   tag_distribution: { slug: string; label: string; document_count: number }[];
   language_breakdown: Record<string, number>;
+  chunk_language_breakdown?: Record<string, number>;
+  parity_gaps?: { en_only: number; es_only: number };
   recent_activity: {
     event_type: string;
     entity_id: string;
@@ -27,6 +29,8 @@ export interface StatsSummary {
   total_chunks: number;
   tag_distribution: { tag: string; count: number }[];
   language_breakdown: { language: string; count: number }[];
+  chunk_language_breakdown: { language: string; count: number }[];
+  parity_gaps: { en_only: number; es_only: number };
   recent_activity: {
     event_type: string;
     entity_type: string;
@@ -48,6 +52,11 @@ function entityTypeFromEventType(eventType: string): string {
 
 /** Normalized for DashboardPage rendering. */
 export function parseStatsSummary(raw: StatsSummaryApiResponse): StatsSummary {
+  const languageKeys = new Set([
+    ...Object.keys(raw.language_breakdown),
+    ...Object.keys(raw.chunk_language_breakdown ?? {}),
+  ]);
+  const chunkBreakdown = raw.chunk_language_breakdown ?? {};
   return {
     total_documents: raw.total_documents,
     total_chunks: raw.total_chunks,
@@ -61,6 +70,14 @@ export function parseStatsSummary(raw: StatsSummaryApiResponse): StatsSummary {
         count,
       }),
     ),
+    chunk_language_breakdown: [...languageKeys].map((language) => ({
+      language,
+      count: chunkBreakdown[language] ?? 0,
+    })),
+    parity_gaps: {
+      en_only: raw.parity_gaps?.en_only ?? 0,
+      es_only: raw.parity_gaps?.es_only ?? 0,
+    },
     recent_activity: raw.recent_activity.map((row) => ({
       event_type: row.event_type,
       entity_type: entityTypeFromEventType(row.event_type),

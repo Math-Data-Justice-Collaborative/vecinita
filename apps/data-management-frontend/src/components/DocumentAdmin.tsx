@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAdminT } from "@/hooks/useAdminT";
 import { AdminWriteGate } from "@/components/AdminWriteGate";
+import { ParityBadge } from "@/components/ParityBadge";
 
 type DocumentAdminProps = {
   document: DocumentSummary;
@@ -264,6 +265,22 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
           {status}
         </p>
       ) : null}
+
+      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        {document.publish_status ? (
+          <span data-testid="document-publish-status">
+            {tr("admin.documentAdmin.publishStatus")}: {document.publish_status}
+          </span>
+        ) : null}
+        {document.paired_document_id ? (
+          <span data-testid="document-paired-id">
+            {tr("admin.documentAdmin.pairedDocument")}:{" "}
+            {document.paired_document_id}
+          </span>
+        ) : (
+          <ParityBadge document={document} />
+        )}
+      </div>
 
       <AdminWriteGate>
         <form
