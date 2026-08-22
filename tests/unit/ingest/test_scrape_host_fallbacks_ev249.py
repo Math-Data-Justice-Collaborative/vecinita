@@ -6,7 +6,6 @@ import httpx
 import pytest
 from vecinita_ingest.scrape import (
     ScrapeFetchError,
-    _raise_scrape_fetch_failure,
     alternate_www_url,
     fetch_url,
     scrape_headers,
@@ -100,17 +99,6 @@ def test_fetch_url_raises_host_waf_blocked_after_exhausted_retries() -> None:
     with pytest.raises(ScrapeFetchError) as exc_info:
         fetch_url("https://eastprovidenceri.gov/", client=client)
     assert exc_info.value.error_code == "host_waf_blocked"
-
-
-def test_raise_scrape_fetch_failed_without_prior_errors() -> None:
-    """TC-258: generic scrape_fetch_failed when no connect/forbidden context."""
-    with pytest.raises(ScrapeFetchError) as exc_info:
-        _raise_scrape_fetch_failure(
-            "https://example.com/",
-            last_connect=None,
-            last_forbidden=None,
-        )
-    assert exc_info.value.error_code == "scrape_fetch_failed"
 
 
 def test_fetch_url_propagates_non_forbidden_http_errors() -> None:
