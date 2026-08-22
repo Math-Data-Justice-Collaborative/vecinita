@@ -6,6 +6,7 @@ import os
 import re
 from html.parser import HTMLParser
 from typing import Final
+from urllib.parse import urlparse, urlunparse
 
 import httpx
 import trafilatura
@@ -32,6 +33,20 @@ DEFAULT_SCRAPE_USER_AGENT: Final[str] = (
     "Math-Data-Justice-Collaborative/vecinita) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 )
+_HTTP_FORBIDDEN: Final[int] = 403
+_FALLBACK_SCRAPE_USER_AGENT: Final[str] = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+)
+
+
+class ScrapeFetchError(Exception):
+    """Public HTML fetch failed after scrape fallbacks (#249)."""
+
+    def __init__(self, message: str, *, error_code: str) -> None:
+        """Attach a stable operator-facing ``error_code`` for job surfaces."""
+        super().__init__(message)
+        self.error_code = error_code
 
 
 def resolve_scrape_user_agent() -> str:
@@ -45,7 +60,44 @@ def scrape_headers() -> dict[str, str]:
     return {
         "User-Agent": resolve_scrape_user_agent(),
         "Accept": "text/html,application/xhtml+xml,application/pdf,text/plain,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Upgrade-Insecure-Requests": "1",
     }
+
+
+def _fallback_scrape_headers() -> dict[str, str]:
+    """Browser headers without VecinitaBot identity for WAF retry (#249)."""
+    return {
+        "User-Agent": _FALLBACK_SCRAPE_USER_AGENT,
+        "Accept": scrape_headers()["Accept"],
+        "Accept-Language": "en-US,en;q=0.9",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+    }
+
+
+def alternate_www_url(url: str) -> str | None:
+    """Return the same URL with a ``www.`` host prefix when the host is apex-only."""
+    parsed = urlparse(url)
+    host = parsed.hostname
+    if host is None or host.startswith("www."):
+        return None
+    port_suffix = f":{parsed.port}" if parsed.port is not None else ""
+    netloc = f"www.{host}{port_suffix}"
+    path = parsed.path or "/"
+    return urlunparse(
+        (
+            parsed.scheme,
+            netloc,
+            path,
+            parsed.params,
+            parsed.query,
+            parsed.fragment,
+        )
+    )
 
 
 class _TextExtractor(HTMLParser):
@@ -162,6 +214,48 @@ def _document_from_response(
     return doc
 
 
+def _fetch_url_once(
+    url: str,
+    *,
+    client: httpx.Client,
+) -> ScrapedDocument:
+    fetch_target = url
+    if is_google_drive_url(url):
+        fetch_target = rewrite_drive_fetch_url(url)
+    response = client.get(fetch_target)
+    response.raise_for_status()
+    return _document_from_response(response, original_url=url)
+
+
+def _fetch_with_headers(
+    url: str,
+    *,
+    client: httpx.Client,
+    headers: dict[str, str],
+) -> ScrapedDocument:
+    request = client.build_request("GET", url)
+    request.headers.update(headers)
+    response = client.send(request, follow_redirects=True)
+    response.raise_for_status()
+    return _document_from_response(response, original_url=url)
+
+
+def _raise_scrape_fetch_failure(
+    url: str,
+    *,
+    last_connect: httpx.ConnectError | None,
+    last_forbidden: httpx.HTTPStatusError | None,
+) -> None:
+    if last_forbidden is not None:
+        msg = f"host blocked scrape fetch for {url}: {last_forbidden}"
+        raise ScrapeFetchError(msg, error_code="host_waf_blocked") from last_forbidden
+    if last_connect is not None:
+        msg = f"TLS handshake failed for {url}: {last_connect}"
+        raise ScrapeFetchError(msg, error_code="tls_handshake_failed") from last_connect
+    msg = f"scrape fetch failed for {url}"
+    raise ScrapeFetchError(msg, error_code="scrape_fetch_failed")
+
+
 def fetch_url(
     url: str,
     *,
@@ -176,12 +270,36 @@ def fetch_url(
         headers=scrape_headers(),
     )
     try:
-        fetch_target = url
-        if is_google_drive_url(url):
-            fetch_target = rewrite_drive_fetch_url(url)
-        response = http.get(fetch_target)
-        response.raise_for_status()
-        return _document_from_response(response, original_url=url)
+        url_candidates: list[str] = [url]
+        www_url = alternate_www_url(url)
+        if www_url is not None:
+            url_candidates.append(www_url)
+
+        header_sets: list[dict[str, str]] = [scrape_headers(), _fallback_scrape_headers()]
+
+        last_connect: httpx.ConnectError | None = None
+        last_forbidden: httpx.HTTPStatusError | None = None
+
+        for candidate in url_candidates:
+            for header_index, header_set in enumerate(header_sets):
+                try:
+                    if header_index == 0 and candidate == url:
+                        return _fetch_url_once(candidate, client=http)
+                    return _fetch_with_headers(candidate, client=http, headers=header_set)
+                except httpx.ConnectError as exc:
+                    last_connect = exc
+                    break
+                except httpx.HTTPStatusError as exc:
+                    if exc.response.status_code == _HTTP_FORBIDDEN:
+                        last_forbidden = exc
+                        continue
+                    raise
+
+        _raise_scrape_fetch_failure(
+            url,
+            last_connect=last_connect,
+            last_forbidden=last_forbidden,
+        )
     finally:
         if owns:
             http.close()

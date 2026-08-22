@@ -1037,3 +1037,22 @@ ChatRAG synthesis always used English `production.system_prompt` even when the f
 
 **Merge:** `6ed408ef` — PR #255 · closes #252  
 **CI:** [ci.yml](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions) + [deploy-preflight](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/32598818761) success on `main`.
+
+## Cycle EV-249 — Blocked ingest hosts (#249)
+
+**Approved:** 2026-08-22  
+**Session:** EV-249-blocked-ingest-hosts (local store)  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/249
+
+### Scope summary
+
+Follow-up to #243/#248: three community hosts still failed staging re-ingest. Add scrape fallbacks (`www.` on TLS failure, alternate Chrome UA on 403) and stable `error_code` values (`host_waf_blocked`, `tls_handshake_failed`).
+
+### Decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV249-D1 | TLS apex | Retry `www.{host}` before failing |
+| EV249-D2 | WAF 403 | Retry without VecinitaBot in UA + browser Sec-Fetch headers |
+| EV249-D3 | Persistent block | `ScrapeFetchError` with stable `error_code` in job metrics |
+| EV249-D4 | Out of scope | Playwright JS-render for WAF; prod corpus mutation |
