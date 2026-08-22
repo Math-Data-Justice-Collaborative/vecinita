@@ -213,5 +213,41 @@
       "Should not fabricate tutoring resources",
       "Should indicate no relevant corpus context when retrieval is empty"
     ]
+  },
+  {
+    "id": "education-esl-free-providence",
+    "locale": "en",
+    "domain": "education",
+    "question": "Where can I find free ESL classes in Providence?",
+    "expected_doc_urls": [
+      "https://provlib.org/education/adults/ri-family-literacy-initiative/",
+      "https://clpvd.org/learn/spotlight/adult-education/esol/",
+      "https://www.diiri.org/classes/english-classes/",
+      "https://enrollri.org/adulted",
+      "https://wrwc.org/olneyville-resilience-hub/"
+    ],
+    "retrieval_expectation": "any_of",
+    "required_facts": [
+      "Names at least one Providence-area ESL or adult education program",
+      "Cites ingested tier-1 ESL sources from EV-029 corpus"
+    ]
+  },
+  {
+    "id": "education-esl-free-providence",
+    "locale": "es",
+    "domain": "education",
+    "question": "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
+    "expected_doc_urls": [
+      "https://provlib.org/education/adults/ri-family-literacy-initiative/",
+      "https://clpvd.org/learn/spotlight/adult-education/esol/",
+      "https://www.diiri.org/classes/english-classes/",
+      "https://enrollri.org/adulted",
+      "https://www.immigrantcoalitionri.org/adult-education"
+    ],
+    "retrieval_expectation": "any_of",
+    "required_facts": [
+      "Responde con detalles de programas de inglés en Providence",
+      "Puede citar páginas en inglés del corpus (EV-029 R6 EN-source-grounded ES answer)"
+    ]
   }
 ]
