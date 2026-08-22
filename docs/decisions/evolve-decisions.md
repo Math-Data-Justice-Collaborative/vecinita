@@ -1012,3 +1012,23 @@ Chat source UX in one cycle:
 **Tip:** `ad15667` — [CI](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31136499387) + [deploy-preflight](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/31136805324) success.  
 **Artifacts:** `docs/sessions/S028-chat-source-ux/reports/evolve-summary.md` · `docs/evolve-report-EV-026.md`  
 **RA-009:** superseded (remote coverage green).
+
+## Cycle EV-252 — Locale system prompt (#252)
+
+**Approved:** 2026-08-22  
+**Session:** EV-252-locale-system-prompt (local store)  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/252
+
+### Scope summary
+
+ChatRAG synthesis always used English `production.system_prompt` even when the frontend sent `language: "es"`. Fix: add `DEFAULT_EVAL_SYSTEM_PROMPT_ES` + locale resolver; wire into ask/stream synthesis paths. No `EvalConfig` schema change in v1.
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV252-D1 | Config | Constants fallback: EN → `production.system_prompt`; ES → `DEFAULT_EVAL_SYSTEM_PROMPT_ES` |
+| EV252-D2 | Out of scope | Admin eval EN/ES textareas; #245 corpus translation; #251 ingest translation |
+| EV252-D3 | Scale | Standard (delta docs + unit + API e2e) |
+| EV252-D4 | Success | Issue #252 acceptance criteria |
+| EV252-D5 | Spec gate | Spec-first; Build blocked until operator approves gate |

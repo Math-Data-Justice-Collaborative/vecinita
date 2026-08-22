@@ -30,7 +30,7 @@ from vecinita_rag.soft_language import soft_language_retrieve
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
-from vecinita_shared_schemas.eval_config import EvalConfig
+from vecinita_shared_schemas.eval_config import EvalConfig, resolve_system_prompt_for_language
 from vecinita_tagging.llm_client import LlmTagClient
 from vecinita_tagging.vocabulary import load_seed_vocabulary, vocabulary_slugs
 
@@ -347,7 +347,7 @@ class ChatRagService:
         prompt = _build_prompt(
             request.question,
             chunk_list,
-            system_prompt=production.system_prompt,
+            system_prompt=resolve_system_prompt_for_language(language, production),
             packer=packer,
             context_max_chars=max_chars,
         )
@@ -515,7 +515,7 @@ class ChatRagService:
         prompt = _build_prompt(
             request.question,
             chunks,
-            system_prompt=production.system_prompt,
+            system_prompt=resolve_system_prompt_for_language(language, production),
             packer=packer,
             context_max_chars=max_chars,
         )
@@ -571,7 +571,7 @@ class ChatRagService:
         prompt = _build_prompt(
             request.question,
             chunks,
-            system_prompt=production.system_prompt,
+            system_prompt=resolve_system_prompt_for_language(language, production),
             packer=packer,
             context_max_chars=max_chars,
         )

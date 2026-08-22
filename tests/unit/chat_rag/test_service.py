@@ -16,7 +16,10 @@ from vecinita_rag.cache import AnswerCache, CachedAnswer
 from vecinita_rag.rerank import CallableCrossEncoderScorer
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
-from vecinita_shared_schemas.eval_config import EvalConfig
+from vecinita_shared_schemas.eval_config import (
+    DEFAULT_EVAL_SYSTEM_PROMPT_ES,
+    EvalConfig,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
@@ -213,6 +216,71 @@ def test_ask_uses_explicit_language() -> None:
         AskRequest(question="¿Dónde está la clínica?", language="es"),
     )
     assert response.language == "es"
+
+
+_PROMOTED_EN_SYSTEM_PROMPT = "Custom promoted English system prompt for TC-257."
+
+
+def test_ask_uses_spanish_system_prompt_when_language_es() -> None:
+    """TC-257 / EV-252: synthesis uses Spanish system prompt when language=es."""
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([_chunk()]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        chat_max_tokens=64,
+    )
+    with patch.object(
+        service,
+        "_production_config",
+        return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
+    ):
+        service.ask(AskRequest(question="clinic hours", language="es"))
+    assert llm.prompts
+    prompt = llm.prompts[0]
+    assert "únicamente el contexto siguiente" in prompt
+    assert DEFAULT_EVAL_SYSTEM_PROMPT_ES.split()[0] in prompt
+    assert _PROMOTED_EN_SYSTEM_PROMPT not in prompt
+
+
+def test_ask_uses_production_system_prompt_when_language_en() -> None:
+    """TC-257 / EV-252: synthesis uses production.system_prompt when language=en."""
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([_chunk()]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        chat_max_tokens=64,
+    )
+    with patch.object(
+        service,
+        "_production_config",
+        return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
+    ):
+        service.ask(AskRequest(question="clinic hours", language="en"))
+    assert llm.prompts
+    prompt = llm.prompts[0]
+    assert _PROMOTED_EN_SYSTEM_PROMPT in prompt
+    assert "únicamente el contexto siguiente" not in prompt
+
+
+def test_stream_ask_uses_spanish_system_prompt_when_language_es() -> None:
+    """TC-257 / EV-252: stream synthesis uses Spanish system prompt when language=es."""
+    llm = StubLlm()
+    service = ChatRagService(
+        retriever=StubRetriever([_chunk()]),  # type: ignore[arg-type]
+        llm_client=llm,  # type: ignore[arg-type]
+        chat_max_tokens=64,
+    )
+    with patch.object(
+        service,
+        "_production_config",
+        return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
+    ):
+        session = service.stream_ask(AskRequest(question="clinic hours", language="es"))
+        list(session.tokens)
+    assert llm.prompts
+    prompt = llm.prompts[0]
+    assert "únicamente el contexto siguiente" in prompt
+    assert _PROMOTED_EN_SYSTEM_PROMPT not in prompt
 
 
 def test_ask_retries_without_tags_when_tag_filter_empty() -> None:

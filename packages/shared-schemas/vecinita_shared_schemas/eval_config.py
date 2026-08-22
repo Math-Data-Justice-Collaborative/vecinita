@@ -36,6 +36,15 @@ DEFAULT_EVAL_SYSTEM_PROMPT = (
     "only about the program named in the question."
 )
 
+DEFAULT_EVAL_SYSTEM_PROMPT_ES = (
+    "Responde las preguntas de la comunidad usando únicamente el contexto siguiente. "
+    "Sé conciso. Si el contexto no responde la pregunta, di que no tienes esa "
+    "información. Nunca inventes números de teléfono personales, direcciones de correo "
+    "electrónico, direcciones físicas ni datos de contacto privados. Cuando en el "
+    "contexto aparezcan varios programas, responde solo sobre el programa mencionado "
+    "en la pregunta."
+)
+
 
 class EvalConfigPartial(BaseModel):
     """Optional sandbox overrides for merge onto a base EvalConfig."""
@@ -104,6 +113,13 @@ class EvalConfig(BaseModel):
     )
     model_id: str = Field(default=DEFAULT_EVAL_MODEL_ID, min_length=1, max_length=128)
     rebuild_run_id: UUID | None = None
+
+
+def resolve_system_prompt_for_language(language: str, production: EvalConfig) -> str:
+    """Return the synthesis system prompt for a request locale (ADR-013, EV-252)."""
+    if language == "es":
+        return DEFAULT_EVAL_SYSTEM_PROMPT_ES
+    return production.system_prompt
 
 
 def merge_eval_config(base: EvalConfig, partial: EvalConfigPartial | None) -> EvalConfig:
