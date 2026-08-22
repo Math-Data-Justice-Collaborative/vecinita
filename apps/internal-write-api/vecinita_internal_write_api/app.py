@@ -100,6 +100,7 @@ from vecinita_shared_schemas.internal_write import (
     FeedbackListResponse,
     HealthAggregateResponse,
     HealthResponse,
+    ParityGaps,
     RebuildPromoteResponse,
     RecentActivity,
     RetagJobResponse,
@@ -2021,6 +2022,47 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 .all()
             )
 
+            chunk_lang_rows = (
+                conn.execute(
+                    text(
+                        "SELECT COALESCE(d.language, 'unknown') AS lang, COUNT(*) AS cnt "
+                        "FROM chunks c "
+                        "JOIN documents d ON d.id = c.document_id "
+                        "GROUP BY d.language"
+                    )
+                )
+                .mappings()
+                .all()
+            )
+
+            en_only = scalar_int(
+                cast(
+                    "object",
+                    conn.execute(
+                        text(
+                            "SELECT COUNT(*) FROM documents "
+                            "WHERE language = 'en' "
+                            "AND publish_status = 'published' "
+                            "AND paired_document_id IS NULL"
+                        )
+                    ).scalar_one(),
+                )
+            )
+
+            es_only = scalar_int(
+                cast(
+                    "object",
+                    conn.execute(
+                        text(
+                            "SELECT COUNT(*) FROM documents "
+                            "WHERE language = 'es' "
+                            "AND publish_status = 'published' "
+                            "AND paired_document_id IS NULL"
+                        )
+                    ).scalar_one(),
+                )
+            )
+
             recent_rows = (
                 conn.execute(
                     text(
@@ -2061,6 +2103,11 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 row_str(mapping_row(row), "lang"): row_int(mapping_row(row), "cnt")
                 for row in lang_rows
             },
+            chunk_language_breakdown={
+                row_str(mapping_row(row), "lang"): row_int(mapping_row(row), "cnt")
+                for row in chunk_lang_rows
+            },
+            parity_gaps=ParityGaps(en_only=en_only, es_only=es_only),
             recent_activity=[
                 RecentActivity(
                     event_type=row_str(mapping_row(row), "event_type"),

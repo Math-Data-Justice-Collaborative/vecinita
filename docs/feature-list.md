@@ -4,7 +4,7 @@
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Last updated**: 2026-06-13  
 > **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-22 (EV-030 — F75 ingest bilingual translation #251; prior S028/EV-026 F72–F74)
+> **Last updated**: 2026-08-22 (EV-031 — F76 corpus language parity #245; prior EV-030 F75)
 
 ## Summary
 
@@ -78,6 +78,7 @@
 | F73 | Dynamic relevance-gated sources (no fixed pad) | Implemented | ChatRAG | packages/rag, chat-rag-backend | S028/EV-026 #223 |
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 | F75 | Optional ingest bilingual translation | Implemented | Data Management | data-management-backend, internal-write-api, Modal LLM, admin FE | EV-030 #251 |
+| F76 | Corpus language parity metrics + badges | Implemented | Data Management | internal-write-api, data-management-frontend | EV-031 #245 |
 
 **Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
 
@@ -1417,10 +1418,32 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | internal-write-api | Batch upsert returns document IDs; PATCH `publish_status` |
   | `packages/rag` | Retriever filters `publish_status = 'published'` |
   | data-management-frontend | JobForm “Also create Spanish translation” checkbox |
-- **Out of scope**: #245 dashboard parity badges; auto-translate on all ingests; live prod corpus
-  mutation without operator approval.
+- **Out of scope**: auto-translate on all ingests; live prod corpus mutation without operator
+  approval. (#245 dashboard parity → **F76**.)
 - **Status**: Implemented (EV-030).
 - **Source**: EV-030; GitHub #251; ADR-052.
+
+### F76: Corpus language parity metrics + badges (#245)
+
+- **What it does**: Extends admin **dashboard** and **corpus list** so operators see **document and
+  chunk counts by language**, **published parity gap totals** (EN-only / ES-only via
+  `paired_document_id`), and **Missing Spanish / Missing English** badges on unpaired rows. Includes
+  a **staging bulk-translate** script that queues F75 `translate_locales: ["es"]` jobs for EN-only
+  published documents.
+- **Inputs**: `GET /internal/v1/stats/summary`; paginated `GET /internal/v1/documents` (existing
+  `paired_document_id` / `publish_status` fields).
+- **Outputs**: Aggregate parity metrics (no PII); per-row parity badges; bulk job report artifact.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/shared-schemas` | `StatsSummaryResponse.chunk_language_breakdown`, `parity_gaps` |
+  | internal-write-api | Stats SQL for chunk language + parity counts |
+  | data-management-frontend | Dashboard language table; `ParityBadge` on corpus list + detail |
+  | Session scripts | `staging-bulk-translate-en-to-es.sh` (staging only) |
+- **Out of scope**: ChatRAG browse parity chips; `es_esl_supplement` retirement; live prod bulk
+  translate without AskQuestion; URL-heuristic pairing.
+- **Status**: Implemented (EV-031).
+- **Source**: EV-031; GitHub #245; ADR-052.
 
 ## Planned / Deferred (post-v1)
 

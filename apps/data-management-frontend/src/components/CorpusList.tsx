@@ -22,6 +22,7 @@ import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
 import { CorpusTree } from "@/components/CorpusTree";
 import { TruncatedText } from "@/components/TruncatedText";
 import { BoundedTagList } from "@/components/BoundedTagList";
+import { ParityBadge } from "@/components/ParityBadge";
 import { RefreshCw, Trash2, Tags, FileEdit } from "lucide-react";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useIsAdmin } from "@/auth/auth-context";
@@ -422,7 +423,10 @@ export function CorpusList() {
                           />
                         </TableCell>
                         <TableCell className="py-2">
-                          {doc.language ?? tr("shared.emDash")}
+                          <div className="flex flex-col">
+                            <span>{doc.language ?? tr("shared.emDash")}</span>
+                            <ParityBadge document={doc} />
+                          </div>
                         </TableCell>
                         {isAdmin ? (
                           <TableCell className="py-2 text-right">

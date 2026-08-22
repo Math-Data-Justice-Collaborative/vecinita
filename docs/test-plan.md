@@ -47,6 +47,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-078 Relevance-gated sources | `tests/e2e/test_uj078_relevance_sources.py` + unit | TC-245, TC-246, TC-247 | — |
 | UJ-079 Operator display_title | `tests/e2e/test_uj079_display_title.py` + Vitest admin | TC-248, TC-249, TC-250, TC-251 | opt |
 | UJ-080 Ingest bilingual translation | `tests/e2e/test_ev030_ingest_bilingual.py` + Vitest JobForm | TC-252, TC-253, TC-254 | opt |
+| UJ-009 Corpus parity visibility | `tests/e2e/test_ev031_corpus_language_parity.py` + Vitest | TC-255, TC-256 | opt |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1554,6 +1555,18 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Draft ES document not returned by `CorpusPgvectorRetriever`; visible after promote.
 - **Expected**: No draft hits before PATCH; at least one hit after promote.
 - **Module**: `tests/e2e/test_ev030_ingest_bilingual.py`
+
+### TC-255: Stats summary parity fields (UJ-009, F76)
+
+- **Objective**: `GET /internal/v1/stats/summary` returns `chunk_language_breakdown` and `parity_gaps`.
+- **Expected**: `en_only >= 1` after seeding published EN-only doc; chunk breakdown includes `en` count >= 1.
+- **Module**: `tests/e2e/test_ev031_corpus_language_parity.py`
+
+### TC-256: Document list pairing fields (UJ-009, F76)
+
+- **Objective**: `GET /internal/v1/documents` items expose `paired_document_id` / `publish_status`.
+- **Expected**: EN-only row has null `paired_document_id`; paired EN row links to ES sibling.
+- **Module**: `tests/e2e/test_ev031_corpus_language_parity.py`
 
 ## Test Data
 

@@ -19,6 +19,8 @@ const API_CONTRACT_STATS = {
     { slug: "legal", label: "Legal", document_count: 10 },
   ],
   language_breakdown: { en: 30, es: 12 },
+  chunk_language_breakdown: { en: 220, es: 36 },
+  parity_gaps: { en_only: 5, es_only: 1 },
   recent_activity: [
     {
       event_type: "document.created",
@@ -77,10 +79,10 @@ describe("BUG-2026-05-27 dashboard Invalid Date and empty Languages on api-contr
     expect(screen.queryByText("Invalid Date")).not.toBeInTheDocument();
     expect(screen.getByText(/Ingested example\.com\/page/)).toBeInTheDocument();
 
-    const languagesCard = screen.getByText("Languages").closest(".rounded-lg");
+    const languagesCard = screen.getByText("Parity gaps").closest(".rounded-lg");
     expect(languagesCard).not.toBeNull();
     expect(
-      within(languagesCard as HTMLElement).getByText("2"),
+      within(languagesCard as HTMLElement).getByText("6"),
     ).toBeInTheDocument();
   });
 });

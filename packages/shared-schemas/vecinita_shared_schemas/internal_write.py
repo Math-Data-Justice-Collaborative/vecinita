@@ -500,6 +500,13 @@ class RecentActivity(BaseModel):
     summary: str | None = None
 
 
+class ParityGaps(BaseModel):
+    """Published documents missing a paired translation (F76 / #245)."""
+
+    en_only: int = Field(..., ge=0)
+    es_only: int = Field(..., ge=0)
+
+
 class StatsSummaryResponse(BaseModel):
     """GET /internal/v1/stats/summary response."""
 
@@ -507,6 +514,8 @@ class StatsSummaryResponse(BaseModel):
     total_chunks: int
     tag_distribution: list[TagCount]
     language_breakdown: dict[str, int]
+    chunk_language_breakdown: dict[str, int]
+    parity_gaps: ParityGaps
     recent_activity: list[RecentActivity]
     top_served: list[TopServedItem]
 
