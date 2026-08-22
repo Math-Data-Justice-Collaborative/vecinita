@@ -53,7 +53,7 @@ def test_fetch_url_retries_www_after_tls_connect_error() -> None:
 
 def test_fetch_url_retries_stealth_headers_after_403() -> None:
     """#249: HTTP 403 retries with alternate browser headers before failing."""
-    attempts: list[tuple[str, str | None]] = []
+    attempts: list[tuple[str, str]] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
         user_agent = str(request.headers.get("user-agent") or "")
