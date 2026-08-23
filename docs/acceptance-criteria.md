@@ -347,10 +347,19 @@
 | F45 CE ship faithfulness | LlamaIndex judge | ≥0.91 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 (after F46) |
 | F46 staging retrieve pools | Non-empty representative rows | `pool > 0` | staging golden / fixtures | test-plan TC-185 / AC-FO1 |
 | F46 ask sources | Non-empty `sources[]` | length ≥ 1 | in-corpus ask | test-plan TC-186 / AC-FO2 |
-| Eval latency p95 | Wall-clock per question | Informational (30s reference) | Golden run | test-plan TC-116 |
+| Eval latency p95 | Wall-clock per question | Informational (30s reference); **regression gate** vs baseline per AC-RG2 | Golden run | test-plan TC-116, TC-280 |
 | Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |
 | Latency | p95 ask | < 15s | Staging smoke | spec |
+
+### EV-028 — ChatRAG regression gate (#181) — S032 / F36 harness
+
+- [x] **AC-RG1**: Committed `data/fixtures/eval/baseline.json` records golden metrics (`retrieval_relevance`, `faithfulness`, `answer_relevancy`, `latency_p95_ms`) with `schema_version` and `fixture_ref`; no visitor PII (ADR-004). *(EV-028 / TC-280 2026-08-23)*
+- [x] **AC-RG2**: Regression compare fails when any metric exceeds documented tolerance vs baseline while still enforcing TC-111/112 floors (TC-280). *(EV-028 2026-08-23)*
+- [x] **AC-RG3**: Cold-start / spawn latency excluded from fail criteria (reported separately if measured). *(EV-028 — CI uses mocked judge + deterministic embed; no Modal spawn in gate path)*
+- [x] **AC-RG4**: GitHub Actions job `rag-regression` runs on PRs to `main` and pushes to `main`; failure blocks merge (required check). *(EV-028 — wired in `ci.yml` + `ci-success` needs; operator: add branch protection required check)*
+- [x] **AC-RG5**: Baseline refresh requires an explicit PR that edits `baseline.json` — no silent CI overwrite. *(EV-028 — generator script + eval-golden-set SOP)*
+- [x] **AC-RG6**: `make test-rag-regression` matches CI compare logic (TC-280). *(EV-028 2026-08-23)*
 
 ## Qualitative criteria
 

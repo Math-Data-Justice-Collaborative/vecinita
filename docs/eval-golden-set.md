@@ -67,6 +67,34 @@ playground / staging sweeps (`scripts/eval_sweep_golden_models.py`).
 6. **Run harness locally** — `uv run pytest tests/eval -m integration` (Postgres required).
 7. **Record baseline** — after a staging eval run, note scores in the admin tab or session report.
 
+## Baseline regression gate (EV-028 / #181)
+
+CI and local `make test-rag-regression` compare current golden metrics against
+**`data/fixtures/eval/baseline.json`**. Floors (TC-111/112) still apply; the gate also rejects
+**regressions** beyond tolerance vs the committed baseline.
+
+### Baseline file schema (v1)
+
+| Field | Description |
+|-------|-------------|
+| `schema_version` | Integer — bump when compare rules change |
+| `generated_at` | ISO-8601 UTC timestamp |
+| `fixture_ref` | Hash of `qa_pairs.json` (fail compare if fixture drift) |
+| `metrics.retrieval_relevance` | Aggregate over `hit` + `any_of` rows |
+| `metrics.faithfulness` | Mocked-judge aggregate (CI path) |
+| `metrics.answer_relevancy` | Mocked-judge aggregate (CI path) |
+| `metrics.latency_p95_ms` | p95 wall time per question (warm path; cold-start excluded) |
+
+### Refresh SOP (intentional improvement)
+
+1. Ensure `qa_pairs.json` changes are reviewed and merged first.
+2. Run `uv run python scripts/eval_generate_baseline.py` (or documented equivalent) with Postgres + seeded eval corpus.
+3. Inspect diff — metrics should improve or stay flat; document rationale in PR.
+4. Commit updated `baseline.json` in the **same PR** as any retrieval/packing change that caused the shift.
+5. Never auto-commit baseline from CI on green `main`.
+
+Tolerances: [Spec: docs/test-plan.md §TC-280] [Spec: docs/acceptance-criteria.md §AC-RG2].
+
 ## Model / parameter sweep (sample CLI)
 
 End-to-end experiment loop (see skill `eval-golden-sweep`):

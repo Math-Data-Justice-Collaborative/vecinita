@@ -8379,9 +8379,35 @@ project:
         handoff → 07-build ready. [Corpus: feature-list.md §F75–F77] [Spec: docs/sessions/S030-corpus-automations/reports/tech-plan-delta.md
         §TP10]'
       updated_at: '2026-08-07T14:47:56Z'
-session_counter: 31
+session_counter: 32
 active_session:
+  id: S032-rag-regression-gate
+  type: feature
+  orchestrator: evolve
+  evolve_cycle_id: EV-028
+  status: in_progress
+  phase: implementing
+  branch: evolve/EV-028-rag-regression-gate
+  issue: 181
+  local_store: ~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-028-rag-regression-gate
+  documenting_to_implementing_gate: open
 sessions:
+- id: S032-rag-regression-gate
+  type: feature
+  slug: rag-regression-gate
+  intent: ChatRAG performance regression gate — baseline JSON + CI compare vs golden metrics (#181)
+  status: in_progress
+  branch: evolve/EV-028-rag-regression-gate
+  orchestrator: evolve
+  evolve_cycle_id: EV-028
+  mode: evolve
+  scale: standard
+  issues: [181]
+  phase: implementing
+  documenting_to_implementing_gate: open
+  local_store: ~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-028-rag-regression-gate
+  started_at: '2026-08-23'
+  cite: '[Corpus: tests] [Issue #181] [F36] EV-028 intake S032-D1'
 - id: S031-docs-gapfill
   type: feature
   slug: docs-gapfill

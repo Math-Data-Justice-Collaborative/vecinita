@@ -165,7 +165,8 @@ Husky installs on `npm ci` (`prepare` script). **Pre-push is lean** (lint + unit
 heavier local gates run on **pre-commit**. GitHub CI remains the merge gate for
 **unit** tests, format-check, audit, **unit coverage** (with PR comment), and production
 builds. **Compose-backed** suites (`integration` / `e2e` / `privacy` / `smoke` / `eval` /
-`bugs`) run locally via `make test-py` / `make ci-push` (S027-D34 / F62).
+`bugs`) run locally via `make test-py` / `make ci-push` (S027-D34 / F62). **Exception (EV-028):**
+`make test-rag-regression` (TC-280) also runs in remote CI job `rag-regression`.
 
 ```bash
 # Skip pre-commit (emergencies only):

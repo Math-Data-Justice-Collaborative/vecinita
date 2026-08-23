@@ -1196,6 +1196,32 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | S031-D5 | `test_fast.sh` bash 3.2 | **Portable rewrite** (replace bash-4-only builtins) so implementing `tests` pack / `make test-fast` works on macOS stock bash |
 | S031-D6 | Close session | **Close** then commit on `feat/S031-docs-gapfill` (`close_then_commit`) |
 
+### Ship path close (2026-08-23)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S030-D67 | Final ship close | **Close EV-027 ship path** — #238 merged `32d94c9b`; #247 merged `d84162ea`; `overall_status=idle`; skip 17-retrospective this session; cutover/enable/FT promote remain deferred (S030-D64) |
+
+## Cycle EV-028 — Scope (S032 / #181)
+
+**Title:** ChatRAG performance regression gate  
+**Session:** S032-rag-regression-gate (local store: `EV-028-rag-regression-gate`)  
+**Issue:** [#181](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/181)  
+**Milestone:** Retrieval and answer quality  
+**Branch:** `evolve/EV-028-rag-regression-gate`  
+**Status:** implementing — implementation complete pending full verify + PR (#181)
+
+### Intake (S032-D1 — 2026-08-23)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S032-D1 | Goal | Full #181 — baseline store + CI regression compare + reviewable bump |
+| S032-D2 | Gate scope | PRs to `main` + pushes to `main` |
+| S032-D3 | Corpus / runtime | Fixture golden + mocked judge + CI postgres (no Modal GPU on PR) |
+| S032-D4 | Tolerances | Quality ≤0.02 abs drop (with floors); retrieval ≤2pp drop; latency p95 max(+10%, +500ms) vs baseline, 15s ceiling |
+| S032-D5 | Scale / angles | Standard + all v1 documenting packs |
+| S032-D6 | Spec→Build gate | **Open** — implement on `evolve/EV-028-rag-regression-gate` |
+
 **Waivers**
 
 - `[Corpus: WAIVED — community maps/alerts mock; reason: non-normative HTML mock, no Fn; decided: S031]`
