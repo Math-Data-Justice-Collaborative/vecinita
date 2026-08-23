@@ -1056,3 +1056,32 @@ Follow-up to #243/#248: three community hosts still failed staging re-ingest. Ad
 | EV249-D2 | WAF 403 | Retry without VecinitaBot in UA + browser Sec-Fetch headers |
 | EV249-D3 | Persistent block | `ScrapeFetchError` with stable `error_code` in job metrics |
 | EV249-D4 | Out of scope | Playwright JS-render for WAF; prod corpus mutation |
+
+## Cycle EV-216 — Suggested question refresh (#216)
+
+**Approved:** 2026-08-22  
+**Session:** EV-216-suggested-questions (local store)  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/216
+
+### Scope summary
+
+Replace empty-state suggested-question chips (EN/ES) with staging-verified wording aligned to
+post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` + Vitest.
+
+### Proposed chips (staging-verified)
+
+| # | English | Spanish |
+|---|---------|---------|
+| 1 | Where can I get food assistance in Rhode Island? | ¿Dónde puedo conseguir ayuda con comida en Rhode Island? |
+| 2 | How do I get rent assistance in Providence? | ¿Cómo solicito ayuda para pagar el alquiler en Providence? |
+| 3 | Where can I find free ESL classes in Providence? | ¿Dónde puedo encontrar clases gratis de inglés en Providence? |
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV216-D1 | Chip selection | Staging eval pass on RI food / Providence rent / Providence ESL |
+| EV216-D2 | Placeholders | Update `questionPlaceholder` to mirror chip 1 topic |
+| EV216-D3 | Out of scope | Dynamic chips; backend query rewrite; coldstart facts copy |
+| EV216-D4 | Success | Issue #216 acceptance criteria; TC-259 / UJ-081 |
+| EV216-D5 | Spec gate | Spec-first; Build blocked until operator approves gate |
