@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from vecinita_eval.baseline import (
     DEFAULT_BASELINE_PATH,
@@ -16,6 +18,12 @@ from tests.eval.conftest import eval_embed_fn
 from tests.helpers.eval_judge import MockEvalJudge
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.fixture(autouse=True)
+def _disable_multi_query_for_regression_gate() -> None:
+    """TC-280 uses single-query retrieval for deterministic CI embed alignment."""
+    os.environ["VECINITA_RAG_MULTI_QUERY"] = "false"
 
 
 def test_rag_regression_gate_within_baseline_tolerance(eval_db: str) -> None:

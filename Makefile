@@ -137,7 +137,7 @@ test-privacy: ## Pytest privacy guardrail tests (starts/stops compose postgres w
 	$(WITH_POSTGRES) $(UV) run pytest tests/privacy
 
 test-rag-regression: ## TC-280 ChatRAG golden regression gate vs baseline (EV-028 / #181)
-	$(WITH_POSTGRES) $(UV) run pytest tests/eval/test_rag_regression_gate.py -q
+	$(WITH_POSTGRES) env VECINITA_RAG_MULTI_QUERY=false $(UV) run pytest tests/eval/test_rag_regression_gate.py -q
 
 test-py: ## Full Python test suite (starts/stops compose postgres when needed)
 	$(WITH_POSTGRES) $(UV) run pytest $(PYTEST_DEFAULT)

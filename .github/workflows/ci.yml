@@ -140,6 +140,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita
+      VECINITA_RAG_MULTI_QUERY: "false"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 

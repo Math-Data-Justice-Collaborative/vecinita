@@ -13,9 +13,7 @@ def basis_vector(index: int, *, scale: float = 1.0) -> list[float]:
 def ci_eval_embed_fn(question: str) -> list[float]:
     """Deterministic embed aligned with seed_eval_corpus basis vectors."""
     lowered = question.lower()
-    if "cuentacuentos" in lowered:
-        vector_index = 2
-    elif "story time" in lowered:
+    if "story time" in lowered:
         vector_index = 0
     elif "vecinita" in lowered or "vecinos" in lowered or "neighbors" in lowered:
         vector_index = 3
