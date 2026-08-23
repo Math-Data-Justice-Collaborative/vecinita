@@ -2,9 +2,8 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-06-13  
-> **Source**: 01-requirements interview (context-brief.md, [ADR index](adr/README.md)); **EV-001** delta (ADR-014); **EV-002** delta (ADR-016); **EV-003** F30 (ADR-018); **EV-004** delta F31 (ADR-019, ADR-020); **S003** delta F33 (ADR-023); **EV-005** delta F34 (ADR-026)
-> **Last updated**: 2026-08-22 (EV-031 — F76 corpus language parity #245; prior EV-030 F75)
+> **Last updated**: 2026-08-22 (EV-031 F76 parity #245; EV-030 F75; EV-027 F78–F80 in progress)  
+> **Source**: Standing product specs + evolve deltas; cite [ADR index](adr/README.md) and session decision logs for cycle history.
 
 ## Summary
 
@@ -19,7 +18,7 @@
 | F7 | URL scrape → chunk → embed → store | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
 | F8 | Ingest job queue & status API | Implemented | Data Management | data-management-backend | 11-verify-impl 2026-05-19 |
 | F9 | Corpus list / delete (admin) | Implemented (+ EV-013 polish) | Data Management | data-management-backend, data-management-frontend | 11-verify-impl 2026-05-19; EV-013 #148 density/truncation |
-| F10 | Multilingual 384-d embeddings on Modal | Planned (EV-025 evolve) | Data Management / Cross-cutting | Modal embed, embedding-client | S027/EV-025 #159; was FastEmbed-en |
+| F10 | Multilingual 384-d embeddings on Modal | Implemented (via F70) | Data Management / Cross-cutting | Modal embed, embedding-client | S027 #159; was FastEmbed-en |
 | F11 | ChatRAG web UI (React/Vite) | Implemented | ChatRAG | chat-rag-frontend | Vitest smoke; UI E2E waived v1 |
 | F12 | Data management admin UI | Implemented (+ EV-013 polish) | Data Management | data-management-frontend | Vitest smoke; EV-013 #148 shared table density |
 | F13 | Database migrations & pgvector | Implemented | Database | apps/database | 11-verify-impl 2026-05-19 |
@@ -40,7 +39,7 @@
 | F28 | Source serving statistics | Implemented | Cross-cutting | chat-rag-backend, internal-write-api, database | 11-verify-impl 2026-05-27 |
 | F29 | Audit log & version history | Implemented | Data Management | internal-write-api, data-management-frontend, database | 11-verify-impl 2026-05-27 |
 | F30 | Strict static typing (no `Any` / `any`) | Implemented | Cross-cutting | all Python + TS apps | EV-003 2026-05-27 |
-| F31 | Admin + shared frontend bilingual UI (en/es) | Planned | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | EV-004 2026-06-13 |
+| F31 | Admin + shared frontend bilingual UI (en/es) | Implemented | Cross-cutting | data-management-frontend, chat-rag-frontend, `packages/frontend-i18n`, `packages/frontend-ui` | Shared packages shipped |
 | F32 | Admin Job Management tab (list jobs) | Implemented → Evolving (EV-012) | Data Management | data-management-backend, data-management-frontend | S002 2026-06-26 (#89); S013/EV-012 #116 |
 | F33 | Browser-local persistent chat history (localStorage + previous-chats list) | Planned | ChatRAG | chat-rag-frontend | S003 2026-06-26; ADR-025 2026-06-28 |
 | F34 | Supabase Auth for admin surfaces (invite-only, admin+viewer) | Planned | Cross-cutting (admin) | data-management-frontend, data-management-backend, internal-write-api | S004/EV-005 2026-06-28; ADR-026 (#75) |
@@ -79,8 +78,11 @@
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 | F75 | Optional ingest bilingual translation | Implemented | Data Management | data-management-backend, internal-write-api, Modal LLM, admin FE | EV-030 #251 |
 | F76 | Corpus language parity metrics + badges | Implemented | Data Management | internal-write-api, data-management-frontend | EV-031 #245 |
+| F78 | Corpus change automations | In progress (catch-up build; PR open) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73 |
+| F79 | Corpus freshness automation | In progress (write-API + schema; Modal job next) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219 |
+| F80 | Modal LoRA fine-tune + human promote | Planned | Cross-cutting (LLM) | new Modal FT app, llm_app, llm-client, eval, admin FE | S030 #72 |
 
-**Status key**: Implemented = production-ready, Planned = not yet built, Experimental = works but not validated
+**Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
 ## Feature Details
 
@@ -1448,13 +1450,67 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Status**: Implemented (EV-031).
 - **Source**: EV-031; GitHub #245; ADR-052.
 
+### F78: Corpus change automations (#73)
+
+- **What it does**: When corpus content is added or changed, enqueue **catch-up** work
+  (failed/partial jobs, missing embeddings; optional retag) — **not** re-embed when
+  already complete (RD-334). Triggers: job completion, cron catch-up, and document
+  CRUD hooks that enqueue async Modal jobs (`document_id`+`revision` idempotent key). Shares
+  **one** Modal schedule with F79 (two job types). Kill-switch + cost/concurrency caps;
+  run history in Postgres via write-API; DM UI enable/disable + history (ADR-052).
+- **Inputs**: Job completion events; cron ticks; document CRUD; config flags/caps.
+- **Outputs**: Automation jobs; `automation_runs` history (status, last run, errors).
+- **Protected surfaces**: `infra/modal/data_management_app.py`; DM backend/FE; write-API
+  + schema for run history.
+- **Journeys / tests**: UJ-082; TC-266–269, TC-270; AC-AU1–AU6.
+- **Out of scope**: #192 dashboard widgets; fine-tune train (→ F80); source refresh (→ F79);
+  auto F41 on every change.
+- **Status**: In progress (S030/EV-027; 01-requirements RD-325+).
+- **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23; ADR-052.
+
+### F79: Corpus freshness automation (#219)
+
+- **What it does**: Keep registered URL sources current via scheduled or triggered
+  re-fetch/re-crawl; stale detection (default **30 days**); change-aware ingest
+  (`content_hash` skip + last_checked bump); operator enable/disable per source and
+  “Refresh now”. Shares Modal schedule with F78 (ADR-052).
+- **Inputs**: Registered source URLs; schedule config; operator refresh actions.
+- **Outputs**: Refreshed or verified documents; stale/last_checked visible in Admin.
+- **Protected surfaces**: Modal schedule (shared with F78); packages/ingest; DM FE;
+  write API / schema as needed.
+- **Journeys / tests**: UJ-083; TC-271–274, TC-270; AC-FR1–FR6.
+- **Out of scope**: Fine-tune (#72/F80); guaranteeing third-party uptime.
+- **Status**: In progress (S030/EV-027; 01-requirements RD-325+).
+- **Source**: S030 / EV-027; GitHub #219; S030-D7, D18–D19; ADR-052.
+
+### F80: Modal LoRA fine-tune + human promote (#72)
+
+- **What it does**: Fine-tune the chat LLM on the RAG corpus via Modal using **LoRA/PEFT**
+  on the pinned Qwen model. Training data: **instruction/QA SFT pairs** from chunks.
+  Version adapters on a Modal Volume. Each train requires **manual approve**. Eval
+  report (base vs adapter) is shown to the operator; **promote is human judgment only**
+  (no automated metric abort) — operator should promote only when they judge better than
+  base. Prod `vecinita-llm` loads adapter **only after promote**; playground optional
+  for pre-promote (ADR-053).
+- **Inputs**: Corpus-derived SFT set; operator approve; eval golden/held-out set.
+- **Outputs**: Versioned LoRA adapter; eval report; optional promoted serve.
+- **Protected surfaces**: new `infra/modal/` FT module; `llm_app.py`; llm-client; eval
+  harness; admin FE approve/promote UX.
+- **Journeys / tests**: UJ-084; TC-275–279; AC-FT1–FT9.
+  (“Eval-gated” = human promote after eval evidence — RD-338; not automated abort.)
+- **Out of scope**: Full-weight FT default; auto-load latest on prod; blind promote
+  without operator review.
+- **Status**: Planned (S030/EV-027; 01-requirements RD-325+). Overrides P3 “excluded
+  from v1” for this cycle.
+- **Source**: S030 / EV-027; GitHub #72; ADR-009, ADR-037, ADR-053; S030-D5, D10–D12, D20–D22.
+
 ## Planned / Deferred (post-v1)
 
 | # | Feature | Priority | Complexity | Notes |
 |---|---------|----------|------------|-------|
 | P1 | Dedicated API gateway / BFF | Medium | Medium | R6 unresolved — direct backend URLs in v1 |
 | P2 | Multimodal / full OCR ingest | Low | High | **F59** covers basic PDF text; full OCR still deferred |
-| P3 | Model fine-tuning on corpus | Low | High | Fine-tuning excluded from v1 |
+| P3 | Model fine-tuning on corpus | Low | High | **Superseded in-cycle by F80** (S030/EV-027 #72); was “excluded from v1” |
 | P4 | Advanced admin (bulk reindex, A/B prompts) | Low | Medium | — |
 | P5 | Full APM / OpenTelemetry | Low | Medium | Basic logs in v1 (F17) |
 | P6 | ChatRAG nested corpus UI | Medium | Medium | Deferred — licensing research (S024-D17) |

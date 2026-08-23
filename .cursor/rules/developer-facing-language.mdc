@@ -1,0 +1,60 @@
+---
+description: >-
+  Human-readable git history, issues, milestones, PRs, deploys, and agent summaries —
+  feature/behavior English first; tracking codes are citations only
+alwaysApply: true
+---
+
+# Developer-facing language
+
+## Principle
+
+Anything a human reads in **git history, GitHub issues/milestones/PRs, project board,
+deploy/release notes, changelogs, or agent status** must make sense in short plain English
+**without decoding** session/evolve/task codes.
+
+Name by **feature, fix, or user-visible behavior** — not by planning bucket (`W1`, `Post-027`)
+or opaque IDs alone.
+
+Tracking IDs stay valid in session docs, execution plans, `workflow-state`, ADRs, and corpus
+cites. In developer-facing text, put them **after** English (parentheses) or in the body.
+
+## Surfaces (always)
+
+| Surface | Do | Do not |
+|---------|----|--------|
+| Commit subject | `feat: enqueue catch-up for failed embeds (F75)` | `[T127.5] feat: …` / `[EV-027] …` as the subject |
+| PR title | `Corpus automations catch-up (F75)` | `[EV-027][M127] F75` as the only readable title |
+| Issue title | `[data] Add Providence ESL class sources` | `[Post-027 W1] …` / bare `T03` / `EV-027 item 2` |
+| GH milestone | `Corpus coverage — sources, ESL, food banks, Drive` | `Post-027 W1` / `M128` / `S030 batch` |
+| Epic title | `[epic] Corpus coverage — sources, ESL, food banks, Drive` | `[epic] Post-027 W1 sprint` |
+| Branch | `evolve/EV-027-corpus-automations` (slug required) | `evolve/EV-027` with no English slug |
+| Deploy / release notes | English bullets by behavior shipped | Bullets that are only `EV-…` / `T…` / `M…` |
+| Agent “completed” lines | `Completed: add export endpoint. Next: …` | `Completed T3.2` with no English |
+
+## Self-check before publishing
+
+Ask: *If someone removed every `EV-` / `S0` / `T` / `F` / `W` token, would the title still
+say what changed?* If no → rewrite.
+
+```text
+❌ Post-027 W2 — RAG quality
+✅ Retrieval and answer quality
+
+❌ [EV-026] M112 F66
+✅ Action icon micro-interactions on admin and chat
+
+❌ feat: T128.3 wire Modal schedule
+✅ feat: share Modal schedule for catch-up and freshness jobs (F75)
+```
+
+## Citations (optional, never the lead)
+
+Features `F75`, ADRs `ADR-052`, sessions `S030`, tests `TC-264` / `UJ-012`, bugs
+`BUG-2026-…` / `#192`, evolve `EV-027` (OK in **branch** names; PR/issue/milestone titles
+still need English).
+
+## Still OK internally
+
+Paths, tables, and cross-links in session/plan docs may use IDs as keys — always pair with
+an English intent column when a human will skim the row.

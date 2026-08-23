@@ -22,6 +22,12 @@ findings into scoped fixes on the PR branch.
 
 **Never merge.** User merges manually after re-review passes.
 
+## Startup interview (required)
+
+**Mandatory thorough interview** ([pipeline-preamble.md](../pipeline-preamble.md) §8) before
+editing: AskQuestion for PR identity, which findings to address (all blockers / selected /
+batch), TDD expectations, and proceed gate. English-first prompts.
+
 ## When to use
 
 | Situation | Use |

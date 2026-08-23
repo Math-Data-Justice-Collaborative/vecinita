@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-05 (S027/EV-025 — sentence-transformers / onnxruntime for ADR-048; prior S024 scrape deps)
+> **Last updated**: 2026-08-07 (S030/EV-027 — Modal FT train pins peft/trl; prior S027 embed)
 
 ## Runtime dependencies (Python — planned)
 
@@ -19,7 +19,13 @@
 | httpx | TBD | Modal HTTP clients | BSD | |
 | modal | >=1.2,<2 | Workers + ASGI | Apache-2.0 | Template registry |
 | **vllm** | **0.8.5.x** (Modal image only; AWQ + sleep mode, S010/ADR-037) | **Primary** LLM on Modal **T4**; Qwen2.5 default + playground tags (e.g. `qwen3:8b` → AWQ) | Apache-2.0 | ADR-009, ADR-037, infra/modal/llm_app.py |
-| **transformers** | **4.51.3** (Modal image; also needed by `llm-client` chat-template helper at Slice C; **ingest chunker F49 / F71**) | Qwen3 `model_type` + HF `apply_chat_template`; chunk HF tokenizer (align to embed pin — EV-025) | Apache-2.0 | S010 T76.7 / TP-S010-24; S022 ADR-044; S027 ADR-048 |
+| **transformers** | **4.51.3** (Modal **llm** serve image; also needed by `llm-client` chat-template helper at Slice C; **ingest chunker F49 / F71**) | Qwen3 `model_type` + HF `apply_chat_template`; chunk HF tokenizer (align to embed pin — EV-025) | Apache-2.0 | S010 T76.7 / TP-S010-24; S022 ADR-044; S027 ADR-048. **FT train** uses a separate pin — see EV-027 table |
+| **peft** | **`==0.20.0`** (Modal **FT train** image only; `infra/modal/finetune_pins.py`) | LoRA/PEFT adapters for F77 | Apache-2.0 | EV-027 / ADR-053 / S030-D33; not DO runtime |
+| **trl** | **`==1.9.2`** (Modal FT train image) | SFTTrainer for instruction/QA pairs | Apache-2.0 | EV-027 / TP10 / S030-D33 |
+| **transformers** (FT train) | **`==4.57.6`** (Modal FT train image only) | Train-time HF stack (newer than llm serve 4.51.3) | Apache-2.0 | Do **not** bump `llm_app` serve pin without ADR |
+| **accelerate** | **`==1.14.0`** (Modal FT train image) | HF training launcher | Apache-2.0 | EV-027 / S030-D33 |
+| **datasets** | **`==4.8.5`** (Modal FT train image) | HF datasets for SFT (trl requires `>=4.7.0`) | Apache-2.0 | EV-027 / S030-D33 |
+| **bitsandbytes** | **deferred** (v1) | QLoRA optional | — | 1.5B LoRA without it; revisit if GPU memory forces QLoRA |
 | **vecinita-llm-client** | workspace | Unified HTTP client to Modal LLM (`httpx`); depends on **vecinita-shared-schemas** | — | T9.3; Phase 18 M77/M81 |
 | **vecinita-shared-schemas** | workspace | Shared schemas + LLM HTTP config resolver (URL/proxy/timeout) | — | TP-S010-20 |
 | **vecinita-tagging** (`packages/tagging`) | workspace | LLM tag prompts, vocabulary merge, caps; reuses vLLM HTTP | — | EV-001 F20/F22; no new Modal deployable |
@@ -186,6 +192,21 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
   `vecinita-frontend-ui`; F73 wires existing `min_retrieval_score` / CE threshold; F74 adds a
   nullable Postgres column + shared-schemas DTO / OpenAPI (`openapi/internal-write.yaml`).
   06-tech-tooling skipped (RD-319 / TP4).
+
+- **EV-027 F75–F77 (Phase 30 / TP10 / S030-D33):** **06-tech-tooling complete.** Fine-tune
+  train stack pinned **exactly** (Modal `vecinita-llm-finetune` image only — not DO apps;
+  not root workspace runtime). Source of truth: `infra/modal/finetune_pins.py`
+  (`FINETUNE_IMAGE_PIPS`):
+  - `peft==0.20.0`
+  - `trl==1.9.2`
+  - `transformers==4.57.6` (train; **≠** llm serve `transformers==4.51.3`)
+  - `accelerate==1.14.0`
+  - `datasets==4.8.5`
+  - **bitsandbytes deferred** (no QLoRA in v1)
+  07-build must `.pip_install(*FINETUNE_IMAGE_PIPS)` (or equivalent) in `finetune_app.py` —
+  do **not** silent-add alternate versions.
+  F75/F76 use existing FastAPI / Modal / Postgres / Playwright — no new required runtime deps
+  beyond FT train image.
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)
 

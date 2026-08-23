@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
+  Bot,
   FileText,
   FlaskConical,
   Heart,
@@ -8,6 +9,7 @@ import {
   MessageSquareText,
   ScrollText,
   Menu,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -120,6 +122,16 @@ function NavItems({ onClick }: { onClick?: () => void }) {
     },
     ...(isAdmin
       ? [
+          {
+            to: "/automations",
+            label: tr("admin.nav.automations"),
+            icon: Bot,
+          } as const,
+          {
+            to: "/finetune",
+            label: tr("admin.nav.finetune"),
+            icon: Sparkles,
+          } as const,
           {
             to: "/feedback",
             label: tr("admin.nav.feedback"),

@@ -36,11 +36,22 @@ Move cards on **state change** — draft PRs stay *In progress*; merged PRs awai
 
 Do not track secrets (`*-spec.yaml`, `prod.env`) on the board.
 
-## Issues & PRs
+## Issues, milestones & PRs
 
-**Titles:** `[EV-NNN] …` · `[Fnn] …` · `[fix] …`
+**Human-readable first** (`.cursor/rules/developer-facing-language.mdc`):
+name by **feature / fix / behavior**, not planning codes.
 
-**Issue body:** feature ID (F1–F30), user journey if applicable (UJ-*), spec/ADR link, apps touched, deploy impact.
+| Surface | Good | Avoid |
+|---------|------|-------|
+| Issue | `[data] Add Providence ESL class sources` | `[Post-027 W1] …`, bare `EV-027` |
+| Milestone | `Corpus coverage — sources, ESL, food banks, Drive` | `Post-027 W1`, `M128` |
+| PR | `Corpus automations catch-up (F75)` | `[EV-027][M127] F75` only |
+| Epic | `[epic] Corpus coverage — …` | `[epic] Post-027 W1 sprint` |
+
+Optional area tags in issue titles are fine: `[data]`, `[chat-rag]`, `[admin]`, `[infra]`,
+`[fix]`, `[epic]`. Cite `Fnn` / `EV-NNN` in the **body** (or parentheses after English).
+
+**Issue body:** feature ID, user journey if applicable (UJ-*), spec/ADR link, apps touched, deploy impact.
 
 **PRs:** link issues (`Closes #N`); `ci.yml` green on branch; on `main` also `deploy-preflight.yml`. After merge: `bash scripts/ci/watch_github_ci.sh main`.
 

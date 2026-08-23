@@ -157,7 +157,7 @@ pr_review_cycles:
   - id: PRR-001
     pr_number: 123
     pr_url: https://github.com/org/repo/pull/123
-    title: "[M1] Example milestone"
+    title: "Example milestone"
     status: completed
     started: "2026-06-12"
     completed: "2026-06-12"

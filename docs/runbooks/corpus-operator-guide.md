@@ -2,7 +2,7 @@
 
 > **Audience:** Corpus operators and community admins  
 > **Issue:** [#52](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/52)  
-> **Last updated:** 2026-08-06 (S028/EV-026 F74 display_title)  
+> **Last updated:** 2026-08-12 (automations / freshness / LoRA promote notes)  
 > **Developer reference:** [data-management-dev-guide.md](data-management-dev-guide.md)
 
 ---
@@ -18,10 +18,24 @@ The **admin frontend** (`data-management-frontend`) lets authenticated operators
 - Run **bulk operations** — delete, retag, metadata edit (admin role only)
 - View **dashboard stats** and **service health**
 - Review the **audit log** and document version history
-- Run **RAG evaluation** against golden fixtures (EV-008)
-- Use **Playground** for sandboxed RAG config (EV-009, super-admin promote)
+- Run **RAG evaluation** against golden fixtures
+- Use **Playground** for sandboxed RAG / model experiments (super-admin promote)
+- Configure **corpus automations** (catch-up for failed embeds) and **freshness** (stale sources / Refresh now) when enabled
+- Review **fine-tune** eval evidence and **human-promote** LoRA adapters (never auto-promote)
 
 Community members use the **ChatRAG frontend** separately — no login required.
+
+---
+
+## Automations, freshness, and fine-tune (operator notes)
+
+| Capability | What it does | Operator controls |
+|------------|--------------|-------------------|
+| **Catch-up** | Re-queues residual failed / partial / missing embeds only — not a full re-embed | Enable/disable + kill-switch; run history in admin |
+| **Freshness** | Flags sources older than the stale threshold (default **30 days**); optional Refresh now | Per-source refresh enable; Refresh now; shared daily schedule with catch-up |
+| **LoRA fine-tune** | Train adapter on pinned Qwen from corpus SFT pairs | Manual approve before GPU train; promote only after reviewing eval evidence |
+
+**Safety:** Do not enable automations or promote adapters on **live production** without an explicit product decision. Prefer staging first. Kill-switch: `VECINITA_AUTOMATIONS_KILL_SWITCH`. Specs: ADR-052, ADR-053; [feature-list.md](../feature-list.md) §F75–F77.
 
 ---
 

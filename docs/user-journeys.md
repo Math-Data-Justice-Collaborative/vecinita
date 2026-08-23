@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-06 (S028/EV-026 F72–F74 — UJ-077–079 chat source UX; prior S027 UJ-075–076)
+> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — UJ-080–082; prior S028 UJ-077–079)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -79,7 +79,11 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-077 | Citation link only for valid http(s) URLs | Community member | ChatRAG SourceList | F72 EV-026 #222 | local (Vitest) |
 | UJ-078 | Ask sources length 0…top_k by relevance | Community member | ChatRAG → `POST /api/v1/ask` / stream | F73 EV-026 #223 | local |
 | UJ-079 | Operator sets document display_title | Admin operator | DocumentAdmin rename + ask citation | F74 EV-026 #224 | local |
+| UJ-080 | Ingest bilingual translation on job | Admin operator | JobForm translate checkbox → ingest job | F75 EV-030 #251 | local |
 | UJ-081 | Use suggested question chips (empty state) | Community member | ChatRAG welcome → chip click → prefilled ask | F1 EV-216 #216 | local |
+| UJ-082 | Enable automations + view run history | Admin operator | DM Automations UI + write-API | F78 EV-027 #73 | local |
+| UJ-083 | Refresh stale sources / schedule freshness | Admin operator | DM freshness + Modal schedule | F79 EV-027 #219 | local |
+| UJ-084 | Approve FT train + human promote | Admin / super-admin | FT job + eval report + llm promote | F80 EV-027 #72 | local |
 
 ## Visual journey maps
 
@@ -1314,6 +1318,80 @@ the human-chosen name; rescrape updates raw `title` but preserves `display_title
 Playwright optional if list↔detail cross-panel.
 
 **E2E tier**: local.
+
+---
+
+### UJ-082: Enable automations + view run history (F78)
+
+**Actor**: Admin operator
+
+**Goal**: Turn corpus-change automations on/off and inspect run history (status, last run, errors).
+
+**Preconditions**: Admin JWT; automations feature deployed; kill-switch config available.
+
+**Steps**:
+
+1. Open DM Automations (or Jobs-adjacent) panel; view enable/disable and current kill-switch state.
+2. Enable automations; trigger or wait for a catch-up / post-job automation run.
+3. Confirm run appears in history with status, timestamps, and error (if any).
+4. Disable or hit kill-switch — no new automation jobs enqueue.
+
+**Acceptance**: AC-AU1–AU6; TC-266–269, TC-270.
+
+**Automated tests**: API e2e `tests/e2e/test_uj082_automations.py`; Vitest enable/history panel.
+**UI E2E**: Playwright if shell ↔ automations panel cross-nav.
+
+**E2E tier**: local (API TestClient); T0-ui when UI ships.
+
+---
+
+### UJ-083: Refresh stale sources / schedule freshness (F79)
+
+**Actor**: Admin operator
+
+**Goal**: Keep URL sources current via schedule or manual refresh; see stale/last-checked state.
+
+**Preconditions**: URL-backed documents; freshness enabled; shared Modal schedule.
+
+**Steps**:
+
+1. View corpus/admin list with stale badge / last_checked for a URL doc older than threshold (default 30d).
+2. Trigger **Refresh now** on one source — job runs; hash-unchanged skips rechunk; last_checked updates.
+3. Confirm scheduled refresh job type runs on cron without incorrectly duplicating F78 catch-up.
+4. Disable refresh for a source — schedule skips it.
+
+**Acceptance**: AC-FR1–FR6; TC-271–274, TC-270.
+
+**Automated tests**: API e2e `tests/e2e/test_uj083_freshness.py`; unit hash/stale helpers.
+**UI E2E**: Playwright list ↔ refresh action if cross-panel.
+
+**E2E tier**: local; T0-ui when UI ships.
+
+---
+
+### UJ-084: Approve FT train + human promote (F80)
+
+**Actor**: Admin / super-admin
+
+**Goal**: Manually approve a LoRA train job, review base-vs-adapter eval evidence, promote to
+prod `vecinita-llm` only when the operator judges quality better.
+
+**Preconditions**: FT Modal app; kill-switch off; train budget; golden/held-out set available.
+
+**Steps**:
+
+1. Request train; job stays pending until **Approve train**.
+2. After train, open eval report (base vs adapter); optionally load adapter on playground.
+3. Operator judges promote / no-promote (human gate — no automated abort).
+4. On promote: prod `vecinita-llm` loads adapter; AskQuestion before live cutover in deploy stages.
+5. Rollback path documented (revert to base pin).
+
+**Acceptance**: AC-FT1–FT9; TC-275–279.
+
+**Automated tests**: Unit train-data builder; API e2e approve/promote/rollback state machine;
+integration eval report shape. Live GPU train is T3 / smoke — not CI default.
+
+**E2E tier**: local (state machine); T3 for real Modal train when approved.
 
 ---
 

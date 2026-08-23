@@ -187,6 +187,19 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 - **Outputs**: Applied schema; forbidden-table CI checks.
 - **Source**: feature-list F13–F15; ADR-004
 
+
+### Corpus automations + freshness (F75–F76, EV-027)
+
+Modal schedule + DM workers orchestrate **catch-up** (failed/partial/missing embed) and
+**freshness refresh** (URL re-fetch). Triggers: job completion, doc CRUD enqueue, cron.
+Kill-switch + caps. Run history in Postgres via write-API. See ADR-052.
+
+### Modal LoRA fine-tune (F77, EV-027)
+
+Separate Modal FT app trains LoRA/PEFT on pinned Qwen from chunk-derived SFT pairs.
+Manual train approve; human promote after eval evidence; prod `vecinita-llm` loads
+adapter only when promoted. See ADR-053.
+
 ### Modal FastEmbed & LLM services
 
 - **Purpose**: Self-hosted embedding (384-dim) and text generation.

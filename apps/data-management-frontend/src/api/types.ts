@@ -1,6 +1,13 @@
 export type JobStatus =
   "pending" | "running" | "completed" | "failed" | "cancelled";
-export type JobType = "ingest" | "retag" | "eval" | "rebuild";
+export type JobType =
+  | "ingest"
+  | "retag"
+  | "eval"
+  | "rebuild"
+  | "finetune_train"
+  | "automation_catchup"
+  | "freshness_refresh";
 export type RebuildMode = "reembed" | "rechunk" | "rescrape";
 export type BackfillSource = "rescrape" | "from_chunks";
 
@@ -10,6 +17,7 @@ export interface JobUrlFailure {
   error_message: string;
 }
 
+/** Optional job metrics — F75 translation, F78–F80 automation outcomes, F80 adapter pin. */
 export interface JobMetrics {
   skipped_unchanged?: number;
   urls_failed_embed?: number;
@@ -19,6 +27,14 @@ export interface JobMetrics {
   pages_failed?: number;
   pages_skipped_robots?: number;
   crawl_stopped_reason?: string | null;
+  catchup_outcome?: string | null;
+  freshness_outcome?: string | null;
+  documents_processed?: number | null;
+  finetune_outcome?: string | null;
+  adapter_id?: string | null;
+  adapter_path?: string | null;
+  pair_count?: number | null;
+  base_model_id?: string | null;
   translated_documents?: number;
   translated_chunks?: number;
   translation_skipped?: number;
@@ -36,6 +52,8 @@ export interface Job {
   dashboard_url?: string | null | undefined;
   error_code?: string | null | undefined;
   error_message?: string | null | undefined;
+  /** F80 finetune_train — false until POST /jobs/{id}/approve (TC-260). */
+  approved?: boolean | null | undefined;
   metrics?: JobMetrics | null | undefined;
   created_at: string;
   updated_at: string;
@@ -99,12 +117,21 @@ export interface DocumentSummary {
   source_path?: string | null;
   parent_url?: string | null;
   canonical_url?: string | null;
+  /** F79 — per-source freshness enable (default true when omitted). */
+  refresh_enabled?: boolean;
+  /** F79 — last successful freshness check (ISO timestamptz). */
+  last_checked_at?: string | null;
+  /** F79 — older than stale threshold (TC-258). */
+  stale?: boolean;
 }
 
 export interface DocumentMetadataPatch {
   display_title?: string | null;
   title?: string | null;
   language?: string | null;
+  publish_status?: "draft" | "published" | null;
+  /** F79 — enable/disable scheduled freshness for this URL source. */
+  refresh_enabled?: boolean;
 }
 
 export interface DocumentMetadataResponse {
@@ -113,6 +140,9 @@ export interface DocumentMetadataResponse {
   title: string | null;
   display_title: string | null;
   language: string | null;
+  publish_status?: "draft" | "published" | null;
+  refresh_enabled?: boolean;
+  last_checked_at?: string | null;
 }
 
 export type TreeNodeKind = "domain" | "path" | "document" | "chunk";

@@ -5,6 +5,8 @@
 | `vecinita-embedding` | `embedding_app.py` | `modal deploy infra/modal/embedding_app.py` | `modal serve infra/modal/embedding_app.py` |
 | `vecinita-data-management` | `data_management_app.py` | `modal deploy infra/modal/data_management_app.py` | `modal serve infra/modal/data_management_app.py` |
 | `vecinita-llm` | `llm_app.py` | `modal deploy infra/modal/llm_app.py` | `modal serve infra/modal/llm_app.py` |
+| `vecinita-llm-playground` | `llm_playground_app.py` | `modal deploy infra/modal/llm_playground_app.py` | `modal serve infra/modal/llm_playground_app.py` |
+| `vecinita-llm-finetune` | `finetune_app.py` | `modal deploy infra/modal/finetune_app.py` | Volume `llm-finetune-adapters`; pins: `finetune_pins.py` (ADR-053 / F77) |
 
 Run commands from the **repo root** with Modal CLI authenticated (`modal token new`).
 
@@ -44,26 +46,35 @@ modal serve infra/modal/embedding_app.py
 
 Endpoints: `GET /health`, `POST /embed`, `POST /embed/batch`
 
-### LLM (GPU — first start downloads weights)
+### LLM — prod (`vecinita-llm`, GPU — first start downloads weights)
 
 ```bash
 modal serve infra/modal/llm_app.py
 # → set VECINITA_MODAL_LLM_URL to the ASGI base URL (no trailing slash)
 ```
 
-**Unified surface (ADR-037):** one app for inference, warm-up, and playground model staging.
-`vecinita-ollama` is deprecated — do not deploy.
+**Prod surface (ADR-037):** ChatRAG / ingest inference on pinned Qwen. Optional promoted LoRA
+adapter after human promote (`VECINITA_FINETUNE_ADAPTER_ID`). `vecinita-ollama` is deprecated —
+do not deploy.
 
 | Route | Auth | Purpose |
 |-------|------|---------|
 | `GET /health` | — | Liveness |
-| `POST /warm` | — | Preload default or `{"model_id": "qwen3:8b"}` tag into VRAM |
-| `POST /generate` | — | Completion; optional `model_id` (playground-style tag → HF repo) |
-| `POST /generate/stream` | — | SSE token stream |
-| `GET /models/ollama` | `X-Vecinita-Proxy-Key` | List staged models (`manifest.json` on `llm-models`) |
-| `POST /models/ollama/pull` | `X-Vecinita-Proxy-Key` | Enqueue HF Hub download (`pull_model_job`) |
+| `POST /warm` | proxy key | Preload default or `{"model_id": …}` into VRAM |
+| `POST /generate` | proxy key | Completion |
+| `POST /generate/stream` | proxy key | SSE token stream |
 
-**Modal one-shot staging functions:**
+### LLM — playground (`vecinita-llm-playground`)
+
+```bash
+modal serve infra/modal/llm_playground_app.py
+# → set VECINITA_MODAL_LLM_PLAYGROUND_URL (admin / eval sandbox only — never ChatRAG)
+```
+
+List/pull and sandbox eval use the playground URL. Path aliases `GET/POST /models/ollama`
+remain for FE compat.
+
+**Modal one-shot staging functions** (prod app module):
 
 ```bash
 modal run infra/modal/llm_app.py::stage_llm_weights      # default Qwen2.5-1.5B via vLLM warmup
@@ -71,7 +82,7 @@ modal run infra/modal/llm_app.py::stage_default_model    # playground default ta
 modal run infra/modal/llm_app.py::pull_model_job --job-id test --model-id qwen3:8b
 ```
 
-### Data management ASGI
+### Data management ASGI + automations
 
 ```bash
 export VECINITA_INTERNAL_WRITE_URL=http://localhost:8002
@@ -82,6 +93,25 @@ modal serve infra/modal/data_management_app.py
 ```
 
 Requires the **internal write API** running locally on port 8002 with `DATABASE_URL` set.
+
+**Shared schedule (corpus automations):** one daily Modal schedule runs catch-up
+(`job_type=automation_catchup`) and freshness (`job_type=freshness_refresh`). Catch-up is
+residual failed/partial/missing embeds only. Freshness default stale threshold is 30 days
+(`VECINITA_FRESHNESS_STALE_DAYS`). Kill-switch: `VECINITA_AUTOMATIONS_KILL_SWITCH`
+(ADR-052; feature-list §F75–F76).
+
+### LoRA fine-tune (`vecinita-llm-finetune`, F77 / ADR-053)
+
+```bash
+modal serve infra/modal/finetune_app.py
+# Modal secret: vecinita-llm-finetune (see docs/staging-secrets-matrix.md §EV-027)
+```
+
+App `vecinita-llm-finetune` mounts volume **`llm-finetune-adapters`** (adapters) and shared
+**`llm-models`** (pinned Qwen base). Image pins: `FINETUNE_IMAGE_PIPS` in `finetune_pins.py`.
+Manual train approve; human promote only — never auto-load latest adapter on prod
+(`VECINITA_FINETUNE_ADAPTER_ID` on `vecinita-llm` after promote). Train worker lands in
+later M129 tasks — scaffold exposes `health()` only.
 
 **Note:** `pytest` and most CI jobs **do not** require Modal — HTTP clients are mocked. Use `serve` when exercising real embed/LLM/GPU paths.
 
@@ -135,9 +165,9 @@ If `VECINITA_CORS_ORIGINS` is omitted, the app falls back to staging DO origins 
 
 **Proxy key parity (H5):** `VECINITA_MODAL_PROXY_KEY` must equal DigitalOcean `VITE_VECINITA_MODAL_PROXY_KEY` on `vecinita-admin-frontend` (build-time). After any change, rebuild the admin frontend. Check with `bash scripts/deploy/check_proxy_key_parity.sh` when both values are exported in your shell.
 
-## vecinita-embedding (FastEmbed)
+## vecinita-embedding
 
-- **Model:** `BAAI/bge-small-en-v1.5` (384-dim, ADR-008)
+- **Model:** `intfloat/multilingual-e5-small` (384-dim, ADR-048; supersedes English-only BGE / ADR-008)
 - **Volume:** `embedding-models` (HF cache)
 - **Endpoints:** `GET /health`, `POST /embed`, `POST /embed/batch`
 - **Consumer env:** `VECINITA_MODAL_EMBED_URL` on DO backends (`packages/embedding-client`)
@@ -146,14 +176,20 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 
 **Staging:** `./scripts/stage_modal_weights.sh` (see `docs/sessions/S000-internal-docs-archive/data-staging-state.md`).
 
-## vecinita-llm (vLLM — unified inference + staging, ADR-037)
+## vecinita-llm (prod vLLM — ADR-037)
 
-- **Default model:** `Qwen/Qwen2.5-1.5B-Instruct` (ADR-009); playground tags via `llm_model_registry.py`
+- **Default model:** `Qwen/Qwen2.5-1.5B-Instruct` (ADR-009); playground tags via `llm_model_registry.py` on the **playground** app
 - **GPU:** NVIDIA T4, `timeout=900s`, `scaledown_window=300` (scale-to-zero)
 - **Volume:** `llm-models` (`/models`, `manifest.json`, `/models/repos/<tag>`)
-- **Endpoints:** see table above — inference + `/warm` + `/models/ollama*`
-- **Consumer env:** `VECINITA_MODAL_LLM_URL` on DO chat-rag-backend, internal-write-api (`packages/llm-client`)
-- **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — de-deploy after S010 smoke
+- **Endpoints:** inference + `/warm` (proxy auth on mutating routes)
+- **Consumer env:** `VECINITA_MODAL_LLM_URL` on DO chat-rag-backend (`packages/llm-client`)
+- **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — do not deploy
+
+## vecinita-llm-playground
+
+- **Role:** Admin list/pull + sandbox eval `model_id` reloads (ADR-037)
+- **Consumer env:** `VECINITA_MODAL_LLM_PLAYGROUND_URL` — never use for ChatRAG
+- **Path aliases:** `GET/POST /models/ollama*` for FE compat
 
 **Modal secret `vecinita-llm`** (ASGI proxy auth only):
 

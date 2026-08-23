@@ -58,6 +58,8 @@ export const REBUILD_JOB_ID = "77777777-7777-4777-8777-777777777777";
 export const RETAG_JOB_ID = "66666666-6666-4666-8666-666666666666";
 export const RETAG_DOC_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 export const REBUILD_RUN_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+/** Automation run for UJ-080 / TC-255 history row. */
+export const AUTOMATION_RUN_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
 const PLAYGROUND_MODELS_BODY = {
   items: [
@@ -327,9 +329,91 @@ async function fulfillJobsRoute(route: Route): Promise<void> {
   });
 }
 
+/** Mutable F75 automations config for Playwright PATCH (UJ-080 / TC-252). */
+let automationsEnabled = true;
+
+async function fulfillAutomationsRoute(route: Route): Promise<boolean> {
+  const url = route.request().url();
+  const method = route.request().method();
+
+  if (!url.includes("/internal/v1/automations/")) {
+    return false;
+  }
+
+  if (url.includes("/internal/v1/automations/config") && method === "GET") {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        enabled: automationsEnabled,
+        kill_switch: false,
+        max_concurrent: 2,
+      }),
+    });
+    return true;
+  }
+
+  if (url.includes("/internal/v1/automations/config") && method === "PATCH") {
+    const raw = route.request().postData() ?? "{}";
+    let nextEnabled = automationsEnabled;
+    try {
+      const body = JSON.parse(raw) as { enabled?: boolean };
+      if (typeof body.enabled === "boolean") {
+        nextEnabled = body.enabled;
+      }
+    } catch {
+      nextEnabled = automationsEnabled;
+    }
+    automationsEnabled = nextEnabled;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        enabled: automationsEnabled,
+        kill_switch: false,
+        max_concurrent: 2,
+      }),
+    });
+    return true;
+  }
+
+  if (url.includes("/internal/v1/automations/runs") && method === "GET") {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: [
+          {
+            id: AUTOMATION_RUN_ID,
+            job_type: "automation_catchup",
+            status: "completed",
+            started_at: "2026-08-07T10:00:00.000Z",
+            finished_at: "2026-08-07T10:01:00.000Z",
+            error: null,
+            document_id: RETAG_DOC_ID,
+            revision: "rev-playwright-1",
+            created_at: "2026-08-07T10:00:00.000Z",
+            updated_at: "2026-08-07T10:01:00.000Z",
+          },
+        ],
+        page: 1,
+        page_size: 20,
+        total_count: 1,
+      }),
+    });
+    return true;
+  }
+
+  return false;
+}
+
 async function fulfillAdminRoute(route: Route): Promise<void> {
   const url = route.request().url();
   const method = route.request().method();
+
+  if (await fulfillAutomationsRoute(route)) {
+    return;
+  }
 
   if (url.includes("/internal/v1/stats")) {
     await route.fulfill({
@@ -479,6 +563,7 @@ async function fulfillAdminRoute(route: Route): Promise<void> {
 
 /** Mock internal-write-api routes for authenticated admin navigation tests. */
 export async function mockAdminApi(page: Page): Promise<void> {
+  automationsEnabled = true;
   await page.route("http://127.0.0.1:8001/jobs**", fulfillJobsRoute);
   await page.route("**/internal/v1/**", fulfillAdminRoute);
 }

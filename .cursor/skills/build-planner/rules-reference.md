@@ -17,11 +17,14 @@ Write the rule content from `.cursor/rules/spec-adherence.mdc`. The rule enforce
 
 Write the rule content from `.cursor/rules/atomic-commits.mdc`. The rule enforces:
 - Atomic commits: one logical change per commit, codebase valid after each
-- Commit message format with task ID prefix
-- Branch workflow: milestone branches (`feat/M[N]-[slug]`) target phase branches
-  (`phase/[N]-[slug]`), phase branches target main
+- Commit / PR subjects in clear short English (`type: summary`); tracking IDs as optional cites
+- Branch workflow: prefer English slugs (`feat/{slug}` → phase → main); legacy `feat/M[N]-…`
+  may exist in history
 - Minor PRs per milestone, major PRs per phase — both require user review
 - PR Plan table kept in sync in the execution plan
+
+Also create **`developer-facing-language.mdc`** (always-apply) from
+`.cursor/rules/developer-facing-language.mdc` when scaffolding tooling rules.
 
 ## tdd.mdc
 

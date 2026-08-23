@@ -196,6 +196,38 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+  /jobs/{job_id}/approve:
+    post:
+      operationId: approveJob
+      summary: Approve a pending finetune_train job (admin only; F77 / TP6)
+      description: >
+        Manual operator approve before GPU train. Only valid for job_type=finetune_train
+        (ADR-053 / TC-260).
+      security:
+        - bearerAuth: []
+          modalProxyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Approved job (status remains pending until runner starts)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /jobs/{job_id}/retry:
     post:
       operationId: retryJob
@@ -702,6 +734,9 @@ components:
             - retag
             - eval
             - rebuild
+            - automation_catchup
+            - freshness_refresh
+            - finetune_train
           default: ingest
         document_id:
           type: string
@@ -835,6 +870,9 @@ components:
             - retag
             - eval
             - rebuild
+            - automation_catchup
+            - freshness_refresh
+            - finetune_train
           default: ingest
         urls:
           type: array
@@ -856,6 +894,11 @@ components:
           type: string
           nullable: true
           description: Modal function call id for log affordances (RD-177)
+        approved:
+          type: boolean
+          nullable: true
+          description: >
+            F77 finetune_train only — false until POST /jobs/{id}/approve (TC-260 / TP6).
         dashboard_url:
           type: string
           format: uri

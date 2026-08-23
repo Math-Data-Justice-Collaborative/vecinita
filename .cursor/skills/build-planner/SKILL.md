@@ -405,7 +405,7 @@ Git strategy:
   Branch workflow: milestone → phase → main
   Minor PRs planned: [N] (one per milestone)
   Major PRs planned: [N] (one per phase)
-  Commit convention: [task-id] type: description
+  Commit convention: type: short English summary (optional ID cites; see developer-facing-language.mdc)
 
 Specs updated: [N] documents back-updated with new tech choices
 

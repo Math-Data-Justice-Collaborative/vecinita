@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita staging  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-07-24 (S010/EV-011 F39 M80 — playground Modal app + shared proxy secret)
+> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 planned secrets; prior S010/EV-011 F39 M80)
 
 Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
 
@@ -326,3 +326,49 @@ Verify Dashboard → Authentication → URL Configuration after every `config pu
 ## EV-004 (F31) — no new secrets
 
 EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy changes (AC-F6). Existing `VITE_*` rows for both DO static frontends and `VECINITA_CORS_ORIGINS` on backends remain sufficient. Re-run H4/H5 after redeploying both frontends (AC-F7).
+
+## EV-027 (F75–F77) — secrets (T130.3 / TP9)
+
+> Confirmed in **07-build** (T130.3). Defaults in [config-spec.md](config-spec.md).
+> Staging first; AskQuestion before live prod automation enable / FT promote.
+> Sync via `scripts/deploy/sync_modal_secret.sh --merge --apply` for Modal secrets;
+> DO apps via `do_apps.py sync-secrets` (never commit operator specs).
+
+### DigitalOcean — Internal write API / Modal DM (add)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VECINITA_AUTOMATIONS_ENABLED` | No | F75 master enable (default `false`) |
+| `VECINITA_AUTOMATIONS_KILL_SWITCH` | No | Hard stop for F75 enqueue + F77 train (default `false`) |
+| `VECINITA_AUTOMATIONS_MAX_CONCURRENT` | No | F75 concurrency (default `2`) |
+| `VECINITA_FRESHNESS_ENABLED` | No | F76 schedule refresh (default `false`) |
+| `VECINITA_FRESHNESS_STALE_DAYS` | No | Stale threshold days (default `30`) |
+| `VECINITA_FINETUNE_ENABLED` | No | F77 feature flag (default `false`) |
+| `VECINITA_FINETUNE_ADAPTER_ID` | No | Promoted LoRA adapter id on prod `vecinita-llm` (empty = base) |
+| `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | No | Pre-promote candidate adapter on playground only |
+| `VECINITA_FINETUNE_REQUIRE_APPROVE` | No | Require approve before GPU (default `true`) |
+| `VECINITA_FINETUNE_MAX_CONCURRENT` | No | F77 max concurrent trains (default `1`) |
+| `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` | No | F77 max train starts per UTC day (default `3`) |
+
+### Modal — `vecinita-llm-finetune` (app + secret name, TP4 / T129.3)
+
+Modal secret name: **`vecinita-llm-finetune`** (`infra/modal/finetune_app.py`).
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| Same FT + kill-switch envs as above | Yes (when FT enabled) | Train image secret |
+| `VECINITA_INTERNAL_WRITE_URL` / `VECINITA_INTERNAL_API_KEY` | Yes | Run metadata + corpus read for SFT pairs |
+| Volume `llm-finetune-adapters` | Yes | Adapter artifacts (Modal Volume, not env) |
+| Volume `llm-models` | Yes | Pinned Qwen base (shared with `vecinita-llm`) |
+
+### Modal — `vecinita-llm` (promote pin)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VECINITA_FINETUNE_ADAPTER_ID` | No | Load adapter after human promote only |
+
+### Modal — `vecinita-llm-playground` (pre-promote candidate)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | No | Optional candidate adapter for playground eval only |

@@ -24,6 +24,12 @@ On-demand **Phase G** skill: structured pull-request review with findings posted
 
 **Never merge.** Recommend verdict only; user merges manually.
 
+## Startup interview (required)
+
+**Mandatory thorough interview** ([pipeline-preamble.md](../pipeline-preamble.md) §8) before
+fetching diffs or posting review: AskQuestion for PR URL/number, review depth (full / focused),
+whether to run Bugbot + Security Review, and proceed gate. English-first prompts.
+
 ## When to use
 
 | Situation | Use |

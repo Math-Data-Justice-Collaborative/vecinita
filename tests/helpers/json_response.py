@@ -84,6 +84,15 @@ def json_int(obj: JsonObject, key: str) -> int:
     return int(str(value))
 
 
+def json_bool(obj: JsonObject, key: str) -> bool:
+    """Return the value at key as bool (rejects non-bool JSON)."""
+    value = obj[key]
+    if not isinstance(value, bool):
+        msg = f"Expected bool at {key!r}, got {type(value).__name__}"
+        raise TypeError(msg)
+    return value
+
+
 def json_object_list(obj: JsonObject, key: str) -> list[JsonObject]:
     """Return the value at key as a list of JSON objects."""
     return json_object_items(obj[key])

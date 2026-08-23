@@ -23,6 +23,8 @@ export interface DocumentListPage {
 export interface ListDocumentsParams {
   page?: number;
   pageSize?: number;
+  /** F76 — when true, only URL sources past the stale threshold (TC-258). */
+  stale?: boolean;
 }
 
 function authHeaders(options: CorpusClientOptions): Record<string, string> {
@@ -45,6 +47,9 @@ export async function listDocuments(
     page: String(page),
     page_size: String(pageSize),
   });
+  if (params.stale === true) {
+    query.set("stale", "true");
+  }
   const response = await fetch(
     `${options.baseUrl}/internal/v1/documents?${query.toString()}`,
     {
@@ -205,6 +210,28 @@ export async function retagDocument(
   if (!response.ok) {
     const detail = await response.text();
     throw new Error(detail || `Retag failed (${String(response.status)})`);
+  }
+  const body = (await response.json()) as { job_id: string };
+  return body.job_id;
+}
+
+/** F79 Refresh now — enqueue ``freshness_refresh`` with force=true (TC-274). */
+export async function refreshDocument(
+  options: CorpusClientOptions,
+  documentId: string,
+): Promise<string> {
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/documents/${documentId}/refresh`,
+    {
+      method: "POST",
+      headers: authHeaders(options),
+    },
+  );
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(
+      detail || `Refresh document failed (${String(response.status)})`,
+    );
   }
   const body = (await response.json()) as { job_id: string };
   return body.job_id;

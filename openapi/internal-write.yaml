@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Vecinita DO Internal Write API
-  version: 0.4.0
+  version: 0.5.0
   description: Service-to-service writes from Modal workers (sole DATABASE_URL holder).
 servers:
   - url: https://{host}/internal/v1
@@ -68,6 +68,14 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: stale
+          in: query
+          required: false
+          description: >
+            When true, only URL sources whose last_checked_at is null or older than
+            VECINITA_FRESHNESS_STALE_DAYS (default 30; F76 / TC-256 / TC-258)
+          schema:
+            type: boolean
       responses:
         "200":
           description: Paginated document list
@@ -193,6 +201,40 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /documents/{document_id}/refresh:
+    post:
+      operationId: refreshDocument
+      summary: Refresh now — enqueue freshness_refresh with force (F76 / TC-259)
+      description: >
+        Enqueues job_type=freshness_refresh for the document. force=true bypasses
+        the stale check; refresh_enabled=false returns 409.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Freshness refresh job enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetagJobResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Refresh disabled or not enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
   /documents/{document_id}/chunks:
     get:
       operationId: listDocumentChunks
@@ -1203,6 +1245,147 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+  /automations/config:
+    get:
+      operationId: getAutomationsConfig
+      summary: Read automations enable flags, kill-switch, and caps (F75)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Automations config
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationsConfigResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    patch:
+      operationId: patchAutomationsConfig
+      summary: Enable or disable corpus automations (F75 / TC-252)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutomationsConfigPatchRequest"
+      responses:
+        "200":
+          description: Updated automations config
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationsConfigResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /automations/runs:
+    get:
+      operationId: listAutomationRuns
+      summary: Paginated automation run history (F75 / TC-255)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Automation run history page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationRunListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /finetune/runs/{run_id}/eval:
+    get:
+      operationId: getFinetuneEvalReport
+      summary: Base vs adapter FT eval report (F77 / TC-261)
+      description: >
+        Operator-facing metrics for human promote judgment. auto_promote is always false.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Eval report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinetuneEvalReportResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /finetune/adapter:
+    get:
+      operationId: getFinetuneAdapterPin
+      summary: Current prod LoRA adapter pin (F77 write-read parity)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Adapter pin or base
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinetuneAdapterPinResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /finetune/promote:
+    post:
+      operationId: promoteFinetuneAdapter
+      summary: Human promote LoRA adapter or clear-pin rollback (F77 / TC-262 / TC-265)
+      description: >
+        Promote requires adapter_id. Rollback (rollback=true) clears the prod pin to base.
+        Never auto-promotes on metric thresholds (RD-338).
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinetunePromoteRequest"
+      responses:
+        "200":
+          description: Promote or rollback applied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinetunePromoteResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 components:
   securitySchemes:
     bearerAuth:
@@ -1464,6 +1647,19 @@ components:
         canonical_url:
           type: string
           nullable: true
+        refresh_enabled:
+          type: boolean
+          default: true
+          description: Per-source freshness refresh enable (F76 / TP7)
+        last_checked_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last freshness check timestamp (bumped even when hash unchanged)
+        stale:
+          type: boolean
+          default: false
+          description: Derived vs VECINITA_FRESHNESS_STALE_DAYS (F76 / TC-258)
         tags:
           type: array
           maxItems: 100
@@ -1489,6 +1685,10 @@ components:
             - published
             - draft
           nullable: true
+        refresh_enabled:
+          type: boolean
+          nullable: true
+          description: Per-source enable/disable for freshness refresh (F79 / TC-259)
     DocumentMetadataResponse:
       type: object
       required:
@@ -1515,6 +1715,213 @@ components:
             - published
             - draft
           nullable: true
+        refresh_enabled:
+          type: boolean
+          default: true
+        last_checked_at:
+          type: string
+          format: date-time
+          nullable: true
+    RetagJobResponse:
+      type: object
+      required:
+        - job_id
+      properties:
+        job_id:
+          type: string
+          format: uuid
+    AutomationsConfigResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+        - kill_switch
+        - max_concurrent
+      properties:
+        enabled:
+          type: boolean
+        kill_switch:
+          type: boolean
+          description: VECINITA_AUTOMATIONS_KILL_SWITCH (blocks enqueue when true)
+        max_concurrent:
+          type: integer
+          minimum: 1
+    AutomationsConfigPatchRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+    AutomationRun:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - job_type
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        job_type:
+          type: string
+          enum:
+            - automation_catchup
+            - freshness_refresh
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - completed
+            - failed
+            - skipped
+            - blocked
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        document_id:
+          type: string
+          format: uuid
+          nullable: true
+        revision:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AutomationRunListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - page
+        - page_size
+        - total_count
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AutomationRun"
+        page:
+          type: integer
+          minimum: 1
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total_count:
+          type: integer
+          minimum: 0
+    FinetuneSideMetrics:
+      type: object
+      additionalProperties: false
+      properties:
+        faithfulness:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
+        answer_relevancy:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
+        questions_scored:
+          type: integer
+          minimum: 0
+          default: 0
+    FinetuneEvalReportResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - run_id
+        - adapter_id
+        - base_model_id
+        - base
+        - adapter
+        - auto_promote
+        - summary
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        adapter_id:
+          type: string
+          minLength: 1
+        base_model_id:
+          type: string
+          minLength: 1
+        base:
+          $ref: "#/components/schemas/FinetuneSideMetrics"
+        adapter:
+          $ref: "#/components/schemas/FinetuneSideMetrics"
+        auto_promote:
+          type: boolean
+          enum:
+            - false
+          description: Always false — human promote only (RD-338)
+        summary:
+          type: string
+          minLength: 1
+    FinetunePromoteRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        adapter_id:
+          type: string
+          nullable: true
+          description: Required unless rollback is true
+        rollback:
+          type: boolean
+          default: false
+          description: When true, clear prod adapter pin to base (TC-265)
+    FinetunePromoteResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - promoted
+        - base
+        - auto_promote
+      properties:
+        promoted:
+          type: boolean
+        adapter_id:
+          type: string
+          nullable: true
+        base:
+          type: boolean
+        auto_promote:
+          type: boolean
+          enum:
+            - false
+    FinetuneAdapterPinResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - base
+      properties:
+        adapter_id:
+          type: string
+          nullable: true
+        base:
+          type: boolean
     TreeNode:
       type: object
       additionalProperties: false

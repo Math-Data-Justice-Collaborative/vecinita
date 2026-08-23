@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-06 (S028/EV-026 F72–F74 — top_k max + min_score filter notes; prior S027 F70–F71)
+> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 automations/freshness/FT env; prior S028 F72–F74)
 
 ## Precedence
 
@@ -46,6 +46,17 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_ENERGY_CAR_GCO2E_PER_YEAR` | float | — | No | Optional F65 use-guide % of typical car-year |
 | `VECINITA_FEEDBACK_RETENTION_DAYS` | int | `90` | No | F68 purge horizon for `feedback` rows |
 | `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | string | — | No | Optional operator notify URL on new feedback |
+| `VECINITA_AUTOMATIONS_ENABLED` | string | `false` | No | F75 master enable (`true`/`false`) |
+| `VECINITA_AUTOMATIONS_KILL_SWITCH` | string | `false` | No | F75/F77 hard stop — no new automation/FT train enqueue when `true` |
+| `VECINITA_AUTOMATIONS_MAX_CONCURRENT` | int | `2` | No | F75 concurrency cap for automation jobs |
+| `VECINITA_FRESHNESS_STALE_DAYS` | int | `30` | No | F76 default stale threshold (days) |
+| `VECINITA_FRESHNESS_ENABLED` | string | `false` | No | F76 schedule refresh enable |
+| `VECINITA_FINETUNE_ENABLED` | string | `false` | No | F77 feature flag |
+| `VECINITA_FINETUNE_ADAPTER_ID` | string | — | No | Promoted LoRA adapter id for prod `vecinita-llm` (empty = base; clear to rollback) |
+| `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | string | — | No | Optional pre-promote LoRA candidate on `vecinita-llm-playground` only (ADR-053; never auto-loads on prod) |
+| `VECINITA_FINETUNE_REQUIRE_APPROVE` | string | `true` | No | F77 train must be approved before GPU (RD-328) |
+| `VECINITA_FINETUNE_MAX_CONCURRENT` | int | `1` | No | F77 max concurrent GPU train jobs (TP5 / RD-348) |
+| `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` | int | `3` | No | F77 max train starts per UTC day (TP5 / RD-348); no GPU-hour metering in v1 |
 | `VECINITA_MODAL_EMBED_URL` | string | — | Yes (prod) | Modal FastEmbed base URL |
 | `VECINITA_MODAL_LLM_URL` | string | — | Yes (prod) | Modal **`vecinita-llm`** base URL — ChatRAG / prod inference + warm (ADR-037) |
 | `VECINITA_MODAL_LLM_PLAYGROUND_URL` | string | — | Yes (admin/eval sandbox, Slice D) | Modal **`vecinita-llm-playground`** base URL — list/pull/eval sandbox (TP-S010-27) |

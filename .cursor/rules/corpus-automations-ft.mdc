@@ -1,0 +1,57 @@
+---
+description: F75–F77 corpus automations, freshness, and LoRA FT guardrails (EV-027)
+alwaysApply: true
+---
+
+# Corpus automations + LoRA FT (F75–F77)
+
+Guardrails for EV-027. Specs: [Corpus: feature-list.md §F75–F77], ADR-052, ADR-053,
+RD-325–348.
+
+## F75 — Corpus change automations
+
+| Do | Do not |
+|----|--------|
+| Enqueue **catch-up** only (failed/partial/missing embed; optional retag) | Re-embed when embeddings already complete |
+| Triggers: job completion, cron catch-up, doc CRUD → **async** Modal job | Sync heavy work on the write-API request path |
+| Idempotent key = `document_id` + `revision` | Blind duplicate enqueue without dedupe |
+| **One** Modal schedule with F76; distinct `job_type`s | Separate sprawl crons without ADR |
+| Kill-switch + concurrency/cost caps; DM enable/disable + Postgres run history | Auto **F41 rebuild** on every change; #192 dashboard widgets (out of scope) |
+
+## F76 — Freshness
+
+| Do | Do not |
+|----|--------|
+| Default stale threshold **30 days** (`VECINITA_FRESHNESS_STALE_DAYS`) | Invent a different default without RD/ADR |
+| Hash-aware refresh; bump `last_checked` even when unchanged | Fire F75 catch-up side effects from freshness beyond shared schedule infra |
+| Per-source enable/disable + Refresh now | Guarantee third-party site uptime |
+
+## F77 — LoRA fine-tune + human promote
+
+| Do | Do not |
+|----|--------|
+| **LoRA/PEFT** on pinned Qwen; instruction/QA **SFT** pairs from chunks | Full-weight FT as default |
+| **Manual operator approve** before each GPU train | Auto-start train on schedule without approve |
+| Present base vs adapter **eval evidence**; promote = **human judgment only** | Automated numeric abort / auto-promote on metric |
+| Load adapter on prod **`vecinita-llm` only after promote** | Auto-load latest adapter on prod |
+| Playground may load candidates pre-promote | Blind promote without operator review |
+| AskQuestion before **live prod** FT cutover | Promote FT to live prod unprompted |
+| Rollback = clear promoted pin → base | Leave orphan adapters as silent prod default |
+
+FT train/serve is **not** antibody `src/finetune/` (F8 template). Use
+`infra/modal/finetune_app.py` (`vecinita-llm-finetune` + volume `llm-finetune-adapters`)
++ `llm_app.py` per ADR-053 / TP4.
+
+## Shared
+
+- Respect `VECINITA_AUTOMATIONS_KILL_SWITCH` for F75 enqueue and F77 train start.
+- FT caps: `VECINITA_FINETUNE_MAX_CONCURRENT` (default 1),
+  `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (default 3) — TP5 / RD-348.
+- Prod corpus mutation via automation/freshness still requires AskQuestion —
+  see [no-live-prod-corpus-push.mdc](no-live-prod-corpus-push.mdc).
+
+## Cite
+
+`docs/adr/ADR-052-corpus-automation-orchestration.md`,
+`docs/adr/ADR-053-modal-lora-finetune.md`,
+`.cursor/skills/corpus-automations-ft/SKILL.md`.

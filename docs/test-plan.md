@@ -1,22 +1,18 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-06 (S028/EV-026 F72–F74 — TC-242–251 chat source UX; prior S027 TC-232–241)  
+> **Last updated**: 2026-08-12 (docs sync — scope blurb; TC-252–265 corpus automations / FT)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
 
-Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Management (scrape→embed→store via Modal + DO write API), Database migrations/seeds, privacy enforcement, and local E2E mapped to UJ-001–UJ-012.
+Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (scrape→embed→store via Modal + DO write API), Database migrations/seeds, privacy enforcement, local E2E mapped to user journeys, and corpus automations / freshness / LoRA FT cases (TC-252+).
 
-**EV-001 (planned):** Corpus browse (F19), LLM/human tagging (F20–F21), tag-filtered RAG (F22).
+**Shipped (do not treat as “planned”):** Corpus browse and tagging, admin dashboard suite, shared frontend i18n/UI packages (bilingual chrome), multilingual embedding pin.
 
-**EV-002 (planned):** Admin UI overhaul (F23), tag display (F24), admin dashboard (F25), health check (F26), bulk ops (F27), serving stats (F28), audit log & versions (F29).
+**Still building / planned:** Browser-local chat history, some admin auth polish items, website scrape/crawl tree, corpus catch-up + freshness (in progress), LoRA fine-tune + human promote.
 
-**EV-004 (planned):** Shared frontend i18n/UI packages (F31); admin bilingual UI; ChatRAG migration to shared packages + Tailwind; Vitest mirror of ChatRAG language-toggle tests.
-
-**S003 (planned):** Browser-local persistent chat history (F33) — `localStorage` rehydration of the active conversation across refresh/tab-away/tab-close/new-tab (UJ-024, ADR-025) and a previous-chats list with new-chat archival, cap/eviction, label derivation, select-to-restore, and clear/delete semantics (UJ-025). Frontend-only (Vitest + jsdom `localStorage`); no API/CORS changes.
-
-**Excludes (v1):** Real Modal invocations in CI, multimodal ingest, fine-tuning.
+**Excludes (CI default):** Real Modal GPU invocations in GitHub Actions, multimodal ingest.
 
 **UI E2E (T0-ui, Playwright):** Browser smoke against `vite preview` with route mocks — `tests/ui/`, `make test-ui`. Complements Vitest (jsdom) and pytest API E2E. Live browser UJ on staging (T3-ui) remains env-gated per `connectivity-gates.md` H6.
 
@@ -49,6 +45,9 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-080 Ingest bilingual translation | `tests/e2e/test_ev030_ingest_bilingual.py` + Vitest JobForm | TC-252, TC-253, TC-254 | opt |
 | UJ-009 Corpus parity visibility | `tests/e2e/test_ev031_corpus_language_parity.py` + Vitest | TC-255, TC-256 | opt |
 | UJ-081 Suggested question chips (empty state) | Vitest `messages` + `ChatPanel` | TC-259 | opt |
+| UJ-082 Automations enable + history | `tests/e2e/test_uj082_automations.py` + Vitest | TC-266, TC-267, TC-268, TC-269, TC-270 | `tests/ui/admin/uj082-automations.spec.ts` |
+| UJ-083 Freshness refresh / stale | `tests/e2e/test_uj083_freshness.py` | TC-271, TC-272, TC-273, TC-274, TC-270 | `tests/ui/admin/uj083-freshness.spec.ts` |
+| UJ-084 FT approve + human promote | `tests/e2e/test_uj084_finetune.py` + unit | TC-275, TC-276, TC-277, TC-278, TC-279 | `tests/ui/admin/uj084-finetune.spec.ts` |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -1628,6 +1627,78 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 | F50 top_k default | 8 | TC-193 / AC-RQ8 |
 | F51 packer default | p3 | TC-194 / AC-RQ9 |
 | Eval latency p95 (golden) | Informational (30s ref) | Admin display only |
+
+
+### TC-266: Automations enable/disable (UJ-082, F78)
+
+- **Input**: Toggle automations off → attempt enqueue catch-up.
+- **Expected**: No new automation run; UI shows disabled.
+
+### TC-267: Kill-switch blocks enqueue (UJ-082, F78)
+
+- **Input**: Kill-switch on; job completion / CRUD would trigger.
+- **Expected**: No enqueue; run history may record skipped/blocked.
+
+### TC-268: Catch-up idempotency — no re-embed if complete (UJ-082, F78)
+
+- **Input**: Document with complete embeddings; CRUD/edit triggers hook.
+- **Expected**: Idempotent skip or no-op embed; revision key dedupes.
+
+### TC-269: Run history via write-API (UJ-082, F78)
+
+- **Input**: Completed automation run.
+- **Expected**: Postgres row; GET history lists status, timestamps, error.
+
+### TC-270: One Modal schedule, two job types (UJ-082/083, F78–F79, AC-AU4)
+
+- **Input**: Shared cron tick dispatches `automation_catchup` and `freshness_refresh` as distinct job types.
+- **Expected**: Both types can be scheduled from one Modal schedule entry; freshness does not incorrectly enqueue F78 catch-up side effects beyond shared infra (AC-FR5).
+
+### TC-271: Stale threshold default 30d (UJ-083, F79)
+
+- **Input**: Doc last_checked 31 days ago; threshold default.
+- **Expected**: Marked stale; eligible for refresh.
+
+### TC-272: Refresh hash skip + last_checked bump (UJ-083, F79)
+
+- **Input**: Refresh URL with unchanged content_hash.
+- **Expected**: No rechunk; last_checked updated.
+
+### TC-273: Stale / last_checked visible in Admin (UJ-083, F79)
+
+- **Input**: Admin list URL-backed docs.
+- **Expected**: UI/API exposes stale or last_checked fields.
+
+### TC-274: Per-source disable + Refresh now (UJ-083, F79)
+
+- **Input**: Disable source refresh; Refresh now on another.
+- **Expected**: Disabled skipped; Refresh now enqueues job.
+
+### TC-275: FT train requires approve (UJ-084, F80)
+
+- **Input**: Create train job without approve.
+- **Expected**: Remains pending; GPU train not started until approve.
+
+### TC-276: Eval report base vs adapter (UJ-084, F80)
+
+- **Input**: Completed train + eval.
+- **Expected**: Report payload with base and adapter metrics for operator review.
+
+### TC-277: Promote loads prod only after promote (UJ-084, F80)
+
+- **Input**: Adapter trained; not promoted.
+- **Expected**: Prod llm_app still base; playground may load candidate.
+
+### TC-278: FT respects kill-switch/caps (UJ-084, F80)
+
+- **Input**: Kill-switch on or cap exceeded; approve train.
+- **Expected**: Train rejected or not started.
+
+### TC-279: FT promote rollback to base (UJ-084, F80, AC-FT9)
+
+- **Input**: Promoted adapter on prod; operator triggers rollback / clear pin.
+- **Expected**: Prod `vecinita-llm` reverts to base (empty `VECINITA_FINETUNE_ADAPTER_ID` or equivalent); chat serves without adapter.
+
 
 ### F31 coverage gate — gated components
 

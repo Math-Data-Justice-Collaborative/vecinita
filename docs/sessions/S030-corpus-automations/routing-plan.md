@@ -1,0 +1,38 @@
+# Routing plan — S030-corpus-automations (Full preset)
+
+Approved: **S030-D1** (Standard) → amended **S030-D9** (Full).  
+Session open: **S030-D0**. Issues: **#73, #72, #219**.
+
+| Stage | Required | Status | Notes |
+|-------|----------|--------|-------|
+| 00-context | yes | completed | Phase 0 session open 2026-08-07 |
+| 01-requirements | yes | completed | delta; RD-325–344; report set |
+| 02-verify-plan | yes | completed | Gate A→B PASS (S030-D26); report set |
+| 03-plan-tooling | yes | completed | S030-D27; report `reports/03-plan-tooling.md` |
+| 04-tech-plan | yes | completed | S030-D28/D29; TP1–TP10; Phase 30; `reports/tech-plan-delta.md` |
+| 05-verify-tech | yes | completed | S030-D30/D31; Gate B→C PASS (S030-D32) |
+| 06-tech-tooling | yes | completed | S030-D33; exact FT pins; `reports/06-tech-tooling.md` |
+| 07-build | yes | completed | Phase 30 M127–M130 |
+| 08-verify-build | yes | completed | PASS @ 3466b2b; Gate C→D PASS |
+| 09-qa | yes | completed | FAIL QA-S030-001 (disposed at 11 tip pin) |
+| 10-e2e | yes | completed | PASS — `reports/e2e-report.md` |
+| 11-verify-impl | yes | completed | PASS — `reports/verify-impl.md`; F75–F77 + UJ-080–082 approved |
+| 12-verify-deploy | yes | completed | ready flags-off — `reports/deploy-checklist.md` (S030-D59) |
+| 13-deploy-smoke | yes | completed | PASS baseline_only (S030-D60/D61); H2 tip-drift accepted; enable/promote still gated |
+| 15-service-health | yes | completed | PASS post-baseline (S030-D62/D63); `reports/service-health.md` |
+
+## Orchestrator
+
+| Stage | Required | Status | Notes |
+|-------|----------|--------|-------|
+| 16-evolve | yes | completed | EV-027 closed S030-D64 — cutover deferred |
+| 15-service-health | yes | completed | PASS post-baseline |
+
+## Preset
+
+**Full** = Standard + `03` + `06` (S030-D9).  
+Orchestrator: **16-evolve** (closed).
+
+## Next
+
+**Session closed.** Ship-path / enable later via new `00-context` session. Optional: 17-retrospective.

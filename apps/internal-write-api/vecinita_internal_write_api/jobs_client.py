@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import os
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, cast
 
 import httpx
-from vecinita_shared_schemas.data_management import CreateJobRequest, CreateJobResponse, JobOptions
+from vecinita_shared_schemas.data_management import (
+    CreateJobRequest,
+    CreateJobResponse,
+    EmbedStatusOption,
+    JobOptions,
+)
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -81,6 +86,56 @@ class DataManagementJobsClient:
             ),
         )
         return self._post_job(body, authorization=authorization, operation="enqueue_eval")
+
+    def enqueue_automation_catchup(
+        self,
+        document_id: UUID,
+        *,
+        revision: str,
+        embed_status: str,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Enqueue F75 ``automation_catchup`` (async Modal worker; RD-335)."""
+        body = CreateJobRequest(
+            urls=[],
+            options=JobOptions(
+                job_type="automation_catchup",
+                document_id=document_id,
+                revision=revision,
+                embed_status=cast("EmbedStatusOption", embed_status),
+            ),
+        )
+        return self._post_job(
+            body,
+            authorization=authorization,
+            operation="enqueue_automation_catchup",
+        )
+
+    def enqueue_freshness_refresh(
+        self,
+        document_id: UUID,
+        *,
+        force: bool = True,
+        refresh_enabled: bool = True,
+        is_stale: bool = True,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Enqueue F76 ``freshness_refresh`` (Refresh now / schedule; RD-337)."""
+        body = CreateJobRequest(
+            urls=[],
+            options=JobOptions(
+                job_type="freshness_refresh",
+                document_id=document_id,
+                force=force,
+                refresh_enabled=refresh_enabled,
+                is_stale=is_stale,
+            ),
+        )
+        return self._post_job(
+            body,
+            authorization=authorization,
+            operation="enqueue_freshness_refresh",
+        )
 
     def _post_job(
         self,

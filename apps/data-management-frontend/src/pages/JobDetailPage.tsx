@@ -41,11 +41,12 @@ const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
   cancelled: "admin.jobs.status.cancelled",
 };
 
-const TYPE_KEY: Record<JobType, StringMessageKey> = {
+const TYPE_KEY: Partial<Record<JobType, StringMessageKey>> = {
   ingest: "admin.jobs.type.ingest",
   retag: "admin.jobs.type.retag",
   eval: "admin.jobs.type.eval",
   rebuild: "admin.jobs.type.rebuild",
+  finetune_train: "admin.jobs.type.finetune_train",
 };
 
 export function JobDetailPage() {
@@ -234,7 +235,12 @@ export function JobDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span>{tr(TYPE_KEY[jobType])}</span>
+            <span>
+              {(() => {
+                const typeKey = TYPE_KEY[jobType];
+                return typeKey ? tr(typeKey) : jobType;
+              })()}
+            </span>
             <Badge variant={STATUS_VARIANT[job.status]}>
               {tr(STATUS_KEY[job.status])}
             </Badge>

@@ -32,9 +32,13 @@ requires a `greenfield` `active_session` opened by [00-context](../00-context/SK
 
 ## Prerequisites
 
-1. **00-context** has opened a `greenfield` session and the user approved `routing-plan.md` (recommended).
+1. **00-context** has opened a `greenfield` session and the user approved `routing-plan.md`
+   after the **mandatory thorough session-startup interview**
+   ([pipeline-preamble.md](../pipeline-preamble.md) §8).
 2. `active_session.orchestrator` is `pipeline` (set by 00 after approval).
 3. If `active_session` is null: route to [00-context](../00-context/SKILL.md) first (or user waives).
+4. On pipeline start (or resume): AskQuestion proceed gate — continue recommended stages ·
+   re-interview goals · pause — unless the user already said continue-with-recommended.
 
 Shared policy (feedback loops, changelogs, performance testing, spec vs code root cause):
 [considerations.md](../considerations.md).

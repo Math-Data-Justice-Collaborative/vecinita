@@ -2,9 +2,10 @@
 name: 16-evolve
 description: >
   Evolves an existing deployed service: add one or more product features (multiple Fn in one
-  cycle), scope/API/arch changes, or structured change requests. Interviews the user, routes
-  selectively through product planning, technical planning, build, verification, and deploy
-  with delta spec updates, mandatory phase checkpoints, and ADR logging. Every change and
+  cycle), scope/API/arch changes, or structured change requests. Mandatory thorough AskQuestion
+  startup interview (intent, scope, constraints, evidence, proceed gate) before specs or code.
+  Routes selectively through product planning, technical planning, build, verification, and
+  deploy with delta spec updates, mandatory phase checkpoints, and ADR logging. Every change and
   reference must cite docs/CORPUS.md ([Corpus: id] or [Spec: path §]); missing coverage →
   interview to add docs or record a waiver. Use when adding features X Y Z to the current app,
   changing scope after deployment, or running a change request — not for surgical bugs
@@ -237,21 +238,29 @@ Evolve summary + optional 14-hotfix / 15-service-health / 17-retrospective
 
 ## Phase 0 — Change / feature intake
 
+**Mandatory thorough interview** before Fn allocation or impact analysis
+([pipeline-preamble.md](../pipeline-preamble.md) §8). Do not edit product specs or code from a
+one-line feature request. English-first prompts; feature/cycle IDs are optional citations.
+
 Interview until the change is concrete enough for Fn allocation and impact analysis.
 
-**For net-new features**, use intake batches in [reference.md](reference.md) §Feature intake batches.
-
-**For general changes**, use:
+**Startup minimum** (AskQuestion batches, then skill-specific intake):
 
 | Batch | Topics |
 |-------|--------|
-| **Intent** | What to change, why now, success criteria |
-| **Scope** | In/out of scope, breaking vs compatible, features affected |
-| **Constraints** | Cost, latency, data, deploy target |
+| **Intent** | What to change, why now, success criteria (readable English) |
+| **Scope** | In/out of scope, breaking vs compatible, surfaces (API / UI / Modal / corpus) |
+| **Constraints** | Cost, latency, data, deploy target; live-prod corpus / FT promote = AskQuestion |
+| **Evidence / risks** | Open issues/PRs, known blockers, waivers |
+| **Proceed** | Approve intake · Adjust · Pause — **block** until answered |
+
+**For net-new features**, continue with intake batches in [reference.md](reference.md) §Feature intake batches.
+
+**For general changes**, expand the scope/constraints batches above as needed.
 
 Surface **immediately** via AskQuestion anything ambiguous, uncertain, or contradictory.
 
-**Approval gate:** AskQuestion — "Proceed to allocate Fn(s) and impact analysis on this scope?"
+**Approval gate:** AskQuestion — "Proceed to allocate feature id(s) and impact analysis on this scope?"
 
 Record approved scope in `docs/decisions.md#evolve-cycle-decisions` §Cycle {id} — Scope (via committed doc;
 agent records cycle metadata).

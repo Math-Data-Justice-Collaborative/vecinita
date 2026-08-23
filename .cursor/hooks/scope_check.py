@@ -11,15 +11,37 @@ import sys
 from pathlib import Path, PurePosixPath
 
 APPROVED_COMPONENTS: dict[str, str] = {
-    "src/app.py": "Modal App (F5/F6/F8/F9)",
-    "src/pipeline.py": "Pipeline Orchestrator (F5)",
-    "src/weights.py": "Weight Manager (F6)",
-    "src/config.py": "Config Module (F5/F7)",
-    "src/output.py": "Output Packaging (F5)",
-    "src/rfdiffusion_stage.py": "RFdiffusion Stage (F1)",
-    "src/proteinmpnn_stage.py": "ProteinMPNN Stage (F2)",
-    "src/rf2_stage.py": "TCR RF2 Stage (F4 only, ADR-007)",
-    "src/finetune": "Fine-Tune Module (F8)",
+    # Vecinita monorepo (EV-027 F75–F77 and standing apps) — check before legacy prefixes
+    "infra/modal/finetune": "F77 Modal LoRA FT app (ADR-053)",
+    "infra/modal/llm_app.py": "Modal vecinita-llm (ADR-037; F77 adapter load after promote)",
+    "infra/modal/llm_playground_app.py": "Modal vecinita-llm-playground (ADR-037)",
+    "infra/modal/data_management_app.py": "Modal DM workers (F75/F76 automations + jobs)",
+    "infra/modal/embedding_app.py": "Modal FastEmbed",
+    "infra/modal": "Modal services (llm / embed / DM / FT)",
+    "apps/data-management": "Data Management backend/FE (F75–F77 UI + jobs)",
+    "apps/internal-write-api": "Internal write API (automation_runs, promote, corpus)",
+    "apps/chat-rag": "ChatRAG backend/FE",
+    "apps/database": "Alembic / schema",
+    "packages/ingest": "Ingest pipeline (F76 freshness / F75 catch-up)",
+    "packages/llm-client": "LLM client (ADR-037)",
+    "packages/rag": "RAG retrieve/pack",
+    "packages/embedding-client": "Embedding client",
+    "packages/shared-schemas": "Shared schemas / OpenAPI models",
+    "packages": "Shared packages",
+    "apps": "DO apps",
+    "infra": "Infra (Modal / DO / compose)",
+    "openapi": "OpenAPI contracts",
+    "scripts": "Ops / CI scripts",
+    # Legacy template (antibody job) — retain for any residual src/
+    "src/app.py": "Modal App (F5/F6/F8/F9) — legacy template",
+    "src/pipeline.py": "Pipeline Orchestrator (F5) — legacy template",
+    "src/weights.py": "Weight Manager (F6) — legacy template",
+    "src/config.py": "Config Module (F5/F7) — legacy template",
+    "src/output.py": "Output Packaging (F5) — legacy template",
+    "src/rfdiffusion_stage.py": "RFdiffusion Stage (F1) — legacy template",
+    "src/proteinmpnn_stage.py": "ProteinMPNN Stage (F2) — legacy template",
+    "src/rf2_stage.py": "TCR RF2 Stage (F4 only, ADR-007) — legacy template",
+    "src/finetune": "Antibody Fine-Tune Module (F8) — NOT F77 LoRA; use infra/modal FT",
     "tests": "Test Suite",
     "docs": "Documentation",
     ".cursor": "Cursor Tooling",
@@ -77,8 +99,8 @@ def main() -> int:
         result = {
             "additional_context": (
                 f"[scope-check] WARNING: '{rel_str}' does not map to any approved "
-                "component in docs/spec.md. Verify this file is in scope (F1-F9) "
-                "or raise [Scope Drift]."
+                "component (docs/spec.md / F75–F77 surfaces). Verify scope or raise "
+                "[Scope Drift]."
             )
         }
 

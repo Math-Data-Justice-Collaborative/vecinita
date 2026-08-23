@@ -15,6 +15,7 @@ See infra/modal/.env.example and docs/staging-secrets-matrix.md.
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -98,6 +99,76 @@ image = (
 )
 
 
+def _run_scheduled_catchup_tick() -> str:
+    """F75 daily catch-up branch (job/CRUD enqueue residual; cron records tick)."""
+    logger.info("daily schedule tick: job_type=automation_catchup (shared Period(days=1))")
+    return "automation_catchup_tick"
+
+
+def _run_scheduled_freshness_tick() -> dict[str, object]:
+    """F76 freshness branch — enqueue refresh for stale refresh-enabled sources."""
+    from uuid import UUID
+
+    from vecinita_data_management_backend.freshness_refresh import run_scheduled_freshness_tick
+    from vecinita_data_management_backend.modal_jobs_client import ModalJobsEnqueueClient
+    from vecinita_data_management_backend.write_client import InternalWriteClient
+    from vecinita_shared_schemas.internal_write import DocumentSummary
+
+    write = InternalWriteClient()
+    jobs = ModalJobsEnqueueClient()
+
+    def list_stale() -> list[DocumentSummary]:
+        items: list[DocumentSummary] = []
+        page = 1
+        while True:
+            listing = write.list_documents(page=page, page_size=100, stale=True)
+            items.extend(listing.items)
+            if page * listing.page_size >= listing.total or not listing.items:
+                break
+            page += 1
+        return items
+
+    def enqueue(document_id: UUID, *, force: bool = False) -> UUID:
+        return jobs.enqueue_freshness_refresh(
+            document_id,
+            force=force,
+            refresh_enabled=True,
+            is_stale=True,
+        )
+
+    result = run_scheduled_freshness_tick(
+        list_stale_documents=list_stale,
+        enqueue_freshness=enqueue,
+    )
+    logger.info(
+        "daily schedule tick: job_type=freshness_refresh enqueued=%s skipped=%s outcome=%s",
+        result.get("enqueued"),
+        result.get("skipped"),
+        result.get("outcome"),
+    )
+    return result
+
+
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_name("vecinita-data-management")],
+    schedule=modal.Period(days=1),
+    timeout=600,
+)
+def daily_corpus_automations() -> dict[str, object]:
+    """Shared F75/F76 daily schedule (ADR-052 / TP2 / TC-264 / S030-D31 M2).
+
+    Dispatches ``automation_catchup`` then ``freshness_refresh`` as distinct job types
+    from one ``schedule=modal.Period(days=1)`` entry.
+    """
+    from vecinita_data_management_backend.schedule_dispatch import run_daily_dispatch
+
+    return run_daily_dispatch(
+        run_catchup=_run_scheduled_catchup_tick,
+        run_freshness=_run_scheduled_freshness_tick,
+    )
+
+
 @app.function(
     image=image,
     secrets=[modal.Secret.from_name("vecinita-data-management")],
@@ -137,6 +208,9 @@ def fastapi_app():
         )
         tag_client = None
         translate_client = None
+
+    # F77: approved finetune_train jobs call vecinita-llm-finetune::train_lora (T129.5).
+    os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
 
     def runner(job_id: UUID) -> None:
         run_job(

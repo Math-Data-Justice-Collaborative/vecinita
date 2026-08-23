@@ -6,6 +6,7 @@ import type { DocumentSummary, TreeNode } from "../api/types";
 import { requireCorpusConfig } from "../config";
 import { DocumentAdmin } from "./DocumentAdmin";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -16,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { BulkDeleteDialog } from "@/components/BulkDeleteDialog";
 import { BulkTagDialog } from "@/components/BulkTagDialog";
 import { BulkMetadataDialog } from "@/components/BulkMetadataDialog";
@@ -55,43 +57,48 @@ export function CorpusList() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkTagOpen, setBulkTagOpen] = useState(false);
   const [bulkMetadataOpen, setBulkMetadataOpen] = useState(false);
+  const [staleOnly, setStaleOnly] = useState(false);
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(total / DEFAULT_PAGE_SIZE)),
     [total],
   );
 
-  const refresh = useCallback(async (isActive: () => boolean, nextPage = 1) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const client = requireCorpusConfig();
-      const result = await listDocuments(client, {
-        page: nextPage,
-        pageSize: DEFAULT_PAGE_SIZE,
-      });
-      if (!isActive()) {
-        return;
+  const refresh = useCallback(
+    async (isActive: () => boolean, nextPage = 1, filterStale = staleOnly) => {
+      setError(null);
+      setLoading(true);
+      try {
+        const client = requireCorpusConfig();
+        const result = await listDocuments(client, {
+          page: nextPage,
+          pageSize: DEFAULT_PAGE_SIZE,
+          ...(filterStale ? { stale: true } : {}),
+        });
+        if (!isActive()) {
+          return;
+        }
+        setDocuments(result.items);
+        setTotal(result.total);
+        setPage(result.page);
+        setSelectedIds(new Set());
+      } catch (err) {
+        if (!isActive()) {
+          return;
+        }
+        setError(
+          err instanceof Error
+            ? err.message
+            : trRef.current("admin.corpusList.loadFailed"),
+        );
+      } finally {
+        if (isActive()) {
+          setLoading(false);
+        }
       }
-      setDocuments(result.items);
-      setTotal(result.total);
-      setPage(result.page);
-      setSelectedIds(new Set());
-    } catch (err) {
-      if (!isActive()) {
-        return;
-      }
-      setError(
-        err instanceof Error
-          ? err.message
-          : trRef.current("admin.corpusList.loadFailed"),
-      );
-    } finally {
-      if (isActive()) {
-        setLoading(false);
-      }
-    }
-  }, []);
+    },
+    [staleOnly],
+  );
 
   const refreshTree = useCallback(async (isActive: () => boolean) => {
     setError(null);
@@ -132,7 +139,12 @@ export function CorpusList() {
     return () => {
       cancelled = true;
     };
-  }, [refresh, refreshTree, page, viewMode]);
+  }, [refresh, refreshTree, page, viewMode, staleOnly]);
+
+  const handleStaleFilterChange = (next: boolean) => {
+    setStaleOnly(next);
+    setPage(1);
+  };
 
   const handleDelete = async (doc: DocumentSummary) => {
     const label = doc.title ?? doc.url;
@@ -256,9 +268,27 @@ export function CorpusList() {
             onClose={() => {
               setSelected(null);
             }}
+            onChanged={() => {
+              void refresh(() => true, page);
+            }}
           />
         ) : (
           <>
+            {viewMode === "flat" ? (
+              <div className="mb-4 flex items-center gap-2">
+                <Checkbox
+                  id="corpus-stale-filter"
+                  checked={staleOnly}
+                  onCheckedChange={(value) => {
+                    handleStaleFilterChange(value === true);
+                  }}
+                  data-testid="corpus-stale-filter"
+                />
+                <Label htmlFor="corpus-stale-filter">
+                  {tr("admin.corpusList.staleFilter")}
+                </Label>
+              </div>
+            ) : null}
             {selectedIds.size > 0 && isAdmin && (
               <div
                 data-testid="bulk-toolbar"
@@ -364,6 +394,9 @@ export function CorpusList() {
                     <TableHead className="w-20 bg-background">
                       {tr("admin.corpusList.columnLanguage")}
                     </TableHead>
+                    <TableHead className="w-36 bg-background">
+                      {tr("admin.corpusList.columnFreshness")}
+                    </TableHead>
                     {isAdmin ? (
                       <TableHead className="w-44 bg-background text-right">
                         {tr("admin.corpusList.columnActions")}
@@ -400,11 +433,21 @@ export function CorpusList() {
                           </TableCell>
                         ) : null}
                         <TableCell className="max-w-0 py-2">
-                          <TruncatedText
-                            text={displayTitle}
-                            className="font-medium"
-                            data-testid={`corpus-title-${doc.document_id}`}
-                          />
+                          <div className="flex flex-wrap items-center gap-2">
+                            <TruncatedText
+                              text={displayTitle}
+                              className="font-medium"
+                              data-testid={`corpus-title-${doc.document_id}`}
+                            />
+                            {doc.stale ? (
+                              <Badge
+                                variant="destructive"
+                                data-testid={`corpus-stale-badge-${doc.document_id}`}
+                              >
+                                {tr("admin.corpusList.staleBadge")}
+                              </Badge>
+                            ) : null}
+                          </div>
                           {doc.tags && doc.tags.length > 0 ? (
                             <BoundedTagList
                               tags={doc.tags}
@@ -427,6 +470,17 @@ export function CorpusList() {
                             <span>{doc.language ?? tr("shared.emDash")}</span>
                             <ParityBadge document={doc} />
                           </div>
+                        </TableCell>
+                        <TableCell className="py-2 text-xs text-muted-foreground">
+                          <span
+                            data-testid={`corpus-last-checked-${doc.document_id}`}
+                          >
+                            {doc.last_checked_at
+                              ? tr("admin.corpusList.lastChecked", {
+                                  when: doc.last_checked_at.slice(0, 10),
+                                })
+                              : tr("admin.corpusList.lastCheckedNever")}
+                          </span>
                         </TableCell>
                         {isAdmin ? (
                           <TableCell className="py-2 text-right">

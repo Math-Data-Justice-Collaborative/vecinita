@@ -14,16 +14,25 @@ IngestLocale = Literal["en", "es"]
 AssignableRole = Literal["admin", "viewer"]
 Role = Literal["admin", "viewer", "super-admin"]
 UserStatus = Literal["active", "invited", "disabled"]
-JobType = Literal["ingest", "retag", "eval", "rebuild"]
+JobType = Literal[
+    "ingest",
+    "retag",
+    "eval",
+    "rebuild",
+    "automation_catchup",
+    "freshness_refresh",
+    "finetune_train",
+]
 RebuildMode = Literal["reembed", "rechunk", "rescrape"]
 BackfillSource = Literal["rescrape", "from_chunks"]
 CrawlScope = Literal["same_domain", "path_prefix"]
 TreeNodeKind = Literal["domain", "path", "document", "chunk"]
 CrawlStoppedReason = Literal["max_pages", "max_depth", "complete"]
+EmbedStatusOption = Literal["complete", "missing", "partial", "failed"]
 
 
 class JobOptions(BaseModel):
-    """Optional ingest, retag, eval, or rebuild tuning parameters for a job."""
+    """Optional ingest, retag, eval, rebuild, or automation_catchup job parameters."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -36,6 +45,15 @@ class JobOptions(BaseModel):
     )
     job_type: JobType = "ingest"
     document_id: UUID | None = None
+    revision: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Document revision for F78 automation_catchup idempotency (RD-335).",
+    )
+    embed_status: EmbedStatusOption | None = Field(
+        default=None,
+        description="Embedding residual status for F75 catch-up (RD-334).",
+    )
     eval_run_id: UUID | None = None
     question: str | None = Field(default=None, min_length=1, max_length=2000)
     mode: RebuildMode | None = None
@@ -43,8 +61,17 @@ class JobOptions(BaseModel):
         default=False,
         description=(
             "Bypass content_hash skip on ingest (F47) and rebuild (F41). "
-            "When true, re-chunk and re-embed even if scraped hash matches stored hash."
+            "When true, re-chunk and re-embed even if scraped hash matches stored hash. "
+            "For freshness_refresh, Refresh now sets force=true to bypass stale (TC-259)."
         ),
+    )
+    refresh_enabled: bool | None = Field(
+        default=None,
+        description="F76 per-source refresh gate snapshot for freshness_refresh jobs.",
+    )
+    is_stale: bool | None = Field(
+        default=None,
+        description="F76 stale snapshot at enqueue time for freshness_refresh jobs.",
     )
     dry_run: bool = False
     document_ids: list[UUID] | None = None
@@ -109,7 +136,7 @@ class JobOptions(BaseModel):
 
 
 class CreateJobRequest(BaseModel):
-    """POST /jobs request to enqueue URL ingestion, LLM retag, eval, or rebuild."""
+    """POST /jobs request to enqueue URL ingestion, LLM retag, eval, rebuild, or catch-up."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -129,6 +156,17 @@ class CreateJobRequest(BaseModel):
         if job_type == "eval" and (self.options is None or self.options.eval_run_id is None):
             msg = "eval_run_id required for eval jobs"
             raise ValueError(msg)
+        if job_type == "automation_catchup" and (
+            self.options is None or self.options.document_id is None
+        ):
+            msg = "document_id required for automation_catchup jobs"
+            raise ValueError(msg)
+        if job_type == "freshness_refresh" and (
+            self.options is None or self.options.document_id is None
+        ):
+            msg = "document_id required for freshness_refresh jobs"
+            raise ValueError(msg)
+        # finetune_train: empty urls allowed; approve gate before GPU (TP6 / TC-260).
         return self
 
 
@@ -176,6 +214,40 @@ class JobMetrics(BaseModel):
         default=None,
         description="Why crawl stopped: max_pages | max_depth | complete (F60).",
     )
+    catchup_outcome: str | None = Field(
+        default=None,
+        description="F78 automation_catchup worker outcome (ADR-052).",
+    )
+    freshness_outcome: str | None = Field(
+        default=None,
+        description="F79 freshness_refresh worker outcome (ADR-052).",
+    )
+    documents_processed: int | None = Field(
+        default=None,
+        ge=0,
+        description="Documents processed by F78 catch-up or F79 freshness (0 when skipped).",
+    )
+    finetune_outcome: str | None = Field(
+        default=None,
+        description="F80 finetune_train worker outcome (approve gate / stub / train).",
+    )
+    adapter_id: str | None = Field(
+        default=None,
+        description="F80 LoRA adapter id written by finetune_train (UJ-084 / TC-262).",
+    )
+    adapter_path: str | None = Field(
+        default=None,
+        description="F80 volume path for the trained adapter (ADR-053).",
+    )
+    pair_count: int | None = Field(
+        default=None,
+        ge=0,
+        description="F80 SFT pair count used for the train run.",
+    )
+    base_model_id: str | None = Field(
+        default=None,
+        description="F80 pinned base model id for the train run.",
+    )
     translated_documents: int = Field(
         default=0,
         ge=0,
@@ -212,6 +284,10 @@ class Job(BaseModel):
     error_code: str | None = None
     error_message: str | None = None
     metrics: JobMetrics | None = None
+    approved: bool | None = Field(
+        default=None,
+        description="F80 finetune_train only — False until POST /jobs/{id}/approve (TC-275).",
+    )
     created_at: datetime
     updated_at: datetime
     initiated_by_user_id: UUID | None = None

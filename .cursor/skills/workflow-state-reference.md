@@ -268,7 +268,7 @@ git_history:
 |-------|----------|-------------|
 | 00-context through 03-plan-tooling | Yes (docs, rules, hooks) | `docs/*` or `chore/*` |
 | 04-tech-plan through 06-tech-tooling | Yes (execution plan, tooling) | `docs/*` or `chore/*` |
-| 07-build / build-executor | Yes (code, tests, specs) | `feat/M{N}-*` per milestone |
+| 07-build / build-executor | Yes (code, tests, specs) | `feat/{english-slug}` per milestone |
 | 08-verify-build | Amend or new commit (auto-fixes) | Same branch as 07-build |
 | 09-qa | Yes (report) | `docs/sessions/{id}/reports/qa-report.md` |
 | 10-e2e | Yes (tests, report) | `docs/sessions/{id}/reports/e2e-report.md` |

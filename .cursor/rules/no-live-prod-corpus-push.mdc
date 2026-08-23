@@ -18,6 +18,10 @@ Staging work is allowed under [corpus-db-safety.mdc](corpus-db-safety.mdc). Live
 - Bulk ingest / retag / delete jobs pointed at prod `DATABASE_URL` or prod DO apps
 - Syncing corpus-changing secrets then triggering rebuild/promote on prod
 - Running scripts that UPSERT/DELETE embeddings while prod env is sourced
+- **F75/F76:** Enabling automations or freshness refresh that mutate the **live prod**
+  corpus (catch-up re-embed/retag, scheduled URL re-fetch/rechunk) without AskQuestion
+- **F77:** Starting FT **train** that reads/writes against live prod corpus, or **promoting**
+  a LoRA adapter onto live prod `vecinita-llm`, without AskQuestion
 
 ## Do instead
 
@@ -27,10 +31,12 @@ Staging work is allowed under [corpus-db-safety.mdc](corpus-db-safety.mdc). Live
 | Validate cutover | Staging shadow → F36 → **operator** promote first |
 | Prod cutover | Present runbook steps; wait for explicit Approve |
 | Read-only health | SELECT / smoke H1–H5 — no corpus writers |
+| F75–F76 automation | Enable/test on **staging** first; prod enable = AskQuestion |
+| F77 FT | Train/eval on approved non-prod path; playground pre-promote OK; prod promote = AskQuestion |
 
 ## Gate
 
-Before any prod corpus mutation:
+Before any prod corpus mutation **or** prod FT promote / prod automation enable:
 
 1. Confirm target is **not** live prod, **or**
 2. AskQuestion `[Decision]` with staging evidence + recommended “defer / runbook only”
@@ -39,9 +45,12 @@ Before any prod corpus mutation:
 ```bash
 # ❌ BAD — agent promotes to live prod unprompted
 curl -X POST "$PROD_API/internal/v1/rebuild/$id/promote"
+curl -X POST "$PROD_API/internal/v1/finetune/promote"
 
 # ✅ GOOD — staging only; prod waits for AskQuestion Approve
 # staging shadow → F36 → operator promote; then ask before prod repeat
+# staging FT eval → human review → AskQuestion before prod adapter pin
 ```
 
-Refs: `docs/staging-runbook.md` §EV-025 prod cutover; `.cursor/skills/corpus-db-safety/SKILL.md`.
+Refs: `docs/staging-runbook.md` §EV-025 prod cutover; `.cursor/skills/corpus-db-safety/SKILL.md`;
+`.cursor/rules/corpus-automations-ft.mdc`; ADR-052 / ADR-053.

@@ -47,6 +47,19 @@ View filters and labels: defined in `docs/sessions/S000-internal-docs-archive/pr
 - OR across fields: **not supported** — use separate views
 - Spaces: quote — `status:"In progress"`
 
+## Naming (required)
+
+When creating or renaming **issues, epics, milestones, or project README priority lines**,
+use **feature / fix / behavior** English — never lead with `Post-027`, `W1`, `S030 batch`,
+or bare `EV-NNN` / `M{N}`. Optional ID cites go after English or in the body.
+
+See [developer-facing-language.mdc](../../rules/developer-facing-language.mdc) and
+[project-board.md](../../../docs/sessions/S000-internal-docs-archive/project-board.md)
+§Issues, milestones & PRs.
+
+Examples: `Corpus coverage — sources, ESL, food banks, Drive` ·
+`Retrieval and answer quality` · `Staging and prod deploy safety`.
+
 ## Updates
 
 1. Edit `docs/sessions/S000-internal-docs-archive/project-board.md`

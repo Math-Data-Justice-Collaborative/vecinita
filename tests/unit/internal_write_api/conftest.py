@@ -53,12 +53,14 @@ def auth_headers() -> dict[str, str]:
 
 
 class StubJobsClient:
-    """Enqueue retag/eval jobs without calling Modal."""
+    """Enqueue retag/eval/catch-up jobs without calling Modal."""
 
     def __init__(self) -> None:
         """Initialize with empty enqueue logs."""
         self.enqueued: list[UUID] = []
         self.enqueued_eval_runs: list[UUID] = []
+        self.enqueued_catchup: list[tuple[UUID, str, str]] = []
+        self.enqueued_freshness: list[tuple[UUID, bool]] = []
 
     def enqueue_retag(
         self,
@@ -81,6 +83,33 @@ class StubJobsClient:
         """Record the eval run id and return a synthetic job id."""
         _ = (authorization, question)
         self.enqueued_eval_runs.append(eval_run_id)
+        return uuid.uuid4()
+
+    def enqueue_automation_catchup(
+        self,
+        document_id: UUID,
+        *,
+        revision: str,
+        embed_status: str,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Record an F75 catch-up enqueue and return a synthetic job id."""
+        _ = authorization
+        self.enqueued_catchup.append((document_id, revision, embed_status))
+        return uuid.uuid4()
+
+    def enqueue_freshness_refresh(
+        self,
+        document_id: UUID,
+        *,
+        force: bool = True,
+        refresh_enabled: bool = True,
+        is_stale: bool = True,
+        authorization: str | None = None,
+    ) -> UUID:
+        """Record an F76 freshness refresh enqueue and return a synthetic job id."""
+        _ = (authorization, refresh_enabled, is_stale)
+        self.enqueued_freshness.append((document_id, force))
         return uuid.uuid4()
 
 

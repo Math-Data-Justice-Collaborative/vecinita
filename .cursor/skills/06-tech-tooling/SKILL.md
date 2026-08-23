@@ -158,13 +158,13 @@ for full content of each rule.
    - Naming: `test_[function]_[scenario]_[expected]`
    - Coverage awareness
 
-3. **`atomic-commits.mdc`** (always-apply):
+3. **`atomic-commits.mdc`** + **`developer-facing-language.mdc`** (always-apply):
    - One task per commit
-   - Commit message: `[T{id}] {type}: {description}`
+   - Commit message: `{type}: {short English summary}` (optional ID cites; no `[T{id}]` lead)
    - Post-commit checks must pass
    - No WIP commits
-   - Branch naming conventions
-   - Minor PR per milestone, major PR per phase
+   - Branch naming: prefer English slugs
+   - Minor PR per milestone, major PR per phase — English titles
 
 4. **`build-execution.mdc`** (always-apply):
    - Pre-task validation (read spec, check deps, check branch)
@@ -267,6 +267,7 @@ Technical Tooling Installed.
     - spec-adherence.mdc (always-apply)
     - tdd.mdc (scoped: [patterns])
     - atomic-commits.mdc (always-apply)
+    - developer-facing-language.mdc (always-apply)
     - build-execution.mdc (always-apply)
     [+ plan tooling rules preserved]
 

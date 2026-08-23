@@ -6,6 +6,9 @@ Shares volume ``llm-models`` with prod ``vecinita-llm`` (TP-S010-25 / TP-S010-28
 Sandbox eval and DM list/pull may switch ``model_id`` (~60-120s reload) without
 stomping the pinned prod app.
 
+F77: may load a pre-promote LoRA candidate via ``VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID``
+from volume ``llm-finetune-adapters`` (ADR-053) — never auto-loads prod promote pin.
+
 Requires Modal secret ``vecinita-llm`` with ``VECINITA_MODAL_PROXY_KEY`` (same as prod).
 """
 
@@ -20,12 +23,15 @@ from typing import TYPE_CHECKING, Final
 
 import modal
 from infra.modal.llm_app import (
+    ADAPTERS_VOLUME_NAME,
     DEFAULT_PLAYGROUND_MODEL_ID,
     MODEL_ID,
     GenerateRequest,
     PullRequest,
     WarmRequest,
+    _adapter_load_for_role,  # pyright: ignore[reportPrivateUsage]
     _authorized,  # pyright: ignore[reportPrivateUsage]  # shared ASGI auth
+    _build_lora_request,  # pyright: ignore[reportPrivateUsage]
     _download_hf_model,  # pyright: ignore[reportPrivateUsage]
     _list_models_payload,  # pyright: ignore[reportPrivateUsage]
     _llm_engine_kwargs,  # pyright: ignore[reportPrivateUsage]
@@ -38,6 +44,7 @@ from infra.modal.llm_app import (
 )
 from infra.modal.llm_model_registry import resolve_hf_repo
 from pydantic import ValidationError
+from vecinita_shared_schemas.finetune import merge_lora_engine_kwargs
 
 if TYPE_CHECKING:
     from starlette.requests import Request
@@ -50,6 +57,7 @@ ALLOW_MODEL_RELOAD: Final[bool] = True
 
 app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
+adapters_volume = modal.Volume.from_name(ADAPTERS_VOLUME_NAME, create_if_missing=True)
 pull_jobs = modal.Dict.from_name("vecinita-llm-playground-pull-jobs", create_if_missing=True)
 
 _LLM_ASGI_SECRETS = [modal.Secret.from_name("vecinita-llm")]
@@ -93,7 +101,7 @@ def pull_model_job(job_id: str, model_id: str) -> str:
 @app.cls(
     image=image,
     gpu="T4",
-    volumes={"/models": model_volume},
+    volumes={"/models": model_volume, "/adapters": adapters_volume},
     scaledown_window=300,
     timeout=900,
     # model_id switching requires clean vLLM init — GPU snapshot breaks NCCL on reload.
@@ -107,22 +115,30 @@ class LlmService:
         """Lazy-load vLLM on first request (supports playground tag switches)."""
         self._llm = None
         self._loaded_model_arg = None
+        self._loaded_cache_key: tuple[str, str | None] | None = None
+        self._lora_request: object | None = None
 
     @modal.exit()
     def unload_model(self) -> None:
         _shutdown_vllm_engine(getattr(self, "_llm", None))
         self._llm = None
         self._loaded_model_arg = None
+        self._loaded_cache_key = None
+        self._lora_request = None
 
     def _ensure_model_loaded(self, model_id: str | None) -> None:
         if not ALLOW_MODEL_RELOAD:
             model_id = None
         resolved = _resolve_vllm_model_arg(model_id)
-        if getattr(self, "_loaded_model_arg", None) == resolved and self._llm is not None:
+        adapter_id, adapter_dir = _adapter_load_for_role("playground")
+        cache_key = (resolved, adapter_id)
+        if getattr(self, "_loaded_cache_key", None) == cache_key and self._llm is not None:
             return
         _shutdown_vllm_engine(getattr(self, "_llm", None))
         self._llm = None
         self._loaded_model_arg = None
+        self._loaded_cache_key = None
+        self._lora_request = None
         import gc
 
         gc.collect()
@@ -134,11 +150,18 @@ class LlmService:
                 torch.cuda.synchronize()
         except Exception:
             pass
-        self._llm = LLM(
-            **_llm_engine_kwargs(max_model_len=max_model_len_for(resolved), model=resolved)
+        engine_kwargs = merge_lora_engine_kwargs(
+            _llm_engine_kwargs(max_model_len=max_model_len_for(resolved), model=resolved),
+            adapter_dir=adapter_dir,
         )
+        self._llm = LLM(**engine_kwargs)
+        self._lora_request = _build_lora_request(adapter_id, adapter_dir)
         self._loaded_model_arg = resolved
-        self._llm.generate(["warmup"], SamplingParams(max_tokens=1))
+        self._loaded_cache_key = cache_key
+        warmup_kwargs: dict[str, object] = {}
+        if self._lora_request is not None:
+            warmup_kwargs["lora_request"] = self._lora_request
+        self._llm.generate(["warmup"], SamplingParams(max_tokens=1), **warmup_kwargs)
 
     def _generate_text(
         self,
@@ -157,7 +180,11 @@ class LlmService:
         if self._llm is None:
             msg = "LlmService model is not loaded"
             raise RuntimeError(msg)
-        outputs = self._llm.generate([prompt], params)
+        gen_kwargs: dict[str, object] = {}
+        lora = getattr(self, "_lora_request", None)
+        if lora is not None:
+            gen_kwargs["lora_request"] = lora
+        outputs = self._llm.generate([prompt], params, **gen_kwargs)
         return outputs[0].outputs[0].text
 
     def _stream_text_deltas(
@@ -183,7 +210,11 @@ class LlmService:
             repetition_penalty=1.15,
         )
         request_id = f"stream-{uuid.uuid4()}"
-        engine.add_request(request_id, prompt, params)
+        lora = getattr(self, "_lora_request", None)
+        if lora is not None:
+            engine.add_request(request_id, prompt, params, lora_request=lora)
+        else:
+            engine.add_request(request_id, prompt, params)
         previous = ""
         while engine.has_unfinished_requests():
             for request_output in engine.step():

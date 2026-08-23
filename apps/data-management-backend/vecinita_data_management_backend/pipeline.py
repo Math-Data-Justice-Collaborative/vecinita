@@ -13,7 +13,12 @@ import httpx
 from pydantic import HttpUrl
 from vecinita_embedding_client import EMBEDDING_DIMENSION, EmbeddingClientError
 from vecinita_embedding_client.modal_pins import DEFAULT_EMBEDDING_MODEL_ID
-from vecinita_ingest import chunk_text, fetch_url
+from vecinita_ingest import (
+    DEFAULT_CHUNK_OVERLAP_TOKENS,
+    DEFAULT_CHUNK_SIZE_TOKENS,
+    chunk_text,
+    fetch_url,
+)
 from vecinita_ingest.chunk import resolve_tokenizer_id
 from vecinita_ingest.crawl import CrawlPlan, discover_crawl_urls
 from vecinita_ingest.drive import DriveFetchError
@@ -282,6 +287,41 @@ def _ingest_one_url(  # noqa: PLR0913  # mirrors run_ingest_job stage branches
         ),
         False,
     )
+
+
+def rechunk_and_upsert_scraped_url(  # noqa: PLR0913  # mirrors ingest dependency surface for F76
+    url: str,
+    *,
+    scraped: ScrapedDocument,
+    write_client: InternalWriteClient,
+    embed_client: EmbeddingClient,
+    chunk_size_tokens: int = DEFAULT_CHUNK_SIZE_TOKENS,
+    chunk_overlap_tokens: int = DEFAULT_CHUNK_OVERLAP_TOKENS,
+) -> DocumentUpsert:
+    """F76: force rechunk/embed/upsert from an already-fetched scrape (hash changed).
+
+    Uses ``force=True`` so F47 content_hash skip cannot short-circuit after probe.
+    """
+
+    def _fetcher(url: str) -> ScrapedDocument:
+        _ = url
+        return scraped
+
+    doc, _skipped = _ingest_one_url(
+        url,
+        fetcher=_fetcher,
+        write_client=write_client,
+        embed_client=embed_client,
+        chunk_size=chunk_size_tokens,
+        chunk_overlap=chunk_overlap_tokens,
+        force=True,
+        tag_client=None,
+        vocabulary=[],
+        slug_vocab=[],
+        max_document_tags=10,
+    )
+    write_client.upsert_batch(BatchUpsertRequest(documents=[doc]))
+    return doc
 
 
 def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + crawl/F47/F48 branches
@@ -863,6 +903,46 @@ def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + 
             )
         )
     return documents
+
+
+def reembed_documents(  # noqa: PLR0913  # mirrors rebuild dependency surface for F75 catch-up
+    document_ids: list[UUID],
+    *,
+    write_client: InternalWriteClient,
+    embed_client: EmbeddingClient,
+    fetch_document: DocumentFetcher | None = None,
+    chunk_size: int | None = None,
+    chunk_overlap: int | None = None,
+) -> int:
+    """Store-backed re-embed for F75 catch-up (mode=reembed; no shadow/rebuild_run).
+
+    Returns the number of documents upserted.
+    """
+    if not document_ids:
+        return 0
+    options: dict[str, object] = {
+        "mode": "reembed",
+        "document_ids": [str(doc_id) for doc_id in document_ids],
+        "force": True,
+    }
+    if chunk_size is not None:
+        options["chunk_size_tokens"] = chunk_size
+    if chunk_overlap is not None:
+        options["chunk_overlap_tokens"] = chunk_overlap
+    documents = _build_rebuild_documents(
+        mode="reembed",
+        targets=_rebuild_targets(write_client, options),
+        write_client=write_client,
+        fetcher=fetch_document or fetch_url,
+        embed_client=embed_client,
+        chunk_size=_chunk_size_from_options(options),
+        chunk_overlap=_chunk_overlap_from_options(options),
+        model_id=_embedding_model_id(),
+        tokenizer_id=_chunk_tokenizer_id(),
+        rebuild_run_id=None,
+    )
+    _write_rebuild_batch(write_client, documents, dry_run=False)
+    return len(documents)
 
 
 def run_rebuild_job(

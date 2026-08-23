@@ -17,8 +17,8 @@ PR Checklist (from execution-plan.md §Git Strategy):
   - [ ] pyright passes (no errors)
   - [ ] Full test suite passes (pytest -v)
   - [ ] No WIP commits in the branch
-  - [ ] Commit messages follow [T{id}] format
-  - [ ] PR title matches convention ([M{n}] name or Phase {n}: name)
+  - [ ] Commit messages use short English (`type: summary`; optional ID cites)
+  - [ ] PR title is clear English (optional cite; not `[M{n}]` / code-only)
   - [ ] execution-plan.md task statuses updated"""
 
 GIT_PUSH_TRIGGERS = ("git push", "gh pr create", "gh pr ")

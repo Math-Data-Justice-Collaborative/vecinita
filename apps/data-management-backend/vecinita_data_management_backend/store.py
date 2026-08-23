@@ -54,6 +54,7 @@ class JobPayload(TypedDict):
     eval_run_id: NotRequired[str | None]
     document_id: NotRequired[str | None]
     metrics: NotRequired[dict[str, object] | None]
+    approved: NotRequired[bool]
 
 
 def _document_id_from_options(options: dict[str, object]) -> str | None:
@@ -99,6 +100,7 @@ class JobStore:
         eval_run_id: UUID | None = None,
         metrics: dict[str, object] | None = None,
         urls: list[str] | None = None,
+        options_patch: dict[str, object] | None = None,
     ) -> JobRecord:
         """Update job status and optional metadata fields."""
         raise NotImplementedError
@@ -123,6 +125,7 @@ def _apply_updates(  # noqa: PLR0913  # mirrors update_job keyword surface
     eval_run_id: UUID | None,
     metrics: dict[str, object] | None,
     urls: list[str] | None = None,
+    options_patch: dict[str, object] | None = None,
 ) -> None:
     if status is not None:
         record.status = status
@@ -140,6 +143,8 @@ def _apply_updates(  # noqa: PLR0913  # mirrors update_job keyword surface
         record.metrics = metrics
     if urls is not None:
         record.urls = list(urls)
+    if options_patch:
+        record.options = {**record.options, **options_patch}
     record.updated_at = datetime.now(UTC)
 
 
@@ -243,6 +248,7 @@ class DictJobStore(JobStore):
         eval_run_id: UUID | None = None,
         metrics: dict[str, object] | None = None,
         urls: list[str] | None = None,
+        options_patch: dict[str, object] | None = None,
     ) -> JobRecord:
         """Apply status or metadata updates to a shared-mapping job."""
         key = str(job_id)
@@ -260,6 +266,7 @@ class DictJobStore(JobStore):
             eval_run_id=eval_run_id,
             metrics=metrics,
             urls=urls,
+            options_patch=options_patch,
         )
         self._jobs[key] = _record_to_payload(record)
         return record
@@ -326,6 +333,7 @@ class InMemoryJobStore(JobStore):
         eval_run_id: UUID | None = None,
         metrics: dict[str, object] | None = None,
         urls: list[str] | None = None,
+        options_patch: dict[str, object] | None = None,
     ) -> JobRecord:
         """Update a job record held in memory."""
         with self._lock:
@@ -342,6 +350,7 @@ class InMemoryJobStore(JobStore):
                 eval_run_id=eval_run_id,
                 metrics=metrics,
                 urls=urls,
+                options_patch=options_patch,
             )
             return record
 
@@ -365,4 +374,7 @@ def job_record_to_schema(record: JobRecord) -> Job:
     loose ``str`` / ``list[str]`` fields into the schema's ``Literal`` / ``HttpUrl``
     types and validates them, instead of suppressing the type mismatch.
     """
-    return Job.model_validate(_record_to_payload(record))
+    payload = _record_to_payload(record)
+    if record.job_type == "finetune_train":
+        payload["approved"] = record.options.get("approved") is True
+    return Job.model_validate(payload)

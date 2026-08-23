@@ -47,9 +47,14 @@ When personal skills say `[Corpus: tech-spec]`, open **config** + **deps** +
 ```
 [Corpus: product]          → feature-list.md (prefer + §Fn when known)
 [Corpus: feature-list.md §F70]
+[Corpus: feature-list.md §F75]   → corpus change automations (catch-up)
+[Corpus: feature-list.md §F76]   → freshness (stale threshold / Refresh now)
+[Corpus: feature-list.md §F77]   → LoRA fine-tune + human promote
+[Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
+[Spec: docs/adr/ADR-053-modal-lora-finetune.md]
 [Corpus: api]
 [Spec: docs/api-contract.md §POST /chat]
-[Corpus: WAIVED — multilingual dim; reason: spike only; decided: EV-025]
+[Corpus: WAIVED — multilingual dim; reason: spike only; decided: 2026-08 / S027]
 ```
 
 ## Skill obligations (open only touched rows)

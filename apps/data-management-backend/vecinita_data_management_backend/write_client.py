@@ -194,11 +194,14 @@ class InternalWriteClient:
         page: int = 1,
         page_size: int = 50,
         missing_body: bool = False,
+        stale: bool = False,
     ) -> DocumentListPage:
-        """List corpus documents; optionally only those missing store body_text."""
+        """List corpus documents; optionally only those missing store body_text or stale."""
         params: dict[str, int | bool] = {"page": page, "page_size": page_size}
         if missing_body:
             params["missing_body"] = True
+        if stale:
+            params["stale"] = True
         response = self._client.get(
             "/internal/v1/documents",
             params=params,
@@ -208,6 +211,16 @@ class InternalWriteClient:
             msg = f"list_documents failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return DocumentListPage.model_validate(response.json())
+
+    def bump_document_last_checked(self, document_id: UUID) -> None:
+        """POST bump ``last_checked_at`` after a freshness check (F76 / RD-337)."""
+        response = self._client.post(
+            f"/internal/v1/documents/{document_id}/mark-checked",
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"bump_document_last_checked failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
 
     def patch_document_tags(self, document_id: UUID, tags: list[TagInput]) -> TagPatchResponse:
         """Replace document tags via the internal write API."""

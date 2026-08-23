@@ -6,15 +6,18 @@ import {
   patchChunkTags,
   patchDocumentMetadata,
   patchDocumentTags,
+  refreshDocument,
   retagDocument,
 } from "../api/corpus";
 import { getJob } from "../api/jobs";
 import type { ChunkDetail, DocumentSummary, TagInput } from "../api/types";
 import { requireAdminConfig, requireCorpusConfig } from "../config";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { useAdminT } from "@/hooks/useAdminT";
 import { AdminWriteGate } from "@/components/AdminWriteGate";
 import { ParityBadge } from "@/components/ParityBadge";
@@ -22,6 +25,8 @@ import { ParityBadge } from "@/components/ParityBadge";
 type DocumentAdminProps = {
   document: DocumentSummary;
   onClose: () => void;
+  /** Called after freshness metadata or Refresh now succeeds (reload list). */
+  onChanged?: (() => void) | undefined;
 };
 
 function parseTagsInput(raw: string): TagInput[] {
@@ -36,7 +41,11 @@ function parseTagsInput(raw: string): TagInput[] {
     }));
 }
 
-export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
+export function DocumentAdmin({
+  document,
+  onClose,
+  onChanged,
+}: DocumentAdminProps) {
   const tr = useAdminT();
   const [chunks, setChunks] = useState<ChunkDetail[]>([]);
   const [docTags, setDocTags] = useState("");
@@ -53,6 +62,13 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
   const [savedDisplayTitle, setSavedDisplayTitle] = useState<string | null>(
     document.display_title ?? null,
   );
+  const [refreshEnabled, setRefreshEnabled] = useState(
+    document.refresh_enabled ?? true,
+  );
+  const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(
+    document.last_checked_at ?? null,
+  );
+  const [stale, setStale] = useState(document.stale ?? false);
 
   const loadDocumentTags = useCallback(async () => {
     try {
@@ -95,7 +111,16 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
   useEffect(() => {
     setDisplayTitle(document.display_title ?? "");
     setSavedDisplayTitle(document.display_title ?? null);
-  }, [document.document_id, document.display_title]);
+    setRefreshEnabled(document.refresh_enabled ?? true);
+    setLastCheckedAt(document.last_checked_at ?? null);
+    setStale(document.stale ?? false);
+  }, [
+    document.document_id,
+    document.display_title,
+    document.refresh_enabled,
+    document.last_checked_at,
+    document.stale,
+  ]);
 
   useEffect(() => {
     if (!retagJobId) {
@@ -244,7 +269,54 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
     }
   }
 
+  async function handleRefreshEnabledChange(next: boolean) {
+    setError(null);
+    try {
+      const client = requireCorpusConfig();
+      const updated = await patchDocumentMetadata(
+        client,
+        document.document_id,
+        { refresh_enabled: next },
+      );
+      setRefreshEnabled(updated.refresh_enabled ?? next);
+      if (updated.last_checked_at !== undefined) {
+        setLastCheckedAt(updated.last_checked_at);
+      }
+      setStatus(tr("admin.documentAdmin.refreshEnabledSaved"));
+      onChanged?.();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.saveRefreshEnabledFailed"),
+      );
+    }
+  }
+
+  async function handleRefreshNow() {
+    setError(null);
+    setStatus(null);
+    try {
+      const client = requireCorpusConfig();
+      const jobId = await refreshDocument(client, document.document_id);
+      setStatus(tr("admin.documentAdmin.refreshQueued", { jobId }));
+      onChanged?.();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : tr("admin.documentAdmin.queueRefreshFailed"),
+      );
+    }
+  }
+
   const headingTitle = savedDisplayTitle ?? document.title ?? document.url;
+  const lastCheckedLabel =
+    lastCheckedAt === null
+      ? tr("admin.corpusList.lastCheckedNever")
+      : tr("admin.corpusList.lastChecked", {
+          when: formatCheckedAt(lastCheckedAt),
+        });
 
   return (
     <div className="space-y-4" aria-label={tr("admin.documentAdmin.ariaLabel")}>
@@ -253,6 +325,23 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
         <Button variant="outline" size="sm" onClick={onClose}>
           {tr("admin.actions.close")}
         </Button>
+      </div>
+
+      <div
+        className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
+        data-testid="document-freshness-summary"
+      >
+        {stale ? (
+          <Badge
+            variant="destructive"
+            data-testid={`document-stale-badge-${document.document_id}`}
+          >
+            {tr("admin.documentAdmin.staleLabel")}
+          </Badge>
+        ) : null}
+        <span data-testid={`document-last-checked-${document.document_id}`}>
+          {tr("admin.documentAdmin.lastCheckedLabel")}: {lastCheckedLabel}
+        </span>
       </div>
 
       {error ? (
@@ -281,6 +370,39 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
           <ParityBadge document={document} />
         )}
       </div>
+
+      <AdminWriteGate>
+        <div className="space-y-3" data-testid="document-freshness-controls">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="doc-refresh-enabled"
+              checked={refreshEnabled}
+              onCheckedChange={(value) => {
+                void handleRefreshEnabledChange(value === true);
+              }}
+              data-testid="document-refresh-enabled-toggle"
+            />
+            <Label htmlFor="doc-refresh-enabled">
+              {tr("admin.documentAdmin.refreshEnabledLabel")}
+            </Label>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {tr("admin.documentAdmin.refreshDisabledHint")}
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => void handleRefreshNow()}
+            disabled={!refreshEnabled}
+            data-testid="document-refresh-now-btn"
+          >
+            {tr("admin.documentAdmin.refreshNow")}
+          </Button>
+        </div>
+      </AdminWriteGate>
+
+      <Separator />
 
       <AdminWriteGate>
         <form
@@ -411,4 +533,12 @@ export function DocumentAdmin({ document, onClose }: DocumentAdminProps) {
 
 function tagsToInput(tags: TagInput[]): string {
   return tags.map((tag) => tag.slug).join(", ");
+}
+
+function formatCheckedAt(iso: string): string {
+  const parsed = Date.parse(iso);
+  if (Number.isNaN(parsed)) {
+    return iso;
+  }
+  return new Date(parsed).toISOString().slice(0, 10);
 }

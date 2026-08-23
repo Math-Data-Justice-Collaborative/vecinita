@@ -80,10 +80,14 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    # Head advances with later phases (EV-026 display_title = 20260806_0014); EV-002
-    # must remain in history, not as the tip string from `alembic current`/`heads`.
-    assert "20260806_0014" in current.stdout
-    assert "20260806_0014" in heads.stdout
+    # Tip is the EV-027 + EV-030 merge head; branch tips and EV-002 remain in history.
+    # [Corpus: feature-list.md §F75-F80] [Spec: docs/sessions/S030-corpus-automations/reports/qa-report.md §QA-S030-001]
+    assert "20260823_0017" in current.stdout
+    assert "20260823_0017" in heads.stdout
+    assert "20260823_0017" in history.stdout
+    assert "20260812_0016" in history.stdout
+    assert "20260822_0015" in history.stdout
+    assert "20260807_0015" in history.stdout
     assert "20260806_0014" in history.stdout
     assert "20260804_0012" in history.stdout
     assert "20260803_0011" in history.stdout

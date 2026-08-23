@@ -28,8 +28,10 @@ and alignment with `docs/deployment-integration.md` — without assuming a hotfi
 Default depth for UI-related reports: **H4–H5 before H3**. Integration regressions: **H0i** locally.
 See connectivity-gates §Stage 15 for tier definitions (H4 ≠ old “full UJ” only).
 
-**User is source of truth.** AskQuestion sets infra depth, health tier (H0–H6), target URL, and
-whether to run costly full corpus smokes.
+**User is source of truth.** **Mandatory thorough interview**
+([pipeline-preamble.md](../pipeline-preamble.md) §8) before live checks: AskQuestion sets
+infra depth, health tier (H0–H6), target URL, cost budget, and an explicit proceed gate.
+English-first prompts. Do not run costly corpus smokes until the proceed gate is answered.
 
 ## Session management
 

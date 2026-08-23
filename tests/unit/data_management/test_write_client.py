@@ -406,6 +406,66 @@ def test_list_documents_raises_on_http_error() -> None:
     client.close()
 
 
+def test_list_documents_includes_stale_query() -> None:
+    """list_documents(stale=True) sends stale query param (F76)."""
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(str(request.url))
+        return httpx.Response(
+            HTTPStatus.OK,
+            json={"items": [], "page": 1, "page_size": 50, "total": 0},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    page = client.list_documents(stale=True)
+    assert page.total == 0
+    assert any("stale=true" in url for url in seen)
+    client.close()
+
+
+def test_bump_document_last_checked_posts() -> None:
+    """bump_document_last_checked POSTs mark-checked (F76 / RD-337)."""
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(f"{request.method} {request.url.path}")
+        return httpx.Response(HTTPStatus.OK, json={})
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    client.bump_document_last_checked(_DOCUMENT_ID)
+    assert seen == [f"POST /internal/v1/documents/{_DOCUMENT_ID}/mark-checked"]
+    client.close()
+
+
+def test_bump_document_last_checked_raises_on_http_error() -> None:
+    """bump_document_last_checked surfaces non-2xx as InternalWriteClientError."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        return httpx.Response(HTTPStatus.NOT_FOUND, text="missing")
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="bump_document_last_checked"):
+        client.bump_document_last_checked(_DOCUMENT_ID)
+    client.close()
+
+
 def test_create_rebuild_run_posts_and_returns_id() -> None:
     """T88.4: create_rebuild_run POSTs /rebuild/runs and returns rebuild_run_id."""
     run_id = uuid4()

@@ -93,7 +93,8 @@ Execution State:
 
 - Implement **only** pending tasks tagged with `evolve_cycle_id` or listed in cycle scope.
 - Support multiple Fn in one branch (`evolve/{cycle-id}-{slug}`).
-- PR title/body references evolve cycle and feature IDs.
+- PR title/body: English summary of the change; cite evolve cycle and feature IDs in
+  parentheses or the body (not as the only title).
 
 ### Mid-build staging / corpus incidents (RET-001 RA-007)
 
@@ -127,7 +128,7 @@ first task is the template scaffold. Execute it before entering the normal Task 
    from `workflow-state.yaml` §template.service_name
 5. **Prune GPU classes** (job template only): Remove GPU class variants not in
    `workflow-state.yaml` §template.gpu_tiers from `src/app.py`
-6. **Commit**: `[T1.1] config: scaffold from template-modal-{id}`
+6. **Commit**: `chore: scaffold from template-modal-{id}`
 
 After the scaffold commit, continue with remaining Phase 1 tasks (dependency setup,
 initial test, CI/CD config) and then enter the normal Task Loop for subsequent phases.
@@ -183,15 +184,16 @@ For each task in order (respecting dependencies):
 
 #### Step 4 — Commit & record
 
-1. Verify correct branch is checked out (create `feat/M{N}-{slug}` if needed)
+1. Verify correct branch is checked out (create `feat/{english-slug}` if needed)
 2. Stage all task-related files
-3. Commit: `[T{id}] {type}: {description}`
+3. Commit: `{type}: {short English summary}` — optional cite e.g. `(F75)` per
+   `atomic-commits.mdc` / `developer-facing-language.mdc`. Do not lead with `[T{id}]`.
 4. Verify clean state (`git status`)
 5. Append to `workflow-state.yaml` §`git_history.commits`:
    ```yaml
    - sha: <short-sha>
-     branch: feat/M{N}-{slug}
-     message: "[T{id}] {type}: {description}"
+     branch: feat/{english-slug}
+     message: "{type}: {short English summary}"
      stage: "07-build"
      files_changed: <count>
      timestamp: "<ISO-8601>"
@@ -205,7 +207,7 @@ is imminent, commit first. Progress lost to uncommitted work is unrecoverable.
 
 1. Set task to `completed` in Task Tracking, record date
 2. Advance Current State to next pending task
-3. Report: `Completed T{id}: {description}. Next: T{next_id}`
+3. Report: `Completed: {description}. Next: {next_description}` (cite task ids only as optional parentheses)
 
 ### Milestone Boundary
 
@@ -215,8 +217,8 @@ When all tasks in a milestone are `completed`:
    agents. 08-verify-build auto-corrects where possible and only blocks on non-trivial
    issues.
 2. **Create minor PR** from milestone branch to phase branch:
-   - Title: `[M{N}] {Milestone Name}`
-   - Body: task list, spec references, check results
+   - Title: short English milestone name (optional cite in parentheses; not `[M{N}] …`)
+   - Body: English task summaries, spec references, check results
 3. **Present to user** (PR URL). Do NOT stop the session.
 4. Update PR Plan table. Continue Task Loop for next milestone.
 

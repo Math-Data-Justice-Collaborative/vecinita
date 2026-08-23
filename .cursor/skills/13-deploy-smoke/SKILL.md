@@ -234,10 +234,11 @@ Record monitoring baseline.
 
 ### Phase 4 — Generate Changelog
 
-Aggregate commits and PRs into a structured changelog:
+Aggregate commits and PRs into a structured changelog that a human can skim **without**
+decoding session/evolve codes ([developer-facing-language.mdc](../../rules/developer-facing-language.mdc)):
 
 1. `git log --oneline [last-deploy-tag]..HEAD`
-2. Group by phase and milestone using `[T{id}]` and `[M{id}]` prefixes
+2. Group by **shipped behavior** / feature name (English); optional cites for feature, ADR, or PR
 3. Write `CHANGELOG.md`:
 
 ```markdown
@@ -245,12 +246,15 @@ Aggregate commits and PRs into a structured changelog:
 
 ## [version] — [date]
 
-### Phase 1: [Phase Name]
-- **M1**: [milestone] ([PR link])
-  - [T1.1] test: [description]
-  - [T1.2] feat: [description]
+### Foundation
+- **Monorepo scaffold** ([PR link])
+  - Add preprocessing unit coverage
+  - Wire ingest input validation
 ...
 ```
+
+Do **not** lead changelog or deploy-report bullets with `EV-…`, `Post-027`, `W1`, `[T…]`, or
+`[M…]` alone — rewrite to the behavior shipped.
 
 4. Tag: `git tag v[version]-deploy`
 

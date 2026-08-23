@@ -191,6 +191,41 @@ Per-stage delta rules live in each skill §Delta / feature-addition mode and
 **The user is the source of truth.** Specs and plans trace to interview answers or explicit
 approvals — not agent inference.
 
+### Mandatory session-startup interview (all entry skills)
+
+**Every entry skill** must run a **thorough AskQuestion interview before** investigation,
+planning edits, or code. Do not skip because the user phrased a request casually or named a
+skill to “just start.”
+
+| Entry skill | When the interview runs |
+|-------------|-------------------------|
+| **00-context** | Phase 0 session open (type, goals, constraints, routing) — always |
+| **pipeline** | After `greenfield` session exists; confirm goals before Stage 01 |
+| **14-hotfix** | Phase 0 Steps 0.1–0.5 — full batches before Phase 1 |
+| **15-service-health** | Depth / tier / target / cost budget before live checks |
+| **16-evolve** | Phase 0 change/feature intake — intent, scope, constraints, success |
+| **17-retrospective** | Phase 0 intake (window, depth, transcript consent) |
+| **18-pr-review** / **19-address-pr-review** | Scope of PR / findings before acting |
+
+**Minimum coverage** (2–4 questions per AskQuestion call; run as many batches as needed):
+
+1. **Intent** — what success looks like this session (English first; IDs optional cites)
+2. **Scope** — in / out of scope; surfaces touched (API, UI, Modal, corpus, deploy)
+3. **Constraints** — env (local / staging / prod), cost, kill-switches, no live-prod corpus
+4. **Evidence / risks** — known failures, open PRs, blockers, waivers
+5. **Proceed gate** — explicit Approve / Adjust / Pause before the skill’s main work
+
+**Hard rules**
+
+- **Block** until the proceed gate is answered (or the user selects exit/pause).
+- **Resume mid-session:** still AskQuestion — resume recommended path · re-interview · close —
+  unless the user already said continue-with-recommended in this turn.
+- **English-first prompts, digests, git titles, issues, milestones, PRs, and deploy notes** —
+  name by feature/fix/behavior; tracking codes are citations only
+  ([developer-facing-language.mdc](../rules/developer-facing-language.mdc)).
+- Skill-specific batches (hotfix symptom intake, evolve feature intake, health tiers) **add
+  to** this minimum; they do not replace it.
+
 ### AskQuestion protocol ([considerations.md](considerations.md) §7)
 
 | Rule | Detail |
