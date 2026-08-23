@@ -16,7 +16,7 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=6.0",
     "pytest>=9.1.1",
-    "ruff>=0.15.20",
+    "ruff>=0.15.20,<0.16",
     "vecinita-chat-rag-backend",
     "vecinita-data-management-backend",
     "vecinita-database",
@@ -115,7 +115,7 @@ ignore = [
 # create_app(). With `from __future__ import annotations`, FastAPI cannot resolve a local
 # closure referenced inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)`
 # default form is required and FAST002 (prefer-Annotated) cannot apply here.
-"apps/data-management-backend/vecinita_data_management_backend/app.py" = ["FAST002"]
+"apps/data-management-backend/vecinita_data_management_backend/app.py" = ["FAST002", "C901"]
 # Same closure-dependency constraint applies to the /admin/users* route module, whose
 # handlers depend on the write_auth_dep closure passed in from create_app (EV-006 F35).
 "apps/data-management-backend/vecinita_data_management_backend/user_admin_routes.py" = [

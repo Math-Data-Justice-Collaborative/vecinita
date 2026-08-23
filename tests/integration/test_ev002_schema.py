@@ -80,12 +80,13 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    # Head advances with later phases (EV-027 freshness = 20260812_0016); EV-002
-    # and intermediate revisions remain in history only — not as tip from current/heads.
-    # [Corpus: feature-list.md §F76] [Spec: docs/sessions/S030-corpus-automations/reports/qa-report.md §QA-S030-001]
-    assert "20260812_0016" in current.stdout
-    assert "20260812_0016" in heads.stdout
+    # Tip is the EV-027 + EV-030 merge head; branch tips and EV-002 remain in history.
+    # [Corpus: feature-list.md §F75-F80] [Spec: docs/sessions/S030-corpus-automations/reports/qa-report.md §QA-S030-001]
+    assert "20260823_0017" in current.stdout
+    assert "20260823_0017" in heads.stdout
+    assert "20260823_0017" in history.stdout
     assert "20260812_0016" in history.stdout
+    assert "20260822_0015" in history.stdout
     assert "20260807_0015" in history.stdout
     assert "20260806_0014" in history.stdout
     assert "20260804_0012" in history.stdout
