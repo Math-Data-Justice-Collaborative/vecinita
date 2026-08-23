@@ -86,6 +86,28 @@ def test_admin_retry_returns_202_new_job() -> None:
     assert new_record.urls == record.urls
 
 
+def test_admin_retry_finetune_train_clears_approved_flag() -> None:
+    """Retrying failed finetune_train requires a fresh operator approve (ADR-053)."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="finetune_train",
+        options={"approved": True},
+    )
+    store.update_job(record.job_id, status="failed", error_code="X", error_message="boom")
+    client = _client_with_principal(store, _ADMIN)
+
+    response = client.post(f"/jobs/{record.job_id}/retry")
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    body = response_json_object(response)
+    new_id = UUID(json_str(body, "job_id"))
+    new_record = store.get_job(new_id)
+    assert new_record is not None
+    assert new_record.job_type == "finetune_train"
+    assert new_record.options.get("approved") is False
+
+
 def test_viewer_retry_returns_403() -> None:
     """Viewer cannot retry jobs (TC-147)."""
     store = InMemoryJobStore()
@@ -425,6 +447,25 @@ def test_delete_unknown_job_returns_404() -> None:
     response = client.delete(f"/jobs/{uuid4()}")
 
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_delete_job_returns_404_when_store_delete_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """DELETE returns 404 when JobStore delete fails after the record was found."""
+    store = InMemoryJobStore()
+    record = store.create_job(urls=["https://example.com/a"])
+
+    def _delete_always_false(_job_id: UUID) -> bool:
+        return False
+
+    monkeypatch.setattr(store, "delete_job", _delete_always_false)
+    client = _client_with_principal(store, _ADMIN)
+
+    response = client.delete(f"/jobs/{record.job_id}")
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert store.get_job(record.job_id) is not None
 
 
 def test_create_job_with_eval_run_id_option() -> None:

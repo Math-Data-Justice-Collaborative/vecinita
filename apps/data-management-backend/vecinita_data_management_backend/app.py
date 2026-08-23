@@ -155,7 +155,7 @@ def _fetch_eval_jobs(eval_client: InternalWriteClient | None) -> list[Job]:
 _STAGING_CORS_ORIGINS = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app"
 
 
-def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory: job routes + injectable admin deps
+def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injectable admin deps
     *,
     store: JobStore | None = None,
     require_proxy_auth: bool = True,

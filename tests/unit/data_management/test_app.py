@@ -334,6 +334,27 @@ def test_create_job_persists_translate_locales_option() -> None:
     assert record.options["force"] is True
 
 
+def test_create_job_persists_freshness_toggle_options() -> None:
+    """TC-259: refresh_enabled / is_stale survive POST /jobs → job store options."""
+    store = InMemoryJobStore()
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+
+    response = client.post(
+        "/jobs",
+        json={
+            "urls": ["https://example.com/page"],
+            "options": {"refresh_enabled": False, "is_stale": True},
+        },
+    )
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.options["refresh_enabled"] is False
+    assert record.options["is_stale"] is True
+
+
 def test_list_jobs_returns_all_jobs() -> None:
     """Test list jobs returns all jobs."""
     store = InMemoryJobStore()
