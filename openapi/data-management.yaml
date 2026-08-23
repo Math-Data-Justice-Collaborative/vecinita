@@ -818,6 +818,18 @@ components:
             - path_prefix
           default: same_domain
           description: same_domain | path_prefix (path_prefix stays under seed path)
+        translate_locales:
+          type: array
+          maxItems: 2
+          items:
+            type: string
+            enum:
+              - en
+              - es
+          nullable: true
+          description: >
+            Optional ingest-time MT targets (F75 / #251). Default off; creates draft
+            paired documents in target locale(s).
     CreateJobResponse:
       type: object
       required:
@@ -925,6 +937,18 @@ components:
           minimum: 0
           default: 0
           description: URLs that failed after embed retry exhaust (F48)
+        urls_failed_scrape:
+          type: integer
+          minimum: 0
+          default: 0
+          description: URLs that soft-failed during scrape/chunk (#243)
+        url_failures:
+          type: array
+          default: []
+          maxItems: 1000
+          description: Per-URL soft-fail details (#243)
+          items:
+            $ref: "#/components/schemas/JobUrlFailure"
         pages_fetched:
           type: integer
           minimum: 0
@@ -948,6 +972,37 @@ components:
             - max_depth
             - complete
           description: Why crawl stopped (F60)
+        translated_documents:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Sibling documents created via ingest-time translation (F75)
+        translated_chunks:
+          type: integer
+          minimum: 0
+          default: 0
+        translation_skipped:
+          type: integer
+          minimum: 0
+          default: 0
+        translation_failed:
+          type: integer
+          minimum: 0
+          default: 0
+    JobUrlFailure:
+      type: object
+      additionalProperties: false
+      required:
+        - url
+        - error_code
+        - error_message
+      properties:
+        url:
+          type: string
+        error_code:
+          type: string
+        error_message:
+          type: string
     TreeNode:
       type: object
       additionalProperties: false

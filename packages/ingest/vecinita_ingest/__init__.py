@@ -11,6 +11,7 @@ from vecinita_ingest.chunk import (
     estimate_tokens,
 )
 from vecinita_ingest.crawl import CrawlPlan, CrawlResult, discover_crawl_urls, normalize_url
+from vecinita_ingest.drive import DriveFetchError, is_drive_auth_shell, is_google_drive_url
 from vecinita_ingest.freshness import (
     UrlRefetchResult,
     content_hash_for_text,
@@ -21,7 +22,13 @@ from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.nested_source import NestedSourceFields, derive_nested_source
 from vecinita_ingest.pdf import PdfExtractError, extract_pdf_text
 from vecinita_ingest.politeness import RateLimiter, robots_allows
-from vecinita_ingest.scrape import extract_main_content, fetch_url, parse_html
+from vecinita_ingest.scrape import (
+    DEFAULT_SCRAPE_USER_AGENT,
+    extract_main_content,
+    fetch_url,
+    parse_html,
+    scrape_headers,
+)
 
 __version__ = "0.1.0"
 
@@ -29,9 +36,11 @@ __all__ = [
     "DEFAULT_CHUNK_OVERLAP_TOKENS",
     "DEFAULT_CHUNK_SIZE_TOKENS",
     "DEFAULT_CHUNK_TOKENIZER_ID",
+    "DEFAULT_SCRAPE_USER_AGENT",
     "MIN_CHUNK_SIZE_TOKENS",
     "CrawlPlan",
     "CrawlResult",
+    "DriveFetchError",
     "JsRenderMode",
     "NestedSourceFields",
     "PdfExtractError",
@@ -48,10 +57,13 @@ __all__ = [
     "extract_main_content",
     "extract_pdf_text",
     "fetch_url",
+    "is_drive_auth_shell",
+    "is_google_drive_url",
     "normalize_url",
     "parse_html",
     "parse_js_render_mode",
     "refetch_url_source",
     "robots_allows",
+    "scrape_headers",
     "should_js_render",
 ]

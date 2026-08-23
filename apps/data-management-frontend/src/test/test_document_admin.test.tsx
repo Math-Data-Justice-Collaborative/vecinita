@@ -1145,4 +1145,48 @@ describe("DocumentAdmin", () => {
       );
     });
   });
+
+  it("shows publish status, paired document id, and parity badge", async () => {
+    renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin
+          document={{
+            ...DOC,
+            publish_status: "published",
+            paired_document_id: null,
+          }}
+          onClose={vi.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("document-publish-status")).toHaveTextContent(
+        "published",
+      );
+    });
+    expect(screen.getByText("Missing Spanish")).toBeInTheDocument();
+    expect(screen.queryByTestId("document-paired-id")).not.toBeInTheDocument();
+  });
+
+  it("shows paired document id instead of parity badge when linked", async () => {
+    renderWithProviders(
+      <ThemeProvider>
+        <DocumentAdmin
+          document={{
+            ...DOC,
+            paired_document_id: "es-sibling-1",
+          }}
+          onClose={vi.fn()}
+        />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("document-paired-id")).toHaveTextContent(
+        "es-sibling-1",
+      );
+    });
+    expect(screen.queryByText("Missing Spanish")).not.toBeInTheDocument();
+  });
 });

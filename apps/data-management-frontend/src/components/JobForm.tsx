@@ -27,6 +27,7 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
   const [urlsText, setUrlsText] = useState("");
   const [chunkSize, setChunkSize] = useState("256");
   const [crawl, setCrawl] = useState(false);
+  const [translateEs, setTranslateEs] = useState(false);
   const [maxDepth, setMaxDepth] = useState(String(DEFAULT_MAX_DEPTH));
   const [maxPages, setMaxPages] = useState(String(DEFAULT_MAX_PAGES));
   const [busy, setBusy] = useState(false);
@@ -83,6 +84,9 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
       options.max_depth = parsedDepth;
       options.max_pages = parsedPages;
       options.crawl_scope = "same_domain";
+    }
+    if (translateEs) {
+      options.translate_locales = ["es"];
     }
 
     setBusy(true);
@@ -163,6 +167,22 @@ export function JobForm({ onJobUpdate }: JobFormProps) {
                 />
                 <Label htmlFor="ingest-crawl" className="font-normal">
                   {tr("admin.ingest.crawlLabel")}
+                </Label>
+              </div>
+              <div className="flex items-start gap-2">
+                <input
+                  id="ingest-translate-es"
+                  type="checkbox"
+                  className="mt-1"
+                  checked={translateEs}
+                  disabled={busy}
+                  data-testid="ingest-translate-es"
+                  onChange={(e) => {
+                    setTranslateEs(e.target.checked);
+                  }}
+                />
+                <Label htmlFor="ingest-translate-es" className="font-normal">
+                  {tr("admin.ingest.translateEsLabel")}
                 </Label>
               </div>
               {crawl ? (

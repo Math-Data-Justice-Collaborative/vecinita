@@ -689,6 +689,8 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
     "running": 2
   },
   "language_breakdown": {"en": 30, "es": 12},
+  "chunk_language_breakdown": {"en": 220, "es": 36},
+  "parity_gaps": {"en_only": 18, "es_only": 0},
   "recent_activity": [
     {
       "event_type": "document.created",

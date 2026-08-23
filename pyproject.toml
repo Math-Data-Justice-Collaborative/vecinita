@@ -35,8 +35,8 @@ dev = [
 override-dependencies = [
     "aiohttp>=3.14.3",
     "msgpack>=1.2.1",
-    "pip>=26.1.2",
-    # Transitive via llama-index-readers-file; pin patched release (CVE-2026-48155/48156).
+    "pip>=26.2",
+    # Transitive via llama-index-readers-file; pin patched release (PYSEC-2026-3655/3656).
     "pypdf>=6.15.0",
     "starlette>=1.3.1",
     # Transitive via modal→grpclib; CVE-2026-71554 fixed in 4.4.1.

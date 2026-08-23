@@ -14,6 +14,7 @@ from vecinita_shared_schemas.eval_config import (
     EvalConfigPresetUpdateRequest,
     RagConfigPromoteRequest,
     merge_eval_config,
+    resolve_system_prompt_for_language,
 )
 from vecinita_shared_schemas.internal_write import EvalRunCreateRequest
 
@@ -130,3 +131,19 @@ def test_eval_run_create_request_golden_mode_without_question() -> None:
     body = EvalRunCreateRequest(mode="golden")
     assert body.mode == "golden"
     assert body.question is None
+
+
+def test_resolve_system_prompt_for_language_es_uses_spanish_constant() -> None:
+    """TC-257: ES locale resolves to DEFAULT_EVAL_SYSTEM_PROMPT_ES (EV-252)."""
+    from vecinita_shared_schemas.eval_config import (  # noqa: PLC0415
+        DEFAULT_EVAL_SYSTEM_PROMPT_ES,
+    )
+
+    production = EvalConfig(system_prompt="Promoted English only.")
+    assert resolve_system_prompt_for_language("es", production) == DEFAULT_EVAL_SYSTEM_PROMPT_ES
+
+
+def test_resolve_system_prompt_for_language_en_uses_production_prompt() -> None:
+    """TC-257: EN locale uses production.system_prompt (EV-252)."""
+    production = EvalConfig(system_prompt="Promoted English only.")
+    assert resolve_system_prompt_for_language("en", production) == "Promoted English only."

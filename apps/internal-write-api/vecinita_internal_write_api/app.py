@@ -77,6 +77,7 @@ from vecinita_shared_schemas.internal_write import (
     AuditEventResponse,
     AuditLogEntry,
     AuditLogResponse,
+    BatchUpsertDocumentResult,
     BatchUpsertRequest,
     BatchUpsertResponse,
     BulkDeleteRequest,
@@ -112,6 +113,7 @@ from vecinita_shared_schemas.internal_write import (
     FeedbackListResponse,
     HealthAggregateResponse,
     HealthResponse,
+    ParityGaps,
     RebuildPromoteResponse,
     RecentActivity,
     RetagJobResponse,
@@ -475,6 +477,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
     def batch_upsert(body: BatchUpsertRequest, actor: WriteActorDep) -> BatchUpsertResponse:  # pyright: ignore[reportUnusedFunction]
         actor_id, actor_role = actor
         upserted = 0
+        written_documents: list[BatchUpsertDocumentResult] = []
         request_id = _uuid.uuid4()
         pending_catchups: list[tuple[_uuid.UUID, str, EmbedStatus]] = []
         with engine.begin() as conn:
@@ -494,13 +497,15 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 """
                         INSERT INTO documents (
                             url, title, content_hash, language, body_text,
-                            source_domain, source_path, parent_url, canonical_url
+                            source_domain, source_path, parent_url, canonical_url,
+                            paired_document_id, publish_status
                         )
                         VALUES (
                             :url, :title, :content_hash, :language, :body_text,
-                            :source_domain, :source_path, :parent_url, :canonical_url
+                            :source_domain, :source_path, :parent_url, :canonical_url,
+                            :paired_document_id, :publish_status
                         )
-                        ON CONFLICT (url) DO UPDATE
+                        ON CONFLICT (url, language) DO UPDATE
                         SET title = EXCLUDED.title,
                             content_hash = EXCLUDED.content_hash,
                             language = EXCLUDED.language,
@@ -509,6 +514,12 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                             source_path = EXCLUDED.source_path,
                             parent_url = EXCLUDED.parent_url,
                             canonical_url = EXCLUDED.canonical_url,
+                            paired_document_id = COALESCE(
+                                EXCLUDED.paired_document_id, documents.paired_document_id
+                            ),
+                            publish_status = COALESCE(
+                                EXCLUDED.publish_status, documents.publish_status
+                            ),
                             updated_at = now()
                         RETURNING id
                         """
@@ -523,8 +534,17 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                                 "source_path": nested.source_path,
                                 "parent_url": nested.parent_url,
                                 "canonical_url": nested.canonical_url,
+                                "paired_document_id": document.paired_document_id,
+                                "publish_status": document.publish_status,
                             },
                         ).scalar_one(),
+                    )
+                )
+                written_documents.append(
+                    BatchUpsertDocumentResult(
+                        document_id=doc_id,
+                        url=str(document.url),
+                        language=document.language,
                     )
                 )
 
@@ -662,7 +682,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 embed_status=embed_status,
             )
 
-        return BatchUpsertResponse(upserted_chunks=upserted)
+        return BatchUpsertResponse(upserted_chunks=upserted, documents=written_documents)
 
     @app.post(
         "/internal/v1/rebuild/runs",
@@ -830,7 +850,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         },
                     )
                     upserted += 1
-        return BatchUpsertResponse(upserted_chunks=upserted)
+        return BatchUpsertResponse(upserted_chunks=upserted, documents=[])
 
     @app.post(
         "/internal/v1/rebuild/{rebuild_run_id}/promote",
@@ -1266,14 +1286,15 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         body: DocumentPatchRequest,
         actor: WriteActorDep,
     ) -> DocumentMetadataResponse:
-        """F74/F76: metadata edit (display_title / title / language / refresh_enabled)."""
+        """F74/F75/F79: metadata edit (display_title / title / language / publish_status / refresh_enabled)."""
         actor_id, actor_role = actor
         fields_set = body.model_fields_set
         if not fields_set:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
-                    "At least one of display_title, title, language, refresh_enabled is required"
+                    "At least one of display_title, title, language, publish_status, "
+                    "refresh_enabled is required"
                 ),
             )
         request_id = _uuid.uuid4()
@@ -1282,7 +1303,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 conn.execute(
                     text(
                         """
-                        SELECT id, url, title, display_title, language,
+                        SELECT id, url, title, display_title, language, publish_status,
                                refresh_enabled, last_checked_at
                         FROM documents
                         WHERE id = :document_id
@@ -1299,6 +1320,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             before_title = row_str_optional(doc, "title")
             before_display = row_str_optional(doc, "display_title")
             before_language = row_str_optional(doc, "language")
+            before_publish = row_str_optional(doc, "publish_status") or "published"
             before_refresh_raw = row_value(doc, "refresh_enabled")
             before_refresh = (
                 before_refresh_raw
@@ -1312,6 +1334,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
             new_title = before_title
             new_display = before_display
             new_language = before_language
+            new_publish = before_publish
             new_refresh = before_refresh
             set_clauses: list[str] = ["updated_at = now()"]
             params: dict[str, object] = {"id": document_id}
@@ -1331,6 +1354,10 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 set_clauses.append("refresh_enabled = :refresh_enabled")
                 params["refresh_enabled"] = body.refresh_enabled
                 new_refresh = body.refresh_enabled
+            if "publish_status" in fields_set and body.publish_status is not None:
+                set_clauses.append("publish_status = :publish_status")
+                params["publish_status"] = body.publish_status
+                new_publish = body.publish_status
             conn.execute(
                 text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                     f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
@@ -1348,12 +1375,14 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         "title": before_title,
                         "display_title": before_display,
                         "language": before_language,
+                        "publish_status": before_publish,
                         "refresh_enabled": before_refresh,
                     },
                     "after": {
                         "title": new_title,
                         "display_title": new_display,
                         "language": new_language,
+                        "publish_status": new_publish,
                         "refresh_enabled": new_refresh,
                     },
                 },
@@ -1372,6 +1401,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 title=new_title,
                 display_title=new_display,
                 language=new_language,
+                publish_status=new_publish,  # type: ignore[arg-type]
                 refresh_enabled=new_refresh,
                 last_checked_at=before_checked,
             )
@@ -1385,7 +1415,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         actor: WriteActorDep,
         request: Request,
     ) -> RetagJobResponse:
-        """F76 Refresh now — enqueue freshness_refresh with force (TC-259)."""
+        """F79 Refresh now — enqueue freshness_refresh with force (TC-259)."""
         _ = actor
         authorization = request.headers.get("Authorization")
         outcome, job_id = enqueue_document_refresh(
@@ -1417,7 +1447,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
     def mark_document_checked(  # pyright: ignore[reportUnusedFunction]
         document_id: UUID,
     ) -> DocumentMetadataResponse:
-        """F76: bump ``last_checked_at`` after a freshness check (RD-337 / TC-257)."""
+        """F79: bump ``last_checked_at`` after a freshness check (RD-337 / TC-257)."""
         with engine.begin() as conn:
             row = (
                 conn.execute(
@@ -1426,7 +1456,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                         UPDATE documents
                         SET last_checked_at = now()
                         WHERE id = :document_id
-                        RETURNING id, url, title, display_title, language,
+                        RETURNING id, url, title, display_title, language, publish_status,
                                   refresh_enabled, last_checked_at
                         """
                     ),
@@ -1448,6 +1478,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 title=row_str_optional(doc, "title"),
                 display_title=row_str_optional(doc, "display_title"),
                 language=row_str_optional(doc, "language"),
+                publish_status=row_str_optional(doc, "publish_status"),  # type: ignore[arg-type]
                 refresh_enabled=refresh_enabled,
                 last_checked_at=last_checked,
             )
@@ -1737,7 +1768,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
         count_sql = f"SELECT COUNT(*) FROM documents{where_sql}"  # noqa: S608  # whitelisted clauses only
         list_sql = f"""
-            SELECT id, url, title, display_title, language,
+            SELECT id, url, title, display_title, language, publish_status, paired_document_id,
                    source_domain, source_path, parent_url, canonical_url,
                    refresh_enabled, last_checked_at
             FROM documents
@@ -1780,6 +1811,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                     title=row_str_optional(mapped, "title"),
                     display_title=row_str_optional(mapped, "display_title"),
                     language=row_str_optional(mapped, "language"),
+                    publish_status=row_str_optional(mapped, "publish_status"),  # type: ignore[arg-type]
+                    paired_document_id=row_uuid_optional(mapped, "paired_document_id"),
                     source_domain=row_str_optional(mapped, "source_domain"),
                     source_path=row_str_optional(mapped, "source_path"),
                     parent_url=row_str_optional(mapped, "parent_url"),
@@ -2229,6 +2262,47 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 .all()
             )
 
+            chunk_lang_rows = (
+                conn.execute(
+                    text(
+                        "SELECT COALESCE(d.language, 'unknown') AS lang, COUNT(*) AS cnt "
+                        "FROM chunks c "
+                        "JOIN documents d ON d.id = c.document_id "
+                        "GROUP BY d.language"
+                    )
+                )
+                .mappings()
+                .all()
+            )
+
+            en_only = scalar_int(
+                cast(
+                    "object",
+                    conn.execute(
+                        text(
+                            "SELECT COUNT(*) FROM documents "
+                            "WHERE language = 'en' "
+                            "AND publish_status = 'published' "
+                            "AND paired_document_id IS NULL"
+                        )
+                    ).scalar_one(),
+                )
+            )
+
+            es_only = scalar_int(
+                cast(
+                    "object",
+                    conn.execute(
+                        text(
+                            "SELECT COUNT(*) FROM documents "
+                            "WHERE language = 'es' "
+                            "AND publish_status = 'published' "
+                            "AND paired_document_id IS NULL"
+                        )
+                    ).scalar_one(),
+                )
+            )
+
             recent_rows = (
                 conn.execute(
                     text(
@@ -2269,6 +2343,11 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
                 row_str(mapping_row(row), "lang"): row_int(mapping_row(row), "cnt")
                 for row in lang_rows
             },
+            chunk_language_breakdown={
+                row_str(mapping_row(row), "lang"): row_int(mapping_row(row), "cnt")
+                for row in chunk_lang_rows
+            },
+            parity_gaps=ParityGaps(en_only=en_only, es_only=es_only),
             recent_activity=[
                 RecentActivity(
                     event_type=row_str(mapping_row(row), "event_type"),

@@ -133,16 +133,69 @@ export function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {tr("admin.dashboard.stats.languages")}
+              {tr("admin.dashboard.stats.parityGaps")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.language_breakdown.length}
+              {stats.parity_gaps.en_only + stats.parity_gaps.es_only}
             </div>
+            <p className="text-xs text-muted-foreground">
+              {tr("admin.dashboard.stats.parityGapsDetail", {
+                enOnly: stats.parity_gaps.en_only,
+                esOnly: stats.parity_gaps.es_only,
+              })}
+            </p>
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{tr("admin.dashboard.languageCoverage.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  {tr("admin.dashboard.languageCoverage.columnLanguage")}
+                </TableHead>
+                <TableHead className="text-right">
+                  {tr("admin.dashboard.languageCoverage.columnDocuments")}
+                </TableHead>
+                <TableHead className="text-right">
+                  {tr("admin.dashboard.languageCoverage.columnChunks")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {stats.language_breakdown.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-muted-foreground">
+                    {tr("admin.dashboard.languageCoverage.empty")}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                stats.language_breakdown.map((row) => {
+                  const chunkRow = stats.chunk_language_breakdown.find(
+                    (item) => item.language === row.language,
+                  );
+                  return (
+                    <TableRow key={row.language}>
+                      <TableCell>{row.language}</TableCell>
+                      <TableCell className="text-right">{row.count}</TableCell>
+                      <TableCell className="text-right">
+                        {chunkRow?.count ?? 0}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

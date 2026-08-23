@@ -1,5 +1,5 @@
 /**
- * F75 automations config + run history via write-API.
+ * F78 automations config + run history via write-API.
  * [Corpus: feature-list.md §F75]
  * [Spec: docs/api-contract.md §EV-027 Automations]
  * [Corpus: user-journeys.md §UJ-080]

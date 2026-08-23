@@ -1018,7 +1018,7 @@ Chat source UX in one cycle:
 **Intake locked:** 2026-08-07 (Phase 0 approved → Phase 1)  
 **Session:** S030-corpus-automations  
 **Issues:** [#73](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/73) · [#72](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/72) · [#219](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/219)  
-**Features:** F75, F76, F77  
+**Features:** F78, F79, F80 (renumbered after `main` took F75/F76 for EV-030/EV-031)  
 **Preset:** **Full** (03 + 06 required; S030-D9)  
 **Branch:** `evolve/EV-027-corpus-automations`
 
@@ -1026,15 +1026,15 @@ Chat source UX in one cycle:
 
 | Fn | Issue | Scope |
 |----|-------|--------|
-| F75 | #73 | Corpus change automations: job completion + cron + doc CRUD hooks; **catch-up only** (failed/partial/missing embed; optional retag — RD-334); idempotency/retries; kill-switch + cost caps; DM run history + enable/disable |
-| F76 | #219 | Corpus freshness: scheduled refresh, stale detection, change-aware ingest (hash skip), operator refresh controls |
-| F77 | #72 | Modal LoRA/PEFT on pinned Qwen; train data from corpus; versioned adapters; serve via llm_app; **manual train approve**; **human promote** after eval evidence (no auto metric abort — RD-338); operator should promote only when they judge better than base |
+| F78 | #73 | Corpus change automations: job completion + cron + doc CRUD hooks; **catch-up only** (failed/partial/missing embed; optional retag — RD-334); idempotency/retries; kill-switch + cost caps; DM run history + enable/disable |
+| F79 | #219 | Corpus freshness: scheduled refresh, stale detection, change-aware ingest (hash skip), operator refresh controls |
+| F80 | #72 | Modal LoRA/PEFT on pinned Qwen; train data from corpus; versioned adapters; serve via llm_app; **manual train approve**; **human promote** after eval evidence (no auto metric abort — RD-338); operator should promote only when they judge better than base |
 
 **Out:** #192 full dashboard widgets; blind FT promote without operator review of eval evidence; casual prod corpus mutation without AskQuestion.
 
 **Deploy:** Prod FT serve only after human promote judgment + AskQuestion (S030-D10 / RD-331/338). Live DO/Modal is prod-careful.
 
-**02-verify-plan (S030-D25):** C1 amended F75 catch-up wording; C2 clarified “eval better” / “eval-gated” = human judgment + eval evidence (not automated abort).
+**02-verify-plan (S030-D25):** C1 amended F78 catch-up wording; C2 clarified “eval better” / “eval-gated” = human judgment + eval evidence (not automated abort).
 
 **Corpus cites:** [Corpus: product] [Corpus: system-spec] [Corpus: deploy-integration] [Corpus: data] [Corpus: api] [Corpus: journeys] [Corpus: tests] [Corpus: acceptance]
 
@@ -1055,15 +1055,15 @@ Chat source UX in one cycle:
 | S030-D10 | Constraints Q9 | Prod FT path; promote when operator judges better than base (clarified S030-D25 / RD-338: human gate + eval evidence, not auto-abort) |
 | S030-D11 | Constraints Q10 | Kill-switch + caps; **manual approve** each train |
 | S030-D12 | Constraints Q11 | Prefer **LoRA/PEFT** on pinned Qwen |
-| S030-D13 | Phase 0 close | Allocate **F75–F77**; enter Phase 1 |
+| S030-D13 | Phase 0 close | Allocate **F78–F80**; enter Phase 1 |
 
 ### Feature map
 
 | Fn | Issue | Title |
 |----|-------|-------|
-| F75 | #73 | Corpus change automations |
-| F76 | #219 | Corpus freshness automation |
-| F77 | #72 | Modal LoRA fine-tune + human promote (eval evidence) |
+| F78 | #73 | Corpus change automations |
+| F79 | #219 | Corpus freshness automation |
+| F80 | #72 | Modal LoRA fine-tune + human promote (eval evidence) |
 
 ### Phase 1
 
@@ -1088,7 +1088,7 @@ Chat source UX in one cycle:
 | ID | Topic | Choice |
 |----|-------|--------|
 | S030-D30 | Phase B verify | Start **05-verify-tech** after 04 |
-| S030-D31 | Medium/low verdicts | **Approve all recommended** — M1 Playwright required UJ-080–082; M2 `schedule=modal.Period(days=1)`; M3 T129.3 Depends On = T129.1 + blocked-until-06 note; M4 T130.4 confirm Accepted + closeout only; M5 deployment-integration EV-027 stub; **L1 waive** Build Plan Card (SoT = tech-plan-delta + Phase 30) |
+| S030-D31 | Medium/low verdicts | **Approve all recommended** — M1 Playwright required UJ-082–084; M2 `schedule=modal.Period(days=1)`; M3 T129.3 Depends On = T129.1 + blocked-until-06 note; M4 T130.4 confirm Accepted + closeout only; M5 deployment-integration EV-027 stub; **L1 waive** Build Plan Card (SoT = tech-plan-delta + Phase 30) |
 
 **Waiver (L1):** `[Corpus: WAIVED — Build Plan Card; reason: evolve SoT is tech-plan-delta + Phase 30 Task Tracking; decided: S030-D31]`
 
@@ -1104,3 +1104,76 @@ Chat source UX in one cycle:
 **Artifacts:** `reports/06-tech-tooling.md` · `infra/modal/finetune_pins.py` · `tests/unit/modal/test_finetune_pins.py`
 
 **Next:** **07-build** Phase 30 M127.
+
+## Cycle EV-252 — Locale system prompt (#252)
+
+**Approved:** 2026-08-22  
+**Session:** EV-252-locale-system-prompt (local store)  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/252
+
+### Scope summary
+
+ChatRAG synthesis always used English `production.system_prompt` even when the frontend sent `language: "es"`. Fix: add `DEFAULT_EVAL_SYSTEM_PROMPT_ES` + locale resolver; wire into ask/stream synthesis paths. No `EvalConfig` schema change in v1.
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV252-D1 | Config | Constants fallback: EN → `production.system_prompt`; ES → `DEFAULT_EVAL_SYSTEM_PROMPT_ES` |
+| EV252-D2 | Out of scope | Admin eval EN/ES textareas; #245 corpus translation; #251 ingest translation |
+| EV252-D3 | Scale | Standard (delta docs + unit + API e2e) |
+| EV252-D4 | Success | Issue #252 acceptance criteria |
+| EV252-D5 | Spec gate | Spec-first; Build blocked until operator approves gate |
+
+### Close (2026-08-22)
+
+**Merge:** `6ed408ef` — PR #255 · closes #252  
+**CI:** [ci.yml](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions) + [deploy-preflight](https://github.com/Math-Data-Justice-Collaborative/vecinita/actions/runs/32598818761) success on `main`.
+
+## Cycle EV-249 — Blocked ingest hosts (#249)
+
+**Approved:** 2026-08-22  
+**Session:** EV-249-blocked-ingest-hosts (local store)  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/249
+
+### Scope summary
+
+Follow-up to #243/#248: three community hosts still failed staging re-ingest. Add scrape fallbacks (`www.` on TLS failure, alternate Chrome UA on 403) and stable `error_code` values (`host_waf_blocked`, `tls_handshake_failed`).
+
+### Decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV249-D1 | TLS apex | Retry `www.{host}` before failing |
+| EV249-D2 | WAF 403 | Retry without VecinitaBot in UA + browser Sec-Fetch headers |
+| EV249-D3 | Persistent block | `ScrapeFetchError` with stable `error_code` in job metrics |
+| EV249-D4 | Out of scope | Playwright JS-render for WAF; prod corpus mutation |
+
+## Cycle EV-216 — Suggested question refresh (#216)
+
+**Approved:** 2026-08-22  
+**Session:** EV-216-suggested-questions (local store)  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/216
+
+### Scope summary
+
+Replace empty-state suggested-question chips (EN/ES) with staging-verified wording aligned to
+post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` + Vitest.
+
+### Proposed chips (staging-verified)
+
+| # | English | Spanish |
+|---|---------|---------|
+| 1 | Where can I get food assistance in Rhode Island? | ¿Dónde puedo conseguir ayuda con comida en Rhode Island? |
+| 2 | How do I get rent assistance in Providence? | ¿Cómo solicito ayuda para pagar el alquiler en Providence? |
+| 3 | Where can I find free ESL classes in Providence? | ¿Dónde puedo encontrar clases gratis de inglés en Providence? |
+
+### Decisions (intake)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV216-D1 | Chip selection | Staging eval pass on RI food / Providence rent / Providence ESL |
+| EV216-D2 | Placeholders | Update `questionPlaceholder` to mirror chip 1 topic |
+| EV216-D3 | Out of scope | Dynamic chips; backend query rewrite; coldstart facts copy |
+| EV216-D4 | Success | Issue #216 acceptance criteria; TC-259 / UJ-081 |
+| EV216-D5 | Spec gate | Spec-first; Build blocked until operator approves gate |

@@ -1,9 +1,8 @@
 import type { Locale } from "../hooks/useLocale.types";
 
 const en = {
-  appTitle: "Vecinita ChatRAG",
-  appSubtitle:
-    "Bilingual community Q&A — answers stay in your browser only (F3).",
+  appTitle: "Vecinita",
+  appSubtitle: "Bilingual community Q&A — answers stay in your browser only.",
   navChat: "Chat",
   navCorpus: "Corpus",
   navFeedback: "Feedback",
@@ -26,9 +25,9 @@ const en = {
   emptyHint: "Ask a question in English or Spanish about your community.",
   welcomeHeading: "What can I help with?",
   suggestedQuestionsLabel: "Try asking",
-  suggestion1: "When is the food pantry open?",
-  suggestion2: "How do I get rent assistance?",
-  suggestion3: "Where can I find free ESL classes?",
+  suggestion1: "Where can I get food assistance in Rhode Island?",
+  suggestion2: "How do I get rent assistance in Providence?",
+  suggestion3: "Where can I find free ESL classes in Providence?",
   menuLabel: "Menu",
   toggleSidebar: "Toggle menu",
   topicsHeading: "Topics",
@@ -38,7 +37,7 @@ const en = {
   roleUser: "You",
   roleAssistant: "Vecinita",
   yourQuestion: "Your question",
-  questionPlaceholder: "e.g. When is the food pantry open?",
+  questionPlaceholder: "e.g. Where can I get food assistance?",
   ask: "Ask",
   asking: "Asking…",
   clearHistory: "Clear history",
@@ -64,6 +63,9 @@ const en = {
   askUnauthorized: "You are not authorized to use the assistant.",
   filterByTopic: "Filter by topic",
   sourcesHeading: "Sources",
+  relevancePercent: "{n}% relevant",
+  relevanceTip:
+    "How closely this source matched what you asked. Higher % means a stronger match.",
   corpusChunk: "Corpus chunk",
   backToChat: "Back to chat",
   corpusBrowseLabel: "Corpus browse",
@@ -90,9 +92,9 @@ const en = {
 } as const;
 
 const es = {
-  appTitle: "Vecinita ChatRAG",
+  appTitle: "Vecinita",
   appSubtitle:
-    "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador (F3).",
+    "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador.",
   navChat: "Chat",
   navCorpus: "Corpus",
   navFeedback: "Comentarios",
@@ -115,9 +117,9 @@ const es = {
   emptyHint: "Pregunta en inglés o español sobre tu comunidad.",
   welcomeHeading: "¿En qué puedo ayudarte?",
   suggestedQuestionsLabel: "Prueba a preguntar",
-  suggestion1: "¿Cuándo abre la despensa de alimentos?",
-  suggestion2: "¿Cómo obtengo ayuda con el alquiler?",
-  suggestion3: "¿Dónde hay clases de inglés gratuitas?",
+  suggestion1: "¿Dónde puedo conseguir ayuda con comida en Rhode Island?",
+  suggestion2: "¿Cómo solicito ayuda para pagar el alquiler en Providence?",
+  suggestion3: "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
   menuLabel: "Menú",
   toggleSidebar: "Mostrar u ocultar el menú",
   topicsHeading: "Temas",
@@ -127,7 +129,7 @@ const es = {
   roleUser: "Tú",
   roleAssistant: "Vecinita",
   yourQuestion: "Tu pregunta",
-  questionPlaceholder: "p. ej. ¿Cuándo abre la despensa de alimentos?",
+  questionPlaceholder: "p. ej. ¿Dónde puedo conseguir ayuda con comida?",
   ask: "Preguntar",
   asking: "Preguntando…",
   clearHistory: "Borrar historial",
@@ -154,6 +156,9 @@ const es = {
   askUnauthorized: "No tienes autorización para usar el asistente.",
   filterByTopic: "Filtrar por tema",
   sourcesHeading: "Fuentes",
+  relevancePercent: "{n}% relevante",
+  relevanceTip:
+    "Qué tan cerca coincidió esta fuente con lo que preguntaste. Un % más alto significa una coincidencia más fuerte.",
   corpusChunk: "Fragmento del corpus",
   backToChat: "Volver al chat",
   corpusBrowseLabel: "Explorar corpus",

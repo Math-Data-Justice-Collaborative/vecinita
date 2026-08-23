@@ -11,10 +11,18 @@ export type JobType =
 export type RebuildMode = "reembed" | "rechunk" | "rescrape";
 export type BackfillSource = "rescrape" | "from_chunks";
 
-/** Optional job metrics — F75–F77 outcomes + F77 adapter pin fields. */
+export interface JobUrlFailure {
+  url: string;
+  error_code: string;
+  error_message: string;
+}
+
+/** Optional job metrics — F75 translation, F78–F80 automation outcomes, F80 adapter pin. */
 export interface JobMetrics {
   skipped_unchanged?: number;
   urls_failed_embed?: number;
+  urls_failed_scrape?: number;
+  url_failures?: JobUrlFailure[];
   pages_fetched?: number;
   pages_failed?: number;
   pages_skipped_robots?: number;
@@ -27,6 +35,10 @@ export interface JobMetrics {
   adapter_path?: string | null;
   pair_count?: number | null;
   base_model_id?: string | null;
+  translated_documents?: number;
+  translated_chunks?: number;
+  translation_skipped?: number;
+  translation_failed?: number;
 }
 
 export interface Job {
@@ -40,7 +52,7 @@ export interface Job {
   dashboard_url?: string | null | undefined;
   error_code?: string | null | undefined;
   error_message?: string | null | undefined;
-  /** F77 finetune_train — false until POST /jobs/{id}/approve (TC-260). */
+  /** F80 finetune_train — false until POST /jobs/{id}/approve (TC-260). */
   approved?: boolean | null | undefined;
   metrics?: JobMetrics | null | undefined;
   created_at: string;
@@ -61,6 +73,7 @@ export interface CreateJobOptions {
   max_depth?: number;
   max_pages?: number;
   crawl_scope?: "same_domain" | "path_prefix";
+  translate_locales?: Array<"en" | "es">;
 }
 
 export interface CreateJobResponse {
@@ -97,16 +110,18 @@ export interface DocumentSummary {
   title: string | null;
   display_title?: string | null;
   language: string | null;
+  publish_status?: "draft" | "published" | null;
+  paired_document_id?: string | null;
   tags?: TagInput[];
   source_domain?: string | null;
   source_path?: string | null;
   parent_url?: string | null;
   canonical_url?: string | null;
-  /** F76 — per-source freshness enable (default true when omitted). */
+  /** F79 — per-source freshness enable (default true when omitted). */
   refresh_enabled?: boolean;
-  /** F76 — last successful freshness check (ISO timestamptz). */
+  /** F79 — last successful freshness check (ISO timestamptz). */
   last_checked_at?: string | null;
-  /** F76 — older than stale threshold (TC-258). */
+  /** F79 — older than stale threshold (TC-258). */
   stale?: boolean;
 }
 
@@ -114,7 +129,8 @@ export interface DocumentMetadataPatch {
   display_title?: string | null;
   title?: string | null;
   language?: string | null;
-  /** F76 — enable/disable scheduled freshness for this URL source. */
+  publish_status?: "draft" | "published" | null;
+  /** F79 — enable/disable scheduled freshness for this URL source. */
   refresh_enabled?: boolean;
 }
 
@@ -124,6 +140,7 @@ export interface DocumentMetadataResponse {
   title: string | null;
   display_title: string | null;
   language: string | null;
+  publish_status?: "draft" | "published" | null;
   refresh_enabled?: boolean;
   last_checked_at?: string | null;
 }

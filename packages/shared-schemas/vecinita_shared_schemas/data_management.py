@@ -10,6 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+IngestLocale = Literal["en", "es"]
 AssignableRole = Literal["admin", "viewer"]
 Role = Literal["admin", "viewer", "super-admin"]
 UserStatus = Literal["active", "invited", "disabled"]
@@ -47,7 +48,7 @@ class JobOptions(BaseModel):
     revision: str | None = Field(
         default=None,
         max_length=128,
-        description="Document revision for F75 automation_catchup idempotency (RD-335).",
+        description="Document revision for F78 automation_catchup idempotency (RD-335).",
     )
     embed_status: EmbedStatusOption | None = Field(
         default=None,
@@ -87,6 +88,31 @@ class JobOptions(BaseModel):
         default="same_domain",
         description="same_domain | path_prefix (path_prefix stays under seed path).",
     )
+    translate_locales: list[IngestLocale] | None = Field(
+        default=None,
+        max_length=2,
+        description=(
+            "Optional target locales for ingest-time MT (F75 / #251). "
+            "Default off; when set, creates draft paired documents in target language(s)."
+        ),
+    )
+
+    @field_validator("translate_locales")
+    @classmethod
+    def validate_translate_locales(
+        cls, value: list[IngestLocale] | None
+    ) -> list[IngestLocale] | None:
+        """Allow only en/es targets, unique, and never identical to sole source-only noop."""
+        if value is None:
+            return None
+        if not value:
+            msg = "translate_locales must be omitted or contain at least one locale"
+            raise ValueError(msg)
+        deduped: list[IngestLocale] = []
+        for locale in value:
+            if locale not in deduped:
+                deduped.append(locale)
+        return deduped
 
     @model_validator(mode="after")
     def validate_rebuild_and_backfill(self) -> JobOptions:
@@ -151,6 +177,16 @@ class CreateJobResponse(BaseModel):
     status: Literal["pending"]
 
 
+class JobUrlFailure(BaseModel):
+    """Per-URL soft-fail detail for multi-URL ingest (#243)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    url: str
+    error_code: str
+    error_message: str
+
+
 class JobMetrics(BaseModel):
     """Optional ingest resilience counters on completed/failed jobs (F47-F48 / M104)."""
 
@@ -158,6 +194,15 @@ class JobMetrics(BaseModel):
 
     skipped_unchanged: int = Field(default=0, ge=0)
     urls_failed_embed: int = Field(default=0, ge=0)
+    urls_failed_scrape: int = Field(
+        default=0,
+        ge=0,
+        description="URLs that soft-failed during scrape/chunk (non-crawl or crawl) (#243).",
+    )
+    url_failures: list[JobUrlFailure] = Field(
+        default_factory=list,
+        description="Per-URL failure details for soft-failed scrapes (#243).",
+    )
     pages_fetched: int = Field(default=0, ge=0, description="Pages fetched during crawl (F60).")
     pages_failed: int = Field(default=0, ge=0, description="Per-page soft failures (F60).")
     pages_skipped_robots: int = Field(
@@ -171,37 +216,57 @@ class JobMetrics(BaseModel):
     )
     catchup_outcome: str | None = Field(
         default=None,
-        description="F75 automation_catchup worker outcome (ADR-052).",
+        description="F78 automation_catchup worker outcome (ADR-052).",
     )
     freshness_outcome: str | None = Field(
         default=None,
-        description="F76 freshness_refresh worker outcome (ADR-052).",
+        description="F79 freshness_refresh worker outcome (ADR-052).",
     )
     documents_processed: int | None = Field(
         default=None,
         ge=0,
-        description="Documents processed by F75 catch-up or F76 freshness (0 when skipped).",
+        description="Documents processed by F78 catch-up or F79 freshness (0 when skipped).",
     )
     finetune_outcome: str | None = Field(
         default=None,
-        description="F77 finetune_train worker outcome (approve gate / stub / train).",
+        description="F80 finetune_train worker outcome (approve gate / stub / train).",
     )
     adapter_id: str | None = Field(
         default=None,
-        description="F77 LoRA adapter id written by finetune_train (UJ-082 / TC-262).",
+        description="F80 LoRA adapter id written by finetune_train (UJ-084 / TC-262).",
     )
     adapter_path: str | None = Field(
         default=None,
-        description="F77 volume path for the trained adapter (ADR-053).",
+        description="F80 volume path for the trained adapter (ADR-053).",
     )
     pair_count: int | None = Field(
         default=None,
         ge=0,
-        description="F77 SFT pair count used for the train run.",
+        description="F80 SFT pair count used for the train run.",
     )
     base_model_id: str | None = Field(
         default=None,
-        description="F77 pinned base model id for the train run.",
+        description="F80 pinned base model id for the train run.",
+    )
+    translated_documents: int = Field(
+        default=0,
+        ge=0,
+        description="Sibling documents created via ingest-time translation (F75).",
+    )
+    translated_chunks: int = Field(
+        default=0,
+        ge=0,
+        description="Chunks written on translated documents (F75).",
+    )
+    translation_skipped: int = Field(
+        default=0,
+        ge=0,
+        description="Translation targets skipped (same locale or unchanged source).",
+    )
+    translation_failed: int = Field(
+        default=0,
+        ge=0,
+        description="Translation targets that failed after source ingest succeeded.",
     )
 
 
@@ -221,7 +286,7 @@ class Job(BaseModel):
     metrics: JobMetrics | None = None
     approved: bool | None = Field(
         default=None,
-        description="F77 finetune_train only — False until POST /jobs/{id}/approve (TC-260).",
+        description="F80 finetune_train only — False until POST /jobs/{id}/approve (TC-275).",
     )
     created_at: datetime
     updated_at: datetime

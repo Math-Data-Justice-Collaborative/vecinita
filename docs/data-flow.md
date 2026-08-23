@@ -204,7 +204,7 @@ sequenceDiagram
     DM-->>AF: completed | failed
 ```
 
-**Bilingual note:** Source pages may be EN or ES; tagging uses vocabulary slugs with language metadata. No translation step in ingest — content stored as scraped.
+**Bilingual note:** Source pages may be EN or ES; tagging uses vocabulary slugs with language metadata. Optional **F75** ingest-time translation (`translate_locales`) creates draft paired documents in the target locale; default ingest has no translation step.
 
 **Privacy note:** Job records store URL and status only — no operator email in Postgres.
 

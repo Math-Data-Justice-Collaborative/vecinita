@@ -1,4 +1,4 @@
-"""F75 automations config + run history persistence (EV-027 / ADR-052 / TP3).
+"""F78 automations config + run history persistence (EV-027 / ADR-052 / TP3).
 
 [Corpus: feature-list.md §F75]
 [Spec: docs/api-contract.md §EV-027 Automations]

@@ -215,7 +215,7 @@ export async function retagDocument(
   return body.job_id;
 }
 
-/** F76 Refresh now — enqueue ``freshness_refresh`` with force=true (TC-259). */
+/** F79 Refresh now — enqueue ``freshness_refresh`` with force=true (TC-274). */
 export async function refreshDocument(
   options: CorpusClientOptions,
   documentId: string,

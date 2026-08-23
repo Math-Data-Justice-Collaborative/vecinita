@@ -21,11 +21,13 @@ from vecinita_ingest import (
 )
 from vecinita_ingest.chunk import resolve_tokenizer_id
 from vecinita_ingest.crawl import CrawlPlan, discover_crawl_urls
+from vecinita_ingest.drive import DriveFetchError
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_ingest.nested_source import derive_nested_source
-from vecinita_ingest.scrape import parse_html
+from vecinita_ingest.scrape import ScrapeFetchError, parse_html, scrape_headers
 from vecinita_shared_schemas.internal_write import (
     BatchUpsertRequest,
+    BatchUpsertResponse,
     ChunkUpsert,
     DocumentUpsert,
     TagInput,
@@ -73,6 +75,35 @@ def _raise_no_documents() -> None:
     raise ValueError(msg)
 
 
+def _exception_error_code(exc: BaseException) -> str:
+    """Prefer explicit ``error_code`` (e.g. DriveFetchError) over type name."""
+    code = getattr(exc, "error_code", None)
+    if isinstance(code, str) and code:
+        return code
+    return type(exc).__name__
+
+
+def _url_failure_entry(url: str, exc: BaseException) -> dict[str, str]:
+    return {
+        "url": url,
+        "error_code": _exception_error_code(exc),
+        "error_message": str(exc)[:500],
+    }
+
+
+def _raise_from_url_failures(url_failures: list[dict[str, str]]) -> None:
+    """Re-raise the first soft-fail so the job surfaces an operator-readable code."""
+    first = url_failures[0]
+    code = first["error_code"]
+    message = first["error_message"]
+    if code in {"drive_auth_required", "drive_unsupported"}:
+        raise DriveFetchError(message, error_code=code)
+    if code in {"host_waf_blocked", "tls_handshake_failed"}:
+        raise ScrapeFetchError(message, error_code=code)
+    msg = f"all URLs failed; first: {message}"
+    raise ValueError(msg)
+
+
 def _lookup_stored_content_hash(write_client: object, url: str) -> str | None:
     """Return stored content_hash when the write client supports F47 lookup."""
     getter = getattr(write_client, "get_content_hash_by_url", None)
@@ -106,9 +137,27 @@ class TagInferrer(Protocol):
         ...
 
 
+class ChunkTranslator(Protocol):
+    """Translate one corpus chunk between EN and ES (F75)."""
+
+    def translate_chunk(
+        self,
+        text: str,
+        *,
+        source_locale: str,
+        target_locale: str,
+    ) -> str:
+        """Return ``text`` translated to ``target_locale``."""
+        ...
+
+
 def _default_fetch_html(url: str) -> str:
     """Fetch raw HTML for crawl link discovery."""
-    with httpx.Client(timeout=30.0, follow_redirects=True) as http:
+    with httpx.Client(
+        timeout=30.0,
+        follow_redirects=True,
+        headers=scrape_headers(),
+    ) as http:
         response = http.get(url)
         response.raise_for_status()
         return response.text
@@ -284,6 +333,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
     fetch_document: DocumentFetcher | None = None,
     fetch_html: Callable[[str], str] | None = None,
     tag_client: TagInferrer | None = None,
+    translate_client: ChunkTranslator | None = None,
     tag_vocabulary: list[SeedTag] | None = None,
     max_document_tags: int = 10,
 ) -> None:
@@ -304,9 +354,16 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
     crawl_enabled = _option_bool(record.options, "crawl")
     skipped_unchanged = 0
     urls_failed_embed = 0
+    urls_failed_scrape = 0
     pages_fetched = 0
     pages_failed = 0
+    url_failures: list[dict[str, str]] = []
     crawl_stopped_reason: str | None = None
+    translate_locales = _translate_locales_from_options(record.options)
+    translated_documents = 0
+    translated_chunks = 0
+    translation_skipped = 0
+    translation_failed = 0
 
     try:
         urls, crawl_stopped_reason = _resolve_crawl_urls(record, fetch_html=html_fetcher)
@@ -329,10 +386,11 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                     slug_vocab=slug_vocab,
                     max_document_tags=max_document_tags,
                 )
-            except EmbeddingClientError:
+            except EmbeddingClientError as embed_exc:
                 urls_failed_embed += 1
                 if crawl_enabled:
                     pages_failed += 1
+                    url_failures.append(_url_failure_entry(url, embed_exc))
                     logger.warning("embed failed for crawl page %s; continuing", url)
                     continue
                 store.update_job(
@@ -343,17 +401,17 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                     metrics={
                         "skipped_unchanged": skipped_unchanged,
                         "urls_failed_embed": urls_failed_embed,
+                        "urls_failed_scrape": urls_failed_scrape,
+                        "url_failures": url_failures,
                     },
                 )
                 raise
-            except Exception:
-                if crawl_enabled:
-                    pages_failed += 1
-                    logger.warning(
-                        "page soft-fail for %s; continuing crawl job", url, exc_info=True
-                    )
-                    continue
-                raise
+            except Exception as page_exc:  # noqa: BLE001  # soft-fail any per-URL ingest error
+                urls_failed_scrape += 1
+                url_failures.append(_url_failure_entry(url, page_exc))
+                pages_failed += 1
+                logger.warning("URL soft-fail for %s; continuing ingest job", url, exc_info=True)
+                continue
 
             if skipped:
                 skipped_unchanged += 1
@@ -361,20 +419,50 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
             documents.append(doc)
 
         if documents:
-            write_client.upsert_batch(BatchUpsertRequest(documents=documents))
+            batch_response = write_client.upsert_batch(BatchUpsertRequest(documents=documents))
+            if translate_locales and translate_client is not None:
+                translation_docs, t_stats = _build_translation_documents(
+                    source_documents=documents,
+                    upserted=batch_response,
+                    translate_locales=translate_locales,
+                    translate_client=translate_client,
+                    embed_client=embed_client,
+                    chunk_size=chunk_size,
+                )
+                translation_skipped += t_stats["skipped"]
+                translation_failed += t_stats["failed"]
+                if translation_docs:
+                    write_client.upsert_batch(BatchUpsertRequest(documents=translation_docs))
+                    translated_documents += t_stats["documents"]
+                    translated_chunks += t_stats["chunks"]
+        elif url_failures and not crawl_enabled:
+            _raise_from_url_failures(url_failures)
         elif not crawl_enabled:
             _raise_no_documents()
 
         metrics: dict[str, object] = {
             "skipped_unchanged": skipped_unchanged,
             "urls_failed_embed": urls_failed_embed,
+            "urls_failed_scrape": urls_failed_scrape,
+            "url_failures": url_failures,
         }
+        if translate_locales:
+            metrics.update(
+                {
+                    "translated_documents": translated_documents,
+                    "translated_chunks": translated_chunks,
+                    "translation_skipped": translation_skipped,
+                    "translation_failed": translation_failed,
+                }
+            )
         if crawl_enabled:
             metrics["pages_fetched"] = pages_fetched
             metrics["pages_failed"] = pages_failed
             metrics["pages_skipped_robots"] = 0
             if crawl_stopped_reason is not None:
                 metrics["crawl_stopped_reason"] = crawl_stopped_reason
+        elif urls_failed_scrape:
+            metrics["pages_failed"] = pages_failed
         store.update_job(job_id, status="completed", metrics=metrics)
     except EmbeddingClientError:
         raise
@@ -382,7 +470,18 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
         fail_metrics: dict[str, object] = {
             "skipped_unchanged": skipped_unchanged,
             "urls_failed_embed": urls_failed_embed,
+            "urls_failed_scrape": urls_failed_scrape,
+            "url_failures": url_failures,
         }
+        if translate_locales:
+            fail_metrics.update(
+                {
+                    "translated_documents": translated_documents,
+                    "translated_chunks": translated_chunks,
+                    "translation_skipped": translation_skipped,
+                    "translation_failed": translation_failed,
+                }
+            )
         if crawl_enabled:
             fail_metrics["pages_fetched"] = pages_fetched
             fail_metrics["pages_failed"] = pages_failed
@@ -392,7 +491,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
         store.update_job(
             job_id,
             status="failed",
-            error_code=type(exc).__name__,
+            error_code=_exception_error_code(exc),
             error_message=str(exc)[:500],
             metrics=fail_metrics,
         )
@@ -483,6 +582,113 @@ def _chunk_overlap_from_options(options: dict[str, object]) -> int:
     """Resolve chunk overlap (F49 / ADR-044); default 32."""
     raw = options.get("chunk_overlap_tokens", 32)
     return int(raw) if isinstance(raw, (int, str)) else 32
+
+
+def _translate_locales_from_options(options: dict[str, object]) -> list[str]:
+    """Parse ``translate_locales`` job option (F75 / #251)."""
+    raw = options.get("translate_locales")
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        return []
+    locales: list[str] = []
+    for item in cast("list[object]", raw):
+        if item in {"en", "es"} and item not in locales:
+            locales.append(str(item))
+    return locales
+
+
+def _document_locale_key(url: str, language: str | None) -> tuple[str, str]:
+    return (url, language or "en")
+
+
+def _as_ingest_locale(value: str) -> str:
+    return "es" if value == "es" else "en"
+
+
+def _build_translation_documents(  # noqa: PLR0913
+    *,
+    source_documents: list[DocumentUpsert],
+    upserted: BatchUpsertResponse,
+    translate_locales: list[str],
+    translate_client: ChunkTranslator,
+    embed_client: EmbeddingClient,
+    chunk_size: int,
+) -> tuple[list[DocumentUpsert], dict[str, int]]:
+    """Create draft paired documents for requested target locales."""
+    id_by_key = {
+        _document_locale_key(item.url, item.language): item.document_id
+        for item in upserted.documents
+    }
+    translation_docs: list[DocumentUpsert] = []
+    stats = {"documents": 0, "chunks": 0, "skipped": 0, "failed": 0}
+
+    for source in source_documents:
+        if not source.chunks:
+            stats["skipped"] += len(translate_locales)
+            continue
+        source_lang = source.language or "en"
+        source_id = id_by_key.get(_document_locale_key(str(source.url), source_lang))
+        if source_id is None:
+            stats["failed"] += len(translate_locales)
+            continue
+
+        for target_lang in translate_locales:
+            if target_lang == source_lang:
+                stats["skipped"] += 1
+                continue
+            try:
+                translated_texts = [
+                    translate_client.translate_chunk(
+                        chunk.text,
+                        source_locale=_as_ingest_locale(source_lang),
+                        target_locale=_as_ingest_locale(target_lang),
+                    )
+                    for chunk in source.chunks
+                ]
+            except Exception:  # noqa: BLE001  # soft-fail per locale; source doc already stored
+                logger.warning(
+                    "translation failed for %s -> %s",
+                    source.url,
+                    target_lang,
+                    exc_info=True,
+                )
+                stats["failed"] += 1
+                continue
+
+            embeddings = embed_client.embed_batch(translated_texts)
+            translated_chunks = [
+                ChunkUpsert(chunk_index=index, text=text, embedding=vector)
+                for index, (text, vector) in enumerate(
+                    zip(translated_texts, embeddings, strict=True)
+                )
+            ]
+            body_text = "\n\n".join(translated_texts)
+            translation_docs.append(
+                DocumentUpsert(
+                    url=source.url,
+                    title=source.title,
+                    content_hash=sha256(body_text.encode("utf-8")).hexdigest(),
+                    language=target_lang,
+                    body_text=body_text,
+                    embedding_model_id=source.embedding_model_id,
+                    embedding_dim=source.embedding_dim,
+                    chunk_size_tokens=chunk_size,
+                    chunk_tokenizer_id=source.chunk_tokenizer_id,
+                    source_domain=source.source_domain,
+                    source_path=source.source_path,
+                    parent_url=source.parent_url,
+                    canonical_url=source.canonical_url,
+                    chunks=translated_chunks,
+                    tags=source.tags,
+                    paired_document_id=source_id,
+                    publish_status="draft",
+                )
+            )
+            stats["documents"] += 1
+            stats["chunks"] += len(translated_chunks)
+
+    return translation_docs, stats
 
 
 def _document_ids_from_options(options: dict[str, object]) -> list[UUID] | None:

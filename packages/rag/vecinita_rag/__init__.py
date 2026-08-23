@@ -26,6 +26,11 @@ from vecinita_rag.engine import (
     build_retriever,
     synthesize_with_llm,
 )
+from vecinita_rag.es_esl_supplement import (
+    merge_es_esl_retrieval_for_r6,
+    merge_retrieved_chunks_by_score,
+    should_supplement_en_for_es_esl_query,
+)
 from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.multi_query import (
     heuristic_rewrites,
@@ -77,13 +82,16 @@ __all__ = [
     "detect_query_language",
     "heuristic_rewrites",
     "merge_ce_rerank",
+    "merge_es_esl_retrieval_for_r6",
     "merge_multi_query_hits",
+    "merge_retrieved_chunks_by_score",
     "multi_query_retrieve",
     "no_context_message",
     "normalize_query",
     "pack_chunks",
     "pack_p1",
     "rerank_with_scorer",
+    "should_supplement_en_for_es_esl_query",
     "soft_language_retrieve",
     "synthesize_with_llm",
 ]

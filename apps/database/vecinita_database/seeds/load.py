@@ -87,7 +87,7 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
                                 """
                             INSERT INTO documents (url, title, content_hash, language)
                             VALUES (:url, :title, :content_hash, :language)
-                            ON CONFLICT (url) DO UPDATE
+                            ON CONFLICT (url, language) DO UPDATE
                             SET title = EXCLUDED.title,
                                 content_hash = EXCLUDED.content_hash,
                                 language = EXCLUDED.language,

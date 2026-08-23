@@ -17,6 +17,10 @@ from vecinita_rag.cache import (
     cascade_lookup,
 )
 from vecinita_rag.engine import answer_from_chunks
+from vecinita_rag.es_esl_supplement import (
+    merge_es_esl_retrieval_for_r6,
+    should_supplement_en_for_es_esl_query,
+)
 from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.multi_query import multi_query_retrieve
 from vecinita_rag.packing import PackerMode, pack_chunks
@@ -26,7 +30,7 @@ from vecinita_rag.soft_language import soft_language_retrieve
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
-from vecinita_shared_schemas.eval_config import EvalConfig
+from vecinita_shared_schemas.eval_config import EvalConfig, resolve_system_prompt_for_language
 from vecinita_tagging.llm_client import LlmTagClient
 from vecinita_tagging.vocabulary import load_seed_vocabulary, vocabulary_slugs
 
@@ -285,12 +289,24 @@ class ChatRagService:
             return chunks
 
         def _retrieve_once(question: str) -> list[RetrievedChunk]:
-            return soft_language_retrieve(
+            chunks = soft_language_retrieve(
                 question,
                 language=language,
                 retrieve_fn=_retrieve_lang,
                 enabled=soft_fallback,
             ).chunks
+            if should_supplement_en_for_es_esl_query(
+                language=language,
+                question=question,
+                tag_slugs=tag_slugs,
+            ):
+                en_chunks = _retrieve_lang(question, "en")
+                chunks = merge_es_esl_retrieval_for_r6(
+                    chunks,
+                    en_chunks,
+                    top_k=retrieve_k,
+                )
+            return chunks
 
         chunks = multi_query_retrieve(
             request.question,
@@ -331,7 +347,7 @@ class ChatRagService:
         prompt = _build_prompt(
             request.question,
             chunk_list,
-            system_prompt=production.system_prompt,
+            system_prompt=resolve_system_prompt_for_language(language, production),
             packer=packer,
             context_max_chars=max_chars,
         )
@@ -499,7 +515,7 @@ class ChatRagService:
         prompt = _build_prompt(
             request.question,
             chunks,
-            system_prompt=production.system_prompt,
+            system_prompt=resolve_system_prompt_for_language(language, production),
             packer=packer,
             context_max_chars=max_chars,
         )
@@ -555,7 +571,7 @@ class ChatRagService:
         prompt = _build_prompt(
             request.question,
             chunks,
-            system_prompt=production.system_prompt,
+            system_prompt=resolve_system_prompt_for_language(language, production),
             packer=packer,
             context_max_chars=max_chars,
         )

@@ -79,9 +79,11 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-077 | Citation link only for valid http(s) URLs | Community member | ChatRAG SourceList | F72 EV-026 #222 | local (Vitest) |
 | UJ-078 | Ask sources length 0…top_k by relevance | Community member | ChatRAG → `POST /api/v1/ask` / stream | F73 EV-026 #223 | local |
 | UJ-079 | Operator sets document display_title | Admin operator | DocumentAdmin rename + ask citation | F74 EV-026 #224 | local |
-| UJ-080 | Enable automations + view run history | Admin operator | DM Automations UI + write-API | F75 EV-027 #73 | local |
-| UJ-081 | Refresh stale sources / schedule freshness | Admin operator | DM freshness + Modal schedule | F76 EV-027 #219 | local |
-| UJ-082 | Approve FT train + human promote | Admin / super-admin | FT job + eval report + llm promote | F77 EV-027 #72 | local |
+| UJ-080 | Ingest bilingual translation on job | Admin operator | JobForm translate checkbox → ingest job | F75 EV-030 #251 | local |
+| UJ-081 | Use suggested question chips (empty state) | Community member | ChatRAG welcome → chip click → prefilled ask | F1 EV-216 #216 | local |
+| UJ-082 | Enable automations + view run history | Admin operator | DM Automations UI + write-API | F78 EV-027 #73 | local |
+| UJ-083 | Refresh stale sources / schedule freshness | Admin operator | DM freshness + Modal schedule | F79 EV-027 #219 | local |
+| UJ-084 | Approve FT train + human promote | Admin / super-admin | FT job + eval report + llm promote | F80 EV-027 #72 | local |
 
 ## Visual journey maps
 
@@ -1319,7 +1321,7 @@ Playwright optional if list↔detail cross-panel.
 
 ---
 
-### UJ-080: Enable automations + view run history (F75)
+### UJ-082: Enable automations + view run history (F78)
 
 **Actor**: Admin operator
 
@@ -1334,16 +1336,16 @@ Playwright optional if list↔detail cross-panel.
 3. Confirm run appears in history with status, timestamps, and error (if any).
 4. Disable or hit kill-switch — no new automation jobs enqueue.
 
-**Acceptance**: AC-AU1–AU6; TC-252–255, TC-264.
+**Acceptance**: AC-AU1–AU6; TC-266–269, TC-270.
 
-**Automated tests**: API e2e `tests/e2e/test_uj080_automations.py`; Vitest enable/history panel.
+**Automated tests**: API e2e `tests/e2e/test_uj082_automations.py`; Vitest enable/history panel.
 **UI E2E**: Playwright if shell ↔ automations panel cross-nav.
 
 **E2E tier**: local (API TestClient); T0-ui when UI ships.
 
 ---
 
-### UJ-081: Refresh stale sources / schedule freshness (F76)
+### UJ-083: Refresh stale sources / schedule freshness (F79)
 
 **Actor**: Admin operator
 
@@ -1355,19 +1357,19 @@ Playwright optional if list↔detail cross-panel.
 
 1. View corpus/admin list with stale badge / last_checked for a URL doc older than threshold (default 30d).
 2. Trigger **Refresh now** on one source — job runs; hash-unchanged skips rechunk; last_checked updates.
-3. Confirm scheduled refresh job type runs on cron without incorrectly duplicating F75 catch-up.
+3. Confirm scheduled refresh job type runs on cron without incorrectly duplicating F78 catch-up.
 4. Disable refresh for a source — schedule skips it.
 
-**Acceptance**: AC-FR1–FR6; TC-256–259, TC-264.
+**Acceptance**: AC-FR1–FR6; TC-271–274, TC-270.
 
-**Automated tests**: API e2e `tests/e2e/test_uj081_freshness.py`; unit hash/stale helpers.
+**Automated tests**: API e2e `tests/e2e/test_uj083_freshness.py`; unit hash/stale helpers.
 **UI E2E**: Playwright list ↔ refresh action if cross-panel.
 
 **E2E tier**: local; T0-ui when UI ships.
 
 ---
 
-### UJ-082: Approve FT train + human promote (F77)
+### UJ-084: Approve FT train + human promote (F80)
 
 **Actor**: Admin / super-admin
 
@@ -1384,7 +1386,7 @@ prod `vecinita-llm` only when the operator judges quality better.
 4. On promote: prod `vecinita-llm` loads adapter; AskQuestion before live cutover in deploy stages.
 5. Rollback path documented (revert to base pin).
 
-**Acceptance**: AC-FT1–FT9; TC-260–263, TC-265.
+**Acceptance**: AC-FT1–FT9; TC-275–279.
 
 **Automated tests**: Unit train-data builder; API e2e approve/promote/rollback state machine;
 integration eval report shape. Live GPU train is T3 / smoke — not CI default.
@@ -1393,6 +1395,31 @@ integration eval report shape. Live GPU train is T3 / smoke — not CI default.
 
 ---
 
+### UJ-081: Use suggested question chips (empty state) (F1)
+
+**Actor**: Community member
+
+**Goal**: On first visit, tap a suggested community question that retrieves a grounded answer
+from the current corpus (EN or ES locale).
+
+**Preconditions**: Chat empty state; staging/prod corpus includes food, rent, and ESL sources
+(EV-029, EV-218).
+
+**Steps**:
+
+1. Open ChatRAG — welcome heading and three suggested-question chips visible.
+2. Switch locale EN ↔ ES — chip labels update to localized strings.
+3. Click a chip — question input prefills with the chip text.
+4. Submit — answer cites corpus sources appropriate to the topic (staging-verified wording).
+
+**Acceptance**: TC-259; chip strings documented in `messages.ts`; evidence in EV-216 session
+`reports/staging-chip-eval.json`.
+
+**Automated tests**: Vitest `messages.test.ts`, `ChatPanel.test.tsx` (empty-state chips).
+
+**E2E tier**: local (Vitest); staging spot-check optional.
+
+---
 
 ### UJ-056: Admin validates F42 via F36 staging golden (Hy1)
 

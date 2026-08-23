@@ -186,6 +186,7 @@ def fastapi_app():
     from vecinita_embedding_client import EmbeddingClient
     from vecinita_llm_client import LlmClient
     from vecinita_tagging.llm_client import LlmTagClient
+    from vecinita_tagging.translate_client import LlmTranslateClient
 
     jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
     # modal.Dict is a MutableMapping at runtime but is not typed as one.
@@ -193,16 +194,20 @@ def fastapi_app():
     embed = EmbeddingClient()
     write = InternalWriteClient()
     tag_client: LlmTagClient | None = None
+    translate_client: LlmTranslateClient | None = None
     try:
-        tag_client = LlmTagClient(LlmClient())
+        llm = LlmClient()
+        tag_client = LlmTagClient(llm)
+        translate_client = LlmTranslateClient(llm)
     except Exception:
         logger.warning(
-            "LlmTagClient init failed — retag jobs will fail. "
+            "LlmTagClient init failed — retag/translate jobs will fail. "
             "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
             APP_NAME,
             exc_info=True,
         )
         tag_client = None
+        translate_client = None
 
     # F77: approved finetune_train jobs call vecinita-llm-finetune::train_lora (T129.5).
     os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
@@ -214,6 +219,7 @@ def fastapi_app():
             embed_client=embed,
             write_client=write,
             tag_client=tag_client,
+            translate_client=translate_client,
         )
 
     return create_app(store=store, pipeline_runner=runner)

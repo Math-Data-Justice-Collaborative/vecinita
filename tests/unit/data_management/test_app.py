@@ -313,6 +313,27 @@ def test_create_job_with_minimal_ingest_options() -> None:
     assert record.options == {}
 
 
+def test_create_job_persists_translate_locales_option() -> None:
+    """TC-252: translate_locales survives POST /jobs → job store options."""
+    store = InMemoryJobStore()
+    client = TestClient(create_app(store=store, require_proxy_auth=False))
+
+    response = client.post(
+        "/jobs",
+        json={
+            "urls": ["https://example.com/page"],
+            "options": {"translate_locales": ["es"], "force": True},
+        },
+    )
+
+    assert response.status_code == HTTPStatus.ACCEPTED
+    job_id = UUID(json_str(response_json_object(response), "job_id"))
+    record = store.get_job(job_id)
+    assert record is not None
+    assert record.options["translate_locales"] == ["es"]
+    assert record.options["force"] is True
+
+
 def test_list_jobs_returns_all_jobs() -> None:
     """Test list jobs returns all jobs."""
     store = InMemoryJobStore()

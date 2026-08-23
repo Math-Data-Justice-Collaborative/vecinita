@@ -38,7 +38,7 @@ FILE_FEATURE_MAP: list[tuple[str, str]] = [
     ("packages/rag/", "RAG retrieve/pack"),
     ("packages/embedding-client/", "Embedding client"),
     ("packages/shared-schemas/", "Shared schemas"),
-    ("tests/e2e/test_uj080", "F75: UJ-080 automations e2e"),
+    ("tests/e2e/test_uj082", "F78: UJ-082 automations e2e"),
     ("tests/e2e/test_uj081", "F76: UJ-081 freshness e2e"),
     ("tests/e2e/test_uj082", "F77: UJ-082 FT approve/promote e2e"),
     # Legacy antibody template

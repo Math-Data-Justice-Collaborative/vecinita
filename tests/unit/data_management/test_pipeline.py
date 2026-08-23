@@ -270,7 +270,12 @@ def test_run_ingest_job_skips_embed_when_content_hash_unchanged() -> None:
     assert doc.chunks == []
     assert doc.body_text is not None
     assert doc.title == scraped.title
-    assert updated.metrics == {"skipped_unchanged": 1, "urls_failed_embed": 0}
+    assert updated.metrics == {
+        "skipped_unchanged": 1,
+        "urls_failed_embed": 0,
+        "urls_failed_scrape": 0,
+        "url_failures": [],
+    }
 
 
 def test_run_ingest_job_without_hash_lookup_still_embeds() -> None:
@@ -334,7 +339,12 @@ def test_run_ingest_job_embed_failure_records_urls_failed_embed() -> None:
     assert updated is not None
     assert updated.status == "failed"
     assert updated.error_code == "EmbeddingClientError"
-    assert updated.metrics == {"skipped_unchanged": 0, "urls_failed_embed": 1}
+    assert updated.metrics == {
+        "skipped_unchanged": 0,
+        "urls_failed_embed": 1,
+        "urls_failed_scrape": 0,
+        "url_failures": [],
+    }
 
 
 def test_run_ingest_job_force_bypasses_content_hash_skip() -> None:
