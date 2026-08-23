@@ -5,7 +5,7 @@
     "answer_relevancy": 0.72,
     "faithfulness": 0.75,
     "latency_p95_ms": 8000,
-    "retrieval_relevance": 0.8333333333333334,
+    "retrieval_relevance": 0.8333333333333334
   },
   "schema_version": 1
 }
