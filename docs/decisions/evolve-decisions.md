@@ -1177,3 +1177,28 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | EV216-D3 | Out of scope | Dynamic chips; backend query rewrite; coldstart facts copy |
 | EV216-D4 | Success | Issue #216 acceptance criteria; TC-259 / UJ-081 |
 | EV216-D5 | Spec gate | Spec-first; Build blocked until operator approves gate |
+
+---
+
+## Session S031 — Brownfield docs gap-fill (2026-08-18)
+
+**Orchestrator:** brownfield (standard) — **not** an evolve cycle  
+**Session:** S031-docs-gapfill  
+**Branch:** `feat/S031-docs-gapfill` (rebased onto `main` after PR #238 merge)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S031-D0 | Proceed gate | Open S031 → documenting → verify → HANDOFF → implement; local only; S030 closed; PR #238 left as-is |
+| S031-D1 | Gap-fill batch | **feature-list** F78–F80 status → Implemented (in-tree; live cutover deferred); **rewrite** plan-adherence / constraint-enforcement / template-conformance to ChatRAG |
+| S031-D2 | Branch base | Rebased onto `main` after PR #238 merge (was `evolve/EV-027-corpus-automations`) |
+| S031-D3 | Expand gap-fill | Draft inventory items **2–12** (staging-runbook, architecture FT, schema, data-flow, deploy-checklist, CHANGELOG, spec overview, CORPUS satellites, eval-golden F77 note, maps-mock waiver) |
+| S031-D4 | Documenting→implementing gate | **Open** + leftover rules (`open_leftover`) — rewrite `domain-vocabulary.mdc` ChatRAG-first; no maps product; no live mutation |
+| S031-D5 | `test_fast.sh` bash 3.2 | **Portable rewrite** (replace bash-4-only builtins) so implementing `tests` pack / `make test-fast` works on macOS stock bash |
+| S031-D6 | Close session | **Close** then commit on `feat/S031-docs-gapfill` (`close_then_commit`) |
+
+**Waivers**
+
+- `[Corpus: WAIVED — community maps/alerts mock; reason: non-normative HTML mock, no Fn; decided: S031]`
+- `[Corpus: WAIVED — research-brief.md; reason: antibody leftover; decided: S031]`
+
+**Cites:** [Corpus: product] [Corpus: orchestrators] [Corpus: feature-list.md §F78–F80] [Corpus: staging] [Corpus: architecture] [Corpus: data] [Corpus: data-flow] [Corpus: deploy]

@@ -458,6 +458,53 @@ re-`POST …/promote` on an already-`promoted` run (idempotent; does not re-copy
 **E0 rollback** is runbook-proven in CI unit/schema + local compose e2e when Docker works
 (S027-D35 waive otherwise); live staging/prod rollback drill is optional at 13.
 
+## EV-027 (F75–F77) — Flags-off posture (in-tree; live enable deferred)
+
+S030 closed with **cutover deferred** (S030-D64). Catch-up, freshness, and LoRA train/promote
+are **implemented in-tree** and must stay **disabled** on the live stack until an explicit
+AskQuestion approve. [Corpus: feature-list.md §F75–F77]
+[Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
+[Spec: docs/adr/ADR-053-modal-lora-finetune.md]
+[Corpus: staging]
+
+**Do not** enable automations or promote an FT adapter on live/prod from this runbook alone.
+See [no-live-prod-corpus-push.mdc](../.cursor/rules/no-live-prod-corpus-push.mdc).
+
+### Safe-off defaults
+
+| Knob | Safe value | Notes |
+|------|------------|-------|
+| `VECINITA_AUTOMATIONS_KILL_SWITCH` | on / true | Blocks F75 enqueue and F77 train start |
+| Automations enable (DM UI / `automation_settings.enabled`) | **false** | Catch-up does not run |
+| Per-source `refresh_enabled` | operator-controlled; treat live as **off** until approved | F76 |
+| `VECINITA_FINETUNE_ADAPTER_ID` | unset / empty | Prod `vecinita-llm` stays base Qwen |
+| FT train approve / promote | not invoked | Human promote only after eval evidence |
+
+### Kill-switch and caps
+
+- One shared Modal schedule on `vecinita-data-management` dispatches `job_type=automation_catchup`
+  then `freshness_refresh` (ADR-052). Distinct enable flags still apply.
+- FT caps: `VECINITA_FINETUNE_MAX_CONCURRENT` (default 1),
+  `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (default 3).
+- Secrets matrix: [staging-secrets-matrix.md](staging-secrets-matrix.md) §EV-027. Do not enable
+  until DO/Modal secret sync lists include these keys.
+
+### CD / deploy debt (document, do not invent)
+
+- `vecinita-llm-finetune` may be omitted from CD / `modal.sh` (accepted S030-D59). Flags-off
+  13-smoke is the standing posture; deploying FT CD is **not** implied by this section.
+- Session checklist: [sessions/S030-corpus-automations/reports/deploy-checklist.md](sessions/S030-corpus-automations/reports/deploy-checklist.md).
+- Live Alembic may lag tip (`20260806_0014` vs `20260812_0016`) — apply migrations only with
+  corpus-safety gates; enabling F75/F76 without the schema is unsupported.
+
+### Enable / promote (AskQuestion required)
+
+1. Staging-first evidence (local compose + flags-off smoke already recorded in S030).
+2. AskQuestion `[Decision]` for **live enable** of F75/F76 and/or **F77 promote** onto
+   `vecinita-llm`. Recommended default: defer / runbook-only.
+3. Proceed only after an explicit approve option — then follow operator steps in
+   [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md).
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  

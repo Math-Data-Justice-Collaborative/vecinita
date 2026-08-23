@@ -3,15 +3,23 @@
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
 > **Version**: greenfield (`fresh-start` branch)  
-> **Last updated**: 2026-07-30 (EV-015 F41 corpus document store + rebuild)
+> **Last updated**: 2026-08-18 (S031 — six-app overview + F75–F77 in-tree; live cutover deferred)
 
 ## Overview
 
-Vecinita is a **five-application monorepo** delivering a **bilingual (English/Spanish) community Q&A RAG chatbot** (ChatRAG) and a **data management platform** (scrape, chunk, embed, corpus admin). Deployment is **hybrid**: DigitalOcean hosts HTTP APIs that touch Postgres, both React frontends, and managed Postgres; **Modal** hosts async ingest workers, FastEmbed, **vLLM** (primary LLM per ADR-009), and the **Data Management ASGI API** (`requires_proxy_auth`). RAG orchestration uses **LlamaIndex** in `packages/rag`. The system enforces **zero personal data**, **US-only** infrastructure, and a **≤ $50/month** cost cap (target $25) per ADR-004.
+Vecinita is a **six-application monorepo** (ADR-001 five-app product split plus standalone
+`internal-write-api`) delivering a **bilingual (English/Spanish) community Q&A RAG chatbot**
+(ChatRAG) and a **data management platform** (scrape, chunk, embed, corpus admin, automations).
+Deployment is **hybrid**: DigitalOcean hosts HTTP APIs that touch Postgres, both React
+frontends, and managed Postgres; **Modal** hosts async ingest/automation workers, multilingual
+embeddings, **vLLM** prod + playground (ADR-009 / ADR-037), the **Data Management ASGI API**
+(`requires_proxy_auth`), and **`vecinita-llm-finetune`** (F77; live adapter pin deferred).
+RAG orchestration uses **LlamaIndex** in `packages/rag`. The system enforces **zero personal
+data**, **US-only** infrastructure, and a **≤ $50/month** cost cap (target $25) per ADR-004.
 
 ## System Architecture
 
-Five deployable applications share Postgres (pgvector) and internal packages. **Only DigitalOcean backends hold `DATABASE_URL`**; Modal workers persist data by calling a **DO internal write API** (RD-016).
+Five deployable applications share Postgres (pgvector) and internal packages; **internal-write-api** is the sixth tree. **Only DigitalOcean backends hold `DATABASE_URL`**; Modal workers persist data by calling a **DO internal write API** (RD-016).
 
 **Diagrams:** Mermaid deployment topology, ERD, sequences, state machines, and class diagrams live in [data-flow.md](data-flow.md) and [architecture.md](architecture.md). User journey maps: [user-journeys.md](user-journeys.md#visual-journey-maps).
 
@@ -36,8 +44,8 @@ Five deployable applications share Postgres (pgvector) and internal packages. **
 ┌───────────┴─────────────────────┴───────────────────────────────────────────┐
 │                              Modal (US workspace)                             │
 │  ┌─────────────────────┐  ┌──────────────┐  ┌────────────────────────────┐ │
-│  │ data-mgmt ASGI      │  │ scrape/ingest│  │ FastEmbed + vLLM (primary) │ │
-│  │ /jobs/*  proxy auth │→ │ queue workers│→ │ Ollama fallback if needed   │ │
+│  │ data-mgmt ASGI      │  │ scrape/ingest│  │ vLLM prod + playground     │ │
+│  │ /jobs/*  proxy auth │→ │ queue workers│→ │ + LoRA FT (live pin off)   │ │
 │  └─────────────────────┘  └──────────────┘  └────────────────────────────┘ │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -302,7 +310,7 @@ Admin UI → Modal ASGI (/jobs) → Modal queue worker → scrape → chunk → 
 
 | ID | Constraint | Source |
 |----|------------|--------|
-| H1 | Five applications, separate deploy boundaries | ADR-001 |
+| H1 | Six application trees, separate deploy boundaries (ADR-001 five-app product split + write API) | ADR-001 |
 | H2 | Hybrid Modal + DigitalOcean; US regions only | ADR-002, R10a |
 | H3 | Greenfield APIs; OpenAPI required as source of truth | ADR-003, user interview |
 | H4 | DO Managed Postgres + pgvector; 384-dim default | ADR-005, ADR-008 → **ADR-048** |
@@ -338,7 +346,7 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 | Topic | Status |
 |-------|--------|
 | Dedicated API gateway (R6) | **Deferred** — direct backend URLs in v1 (TP-001) |
-| vLLM model / GPU | **Qwen2.5-1.5B-Instruct** on Modal **T4**; Ollama fallback if cost fails after DO consolidation |
+| vLLM model / GPU | **Qwen2.5-1.5B-Instruct** on Modal **T4**; playground is a separate app (ADR-037); Ollama Modal app de-deployed |
 | Full OCR / multimodal beyond basic PDF text | Post-v1 (F59 covers best-effort PDF text) |
 | ChatRAG nested corpus UI | Deferred — licensing research (S024-D17) |
 
@@ -393,6 +401,8 @@ Full schemas: `docs/api-contract.md`; OpenAPI files in repo (required).
 | S024 / EV-022 (F59–F61) | 2026-08-03 | Robust scrape + JS-render + PDF text (F59); website crawl (F60); admin corpus tree + ChatRAG backend nested meta (F61); epic #185. |
 | S027 / EV-025 (F70–F71) | 2026-08-05 | Multilingual 384-d embed pin + F41 rechunk/re-embed cutover (ADR-048). |
 | S028 / EV-026 (F72–F74) | 2026-08-06 | Citation URL display filter (F72); relevance-gated sources 0…top_k (F73); `documents.display_title` + single-doc PATCH (F74). |
+| S030 / EV-027 (F75–F77) | 2026-08-13 | Catch-up + freshness schedule (ADR-052); LoRA FT app (ADR-053); live enable/promote deferred (S030-D64). |
+| S031 brownfield | 2026-08-18 | Overview: six-app + FT deployable; drop Ollama ASCII; F75–F77 status in-tree. |
 
 ## References
 

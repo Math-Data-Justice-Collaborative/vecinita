@@ -2,6 +2,8 @@
 # Run unit tests only for components touched by local changes (staged, unstaged, untracked).
 # Used by `make test-fast`, the Cursor stop hook, and Husky pre-push.
 # Full CI parity: `make ci-push` before opening a PR.
+#
+# Portable for macOS /bin/bash 3.2 (S031): avoid bash-4-only builtins.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -15,52 +17,82 @@ collect_changed() {
 	} | awk 'NF && !seen[$0]++'
 }
 
-add_py_path() {
-	PY_PATHS["$1"]=1
+# Newline-delimited unique membership (bash 3.2 — no associative arrays).
+list_has() {
+	# $1 = needle, $2 = newline-delimited haystack
+	local needle="$1"
+	local haystack="${2-}"
+	[[ -n "$haystack" ]] || return 1
+	printf '%s\n' "$haystack" | grep -Fxq -- "$needle"
 }
 
-mapfile -t CHANGED < <(collect_changed)
-if ((${#CHANGED[@]} == 0)); then
+list_add() {
+	# stdout = haystack with needle appended if missing
+	local needle="$1"
+	local haystack="${2-}"
+	if list_has "$needle" "$haystack"; then
+		printf '%s' "$haystack"
+		return 0
+	fi
+	if [[ -n "$haystack" ]]; then
+		printf '%s\n%s' "$haystack" "$needle"
+	else
+		printf '%s' "$needle"
+	fi
+}
+
+CHANGED=""
+while IFS= read -r line || [[ -n "$line" ]]; do
+	[[ -z "$line" ]] && continue
+	if [[ -n "$CHANGED" ]]; then
+		CHANGED="${CHANGED}"$'\n'"${line}"
+	else
+		CHANGED="${line}"
+	fi
+done < <(collect_changed)
+
+if [[ -z "$CHANGED" ]]; then
 	echo "test-fast: no local changes; skipping"
 	exit 0
 fi
 
-declare -A PY_PATHS=()
-declare -A FE_WS=()
+PY_PATHS=""
+FE_WS=""
 RUN_ALL_UNIT=false
 
-for f in "${CHANGED[@]}"; do
+while IFS= read -r f || [[ -n "$f" ]]; do
+	[[ -z "$f" ]] && continue
 	case "$f" in
-	apps/chat-rag-frontend/*) FE_WS[vecinita-chat-rag-frontend]=1 ;;
-	apps/data-management-frontend/*) FE_WS[vecinita-data-management-frontend]=1 ;;
-	packages/frontend-i18n/*) FE_WS[vecinita-frontend-i18n]=1 ;;
-	packages/frontend-ui/*) FE_WS[vecinita-frontend-ui]=1 ;;
-	apps/chat-rag-backend/*) add_py_path tests/unit/chat_rag ;;
-	apps/data-management-backend/*) add_py_path tests/unit/data_management ;;
-	apps/internal-write-api/*) add_py_path tests/unit/internal_write_api ;;
-	apps/database/*) add_py_path tests/unit/database ;;
-	packages/ingest/*) add_py_path tests/unit/ingest ;;
-	packages/rag/*) add_py_path tests/unit/rag ;;
-	packages/shared-schemas/*) add_py_path tests/unit/shared_schemas ;;
-	packages/eval/*) add_py_path tests/unit/eval ;;
-	packages/tagging/*) add_py_path tests/unit/tagging ;;
+	apps/chat-rag-frontend/*) FE_WS="$(list_add "vecinita-chat-rag-frontend" "$FE_WS")" ;;
+	apps/data-management-frontend/*) FE_WS="$(list_add "vecinita-data-management-frontend" "$FE_WS")" ;;
+	packages/frontend-i18n/*) FE_WS="$(list_add "vecinita-frontend-i18n" "$FE_WS")" ;;
+	packages/frontend-ui/*) FE_WS="$(list_add "vecinita-frontend-ui" "$FE_WS")" ;;
+	apps/chat-rag-backend/*) PY_PATHS="$(list_add "tests/unit/chat_rag" "$PY_PATHS")" ;;
+	apps/data-management-backend/*) PY_PATHS="$(list_add "tests/unit/data_management" "$PY_PATHS")" ;;
+	apps/internal-write-api/*) PY_PATHS="$(list_add "tests/unit/internal_write_api" "$PY_PATHS")" ;;
+	apps/database/*) PY_PATHS="$(list_add "tests/unit/database" "$PY_PATHS")" ;;
+	packages/ingest/*) PY_PATHS="$(list_add "tests/unit/ingest" "$PY_PATHS")" ;;
+	packages/rag/*) PY_PATHS="$(list_add "tests/unit/rag" "$PY_PATHS")" ;;
+	packages/shared-schemas/*) PY_PATHS="$(list_add "tests/unit/shared_schemas" "$PY_PATHS")" ;;
+	packages/eval/*) PY_PATHS="$(list_add "tests/unit/eval" "$PY_PATHS")" ;;
+	packages/tagging/*) PY_PATHS="$(list_add "tests/unit/tagging" "$PY_PATHS")" ;;
 	packages/llm-client/*)
-		add_py_path tests/unit/test_llm_client.py
-		add_py_path tests/unit/test_llm_tag_client.py
-		add_py_path tests/unit/test_llm_app_snapshot_prep.py
-		add_py_path tests/unit/test_llm_app_enforce_eager_ab.py
+		PY_PATHS="$(list_add "tests/unit/test_llm_client.py" "$PY_PATHS")"
+		PY_PATHS="$(list_add "tests/unit/test_llm_tag_client.py" "$PY_PATHS")"
+		PY_PATHS="$(list_add "tests/unit/test_llm_app_snapshot_prep.py" "$PY_PATHS")"
+		PY_PATHS="$(list_add "tests/unit/test_llm_app_enforce_eager_ab.py" "$PY_PATHS")"
 		;;
-	packages/embedding-client/*) add_py_path tests/unit/test_embedding_client.py ;;
-	scripts/*) add_py_path tests/unit/scripts ;;
+	packages/embedding-client/*) PY_PATHS="$(list_add "tests/unit/test_embedding_client.py" "$PY_PATHS")" ;;
+	scripts/*) PY_PATHS="$(list_add "tests/unit/scripts" "$PY_PATHS")" ;;
 	infra/* | .github/workflows/*)
-		add_py_path tests/unit/test_shell_deploy_guard.py
-		add_py_path tests/unit/scripts
+		PY_PATHS="$(list_add "tests/unit/test_shell_deploy_guard.py" "$PY_PATHS")"
+		PY_PATHS="$(list_add "tests/unit/scripts" "$PY_PATHS")"
 		;;
 	tests/unit/*)
 		if [[ -f "$f" ]]; then
-			add_py_path "$f"
+			PY_PATHS="$(list_add "$f" "$PY_PATHS")"
 		else
-			add_py_path "$(dirname "$f")"
+			PY_PATHS="$(list_add "$(dirname "$f")" "$PY_PATHS")"
 		fi
 		;;
 	pyproject.toml | uv.lock | Makefile | package.json | package-lock.json)
@@ -70,22 +102,27 @@ for f in "${CHANGED[@]}"; do
 		RUN_ALL_UNIT=true
 		;;
 	esac
-done
+done <<<"$CHANGED"
 
 if [[ "$RUN_ALL_UNIT" == true ]]; then
 	echo "==> test-fast: pytest tests/unit (broad change)"
 	uv run pytest tests/unit -q --tb=line
-elif ((${#PY_PATHS[@]} > 0)); then
-	mapfile -t PY_ARGS < <(printf '%s\n' "${!PY_PATHS[@]}" | sort -u)
-	echo "==> test-fast: pytest ${PY_ARGS[*]}"
-	uv run pytest "${PY_ARGS[@]}" -q --tb=line
+elif [[ -n "$PY_PATHS" ]]; then
+	# shellcheck disable=SC2086 # intentional word-split of sorted paths
+	PY_ARGS="$(printf '%s\n' "$PY_PATHS" | sort -u | tr '\n' ' ')"
+	echo "==> test-fast: pytest ${PY_ARGS}"
+	# shellcheck disable=SC2086
+	uv run pytest ${PY_ARGS} -q --tb=line
 fi
 
-for ws in "${!FE_WS[@]}"; do
-	echo "==> test-fast: npm test -w ${ws}"
-	bash scripts/npm_with_lock.sh npm test -w "${ws}"
-done
+if [[ -n "$FE_WS" ]]; then
+	while IFS= read -r ws || [[ -n "$ws" ]]; do
+		[[ -z "$ws" ]] && continue
+		echo "==> test-fast: npm test -w ${ws}"
+		bash scripts/npm_with_lock.sh npm test -w "${ws}"
+	done <<<"$FE_WS"
+fi
 
-if [[ "$RUN_ALL_UNIT" != true && ${#PY_PATHS[@]} -eq 0 && ${#FE_WS[@]} -eq 0 ]]; then
+if [[ "$RUN_ALL_UNIT" != true && -z "$PY_PATHS" && -z "$FE_WS" ]]; then
 	echo "test-fast: no testable source changes; skipping"
 fi

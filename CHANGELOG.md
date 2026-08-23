@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### EV-027: Corpus automations + LoRA FT (F75–F77) — S030 / #73 #219 #72
+
+- **F75**: Catch-up enqueue for failed/partial/missing embeddings (`job_type=automation_catchup`); kill-switch + run history
+- **F76**: Freshness refresh (default stale **30 days**; `refresh_enabled` / `last_checked_at`); shared Modal daily schedule
+- **F77**: LoRA/PEFT train on `vecinita-llm-finetune`; manual approve; human promote after F36 eval evidence
+- **Status:** In-tree on `evolve/EV-027-corpus-automations`; **live enable / FT promote deferred** (S030-D64). PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) open — not a live ship.
+
 ### EV-026: Chat source UX (F72–F74) — S028 / #222 #223 #224
 
 - **F72**: Citation hrefs only for absolute `http(s)` URLs (`SourceList` + `isSafeHttpUrl`)

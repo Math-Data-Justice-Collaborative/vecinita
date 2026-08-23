@@ -41,6 +41,13 @@ When personal skills say `[Corpus: tech-spec]`, open **config** + **deps** +
 | Env / secrets matrix | [staging-secrets-matrix.md](staging-secrets-matrix.md) |
 | Local dev | [LOCAL_DEV.md](LOCAL_DEV.md) |
 | Eval golden set | [eval-golden-set.md](eval-golden-set.md) |
+| OpenAPI (write API) | [../openapi/internal-write.yaml](../openapi/internal-write.yaml) |
+| OpenAPI (data management) | [../openapi/data-management.yaml](../openapi/data-management.yaml) |
+| OpenAPI (ChatRAG) | [../openapi/chat-rag.yaml](../openapi/chat-rag.yaml) |
+| Changelog | [../CHANGELOG.md](../CHANGELOG.md) |
+
+Runbooks stay **opt-in** (cite by path): [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md).
+`docs/research-brief.md` is **not** a Vecinita standing doc — `[Corpus: WAIVED — research-brief.md; reason: antibody leftover cite; decided: S031]`.
 
 ## Citation examples
 
@@ -55,6 +62,8 @@ When personal skills say `[Corpus: tech-spec]`, open **config** + **deps** +
 [Corpus: api]
 [Spec: docs/api-contract.md §POST /chat]
 [Corpus: WAIVED — multilingual dim; reason: spike only; decided: 2026-08 / S027]
+[Corpus: WAIVED — community maps/alerts mock; reason: non-normative HTML mock, no Fn; decided: S031]
+[Corpus: WAIVED — research-brief.md; reason: antibody leftover; decided: S031]
 ```
 
 ## Skill obligations (open only touched rows)
