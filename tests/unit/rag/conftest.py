@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 from sqlalchemy import create_engine, text
 from vecinita_database.seeds.load import load_corpus
-from vecinita_database.seeds.tags import load_tagged_corpus
+from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
 from vecinita_shared_schemas.db_mapping import scalar_int, sqlalchemy_scalar_one
 
 if TYPE_CHECKING:
@@ -185,6 +185,7 @@ def seed_eval_corpus(*, database_url: str) -> dict[str, int]:
     """Load fixture corpus + tagged docs + deterministic embeddings for eval benchmarks."""
     with corpus_db_lock():
         _reset_corpus_tables_impl(database_url=database_url)
+        load_seed_tags(database_url=database_url)
         counts = load_corpus(database_url=database_url)
         tagged_counts = load_tagged_corpus(database_url=database_url)
         counts = {
