@@ -16,8 +16,31 @@ describe("messages", () => {
   it("provides the redesign welcome + sidebar strings in both locales", () => {
     expect(t("en", "welcomeHeading")).toBe("What can I help with?");
     expect(t("es", "welcomeHeading")).toMatch(/ayudarte/i);
-    expect(t("en", "suggestion1")).toMatch(/food pantry/i);
-    expect(t("es", "suggestion1")).toMatch(/despensa/i);
+    // TC-259 / EV-216 — corpus-aligned suggested chips
+    expect(t("en", "suggestion1")).toBe(
+      "Where can I get food assistance in Rhode Island?",
+    );
+    expect(t("es", "suggestion1")).toBe(
+      "¿Dónde puedo conseguir ayuda con comida en Rhode Island?",
+    );
+    expect(t("en", "suggestion2")).toBe(
+      "How do I get rent assistance in Providence?",
+    );
+    expect(t("es", "suggestion2")).toBe(
+      "¿Cómo solicito ayuda para pagar el alquiler en Providence?",
+    );
+    expect(t("en", "suggestion3")).toBe(
+      "Where can I find free ESL classes in Providence?",
+    );
+    expect(t("es", "suggestion3")).toBe(
+      "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
+    );
+    expect(t("en", "questionPlaceholder")).toBe(
+      "e.g. Where can I get food assistance?",
+    );
+    expect(t("es", "questionPlaceholder")).toBe(
+      "p. ej. ¿Dónde puedo conseguir ayuda con comida?",
+    );
     expect(t("en", "toggleSidebar")).toMatch(/menu/i);
     expect(t("es", "toggleSidebar")).toMatch(/menú/i);
     expect(t("en", "switchToDark")).toMatch(/dark/i);

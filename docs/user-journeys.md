@@ -79,6 +79,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-077 | Citation link only for valid http(s) URLs | Community member | ChatRAG SourceList | F72 EV-026 #222 | local (Vitest) |
 | UJ-078 | Ask sources length 0…top_k by relevance | Community member | ChatRAG → `POST /api/v1/ask` / stream | F73 EV-026 #223 | local |
 | UJ-079 | Operator sets document display_title | Admin operator | DocumentAdmin rename + ask citation | F74 EV-026 #224 | local |
+| UJ-081 | Use suggested question chips (empty state) | Community member | ChatRAG welcome → chip click → prefilled ask | F1 EV-216 #216 | local |
 
 ## Visual journey maps
 
@@ -1313,6 +1314,32 @@ the human-chosen name; rescrape updates raw `title` but preserves `display_title
 Playwright optional if list↔detail cross-panel.
 
 **E2E tier**: local.
+
+---
+
+### UJ-081: Use suggested question chips (empty state) (F1)
+
+**Actor**: Community member
+
+**Goal**: On first visit, tap a suggested community question that retrieves a grounded answer
+from the current corpus (EN or ES locale).
+
+**Preconditions**: Chat empty state; staging/prod corpus includes food, rent, and ESL sources
+(EV-029, EV-218).
+
+**Steps**:
+
+1. Open ChatRAG — welcome heading and three suggested-question chips visible.
+2. Switch locale EN ↔ ES — chip labels update to localized strings.
+3. Click a chip — question input prefills with the chip text.
+4. Submit — answer cites corpus sources appropriate to the topic (staging-verified wording).
+
+**Acceptance**: TC-259; chip strings documented in `messages.ts`; evidence in EV-216 session
+`reports/staging-chip-eval.json`.
+
+**Automated tests**: Vitest `messages.test.ts`, `ChatPanel.test.tsx` (empty-state chips).
+
+**E2E tier**: local (Vitest); staging spot-check optional.
 
 ---
 

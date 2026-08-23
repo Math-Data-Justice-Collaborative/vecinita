@@ -48,6 +48,7 @@ Covers **v1** Vecinita: ChatRAG (bilingual Q&A, streaming, stateless), Data Mana
 | UJ-079 Operator display_title | `tests/e2e/test_uj079_display_title.py` + Vitest admin | TC-248, TC-249, TC-250, TC-251 | opt |
 | UJ-080 Ingest bilingual translation | `tests/e2e/test_ev030_ingest_bilingual.py` + Vitest JobForm | TC-252, TC-253, TC-254 | opt |
 | UJ-009 Corpus parity visibility | `tests/e2e/test_ev031_corpus_language_parity.py` + Vitest | TC-255, TC-256 | opt |
+| UJ-081 Suggested question chips (empty state) | Vitest `messages` + `ChatPanel` | TC-259 | opt |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
@@ -202,6 +203,12 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries alternate browser headers; stable operator `error_code` when blocked.
 - **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with VecinitaBot UA + success with Chrome UA; all 403.
 - **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with `tls_handshake_failed` or `host_waf_blocked` when exhausted.
+
+### TC-259: Suggested question chips (UJ-081, F1, EV-216 / #216)
+
+- **Objective**: Empty-state chips show corpus-aligned EN/ES community questions; clicking prefills the input.
+- **Input**: Render `ChatPanel` empty state in EN and ES locales.
+- **Expected**: `suggestion1`–`suggestion3` match staging-verified strings (food assistance RI, rent assistance Providence, ESL Providence); chip click sets question input value; `questionPlaceholder` mirrors chip 1 topic.
 
 ### TC-012: Document delete (UJ-003)
 
