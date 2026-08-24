@@ -1209,9 +1209,14 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 **Issue:** [#181](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/181)  
 **Milestone:** Retrieval and answer quality  
 **Branch:** `evolve/EV-028-rag-regression-gate`  
-**Status:** implementing — implementation complete pending full verify + PR (#181)
+**Status:** **closed (merged)** — PR [#258](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/258) @ `b977599d`; CI + deploy-preflight green on `main`. Operator: add `rag-regression` required check on branch protection.
 
-### Intake (S032-D1 — 2026-08-23)
+### Ship close (2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S032-D7 | EV-028 close | **Closed** — #181 closed; `rag-regression` green on `main`; session `EV-028-rag-regression-gate` archived |
+| S032-D6 | Spec→Build gate | **Closed** — shipped on `evolve/EV-028-rag-regression-gate`, merged `b977599d` |
 
 | ID | Topic | Choice |
 |----|-------|--------|
@@ -1220,7 +1225,9 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | S032-D3 | Corpus / runtime | Fixture golden + mocked judge + CI postgres (no Modal GPU on PR) |
 | S032-D4 | Tolerances | Quality ≤0.02 abs drop (with floors); retrieval ≤2pp drop; latency p95 max(+10%, +500ms) vs baseline, 15s ceiling |
 | S032-D5 | Scale / angles | Standard + all v1 documenting packs |
-| S032-D6 | Spec→Build gate | **Open** — implement on `evolve/EV-028-rag-regression-gate` |
+| S032-D6 | Spec→Build gate | **Closed** — merged `b977599d` |
+
+### Intake (S032-D1 — 2026-08-23)
 
 **Waivers**
 
