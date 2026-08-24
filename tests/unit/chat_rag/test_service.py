@@ -324,10 +324,10 @@ def test_ask_stream_yields_no_context_when_empty() -> None:
 
 
 def test_ask_stream_yields_llm_tokens() -> None:
-    """Test ask stream yields llm tokens."""
+    """F82 / AC-OV5: stream buffers full generation then emits once (TC-288)."""
     service = _service(chunks=[_chunk()])
     tokens = list(service.ask_stream(AskRequest(question="clinic hours")))
-    assert tokens == ["Stream", "ed"]
+    assert tokens == ["Streamed"]
 
 
 def test_retrieve_sources_maps_chunks() -> None:
