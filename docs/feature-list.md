@@ -55,7 +55,7 @@
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
 | F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Implemented | ChatRAG | packages/rag, rerank-client, chat-rag-backend; Modal `vecinita-rerank` | 11-verify-impl EV-029 2026-08-24; staging CE on |
 | F81 | LLM query refinement before retrieval (#82) | Implemented | ChatRAG | packages/rag, chat-rag-backend, llm-client | 11-verify-impl EV-029 2026-08-24; flag default-off; staging enable deferred |
-| F82 | Output verification + inline citations (#84) | Implemented (flag off) | ChatRAG | packages/rag, chat-rag-backend, packages/eval | EV-030 verify-impl 2026-08-24 |
+| F82 | Output verification + inline citations (#84) | Implemented (live) | ChatRAG | packages/rag, chat-rag-backend, packages/eval | EV-030 live verify 2026-08-24 |
 | F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
 | F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
 | F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
@@ -1554,8 +1554,8 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `packages/eval` | `OutputVerificationScorer` adapter (ADR-033 §9) |
 - **Interaction**: Runs **after** F45 CE retrieve and F81 refine paths; before F43 cache store.
 - **Out of scope**: NLI entailment Modal app; regenerate-on-fail; prod flag without AskQuestion.
-- **Ship gate**: Wiring ships with flag default-off; staging enable after F36 / `rag-regression`
-  non-regression (S034-D5).
+- **Ship gate**: Wiring ships with flag default-off; **live `VECINITA_RAG_OUTPUT_VERIFY=true`**
+  after F36 / `rag-regression` non-regression + operator approval (S034-D10 / AC-OV7).
 - **Source**: EV-030; GitHub #84; ADR-033 §9; ADR-009 / ADR-037.
 
 ## Planned / Deferred (post-v1)
