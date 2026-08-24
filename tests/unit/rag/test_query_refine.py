@@ -70,3 +70,40 @@ def test_refine_queries_llm_success_limits_count() -> None:
     )
     assert refined == [_ES_QUESTION, _ES_ALT_1, _ES_ALT_2]
     assert len(prompts) == 1
+
+
+def test_parse_refine_response_non_list_json_falls_back_to_original() -> None:
+    """TC-282: JSON object (not array) → raw question only."""
+    refined = parse_refine_response('{"q": "x"}', locale="es", original=_ES_QUESTION)
+    assert refined == [_ES_QUESTION]
+
+
+def test_parse_refine_response_skips_non_string_and_empty_items() -> None:
+    """TC-282: ignore non-strings, blanks, and duplicates."""
+    raw = f'[1, "", "   ", "{_ES_ALT_1}", "{_ES_ALT_1}", "{_ES_ALT_2}"]'
+    refined = parse_refine_response(raw, locale="es", original=_ES_QUESTION)
+    assert refined == [_ES_QUESTION, _ES_ALT_1, _ES_ALT_2]
+
+
+def test_parse_refine_response_all_filtered_returns_original_only() -> None:
+    """TC-282: when every alternate is dropped, return raw question only."""
+    refined = parse_refine_response(
+        f'["{_ES_QUESTION}", "  "]',
+        locale="es",
+        original=_ES_QUESTION,
+    )
+    assert refined == [_ES_QUESTION]
+
+
+def test_build_refine_prompt_english_and_clamps_count() -> None:
+    """build_refine_prompt uses English label and clamps count to 1..3."""
+    prompt = build_refine_prompt("food pantry hours", locale="en", count=0)
+    assert "English" in prompt
+    assert "up to 1 alternate English" in prompt
+    capped = build_refine_prompt("food pantry hours", locale="en", count=99)
+    assert "up to 3 alternate English" in capped
+
+
+def test_refine_queries_llm_blank_question_returns_empty() -> None:
+    """refine_queries_llm returns [] for whitespace-only input."""
+    assert refine_queries_llm("   ", locale="en", generate_fn=lambda _: "[]") == []
