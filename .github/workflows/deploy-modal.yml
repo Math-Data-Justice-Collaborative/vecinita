@@ -94,6 +94,11 @@ jobs:
       VECINITA_ADMIN_FRONTEND_URL: ${{ secrets.VECINITA_ADMIN_FRONTEND_URL }}
       VECINITA_CHAT_FRONTEND_URL: ${{ secrets.VECINITA_CHAT_FRONTEND_URL }}
       VECINITA_CORS_ORIGINS: ${{ secrets.VECINITA_CORS_ORIGINS }}
+      VECINITA_AUTOMATIONS_KILL_SWITCH: ${{ secrets.VECINITA_AUTOMATIONS_KILL_SWITCH }}
+      VECINITA_FINETUNE_ENABLED: ${{ secrets.VECINITA_FINETUNE_ENABLED }}
+      VECINITA_FINETUNE_REQUIRE_APPROVE: ${{ secrets.VECINITA_FINETUNE_REQUIRE_APPROVE }}
+      VECINITA_FINETUNE_MAX_CONCURRENT: ${{ secrets.VECINITA_FINETUNE_MAX_CONCURRENT }}
+      VECINITA_FINETUNE_MAX_RUNS_PER_DAY: ${{ secrets.VECINITA_FINETUNE_MAX_RUNS_PER_DAY }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2  # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
         with:
@@ -125,9 +130,6 @@ jobs:
       - name: Build smoke (uv sync + Modal app import)
         run: bash scripts/deploy/verify_build.sh
 
-      - name: Verify Modal secrets and volumes
-        run: bash scripts/deploy/verify_secrets.sh
-
       - name: Materialize deploy env from GitHub secrets
         run: bash scripts/deploy/ci_materialize_env.sh
 
@@ -139,6 +141,18 @@ jobs:
           else
             echo "::warning::Modal deploy env incomplete — skipping secret sync. Push secrets via sync_github_secrets.sh --apply"
           fi
+
+      - name: Sync Modal vecinita-llm-finetune secret
+        run: |
+          set -euo pipefail
+          if bash scripts/deploy/ci_materialize_env.sh --check finetune; then
+            bash scripts/deploy/sync_finetune_secret.sh --apply
+          else
+            echo "::warning::Finetune secret env incomplete — skipping. Push F80 keys via sync_github_secrets.sh --apply"
+          fi
+
+      - name: Verify Modal secrets and volumes
+        run: bash scripts/deploy/verify_secrets.sh
 
       - name: Deploy Modal apps (embedding, data-management, llm)
         run: bash scripts/deploy/modal.sh

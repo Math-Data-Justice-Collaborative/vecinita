@@ -66,15 +66,14 @@ if ! grep -qx "${RERANK_SECRET}" <<<"${secret_names}"; then
 fi
 echo "OK secret ${RERANK_SECRET} exists"
 
-echo "==> Advisory secret: ${FINETUNE_SECRET} (F80 — create before train)"
+echo "==> Required secret: ${FINETUNE_SECRET} (F80 / EV-031)"
 if ! grep -qx "${FINETUNE_SECRET}" <<<"${secret_names}"; then
-  echo "WARN: missing Modal secret '${FINETUNE_SECRET}' — required when VECINITA_FINETUNE_ENABLED=true." >&2
-  echo "  Keys: VECINITA_AUTOMATIONS_KILL_SWITCH, VECINITA_FINETUNE_ENABLED, VECINITA_FINETUNE_REQUIRE_APPROVE," >&2
-  echo "  VECINITA_FINETUNE_MAX_CONCURRENT, VECINITA_FINETUNE_MAX_RUNS_PER_DAY," >&2
-  echo "  VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY (see finetune_app.py)" >&2
-else
-  echo "OK secret ${FINETUNE_SECRET} exists"
+  echo "ERROR: missing Modal secret '${FINETUNE_SECRET}'." >&2
+  echo "Create with: bash scripts/deploy/sync_finetune_secret.sh --apply" >&2
+  echo "  (requires F80 + internal-write keys in shell — see infra/modal/.env.example)" >&2
+  exit 1
 fi
+echo "OK secret ${FINETUNE_SECRET} exists"
 
 echo "==> Deprecated secret check (advisory)"
 if grep -qx "vecinita-ollama" <<<"${secret_names}"; then
