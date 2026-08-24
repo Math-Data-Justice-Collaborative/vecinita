@@ -1295,6 +1295,27 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 **Cites:** [Corpus: feature-list.md §F82] [Spec: docs/acceptance-criteria.md §AC-OV1–OV7]
 [Spec: docs/adr/ADR-033-ev008-rag-evaluation-implementation.md §9]
 
+## Cycle EV-031 — Live enable F78/F79 + F80 eval (S035)
+
+**Title:** Corpus automations live enable + FT playground eval path  
+**Session:** EV-031-corpus-automations-live-enable (local store)  
+**Prior:** EV-027 (S030-D64 deferred cutover)  
+**Branch:** `evolve/EV-031-corpus-automations-live-enable`  
+**Status:** **in_progress** (spec band)
+
+### Intake (S035-D1 — 2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S035-D1 | Scope | F78 + F79 live enable + F80 playground eval (no prod promote) |
+| S035-D2 | Enable order | F78 + F79 together in one deploy |
+| S035-D3 | Kill-switch | ON until post-enable smoke, then off |
+| S035-D4 | Scale | Full evolve band |
+
+**Features:** F78, F79, F80  
+**Cites:** [Corpus: feature-list.md §F78–F80] [Spec: ADR-052] [Spec: ADR-053]
+[Spec: docs/staging-runbook.md §EV-031 live enable sequence]
+
 ### Intake (S032-D1 — 2026-08-23)
 
 **Waivers**

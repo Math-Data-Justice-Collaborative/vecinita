@@ -1760,6 +1760,36 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: `POST /api/v1/ask/stream` with verify on; mock stream tokens.
 - **Expected**: Single yielded payload includes hedge/citations; no pre-verify tokens (AC-OV5).
 
+### TC-289: Live automation run history after enable (UJ-082, F78, EV-031)
+
+- **Given** live `VECINITA_AUTOMATIONS_ENABLED=true` and kill-switch off after post-enable smoke
+- **When** operator opens DM Automations panel
+- **Then** at least one `automation_runs` row is visible with status and timestamps
+
+### TC-290: Live kill-switch blocks enqueue (UJ-082, F78, EV-031)
+
+- **Given** live stack with `VECINITA_AUTOMATIONS_KILL_SWITCH=true`
+- **When** catch-up trigger fires
+- **Then** no new automation job is enqueued
+
+### TC-291: Live freshness stale visible (UJ-083, F79, EV-031)
+
+- **Given** live `VECINITA_FRESHNESS_ENABLED=true`
+- **When** operator views URL-backed document list
+- **Then** stale / `last_checked` fields are populated per AC-FR3
+
+### TC-292: Finetune Modal app deployed (F80, EV-031)
+
+- **Given** CD includes `vecinita-llm-finetune`
+- **When** deploy smoke runs post-merge
+- **Then** finetune app is listed and train approve path is reachable from DM
+
+### TC-293: Prod LLM has no adapter pin (F80, EV-031)
+
+- **Given** F80 eval path enabled without promote
+- **When** prod `vecinita-llm` health/models is queried
+- **Then** `VECINITA_FINETUNE_ADAPTER_ID` is unset / base model only
+
 ### F31 coverage gate — gated components
 
 Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-coverage`.

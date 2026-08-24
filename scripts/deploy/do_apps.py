@@ -216,6 +216,17 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "SUPABASE_SECRET_KEY",  # F69 — audit actor_email Admin lookup
                 "VECINITA_AUTH_REQUIRED",
                 "SUPABASE_JWT_AUD",
+                # F78-F80 corpus automations / freshness / FT (EV-031)
+                "VECINITA_AUTOMATIONS_ENABLED",
+                "VECINITA_AUTOMATIONS_KILL_SWITCH",
+                "VECINITA_AUTOMATIONS_MAX_CONCURRENT",
+                "VECINITA_FRESHNESS_ENABLED",
+                "VECINITA_FRESHNESS_STALE_DAYS",
+                "VECINITA_FINETUNE_ENABLED",
+                "VECINITA_FINETUNE_REQUIRE_APPROVE",
+                "VECINITA_FINETUNE_MAX_CONCURRENT",
+                "VECINITA_FINETUNE_MAX_RUNS_PER_DAY",
+                "VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID",
             ],
         )
     elif name == "vecinita-chat-rag-frontend":

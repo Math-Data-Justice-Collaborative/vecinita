@@ -500,10 +500,30 @@ See [no-live-prod-corpus-push.mdc](../.cursor/rules/no-live-prod-corpus-push.mdc
 ### Enable / promote (AskQuestion required)
 
 1. Staging-first evidence (local compose + flags-off smoke already recorded in S030).
-2. AskQuestion `[Decision]` for **live enable** of F75/F76 and/or **F77 promote** onto
+2. AskQuestion `[Decision]` for **live enable** of F78/F79 and/or **F80 promote** onto
    `vecinita-llm`. Recommended default: defer / runbook-only.
 3. Proceed only after an explicit approve option — then follow operator steps in
    [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md).
+
+### EV-031 live enable sequence (F78 + F79 + F80 eval path)
+
+**Cycle:** EV-031 · **Decision:** S035-D1–D3  
+**Scope:** F78 catch-up + F79 freshness live; F80 playground eval only (no prod promote).
+
+| Step | Action |
+|------|--------|
+| 1 | Ship secrets/CD parity (M131–M132) — flags still safe-off |
+| 2 | CD deploy green on `main` |
+| 3 | **AskQuestion** — approve live F78/F79 enable |
+| 4 | Set `VECINITA_AUTOMATIONS_ENABLED=true`, `VECINITA_FRESHNESS_ENABLED=true`, `VECINITA_AUTOMATIONS_KILL_SWITCH=true` |
+| 5 | `sync_github_secrets.sh --apply` + DO sync + redeploy |
+| 6 | Post-enable smoke H1–H5 (kill-switch ON — no jobs yet) |
+| 7 | Set `VECINITA_AUTOMATIONS_KILL_SWITCH=false`; observe bounded catch-up/freshness |
+| 8 | Verify DM run history (TC-289); re-run H1–H3 |
+| 9 | Enable F80 eval: deploy `vecinita-llm-finetune`; `VECINITA_FINETUNE_ENABLED=true`; **leave** `VECINITA_FINETUNE_ADAPTER_ID` empty |
+| 10 | Confirm TC-292/293; record AC-AU7/FR7/FT10 |
+
+**Rollback:** kill-switch ON → `*_ENABLED=false` → DO redeploy → H1–H5.
 
 ## Related
 
