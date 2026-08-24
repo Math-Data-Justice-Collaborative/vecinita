@@ -246,13 +246,13 @@
 
 ### EV-029 — Smart retrieval ship + query refinement (F45 + F81) — S033
 
-- [ ] **AC-SR1**: `ChatRagService.from_settings` wires CE scorer when `VECINITA_RAG_RERANK_CE=true` and Modal rerank URL set (TC-281, F45).
-- [ ] **AC-SR2**: Staging ChatRAG has `VECINITA_RAG_RERANK_CE=true`; prod remains **false** (AC-FO4 / TC-183).
-- [ ] **AC-SR3**: CE retrieve-N=20 → rerank → ≤ `top_k` with F73 threshold (TC-182, UJ-059).
-- [ ] **AC-SR4**: F81 LLM refinement preserves locale; fallback to raw question on failure (TC-282, UJ-085).
-- [ ] **AC-SR5**: F81 flag defaults **off**; staging enable only after F36 / `rag-regression` non-regression (TC-283).
-- [ ] **AC-SR6**: `rag-regression` CI job green on EV-029 branch (TC-280, #181).
-- [ ] **AC-SR7**: Modal `vecinita-rerank` deployed; ChatRAG uses `VECINITA_MODAL_RERANK_URL` (deployment-integration).
+- [x] **AC-SR1**: `ChatRagService.from_settings` wires CE scorer when `VECINITA_RAG_RERANK_CE=true` and Modal rerank URL set (TC-281, F45). *(11-verify-impl EV-029 2026-08-24)*
+- [x] **AC-SR2**: Staging ChatRAG has `VECINITA_RAG_RERANK_CE=true`; prod remains **false** (AC-FO4 / TC-183). *(11-verify-impl EV-029 2026-08-24)*
+- [x] **AC-SR3**: CE retrieve-N=20 → rerank → ≤ `top_k` with F73 threshold (TC-182, UJ-059). *(13-deploy-smoke EV-029 2026-08-24 — live H3)*
+- [x] **AC-SR4**: F81 LLM refinement preserves locale; fallback to raw question on failure (TC-282, UJ-085). *(11-verify-impl EV-029 2026-08-24 — T0)*
+- [x] **AC-SR5**: F81 flag defaults **off**; staging enable only after F36 / `rag-regression` non-regression (TC-283). *(11-verify-impl EV-029 2026-08-24 — default off; enable deferred)*
+- [x] **AC-SR6**: `rag-regression` CI job green on EV-029 branch (TC-280, #181). *(CI `main` @ `9d95133e`)*
+- [x] **AC-SR7**: Modal `vecinita-rerank` deployed; ChatRAG uses `VECINITA_MODAL_RERANK_URL` (deployment-integration). *(13-deploy-smoke EV-029 2026-08-24)*
 - [ ] **AC-SR8**: Out of EV-029 without unlock: prod CE flip; F43 cache; #84 groundedness; LLM-as-reranker.
 
 ### EV-019 — Ingest resilience (F47–F49) — S022

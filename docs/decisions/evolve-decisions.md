@@ -1235,7 +1235,18 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 [#82](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/82)  
 **Milestone:** Retrieval and answer quality  
 **Branch:** `evolve/EV-029-smart-retrieval-rerank`  
-**Status:** **in_progress** — documenting band
+**Status:** **completed** — 11-verify-impl + 13-deploy-smoke 2026-08-24
+
+### Close-out (2026-08-24)
+
+| Item | Result |
+|------|--------|
+| PR #260 | Merged `c69f8646` |
+| Hotfix #261 | Merged `9d95133e` (starlette image + rerank-client proxy header) |
+| Staging H3 ask | PASS (AC-SR3 / UJ-059) |
+| AC-SR1–SR7 | PASS — see `docs/acceptance-criteria.md` |
+| F81 staging enable | Deferred (`VECINITA_RAG_QUERY_REFINE=false`) |
+| Reports | session `reports/verify-impl.md`, `reports/deploy-smoke.md` |
 
 ### Intake (S033-D1 — 2026-08-24)
 

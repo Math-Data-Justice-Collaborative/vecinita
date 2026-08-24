@@ -38,3 +38,9 @@ Function rerank_app.rerank_api is crash-looping: containers are repeatedly faili
 
 1. Add `starlette>=0.37,<1` to rerank Modal image; redeploy `vecinita-rerank`.
 2. Stop sending proxy auth from `RerankClient`; redeploy ChatRAG backend.
+
+## Resolution (2026-08-24)
+
+- Hotfix PR #261 merged; ChatRAG redeployed via CD.
+- Staging `POST /api/v1/ask` PASS (H3 smoke).
+- Status: **resolved**

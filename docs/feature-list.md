@@ -53,8 +53,8 @@
 | F42 | Richer context packing + multi-query retrieval (H7+P1) | Implemented | ChatRAG | packages/rag, chat-rag-backend; F36 eval sandbox join | S019/EV-016 #165; PR #172 |
 | F43 | Answer / retrieval cache (H1 cascade) | Planned | ChatRAG | packages/rag, chat-rag-backend; F36 harness | S020/EV-017; S020-D4/D7 |
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
-| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Evolving (EV-029) | ChatRAG | packages/rag, rerank-client, chat-rag-backend; Modal `vecinita-rerank` | S020–S021 spikes; EV-029 ship wiring + staging enable |
-| F81 | LLM query refinement before retrieval (#82) | Planned (EV-029) | ChatRAG | packages/rag, chat-rag-backend, llm-client | EV-029 #82; distinct from F42 H7 heuristics |
+| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Implemented | ChatRAG | packages/rag, rerank-client, chat-rag-backend; Modal `vecinita-rerank` | 11-verify-impl EV-029 2026-08-24; staging CE on |
+| F81 | LLM query refinement before retrieval (#82) | Implemented | ChatRAG | packages/rag, chat-rag-backend, llm-client | 11-verify-impl EV-029 2026-08-24; flag default-off; staging enable deferred |
 | F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
 | F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
 | F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
