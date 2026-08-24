@@ -13,6 +13,9 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `DATABASE_URL` | Yes | Managed Postgres connection string (read + pgvector) |
 | `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` **base** URL (**`vecinita--`** prefix; no `/health` suffix) |
 | `VECINITA_MODAL_LLM_URL` | Yes | Modal `vecinita-llm` base URL |
+| `VECINITA_MODAL_RERANK_URL` | When CE on | Modal `vecinita-rerank` base URL (**`vecinita--vecinita-rerank`** prefix; no `/health` suffix) |
+| `VECINITA_RAG_RERANK_CE` | No (default `false`) | F45 CE rerank; **staging `true`** after Modal deploy + AC-BB9; prod stays `false` (AC-FO4) |
+| `VECINITA_RAG_QUERY_REFINE` | No (default `false`) | F81 LLM query rewrite before retrieve; enable on staging only after `rag-regression` (AC-SR5) |
 | `VECINITA_MODAL_TOKEN_ID` | If Modal auth | DO→Modal credential |
 | `VECINITA_MODAL_TOKEN_SECRET` | If Modal auth | DO→Modal credential |
 | `VECINITA_TOP_K` | No | Default `5` |

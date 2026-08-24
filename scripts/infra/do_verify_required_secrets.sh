@@ -80,6 +80,11 @@ if [[ -n "${VECINITA_MODAL_LLM_URL:-}" ]]; then
   uv run python scripts/deploy/modal_url_validate.py \
     VECINITA_MODAL_LLM_URL "${VECINITA_MODAL_LLM_URL}"
 fi
+if [[ -n "${VECINITA_MODAL_RERANK_URL:-}" ]]; then
+  echo "==> Validate rerank URL format (shell)"
+  uv run python scripts/deploy/modal_url_validate.py \
+    VECINITA_MODAL_RERANK_URL "${VECINITA_MODAL_RERANK_URL}"
+fi
 
 chat_url="${VECINITA_STAGING_CHAT_URL:-}"
 if [[ -n "$chat_url" ]]; then
