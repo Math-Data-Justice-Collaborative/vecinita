@@ -56,6 +56,13 @@ jobs:
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+      VECINITA_INTERNAL_API_KEY: ${{ secrets.VECINITA_INTERNAL_API_KEY }}
+      VECINITA_INTERNAL_WRITE_URL: ${{ secrets.VECINITA_INTERNAL_WRITE_URL }}
+      VECINITA_AUTOMATIONS_KILL_SWITCH: ${{ secrets.VECINITA_AUTOMATIONS_KILL_SWITCH }}
+      VECINITA_FINETUNE_ENABLED: ${{ secrets.VECINITA_FINETUNE_ENABLED }}
+      VECINITA_FINETUNE_REQUIRE_APPROVE: ${{ secrets.VECINITA_FINETUNE_REQUIRE_APPROVE }}
+      VECINITA_FINETUNE_MAX_CONCURRENT: ${{ secrets.VECINITA_FINETUNE_MAX_CONCURRENT }}
+      VECINITA_FINETUNE_MAX_RUNS_PER_DAY: ${{ secrets.VECINITA_FINETUNE_MAX_RUNS_PER_DAY }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2  # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
         with:
@@ -75,6 +82,20 @@ jobs:
       - name: Install Modal CLI
         if: steps.modal_tokens.outputs.skip != 'true'
         run: pip install 'modal>=1.2.6,<2'
+
+      - name: Materialize deploy env from GitHub secrets
+        if: steps.modal_tokens.outputs.skip != 'true'
+        run: bash scripts/deploy/ci_materialize_env.sh
+
+      - name: Sync Modal vecinita-llm-finetune secret
+        if: steps.modal_tokens.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          if bash scripts/deploy/ci_materialize_env.sh --check finetune; then
+            bash scripts/deploy/sync_finetune_secret.sh --apply
+          else
+            echo "::warning::Finetune secret env incomplete — skipping sync"
+          fi
 
       - name: Verify Modal secrets and volumes
         if: steps.modal_tokens.outputs.skip != 'true'
