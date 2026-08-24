@@ -1262,6 +1262,31 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 **Cites:** [Corpus: feature-list.md §F45] [Corpus: feature-list.md §F81] [Corpus: acceptance §AC-BB9]
 [Spec: docs/config-spec.md §VECINITA_RAG_RERANK_CE] [Spec: docs/test-plan.md §TC-280]
 
+## Cycle EV-030 — Scope (S034 / #84)
+
+**Title:** Output verification (groundedness) + inline citations  
+**Session:** EV-030-groundedness-answer-formatting (local store)  
+**Issue:** [#84](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/84)  
+**Milestone:** Retrieval and answer quality (last open item)  
+**Branch:** `evolve/EV-030-groundedness-answer-formatting`  
+**Status:** **documenting** — spec drafted 2026-08-24; gate pending
+
+### Intake (S034-D1 — 2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S034-D1 | Verifier | Self-hosted LLM YES/NO (`score_faithfulness` on `vecinita-llm`) |
+| S034-D2 | Fail action | Hedge — prepend bilingual disclaimer; keep answer body |
+| S034-D3 | Streaming | Buffer full answer → verify+cite → emit (sync + SSE) |
+| S034-D4 | Formatting | Inline `[1]`…`[N]` citations mapped to `sources[]` |
+| S034-D5 | Rollout | Flag default-off; staging enable after F36 / `rag-regression` |
+| S034-D6 | Scale / angles | Standard + all v1 documenting packs |
+| S034-D7 | Spec→Build gate | **Closed** — pending operator approval at HANDOFF |
+
+**Feature:** F82  
+**Cites:** [Corpus: feature-list.md §F82] [Spec: docs/acceptance-criteria.md §AC-OV1–OV7]
+[Spec: docs/adr/ADR-033-ev008-rag-evaluation-implementation.md §9]
+
 ### Intake (S032-D1 — 2026-08-23)
 
 **Waivers**

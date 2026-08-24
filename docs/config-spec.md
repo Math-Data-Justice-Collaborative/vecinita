@@ -40,6 +40,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MODAL_RERANK_URL` | string | — | When CE on | F45 Modal `vecinita-rerank` HTTP base URL |
 | `VECINITA_RAG_QUERY_REFINE` | string | `false` | No | F81 LLM query refinement on/off (default off) |
 | `VECINITA_RAG_QUERY_REFINE_COUNT` | int | `2` | No | F81 max alternate queries (1–3) |
+| `VECINITA_RAG_OUTPUT_VERIFY` | string | `false` | No | F82 post-generation groundedness check on/off (default off) |
+| `VECINITA_RAG_OUTPUT_VERIFY_MIN` | float | `1.0` | No | F82 minimum faithfulness score (1.0 = YES on LLM judge) |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_ENERGY_GPU_TDP_W` | float | `70` | No | F65 heuristic GPU TDP (watts); prod pin T4 |
 | `VECINITA_ENERGY_GPU_UTIL` | float | `0.5` | No | F65 assumed GPU utilization (0–1] |
@@ -347,6 +349,8 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_MODAL_RERANK_URL` non-empty when `VECINITA_RAG_RERANK_CE=true` | Config module at startup (F45) |
 | `VECINITA_RAG_QUERY_REFINE` in `true`, `false` | Config module at startup (F81) |
 | `VECINITA_RAG_QUERY_REFINE_COUNT` ≥ 1 and ≤ 3 | Config module at startup (F81) |
+| `VECINITA_RAG_OUTPUT_VERIFY` in `true`, `false` | Config module at startup (F82) |
+| `VECINITA_RAG_OUTPUT_VERIFY_MIN` ≥ 0.0 and ≤ 1.0 | Config module at startup (F82) |
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
 | `VECINITA_CHUNK_OVERLAP_TOKENS` ≥ 0 and &lt; `VECINITA_CHUNK_SIZE_TOKENS` | Ingest validation (F49) |

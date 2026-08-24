@@ -1730,6 +1730,36 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: Default env (`VECINITA_RAG_QUERY_REFINE=false`).
 - **Expected**: No refine LLM call; path matches F42-only retrieve (AC-SR5).
 
+### TC-284: Output verify wired from settings (UJ-086, F82, EV-030)
+
+- **Objective**: `from_settings` / ask path invokes verifier when flag on.
+- **Input**: `VECINITA_RAG_OUTPUT_VERIFY=true`; mock LLM judge returns YES/NO.
+- **Expected**: Faithfulness called with packed context; flag off → no verify call (AC-OV1).
+
+### TC-285: Hedge on ungrounded verdict (UJ-086, F82)
+
+- **Objective**: Failed verification prepends hedge, keeps answer body.
+- **Input**: Mock judge NO; Spanish locale.
+- **Expected**: Answer starts with ES hedge disclaimer; original text follows (AC-OV2).
+
+### TC-286: Output verify flag default off (UJ-086, F82)
+
+- **Objective**: No post-generation judge until enabled.
+- **Input**: Default env (`VECINITA_RAG_OUTPUT_VERIFY=false`).
+- **Expected**: No verify LLM call; no citation suffix (AC-OV4).
+
+### TC-287: Inline citations match sources (UJ-086, F82)
+
+- **Objective**: Citation markers align with `sources[]` order.
+- **Input**: Three retrieved chunks; verify on; grounded YES.
+- **Expected**: Answer ends with `[1][2][3]`; `sources[i]` maps to `[i+1]` (AC-OV3).
+
+### TC-288: Stream path buffers then verifies (UJ-086, F82)
+
+- **Objective**: SSE path does not emit tokens until verify+cite complete.
+- **Input**: `POST /api/v1/ask/stream` with verify on; mock stream tokens.
+- **Expected**: Single yielded payload includes hedge/citations; no pre-verify tokens (AC-OV5).
+
 ### F31 coverage gate — gated components
 
 Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-coverage`.

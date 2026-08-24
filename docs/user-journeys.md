@@ -85,6 +85,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-083 | Refresh stale sources / schedule freshness | Admin operator | DM freshness + Modal schedule | F79 EV-027 #219 | local |
 | UJ-084 | Approve FT train + human promote | Admin / super-admin | FT job + eval report + llm promote | F80 EV-027 #72 | local |
 | UJ-085 | LLM query refinement gated ask | Community member | ChatRAG ask with F81 enabled | F81 EV-029 #82 | local |
+| UJ-086 | Verified answer with citations | Community member | ChatRAG ask/stream with F82 enabled | F82 EV-030 #84 | local |
 
 ## Visual journey maps
 

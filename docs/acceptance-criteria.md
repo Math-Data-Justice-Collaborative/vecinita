@@ -255,6 +255,16 @@
 - [x] **AC-SR7**: Modal `vecinita-rerank` deployed; ChatRAG uses `VECINITA_MODAL_RERANK_URL` (deployment-integration). *(13-deploy-smoke EV-029 2026-08-24)*
 - [ ] **AC-SR8**: Out of EV-029 without unlock: prod CE flip; F43 cache; #84 groundedness; LLM-as-reranker.
 
+### EV-030 — Output verification + citations (F82 / #84) — S034
+
+- [x] **AC-OV1**: `ChatRagService` calls shared verifier when `VECINITA_RAG_OUTPUT_VERIFY=true` (TC-284, F82). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV2**: Ungrounded verdict prepends bilingual hedge disclaimer; answer body retained (TC-285, UJ-086). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV3**: Enabled path appends `[1]`…`[N]` citations matching `sources[]` order (TC-287). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV4**: Flag defaults **off**; no verify LLM call until explicitly enabled (TC-286). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV5**: `/ask/stream` buffers full generation → verify+cite → emit (TC-288). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV6**: `OutputVerificationScorer` delegates to same verifier as ChatRAG (ADR-033 §9). *(11-verify-impl EV-030 2026-08-24)*
+- [ ] **AC-OV7**: Staging enable only after F36 / `rag-regression` non-regression; prod deferred (AC-FO4).
+
 ### EV-019 — Ingest resilience (F47–F49) — S022
 
 - [x] **AC-IR1**: Unchanged `content_hash` + `force=false` skips chunk delete + re-embed; metadata may refresh (TC-187, UJ-062, F47 / #163). *(11-verify-impl S022 2026-08-02)*
