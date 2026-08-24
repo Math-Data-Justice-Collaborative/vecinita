@@ -13,6 +13,7 @@ from vecinita_chat_rag_backend.service import (
     _to_ask_response,  # pyright: ignore[reportPrivateUsage]
 )
 from vecinita_rag.cache import AnswerCache, CachedAnswer
+from vecinita_rag.constants import HEDGE_DISCLAIMER_EN
 from vecinita_rag.rerank import CallableCrossEncoderScorer
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
@@ -328,6 +329,45 @@ def test_ask_stream_yields_llm_tokens() -> None:
     service = _service(chunks=[_chunk()])
     tokens = list(service.ask_stream(AskRequest(question="clinic hours")))
     assert tokens == ["Streamed"]
+
+
+def test_ask_applies_output_verify_when_enabled() -> None:
+    """TC-284: verify on prepends hedge and appends citations on /ask path."""
+
+    class _VerifyLlm(StubLlm):
+        def generate(
+            self,
+            prompt: str,
+            *,
+            max_tokens: int = 256,
+            model_id: str | None = None,
+        ) -> str:
+            _ = (max_tokens, model_id)
+            self.prompts.append(prompt)
+            if "faithfulness judge" in prompt:
+                return "NO"
+            return self.answer
+
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=5,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_output_verify=True,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=StubRetriever([_chunk()]),  # type: ignore[arg-type]
+        llm_client=_VerifyLlm(),  # type: ignore[arg-type]
+        settings=settings,
+    )
+    response = service.ask(AskRequest(question="clinic hours"))
+    assert response.answer.startswith(HEDGE_DISCLAIMER_EN)
+    assert response.answer.endswith("[1]")
+    assert "Generated answer" in response.answer
+    assert len(response.sources) == 1
 
 
 def test_retrieve_sources_maps_chunks() -> None:

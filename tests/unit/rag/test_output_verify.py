@@ -32,6 +32,11 @@ def test_format_inline_citations_skips_when_no_sources() -> None:
     assert format_inline_citations("Hello.", 0) == "Hello."
 
 
+def test_format_inline_citations_empty_answer_returns_markers_only() -> None:
+    """Whitespace-only answers still emit citation markers."""
+    assert format_inline_citations("   ", 2) == "[1][2]"
+
+
 def test_verify_disabled_returns_answer_unchanged() -> None:
     """TC-286: flag off → no citations or hedge."""
     calls: list[str] = []
