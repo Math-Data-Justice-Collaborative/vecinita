@@ -15,15 +15,17 @@ source "${ROOT}/scripts/modal_ensure_workspace.sh"
 
 REQUIRED_SECRET="vecinita-data-management"
 LLM_SECRET="vecinita-llm"
-REQUIRED_VOLUMES=(embedding-models llm-models rerank-models)
+REQUIRED_VOLUMES=(embedding-models llm-models rerank-models llm-finetune-adapters)
 REQUIRED_APPS=(
   vecinita-embedding
   vecinita-data-management
   vecinita-llm
   vecinita-llm-playground
   vecinita-rerank
+  vecinita-llm-finetune
 )
 RERANK_SECRET="vecinita-rerank"
+FINETUNE_SECRET="vecinita-llm-finetune"
 
 echo "==> Modal profile"
 modal profile current
@@ -63,6 +65,16 @@ if ! grep -qx "${RERANK_SECRET}" <<<"${secret_names}"; then
   exit 1
 fi
 echo "OK secret ${RERANK_SECRET} exists"
+
+echo "==> Advisory secret: ${FINETUNE_SECRET} (F80 — create before train)"
+if ! grep -qx "${FINETUNE_SECRET}" <<<"${secret_names}"; then
+  echo "WARN: missing Modal secret '${FINETUNE_SECRET}' — required when VECINITA_FINETUNE_ENABLED=true." >&2
+  echo "  Keys: VECINITA_AUTOMATIONS_KILL_SWITCH, VECINITA_FINETUNE_ENABLED, VECINITA_FINETUNE_REQUIRE_APPROVE," >&2
+  echo "  VECINITA_FINETUNE_MAX_CONCURRENT, VECINITA_FINETUNE_MAX_RUNS_PER_DAY," >&2
+  echo "  VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY (see finetune_app.py)" >&2
+else
+  echo "OK secret ${FINETUNE_SECRET} exists"
+fi
 
 echo "==> Deprecated secret check (advisory)"
 if grep -qx "vecinita-ollama" <<<"${secret_names}"; then

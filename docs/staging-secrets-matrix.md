@@ -337,6 +337,8 @@ EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy c
 > Staging first; AskQuestion before live prod automation enable / FT promote.
 > Sync via `scripts/deploy/sync_modal_secret.sh --merge --apply` for Modal secrets;
 > DO apps via `do_apps.py sync-secrets` (never commit operator specs).
+> **EV-031:** keys below added to `sync_github_secrets.sh`, `do_apps.py`, and
+> `deploy-digitalocean.yml` (CD parity — values still safe-off until operator enable).
 
 ### DigitalOcean — Internal write API / Modal DM (add)
 
