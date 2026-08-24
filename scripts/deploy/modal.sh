@@ -28,6 +28,9 @@ echo "Deploying vecinita-llm (prod pin; ADR-037 / RD-169)..."
 echo "Deploying vecinita-llm-playground (shared llm-models; TP-S010-25)..."
 "${MODAL_CMD[@]}" deploy infra/modal/llm_playground_app.py
 
+echo "Deploying vecinita-rerank (CE rerank; F45 / EV-029)..."
+"${MODAL_CMD[@]}" deploy infra/modal/rerank_app.py
+
 echo "Done. vecinita-ollama is deprecated — do not deploy (ADR-037)."
-echo "Record VECINITA_MODAL_LLM_URL (prod) and VECINITA_MODAL_LLM_PLAYGROUND_URL in DO secrets"
-echo "(see docs/staging-secrets-matrix.md)."
+echo "Record VECINITA_MODAL_LLM_URL (prod), VECINITA_MODAL_LLM_PLAYGROUND_URL, and"
+echo "VECINITA_MODAL_RERANK_URL (when CE on) in DO secrets (docs/staging-secrets-matrix.md)."

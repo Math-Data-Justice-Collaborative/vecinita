@@ -53,7 +53,8 @@
 | F42 | Richer context packing + multi-query retrieval (H7+P1) | Implemented | ChatRAG | packages/rag, chat-rag-backend; F36 eval sandbox join | S019/EV-016 #165; PR #172 |
 | F43 | Answer / retrieval cache (H1 cascade) | Planned | ChatRAG | packages/rag, chat-rag-backend; F36 harness | S020/EV-017; S020-D4/D7 |
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
-| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S021/EV-018 re-gate; S020-D5/D7 |
+| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Evolving (EV-029) | ChatRAG | packages/rag, rerank-client, chat-rag-backend; Modal `vecinita-rerank` | S020–S021 spikes; EV-029 ship wiring + staging enable |
+| F81 | LLM query refinement before retrieval (#82) | Planned (EV-029) | ChatRAG | packages/rag, chat-rag-backend, llm-client | EV-029 #82; distinct from F42 H7 heuristics |
 | F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
 | F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
 | F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
@@ -957,15 +958,16 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 
 ### F45: Cross-encoder rerank spike + gated ship (#83/#161)
 
-- **What it does**: Renews the **cross-encoder rerank** track for smart retrieval. Runs a
-  documented spike (Modal T4 or playground) with a **hard ship gate**; **no production CE**
-  unless the gate passes (S020-D5). Prior R3 (`bge-reranker-base`) failed relevancy lift —
-  EV-018 re-gate keeps **`BAAI/bge-reranker-v2-m3`** on Modal T4 (RD-213). If gate fails,
-  F45 stays spike/docs only and #83 remains open.
-- **EV-017 outcome**: Path A ship gate **FAIL** (`ship_gate_pass=false`) — empty retrieve pools
-  made faith null and R0≈CE; disposition **spike-only**; prod flag stays off (S020-D21).
-- **EV-018 extension**: Re-run AC-BB9 / UJ-060 / TC-184 **only after F46** restores non-empty
-  staging pools. Same floors (relevancy ≥ 0.28, faith ≥ 0.91) unless Phase 0/01 changes them.
+- **What it does**: **Cross-encoder rerank** for smart retrieval: retrieve-N → CE score →
+  keep `top_k` (F73 threshold-aware). Spike gate **PASS** (S021 AC-BB9). EV-029 ships production
+  Modal app `vecinita-rerank`, HTTP client, and ChatRAG wiring; enables on **staging** first.
+  Prod `VECINITA_RAG_RERANK_CE` stays **false** until deploy AskQuestion (AC-FO4).
+- **Model**: **`BAAI/bge-reranker-v2-m3`** on Modal T4 (RD-213). Prior R3 (`bge-reranker-base`)
+  failed lift — do not regress model choice.
+- **EV-017 outcome**: Path A ship gate **FAIL** on empty pools (S020-D21) — superseded after F46.
+- **EV-018**: AC-BB9 / TC-184 **PASS** (relevancy 0.778 / faith 0.938).
+- **EV-029**: Wire `ce_scorer` in `from_settings`; promote spike to `infra/modal/rerank_app.py`;
+  staging flag on; close #83 when staging smoke passes.
 - **Inputs**: Retrieved top-N passages; CE model id; keep_k; packing (P1) fixed as F42.
 - **Outputs**: Reranked top_k for synthesis when enabled; spike report + gate metrics; optional
   prod flag only after gate pass.
@@ -1510,6 +1512,28 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   Overrides P3 “excluded from v1”.
 - **Source**: S030 / EV-027; GitHub #72; ADR-009, ADR-037, ADR-053; S030-D5, D10–D12,
   D20–D22, D64; S031.
+
+### F81: LLM query refinement before retrieval (#82)
+
+- **What it does**: Optional **LLM rewrite** step before pgvector retrieve — transforms the
+  raw user question into 1–`REFINE_COUNT` alternate retrieval queries via **`vecinita-llm`**
+  (self-hosted). Distinct from **F42 H7** heuristic fan-out (rules/locale variants). Refinement
+  preserves user **locale** (no cross-language translation). Merged retrieve dedupes by chunk id
+  (same merge as H7). Flag-gated default **off** until F36 / `rag-regression` evidence on staging.
+- **Inputs**: Raw question; detected locale; tag vocabulary context (read-only).
+- **Outputs**: Refined query list fed to retrieve; fallback to raw question on LLM/parse failure.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | `refine_query_llm` + merge hook before retrieve |
+  | `apps/chat-rag-backend` | Flag-gated call in ask path (before `_retrieve`) |
+  | `packages/llm-client` | Shared chat-template prompt for rewrite JSON |
+- **Interaction**: Runs **before** F22 tag-filtered retrieve; composes with F42 H7 and F45 CE
+  (refine → multi-query → retrieve-N → CE → pack).
+- **Out of scope**: LangGraph orchestration; paid rewrite APIs; translating user language away.
+- **Ship gate**: Staging F36 + `rag-regression` must not regress beyond EV-028 tolerances; if no
+  lift, ship wiring with flag default-off and keep #82 open for follow-up.
+- **Source**: EV-029; GitHub #82; #76 umbrella; ADR-009 / ADR-037.
 
 ## Planned / Deferred (post-v1)
 

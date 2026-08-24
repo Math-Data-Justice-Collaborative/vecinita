@@ -4,66 +4,66 @@
   "hooks": {
     "preToolUse": [
       {
-        "command": "uv run python .cursor/hooks/scope_check.py",
+        "command": "python3 .cursor/hooks/scope_check.py",
         "matcher": "Write",
         "timeout": 10
       },
       {
-        "command": "uv run python .cursor/hooks/pre_task_check.py",
+        "command": "python3 .cursor/hooks/pre_task_check.py",
         "matcher": "Write",
         "timeout": 10
       },
       {
-        "command": "uv run python .cursor/hooks/pr_checklist.py",
+        "command": "python3 .cursor/hooks/pr_checklist.py",
         "matcher": "Shell",
         "timeout": 10
       },
       {
-        "command": "uv run python .cursor/hooks/common_ci_failures.py",
+        "command": "python3 .cursor/hooks/common_ci_failures.py",
         "matcher": "Shell",
         "timeout": 10
       },
       {
-        "command": "uv run python .cursor/hooks/shell_deploy_guard.py",
+        "command": "python3 .cursor/hooks/shell_deploy_guard.py",
         "matcher": "Shell",
         "timeout": 10
       }
     ],
     "afterFileEdit": [
       {
-        "command": "uv run python .cursor/hooks/make_format_lint_fix.py",
+        "command": "python3 .cursor/hooks/make_format_lint_fix.py",
         "matcher": "Write|TabWrite",
         "timeout": 300
       },
       {
-        "command": "uv run python .cursor/hooks/common_ci_failures.py",
+        "command": "python3 .cursor/hooks/common_ci_failures.py",
         "matcher": "Write|TabWrite",
         "timeout": 180
       },
       {
-        "command": "uv run python .cursor/hooks/typecheck.py",
+        "command": "python3 .cursor/hooks/typecheck.py",
         "matcher": "Write",
         "timeout": 120
       },
       {
-        "command": "uv run python .cursor/hooks/pydantic_field_check.py",
+        "command": "python3 .cursor/hooks/pydantic_field_check.py",
         "matcher": "Write",
         "timeout": 10
       },
       {
-        "command": "uv run python .cursor/hooks/feature_drift.py",
+        "command": "python3 .cursor/hooks/feature_drift.py",
         "matcher": "Write",
         "timeout": 10
       },
       {
-        "command": "uv run python .cursor/hooks/type_suppression_check.py",
+        "command": "python3 .cursor/hooks/type_suppression_check.py",
         "matcher": "Write",
         "timeout": 15
       }
     ],
     "stop": [
       {
-        "command": "uv run python .cursor/hooks/make_ci_on_stop.py",
+        "command": "python3 .cursor/hooks/make_ci_on_stop.py",
         "timeout": 900
       }
     ]

@@ -19,6 +19,7 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | vecinita-embedding | Modal | 384-d embeddings (ADR-048) — FastEmbed preferred; ST/ONNX fallback; CPU |
 | vecinita-llm | Modal | **Prod LLM** — vLLM pinned to `qwen2.5:1.5b-instruct`; volume **`llm-models`**; generate/warm (ADR-037) |
 | vecinita-llm-playground | Modal | **Playground LLM** — vLLM + HF list/pull/staging; **same** `llm-models` volume; sandbox `model_id` reloads (TP-S010-25) |
+| vecinita-rerank | Modal | **CE rerank** — `BAAI/bge-reranker-v2-m3` on T4; HTTP score API (F45 / EV-029) |
 | ~~vecinita-ollama~~ | ~~Modal~~ | **Deprecated** — de-deployed; superseded by `vecinita-llm` (+ playground app) |
 | database | DO Managed Postgres | Smallest viable tier |
 

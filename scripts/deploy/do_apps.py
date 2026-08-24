@@ -185,6 +185,9 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_MODAL_EMBED_URL",
                 "VECINITA_MODAL_LLM_URL",
                 "VECINITA_MODAL_PROXY_KEY",  # RD-165 — required on /generate
+                "VECINITA_MODAL_RERANK_URL",  # F45 — CE rerank when VECINITA_RAG_RERANK_CE=true
+                "VECINITA_RAG_RERANK_CE",
+                "VECINITA_RAG_QUERY_REFINE",
                 "VECINITA_CORS_ORIGINS",
                 "VECINITA_INTERNAL_WRITE_URL",
                 "VECINITA_INTERNAL_API_KEY",

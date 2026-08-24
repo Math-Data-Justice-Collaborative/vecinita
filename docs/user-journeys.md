@@ -84,6 +84,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-082 | Enable automations + view run history | Admin operator | DM Automations UI + write-API | F78 EV-027 #73 | local |
 | UJ-083 | Refresh stale sources / schedule freshness | Admin operator | DM freshness + Modal schedule | F79 EV-027 #219 | local |
 | UJ-084 | Approve FT train + human promote | Admin / super-admin | FT job + eval report + llm promote | F80 EV-027 #72 | local |
+| UJ-085 | LLM query refinement gated ask | Community member | ChatRAG ask with F81 enabled | F81 EV-029 #82 | local |
 
 ## Visual journey maps
 
@@ -1550,6 +1551,30 @@ evidence (EV-017 lesson).
 **Automated tests**: Spike harness + gate doc (TC-184); not a CI Modal live requirement.
 
 **E2E tier**: local (+ staging spike).
+
+---
+
+### UJ-085: LLM query refinement gated ask (F81, #82)
+
+**Actor**: Community member (no account)
+
+**Goal**: When F81 is enabled, the ask path calls **`vecinita-llm`** to produce 1–2
+same-locale retrieval query variants before pgvector retrieve, improving recall without
+translating the user's language away.
+
+**Preconditions**: `VECINITA_RAG_QUERY_REFINE=true`; LLM URL available (mocked in CI).
+
+**Steps**:
+
+1. User asks a question in `en` or `es`.
+2. Backend optionally refines → runs F42 H7 multi-query (if on) → retrieve → F45 CE (if on) → P1 pack → synthesize.
+3. On LLM/parse failure, retrieve uses the raw question only.
+
+**Acceptance**: AC-SR4–SR5; default refine **off**; no API schema break vs UJ-001.
+
+**Automated tests**: `tests/e2e/test_uj085_query_refine.py` (TC-282–283); unit refine parser.
+
+**E2E tier**: local.
 
 ---
 

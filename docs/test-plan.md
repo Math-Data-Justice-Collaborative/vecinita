@@ -98,8 +98,9 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-056 F42 staging Hy1 eval gate | unit + eval harness (ISS-008 fixture) | TC-174, TC-175 | — |
 | UJ-057 Answer/retrieve cache | `tests/e2e/test_uj057_answer_cache.py` | TC-176, TC-177, TC-178, TC-179 | — (no UI change) |
 | UJ-058 Soft language L1 fallback | `tests/e2e/test_uj058_soft_language.py` | TC-180, TC-181 | — |
-| UJ-059 CE gated ask | `tests/e2e/test_uj059_ce_rerank.py` | TC-182, TC-183 | — |
+| UJ-059 CE gated ask | `tests/e2e/test_uj059_ce_rerank.py` | TC-182, TC-183, TC-281 | — |
 | UJ-060 CE ship gate spike | spike harness + report | TC-184 | — |
+| UJ-085 LLM query refinement gated ask | `tests/e2e/test_uj085_query_refine.py` | TC-282, TC-283 | — |
 | UJ-061 Non-empty staging retrieve | `tests/e2e/test_uj061_retrieve_nonempty.py` | TC-185, TC-186 | — (no UI change) |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -1710,6 +1711,24 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Tolerances** (vs baseline): retrieval relevance ≥ max(0.80, baseline − 0.02); faithfulness and answer relevancy ≥ max(0.60, baseline − 0.02); `latency_p95_ms` ≤ min(15000, baseline × 1.10 + 500). Cold-start/spawn excluded from latency fail criteria.
 - **CI**: Required job `rag-regression` in `.github/workflows/ci.yml` on PRs to `main` and pushes to `main`.
 - **Local**: `make test-rag-regression` (parity with CI job).
+
+### TC-281: CE scorer wired from settings (UJ-059, F45, EV-029)
+
+- **Objective**: `from_settings` injects CE client when flag on.
+- **Input**: `VECINITA_RAG_RERANK_CE=true` + mock Modal rerank URL.
+- **Expected**: Ask path calls scorer; flag off → no scorer (AC-SR1).
+
+### TC-282: LLM refinement preserves locale (UJ-085, F81)
+
+- **Objective**: Refinement returns same-locale alternates or falls back.
+- **Input**: Spanish question with `VECINITA_RAG_QUERY_REFINE=true`; mock LLM JSON.
+- **Expected**: Retrieve uses refined queries in `es`; invalid output → raw question only (AC-SR4).
+
+### TC-283: Query refine flag default off (UJ-085, F81)
+
+- **Objective**: No LLM rewrite until explicitly enabled.
+- **Input**: Default env (`VECINITA_RAG_QUERY_REFINE=false`).
+- **Expected**: No refine LLM call; path matches F42-only retrieve (AC-SR5).
 
 ### F31 coverage gate — gated components
 

@@ -22,13 +22,15 @@ from vecinita_rag.es_esl_supplement import (
     should_supplement_en_for_es_esl_query,
 )
 from vecinita_rag.language import detect_query_language, no_context_message
-from vecinita_rag.multi_query import multi_query_retrieve
+from vecinita_rag.multi_query import merge_multi_query_hits, multi_query_retrieve
 from vecinita_rag.packing import PackerMode, pack_chunks
+from vecinita_rag.query_refine import refine_queries_llm
 from vecinita_rag.rerank import CrossEncoderScorer, rerank_with_scorer
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.soft_language import soft_language_retrieve
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
 from vecinita_rag.types import RagAnswer, RetrievedChunk
+from vecinita_rerank_client import RerankClient
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
 from vecinita_shared_schemas.eval_config import EvalConfig, resolve_system_prompt_for_language
 from vecinita_tagging.llm_client import LlmTagClient
@@ -194,6 +196,12 @@ class ChatRagService:
             score_threshold=settings.min_retrieval_score,
         )
         config_engine = create_engine(settings.database_url)
+        ce_scorer: CrossEncoderScorer | None = None
+        if settings.rag_rerank_ce and settings.rerank_url:
+            ce_scorer = RerankClient(
+                settings.rerank_url,
+                timeout=settings.request_timeout_s,
+            )
         return cls(
             retriever=retriever,
             llm_client=llm_client,
@@ -202,6 +210,7 @@ class ChatRagService:
             llm_model_id=settings.llm_model_id,
             settings=settings,
             config_engine=config_engine,
+            ce_scorer=ce_scorer,
         )
 
     def _effective_language(self, request: AskRequest) -> str:
@@ -247,6 +256,26 @@ class ChatRagService:
         if not callable(embed_fn):
             return None
         return tuple(cast("EmbedFn", embed_fn)(question))
+
+    def _retrieval_questions(self, request: AskRequest) -> list[str]:
+        """F81 optional LLM refinement; always includes the raw question first."""
+        language = self._effective_language(request)
+        raw = request.question.strip()
+        if not raw:
+            return []
+        if self._settings is None or not self._settings.rag_query_refine:
+            return [raw]
+
+        def _generate(prompt: str) -> str:
+            return self._llm.generate(prompt, max_tokens=128)
+
+        refined = refine_queries_llm(
+            raw,
+            locale=language,
+            generate_fn=_generate,
+            count=self._settings.rag_query_refine_count,
+        )
+        return refined or [raw]
 
     def _retrieve(
         self,
@@ -308,14 +337,20 @@ class ChatRagService:
                 )
             return chunks
 
-        chunks = multi_query_retrieve(
-            request.question,
-            locale=language,
-            top_k=retrieve_k,
-            retrieve_fn=_retrieve_once,
-            enabled=multi_query,
-            count=multi_count,
-        )
+        questions = self._retrieval_questions(request)
+        groups: list[list[RetrievedChunk]] = []
+        for question_text in questions:
+            sub_request = request.model_copy(update={"question": question_text})
+            sub_chunks = multi_query_retrieve(
+                sub_request.question,
+                locale=language,
+                top_k=retrieve_k,
+                retrieve_fn=_retrieve_once,
+                enabled=multi_query,
+                count=multi_count,
+            )
+            groups.append(sub_chunks)
+        chunks = merge_multi_query_hits(groups, top_k=retrieve_k)
         if ce_enabled and self._ce_scorer is not None:
             return rerank_with_scorer(
                 request.question,

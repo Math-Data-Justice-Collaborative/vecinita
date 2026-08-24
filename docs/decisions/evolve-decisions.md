@@ -1227,6 +1227,30 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | S032-D5 | Scale / angles | Standard + all v1 documenting packs |
 | S032-D6 | Spec→Build gate | **Closed** — merged `b977599d` |
 
+## Cycle EV-029 — Scope (S033 / #83 #82)
+
+**Title:** Smart retrieval + reranking ship + LLM query refinement  
+**Session:** EV-029-smart-retrieval-rerank (local store)  
+**Issues:** [#83](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/83),
+[#82](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/82)  
+**Milestone:** Retrieval and answer quality  
+**Branch:** `evolve/EV-029-smart-retrieval-rerank`  
+**Status:** **in_progress** — documenting band
+
+### Intake (S033-D1 — 2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S033-D1 | Goal | Full #83 ship — Modal CE + ChatRAG wiring + staging enable; include #82 F81 |
+| S033-D2 | #82 | **In scope** — F81 LLM query refinement (not deferred) |
+| S033-D3 | Prod CE | **Deferred** — staging flag on; prod AskQuestion at deploy (AC-FO4) |
+| S033-D4 | Success | AC-BB9 met + CE wired + staging on + UJ-059 green + `rag-regression` passes |
+| S033-D5 | Scale / angles | Standard + all v1 documenting packs |
+| S033-D6 | Spec→Build gate | **Closed** — pending operator approval at HANDOFF |
+
+**Cites:** [Corpus: feature-list.md §F45] [Corpus: feature-list.md §F81] [Corpus: acceptance §AC-BB9]
+[Spec: docs/config-spec.md §VECINITA_RAG_RERANK_CE] [Spec: docs/test-plan.md §TC-280]
+
 ### Intake (S032-D1 — 2026-08-23)
 
 **Waivers**
