@@ -13,8 +13,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 _ENV_RERANK_URL: Final[str] = "VECINITA_MODAL_RERANK_URL"
-_ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
-_PROXY_HEADER: Final[str] = "Modal-Proxy-Authorization"
 
 
 class RerankClientError(RuntimeError):
@@ -22,23 +20,25 @@ class RerankClientError(RuntimeError):
 
 
 class RerankClient:
-    """Call vecinita-rerank Modal app ``/score`` endpoint."""
+    """Call vecinita-rerank Modal app ``/score`` endpoint.
+
+    Unlike ``vecinita-llm``, rerank HTTP is open (no ``Modal-Proxy-Authorization``).
+    Do not forward ``VECINITA_MODAL_PROXY_KEY`` — Modal rejects that header on open apps.
+    """
 
     def __init__(
         self,
         base_url: str | None = None,
         *,
-        proxy_key: str | None = None,
         timeout: float = 60.0,
         http_client: httpx.Client | None = None,
     ) -> None:
-        """Resolve base URL and optional proxy key; own httpx client unless injected."""
+        """Resolve base URL; own httpx client unless injected."""
         resolved = base_url or os.environ.get(_ENV_RERANK_URL)
         if not resolved:
             msg = f"{_ENV_RERANK_URL} or base_url is required"
             raise RerankClientError(msg)
         self._base_url = resolved.rstrip("/")
-        self._proxy_key = proxy_key if proxy_key is not None else os.environ.get(_ENV_PROXY_KEY)
         self._owns_client = http_client is None
         self._client = http_client or httpx.Client(
             base_url=self._base_url,
@@ -59,11 +59,6 @@ class RerankClient:
         """Exit context manager and close owned client."""
         self.close()
 
-    def _headers(self) -> dict[str, str]:
-        if self._proxy_key:
-            return {_PROXY_HEADER: self._proxy_key}
-        return {}
-
     def score_pairs(self, query: str, passages: Sequence[str]) -> list[float]:
         """Score query/passage pairs; return one float per passage (aligned order)."""
         if not passages:
@@ -71,7 +66,6 @@ class RerankClient:
         response = self._client.post(
             "/score",
             json={"query": query, "passages": list(passages)},
-            headers=self._headers(),
         )
         if response.status_code != HTTPStatus.OK:
             msg = f"/score returned {response.status_code}: {response.text[:200]}"
