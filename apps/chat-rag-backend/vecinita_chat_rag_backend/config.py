@@ -33,6 +33,8 @@ _MAX_CACHE_SEMANTIC_THRESHOLD = 1.0
 _MAX_CE_TOP_N = 50
 _MIN_REFINE_COUNT = 1
 _MAX_REFINE_COUNT = 3
+_MIN_OUTPUT_VERIFY_MIN = 0.0
+_MAX_OUTPUT_VERIFY_MIN = 1.0
 
 
 def _int_env(name: str, default: int) -> int:
@@ -144,6 +146,15 @@ def _validate_f81_query_refine_knobs(*, rag_query_refine_count: int) -> None:
         raise ValueError(msg)
 
 
+def _validate_f82_output_verify_knobs(*, rag_output_verify_min: float) -> None:
+    if not (_MIN_OUTPUT_VERIFY_MIN <= rag_output_verify_min <= _MAX_OUTPUT_VERIFY_MIN):
+        msg = (
+            "VECINITA_RAG_OUTPUT_VERIFY_MIN must be between "
+            f"{_MIN_OUTPUT_VERIFY_MIN} and {_MAX_OUTPUT_VERIFY_MIN}"
+        )
+        raise ValueError(msg)
+
+
 def _validate_f45_rerank_url(*, rag_rerank_ce: bool, rerank_url: str | None) -> None:
     if rag_rerank_ce and not rerank_url:
         msg = "VECINITA_MODAL_RERANK_URL is required when VECINITA_RAG_RERANK_CE=true"
@@ -188,6 +199,8 @@ class ChatRagSettings:
     rerank_url: str | None = None
     rag_query_refine: bool = False
     rag_query_refine_count: int = 2
+    rag_output_verify: bool = False
+    rag_output_verify_min: float = 1.0
     # F65 / ADR-047 energy heuristic knobs
     energy_gpu_tdp_w: float = 70.0
     energy_gpu_util: float = 0.5
@@ -234,6 +247,8 @@ class ChatRagSettings:
         _validate_f45_rerank_url(rag_rerank_ce=rag_rerank_ce, rerank_url=rerank_url)
         rag_query_refine_count = _int_env("VECINITA_RAG_QUERY_REFINE_COUNT", 2)
         _validate_f81_query_refine_knobs(rag_query_refine_count=rag_query_refine_count)
+        rag_output_verify_min = _float_env("VECINITA_RAG_OUTPUT_VERIFY_MIN", 1.0)
+        _validate_f82_output_verify_knobs(rag_output_verify_min=rag_output_verify_min)
         return cls(
             database_url=_normalize_database_url(database_url),
             top_k=top_k,
@@ -291,6 +306,8 @@ class ChatRagSettings:
             rerank_url=rerank_url,
             rag_query_refine=_bool_env("VECINITA_RAG_QUERY_REFINE", default=False),
             rag_query_refine_count=rag_query_refine_count,
+            rag_output_verify=_bool_env("VECINITA_RAG_OUTPUT_VERIFY", default=False),
+            rag_output_verify_min=rag_output_verify_min,
             energy_gpu_tdp_w=_float_env("VECINITA_ENERGY_GPU_TDP_W", 70.0),
             energy_gpu_util=_float_env("VECINITA_ENERGY_GPU_UTIL", 0.5),
             energy_gco2e_per_kwh=_float_env("VECINITA_ENERGY_GCO2E_PER_KWH", 386.0),

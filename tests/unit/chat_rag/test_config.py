@@ -325,6 +325,34 @@ def test_from_env_parses_f81_query_refine_knobs(monkeypatch: pytest.MonkeyPatch)
     assert settings.rag_query_refine_count == _PARSED_REFINE_COUNT
 
 
+def test_from_env_defaults_f82_output_verify_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    """TC-286 / AC-OV4: VECINITA_RAG_OUTPUT_VERIFY defaults false (F82)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_RAG_OUTPUT_VERIFY", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_OUTPUT_VERIFY_MIN", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_output_verify is False
+    assert settings.rag_output_verify_min == 1.0
+
+
+def test_from_env_parses_f82_output_verify_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F82: VECINITA_RAG_OUTPUT_VERIFY* knobs parse from env (config-spec)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_OUTPUT_VERIFY", "true")
+    monkeypatch.setenv("VECINITA_RAG_OUTPUT_VERIFY_MIN", "0.5")
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_output_verify is True
+    assert settings.rag_output_verify_min == _DEFAULT_FLOAT
+
+
+def test_from_env_rejects_invalid_f82_output_verify_min(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F82: VECINITA_RAG_OUTPUT_VERIFY_MIN must stay within [0, 1]."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_OUTPUT_VERIFY_MIN", "1.5")
+    with pytest.raises(ValueError, match="VECINITA_RAG_OUTPUT_VERIFY_MIN"):
+        ChatRagSettings.from_env()
+
+
 def test_from_env_requires_rerank_url_when_ce_on(monkeypatch: pytest.MonkeyPatch) -> None:
     """F45: VECINITA_MODAL_RERANK_URL required when VECINITA_RAG_RERANK_CE=true."""
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")

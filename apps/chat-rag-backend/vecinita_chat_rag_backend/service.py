@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Literal, cast
 
 from sqlalchemy import create_engine
@@ -21,8 +22,10 @@ from vecinita_rag.es_esl_supplement import (
     merge_es_esl_retrieval_for_r6,
     should_supplement_en_for_es_esl_query,
 )
+from vecinita_rag.faithfulness_judge import CompletingLlm, score_faithfulness
 from vecinita_rag.language import detect_query_language, no_context_message
 from vecinita_rag.multi_query import merge_multi_query_hits, multi_query_retrieve
+from vecinita_rag.output_verify import OutputVerifyRequest, verify_and_format_answer
 from vecinita_rag.packing import PackerMode, pack_chunks
 from vecinita_rag.query_refine import refine_queries_llm
 from vecinita_rag.rerank import CrossEncoderScorer, rerank_with_scorer
@@ -123,6 +126,16 @@ def _sources_from_chunks(chunks: Sequence[RetrievedChunk]) -> list[Source]:
         )
         for chunk in chunks
     ]
+
+
+class _FaithfulnessLlmAdapter:
+    """Adapt ``LlmClient.generate`` to the faithfulness judge ``complete`` surface."""
+
+    def __init__(self, llm: LlmClient) -> None:
+        self._llm = llm
+
+    def complete(self, prompt: str) -> object:
+        return SimpleNamespace(text=self._llm.generate(prompt, max_tokens=8))
 
 
 @dataclass
@@ -277,6 +290,54 @@ class ChatRagService:
         )
         return refined or [raw]
 
+    def _output_verify_enabled(self) -> bool:
+        return self._settings is not None and self._settings.rag_output_verify
+
+    def _faithfulness_score(
+        self,
+        *,
+        question: str,
+        answer: str,
+        context: str,
+    ) -> float:
+        adapter: CompletingLlm = _FaithfulnessLlmAdapter(self._llm)
+        return score_faithfulness(
+            llm=adapter,
+            question=question,
+            answer=answer,
+            context=context,
+        )
+
+    def _apply_output_verify(  # noqa: PLR0913 — synthesis hook mirrors _synthesize context
+        self,
+        request: AskRequest,
+        chunks: Sequence[RetrievedChunk],
+        answer_text: str,
+        *,
+        language: str,
+        packer: PackerMode,
+        max_chars: int,
+    ) -> str:
+        enabled = self._output_verify_enabled()
+        if not enabled or not chunks:
+            return answer_text
+        packed_context = pack_chunks(list(chunks), mode=packer, max_chars=max_chars)
+        min_score = self._settings.rag_output_verify_min if self._settings is not None else 1.0
+        verified = verify_and_format_answer(
+            OutputVerifyRequest(
+                question=request.question,
+                answer=answer_text,
+                context=packed_context,
+                language=language,
+                source_count=len(chunks),
+                min_score=min_score,
+                enabled=True,
+                add_citations=True,
+            ),
+            faithfulness_fn=self._faithfulness_score,
+        )
+        return verified.answer
+
     def _retrieve(
         self,
         request: AskRequest,
@@ -391,6 +452,14 @@ class ChatRagService:
             prompt,
             max_tokens=production.max_tokens,
             model_id=model_id,
+        )
+        answer_text = self._apply_output_verify(
+            request,
+            chunk_list,
+            answer_text,
+            language=language,
+            packer=packer,
+            max_chars=max_chars,
         )
         result = answer_from_chunks(request.question, chunk_list, answer_text=answer_text)
         return CachedAnswer(
@@ -558,18 +627,27 @@ class ChatRagService:
         parts: list[str] = []
 
         def _token_stream() -> Iterator[str]:
-            for token in self._llm.generate_stream(
-                prompt,
-                max_tokens=production.max_tokens,
-                model_id=model_id,
-            ):
-                parts.append(token)
-                yield token
+            parts.extend(
+                self._llm.generate_stream(
+                    prompt,
+                    max_tokens=production.max_tokens,
+                    model_id=model_id,
+                ),
+            )
+            draft = "".join(parts)
+            verified = self._apply_output_verify(
+                request,
+                chunks,
+                draft,
+                language=language,
+                packer=packer,
+                max_chars=max_chars,
+            )
             cache.store_answer(
                 request.question,
                 language,
                 CachedAnswer(
-                    answer="".join(parts),
+                    answer=verified,
                     language=language,
                     sources=tuple(chunks),
                     query_embedding=(
@@ -577,6 +655,7 @@ class ChatRagService:
                     ),
                 ),
             )
+            yield verified
 
         return AskStreamSession(
             sources=_sources_from_chunks(chunks),
@@ -611,14 +690,31 @@ class ChatRagService:
             context_max_chars=max_chars,
         )
         model_id = production.model_id or self._llm_model_id
+        parts: list[str] = []
+
+        def _token_stream() -> Iterator[str]:
+            parts.extend(
+                self._llm.generate_stream(
+                    prompt,
+                    max_tokens=production.max_tokens,
+                    model_id=model_id,
+                ),
+            )
+            draft = "".join(parts)
+            verified = self._apply_output_verify(
+                request,
+                chunks,
+                draft,
+                language=language,
+                packer=packer,
+                max_chars=max_chars,
+            )
+            yield verified
+
         return AskStreamSession(
             sources=_sources_from_chunks(chunks),
             cache_hit="none",
-            tokens=self._llm.generate_stream(
-                prompt,
-                max_tokens=production.max_tokens,
-                model_id=model_id,
-            ),
+            tokens=_token_stream(),
         )
 
     def ask_stream(self, request: AskRequest) -> Iterator[str]:

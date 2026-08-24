@@ -11,3 +11,11 @@ NO_CONTEXT_MESSAGE_EN = "I don't have enough community corpus context to answer 
 NO_CONTEXT_MESSAGE_ES = (
     "No tengo suficiente contexto del corpus comunitario para responder esa pregunta."
 )
+HEDGE_DISCLAIMER_EN = (
+    "This answer may not be fully supported by the sources we found. "
+    "Please verify important details with the linked resources."
+)
+HEDGE_DISCLAIMER_ES = (
+    "Esta respuesta puede no estar completamente respaldada por las fuentes encontradas. "
+    "Verifique los detalles importantes con los recursos enlazados."
+)
