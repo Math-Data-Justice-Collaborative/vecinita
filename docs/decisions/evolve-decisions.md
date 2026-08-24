@@ -1269,7 +1269,15 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 **Issue:** [#84](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/84)  
 **Milestone:** Retrieval and answer quality (last open item)  
 **Branch:** `evolve/EV-030-groundedness-answer-formatting`  
-**Status:** **documenting** — spec drafted 2026-08-24; gate pending
+**Status:** **closed (merged + live)** — PR [#262](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/262) @ `17c5b631`; DO deploy `357f3e4a` ACTIVE; live `VECINITA_RAG_OUTPUT_VERIFY=true`; #84 closed
+
+### Closeout (2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S034-D8 | EV-030 close | F82 live; post-deploy smoke PASS (hedge + `[1]`…`[N]`); golden sweep non-regression |
+| S034-D9 | DO outage | Apps API 503/504 ~17:30–18:59 UTC; recovered; manual sync+deploy succeeded |
+| S034-D10 | Live verify (AC-FO4) | Operator approved `VECINITA_RAG_OUTPUT_VERIFY=true` on live ChatRAG (ADR-049 staging-as-live); H1–H3b smoke PASS 2026-08-24 |
 
 ### Intake (S034-D1 — 2026-08-24)
 

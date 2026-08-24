@@ -263,7 +263,7 @@
 - [x] **AC-OV4**: Flag defaults **off**; no verify LLM call until explicitly enabled (TC-286). *(11-verify-impl EV-030 2026-08-24)*
 - [x] **AC-OV5**: `/ask/stream` buffers full generation → verify+cite → emit (TC-288). *(11-verify-impl EV-030 2026-08-24)*
 - [x] **AC-OV6**: `OutputVerificationScorer` delegates to same verifier as ChatRAG (ADR-033 §9). *(11-verify-impl EV-030 2026-08-24)*
-- [x] **AC-OV7**: Staging enable only after F36 / `rag-regression` non-regression; prod deferred (AC-FO4). *(staging `VECINITA_RAG_OUTPUT_VERIFY=true` in infra/do EV-030 2026-08-24; prod off)*
+- [x] **AC-OV7**: Live enable after F36 / `rag-regression` non-regression + operator approval (AC-FO4). *(live `VECINITA_RAG_OUTPUT_VERIFY=true` in infra/do + DO deploy EV-030 2026-08-24; S034-D10 prod verify 2026-08-24)*
 
 ### EV-019 — Ingest resilience (F47–F49) — S022
 
