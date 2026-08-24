@@ -47,6 +47,9 @@ services:
       - key: VECINITA_RAG_QUERY_REFINE
         scope: RUN_TIME
         value: "false"
+      - key: VECINITA_RAG_OUTPUT_VERIFY
+        scope: RUN_TIME
+        value: "true"
       - key: VECINITA_TOP_K
         scope: RUN_TIME
         value: "8"
