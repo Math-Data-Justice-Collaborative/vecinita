@@ -1699,6 +1699,17 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: Promoted adapter on prod; operator triggers rollback / clear pin.
 - **Expected**: Prod `vecinita-llm` reverts to base (empty `VECINITA_FINETUNE_ADAPTER_ID` or equivalent); chat serves without adapter.
 
+### TC-280: ChatRAG golden regression gate vs committed baseline (F36, EV-028, #181)
+
+- **Objective**: Fail CI when golden-set metrics **regress** beyond tolerance vs `data/fixtures/eval/baseline.json` (not only absolute floors).
+- **Input**: `tests/eval/test_rag_regression_gate.py` — `run_golden_eval` with `MockEvalJudge`, seeded eval corpus (`eval_db` fixture), committed baseline.
+- **Expected**:
+  - **Pass** when current metrics are within tolerance of baseline **and** still meet TC-111/112 floors.
+  - **Fail** when any gated metric regresses beyond tolerance (see AC-RG2).
+  - Baseline bump requires an explicit PR edit to `baseline.json` (AC-RG5).
+- **Tolerances** (vs baseline): retrieval relevance ≥ max(0.80, baseline − 0.02); faithfulness and answer relevancy ≥ max(0.60, baseline − 0.02); `latency_p95_ms` ≤ min(15000, baseline × 1.10 + 500). Cold-start/spawn excluded from latency fail criteria.
+- **CI**: Required job `rag-regression` in `.github/workflows/ci.yml` on PRs to `main` and pushes to `main`.
+- **Local**: `make test-rag-regression` (parity with CI job).
 
 ### F31 coverage gate — gated components
 
@@ -1731,16 +1742,18 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 1. ruff lint + format-check + basedpyright (Python) — no `typing.Any` (ADR-018; supersedes pyright/mypy)
 2. eslint (frontends) — no `any` / unsafe-any flows (`docs/typing-policy.md`)
-3. `uv run pytest tests/unit` (S027-D34 — unit only on remote)
-4. Vitest (frontends) + Playwright UI e2e (`ui-e2e`)
-5. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031) and **posts a sticky PR comment** with the per-component table (`scripts/ci/comment_unit_coverage_pr.sh`)
-6. pip-audit (blocking) + security job
+3. `uv run pytest tests/unit` (S027-D34 — unit only on remote `python` job)
+4. **`rag-regression` job** — `make test-rag-regression` / TC-280 golden baseline compare (EV-028 / #181; postgres service; fixture + mocked judge)
+5. Vitest (frontends) + Playwright UI e2e (`ui-e2e`)
+6. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031) and **posts a sticky PR comment** with the per-component table (`scripts/ci/comment_unit_coverage_pr.sh`)
+7. pip-audit (blocking) + security job
 
 **Local CI (compose / long-running — before opening a PR):**
 
 - `make test-py` or `make ci-push` — Postgres via `scripts/ci/with_local_postgres.sh` (docker compose)
 - Runs `tests/unit` + `tests/integration` + `tests/privacy` + `tests/e2e` + `tests/smoke` + `tests/eval` + `tests/bugs`
-- Do **not** rely on remote GitHub Actions for compose-backed suites (S027-D34)
+- `make test-rag-regression` — TC-280 baseline compare (also runs in remote `rag-regression` CI job)
+- Other compose-backed suites remain **local-only** on the `python` job (S027-D34); regression gate is the documented remote exception (EV-028)
 
 **Workflow:** `.github/workflows/ci.yml` (created in **06-tech-tooling**; unit/coverage split S027-D34).
 

@@ -25,7 +25,7 @@ NPM_WS := bash scripts/npm_workspaces.sh
 	lint lint-py lint-fe lint-fix lint-fix-py lint-fix-fe \
 	format format-py format-fe format-check format-check-py format-fe-check \
 	typecheck typecheck-py typecheck-fe \
-	test test-py test-fe test-ui test-unit test-unit-coverage test-fast test-coverage-fe test-integration test-e2e test-smoke test-privacy test-live \
+	test test-py test-fe test-ui test-unit test-unit-coverage test-fast test-coverage-fe test-integration test-e2e test-smoke test-privacy test-live test-rag-regression \
 	verify-connectivity \
 	build-frontend ci ci-push ci-push-py ci-pr-ready ci-guards audit audit-fe audit-fix 	check check-fast pre-push
 
@@ -135,6 +135,9 @@ test-smoke: ## Pytest smoke tests (starts/stops compose postgres when needed)
 
 test-privacy: ## Pytest privacy guardrail tests (starts/stops compose postgres when needed)
 	$(WITH_POSTGRES) $(UV) run pytest tests/privacy
+
+test-rag-regression: ## TC-280 ChatRAG golden regression gate vs baseline (EV-028 / #181)
+	$(WITH_POSTGRES) env VECINITA_RAG_MULTI_QUERY=false $(UV) run pytest tests/eval/test_rag_regression_gate.py -q
 
 test-py: ## Full Python test suite (starts/stops compose postgres when needed)
 	$(WITH_POSTGRES) $(UV) run pytest $(PYTEST_DEFAULT)

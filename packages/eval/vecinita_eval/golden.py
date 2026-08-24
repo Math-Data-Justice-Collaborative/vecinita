@@ -18,6 +18,11 @@ _DEFAULT_FIXTURE = (
 )
 
 
+def default_golden_fixture_path() -> Path:
+    """Return the default qa_pairs.json path for CI and baseline generation."""
+    return _DEFAULT_FIXTURE
+
+
 @dataclass(frozen=True, slots=True)
 class GoldenRow:
     """One locale variant of a golden eval case."""
