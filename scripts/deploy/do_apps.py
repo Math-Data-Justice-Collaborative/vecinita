@@ -216,7 +216,7 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "SUPABASE_SECRET_KEY",  # F69 — audit actor_email Admin lookup
                 "VECINITA_AUTH_REQUIRED",
                 "SUPABASE_JWT_AUD",
-                # F78–F80 corpus automations / freshness / FT (EV-031)
+                # F78-F80 corpus automations / freshness / FT (EV-031)
                 "VECINITA_AUTOMATIONS_ENABLED",
                 "VECINITA_AUTOMATIONS_KILL_SWITCH",
                 "VECINITA_AUTOMATIONS_MAX_CONCURRENT",
