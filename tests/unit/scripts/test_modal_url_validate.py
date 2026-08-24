@@ -10,6 +10,7 @@ pytestmark = pytest.mark.unit
 GOOD_EMBED = "https://vecinita--vecinita-embedding-embedding-api.modal.run"
 GOOD_LLM = "https://vecinita--vecinita-llm-fastapi-app.modal.run"
 GOOD_LLM_PLAYGROUND = "https://vecinita--vecinita-llm-playground-fastapi-app.modal.run"
+GOOD_RERANK = "https://vecinita--vecinita-rerank-rerank-api.modal.run"
 
 
 def test_validate_accepts_correct_embed_url() -> None:
@@ -62,3 +63,15 @@ def test_validate_accepts_correct_llm_playground_url() -> None:
 def test_validate_rejects_prod_url_as_playground() -> None:
     with pytest.raises(ValueError, match="vecinita-llm-playground"):
         validate_modal_service_url("VECINITA_MODAL_LLM_PLAYGROUND_URL", GOOD_LLM)
+
+
+def test_validate_accepts_correct_rerank_url() -> None:
+    validate_modal_service_url("VECINITA_MODAL_RERANK_URL", GOOD_RERANK)
+
+
+def test_validate_rejects_wrong_rerank_app_host() -> None:
+    with pytest.raises(ValueError, match="vecinita-rerank"):
+        validate_modal_service_url(
+            "VECINITA_MODAL_RERANK_URL",
+            "https://vecinita--vecinita-embedding-embedding-api.modal.run",
+        )

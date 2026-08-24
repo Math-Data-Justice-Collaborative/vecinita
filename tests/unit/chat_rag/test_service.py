@@ -898,3 +898,79 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
     assert embed_fn("housing help") == [0.01] * 384  # type: ignore[operator]
     assert captured["tag_question"] == "housing help"
     assert captured["require_proxy_key"] is True
+
+
+def test_from_settings_wires_ce_scorer_when_rerank_ce_on() -> None:
+    """TC-281 / AC-SR1: CE on + rerank URL wires RerankClient as ce_scorer."""
+    captured: dict[str, object] = {}
+    request_timeout_s = 30.0
+
+    class _RerankClient:
+        def __init__(self, url: str, *, timeout: float) -> None:
+            captured["url"] = url
+            captured["timeout"] = timeout
+
+        def score_pairs(self, _query: str, passages: Sequence[str]) -> list[float]:
+            return [0.5] * len(passages)
+
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=4,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=request_timeout_s,
+        rag_rerank_ce=True,
+        rerank_url="http://rerank.test",
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+
+    with (
+        patch("vecinita_chat_rag_backend.service.EmbeddingClient"),
+        patch("vecinita_chat_rag_backend.service.LlmClient"),
+        patch("vecinita_chat_rag_backend.service.LlmTagClient"),
+        patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.create_engine"),
+        patch(
+            "vecinita_chat_rag_backend.service.CorpusPgvectorRetriever",
+            return_value=StubRetriever([]),
+        ),
+        patch("vecinita_chat_rag_backend.service.RerankClient", _RerankClient),
+    ):
+        service = ChatRagService.from_settings(settings)
+
+    assert service._ce_scorer is not None  # pyright: ignore[reportPrivateUsage]  # noqa: SLF001
+    assert captured["url"] == "http://rerank.test"
+    assert captured["timeout"] == request_timeout_s
+
+
+def test_from_settings_skips_ce_scorer_when_rerank_ce_off() -> None:
+    """TC-281 / AC-SR1: CE flag off → no ce_scorer even when rerank URL set."""
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=4,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_rerank_ce=False,
+        rerank_url="http://rerank.test",
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+
+    with (
+        patch("vecinita_chat_rag_backend.service.EmbeddingClient"),
+        patch("vecinita_chat_rag_backend.service.LlmClient"),
+        patch("vecinita_chat_rag_backend.service.LlmTagClient"),
+        patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.create_engine"),
+        patch(
+            "vecinita_chat_rag_backend.service.CorpusPgvectorRetriever",
+            return_value=StubRetriever([]),
+        ),
+    ):
+        service = ChatRagService.from_settings(settings)
+
+    assert service._ce_scorer is None  # pyright: ignore[reportPrivateUsage]  # noqa: SLF001

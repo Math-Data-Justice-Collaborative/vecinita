@@ -37,6 +37,9 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_RAG_RERANK_CE` | string | `false` | No | F45 CE rerank on/off; **default off** until ship gate |
 | `VECINITA_RAG_RERANK_CE_MODEL` | string | `BAAI/bge-reranker-v2-m3` | No | F45 CE model id (spike + gated prod) |
 | `VECINITA_RAG_RERANK_CE_TOP_N` | int | `20` | No | F45 retrieve-N before CE; keep `top_k` after |
+| `VECINITA_MODAL_RERANK_URL` | string | — | When CE on | F45 Modal `vecinita-rerank` HTTP base URL |
+| `VECINITA_RAG_QUERY_REFINE` | string | `false` | No | F81 LLM query refinement on/off (default off) |
+| `VECINITA_RAG_QUERY_REFINE_COUNT` | int | `2` | No | F81 max alternate queries (1–3) |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_ENERGY_GPU_TDP_W` | float | `70` | No | F65 heuristic GPU TDP (watts); prod pin T4 |
 | `VECINITA_ENERGY_GPU_UTIL` | float | `0.5` | No | F65 assumed GPU utilization (0–1] |
@@ -341,6 +344,9 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK` in `true`, `false` | Config module at startup (F44) |
 | `VECINITA_RAG_RERANK_CE` in `true`, `false` | Config module at startup (F45) |
 | `VECINITA_RAG_RERANK_CE_TOP_N` ≥ `top_k` and ≤ 50 | Config module at startup (F45) |
+| `VECINITA_MODAL_RERANK_URL` non-empty when `VECINITA_RAG_RERANK_CE=true` | Config module at startup (F45) |
+| `VECINITA_RAG_QUERY_REFINE` in `true`, `false` | Config module at startup (F81) |
+| `VECINITA_RAG_QUERY_REFINE_COUNT` ≥ 1 and ≤ 3 | Config module at startup (F81) |
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
 | `VECINITA_CHUNK_OVERLAP_TOKENS` ≥ 0 and &lt; `VECINITA_CHUNK_SIZE_TOKENS` | Ingest validation (F49) |

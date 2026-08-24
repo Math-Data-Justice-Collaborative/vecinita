@@ -21,6 +21,7 @@ dev = [
     "vecinita-data-management-backend",
     "vecinita-database",
     "vecinita-embedding-client",
+    "vecinita-rerank-client",
     "vecinita-eval",
     "vecinita-ingest",
     "vecinita-internal-write-api",
@@ -56,6 +57,7 @@ members = [
     "packages/eval",
     "packages/ingest",
     "packages/embedding-client",
+    "packages/rerank-client",
     "packages/llm-client",
     "packages/tagging",
     "packages/shared-schemas",
@@ -70,6 +72,7 @@ vecinita-rag = { workspace = true }
 vecinita-eval = { workspace = true }
 vecinita-ingest = { workspace = true }
 vecinita-embedding-client = { workspace = true }
+vecinita-rerank-client = { workspace = true }
 vecinita-shared-schemas = { workspace = true }
 vecinita-chat-rag-backend = { workspace = true }
 vecinita-data-management-backend = { workspace = true }

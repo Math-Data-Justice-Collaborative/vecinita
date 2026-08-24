@@ -31,6 +31,8 @@ _MAX_CACHE_MAX_ENTRIES = 100000
 _MIN_CACHE_SEMANTIC_THRESHOLD = 0.5
 _MAX_CACHE_SEMANTIC_THRESHOLD = 1.0
 _MAX_CE_TOP_N = 50
+_MIN_REFINE_COUNT = 1
+_MAX_REFINE_COUNT = 3
 
 
 def _int_env(name: str, default: int) -> int:
@@ -133,6 +135,21 @@ def _validate_f45_rag_ce_knobs(*, top_k: int, rag_rerank_ce_top_n: int) -> None:
         raise ValueError(msg)
 
 
+def _validate_f81_query_refine_knobs(*, rag_query_refine_count: int) -> None:
+    if not (_MIN_REFINE_COUNT <= rag_query_refine_count <= _MAX_REFINE_COUNT):
+        msg = (
+            f"VECINITA_RAG_QUERY_REFINE_COUNT must be between "
+            f"{_MIN_REFINE_COUNT} and {_MAX_REFINE_COUNT}"
+        )
+        raise ValueError(msg)
+
+
+def _validate_f45_rerank_url(*, rag_rerank_ce: bool, rerank_url: str | None) -> None:
+    if rag_rerank_ce and not rerank_url:
+        msg = "VECINITA_MODAL_RERANK_URL is required when VECINITA_RAG_RERANK_CE=true"
+        raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class ChatRagSettings:
     """Runtime settings for retrieval, embedding, and LLM upstreams."""
@@ -168,6 +185,9 @@ class ChatRagSettings:
     rag_rerank_ce: bool = False
     rag_rerank_ce_model: str = DEFAULT_CE_MODEL_ID
     rag_rerank_ce_top_n: int = DEFAULT_CE_TOP_N
+    rerank_url: str | None = None
+    rag_query_refine: bool = False
+    rag_query_refine_count: int = 2
     # F65 / ADR-047 energy heuristic knobs
     energy_gpu_tdp_w: float = 70.0
     energy_gpu_util: float = 0.5
@@ -209,6 +229,11 @@ class ChatRagSettings:
         )
         rag_rerank_ce_top_n = _int_env("VECINITA_RAG_RERANK_CE_TOP_N", DEFAULT_CE_TOP_N)
         _validate_f45_rag_ce_knobs(top_k=top_k, rag_rerank_ce_top_n=rag_rerank_ce_top_n)
+        rag_rerank_ce = _bool_env("VECINITA_RAG_RERANK_CE", default=False)
+        rerank_url = os.environ.get("VECINITA_MODAL_RERANK_URL")
+        _validate_f45_rerank_url(rag_rerank_ce=rag_rerank_ce, rerank_url=rerank_url)
+        rag_query_refine_count = _int_env("VECINITA_RAG_QUERY_REFINE_COUNT", 2)
+        _validate_f81_query_refine_knobs(rag_query_refine_count=rag_query_refine_count)
         return cls(
             database_url=_normalize_database_url(database_url),
             top_k=top_k,
@@ -257,12 +282,15 @@ class ChatRagSettings:
                 "VECINITA_RAG_SOFT_LANGUAGE_FALLBACK",
                 default=False,
             ),
-            rag_rerank_ce=_bool_env("VECINITA_RAG_RERANK_CE", default=False),
+            rag_rerank_ce=rag_rerank_ce,
             rag_rerank_ce_model=_str_env(
                 "VECINITA_RAG_RERANK_CE_MODEL",
                 DEFAULT_CE_MODEL_ID,
             ),
             rag_rerank_ce_top_n=rag_rerank_ce_top_n,
+            rerank_url=rerank_url,
+            rag_query_refine=_bool_env("VECINITA_RAG_QUERY_REFINE", default=False),
+            rag_query_refine_count=rag_query_refine_count,
             energy_gpu_tdp_w=_float_env("VECINITA_ENERGY_GPU_TDP_W", 70.0),
             energy_gpu_util=_float_env("VECINITA_ENERGY_GPU_UTIL", 0.5),
             energy_gco2e_per_kwh=_float_env("VECINITA_ENERGY_GCO2E_PER_KWH", 386.0),

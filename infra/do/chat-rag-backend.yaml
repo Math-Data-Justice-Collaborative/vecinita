@@ -38,6 +38,15 @@ services:
       - key: VECINITA_MODAL_PROXY_KEY
         scope: RUN_TIME
         type: SECRET
+      - key: VECINITA_MODAL_RERANK_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_RAG_RERANK_CE
+        scope: RUN_TIME
+        value: "true"
+      - key: VECINITA_RAG_QUERY_REFINE
+        scope: RUN_TIME
+        value: "false"
       - key: VECINITA_TOP_K
         scope: RUN_TIME
         value: "8"
