@@ -80,7 +80,7 @@
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 | F75 | Optional ingest bilingual translation | Implemented | Data Management | data-management-backend, internal-write-api, Modal LLM, admin FE | EV-030 #251 |
 | F76 | Corpus language parity metrics + badges | Implemented | Data Management | internal-write-api, data-management-frontend | EV-031 #245 |
-| F78 | Corpus change automations | Live enabled (EV-031); run history persist pending deploy | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133 |
+| F78 | Corpus change automations | Live enabled (EV-031) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133/M135 |
 | F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
 | F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
 
@@ -1468,8 +1468,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Journeys / tests**: UJ-082; TC-266–269, TC-270; AC-AU1–AU6.
 - **Out of scope**: #192 dashboard widgets; fine-tune train (→ F80); source refresh (→ F79);
   auto F41 on every change.
-- **Status**: Live enabled (EV-031 M133). Run history persist (`POST /automations/runs`) on branch
-  `feat/automation-run-history-persist` — TC-289 pending CD deploy.
+- **Status**: Live enabled (EV-031 M133/M135). Run history via `POST /automations/runs` + worker persist (PR #266).
 - **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23, D64; ADR-052; S031; EV-031.
 
 ### F79: Corpus freshness automation (#219)

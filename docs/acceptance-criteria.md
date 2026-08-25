@@ -425,11 +425,11 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-FT8**: Out of F77 without unlock: full-weight FT default; auto-load latest on prod; blind promote without operator review.
 - [x] **AC-FT9**: Rollback path: operator can revert prod to base pin (clear promoted adapter) (UJ-082, TC-265).
 
-### EV-031 — Live enable F78/F79 + F80 eval path (S035) — in progress
+### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
 
 #### F78 live enable (AC-AU7)
 
-- [ ] **AC-AU7**: Live F78 enabled with operator approval; kill-switch ON until post-enable smoke, then off; DM run history observable (TC-289, TC-290). **TC-290 PASS (M133); TC-289 pending persist deploy** — see session `reports/m135-post-enable-verify.md`.
+- [x] **AC-AU7**: Live F78 enabled with operator approval; kill-switch ON until post-enable smoke, then off; DM run history observable (TC-289, TC-290). **Signed off M135 2026-08-25** — `POST /automations/runs` 201 + list ≥1 row after PR #266 deploy.
 
 #### F79 live enable (AC-FR7)
 
