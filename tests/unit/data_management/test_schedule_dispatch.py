@@ -75,3 +75,4 @@ def test_data_management_app_has_period_days_1_schedule() -> None:
     assert "daily_corpus_automations" in source
     assert "automation_catchup" in source
     assert "freshness_refresh" in source
+    assert "record_scheduled_catchup_tick" in source

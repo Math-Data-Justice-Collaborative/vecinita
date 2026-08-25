@@ -80,9 +80,9 @@
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 | F75 | Optional ingest bilingual translation | Implemented | Data Management | data-management-backend, internal-write-api, Modal LLM, admin FE | EV-030 #251 |
 | F76 | Corpus language parity metrics + badges | Implemented | Data Management | internal-write-api, data-management-frontend | EV-031 #245 |
-| F78 | Corpus change automations | Implemented (in-tree; live enable deferred) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; merged #238 |
-| F79 | Corpus freshness automation | Implemented (in-tree; live enable deferred) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; merged #238 |
-| F80 | Modal LoRA fine-tune + human promote | Implemented (in-tree; live promote deferred) | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; merged #238 |
+| F78 | Corpus change automations | Live enabled (EV-031); run history persist pending deploy | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133 |
+| F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
+| F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -1468,10 +1468,9 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Journeys / tests**: UJ-082; TC-266–269, TC-270; AC-AU1–AU6.
 - **Out of scope**: #192 dashboard widgets; fine-tune train (→ F80); source refresh (→ F79);
   auto F41 on every change.
-- **Status**: Implemented in-tree (S030/EV-027); **live enable deferred** — default
-  flags off / kill-switch; cutover requires AskQuestion (S030-D64). Merged via PR #238
-  (2026-08-23).
-- **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23, D64; ADR-052; S031.
+- **Status**: Live enabled (EV-031 M133). Run history persist (`POST /automations/runs`) on branch
+  `feat/automation-run-history-persist` — TC-289 pending CD deploy.
+- **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23, D64; ADR-052; S031; EV-031.
 
 ### F79: Corpus freshness automation (#219)
 
@@ -1485,10 +1484,8 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   write API / schema as needed.
 - **Journeys / tests**: UJ-083; TC-271–274, TC-270; AC-FR1–FR6.
 - **Out of scope**: Fine-tune (#72/F80); guaranteeing third-party uptime.
-- **Status**: Implemented in-tree (S030/EV-027); **live enable deferred** — default
-  flags off / kill-switch; cutover requires AskQuestion (S030-D64). Merged via PR #238
-  (2026-08-23).
-- **Source**: S030 / EV-027; GitHub #219; S030-D7, D18–D19, D64; ADR-052; S031.
+- **Status**: Live enabled (EV-031 M133). TC-291 PASS — stale/`last_checked_at` visible on live admin list.
+- **Source**: S030 / EV-027; GitHub #219; S030-D7, D18–D19, D64; ADR-052; S031; EV-031.
 
 ### F80: Modal LoRA fine-tune + human promote (#72)
 
@@ -1507,10 +1504,9 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   (“Eval-gated” = human promote after eval evidence — RD-338; not automated abort.)
 - **Out of scope**: Full-weight FT default; auto-load latest on prod; blind promote
   without operator review.
-- **Status**: Implemented in-tree (S030/EV-027); **live train/promote deferred** —
-  no auto-load on prod `vecinita-llm`; promote remains human judgment + AskQuestion
-  for live cutover (S030-D64; ADR-053; PR #238). S031 brownfield status sync 2026-08-18.
-  Overrides P3 “excluded from v1”.
+- **Status**: Eval path live (EV-031 M134) — `VECINITA_FINETUNE_ENABLED=true`, `vecinita-llm-finetune`
+  deployed; prod adapter pin empty (`adapter_id: null`). **Prod promote deferred** — human
+  judgment + AskQuestion for live cutover (ADR-053).
 - **Source**: S030 / EV-027; GitHub #72; ADR-009, ADR-037, ADR-053; S030-D5, D10–D12,
   D20–D22, D64; S031.
 

@@ -1198,6 +1198,7 @@ Compatible deltas unless noted. Auth: admin JWT (+ Modal proxy on Modal routes).
 | `GET` | `/internal/v1/automations/config` | enable flags, kill-switch, caps (read) |
 | `PATCH` | `/internal/v1/automations/config` | enable/disable; admin only |
 | `GET` | `/internal/v1/automations/runs` | Paginated run history (status, timestamps, error) |
+| `POST` | `/internal/v1/automations/runs` | Persist one run (Modal workers / schedule tick; TC-289) |
 | `POST` | `/jobs` (`job_type=automation_catchup`) | Enqueue catch-up (also from schedule / hooks) |
 
 CRUD hooks enqueue with idempotent key `document_id` + `revision` (RD-335).

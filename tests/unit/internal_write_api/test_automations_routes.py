@@ -21,6 +21,8 @@ from vecinita_internal_write_api.automations import (
 )
 from vecinita_shared_schemas.automations import (
     DEFAULT_AUTOMATIONS_MAX_CONCURRENT,
+    AutomationRun,
+    AutomationRunCreateRequest,
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
@@ -86,6 +88,46 @@ def test_list_automations_runs_returns_paginated_history(
     assert body.page_size == _PAGE_SIZE
     assert body.total_count >= 0
     assert isinstance(body.items, list)
+
+
+def test_post_automation_run_persists_and_lists(
+    write_client: TestClient,
+) -> None:
+    """POST /internal/v1/automations/runs then GET lists the row (TC-289 / AC-AU5)."""
+    document_id = uuid4()
+    create = write_client.post(
+        "/internal/v1/automations/runs",
+        headers=auth_headers(),
+        json=AutomationRunCreateRequest(
+            job_type="automation_catchup",
+            status="skipped",
+            document_id=document_id,
+            revision="rev-live",
+            error=None,
+        ).model_dump(mode="json"),
+    )
+    assert create.status_code == HTTPStatus.CREATED
+    created = AutomationRun.model_validate(response_json_object(create))
+    assert created.job_type == "automation_catchup"
+    assert created.status == "skipped"
+    assert created.document_id == document_id
+    assert created.revision == "rev-live"
+    assert created.error is None
+    assert created.started_at is not None
+    assert created.finished_at is not None
+    assert created.created_at is not None
+    assert created.updated_at is not None
+
+    listing = write_client.get(
+        "/internal/v1/automations/runs",
+        headers=auth_headers(),
+        params={"page": 1, "page_size": _PAGE_SIZE},
+    )
+    assert listing.status_code == HTTPStatus.OK
+    body = AutomationRunListResponse.model_validate(response_json_object(listing))
+    match = next((item for item in body.items if item.id == created.id), None)
+    assert match is not None
+    assert match == created
 
 
 def test_automation_row_datetime_helpers_cover_type_branches() -> None:

@@ -7,13 +7,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 
 from sqlalchemy import text
 from vecinita_shared_schemas.automations import (
     AutomationJobType,
     AutomationRun,
+    AutomationRunCreateRequest,
     AutomationRunListResponse,
     AutomationRunStatus,
     AutomationsConfigResponse,
@@ -133,3 +134,50 @@ def list_automation_runs(
         page_size=page_size,
         total_count=total,
     )
+
+
+_TERMINAL_RUN_STATUSES: frozenset[str] = frozenset({"completed", "failed", "skipped", "blocked"})
+
+
+def create_automation_run(
+    engine: Engine,
+    body: AutomationRunCreateRequest,
+) -> AutomationRun:
+    """Insert one ``automation_runs`` row and return the persisted record (TC-289)."""
+    now = datetime.now(UTC)
+    started_at = body.started_at or now
+    finished_at = body.finished_at
+    if finished_at is None and body.status in _TERMINAL_RUN_STATUSES:
+        finished_at = now
+    with engine.begin() as conn:
+        row = mapping_row(
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO automation_runs (
+                        job_type, status, started_at, finished_at,
+                        error, document_id, revision
+                    )
+                    VALUES (
+                        :job_type, :status, :started_at, :finished_at,
+                        :error, :document_id, :revision
+                    )
+                    RETURNING
+                        id, job_type, status, started_at, finished_at, error,
+                        document_id, revision, created_at, updated_at
+                    """
+                ),
+                {
+                    "job_type": body.job_type,
+                    "status": body.status,
+                    "started_at": started_at,
+                    "finished_at": finished_at,
+                    "error": body.error,
+                    "document_id": body.document_id,
+                    "revision": body.revision,
+                },
+            )
+            .mappings()
+            .one()
+        )
+    return _run_from_row(row)

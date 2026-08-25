@@ -101,8 +101,20 @@ image = (
 
 def _run_scheduled_catchup_tick() -> str:
     """F75 daily catch-up branch (job/CRUD enqueue residual; cron records tick)."""
-    logger.info("daily schedule tick: job_type=automation_catchup (shared Period(days=1))")
-    return "automation_catchup_tick"
+    from vecinita_data_management_backend.schedule_catchup import (
+        record_scheduled_catchup_tick,
+    )
+    from vecinita_data_management_backend.write_client import (
+        InternalWriteClient,
+        InternalWriteClientError,
+    )
+
+    try:
+        write = InternalWriteClient()
+    except InternalWriteClientError:
+        logger.warning("catch-up tick: write client unavailable", exc_info=True)
+        return "automation_catchup_tick"
+    return record_scheduled_catchup_tick(write)
 
 
 def _run_scheduled_freshness_tick() -> dict[str, object]:

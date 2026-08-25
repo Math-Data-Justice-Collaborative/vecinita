@@ -44,6 +44,16 @@ def test_openapi_automations_config_and_runs_paths() -> None:
     runs = as_json_object(paths["/automations/runs"])
     assert "get" in runs
     assert as_json_object(runs["get"]).get("operationId") == "listAutomationRuns"
+    assert "post" in runs
+    post_op = as_json_object(runs["post"])
+    assert post_op.get("operationId") == "createAutomationRun"
+    post_body = as_json_object(as_json_object(post_op["requestBody"])["content"])
+    json_body = as_json_object(post_body["application/json"])
+    assert as_json_object(json_body["schema"]).get("$ref") == (
+        "#/components/schemas/AutomationRunCreateRequest"
+    )
+    post_responses = as_json_object(post_op["responses"])
+    assert "201" in post_responses
 
     components = as_json_object(spec["components"])
     schemas = as_json_object(components["schemas"])
@@ -51,6 +61,7 @@ def test_openapi_automations_config_and_runs_paths() -> None:
         "AutomationsConfigResponse",
         "AutomationsConfigPatchRequest",
         "AutomationRun",
+        "AutomationRunCreateRequest",
         "AutomationRunListResponse",
     ):
         assert name in schemas

@@ -19,7 +19,10 @@ from typing import TYPE_CHECKING, Literal, Protocol
 from uuid import UUID
 
 from vecinita_ingest.freshness import refetch_url_source
-from vecinita_shared_schemas.automations import is_automations_kill_switch_on
+from vecinita_shared_schemas.automations import (
+    freshness_outcome_to_run_status,
+    is_automations_kill_switch_on,
+)
 from vecinita_shared_schemas.freshness import (
     FreshnessEnqueueRequest,
     decide_freshness_enqueue,
@@ -28,6 +31,9 @@ from vecinita_shared_schemas.freshness import (
     should_bump_last_checked_after_refresh,
 )
 
+from vecinita_data_management_backend.automation_run_persist import (
+    maybe_record_automation_run,
+)
 from vecinita_data_management_backend.pipeline import (
     DocumentFetcher,
     rechunk_and_upsert_scraped_url,
@@ -184,6 +190,14 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
             document_id,
             force,
         )
+        maybe_record_automation_run(
+            write_client,
+            job_type="freshness_refresh",
+            status=freshness_outcome_to_run_status(outcome),
+            document_id=document_id,
+            revision=None,
+            error=None,
+        )
         return
 
     store.update_job(job_id, status="running")
@@ -207,6 +221,16 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
                 "hash_decision": _HASH_OUTCOME_TO_DECISION[hash_outcome],
             }
         store.update_job(job_id, status="completed", metrics=metrics)
+        outcome_raw = metrics.get("freshness_outcome")
+        outcome = str(outcome_raw) if outcome_raw is not None else "refreshed"
+        maybe_record_automation_run(
+            write_client,
+            job_type="freshness_refresh",
+            status=freshness_outcome_to_run_status(outcome),
+            document_id=document_id,
+            revision=None,
+            error=None,
+        )
     except Exception as exc:
         store.update_job(
             job_id,
@@ -217,6 +241,14 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
                 "freshness_outcome": "failed",
                 "documents_processed": 0,
             },
+        )
+        maybe_record_automation_run(
+            write_client,
+            job_type="freshness_refresh",
+            status=freshness_outcome_to_run_status("failed"),
+            document_id=document_id,
+            revision=None,
+            error=str(exc)[:500],
         )
         raise
 

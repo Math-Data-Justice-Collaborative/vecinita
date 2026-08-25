@@ -1316,6 +1316,29 @@ paths:
                 $ref: "#/components/schemas/AutomationRunListResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createAutomationRun
+      summary: Persist one automation run (F78 / TC-289)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutomationRunCreateRequest"
+      responses:
+        "201":
+          description: Created automation run
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomationRun"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /finetune/runs/{run_id}/eval:
     get:
       operationId: getFinetuneEvalReport
@@ -1805,6 +1828,45 @@ components:
         updated_at:
           type: string
           format: date-time
+    AutomationRunCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - job_type
+        - status
+      properties:
+        job_type:
+          type: string
+          enum:
+            - automation_catchup
+            - freshness_refresh
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - completed
+            - failed
+            - skipped
+            - blocked
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        document_id:
+          type: string
+          format: uuid
+          nullable: true
+        revision:
+          type: string
+          nullable: true
     AutomationRunListResponse:
       type: object
       additionalProperties: false

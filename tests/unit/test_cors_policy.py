@@ -499,6 +499,7 @@ def test_internal_write_cors_preflight_on_ev027_automations_freshness_ft(
         ("/internal/v1/automations/config", "GET"),
         ("/internal/v1/automations/config", "PATCH"),
         ("/internal/v1/automations/runs", "GET"),
+        ("/internal/v1/automations/runs", "POST"),
         (
             "/internal/v1/documents/00000000-0000-4000-8000-000000000001/refresh",
             "POST",
