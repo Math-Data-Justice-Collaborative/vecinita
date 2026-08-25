@@ -16,9 +16,12 @@ import pytest
 from pydantic import ValidationError
 from vecinita_shared_schemas.automations import (
     AutomationRun,
+    AutomationRunCreateRequest,
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
+    catchup_outcome_to_run_status,
+    freshness_outcome_to_run_status,
     load_automations_config_from_env,
 )
 
@@ -96,6 +99,53 @@ def test_automation_run_list_response_pagination() -> None:
     assert listing.total_count == 1
     assert listing.items[0].job_type == "freshness_refresh"
     assert listing.items[0].error == "fetch timeout"
+
+
+def test_automation_run_create_request_requires_job_type_and_status() -> None:
+    """POST /automations/runs body is job_type + status; document key optional (TC-289)."""
+    body = AutomationRunCreateRequest(
+        job_type="automation_catchup",
+        status="skipped",
+        document_id=DOC_ID,
+        revision="1",
+        error=None,
+    )
+    dumped = body.model_dump()
+    assert dumped["job_type"] == "automation_catchup"
+    assert dumped["status"] == "skipped"
+    assert dumped["document_id"] == DOC_ID
+    assert dumped["revision"] == "1"
+    assert dumped["started_at"] is None
+    assert dumped["finished_at"] is None
+    with pytest.raises(ValidationError):
+        AutomationRunCreateRequest.model_validate({"job_type": "automation_catchup"})
+    with pytest.raises(ValidationError):
+        AutomationRunCreateRequest.model_validate(
+            {"job_type": "automation_catchup", "status": "unknown"}
+        )
+
+
+def test_catchup_outcome_maps_to_automation_run_status() -> None:
+    """Worker outcomes persist as automation_runs status (AC-AU5 / TC-289)."""
+    assert catchup_outcome_to_run_status("reembedded") == "completed"
+    assert catchup_outcome_to_run_status("skipped_complete") == "skipped"
+    assert catchup_outcome_to_run_status("skipped_disabled") == "skipped"
+    assert catchup_outcome_to_run_status("skipped_duplicate") == "skipped"
+    assert catchup_outcome_to_run_status("skipped_at_capacity") == "skipped"
+    assert catchup_outcome_to_run_status("skipped_kill_switch") == "blocked"
+    assert catchup_outcome_to_run_status("failed") == "failed"
+
+
+def test_freshness_outcome_maps_to_automation_run_status() -> None:
+    """Freshness worker outcomes persist as automation_runs status (AC-FR7)."""
+    assert freshness_outcome_to_run_status("refreshed") == "completed"
+    assert freshness_outcome_to_run_status("verified_unchanged") == "completed"
+    assert freshness_outcome_to_run_status("rechunked") == "completed"
+    assert freshness_outcome_to_run_status("skipped_not_stale") == "skipped"
+    assert freshness_outcome_to_run_status("skipped_disabled") == "skipped"
+    assert freshness_outcome_to_run_status("skipped_refresh_disabled") == "skipped"
+    assert freshness_outcome_to_run_status("skipped_kill_switch") == "blocked"
+    assert freshness_outcome_to_run_status("failed") == "failed"
 
 
 def test_load_automations_config_from_env(

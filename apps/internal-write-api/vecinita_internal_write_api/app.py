@@ -33,6 +33,8 @@ from vecinita_shared_schemas.auth import (
     require_super_admin,
 )
 from vecinita_shared_schemas.automations import (
+    AutomationRun,
+    AutomationRunCreateRequest,
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
@@ -155,6 +157,7 @@ from vecinita_internal_write_api.audit import (
     emit_audit_event,
 )
 from vecinita_internal_write_api.automations import (
+    create_automation_run,
     get_automations_config,
     list_automation_runs,
     set_automations_enabled,
@@ -2123,6 +2126,17 @@ def create_app(  # noqa: C901, PLR0913, PLR0915  # FastAPI factory registers man
         page_size: Annotated[int, Query(ge=1, le=100)] = 20,
     ) -> AutomationRunListResponse:
         return list_automation_runs(engine, page=page, page_size=page_size)
+
+    @app.post(
+        "/internal/v1/automations/runs",
+        response_model=AutomationRun,
+        status_code=status.HTTP_201_CREATED,
+    )
+    def create_automations_run_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+        body: AutomationRunCreateRequest,
+    ) -> AutomationRun:
+        return create_automation_run(engine, body)
 
     @app.get(
         "/internal/v1/documents/{document_id}/history",

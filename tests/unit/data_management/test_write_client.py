@@ -650,3 +650,78 @@ def test_list_eval_runs_raises_on_http_error() -> None:
     with pytest.raises(InternalWriteClientError, match="list_eval_runs"):
         client.list_eval_runs()
     client.close()
+
+
+def test_record_automation_run_posts_create_body() -> None:
+    """record_automation_run POSTs /internal/v1/automations/runs (TC-289)."""
+    run_id = uuid4()
+    document_id = uuid4()
+    seen: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/internal/v1/automations/runs"
+        assert request.headers["Authorization"] == "Bearer test-key"
+        payload = cast("dict[str, object]", json.loads(request.content.decode()))
+        seen.append(payload)
+        return httpx.Response(
+            HTTPStatus.CREATED,
+            json={
+                "id": str(run_id),
+                "job_type": payload["job_type"],
+                "status": payload["status"],
+                "started_at": "2026-08-25T16:00:00+00:00",
+                "finished_at": "2026-08-25T16:00:00+00:00",
+                "error": None,
+                "document_id": payload.get("document_id"),
+                "revision": payload.get("revision"),
+                "created_at": "2026-08-25T16:00:00+00:00",
+                "updated_at": "2026-08-25T16:00:00+00:00",
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    recorded = client.record_automation_run(
+        job_type="automation_catchup",
+        status="skipped",
+        document_id=document_id,
+        revision="1",
+    )
+    assert recorded.id == run_id
+    assert recorded.job_type == "automation_catchup"
+    assert recorded.status == "skipped"
+    assert recorded.document_id == document_id
+    assert recorded.revision == "1"
+    assert recorded.error is None
+    assert seen == [
+        {
+            "job_type": "automation_catchup",
+            "status": "skipped",
+            "started_at": None,
+            "finished_at": None,
+            "error": None,
+            "document_id": str(document_id),
+            "revision": "1",
+        }
+    ]
+    client.close()
+
+
+def test_record_automation_run_raises_on_http_error() -> None:
+    """record_automation_run surfaces non-2xx as InternalWriteClientError."""
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(HTTPStatus.BAD_GATEWAY, text="down")
+    )
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    with pytest.raises(InternalWriteClientError, match="record_automation_run"):
+        client.record_automation_run(job_type="automation_catchup", status="completed")
+    client.close()

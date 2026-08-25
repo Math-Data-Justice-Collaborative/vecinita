@@ -173,6 +173,50 @@ def test_catchup_worker_complete_embed_skips_reembed(
     assert called == []
 
 
+def test_catchup_worker_records_run_history_on_skip_complete(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-289: skip_complete catch-up persists an automation_runs row (no re-embed)."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options=_catchup_options(embed_status="complete"),
+    )
+    recorded: list[dict[str, object]] = []
+
+    class _RecordingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            recorded.append(dict(kwargs))
+
+    run_automation_catchup_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        perform_catchup=lambda _doc: None,
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.metrics == {
+        "catchup_outcome": "skipped_complete",
+        "documents_processed": 0,
+    }
+    assert recorded == [
+        {
+            "job_type": "automation_catchup",
+            "status": "skipped",
+            "document_id": DOC_ID,
+            "revision": "1",
+            "error": None,
+        }
+    ]
+
+
 def test_catchup_worker_at_capacity_skips_reembed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

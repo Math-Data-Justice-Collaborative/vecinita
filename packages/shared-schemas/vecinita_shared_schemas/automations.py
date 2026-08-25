@@ -203,6 +203,60 @@ class AutomationsConfigPatchRequest(BaseModel):
     enabled: bool
 
 
+_CATCHUP_OUTCOME_TO_STATUS: dict[str, AutomationRunStatus] = {
+    "reembedded": "completed",
+    "skipped_complete": "skipped",
+    "skipped_disabled": "skipped",
+    "skipped_duplicate": "skipped",
+    "skipped_at_capacity": "skipped",
+    "skipped_kill_switch": "blocked",
+    "failed": "failed",
+}
+
+_FRESHNESS_OUTCOME_TO_STATUS: dict[str, AutomationRunStatus] = {
+    "refreshed": "completed",
+    "verified_unchanged": "completed",
+    "rechunked": "completed",
+    "skipped_not_stale": "skipped",
+    "skipped_disabled": "skipped",
+    "skipped_refresh_disabled": "skipped",
+    "skipped_kill_switch": "blocked",
+    "failed": "failed",
+}
+
+
+def catchup_outcome_to_run_status(outcome: str) -> AutomationRunStatus:
+    """Map catch-up worker outcome to ``automation_runs.status`` (TC-289)."""
+    try:
+        return _CATCHUP_OUTCOME_TO_STATUS[outcome]
+    except KeyError:
+        msg = f"unknown catch-up outcome: {outcome!r}"
+        raise ValueError(msg) from None
+
+
+def freshness_outcome_to_run_status(outcome: str) -> AutomationRunStatus:
+    """Map freshness worker outcome to ``automation_runs.status`` (AC-FR7)."""
+    try:
+        return _FRESHNESS_OUTCOME_TO_STATUS[outcome]
+    except KeyError:
+        msg = f"unknown freshness outcome: {outcome!r}"
+        raise ValueError(msg) from None
+
+
+class AutomationRunCreateRequest(BaseModel):
+    """POST /internal/v1/automations/runs — persist one history row (TC-289)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    job_type: AutomationJobType
+    status: AutomationRunStatus
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    error: str | None = None
+    document_id: UUID | None = None
+    revision: str | None = None
+
+
 class AutomationRun(BaseModel):
     """One ``automation_runs`` row (TP3 / RD-341)."""
 

@@ -425,16 +425,16 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-FT8**: Out of F77 without unlock: full-weight FT default; auto-load latest on prod; blind promote without operator review.
 - [x] **AC-FT9**: Rollback path: operator can revert prod to base pin (clear promoted adapter) (UJ-082, TC-265).
 
-### EV-031 — Live enable F78/F79 + F80 eval path (S035) — pending
+### EV-031 — Live enable F78/F79 + F80 eval path (S035) — in progress
 
 #### F78 live enable (AC-AU7)
 
-- [ ] **AC-AU7**: Live F78 enabled with operator approval; kill-switch ON until post-enable smoke, then off; DM run history observable (TC-289, TC-290).
+- [ ] **AC-AU7**: Live F78 enabled with operator approval; kill-switch ON until post-enable smoke, then off; DM run history observable (TC-289, TC-290). **TC-290 PASS (M133); TC-289 pending persist deploy** — see session `reports/m135-post-enable-verify.md`.
 
 #### F79 live enable (AC-FR7)
 
-- [ ] **AC-FR7**: Live F79 enabled together with F78; scheduled refresh runs without spurious catch-up side effects (TC-291).
+- [x] **AC-FR7**: Live F79 enabled together with F78; scheduled refresh runs without spurious catch-up side effects (TC-291). **Signed off M135 2026-08-25** — stale/`last_checked_at` visible on live admin list (92 URL docs).
 
 #### F80 playground eval (AC-FT10)
 
-- [ ] **AC-FT10**: `vecinita-llm-finetune` deployed via CD; `VECINITA_FINETUNE_ENABLED=true`; prod adapter pin empty; playground eval path works (TC-292, TC-293).
+- [x] **AC-FT10**: `vecinita-llm-finetune` deployed via CD; `VECINITA_FINETUNE_ENABLED=true`; prod adapter pin empty; playground eval path works (TC-292, TC-293). **Signed off M135 2026-08-25 (M134 evidence).**
