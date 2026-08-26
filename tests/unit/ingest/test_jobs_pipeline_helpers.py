@@ -227,7 +227,7 @@ def test_ingest_one_url_raises_when_chunking_produces_no_chunks() -> None:
         _ingest_one_url(
             "https://example.com/blank",
             fetcher=lambda url: ScrapedDocument(
-                url="https://example.com/blank",
+                url=url,
                 title=None,
                 text="   \n\t  ",
             ),
@@ -403,7 +403,7 @@ def test_run_ingest_job_failure_includes_translation_metrics() -> None:
 
     def fetch(url: str) -> ScrapedDocument:
         return ScrapedDocument(
-            url="https://example.com/page",
+            url=url,
             title="Notice",
             text="Neighborhood clinic hours and housing assistance resources.",
         )
