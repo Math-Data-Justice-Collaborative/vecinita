@@ -214,7 +214,7 @@ def test_health_all_swallows_dependency_exceptions(
         msg = "network down"
         raise OSError(msg)
 
-    with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_boom):
+    with patch("vecinita_internal_write_api.health_service.httpx.get", side_effect=_boom):
         response = write_client.get("/internal/v1/health/all", headers=auth_headers())
 
     body = response_json_object(response)

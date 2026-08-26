@@ -18,7 +18,6 @@ from vecinita_eval.runner import EvalSummary, RowMetrics, RowResult
 from vecinita_internal_write_api.eval_criteria_service import create_eval_criterion
 from vecinita_internal_write_api.eval_service import (
     EvalRunNotFoundError,
-    _config_from_json,  # pyright: ignore[reportPrivateUsage]
     _load_eval_run,  # pyright: ignore[reportPrivateUsage]
     _optional_uuid,  # pyright: ignore[reportPrivateUsage]
     _require_adhoc_question,  # pyright: ignore[reportPrivateUsage]
@@ -33,6 +32,7 @@ from vecinita_shared_schemas.eval_config import (
     EvalConfig,
     EvalConfigPartial,
     EvalConfigPresetCreateRequest,
+    eval_config_from_json,
 )
 from vecinita_shared_schemas.internal_write import (
     EvalCriterionCreateRequest,
@@ -975,7 +975,6 @@ def test_resolve_eval_run_config_raises_for_private_preset(
         EvalRunPresetAccessError,
         resolve_eval_run_config,
     )
-    from vecinita_shared_schemas.eval_config import EvalConfigPresetCreateRequest  # noqa: PLC0415
 
     owner_id = uuid4()
     preset = create_eval_config_preset(
@@ -1116,9 +1115,9 @@ def test_resolve_eval_runtime_preserves_injected_judge_when_llm_missing() -> Non
 def test_eval_service_json_helpers_and_guards() -> None:
     """Private eval helpers parse config JSON, modes, UUIDs, and adhoc questions."""
     sample = EvalConfig(top_k=_EXPECTED_CONFIG_TOP_K)
-    assert _config_from_json(sample.model_dump_json()).top_k == _EXPECTED_CONFIG_TOP_K
-    assert _config_from_json(sample.model_dump()).top_k == _EXPECTED_CONFIG_TOP_K
-    assert _config_from_json(None).top_k == EvalConfig().top_k
+    assert eval_config_from_json(sample.model_dump_json()).top_k == _EXPECTED_CONFIG_TOP_K
+    assert eval_config_from_json(sample.model_dump()).top_k == _EXPECTED_CONFIG_TOP_K
+    assert eval_config_from_json(None).top_k == EvalConfig().top_k
     assert _run_mode("golden") == "golden"
     assert _run_mode("adhoc") == "adhoc"
     assert _run_mode("unknown") == "golden"

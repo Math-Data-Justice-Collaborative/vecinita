@@ -24,10 +24,9 @@ import json
 import logging
 import os
 import uuid
-from collections.abc import Iterator
 from http import HTTPStatus
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, Literal
+from typing import TYPE_CHECKING, ClassVar, Final, Literal
 
 import modal
 from infra.modal.llm_model_registry import (
@@ -35,10 +34,11 @@ from infra.modal.llm_model_registry import (
     repo_dir_name,
     resolve_hf_repo,
 )
+from infra.modal.llm_service_core import LlmServiceCore
+from infra.modal.repo_paths import MODAL_ROOT_MOUNT, resolve_repo_root
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from vecinita_shared_schemas.finetune import (
     decide_serve_adapter_id,
-    merge_lora_engine_kwargs,
     resolve_finetune_adapter_dir,
 )
 
@@ -48,15 +48,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("vecinita.llm")
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when building from infra/modal; /root when Modal mounts llm_app.py."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/root")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root(fallback=MODAL_ROOT_MOUNT)
 
 
 APP_NAME = "vecinita-llm"
@@ -261,13 +253,18 @@ def _local_repo_path(model_id: str) -> Path:
     return _REPOS_ROOT / repo_dir_name(model_id)
 
 
-def _resolve_vllm_model_arg(model_id: str | None) -> str:
+def _resolve_vllm_model_arg(
+    model_id: str | None,
+    *,
+    allow_model_reload: bool | None = None,
+) -> str:
     """Resolve playground tag or None to a vLLM ``model`` argument.
 
-    When ``ALLOW_MODEL_RELOAD`` is False (prod pin), always return the pinned
+    When ``allow_model_reload`` is False (prod pin), always return the pinned
     ``MODEL_ID`` so playground/eval tags cannot stomp ChatRAG (RD-169 / TC-145).
     """
-    if not ALLOW_MODEL_RELOAD:
+    reload = ALLOW_MODEL_RELOAD if allow_model_reload is None else allow_model_reload
+    if not reload:
         return MODEL_ID
     if model_id is None or normalize_playground_tag(model_id) == normalize_playground_tag(
         DEFAULT_PLAYGROUND_MODEL_ID
@@ -400,129 +397,19 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     # ADR-037: model_id switching requires clean vLLM init — GPU snapshot breaks NCCL on reload.
     enable_memory_snapshot=False,
 )
-class LlmService:
+class LlmService(LlmServiceCore):
+    """Prod GPU service — pinned model; LoRA after human promote (ADR-037 / ADR-053)."""
+
+    serve_role: ClassVar[ServeRole] = "prod"
+    allow_model_reload: ClassVar[bool] = ALLOW_MODEL_RELOAD
+
     @modal.enter()
     def load_model(self) -> None:
-        """Lazy-load vLLM on first request (supports default + playground tag switches)."""
-        self._llm = None
-        self._loaded_model_arg = None
-        self._loaded_cache_key: tuple[str, str | None] | None = None
-        self._lora_request: object | None = None
+        super().load_model()
 
     @modal.exit()
     def unload_model(self) -> None:
-        _shutdown_vllm_engine(getattr(self, "_llm", None))
-        self._llm = None
-        self._loaded_model_arg = None
-        self._loaded_cache_key = None
-        self._lora_request = None
-
-    def _ensure_model_loaded(self, model_id: str | None) -> None:
-        resolved = _resolve_vllm_model_arg(model_id)
-        adapter_id, adapter_dir = _adapter_load_for_role("prod")
-        cache_key = (resolved, adapter_id)
-        if getattr(self, "_loaded_cache_key", None) == cache_key and self._llm is not None:
-            return
-        _shutdown_vllm_engine(getattr(self, "_llm", None))
-        self._llm = None
-        self._loaded_model_arg = None
-        self._loaded_cache_key = None
-        self._lora_request = None
-        import gc
-
-        gc.collect()
-        try:
-            import torch
-
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-                torch.cuda.synchronize()
-        except Exception:
-            pass
-        engine_kwargs = merge_lora_engine_kwargs(
-            _llm_engine_kwargs(max_model_len=max_model_len_for(resolved), model=resolved),
-            adapter_dir=adapter_dir,
-        )
-        self._llm = LLM(**engine_kwargs)
-        self._lora_request = _build_lora_request(adapter_id, adapter_dir)
-        self._loaded_model_arg = resolved
-        self._loaded_cache_key = cache_key
-        warmup_kwargs: dict[str, object] = {}
-        if self._lora_request is not None:
-            warmup_kwargs["lora_request"] = self._lora_request
-        self._llm.generate(["warmup"], SamplingParams(max_tokens=1), **warmup_kwargs)
-
-    def _generate_text(
-        self,
-        prompt: str,
-        *,
-        max_tokens: int = 512,
-        temperature: float = 0.2,
-        model_id: str | None = None,
-    ) -> str:
-        self._ensure_model_loaded(model_id)
-        params = SamplingParams(
-            max_tokens=max_tokens,
-            temperature=temperature,
-            repetition_penalty=1.15,
-        )
-        if self._llm is None:
-            msg = "LlmService model is not loaded"
-            raise RuntimeError(msg)
-        gen_kwargs: dict[str, object] = {}
-        lora = getattr(self, "_lora_request", None)
-        if lora is not None:
-            gen_kwargs["lora_request"] = lora
-        outputs = self._llm.generate([prompt], params, **gen_kwargs)
-        return outputs[0].outputs[0].text
-
-    def _stream_text_deltas(
-        self,
-        prompt: str,
-        *,
-        max_tokens: int = 512,
-        temperature: float = 0.2,
-        model_id: str | None = None,
-    ) -> Iterator[str]:
-        """Yield incremental token text from the vLLM engine (RD-164 / TP-S010-22).
-
-        Uses ``llm_engine.add_request`` + ``step`` so SSE receives real deltas — not a
-        completed reply split into words.
-        """
-        self._ensure_model_loaded(model_id)
-        if self._llm is None:
-            msg = "LlmService model is not loaded"
-            raise RuntimeError(msg)
-        engine = getattr(self._llm, "llm_engine", None)
-        if engine is None or not hasattr(engine, "add_request") or not hasattr(engine, "step"):
-            msg = "vLLM llm_engine streaming API unavailable"
-            raise RuntimeError(msg)
-        params = SamplingParams(
-            max_tokens=max_tokens,
-            temperature=temperature,
-            repetition_penalty=1.15,
-        )
-        request_id = f"stream-{uuid.uuid4()}"
-        lora = getattr(self, "_lora_request", None)
-        if lora is not None:
-            engine.add_request(request_id, prompt, params, lora_request=lora)
-        else:
-            engine.add_request(request_id, prompt, params)
-        previous = ""
-        while engine.has_unfinished_requests():
-            for request_output in engine.step():
-                if getattr(request_output, "request_id", None) != request_id:
-                    continue
-                outputs = getattr(request_output, "outputs", None) or []
-                if not outputs:
-                    continue
-                text = getattr(outputs[0], "text", "") or ""
-                delta = text[len(previous) :]
-                previous = text
-                if delta:
-                    yield delta
-                if getattr(request_output, "finished", False):
-                    return
+        super().unload_model()
 
     @modal.method()
     def complete(
@@ -533,7 +420,7 @@ class LlmService:
         temperature: float = 0.2,
         model_id: str | None = None,
     ) -> str:
-        return self._generate_text(
+        return super().complete(
             prompt,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -550,7 +437,7 @@ class LlmService:
         model_id: str | None = None,
     ):
         """Yield incremental tokens for SSE (real vLLM deltas — RD-164)."""
-        yield from self._stream_text_deltas(
+        yield from super().stream_tokens(
             prompt,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -560,8 +447,7 @@ class LlmService:
     @modal.method()
     def warm_model(self, model_id: str | None = None) -> str:
         """Preload a model into VRAM (fold cold-start into warm-up window)."""
-        self._ensure_model_loaded(model_id)
-        return _resolve_vllm_model_arg(model_id)
+        return super().warm_model(model_id)
 
 
 @app.function(

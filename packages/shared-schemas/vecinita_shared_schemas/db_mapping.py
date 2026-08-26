@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import datetime
 from typing import TypeVar, cast
 from uuid import UUID
 
@@ -61,6 +62,26 @@ def row_uuid_optional(row: Mapping[str, object], key: str) -> UUID | None:
     if isinstance(value, UUID):
         return value
     return UUID(str(value))
+
+
+def row_datetime(row: Mapping[str, object], key: str) -> datetime:
+    """Return ``key`` from a row mapping as a ``datetime``."""
+    value = row[key]
+    if isinstance(value, datetime):
+        return value
+    msg = f"Expected datetime for {key!r}, got {type(value).__name__}"
+    raise TypeError(msg)
+
+
+def row_datetime_optional(row: Mapping[str, object], key: str) -> datetime | None:
+    """Return ``key`` as ``datetime`` or ``None`` when the column value is null."""
+    value = row[key]
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    msg = f"Expected datetime for {key!r}, got {type(value).__name__}"
+    raise TypeError(msg)
 
 
 def scalar_int(value: object) -> int:

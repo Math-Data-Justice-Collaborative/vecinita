@@ -10,9 +10,9 @@ from uuid import UUID, uuid4
 from sqlalchemy import text
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
+    row_datetime_optional,
     row_int,
-    row_uuid,
-    row_value,
+    row_uuid_optional,
     scalar_int,
     sqlalchemy_scalar_one,
 )
@@ -21,6 +21,7 @@ from vecinita_shared_schemas.eval_config import (
     RagConfigActiveResponse,
     RagConfigPromoteRequest,
     RagConfigPromoteResponse,
+    eval_config_from_json,
 )
 
 from vecinita_internal_write_api.audit import emit_audit_event
@@ -35,37 +36,12 @@ class RagConfigPromoteNotFoundError(Exception):
     """Promote source preset or run was not found."""
 
 
-def _row_datetime_optional(row: Mapping[str, object], key: str) -> datetime | None:
-    value = row_value(row, key)
-    if value is None:
-        return None
-    if isinstance(value, datetime):
-        return value
-    msg = f"Expected datetime for {key!r}, got {type(value).__name__}"
-    raise TypeError(msg)
-
-
-def _row_uuid_optional(row: Mapping[str, object], key: str) -> UUID | None:
-    value = row_value(row, key)
-    if value is None:
-        return None
-    return row_uuid(row, key)
-
-
-def _config_from_json(value: object) -> EvalConfig:
-    if isinstance(value, str):
-        return EvalConfig.model_validate_json(value)
-    if isinstance(value, dict):
-        return EvalConfig.model_validate(value)
-    return EvalConfig()
-
-
 def _active_row_from_mapping(row: Mapping[str, object]) -> RagConfigActiveResponse:
     return RagConfigActiveResponse(
-        config=_config_from_json(row.get("config")),
+        config=eval_config_from_json(row.get("config")),
         config_version=row_int(row, "config_version"),
-        promoted_at=_row_datetime_optional(row, "promoted_at"),
-        promoted_by=_row_uuid_optional(row, "promoted_by"),
+        promoted_at=row_datetime_optional(row, "promoted_at"),
+        promoted_by=row_uuid_optional(row, "promoted_by"),
     )
 
 
@@ -119,7 +95,7 @@ def _resolve_promote_config(
         if row is None:
             msg = "preset not found"
             raise RagConfigPromoteNotFoundError(msg)
-        return _config_from_json(mapping_row(row).get("config"))
+        return eval_config_from_json(mapping_row(row).get("config"))
 
     run_id = body.run_id
     if run_id is None:
@@ -144,7 +120,7 @@ def _resolve_promote_config(
         msg = "run not found"
         raise RagConfigPromoteNotFoundError(msg)
     mapped = mapping_row(row)
-    return _config_from_json(mapped.get("config_snapshot"))
+    return eval_config_from_json(mapped.get("config_snapshot"))
 
 
 def promote_rag_config(

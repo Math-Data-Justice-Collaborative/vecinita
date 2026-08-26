@@ -6,22 +6,12 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import text
 from vecinita_shared_schemas.db_mapping import mapping_row, row_int
-from vecinita_shared_schemas.eval_config import (
-    EvalConfig,
-)
+from vecinita_shared_schemas.eval_config import EvalConfig, eval_config_from_json
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
     from vecinita_chat_rag_backend.config import ChatRagSettings
-
-
-def _config_from_json(value: object) -> EvalConfig:
-    if isinstance(value, str):
-        return EvalConfig.model_validate_json(value)
-    if isinstance(value, dict):
-        return EvalConfig.model_validate(value)
-    return EvalConfig()
 
 
 def fallback_rag_config(settings: ChatRagSettings) -> EvalConfig:
@@ -57,4 +47,4 @@ def load_active_rag_config(engine: Engine, settings: ChatRagSettings) -> EvalCon
         return fallback_rag_config(settings)
     mapped = mapping_row(row)
     _ = row_int(mapped, "config_version")
-    return _config_from_json(mapped.get("config"))
+    return eval_config_from_json(mapped.get("config"))

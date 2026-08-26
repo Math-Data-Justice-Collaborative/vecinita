@@ -212,3 +212,12 @@ class RagConfigActiveResponse(BaseModel):
     config_version: int
     promoted_at: datetime | None = None
     promoted_by: UUID | None = None
+
+
+def eval_config_from_json(value: object) -> EvalConfig:
+    """Parse ``EvalConfig`` from a DB JSON/JSONB column value."""
+    if isinstance(value, str):
+        return EvalConfig.model_validate_json(value)
+    if isinstance(value, dict):
+        return EvalConfig.model_validate(value)
+    return EvalConfig()

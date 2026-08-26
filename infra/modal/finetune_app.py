@@ -37,6 +37,7 @@ from infra.modal.finetune_train_core import (
     invoke_train_from_payload,
     materialize_adapter_config,
 )
+from infra.modal.repo_paths import MODAL_ROOT_MOUNT, resolve_repo_root
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -52,15 +53,7 @@ BASE_MODELS_MOUNT: Final[str] = "/models"
 _logger = logging.getLogger("vecinita.finetune")
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when deploying from infra/modal; /root when Modal mounts at /root."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/root")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root(fallback=MODAL_ROOT_MOUNT)
 
 app = modal.App(APP_NAME)
 adapter_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)

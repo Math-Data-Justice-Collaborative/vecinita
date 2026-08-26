@@ -29,7 +29,12 @@ from vecinita_shared_schemas.db_mapping import (
     scalar_int,
     sqlalchemy_scalar_one,
 )
-from vecinita_shared_schemas.eval_config import EvalConfig, EvalRunMode, merge_eval_config
+from vecinita_shared_schemas.eval_config import (
+    EvalConfig,
+    EvalRunMode,
+    eval_config_from_json,
+    merge_eval_config,
+)
 from vecinita_shared_schemas.internal_write import (
     EvalMetricsSummary,
     EvalRunCreateRequest,
@@ -263,14 +268,6 @@ def _default_embed_fn(question: str) -> list[float]:
     return client.embed(question)
 
 
-def _config_from_json(value: object) -> EvalConfig:
-    if isinstance(value, str):
-        return EvalConfig.model_validate_json(value)
-    if isinstance(value, dict):
-        return EvalConfig.model_validate(value)
-    return EvalConfig()
-
-
 def _run_mode(value: object) -> EvalRunMode:
     if value in {"golden", "adhoc"}:
         return cast("EvalRunMode", value)
@@ -304,7 +301,7 @@ def _load_eval_run(engine: Engine, *, run_id: UUID) -> LoadedEvalRun:
         raise EvalRunNotFoundError(msg)
     loaded = mapping_row(row)
     return LoadedEvalRun(
-        config_snapshot=_config_from_json(loaded.get("config_snapshot")),
+        config_snapshot=eval_config_from_json(loaded.get("config_snapshot")),
         mode=_run_mode(loaded.get("mode")),
         corpus_profile=row_str(loaded, "corpus_profile"),
     )
@@ -615,7 +612,7 @@ def get_eval_run(engine: Engine, *, run_id: UUID) -> EvalRunDetailResponse | Non
         status=_status(row_str(run, "status")),
         mode=_run_mode(run.get("mode")),
         preset_id=_optional_uuid(run.get("preset_id")),
-        config_snapshot=_config_from_json(run.get("config_snapshot")),
+        config_snapshot=eval_config_from_json(run.get("config_snapshot")),
         metrics_summary=_summary_from_json(run.get("metrics_summary")),
         items=items,
         error_message=row_str_optional(run, "error_message"),

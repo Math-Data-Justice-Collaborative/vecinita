@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
@@ -11,10 +11,7 @@ import pytest
 from sqlalchemy import text
 from vecinita_internal_write_api.rag_production_config_service import (
     RagConfigPromoteNotFoundError,
-    _config_from_json,  # pyright: ignore[reportPrivateUsage]
     _resolve_promote_config,  # pyright: ignore[reportPrivateUsage]
-    _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
-    _row_uuid_optional,  # pyright: ignore[reportPrivateUsage]
     get_active_rag_config,
     promote_rag_config,
 )
@@ -247,31 +244,6 @@ def test_get_active_rag_config_parses_promoted_at_timestamp(
     assert active is not None
     assert active.promoted_at is not None
     assert active.promoted_at.tzinfo is not None
-
-
-def test_config_from_json_parses_string_dict_and_defaults() -> None:
-    """_config_from_json accepts JSON text, dict payloads, and falls back to defaults."""
-    sample = _sample_config(top_k=_PRESET_TOP_K)
-    parsed = EvalConfig.model_validate(sample)
-    assert _config_from_json(parsed.model_dump_json()).top_k == _PRESET_TOP_K
-    assert _config_from_json(parsed.model_dump()).top_k == _PRESET_TOP_K
-    assert _config_from_json(None).top_k == EvalConfig().top_k
-
-
-def test_row_datetime_optional_handles_none_datetime_and_invalid() -> None:
-    """Row datetime helper returns None, datetime values, or raises on bad types."""
-    assert _row_datetime_optional({"promoted_at": None}, "promoted_at") is None
-    promoted_at = datetime.now(UTC)
-    assert _row_datetime_optional({"promoted_at": promoted_at}, "promoted_at") == promoted_at
-    with pytest.raises(TypeError, match="Expected datetime"):
-        _row_datetime_optional({"promoted_at": "not-a-datetime"}, "promoted_at")
-
-
-def test_row_uuid_optional_handles_none_and_uuid() -> None:
-    """Row UUID helper returns None or parses UUID columns."""
-    assert _row_uuid_optional({"promoted_by": None}, "promoted_by") is None
-    owner_id = uuid4()
-    assert _row_uuid_optional({"promoted_by": owner_id}, "promoted_by") == owner_id
 
 
 def test_resolve_promote_config_requires_source_ids(
