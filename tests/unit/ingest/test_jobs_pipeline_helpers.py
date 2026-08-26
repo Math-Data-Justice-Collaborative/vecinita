@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from hashlib import sha256
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from pydantic import HttpUrl
@@ -38,6 +38,11 @@ from vecinita_shared_schemas.internal_write import (
 
 _DEFAULT_LOCALE = "en"
 _CHUNK_SIZE = 64
+_PAGE_SIZE = 100
+_PAGE_ONE_COUNT = 100
+_PAGE_TWO_COUNT = 1
+_EXPECTED_PAGED_TOTAL = _PAGE_ONE_COUNT + _PAGE_TWO_COUNT
+_EXPECTED_PAGE_CALLS = 2
 
 
 def test_raise_no_documents_raises_value_error() -> None:
@@ -328,28 +333,28 @@ def _summary(url: str) -> DocumentSummary:
 
 def test_list_missing_body_docs_paginates_until_exhausted() -> None:
     """Missing-body listing walks every page when total exceeds page_size."""
-    page_one = [_summary(f"https://example.com/{index}") for index in range(100)]
+    page_one = [_summary(f"https://example.com/{index}") for index in range(_PAGE_ONE_COUNT)]
     page_two = [_summary("https://example.com/last")]
     client = _PagingWriteClient(pages=[page_one, page_two], missing_body=True)
 
     targets = _list_missing_body_docs(client)  # type: ignore[arg-type]
 
-    assert len(targets) == 101
-    assert len(client.calls) == 2
-    assert client.calls[0] == {"page": 1, "page_size": 100, "missing_body": True}
-    assert client.calls[1] == {"page": 2, "page_size": 100, "missing_body": True}
+    assert len(targets) == _EXPECTED_PAGED_TOTAL
+    assert len(client.calls) == _EXPECTED_PAGE_CALLS
+    assert client.calls[0] == {"page": 1, "page_size": _PAGE_SIZE, "missing_body": True}
+    assert client.calls[1] == {"page": 2, "page_size": _PAGE_SIZE, "missing_body": True}
 
 
 def test_list_all_docs_paginates_until_exhausted() -> None:
     """Full corpus listing walks every page when total exceeds page_size."""
-    page_one = [_summary(f"https://example.com/{index}") for index in range(100)]
+    page_one = [_summary(f"https://example.com/{index}") for index in range(_PAGE_ONE_COUNT)]
     page_two = [_summary("https://example.com/final")]
     client = _PagingWriteClient(pages=[page_one, page_two], missing_body=False)
 
     targets = _list_all_docs(client)  # type: ignore[arg-type]
 
-    assert len(targets) == 101
-    assert len(client.calls) == 2
+    assert len(targets) == _EXPECTED_PAGED_TOTAL
+    assert len(client.calls) == _EXPECTED_PAGE_CALLS
 
 
 def test_reembed_documents_returns_zero_for_empty_scope() -> None:
