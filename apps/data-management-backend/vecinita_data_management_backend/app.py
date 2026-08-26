@@ -214,7 +214,8 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
         if ctx.is_service:
             # Service-to-service from internal-write-api (VECINITA_INTERNAL_API_KEY).
             return AuthPrincipal(sub=UUID(int=0), role="admin")
-        assert ctx.principal is not None  # require_admin_write guarantees admin principal
+        if ctx.principal is None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
         return ctx.principal
 
     @app.get("/health", response_model=HealthResponse)
