@@ -9,7 +9,12 @@ from uuid import UUID  # FastAPI path params require UUID at runtime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
-from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, require_role
+from vecinita_shared_schemas.auth import (
+    AuthContext,
+    AuthPrincipal,
+    get_principal,
+    require_admin_write,
+)
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.data_management import (
     CreateJobRequest,
@@ -188,7 +193,6 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
     job_store = store or InMemoryJobStore()
     event_broker = job_event_broker if job_event_broker is not None else JobEventBroker()
     runner = pipeline_runner
-    require_admin = require_role("admin")
     resolved_eval_client = (
         eval_runs_client if eval_runs_client is not None else _default_eval_runs_client()
     )
@@ -202,11 +206,17 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
         return _principal
 
     def write_auth_dep(
+        ctx: Annotated[AuthContext, Depends(require_admin_write)],
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
-        principal: AuthPrincipal = Depends(require_admin),
     ) -> AuthPrincipal:
+        """Write routes: proxy key + admin JWT or internal-write service key (F79 Refresh now)."""
         _check_proxy_auth(require_proxy_auth=require_proxy_auth, modal_key=modal_key)
-        return principal
+        if ctx.is_service:
+            # Service-to-service from internal-write-api (VECINITA_INTERNAL_API_KEY).
+            return AuthPrincipal(sub=UUID(int=0), role="admin")
+        if ctx.principal is None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        return ctx.principal
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]
