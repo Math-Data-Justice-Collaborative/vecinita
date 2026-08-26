@@ -171,6 +171,245 @@ def _git_root_from_path(start: Path) -> Path | None:
     return None
 
 
+def _orchestrator_workspace_root(
+    session_path: Path | None = None,
+    workspace_root: Path | None = None,
+) -> Path:
+    """Resolve product repo root for orchestrator KG sync (prefer explicit, then git, then cwd)."""
+    _ = session_path
+    if workspace_root is not None:
+        return workspace_root.resolve()
+    git_root = _git_root_from_path(Path.cwd())
+    if git_root:
+        return git_root
+    return Path.cwd().resolve()
+
+
+def _kg_orchestrator_preflight(
+    workspace_root: Path,
+    *,
+    phase: str,
+    run_bootstrap: bool = False,
+) -> dict[str, Any]:
+    """Bootstrap Neo4j (optional, fail-open) and git/corpus sync for orchestrator sessions."""
+    if not hooks_enabled():
+        return {"status": "skipped", "reason": "EM_MEMORY_HOOKS_ENABLED=0", "phase": phase}
+    if run_bootstrap:
+        cmd_bootstrap(workspace_root)
+    sync_result = _sync_workspace_repo(workspace_root, phase=phase)
+    return {"status": sync_result.get("status", "skipped"), "phase": phase, "sync": sync_result}
+
+
+def bootstrap_enabled() -> bool:
+    """Return whether workspaceOpen Neo4j bootstrap is enabled."""
+    return os.environ.get("EM_BOOTSTRAP_ENABLED", "1").strip() not in ("0", "false", "False")
+
+
+def _sync_debounce_sec() -> int:
+    return int(os.environ.get("EM_SYNC_DEBOUNCE_SEC", "30"))
+
+
+def _derive_owner_repo_from_workspace(workspace_root: Path) -> str | None:
+    git_root = _git_root_from_path(workspace_root)
+    try:
+        url = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=git_root or workspace_root.resolve(),
+        ).stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+    match = re.search(r"[:/](?P<owner>[^/]+)/(?P<repo>[^/.]+?)(?:\.git)?$", url)
+    if match:
+        return f"{match.group('owner')}/{match.group('repo')}"
+    return None
+
+
+def resolve_cursor_session_path(conversation_id: str, workspace_root: Path) -> Path | None:
+    """Map Cursor conversation id + workspace to workflow cursor-sessions directory."""
+    raw = _derive_owner_repo_from_workspace(workspace_root)
+    if not raw or "/" not in raw:
+        return None
+    owner, repo = raw.split("/", 1)
+    safe_id = re.sub(r"[^\w.-]", "_", conversation_id.strip()) or "unknown"
+    return Path.home() / ".cursor" / "workflow" / owner / repo / "cursor-sessions" / safe_id
+
+
+def _ensure_cursor_session_stub(session_path: Path) -> None:
+    session_path.mkdir(parents=True, exist_ok=True)
+    (session_path / "reports").mkdir(exist_ok=True)
+    brief = session_path / "session-brief.md"
+    if not brief.is_file():
+        brief.write_text(
+            "# Cursor session\n\nAuto-created by memory-hook cursor-session-start.\n",
+            encoding="utf-8",
+        )
+    state = session_path / "state.yaml"
+    if not state.is_file():
+        state.write_text("id: cursor-session\nstatus: in_progress\nsource: cursor\n", encoding="utf-8")
+
+
+def _sync_lock_path(workspace_root: Path) -> Path:
+    raw = _derive_owner_repo_from_workspace(workspace_root) or "unknown"
+    safe = re.sub(r"[^\w.-]", "_", raw)
+    lock_dir = _engineering_memory_root() / ".cursor" / "bootstrap"
+    lock_dir.mkdir(parents=True, exist_ok=True)
+    return lock_dir / f"sync-{safe}.lock"
+
+
+def _sync_debounce_active(lock_path: Path) -> bool:
+    if not lock_path.is_file():
+        return False
+    return (time.time() - lock_path.stat().st_mtime) < _sync_debounce_sec()
+
+
+def _touch_sync_lock(lock_path: Path) -> None:
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path.write_text(datetime.now(UTC).isoformat(), encoding="utf-8")
+
+
+def _sync_workspace_repo(workspace_root: Path, *, phase: str) -> dict[str, Any]:
+    if not hooks_enabled():
+        return {**_skip_payload("EM_MEMORY_HOOKS_ENABLED=0"), "phase": phase}
+    lock = _sync_lock_path(workspace_root)
+    if _sync_debounce_active(lock):
+        return {"status": "skipped", "reason": "sync debounce active", "phase": phase}
+    project_id = resolve_project_id(workspace_root)
+    if not project_id:
+        return {"status": "skipped", "reason": "project_id unresolved", "phase": phase}
+    git_root = _git_root_from_path(workspace_root)
+    if not git_root:
+        return {"status": "skipped", "reason": "not a git repository", "phase": phase}
+    try:
+        from engineering_memory.ingestion.corpus_sync import ingest_corpus
+        from engineering_memory.ingestion.sync import sync_repository
+
+        git_result = _with_service(
+            lambda svc: sync_repository(svc, project_id, git_root, limit=20)
+        )
+        corpus_result: dict[str, Any] = {"status": "skipped", "reason": "no docs/CORPUS.md"}
+        docs = git_root / "docs"
+        if (docs / "CORPUS.md").is_file():
+            corpus_result = _with_service(lambda svc: ingest_corpus(svc, project_id, docs))
+        _touch_sync_lock(lock)
+        return {"status": "ok", "phase": phase, "git": git_result, "corpus": corpus_result}
+    except Exception as exc:  # noqa: BLE001
+        return {"status": "skipped", "reason": str(exc), "phase": phase}
+
+
+def cmd_bootstrap(workspace_root: Path | None = None) -> int:
+    """Start Neo4j via docker compose in EM root and wait for health (fail-open)."""
+    _ = workspace_root
+    if not bootstrap_enabled():
+        payload = _skip_payload("EM_BOOTSTRAP_ENABLED=0")
+        _set_telemetry_result(payload)
+        _print_json(payload)
+        return 0
+    if not hooks_enabled():
+        payload = _skip_payload("EM_MEMORY_HOOKS_ENABLED=0")
+        _set_telemetry_result(payload)
+        _print_json(payload)
+        return 0
+
+    root = _engineering_memory_root()
+    compose = root / "docker-compose.yml"
+    if not compose.is_file():
+        payload = _skip_payload(f"docker-compose.yml not found at {root}")
+        _set_telemetry_result(payload)
+        _print_json(payload)
+        return 0
+
+    try:
+        proc = subprocess.run(
+            ["docker", "compose", "-f", str(compose), "up", "-d"],
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            payload = {
+                "status": "skipped",
+                "reason": "docker compose up failed",
+                "stderr": (proc.stderr or "")[:500],
+            }
+            _set_telemetry_result(payload)
+            _print_json(payload)
+            return 0
+    except FileNotFoundError:
+        payload = _skip_payload("docker not found")
+        _set_telemetry_result(payload)
+        _print_json(payload)
+        return 0
+
+    timeout = int(os.environ.get("EM_BOOTSTRAP_NEO4J_TIMEOUT_SEC", "60"))
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if cmd_check() == 0:
+            payload = {"status": "ok", "message": "bootstrap complete", "em_root": str(root)}
+            _set_telemetry_result(payload)
+            _print_json(payload)
+            return 0
+        time.sleep(2)
+
+    payload = {"status": "skipped", "reason": "neo4j health timeout", "timeout_sec": timeout}
+    _set_telemetry_result(payload)
+    _print_json(payload)
+    return 0
+
+
+def cmd_cursor_session_start(
+    conversation_id: str,
+    workspace_root: Path,
+    query: str | None = None,
+) -> int:
+    """Cursor sessionStart: sync, retrieve, write memory-context.md."""
+    session_path = resolve_cursor_session_path(conversation_id, workspace_root)
+    if not session_path:
+        payload = _skip_payload("could not resolve cursor session path")
+        _set_telemetry_result(payload)
+        _print_json(payload)
+        return 0
+
+    _ensure_cursor_session_stub(session_path)
+    sync_result = _sync_workspace_repo(workspace_root, phase="start")
+    open_query = query or "cursor session engineering context"
+    open_code = cmd_session_open(session_path, open_query, None)
+    payload = {
+        "status": "ok" if open_code == 0 else "skipped",
+        "session_path": str(session_path),
+        "sync": sync_result,
+    }
+    _set_telemetry_result(payload)
+    _print_json(payload)
+    return 0
+
+
+def cmd_cursor_session_end(conversation_id: str, workspace_root: Path) -> int:
+    """Cursor sessionEnd: sync, record session, queue Graphiti."""
+    session_path = resolve_cursor_session_path(conversation_id, workspace_root)
+    if not session_path:
+        payload = _skip_payload("could not resolve cursor session path")
+        _set_telemetry_result(payload)
+        _print_json(payload)
+        return 0
+
+    if session_path.is_dir():
+        _ensure_cursor_session_stub(session_path)
+    sync_result = _sync_workspace_repo(workspace_root, phase="end")
+    close_code = cmd_session_close(session_path, include_verification=False)
+    payload = {
+        "status": "ok" if close_code == 0 else "skipped",
+        "session_path": str(session_path),
+        "sync": sync_result,
+    }
+    _set_telemetry_result(payload)
+    _print_json(payload)
+    return 0
+
+
 def _register_session_path_alias(session_path: Path, canonical_project_id: str) -> None:
     override = os.environ.get("EM_CONTEXT_PROJECT_ID", "").strip()
     if not override or not hooks_enabled():
@@ -382,6 +621,7 @@ def write_memory_context_report(
     retrieve_result: dict[str, Any],
     recommend_result: dict[str, Any],
     skip_reason: str | None = None,
+    kg_preflight: dict[str, Any] | None = None,
 ) -> None:
     """Write memory-context.md from retrieve and recommend hook results."""
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -450,12 +690,34 @@ def write_memory_context_report(
                     lines.append(f"- {item.get('kind', 'conflict')}: {item.get('description', '')}")
                 lines.append("")
 
+    if kg_preflight:
+        sync = kg_preflight.get("sync") or {}
+        lines.extend(
+            [
+                "## KG preflight",
+                "",
+                "- **Bootstrap:** attempted (fail-open)",
+                f"- **Git/corpus sync ({kg_preflight.get('phase', '?')}):** "
+                f"{sync.get('status', kg_preflight.get('status', 'unknown'))}"
+                + (f" — {sync.get('reason')}" if sync.get("reason") else ""),
+                "",
+            ]
+        )
+
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def cmd_session_open(session_path: Path, query: str, report_path: Path | None) -> int:
-    """Open a session: retrieve knowledge, recommend, and write memory-context.md."""
+def cmd_session_open(
+    session_path: Path,
+    query: str,
+    report_path: Path | None,
+    workspace_root: Path | None = None,
+) -> int:
+    """Open a session: KG preflight, retrieve knowledge, recommend, write memory-context.md."""
     report = report_path or (session_path / "reports" / "memory-context.md")
+    ws = _orchestrator_workspace_root(session_path, workspace_root)
+    kg_preflight = _kg_orchestrator_preflight(ws, phase="open", run_bootstrap=True)
+
     if not hooks_enabled():
         write_memory_context_report(
             report,
@@ -464,6 +726,7 @@ def cmd_session_open(session_path: Path, query: str, report_path: Path | None) -
             retrieve_result=_skip_payload("EM_MEMORY_HOOKS_ENABLED=0"),
             recommend_result=_skip_payload("EM_MEMORY_HOOKS_ENABLED=0"),
             skip_reason="EM_MEMORY_HOOKS_ENABLED=0",
+            kg_preflight=kg_preflight,
         )
         _set_telemetry_result(_skip_payload("EM_MEMORY_HOOKS_ENABLED=0"))
         return 0
@@ -478,6 +741,7 @@ def cmd_session_open(session_path: Path, query: str, report_path: Path | None) -
             retrieve_result={"status": "error", "message": "project_id unresolved"},
             recommend_result={"status": "error", "message": "project_id unresolved"},
             skip_reason="could not resolve project_id",
+            kg_preflight=kg_preflight,
         )
         _set_telemetry_result(result)
         return 0
@@ -492,6 +756,7 @@ def cmd_session_open(session_path: Path, query: str, report_path: Path | None) -
             retrieve_result={"status": "error", "message": "health check failed"},
             recommend_result={"status": "error", "message": "health check failed"},
             skip_reason="engineering-memory unavailable (check failed)",
+            kg_preflight=kg_preflight,
         )
         _set_telemetry_result(result)
         return 0
@@ -514,6 +779,7 @@ def cmd_session_open(session_path: Path, query: str, report_path: Path | None) -
             retrieve_result={"status": "error", "message": str(exc)},
             recommend_result={"status": "error", "message": str(exc)},
             skip_reason=str(exc),
+            kg_preflight=kg_preflight,
         )
         _set_telemetry_result(result)
         return 0
@@ -524,6 +790,7 @@ def cmd_session_open(session_path: Path, query: str, report_path: Path | None) -
         query=query,
         retrieve_result=retrieve_result,
         recommend_result=recommend_result,
+        kg_preflight=kg_preflight,
     )
     retrieve_items = ((retrieve_result.get("data") or {}).get("items") or [])
     recommend_items = ((recommend_result.get("data") or {}).get("recommendations") or [])
@@ -587,11 +854,18 @@ def cmd_search_episodic(query: str, session_path: Path, limit: int) -> int:
         return 1
 
 
-def cmd_session_close(session_path: Path, include_verification: bool) -> int:
-    """Close a session: ingest session and optionally queue Graphiti worker."""
+def cmd_session_close(
+    session_path: Path,
+    include_verification: bool,
+    workspace_root: Path | None = None,
+) -> int:
+    """Close a session: git/corpus sync, ingest session, optionally queue Graphiti worker."""
+    ws = _orchestrator_workspace_root(session_path, workspace_root)
+    sync_preflight = _kg_orchestrator_preflight(ws, phase="close", run_bootstrap=False)
     project_id = resolve_project_id(session_path)
     if not project_id:
         result = _skip_payload("project_id unresolved")
+        result = {**result, "data": {"kg_preflight": sync_preflight}}
         _set_telemetry_result(result)
         _print_json(result)
         return 0
@@ -616,6 +890,7 @@ def cmd_session_close(session_path: Path, include_verification: bool) -> int:
 
     if not hooks_enabled():
         result = _skip_payload("EM_MEMORY_HOOKS_ENABLED=0")
+        result = {**result, "data": {"kg_preflight": sync_preflight}}
         _set_telemetry_result(result)
         _print_json(result)
         return 0
@@ -647,6 +922,7 @@ def cmd_session_close(session_path: Path, include_verification: bool) -> int:
             }
         data = dict(result.get("data") or {}) if isinstance(result.get("data"), dict) else {}
         data["graphiti_episodic"] = graphiti_episodic
+        data["kg_preflight"] = sync_preflight
         result = {**result, "data": data}
         _set_telemetry_result(result)
         _print_json(result)
@@ -723,10 +999,24 @@ def build_parser() -> argparse.ArgumentParser:
     p_open.add_argument("--session-path", type=Path, required=True)
     p_open.add_argument("--query", required=True)
     p_open.add_argument("--report", type=Path, default=None)
+    p_open.add_argument("--workspace-root", type=Path, default=None)
 
     p_close = sub.add_parser("session-close", help="Record session on orchestrator close")
     p_close.add_argument("--session-path", type=Path, required=True)
     p_close.add_argument("--include-verification", action="store_true")
+    p_close.add_argument("--workspace-root", type=Path, default=None)
+
+    p_boot = sub.add_parser("bootstrap", help="workspaceOpen Neo4j bootstrap (F71)")
+    p_boot.add_argument("--workspace-root", type=Path, default=None)
+
+    p_cstart = sub.add_parser("cursor-session-start", help="Cursor sessionStart hook (F71)")
+    p_cstart.add_argument("--conversation-id", required=True)
+    p_cstart.add_argument("--workspace-root", type=Path, required=True)
+    p_cstart.add_argument("--query", default=None)
+
+    p_cend = sub.add_parser("cursor-session-end", help="Cursor sessionEnd hook (F71)")
+    p_cend.add_argument("--conversation-id", required=True)
+    p_cend.add_argument("--workspace-root", type=Path, required=True)
 
     p_epi = sub.add_parser("search-episodic", help="Search Graphiti episodic memory")
     p_epi.add_argument("--query", required=True)
@@ -820,13 +1110,44 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.cmd == "session-open":
         return _run_with_telemetry(
-            args, args.cmd, lambda: cmd_session_open(args.session_path, args.query, args.report)
+            args,
+            args.cmd,
+            lambda: cmd_session_open(
+                args.session_path,
+                args.query,
+                args.report,
+                getattr(args, "workspace_root", None),
+            ),
         )
     if args.cmd == "session-close":
         return _run_with_telemetry(
             args,
             args.cmd,
-            lambda: cmd_session_close(args.session_path, args.include_verification),
+            lambda: cmd_session_close(
+                args.session_path,
+                args.include_verification,
+                getattr(args, "workspace_root", None),
+            ),
+        )
+    if args.cmd == "bootstrap":
+        return _run_with_telemetry(
+            args,
+            args.cmd,
+            lambda: cmd_bootstrap(getattr(args, "workspace_root", None)),
+        )
+    if args.cmd == "cursor-session-start":
+        return _run_with_telemetry(
+            args,
+            args.cmd,
+            lambda: cmd_cursor_session_start(
+                args.conversation_id, args.workspace_root, args.query
+            ),
+        )
+    if args.cmd == "cursor-session-end":
+        return _run_with_telemetry(
+            args,
+            args.cmd,
+            lambda: cmd_cursor_session_end(args.conversation_id, args.workspace_root),
         )
     if args.cmd == "search-episodic":
         return _run_with_telemetry(

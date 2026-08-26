@@ -1,6 +1,6 @@
 # Engineering Memory — workspace install
 
-**Installed:** 2026-08-24
+**Installed:** 2026-08-26
 
 | Item | Path |
 |------|------|
@@ -10,8 +10,11 @@
 | CLI | `.cursor/bin/` (verify, session-store, memory-hook) |
 | CLI symlinks | `.cursor/skills/bin/` → `../../bin/` |
 | Hook templates | `.cursor/hooks/pack/` (scope_check, feature_drift + lib) |
+| Bootstrap (F71) | `.cursor/hooks/pack/bootstrap-engineering-memory.sh` |
+| Cursor session hooks (F71) | `sessionStart` / `sessionEnd` → `.cursor/hooks/pack/cursor-session-*.sh` |
 | Hook config examples | `.cursor/hooks/config/examples/` |
 | Plugin rules | Loaded via `workspaceOpen` plugin — not copied to `.cursor/rules/` |
+| EM root (Neo4j venv) | `$EM_ROOT` (default `~/Documents/GitHub/spec-dev-knowledge-graph`) |
 
 Re-run:
 
