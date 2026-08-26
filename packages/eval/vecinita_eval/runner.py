@@ -13,7 +13,7 @@ from vecinita_rag.language import detect_query_language
 from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode
 from vecinita_rag.pipeline_knobs import (
     rag_pipeline_knobs_from_env,
-    retrieve_multi_query_packed,
+    retrieve_eval_packed,
 )
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.types import RagAnswer, RetrievedChunk
@@ -191,7 +191,7 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
         def _retrieve_once(question: str) -> list[RetrievedChunk]:
             return retriever.retrieve_chunks(question, rebuild_run_id=rebuild_run_id)
 
-        chunks, context = retrieve_multi_query_packed(
+        chunks, context = retrieve_eval_packed(
             row.question,
             locale=locale,
             top_k=retriever_top_k,

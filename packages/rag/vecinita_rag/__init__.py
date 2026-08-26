@@ -12,6 +12,7 @@ from vecinita_rag.cache import (
     content_hash,
     normalize_query,
 )
+from vecinita_rag.chat_retrieve import retrieve_chat_chunks
 from vecinita_rag.constants import (
     DEFAULT_TOP_K,
     EMBEDDING_DIMENSION,
@@ -37,7 +38,13 @@ from vecinita_rag.multi_query import (
     merge_multi_query_hits,
     multi_query_retrieve,
 )
-from vecinita_rag.packing import pack_chunks, pack_p1
+from vecinita_rag.pipeline_knobs import (
+    RagPipelineKnobs,
+    normalize_rag_pipeline_knobs,
+    rag_pipeline_knobs_from_env,
+    retrieve_eval_packed,
+    retrieve_multi_query_packed,
+)
 from vecinita_rag.rerank import (
     DEFAULT_CE_MODEL_ID,
     DEFAULT_CE_TOP_N,
@@ -70,6 +77,7 @@ __all__ = [
     "CorpusPgvectorRetriever",
     "CrossEncoderScorer",
     "RagAnswer",
+    "RagPipelineKnobs",
     "RetrievedChunk",
     "SoftLanguageResult",
     "answer_from_chunks",
@@ -88,9 +96,14 @@ __all__ = [
     "multi_query_retrieve",
     "no_context_message",
     "normalize_query",
+    "normalize_rag_pipeline_knobs",
     "pack_chunks",
     "pack_p1",
+    "rag_pipeline_knobs_from_env",
     "rerank_with_scorer",
+    "retrieve_chat_chunks",
+    "retrieve_eval_packed",
+    "retrieve_multi_query_packed",
     "should_supplement_en_for_es_esl_query",
     "soft_language_retrieve",
     "synthesize_with_llm",

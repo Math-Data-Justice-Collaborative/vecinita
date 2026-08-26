@@ -249,16 +249,6 @@ class ChatRagService:
             context_max_chars=self._settings.rag_context_max_chars,
         )
 
-    def _rag_packing(self) -> tuple[bool, int, PackerMode, int]:
-        """Return (multi_query, count, packer, max_chars) from settings or defaults."""
-        knobs = self._rag_knobs()
-        return (
-            knobs.multi_query,
-            knobs.multi_query_count,
-            knobs.packer,
-            knobs.context_max_chars,
-        )
-
     def _cache_enabled(self) -> bool:
         return (
             self._answer_cache is not None
@@ -402,7 +392,7 @@ class ChatRagService:
         production: EvalConfig,
         query_embedding: Sequence[float] | None,
     ) -> CachedAnswer:
-        _, _, packer, max_chars = self._rag_packing()
+        knobs = self._rag_knobs()
         if not chunks:
             return CachedAnswer(
                 answer=no_context_message(language),
@@ -415,8 +405,8 @@ class ChatRagService:
             request.question,
             chunk_list,
             system_prompt=resolve_system_prompt_for_language(language, production),
-            packer=packer,
-            context_max_chars=max_chars,
+            packer=knobs.packer,
+            context_max_chars=knobs.context_max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         answer_text = self._llm.generate(
@@ -429,8 +419,8 @@ class ChatRagService:
             chunk_list,
             answer_text,
             language=language,
-            packer=packer,
-            max_chars=max_chars,
+            packer=knobs.packer,
+            max_chars=knobs.context_max_chars,
         )
         result = answer_from_chunks(request.question, chunk_list, answer_text=answer_text)
         return CachedAnswer(
@@ -586,13 +576,13 @@ class ChatRagService:
                 tokens=iter((message,)),
             )
 
-        _, _, packer, max_chars = self._rag_packing()
+        knobs = self._rag_knobs()
         prompt = _build_prompt(
             request.question,
             chunks,
             system_prompt=resolve_system_prompt_for_language(language, production),
-            packer=packer,
-            context_max_chars=max_chars,
+            packer=knobs.packer,
+            context_max_chars=knobs.context_max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         parts: list[str] = []
@@ -611,8 +601,8 @@ class ChatRagService:
                 chunks,
                 draft,
                 language=language,
-                packer=packer,
-                max_chars=max_chars,
+                packer=knobs.packer,
+                max_chars=knobs.context_max_chars,
             )
             cache.store_answer(
                 request.question,
@@ -652,13 +642,13 @@ class ChatRagService:
                 cache_hit="none",
                 tokens=iter((no_context_message(language),)),
             )
-        _, _, packer, max_chars = self._rag_packing()
+        knobs = self._rag_knobs()
         prompt = _build_prompt(
             request.question,
             chunks,
             system_prompt=resolve_system_prompt_for_language(language, production),
-            packer=packer,
-            context_max_chars=max_chars,
+            packer=knobs.packer,
+            context_max_chars=knobs.context_max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         parts: list[str] = []
@@ -677,8 +667,8 @@ class ChatRagService:
                 chunks,
                 draft,
                 language=language,
-                packer=packer,
-                max_chars=max_chars,
+                packer=knobs.packer,
+                max_chars=knobs.context_max_chars,
             )
             yield verified
 

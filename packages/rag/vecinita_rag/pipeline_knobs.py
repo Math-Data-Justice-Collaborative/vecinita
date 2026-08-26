@@ -95,3 +95,21 @@ def retrieve_multi_query_packed(
     )
     context = pack_chunks(chunks, mode=knobs.packer, max_chars=knobs.context_max_chars)
     return chunks, context
+
+
+def retrieve_eval_packed(
+    question: str,
+    *,
+    locale: str,
+    top_k: int,
+    retrieve_fn: Callable[[str], list[RetrievedChunk]],
+    knobs: RagPipelineKnobs | None = None,
+) -> tuple[list[RetrievedChunk], str]:
+    """Golden-set eval retrieve+pack via shared F42 knobs (ADR-041)."""
+    return retrieve_multi_query_packed(
+        question,
+        locale=locale,
+        top_k=top_k,
+        retrieve_fn=retrieve_fn,
+        knobs=knobs or rag_pipeline_knobs_from_env(),
+    )
