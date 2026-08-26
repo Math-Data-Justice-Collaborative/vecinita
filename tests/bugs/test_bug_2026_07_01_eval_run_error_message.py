@@ -125,7 +125,7 @@ def test_execute_eval_run_persists_embed_client_error_for_api(
     try:
         with (
             patch(
-                "vecinita_internal_write_api.eval_service.run_golden_eval",
+                "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
                 side_effect=RuntimeError(_EMBED_404_MESSAGE),
             ),
             pytest.raises(RuntimeError, match="invalid function call"),

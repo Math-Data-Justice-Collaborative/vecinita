@@ -130,7 +130,7 @@ def test_execute_eval_run_persists_completed_results(
     monkeypatch.setenv("VECINITA_EVAL_FIXTURE_PATH", str(fixture))
     run_id = eval_run_id
     with patch(
-        "vecinita_internal_write_api.eval_service.run_golden_eval",
+        "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
         return_value=([_sample_row_result()], _sample_summary()),
     ):
         execute_eval_run(
@@ -171,7 +171,7 @@ def test_execute_eval_run_resolves_default_judge_when_not_injected(
     monkeypatch.setenv("VECINITA_MODAL_LLM_URL", "http://llm.test")
     run_id = eval_run_id
     with patch(
-        "vecinita_internal_write_api.eval_service.run_golden_eval",
+        "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
         return_value=([_sample_row_result()], _sample_summary()),
     ) as mock_run:
         execute_eval_run(
@@ -204,7 +204,7 @@ def test_execute_eval_run_passes_config_snapshot_to_runner(
     run_id = created.response.run_id
     try:
         with patch(
-            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
             return_value=([_sample_row_result()], _sample_summary()),
         ) as mock_run:
             execute_eval_run(
@@ -247,7 +247,7 @@ def test_execute_eval_run_adhoc_dispatches_single_question(
     run_id = created.response.run_id
     try:
         with patch(
-            "vecinita_internal_write_api.eval_service.run_adhoc_eval",
+            "vecinita_internal_write_api.eval_run_execute.run_adhoc_eval",
             return_value=([_sample_row_result()], _sample_summary()),
         ) as mock_run:
             execute_eval_run(
@@ -275,7 +275,7 @@ def test_execute_eval_run_marks_failed_on_exception(
     """execute_eval_run sets status failed and re-raises on harness errors."""
     with (
         patch(
-            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
             side_effect=RuntimeError("eval harness failed"),
         ),
         pytest.raises(RuntimeError, match="eval harness failed"),
@@ -382,7 +382,7 @@ def test_execute_eval_run_requires_database_url(
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with (
         patch(
-            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
             return_value=([_sample_row_result()], _sample_summary()),
         ),
         pytest.raises(RuntimeError, match="DATABASE_URL is required"),
@@ -408,7 +408,7 @@ def test_default_embed_fn_uses_embedding_client(monkeypatch: pytest.MonkeyPatch)
 
     stub = StubEmbeddingClient()
     with patch(
-        "vecinita_internal_write_api.eval_service.EmbeddingClient",
+        "vecinita_internal_write_api.eval_run_execute.EmbeddingClient",
         return_value=stub,
     ):
         from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
@@ -578,7 +578,7 @@ def test_execute_eval_run_staging_profile_uses_staging_golden(
             {"id": eval_run_id},
         )
     with patch(
-        "vecinita_internal_write_api.eval_service.run_golden_eval",
+        "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
         return_value=([_sample_row_result()], _sample_summary()),
     ) as mock_run:
         execute_eval_run(
@@ -752,7 +752,7 @@ def test_execute_eval_run_omits_custom_scores_when_empty(
         custom_scores=None,
     )
     with patch(
-        "vecinita_internal_write_api.eval_service.run_golden_eval",
+        "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
         return_value=([_sample_row_result()], summary),
     ):
         execute_eval_run(
@@ -1181,7 +1181,7 @@ def test_criteria_for_config_filters_enabled_criteria(
                 },
             )
         with patch(
-            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
             return_value=([_sample_row_result()], _sample_summary()),
         ) as mock_run:
             execute_eval_run(

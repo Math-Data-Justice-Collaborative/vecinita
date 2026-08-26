@@ -58,7 +58,7 @@ def test_execute_eval_run_wires_default_judge_and_llm_when_modal_url_set(
     )
     try:
         with patch(
-            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
             return_value=([], summary),
         ) as mock_run:
             execute_eval_run(
