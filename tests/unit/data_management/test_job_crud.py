@@ -10,7 +10,13 @@ from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore, job_record_to_schema
 from vecinita_data_management_backend.write_client import InternalWriteClientError
-from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
+from vecinita_shared_schemas.auth import (
+    AuthContext,
+    AuthPrincipal,
+    get_principal,
+    reset_auth_config_for_tests,
+    resolve_operator_or_service,
+)
 from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.helpers.json_response import json_list, json_str, response_json_object
@@ -33,7 +39,9 @@ def _client_with_principal(
     principal: AuthPrincipal,
 ) -> TestClient:
     app = create_app(store=store, require_proxy_auth=False)
+    ctx = AuthContext(principal=principal, is_service=False)
     app.dependency_overrides[get_principal] = lambda: principal
+    app.dependency_overrides[resolve_operator_or_service] = lambda: ctx
     return TestClient(app)
 
 
