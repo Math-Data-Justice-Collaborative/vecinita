@@ -9,6 +9,7 @@ from infra.modal.llm_app import LLM_MAX_MODEL_LEN, max_model_len_for
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LLM_APP = REPO_ROOT / "infra" / "modal" / "llm_app.py"
+LLM_SERVICE_CORE = REPO_ROOT / "infra" / "modal" / "llm_service_core.py"
 
 SNAPSHOT_ENV_VARS = (
     "TORCHINDUCTOR_COMPILE_THREADS",
@@ -21,13 +22,18 @@ def _llm_app_source() -> str:
     return LLM_APP.read_text(encoding="utf-8")
 
 
-def _llm_service_class() -> ast.ClassDef:
-    """Return the LlmService class node parsed from the LLM app source."""
-    tree = ast.parse(_llm_app_source())
+def _llm_service_core_source() -> str:
+    """Read shared LlmServiceCore implementation source."""
+    return LLM_SERVICE_CORE.read_text(encoding="utf-8")
+
+
+def _llm_service_core_class() -> ast.ClassDef:
+    """Return the LlmServiceCore class node from llm_service_core.py."""
+    tree = ast.parse(_llm_service_core_source())
     for node in tree.body:
-        if isinstance(node, ast.ClassDef) and node.name == "LlmService":
+        if isinstance(node, ast.ClassDef) and node.name == "LlmServiceCore":
             return node
-    msg = "LlmService not found"
+    msg = "LlmServiceCore not found"
     raise AssertionError(msg)
 
 
@@ -36,7 +42,7 @@ def _method_named(cls: ast.ClassDef, name: str) -> ast.FunctionDef:
     for item in cls.body:
         if isinstance(item, ast.FunctionDef) and item.name == name:
             return item
-    msg = f"LlmService.{name} not found"
+    msg = f"{cls.name}.{name} not found"
     raise AssertionError(msg)
 
 
@@ -71,19 +77,29 @@ def test_llm_image_pins_vllm_with_sleep_mode() -> None:
 
 def test_load_model_does_not_import_vllm_inline() -> None:
     """load_model avoids importing vllm inline."""
-    load_model = _method_named(_llm_service_class(), "load_model")
+    load_model = _method_named(_llm_service_core_class(), "load_model")
     assert not _function_has_vllm_import(load_model)
 
 
-def test_generate_text_does_not_import_sampling_params_inline() -> None:
-    """_generate_text avoids importing SamplingParams inline."""
-    generate_text = _method_named(_llm_service_class(), "_generate_text")
-    assert not _function_has_vllm_import(generate_text)
+def _function_imports_vllm_llm(func: ast.FunctionDef) -> bool:
+    """Return whether the function body imports LLM from vllm."""
+    for child in ast.walk(func):
+        if isinstance(child, ast.ImportFrom) and child.module == "vllm":
+            for alias in child.names:
+                if alias.name == "LLM":
+                    return True
+    return False
+
+
+def test_generate_text_does_not_import_llm_inline() -> None:
+    """_generate_text may import SamplingParams lazily but must not import LLM inline."""
+    generate_text = _method_named(_llm_service_core_class(), "_generate_text")
+    assert not _function_imports_vllm_llm(generate_text)
 
 
 def test_load_model_lazy_initializes_state() -> None:
     """ADR-037: load_model defers vLLM init until first request (model_id switching)."""
-    load_model = _method_named(_llm_service_class(), "load_model")
+    load_model = _method_named(_llm_service_core_class(), "load_model")
     source = ast.unparse(load_model)
     assert "self._llm = None" in source
     assert "self._loaded_model_arg = None" in source
