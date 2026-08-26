@@ -7,13 +7,23 @@ from uuid import uuid4
 
 import pytest
 from starlette.requests import Request
-from vecinita_internal_write_api.app import (
-    _dependency_health_url,  # pyright: ignore[reportPrivateUsage]
-    _normalize_database_url,  # pyright: ignore[reportPrivateUsage]
-    _resolve_write_actor,  # pyright: ignore[reportPrivateUsage]
-    _row_datetime,  # pyright: ignore[reportPrivateUsage]
-    _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
-    _tags_snapshot_list,  # pyright: ignore[reportPrivateUsage]
+from vecinita_internal_write_api.deps import (
+    dependency_health_url as _dependency_health_url,
+)
+from vecinita_internal_write_api.deps import (
+    normalize_database_url as _normalize_database_url,
+)
+from vecinita_internal_write_api.deps import (
+    resolve_write_actor as _resolve_write_actor,
+)
+from vecinita_internal_write_api.deps import (
+    row_datetime as _row_datetime,
+)
+from vecinita_internal_write_api.deps import (
+    row_datetime_optional as _row_datetime_optional,
+)
+from vecinita_internal_write_api.deps import (
+    tags_snapshot_list as _tags_snapshot_list,
 )
 from vecinita_shared_schemas.audit_headers import (
     AUDIT_ACTOR_ID_HEADER,

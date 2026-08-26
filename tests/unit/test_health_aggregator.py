@@ -73,7 +73,7 @@ def _mock_get_timeout(_url: str, **_kwargs: object) -> httpx.Response:
 
 def test_health_all_returns_service_statuses(client: TestClient) -> None:
     """Health-all returns per-service statuses with the database up."""
-    with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_mock_get_ok):
+    with patch("vecinita_internal_write_api.health_service.httpx.get", side_effect=_mock_get_ok):
         resp = client.get("/internal/v1/health/all", headers=_auth())
     assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
@@ -88,7 +88,9 @@ def test_health_all_returns_service_statuses(client: TestClient) -> None:
 
 def test_health_all_marks_down_on_timeout(client: TestClient) -> None:
     """Health-all reports degraded with errors when services time out."""
-    with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_mock_get_timeout):
+    with patch(
+        "vecinita_internal_write_api.health_service.httpx.get", side_effect=_mock_get_timeout
+    ):
         resp = client.get("/internal/v1/health/all", headers=_auth())
     assert resp.status_code == HTTPStatus.OK
     data = response_json_object(resp)
@@ -102,7 +104,7 @@ def test_health_all_marks_down_on_timeout(client: TestClient) -> None:
 
 def test_health_all_includes_all_configured_services(client: TestClient) -> None:
     """Health-all includes every configured service in its report."""
-    with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_mock_get_ok):
+    with patch("vecinita_internal_write_api.health_service.httpx.get", side_effect=_mock_get_ok):
         resp = client.get("/internal/v1/health/all", headers=_auth())
     data = response_json_object(resp)
     expected_services = {

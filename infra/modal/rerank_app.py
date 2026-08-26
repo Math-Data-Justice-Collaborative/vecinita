@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 
 import modal
+from infra.modal.repo_paths import resolve_repo_root
 
 APP_NAME = "vecinita-rerank"
 VOLUME_NAME = "rerank-models"
@@ -19,14 +19,7 @@ CE_MODEL = "BAAI/bge-reranker-v2-m3"
 _RERANK_SECRETS = [modal.Secret.from_name("vecinita-rerank")]
 
 
-def _resolve_repo_root() -> Path:
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/opt/vecinita")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root()
 
 app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)

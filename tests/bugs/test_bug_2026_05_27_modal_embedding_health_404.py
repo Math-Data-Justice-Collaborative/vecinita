@@ -57,7 +57,7 @@ def test_health_all_modal_embedding_url_must_not_double_health_suffix(
         probed.append(url)
         return httpx.Response(HTTPStatus.OK, json={"status": "ok"})
 
-    with patch("vecinita_internal_write_api.app.httpx.get", side_effect=mock_get):
+    with patch("vecinita_internal_write_api.health_service.httpx.get", side_effect=mock_get):
         resp = client.get("/internal/v1/health/all", headers=_auth())
 
     assert resp.status_code == HTTPStatus.OK

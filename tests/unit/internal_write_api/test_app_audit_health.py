@@ -72,7 +72,7 @@ def test_health_all_marks_non_200_dependency_down(
             return httpx.Response(503, text="unavailable")
         return httpx.Response(200, json={"status": "ok"})
 
-    with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_mock_get):
+    with patch("vecinita_internal_write_api.health_service.httpx.get", side_effect=_mock_get):
         response = write_client.get("/internal/v1/health/all", headers=auth_headers())
 
     assert response.status_code == HTTPStatus.OK
@@ -109,7 +109,7 @@ def test_health_all_uses_health_suffix_url(
         seen.append(url)
         return httpx.Response(200, json={"status": "ok"})
 
-    with patch("vecinita_internal_write_api.app.httpx.get", side_effect=_mock_get):
+    with patch("vecinita_internal_write_api.health_service.httpx.get", side_effect=_mock_get):
         write_client.get("/internal/v1/health/all", headers=auth_headers())
 
     assert "http://chat-rag:8000/health" in seen
@@ -136,7 +136,7 @@ def test_health_all_database_down_marks_degraded(
         )
 
         client = TestClient(create_app())
-        with patch("vecinita_internal_write_api.app.httpx.get") as mock_get:
+        with patch("vecinita_internal_write_api.health_service.httpx.get") as mock_get:
             mock_get.return_value = httpx.Response(200, json={"status": "ok"})
             response = client.get("/internal/v1/health/all", headers=auth_headers())
 

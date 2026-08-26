@@ -11,6 +11,11 @@ from vecinita_rag.cache import (
     DEFAULT_SEMANTIC_THRESHOLD,
 )
 from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode
+from vecinita_rag.pipeline_knobs import (
+    MAX_MULTI_QUERY_COUNT,
+    MIN_CONTEXT_MAX_CHARS,
+    MIN_MULTI_QUERY_COUNT,
+)
 from vecinita_rag.rerank import DEFAULT_CE_MODEL_ID, DEFAULT_CE_TOP_N
 from vecinita_shared_schemas.eval_config import (
     DEFAULT_EVAL_MAX_TOKENS,
@@ -21,9 +26,9 @@ from vecinita_shared_schemas.eval_config import (
     DEFAULT_EVAL_TOP_K,
 )
 
-_MIN_MULTI_QUERY_COUNT = 1
-_MAX_MULTI_QUERY_COUNT = 5
-_MIN_CONTEXT_MAX_CHARS = 256
+_MIN_MULTI_QUERY_COUNT = MIN_MULTI_QUERY_COUNT
+_MAX_MULTI_QUERY_COUNT = MAX_MULTI_QUERY_COUNT
+_MIN_CONTEXT_MAX_CHARS = MIN_CONTEXT_MAX_CHARS
 _MIN_CACHE_TTL_S = 60
 _MAX_CACHE_TTL_S = 86400
 _MIN_CACHE_MAX_ENTRIES = 16

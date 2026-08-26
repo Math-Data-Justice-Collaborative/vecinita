@@ -16,10 +16,10 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import modal
+from infra.modal.repo_paths import resolve_repo_root
 
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
@@ -31,15 +31,7 @@ logger = logging.getLogger(__name__)
 APP_NAME = "vecinita-data-management"
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when deploying from infra/modal; /opt/vecinita when Modal mounts at /root."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/opt/vecinita")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root()
 
 app = modal.App(APP_NAME)
 

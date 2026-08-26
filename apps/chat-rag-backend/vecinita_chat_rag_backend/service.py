@@ -17,20 +17,15 @@ from vecinita_rag.cache import (
     CascadeRequest,
     cascade_lookup,
 )
+from vecinita_rag.chat_retrieve import retrieve_chat_chunks
 from vecinita_rag.engine import answer_from_chunks
-from vecinita_rag.es_esl_supplement import (
-    merge_es_esl_retrieval_for_r6,
-    should_supplement_en_for_es_esl_query,
-)
 from vecinita_rag.faithfulness_judge import CompletingLlm, score_faithfulness
 from vecinita_rag.language import detect_query_language, no_context_message
-from vecinita_rag.multi_query import merge_multi_query_hits, multi_query_retrieve
 from vecinita_rag.output_verify import OutputVerifyRequest, verify_and_format_answer
 from vecinita_rag.packing import PackerMode, pack_chunks
+from vecinita_rag.pipeline_knobs import RagPipelineKnobs, normalize_rag_pipeline_knobs
 from vecinita_rag.query_refine import refine_queries_llm
-from vecinita_rag.rerank import CrossEncoderScorer, rerank_with_scorer
 from vecinita_rag.retriever import CorpusPgvectorRetriever
-from vecinita_rag.soft_language import soft_language_retrieve
 from vecinita_rag.tag_inference import TagInferFn, resolve_retrieval_tags
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_rerank_client import RerankClient
@@ -43,6 +38,7 @@ from vecinita_chat_rag_backend.rag_production_config import load_active_rag_conf
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
+    from vecinita_rag.rerank import CrossEncoderScorer
 
     from vecinita_chat_rag_backend.config import ChatRagSettings
 
@@ -243,15 +239,14 @@ class ChatRagService:
             return EvalConfig()
         return load_active_rag_config(self._config_engine, self._settings)
 
-    def _rag_packing(self) -> tuple[bool, int, PackerMode, int]:
-        """Return (multi_query, count, packer, max_chars) from settings or defaults."""
+    def _rag_knobs(self) -> RagPipelineKnobs:
         if self._settings is None:
-            return True, 3, "p3", 3500
-        return (
-            self._settings.rag_multi_query,
-            self._settings.rag_multi_query_count,
-            self._settings.rag_packer,
-            self._settings.rag_context_max_chars,
+            return normalize_rag_pipeline_knobs()
+        return normalize_rag_pipeline_knobs(
+            multi_query=self._settings.rag_multi_query,
+            multi_query_count=self._settings.rag_multi_query_count,
+            packer=self._settings.rag_packer,
+            context_max_chars=self._settings.rag_context_max_chars,
         )
 
     def _cache_enabled(self) -> bool:
@@ -347,7 +342,7 @@ class ChatRagService:
     ) -> list[RetrievedChunk]:
         language = self._effective_language(request)
         tag_slugs = self._retrieval_tags(request)
-        multi_query, multi_count, _, _ = self._rag_packing()
+        knobs = self._rag_knobs()
         soft_fallback = (
             self._settings.rag_soft_language_fallback if self._settings is not None else False
         )
@@ -356,71 +351,37 @@ class ChatRagService:
             and self._settings.rag_rerank_ce
             and self._ce_scorer is not None
         )
-        retrieve_k = top_k
-        if ce_enabled and self._settings is not None:
-            retrieve_k = max(top_k, self._settings.rag_rerank_ce_top_n)
+        ce_top_n = self._settings.rag_rerank_ce_top_n if self._settings is not None else top_k
 
-        def _retrieve_lang(question: str, lang: str | None) -> list[RetrievedChunk]:
-            chunks = self._retriever.retrieve_chunks(
+        def retrieve_lang_fn(
+            question: str,
+            lang: str | None,
+            tags: list[str] | None,
+            retrieve_k: int,
+            threshold: float,
+        ) -> list[RetrievedChunk]:
+            return self._retriever.retrieve_chunks(
                 question,
-                tag_slugs=tag_slugs,
+                tag_slugs=tags,
                 language=lang,
                 top_k=retrieve_k,
-                score_threshold=min_retrieval_score,
+                score_threshold=threshold,
             )
-            if not chunks and tag_slugs:
-                chunks = self._retriever.retrieve_chunks(
-                    question,
-                    tag_slugs=None,
-                    language=lang,
-                    top_k=retrieve_k,
-                    score_threshold=min_retrieval_score,
-                )
-            return chunks
 
-        def _retrieve_once(question: str) -> list[RetrievedChunk]:
-            chunks = soft_language_retrieve(
-                question,
-                language=language,
-                retrieve_fn=_retrieve_lang,
-                enabled=soft_fallback,
-            ).chunks
-            if should_supplement_en_for_es_esl_query(
-                language=language,
-                question=question,
-                tag_slugs=tag_slugs,
-            ):
-                en_chunks = _retrieve_lang(question, "en")
-                chunks = merge_es_esl_retrieval_for_r6(
-                    chunks,
-                    en_chunks,
-                    top_k=retrieve_k,
-                )
-            return chunks
-
-        questions = self._retrieval_questions(request)
-        groups: list[list[RetrievedChunk]] = []
-        for question_text in questions:
-            sub_request = request.model_copy(update={"question": question_text})
-            sub_chunks = multi_query_retrieve(
-                sub_request.question,
-                locale=language,
-                top_k=retrieve_k,
-                retrieve_fn=_retrieve_once,
-                enabled=multi_query,
-                count=multi_count,
-            )
-            groups.append(sub_chunks)
-        chunks = merge_multi_query_hits(groups, top_k=retrieve_k)
-        if ce_enabled and self._ce_scorer is not None:
-            return rerank_with_scorer(
-                request.question,
-                chunks,
-                top_k=top_k,
-                scorer=self._ce_scorer,
-                score_threshold=min_retrieval_score,
-            )
-        return chunks
+        return retrieve_chat_chunks(
+            self._retrieval_questions(request),
+            language=language,
+            tag_slugs=tag_slugs,
+            top_k=top_k,
+            min_retrieval_score=min_retrieval_score,
+            retrieve_lang_fn=retrieve_lang_fn,
+            knobs=knobs,
+            soft_language_fallback=soft_fallback,
+            ce_enabled=ce_enabled,
+            ce_scorer=self._ce_scorer,
+            ce_top_n=ce_top_n,
+            rerank_question=request.question,
+        )
 
     def _synthesize(
         self,
@@ -431,7 +392,7 @@ class ChatRagService:
         production: EvalConfig,
         query_embedding: Sequence[float] | None,
     ) -> CachedAnswer:
-        _, _, packer, max_chars = self._rag_packing()
+        knobs = self._rag_knobs()
         if not chunks:
             return CachedAnswer(
                 answer=no_context_message(language),
@@ -444,8 +405,8 @@ class ChatRagService:
             request.question,
             chunk_list,
             system_prompt=resolve_system_prompt_for_language(language, production),
-            packer=packer,
-            context_max_chars=max_chars,
+            packer=knobs.packer,
+            context_max_chars=knobs.context_max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         answer_text = self._llm.generate(
@@ -458,8 +419,8 @@ class ChatRagService:
             chunk_list,
             answer_text,
             language=language,
-            packer=packer,
-            max_chars=max_chars,
+            packer=knobs.packer,
+            max_chars=knobs.context_max_chars,
         )
         result = answer_from_chunks(request.question, chunk_list, answer_text=answer_text)
         return CachedAnswer(
@@ -615,13 +576,13 @@ class ChatRagService:
                 tokens=iter((message,)),
             )
 
-        _, _, packer, max_chars = self._rag_packing()
+        knobs = self._rag_knobs()
         prompt = _build_prompt(
             request.question,
             chunks,
             system_prompt=resolve_system_prompt_for_language(language, production),
-            packer=packer,
-            context_max_chars=max_chars,
+            packer=knobs.packer,
+            context_max_chars=knobs.context_max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         parts: list[str] = []
@@ -640,8 +601,8 @@ class ChatRagService:
                 chunks,
                 draft,
                 language=language,
-                packer=packer,
-                max_chars=max_chars,
+                packer=knobs.packer,
+                max_chars=knobs.context_max_chars,
             )
             cache.store_answer(
                 request.question,
@@ -681,13 +642,13 @@ class ChatRagService:
                 cache_hit="none",
                 tokens=iter((no_context_message(language),)),
             )
-        _, _, packer, max_chars = self._rag_packing()
+        knobs = self._rag_knobs()
         prompt = _build_prompt(
             request.question,
             chunks,
             system_prompt=resolve_system_prompt_for_language(language, production),
-            packer=packer,
-            context_max_chars=max_chars,
+            packer=knobs.packer,
+            context_max_chars=knobs.context_max_chars,
         )
         model_id = production.model_id or self._llm_model_id
         parts: list[str] = []
@@ -706,8 +667,8 @@ class ChatRagService:
                 chunks,
                 draft,
                 language=language,
-                packer=packer,
-                max_chars=max_chars,
+                packer=knobs.packer,
+                max_chars=knobs.context_max_chars,
             )
             yield verified
 

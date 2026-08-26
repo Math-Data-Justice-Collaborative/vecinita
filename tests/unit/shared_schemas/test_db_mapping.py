@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
+    row_datetime,
+    row_datetime_optional,
     row_int,
     row_str,
     row_str_optional,
@@ -125,3 +128,22 @@ def test_scalar_int_returns_int_without_coercion() -> None:
 def test_scalar_float_returns_float_without_coercion() -> None:
     """Test scalar float returns float without coercion."""
     assert scalar_float(_SCALAR_FLOAT_RAW) == _SCALAR_FLOAT_RAW
+
+
+def test_row_datetime_returns_datetime() -> None:
+    """row_datetime returns datetime values from row mappings."""
+    now = datetime.now(UTC)
+    assert row_datetime({"created_at": now}, "created_at") == now
+
+
+def test_row_datetime_raises_on_invalid_type() -> None:
+    """row_datetime rejects non-datetime column values."""
+    with pytest.raises(TypeError, match="Expected datetime"):
+        row_datetime({"created_at": "bad"}, "created_at")
+
+
+def test_row_datetime_optional_returns_none_or_datetime() -> None:
+    """row_datetime_optional handles null and datetime values."""
+    assert row_datetime_optional({"finished_at": None}, "finished_at") is None
+    now = datetime.now(UTC)
+    assert row_datetime_optional({"finished_at": now}, "finished_at") == now

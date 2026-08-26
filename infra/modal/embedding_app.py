@@ -12,10 +12,10 @@ from __future__ import annotations
 import json
 import logging
 import os
-from pathlib import Path
 from typing import Protocol, cast
 
 import modal
+from infra.modal.repo_paths import resolve_repo_root
 from vecinita_embedding_client.modal_pins import (
     DEFAULT_EMBEDDING_MODEL_ID,
     EMBED_IMAGE_PIPS,
@@ -30,15 +30,7 @@ VOLUME_NAME = "embedding-models"
 _LOG = logging.getLogger(__name__)
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when deploying from infra/modal; /opt/vecinita when Modal mounts at /root."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/opt/vecinita")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root()
 _PKG_ROOT = "/opt/vecinita"
 _PYTHONPATH = ":".join(
     [

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -11,8 +10,11 @@ from typing import TYPE_CHECKING, cast
 
 from vecinita_rag.engine import answer_without_context, synthesize_with_llm
 from vecinita_rag.language import detect_query_language
-from vecinita_rag.multi_query import multi_query_retrieve
-from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode, pack_chunks
+from vecinita_rag.packing import DEFAULT_CONTEXT_MAX_CHARS, PackerMode
+from vecinita_rag.pipeline_knobs import (
+    rag_pipeline_knobs_from_env,
+    retrieve_eval_packed,
+)
 from vecinita_rag.retriever import CorpusPgvectorRetriever
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.eval_config import DEFAULT_EVAL_TOP_K, EvalConfig
@@ -125,40 +127,6 @@ def _adhoc_golden_row(question: str) -> GoldenRow:
     )
 
 
-def _env_bool(name: str, default: bool) -> bool:  # noqa: FBT001
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    return raw.strip().lower() in ("1", "true", "yes", "on")
-
-
-def _f42_rag_knobs() -> tuple[bool, int, PackerMode, int]:
-    """Shared ChatRAG/F36 knobs from ``VECINITA_RAG_*`` (ADR-041)."""
-    count_raw = os.environ.get("VECINITA_RAG_MULTI_QUERY_COUNT", "3")
-    try:
-        count = int(count_raw)
-    except ValueError:
-        count = 3
-    count = max(1, min(5, count))
-    packer_raw = os.environ.get("VECINITA_RAG_PACKER", "p3").strip().lower()
-    packer: PackerMode = "p3" if packer_raw == "p3" else "p1"
-    max_chars_raw = os.environ.get(
-        "VECINITA_RAG_CONTEXT_MAX_CHARS",
-        str(DEFAULT_CONTEXT_MAX_CHARS),
-    )
-    try:
-        max_chars = int(max_chars_raw)
-    except ValueError:
-        max_chars = DEFAULT_CONTEXT_MAX_CHARS
-    max_chars = max(256, max_chars)
-    return (
-        _env_bool("VECINITA_RAG_MULTI_QUERY", default=True),
-        count,
-        packer,
-        max_chars,
-    )
-
-
 def _abstain_answer_ok(answer: str) -> bool:
     lowered = answer.lower()
     no_info_markers = (
@@ -214,7 +182,7 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
     retrieval_passes: dict[tuple[str, str], bool] = {}
     latencies: list[int] = []
     custom_per_row: list[dict[str, float]] = []
-    multi_query, multi_count, packer, context_max_chars = _f42_rag_knobs()
+    knobs = rag_pipeline_knobs_from_env()
 
     for row in rows:
         start = time.monotonic()
@@ -223,13 +191,12 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
         def _retrieve_once(question: str) -> list[RetrievedChunk]:
             return retriever.retrieve_chunks(question, rebuild_run_id=rebuild_run_id)
 
-        chunks = multi_query_retrieve(
+        chunks, context = retrieve_eval_packed(
             row.question,
             locale=locale,
             top_k=retriever_top_k,
             retrieve_fn=_retrieve_once,
-            enabled=multi_query,
-            count=multi_count,
+            knobs=knobs,
         )
         retrieved_urls = [chunk.url for chunk in chunks if chunk.url]
         rag_answer = _answer_for_row(
@@ -237,11 +204,10 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
             chunks=chunks,
             llm=llm,
             system_prompt=system_prompt,
-            packer=packer,
-            context_max_chars=context_max_chars,
+            packer=knobs.packer,
+            context_max_chars=knobs.context_max_chars,
         )
         answer = rag_answer.answer
-        context = pack_chunks(chunks, mode=packer, max_chars=context_max_chars)
 
         if adhoc:
             retrieval_pass = bool(retrieved_urls)

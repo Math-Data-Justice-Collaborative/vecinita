@@ -23,6 +23,8 @@ from vecinita_shared_schemas.automations import (
 )
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
+    row_datetime,
+    row_datetime_optional,
     row_str,
     row_str_optional,
     row_uuid,
@@ -37,21 +39,6 @@ if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 
-def _row_datetime(row: Mapping[str, object], key: str) -> datetime:
-    value = row[key]
-    if isinstance(value, datetime):
-        return value
-    msg = f"Expected datetime for {key!r}, got {type(value).__name__}"
-    raise TypeError(msg)
-
-
-def _row_datetime_optional(row: Mapping[str, object], key: str) -> datetime | None:
-    value = row[key]
-    if value is None:
-        return None
-    return _row_datetime(row, key)
-
-
 def _run_from_row(row: Mapping[str, object]) -> AutomationRun:
     job_type = cast("AutomationJobType", row_str(row, "job_type"))
     status = cast("AutomationRunStatus", row_str(row, "status"))
@@ -59,13 +46,13 @@ def _run_from_row(row: Mapping[str, object]) -> AutomationRun:
         id=row_uuid(row, "id"),
         job_type=job_type,
         status=status,
-        started_at=_row_datetime_optional(row, "started_at"),
-        finished_at=_row_datetime_optional(row, "finished_at"),
+        started_at=row_datetime_optional(row, "started_at"),
+        finished_at=row_datetime_optional(row, "finished_at"),
         error=row_str_optional(row, "error"),
         document_id=row_uuid_optional(row, "document_id"),
         revision=row_str_optional(row, "revision"),
-        created_at=_row_datetime(row, "created_at"),
-        updated_at=_row_datetime(row, "updated_at"),
+        created_at=row_datetime(row, "created_at"),
+        updated_at=row_datetime(row, "updated_at"),
     )
 
 

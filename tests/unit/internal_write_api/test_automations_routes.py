@@ -15,8 +15,6 @@ from uuid import uuid4
 
 import pytest
 from vecinita_internal_write_api.automations import (
-    _row_datetime,  # pyright: ignore[reportPrivateUsage]
-    _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
     _run_from_row,  # pyright: ignore[reportPrivateUsage]
 )
 from vecinita_shared_schemas.automations import (
@@ -27,6 +25,7 @@ from vecinita_shared_schemas.automations import (
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
 )
+from vecinita_shared_schemas.db_mapping import row_datetime, row_datetime_optional
 
 from tests.helpers.json_response import response_json_object
 from tests.unit.internal_write_api.conftest import auth_headers
@@ -133,11 +132,11 @@ def test_post_automation_run_persists_and_lists(
 def test_automation_row_datetime_helpers_cover_type_branches() -> None:
     """Cover datetime coercion helpers used by automation_runs mapping (TP3)."""
     now = datetime.now(UTC)
-    assert _row_datetime({"started_at": now}, "started_at") == now
+    assert row_datetime({"started_at": now}, "started_at") == now
     with pytest.raises(TypeError, match="Expected datetime"):
-        _row_datetime({"started_at": "not-a-datetime"}, "started_at")
-    assert _row_datetime_optional({"finished_at": None}, "finished_at") is None
-    assert _row_datetime_optional({"finished_at": now}, "finished_at") == now
+        row_datetime({"started_at": "not-a-datetime"}, "started_at")
+    assert row_datetime_optional({"finished_at": None}, "finished_at") is None
+    assert row_datetime_optional({"finished_at": now}, "finished_at") == now
 
     run_id = uuid4()
     row = {

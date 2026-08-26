@@ -54,7 +54,7 @@ def test_uj074_audit_list_includes_actor_email_when_resolvable(
         return {actor_id: _ACTOR_EMAIL}
 
     monkeypatch.setattr(
-        "vecinita_internal_write_api.app.resolve_actor_emails",
+        "vecinita_internal_write_api.audit_service.resolve_actor_emails",
         fake_lookup,
         raising=False,
     )
@@ -132,7 +132,7 @@ def test_uj074_audit_list_actor_email_null_when_unresolved(
         return {}
 
     monkeypatch.setattr(
-        "vecinita_internal_write_api.app.resolve_actor_emails",
+        "vecinita_internal_write_api.audit_service.resolve_actor_emails",
         fake_lookup,
         raising=False,
     )

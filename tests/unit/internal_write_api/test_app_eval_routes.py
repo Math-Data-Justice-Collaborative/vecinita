@@ -117,7 +117,9 @@ def test_create_eval_run_enqueues_modal_eval_job(internal_api_env: None) -> None
     )
     client = TestClient(app)
 
-    with patch("vecinita_internal_write_api.app.create_eval_run", side_effect=_fake_create):
+    with patch(
+        "vecinita_internal_write_api.routes.eval_runs.create_eval_run", side_effect=_fake_create
+    ):
         response = client.post(
             "/internal/v1/eval/runs",
             headers=auth_headers(),
@@ -161,7 +163,9 @@ def test_create_eval_run_returns_503_when_jobs_client_missing(
     client = TestClient(
         create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge(), jobs_client=None),
     )
-    with patch("vecinita_internal_write_api.app.create_eval_run", side_effect=_fake_create):
+    with patch(
+        "vecinita_internal_write_api.routes.eval_runs.create_eval_run", side_effect=_fake_create
+    ):
         response = client.post(
             "/internal/v1/eval/runs",
             json={"corpus_profile": "fixture"},
@@ -906,7 +910,7 @@ def test_execute_eval_run_route_invokes_execute_service(internal_api_env: None) 
     )
     client = TestClient(app)
     with patch(
-        "vecinita_internal_write_api.app.execute_eval_run",
+        "vecinita_internal_write_api.routes.eval_runs.execute_eval_run",
         _fake_execute,
     ):
         response = client.post(
@@ -946,7 +950,7 @@ def test_execute_eval_run_route_returns_404_when_missing(internal_api_env: None)
     )
     client = TestClient(app)
     with patch(
-        "vecinita_internal_write_api.app.execute_eval_run",
+        "vecinita_internal_write_api.routes.eval_runs.execute_eval_run",
         _missing,
     ):
         response = client.post(

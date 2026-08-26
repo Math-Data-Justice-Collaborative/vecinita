@@ -114,6 +114,21 @@ ignore = [
 # TYPE_CHECKING block and break model construction. Scoped to the schema package only.
 "packages/shared-schemas/vecinita_shared_schemas/*.py" = ["TC001", "TC002", "TC003"]
 "packages/eval/vecinita_eval/*.py" = ["TC001", "TC002"]
+"packages/ingest/vecinita_ingest/jobs/**" = ["TC001", "TC002", "TC003"]
+"apps/internal-write-api/vecinita_internal_write_api/routes/**" = ["TC001", "TC003", "C901"]
+"apps/internal-write-api/vecinita_internal_write_api/audit_service.py" = ["TC003"]
+"apps/internal-write-api/vecinita_internal_write_api/rebuild_service.py" = ["TC003"]
+"apps/internal-write-api/vecinita_internal_write_api/document_batch.py" = ["TC001", "TC002"]
+"apps/internal-write-api/vecinita_internal_write_api/document_service.py" = ["TC003"]
+"apps/internal-write-api/vecinita_internal_write_api/document_crud.py" = ["TC003"]
+"apps/internal-write-api/vecinita_internal_write_api/document_tags.py" = ["TC003"]
+"apps/internal-write-api/vecinita_internal_write_api/eval_run_types.py" = ["TC002"]
+"apps/internal-write-api/vecinita_internal_write_api/eval_run_metrics.py" = ["TC002", "D103"]
+"apps/internal-write-api/vecinita_internal_write_api/eval_run_crud.py" = ["TC003"]
+"apps/internal-write-api/vecinita_internal_write_api/eval_run_execute.py" = ["TC003"]
+"packages/rag/vecinita_rag/pipeline_knobs.py" = ["TC001", "TC003"]
+"tests/unit/rag/test_chat_retrieve.py" = ["TC003"]
+"tests/unit/modal/test_repo_paths.py" = ["TC002"]
 # Data Management routes depend on closures (auth_dep/write_auth_dep) defined inside
 # create_app(). With `from __future__ import annotations`, FastAPI cannot resolve a local
 # closure referenced inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)`
@@ -271,6 +286,8 @@ extraPaths = [".cursor/hooks", "scripts"]
 [[tool.basedpyright.executionEnvironments]]
 root = "infra"
 reportMissingImports = false
+reportUnusedFunction = "none"
+reportUntypedBaseClass = "none"
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false
