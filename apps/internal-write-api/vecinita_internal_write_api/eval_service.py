@@ -10,9 +10,7 @@ from vecinita_internal_write_api.eval_run_crud import (
     resolve_eval_run_config,
     soft_delete_eval_run,
 )
-from vecinita_internal_write_api.eval_run_execute import (
-    execute_eval_run,
-)
+from vecinita_internal_write_api.eval_run_execute import execute_eval_run
 from vecinita_internal_write_api.eval_run_types import (
     CreatedEvalRun,
     EvalRunNotFoundError,

@@ -16,14 +16,20 @@ from vecinita_eval.judges import LlamaIndexJudgeClient
 from vecinita_eval.modal_llm import ModalHttpLLM
 from vecinita_eval.runner import EvalSummary, RowMetrics, RowResult
 from vecinita_internal_write_api.eval_criteria_service import create_eval_criterion
-from vecinita_internal_write_api.eval_service import (
-    EvalRunNotFoundError,
+from vecinita_internal_write_api.eval_run_execute import (
     _load_eval_run,  # pyright: ignore[reportPrivateUsage]
-    _optional_uuid,  # pyright: ignore[reportPrivateUsage]
     _require_adhoc_question,  # pyright: ignore[reportPrivateUsage]
     _resolve_eval_runtime,  # pyright: ignore[reportPrivateUsage]
-    _run_mode,  # pyright: ignore[reportPrivateUsage]
     execute_eval_run,
+)
+from vecinita_internal_write_api.eval_run_metrics import (
+    optional_uuid as _optional_uuid,  # pyright: ignore[reportPrivateUsage]
+)
+from vecinita_internal_write_api.eval_run_metrics import (
+    run_mode as _run_mode,  # pyright: ignore[reportPrivateUsage]
+)
+from vecinita_internal_write_api.eval_service import (
+    EvalRunNotFoundError,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
@@ -411,7 +417,7 @@ def test_default_embed_fn_uses_embedding_client(monkeypatch: pytest.MonkeyPatch)
         "vecinita_internal_write_api.eval_run_execute.EmbeddingClient",
         return_value=stub,
     ):
-        from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+        from vecinita_internal_write_api.eval_run_execute import (  # noqa: PLC0415
             _default_embed_fn,  # pyright: ignore[reportPrivateUsage]
         )
 
@@ -428,7 +434,7 @@ def test_fixture_path_honors_env_override(
     fixture = tmp_path / "qa_pairs.json"
     fixture.write_text("[]", encoding="utf-8")
     monkeypatch.setenv("VECINITA_EVAL_FIXTURE_PATH", str(fixture))
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+    from vecinita_internal_write_api.eval_run_execute import (  # noqa: PLC0415
         _fixture_path,  # pyright: ignore[reportPrivateUsage]
     )
 
@@ -441,7 +447,7 @@ def test_fixture_path_falls_back_to_repo_root_when_missing(
 ) -> None:
     """Relative fixture paths resolve under the repository root when not absolute files."""
     monkeypatch.setenv("VECINITA_EVAL_FIXTURE_PATH", "data/fixtures/eval/missing.json")
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+    from vecinita_internal_write_api.eval_run_execute import (  # noqa: PLC0415
         _fixture_path,  # pyright: ignore[reportPrivateUsage]
     )
 
@@ -454,7 +460,7 @@ def test_fixture_path_staging_defaults_to_qa_pairs_staging(
 ) -> None:
     """ISS-008: staging corpus_profile defaults to qa_pairs_staging.json."""
     monkeypatch.delenv("VECINITA_EVAL_FIXTURE_PATH", raising=False)
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
+    from vecinita_internal_write_api.eval_run_execute import (  # noqa: PLC0415
         _fixture_path,  # pyright: ignore[reportPrivateUsage]
     )
 
@@ -773,8 +779,8 @@ def test_execute_eval_run_omits_custom_scores_when_empty(
 
 def test_optional_int_returns_none_for_bool() -> None:
     """_optional_int rejects boolean values."""
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
-        _optional_int,  # pyright: ignore[reportPrivateUsage]
+    from vecinita_internal_write_api.eval_run_metrics import (  # noqa: PLC0415
+        optional_int as _optional_int,  # pyright: ignore[reportPrivateUsage]
     )
 
     assert _optional_int(value=True) is None
@@ -790,7 +796,7 @@ def test_create_eval_run_fallback_created_at(
         "postgresql://vecinita:vecinita@localhost:5432/vecinita",
     )
     with patch(
-        "vecinita_internal_write_api.eval_service.sqlalchemy_scalar_one",
+        "vecinita_internal_write_api.eval_run_crud.sqlalchemy_scalar_one",
         return_value="not-a-datetime",
     ):
         created = create_test_eval_run(engine, corpus_profile="fixture")
@@ -843,8 +849,8 @@ def test_latency_ms_defaults_when_item_latency_is_float(
                 "metrics": json.dumps({}),
             },
         )
-    from vecinita_internal_write_api.eval_service import (  # noqa: PLC0415
-        _latency_ms,  # pyright: ignore[reportPrivateUsage]
+    from vecinita_internal_write_api.eval_run_metrics import (  # noqa: PLC0415
+        latency_ms as _latency_ms,  # pyright: ignore[reportPrivateUsage]
     )
 
     item: dict[str, object] = {"latency_ms": 12.5}
@@ -1050,11 +1056,11 @@ def test_resolve_eval_runtime_modal_llm_with_llamaindex_judge() -> None:
     synthesis = MagicMock()
     with (
         patch(
-            "vecinita_internal_write_api.eval_service.synthesis_llm_from_config",
+            "vecinita_internal_write_api.eval_run_execute.synthesis_llm_from_config",
             return_value=synthesis,
         ) as mock_synthesis,
         patch(
-            "vecinita_internal_write_api.eval_service.judge_llm_from_config",
+            "vecinita_internal_write_api.eval_run_execute.judge_llm_from_config",
             return_value=MagicMock(),
         ) as mock_judge_llm,
     ):
@@ -1075,7 +1081,7 @@ def test_resolve_eval_runtime_modal_llm_without_llamaindex_judge() -> None:
     judge = MagicMock()
     synthesis = MagicMock()
     with patch(
-        "vecinita_internal_write_api.eval_service.synthesis_llm_from_config",
+        "vecinita_internal_write_api.eval_run_execute.synthesis_llm_from_config",
         return_value=synthesis,
     ):
         resolved_judge, resolved_llm = _resolve_eval_runtime(
@@ -1092,7 +1098,7 @@ def test_resolve_eval_runtime_uses_factory_when_judge_or_llm_missing() -> None:
     sentinel_judge = object()
     sentinel_llm = object()
     with patch(
-        "vecinita_internal_write_api.eval_service.eval_runtime_for_config",
+        "vecinita_internal_write_api.eval_run_execute.eval_runtime_for_config",
         return_value=(sentinel_judge, sentinel_llm),
     ) as mock_factory:
         resolved = _resolve_eval_runtime(EvalConfig(), None, None)
@@ -1104,7 +1110,7 @@ def test_resolve_eval_runtime_preserves_injected_judge_when_llm_missing() -> Non
     """Injected test judges must not be replaced when synthesis LLM is absent."""
     judge = MockEvalJudge()
     with patch(
-        "vecinita_internal_write_api.eval_service.eval_runtime_for_config",
+        "vecinita_internal_write_api.eval_run_execute.eval_runtime_for_config",
     ) as mock_factory:
         resolved_judge, resolved_llm = _resolve_eval_runtime(EvalConfig(), judge, None)
     mock_factory.assert_not_called()
