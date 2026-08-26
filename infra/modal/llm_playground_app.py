@@ -12,6 +12,8 @@ from volume ``llm-finetune-adapters`` (ADR-053) — never auto-loads prod promot
 Requires Modal secret ``vecinita-llm`` with ``VECINITA_MODAL_PROXY_KEY`` (same as prod).
 """
 
+# pyright: reportUntypedBaseClass=false
+
 from __future__ import annotations
 
 import json

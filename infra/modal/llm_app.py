@@ -18,6 +18,8 @@ F77 LoRA (ADR-053): after human promote, load adapter from volume
 uses ``VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID`` for pre-promote candidates.
 """
 
+# pyright: reportUnusedFunction=false, reportUntypedBaseClass=false
+
 from __future__ import annotations
 
 import json

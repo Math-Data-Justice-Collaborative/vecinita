@@ -286,6 +286,8 @@ extraPaths = [".cursor/hooks", "scripts"]
 [[tool.basedpyright.executionEnvironments]]
 root = "infra"
 reportMissingImports = false
+reportUnusedFunction = "none"
+reportUntypedBaseClass = "none"
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false

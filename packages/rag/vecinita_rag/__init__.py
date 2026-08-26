@@ -38,6 +38,7 @@ from vecinita_rag.multi_query import (
     merge_multi_query_hits,
     multi_query_retrieve,
 )
+from vecinita_rag.packing import pack_chunks, pack_p1
 from vecinita_rag.pipeline_knobs import (
     RagPipelineKnobs,
     normalize_rag_pipeline_knobs,

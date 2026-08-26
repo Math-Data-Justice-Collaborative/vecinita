@@ -21,11 +21,7 @@ from vecinita_shared_schemas.auth import (
     require_authenticated,
     require_super_admin,
 )
-from vecinita_shared_schemas.db_mapping import (
-    row_datetime,  # noqa: F401  # re-export for internal-write-api services
-    row_datetime_optional,  # noqa: F401  # re-export for internal-write-api services
-    row_str,
-)
+from vecinita_shared_schemas.db_mapping import row_datetime, row_datetime_optional, row_str
 from vecinita_shared_schemas.internal_write import TagInput
 from vecinita_shared_schemas.json_types import as_json_object
 
@@ -141,3 +137,24 @@ AdminReadActorDep = Annotated[AuthPrincipal, Depends(resolve_admin_read_actor)]
 SuperAdminActorDep = Annotated[UUID, Depends(resolve_super_admin_actor)]
 WriteActorDep = Annotated[tuple[UUID | None, str | None], Depends(resolve_write_actor)]
 ReadActorDep = Annotated[tuple[UUID | None, str | None], Depends(resolve_read_actor)]
+
+__all__ = [
+    "MAX_DOCUMENT_TAGS",
+    "AdminReadActorDep",
+    "ReadActorDep",
+    "SuperAdminActorDep",
+    "WriteActorDep",
+    "database_url",
+    "dependency_health_url",
+    "document_url_key",
+    "engine",
+    "normalize_database_url",
+    "resolve_admin_read_actor",
+    "resolve_read_actor",
+    "resolve_super_admin_actor",
+    "resolve_write_actor",
+    "row_datetime",
+    "row_datetime_optional",
+    "tag_input_from_row",
+    "tags_snapshot_list",
+]

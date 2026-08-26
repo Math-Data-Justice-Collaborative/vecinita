@@ -11,6 +11,7 @@ from vecinita_shared_schemas.internal_write import (
     DocumentDetail,
     DocumentListPage,
     TagInput,
+    TagPatchResponse,
 )
 
 
@@ -30,7 +31,20 @@ class JobStoreProtocol(Protocol):
         """Load a job by id."""
         ...
 
-    def update_job(self, job_id: UUID, **fields: object) -> None:
+    def update_job(  # noqa: PLR0913  # mirrors JobStore.update_job keyword surface
+        self,
+        job_id: UUID,
+        *,
+        status: str | None = None,
+        error_code: str | None = None,
+        error_message: str | None = None,
+        modal_call_id: str | None = None,
+        dashboard_url: str | None = None,
+        eval_run_id: UUID | None = None,
+        metrics: dict[str, object] | None = None,
+        urls: list[str] | None = None,
+        options_patch: dict[str, object] | None = None,
+    ) -> JobRecordProtocol:
         """Patch job fields (status, metrics, urls, etc.)."""
         ...
 
@@ -50,7 +64,11 @@ class CorpusWriteClientProtocol(Protocol):
         """Fetch one document with reassembled text."""
         ...
 
-    def patch_document_tags(self, document_id: UUID, tags: list[TagInput]) -> None:
+    def patch_document_tags(
+        self,
+        document_id: UUID,
+        tags: list[TagInput],
+    ) -> TagPatchResponse:
         """Replace document-level tags."""
         ...
 
@@ -60,11 +78,12 @@ class CorpusWriteClientProtocol(Protocol):
         page: int = 1,
         page_size: int = 100,
         missing_body: bool = False,
+        stale: bool = False,
     ) -> DocumentListPage:
         """Paginated document list."""
         ...
 
-    def create_rebuild_run(self, payload: dict[str, object]) -> UUID:
+    def create_rebuild_run(self, body: dict[str, object]) -> UUID:
         """Create a rebuild run row; returns rebuild_run_id."""
         ...
 

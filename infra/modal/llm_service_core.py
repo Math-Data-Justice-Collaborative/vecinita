@@ -1,5 +1,7 @@
 """Shared vLLM GPU service implementation for prod and playground Modal apps (ADR-037)."""
 
+# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
+
 from __future__ import annotations
 
 import uuid
@@ -7,6 +9,8 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from infra.modal.llm_app import ServeRole
 
 
@@ -111,7 +115,8 @@ class LlmServiceCore:
         lora = getattr(self, "_lora_request", None)
         if lora is not None:
             gen_kwargs["lora_request"] = lora
-        outputs = self._llm.generate([prompt], params, **gen_kwargs)
+        generate = self._llm.generate
+        outputs = generate([prompt], params, **gen_kwargs)
         return outputs[0].outputs[0].text
 
     def _stream_text_deltas(
