@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -131,8 +132,6 @@ def test_scalar_float_returns_float_without_coercion() -> None:
 
 def test_row_datetime_returns_datetime() -> None:
     """row_datetime returns datetime values from row mappings."""
-    from datetime import UTC, datetime
-
     now = datetime.now(UTC)
     assert row_datetime({"created_at": now}, "created_at") == now
 
@@ -145,8 +144,6 @@ def test_row_datetime_raises_on_invalid_type() -> None:
 
 def test_row_datetime_optional_returns_none_or_datetime() -> None:
     """row_datetime_optional handles null and datetime values."""
-    from datetime import UTC, datetime
-
     assert row_datetime_optional({"finished_at": None}, "finished_at") is None
     now = datetime.now(UTC)
     assert row_datetime_optional({"finished_at": now}, "finished_at") == now

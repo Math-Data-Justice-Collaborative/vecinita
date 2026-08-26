@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+from infra.modal import repo_paths
 from infra.modal.repo_paths import MODAL_PKG_ROOT, MODAL_ROOT_MOUNT, resolve_repo_root
 
 
@@ -18,8 +20,6 @@ def test_resolve_repo_root_uses_fallback_outside_repo_layout(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """resolve_repo_root falls back when repo_paths is not under infra/modal."""
-    from infra.modal import repo_paths
-
     fallback = Path("/opt/modal-fallback-test")
     monkeypatch.setattr(repo_paths, "__file__", "/var/task/single_file.py")
     assert repo_paths.resolve_repo_root(fallback=fallback) == fallback

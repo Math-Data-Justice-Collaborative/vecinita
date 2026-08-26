@@ -127,6 +127,8 @@ ignore = [
 "apps/internal-write-api/vecinita_internal_write_api/eval_run_crud.py" = ["TC003"]
 "apps/internal-write-api/vecinita_internal_write_api/eval_run_execute.py" = ["TC003"]
 "packages/rag/vecinita_rag/pipeline_knobs.py" = ["TC001", "TC003"]
+"tests/unit/rag/test_chat_retrieve.py" = ["TC003"]
+"tests/unit/modal/test_repo_paths.py" = ["TC002"]
 # Data Management routes depend on closures (auth_dep/write_auth_dep) defined inside
 # create_app(). With `from __future__ import annotations`, FastAPI cannot resolve a local
 # closure referenced inside `Annotated[..., Depends(local_fn)]`, so the `= Depends(...)`
