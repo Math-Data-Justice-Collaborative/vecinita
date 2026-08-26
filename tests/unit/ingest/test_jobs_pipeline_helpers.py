@@ -226,7 +226,7 @@ def test_ingest_one_url_raises_when_chunking_produces_no_chunks() -> None:
     with pytest.raises(ValueError, match="no chunks produced"):
         _ingest_one_url(
             "https://example.com/blank",
-            fetcher=lambda _url: ScrapedDocument(
+            fetcher=lambda url: ScrapedDocument(
                 url="https://example.com/blank",
                 title=None,
                 text="   \n\t  ",
@@ -401,7 +401,7 @@ def test_run_ingest_job_failure_includes_translation_metrics() -> None:
         options={"chunk_size_tokens": _CHUNK_SIZE, "translate_locales": ["es"]},
     )
 
-    def fetch(_url: str) -> ScrapedDocument:
+    def fetch(url: str) -> ScrapedDocument:
         return ScrapedDocument(
             url="https://example.com/page",
             title="Notice",
@@ -438,7 +438,7 @@ def test_run_ingest_job_raises_when_no_urls_produce_documents() -> None:
             store=store,
             embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
             write_client=object(),  # type: ignore[arg-type]
-            fetch_document=lambda _url: ScrapedDocument(url=_url, title="t", text="body"),
+            fetch_document=lambda url: ScrapedDocument(url=url, title="t", text="body"),
             tag_vocabulary=[],
         )
 
