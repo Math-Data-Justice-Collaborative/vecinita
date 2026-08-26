@@ -4,6 +4,8 @@ Canonical index of **standing** product docs. Cite rows as `[Corpus: <id>]` (see
 `.cursor/rules/doc-corpus-citation.mdc`). Session/ephemeral artifacts live under
 `docs/sessions/{id}/` and are **not** corpus rows unless promoted here.
 
+**Pack session store:** new orchestrator cycles use `~/.cursor/workflow/{owner}/vecinita/sessions/{id}/` (`state.yaml`, `HANDOFF.md`). Legacy `workflow-state.yaml` at repo root remains for in-flight brownfield sessions only. See [.cursor/MIGRATED-TO-PLUGIN.md](../.cursor/MIGRATED-TO-PLUGIN.md).
+
 **Parity:** Before shipping a behavior change, the cited corpus row(s) must already
 define or be updated to define that behavior — or carry an explicit waiver cite.
 
@@ -68,16 +70,18 @@ Runbooks stay **opt-in** (cite by path): [runbooks/corpus-operator-guide.md](run
 
 ## Skill obligations (open only touched rows)
 
+Pack skills load from **engineering-memory** plugin (`evolve`, `spec-*`, `build-*`). Project-only skills: see [.cursor/skills/README.md](../.cursor/skills/README.md).
+
 | Stage band | Minimum corpus rows |
 |------------|---------------------|
-| 00 / 16 intake | product, journeys (if UI), system-spec |
-| 01–02 product | product, journeys, system-spec, api (if contract), tests |
-| 04–05 tech | system-spec, config, api, deps, deploy-integration, data (if schema) |
-| 07–08 build | cited Spec Source rows + tests |
-| 09–11 verify | tests, acceptance, journeys (if UI), product |
-| 12–13 deploy | deploy, deploy-integration, staging |
-| 14 hotfix | product + system-spec + rows for the failing surface |
-| 15 health | deploy-integration, staging |
+| Orchestrator intake / `spec-context` | product, journeys (if UI), system-spec |
+| Spec band (`spec-requirements`, `spec-draft-docs`, …) | product, journeys, system-spec, api (if contract), tests |
+| Tech band (`spec-tech-plan`, …) | system-spec, config, api, deps, deploy-integration, data (if schema) |
+| Build band (`build-build`, `build-verify-*`, …) | cited Spec Source rows + tests |
+| QA / verify (`build-qa`, `build-verify-impl`, …) | tests, acceptance, journeys (if UI), product |
+| Deploy (`build-verify-deploy`, `build-deploy-smoke`) | deploy, deploy-integration, staging |
+| `hotfix` | product + system-spec + rows for the failing surface |
+| `build-health` | deploy-integration, staging |
 
 Domain / runbooks (e.g. [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md))
 are **opt-in** — cite by path when touched; add a CORPUS row only if they become normative.

@@ -14,6 +14,11 @@ prod.env
 
 # Cursor / agent ephemeral (workflow-state-manager one-shots, local scratch)
 .cursor/tmp/
+.cursor/mcp.json
+.cursor/pack
+
+# Local verify evidence (bin/verify output; session store holds canonical copies)
+evidence/
 
 # Supabase CLI local state (`supabase link`, config push) — never commit
 supabase/.temp/

@@ -1,0 +1,123 @@
+{
+  "prefixes": [
+    {
+      "prefix": "infra/modal/finetune",
+      "label": "F77: Modal LoRA FT (ADR-053) \u2014 train/approve; not antibody src/finetune"
+    },
+    {
+      "prefix": "infra/modal/llm_app.py",
+      "label": "ADR-037 / F77: prod vecinita-llm \u2014 load adapter only after human promote"
+    },
+    {
+      "prefix": "infra/modal/llm_playground_app.py",
+      "label": "ADR-037 / F77: playground may load candidate adapters pre-promote"
+    },
+    {
+      "prefix": "infra/modal/data_management_app.py",
+      "label": "F75/F76: DM Modal \u2014 catch-up + freshness schedule / job types"
+    },
+    {
+      "prefix": "infra/modal/embedding_app.py",
+      "label": "Modal FastEmbed service"
+    },
+    {
+      "prefix": "infra/modal/",
+      "label": "Modal services (llm / embed / DM / FT)"
+    },
+    {
+      "prefix": "apps/data-management",
+      "label": "F75\u2013F77: Admin DM UI + jobs (automations / freshness / FT)"
+    },
+    {
+      "prefix": "apps/internal-write-api",
+      "label": "F75\u2013F77: write-API \u2014 automation_runs, promote, corpus"
+    },
+    {
+      "prefix": "apps/chat-rag",
+      "label": "ChatRAG \u2014 prod inference (adapter pin after F77 promote)"
+    },
+    {
+      "prefix": "packages/ingest/",
+      "label": "F75/F76: ingest \u2014 catch-up embed path + freshness re-fetch"
+    },
+    {
+      "prefix": "packages/llm-client/",
+      "label": "ADR-037: unified LLM client"
+    },
+    {
+      "prefix": "packages/rag/",
+      "label": "RAG retrieve/pack"
+    },
+    {
+      "prefix": "packages/embedding-client/",
+      "label": "Embedding client"
+    },
+    {
+      "prefix": "packages/shared-schemas/",
+      "label": "Shared schemas"
+    },
+    {
+      "prefix": "tests/e2e/test_uj082",
+      "label": "F78: UJ-082 automations e2e"
+    },
+    {
+      "prefix": "tests/e2e/test_uj081",
+      "label": "F76: UJ-081 freshness e2e"
+    },
+    {
+      "prefix": "tests/e2e/test_uj082",
+      "label": "F77: UJ-082 FT approve/promote e2e"
+    },
+    {
+      "prefix": "src/app.py",
+      "label": "Modal App \u2014 entry point (ADR-001), GPU class variants, @modal.enter()"
+    },
+    {
+      "prefix": "src/pipeline.py",
+      "label": "F5: Pipeline Orchestrator \u2014 chains F1\u2192F2\u2192F3, manages intermediates"
+    },
+    {
+      "prefix": "src/weights.py",
+      "label": "F6: Weight Manager \u2014 download, SHA256 verify, Modal Volume cache"
+    },
+    {
+      "prefix": "src/config.py",
+      "label": "F5/F7: Config Module \u2014 parsing, validation, defaults"
+    },
+    {
+      "prefix": "src/output.py",
+      "label": "F5: Output Packaging \u2014 ZIP, results.json"
+    },
+    {
+      "prefix": "src/rfdiffusion_stage.py",
+      "label": "F1: RFdiffusion \u2014 CDR backbone generation (ADR-002: flat module)"
+    },
+    {
+      "prefix": "src/proteinmpnn_stage.py",
+      "label": "F2: ProteinMPNN \u2014 sequence design (ADR-002: flat module)"
+    },
+    {
+      "prefix": "src/rf2_stage.py",
+      "label": "F3/F4: RF2 \u2014 in-silico validation + TCR-MHC mode (ADR-002: flat module)"
+    },
+    {
+      "prefix": "src/finetune/",
+      "label": "F8 antibody Fine-Tuning \u2014 NOT F77 LoRA (use infra/modal FT)"
+    },
+    {
+      "prefix": "tests/",
+      "label": "Test Suite \u2014 see docs/test-plan.md for test case definitions"
+    },
+    {
+      "prefix": "docs/",
+      "label": "Documentation \u2014 spec-driven, see docs/ for all specs"
+    }
+  ],
+  "options": {
+    "file_suffixes": [
+      ".py"
+    ],
+    "emit_when_unmapped": false,
+    "context_tag": "feature-context"
+  }
+}

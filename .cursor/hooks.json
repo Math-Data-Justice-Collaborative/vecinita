@@ -66,6 +66,11 @@
         "command": "python3 .cursor/hooks/make_ci_on_stop.py",
         "timeout": 900
       }
+    ],
+    "workspaceOpen": [
+      {
+        "command": ".cursor/hooks/register-workspace-plugins.sh"
+      }
     ]
   }
 }
