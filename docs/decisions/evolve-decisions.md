@@ -1301,7 +1301,7 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 **Session:** EV-031-corpus-automations-live-enable (local store)  
 **Prior:** EV-027 (S030-D64 deferred cutover)  
 **Branch:** `evolve/EV-031-corpus-automations-live-enable`  
-**Status:** **complete** (2026-08-26) — M133–M135 signed off; post-enable hotfix PR [#267](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/267) open (Refresh now internal key auth on Modal DM `POST /jobs`; prod verified, CI green on `1f1760b4`)
+**Status:** **complete** (2026-08-26) — M133–M135 signed off; post-enable hotfix [#267](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/267) merged (Refresh now internal key auth on Modal DM `POST /jobs`; prod verified)
 
 ### Intake (S035-D1 — 2026-08-24)
 
