@@ -27,7 +27,7 @@ def upgrade() -> None:
     """Add body_text, document_revisions, rebuild_runs, and shadow chunk/embedding tables."""
     op.add_column("documents", sa.Column("body_text", sa.Text(), nullable=True))
 
-    op.create_table(
+    _ = op.create_table(
         "rebuild_runs",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("mode", sa.String(length=32), nullable=False),
@@ -61,7 +61,7 @@ def upgrade() -> None:
         ),
     )
 
-    op.create_table(
+    _ = op.create_table(
         "document_revisions",
         sa.Column(
             "revision_id",
@@ -98,7 +98,7 @@ def upgrade() -> None:
         ["rebuild_run_id"],
     )
 
-    op.create_table(
+    _ = op.create_table(
         "shadow_chunks",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("rebuild_run_id", sa.Uuid(), nullable=False),

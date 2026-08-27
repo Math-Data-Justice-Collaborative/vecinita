@@ -130,7 +130,7 @@ def perform_hash_aware_url_refresh(
             write_client.bump_document_last_checked(document_id)
         return "verified_unchanged"
 
-    rechunk_and_upsert_scraped_url(
+    _ = rechunk_and_upsert_scraped_url(
         detail.url,
         scraped=probe.scraped,
         write_client=write_client,
@@ -175,7 +175,7 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
 
     if decision != "enqueue":
         outcome = _DECISION_TO_OUTCOME[decision]
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="completed",
             metrics={
@@ -200,7 +200,7 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
         )
         return
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     try:
         if perform_refresh is not None:
             perform_refresh(document_id)
@@ -220,7 +220,7 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
                 "documents_processed": 1,
                 "hash_decision": _HASH_OUTCOME_TO_DECISION[hash_outcome],
             }
-        store.update_job(job_id, status="completed", metrics=metrics)
+        _ = store.update_job(job_id, status="completed", metrics=metrics)
         outcome_raw = metrics.get("freshness_outcome")
         outcome = str(outcome_raw) if outcome_raw is not None else "refreshed"
         maybe_record_automation_run(
@@ -232,7 +232,7 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
             error=None,
         )
     except Exception as exc:
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
@@ -283,7 +283,7 @@ def run_scheduled_freshness_tick(
         if not doc.refresh_enabled:
             skipped += 1
             continue
-        enqueue_freshness(doc.document_id, force=False)
+        _ = enqueue_freshness(doc.document_id, force=False)
         enqueued += 1
 
     return {

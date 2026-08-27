@@ -70,7 +70,7 @@ def bulk_delete_documents(
                 actor_id=actor_id,
                 actor_role=actor_role,
             )
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
             successes += 1
     return BulkResultResponse(successes=successes, failures=failures)
 
@@ -104,10 +104,12 @@ def bulk_tag_documents(
             existing_tags = (
                 conn.execute(
                     text(
-                        "SELECT t.slug, t.label, dt.source "
-                        "FROM document_tags dt "
-                        "JOIN tags t ON t.id = dt.tag_id "
-                        "WHERE dt.document_id = :doc_id AND t.language = :lang"
+                        """
+                        SELECT t.slug, t.label, dt.source
+                        FROM document_tags dt
+                        JOIN tags t ON t.id = dt.tag_id
+                        WHERE dt.document_id = :doc_id AND t.language = :lang
+                        """
                     ),
                     {"doc_id": doc_id, "lang": language},
                 )
@@ -120,7 +122,7 @@ def bulk_tag_documents(
                 tag_input = tag_input_from_row(tag)
                 current[tag_input.slug] = tag_input
             for slug in body.remove_tags:
-                current.pop(slug, None)
+                _ = current.pop(slug, None)
             for tag in body.add_tags:
                 current[tag.slug] = tag
             final_tags = list(current.values())
@@ -151,7 +153,7 @@ def bulk_tag_documents(
                 actor_id=actor_id,
                 actor_role=actor_role,
             )
-            create_document_version(
+            _ = create_document_version(
                 conn,
                 document_id=doc_id,
                 title=row_str_optional(doc, "title"),
@@ -256,7 +258,7 @@ def bulk_update_metadata(
                 set_clauses.append("language = :language")
                 params["language"] = body.updates.language
                 new_language = body.updates.language
-            conn.execute(
+            _ = conn.execute(
                 text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                     f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
                 ),
@@ -283,7 +285,7 @@ def bulk_update_metadata(
                 actor_id=actor_id,
                 actor_role=actor_role,
             )
-            create_document_version(
+            _ = create_document_version(
                 conn,
                 document_id=doc_id,
                 title=new_title,

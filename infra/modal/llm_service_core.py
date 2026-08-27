@@ -70,7 +70,7 @@ class LlmServiceCore:
         self._lora_request = None
         import gc
 
-        gc.collect()
+        _ = gc.collect()
         try:
             import torch
 

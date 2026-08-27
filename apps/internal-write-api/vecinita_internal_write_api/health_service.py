@@ -37,7 +37,7 @@ def aggregate_health(*, engine: Engine) -> HealthAggregateResponse:
     db_start = time.monotonic()
     try:
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            _ = conn.execute(text("SELECT 1"))
         db_ms = int((time.monotonic() - db_start) * 1000)
         results["database"] = ServiceHealth(status="up", latency_ms=db_ms)
     except Exception as exc:  # noqa: BLE001  # aggregate health must tolerate any dependency failure

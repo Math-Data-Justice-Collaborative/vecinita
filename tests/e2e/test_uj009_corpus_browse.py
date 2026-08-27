@@ -36,8 +36,8 @@ def _database_url() -> str:
 @pytest.fixture
 def browse_e2e_client() -> TestClient:
     """Browse e2e client."""
-    load_seed_tags(database_url=_database_url())
-    load_tagged_corpus(database_url=_database_url())
+    _ = load_seed_tags(database_url=_database_url())
+    _ = load_tagged_corpus(database_url=_database_url())
     settings = ChatRagSettings(
         database_url=_database_url(),
         top_k=5,

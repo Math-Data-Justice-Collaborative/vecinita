@@ -32,7 +32,7 @@ def maybe_record_automation_run(  # noqa: PLR0913  # mirrors write-client record
     if not callable(record):
         return
     try:
-        record(
+        _ = record(
             job_type=job_type,
             status=status,
             document_id=document_id,

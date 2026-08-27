@@ -103,7 +103,9 @@ def pairs_from_job_options(options: Mapping[str, object]) -> list[SftPair]:
 def write_run_metadata(adapter_dir: Path, metadata: Mapping[str, object]) -> Path:
     """Persist ``run_metadata.json`` beside adapter weights (TP4)."""
     path = adapter_dir / "run_metadata.json"
-    path.write_text(json.dumps(dict(metadata), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _ = path.write_text(
+        json.dumps(dict(metadata), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return path
 
 
@@ -120,7 +122,7 @@ def materialize_adapter_config(adapter_dir: Path, *, base_model_id: str) -> Path
         "task_type": "CAUSAL_LM",
     }
     path = adapter_dir / "adapter_config.json"
-    path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _ = path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return path
 
 
@@ -151,10 +153,10 @@ def run_lora_sft_train(
     if peft_train is not None:
         peft_train(adapter_dir=adapter_dir, pairs=list(pairs), base_model_id=base_model_id)
     else:
-        materialize_adapter_config(adapter_dir, base_model_id=base_model_id)
+        _ = materialize_adapter_config(adapter_dir, base_model_id=base_model_id)
 
     if not (adapter_dir / "adapter_config.json").is_file():
-        materialize_adapter_config(adapter_dir, base_model_id=base_model_id)
+        _ = materialize_adapter_config(adapter_dir, base_model_id=base_model_id)
 
     started = datetime.now(UTC).isoformat()
     metadata: dict[str, object] = {
@@ -167,7 +169,7 @@ def run_lora_sft_train(
         "completed_at": started,
         "status": "completed",
     }
-    write_run_metadata(adapter_dir, metadata)
+    _ = write_run_metadata(adapter_dir, metadata)
 
     return FinetuneTrainResult(
         adapter_id=adapter_id,

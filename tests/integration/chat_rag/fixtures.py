@@ -52,7 +52,7 @@ class _MockLlmClient:
 def seeded_corpus_db() -> str:
     """Seed the corpus with embeddings and return the database URL."""
     url = _database_url()
-    seed_corpus_with_embeddings(
+    _ = seed_corpus_with_embeddings(
         database_url=url,
         match_substrings={"Food pantry": 0, "banco de alimentos": 2},
         default_index=1,

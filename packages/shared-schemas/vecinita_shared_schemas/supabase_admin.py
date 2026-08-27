@@ -218,7 +218,7 @@ class SupabaseAdminClient:
 
     def delete_user(self, user_id: UUID) -> None:
         """Permanently delete an operator."""
-        self._request("DELETE", f"/auth/v1/admin/users/{user_id}")
+        _ = self._request("DELETE", f"/auth/v1/admin/users/{user_id}")
 
     def delete_user_sessions(self, user_id: UUID) -> None:
         """Revoke a target operator's sessions via the ``admin_delete_user_sessions`` RPC.
@@ -228,7 +228,7 @@ class SupabaseAdminClient:
         :class:`SupabaseAdminError` signals the RPC has not been applied to the project yet,
         which the route layer maps to ``503 mechanism_unavailable``.
         """
-        self._request(
+        _ = self._request(
             "POST",
             "/rest/v1/rpc/admin_delete_user_sessions",
             body={"uid": str(user_id)},
@@ -237,7 +237,7 @@ class SupabaseAdminClient:
     def send_password_recovery(self, email: str, *, redirect_to: str | None = None) -> None:
         """Trigger a recovery email (sends via the configured SMTP + recovery template)."""
         params = {"redirect_to": redirect_to} if redirect_to else None
-        self._request("POST", "/auth/v1/recover", params=params, body={"email": email})
+        _ = self._request("POST", "/auth/v1/recover", params=params, body={"email": email})
 
     def generate_link(
         self,

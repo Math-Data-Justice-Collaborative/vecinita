@@ -21,7 +21,7 @@ from vecinita_eval.runner import run_golden_eval
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate golden eval baseline.json")
-    parser.add_argument(
+    _ = parser.add_argument(
         "--output",
         type=Path,
         default=DEFAULT_BASELINE_PATH,
@@ -43,7 +43,7 @@ def main() -> int:
         fixture_path=fixture_path,
     )
     generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    write_baseline(
+    _ = write_baseline(
         summary=summary,
         fixture_ref=fixture_content_hash(fixture_path),
         generated_at=generated_at,

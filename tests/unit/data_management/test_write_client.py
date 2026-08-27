@@ -39,7 +39,7 @@ def test_write_client_requires_env_or_args(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.delenv("VECINITA_INTERNAL_API_KEY", raising=False)
 
     with pytest.raises(InternalWriteClientError, match="VECINITA_INTERNAL_WRITE_URL"):
-        InternalWriteClient()
+        _ = InternalWriteClient()
 
 
 def test_upsert_batch_posts_documents() -> None:
@@ -87,7 +87,7 @@ def test_upsert_batch_raises_on_http_error() -> None:
     )
 
     with pytest.raises(InternalWriteClientError, match="500"):
-        client.upsert_batch(
+        _ = client.upsert_batch(
             BatchUpsertRequest(
                 documents=[
                     DocumentUpsert(
@@ -143,7 +143,7 @@ def test_get_document_detail_raises_on_http_error() -> None:
     )
 
     with pytest.raises(InternalWriteClientError, match="404"):
-        client.get_document_detail(_DOCUMENT_ID)
+        _ = client.get_document_detail(_DOCUMENT_ID)
     client.close()
 
 
@@ -186,7 +186,7 @@ def test_patch_document_tags_raises_on_http_error() -> None:
     )
 
     with pytest.raises(InternalWriteClientError, match="400"):
-        client.patch_document_tags(_DOCUMENT_ID, [])
+        _ = client.patch_document_tags(_DOCUMENT_ID, [])
     client.close()
 
 
@@ -214,7 +214,7 @@ def test_write_client_closes_owned_client(monkeypatch: pytest.MonkeyPatch) -> No
             closed.append(True)
             original_close()
 
-        client.close = tracked_close  # type: ignore[method-assign]
+        client.close = tracked_close
         return client
 
     monkeypatch.setattr(httpx, "Client", client_factory)
@@ -239,7 +239,7 @@ def test_write_client_does_not_close_injected_http_client() -> None:
         closed.append(True)
         original_close()
 
-    http.close = tracked_close  # type: ignore[method-assign]
+    http.close = tracked_close
     client = InternalWriteClient("http://write.test", api_key="test-key", http_client=http)
     client.close()
 
@@ -262,7 +262,7 @@ def test_upsert_batch_forwards_audit_actor_headers() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://write.test"),
     )
     client = base.with_audit_actor(actor_id, "admin")
-    client.upsert_batch(
+    _ = client.upsert_batch(
         BatchUpsertRequest(
             documents=[
                 DocumentUpsert(
@@ -402,7 +402,7 @@ def test_list_documents_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://write.test"),
     )
     with pytest.raises(InternalWriteClientError, match="list_documents"):
-        client.list_documents()
+        _ = client.list_documents()
     client.close()
 
 
@@ -648,7 +648,7 @@ def test_list_eval_runs_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://write.test"),
     )
     with pytest.raises(InternalWriteClientError, match="list_eval_runs"):
-        client.list_eval_runs()
+        _ = client.list_eval_runs()
     client.close()
 
 
@@ -723,5 +723,5 @@ def test_record_automation_run_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://write.test"),
     )
     with pytest.raises(InternalWriteClientError, match="record_automation_run"):
-        client.record_automation_run(job_type="automation_catchup", status="completed")
+        _ = client.record_automation_run(job_type="automation_catchup", status="completed")
     client.close()

@@ -57,8 +57,8 @@ def _auth() -> dict[str, str]:
 
 def _clear_audit(engine: Engine, entity_id: uuid.UUID) -> None:
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": entity_id})
-        conn.execute(
+        _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": entity_id})
+        _ = conn.execute(
             text("DELETE FROM document_versions WHERE document_id = :id"),
             {"id": entity_id},
         )
@@ -123,7 +123,7 @@ def test_batch_upsert_emits_document_created_audit(client: TestClient, engine: E
 
     _clear_audit(engine, doc_id)
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_delete_document_emits_audit(client: TestClient, engine: Engine) -> None:
@@ -134,7 +134,7 @@ def test_delete_document_emits_audit(client: TestClient, engine: Engine) -> None
             conn.execute(
                 text(
                     "INSERT INTO documents (url, title, language) "
-                    "VALUES (:url, 'Delete Me', 'en') RETURNING id"
+                    + "VALUES (:url, 'Delete Me', 'en') RETURNING id"
                 ),
                 {"url": url},
             )
@@ -170,7 +170,7 @@ def test_patch_document_tags_emits_audit_and_version(client: TestClient, engine:
             conn.execute(
                 text(
                     "INSERT INTO documents (url, title, language) "
-                    "VALUES (:url, 'Tag Me', 'en') RETURNING id"
+                    + "VALUES (:url, 'Tag Me', 'en') RETURNING id"
                 ),
                 {"url": url},
             )
@@ -201,8 +201,8 @@ def test_patch_document_tags_emits_audit_and_version(client: TestClient, engine:
         version_row = (
             conn.execute(
                 text(
-                    "SELECT version_number, tags_snapshot FROM document_versions "
-                    "WHERE document_id = :id ORDER BY version_number DESC LIMIT 1"
+                    "SELECT version_number, tags_snapshot FROM document_versions "  # noqa: S608
+                    + "WHERE document_id = :id ORDER BY version_number DESC LIMIT 1"
                 ),
                 {"id": doc_id},
             )
@@ -217,4 +217,4 @@ def test_patch_document_tags_emits_audit_and_version(client: TestClient, engine:
 
     _clear_audit(engine, doc_id)
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})

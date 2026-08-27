@@ -380,8 +380,8 @@ def test_write_auth_dep_rejects_missing_principal() -> None:
 def test_list_jobs_returns_all_jobs() -> None:
     """Test list jobs returns all jobs."""
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/a"])
-    store.create_job(urls=["https://example.com/b"], job_type="retag")
+    _ = store.create_job(urls=["https://example.com/a"])
+    _ = store.create_job(urls=["https://example.com/b"], job_type="retag")
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     response = client.get("/jobs")
@@ -419,7 +419,7 @@ def test_list_jobs_includes_eval_runs_from_internal_write_api() -> None:
             )
 
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/a"])
+    _ = store.create_job(urls=["https://example.com/a"])
     client = TestClient(
         create_app(
             store=store,
@@ -442,8 +442,8 @@ def test_list_jobs_filters_by_status() -> None:
     """Test list jobs filters by status."""
     store = InMemoryJobStore()
     done = store.create_job(urls=["https://example.com/a"])
-    store.update_job(done.job_id, status="completed")
-    store.create_job(urls=["https://example.com/b"])
+    _ = store.update_job(done.job_id, status="completed")
+    _ = store.create_job(urls=["https://example.com/b"])
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     response = client.get("/jobs", params={"status": "completed"})

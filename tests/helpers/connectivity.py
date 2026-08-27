@@ -47,7 +47,7 @@ def assert_cors_preflight(  # noqa: PLR0913  # mirrors CORS preflight request fi
 def fetch_main_js_url(frontend_base: str, timeout: float = 30.0) -> str:
     """Resolve the Vite main bundle URL from deployed index.html."""
     index = httpx.get(f"{frontend_base.rstrip('/')}/", timeout=timeout)
-    index.raise_for_status()
+    _ = index.raise_for_status()
     match = re.search(r'src="(/assets/index-[^"]+\.js)"', index.text)
     assert match, "Could not find Vite index-*.js in frontend HTML"
     return f"{frontend_base.rstrip('/')}{match.group(1)}"

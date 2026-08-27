@@ -63,7 +63,7 @@ def maybe_enqueue_catchup_after_document_change(  # noqa: PLR0913  # CRUD hook s
         )
         if decision != "enqueue":
             return decision
-        jobs_client.enqueue_automation_catchup(
+        _ = jobs_client.enqueue_automation_catchup(
             document_id,
             revision=revision,
             embed_status=embed_status,

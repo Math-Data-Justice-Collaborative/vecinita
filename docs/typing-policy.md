@@ -5,10 +5,11 @@
 
 Vecinita requires **strict static typing**. Do not use `typing.Any` in Python or `any` in TypeScript except where an external boundary cannot be typed and a documented waiver exists (none today).
 
-As of 2026-06-29 the linters/typecheckers run at their strictest sensible settings: Ruff
-`select = ["ALL"]`, basedpyright `typeCheckingMode = "strict"`, and all strict TypeScript
-compiler flags. See the per-stack sections below for the exact config and the small set of
-deliberately-ignored rules (formatter conflicts and mutually-incompatible rule pairs).
+As of 2026-08-26 the linters/typecheckers run at their strictest sensible settings: Ruff
+`select = ["ALL"]` (minus formatter conflicts and `ISC003`, which fights basedpyright
+`reportImplicitStringConcatenation`), basedpyright `typeCheckingMode = "strict"` plus
+extra diagnostic rules below, and all strict TypeScript compiler flags plus ESLint
+`strictTypeChecked` + `stylisticTypeChecked`.
 
 ## Quick reference
 
@@ -39,6 +40,8 @@ same five Python roots: `apps`, `packages`, `tests`, `infra`, `scripts`.
   | `ISC001` | Conflicts with `ruff format` |
   | `D203` | Mutually incompatible with `D211` (we keep `D211`) |
   | `D213` | Mutually incompatible with `D212` (we keep `D212`) |
+  | `ISC003` | Conflicts with basedpyright `reportImplicitStringConcatenation` (explicit `+` required) |
+  | `G003` | Conflicts with `reportImplicitStringConcatenation` for multi-line logging strings |
 - **Per-file ignores** (`[tool.ruff.lint.per-file-ignores]`):
   | Path | Ignored | Why |
   |------|---------|-----|
@@ -63,6 +66,7 @@ same five Python roots: `apps`, `packages`, `tests`, `infra`, `scripts`.
     by adding types). Strict requires complete type information everywhere.
   - **`reportExplicitAny = "error"`** — rejects `dict[str, Any]`, `payload: Any`, etc.
   - **`reportAny = "error"`** — rejects *using* values typed as `Any` (e.g. untyped SQLAlchemy scalars). Use `db_mapping` / `json_types` helpers.
+  - **Extra strict diagnostics (2026-08-26):** `reportUnusedCallResult`, `reportUnnecessaryTypeIgnoreComment`, `reportMatchNotExhaustive`, `reportImplicitStringConcatenation`, `reportDeprecated`, `reportPrivateUsage` — all **error**.
   - **`stubPath = "stubs"`** — local `.pyi` stubs for genuinely untyped third-party libs.
     Current stubs: `stubs/langdetect/__init__.pyi` (replaces the former `reportUnknown*`
     waivers in `language.py` / `vocabulary.py`).
@@ -102,7 +106,10 @@ keeping real-bug rules (`reportReturnType`, `reportArgumentType`, `reportOptiona
 
 Type-aware lint (`parserOptions.projectService: true`):
 
-Production `src/**` uses **`typescript-eslint` `strictTypeChecked`** (includes `no-explicit-any` and strict inference rules). Test files (`src/test/**`) keep `no-explicit-any` but relax mock-noisy rules (`require-await`, etc.). React apps use `react-refresh/only-export-components` at **error** (hooks/context in `.ts` files; provider components in `.tsx` only — see `auth-context.ts` / `AuthContext.tsx`). `npm run lint` runs ESLint with **`--max-warnings 0`** so warnings fail CI and local `make lint`.
+Production `src/**` uses **`typescript-eslint` `strictTypeChecked` + `stylisticTypeChecked`**
+(includes `no-explicit-any`, `prefer-nullish-coalescing`, `consistent-type-definitions`, and
+strict inference rules). Test files (`src/test/**`) keep `no-explicit-any` but relax
+mock-noisy rules (`require-await`, etc.). React apps use `react-refresh/only-export-components` at **error** (hooks/context in `.ts` files; provider components in `.tsx` only — see `auth-context.ts` / `AuthContext.tsx`). `npm run lint` runs ESLint with **`--max-warnings 0`** so warnings fail CI and local `make lint`.
 
 All four frontend workspaces (`apps/chat-rag-frontend`, `apps/data-management-frontend`,
 `packages/frontend-i18n`, `packages/frontend-ui`) enable `@typescript-eslint/no-unused-vars`

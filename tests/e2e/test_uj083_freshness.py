@@ -59,7 +59,7 @@ def test_uj081_freshness_stale_disable_refresh_now_and_mark_checked(  # noqa: PL
 
     stale_at = datetime.now(tz=UTC) - timedelta(days=31)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE documents

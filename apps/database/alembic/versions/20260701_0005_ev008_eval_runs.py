@@ -25,7 +25,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Add eval run persistence tables (no PII columns — ADR-004)."""
-    op.create_table(
+    _ = op.create_table(
         "eval_runs",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("status", sa.String(length=16), nullable=False),
@@ -50,7 +50,7 @@ def upgrade() -> None:
     op.create_index("ix_eval_runs_status", "eval_runs", ["status"])
     op.create_index("ix_eval_runs_created_at", "eval_runs", ["created_at"])
 
-    op.create_table(
+    _ = op.create_table(
         "eval_run_items",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("run_id", sa.Uuid(), nullable=False),

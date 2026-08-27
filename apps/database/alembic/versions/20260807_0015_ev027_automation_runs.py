@@ -29,7 +29,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Create automation_runs (TP3) and singleton automation_settings (AC-AU1)."""
-    op.create_table(
+    _ = op.create_table(
         "automation_settings",
         sa.Column(
             "id",
@@ -54,7 +54,7 @@ def upgrade() -> None:
     )
     op.execute(sa.text("INSERT INTO automation_settings (id, enabled) VALUES (1, false)"))
 
-    op.create_table(
+    _ = op.create_table(
         "automation_runs",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("job_type", sa.String(length=64), nullable=False),

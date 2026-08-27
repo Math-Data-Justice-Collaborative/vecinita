@@ -206,7 +206,7 @@ def fastapi_app():
     except Exception:
         logger.warning(
             "LlmTagClient init failed — retag/translate jobs will fail. "
-            "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
+            + "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
             APP_NAME,
             exc_info=True,
         )
@@ -214,7 +214,7 @@ def fastapi_app():
         translate_client = None
 
     # F77: approved finetune_train jobs call vecinita-llm-finetune::train_lora (T129.5).
-    os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
+    _ = os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
 
     def runner(job_id: UUID) -> None:
         run_job(

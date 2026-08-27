@@ -11,7 +11,7 @@ from vecinita_rag.faithfulness_judge import score_faithfulness, truncate_judge_c
 def test_truncate_judge_context_raises_when_max_chars_invalid() -> None:
     """Invalid max_chars is rejected before truncation."""
     with pytest.raises(ValueError, match="max_chars must be >= 1"):
-        truncate_judge_context("context", max_chars=0)
+        _ = truncate_judge_context("context", max_chars=0)
 
 
 def test_truncate_judge_context_truncates_long_text() -> None:

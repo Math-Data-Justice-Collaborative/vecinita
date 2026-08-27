@@ -94,7 +94,7 @@ def seeded_audit_data(client: TestClient, engine: Engine) -> Iterator[DocumentFi
             conn.execute(text("SELECT id FROM documents WHERE url = :url"), {"url": url})
         )
         doc_id = UUID(str(doc_id_raw))
-    client.patch(
+    _ = client.patch(
         f"/internal/v1/documents/{doc_id}/tags",
         json={"tags": [{"slug": "legal", "label": "Legal"}], "source": "human"},
         headers=_auth(),
@@ -103,9 +103,11 @@ def seeded_audit_data(client: TestClient, engine: Engine) -> Iterator[DocumentFi
     yield {"doc_id": doc_id, "url": url}
 
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+        _ = conn.execute(
+            text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id}
+        )
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 @pytest.mark.usefixtures("seeded_audit_data")

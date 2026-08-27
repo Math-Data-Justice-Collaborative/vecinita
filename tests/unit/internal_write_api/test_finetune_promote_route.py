@@ -149,4 +149,4 @@ def test_apply_promote_rejects_missing_adapter_via_construct() -> None:
     store.clear()
     req = FinetunePromoteRequest.model_construct(adapter_id=None, rollback=False)
     with pytest.raises(ValueError, match="adapter_id is required"):
-        apply_finetune_promote(req)
+        _ = apply_finetune_promote(req)

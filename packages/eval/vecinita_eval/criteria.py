@@ -46,7 +46,7 @@ def score_custom_criteria(
     scores: dict[str, float] = {}
     for criterion in criteria:
         if hasattr(judge, "rubric_score"):
-            score = judge.rubric_score(  # pyright: ignore[reportUnknownMemberType]
+            score = judge.rubric_score(
                 question=question,
                 answer=answer,
                 context=context,

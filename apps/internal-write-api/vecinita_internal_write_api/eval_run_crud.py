@@ -95,7 +95,7 @@ def create_eval_run(
     config_snapshot = resolve_eval_run_config(engine, requester_id=requester_id, body=body)
     run_id = uuid4()
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO eval_runs (

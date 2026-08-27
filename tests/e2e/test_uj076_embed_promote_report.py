@@ -370,13 +370,13 @@ def test_tc239_e0_rollback_restores_live_text_and_stamps(
             "url",
         )
 
-    _create_shadow_promote(
+    _ = _create_shadow_promote(
         write_client,
         url=url,
         embedding_model_id=_E0_PIN,
         shadow_text=_E0_RESTORE_TEXT,
     )
-    _create_shadow_promote(
+    _ = _create_shadow_promote(
         write_client,
         url=url,
         embedding_model_id=_E1_PIN,
@@ -404,7 +404,7 @@ def test_tc239_e0_rollback_restores_live_text_and_stamps(
         )
     assert live_e1 == _SHADOW_TEXT
 
-    _create_shadow_promote(
+    _ = _create_shadow_promote(
         write_client,
         url=url,
         embedding_model_id=_E0_PIN,

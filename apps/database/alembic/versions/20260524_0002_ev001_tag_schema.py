@@ -28,7 +28,7 @@ _JOB_TYPE = ("ingest", "retag")
 
 def upgrade() -> None:
     """Add tag tables and extend jobs with job_type."""
-    op.create_table(
+    _ = op.create_table(
         "tags",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("slug", sa.Text(), nullable=False),
@@ -44,7 +44,7 @@ def upgrade() -> None:
         sa.UniqueConstraint("slug", "language", name="uq_tags_slug_language"),
     )
 
-    op.create_table(
+    _ = op.create_table(
         "document_tags",
         sa.Column("document_id", sa.Uuid(), nullable=False),
         sa.Column("tag_id", sa.Uuid(), nullable=False),
@@ -64,7 +64,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("document_id", "tag_id"),
     )
 
-    op.create_table(
+    _ = op.create_table(
         "chunk_tags",
         sa.Column("chunk_id", sa.Uuid(), nullable=False),
         sa.Column("tag_id", sa.Uuid(), nullable=False),

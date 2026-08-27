@@ -52,10 +52,10 @@ def tagged_corpus_db() -> str:
     """Tagged corpus db."""
     url = _database_url()
     reset_corpus_tables(database_url=url)
-    load_seed_tags(database_url=url)
-    load_tagged_corpus(database_url=url)
+    _ = load_seed_tags(database_url=url)
+    _ = load_tagged_corpus(database_url=url)
     clear_embeddings(database_url=url)
-    attach_embeddings(
+    _ = attach_embeddings(
         database_url=url,
         match_substrings={
             "Housing Rights": 0,

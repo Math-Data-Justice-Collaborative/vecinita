@@ -105,7 +105,7 @@ def test_patch_display_title_emits_audit_before_after(
     """TC-248 / AC-SU7: document.edited audit includes before/after display_title."""
     document_id = _upsert_with_title(write_client, title=_SCRAPED)
 
-    write_client.patch(
+    _ = write_client.patch(
         f"/internal/v1/documents/{document_id}",
         json={"display_title": _DISPLAY},
         headers=auth_headers(),
@@ -137,7 +137,7 @@ def test_patch_display_title_emits_audit_before_after(
 def test_patch_display_title_null_clears_override(write_client: TestClient, engine: Engine) -> None:
     """TC-251 / AC-SU10: explicit null clears display_title."""
     document_id = _upsert_with_title(write_client, title=_SCRAPED)
-    write_client.patch(
+    _ = write_client.patch(
         f"/internal/v1/documents/{document_id}",
         json={"display_title": _DISPLAY},
         headers=auth_headers(),
@@ -191,7 +191,7 @@ def test_rescrape_upsert_preserves_display_title(write_client: TestClient, engin
     """TC-250 / AC-SU9: batch upsert updates title; display_title unchanged."""
     doc_url = f"https://rescrape-display-{uuid.uuid4().hex[:10]}.example.com/"
     document_id = _upsert_with_title(write_client, title=_SCRAPED, url=doc_url)
-    write_client.patch(
+    _ = write_client.patch(
         f"/internal/v1/documents/{document_id}",
         json={"display_title": _DISPLAY},
         headers=auth_headers(),
@@ -235,7 +235,7 @@ def test_rescrape_upsert_preserves_display_title(write_client: TestClient, engin
 def test_get_document_detail_includes_display_title(write_client: TestClient) -> None:
     """Write-read parity: GET detail returns display_title after PATCH."""
     document_id = _upsert_with_title(write_client, title=_SCRAPED)
-    write_client.patch(
+    _ = write_client.patch(
         f"/internal/v1/documents/{document_id}",
         json={"display_title": _DISPLAY},
         headers=auth_headers(),
@@ -279,7 +279,7 @@ def test_patch_document_metadata_title_and_language_without_display_title(
 ) -> None:
     """F74: PATCH title/language alone leaves display_title untouched."""
     document_id = _upsert_with_title(write_client, title=_SCRAPED)
-    write_client.patch(
+    _ = write_client.patch(
         f"/internal/v1/documents/{document_id}",
         json={"display_title": _DISPLAY},
         headers=auth_headers(),

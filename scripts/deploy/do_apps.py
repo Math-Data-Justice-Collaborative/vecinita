@@ -117,7 +117,7 @@ def cmd_create_all(client) -> int:
             continue
         print(f"==> {path.name}")
         try:
-            cmd_create(client, path)
+            _ = cmd_create(client, path)
         except SystemExit as exc:
             print(exc, file=sys.stderr)
             rc = 1
@@ -262,7 +262,7 @@ def cmd_sync_all_secrets(client) -> int:
     for name in names:
         print(f"==> sync-secrets {name}")
         try:
-            cmd_sync_secrets(client, name)
+            _ = cmd_sync_secrets(client, name)
         except SystemExit as exc:
             print(exc, file=sys.stderr)
             rc = 1
@@ -316,21 +316,21 @@ def cmd_urls(client, *, include_frontends: bool = False) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Vecinita DO App Platform (pydo)")
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("list", help="List all apps (id, name, phase, ingress)")
+    _ = sub.add_parser("list", help="List all apps (id, name, phase, ingress)")
     p_create = sub.add_parser("create", help="Create app from YAML spec")
-    p_create.add_argument("--spec", type=Path, required=True)
-    sub.add_parser("create-all", help="Create all four infra/do/*.yaml apps (idempotent)")
+    _ = p_create.add_argument("--spec", type=Path, required=True)
+    _ = sub.add_parser("create-all", help="Create all four infra/do/*.yaml apps (idempotent)")
     p_dep = sub.add_parser("deploy", help="Trigger deployment for existing app by spec name")
-    p_dep.add_argument("--name", required=True, help="App spec name field")
+    _ = p_dep.add_argument("--name", required=True, help="App spec name field")
     p_urls = sub.add_parser("urls", help="Print VECINITA_STAGING_* export lines")
-    p_urls.add_argument(
+    _ = p_urls.add_argument(
         "--frontend",
         action="store_true",
         help="Include VECINITA_STAGING_*_FRONTEND_URL for H4/H5 connectivity",
     )
     p_sync = sub.add_parser("sync-secrets", help="Update app spec env from shell")
-    p_sync.add_argument("--name", required=True, help="App spec name field")
-    sub.add_parser(
+    _ = p_sync.add_argument("--name", required=True, help="App spec name field")
+    _ = sub.add_parser(
         "sync-all-secrets",
         help="Update all four Vecinita DO apps from shell env (see infra/do/.env.example)",
     )

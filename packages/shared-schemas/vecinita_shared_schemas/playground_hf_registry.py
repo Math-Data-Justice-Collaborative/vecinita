@@ -241,7 +241,7 @@ def resolve_hf_repo(model_id: str) -> str:
     if inferred in _BLOCKED_NC_HF_REPOS:
         msg = (
             f"blocked non-commercial HuggingFace repo {inferred!r} for model_id "
-            f"{model_id!r} (Qwen Research License; ISS-004)"
+            + f"{model_id!r} (Qwen Research License; ISS-004)"
         )
         raise ValueError(msg)
     return inferred

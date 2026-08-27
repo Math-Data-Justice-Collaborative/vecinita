@@ -115,7 +115,7 @@ def _default_perform_catchup(
     fetch_document: DocumentFetcher | None,
 ) -> None:
     """Re-embed one document via store-backed rebuild helpers (mode=reembed)."""
-    reembed_documents(
+    _ = reembed_documents(
         [document_id],
         write_client=write_client,
         embed_client=embed_client,
@@ -162,7 +162,7 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
 
     if decision != "enqueue":
         outcome = _DECISION_TO_OUTCOME[decision]
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="completed",
             metrics={
@@ -187,7 +187,7 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
         )
         return
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     try:
         if perform_catchup is not None:
             perform_catchup(document_id)
@@ -198,7 +198,7 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
                 write_client=write_client,
                 fetch_document=fetch_document,
             )
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="completed",
             metrics={
@@ -215,7 +215,7 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
             error=None,
         )
     except Exception as exc:
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,

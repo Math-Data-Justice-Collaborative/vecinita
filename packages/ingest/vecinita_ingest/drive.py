@@ -101,6 +101,6 @@ def rewrite_drive_fetch_url(url: str) -> str:
 
     msg = (
         "Unsupported Google Drive URL shape — use a public file/Docs/Sheets "
-        "share link, upload the file, or paste an export URL"
+        + "share link, upload the file, or paste an export URL"
     )
     raise DriveFetchError(msg, error_code="drive_unsupported")

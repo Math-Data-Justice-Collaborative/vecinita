@@ -166,7 +166,7 @@ def upsert_shadow_batch(
                     )
                 )
                 vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
-                conn.execute(
+                _ = conn.execute(
                     text(
                         """
                             INSERT INTO shadow_embeddings (shadow_chunk_id, embedding)

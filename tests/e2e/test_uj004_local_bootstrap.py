@@ -65,8 +65,8 @@ def bootstrapped_stack() -> str:
 
     url = default_database_url()
     run_alembic_upgrade_head(url)
-    load_corpus(database_url=url)
-    attach_embeddings(
+    _ = load_corpus(database_url=url)
+    _ = attach_embeddings(
         database_url=url,
         match_substrings={"Food pantry": 0, "banco de alimentos": 2},
         default_index=1,

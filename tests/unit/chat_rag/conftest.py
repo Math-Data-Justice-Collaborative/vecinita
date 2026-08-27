@@ -85,7 +85,7 @@ def browse_document(engine: Engine) -> Iterator[tuple[UUID, str]]:
                 )
             )
         )
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO document_tags (document_id, tag_id, source)
@@ -97,8 +97,8 @@ def browse_document(engine: Engine) -> Iterator[tuple[UUID, str]]:
         )
     yield doc_id, doc_url
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM document_tags WHERE document_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM document_tags WHERE document_id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 _CHUNK = RetrievedChunk(

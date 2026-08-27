@@ -235,7 +235,7 @@ def test_promote_copies_shadow_to_live_and_returns_counts(
             assert revision_count >= 1
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     DELETE FROM shadow_embeddings
@@ -246,15 +246,17 @@ def test_promote_copies_shadow_to_live_and_returns_counts(
                 ),
                 {"id": rebuild_run_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM shadow_chunks WHERE rebuild_run_id = :id"),
                 {"id": rebuild_run_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM document_revisions WHERE rebuild_run_id = :id"),
                 {"id": rebuild_run_id},
             )
-            conn.execute(text("DELETE FROM rebuild_runs WHERE id = :id"), {"id": rebuild_run_id})
+            _ = conn.execute(
+                text("DELETE FROM rebuild_runs WHERE id = :id"), {"id": rebuild_run_id}
+            )
 
 
 def test_promote_first_cutover_archives_legacy_e0_revision(

@@ -162,7 +162,7 @@ def _default_fetch_html(url: str) -> str:
         headers=scrape_headers(),
     ) as http:
         response = http.get(url)
-        response.raise_for_status()
+        _ = response.raise_for_status()
         return response.text
 
 
@@ -323,7 +323,7 @@ def rechunk_and_upsert_scraped_url(  # noqa: PLR0913  # mirrors ingest dependenc
         slug_vocab=[],
         max_document_tags=10,
     )
-    write_client.upsert_batch(BatchUpsertRequest(documents=[doc]))
+    _ = write_client.upsert_batch(BatchUpsertRequest(documents=[doc]))
     return doc
 
 
@@ -345,7 +345,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
     if record is None:
         raise KeyError(job_id)
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
     html_fetcher = fetch_html or _default_fetch_html
     chunk_size = _chunk_size_from_options(record.options)
@@ -371,7 +371,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
     try:
         urls, crawl_stopped_reason = _resolve_crawl_urls(record, fetch_html=html_fetcher)
         if crawl_enabled:
-            store.update_job(job_id, urls=urls)
+            _ = store.update_job(job_id, urls=urls)
 
         documents: list[DocumentUpsert] = []
         for url in urls:
@@ -396,7 +396,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                     url_failures.append(_url_failure_entry(url, embed_exc))
                     logger.warning("embed failed for crawl page %s; continuing", url)
                     continue
-                store.update_job(
+                _ = store.update_job(
                     job_id,
                     status="failed",
                     error_code="EmbeddingClientError",
@@ -435,7 +435,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                 translation_skipped += t_stats["skipped"]
                 translation_failed += t_stats["failed"]
                 if translation_docs:
-                    write_client.upsert_batch(BatchUpsertRequest(documents=translation_docs))
+                    _ = write_client.upsert_batch(BatchUpsertRequest(documents=translation_docs))
                     translated_documents += t_stats["documents"]
                     translated_chunks += t_stats["chunks"]
         elif url_failures and not crawl_enabled:
@@ -466,7 +466,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                 metrics["crawl_stopped_reason"] = crawl_stopped_reason
         elif urls_failed_scrape:
             metrics["pages_failed"] = pages_failed
-        store.update_job(job_id, status="completed", metrics=metrics)
+        _ = store.update_job(job_id, status="completed", metrics=metrics)
     except EmbeddingClientError:
         raise
     except Exception as exc:
@@ -491,7 +491,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
             fail_metrics["pages_skipped_robots"] = 0
             if crawl_stopped_reason is not None:
                 fail_metrics["crawl_stopped_reason"] = crawl_stopped_reason
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=_exception_error_code(exc),
@@ -523,7 +523,7 @@ def run_retag_job(  # noqa: PLR0913  # retag pipeline needs explicit stage depen
         msg = "retag job missing document_id option"
         raise ValueError(msg)  # noqa: TRY004  # validation error for missing job option
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     vocabulary = tag_vocabulary if tag_vocabulary is not None else load_seed_vocabulary()
     slug_vocab = vocabulary_slugs(vocabulary)
 
@@ -543,10 +543,10 @@ def run_retag_job(  # noqa: PLR0913  # retag pipeline needs explicit stage depen
             language=language,
             source="llm",
         )
-        write_client.patch_document_tags(UUID(document_id_raw), tags)
-        store.update_job(job_id, status="completed")
+        _ = write_client.patch_document_tags(UUID(document_id_raw), tags)
+        _ = store.update_job(job_id, status="completed")
     except Exception as exc:
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
@@ -862,7 +862,7 @@ def _write_rebuild_batch(
     if dry_run:
         write_client.upsert_shadow_batch(batch)
     else:
-        write_client.upsert_batch(batch)
+        _ = write_client.upsert_batch(batch)
 
 
 def _build_rebuild_documents(  # noqa: PLR0913  # rebuild batch needs clients + stamp fields
@@ -972,7 +972,7 @@ def run_rebuild_job(
     model_id = _embedding_model_id()
     tokenizer_id = _chunk_tokenizer_id()
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
     rebuild_run_id: UUID | None = None
 
@@ -1008,12 +1008,12 @@ def run_rebuild_job(
         _write_rebuild_batch(write_client, documents, dry_run=dry_run)
         if dry_run and rebuild_run_id is not None:
             write_client.complete_rebuild_run(rebuild_run_id, status="completed")
-        store.update_job(job_id, status="completed")
+        _ = store.update_job(job_id, status="completed")
     except Exception as exc:
         if dry_run and rebuild_run_id is not None:
             with contextlib.suppress(Exception):
                 write_client.complete_rebuild_run(rebuild_run_id, status="failed")
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
@@ -1053,15 +1053,15 @@ def run_eval_job(
         msg = f"job {job_id} is not an eval job"
         raise ValueError(msg)
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     try:
         eval_run_id = _eval_run_id_from_record(record)
         question = _eval_question_from_options(record.options)
-        store.update_job(job_id, eval_run_id=eval_run_id)
+        _ = store.update_job(job_id, eval_run_id=eval_run_id)
         write_client.execute_eval_run(eval_run_id, question=question)
-        store.update_job(job_id, status="completed")
+        _ = store.update_job(job_id, status="completed")
     except Exception as exc:
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
@@ -1088,7 +1088,7 @@ def run_backfill_job(
     source = _option_str(record.options, "backfill_source", "rescrape")
     if source == "from_chunks" and not _option_bool(record.options, "ack_reconstruct_from_chunks"):
         msg = "ack_reconstruct_from_chunks required when backfill_source is from_chunks"
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code="ValueError",
@@ -1096,7 +1096,7 @@ def run_backfill_job(
         )
         raise ValueError(msg)
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     fetcher = fetch_document or fetch_url
     chunk_size = _chunk_size_from_options(record.options)
 
@@ -1153,10 +1153,10 @@ def run_backfill_job(
             )
 
         if documents:
-            write_client.upsert_batch(BatchUpsertRequest(documents=documents))
-        store.update_job(job_id, status="completed")
+            _ = write_client.upsert_batch(BatchUpsertRequest(documents=documents))
+        _ = store.update_job(job_id, status="completed")
     except Exception as exc:
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,

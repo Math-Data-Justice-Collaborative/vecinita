@@ -9,6 +9,12 @@
   "reportMissingTypeStubs": false,
   "reportExplicitAny": "error",
   "reportAny": "error",
+  "reportUnusedCallResult": "error",
+  "reportUnnecessaryTypeIgnoreComment": "error",
+  "reportMatchNotExhaustive": "error",
+  "reportImplicitStringConcatenation": "error",
+  "reportDeprecated": "error",
+  "reportPrivateUsage": "error",
   "executionEnvironments": [
     {
       "root": "infra",

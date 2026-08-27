@@ -79,7 +79,7 @@ def create_app(  # noqa: PLR0913  # factory accepts injectable clients for tests
 ) -> FastAPI:
     """Build the internal write API (sole holder of DATABASE_URL)."""
     app = FastAPI(title="Vecinita Internal Write API", version="0.1.0")
-    configure_cors(app, extra_allow_headers=["Authorization"])
+    _ = configure_cors(app, extra_allow_headers=["Authorization"])
     engine = _engine()
     retag_jobs = jobs_client if jobs_client is not None else _default_jobs_client()
     resolved_eval_embed = eval_embed_fn

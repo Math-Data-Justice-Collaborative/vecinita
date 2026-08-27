@@ -211,7 +211,7 @@ def _markdown_section(title: str, rows: list[CoverageRow]) -> list[str]:
         branch_pct = f"{row.branch_pct:.1f}%" if row.branches_total else "n/a"
         lines.append(
             f"| `{row.component}` | {line_label} | {branch_label} | "
-            f"{row.line_pct:.1f}% | {branch_pct} |"
+            + f"{row.line_pct:.1f}% | {branch_pct} |"
         )
     total = _aggregate(rows)
     total_lines = f"{total.lines_covered}/{total.lines_total}"
@@ -221,7 +221,7 @@ def _markdown_section(title: str, rows: list[CoverageRow]) -> list[str]:
     total_branch_pct = f"{total.branch_pct:.1f}%" if total.branches_total else "n/a"
     lines.append(
         f"| **{total.component}** | {total_lines} | {total_branches} | "
-        f"**{total.line_pct:.1f}%** | {total_branch_pct} |"
+        + f"**{total.line_pct:.1f}%** | {total_branch_pct} |"
     )
     lines.append("")
     return lines
@@ -240,10 +240,10 @@ def render_markdown_summary(
         "## Unit coverage",
         "",
         f"Per-component gate: **≥{line_threshold:.0f}%** line / "
-        f"**≥{branch_threshold:.0f}%** branch (ADR-019).",
+        + f"**≥{branch_threshold:.0f}%** branch (ADR-019).",
         "",
         "Compose-backed suites (`integration` / `e2e` / …) run via **local** "
-        "`make test-py` / `make ci-push` — not this remote job.",
+        + "`make test-py` / `make ci-push` — not this remote job.",
         "",
     ]
     parts.extend(_markdown_section("Python (packages + backend apps)", python_rows))
@@ -276,30 +276,30 @@ def _parse_args(argv: list[str] | None = None) -> CliOptions:
     parser = argparse.ArgumentParser(
         description="Print per-component unit test coverage summary.",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--coverage-dir",
         type=Path,
         default=DEFAULT_COVERAGE_DIR,
         help="Directory containing python.json and frontend coverage summaries.",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--enforce",
         action="store_true",
         help="Exit 1 when any component is below line or branch thresholds.",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--line-threshold",
         type=float,
         default=DEFAULT_LINE_THRESHOLD,
         help="Minimum line coverage percentage per component (default: 95).",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--branch-threshold",
         type=float,
         default=DEFAULT_BRANCH_THRESHOLD,
         help="Minimum branch coverage percentage per component (default: 95).",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--markdown-out",
         type=Path,
         default=None,
@@ -364,7 +364,7 @@ def main(argv: list[str] | None = None) -> int:
             branch_threshold=options.branch_threshold,
         )
         options.markdown_out.parent.mkdir(parents=True, exist_ok=True)
-        options.markdown_out.write_text(markdown, encoding="utf-8")
+        _ = options.markdown_out.write_text(markdown, encoding="utf-8")
         print(f"Wrote PR coverage markdown: {_display_path(options.markdown_out)}")
 
     if options.enforce:

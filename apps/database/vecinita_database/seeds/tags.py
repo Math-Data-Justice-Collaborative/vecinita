@@ -73,7 +73,7 @@ def load_seed_tags(*, database_url: str | None = None, seed_path: Path | None = 
             slug = str(entry["slug"])
             for language, label_key in (("en", "label_en"), ("es", "label_es")):
                 label = str(entry[label_key])
-                conn.execute(
+                _ = conn.execute(
                     text(
                         """
                         INSERT INTO tags (slug, label, language)
@@ -159,16 +159,16 @@ def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
             )
             documents += 1
 
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM chunks WHERE document_id = :document_id"),
                 {"document_id": doc_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM document_tags WHERE document_id = :document_id"),
                 {"document_id": doc_id},
             )
             for index, chunk in enumerate(_chunk_text(body)):
-                conn.execute(
+                _ = conn.execute(
                     text(
                         """
                         INSERT INTO chunks (document_id, chunk_index, text, token_count)
@@ -191,7 +191,7 @@ def load_tagged_corpus(*, database_url: str | None = None) -> dict[str, int]:
             for raw_slug in tags_list:
                 slug = str(raw_slug)
                 tag_id = _resolve_tag_id(conn, slug=slug, language=language)
-                conn.execute(
+                _ = conn.execute(
                     text(
                         """
                         INSERT INTO document_tags (document_id, tag_id, source)

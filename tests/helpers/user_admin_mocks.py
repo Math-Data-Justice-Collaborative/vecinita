@@ -104,12 +104,12 @@ def make_handler(  # noqa: C901
                 user["app_metadata"] = body["app_metadata"]
             if "ban_duration" in body:
                 if body["ban_duration"] == "none":
-                    user.pop("banned_until", None)
+                    _ = user.pop("banned_until", None)
                 else:
                     user["banned_until"] = BANNED_UNTIL
             return httpx.Response(HTTPStatus.OK, json=user)
         if path.startswith("/auth/v1/admin/users/") and method == "DELETE":
-            users.pop(path.rsplit("/", 1)[-1], None)
+            _ = users.pop(path.rsplit("/", 1)[-1], None)
             return httpx.Response(HTTPStatus.OK, json={})
         if path == "/auth/v1/recover" and method == "POST":
             if outbound is not None:

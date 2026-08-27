@@ -107,7 +107,7 @@ def batch_upsert_documents(
             )
 
             if document.body_text is not None:
-                conn.execute(
+                _ = conn.execute(
                     text(
                         """
                             INSERT INTO document_revisions (
@@ -145,7 +145,7 @@ def batch_upsert_documents(
                 )
 
             if document.chunks:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM chunks WHERE document_id = :document_id"),
                     {"document_id": doc_id},
                 )
@@ -171,7 +171,7 @@ def batch_upsert_documents(
                         )
                     )
                     vector_literal = "[" + ",".join(str(v) for v in chunk.embedding) + "]"
-                    conn.execute(
+                    _ = conn.execute(
                         text(
                             """
                             INSERT INTO embeddings (chunk_id, embedding)
@@ -214,7 +214,7 @@ def batch_upsert_documents(
                 actor_id=actor_id,
                 actor_role=actor_role,
             )
-            create_document_version(
+            _ = create_document_version(
                 conn,
                 document_id=doc_id,
                 title=document.title,
@@ -230,7 +230,7 @@ def batch_upsert_documents(
             )
 
     for doc_id, revision, embed_status in pending_catchups:
-        maybe_enqueue_catchup_after_document_change(
+        _ = maybe_enqueue_catchup_after_document_change(
             engine=engine,
             jobs_client=jobs_client,
             document_id=doc_id,

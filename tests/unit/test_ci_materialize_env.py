@@ -27,8 +27,8 @@ def test_ci_materialize_env_derives_vite_and_cors_aliases() -> None:
     }
     cmd = (
         f"set -a && source '{_SCRIPT}' && "
-        "echo VITE_SUPABASE_URL=$VITE_SUPABASE_URL && "
-        "echo VECINITA_CORS_ORIGINS=$VECINITA_CORS_ORIGINS"
+        + "echo VITE_SUPABASE_URL=$VITE_SUPABASE_URL && "
+        + "echo VECINITA_CORS_ORIGINS=$VECINITA_CORS_ORIGINS"
     )
     proc = subprocess.run(  # noqa: S603
         [str(_BASH), "-c", cmd],
@@ -63,13 +63,13 @@ def test_ci_materialize_env_derives_staging_url_aliases() -> None:
         "VECINITA_CHAT_FRONTEND_URL",
         "VITE_VECINITA_MODAL_PROXY_KEY",
     ):
-        env.pop(key, None)
+        _ = env.pop(key, None)
     cmd = (
         f"set -a && source '{_SCRIPT}' && "
-        "echo WRITE=$VECINITA_INTERNAL_WRITE_URL && "
-        "echo CHAT=$VECINITA_CHAT_RAG_URL && "
-        "echo CORS=$VECINITA_CORS_ORIGINS && "
-        "echo VITE_PROXY=$VITE_VECINITA_MODAL_PROXY_KEY"
+        + "echo WRITE=$VECINITA_INTERNAL_WRITE_URL && "
+        + "echo CHAT=$VECINITA_CHAT_RAG_URL && "
+        + "echo CORS=$VECINITA_CORS_ORIGINS && "
+        + "echo VITE_PROXY=$VITE_VECINITA_MODAL_PROXY_KEY"
     )
     proc = subprocess.run(  # noqa: S603
         [str(_BASH), "-c", cmd],

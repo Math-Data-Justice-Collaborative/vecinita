@@ -57,7 +57,7 @@ def test_requires_url_and_secret_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("SUPABASE_URL", raising=False)
     monkeypatch.delenv("SUPABASE_SECRET_KEY", raising=False)
     with pytest.raises(SupabaseAdminError):
-        SupabaseAdminClient()
+        _ = SupabaseAdminClient()
 
 
 def test_list_users_sends_auth_headers_and_parses() -> None:
@@ -102,7 +102,7 @@ def test_list_users_passes_filter() -> None:
         captured["filter"] = request.url.params.get("filter")
         return httpx.Response(200, json={"users": []})
 
-    _client(handler).list_users(user_filter="alice")
+    _ = _client(handler).list_users(user_filter="alice")
     assert captured["filter"] == "alice"
 
 
@@ -219,7 +219,7 @@ def test_non_2xx_raises_with_status_code() -> None:
         return httpx.Response(409, json={"msg": "already registered"})
 
     with pytest.raises(SupabaseAdminError) as excinfo:
-        _client(handler).invite_user_by_email("dup@example.org")
+        _ = _client(handler).invite_user_by_email("dup@example.org")
     assert excinfo.value.status_code == _HTTP_CONFLICT
 
 
@@ -257,7 +257,7 @@ def test_malformed_gotrue_payload_raises() -> None:
         return httpx.Response(200, json={"id": 123, "email": "op@example.org"})
 
     with pytest.raises(SupabaseAdminError):
-        _client(handler).get_user_by_id(UUID(_UID))
+        _ = _client(handler).get_user_by_id(UUID(_UID))
 
 
 def test_client_close_owned_http_client() -> None:
@@ -276,7 +276,7 @@ def test_client_close_skips_injected_http_client() -> None:
         closed.append(True)
         original_close()
 
-    http.close = tracked_close  # type: ignore[method-assign]
+    http.close = tracked_close
     client = SupabaseAdminClient(base_url=_BASE, secret_key=_SECRET, http_client=http)
     client.close()
     assert closed == []

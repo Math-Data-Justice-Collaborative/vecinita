@@ -197,7 +197,7 @@ def test_approve_non_pending_returns_409() -> None:
         job_type="finetune_train",
         options={"approved": False},
     )
-    store.update_job(record.job_id, status="running")
+    _ = store.update_job(record.job_id, status="running")
     client = _client_with_principal(store, _ADMIN)
     response = client.post(f"/jobs/{record.job_id}/approve")
     assert response.status_code == HTTPStatus.CONFLICT

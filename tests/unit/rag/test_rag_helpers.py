@@ -96,7 +96,7 @@ def test_database_url_from_env_raises_when_missing(
     monkeypatch.delenv("DATABASE_URL", raising=False)
 
     with pytest.raises(RuntimeError, match="DATABASE_URL"):
-        database_url_from_env()
+        _ = database_url_from_env()
 
 
 def test_database_url_from_env_normalizes_value(
@@ -111,7 +111,7 @@ def test_database_url_from_env_normalizes_value(
 def test_vector_literal_rejects_wrong_dimension() -> None:
     """Test vector literal rejects wrong dimension."""
     with pytest.raises(ValueError, match="384"):
-        _vector_literal([0.1, 0.2])
+        _ = _vector_literal([0.1, 0.2])
 
 
 def test_vector_literal_formats_embedding() -> None:
@@ -124,7 +124,7 @@ def test_vector_literal_formats_embedding() -> None:
 def test_corpus_retriever_rejects_invalid_top_k() -> None:
     """Test corpus retriever rejects invalid top k."""
     with pytest.raises(ValueError, match="top_k"):
-        CorpusPgvectorRetriever(embed_fn=lambda _q: [0.0] * 384, top_k=0)
+        _ = CorpusPgvectorRetriever(embed_fn=lambda _q: [0.0] * 384, top_k=0)
 
 
 def test_build_retriever_returns_pgvector_retriever() -> None:

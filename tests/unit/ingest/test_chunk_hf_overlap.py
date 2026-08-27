@@ -104,7 +104,7 @@ def test_chunk_text_respects_hf_token_budget_with_overlap() -> None:
 def test_chunk_text_rejects_overlap_equal_to_size() -> None:
     """Validation rejects overlap >= chunk_size (TC-192 / AC-IR6)."""
     with pytest.raises(ValueError, match="overlap"):
-        chunk_text(
+        _ = chunk_text(
             "hello world",
             chunk_size_tokens=256,
             chunk_overlap_tokens=256,
@@ -114,7 +114,7 @@ def test_chunk_text_rejects_overlap_equal_to_size() -> None:
 def test_chunk_text_rejects_overlap_greater_than_size() -> None:
     """Validation rejects overlap greater than chunk_size (TC-192 / AC-IR6)."""
     with pytest.raises(ValueError, match="overlap"):
-        chunk_text(
+        _ = chunk_text(
             "hello world",
             chunk_size_tokens=64,
             chunk_overlap_tokens=100,
@@ -124,7 +124,7 @@ def test_chunk_text_rejects_overlap_greater_than_size() -> None:
 def test_chunk_text_rejects_negative_overlap() -> None:
     """Overlap must be >= 0."""
     with pytest.raises(ValueError, match="overlap"):
-        chunk_text("hello world", chunk_size_tokens=64, chunk_overlap_tokens=-1)
+        _ = chunk_text("hello world", chunk_size_tokens=64, chunk_overlap_tokens=-1)
 
 
 class _EmptyIdsTokenizer:

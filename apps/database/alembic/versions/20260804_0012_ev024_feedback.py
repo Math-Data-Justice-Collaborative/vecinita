@@ -25,7 +25,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Create anonymous feedback table (no visitor identity columns)."""
-    op.create_table(
+    _ = op.create_table(
         "feedback",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column(

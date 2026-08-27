@@ -53,7 +53,7 @@ def seeded_automation_run(engine: Engine) -> Iterator[UUID]:
     """Insert one automation_runs row; delete after test."""
     run_id = uuid.uuid4()
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO automation_runs (
@@ -74,7 +74,7 @@ def seeded_automation_run(engine: Engine) -> Iterator[UUID]:
         )
     yield run_id
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM automation_runs WHERE id = :id"), {"id": run_id})
+        _ = conn.execute(text("DELETE FROM automation_runs WHERE id = :id"), {"id": run_id})
 
 
 @pytest.fixture
@@ -86,7 +86,7 @@ def reset_automations_enabled(engine: Engine) -> Iterator[None]:
         )
     yield
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE automation_settings

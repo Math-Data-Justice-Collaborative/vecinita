@@ -60,7 +60,7 @@ def test_uj074_audit_list_includes_actor_email_when_resolvable(
     )
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO audit_log (
@@ -112,7 +112,7 @@ def test_uj074_audit_list_includes_actor_email_when_resolvable(
         assert "email" not in cols
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )
@@ -138,7 +138,7 @@ def test_uj074_audit_list_actor_email_null_when_unresolved(
     )
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO audit_log (
@@ -172,7 +172,7 @@ def test_uj074_audit_list_actor_email_null_when_unresolved(
         assert match["actor_email"] is None
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )
@@ -237,7 +237,7 @@ def test_uj074_audit_write_does_not_persist_email(
         assert count == 0
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )

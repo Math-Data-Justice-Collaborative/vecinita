@@ -25,4 +25,4 @@ def test_row_datetime_optional_reexported_via_db_mapping() -> None:
     promoted_at = datetime.now(UTC)
     assert row_datetime_optional({"promoted_at": promoted_at}, "promoted_at") == promoted_at
     with pytest.raises(TypeError, match="Expected datetime"):
-        row_datetime_optional({"promoted_at": "not-a-datetime"}, "promoted_at")
+        _ = row_datetime_optional({"promoted_at": "not-a-datetime"}, "promoted_at")

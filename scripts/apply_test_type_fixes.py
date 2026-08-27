@@ -58,13 +58,13 @@ def patch_async_clients() -> None:
             "async def write_client(internal_api_key: None) -> TestClient:",
             "async def write_client(internal_api_key: None) -> AsyncIterator[AsyncClient]:",
         )
-        p.write_text(text)
+        _ = p.write_text(text)
 
 
 def patch_doc_ids() -> None:
     for rel in DOC_IDS_FILES:
         p = ROOT / rel
-        p.write_text(p.read_text().replace("    doc_ids = []", "    doc_ids: list[UUID] = []"))
+        _ = p.write_text(p.read_text().replace("    doc_ids = []", "    doc_ids: list[UUID] = []"))
 
 
 def patch_runners() -> None:
@@ -84,7 +84,7 @@ def patch_runners() -> None:
                 text,
                 count=1,
             )
-        p.write_text(text)
+        _ = p.write_text(text)
 
 
 def main() -> None:

@@ -63,9 +63,9 @@ def test_count_running_automation_catchup_excludes_other_types() -> None:
         job_type="automation_catchup",
         options=_catchup_options(revision="1"),
     )
-    store.update_job(running.job_id, status="running")
+    _ = store.update_job(running.job_id, status="running")
     other = store.create_job(urls=["https://example.com"], job_type="ingest")
-    store.update_job(other.job_id, status="running")
+    _ = store.update_job(other.job_id, status="running")
     pending = store.create_job(
         urls=[],
         job_type="automation_catchup",
@@ -234,7 +234,7 @@ def test_catchup_worker_at_capacity_skips_reembed(
             job_type="automation_catchup",
             options=_catchup_options(revision=str(index), embed_status="partial"),
         )
-        store.update_job(peer.job_id, status="running")
+        _ = store.update_job(peer.job_id, status="running")
 
     record = store.create_job(
         urls=[],
@@ -312,7 +312,7 @@ def test_run_job_dispatches_automation_catchup(
         store_obj = kwargs["store"]
         assert isinstance(store_obj, InMemoryJobStore)
         dispatched.append(job_id)
-        store_obj.update_job(
+        _ = store_obj.update_job(
             job_id,
             status="completed",
             metrics={"catchup_outcome": "reembedded", "documents_processed": 1},
@@ -359,7 +359,7 @@ def test_create_job_request_accepts_automation_catchup() -> None:
 def test_create_job_request_requires_document_id_for_catchup() -> None:
     """automation_catchup without document_id is rejected at the API schema."""
     with pytest.raises(ValueError, match="document_id"):
-        CreateJobRequest.model_validate(
+        _ = CreateJobRequest.model_validate(
             {
                 "urls": [],
                 "options": {"job_type": "automation_catchup", "revision": "1"},

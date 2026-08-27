@@ -208,4 +208,4 @@ def test_write_client_list_feedback_raises_on_error() -> None:
         http_client=http_client,
     )
     with pytest.raises(InternalWriteClientError, match="list_feedback"):
-        client.list_feedback()
+        _ = client.list_feedback()

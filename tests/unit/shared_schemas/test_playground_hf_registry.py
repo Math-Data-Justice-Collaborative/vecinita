@@ -59,13 +59,13 @@ def test_normalize_playground_tag_strips_quant_and_mlx_suffixes() -> None:
 def test_resolve_hf_repo_blocks_nc_qwen25_3b(model_id: str) -> None:
     """ISS-004: Qwen2.5-3B Research License (NC) must not resolve for pull/load."""
     with pytest.raises(ValueError, match=r"blocked non-commercial"):
-        resolve_hf_repo(model_id)
+        _ = resolve_hf_repo(model_id)
 
 
 def test_resolve_hf_repo_unknown_tag_raises() -> None:
     """Unmapped families raise a clear error (Ollama-only GGUF tags)."""
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("unknown-custom:7b")
+        _ = resolve_hf_repo("unknown-custom:7b")
 
 
 def test_resolve_hf_repo_maps_additional_family_variants() -> None:
@@ -92,31 +92,31 @@ def test_resolve_hf_repo_maps_additional_family_variants() -> None:
 def test_resolve_hf_repo_known_family_unmapped_variant_raises() -> None:
     """Known family with unmapped variant still raises (inferer returns None)."""
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("mistral:13b")
+        _ = resolve_hf_repo("mistral:13b")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("llama3.2:70b")
+        _ = resolve_hf_repo("llama3.2:70b")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("qwen2.5:7b")  # missing -instruct
+        _ = resolve_hf_repo("qwen2.5:7b")  # missing -instruct
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("qwen3.6:1b")
+        _ = resolve_hf_repo("qwen3.6:1b")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("qwen2:7b")  # missing -instruct
+        _ = resolve_hf_repo("qwen2:7b")  # missing -instruct
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("qwen3:latest-extra")
+        _ = resolve_hf_repo("qwen3:latest-extra")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("llama3.1:chat")
+        _ = resolve_hf_repo("llama3.1:chat")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("llama3:chat")
+        _ = resolve_hf_repo("llama3:chat")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("llama2:chat")
+        _ = resolve_hf_repo("llama2:chat")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("mixtral:7b")
+        _ = resolve_hf_repo("mixtral:7b")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("gemma2:2b-it")
+        _ = resolve_hf_repo("gemma2:2b-it")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("gemma:tiny")
+        _ = resolve_hf_repo("gemma:tiny")
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("codellama:code")
+        _ = resolve_hf_repo("codellama:code")
 
 
 def test_resolve_hf_repo_latest_defaults_and_no_colon() -> None:
@@ -124,7 +124,7 @@ def test_resolve_hf_repo_latest_defaults_and_no_colon() -> None:
     assert resolve_hf_repo("gemma:latest") == "google/gemma-7b-it"
     assert resolve_hf_repo("phi3:latest") == "microsoft/Phi-3-mini-4k-instruct"
     with pytest.raises(ValueError, match="no HuggingFace mapping"):
-        resolve_hf_repo("notagfamily")
+        _ = resolve_hf_repo("notagfamily")
 
 
 def test_cap_b_size_passthrough_without_b_suffix() -> None:

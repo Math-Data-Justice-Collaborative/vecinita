@@ -296,7 +296,7 @@ def test_run_job_dispatches_freshness_refresh(
         store_obj = kwargs["store"]
         assert isinstance(store_obj, InMemoryJobStore)
         dispatched.append(job_id)
-        store_obj.update_job(
+        _ = store_obj.update_job(
             job_id,
             status="completed",
             metrics={"freshness_outcome": "refreshed", "documents_processed": 1},

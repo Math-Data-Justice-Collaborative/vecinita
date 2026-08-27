@@ -110,8 +110,8 @@ def test_service_batch_upsert_records_audit_actor_id(client: TestClient, engine:
         row = (
             conn.execute(
                 text(
-                    "SELECT actor_id, actor_role FROM audit_log "
-                    "WHERE entity_id = :id AND event_type = 'document.created'"
+                    "SELECT actor_id, actor_role FROM audit_log "  # noqa: S608
+                    + "WHERE entity_id = :id AND event_type = 'document.created'"
                 ),
                 {"id": doc_id},
             )
@@ -128,13 +128,13 @@ def test_audit_log_filters_by_actor_id(client: TestClient, engine: Engine) -> No
     entity_id = uuid.uuid4()
     request_id = uuid.uuid4()
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 "INSERT INTO audit_log "
-                "(event_type, entity_type, entity_id, request_id, payload, actor_id, actor_role) "
-                "VALUES "
-                "('document.created', 'document', :entity_id, :request_id, '{}'::jsonb, "
-                ":actor_id, 'admin')"
+                + "(event_type, entity_type, entity_id, request_id, payload, actor_id, actor_role) "
+                + "VALUES "
+                + "('document.created', 'document', :entity_id, :request_id, '{}'::jsonb, "
+                + ":actor_id, 'admin')"
             ),
             {
                 "entity_id": entity_id,
@@ -157,7 +157,7 @@ def test_audit_log_filters_by_actor_id(client: TestClient, engine: Engine) -> No
         assert first.actor_role == "admin"
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE request_id = :request_id"),
                 {"request_id": request_id},
             )

@@ -13,9 +13,9 @@ NO_CONTEXT_MESSAGE_ES = (
 )
 HEDGE_DISCLAIMER_EN = (
     "This answer may not be fully supported by the sources we found. "
-    "Please verify important details with the linked resources."
+    + "Please verify important details with the linked resources."
 )
 HEDGE_DISCLAIMER_ES = (
     "Esta respuesta puede no estar completamente respaldada por las fuentes encontradas. "
-    "Verifique los detalles importantes con los recursos enlazados."
+    + "Verifique los detalles importantes con los recursos enlazados."
 )

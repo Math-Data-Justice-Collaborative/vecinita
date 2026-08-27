@@ -130,7 +130,7 @@ def _audit_row(engine: Engine, entity_id: UUID) -> dict[str, object] | None:
             conn.execute(
                 text(
                     "SELECT event_type, entity_type, actor_id, actor_role, payload "
-                    "FROM audit_log WHERE entity_id = :id ORDER BY created_at DESC LIMIT 1"
+                    + "FROM audit_log WHERE entity_id = :id ORDER BY created_at DESC LIMIT 1"
                 ),
                 {"id": entity_id},
             )
@@ -167,14 +167,14 @@ def test_user_management_mutations_audited_without_pii(user_mgmt_stack: UserMgmt
     assert "name" not in payload
     assert "audit-target@example.org" not in json.dumps(payload)
 
-    dm.patch(f"/admin/users/{entity_id}/role", json={"role": "admin"}, headers=headers)
+    _ = dm.patch(f"/admin/users/{entity_id}/role", json={"role": "admin"}, headers=headers)
     role_row = _audit_row(engine, entity_id)
     assert role_row is not None
     assert role_row["event_type"] == "user.role_changed"
     role_payload = as_json_object(role_row["payload"])
     assert "email" not in role_payload
 
-    dm.delete(f"/admin/users/{entity_id}", headers=headers)
+    _ = dm.delete(f"/admin/users/{entity_id}", headers=headers)
     delete_row = _audit_row(engine, entity_id)
     assert delete_row is not None
     assert delete_row["event_type"] == "user.deleted"

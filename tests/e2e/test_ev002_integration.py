@@ -98,11 +98,11 @@ def two_docs(client: TestClient, engine: Engine) -> Iterator[list[str]]:
 
     with engine.begin() as conn:
         for doc_id in doc_ids:
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id}
             )
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_ev002_full_integration_flow(client: TestClient, two_docs: list[str]) -> None:

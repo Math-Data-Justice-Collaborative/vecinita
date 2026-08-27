@@ -66,7 +66,7 @@ def register_playground_routes(
                 detail="Playground models client not configured",
             )
         try:
-            resolve_hf_repo(body.model_id)
+            _ = resolve_hf_repo(body.model_id)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -118,7 +118,7 @@ def register_playground_routes(
         allowed_tags: list[str] = []
         for tag in tags:
             try:
-                resolve_hf_repo(tag)
+                _ = resolve_hf_repo(tag)
             except ValueError:
                 continue
             allowed_tags.append(tag)

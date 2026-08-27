@@ -97,6 +97,8 @@ ignore = [
     # Mutually-incompatible docstring rule pairs (Ruff warns if both enabled). Keep D211/D212.
     "D203",   # one-blank-line-before-class (conflicts with D211)
     "D213",   # multi-line-summary-second-line (conflicts with D212)
+    "ISC003", # Conflicts with basedpyright reportImplicitStringConcatenation (explicit + required)
+    "G003",   # Conflicts with reportImplicitStringConcatenation for multi-line logging strings
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -272,6 +274,13 @@ reportMissingImports = true
 reportMissingTypeStubs = false
 reportExplicitAny = "error"
 reportAny = "error"
+# Beyond strict: catch silent failures, stale suppressions, and non-exhaustive matches.
+reportUnusedCallResult = "error"
+reportUnnecessaryTypeIgnoreComment = "error"
+reportMatchNotExhaustive = "error"
+reportImplicitStringConcatenation = "error"
+reportDeprecated = "error"
+reportPrivateUsage = "error"
 
 # infra/modal and scripts are deploy/ops glue around libraries that are either GPU/ML
 # runtime-only (vllm, torch, fastembed — present only inside the Modal image, not CI) or

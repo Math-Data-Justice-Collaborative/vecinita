@@ -207,7 +207,7 @@ class AnswerCache:
 
     def _evict_if_needed(self) -> None:
         while len(self._entries) > self.max_entries:
-            self._entries.popitem(last=False)
+            _ = self._entries.popitem(last=False)
 
 
 @dataclass(frozen=True)

@@ -44,7 +44,7 @@ def test_parse_model_tags_extracts_full_tag_strings() -> None:
 def test_parse_model_tags_rejects_invalid_slug() -> None:
     """Slug validation blocks path traversal in tag fetch URLs."""
     with pytest.raises(PlaygroundLibraryClientError, match="Invalid model slug"):
-        parse_model_tags("../evil", _TAGS_HTML)
+        _ = parse_model_tags("../evil", _TAGS_HTML)
 
 
 def test_playground_library_client_list_families_uses_http() -> None:
@@ -127,7 +127,7 @@ def test_playground_library_client_list_families_raises_on_http_error() -> None:
     )
     try:
         with pytest.raises(PlaygroundLibraryClientError, match="library index failed"):
-            client.list_families()
+            _ = client.list_families()
     finally:
         client.close()
 
@@ -144,7 +144,7 @@ def test_playground_library_client_list_tags_raises_on_http_error() -> None:
     )
     try:
         with pytest.raises(PlaygroundLibraryClientError, match="tags page failed"):
-            client.list_tags("qwen2.5")
+            _ = client.list_tags("qwen2.5")
     finally:
         client.close()
 

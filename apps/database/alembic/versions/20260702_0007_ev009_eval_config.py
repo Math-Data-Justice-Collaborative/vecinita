@@ -25,7 +25,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Add eval playground config tables and extend eval_runs (no PII columns — ADR-004)."""
-    op.create_table(
+    _ = op.create_table(
         "eval_config_presets",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("preset_name", sa.String(length=128), nullable=False),
@@ -55,7 +55,7 @@ def upgrade() -> None:
     op.create_index("ix_eval_config_presets_owner_id", "eval_config_presets", ["owner_id"])
     op.create_index("ix_eval_config_presets_shared", "eval_config_presets", ["shared"])
 
-    op.create_table(
+    _ = op.create_table(
         "rag_production_config",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column(

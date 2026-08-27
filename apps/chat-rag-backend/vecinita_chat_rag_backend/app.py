@@ -70,7 +70,7 @@ def _check_dependency(url: str | None, path: str = "/health") -> str:
 def _warm_modal_url(url: str, *, timeout_s: float) -> None:
     """Best-effort POST /warm on one Modal app; failures are ignored (S001 T11)."""
     with contextlib.suppress(Exception):
-        httpx.post(f"{url.rstrip('/')}/warm", timeout=timeout_s)
+        _ = httpx.post(f"{url.rstrip('/')}/warm", timeout=timeout_s)
 
 
 def _warm_modal_services(
@@ -82,9 +82,9 @@ def _warm_modal_services(
     """Boot Modal EmbeddingService and LlmService in parallel during user think-time."""
     with ThreadPoolExecutor(max_workers=2) as executor:
         if embed_url:
-            executor.submit(_warm_modal_url, embed_url, timeout_s=request_timeout_s)
+            _ = executor.submit(_warm_modal_url, embed_url, timeout_s=request_timeout_s)
         if llm_url:
-            executor.submit(_warm_modal_url, llm_url, timeout_s=request_timeout_s)
+            _ = executor.submit(_warm_modal_url, llm_url, timeout_s=request_timeout_s)
 
 
 def _source_payload(sources: list[Source]) -> list[dict[str, object]]:
@@ -116,7 +116,7 @@ def _fire_stats(
     if internal_api_key:
         headers["Authorization"] = f"Bearer {internal_api_key}"
     with contextlib.suppress(Exception):
-        httpx.post(
+        _ = httpx.post(
             f"{internal_write_url.rstrip('/')}/internal/v1/stats/served",
             json={"document_ids": doc_ids},
             headers=headers,
@@ -131,7 +131,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
 ) -> FastAPI:
     """Build the ChatRAG FastAPI app with health, ask, and streaming routes."""
     app = FastAPI(title="Vecinita ChatRAG", version="0.2.0")
-    configure_cors(app)
+    _ = configure_cors(app)
     resolved_settings = settings
     resolved_service = chat_service
 
@@ -158,7 +158,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         try:
             engine = create_engine(cfg.database_url)
             with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
+                _ = conn.execute(text("SELECT 1"))
             deps["postgres"] = "ok"
         except Exception:  # noqa: BLE001  # health probe must tolerate any DB failure
             deps["postgres"] = "error"

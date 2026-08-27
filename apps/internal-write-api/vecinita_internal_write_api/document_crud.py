@@ -138,7 +138,7 @@ def patch_document_metadata(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
                 "At least one of display_title, title, language, publish_status, "
-                "refresh_enabled is required"
+                + "refresh_enabled is required"
             ),
         )
     request_id = uuid.uuid4()
@@ -198,7 +198,7 @@ def patch_document_metadata(
             set_clauses.append("publish_status = :publish_status")
             params["publish_status"] = body.publish_status
             new_publish = body.publish_status
-        conn.execute(
+        _ = conn.execute(
             text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                 f"UPDATE documents SET {', '.join(set_clauses)} WHERE id = :id"  # noqa: S608  # whitelisted columns only
             ),
@@ -229,7 +229,7 @@ def patch_document_metadata(
             actor_id=actor_id,
             actor_role=actor_role,
         )
-        create_document_version(
+        _ = create_document_version(
             conn,
             document_id=document_id,
             title=new_title,
@@ -425,7 +425,7 @@ def delete_document(
             actor_id=actor_id,
             actor_role=actor_role,
         )
-        conn.execute(
+        _ = conn.execute(
             text("DELETE FROM documents WHERE id = :document_id"),
             {"document_id": document_id},
         )
@@ -444,9 +444,11 @@ def get_document_history(engine: Engine, document_id: UUID) -> DocumentHistoryRe
         rows = (
             conn.execute(
                 text(
-                    "SELECT version_number, title, language, tags_snapshot, created_at "
-                    "FROM document_versions WHERE document_id = :doc_id "
-                    "ORDER BY version_number ASC"
+                    """
+                    SELECT version_number, title, language, tags_snapshot, created_at
+                    FROM document_versions WHERE document_id = :doc_id
+                    ORDER BY version_number ASC
+                    """
                 ),
                 {"doc_id": document_id},
             )

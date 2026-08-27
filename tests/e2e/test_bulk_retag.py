@@ -75,7 +75,7 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
                 conn.execute(
                     text(
                         "INSERT INTO documents (url, title, language) "
-                        "VALUES (:url, :title, 'en') RETURNING id"
+                        + "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Bulk Retag Doc {i}"},
                 )
@@ -85,8 +85,8 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
     yield doc_ids
     with engine.begin() as conn:
         for doc_id in doc_ids:
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_bulk_retag_returns_job_ids(client: TestClient, sample_docs: list[UUID]) -> None:

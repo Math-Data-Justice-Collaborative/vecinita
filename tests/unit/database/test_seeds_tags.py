@@ -74,10 +74,10 @@ def test_chunk_text_flushes_buffer_on_overflow() -> None:
 def test_load_seed_tags_rejects_invalid_payload(tmp_path: Path) -> None:
     """Test load seed tags rejects invalid payload."""
     bad_path = tmp_path / "seed_tags.json"
-    bad_path.write_text(json.dumps({"not_tags": []}), encoding="utf-8")
+    _ = bad_path.write_text(json.dumps({"not_tags": []}), encoding="utf-8")
 
     with pytest.raises(ValueError, match="tags"):
-        load_seed_tags(database_url=database_url(), seed_path=bad_path)
+        _ = load_seed_tags(database_url=database_url(), seed_path=bad_path)
 
 
 def test_load_seed_tags_inserts_bilingual_rows() -> None:
@@ -90,7 +90,7 @@ def test_resolve_tag_id_raises_for_missing_tag() -> None:
     """Test resolve tag id raises for missing tag."""
     engine = create_engine(database_url())
     with engine.begin() as conn, pytest.raises(ValueError, match="Missing seed tag"):
-        _resolve_tag_id(conn, slug="does-not-exist", language="en")
+        _ = _resolve_tag_id(conn, slug="does-not-exist", language="en")
 
 
 def test_load_tagged_corpus_rejects_invalid_manifest(
@@ -99,11 +99,13 @@ def test_load_tagged_corpus_rejects_invalid_manifest(
     """Test load tagged corpus rejects invalid manifest."""
     tagged_root = tmp_path / "tagged"
     tagged_root.mkdir()
-    (tagged_root / "manifest.json").write_text(json.dumps({"documents": "bad"}), encoding="utf-8")
+    _ = (tagged_root / "manifest.json").write_text(
+        json.dumps({"documents": "bad"}), encoding="utf-8"
+    )
     monkeypatch.setattr("vecinita_database.seeds.tags._TAGGED_ROOT", tagged_root)
 
     with pytest.raises(ValueError, match="documents"):
-        load_tagged_corpus(database_url=database_url())
+        _ = load_tagged_corpus(database_url=database_url())
 
 
 def test_load_tagged_corpus_rejects_document_without_tags(
@@ -114,18 +116,18 @@ def test_load_tagged_corpus_rejects_document_without_tags(
     tagged_root = tmp_path / "tagged"
     doc_path = Path("en/missing-tags.md")
     (tagged_root / doc_path).parent.mkdir(parents=True)
-    (tagged_root / doc_path).write_text("# Doc\n\nBody", encoding="utf-8")
+    _ = (tagged_root / doc_path).write_text("# Doc\n\nBody", encoding="utf-8")
     manifest = {
         "documents": [
             {"path": doc_path.as_posix(), "language": "en", "tags": "not-a-list"},
         ]
     }
-    (tagged_root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    _ = (tagged_root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     monkeypatch.setattr("vecinita_database.seeds.tags._TAGGED_ROOT", tagged_root)
-    load_seed_tags(database_url=database_url())
+    _ = load_seed_tags(database_url=database_url())
 
     with pytest.raises(ValueError, match="must contain a 'tags' array"):
-        load_tagged_corpus(database_url=database_url())
+        _ = load_tagged_corpus(database_url=database_url())
 
 
 def test_chunk_text_empty_body_returns_empty_list() -> None:
@@ -141,7 +143,7 @@ def test_database_url_reads_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_load_tagged_corpus_loads_manifest_documents() -> None:
     """Test load tagged corpus loads manifest documents."""
-    load_seed_tags(database_url=database_url())
+    _ = load_seed_tags(database_url=database_url())
     counts = load_tagged_corpus(database_url=database_url())
     assert counts["documents"] >= 1
     assert counts["document_tags"] >= 1

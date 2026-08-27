@@ -88,7 +88,7 @@ def test_resolve_embed_runtime_rejects_unknown(
     """Unknown runtime values raise EmbeddingClientError (TC-234)."""
     monkeypatch.setenv("VECINITA_EMBED_RUNTIME", "openai")
     with pytest.raises(EmbeddingClientError, match="VECINITA_EMBED_RUNTIME"):
-        resolve_embed_runtime()
+        _ = resolve_embed_runtime()
 
 
 def test_assert_embedding_dimension_accepts_384() -> None:
@@ -100,7 +100,7 @@ def test_assert_embedding_dimension_accepts_384() -> None:
 def test_assert_embedding_dimension_rejects_wrong_len() -> None:
     """Non-384 vectors raise EmbeddingClientError mentioning 384 (AC-ME1)."""
     with pytest.raises(EmbeddingClientError, match="384"):
-        assert_embedding_dimension([0.1, 0.2, 0.3])
+        _ = assert_embedding_dimension([0.1, 0.2, 0.3])
 
 
 def test_resolve_e5_setting_rejects_unknown_and_defaults_from_env(
@@ -113,7 +113,7 @@ def test_resolve_e5_setting_rejects_unknown_and_defaults_from_env(
     assert e5_prefixes_enabled(model_id=_E0) is False
     monkeypatch.setenv("VECINITA_EMBED_E5_PREFIXES", "bogus")
     with pytest.raises(EmbeddingClientError, match="VECINITA_EMBED_E5_PREFIXES"):
-        e5_prefixes_enabled(model_id=_E1)
+        _ = e5_prefixes_enabled(model_id=_E1)
 
 
 def test_apply_embed_prefix_reads_model_id_from_env(

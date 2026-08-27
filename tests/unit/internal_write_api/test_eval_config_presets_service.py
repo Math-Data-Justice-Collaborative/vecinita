@@ -56,7 +56,7 @@ def created_preset_id(
     )
     yield created.preset_id
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text("DELETE FROM eval_config_presets WHERE id = :id"),
             {"id": created.preset_id},
         )
@@ -109,7 +109,7 @@ def test_list_includes_shared_presets_from_other_owners(
         assert any(item.preset_id == shared.preset_id for item in listed.items)
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_config_presets WHERE id = :id"),
                 {"id": shared.preset_id},
             )
@@ -148,7 +148,7 @@ def test_get_shared_preset_allows_non_owner(
         assert fetched.shared is True
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_config_presets WHERE id = :id"),
                 {"id": shared.preset_id},
             )
@@ -221,11 +221,11 @@ def test_clone_shared_preset_creates_private_copy(
         assert cloned.config.top_k == _CUSTOM_TOP_K
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_config_presets WHERE id = :id"),
                 {"id": source.preset_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_config_presets WHERE owner_id = :owner_id"),
                 {"owner_id": cloner_id},
             )
@@ -252,12 +252,12 @@ def test_clone_preset_uses_default_copy_name(
         assert cloned.name == "baseline (copy)"
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_config_presets WHERE id = :id"),
                 {"id": source.preset_id},
             )
             if clone_id is not None:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": clone_id},
                 )

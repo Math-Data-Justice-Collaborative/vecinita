@@ -42,7 +42,7 @@ def test_live_modal_get_jobs_list_returns_200() -> None:
     )
     assert response.status_code == HTTPStatus.OK, (
         f"Expected GET /jobs 200 on production Modal, got {response.status_code}: "
-        f"{response.text[:200]}"
+        + f"{response.text[:200]}"
     )
     body = response_json_object(response)
     assert isinstance(body.get("jobs"), list)

@@ -52,14 +52,14 @@ if TYPE_CHECKING:
 def test_row_datetime_optional_raises_on_wrong_type() -> None:
     """Test row datetime optional raises on wrong type."""
     with pytest.raises(TypeError, match="Expected datetime"):
-        _row_datetime_optional({"last_served_at": "bad"}, "last_served_at")
+        _ = _row_datetime_optional({"last_served_at": "bad"}, "last_served_at")
 
 
 def test_database_url_raises_when_env_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test database url raises when env missing."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with pytest.raises(RuntimeError, match="DATABASE_URL"):
-        _database_url()
+        _ = _database_url()
 
 
 def test_get_document_tags_404(write_client: TestClient) -> None:
@@ -243,7 +243,7 @@ def test_cleanup_audit_log_deletes_old_rows(engine: Engine) -> None:
             request_id=request_id,
             payload={"test": "cleanup-unit"},
         )
-        conn.execute(
+        _ = conn.execute(
             text("UPDATE audit_log SET created_at = :ts WHERE entity_id = :entity_id"),
             {"ts": old_ts, "entity_id": entity_id},
         )

@@ -50,7 +50,7 @@ def test_stream_tokens_does_not_word_chunk_full_completion() -> None:
     stream_tokens = _find_llm_service_method("stream_tokens")
     assert not _calls_attr(stream_tokens, attr="split"), (
         "stream_tokens must not word-chunk a full completion via .split(); "
-        "wire vLLM incremental token streaming (RD-164 / TP-S010-22 / TC-143)"
+        + "wire vLLM incremental token streaming (RD-164 / TP-S010-22 / TC-143)"
     )
 
 
@@ -59,5 +59,5 @@ def test_stream_tokens_does_not_call_generate_text_for_full_reply() -> None:
     stream_tokens = _find_llm_service_method("stream_tokens")
     assert not _calls_self_method(stream_tokens, method="_generate_text"), (
         "stream_tokens must not call self._generate_text(...) then yield pieces; "
-        "use vLLM engine streaming / async iterator (TP-S010-22)"
+        + "use vLLM engine streaming / async iterator (TP-S010-22)"
     )

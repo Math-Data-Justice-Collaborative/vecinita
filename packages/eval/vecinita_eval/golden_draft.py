@@ -146,7 +146,7 @@ def append_golden_rows(
             raise ValueError(msg)
     merged = [*existing, *new_rows]
     fixture_path.parent.mkdir(parents=True, exist_ok=True)
-    fixture_path.write_text(
+    _ = fixture_path.write_text(
         json.dumps([golden_row_to_json(row) for row in merged], indent=2, ensure_ascii=False)
         + "\n",
         encoding="utf-8",

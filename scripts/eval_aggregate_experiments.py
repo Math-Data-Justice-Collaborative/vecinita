@@ -35,23 +35,23 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--results-dir",
         type=Path,
         default=_DEFAULT_RESULTS,
         help="Folder of experiment_*.json files",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--group-by",
         default="model_id,prompt_name,temperature,top_k",
         help="Comma-separated grouping fields from cell config",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--metrics",
         default="retrieval_relevance,faithfulness,answer_relevancy,wall_time_s,latency_p95_ms,spawn_wall_time_s",
         help="Comma-separated metrics to average",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--out",
         type=Path,
         default=None,
@@ -77,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     group_count = len(cast("list[object]", groups)) if isinstance(groups, list) else 0
     print(
         f"OK: aggregated {aggregate['experiment_count']} experiment(s) "
-        f"into {group_count} group(s) -> {out}",
+        + f"into {group_count} group(s) -> {out}",
         file=sys.stderr,
     )
     return 0

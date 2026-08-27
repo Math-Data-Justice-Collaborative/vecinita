@@ -235,7 +235,7 @@ def test_ask_uses_spanish_system_prompt_when_language_es() -> None:
         "_production_config",
         return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
     ):
-        service.ask(AskRequest(question="clinic hours", language="es"))
+        _ = service.ask(AskRequest(question="clinic hours", language="es"))
     assert llm.prompts
     prompt = llm.prompts[0]
     assert "únicamente el contexto siguiente" in prompt
@@ -256,7 +256,7 @@ def test_ask_uses_production_system_prompt_when_language_en() -> None:
         "_production_config",
         return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
     ):
-        service.ask(AskRequest(question="clinic hours", language="en"))
+        _ = service.ask(AskRequest(question="clinic hours", language="en"))
     assert llm.prompts
     prompt = llm.prompts[0]
     assert _PROMOTED_EN_SYSTEM_PROMPT in prompt
@@ -277,7 +277,7 @@ def test_stream_ask_uses_spanish_system_prompt_when_language_es() -> None:
         return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
     ):
         session = service.stream_ask(AskRequest(question="clinic hours", language="es"))
-        list(session.tokens)
+        _ = list(session.tokens)
     assert llm.prompts
     prompt = llm.prompts[0]
     assert "únicamente el contexto siguiente" in prompt
@@ -931,11 +931,11 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
 
         mock_retriever.side_effect = _capture_retriever
         service = ChatRagService.from_settings(settings)
-        service.ask(AskRequest(question="housing help"))
+        _ = service.ask(AskRequest(question="housing help"))
 
     embed_fn = embed_fn_holder.get("fn")
     assert callable(embed_fn)
-    assert embed_fn("housing help") == [0.01] * 384  # type: ignore[operator]
+    assert embed_fn("housing help") == [0.01] * 384
     assert captured["tag_question"] == "housing help"
     assert captured["require_proxy_key"] is True
 

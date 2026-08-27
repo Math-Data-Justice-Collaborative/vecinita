@@ -30,7 +30,7 @@ def test_broker_skips_unchanged_fingerprint() -> None:
     assert len(first) == 1
     broker.sync_from_store(store)
     assert broker.events_after(None) == first
-    store.update_job(record.job_id, status="running")
+    _ = store.update_job(record.job_id, status="running")
     broker.sync_from_store(store)
     after_update = broker.events_after(None)
     assert len(after_update) == len(first) + 1
@@ -39,7 +39,7 @@ def test_broker_skips_unchanged_fingerprint() -> None:
 def test_events_after_invalid_last_id_returns_all() -> None:
     """Non-numeric Last-Event-ID falls back to full history."""
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/a"])
+    _ = store.create_job(urls=["https://example.com/a"])
     broker = JobEventBroker()
     broker.sync_from_store(store)
     assert len(broker.events_after("not-a-number")) == 1
@@ -49,7 +49,7 @@ def test_events_after_invalid_last_id_returns_all() -> None:
 def test_iter_job_sse_respects_max_cycles() -> None:
     """max_cycles bounds the poll loop for finite streams."""
     store = InMemoryJobStore()
-    store.create_job(urls=[f"https://example.com/{uuid4()}"])
+    _ = store.create_job(urls=[f"https://example.com/{uuid4()}"])
     broker = JobEventBroker()
     frames = list(
         iter_job_sse(

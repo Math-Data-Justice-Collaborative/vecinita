@@ -54,7 +54,7 @@ def promoted_config_chat_client(
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
     )
-    seed_corpus_with_embeddings(
+    _ = seed_corpus_with_embeddings(
         database_url=database_url,
         match_substrings={"Food pantry": 0, "banco de alimentos": 2},
         default_index=1,
@@ -70,8 +70,8 @@ def promoted_config_chat_client(
         model_id="qwen2.5:1.5b-instruct",
     ).model_dump(mode="json")
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
-        conn.execute(
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO rag_production_config (

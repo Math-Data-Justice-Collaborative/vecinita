@@ -47,31 +47,31 @@ def test_eval_config_defaults_match_config_spec() -> None:
 def test_eval_config_rejects_top_k_below_minimum() -> None:
     """top_k must be >= 1."""
     with pytest.raises(ValidationError):
-        EvalConfig(top_k=0)
+        _ = EvalConfig(top_k=0)
 
 
 def test_eval_config_rejects_top_k_above_maximum() -> None:
     """top_k must be <= 50."""
     with pytest.raises(ValidationError):
-        EvalConfig(top_k=51)
+        _ = EvalConfig(top_k=51)
 
 
 def test_eval_config_rejects_empty_system_prompt() -> None:
     """System_prompt must be 1-8000 chars."""
     with pytest.raises(ValidationError):
-        EvalConfig(system_prompt="")
+        _ = EvalConfig(system_prompt="")
 
 
 def test_eval_config_rejects_temperature_above_maximum() -> None:
     """Temperature must be <= 2.0."""
     with pytest.raises(ValidationError):
-        EvalConfig(temperature=2.1)
+        _ = EvalConfig(temperature=2.1)
 
 
 def test_eval_config_preset_create_requires_name() -> None:
     """Preset create body requires non-empty name."""
     with pytest.raises(ValidationError):
-        EvalConfigPresetCreateRequest(name="", config=EvalConfig())
+        _ = EvalConfigPresetCreateRequest(name="", config=EvalConfig())
 
 
 def test_eval_config_preset_update_allows_partial_fields() -> None:
@@ -85,7 +85,7 @@ def test_eval_config_preset_update_allows_partial_fields() -> None:
 def test_rag_config_promote_requires_preset_id_when_source_preset() -> None:
     """Promote from preset requires preset_id."""
     with pytest.raises(ValidationError):
-        RagConfigPromoteRequest(source="preset")
+        _ = RagConfigPromoteRequest(source="preset")
 
 
 def test_rag_config_promote_accepts_run_source() -> None:
@@ -117,13 +117,13 @@ def test_merge_eval_config_none_partial_returns_base() -> None:
 def test_rag_config_promote_requires_run_id_when_source_run() -> None:
     """Promote from run requires run_id."""
     with pytest.raises(ValidationError):
-        RagConfigPromoteRequest(source="run")
+        _ = RagConfigPromoteRequest(source="run")
 
 
 def test_eval_run_create_request_requires_question_for_adhoc() -> None:
     """Ad-hoc eval runs require a question in the POST body."""
     with pytest.raises(ValidationError):
-        EvalRunCreateRequest(mode="adhoc")
+        _ = EvalRunCreateRequest(mode="adhoc")
 
 
 def test_eval_run_create_request_golden_mode_without_question() -> None:

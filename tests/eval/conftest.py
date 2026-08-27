@@ -20,5 +20,5 @@ def eval_db() -> str:
     if not postgres_is_ready():
         pytest.skip("Postgres not available for eval tests")
     url = _database_url()
-    seed_eval_corpus(database_url=url)
+    _ = seed_eval_corpus(database_url=url)
     return url

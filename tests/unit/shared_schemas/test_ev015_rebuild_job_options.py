@@ -25,7 +25,7 @@ def test_rebuild_accepts_all_modes(mode: str) -> None:
 def test_rebuild_requires_mode() -> None:
     """TC-161: mode is required when job_type is rebuild."""
     with pytest.raises(ValidationError) as exc_info:
-        JobOptions.model_validate({"job_type": "rebuild"})
+        _ = JobOptions.model_validate({"job_type": "rebuild"})
     assert any(
         err.get("type") == "value_error" and "mode" in str(err.get("msg", "")).lower()
         for err in exc_info.value.errors()
@@ -35,7 +35,7 @@ def test_rebuild_requires_mode() -> None:
 def test_rebuild_rejects_unknown_mode() -> None:
     """Invalid rebuild mode is rejected at the schema boundary."""
     with pytest.raises(ValidationError):
-        JobOptions.model_validate({"job_type": "rebuild", "mode": "reindex"})
+        _ = JobOptions.model_validate({"job_type": "rebuild", "mode": "reindex"})
 
 
 def test_rebuild_force_and_dry_run_defaults_and_flags() -> None:

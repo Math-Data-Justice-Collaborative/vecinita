@@ -82,7 +82,7 @@ def test_get_eval_run_detail_includes_error_message_when_failed(
     run_id = created.response.run_id
     try:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     UPDATE eval_runs
@@ -107,11 +107,11 @@ def test_get_eval_run_detail_includes_error_message_when_failed(
         assert body.get("items") == []
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
                 {"id": run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
 
 
 def test_execute_eval_run_persists_embed_client_error_for_api(
@@ -147,11 +147,11 @@ def test_execute_eval_run_persists_embed_client_error_for_api(
         assert json_str(body, "error_message") == _EMBED_404_MESSAGE
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
                 {"id": run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
 
 
 def test_get_eval_run_detail_error_message_null_when_completed(
@@ -164,7 +164,7 @@ def test_get_eval_run_detail_error_message_null_when_completed(
     run_id = created.response.run_id
     try:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     UPDATE eval_runs
@@ -187,8 +187,8 @@ def test_get_eval_run_detail_error_message_null_when_completed(
         assert body.get("error_message") is None
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
                 {"id": run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})

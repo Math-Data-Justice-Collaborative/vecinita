@@ -185,7 +185,7 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
     # Cache-Control + Last-Event-ID: fetch-based SSE (subscribeJobEvents / TC-148).
     # Without them, browser OPTIONS /jobs/events → 400 Disallowed CORS headers
     # (BUG-2026-07-29).
-    configure_cors(
+    _ = configure_cors(
         app,
         extra_allow_headers=[_PROXY_HEADER, "Cache-Control", "Last-Event-ID"],
         env_value=resolved_cors,

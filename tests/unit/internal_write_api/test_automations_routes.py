@@ -134,7 +134,7 @@ def test_automation_row_datetime_helpers_cover_type_branches() -> None:
     now = datetime.now(UTC)
     assert row_datetime({"started_at": now}, "started_at") == now
     with pytest.raises(TypeError, match="Expected datetime"):
-        row_datetime({"started_at": "not-a-datetime"}, "started_at")
+        _ = row_datetime({"started_at": "not-a-datetime"}, "started_at")
     assert row_datetime_optional({"finished_at": None}, "finished_at") is None
     assert row_datetime_optional({"finished_at": now}, "finished_at") == now
 

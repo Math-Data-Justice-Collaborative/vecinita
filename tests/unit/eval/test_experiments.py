@@ -88,7 +88,7 @@ def test_write_and_load_experiments_round_trip(tmp_path: Path) -> None:
 
 def test_aggregate_experiments_groups_by_model_and_prompt(tmp_path: Path) -> None:
     """Aggregation means metrics across experiments for matching group keys."""
-    write_experiment(
+    _ = write_experiment(
         results_dir=tmp_path,
         experiment_id="exp_a",
         payload={
@@ -112,7 +112,7 @@ def test_aggregate_experiments_groups_by_model_and_prompt(tmp_path: Path) -> Non
             ]
         },
     )
-    write_experiment(
+    _ = write_experiment(
         results_dir=tmp_path,
         experiment_id="exp_b",
         payload={
