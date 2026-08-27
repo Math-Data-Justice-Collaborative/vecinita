@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { MODEL_PULL_POLL_INTERVAL_MS } from "./playgroundModelDownloadContext";
+import { MODEL_PULL_POLL_INTERVAL_MS } from "./playground-model-download-context";
 import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

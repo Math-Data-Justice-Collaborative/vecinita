@@ -23,7 +23,7 @@ import { t } from "vecinita-frontend-i18n";
 
 import { useAuth, useIsAdmin } from "@/auth/auth-context";
 import { ModelDownloadProgressIndicator } from "@/evaluation/ModelDownloadProgressIndicator";
-import { PlaygroundModelDownloadProvider } from "@/evaluation/playgroundModelDownloadContext";
+import { PlaygroundModelDownloadProvider } from "@/evaluation/PlaygroundModelDownloadProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {

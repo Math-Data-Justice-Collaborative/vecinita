@@ -55,7 +55,8 @@ same five Python roots: `apps`, `packages`, `tests`, `infra`, `scripts`.
 ### basedpyright
 
 - Package: **`basedpyright`** (Pyright-compatible; adds `reportExplicitAny`).
-- Config sections: `[tool.basedpyright]` in `pyproject.toml` and `pyrightconfig.json`.
+- Config sections: `[tool.basedpyright]` in `pyproject.toml` and `pyrightconfig.json` (keep
+  `extraPaths` in sync — include `scripts` so `deploy.*` imports resolve without stubs).
 - Key settings:
   - **`typeCheckingMode = "strict"`** — Pyright strict mode (the strongest sensible level;
     `all` adds non-type stylistic rules like `reportUnusedCallResult` that cannot be resolved
@@ -101,7 +102,7 @@ keeping real-bug rules (`reportReturnType`, `reportArgumentType`, `reportOptiona
 
 Type-aware lint (`parserOptions.projectService: true`):
 
-Production `src/**` uses **`typescript-eslint` `strictTypeChecked`** (includes `no-explicit-any` and strict inference rules). Test files (`src/test/**`) keep `no-explicit-any` but relax mock-noisy rules (`require-await`, etc.).
+Production `src/**` uses **`typescript-eslint` `strictTypeChecked`** (includes `no-explicit-any` and strict inference rules). Test files (`src/test/**`) keep `no-explicit-any` but relax mock-noisy rules (`require-await`, etc.). React apps use `react-refresh/only-export-components` at **error** (hooks/context in `.ts` files; provider components in `.tsx` only — see `auth-context.ts` / `AuthContext.tsx`). `npm run lint` runs ESLint with **`--max-warnings 0`** so warnings fail CI and local `make lint`.
 
 All four frontend workspaces (`apps/chat-rag-frontend`, `apps/data-management-frontend`,
 `packages/frontend-i18n`, `packages/frontend-ui`) enable `@typescript-eslint/no-unused-vars`
