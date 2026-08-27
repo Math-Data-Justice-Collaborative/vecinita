@@ -5,7 +5,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 
 import {
@@ -61,10 +60,10 @@ export interface UsePlaygroundModelDownloadResult {
   resetDownloadStatus: () => void;
 }
 
-const PlaygroundModelDownloadContext =
+export const PlaygroundModelDownloadContext =
   createContext<UsePlaygroundModelDownloadResult | null>(null);
 
-function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadResult & {
+export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadResult & {
   clearDownloadPoll: () => void;
 } {
   const [models, setModels] = useState<PlaygroundModelSummaryApi[]>([]);
@@ -265,26 +264,6 @@ function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadResult & {
     resetDownloadStatus,
     clearDownloadPoll,
   };
-}
-
-export function PlaygroundModelDownloadProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  const { clearDownloadPoll, ...value } = usePlaygroundModelDownloadState();
-
-  useEffect(() => {
-    return () => {
-      clearDownloadPoll();
-    };
-  }, [clearDownloadPoll]);
-
-  return (
-    <PlaygroundModelDownloadContext.Provider value={value}>
-      {children}
-    </PlaygroundModelDownloadContext.Provider>
-  );
 }
 
 export function usePlaygroundModelDownload(): UsePlaygroundModelDownloadResult {
