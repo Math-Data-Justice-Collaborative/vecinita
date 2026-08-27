@@ -135,7 +135,7 @@ def test_tc131_super_admin_promote_updates_active_config_and_audit(
                         """
                     SELECT COUNT(*)
                     FROM audit_log
-                    WHERE event_type = 'rag.config.promoted' +
+                    WHERE event_type = 'rag.config.promoted'
                     """
                     )
                 )

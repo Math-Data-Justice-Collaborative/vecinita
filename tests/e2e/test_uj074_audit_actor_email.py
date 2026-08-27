@@ -103,7 +103,7 @@ def test_uj074_audit_list_includes_actor_email_when_resolvable(
                     text(
                         """
                         SELECT column_name FROM information_schema.columns
-                        WHERE table_schema = 'public' AND table_name = 'audit_log' +
+                        WHERE table_schema = 'public' AND table_name = 'audit_log'
                         """
                     )
                 )

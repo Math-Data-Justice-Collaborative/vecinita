@@ -16,6 +16,9 @@ def fix_file(path: Path) -> bool:
     while idx < len(lines) - 1:
         cur = lines[idx].rstrip()
         nxt = lines[idx + 1].lstrip()
+        if nxt.startswith(('"""', "'''")):
+            idx += 1
+            continue
         next_is_string = nxt.startswith(('"', "'", 'f"', "f'", 'F"', "F'"))
         if (
             (cur.endswith(('"', "'")))

@@ -843,7 +843,7 @@ def test_latency_ms_defaults_when_item_latency_is_float(
                 UPDATE eval_run_items
                 SET metrics = CAST(:metrics AS jsonb),
                     latency_ms = 0
-                WHERE run_id = :run_id AND case_id = 'float-latency' +
+                WHERE run_id = :run_id AND case_id = 'float-latency'
                 """
             ),
             {

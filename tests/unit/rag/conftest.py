@@ -218,8 +218,8 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
                 _ = conn.execute(text("DELETE FROM embeddings"))
                 _ = conn.execute(
                     text(
-                        "DELETE FROM chunks WHERE document_id IN " +  # noqa: S608
-                        "(SELECT id FROM documents WHERE language = 'en')"
+                        "DELETE FROM chunks WHERE document_id IN "  # noqa: S608
+                        + "(SELECT id FROM documents WHERE language = 'en')"
                     )
                 )
                 _ = conn.execute(text("DELETE FROM documents WHERE language = 'en'"))
@@ -231,7 +231,7 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
                                 SELECT COUNT(*)
                                 FROM chunks c
                                 JOIN documents d ON d.id = c.document_id
-                                WHERE d.language = 'es' +
+                                WHERE d.language = 'es'
                                 """
                             )
                         )
