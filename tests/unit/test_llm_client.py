@@ -247,10 +247,10 @@ def test_generate_stream_ignores_empty_and_non_string_tokens() -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
         """Handler."""
         content = (
-            'data: {"token": ""}\n' +
-            'data: {"token": 123}\n' +
-            'data: {"token": "Done"}\n' +
-            'data: {"done": true}'
+            'data: {"token": ""}\n'
+            + 'data: {"token": 123}\n'
+            + 'data: {"token": "Done"}\n'
+            + 'data: {"done": true}'
         )
         return httpx.Response(200, content=content)
 

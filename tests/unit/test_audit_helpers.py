@@ -62,8 +62,8 @@ def sample_document(engine: Engine) -> Iterator[UUID]:
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO documents (url, title, language) " +
-                    "VALUES (:url, 'Audit Test Doc', 'en') RETURNING id"
+                    "INSERT INTO documents (url, title, language) "
+                    + "VALUES (:url, 'Audit Test Doc', 'en') RETURNING id"
                 ),
                 {"url": url},
             )
@@ -91,8 +91,8 @@ def test_emit_audit_event_inserts_row(engine: Engine, sample_document: UUID) -> 
         row = (
             conn.execute(
                 text(
-                    "SELECT event_type, entity_type, entity_id, request_id, payload " +
-                    "FROM audit_log WHERE entity_id = :entity_id AND request_id = :request_id"
+                    "SELECT event_type, entity_type, entity_id, request_id, payload "
+                    + "FROM audit_log WHERE entity_id = :entity_id AND request_id = :request_id"
                 ),
                 {"entity_id": sample_document, "request_id": request_id},
             )
@@ -125,8 +125,8 @@ def test_emit_audit_event_empty_payload(engine: Engine, sample_document: UUID) -
         row = (
             conn.execute(
                 text(
-                    "SELECT payload FROM audit_log " +  # noqa: S608
-                    "WHERE entity_id = :entity_id AND request_id = :request_id"
+                    "SELECT payload FROM audit_log "  # noqa: S608
+                    + "WHERE entity_id = :entity_id AND request_id = :request_id"
                 ),
                 {"entity_id": sample_document, "request_id": request_id},
             )
@@ -153,9 +153,9 @@ def test_create_document_version_inserts_snapshot(engine: Engine, sample_documen
         row = (
             conn.execute(
                 text(
-                    "SELECT version_number, title, language, tags_snapshot " +
-                    "FROM document_versions WHERE document_id = :doc_id " +
-                    "ORDER BY version_number DESC LIMIT 1"
+                    "SELECT version_number, title, language, tags_snapshot "
+                    + "FROM document_versions WHERE document_id = :doc_id "
+                    + "ORDER BY version_number DESC LIMIT 1"
                 ),
                 {"doc_id": sample_document},
             )
@@ -198,8 +198,8 @@ def test_create_document_version_increments_version_number(
         rows = (
             conn.execute(
                 text(
-                    "SELECT version_number, title FROM document_versions " +  # noqa: S608
-                    "WHERE document_id = :doc_id ORDER BY version_number"
+                    "SELECT version_number, title FROM document_versions "  # noqa: S608
+                    + "WHERE document_id = :doc_id ORDER BY version_number"
                 ),
                 {"doc_id": sample_document},
             )

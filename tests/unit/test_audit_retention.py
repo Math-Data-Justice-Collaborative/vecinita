@@ -89,8 +89,8 @@ def seed_old_events(engine: Engine) -> Iterator[None]:
     with engine.begin() as conn:
         _ = conn.execute(
             text(
-                "DELETE FROM audit_log WHERE payload::text LIKE '%old_event%' " +  # noqa: S608
-                "OR payload::text LIKE '%recent_event%'"
+                "DELETE FROM audit_log WHERE payload::text LIKE '%old_event%' "  # noqa: S608
+                + "OR payload::text LIKE '%recent_event%'"
             )
         )
 

@@ -29,20 +29,20 @@ DEFAULT_EVAL_JUDGE_TEMPERATURE = 0.2
 DEFAULT_EVAL_MODEL_ID = "qwen2.5:1.5b-instruct"
 
 DEFAULT_EVAL_SYSTEM_PROMPT = (
-    "Answer community questions using only the context below. Be concise. " +
-    "If the context does not answer the question, say you do not have that information. " +
-    "Never invent personal phone numbers, email addresses, street addresses, or " +
-    "private contact details. When multiple programs appear in the context, answer " +
-    "only about the program named in the question."
+    "Answer community questions using only the context below. Be concise. "
+    + "If the context does not answer the question, say you do not have that information. "
+    + "Never invent personal phone numbers, email addresses, street addresses, or "
+    + "private contact details. When multiple programs appear in the context, answer "
+    + "only about the program named in the question."
 )
 
 DEFAULT_EVAL_SYSTEM_PROMPT_ES = (
-    "Responde las preguntas de la comunidad usando únicamente el contexto siguiente. " +
-    "Sé conciso. Si el contexto no responde la pregunta, di que no tienes esa " +
-    "información. Nunca inventes números de teléfono personales, direcciones de correo " +
-    "electrónico, direcciones físicas ni datos de contacto privados. Cuando en el " +
-    "contexto aparezcan varios programas, responde solo sobre el programa mencionado " +
-    "en la pregunta."
+    "Responde las preguntas de la comunidad usando únicamente el contexto siguiente. "
+    + "Sé conciso. Si el contexto no responde la pregunta, di que no tienes esa "
+    + "información. Nunca inventes números de teléfono personales, direcciones de correo "
+    + "electrónico, direcciones físicas ni datos de contacto privados. Cuando en el "
+    + "contexto aparezcan varios programas, responde solo sobre el programa mencionado "
+    + "en la pregunta."
 )
 
 

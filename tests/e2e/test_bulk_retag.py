@@ -74,8 +74,8 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
             doc_id_raw = sqlalchemy_scalar_one(
                 conn.execute(
                     text(
-                        "INSERT INTO documents (url, title, language) " +
-                        "VALUES (:url, :title, 'en') RETURNING id"
+                        "INSERT INTO documents (url, title, language) "
+                        + "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Bulk Retag Doc {i}"},
                 )

@@ -137,8 +137,8 @@ def patch_document_metadata(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                "At least one of display_title, title, language, publish_status, " +
-                "refresh_enabled is required"
+                "At least one of display_title, title, language, publish_status, "
+                + "refresh_enabled is required"
             ),
         )
     request_id = uuid.uuid4()
@@ -444,9 +444,9 @@ def get_document_history(engine: Engine, document_id: UUID) -> DocumentHistoryRe
         rows = (
             conn.execute(
                 text(
-                    "SELECT version_number, title, language, tags_snapshot, created_at " +
-                    "FROM document_versions WHERE document_id = :doc_id " +
-                    "ORDER BY version_number ASC"
+                    "SELECT version_number, title, language, tags_snapshot, created_at "
+                    + "FROM document_versions WHERE document_id = :doc_id "
+                    + "ORDER BY version_number ASC"
                 ),
                 {"doc_id": document_id},
             )

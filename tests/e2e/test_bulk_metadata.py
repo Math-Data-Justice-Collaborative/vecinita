@@ -64,8 +64,8 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
             doc_id_raw = sqlalchemy_scalar_one(
                 conn.execute(
                     text(
-                        "INSERT INTO documents (url, title, language) " +
-                        "VALUES (:url, :title, 'en') RETURNING id"
+                        "INSERT INTO documents (url, title, language) "
+                        + "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Bulk Meta Doc {i}"},
                 )
@@ -143,8 +143,8 @@ def test_bulk_metadata_emits_audit(
         for doc_id in sample_docs:
             row = conn.execute(
                 text(
-                    "SELECT event_type FROM audit_log " +  # noqa: S608
-                    "WHERE entity_id = :id AND event_type = 'document.edited'"
+                    "SELECT event_type FROM audit_log "  # noqa: S608
+                    + "WHERE entity_id = :id AND event_type = 'document.edited'"
                 ),
                 {"id": doc_id},
             ).first()
@@ -167,8 +167,8 @@ def test_bulk_metadata_creates_version(
         for doc_id in sample_docs:
             row = conn.execute(
                 text(
-                    "SELECT title FROM document_versions " +  # noqa: S608
-                    "WHERE document_id = :id ORDER BY version_number DESC LIMIT 1"
+                    "SELECT title FROM document_versions "  # noqa: S608
+                    + "WHERE document_id = :id ORDER BY version_number DESC LIMIT 1"
                 ),
                 {"id": doc_id},
             ).first()

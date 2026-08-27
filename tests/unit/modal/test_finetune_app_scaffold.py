@@ -29,8 +29,8 @@ def _import_finetune_app() -> object:
     """Load finetune Modal app module; missing file is the red phase (T129.3)."""
     if not _APP_PATH.is_file():
         pytest.fail(
-            "infra/modal/finetune_app.py missing (T129.3 / TP4 / ADR-053): " +
-            "scaffold vecinita-llm-finetune + volume llm-finetune-adapters"
+            "infra/modal/finetune_app.py missing (T129.3 / TP4 / ADR-053): "
+            + "scaffold vecinita-llm-finetune + volume llm-finetune-adapters"
         )
     try:
         return importlib.import_module("infra.modal.finetune_app")
@@ -83,8 +83,8 @@ def test_finetune_app_wires_finetune_image_pips() -> None:
     pip_args = _pip_install_string_args(source)
     for pin in FINETUNE_IMAGE_PIPS:
         assert pin in pip_args, (
-            f"{pin} missing from finetune_app pip_install " +
-            f"(got {pip_args!r}; must use *FINETUNE_IMAGE_PIPS)"
+            f"{pin} missing from finetune_app pip_install "
+            + f"(got {pip_args!r}; must use *FINETUNE_IMAGE_PIPS)"
         )
     assert "bitsandbytes" not in " ".join(pip_args)
 

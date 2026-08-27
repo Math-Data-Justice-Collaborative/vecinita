@@ -12,8 +12,8 @@ from vecinita_ingest.scrape import (
 )
 
 _BODY = (
-    "<html><head><title>Community</title></head>" +
-    "<body><p>Resource hours and services for neighbors.</p></body></html>"
+    "<html><head><title>Community</title></head>"
+    + "<body><p>Resource hours and services for neighbors.</p></body></html>"
 )
 _TLS_HANDSHAKE_MSG = "SSL handshake failure"
 _EXPECTED_UA_RETRY_ATTEMPTS = 2

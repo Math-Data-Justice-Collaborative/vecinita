@@ -61,8 +61,8 @@ def seeded_document_id(engine: Engine) -> Iterator[UUID]:
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO documents (url, title, language) " +
-                    "VALUES (:url, :title, 'en') RETURNING id"
+                    "INSERT INTO documents (url, title, language) "
+                    + "VALUES (:url, :title, 'en') RETURNING id"
                 ),
                 {
                     "url": f"https://retag-500-{uuid4().hex[:8]}.example.com",
@@ -127,8 +127,8 @@ def test_retag_modal_401_must_not_be_opaque_500(seeded_document_id: UUID) -> Non
     )
 
     assert resp.status_code != HTTPStatus.INTERNAL_SERVER_ERROR, (
-        "Retag must not return opaque 500 when Modal enqueue fails; " +
-        f"got {resp.status_code}: {resp.text}"
+        "Retag must not return opaque 500 when Modal enqueue fails; "
+        + f"got {resp.status_code}: {resp.text}"
     )
     assert resp.status_code == HTTPStatus.BAD_GATEWAY
     assert "401" in resp.text or "enqueue" in resp.text.lower()

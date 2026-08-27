@@ -32,8 +32,8 @@ def test_admin_force_signout_audited_without_pii(user_mgmt_stack: UserMgmtStack)
         row = (
             conn.execute(
                 text(
-                    "SELECT event_type, entity_type, payload " +
-                    "FROM audit_log WHERE entity_id = :id ORDER BY created_at DESC LIMIT 1"
+                    "SELECT event_type, entity_type, payload "
+                    + "FROM audit_log WHERE entity_id = :id ORDER BY created_at DESC LIMIT 1"
                 ),
                 {"id": VIEWER_ID},
             )

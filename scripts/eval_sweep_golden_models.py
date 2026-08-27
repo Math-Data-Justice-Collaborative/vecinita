@@ -172,8 +172,8 @@ def _print_comparison_table(payloads: list[JsonObject]) -> None:
     )
     print("\n==> Comparison (averages)")
     print(
-        f"{headers[0]:<48} {headers[1]:>8} {headers[2]:>8} {headers[3]:>9} " +
-        f"{headers[4]:>7} {headers[5]:>9} {headers[6]:>7} {headers[7]:>5}"
+        f"{headers[0]:<48} {headers[1]:>8} {headers[2]:>8} {headers[3]:>9} "
+        + f"{headers[4]:>7} {headers[5]:>9} {headers[6]:>7} {headers[7]:>5}"
     )
     for item in payloads:
         averages = item.get("averages")
@@ -196,8 +196,8 @@ def _print_comparison_table(payloads: list[JsonObject]) -> None:
         p95_s = f"{p95:.0f}" if isinstance(p95, float) else "-"
         runs_s = f"{run_count}" if isinstance(run_count, int) else "-"
         print(
-            f"{label:<48} {spawn_s:>8} {wall_s:>8} {retrieval_s:>9} " +
-            f"{faith_s:>7} {relevancy_s:>9} {p95_s:>7} {runs_s:>5}"
+            f"{label:<48} {spawn_s:>8} {wall_s:>8} {retrieval_s:>9} "
+            + f"{faith_s:>7} {relevancy_s:>9} {p95_s:>7} {runs_s:>5}"
         )
         if isinstance(config, dict):
             model_type = config.get("model_type")
@@ -526,11 +526,11 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 )
                 print(
-                    f"      wall={elapsed:.1f}s " +
-                    f"retrieval={summary.retrieval_relevance:.2f} " +
-                    f"faith={summary.faithfulness} " +
-                    f"relevancy={summary.answer_relevancy} " +
-                    f"p95={summary.latency_p95_ms}ms"
+                    f"      wall={elapsed:.1f}s "
+                    + f"retrieval={summary.retrieval_relevance:.2f} "
+                    + f"faith={summary.faithfulness} "
+                    + f"relevancy={summary.answer_relevancy} "
+                    + f"p95={summary.latency_p95_ms}ms"
                 )
 
             payload = summarize_cell(
@@ -543,10 +543,10 @@ def main(argv: list[str] | None = None) -> int:
             payloads.append(payload)
             averages = as_json_object(payload["averages"])
             print(
-                f"    avg wall={averages['wall_time_s']}s " +
-                f"retrieval={averages['retrieval_relevance']} " +
-                f"faith={averages['faithfulness']} " +
-                f"relevancy={averages['answer_relevancy']}"
+                f"    avg wall={averages['wall_time_s']}s "
+                + f"retrieval={averages['retrieval_relevance']} "
+                + f"faith={averages['faithfulness']} "
+                + f"relevancy={averages['answer_relevancy']}"
             )
     finally:
         embed_client.close()

@@ -29,9 +29,9 @@ class _FakeFastEmbed:
         del cache_dir
         if model_id == DEFAULT_EMBEDDING_MODEL_ID:
             msg = (
-                f"Model {model_id} is not supported in TextEmbedding. " +
-                "Please check the supported models using " +
-                "`TextEmbedding.list_supported_models()`"
+                f"Model {model_id} is not supported in TextEmbedding. "
+                + "Please check the supported models using "
+                + "`TextEmbedding.list_supported_models()`"
             )
             raise ValueError(msg)
         self.name = "fastembed"

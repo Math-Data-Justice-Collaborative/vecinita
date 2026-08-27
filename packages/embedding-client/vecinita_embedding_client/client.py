@@ -149,9 +149,9 @@ class EmbeddingClient:
                 return response
             if response.status_code >= _TRANSIENT_HTTP_MIN and attempt < self._max_retries:
                 last_error = EmbeddingClientError(
-                    f"{path.lstrip('/')}" +
-                    " failed with status " +
-                    f"{response.status_code}: {response.text}",
+                    f"{path.lstrip('/')}"
+                    + " failed with status "
+                    + f"{response.status_code}: {response.text}",
                 )
                 self._backoff(attempt)
                 continue

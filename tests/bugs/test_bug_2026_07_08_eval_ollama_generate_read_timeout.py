@@ -57,8 +57,8 @@ def test_llm_service_class_timeout_covers_slow_generation() -> None:
     class_timeout = _class_decorator_timeout(tree, "LlmService")
     assert class_timeout is not None, "LlmService must declare a Modal class timeout"
     assert class_timeout >= _MIN_LLM_SERVICE_TIMEOUT_SECONDS, (
-        f"LlmService timeout ({class_timeout}s) must be >= {_MIN_LLM_SERVICE_TIMEOUT_SECONDS}s " +
-        "for golden eval batches"
+        f"LlmService timeout ({class_timeout}s) must be >= {_MIN_LLM_SERVICE_TIMEOUT_SECONDS}s "
+        + "for golden eval batches"
     )
 
 

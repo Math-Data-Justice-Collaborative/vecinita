@@ -104,10 +104,10 @@ def bulk_tag_documents(
             existing_tags = (
                 conn.execute(
                     text(
-                        "SELECT t.slug, t.label, dt.source " +
-                        "FROM document_tags dt " +
-                        "JOIN tags t ON t.id = dt.tag_id " +
-                        "WHERE dt.document_id = :doc_id AND t.language = :lang"
+                        "SELECT t.slug, t.label, dt.source "
+                        + "FROM document_tags dt "
+                        + "JOIN tags t ON t.id = dt.tag_id "
+                        + "WHERE dt.document_id = :doc_id AND t.language = :lang"
                     ),
                     {"doc_id": doc_id, "lang": language},
                 )

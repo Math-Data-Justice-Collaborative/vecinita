@@ -28,8 +28,8 @@ _VOCAB = [
     SeedTag(slug="housing", label_en="Housing", label_es="Vivienda"),
 ]
 _BODY = (
-    "<html><head><title>OK</title></head>" +
-    "<body><p>Good community resource text for chunking windows.</p></body></html>"
+    "<html><head><title>OK</title></head>"
+    + "<body><p>Good community resource text for chunking windows.</p></body></html>"
 )
 
 
@@ -120,8 +120,8 @@ def test_fetch_url_drive_auth_shell_raises_drive_fetch_error() -> None:
         return httpx.Response(
             200,
             text=(
-                "<html><head><title>Google Drive</title></head>" +
-                "<body><p>Loading…</p><p>Sign in</p></body></html>"
+                "<html><head><title>Google Drive</title></head>"
+                + "<body><p>Loading…</p><p>Sign in</p></body></html>"
             ),
         )
 

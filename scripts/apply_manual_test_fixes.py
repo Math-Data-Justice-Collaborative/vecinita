@@ -56,9 +56,9 @@ def main() -> None:
     patch_file(
         "tests/integration/test_audit_emission.py",
         '        assert any(t["slug"] == "housing" for t in version_row["tags_snapshot"])',
-        '        tags_snapshot_raw: object = cast("object", version_row["tags_snapshot"])\n' +
-        "        tags_snapshot = json_object_items(tags_snapshot_raw)\n" +
-        '        assert any(json_str(tag, "slug") == "housing" for tag in tags_snapshot)',
+        '        tags_snapshot_raw: object = cast("object", version_row["tags_snapshot"])\n'
+        + "        tags_snapshot = json_object_items(tags_snapshot_raw)\n"
+        + '        assert any(json_str(tag, "slug") == "housing" for tag in tags_snapshot)',
     )
 
     # seed test - avoid private import
@@ -70,12 +70,12 @@ def main() -> None:
     patch_file(
         "tests/integration/test_seed.py",
         "pytestmark = pytest.mark.integration\n\n\n@pytest.fixture",
-        "pytestmark = pytest.mark.integration\n\n\n" +
-        "def _database_url() -> str:\n" +
-        "    return os.environ.get(\n" +
-        '        "DATABASE_URL",\n' +
-        '        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",\n' +
-        "    )\n\n\n@pytest.fixture",
+        "pytestmark = pytest.mark.integration\n\n\n"
+        + "def _database_url() -> str:\n"
+        + "    return os.environ.get(\n"
+        + '        "DATABASE_URL",\n'
+        + '        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",\n'
+        + "    )\n\n\n@pytest.fixture",
     )
 
     # uj007 mock llm
@@ -87,16 +87,16 @@ def main() -> None:
     patch_file(
         "tests/e2e/test_uj007_reject_identity.py",
         "pytestmark = pytest.mark.e2e\n\n\n@pytest.fixture",
-        "pytestmark = pytest.mark.e2e\n\n\n" +
-        "class _E2eMockLlmClient:\n" +
-        "    def generate(self, prompt: str, **kwargs: object) -> str:\n" +
-        "        _ = (prompt, kwargs)\n" +
-        '        return "ok"\n\n' +
-        "    def generate_stream(self, prompt: str, **kwargs: object):\n" +
-        "        _ = (prompt, kwargs)\n" +
-        '        yield "ok"\n\n' +
-        "    def close(self) -> None:\n" +
-        "        return None\n\n\n@pytest.fixture",
+        "pytestmark = pytest.mark.e2e\n\n\n"
+        + "class _E2eMockLlmClient:\n"
+        + "    def generate(self, prompt: str, **kwargs: object) -> str:\n"
+        + "        _ = (prompt, kwargs)\n"
+        + '        return "ok"\n\n'
+        + "    def generate_stream(self, prompt: str, **kwargs: object):\n"
+        + "        _ = (prompt, kwargs)\n"
+        + '        yield "ok"\n\n'
+        + "    def close(self) -> None:\n"
+        + "        return None\n\n\n@pytest.fixture",
     )
     patch_file(
         "tests/e2e/test_uj007_reject_identity.py",

@@ -106,14 +106,14 @@ def test_audit_log_columns_match_spec() -> None:
     with engine.connect() as conn:
         rows = conn.execute(
             text(
-                "SELECT column_name FROM information_schema.columns " +  # noqa: S608
-                "WHERE table_schema = 'public' AND table_name = 'audit_log'"
+                "SELECT column_name FROM information_schema.columns "  # noqa: S608
+                + "WHERE table_schema = 'public' AND table_name = 'audit_log'"
             )
         ).fetchall()
     actual = {row[0] for row in rows}
     assert actual == _EXPECTED_AUDIT_LOG_COLUMNS, (
-        f"Column mismatch: extra={actual - _EXPECTED_AUDIT_LOG_COLUMNS}, " +
-        f"missing={_EXPECTED_AUDIT_LOG_COLUMNS - actual}"
+        f"Column mismatch: extra={actual - _EXPECTED_AUDIT_LOG_COLUMNS}, "
+        + f"missing={_EXPECTED_AUDIT_LOG_COLUMNS - actual}"
     )
 
 
@@ -123,14 +123,14 @@ def test_document_versions_columns_match_spec() -> None:
     with engine.connect() as conn:
         rows = conn.execute(
             text(
-                "SELECT column_name FROM information_schema.columns " +  # noqa: S608
-                "WHERE table_schema = 'public' AND table_name = 'document_versions'"
+                "SELECT column_name FROM information_schema.columns "  # noqa: S608
+                + "WHERE table_schema = 'public' AND table_name = 'document_versions'"
             )
         ).fetchall()
     actual = {row[0] for row in rows}
     assert actual == _EXPECTED_DOCUMENT_VERSIONS_COLUMNS, (
-        f"Column mismatch: extra={actual - _EXPECTED_DOCUMENT_VERSIONS_COLUMNS}, " +
-        f"missing={_EXPECTED_DOCUMENT_VERSIONS_COLUMNS - actual}"
+        f"Column mismatch: extra={actual - _EXPECTED_DOCUMENT_VERSIONS_COLUMNS}, "
+        + f"missing={_EXPECTED_DOCUMENT_VERSIONS_COLUMNS - actual}"
     )
 
 
@@ -140,14 +140,14 @@ def test_serving_stats_columns_match_spec() -> None:
     with engine.connect() as conn:
         rows = conn.execute(
             text(
-                "SELECT column_name FROM information_schema.columns " +  # noqa: S608
-                "WHERE table_schema = 'public' AND table_name = 'document_serving_stats'"
+                "SELECT column_name FROM information_schema.columns "  # noqa: S608
+                + "WHERE table_schema = 'public' AND table_name = 'document_serving_stats'"
             )
         ).fetchall()
     actual = {row[0] for row in rows}
     assert actual == _EXPECTED_SERVING_STATS_COLUMNS, (
-        f"Column mismatch: extra={actual - _EXPECTED_SERVING_STATS_COLUMNS}, " +
-        f"missing={_EXPECTED_SERVING_STATS_COLUMNS - actual}"
+        f"Column mismatch: extra={actual - _EXPECTED_SERVING_STATS_COLUMNS}, "
+        + f"missing={_EXPECTED_SERVING_STATS_COLUMNS - actual}"
     )
 
 
@@ -158,9 +158,9 @@ def test_document_versions_fk_enforced() -> None:
     with engine.begin() as conn, pytest.raises(IntegrityError):
         _ = conn.execute(
             text(
-                "INSERT INTO document_versions " +
-                "(document_id, version_number, title, language) " +
-                "VALUES (:doc_id, 1, 'test', 'en')"
+                "INSERT INTO document_versions "
+                + "(document_id, version_number, title, language) "
+                + "VALUES (:doc_id, 1, 'test', 'en')"
             ),
             {"doc_id": bogus_doc},
         )
@@ -173,8 +173,8 @@ def test_document_versions_unique_constraint() -> None:
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO documents (url, title, language) " +
-                    "VALUES (:url, 'Test Doc', 'en') RETURNING id"
+                    "INSERT INTO documents (url, title, language) "
+                    + "VALUES (:url, 'Test Doc', 'en') RETURNING id"
                 ),
                 {"url": f"https://test.example.com/ev002-uniq-{uuid.uuid4().hex[:8]}"},
             )
@@ -183,9 +183,9 @@ def test_document_versions_unique_constraint() -> None:
 
         _ = conn.execute(
             text(
-                "INSERT INTO document_versions " +
-                "(document_id, version_number, title, language) " +
-                "VALUES (:doc_id, 1, 'v1', 'en')"
+                "INSERT INTO document_versions "
+                + "(document_id, version_number, title, language) "
+                + "VALUES (:doc_id, 1, 'v1', 'en')"
             ),
             {"doc_id": doc_id},
         )
@@ -193,9 +193,9 @@ def test_document_versions_unique_constraint() -> None:
         with pytest.raises(IntegrityError):
             _ = conn.execute(
                 text(
-                    "INSERT INTO document_versions " +
-                    "(document_id, version_number, title, language) " +
-                    "VALUES (:doc_id, 1, 'v1-dup', 'en')"
+                    "INSERT INTO document_versions "
+                    + "(document_id, version_number, title, language) "
+                    + "VALUES (:doc_id, 1, 'v1-dup', 'en')"
                 ),
                 {"doc_id": doc_id},
             )
@@ -219,8 +219,8 @@ def test_serving_stats_upsert_counter() -> None:
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO documents (url, title, language) " +
-                    "VALUES (:url, 'Stats Test', 'en') RETURNING id"
+                    "INSERT INTO documents (url, title, language) "
+                    + "VALUES (:url, 'Stats Test', 'en') RETURNING id"
                 ),
                 {"url": f"https://test.example.com/ev002-stats-{uuid.uuid4().hex[:8]}"},
             )
@@ -242,9 +242,9 @@ def test_serving_stats_upsert_counter() -> None:
 
         _ = conn.execute(
             text(
-                "UPDATE document_serving_stats " +
-                "SET served_count = served_count + 1, last_served_at = now() " +
-                "WHERE document_id = :doc_id"
+                "UPDATE document_serving_stats "
+                + "SET served_count = served_count + 1, last_served_at = now() "
+                + "WHERE document_id = :doc_id"
             ),
             {"doc_id": doc_id},
         )

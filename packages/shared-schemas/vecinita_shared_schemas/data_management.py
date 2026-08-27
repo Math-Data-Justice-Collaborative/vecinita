@@ -60,9 +60,9 @@ class JobOptions(BaseModel):
     force: bool = Field(
         default=False,
         description=(
-            "Bypass content_hash skip on ingest (F47) and rebuild (F41). " +
-            "When true, re-chunk and re-embed even if scraped hash matches stored hash. " +
-            "For freshness_refresh, Refresh now sets force=true to bypass stale (TC-259)."
+            "Bypass content_hash skip on ingest (F47) and rebuild (F41). "
+            + "When true, re-chunk and re-embed even if scraped hash matches stored hash. "
+            + "For freshness_refresh, Refresh now sets force=true to bypass stale (TC-259)."
         ),
     )
     refresh_enabled: bool | None = Field(
@@ -92,8 +92,8 @@ class JobOptions(BaseModel):
         default=None,
         max_length=2,
         description=(
-            "Optional target locales for ingest-time MT (F75 / #251). " +
-            "Default off; when set, creates draft paired documents in target language(s)."
+            "Optional target locales for ingest-time MT (F75 / #251). "
+            + "Default off; when set, creates draft paired documents in target language(s)."
         ),
     )
 

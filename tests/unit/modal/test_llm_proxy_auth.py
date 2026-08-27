@@ -95,8 +95,8 @@ def test_asgi_handler_requires_authorized(handler_name: str) -> None:
     """TC-142: all non-health LLM routes must call _authorized (UJ-049)."""
     handler = _find_fastapi_handler(handler_name)
     assert _calls_authorized(handler), (
-        f"{handler_name} must call _authorized(...) and return 401 when unauthorized " +
-        "(RD-165 / TP-S010-23 / TC-142)"
+        f"{handler_name} must call _authorized(...) and return 401 when unauthorized "
+        + "(RD-165 / TP-S010-23 / TC-142)"
     )
 
 

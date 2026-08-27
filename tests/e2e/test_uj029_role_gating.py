@@ -153,8 +153,8 @@ def test_admin_write_records_opaque_audit_actor(
         audit_row = (
             conn.execute(
                 text(
-                    "SELECT actor_id, actor_role, payload FROM audit_log " +  # noqa: S608
-                    "WHERE entity_id = :id AND event_type = 'document.created'"
+                    "SELECT actor_id, actor_role, payload FROM audit_log "  # noqa: S608
+                    + "WHERE entity_id = :id AND event_type = 'document.created'"
                 ),
                 {"id": doc_id},
             )

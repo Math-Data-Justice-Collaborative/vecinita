@@ -40,8 +40,8 @@ def test_seed_load_row_counts() -> None:
         chunks = scalar_int(chunks_raw)
         languages = conn.execute(
             text(
-                "SELECT DISTINCT language FROM documents " +  # noqa: S608
-                "WHERE language IN ('en', 'es') ORDER BY language"
+                "SELECT DISTINCT language FROM documents "  # noqa: S608
+                + "WHERE language IN ('en', 'es') ORDER BY language"
             )
         ).fetchall()
 

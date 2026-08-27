@@ -48,8 +48,8 @@ def tagged_document(engine: Engine) -> Iterator[tuple[UUID, UUID]]:
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO documents (url, title, language) " +
-                    "VALUES (:url, 'Tag test', 'en') RETURNING id"
+                    "INSERT INTO documents (url, title, language) "
+                    + "VALUES (:url, 'Tag test', 'en') RETURNING id"
                 ),
                 {"url": doc_url},
             )
@@ -58,8 +58,8 @@ def tagged_document(engine: Engine) -> Iterator[tuple[UUID, UUID]]:
         chunk_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO chunks (document_id, chunk_index, text) " +
-                    "VALUES (:doc_id, 0, 'chunk') RETURNING id"
+                    "INSERT INTO chunks (document_id, chunk_index, text) "
+                    + "VALUES (:doc_id, 0, 'chunk') RETURNING id"
                 ),
                 {"doc_id": doc_id},
             )

@@ -139,8 +139,8 @@ exit 2
     )
 
     assert result.returncode == 0, (
-        "install-tools.sh failed under transient GitHub API error\n" +
-        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        "install-tools.sh failed under transient GitHub API error\n"
+        + f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
     )
     installed = bin_dir / "2ms"
     assert installed.is_file(), "2ms binary was not installed"

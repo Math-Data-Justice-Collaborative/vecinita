@@ -53,8 +53,8 @@ def _import_chat_template_mod() -> ModuleType:
         return importlib.import_module("vecinita_llm_client.chat_template")
     except ModuleNotFoundError as exc:
         pytest.fail(
-            "vecinita_llm_client.chat_template missing " +
-            f"(T79.3 / RD-167 / TP-S010-24 / TC-145): {exc}"
+            "vecinita_llm_client.chat_template missing "
+            + f"(T79.3 / RD-167 / TP-S010-24 / TC-145): {exc}"
         )
 
 
@@ -64,8 +64,8 @@ def _import_apply_chat_template() -> _ApplyChatTemplateFn:
     raw = getattr(mod, "apply_chat_template", None)
     if not callable(raw):
         pytest.fail(
-            "apply_chat_template not exported from vecinita_llm_client.chat_template " +
-            "(T79.3 / TC-145)"
+            "apply_chat_template not exported from vecinita_llm_client.chat_template "
+            + "(T79.3 / TC-145)"
         )
     return cast("_ApplyChatTemplateFn", raw)
 
@@ -109,21 +109,21 @@ class _FixtureTokenizer:
 
 
 _QWEN_CHAT_TEMPLATE: Final[str] = (
-    "{% for message in messages %}" +
-    "{{'<|im_start|>' + message['role'] + '\\n' + message['content'] + '<|im_end|>' + '\\n'}}" +
-    "{% endfor %}" +
-    "{% if add_generation_prompt %}{{'<|im_start|>assistant\\n'}}{% endif %}"
+    "{% for message in messages %}"
+    + "{{'<|im_start|>' + message['role'] + '\\n' + message['content'] + '<|im_end|>' + '\\n'}}"
+    + "{% endfor %}"
+    + "{% if add_generation_prompt %}{{'<|im_start|>assistant\\n'}}{% endif %}"
 )
 
 _LLAMA_CHAT_TEMPLATE: Final[str] = (
-    "{{ bos_token }}" +
-    "{% for message in messages %}" +
-    "{{ '<|start_header_id|>' + message['role'] + '<|end_header_id|>\\n\\n'" +
-    "+ message['content'] + '<|eot_id|>' }}" +
-    "{% endfor %}" +
-    "{% if add_generation_prompt %}" +
-    "{{ '<|start_header_id|>assistant<|end_header_id|>\\n\\n' }}" +
-    "{% endif %}"
+    "{{ bos_token }}"
+    + "{% for message in messages %}"
+    + "{{ '<|start_header_id|>' + message['role'] + '<|end_header_id|>\\n\\n'"
+    + "+ message['content'] + '<|eot_id|>' }}"
+    + "{% endfor %}"
+    + "{% if add_generation_prompt %}"
+    + "{{ '<|start_header_id|>assistant<|end_header_id|>\\n\\n' }}"
+    + "{% endif %}"
 )
 
 

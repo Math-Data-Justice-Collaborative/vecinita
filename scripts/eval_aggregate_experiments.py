@@ -76,8 +76,8 @@ def main(argv: list[str] | None = None) -> int:
     groups = aggregate["groups"]
     group_count = len(cast("list[object]", groups)) if isinstance(groups, list) else 0
     print(
-        f"OK: aggregated {aggregate['experiment_count']} experiment(s) " +
-        f"into {group_count} group(s) -> {out}",
+        f"OK: aggregated {aggregate['experiment_count']} experiment(s) "
+        + f"into {group_count} group(s) -> {out}",
         file=sys.stderr,
     )
     return 0

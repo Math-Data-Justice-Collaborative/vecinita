@@ -210,8 +210,8 @@ def _markdown_section(title: str, rows: list[CoverageRow]) -> list[str]:
         )
         branch_pct = f"{row.branch_pct:.1f}%" if row.branches_total else "n/a"
         lines.append(
-            f"| `{row.component}` | {line_label} | {branch_label} | " +
-            f"{row.line_pct:.1f}% | {branch_pct} |"
+            f"| `{row.component}` | {line_label} | {branch_label} | "
+            + f"{row.line_pct:.1f}% | {branch_pct} |"
         )
     total = _aggregate(rows)
     total_lines = f"{total.lines_covered}/{total.lines_total}"
@@ -220,8 +220,8 @@ def _markdown_section(title: str, rows: list[CoverageRow]) -> list[str]:
     )
     total_branch_pct = f"{total.branch_pct:.1f}%" if total.branches_total else "n/a"
     lines.append(
-        f"| **{total.component}** | {total_lines} | {total_branches} | " +
-        f"**{total.line_pct:.1f}%** | {total_branch_pct} |"
+        f"| **{total.component}** | {total_lines} | {total_branches} | "
+        + f"**{total.line_pct:.1f}%** | {total_branch_pct} |"
     )
     lines.append("")
     return lines
@@ -239,11 +239,11 @@ def render_markdown_summary(
         "<!-- vecinita-unit-coverage -->",
         "## Unit coverage",
         "",
-        f"Per-component gate: **≥{line_threshold:.0f}%** line / " +
-        f"**≥{branch_threshold:.0f}%** branch (ADR-019).",
+        f"Per-component gate: **≥{line_threshold:.0f}%** line / "
+        + f"**≥{branch_threshold:.0f}%** branch (ADR-019).",
         "",
-        "Compose-backed suites (`integration` / `e2e` / …) run via **local** " +
-        "`make test-py` / `make ci-push` — not this remote job.",
+        "Compose-backed suites (`integration` / `e2e` / …) run via **local** "
+        + "`make test-py` / `make ci-push` — not this remote job.",
         "",
     ]
     parts.extend(_markdown_section("Python (packages + backend apps)", python_rows))

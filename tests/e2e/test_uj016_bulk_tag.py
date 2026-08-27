@@ -64,8 +64,8 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
             doc_id_raw = sqlalchemy_scalar_one(
                 conn.execute(
                     text(
-                        "INSERT INTO documents (url, title, language) " +
-                        "VALUES (:url, :title, 'en') RETURNING id"
+                        "INSERT INTO documents (url, title, language) "
+                        + "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Bulk Tag Doc {i}"},
                 )
@@ -137,8 +137,8 @@ def test_bulk_tag_emits_audit(client: TestClient, sample_docs: list[UUID], engin
         for doc_id in sample_docs:
             row = conn.execute(
                 text(
-                    "SELECT event_type FROM audit_log " +  # noqa: S608
-                    "WHERE entity_id = :id AND event_type = 'document.tagged'"
+                    "SELECT event_type FROM audit_log "  # noqa: S608
+                    + "WHERE entity_id = :id AND event_type = 'document.tagged'"
                 ),
                 {"id": doc_id},
             ).first()

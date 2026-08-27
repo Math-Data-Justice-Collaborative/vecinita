@@ -74,8 +74,8 @@ def test_pull_model_gates_unmapped_tag_with_bad_request() -> None:
         "pull_model must call resolve_hf_repo before spawning pull_model_job (RD-168 / TP-S010-26)"
     )
     assert "BAD_REQUEST" in source or str(HTTPStatus.BAD_REQUEST) in source, (
-        "pull_model must return HTTP 400 (BAD_REQUEST) when model_id is unmapped " +
-        "(TC-141 / TP-S010-26)"
+        "pull_model must return HTTP 400 (BAD_REQUEST) when model_id is unmapped "
+        + "(TC-141 / TP-S010-26)"
     )
     # Must not spawn until mapping succeeds.
     spawn_idx = source.find("pull_model_job.spawn")

@@ -41,9 +41,9 @@ def test_check_test_inline_imports_flags_indented_imports() -> None:
     """Indented imports inside test functions trigger PLC0415 guidance."""
     path = Path("tests/unit/foo/test_example.py")
     content = (
-        "def test_something() -> None:\n" +
-        "    from vecinita_eval.modal_llm import ModalHttpLLM\n" +
-        "    assert True\n"
+        "def test_something() -> None:\n"
+        + "    from vecinita_eval.modal_llm import ModalHttpLLM\n"
+        + "    assert True\n"
     )
     note = check_test_inline_imports(path, content)
     assert note is not None
@@ -54,9 +54,9 @@ def test_check_test_inline_imports_ignores_top_level_imports() -> None:
     """Top-level imports in test modules are allowed."""
     path = Path("tests/unit/foo/test_example.py")
     content = (
-        "from vecinita_eval.modal_llm import ModalHttpLLM\n\n" +
-        "def test_something() -> None:\n" +
-        "    assert True\n"
+        "from vecinita_eval.modal_llm import ModalHttpLLM\n\n"
+        + "def test_something() -> None:\n"
+        + "    assert True\n"
     )
     assert check_test_inline_imports(path, content) is None
 
@@ -65,9 +65,9 @@ def test_check_eval_runtime_factory_guard_flags_or_condition() -> None:
     """The injected-judge regression uses `or` instead of `and`."""
     path = Path("eval_service.py")
     content = (
-        "def _resolve_eval_runtime(judge, llm):\n" +
-        "    if judge is None or llm is None:\n" +
-        "        return eval_runtime_for_config(config)\n"
+        "def _resolve_eval_runtime(judge, llm):\n"
+        + "    if judge is None or llm is None:\n"
+        + "        return eval_runtime_for_config(config)\n"
     )
     note = check_eval_runtime_factory_guard(path, content)
     assert note is not None
@@ -78,8 +78,8 @@ def test_check_eval_runtime_factory_guard_allows_and_condition() -> None:
     """The corrected guard using `and` does not warn."""
     path = Path("eval_service.py")
     content = (
-        "def _resolve_eval_runtime(judge, llm):\n" +
-        "    if judge is None and llm is None:\n" +
-        "        return eval_runtime_for_config(config)\n"
+        "def _resolve_eval_runtime(judge, llm):\n"
+        + "    if judge is None and llm is None:\n"
+        + "        return eval_runtime_for_config(config)\n"
     )
     assert check_eval_runtime_factory_guard(path, content) is None

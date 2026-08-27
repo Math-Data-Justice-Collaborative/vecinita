@@ -36,9 +36,9 @@ def test_load_supabase_credentials_reads_token_and_ref_from_env_file(
     """Helper exports token + project ref from a parse-only .env file."""
     env_file = tmp_path / ".env"
     _ = env_file.write_text(
-        "SUPABASE_ACCESS_TOKEN=sbp_test_token_abc\n" +
-        "SUPABASE_PROJECT_REF=cfuvghdsuwactfeamtym\n" +
-        "OTHER=ignore\n",
+        "SUPABASE_ACCESS_TOKEN=sbp_test_token_abc\n"
+        + "SUPABASE_PROJECT_REF=cfuvghdsuwactfeamtym\n"
+        + "OTHER=ignore\n",
         encoding="utf-8",
     )
     result = subprocess.run(  # noqa: S603

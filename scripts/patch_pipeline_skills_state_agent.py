@@ -126,8 +126,8 @@ Does not implement features — process improvement only.""",
 }
 
 STATE_AGENT_LINE = (
-    "**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) " +
-    "— mandatory read/update.\n"
+    "**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) "
+    + "— mandatory read/update.\n"
 )
 
 STATE_MGMT_REPLACEMENT = """## State management

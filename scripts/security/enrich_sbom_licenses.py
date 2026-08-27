@@ -349,9 +349,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         spdx_stats = enrich_spdx(args.spdx, workers=args.workers)
         summary["spdx"] = spdx_stats
         print(
-            f"[enrich-sbom] spdx packages={spdx_stats['packages']} " +
-            f"resolved={spdx_stats['resolved']} " +
-            f"still_noassertion={spdx_stats['still_noassertion']}",
+            f"[enrich-sbom] spdx packages={spdx_stats['packages']} "
+            + f"resolved={spdx_stats['resolved']} "
+            + f"still_noassertion={spdx_stats['still_noassertion']}",
             file=sys.stderr,
         )
     if args.uv_lock:
@@ -361,8 +361,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         uv_stats = inventory_uv_lock(args.uv_lock, uv_out, workers=args.workers)
         summary["uv"] = uv_stats
         print(
-            f"[enrich-sbom] uv.lock packages={uv_stats['packages']} " +
-            f"resolved={uv_stats['resolved']} unknown={uv_stats['unknown']} -> {uv_out}",
+            f"[enrich-sbom] uv.lock packages={uv_stats['packages']} "
+            + f"resolved={uv_stats['resolved']} unknown={uv_stats['unknown']} -> {uv_out}",
             file=sys.stderr,
         )
     if args.summary:

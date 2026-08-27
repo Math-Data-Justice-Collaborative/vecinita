@@ -98,8 +98,8 @@ def test_retag_job_reaches_terminal_state_when_tag_client_none(
     assert record is not None
     # BUG: job stays "pending" — should be "failed"
     assert record.status == "failed", (
-        f"Expected job status 'failed' but got '{record.status}'. " +
-        "The job must reach a terminal state so the frontend stops polling."
+        f"Expected job status 'failed' but got '{record.status}'. "
+        + "The job must reach a terminal state so the frontend stops polling."
     )
     assert record.error_message is not None
     assert "tag_client" in record.error_message.lower()
@@ -133,6 +133,6 @@ def test_retag_job_reaches_terminal_state_on_any_pre_execution_error(
     record = store.get_job(job_id)
     assert record is not None
     assert record.status == "failed", (
-        f"Expected job status 'failed' but got '{record.status}'. " +
-        "Pre-execution errors must still mark the job as failed."
+        f"Expected job status 'failed' but got '{record.status}'. "
+        + "Pre-execution errors must still mark the job as failed."
     )

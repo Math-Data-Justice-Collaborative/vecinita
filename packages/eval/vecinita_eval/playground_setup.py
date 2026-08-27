@@ -83,8 +83,8 @@ def resolve_playground_base_url(*, base_url: str | None = None) -> str:
     )
     if not resolved:
         msg = (
-            f"{_ENV_PLAYGROUND} (preferred) or {_ENV_LLM} or --base-url is required " +
-            "for playground model list/setup"
+            f"{_ENV_PLAYGROUND} (preferred) or {_ENV_LLM} or --base-url is required "
+            + "for playground model list/setup"
         )
         raise PlaygroundSetupError(msg)
     return resolved.rstrip("/")
@@ -212,8 +212,8 @@ def _warm_if_requested(client: LlmClient, tag: str, *, available: bool, warm: bo
         raise PlaygroundSetupError(msg)
     if client.default_model_id != tag:
         msg = (
-            f"client default_model_id {client.default_model_id!r} != {tag!r}; " +
-            "construct LlmClient/make_playground_client with model_id set"
+            f"client default_model_id {client.default_model_id!r} != {tag!r}; "
+            + "construct LlmClient/make_playground_client with model_id set"
         )
         raise PlaygroundSetupError(msg)
     try:

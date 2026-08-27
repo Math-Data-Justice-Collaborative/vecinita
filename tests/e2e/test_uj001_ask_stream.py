@@ -122,8 +122,8 @@ def test_uj001_stream_emits_multiple_token_events_before_done(
     assert events[-1].get("done") is True
     token_events = [event for event in events[:-1] if isinstance(event.get("token"), str)]
     assert len(token_events) >= _MIN_INCREMENTAL_TOKEN_EVENTS, (
-        "TC-143 / RD-164: expect multiple incremental token events before done " +
-        f"(got {len(token_events)})"
+        "TC-143 / RD-164: expect multiple incremental token events before done "
+        + f"(got {len(token_events)})"
     )
     joined = "".join(str(event.get("token")) for event in token_events)
     assert "pantry" in joined.lower()

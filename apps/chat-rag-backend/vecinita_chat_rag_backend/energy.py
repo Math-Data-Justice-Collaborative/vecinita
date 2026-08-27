@@ -12,8 +12,8 @@ DEFAULT_GPU_UTIL = 0.5
 DEFAULT_GCO2E_PER_KWH = 386.0
 DEFAULT_CAR_GCO2E_PER_KM = 251.0
 DEFAULT_ADVISORY = (
-    "Approximate energy and CO2e from GPU TDP x utilization x wall time -- " +
-    "not live Modal power telemetry."
+    "Approximate energy and CO2e from GPU TDP x utilization x wall time -- "
+    + "not live Modal power telemetry."
 )
 
 

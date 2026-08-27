@@ -133,8 +133,8 @@ def test_delete_document_emits_audit(client: TestClient, engine: Engine) -> None
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO documents (url, title, language) " +
-                    "VALUES (:url, 'Delete Me', 'en') RETURNING id"
+                    "INSERT INTO documents (url, title, language) "
+                    + "VALUES (:url, 'Delete Me', 'en') RETURNING id"
                 ),
                 {"url": url},
             )
@@ -169,8 +169,8 @@ def test_patch_document_tags_emits_audit_and_version(client: TestClient, engine:
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(
                 text(
-                    "INSERT INTO documents (url, title, language) " +
-                    "VALUES (:url, 'Tag Me', 'en') RETURNING id"
+                    "INSERT INTO documents (url, title, language) "
+                    + "VALUES (:url, 'Tag Me', 'en') RETURNING id"
                 ),
                 {"url": url},
             )
@@ -201,8 +201,8 @@ def test_patch_document_tags_emits_audit_and_version(client: TestClient, engine:
         version_row = (
             conn.execute(
                 text(
-                    "SELECT version_number, tags_snapshot FROM document_versions " +  # noqa: S608
-                    "WHERE document_id = :id ORDER BY version_number DESC LIMIT 1"
+                    "SELECT version_number, tags_snapshot FROM document_versions "  # noqa: S608
+                    + "WHERE document_id = :id ORDER BY version_number DESC LIMIT 1"
                 ),
                 {"id": doc_id},
             )

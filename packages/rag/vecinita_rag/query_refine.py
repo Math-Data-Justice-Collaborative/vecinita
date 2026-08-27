@@ -52,12 +52,12 @@ def build_refine_prompt(question: str, *, locale: str, count: int) -> str:
     lang = "Spanish" if locale == "es" else "English"
     n = max(1, min(count, _MAX_REFINE_COUNT))
     return (
-        "You improve search queries for a community resource chatbot.\n" +
-        f"User question ({lang}): {question!r}\n" +
-        f"Return ONLY a JSON array of up to {n} alternate {lang} search queries " +
-        "that preserve the user's intent. Do not translate to another language. " +
-        "Do not add facts not implied by the question.\n" +
-        'Example: ["query one", "query two"]'
+        "You improve search queries for a community resource chatbot.\n"
+        + f"User question ({lang}): {question!r}\n"
+        + f"Return ONLY a JSON array of up to {n} alternate {lang} search queries "
+        + "that preserve the user's intent. Do not translate to another language. "
+        + "Do not add facts not implied by the question.\n"
+        + 'Example: ["query one", "query two"]'
     )
 
 

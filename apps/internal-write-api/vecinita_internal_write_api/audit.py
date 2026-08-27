@@ -57,11 +57,11 @@ def emit_audit_event(  # noqa: PLR0913  # audit rows need explicit attribution f
         actor_id, actor_role = _audit_actor.get()
     _ = conn.execute(
         text(
-            "INSERT INTO audit_log " +
-            "(event_type, entity_type, entity_id, request_id, payload, actor_id, actor_role) " +
-            "VALUES " +
-            "(:event_type, :entity_type, :entity_id, :request_id, " +
-            "CAST(:payload AS jsonb), :actor_id, :actor_role)"
+            "INSERT INTO audit_log "
+            + "(event_type, entity_type, entity_id, request_id, payload, actor_id, actor_role) "
+            + "VALUES "
+            + "(:event_type, :entity_type, :entity_id, :request_id, "
+            + "CAST(:payload AS jsonb), :actor_id, :actor_role)"
         ),
         {
             "event_type": event_type,
@@ -89,8 +89,8 @@ def create_document_version(
             "object",
             conn.execute(
                 text(
-                    "SELECT COALESCE(MAX(version_number), 0) " +
-                    "FROM document_versions WHERE document_id = :doc_id"
+                    "SELECT COALESCE(MAX(version_number), 0) "
+                    + "FROM document_versions WHERE document_id = :doc_id"
                 ),
                 {"doc_id": document_id},
             ).scalar_one(),
@@ -101,9 +101,9 @@ def create_document_version(
 
     _ = conn.execute(
         text(
-            "INSERT INTO document_versions " +
-            "(document_id, version_number, title, language, tags_snapshot) " +
-            "VALUES (:doc_id, :ver, :title, :lang, CAST(:tags AS jsonb))"
+            "INSERT INTO document_versions "
+            + "(document_id, version_number, title, language, tags_snapshot) "
+            + "VALUES (:doc_id, :ver, :title, :lang, CAST(:tags AS jsonb))"
         ),
         {
             "doc_id": document_id,

@@ -84,6 +84,6 @@ async def test_bug_2026_08_05_ask_does_not_block_event_loop() -> None:
     assert ask_resp.status_code == HTTPStatus.OK
     assert ask_resp.json()["answer"] == "ok"
     assert ticks_during >= _MIN_TICKS_DURING_ASK, (
-        f"event loop stalled during ask: only {ticks_during} ticks " +
-        f"(expected >= {_MIN_TICKS_DURING_ASK}); sync ask likely ran on the loop"
+        f"event loop stalled during ask: only {ticks_during} ticks "
+        + f"(expected >= {_MIN_TICKS_DURING_ASK}); sync ask likely ran on the loop"
     )

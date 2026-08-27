@@ -82,8 +82,8 @@ def test_score_faithfulness_nested_async_runtime_error_returns_zero() -> None:
         def complete(self, prompt: str, **_kwargs: object) -> SimpleNamespace:
             _ = prompt
             msg = (
-                "Detected nested async. Please use nest_asyncio.apply() " +
-                "to allow nested event loops."
+                "Detected nested async. Please use nest_asyncio.apply() "
+                + "to allow nested event loops."
             )
             raise RuntimeError(msg)
 

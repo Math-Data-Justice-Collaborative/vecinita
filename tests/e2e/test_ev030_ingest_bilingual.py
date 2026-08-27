@@ -261,8 +261,8 @@ def draft_es_document(write_client: TestClient, engine: Engine) -> Iterator[str]
             )
             _ = conn.execute(
                 text(
-                    "DELETE FROM embeddings WHERE chunk_id IN " +  # noqa: S608
-                    "(SELECT id FROM chunks WHERE document_id = :id)"
+                    "DELETE FROM embeddings WHERE chunk_id IN "  # noqa: S608
+                    + "(SELECT id FROM chunks WHERE document_id = :id)"
                 ),
                 {"id": doc_id},
             )

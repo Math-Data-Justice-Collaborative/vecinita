@@ -205,8 +205,8 @@ def fastapi_app():
         translate_client = LlmTranslateClient(llm)
     except Exception:
         logger.warning(
-            "LlmTagClient init failed — retag/translate jobs will fail. " +
-            "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
+            "LlmTagClient init failed — retag/translate jobs will fail. "
+            + "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
             APP_NAME,
             exc_info=True,
         )

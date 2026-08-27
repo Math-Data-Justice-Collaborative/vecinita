@@ -97,8 +97,8 @@ def _validate_f42_rag_knobs(
 ) -> None:
     if not (_MIN_MULTI_QUERY_COUNT <= rag_multi_query_count <= _MAX_MULTI_QUERY_COUNT):
         msg = (
-            "VECINITA_RAG_MULTI_QUERY_COUNT must be between " +
-            f"{_MIN_MULTI_QUERY_COUNT} and {_MAX_MULTI_QUERY_COUNT}"
+            "VECINITA_RAG_MULTI_QUERY_COUNT must be between "
+            + f"{_MIN_MULTI_QUERY_COUNT} and {_MAX_MULTI_QUERY_COUNT}"
         )
         raise ValueError(msg)
     if rag_packer not in ("p1", "p3"):
@@ -120,8 +120,8 @@ def _validate_f43_rag_cache_knobs(
         raise ValueError(msg)
     if not (_MIN_CACHE_MAX_ENTRIES <= rag_cache_max_entries <= _MAX_CACHE_MAX_ENTRIES):
         msg = (
-            "VECINITA_RAG_CACHE_MAX_ENTRIES must be between " +
-            f"{_MIN_CACHE_MAX_ENTRIES} and {_MAX_CACHE_MAX_ENTRIES}"
+            "VECINITA_RAG_CACHE_MAX_ENTRIES must be between "
+            + f"{_MIN_CACHE_MAX_ENTRIES} and {_MAX_CACHE_MAX_ENTRIES}"
         )
         raise ValueError(msg)
     if not (
@@ -130,8 +130,8 @@ def _validate_f43_rag_cache_knobs(
         <= _MAX_CACHE_SEMANTIC_THRESHOLD
     ):
         msg = (
-            "VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD must be between " +
-            f"{_MIN_CACHE_SEMANTIC_THRESHOLD} and {_MAX_CACHE_SEMANTIC_THRESHOLD}"
+            "VECINITA_RAG_CACHE_SEMANTIC_THRESHOLD must be between "
+            + f"{_MIN_CACHE_SEMANTIC_THRESHOLD} and {_MAX_CACHE_SEMANTIC_THRESHOLD}"
         )
         raise ValueError(msg)
 
@@ -145,8 +145,8 @@ def _validate_f45_rag_ce_knobs(*, top_k: int, rag_rerank_ce_top_n: int) -> None:
 def _validate_f81_query_refine_knobs(*, rag_query_refine_count: int) -> None:
     if not (_MIN_REFINE_COUNT <= rag_query_refine_count <= _MAX_REFINE_COUNT):
         msg = (
-            "VECINITA_RAG_QUERY_REFINE_COUNT must be between " +
-            f"{_MIN_REFINE_COUNT} and {_MAX_REFINE_COUNT}"
+            "VECINITA_RAG_QUERY_REFINE_COUNT must be between "
+            + f"{_MIN_REFINE_COUNT} and {_MAX_REFINE_COUNT}"
         )
         raise ValueError(msg)
 
@@ -154,8 +154,8 @@ def _validate_f81_query_refine_knobs(*, rag_query_refine_count: int) -> None:
 def _validate_f82_output_verify_knobs(*, rag_output_verify_min: float) -> None:
     if not (_MIN_OUTPUT_VERIFY_MIN <= rag_output_verify_min <= _MAX_OUTPUT_VERIFY_MIN):
         msg = (
-            "VECINITA_RAG_OUTPUT_VERIFY_MIN must be between " +
-            f"{_MIN_OUTPUT_VERIFY_MIN} and {_MAX_OUTPUT_VERIFY_MIN}"
+            "VECINITA_RAG_OUTPUT_VERIFY_MIN must be between "
+            + f"{_MIN_OUTPUT_VERIFY_MIN} and {_MAX_OUTPUT_VERIFY_MIN}"
         )
         raise ValueError(msg)
 
