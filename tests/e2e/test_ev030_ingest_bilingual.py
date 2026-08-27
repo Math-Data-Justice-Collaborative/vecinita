@@ -254,20 +254,20 @@ def draft_es_document(write_client: TestClient, engine: Engine) -> Iterator[str]
     yield draft_id
     with engine.begin() as conn:
         for doc_id in (draft_id, source_id):
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text(
-                    "DELETE FROM embeddings WHERE chunk_id IN "
+                    "DELETE FROM embeddings WHERE chunk_id IN " +  # noqa: S608
                     "(SELECT id FROM chunks WHERE document_id = :id)"
                 ),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM chunks WHERE document_id = :id"), {"id": doc_id})
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM chunks WHERE document_id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_tc253_promote_draft_publish_status(
@@ -300,7 +300,7 @@ def test_tc254_retriever_excludes_draft_documents(
     assert all(chunk.document_id != UUID(draft_es_document) for chunk in before)
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text("UPDATE documents SET publish_status = 'published' WHERE id = :id"),
             {"id": draft_es_document},
         )

@@ -31,11 +31,11 @@ from infra.modal.llm_app import (
     PullRequest,
     ServeRole,
     WarmRequest,
-    _authorized,  # pyright: ignore[reportPrivateUsage]  # shared ASGI auth
-    _download_hf_model,  # pyright: ignore[reportPrivateUsage]
-    _list_models_payload,  # pyright: ignore[reportPrivateUsage]
-    _mark_model_available,  # pyright: ignore[reportPrivateUsage]
-    _register_pending_model,  # pyright: ignore[reportPrivateUsage]
+    _authorized,
+    _download_hf_model,
+    _list_models_payload,
+    _mark_model_available,
+    _register_pending_model,
     image,
 )
 from infra.modal.llm_model_registry import resolve_hf_repo
@@ -207,7 +207,7 @@ def fastapi_app():
         except ValueError as exc:
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_REQUEST)
         job_id = str(uuid.uuid4())
-        pull_model_job.spawn(job_id, payload.model_id)
+        _ = pull_model_job.spawn(job_id, payload.model_id)
         _register_pending_model(payload.model_id)
         return JSONResponse(
             {

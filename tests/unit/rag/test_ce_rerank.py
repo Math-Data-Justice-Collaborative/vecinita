@@ -90,7 +90,7 @@ def test_merge_ce_rerank_score_length_mismatch_raises() -> None:
         return [0.5]
 
     with pytest.raises(ValueError, match="scores for"):
-        merge_ce_rerank(
+        _ = merge_ce_rerank(
             _QUERY,
             [_chunk(text="a"), _chunk(text="b")],
             top_k=_TOP_K,

@@ -78,7 +78,7 @@ def test_promote_not_found() -> None:
     """Missing rebuild_run raises RebuildPromoteNotFoundError."""
     conn = cast("Connection", _Conn(run_row=None))
     with pytest.raises(RebuildPromoteNotFoundError, match="not found"):
-        _PROMOTE(conn, rebuild_run_id=uuid4())
+        _ = _PROMOTE(conn, rebuild_run_id=uuid4())
 
 
 def test_promote_already_promoted_is_idempotent() -> None:
@@ -110,7 +110,7 @@ def test_promote_rejects_non_completed_status() -> None:
         ),
     )
     with pytest.raises(RebuildPromoteConflictError, match="must be completed"):
-        _PROMOTE(conn, rebuild_run_id=run_id)
+        _ = _PROMOTE(conn, rebuild_run_id=run_id)
 
 
 def test_promote_rejects_empty_shadow() -> None:
@@ -121,4 +121,4 @@ def test_promote_rejects_empty_shadow() -> None:
         _Conn(run_row={"id": run_id, "status": "completed"}, chunk_count=0, doc_count=0),
     )
     with pytest.raises(RebuildPromoteConflictError, match="no shadow chunks"):
-        _PROMOTE(conn, rebuild_run_id=run_id)
+        _ = _PROMOTE(conn, rebuild_run_id=run_id)

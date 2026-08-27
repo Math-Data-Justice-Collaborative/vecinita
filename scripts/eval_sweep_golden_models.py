@@ -172,7 +172,7 @@ def _print_comparison_table(payloads: list[JsonObject]) -> None:
     )
     print("\n==> Comparison (averages)")
     print(
-        f"{headers[0]:<48} {headers[1]:>8} {headers[2]:>8} {headers[3]:>9} "
+        f"{headers[0]:<48} {headers[1]:>8} {headers[2]:>8} {headers[3]:>9} " +
         f"{headers[4]:>7} {headers[5]:>9} {headers[6]:>7} {headers[7]:>5}"
     )
     for item in payloads:
@@ -196,7 +196,7 @@ def _print_comparison_table(payloads: list[JsonObject]) -> None:
         p95_s = f"{p95:.0f}" if isinstance(p95, float) else "-"
         runs_s = f"{run_count}" if isinstance(run_count, int) else "-"
         print(
-            f"{label:<48} {spawn_s:>8} {wall_s:>8} {retrieval_s:>9} "
+            f"{label:<48} {spawn_s:>8} {wall_s:>8} {retrieval_s:>9} " +
             f"{faith_s:>7} {relevancy_s:>9} {p95_s:>7} {runs_s:>5}"
         )
         if isinstance(config, dict):
@@ -226,7 +226,7 @@ def _spawn_model(model_id: str) -> float:
         t0 = time.perf_counter()
         warm_modal_llm(client)
         # Touch generate so first-token load is included in spawn wall time.
-        client.generate(
+        _ = client.generate(
             "Reply with exactly: ready",
             max_tokens=8,
             temperature=0.0,
@@ -281,132 +281,132 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--models",
         default=DEFAULT_EVAL_MODEL_ID,
         help=f"Comma-separated model_id tags (default: {DEFAULT_EVAL_MODEL_ID})",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--temperatures",
         default="0.2",
         help="Comma-separated synthesis temperatures (default: 0.2)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--top-k",
         default="5",
         dest="top_k",
         help="Comma-separated retriever top_k values (default: 5)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--max-tokens",
         default="256",
         dest="max_tokens",
         help="Comma-separated max_tokens values (default: 256)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--min-retrieval-score",
         default="0.2",
         dest="min_retrieval_score",
         help="Comma-separated min_retrieval_score values (default: 0.2)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--judge-temperature",
         default="0.2",
         dest="judge_temperature",
         help="Comma-separated judge temperatures (default: 0.2)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--runs",
         type=int,
         default=1,
         help="Repeat each config this many times and average scores/wall times",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--system-prompt",
         default=None,
         help="Inline sandbox system prompt (single prompt variant named 'inline')",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--system-prompt-file",
         type=Path,
         default=None,
         help="Single system prompt file (stem becomes prompt_name)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--system-prompt-files",
         default="",
         help="Comma-separated system prompt files (multi-prompt sweep dimension)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--system-prompt-dir",
         type=Path,
         default=None,
         help="Directory of *.txt prompts (each file is a prompt variant)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--rules-file",
         type=Path,
         default=None,
         help="JSON array of {slug, rubric} custom judge criteria",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--fixture",
         type=Path,
         default=_DEFAULT_GOLDEN,
         help="Golden qa_pairs.json path",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--extra-fixture",
         type=Path,
         default=None,
         help="Optional extra/similar examples JSON (same schema as golden)",
     )
-    parser.add_argument("--ids", default="", help="Comma-separated case ids to include")
-    parser.add_argument(
+    _ = parser.add_argument("--ids", default="", help="Comma-separated case ids to include")
+    _ = parser.add_argument(
         "--domains",
         default="",
         help="Comma-separated domains: community,housing,legal,edge",
     )
-    parser.add_argument("--locales", default="", help="Comma-separated locales: en,es")
-    parser.add_argument(
+    _ = parser.add_argument("--locales", default="", help="Comma-separated locales: en,es")
+    _ = parser.add_argument(
         "--limit",
         type=int,
         default=0,
         help="Max rows after filters (0 = all)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--skip-judge",
         action="store_true",
         help="Skip faithfulness/relevancy/rubric judges (faster retrieval-only compare)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--skip-spawn",
         action="store_true",
         help="Skip explicit warm/spawn timing (still uses eval_runtime warm)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the config grid and selected rows without calling Modal/DB",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--results-dir",
         type=Path,
         default=_DEFAULT_RESULTS,
         help="Directory to drop experiment JSON files (default: data/eval-experiments)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--experiment-id",
         default="",
         help="Optional experiment id slug (default: auto timestamp id)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--out",
         type=Path,
         default=None,
         help="Also write a copy of the experiment JSON to this path",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--no-save",
         action="store_true",
         help="Do not write JSON under --results-dir",
@@ -467,8 +467,8 @@ def main(argv: list[str] | None = None) -> int:
 
     _assert_no_ollama_url()
     database_url = _require_env(_ENV_DB)
-    _require_env(_ENV_LLM)
-    _require_env(_ENV_EMBED)
+    _ = _require_env(_ENV_LLM)
+    _ = _require_env(_ENV_EMBED)
 
     # Modal cold-start / InternalFailure can exceed the default 30s read timeout.
     embed_client = EmbeddingClient(timeout=120.0)
@@ -526,10 +526,10 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 )
                 print(
-                    f"      wall={elapsed:.1f}s "
-                    f"retrieval={summary.retrieval_relevance:.2f} "
-                    f"faith={summary.faithfulness} "
-                    f"relevancy={summary.answer_relevancy} "
+                    f"      wall={elapsed:.1f}s " +
+                    f"retrieval={summary.retrieval_relevance:.2f} " +
+                    f"faith={summary.faithfulness} " +
+                    f"relevancy={summary.answer_relevancy} " +
                     f"p95={summary.latency_p95_ms}ms"
                 )
 
@@ -543,9 +543,9 @@ def main(argv: list[str] | None = None) -> int:
             payloads.append(payload)
             averages = as_json_object(payload["averages"])
             print(
-                f"    avg wall={averages['wall_time_s']}s "
-                f"retrieval={averages['retrieval_relevance']} "
-                f"faith={averages['faithfulness']} "
+                f"    avg wall={averages['wall_time_s']}s " +
+                f"retrieval={averages['retrieval_relevance']} " +
+                f"faith={averages['faithfulness']} " +
                 f"relevancy={averages['answer_relevancy']}"
             )
     finally:

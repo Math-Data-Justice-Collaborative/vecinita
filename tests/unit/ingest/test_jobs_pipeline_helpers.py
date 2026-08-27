@@ -277,7 +277,7 @@ def test_build_translation_documents_skips_empty_source_chunks() -> None:
         source_documents=[source],
         upserted=upserted,
         translate_locales=["es"],
-        translate_client=_TranslateStub(),  # type: ignore[arg-type]
+        translate_client=_TranslateStub(),
         embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
         chunk_size=_CHUNK_SIZE,
     )
@@ -300,7 +300,7 @@ def test_build_translation_documents_counts_missing_source_ids_as_failed() -> No
         source_documents=[source],
         upserted=upserted,
         translate_locales=["es"],
-        translate_client=_TranslateStub(),  # type: ignore[arg-type]
+        translate_client=_TranslateStub(),
         embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
         chunk_size=_CHUNK_SIZE,
     )
@@ -376,7 +376,7 @@ def test_run_eval_job_reads_eval_run_id_from_record_field() -> None:
     store = InMemoryJobStore()
     eval_run_id = uuid4()
     record = store.create_job(urls=[], job_type="eval", options={})
-    store.update_job(record.job_id, eval_run_id=eval_run_id)
+    _ = store.update_job(record.job_id, eval_run_id=eval_run_id)
     write = _EvalWriteClient()
 
     run_eval_job(record.job_id, store=store, write_client=write)  # type: ignore[arg-type]
@@ -415,7 +415,7 @@ def test_run_ingest_job_failure_includes_translation_metrics() -> None:
             embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
             write_client=_BoomWriteClient(),  # type: ignore[arg-type]
             fetch_document=fetch,
-            translate_client=_TranslateStub(),  # type: ignore[arg-type]
+            translate_client=_TranslateStub(),
             tag_vocabulary=[],
         )
 

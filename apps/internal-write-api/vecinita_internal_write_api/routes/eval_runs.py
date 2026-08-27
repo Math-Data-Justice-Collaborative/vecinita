@@ -87,7 +87,7 @@ def register_eval_run_routes(  # noqa: PLR0913, PLR0915 — route factory wires 
                 detail="Eval job client not configured",
             )
         try:
-            retag_jobs.enqueue_eval(
+            _ = retag_jobs.enqueue_eval(
                 created.response.run_id,
                 authorization=request.headers.get("Authorization"),
                 question=created.question,

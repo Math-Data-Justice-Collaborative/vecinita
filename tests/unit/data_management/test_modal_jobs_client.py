@@ -28,11 +28,11 @@ def test_modal_jobs_client_requires_url_and_proxy_key(
     monkeypatch.delenv("VECINITA_MODAL_DATA_MGMT_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
     with pytest.raises(ModalJobsEnqueueError, match="required"):
-        ModalJobsEnqueueClient()
+        _ = ModalJobsEnqueueClient()
 
     monkeypatch.setenv("VECINITA_MODAL_DATA_MGMT_URL", "https://dm.example")
     with pytest.raises(ModalJobsEnqueueError, match="required"):
-        ModalJobsEnqueueClient()
+        _ = ModalJobsEnqueueClient()
 
 
 def test_modal_jobs_client_enqueue_success_and_auth_header(
@@ -89,7 +89,7 @@ def test_modal_jobs_client_enqueue_http_error_raises() -> None:
     )
     try:
         with pytest.raises(ModalJobsEnqueueError, match="503"):
-            client.enqueue_automation_catchup(
+            _ = client.enqueue_automation_catchup(
                 DOC_ID,
                 revision="1",
                 embed_status="failed",
@@ -216,7 +216,7 @@ def test_modal_jobs_client_enqueue_freshness_http_error_raises() -> None:
     )
     try:
         with pytest.raises(ModalJobsEnqueueError, match="enqueue_freshness_refresh"):
-            client.enqueue_freshness_refresh(DOC_ID, force=True)
+            _ = client.enqueue_freshness_refresh(DOC_ID, force=True)
     finally:
         client.close()
         http_client.close()

@@ -20,7 +20,7 @@ _ENV_SENDER: Final[str] = "RESEND_SENDER_EMAIL"
 _RESEND_URL: Final[str] = "https://api.resend.com/emails"
 _SUBJECT: Final[str] = "Vecinita Admin · deliverability test"
 _HTML_BODY: Final[str] = (
-    "<p>This is a Vecinita Admin deliverability test email.</p>"
+    "<p>This is a Vecinita Admin deliverability test email.</p>" +
     "<p>Si recibes este mensaje, la entrega de correo de Vecinita funciona.</p>"
 )
 

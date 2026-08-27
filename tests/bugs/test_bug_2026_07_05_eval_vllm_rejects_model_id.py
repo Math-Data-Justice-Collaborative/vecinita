@@ -91,6 +91,6 @@ def test_eval_runtime_for_config_forwards_model_id_to_vecinita_llm(
         EvalConfig(model_id=_SANDBOX_MODEL_ID),
     )
     assert synthesis is not None
-    synthesis.complete("prompt")
+    _ = synthesis.complete("prompt")
     assert captured["path"] == "/generate"
     assert captured.get("model_id") == _SANDBOX_MODEL_ID

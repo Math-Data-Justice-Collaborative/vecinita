@@ -66,7 +66,7 @@ def _attach_embeddings_impl(
                         index = basis_idx
                         break
                 vector = basis_vector(index)
-                conn.execute(
+                _ = conn.execute(
                     text(
                         """
                         INSERT INTO embeddings (chunk_id, embedding)
@@ -112,7 +112,7 @@ def clear_embeddings(*, database_url: str) -> None:
         engine = create_engine(database_url)
         try:
             with engine.begin() as conn:
-                conn.execute(text("DELETE FROM embeddings"))
+                _ = conn.execute(text("DELETE FROM embeddings"))
         finally:
             engine.dispose()
 
@@ -158,7 +158,7 @@ def _reset_corpus_tables_impl(*, database_url: str) -> None:
     engine = create_engine(database_url)
     try:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     TRUNCATE TABLE
@@ -185,7 +185,7 @@ def seed_eval_corpus(*, database_url: str) -> dict[str, int]:
     """Load fixture corpus + tagged docs + deterministic embeddings for eval benchmarks."""
     with corpus_db_lock():
         _reset_corpus_tables_impl(database_url=database_url)
-        load_seed_tags(database_url=database_url)
+        _ = load_seed_tags(database_url=database_url)
         counts = load_corpus(database_url=database_url)
         tagged_counts = load_tagged_corpus(database_url=database_url)
         counts = {
@@ -215,14 +215,14 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
         try:
             with engine.begin() as conn:
                 # Guard already ran via _reset_corpus_tables_impl above.
-                conn.execute(text("DELETE FROM embeddings"))
-                conn.execute(
+                _ = conn.execute(text("DELETE FROM embeddings"))
+                _ = conn.execute(
                     text(
-                        "DELETE FROM chunks WHERE document_id IN "
+                        "DELETE FROM chunks WHERE document_id IN " +  # noqa: S608
                         "(SELECT id FROM documents WHERE language = 'en')"
                     )
                 )
-                conn.execute(text("DELETE FROM documents WHERE language = 'en'"))
+                _ = conn.execute(text("DELETE FROM documents WHERE language = 'en'"))
                 es_chunks = scalar_int(
                     sqlalchemy_scalar_one(
                         conn.execute(
@@ -231,7 +231,7 @@ def seed_spanish_only_corpus(*, database_url: str) -> dict[str, int]:
                                 SELECT COUNT(*)
                                 FROM chunks c
                                 JOIN documents d ON d.id = c.document_id
-                                WHERE d.language = 'es'
+                                WHERE d.language = 'es' +
                                 """
                             )
                         )
@@ -266,7 +266,7 @@ def corpus_db() -> str:
     """Load corpus rows and return the database URL for integration tests."""
     url = _database_url()
     with corpus_db_lock():
-        load_corpus(database_url=url)
+        _ = load_corpus(database_url=url)
     clear_embeddings(database_url=url)
     return url
 

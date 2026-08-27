@@ -180,7 +180,7 @@ def test_tc239_rollback_restores_prior_e0_live_text_and_stamps(
         embedding_model_id=_E0,
         shadow_text=_E0_RESTORE,
     )
-    _promote(write_client, e0_run)
+    _ = _promote(write_client, e0_run)
     assert _live_chunk_text(engine, seeded_document) == _E0_RESTORE
     e0_embed, e0_tok = _latest_revision_stamps(engine, seeded_document)
     assert e0_embed == _E0
@@ -193,7 +193,7 @@ def test_tc239_rollback_restores_prior_e0_live_text_and_stamps(
         embedding_model_id=_E1,
         shadow_text=_E1_SHADOW,
     )
-    _promote(write_client, e1_run)
+    _ = _promote(write_client, e1_run)
     assert _live_chunk_text(engine, seeded_document) == _E1_SHADOW
     e1_embed, e1_tok = _latest_revision_stamps(engine, seeded_document)
     assert e1_embed == _E1
@@ -207,7 +207,7 @@ def test_tc239_rollback_restores_prior_e0_live_text_and_stamps(
         embedding_model_id=_E0,
         shadow_text=_E0_RESTORE,
     )
-    _promote(write_client, rollback_run)
+    _ = _promote(write_client, rollback_run)
 
     assert _live_chunk_text(engine, seeded_document) == _E0_RESTORE
     restored_embed, restored_tok = _latest_revision_stamps(engine, seeded_document)

@@ -129,14 +129,14 @@ def run_finetune_train_job(
     )
     if decision != "start":
         _logger.info("finetune_train %s skipped: %s", job_id, decision)
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="completed",
             metrics={"finetune_outcome": decision},
         )
         return
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     invoker = train_invoker if train_invoker is not None else resolve_default_train_invoker()
     payload: dict[str, object] = {
         "job_id": str(job_id),
@@ -146,7 +146,7 @@ def run_finetune_train_job(
         result: Mapping[str, object] = invoker(payload)
     except Exception as exc:
         _logger.exception("finetune_train %s failed", job_id)
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code="finetune_train_failed",
@@ -159,7 +159,7 @@ def run_finetune_train_job(
     adapter_path = str(result.get("adapter_path", ""))
     pair_count = result.get("pair_count", 0)
     base_model_id = str(result.get("base_model_id", "qwen2.5:1.5b-instruct"))
-    store.update_job(
+    _ = store.update_job(
         job_id,
         status="completed",
         metrics={

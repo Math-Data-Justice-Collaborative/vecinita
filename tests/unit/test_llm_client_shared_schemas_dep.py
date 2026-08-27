@@ -22,6 +22,6 @@ def test_llm_client_declares_shared_schemas_dependency() -> None:
         dep == "vecinita-shared-schemas" or dep.startswith("vecinita-shared-schemas")
         for dep in deps
     ), (
-        "packages/llm-client/pyproject.toml must declare vecinita-shared-schemas "
+        "packages/llm-client/pyproject.toml must declare vecinita-shared-schemas " +
         "(LlmClient imports resolve_llm_http_config from shared-schemas)"
     )

@@ -202,7 +202,7 @@ def test_run_ingest_job_applies_llm_tags_when_client_provided() -> None:
         embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
         write_client=write_client,  # type: ignore[arg-type]
         fetch_document=_fetch_fixture,
-        tag_client=_StubTagClient(),  # type: ignore[arg-type]
+        tag_client=_StubTagClient(),
         tag_vocabulary=_VOCAB,
     )
 
@@ -224,7 +224,7 @@ def test_run_ingest_job_ingests_without_tags_when_inference_fails() -> None:
         embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
         write_client=write_client,  # type: ignore[arg-type]
         fetch_document=_fetch_fixture,
-        tag_client=_RaisingTagClient(),  # type: ignore[arg-type]
+        tag_client=_RaisingTagClient(),
         tag_vocabulary=_VOCAB,
     )
 
@@ -434,7 +434,7 @@ def test_run_retag_job_completes() -> None:
         record.job_id,
         store=store,
         write_client=write_client,  # type: ignore[arg-type]
-        tag_client=_StubTagClient(),  # type: ignore[arg-type]
+        tag_client=_StubTagClient(),
         tag_vocabulary=_VOCAB,
     )
 
@@ -472,7 +472,7 @@ def test_run_retag_job_detects_language_when_missing() -> None:
         record.job_id,
         store=store,
         write_client=write_client,  # type: ignore[arg-type]
-        tag_client=_StubTagClient(),  # type: ignore[arg-type]
+        tag_client=_StubTagClient(),
         tag_vocabulary=_VOCAB,
     )
 
@@ -490,7 +490,7 @@ def test_run_retag_job_raises_when_job_missing() -> None:
             uuid4(),
             store=store,
             write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
-            tag_client=_StubTagClient(),  # type: ignore[arg-type]
+            tag_client=_StubTagClient(),
         )
 
 
@@ -517,7 +517,7 @@ def test_run_retag_job_marks_failed_on_write_error() -> None:
             record.job_id,
             store=store,
             write_client=write_client,  # type: ignore[arg-type]
-            tag_client=_StubTagClient(),  # type: ignore[arg-type]
+            tag_client=_StubTagClient(),
             tag_vocabulary=_VOCAB,
         )
 
@@ -536,7 +536,7 @@ def test_run_retag_job_rejects_non_retag_job() -> None:
             record.job_id,
             store=store,
             write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
-            tag_client=_StubTagClient(),  # type: ignore[arg-type]
+            tag_client=_StubTagClient(),
         )
 
 
@@ -550,5 +550,5 @@ def test_run_retag_job_requires_document_id_option() -> None:
             record.job_id,
             store=store,
             write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
-            tag_client=_StubTagClient(),  # type: ignore[arg-type]
+            tag_client=_StubTagClient(),
         )

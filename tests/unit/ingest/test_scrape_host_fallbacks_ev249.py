@@ -12,7 +12,7 @@ from vecinita_ingest.scrape import (
 )
 
 _BODY = (
-    "<html><head><title>Community</title></head>"
+    "<html><head><title>Community</title></head>" +
     "<body><p>Resource hours and services for neighbors.</p></body></html>"
 )
 _TLS_HANDSHAKE_MSG = "SSL handshake failure"
@@ -97,7 +97,7 @@ def test_fetch_url_raises_host_waf_blocked_after_exhausted_retries() -> None:
         follow_redirects=True,
     )
     with pytest.raises(ScrapeFetchError) as exc_info:
-        fetch_url("https://eastprovidenceri.gov/", client=client)
+        _ = fetch_url("https://eastprovidenceri.gov/", client=client)
     assert exc_info.value.error_code == "host_waf_blocked"
 
 
@@ -114,7 +114,7 @@ def test_fetch_url_propagates_non_forbidden_http_errors() -> None:
         follow_redirects=True,
     )
     with pytest.raises(httpx.HTTPStatusError):
-        fetch_url("https://example.com/page", client=client)
+        _ = fetch_url("https://example.com/page", client=client)
 
 
 def test_fetch_url_www_first_header_uses_fetch_with_headers() -> None:
@@ -153,5 +153,5 @@ def test_fetch_url_raises_tls_handshake_failed_without_www_recovery() -> None:
         follow_redirects=True,
     )
     with pytest.raises(ScrapeFetchError) as exc_info:
-        fetch_url("https://blocked.example/", client=client)
+        _ = fetch_url("https://blocked.example/", client=client)
     assert exc_info.value.error_code == "tls_handshake_failed"

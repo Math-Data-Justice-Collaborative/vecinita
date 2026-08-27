@@ -64,7 +64,7 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
             doc_id_raw = sqlalchemy_scalar_one(
                 conn.execute(
                     text(
-                        "INSERT INTO documents (url, title, language) "
+                        "INSERT INTO documents (url, title, language) " +
                         "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Bulk Del Doc {i}"},
@@ -75,12 +75,12 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
     yield doc_ids
     with engine.begin() as conn:
         for doc_id in doc_ids:
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_bulk_delete_success(client: TestClient, sample_docs: list[UUID]) -> None:
@@ -121,7 +121,7 @@ def test_bulk_delete_emits_audit_events(
 ) -> None:
     """Bulk delete emits audit events."""
     doc_ids = [str(d) for d in sample_docs[:2]]
-    client.request(
+    _ = client.request(
         "DELETE",
         "/internal/v1/documents/bulk",
         json={"document_ids": doc_ids},
@@ -131,7 +131,7 @@ def test_bulk_delete_emits_audit_events(
         for doc_id in sample_docs[:2]:
             row = conn.execute(
                 text(
-                    "SELECT event_type FROM audit_log "
+                    "SELECT event_type FROM audit_log " +  # noqa: S608
                     "WHERE entity_id = :id AND event_type = 'document.deleted'"
                 ),
                 {"id": doc_id},

@@ -67,9 +67,9 @@ def fetch_audit_log(  # noqa: PLR0913  # filter params mirror query string
     where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
     audit_list_sql = (
-        f"SELECT id, event_type, entity_type, entity_id, request_id, payload, "  # noqa: S608  # fixed filter templates; values bound
-        f"created_at, actor_id, actor_role "
-        f"FROM audit_log {where_sql} ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+        "SELECT id, event_type, entity_type, entity_id, request_id, payload, "
+        + "created_at, actor_id, actor_role "
+        + f"FROM audit_log {where_sql} ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
     )
 
     with engine.connect() as conn:

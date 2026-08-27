@@ -47,7 +47,7 @@ def test_automations_config_patch_requires_enabled() -> None:
     patch = AutomationsConfigPatchRequest(enabled=False)
     assert patch.enabled is False
     with pytest.raises(ValidationError):
-        AutomationsConfigPatchRequest.model_validate({})
+        _ = AutomationsConfigPatchRequest.model_validate({})
 
 
 def test_automation_run_row_shape_matches_tp3() -> None:
@@ -118,9 +118,9 @@ def test_automation_run_create_request_requires_job_type_and_status() -> None:
     assert dumped["started_at"] is None
     assert dumped["finished_at"] is None
     with pytest.raises(ValidationError):
-        AutomationRunCreateRequest.model_validate({"job_type": "automation_catchup"})
+        _ = AutomationRunCreateRequest.model_validate({"job_type": "automation_catchup"})
     with pytest.raises(ValidationError):
-        AutomationRunCreateRequest.model_validate(
+        _ = AutomationRunCreateRequest.model_validate(
             {"job_type": "automation_catchup", "status": "unknown"}
         )
 

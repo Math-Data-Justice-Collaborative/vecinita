@@ -23,7 +23,7 @@ _DO_URL = f"postgresql://{_USER}:{_PASSWORD}@{_DO_HOST}:25060/defaultdb?sslmode=
 def test_attach_embeddings_refuses_do_managed_postgres() -> None:
     """Guard must block synthetic basis_vector UPSERT on staging hosts."""
     with pytest.raises(RuntimeError, match="managed Postgres"):
-        attach_embeddings(
+        _ = attach_embeddings(
             database_url=_DO_URL,
             match_substrings={"food pantry": 0},
             default_index=1,

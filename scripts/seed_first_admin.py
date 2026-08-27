@@ -164,7 +164,7 @@ def seed_super_admin(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Seed the first Supabase admin operator.")
-    parser.add_argument(
+    _ = parser.add_argument(
         "--dry-run", action="store_true", help="Print action without mutating Supabase"
     )
     args = parser.parse_args(argv)

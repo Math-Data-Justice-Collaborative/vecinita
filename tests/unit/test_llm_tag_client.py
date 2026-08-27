@@ -92,7 +92,7 @@ def test_infer_document_tags_raises_on_http_error() -> None:
     )
     client = LlmTagClient(llm)
     with pytest.raises(LlmTagClientError, match="503"):
-        client.infer_document_tags(
+        _ = client.infer_document_tags(
             title="Test",
             text="Body",
             language="en",
@@ -115,7 +115,7 @@ def test_infer_document_tags_raises_on_invalid_json() -> None:
     )
     client = LlmTagClient(llm)
     with pytest.raises(LlmTagClientError, match="JSON"):
-        client.infer_document_tags(
+        _ = client.infer_document_tags(
             title="Test",
             text="Body",
             language="en",
@@ -164,7 +164,7 @@ def test_infer_document_tags_raises_when_tags_not_string_array() -> None:
     )
     client = LlmTagClient(llm)
     with pytest.raises(LlmTagClientError, match="string array"):
-        client.infer_document_tags(
+        _ = client.infer_document_tags(
             title="Test",
             text="Body",
             language="en",
@@ -187,7 +187,7 @@ def test_infer_document_tags_raises_when_tags_field_not_a_list() -> None:
     )
     client = LlmTagClient(llm)
     with pytest.raises(LlmTagClientError, match="string array"):
-        client.infer_document_tags(
+        _ = client.infer_document_tags(
             title="Test",
             text="Body",
             language="en",
@@ -205,7 +205,7 @@ def test_infer_document_tags_rejects_max_tags_below_one() -> None:
     )
     client = LlmTagClient(llm)
     with pytest.raises(LlmTagClientError, match="max_tags"):
-        client.infer_document_tags(
+        _ = client.infer_document_tags(
             title="Test",
             text="Body",
             language="en",
@@ -254,7 +254,7 @@ def test_llm_tag_client_uses_explicit_tag_max_tokens() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     client = LlmTagClient(llm, tag_max_tokens=256)
-    client.infer_document_tags(
+    _ = client.infer_document_tags(
         title="Test",
         text="Body",
         language="en",

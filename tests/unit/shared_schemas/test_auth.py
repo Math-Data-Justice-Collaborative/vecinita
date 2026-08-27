@@ -66,8 +66,8 @@ def test_verify_rejects_missing_or_malformed_token(token: str) -> None:
     cfg = make_auth_config(private_key)
 
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_verify_rejects_expired_token() -> None:
@@ -77,8 +77,8 @@ def test_verify_rejects_expired_token() -> None:
     cfg = make_auth_config(private_key)
 
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_verify_rejects_wrong_audience() -> None:
@@ -88,8 +88,8 @@ def test_verify_rejects_wrong_audience() -> None:
     cfg = make_auth_config(private_key)
 
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_require_role_admin_denies_viewer() -> None:
@@ -204,8 +204,8 @@ def test_require_admin_write_blocks_viewer_allows_admin_and_service() -> None:
 
     viewer = verify_supabase_jwt(sign_test_jwt(private_key, role="viewer"), config=cfg)
     with pytest.raises(HTTPException) as exc_info:
-        require_admin_write(AuthContext(principal=viewer, is_service=False))
-    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN  # type: ignore[attr-defined]
+        _ = require_admin_write(AuthContext(principal=viewer, is_service=False))
+    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN
 
     admin = verify_supabase_jwt(sign_test_jwt(private_key, role="admin"), config=cfg)
     ctx_admin = require_admin_write(AuthContext(principal=admin, is_service=False))
@@ -224,8 +224,8 @@ def test_verify_rejects_when_supabase_url_missing() -> None:
     cfg.supabase_url = ""
 
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.SERVICE_UNAVAILABLE  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
 def test_verify_rejects_invalid_sub_and_role_metadata() -> None:
@@ -243,13 +243,13 @@ def test_verify_rejects_invalid_sub_and_role_metadata() -> None:
     bad_sub_token = jwt.encode(payload, private_key, algorithm="ES256")
 
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(bad_sub_token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(bad_sub_token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
     no_role = sign_test_jwt(private_key, role="guest")
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(no_role, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(no_role, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_dev_bypass_when_auth_not_required() -> None:
@@ -271,8 +271,8 @@ def test_resolve_operator_or_service_requires_bearer_when_auth_required() -> Non
     cfg = make_auth_config(private_key, auth_required=True)
 
     with pytest.raises(HTTPException) as exc_info:
-        _resolve_operator_or_service(authorization=None, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = _resolve_operator_or_service(authorization=None, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_require_authenticated_allows_viewer_and_service() -> None:
@@ -289,8 +289,8 @@ def test_require_authenticated_allows_viewer_and_service() -> None:
     assert ctx_service.is_service is True
 
     with pytest.raises(HTTPException) as exc_info:
-        require_authenticated(AuthContext(principal=None, is_service=False))
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = require_authenticated(AuthContext(principal=None, is_service=False))
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_auth_config_from_env_and_cache() -> None:
@@ -326,13 +326,13 @@ def test_verify_rejects_non_dict_app_metadata_and_invalid_signing_key() -> None:
     payload["app_metadata"] = "not-a-dict"
     bad_meta = jwt.encode(payload, private_key, algorithm="ES256")
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(bad_meta, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(bad_meta, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN
 
-    cfg.signing_key_resolver = InvalidSigningKeyResolver()  # type: ignore[assignment]
+    cfg.signing_key_resolver = InvalidSigningKeyResolver()
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.SERVICE_UNAVAILABLE  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
 def test_verify_rejects_non_uuid_sub() -> None:
@@ -349,8 +349,8 @@ def test_verify_rejects_non_uuid_sub() -> None:
     payload["sub"] = "not-a-uuid"
     bad_sub = jwt.encode(payload, private_key, algorithm="ES256")
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(bad_sub, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(bad_sub, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_get_principal_and_resolve_operator_or_service_dependencies() -> None:
@@ -399,12 +399,12 @@ def test_resolve_operator_or_service_rejects_non_bearer_authorization() -> None:
     cfg = make_auth_config(private_key, auth_required=True)
 
     with pytest.raises(HTTPException) as exc_info:
-        _resolve_operator_or_service(authorization="Token abc", config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = _resolve_operator_or_service(authorization="Token abc", config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
     with pytest.raises(HTTPException) as exc_info:
-        _principal_from_authorization("Bearer ", config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = _principal_from_authorization("Bearer ", config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
     operator_token = sign_test_jwt(private_key, role="viewer")
     ctx = _resolve_operator_or_service(
@@ -478,8 +478,8 @@ def test_verify_rejects_non_string_sub(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(auth_mod.jwt, "decode", _decode_non_string_sub)
 
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_verify_rejects_payload_without_sub() -> None:
@@ -493,5 +493,5 @@ def test_verify_rejects_payload_without_sub() -> None:
     }
     token = jwt.encode(payload, private_key, algorithm="ES256")
     with pytest.raises(HTTPException) as exc_info:
-        verify_supabase_jwt(token, config=cfg)
-    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED  # type: ignore[attr-defined]
+        _ = verify_supabase_jwt(token, config=cfg)
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED

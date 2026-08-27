@@ -52,7 +52,7 @@ def test_retag_not_503_when_modal_env_vars_configured() -> None:
         resp.status_code != HTTPStatus.SERVICE_UNAVAILABLE
         or "not configured" not in resp.text.lower()
     ), (
-        f"Retag should not return 503 'not configured' when "
-        f"VECINITA_MODAL_DATA_MGMT_URL and VECINITA_MODAL_PROXY_KEY are set; "
+        "Retag should not return 503 'not configured' when " +
+        "VECINITA_MODAL_DATA_MGMT_URL and VECINITA_MODAL_PROXY_KEY are set; " +
         f"got {resp.status_code}: {resp.text}"
     )

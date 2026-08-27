@@ -40,7 +40,7 @@ def test_create_rebuild_run_accepts_chunk_tokenizer_id_aligned_to_e1() -> None:
 def test_create_rebuild_run_rejects_tokenizer_mismatch_when_both_set() -> None:
     """When both stamps set, tokenizer must match embed pin (AC-ME11)."""
     with pytest.raises(ValidationError):
-        CreateRebuildRunRequest.model_validate(
+        _ = CreateRebuildRunRequest.model_validate(
             {
                 "mode": "rechunk",
                 "embedding_model_id": DEFAULT_EMBEDDING_MODEL_ID,

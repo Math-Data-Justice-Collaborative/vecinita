@@ -67,7 +67,7 @@ def _post_jobs(key: str) -> int:
 
 def _load_modal_secret() -> dict[str, str]:
     if not SECRET_JSON.is_file():
-        subprocess.run(
+        _ = subprocess.run(
             [
                 "uv",
                 "run",
@@ -85,8 +85,8 @@ def _load_modal_secret() -> dict[str, str]:
 
 def _write_modal_secret(data: dict[str, str]) -> None:
     tmp = ROOT / ".tmp" / "vecinita-data-management-secret-new.json"
-    tmp.write_text(json.dumps(data), encoding="utf-8")
-    subprocess.run(
+    _ = tmp.write_text(json.dumps(data), encoding="utf-8")
+    _ = subprocess.run(
         [
             "modal",
             "secret",
@@ -103,12 +103,12 @@ def _write_modal_secret(data: dict[str, str]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
+    _ = parser.add_argument(
         "--apply",
         action="store_true",
         help="Update Modal secret and redeploy data-mgmt when keys differ",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--sync-do",
         action="store_true",
         help="Also push VITE_VECINITA_MODAL_PROXY_KEY to DO and redeploy admin FE",
@@ -139,7 +139,7 @@ def main() -> int:
     _write_modal_secret(secret)
     print("Updated Modal secret vecinita-data-management")
 
-    subprocess.run(
+    _ = subprocess.run(
         ["modal", "deploy", "infra/modal/data_management_app.py"],
         cwd=ROOT,
         check=True,
@@ -151,7 +151,7 @@ def main() -> int:
 
     if args.sync_do:
         env = {**os.environ, "VITE_VECINITA_MODAL_PROXY_KEY": bundle_key}
-        subprocess.run(
+        _ = subprocess.run(
             [
                 "uv",
                 "run",
@@ -168,7 +168,7 @@ def main() -> int:
             check=True,
             env=env,
         )
-        subprocess.run(
+        _ = subprocess.run(
             [
                 "uv",
                 "run",

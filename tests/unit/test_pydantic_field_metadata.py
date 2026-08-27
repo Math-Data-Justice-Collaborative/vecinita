@@ -24,7 +24,7 @@ def test_owned_schema_modules_emit_no_field_metadata_warnings(module_name: str) 
     """Importing each owned schema module emits no field metadata warnings."""
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always", UnsupportedFieldAttributeWarning)
-        importlib.import_module(module_name)
+        _ = importlib.import_module(module_name)
 
     ours = [w for w in caught if issubclass(w.category, UnsupportedFieldAttributeWarning)]
     assert not ours, f"{module_name} triggered UnsupportedFieldAttributeWarning: " + "; ".join(

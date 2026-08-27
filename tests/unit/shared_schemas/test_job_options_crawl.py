@@ -42,16 +42,16 @@ def test_job_options_accepts_crawl_true_with_limits() -> None:
 def test_job_options_rejects_invalid_crawl_scope() -> None:
     """crawl_scope must be same_domain or path_prefix."""
     with pytest.raises(ValidationError, match="crawl_scope"):
-        JobOptions.model_validate({"crawl_scope": "cross_domain"})
+        _ = JobOptions.model_validate({"crawl_scope": "cross_domain"})
 
 
 def test_job_options_rejects_non_positive_max_pages() -> None:
     """max_pages must be >= 1."""
     with pytest.raises(ValidationError):
-        JobOptions.model_validate({"max_pages": 0})
+        _ = JobOptions.model_validate({"max_pages": 0})
 
 
 def test_job_options_rejects_negative_max_depth() -> None:
     """max_depth must be >= 0."""
     with pytest.raises(ValidationError):
-        JobOptions.model_validate({"max_depth": -1})
+        _ = JobOptions.model_validate({"max_depth": -1})

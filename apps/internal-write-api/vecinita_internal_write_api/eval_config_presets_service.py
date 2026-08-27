@@ -70,7 +70,7 @@ def create_eval_config_preset(
     preset_id = uuid4()
     now = datetime.now(UTC)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO eval_config_presets (
@@ -142,7 +142,7 @@ def update_eval_config_preset(
     version = current.version + 1
     now = datetime.now(UTC)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE eval_config_presets

@@ -102,7 +102,7 @@ def resilient_dm_client(
             embed_client=_MockEmbedClient(),  # type: ignore[arg-type]
             write_client=write_client,  # type: ignore[arg-type]
             fetch_document=lambda url: fetch_html_fixture(url, fixture_html=_FIXTURE_HTML),
-            tag_client=_NonJsonTagClient(),  # type: ignore[arg-type]
+            tag_client=_NonJsonTagClient(),
             tag_vocabulary=_VOCAB,
         )
 

@@ -114,7 +114,7 @@ def test_llm_client_requires_base_url_or_env(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.delenv("VECINITA_MODAL_OLLAMA_URL", raising=False)
 
     with pytest.raises(LlmClientError, match="VECINITA_MODAL_LLM_URL"):
-        LlmClient(base_url=None)
+        _ = LlmClient(base_url=None)
 
 
 def test_generate_stream_yields_tokens() -> None:
@@ -153,7 +153,7 @@ def test_generate_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     with pytest.raises(LlmClientError, match="503"):
-        client.generate("test")
+        _ = client.generate("test")
     client.close()
 
 
@@ -184,7 +184,7 @@ def test_llm_client_context_manager_closes_owned_client(
             closed.append(True)
             original_close()
 
-        client.close = tracked_close  # type: ignore[method-assign]
+        client.close = tracked_close
         return client
 
     monkeypatch.setattr(httpx, "Client", client_factory)
@@ -206,7 +206,7 @@ def test_generate_raises_when_text_field_missing() -> None:
     )
 
     with pytest.raises(LlmClientError, match="text"):
-        client.generate("test")
+        _ = client.generate("test")
     client.close()
 
 
@@ -219,7 +219,7 @@ def test_generate_stream_raises_on_http_error() -> None:
     )
 
     with pytest.raises(LlmClientError, match="503"):
-        list(client.generate_stream("test"))
+        _ = list(client.generate_stream("test"))
     client.close()
 
 
@@ -247,9 +247,9 @@ def test_generate_stream_ignores_empty_and_non_string_tokens() -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
         """Handler."""
         content = (
-            'data: {"token": ""}\n'
-            'data: {"token": 123}\n'
-            'data: {"token": "Done"}\n'
+            'data: {"token": ""}\n' +
+            'data: {"token": 123}\n' +
+            'data: {"token": "Done"}\n' +
             'data: {"done": true}'
         )
         return httpx.Response(200, content=content)
@@ -381,7 +381,7 @@ def test_llm_client_does_not_close_injected_http_client() -> None:
         closed.append(True)
         original_close()
 
-    http.close = tracked_close  # type: ignore[method-assign]
+    http.close = tracked_close
     client = LlmClient("http://llm.test", http_client=http)
     client.close()
 
@@ -437,7 +437,7 @@ def test_resolve_llm_http_config_missing_url_raises(
     monkeypatch.delenv("VECINITA_MODAL_OLLAMA_URL", raising=False)
 
     with pytest.raises(LlmHttpConfigError, match="VECINITA_MODAL_LLM_URL"):
-        resolve_llm_http_config()
+        _ = resolve_llm_http_config()
 
 
 def test_resolve_llm_http_config_require_proxy_key(
@@ -448,7 +448,7 @@ def test_resolve_llm_http_config_require_proxy_key(
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
 
     with pytest.raises(LlmHttpConfigError, match="VECINITA_MODAL_PROXY_KEY"):
-        resolve_llm_http_config(require_proxy_key=True)
+        _ = resolve_llm_http_config(require_proxy_key=True)
 
 
 def test_resolve_llm_http_config_legacy_ollama_url_does_not_resolve(
@@ -460,7 +460,7 @@ def test_resolve_llm_http_config_legacy_ollama_url_does_not_resolve(
     monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test/")
 
     with pytest.raises(LlmHttpConfigError, match="VECINITA_MODAL_LLM_URL"):
-        resolve_llm_http_config()
+        _ = resolve_llm_http_config()
 
 
 def test_resolve_llm_http_config_ignores_legacy_ollama_model_id(
@@ -483,7 +483,7 @@ def test_llm_client_missing_url_hard_fails_even_with_ollama_env(
     monkeypatch.setenv("VECINITA_MODAL_OLLAMA_URL", "http://legacy-ollama.test/")
 
     with pytest.raises(LlmClientError, match="VECINITA_MODAL_LLM_URL"):
-        LlmClient()
+        _ = LlmClient()
 
 
 def test_resolve_llm_http_config_playground_purpose_prefers_playground_url(
@@ -513,7 +513,7 @@ def test_resolve_llm_http_config_playground_missing_url_raises(
     monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
     with pytest.raises(LlmHttpConfigError, match="purpose='playground'"):
-        resolve_llm_http_config(purpose="playground")
+        _ = resolve_llm_http_config(purpose="playground")
 
 
 def test_list_models_returns_parsed_response() -> None:
@@ -551,7 +551,7 @@ def test_list_models_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     with pytest.raises(LlmClientError, match="list_models failed"):
-        client.list_models()
+        _ = client.list_models()
     client.close()
 
 
@@ -595,7 +595,7 @@ def test_start_pull_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://llm.test"),
     )
     with pytest.raises(LlmClientError, match="start_pull failed"):
-        client.start_pull("missing:tag")
+        _ = client.start_pull("missing:tag")
     client.close()
 
 

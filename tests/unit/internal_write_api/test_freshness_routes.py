@@ -74,7 +74,7 @@ def test_list_documents_stale_filter_returns_old_last_checked(
     document_id = upsert_document_via_api(write_client)
     stale_at = datetime.now(tz=UTC) - timedelta(days=31)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE documents
@@ -132,7 +132,7 @@ def test_refresh_now_skips_when_refresh_disabled(
     monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
     document_id = upsert_document_via_api(client)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text("UPDATE documents SET refresh_enabled = false WHERE id = :id"),
             {"id": document_id},
         )
@@ -268,7 +268,7 @@ def test_list_documents_stale_and_missing_body_combined(
         url=f"https://freshness-combo-{uuid.uuid4().hex[:10]}.example.com/",
     )
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE documents

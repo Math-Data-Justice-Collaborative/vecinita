@@ -49,7 +49,7 @@ def test_admin_cancel_sets_job_cancelled() -> None:
     """POST /jobs/{id}/cancel marks the job cancelled (TC-147)."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="running")
+    _ = store.update_job(record.job_id, status="running")
     client = _client_with_principal(store, _ADMIN)
 
     response = client.post(f"/jobs/{record.job_id}/cancel")
@@ -78,7 +78,7 @@ def test_admin_retry_returns_202_new_job() -> None:
     """POST /jobs/{id}/retry accepts and returns a new pending job_id (TC-147)."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="failed", error_code="X", error_message="boom")
+    _ = store.update_job(record.job_id, status="failed", error_code="X", error_message="boom")
     client = _client_with_principal(store, _ADMIN)
 
     response = client.post(f"/jobs/{record.job_id}/retry")
@@ -102,7 +102,7 @@ def test_admin_retry_finetune_train_clears_approved_flag() -> None:
         job_type="finetune_train",
         options={"approved": True},
     )
-    store.update_job(record.job_id, status="failed", error_code="X", error_message="boom")
+    _ = store.update_job(record.job_id, status="failed", error_code="X", error_message="boom")
     client = _client_with_principal(store, _ADMIN)
 
     response = client.post(f"/jobs/{record.job_id}/retry")
@@ -120,7 +120,7 @@ def test_viewer_retry_returns_403() -> None:
     """Viewer cannot retry jobs (TC-147)."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="failed")
+    _ = store.update_job(record.job_id, status="failed")
     client = _client_with_principal(store, _VIEWER)
 
     response = client.post(f"/jobs/{record.job_id}/retry")
@@ -148,7 +148,7 @@ def test_admin_delete_eval_job_soft_deletes_linked_run() -> None:
         job_type="eval",
         options={"eval_run_id": str(_EVAL_RUN_ID)},
     )
-    store.update_job(record.job_id, eval_run_id=_EVAL_RUN_ID)
+    _ = store.update_job(record.job_id, eval_run_id=_EVAL_RUN_ID)
     soft_deleted: list[UUID] = []
 
     class _EvalClient:
@@ -213,7 +213,7 @@ def test_admin_delete_eval_job_soft_delete_error_returns_502() -> None:
         job_type="eval",
         options={"eval_run_id": str(_EVAL_RUN_ID)},
     )
-    store.update_job(record.job_id, eval_run_id=_EVAL_RUN_ID)
+    _ = store.update_job(record.job_id, eval_run_id=_EVAL_RUN_ID)
 
     class _EvalClient:
         def soft_delete_eval_run(self, run_id: UUID) -> None:
@@ -316,7 +316,7 @@ def test_get_job_includes_ev012_extras() -> None:
         job_type="retag",
         options={"document_id": str(_DOC_ID)},
     )
-    store.update_job(
+    _ = store.update_job(
         record.job_id,
         status="failed",
         error_code="PipelineError",
@@ -346,7 +346,7 @@ def test_job_record_to_schema_maps_cancelled_and_extras() -> None:
         job_type="eval",
         options={"eval_run_id": str(_EVAL_RUN_ID)},
     )
-    store.update_job(
+    _ = store.update_job(
         record.job_id,
         status="cancelled",
         modal_call_id="fc-xyz",
@@ -379,7 +379,7 @@ def test_cancel_terminal_job_returns_409() -> None:
     """Cannot cancel a completed job (409)."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="completed")
+    _ = store.update_job(record.job_id, status="completed")
     client = _client_with_principal(store, _ADMIN)
 
     response = client.post(f"/jobs/{record.job_id}/cancel")
@@ -391,7 +391,7 @@ def test_cancel_invokes_modal_cancel_when_call_id_present() -> None:
     """Best-effort FunctionCall.cancel when modal_call_id is set."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="running", modal_call_id="fc-123")
+    _ = store.update_job(record.job_id, status="running", modal_call_id="fc-123")
     cancelled: list[str] = []
 
     def _cancel(call_id: str) -> None:
@@ -415,7 +415,7 @@ def test_cancel_swallows_modal_cancel_errors() -> None:
     """Modal cancel failures do not block JobStore cancelled status."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="running", modal_call_id="fc-boom")
+    _ = store.update_job(record.job_id, status="running", modal_call_id="fc-boom")
 
     def _cancel(_call_id: str) -> None:
         msg = "modal down"
@@ -439,7 +439,7 @@ def test_retry_running_job_returns_409() -> None:
     """Cannot retry a running job."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="running")
+    _ = store.update_job(record.job_id, status="running")
     client = _client_with_principal(store, _ADMIN)
 
     response = client.post(f"/jobs/{record.job_id}/retry")
@@ -529,7 +529,7 @@ def test_retry_schedules_pipeline_runner_when_injected() -> None:
     """Retry adds background task when pipeline_runner is set."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="failed")
+    _ = store.update_job(record.job_id, status="failed")
     ran: list[UUID] = []
 
     def _runner(job_id: UUID) -> None:
@@ -548,7 +548,7 @@ def test_retry_schedules_pipeline_runner_when_injected() -> None:
 def test_list_jobs_swallows_eval_client_errors() -> None:
     """Eval aggregation errors leave Modal jobs list intact."""
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/a"])
+    _ = store.create_job(urls=["https://example.com/a"])
 
     class _BrokenEval:
         def list_eval_runs(self, *, page_size: int = 100) -> object:

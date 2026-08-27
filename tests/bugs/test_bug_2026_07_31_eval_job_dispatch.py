@@ -86,7 +86,7 @@ def test_run_job_eval_dispatches_to_execute_not_ingest() -> None:
     updated = store.get_job(record.job_id)
     assert updated is not None
     assert updated.status == "completed", (
-        f"expected completed eval job, got {updated.status}: "
+        f"expected completed eval job, got {updated.status}: " +
         f"{updated.error_code} {updated.error_message}"
     )
     assert write.upsert_batches == [], "eval must not call upsert_batch (ingest path)"

@@ -19,7 +19,7 @@ from tests.helpers.json_response import json_object_get, json_str, response_json
 
 _RECIPIENT = "joseph.c.mcg@gmail.com"
 _RESEND_DOMAIN_MESSAGE = (
-    "The vecinita.admin domain is not verified. Please, add and verify your domain "
+    "The vecinita.admin domain is not verified. Please, add and verify your domain " +
     "on https://resend.com/domains"
 )
 

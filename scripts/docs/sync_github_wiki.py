@@ -224,10 +224,10 @@ def write_wiki_tree(
         body = rewrite_markdown_links(body, page.source, link_map)
         target = out_dir / f"{page.wiki}.md"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(body, encoding="utf-8")
+        _ = target.write_text(body, encoding="utf-8")
 
-    (out_dir / "Home.md").write_text(render_home(manifest, pages), encoding="utf-8")
-    (out_dir / "_Sidebar.md").write_text(
+    _ = (out_dir / "Home.md").write_text(render_home(manifest, pages), encoding="utf-8")
+    _ = (out_dir / "_Sidebar.md").write_text(
         render_sidebar(manifest, include_operator=include_operator),
         encoding="utf-8",
     )
@@ -247,20 +247,20 @@ def build_wiki_remote_url(*, repository: str, token: str, actor: str) -> str:
 
 def git_push_wiki(wiki_dir: Path, *, remote_url: str, message: str) -> None:
     env = {"GIT_TERMINAL_PROMPT": "0"}
-    subprocess.run(["git", "init"], cwd=wiki_dir, check=True, env=env)
-    subprocess.run(
+    _ = subprocess.run(["git", "init"], cwd=wiki_dir, check=True, env=env)
+    _ = subprocess.run(
         ["git", "config", "user.name", "github-actions[bot]"], cwd=wiki_dir, check=True, env=env
     )
-    subprocess.run(
+    _ = subprocess.run(
         ["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"],
         cwd=wiki_dir,
         check=True,
         env=env,
     )
-    subprocess.run(
+    _ = subprocess.run(
         ["git", "remote", "add", "origin", remote_url], cwd=wiki_dir, check=True, env=env
     )
-    subprocess.run(["git", "add", "-A"], cwd=wiki_dir, check=True, env=env)
+    _ = subprocess.run(["git", "add", "-A"], cwd=wiki_dir, check=True, env=env)
     status = subprocess.run(
         ["git", "status", "--porcelain"],
         cwd=wiki_dir,
@@ -272,26 +272,28 @@ def git_push_wiki(wiki_dir: Path, *, remote_url: str, message: str) -> None:
     if not status.stdout.strip():
         print("Wiki already up to date — no commit needed.")
         return
-    subprocess.run(["git", "commit", "-m", message], cwd=wiki_dir, check=True, env=env)
-    subprocess.run(
+    _ = subprocess.run(["git", "commit", "-m", message], cwd=wiki_dir, check=True, env=env)
+    _ = subprocess.run(
         ["git", "push", "--force", "origin", "HEAD:master"], cwd=wiki_dir, check=True, env=env
     )
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", type=Path, default=MANIFEST_PATH)
-    parser.add_argument("--out-dir", type=Path, default=REPO_ROOT / ".wiki-build")
-    parser.add_argument(
+    _ = parser.add_argument("--manifest", type=Path, default=MANIFEST_PATH)
+    _ = parser.add_argument("--out-dir", type=Path, default=REPO_ROOT / ".wiki-build")
+    _ = parser.add_argument(
         "--include-operator",
         action=argparse.BooleanOptionalAction,
         default=False,
     )
-    parser.add_argument("--dry-run", action="store_true", help="Build wiki tree only; do not push.")
-    parser.add_argument(
+    _ = parser.add_argument(
+        "--dry-run", action="store_true", help="Build wiki tree only; do not push."
+    )
+    _ = parser.add_argument(
         "--remote-url", default="", help="Wiki git remote (required unless --dry-run)."
     )
-    parser.add_argument("--message", default="Sync docs from repository")
+    _ = parser.add_argument("--message", default="Sync docs from repository")
     return parser.parse_args(argv)
 
 

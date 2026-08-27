@@ -138,12 +138,12 @@ def make_gotrue_handler(  # noqa: C901
                 user["app_metadata"] = body["app_metadata"]
             if "ban_duration" in body:
                 if body["ban_duration"] == "none":
-                    user.pop("banned_until", None)
+                    _ = user.pop("banned_until", None)
                 else:
                     user["banned_until"] = _BANNED_UNTIL
             return httpx.Response(HTTPStatus.OK, json=user)
         if path.startswith("/auth/v1/admin/users/") and method == "DELETE":
-            users.pop(path.rsplit("/", 1)[-1], None)
+            _ = users.pop(path.rsplit("/", 1)[-1], None)
             return httpx.Response(HTTPStatus.OK, json={})
         if path == "/auth/v1/recover" and method == "POST":
             return httpx.Response(HTTPStatus.OK, json={})
@@ -236,6 +236,6 @@ def build_user_mgmt_stack(monkeypatch: pytest.MonkeyPatch) -> Iterator[UserMgmtS
 
     with engine.begin() as conn:
         for entity_id in audited_entity_ids:
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": entity_id})
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": entity_id})
 
     reset_auth_config_for_tests()

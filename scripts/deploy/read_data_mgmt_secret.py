@@ -34,7 +34,7 @@ def main() -> None:
     root = Path(__file__).resolve().parents[2]
     out = root / ".tmp" / "vecinita-data-management-secret.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    _ = out.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     os.chmod(out, 0o600)
     missing = [k for k in KEYS if not data.get(k)]
     modal_len = len(data.get("VECINITA_MODAL_PROXY_KEY", ""))

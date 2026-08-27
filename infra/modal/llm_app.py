@@ -130,8 +130,8 @@ def _llm_engine_kwargs(*, max_model_len: int, model: str) -> dict[str, object]:
     }
     if "AWQ" in model.upper() or model.endswith("-awq"):
         kwargs["quantization"] = "awq"
-        kwargs.pop("dtype", None)
-        kwargs.pop("hf_overrides", None)
+        _ = kwargs.pop("dtype", None)
+        _ = kwargs.pop("hf_overrides", None)
     if not model.startswith("/"):
         kwargs["download_dir"] = "/models"
     return kwargs
@@ -157,7 +157,7 @@ def _shutdown_vllm_engine(llm: object | None) -> None:
             if engine is not None:
                 shutdown = getattr(engine, "shutdown", None)
                 if callable(shutdown):
-                    shutdown()
+                    _ = shutdown()
         except Exception:
             pass
         del llm
@@ -285,7 +285,7 @@ def _download_hf_model(model_id: str) -> Path:
     hf_repo = resolve_hf_repo(model_id)
     dest = _local_repo_path(model_id)
     dest.mkdir(parents=True, exist_ok=True)
-    snapshot_download(repo_id=hf_repo, local_dir=str(dest))
+    _ = snapshot_download(repo_id=hf_repo, local_dir=str(dest))
     return dest
 
 
@@ -366,7 +366,7 @@ def stage_llm_weights() -> str:
 )
 def stage_default_model() -> str:
     """One-shot: stage the default playground model tag (ADR-037; replaces ollama_app)."""
-    _download_hf_model(DEFAULT_PLAYGROUND_MODEL_ID)
+    _ = _download_hf_model(DEFAULT_PLAYGROUND_MODEL_ID)
     _mark_model_available(DEFAULT_PLAYGROUND_MODEL_ID)
     return f"staged {DEFAULT_PLAYGROUND_MODEL_ID}"
 
@@ -380,7 +380,7 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     """Background HF download for a playground model tag (replaces vecinita-ollama pull)."""
     pull_jobs[job_id] = {"model_id": model_id, "status": "pulling"}
     try:
-        _download_hf_model(model_id)
+        _ = _download_hf_model(model_id)
     except (ValueError, OSError) as exc:
         pull_jobs[job_id] = {"model_id": model_id, "status": "failed", "error": str(exc)}
         raise
@@ -507,7 +507,7 @@ def fastapi_app():
         except ValueError as exc:
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_REQUEST)
         job_id = str(uuid.uuid4())
-        pull_model_job.spawn(job_id, payload.model_id)
+        _ = pull_model_job.spawn(job_id, payload.model_id)
         _register_pending_model(payload.model_id)
         return JSONResponse(
             {

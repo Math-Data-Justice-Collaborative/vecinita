@@ -164,7 +164,7 @@ def test_run_job_dispatches_eval(
     def _eval(job_id: UUID, **kwargs: object) -> None:
         _ = kwargs
         called.append(job_id)
-        store.update_job(job_id, status="completed")
+        _ = store.update_job(job_id, status="completed")
 
     monkeypatch.setattr(
         "vecinita_data_management_backend.jobs.run_eval_job",
@@ -244,7 +244,7 @@ def test_run_job_skips_failure_update_when_job_already_terminal(
     """Test run job skips failure update when job already terminal."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"])
-    store.update_job(record.job_id, status="completed")
+    _ = store.update_job(record.job_id, status="completed")
 
     def _fail(_job_id: UUID, **_kwargs: object) -> Never:
         """Fail."""
@@ -304,7 +304,7 @@ def test_run_job_rejects_unknown_job_type() -> None:
     """Unknown job_type raises ValueError from the dispatcher."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/page"], job_type="ingest")
-    store.update_job(record.job_id, status="queued")
+    _ = store.update_job(record.job_id, status="queued")
     # Bypass create_job validation by mutating the in-memory record.
     mutated = store.get_job(record.job_id)
     assert mutated is not None
@@ -327,7 +327,7 @@ def test_run_job_audit_emit_failure_is_swallowed(
     record = store.create_job(urls=["https://example.com/page"])
 
     def _ok(_job_id: UUID, **_kwargs: object) -> None:
-        store.update_job(_job_id, status="completed")
+        _ = store.update_job(_job_id, status="completed")
 
     class _AuditFailWrite(_StubWriteClient):
         def post_audit_event(self, event: object) -> None:
@@ -359,7 +359,7 @@ def test_run_job_emits_failed_audit_when_pipeline_already_failed(
     events: list[str] = []
 
     def _fail_marked(_job_id: UUID, **_kwargs: object) -> Never:
-        store.update_job(
+        _ = store.update_job(
             _job_id,
             status="failed",
             error_code="Boom",

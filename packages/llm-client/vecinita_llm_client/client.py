@@ -149,7 +149,7 @@ class LlmClient:
     def warm(self) -> None:
         """Best-effort POST ``/warm`` to preload the model and reduce cold-start latency."""
         body = {"model_id": self._model_id} if self._model_id else {}
-        self._client.post("/warm", json=body, headers=self._request_headers())
+        _ = self._client.post("/warm", json=body, headers=self._request_headers())
 
     def generate_stream(
         self,

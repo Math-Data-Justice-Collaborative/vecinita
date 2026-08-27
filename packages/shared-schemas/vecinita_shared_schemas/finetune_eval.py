@@ -15,7 +15,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 HUMAN_JUDGMENT_SUMMARY = (
-    "Human judgment required — no automated promote (RD-338 / AC-FT4). "
+    "Human judgment required — no automated promote (RD-338 / AC-FT4). " +
     "Promote only when the operator judges the adapter better than base."
 )
 

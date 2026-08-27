@@ -111,11 +111,11 @@ def _peft_sft_train(
     materialize_adapter_config(adapter_dir, base_model_id=base_model_id)
     if model_dir is None:
         _logger.warning(
-            "base model weights missing under %s — wrote adapter_config only "
+            "base model weights missing under %s — wrote adapter_config only " +
             "(stage Qwen via vecinita-llm volume before production FT)",
             base_root,
         )
-        (adapter_dir / "adapter_model.safetensors").write_bytes(b"")
+        _ = (adapter_dir / "adapter_model.safetensors").write_bytes(b"")
         return
 
     # Lazy GPU imports — keep module importable in unit tests without CUDA wheels.
@@ -147,8 +147,8 @@ def _peft_sft_train(
     rows: list[dict[str, str]] = []
     for pair in pairs:
         text = (
-            f"### Instruction:\n{pair.instruction}\n\n"
-            f"### Input:\n{pair.input}\n\n"
+            f"### Instruction:\n{pair.instruction}\n\n" +
+            f"### Input:\n{pair.input}\n\n" +
             f"### Response:\n{pair.output}"
         )
         rows.append({"text": text})

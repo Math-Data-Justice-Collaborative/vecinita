@@ -15,7 +15,7 @@ ARGPARSE_USAGE_EXIT = 2
 def test_ci_invocation_with_include_operator_equals_false_exits_2() -> None:
     """Matches Publish Wiki CI failure before fix (run 28749720275)."""
     with pytest.raises(SystemExit) as exc_info:
-        parse_args(["--dry-run", "--include-operator=false"])
+        _ = parse_args(["--dry-run", "--include-operator=false"])
     assert exc_info.value.code == ARGPARSE_USAGE_EXIT
 
 

@@ -52,10 +52,10 @@ class _MockLlmClient:
 def tag_ask_client() -> TestClient:
     """Tag ask client."""
     url = _database_url()
-    load_seed_tags(database_url=url)
-    load_tagged_corpus(database_url=url)
+    _ = load_seed_tags(database_url=url)
+    _ = load_tagged_corpus(database_url=url)
     clear_embeddings(database_url=url)
-    attach_embeddings(
+    _ = attach_embeddings(
         database_url=url,
         match_substrings={"Housing Rights": 0, "Legal Aid": 1},
         default_index=1,

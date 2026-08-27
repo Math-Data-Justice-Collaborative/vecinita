@@ -81,9 +81,9 @@ def _build_translate_prompt(
     target_name = "Spanish" if target_locale == "es" else "English"
     source_name = "Spanish" if source_locale == "es" else "English"
     system = (
-        "You translate community resource text for a bilingual neighborhood help site. "
-        "Preserve program names, addresses, phone numbers, and URLs exactly. "
-        "Do not add personal data or invented details. "
+        "You translate community resource text for a bilingual neighborhood help site. " +
+        "Preserve program names, addresses, phone numbers, and URLs exactly. " +
+        "Do not add personal data or invented details. " +
         f"Return only the {target_name} translation with no preamble."
     )
     user = f"Translate this {source_name} excerpt to {target_name}:\n\n{text}"

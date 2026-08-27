@@ -58,4 +58,4 @@ def test_translate_chunk_empty_response_raises() -> None:
     client = LlmTranslateClient(_StubLlm("   "))  # type: ignore[arg-type]
 
     with pytest.raises(LlmTranslateClientError, match="empty"):
-        client.translate_chunk("Hello", source_locale="en", target_locale="es")
+        _ = client.translate_chunk("Hello", source_locale="en", target_locale="es")

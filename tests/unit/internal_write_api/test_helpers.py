@@ -65,7 +65,7 @@ def test_row_datetime_returns_datetime() -> None:
 def test_row_datetime_raises_on_wrong_type() -> None:
     """Test row datetime raises on wrong type."""
     with pytest.raises(TypeError, match="Expected datetime"):
-        _row_datetime({"created_at": "not-a-datetime"}, "created_at")
+        _ = _row_datetime({"created_at": "not-a-datetime"}, "created_at")
 
 
 def test_row_datetime_optional_returns_none() -> None:

@@ -28,7 +28,7 @@ _VOCAB = [
     SeedTag(slug="housing", label_en="Housing", label_es="Vivienda"),
 ]
 _BODY = (
-    "<html><head><title>OK</title></head>"
+    "<html><head><title>OK</title></head>" +
     "<body><p>Good community resource text for chunking windows.</p></body></html>"
 )
 
@@ -120,7 +120,7 @@ def test_fetch_url_drive_auth_shell_raises_drive_fetch_error() -> None:
         return httpx.Response(
             200,
             text=(
-                "<html><head><title>Google Drive</title></head>"
+                "<html><head><title>Google Drive</title></head>" +
                 "<body><p>Loading…</p><p>Sign in</p></body></html>"
             ),
         )
@@ -131,7 +131,7 @@ def test_fetch_url_drive_auth_shell_raises_drive_fetch_error() -> None:
         follow_redirects=True,
     )
     with pytest.raises(DriveFetchError, match=r"(?i)auth|sign.?in|loading") as exc_info:
-        fetch_url("https://drive.google.com/file/d/abc123/view", client=client)
+        _ = fetch_url("https://drive.google.com/file/d/abc123/view", client=client)
     assert exc_info.value.error_code == "drive_auth_required"
 
 
@@ -265,7 +265,7 @@ def test_rewrite_drive_presentation_and_passthrough() -> None:
 def test_rewrite_drive_folder_raises_unsupported() -> None:
     """Folder share links are unsupported."""
     with pytest.raises(DriveFetchError) as exc_info:
-        rewrite_drive_fetch_url("https://drive.google.com/drive/folders/FOLDERID")
+        _ = rewrite_drive_fetch_url("https://drive.google.com/drive/folders/FOLDERID")
     assert exc_info.value.error_code == "drive_unsupported"
 
 
@@ -310,7 +310,7 @@ def test_fetch_url_drive_pdf_success_and_empty() -> None:
         follow_redirects=True,
     )
     with pytest.raises(DriveFetchError) as exc_info:
-        fetch_url("https://drive.google.com/file/d/EMPTY/view", client=empty_client)
+        _ = fetch_url("https://drive.google.com/file/d/EMPTY/view", client=empty_client)
     assert exc_info.value.error_code == "drive_unsupported"
 
 
@@ -330,7 +330,7 @@ def test_fetch_url_drive_empty_text_export_raises() -> None:
         follow_redirects=True,
     )
     with pytest.raises(DriveFetchError) as exc_info:
-        fetch_url("https://docs.google.com/spreadsheets/d/SHEET/edit", client=client)
+        _ = fetch_url("https://docs.google.com/spreadsheets/d/SHEET/edit", client=client)
     assert exc_info.value.error_code == "drive_auth_required"
 
 

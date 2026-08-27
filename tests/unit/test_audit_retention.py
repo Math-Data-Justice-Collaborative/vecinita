@@ -53,7 +53,7 @@ def seed_old_events(engine: Engine) -> Iterator[None]:
             request_id=req_id,
             payload={"test": "old_event_1"},
         )
-        conn.execute(
+        _ = conn.execute(
             text("UPDATE audit_log SET created_at = :ts WHERE payload::text LIKE :pat"),
             {"ts": old_ts, "pat": "%old_event_1%"},
         )
@@ -66,7 +66,7 @@ def seed_old_events(engine: Engine) -> Iterator[None]:
             request_id=req_id,
             payload={"test": "old_event_2"},
         )
-        conn.execute(
+        _ = conn.execute(
             text("UPDATE audit_log SET created_at = :ts WHERE payload::text LIKE :pat"),
             {"ts": old_ts, "pat": "%old_event_2%"},
         )
@@ -79,7 +79,7 @@ def seed_old_events(engine: Engine) -> Iterator[None]:
             request_id=req_id,
             payload={"test": "recent_event"},
         )
-        conn.execute(
+        _ = conn.execute(
             text("UPDATE audit_log SET created_at = :ts WHERE payload::text LIKE :pat"),
             {"ts": recent_ts, "pat": "%recent_event%"},
         )
@@ -87,9 +87,9 @@ def seed_old_events(engine: Engine) -> Iterator[None]:
     yield
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
-                "DELETE FROM audit_log WHERE payload::text LIKE '%old_event%' "
+                "DELETE FROM audit_log WHERE payload::text LIKE '%old_event%' " +  # noqa: S608
                 "OR payload::text LIKE '%recent_event%'"
             )
         )

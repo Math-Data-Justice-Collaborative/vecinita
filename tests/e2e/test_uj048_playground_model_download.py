@@ -55,7 +55,7 @@ def playground_download_e2e_client(
     monkeypatch.setenv("DATABASE_URL", database_url)
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
-    seed_eval_corpus(database_url=database_url)
+    _ = seed_eval_corpus(database_url=database_url)
     mock_client = MockPlaygroundModelsClient()
     app = create_app(
         eval_embed_fn=eval_embed_fn,

@@ -34,7 +34,7 @@ def test_modal_data_mgmt_asgi_does_not_use_edge_proxy_auth() -> None:
     """Browser CORS preflight cannot satisfy Modal requires_proxy_auth (see deploy-report H4)."""
     source = _MODAL_APP.read_text(encoding="utf-8")
     assert "requires_proxy_auth=True" not in source, (
-        "data_management_app.py must not use requires_proxy_auth=True; "
+        "data_management_app.py must not use requires_proxy_auth=True; " +
         "use FastAPI Modal-Key check so OPTIONS reaches CORSMiddleware"
     )
     assert re.search(r"requires_proxy_auth\s*=\s*False", source), (

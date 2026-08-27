@@ -44,7 +44,7 @@ def test_mapping_row_accepts_mapping() -> None:
 def test_mapping_row_rejects_non_mapping() -> None:
     """Test mapping row rejects non mapping."""
     with pytest.raises(TypeError, match="mapping"):
-        mapping_row(["not", "a", "mapping"])
+        _ = mapping_row(["not", "a", "mapping"])
 
 
 def test_row_str_optional_returns_none_for_null() -> None:
@@ -102,7 +102,7 @@ def test_sqlalchemy_scalar_one_returns_value() -> None:
 def test_sqlalchemy_scalar_one_rejects_invalid_result() -> None:
     """Test sqlalchemy scalar one rejects invalid result."""
     with pytest.raises(TypeError, match="scalar_one"):
-        sqlalchemy_scalar_one(object())
+        _ = sqlalchemy_scalar_one(object())
 
 
 def test_row_str_returns_string_value() -> None:
@@ -139,7 +139,7 @@ def test_row_datetime_returns_datetime() -> None:
 def test_row_datetime_raises_on_invalid_type() -> None:
     """row_datetime rejects non-datetime column values."""
     with pytest.raises(TypeError, match="Expected datetime"):
-        row_datetime({"created_at": "bad"}, "created_at")
+        _ = row_datetime({"created_at": "bad"}, "created_at")
 
 
 def test_row_datetime_optional_returns_none_or_datetime() -> None:

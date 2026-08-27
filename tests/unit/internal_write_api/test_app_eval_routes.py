@@ -270,11 +270,11 @@ def test_get_eval_run_route_returns_detail(
         assert json_str(body, "status") == "pending"
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
                 {"id": created.response.run_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_runs WHERE id = :id"),
                 {"id": created.response.run_id},
             )
@@ -619,7 +619,7 @@ def test_eval_config_preset_routes_with_admin_jwt(
         reset_auth_config_for_tests()
         if preset_id is not None:
             with engine.begin() as conn:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )
@@ -666,7 +666,7 @@ def test_ingest_audit_event_service_key(engine: Engine, monkeypatch: pytest.Monk
     finally:
         reset_auth_config_for_tests()
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )
@@ -726,7 +726,7 @@ def test_get_active_rag_config_returns_404_when_empty(
     """GET /rag/config/active returns 404 when no production config is active."""
     client, _owner_id, headers, _private_key = _admin_jwt_client(monkeypatch, role="admin")
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
     try:
         response = client.get("/internal/v1/rag/config/active", headers=headers)
         assert response.status_code == HTTPStatus.NOT_FOUND
@@ -807,7 +807,7 @@ def test_create_eval_run_returns_403_for_private_preset(
         reset_auth_config_for_tests()
         if preset_id is not None:
             with engine.begin() as conn:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )
@@ -859,7 +859,7 @@ def test_eval_config_preset_routes_return_403_for_private_preset(
         reset_auth_config_for_tests()
         if preset_id is not None:
             with engine.begin() as conn:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )

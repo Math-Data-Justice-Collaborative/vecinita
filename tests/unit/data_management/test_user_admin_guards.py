@@ -119,7 +119,7 @@ def test_disable_last_admin_blocked() -> None:
         admins=[_user_json(_OTHER_ADMIN, "admin")],
     )
     with pytest.raises(LockoutError) as excinfo:
-        svc.disable_user(actor_id=_ACTOR, target_id=_OTHER_ADMIN)
+        _ = svc.disable_user(actor_id=_ACTOR, target_id=_OTHER_ADMIN)
     assert excinfo.value.code == "last_admin"
 
 
@@ -130,7 +130,7 @@ def test_demote_self_blocked() -> None:
         admins=[_user_json(_ACTOR, "admin"), _user_json(_OTHER_ADMIN, "admin")],
     )
     with pytest.raises(LockoutError) as excinfo:
-        svc.change_role(actor_id=_ACTOR, target_id=_ACTOR, new_role="viewer")
+        _ = svc.change_role(actor_id=_ACTOR, target_id=_ACTOR, new_role="viewer")
     assert excinfo.value.code == "self_action"
 
 
@@ -141,7 +141,7 @@ def test_demote_last_admin_blocked() -> None:
         admins=[_user_json(_OTHER_ADMIN, "admin")],
     )
     with pytest.raises(LockoutError) as excinfo:
-        svc.change_role(actor_id=_ACTOR, target_id=_OTHER_ADMIN, new_role="viewer")
+        _ = svc.change_role(actor_id=_ACTOR, target_id=_OTHER_ADMIN, new_role="viewer")
     assert excinfo.value.code == "last_admin"
 
 

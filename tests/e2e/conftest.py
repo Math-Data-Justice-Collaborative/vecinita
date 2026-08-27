@@ -94,7 +94,7 @@ def seeded_document(engine: Engine) -> Iterator[UUID]:
             )
         )
         chunk_id = UUID(str(chunk_id_raw))
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO embeddings (chunk_id, embedding)
@@ -105,9 +105,11 @@ def seeded_document(engine: Engine) -> Iterator[UUID]:
         )
     yield doc_id
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+        _ = conn.execute(
+            text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id}
+        )
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 @pytest.fixture

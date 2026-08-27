@@ -51,7 +51,7 @@ def test_uj044_unified_jobs_list_includes_eval_run_with_status() -> None:
     """TC-124: GET /jobs merges DO eval runs with job_type=eval and live status."""
     eval_run_id = uuid4()
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/ingest"])
+    _ = store.create_job(urls=["https://example.com/ingest"])
     client = TestClient(
         create_app(
             store=store,
@@ -78,13 +78,13 @@ def test_uj044_modal_native_eval_job_on_jobs_list(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
     eval_run_id = uuid4()
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/ingest"])
+    _ = store.create_job(urls=["https://example.com/ingest"])
     eval_record = store.create_job(
         urls=[],
         job_type="eval",
         options={"eval_run_id": str(eval_run_id)},
     )
-    store.update_job(eval_record.job_id, status="running", eval_run_id=eval_run_id)
+    _ = store.update_job(eval_record.job_id, status="running", eval_run_id=eval_run_id)
     app = create_app(store=store, require_proxy_auth=False)
     app.dependency_overrides[get_principal] = lambda: _ADMIN
     client = TestClient(app)

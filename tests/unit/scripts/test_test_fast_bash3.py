@@ -47,20 +47,20 @@ def test_test_fast_membership_helpers_on_bin_bash(tmp_path: Path) -> None:
         pytest.skip("bash not available")
 
     harness = tmp_path / "run_test_fast.sh"
-    harness.write_text(
-        "#!/usr/bin/env bash\n"
-        "set -euo pipefail\n"
-        'list_has() { local n="$1"; local h="${2-}"; '
-        '[[ -n "$h" ]] || return 1; printf \'%s\\n\' "$h" | grep -Fxq -- "$n"; }\n'
-        "list_add() {\n"
-        '  local n="$1"; local h="${2-}"\n'
-        '  if list_has "$n" "$h"; then printf \'%s\' "$h"; return 0; fi\n'
-        '  if [[ -n "$h" ]]; then printf \'%s\\n%s\' "$h" "$n"; else printf \'%s\' "$n"; fi\n'
-        "}\n"
-        'PY_PATHS=""\n'
-        'PY_PATHS="$(list_add tests/unit/scripts "$PY_PATHS")"\n'
-        'PY_PATHS="$(list_add tests/unit/scripts "$PY_PATHS")"\n'
-        'echo "paths=$PY_PATHS"\n'
+    _ = harness.write_text(
+        "#!/usr/bin/env bash\n" +
+        "set -euo pipefail\n" +
+        'list_has() { local n="$1"; local h="${2-}"; ' +
+        '[[ -n "$h" ]] || return 1; printf \'%s\\n\' "$h" | grep -Fxq -- "$n"; }\n' +
+        "list_add() {\n" +
+        '  local n="$1"; local h="${2-}"\n' +
+        '  if list_has "$n" "$h"; then printf \'%s\' "$h"; return 0; fi\n' +
+        '  if [[ -n "$h" ]]; then printf \'%s\\n%s\' "$h" "$n"; else printf \'%s\' "$n"; fi\n' +
+        "}\n" +
+        'PY_PATHS=""\n' +
+        'PY_PATHS="$(list_add tests/unit/scripts "$PY_PATHS")"\n' +
+        'PY_PATHS="$(list_add tests/unit/scripts "$PY_PATHS")"\n' +
+        'echo "paths=$PY_PATHS"\n' +
         'echo "test-fast: no testable source changes; skipping"\n',
         encoding="utf-8",
     )

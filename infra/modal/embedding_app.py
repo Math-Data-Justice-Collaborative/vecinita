@@ -168,7 +168,7 @@ class EmbeddingService:
     @modal.enter(snap=True)
     def load_model(self) -> None:
         self._backend = _load_backend("/models")
-        self._backend.embed(["warmup"])
+        _ = self._backend.embed(["warmup"])
 
     @modal.method()
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
@@ -203,9 +203,9 @@ def embedding_api():
             },
         )
 
-    async def warm(_: Request) -> JSONResponse:
+    async def warm(_request: Request) -> JSONResponse:
         """Boot EmbeddingService during user think-time (S001 T11)."""
-        service.embed_texts.remote(["warmup"])
+        _ = service.embed_texts.remote(["warmup"])
         return JSONResponse({"status": "ok"})
 
     async def embed(request: Request) -> JSONResponse:

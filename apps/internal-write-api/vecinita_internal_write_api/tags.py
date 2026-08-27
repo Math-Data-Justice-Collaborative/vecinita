@@ -45,7 +45,7 @@ def replace_document_tags(
     language: str,
 ) -> None:
     """Replace document-level tags; upsert tag rows by slug and language."""
-    conn.execute(
+    _ = conn.execute(
         text("DELETE FROM document_tags WHERE document_id = :document_id"),
         {"document_id": document_id},
     )
@@ -67,7 +67,7 @@ def replace_document_tags(
             )
         )
         source = tag.source or "llm"
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO document_tags (document_id, tag_id, source)
@@ -88,7 +88,7 @@ def replace_chunk_tags(
     language: str,
 ) -> None:
     """Replace chunk-level tags; upsert tag rows by slug and language."""
-    conn.execute(
+    _ = conn.execute(
         text("DELETE FROM chunk_tags WHERE chunk_id = :chunk_id"),
         {"chunk_id": chunk_id},
     )
@@ -110,7 +110,7 @@ def replace_chunk_tags(
             )
         )
         source = tag.source or "llm"
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO chunk_tags (chunk_id, tag_id, source)

@@ -110,7 +110,7 @@ def test_health_all_uses_health_suffix_url(
         return httpx.Response(200, json={"status": "ok"})
 
     with patch("vecinita_internal_write_api.health_service.httpx.get", side_effect=_mock_get):
-        write_client.get("/internal/v1/health/all", headers=auth_headers())
+        _ = write_client.get("/internal/v1/health/all", headers=auth_headers())
 
     assert "http://chat-rag:8000/health" in seen
 

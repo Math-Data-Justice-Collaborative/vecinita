@@ -33,12 +33,12 @@ _audit_actor: ContextVar[tuple[UUID | None, str | None]] = ContextVar(
 
 def bind_audit_actor(*, actor_id: UUID | None, actor_role: str | None) -> None:
     """Set the actor for audit rows emitted in the current request (write routes)."""
-    _audit_actor.set((actor_id, actor_role))
+    _ = _audit_actor.set((actor_id, actor_role))
 
 
 def clear_audit_actor() -> None:
     """Clear request-scoped audit actor attribution."""
-    _audit_actor.set((None, None))
+    _ = _audit_actor.set((None, None))
 
 
 def emit_audit_event(  # noqa: PLR0913  # audit rows need explicit attribution fields
@@ -55,12 +55,12 @@ def emit_audit_event(  # noqa: PLR0913  # audit rows need explicit attribution f
     """Insert an audit_log row within the caller's transaction."""
     if actor_id is None and actor_role is None:
         actor_id, actor_role = _audit_actor.get()
-    conn.execute(
+    _ = conn.execute(
         text(
-            "INSERT INTO audit_log "
-            "(event_type, entity_type, entity_id, request_id, payload, actor_id, actor_role) "
-            "VALUES "
-            "(:event_type, :entity_type, :entity_id, :request_id, "
+            "INSERT INTO audit_log " +
+            "(event_type, entity_type, entity_id, request_id, payload, actor_id, actor_role) " +
+            "VALUES " +
+            "(:event_type, :entity_type, :entity_id, :request_id, " +
             "CAST(:payload AS jsonb), :actor_id, :actor_role)"
         ),
         {
@@ -89,7 +89,7 @@ def create_document_version(
             "object",
             conn.execute(
                 text(
-                    "SELECT COALESCE(MAX(version_number), 0) "
+                    "SELECT COALESCE(MAX(version_number), 0) " +
                     "FROM document_versions WHERE document_id = :doc_id"
                 ),
                 {"doc_id": document_id},
@@ -99,10 +99,10 @@ def create_document_version(
 
     next_version = current_max + 1
 
-    conn.execute(
+    _ = conn.execute(
         text(
-            "INSERT INTO document_versions "
-            "(document_id, version_number, title, language, tags_snapshot) "
+            "INSERT INTO document_versions " +
+            "(document_id, version_number, title, language, tags_snapshot) " +
             "VALUES (:doc_id, :ver, :title, :lang, CAST(:tags AS jsonb))"
         ),
         {

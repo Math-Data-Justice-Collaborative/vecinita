@@ -48,7 +48,7 @@ def chat_anonymous_client() -> TestClient:
         "DATABASE_URL",
         "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
     )
-    seed_corpus_with_embeddings(
+    _ = seed_corpus_with_embeddings(
         database_url=db_url,
         match_substrings={"Food pantry": 0},
         default_index=0,

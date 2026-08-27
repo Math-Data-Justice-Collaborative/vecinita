@@ -245,7 +245,7 @@ def process_file(path: Path) -> bool:
     text = ensure_tc_imports(text)
 
     if text != original:
-        path.write_text(text, encoding="utf-8")
+        _ = path.write_text(text, encoding="utf-8")
         return True
     return False
 

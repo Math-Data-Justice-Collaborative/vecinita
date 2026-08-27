@@ -23,7 +23,7 @@ class DocumentFixtureData(TypedDict):
 
 
 def write_fixture_types() -> None:
-    (ROOT / "tests/helpers/fixture_types.py").write_text(FIXTURE_TYPES, encoding="utf-8")
+    _ = (ROOT / "tests/helpers/fixture_types.py").write_text(FIXTURE_TYPES, encoding="utf-8")
 
 
 def patch_file(rel: str, old: str, new: str) -> None:
@@ -31,7 +31,7 @@ def patch_file(rel: str, old: str, new: str) -> None:
     text = p.read_text(encoding="utf-8")
     if old not in text:
         return
-    p.write_text(text.replace(old, new, 1), encoding="utf-8")
+    _ = p.write_text(text.replace(old, new, 1), encoding="utf-8")
 
 
 def main() -> None:
@@ -56,8 +56,8 @@ def main() -> None:
     patch_file(
         "tests/integration/test_audit_emission.py",
         '        assert any(t["slug"] == "housing" for t in version_row["tags_snapshot"])',
-        '        tags_snapshot_raw: object = cast("object", version_row["tags_snapshot"])\n'
-        "        tags_snapshot = json_object_items(tags_snapshot_raw)\n"
+        '        tags_snapshot_raw: object = cast("object", version_row["tags_snapshot"])\n' +
+        "        tags_snapshot = json_object_items(tags_snapshot_raw)\n" +
         '        assert any(json_str(tag, "slug") == "housing" for tag in tags_snapshot)',
     )
 
@@ -70,11 +70,11 @@ def main() -> None:
     patch_file(
         "tests/integration/test_seed.py",
         "pytestmark = pytest.mark.integration\n\n\n@pytest.fixture",
-        "pytestmark = pytest.mark.integration\n\n\n"
-        "def _database_url() -> str:\n"
-        "    return os.environ.get(\n"
-        '        "DATABASE_URL",\n'
-        '        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",\n'
+        "pytestmark = pytest.mark.integration\n\n\n" +
+        "def _database_url() -> str:\n" +
+        "    return os.environ.get(\n" +
+        '        "DATABASE_URL",\n' +
+        '        "postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",\n' +
         "    )\n\n\n@pytest.fixture",
     )
 
@@ -87,15 +87,15 @@ def main() -> None:
     patch_file(
         "tests/e2e/test_uj007_reject_identity.py",
         "pytestmark = pytest.mark.e2e\n\n\n@pytest.fixture",
-        "pytestmark = pytest.mark.e2e\n\n\n"
-        "class _E2eMockLlmClient:\n"
-        "    def generate(self, prompt: str, **kwargs: object) -> str:\n"
-        "        _ = (prompt, kwargs)\n"
-        '        return "ok"\n\n'
-        "    def generate_stream(self, prompt: str, **kwargs: object):\n"
-        "        _ = (prompt, kwargs)\n"
-        '        yield "ok"\n\n'
-        "    def close(self) -> None:\n"
+        "pytestmark = pytest.mark.e2e\n\n\n" +
+        "class _E2eMockLlmClient:\n" +
+        "    def generate(self, prompt: str, **kwargs: object) -> str:\n" +
+        "        _ = (prompt, kwargs)\n" +
+        '        return "ok"\n\n' +
+        "    def generate_stream(self, prompt: str, **kwargs: object):\n" +
+        "        _ = (prompt, kwargs)\n" +
+        '        yield "ok"\n\n' +
+        "    def close(self) -> None:\n" +
         "        return None\n\n\n@pytest.fixture",
     )
     patch_file(
@@ -117,7 +117,7 @@ def main() -> None:
         )
 
     # modal repo root
-    (ROOT / "tests/bugs/test_bug_2026_05_22_modal_data_mgmt_repo_root.py").write_text(
+    _ = (ROOT / "tests/bugs/test_bug_2026_05_22_modal_data_mgmt_repo_root.py").write_text(
         '''"""BUG-2026-05-22: Modal data-mgmt ASGI must import when mounted at /root/data_management_app.py."""
 
 from __future__ import annotations

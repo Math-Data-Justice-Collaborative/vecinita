@@ -47,7 +47,7 @@ def test_invite_creates_invited_viewer_with_audit(user_mgmt_stack: UserMgmtStack
         row = (
             conn.execute(
                 text(
-                    "SELECT event_type, actor_id, actor_role, payload "
+                    "SELECT event_type, actor_id, actor_role, payload " +
                     "FROM audit_log WHERE entity_id = :id"
                 ),
                 {"id": entity_id},

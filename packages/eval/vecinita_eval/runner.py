@@ -230,12 +230,12 @@ def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
                 if scorer is not None:
                     faithfulness = scorer.score(row=row, answer=answer, context=context)
                 elif hasattr(judge, "faithfulness"):
-                    faithfulness = judge.faithfulness(  # pyright: ignore[reportUnknownMemberType]
+                    faithfulness = judge.faithfulness(
                         question=row.question,
                         answer=answer,
                         context=context,
                     )
-            answer_relevancy = judge.answer_relevancy(  # pyright: ignore[reportUnknownMemberType]
+            answer_relevancy = judge.answer_relevancy(
                 question=row.question,
                 answer=answer,
                 context=context,

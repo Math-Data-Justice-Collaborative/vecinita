@@ -130,7 +130,7 @@ def build_config_grid(  # noqa: PLR0913
                                     }
                                 )
                                 label = (
-                                    f"{model_id}|p={prompt.name}|t={temperature}|k={top_k}|"
+                                    f"{model_id}|p={prompt.name}|t={temperature}|k={top_k}|" +
                                     f"mt={max_tokens}|mrs={min_score}|jt={judge_temperature}"
                                 )
                                 cells.append(

@@ -38,7 +38,7 @@ def _load_harness() -> _SpikeF45ShipGateMod:
     existing = sys.modules.get(name)
     if existing is not None and hasattr(existing, "SHIP_RELEVANCY_FLOOR"):
         return cast("_SpikeF45ShipGateMod", existing)
-    sys.modules.pop(name, None)
+    _ = sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, _HARNESS_SCRIPT)
     assert spec is not None
     assert spec.loader is not None
@@ -47,7 +47,7 @@ def _load_harness() -> _SpikeF45ShipGateMod:
     try:
         spec.loader.exec_module(mod)
     except Exception:
-        sys.modules.pop(name, None)
+        _ = sys.modules.pop(name, None)
         raise
     return cast("_SpikeF45ShipGateMod", mod)
 

@@ -31,8 +31,8 @@ def _database_url() -> str:
 @pytest.fixture
 def browse_client() -> TestClient:
     """Load tagged corpus fixtures and return a browse API TestClient."""
-    load_seed_tags(database_url=_database_url())
-    load_tagged_corpus(database_url=_database_url())
+    _ = load_seed_tags(database_url=_database_url())
+    _ = load_tagged_corpus(database_url=_database_url())
     settings = ChatRagSettings(
         database_url=_database_url(),
         top_k=5,

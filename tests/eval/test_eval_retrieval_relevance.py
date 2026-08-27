@@ -36,7 +36,7 @@ def test_eval_retrieval_relevance_at_least_eighty_percent(eval_db: str) -> None:
 
     rate = hits / len(scored_rows)
     assert rate >= _RELEVANCE_THRESHOLD, (
-        f"retrieval relevance {rate:.0%} below {_RELEVANCE_THRESHOLD:.0%} "
+        f"retrieval relevance {rate:.0%} below {_RELEVANCE_THRESHOLD:.0%} " +
         f"({hits}/{len(scored_rows)} scored rows passed)"
     )
 

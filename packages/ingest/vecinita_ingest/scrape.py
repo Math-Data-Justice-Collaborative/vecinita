@@ -29,13 +29,13 @@ _BOILERPLATE_RE: Final[re.Pattern[str]] = re.compile(
 # Browser-like default so community hosts that block empty/bot UA may respond (#243).
 # Override with VECINITA_SCRAPE_USER_AGENT (config-spec).
 DEFAULT_SCRAPE_USER_AGENT: Final[str] = (
-    "Mozilla/5.0 (compatible; VecinitaBot/1.0; +https://github.com/"
-    "Math-Data-Justice-Collaborative/vecinita) AppleWebKit/537.36 "
+    "Mozilla/5.0 (compatible; VecinitaBot/1.0; +https://github.com/" +
+    "Math-Data-Justice-Collaborative/vecinita) AppleWebKit/537.36 " +
     "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 )
 _HTTP_FORBIDDEN: Final[int] = 403
 _FALLBACK_SCRAPE_USER_AGENT: Final[str] = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
     "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 )
 
@@ -182,7 +182,7 @@ def parse_html(html: str, *, url: str) -> ScrapedDocument:
 def _reject_drive_shell_if_needed(*, source_url: str, text: str) -> None:
     if is_google_drive_url(source_url) and is_drive_auth_shell(text):
         msg = (
-            "Google Drive returned an auth/loading shell "
+            "Google Drive returned an auth/loading shell " +
             "(e.g. Loading… Sign in) instead of document content"
         )
         raise DriveFetchError(msg, error_code="drive_auth_required")
@@ -223,7 +223,7 @@ def _fetch_url_once(
     if is_google_drive_url(url):
         fetch_target = rewrite_drive_fetch_url(url)
     response = client.get(fetch_target)
-    response.raise_for_status()
+    _ = response.raise_for_status()
     return _document_from_response(response, original_url=url)
 
 
@@ -236,7 +236,7 @@ def _fetch_with_headers(
     request = client.build_request("GET", url)
     request.headers.update(headers)
     response = client.send(request, follow_redirects=True)
-    response.raise_for_status()
+    _ = response.raise_for_status()
     return _document_from_response(response, original_url=url)
 
 

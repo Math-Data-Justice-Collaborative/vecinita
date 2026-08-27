@@ -70,7 +70,7 @@ def test_modal_image_includes_langdetect() -> None:
     """Modal data-management image must pip_install langdetect (required by vecinita-tagging)."""
     pip_package_names = _get_image_pip_packages()
     assert "langdetect" in pip_package_names, (
-        "langdetect not found in Modal image pip_install(). "
+        "langdetect not found in Modal image pip_install(). " +
         "packages/tagging requires langdetect>=1.0.9 but it is not in the container image."
     )
 
@@ -90,7 +90,7 @@ def test_modal_image_includes_all_mounted_package_deps() -> None:
             all_missing[pkg_dir_name] = missing
 
     assert not all_missing, (
-        f"Modal data-management image is missing pip packages required by mounted packages: "
+        "Modal data-management image is missing pip packages required by mounted packages: " +
         f"{all_missing}. Add them to pip_install() in {_MODAL_APP.name}."
     )
 

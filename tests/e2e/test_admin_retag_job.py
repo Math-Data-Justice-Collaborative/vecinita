@@ -176,7 +176,7 @@ def retag_clients(
     write_api = TestClient(create_write_app())
     write_api.headers.update({"Authorization": f"Bearer {_WRITE_KEY}"})
     write_client = _TestClientWriteClient(write_api)
-    write_client.upsert_batch(
+    _ = write_client.upsert_batch(
         BatchUpsertRequest(
             documents=[
                 DocumentUpsert(

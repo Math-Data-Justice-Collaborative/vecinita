@@ -91,7 +91,7 @@ def test_enqueue_catchup_targets_respects_kill_switch(
             return uuid4()
 
     results = enqueue_catchup_targets(
-        _Client(),  # type: ignore[arg-type]
+        _Client(),
         targets=[(DOC_ID, "1", "missing")],
         enabled=True,
         kill_switch=True,
@@ -123,7 +123,7 @@ def test_enqueue_catchup_targets_posts_when_residual() -> None:
             return job_id
 
     results = enqueue_catchup_targets(
-        _Client(),  # type: ignore[arg-type]
+        _Client(),
         targets=[(DOC_ID, "9", "partial")],
         enabled=True,
         kill_switch=False,
@@ -146,7 +146,7 @@ def test_targets_from_completed_job_skips_automation_catchup_jobs() -> None:
             "embed_status": "missing",
         },
     )
-    store.update_job(record.job_id, status="completed")
+    _ = store.update_job(record.job_id, status="completed")
     final = store.get_job(record.job_id)
     assert final is not None
     assert targets_from_completed_job(final) == []
@@ -160,7 +160,7 @@ def test_targets_from_completed_job_retag_failed_is_residual() -> None:
         job_type="retag",
         options={"document_id": str(DOC_ID)},
     )
-    store.update_job(
+    _ = store.update_job(
         record.job_id,
         status="failed",
         error_code="RuntimeError",
@@ -183,7 +183,7 @@ def test_targets_from_completed_job_rebuild_partial_metrics() -> None:
             "document_ids": [str(DOC_ID), str(doc_b)],
         },
     )
-    store.update_job(
+    _ = store.update_job(
         record.job_id,
         status="completed",
         metrics={"urls_failed_embed": 1},
@@ -223,7 +223,7 @@ def test_run_job_completion_enqueues_catchup_for_failed_retag(
             return uuid4()
 
     def _failing_retag(*_args: object, **_kwargs: object) -> None:
-        store.update_job(
+        _ = store.update_job(
             record.job_id,
             status="failed",
             error_code="RuntimeError",
@@ -289,7 +289,7 @@ def test_targets_from_completed_job_skips_unknown_and_healthy() -> None:
     """Unknown job types and healthy completes yield no targets."""
     store = InMemoryJobStore()
     unknown = store.create_job(urls=["https://example.com"], job_type="finetune_train")
-    store.update_job(unknown.job_id, status="completed")
+    _ = store.update_job(unknown.job_id, status="completed")
     unknown_final = store.get_job(unknown.job_id)
     assert unknown_final is not None
     assert targets_from_completed_job(unknown_final) == []
@@ -299,7 +299,7 @@ def test_targets_from_completed_job_skips_unknown_and_healthy() -> None:
         job_type="ingest",
         options={"document_id": str(DOC_ID), "revision": "rev-9"},
     )
-    store.update_job(healthy.job_id, status="completed", metrics={"urls_failed_embed": 0})
+    _ = store.update_job(healthy.job_id, status="completed", metrics={"urls_failed_embed": 0})
     healthy_final = store.get_job(healthy.job_id)
     assert healthy_final is not None
     assert targets_from_completed_job(healthy_final) == []
@@ -317,7 +317,7 @@ def test_targets_from_completed_job_uses_revision_and_dedupes_ids() -> None:
             "revision": "rev-77",
         },
     )
-    store.update_job(
+    _ = store.update_job(
         record.job_id,
         status="completed",
         metrics={"urls_failed_embed": 2},
@@ -331,7 +331,7 @@ def test_targets_from_completed_job_requires_document_ids() -> None:
     """Failed ingest without document ids → empty targets."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com"], job_type="ingest")
-    store.update_job(record.job_id, status="failed")
+    _ = store.update_job(record.job_id, status="failed")
     final = store.get_job(record.job_id)
     assert final is not None
     assert targets_from_completed_job(final) == []
@@ -347,7 +347,7 @@ def test_maybe_enqueue_after_job_none_client_and_exceptions(
         job_type="retag",
         options={"document_id": str(DOC_ID)},
     )
-    store.update_job(record.job_id, status="failed")
+    _ = store.update_job(record.job_id, status="failed")
     final = store.get_job(record.job_id)
     assert final is not None
     assert maybe_enqueue_after_job(final, jobs_client=None) == []
@@ -360,17 +360,14 @@ def test_maybe_enqueue_after_job_none_client_and_exceptions(
             msg = "modal down"
             raise RuntimeError(msg)
 
-    assert maybe_enqueue_after_job(final, jobs_client=_BoomClient()) == []  # type: ignore[arg-type]
+    assert maybe_enqueue_after_job(final, jobs_client=_BoomClient()) == []
 
     healthy = store.create_job(
         urls=[],
         job_type="ingest",
         options={"document_id": str(DOC_ID)},
     )
-    store.update_job(healthy.job_id, status="completed")
+    _ = store.update_job(healthy.job_id, status="completed")
     healthy_final = store.get_job(healthy.job_id)
     assert healthy_final is not None
-    assert (
-        maybe_enqueue_after_job(healthy_final, jobs_client=_BoomClient())  # type: ignore[arg-type]
-        == []
-    )
+    assert maybe_enqueue_after_job(healthy_final, jobs_client=_BoomClient()) == []

@@ -92,7 +92,7 @@ def test_service_key_writes_audit_row(client: TestClient, engine: Engine) -> Non
             row = (
                 conn.execute(
                     text(
-                        "SELECT event_type, entity_type, actor_role "
+                        "SELECT event_type, entity_type, actor_role " +
                         "FROM audit_log WHERE entity_id = :id"
                     ),
                     {"id": entity_id},
@@ -106,7 +106,7 @@ def test_service_key_writes_audit_row(client: TestClient, engine: Engine) -> Non
         assert row["actor_role"] == "admin"
     finally:
         with engine.begin() as conn:
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": entity_id})
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": entity_id})
 
 
 def test_operator_jwt_forbidden(client: TestClient) -> None:

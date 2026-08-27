@@ -144,7 +144,7 @@ def promote_rag_config(
                 )
             )
         )
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE rag_production_config
@@ -153,7 +153,7 @@ def promote_rag_config(
                 """
             )
         )
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO rag_production_config (

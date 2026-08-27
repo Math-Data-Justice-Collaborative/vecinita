@@ -25,7 +25,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Add audit, version history, and serving stats tables (ADR-016, F28, F29)."""
-    op.create_table(
+    _ = op.create_table(
         "audit_log",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("event_type", sa.String(length=64), nullable=False),
@@ -46,7 +46,7 @@ def upgrade() -> None:
     op.create_index("ix_audit_log_created_at", "audit_log", ["created_at"])
     op.create_index("ix_audit_log_request_id", "audit_log", ["request_id"])
 
-    op.create_table(
+    _ = op.create_table(
         "document_versions",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("document_id", sa.Uuid(), nullable=False),
@@ -68,7 +68,7 @@ def upgrade() -> None:
     )
     op.create_index("ix_document_versions_document_id", "document_versions", ["document_id"])
 
-    op.create_table(
+    _ = op.create_table(
         "document_serving_stats",
         sa.Column("document_id", sa.Uuid(), nullable=False),
         sa.Column("served_count", sa.Integer(), server_default=sa.text("0"), nullable=False),

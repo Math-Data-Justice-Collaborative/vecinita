@@ -81,7 +81,7 @@ def test_load_corpus_skips_unsupported_language(
     """Test load corpus skips unsupported language."""
     corpus_root = tmp_path / "corpus"
     (corpus_root / "fr").mkdir(parents=True)
-    (corpus_root / "fr" / "doc.md").write_text("# French\n\nBody", encoding="utf-8")
+    _ = (corpus_root / "fr" / "doc.md").write_text("# French\n\nBody", encoding="utf-8")
     monkeypatch.setattr("vecinita_database.seeds.load._CORPUS_ROOT", corpus_root)
 
     counts = load_corpus(database_url=database_url())
@@ -96,7 +96,7 @@ def test_load_corpus_skips_non_markdown_files(
     corpus_root = tmp_path / "corpus"
     en_dir = corpus_root / "en"
     en_dir.mkdir(parents=True)
-    (en_dir / "notes.pdf").write_bytes(b"%PDF")
+    _ = (en_dir / "notes.pdf").write_bytes(b"%PDF")
     monkeypatch.setattr("vecinita_database.seeds.load._CORPUS_ROOT", corpus_root)
 
     counts = load_corpus(database_url=database_url())
@@ -111,7 +111,9 @@ def test_load_corpus_inserts_fixture_document(
     corpus_root = tmp_path / "corpus"
     en_dir = corpus_root / "en"
     en_dir.mkdir(parents=True)
-    (en_dir / "seed-doc.md").write_text("# Seed title\n\nSeed body paragraph.", encoding="utf-8")
+    _ = (en_dir / "seed-doc.md").write_text(
+        "# Seed title\n\nSeed body paragraph.", encoding="utf-8"
+    )
     monkeypatch.setattr("vecinita_database.seeds.load._CORPUS_ROOT", corpus_root)
 
     counts = load_corpus(database_url=database_url())
@@ -132,10 +134,10 @@ def test_load_corpus_skips_non_directory_entries(
     """Test load corpus skips non directory entries."""
     corpus_root = tmp_path / "corpus"
     corpus_root.mkdir()
-    (corpus_root / "readme.txt").write_text("skip me", encoding="utf-8")
+    _ = (corpus_root / "readme.txt").write_text("skip me", encoding="utf-8")
     en_dir = corpus_root / "en"
     en_dir.mkdir()
-    (en_dir / "valid.md").write_text("# Valid\n\nBody", encoding="utf-8")
+    _ = (en_dir / "valid.md").write_text("# Valid\n\nBody", encoding="utf-8")
     monkeypatch.setattr("vecinita_database.seeds.load._CORPUS_ROOT", corpus_root)
 
     counts = load_corpus(database_url=database_url())

@@ -43,7 +43,7 @@ def _require_env(name: str) -> str:
 
 def _modal_llm_smoke() -> None:
     """Warm and generate with sandbox model_id on vecinita-llm."""
-    _require_env(_ENV_LLM)
+    _ = _require_env(_ENV_LLM)
     if os.environ.get(_ENV_OLLAMA):
         print(f"ERROR: {_ENV_OLLAMA} must be unset (ADR-037)", file=sys.stderr)
         sys.exit(1)
@@ -70,7 +70,7 @@ def _modal_llm_smoke() -> None:
 def _golden_row_smoke(*, limit: int) -> None:
     """Run golden-set rows through sandbox RAG with qwen3:8b on vecinita-llm."""
     database_url = _require_env(_ENV_DB)
-    _require_env(_ENV_EMBED)
+    _ = _require_env(_ENV_EMBED)
     if os.environ.get(_ENV_OLLAMA):
         print(f"ERROR: {_ENV_OLLAMA} must be unset (ADR-037)", file=sys.stderr)
         sys.exit(1)
@@ -129,13 +129,13 @@ def _golden_row_smoke(*, limit: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
+    _ = parser.add_argument(
         "--limit",
         type=int,
         default=2,
         help="Golden rows to evaluate (default 2 for smoke speed)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--skip-golden",
         action="store_true",
         help="Only run Modal warm/generate smoke",

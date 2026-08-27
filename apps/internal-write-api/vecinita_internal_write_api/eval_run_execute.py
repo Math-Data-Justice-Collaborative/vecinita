@@ -154,7 +154,7 @@ def execute_eval_run(  # noqa: PLR0913
     criteria = _criteria_for_config(engine, config)
     try:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     UPDATE eval_runs
@@ -188,7 +188,7 @@ def execute_eval_run(  # noqa: PLR0913
             )
         _persist_results(engine, run_id=run_id, results=results, summary=summary)
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     UPDATE eval_runs
@@ -202,7 +202,7 @@ def execute_eval_run(  # noqa: PLR0913
             )
     except Exception as exc:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     UPDATE eval_runs
@@ -227,7 +227,7 @@ def _persist_results(
     _ = summary
     with engine.begin() as conn:
         for result in results:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     INSERT INTO eval_run_items (

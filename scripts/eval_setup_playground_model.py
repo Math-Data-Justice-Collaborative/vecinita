@@ -67,49 +67,49 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--model",
         default="",
         help="Single model tag (repeatable via --models CSV)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--models",
         default="",
         help="Comma-separated model tags to stage",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--base-url",
         default=None,
         help="Override playground/LLM Modal ASGI URL",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--no-pull",
         action="store_true",
         help="Fail if a model is not already available (do not enqueue pull)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--no-wait",
         action="store_true",
         help="After pull, do not poll until available (implies skip warm unless already ready)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--no-warm",
         action="store_true",
         help="Skip POST /warm after the model is available",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--poll-interval",
         type=float,
         default=DEFAULT_POLL_INTERVAL_S,
         help=f"Seconds between list polls while waiting (default {DEFAULT_POLL_INTERVAL_S})",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--timeout",
         type=float,
         default=DEFAULT_PULL_TIMEOUT_S,
         help=f"Max wait seconds after pull (default {DEFAULT_PULL_TIMEOUT_S})",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--json",
         action="store_true",
         help="Emit JSON array of per-model results",

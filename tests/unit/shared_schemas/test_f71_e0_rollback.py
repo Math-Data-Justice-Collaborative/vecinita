@@ -59,7 +59,7 @@ def test_tc239_e0_rollback_create_rebuild_uses_legacy_pin_and_matching_tokenizer
 def test_tc239_e0_rollback_rejects_tokenizer_mismatched_to_e0_pin() -> None:
     """Rollback rebuild must keep tokenizer aligned to E0 pin (AC-ME11 on rollback path)."""
     with pytest.raises(ValidationError):
-        CreateRebuildRunRequest.model_validate(
+        _ = CreateRebuildRunRequest.model_validate(
             {
                 "mode": "rechunk",
                 "embedding_model_id": _E0,

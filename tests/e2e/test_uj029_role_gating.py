@@ -153,7 +153,7 @@ def test_admin_write_records_opaque_audit_actor(
         audit_row = (
             conn.execute(
                 text(
-                    "SELECT actor_id, actor_role, payload FROM audit_log "
+                    "SELECT actor_id, actor_role, payload FROM audit_log " +  # noqa: S608
                     "WHERE entity_id = :id AND event_type = 'document.created'"
                 ),
                 {"id": doc_id},
@@ -169,6 +169,8 @@ def test_admin_write_records_opaque_audit_actor(
         assert "name" not in payload
 
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+        _ = conn.execute(
+            text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id}
+        )
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})

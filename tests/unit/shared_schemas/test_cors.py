@@ -61,7 +61,7 @@ def test_configure_cors_adds_middleware_and_extra_headers() -> None:
 def test_unhandled_exception_includes_cors_headers() -> None:
     """500 responses include Access-Control-Allow-Origin so browsers surface HTTP errors."""
     app = FastAPI()
-    configure_cors(app, env_value=ADMIN_ORIGIN)
+    _ = configure_cors(app, env_value=ADMIN_ORIGIN)
 
     @app.get("/boom")
     def boom() -> None:  # pyright: ignore[reportUnusedFunction]

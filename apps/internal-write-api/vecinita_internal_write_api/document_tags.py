@@ -107,7 +107,7 @@ def patch_document_tags(
             actor_id=actor_id,
             actor_role=actor_role,
         )
-        create_document_version(
+        _ = create_document_version(
             conn,
             document_id=document_id,
             title=row_str_optional(doc, "title"),

@@ -126,7 +126,7 @@ Does not implement features — process improvement only.""",
 }
 
 STATE_AGENT_LINE = (
-    "**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) "
+    "**State agent:** [workflow-state-manager](../../agents/workflow-state-manager.md) " +
     "— mandatory read/update.\n"
 )
 
@@ -221,7 +221,7 @@ def patch_skill(skill_id: str) -> bool:
         )
 
     if text != original:
-        path.write_text(text, encoding="utf-8")
+        _ = path.write_text(text, encoding="utf-8")
         print(f"UPDATED: {skill_id}")
         return True
     print(f"UNCHANGED: {skill_id}")
@@ -230,7 +230,7 @@ def patch_skill(skill_id: str) -> bool:
 
 def main() -> None:
     for sid in SKILL_IDS:
-        patch_skill(sid)
+        _ = patch_skill(sid)
 
 
 if __name__ == "__main__":

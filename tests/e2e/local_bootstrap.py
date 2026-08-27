@@ -27,7 +27,7 @@ def postgres_is_ready(database_url: str | None = None) -> bool:
     try:
         engine = create_engine(url)
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            _ = conn.execute(text("SELECT 1"))
     except SQLAlchemyError:
         return False
     else:
@@ -39,7 +39,7 @@ def run_alembic_upgrade_head(database_url: str | None = None) -> None:
     url = database_url or default_database_url()
     env = os.environ.copy()
     env["DATABASE_URL"] = url
-    subprocess.run(
+    _ = subprocess.run(
         ["uv", "run", "alembic", "upgrade", "head"],  # noqa: S607 # uv resolved from PATH in CI/dev
         cwd=_DATABASE_APP,
         check=True,

@@ -64,7 +64,7 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
             doc_id_raw = sqlalchemy_scalar_one(
                 conn.execute(
                     text(
-                        "INSERT INTO documents (url, title, language) "
+                        "INSERT INTO documents (url, title, language) " +
                         "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Bulk Meta Doc {i}"},
@@ -75,12 +75,12 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
     yield doc_ids
     with engine.begin() as conn:
         for doc_id in doc_ids:
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_bulk_metadata_update_title(
@@ -131,7 +131,7 @@ def test_bulk_metadata_emits_audit(
     client: TestClient, sample_docs: list[UUID], engine: Engine
 ) -> None:
     """Bulk metadata emits audit."""
-    client.patch(
+    _ = client.patch(
         "/internal/v1/documents/bulk/metadata",
         json={
             "document_ids": [str(d) for d in sample_docs],
@@ -143,7 +143,7 @@ def test_bulk_metadata_emits_audit(
         for doc_id in sample_docs:
             row = conn.execute(
                 text(
-                    "SELECT event_type FROM audit_log "
+                    "SELECT event_type FROM audit_log " +  # noqa: S608
                     "WHERE entity_id = :id AND event_type = 'document.edited'"
                 ),
                 {"id": doc_id},
@@ -155,7 +155,7 @@ def test_bulk_metadata_creates_version(
     client: TestClient, sample_docs: list[UUID], engine: Engine
 ) -> None:
     """Bulk metadata creates version."""
-    client.patch(
+    _ = client.patch(
         "/internal/v1/documents/bulk/metadata",
         json={
             "document_ids": [str(d) for d in sample_docs],
@@ -167,7 +167,7 @@ def test_bulk_metadata_creates_version(
         for doc_id in sample_docs:
             row = conn.execute(
                 text(
-                    "SELECT title FROM document_versions "
+                    "SELECT title FROM document_versions " +  # noqa: S608
                     "WHERE document_id = :id ORDER BY version_number DESC LIMIT 1"
                 ),
                 {"id": doc_id},

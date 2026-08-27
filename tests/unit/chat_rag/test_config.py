@@ -112,7 +112,7 @@ def test_from_env_requires_database_url(monkeypatch: pytest.MonkeyPatch) -> None
     """Test from env requires database url."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with pytest.raises(RuntimeError, match="DATABASE_URL"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_str_env_parses_value(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -188,7 +188,7 @@ def test_from_env_rejects_invalid_f42_rag_knobs(
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
     monkeypatch.setenv(name, value)
     with pytest.raises(ValueError, match="VECINITA_RAG_"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_from_env_defaults_f43_rag_cache_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -243,7 +243,7 @@ def test_from_env_rejects_invalid_f43_rag_cache_knobs(
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
     monkeypatch.setenv(name, value)
     with pytest.raises(ValueError, match="VECINITA_RAG_CACHE"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_from_env_defaults_f44_soft_language_fallback_off(
@@ -302,7 +302,7 @@ def test_from_env_rejects_invalid_f45_rerank_ce_top_n(
     monkeypatch.setenv("VECINITA_TOP_K", "5")
     monkeypatch.setenv("VECINITA_RAG_RERANK_CE_TOP_N", "3")
     with pytest.raises(ValueError, match="VECINITA_RAG_RERANK_CE_TOP_N"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_from_env_defaults_f81_query_refine_off(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -350,7 +350,7 @@ def test_from_env_rejects_invalid_f82_output_verify_min(monkeypatch: pytest.Monk
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
     monkeypatch.setenv("VECINITA_RAG_OUTPUT_VERIFY_MIN", "1.5")
     with pytest.raises(ValueError, match="VECINITA_RAG_OUTPUT_VERIFY_MIN"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_from_env_requires_rerank_url_when_ce_on(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -359,4 +359,4 @@ def test_from_env_requires_rerank_url_when_ce_on(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setenv("VECINITA_RAG_RERANK_CE", "true")
     monkeypatch.delenv("VECINITA_MODAL_RERANK_URL", raising=False)
     with pytest.raises(ValueError, match="VECINITA_MODAL_RERANK_URL"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()

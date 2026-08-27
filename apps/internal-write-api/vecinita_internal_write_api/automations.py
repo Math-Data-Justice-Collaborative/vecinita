@@ -72,7 +72,7 @@ def get_automations_config(engine: Engine) -> AutomationsConfigResponse:
 def set_automations_enabled(engine: Engine, *, enabled: bool) -> AutomationsConfigResponse:
     """Persist DM enable/disable and return the full config snapshot."""
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE automation_settings

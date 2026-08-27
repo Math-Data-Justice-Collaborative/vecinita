@@ -159,7 +159,7 @@ def test_heuristic_rewrites_es_content_echo_none_for_non_interrogative() -> None
 def test_merge_multi_query_hits_rejects_non_positive_top_k() -> None:
     """top_k < 1 raises ValueError."""
     with pytest.raises(ValueError, match="top_k"):
-        merge_multi_query_hits([[_chunk()]], top_k=0)
+        _ = merge_multi_query_hits([[_chunk()]], top_k=0)
 
 
 def test_multi_query_retrieve_disabled_still_applies_locale_boost() -> None:

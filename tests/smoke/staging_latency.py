@@ -41,7 +41,7 @@ def measure_staging_ask_p95(
                 json={"question": question},
             )
             elapsed = time.perf_counter() - start
-            response.raise_for_status()
+            _ = response.raise_for_status()
             payload = response_json_object(response)
             if not payload.get("answer"):
                 msg = "staging ask returned empty answer"

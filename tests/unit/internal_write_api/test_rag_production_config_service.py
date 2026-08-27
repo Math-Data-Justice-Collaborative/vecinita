@@ -40,23 +40,23 @@ _SECOND_CONFIG_VERSION = 2
 def clean_rag_tables(engine: Engine) -> Iterator[None]:
     """Clear production config, presets, and eval runs touched by promote tests."""
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
-        conn.execute(text("DELETE FROM audit_log WHERE event_type = 'rag.config.promoted'"))
-        conn.execute(
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(text("DELETE FROM audit_log WHERE event_type = 'rag.config.promoted'"))
+        _ = conn.execute(
             text("DELETE FROM eval_config_presets WHERE preset_name LIKE 'unit-promote-%'")
         )
-        conn.execute(
+        _ = conn.execute(
             text("DELETE FROM eval_runs WHERE corpus_profile = :corpus"),
             {"corpus": _UNIT_PROMOTE_CORPUS},
         )
     yield
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
-        conn.execute(text("DELETE FROM audit_log WHERE event_type = 'rag.config.promoted'"))
-        conn.execute(
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(text("DELETE FROM audit_log WHERE event_type = 'rag.config.promoted'"))
+        _ = conn.execute(
             text("DELETE FROM eval_config_presets WHERE preset_name LIKE 'unit-promote-%'")
         )
-        conn.execute(
+        _ = conn.execute(
             text("DELETE FROM eval_runs WHERE corpus_profile = :corpus"),
             {"corpus": _UNIT_PROMOTE_CORPUS},
         )
@@ -76,7 +76,7 @@ def _sample_config(*, top_k: int) -> dict[str, object]:
 def _insert_preset(engine: Engine, *, owner_id: UUID, top_k: int) -> UUID:
     preset_id = uuid4()
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO eval_config_presets (
@@ -100,7 +100,7 @@ def _insert_preset(engine: Engine, *, owner_id: UUID, top_k: int) -> UUID:
 def _insert_eval_run(engine: Engine, *, top_k: int) -> UUID:
     run_id = uuid4()
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO eval_runs (
@@ -182,7 +182,7 @@ def test_promote_second_time_increments_config_version(
     owner_id = uuid4()
     first_preset = _insert_preset(engine, owner_id=owner_id, top_k=_PRESET_TOP_K)
     second_preset = _insert_preset(engine, owner_id=owner_id, top_k=_PROMOTED_TOP_K)
-    promote_rag_config(
+    _ = promote_rag_config(
         engine,
         promoted_by=uuid4(),
         body=RagConfigPromoteRequest(source="preset", preset_id=first_preset),
@@ -206,7 +206,7 @@ def test_promote_preset_not_found_raises(
     """Unknown preset id raises RagConfigPromoteNotFoundError."""
     _ = clean_rag_tables
     with pytest.raises(RagConfigPromoteNotFoundError, match="preset not found"):
-        promote_rag_config(
+        _ = promote_rag_config(
             engine,
             promoted_by=uuid4(),
             body=RagConfigPromoteRequest(source="preset", preset_id=uuid4()),
@@ -220,7 +220,7 @@ def test_promote_run_not_found_raises(
     """Unknown run id raises RagConfigPromoteNotFoundError."""
     _ = clean_rag_tables
     with pytest.raises(RagConfigPromoteNotFoundError, match="run not found"):
-        promote_rag_config(
+        _ = promote_rag_config(
             engine,
             promoted_by=uuid4(),
             body=RagConfigPromoteRequest(source="run", run_id=uuid4()),
@@ -234,7 +234,7 @@ def test_get_active_rag_config_parses_promoted_at_timestamp(
     """Active row maps promoted_at from the database."""
     _ = clean_rag_tables
     preset_id = _insert_preset(engine, owner_id=uuid4(), top_k=_PRESET_TOP_K)
-    promote_rag_config(
+    _ = promote_rag_config(
         engine,
         promoted_by=uuid4(),
         body=RagConfigPromoteRequest(source="preset", preset_id=preset_id),
@@ -253,12 +253,12 @@ def test_resolve_promote_config_requires_source_ids(
     """Service-level guard rejects promote requests missing preset_id or run_id."""
     _ = clean_rag_tables
     with pytest.raises(ValueError, match="preset_id is required"):
-        _resolve_promote_config(
+        _ = _resolve_promote_config(
             engine,
             body=RagConfigPromoteRequest.model_construct(source="preset", preset_id=None),
         )
     with pytest.raises(ValueError, match="run_id is required"):
-        _resolve_promote_config(
+        _ = _resolve_promote_config(
             engine,
             body=RagConfigPromoteRequest.model_construct(source="run", run_id=None),
         )

@@ -48,8 +48,8 @@ class RerankService:
     def load(self) -> None:
         from sentence_transformers import CrossEncoder
 
-        os.environ.setdefault("HF_HOME", "/models/hf")
-        os.environ.setdefault("TRANSFORMERS_CACHE", "/models/hf")
+        _ = os.environ.setdefault("HF_HOME", "/models/hf")
+        _ = os.environ.setdefault("TRANSFORMERS_CACHE", "/models/hf")
         model_id = os.environ.get("VECINITA_RAG_RERANK_CE_MODEL", CE_MODEL)
         self._model = CrossEncoder(model_id, device="cuda")
         _ = self._model.predict([["warmup query", "warmup passage"]])

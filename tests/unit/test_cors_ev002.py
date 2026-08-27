@@ -63,7 +63,7 @@ def test_cors_bulk_tags(client: TestClient) -> None:
 
 def test_cors_bulk_retag(client: TestClient) -> None:
     """Bulk retag endpoint allows POST via CORS preflight."""
-    _preflight(client, "/internal/v1/documents/bulk/retag", "POST")
+    _ = _preflight(client, "/internal/v1/documents/bulk/retag", "POST")
 
 
 def test_cors_bulk_metadata(client: TestClient) -> None:
@@ -81,44 +81,44 @@ def test_cors_patch_document_metadata(client: TestClient) -> None:
 
 def test_cors_health_all(client: TestClient) -> None:
     """Health-all endpoint allows GET via CORS preflight."""
-    _preflight(client, "/internal/v1/health/all", "GET")
+    _ = _preflight(client, "/internal/v1/health/all", "GET")
 
 
 def test_cors_stats_summary(client: TestClient) -> None:
     """Stats summary endpoint allows GET via CORS preflight."""
-    _preflight(client, "/internal/v1/stats/summary", "GET")
+    _ = _preflight(client, "/internal/v1/stats/summary", "GET")
 
 
 def test_cors_stats_served(client: TestClient) -> None:
     """Stats served endpoint allows POST via CORS preflight."""
-    _preflight(client, "/internal/v1/stats/served", "POST")
+    _ = _preflight(client, "/internal/v1/stats/served", "POST")
 
 
 def test_cors_stats_top_served(client: TestClient) -> None:
     """Top-served stats endpoint allows GET via CORS preflight."""
-    _preflight(client, "/internal/v1/stats/top-served", "GET")
+    _ = _preflight(client, "/internal/v1/stats/top-served", "GET")
 
 
 def test_cors_audit_log(client: TestClient) -> None:
     """Audit log endpoint allows GET via CORS preflight."""
-    _preflight(client, "/internal/v1/audit", "GET")
+    _ = _preflight(client, "/internal/v1/audit", "GET")
 
 
 def test_cors_audit_cleanup(client: TestClient) -> None:
     """Audit cleanup endpoint allows POST via CORS preflight."""
-    _preflight(client, "/internal/v1/audit/cleanup", "POST")
+    _ = _preflight(client, "/internal/v1/audit/cleanup", "POST")
 
 
 def test_cors_feedback_cleanup(client: TestClient) -> None:
     """Feedback cleanup endpoint allows POST via CORS preflight (F68)."""
-    _preflight(client, "/internal/v1/feedback/cleanup", "POST")
+    _ = _preflight(client, "/internal/v1/feedback/cleanup", "POST")
 
 
 def test_cors_feedback_create(client: TestClient) -> None:
     """Feedback create endpoint allows POST via CORS preflight (F68)."""
-    _preflight(client, "/internal/v1/feedback", "POST")
+    _ = _preflight(client, "/internal/v1/feedback", "POST")
 
 
 def test_cors_feedback_list(client: TestClient) -> None:
     """Feedback list endpoint allows GET via CORS preflight (F68)."""
-    _preflight(client, "/internal/v1/feedback", "GET")
+    _ = _preflight(client, "/internal/v1/feedback", "GET")

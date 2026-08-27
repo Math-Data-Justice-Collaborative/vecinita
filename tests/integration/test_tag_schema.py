@@ -57,7 +57,7 @@ def test_document_tags_foreign_key_enforced() -> None:
         )
         tag_id = UUID(str(tag_id_raw))
         with pytest.raises(IntegrityError):
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     INSERT INTO document_tags (document_id, tag_id, source)
@@ -86,7 +86,7 @@ def test_chunk_tags_foreign_key_enforced() -> None:
         )
         tag_id = UUID(str(tag_id_raw))
         with pytest.raises(IntegrityError):
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     INSERT INTO chunk_tags (chunk_id, tag_id, source)

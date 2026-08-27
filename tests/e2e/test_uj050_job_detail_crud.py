@@ -96,14 +96,14 @@ def test_uj050_get_job_detail_includes_type_context_and_errors() -> None:
     """TC-146: GET /jobs/{id} returns status, timestamps, retag/eval context, errors."""
     store = InMemoryJobStore()
     ingest = store.create_job(urls=["https://example.com/ingest"])
-    store.update_job(ingest.job_id, status="completed")
+    _ = store.update_job(ingest.job_id, status="completed")
 
     retag = store.create_job(
         urls=[],
         job_type="retag",
         options={"document_id": str(_DOC_ID)},
     )
-    store.update_job(
+    _ = store.update_job(
         retag.job_id,
         status="failed",
         error_code="TagError",
@@ -115,7 +115,7 @@ def test_uj050_get_job_detail_includes_type_context_and_errors() -> None:
         job_type="eval",
         options={"eval_run_id": str(_EVAL_RUN_ID)},
     )
-    store.update_job(eval_job.job_id, status="running", eval_run_id=_EVAL_RUN_ID)
+    _ = store.update_job(eval_job.job_id, status="running", eval_run_id=_EVAL_RUN_ID)
 
     client = _client(store, _ADMIN)
 
@@ -141,16 +141,16 @@ def test_uj050_admin_cancel_retry_delete_and_viewer_forbidden() -> None:
     """TC-147: Admin cancel/retry/delete succeed; viewer mutate returns 403 (RD-176)."""
     store = InMemoryJobStore()
     running = store.create_job(urls=["https://example.com/running"])
-    store.update_job(running.job_id, status="running")
+    _ = store.update_job(running.job_id, status="running")
     failed = store.create_job(urls=["https://example.com/failed"])
-    store.update_job(
+    _ = store.update_job(
         failed.job_id,
         status="failed",
         error_code="X",
         error_message="boom",
     )
     terminal = store.create_job(urls=["https://example.com/done"])
-    store.update_job(terminal.job_id, status="completed")
+    _ = store.update_job(terminal.job_id, status="completed")
 
     admin = _client(store, _ADMIN)
     viewer = _client(store, _VIEWER)
@@ -186,7 +186,7 @@ def test_uj050_jobs_events_sse_emits_status_update() -> None:
     """TC-148: GET /jobs/events streams a job status update (SSE primary path)."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/sse"])
-    store.update_job(record.job_id, status="running")
+    _ = store.update_job(record.job_id, status="running")
     client = _client(store, _ADMIN, sse_max_cycles=8)
 
     with client.stream("GET", "/jobs/events") as response:
@@ -214,7 +214,7 @@ def test_uj050_failed_job_detail_includes_modal_log_affordances() -> None:
     """TC-149: Failed job detail exposes modal_call_id + dashboard_url when known (RD-177)."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/modal-fail"])
-    store.update_job(
+    _ = store.update_job(
         record.job_id,
         status="failed",
         error_code="ModalError",
@@ -233,7 +233,7 @@ def test_uj050_failed_job_detail_includes_modal_log_affordances() -> None:
 
     # Affordance omitted when dashboard URL unknown (UI hides link).
     no_dash = store.create_job(urls=["https://example.com/no-dash"])
-    store.update_job(
+    _ = store.update_job(
         no_dash.job_id,
         status="failed",
         error_code="X",

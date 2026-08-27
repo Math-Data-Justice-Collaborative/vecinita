@@ -68,7 +68,7 @@ def test_rebuild_promote_response_shape() -> None:
 def test_rebuild_promote_response_rejects_negative_counts() -> None:
     """Promote counts must be non-negative."""
     with pytest.raises(ValidationError):
-        RebuildPromoteResponse.model_validate(
+        _ = RebuildPromoteResponse.model_validate(
             {
                 "promoted": True,
                 "rebuild_run_id": str(uuid4()),

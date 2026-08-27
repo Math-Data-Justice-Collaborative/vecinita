@@ -64,7 +64,7 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
             doc_id_raw = sqlalchemy_scalar_one(
                 conn.execute(
                     text(
-                        "INSERT INTO documents (url, title, language) "
+                        "INSERT INTO documents (url, title, language) " +
                         "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Bulk Tag Doc {i}"},
@@ -75,16 +75,16 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
     yield doc_ids
     with engine.begin() as conn:
         for doc_id in doc_ids:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM document_tags WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_bulk_tag_add(client: TestClient, sample_docs: list[UUID]) -> None:
@@ -125,7 +125,7 @@ def test_bulk_tag_partial_failure_not_found(client: TestClient, sample_docs: lis
 
 def test_bulk_tag_emits_audit(client: TestClient, sample_docs: list[UUID], engine: Engine) -> None:
     """Bulk tag emits audit."""
-    client.patch(
+    _ = client.patch(
         "/internal/v1/documents/bulk/tags",
         json={
             "document_ids": [str(d) for d in sample_docs],
@@ -137,7 +137,7 @@ def test_bulk_tag_emits_audit(client: TestClient, sample_docs: list[UUID], engin
         for doc_id in sample_docs:
             row = conn.execute(
                 text(
-                    "SELECT event_type FROM audit_log "
+                    "SELECT event_type FROM audit_log " +  # noqa: S608
                     "WHERE entity_id = :id AND event_type = 'document.tagged'"
                 ),
                 {"id": doc_id},

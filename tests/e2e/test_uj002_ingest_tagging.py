@@ -119,7 +119,7 @@ def test_ingest_job_assigns_llm_document_tags(
     assert json_str(response_json_object(status), "status") == "completed"
 
     assert mock_write.last_batch is not None
-    document = mock_write.last_batch.documents[0]  # type: ignore[attr-defined]
+    document = mock_write.last_batch.documents[0]
     assert document.tags is not None
     assert len(document.tags) <= _MAX_DOCUMENT_TAGS
     assert all(tag.source == "llm" for tag in document.tags)

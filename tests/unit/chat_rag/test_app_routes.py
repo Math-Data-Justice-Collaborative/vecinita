@@ -61,7 +61,7 @@ async def _request_with_body(body: object) -> Request:
         "path": "/api/v1/ask",
         "headers": [],
     }
-    return Request(scope, receive)  # type: ignore[arg-type]
+    return Request(scope, receive)
 
 
 @pytest.mark.asyncio
@@ -86,9 +86,9 @@ async def test_parse_ask_body_rejects_invalid_json() -> None:
         """Receive."""
         return {"type": "http.request", "body": b"{not-json", "more_body": False}
 
-    request = Request(scope, receive)  # type: ignore[arg-type]
+    request = Request(scope, receive)
     with pytest.raises(HTTPException) as exc:
-        await parse_ask_body(request)
+        _ = await parse_ask_body(request)
     assert getattr(exc.value, "status_code", None) == HTTPStatus.BAD_REQUEST
 
 
@@ -97,7 +97,7 @@ async def test_parse_ask_body_rejects_non_object_json() -> None:
     """Test parse ask body rejects non object json."""
     request = await _request_with_body(["not", "an", "object"])
     with pytest.raises(HTTPException) as exc:
-        await parse_ask_body(request)
+        _ = await parse_ask_body(request)
     assert getattr(exc.value, "status_code", None) == HTTPStatus.BAD_REQUEST
 
 
@@ -106,7 +106,7 @@ async def test_parse_ask_body_rejects_identity_fields() -> None:
     """Test parse ask body rejects identity fields."""
     request = await _request_with_body({"question": "hi", "user_id": "abc"})
     with pytest.raises(HTTPException) as exc:
-        await parse_ask_body(request)
+        _ = await parse_ask_body(request)
     assert getattr(exc.value, "status_code", None) == HTTPStatus.BAD_REQUEST
 
 

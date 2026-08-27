@@ -35,9 +35,9 @@ def test_load_supabase_credentials_reads_token_and_ref_from_env_file(
 ) -> None:
     """Helper exports token + project ref from a parse-only .env file."""
     env_file = tmp_path / ".env"
-    env_file.write_text(
-        "SUPABASE_ACCESS_TOKEN=sbp_test_token_abc\n"
-        "SUPABASE_PROJECT_REF=cfuvghdsuwactfeamtym\n"
+    _ = env_file.write_text(
+        "SUPABASE_ACCESS_TOKEN=sbp_test_token_abc\n" +
+        "SUPABASE_PROJECT_REF=cfuvghdsuwactfeamtym\n" +
         "OTHER=ignore\n",
         encoding="utf-8",
     )
@@ -64,7 +64,7 @@ def test_load_supabase_credentials_falls_back_to_project_id_and_config_toml(
     tmp_path: Path,
 ) -> None:
     """PROJECT_ID and config.toml project_id fill ref when PROJECT_REF unset."""
-    (tmp_path / ".env").write_text(
+    _ = (tmp_path / ".env").write_text(
         "SUPABASE_ACCESS_TOKEN=sbp_from_id\nSUPABASE_PROJECT_ID=projidfallback\n",
         encoding="utf-8",
     )
@@ -84,7 +84,7 @@ def test_load_supabase_credentials_prefers_existing_process_env(
     tmp_path: Path,
 ) -> None:
     """Already-exported process env wins over .env file values."""
-    (tmp_path / ".env").write_text(
+    _ = (tmp_path / ".env").write_text(
         "SUPABASE_ACCESS_TOKEN=sbp_from_file\nSUPABASE_PROJECT_REF=from_file\n",
         encoding="utf-8",
     )

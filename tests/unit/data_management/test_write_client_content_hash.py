@@ -78,4 +78,4 @@ def test_get_content_hash_by_url_raises_on_http_error() -> None:
         http_client=http_client,
     )
     with pytest.raises(InternalWriteClientError, match="get_content_hash_by_url"):
-        client.get_content_hash_by_url("https://example.com/doc")
+        _ = client.get_content_hash_by_url("https://example.com/doc")

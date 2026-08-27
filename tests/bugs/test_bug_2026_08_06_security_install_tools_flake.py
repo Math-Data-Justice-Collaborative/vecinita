@@ -43,7 +43,7 @@ def test_install_tools_retries_transient_github_api_failure(tmp_path: Path) -> N
     assets.mkdir(parents=True)
     for name in ("opengrep", "kics", "grype", "sbom-tool"):
         stub = bin_dir / name
-        stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        _ = stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
         stub.chmod(stub.stat().st_mode | stat.S_IXUSR)
 
     asset = _2ms_asset_name()
@@ -54,12 +54,12 @@ def test_install_tools_retries_transient_github_api_failure(tmp_path: Path) -> N
         zf.writestr(info, b"#!/bin/sh\necho 2ms-fixture\n")
 
     counter = tmp_path / "github_api_calls"
-    counter.write_text("0", encoding="utf-8")
+    _ = counter.write_text("0", encoding="utf-8")
     fake_bin = tmp_path / "fake-bin"
     fake_bin.mkdir()
     fake_curl = fake_bin / "curl"
     # Fail first API hit, then return a release JSON whose asset URL is served from fixture.
-    fake_curl.write_text(
+    _ = fake_curl.write_text(
         f"""#!/usr/bin/env bash
 set -euo pipefail
 COUNTER="{counter}"
@@ -139,7 +139,7 @@ exit 2
     )
 
     assert result.returncode == 0, (
-        f"install-tools.sh failed under transient GitHub API error\n"
+        "install-tools.sh failed under transient GitHub API error\n" +
         f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
     )
     installed = bin_dir / "2ms"
@@ -157,7 +157,7 @@ def test_install_tools_uses_pinned_2ms_download_without_api(tmp_path: Path) -> N
     assets.mkdir(parents=True)
     for name in ("opengrep", "kics", "grype", "sbom-tool"):
         stub = bin_dir / name
-        stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        _ = stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
         stub.chmod(stub.stat().st_mode | stat.S_IXUSR)
 
     asset = _2ms_asset_name()
@@ -169,16 +169,16 @@ def test_install_tools_uses_pinned_2ms_download_without_api(tmp_path: Path) -> N
         zf.writestr(info, b"#!/bin/sh\necho 2ms-pinned\n")
 
     api_counter = tmp_path / "github_api_calls"
-    api_counter.write_text("0", encoding="utf-8")
+    _ = api_counter.write_text("0", encoding="utf-8")
     pin_hits = tmp_path / "pin_download_hits"
-    pin_hits.write_text("0", encoding="utf-8")
+    _ = pin_hits.write_text("0", encoding="utf-8")
     pins_file = tmp_path / "tool-pins.conf"
-    pins_file.write_text(f"SEC_PIN_2MS_TAG={pin_tag}\n", encoding="utf-8")
+    _ = pins_file.write_text(f"SEC_PIN_2MS_TAG={pin_tag}\n", encoding="utf-8")
 
     fake_bin = tmp_path / "fake-bin"
     fake_bin.mkdir()
     fake_curl = fake_bin / "curl"
-    fake_curl.write_text(
+    _ = fake_curl.write_text(
         f"""#!/usr/bin/env bash
 set -euo pipefail
 API_COUNTER="{api_counter}"
