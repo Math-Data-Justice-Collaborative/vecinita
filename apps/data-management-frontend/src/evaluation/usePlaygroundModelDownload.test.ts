@@ -230,10 +230,11 @@ describe("usePlaygroundModelDownload hook", () => {
       wrapper: providerWrapper,
     });
     unmount();
-    await act(() => {
+    act(() => {
       resolveList?.({
         items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
       });
     });
+    await Promise.resolve();
   });
 });
