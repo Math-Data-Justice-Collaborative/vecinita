@@ -52,7 +52,8 @@ jobs:
           # Stop ASGI entrypoints that can accumulate remote() backlog (#275).
           for app in vecinita-embedding vecinita-rerank vecinita-data-management; do
             echo "==> modal app stop ${app}"
-            modal app stop "$app" || echo "WARN: stop ${app} failed (continuing)"
+            # Non-interactive CI requires -y (otherwise stop aborts and queue stays full).
+            modal app stop --yes "$app" || echo "WARN: stop ${app} failed (continuing)"
           done
           sleep 20
 
