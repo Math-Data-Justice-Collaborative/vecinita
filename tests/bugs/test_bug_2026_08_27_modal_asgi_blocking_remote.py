@@ -37,7 +37,14 @@ def _async_route_bodies(source: str) -> list[str]:
     return [part for part in parts if part.lstrip().startswith("async def ")]
 
 
-def _assert_no_blocking_remote(path: str) -> None:
+def test_embedding_asgi_keeps_min_containers_warm() -> None:
+    """ASGI web worker must stay warm so /health is not blocked on image.imports cold start."""
+    source = Path("infra/modal/embedding_app.py").read_text(encoding="utf-8")
+    assert "def embedding_api()" in source
+    # min_containers appears on the ASGI function decorator block before embedding_api.
+    api_idx = source.index("def embedding_api()")
+    window = source[max(0, api_idx - 400) : api_idx]
+    assert "min_containers=1" in window
     source = Path(path).read_text(encoding="utf-8")
     for body in _async_route_bodies(source):
         for match in _REMOTE_CALL.finditer(body):
