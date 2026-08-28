@@ -89,7 +89,23 @@ apply_repo_state_to_preview_branch() {
 
 sync_production() {
   require_token
-  link_project
+  # Expired/revoked Management API PATs must not block Modal/DO CD. Same soft-fail
+  # pattern as scripts/security/run-supabase-advisors.sh (Unauthorized → skip).
+  set +e
+  link_log="$(link_project 2>&1)"
+  link_rc=$?
+  set -e
+  if (( link_rc != 0 )); then
+    if grep -qiE 'unauthorized|401' <<<"$link_log"; then
+      echo "WARN: SUPABASE_ACCESS_TOKEN unauthorized — skipping production sync." >&2
+      echo "Rotate the account PAT in GitHub Actions secrets (Settings → Secrets)." >&2
+      echo "$link_log" >&2
+      exit 0
+    fi
+    echo "$link_log" >&2
+    exit "$link_rc"
+  fi
+  printf '%s\n' "$link_log"
   echo "==> Pushing auth/config from supabase/config.toml"
   supabase config push --yes
   if compgen -G "supabase/migrations/*.sql" > /dev/null; then
