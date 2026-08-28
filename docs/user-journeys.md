@@ -1579,6 +1579,35 @@ translating the user's language away.
 
 ---
 
+### UJ-087: Operator uses distinct staging before merge to main (F83)
+
+**Actor**: Operator / maintainer
+
+**Goal**: Deploy and smoke a **true staging** stack (DO + Supabase + Modal workspace
+`vecinita-staging`), then merge to `main` only when CI and staging smoke are green.
+
+**Features**: F83 — EV-staging-do-supabase; ADR-054
+
+**Preconditions**: Staging resources provisioned (or being provisioned in Build band);
+prod stack treated as `prod`; no live corpus mutation without AskQuestion.
+
+**Steps**:
+
+1. Confirm `env_role` target is staging for this deploy (not prod / not staging_as_live).
+2. Deploy or update staging DO apps + migrate/seed staging DB.
+3. Deploy Modal apps into workspace `vecinita-staging`; wire staging secrets only.
+4. Point staging admin FE at staging Supabase project; run H1–H5.
+5. Open PR to `main`; observe required checks: CI + staging smoke for tip SHA.
+6. Merge only when both green; prod CD runs post-merge on Environment `production`.
+
+**Acceptance**: AC-ST1–AC-ST7; TC-294–TC-297.
+
+**Automated tests**: smoke/live gated (`tests/smoke/…`); ruleset contract test in Build.
+
+**E2E tier**: staging (T2/T3) after provision.
+
+---
+
 ### UJ-062: Re-ingest resilience (hash skip, force, embed retry)
 
 **Actor**: Admin operator

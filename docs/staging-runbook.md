@@ -4,16 +4,36 @@
 > **Health tiers:** `.cursor/skills/deployment-catalog.md`, `15-service-health`  
 > **Secrets:** [staging-secrets-matrix.md](staging-secrets-matrix.md)
 
-## Env role: staging label vs live (RET-002 / ADR-049)
+## Env role: staging vs prod (ADR-054 / F83)
 
-Until a **distinct** non-prod stack exists, DO apps/DB still named “staging” are the **live /
-production** surface (`env_role: staging_as_live`). Skills and operators must:
+**Target (after dual-env provision):** resolve `env_role` as `staging` or `prod` only.
+
+| Role | Resources |
+|------|-----------|
+| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging`; Modal workspace **`vecinita-staging`** |
+| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`); Modal **`vecinita`**; Supabase ref `cfuvghdsuwactfeamtym` |
+
+Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
+live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`).
+
+### Until staging H1–H5 pass (ADR-049 interim)
+
+If a **distinct** non-prod stack is not yet healthy, DO apps/DB still named “staging” remain
+the **live / production** surface (`env_role: staging_as_live`). Skills and operators must:
 
 - Say **live/prod** in cutover AskQuestions and smokes — do not imply a safer staging-only target.
 - Keep corpus/promote approval gates (`no-live-prod-corpus-push`).
 - Cite [ADR-049](adr/ADR-049-single-env-staging-as-live.md).
 
-When a true second environment is provisioned, restore separate staging→prod paths.
+## Branch protection / merge gate (F83 / ADR-050 / ADR-054)
+
+`main` must use a GitHub **ruleset** (or classic branch protection) that requires:
+
+1. Project CI green for the PR tip SHA (`ci.yml` / `ci-success`)
+2. **Staging deploy + H1–H5 smoke** green for that same SHA (GitHub Environment `staging`)
+
+Do not merge to `main` when either check is red/missing unless an explicit waiver AskQuestion.
+Prefer Environments: `staging` (PR / pre-merge) and `production` (post-merge CD on `main`).
 
 ## CI/CD before promote (RET-002 / ADR-050)
 

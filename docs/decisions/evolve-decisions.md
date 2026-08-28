@@ -1324,3 +1324,25 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 - `[Corpus: WAIVED — research-brief.md; reason: antibody leftover; decided: S031]`
 
 **Cites:** [Corpus: product] [Corpus: orchestrators] [Corpus: feature-list.md §F78–F80] [Corpus: staging] [Corpus: architecture] [Corpus: data] [Corpus: data-flow] [Corpus: deploy]
+
+---
+
+## Cycle EV-staging-do-supabase — Distinct staging (F83)
+
+**Title:** Distinct staging on DO + Supabase + Modal workspace  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-staging-do-supabase`  
+**Status:** documenting (Spec band; Build gate closed)  
+**Date:** 2026-08-28
+
+### Intake / context
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-STG-D0 | Naming | Keep current stack as **prod**; new `*-staging` resources |
+| EV-STG-D1 | Modal | Separate workspace **`vecinita-staging`** (full mirror) |
+| EV-STG-D2 | Corpus | Staging migrations + seed only |
+| EV-STG-D3 | Merge gate | Ruleset on `main`: CI + staging deploy/H1–H5 smoke |
+| EV-STG-D4 | Modal CLI | After Spec→Build gate (not during Spec) |
+| EV-STG-D5 | Feature | **F83**; ADR-054 |
+
+**Cites:** [Corpus: product] §F83 [Corpus: staging] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]

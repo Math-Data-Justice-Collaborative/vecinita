@@ -21,18 +21,27 @@ One App spec per deployable (multi-app topology). Region: **nyc** (US-only per A
 - Modal apps deployed; copy embed/LLM URLs into ChatRAG backend secrets
 - Secrets matrix: [docs/staging-secrets-matrix.md](../../docs/staging-secrets-matrix.md)
 
-## Create apps (staging)
+## Create apps (prod)
 
 **pydo (recommended):**
 
 ```bash
 export DIGITALOCEAN_TOKEN='...'
-uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all --env prod
 uv run --with pydo --with pyyaml scripts/deploy/do_apps.py list
-uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls   # staging smoke env hints
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env prod --frontend
 ```
 
-**doctl (equivalent):**
+## Create apps (staging — F83 / ADR-054)
+
+Specs: [staging/README.md](staging/README.md)
+
+```bash
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all --env staging
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend
+```
+
+**doctl (prod equivalent):**
 
 ```bash
 doctl apps create --spec infra/do/internal-write-api.yaml

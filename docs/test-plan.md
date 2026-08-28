@@ -1790,6 +1790,26 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **When** prod `vecinita-llm` health/models is queried
 - **Then** `VECINITA_FINETUNE_ADAPTER_ID` is unset / base model only
 
+### TC-294: Staging stack H1–H5 (UJ-087, F83)
+- **Objective**: Distinct staging DO + DB pass liveness, DB, RAG, CORS, frontend host checks without prod `DATABASE_URL`.
+- **Input**: Staging URLs / `VECINITA_STAGING_*` env; smoke scripts from staging-runbook.
+- **Expected**: H1–H5 pass; prod DB unchanged (AC-ST2).
+
+### TC-295: Staging Modal workspace isolation (F83)
+- **Objective**: Staging Modal tokens/workspace are `vecinita-staging` only.
+- **Input**: `VECINITA_MODAL_WORKSPACE=vecinita-staging`; staging embed/LLM base URLs.
+- **Expected**: Workspace prefix ≠ prod `vecinita--`; no shared secret accidental cross-wire (AC-ST3).
+
+### TC-296: Staging Supabase project isolation (F83)
+- **Objective**: Staging admin Auth uses staging Supabase project ref/keys only.
+- **Input**: Staging `SUPABASE_*` / `VITE_SUPABASE_*`.
+- **Expected**: Distinct project from `cfuvghdsuwactfeamtym` (AC-ST4).
+
+### TC-297: main ruleset requires staging smoke (F83, ADR-050/054)
+- **Objective**: Merge to `main` blocked unless CI + staging deploy/smoke green for tip SHA.
+- **Input**: GitHub ruleset / branch protection API or UI export.
+- **Expected**: Required checks include CI success job and staging Environment smoke (AC-ST5).
+
 ### F31 coverage gate — gated components
 
 Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-coverage`.
