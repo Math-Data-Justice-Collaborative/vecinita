@@ -34,6 +34,7 @@ _REPO_ROOT = resolve_repo_root()
 _PKG_ROOT = "/opt/vecinita"
 _PYTHONPATH = ":".join(
     [
+        "/root",
         f"{_PKG_ROOT}/packages/embedding-client",
         f"{_PKG_ROOT}/packages/shared-schemas",
     ],
@@ -51,6 +52,7 @@ image = (
         "httpx>=0.27,<1",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
+    .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
     .add_local_dir(
         _REPO_ROOT / "packages" / "embedding-client",
         remote_path=f"{_PKG_ROOT}/packages/embedding-client",

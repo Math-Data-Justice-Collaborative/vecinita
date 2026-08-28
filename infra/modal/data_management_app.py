@@ -38,6 +38,7 @@ app = modal.App(APP_NAME)
 _PKG_ROOT = "/opt/vecinita"
 _PYTHONPATH = ":".join(
     [
+        "/root",
         f"{_PKG_ROOT}/packages/ingest",
         f"{_PKG_ROOT}/packages/embedding-client",
         f"{_PKG_ROOT}/packages/llm-client",
@@ -63,6 +64,7 @@ image = (
         "playwright>=1.40,<2",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
+    .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
     .add_local_dir(_REPO_ROOT / "packages" / "ingest", remote_path=f"{_PKG_ROOT}/packages/ingest")
     .add_local_dir(
         _REPO_ROOT / "packages" / "embedding-client",

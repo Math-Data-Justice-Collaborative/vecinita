@@ -24,12 +24,17 @@ _REPO_ROOT = resolve_repo_root()
 app = modal.App(APP_NAME)
 model_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
-image = modal.Image.debian_slim(python_version="3.11").pip_install(
-    "sentence-transformers>=3.0,<4",
-    "torch>=2.2,<3",
-    "transformers>=4.40,<5",
-    "httpx>=0.27,<1",
-    "starlette>=0.37,<1",
+image = (
+    modal.Image.debian_slim(python_version="3.11")
+    .pip_install(
+        "sentence-transformers>=3.0,<4",
+        "torch>=2.2,<3",
+        "transformers>=4.40,<5",
+        "httpx>=0.27,<1",
+        "starlette>=0.37,<1",
+    )
+    .env({"PYTHONPATH": "/root"})
+    .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
 )
 
 
