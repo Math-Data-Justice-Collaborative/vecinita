@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 import yaml
 from deploy.do_apps import STAGING_APP_NAMES, app_names_for_env, specs_for_env
@@ -37,7 +39,7 @@ def test_app_names_for_env_staging_short_names() -> None:
 def test_specs_for_env_rejects_unknown() -> None:
     """Only prod and staging are valid env selectors."""
     with pytest.raises(ValueError, match="env"):
-        specs_for_env("dev")
+        _ = specs_for_env("dev")
 
 
 def test_staging_spec_names_match_yaml() -> None:
@@ -45,8 +47,7 @@ def test_staging_spec_names_match_yaml() -> None:
     expected = set(app_names_for_env("staging"))
     found: set[str] = set()
     for path in specs_for_env("staging"):
-        data = yaml.safe_load(path.read_text())
-        assert isinstance(data, dict)
+        data = cast("dict[str, object]", yaml.safe_load(path.read_text()))
         name = data.get("name")
         assert isinstance(name, str)
         found.add(name)
