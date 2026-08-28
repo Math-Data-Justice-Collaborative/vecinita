@@ -17,7 +17,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request, sta
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from vecinita_shared_schemas.chat_rag import (
     AskRequest,
     AskResponse,
@@ -35,11 +35,14 @@ from vecinita_shared_schemas.validation import validate_ask_request, validate_fe
 
 from vecinita_chat_rag_backend.browse import get_document, list_documents, list_tag_facets
 from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_chat_rag_backend.db import create_app_engine
 from vecinita_chat_rag_backend.energy import EnergyKnobs, compute_energy_estimate
 from vecinita_chat_rag_backend.service import ChatRagService
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
 
 
 async def parse_ask_body(request: Request) -> AskRequest:
@@ -154,12 +157,23 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     _ = configure_cors(app)
     resolved_settings = settings
     resolved_service = chat_service
+    resolved_engine: Engine | None = None
 
     def get_settings() -> ChatRagSettings:
         nonlocal resolved_settings
         if resolved_settings is None:
             resolved_settings = ChatRagSettings.from_env()
         return resolved_settings
+
+    def get_engine() -> Engine:
+        """One capped QueuePool for health + browse (DO max_connections=25)."""
+        nonlocal resolved_engine
+        if resolved_engine is None:
+            resolved_engine = create_app_engine(
+                get_settings().database_url,
+                application_name="vecinita-chatrag",
+            )
+        return resolved_engine
 
     def get_service() -> ChatRagService:
         nonlocal resolved_service
@@ -176,8 +190,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             "modal_llm": _check_dependency(cfg.llm_url),
         }
         try:
-            engine = create_engine(cfg.database_url)
-            with engine.connect() as conn:
+            with get_engine().connect() as conn:
                 _ = conn.execute(text("SELECT 1"))
             deps["postgres"] = "ok"
         except Exception:  # noqa: BLE001  # health probe must tolerate any DB failure
@@ -271,9 +284,8 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     ) -> DocumentBrowsePage:
         cfg = get_settings()
         resolved_page_size = page_size or cfg.browse_page_size
-        engine = create_engine(cfg.database_url)
         return list_documents(
-            engine,
+            get_engine(),
             tags=tags,
             q=q,
             page=page,
@@ -282,18 +294,14 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
 
     @app.get("/api/v1/documents/{document_id}", response_model=DocumentBrowseDetail)
     def get_document_public(document_id: UUID) -> DocumentBrowseDetail:  # pyright: ignore[reportUnusedFunction]
-        cfg = get_settings()
-        engine = create_engine(cfg.database_url)
-        detail = get_document(engine, document_id)
+        detail = get_document(get_engine(), document_id)
         if detail is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
         return detail
 
     @app.get("/api/v1/tags", response_model=TagListResponse)
     def list_tags_public() -> TagListResponse:  # pyright: ignore[reportUnusedFunction]
-        cfg = get_settings()
-        engine = create_engine(cfg.database_url)
-        return list_tag_facets(engine)
+        return list_tag_facets(get_engine())
 
     @app.post(
         "/api/v1/feedback",

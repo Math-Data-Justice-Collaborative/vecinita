@@ -915,7 +915,7 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
         patch("vecinita_chat_rag_backend.service.LlmTagClient", _TagClient),
         patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
         patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=["housing"]),
-        patch("vecinita_chat_rag_backend.service.create_engine"),
+        patch("vecinita_chat_rag_backend.service.create_app_engine"),
         patch(
             "vecinita_chat_rag_backend.service.load_active_rag_config",
             return_value=EvalConfig(),
@@ -971,7 +971,7 @@ def test_from_settings_wires_ce_scorer_when_rerank_ce_on() -> None:
         patch("vecinita_chat_rag_backend.service.LlmTagClient"),
         patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
         patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=[]),
-        patch("vecinita_chat_rag_backend.service.create_engine"),
+        patch("vecinita_chat_rag_backend.service.create_app_engine"),
         patch(
             "vecinita_chat_rag_backend.service.CorpusPgvectorRetriever",
             return_value=StubRetriever([]),
@@ -1005,7 +1005,7 @@ def test_from_settings_skips_ce_scorer_when_rerank_ce_off() -> None:
         patch("vecinita_chat_rag_backend.service.LlmTagClient"),
         patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
         patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=[]),
-        patch("vecinita_chat_rag_backend.service.create_engine"),
+        patch("vecinita_chat_rag_backend.service.create_app_engine"),
         patch(
             "vecinita_chat_rag_backend.service.CorpusPgvectorRetriever",
             return_value=StubRetriever([]),

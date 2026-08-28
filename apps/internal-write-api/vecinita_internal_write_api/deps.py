@@ -32,6 +32,11 @@ if TYPE_CHECKING:
 
 MAX_DOCUMENT_TAGS = 10
 
+# DO Managed Postgres max_connections=25 (HF-alembic-do-db-ports).
+_WRITE_POOL_SIZE = 2
+_WRITE_MAX_OVERFLOW = 1
+_WRITE_POOL_RECYCLE_S = 300
+
 
 def dependency_health_url(base: str) -> str:
     """Build liveness URL for an upstream base that may already end with /health."""
@@ -86,8 +91,15 @@ def database_url() -> str:
 
 
 def engine() -> Engine:
-    """Create the SQLAlchemy engine for corpus writes."""
-    return create_engine(database_url())
+    """Create a capped SQLAlchemy engine for corpus writes."""
+    return create_engine(
+        database_url(),
+        pool_size=_WRITE_POOL_SIZE,
+        max_overflow=_WRITE_MAX_OVERFLOW,
+        pool_pre_ping=True,
+        pool_recycle=_WRITE_POOL_RECYCLE_S,
+        connect_args={"application_name": "vecinita-internal-write"},
+    )
 
 
 def resolve_write_actor(

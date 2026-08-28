@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Literal, cast
 
-from sqlalchemy import create_engine
 from vecinita_embedding_client import EmbeddingClient
 from vecinita_llm_client import LlmClient, format_instruct_prompt
 from vecinita_rag.cache import (
@@ -34,6 +33,7 @@ from vecinita_shared_schemas.eval_config import EvalConfig, resolve_system_promp
 from vecinita_tagging.llm_client import LlmTagClient
 from vecinita_tagging.vocabulary import load_seed_vocabulary, vocabulary_slugs
 
+from vecinita_chat_rag_backend.db import create_app_engine
 from vecinita_chat_rag_backend.rag_production_config import load_active_rag_config
 
 if TYPE_CHECKING:
@@ -198,13 +198,17 @@ class ChatRagService:
         def tag_infer_fn(question: str) -> list[str]:
             return tag_client.infer_query_tags(question=question, vocabulary=vocabulary)
 
+        db_engine = create_app_engine(
+            settings.database_url,
+            application_name="vecinita-chatrag-rag",
+        )
         retriever = CorpusPgvectorRetriever(
             embed_fn=embed_fn,
-            database_url=settings.database_url,
+            engine=db_engine,
             top_k=settings.top_k,
             score_threshold=settings.min_retrieval_score,
         )
-        config_engine = create_engine(settings.database_url)
+        config_engine = db_engine
         ce_scorer: CrossEncoderScorer | None = None
         if settings.rag_rerank_ce and settings.rerank_url:
             ce_scorer = RerankClient(
