@@ -222,6 +222,13 @@ class JobMetrics(BaseModel):
         default=None,
         description="F79 freshness_refresh worker outcome (ADR-052).",
     )
+    hash_decision: Literal["skip_rechunk", "rechunk"] | None = Field(
+        default=None,
+        description=(
+            "F79 hash-aware freshness: skip_rechunk when content unchanged, "
+            "rechunk when content changed (BUG-2026-08-28)."
+        ),
+    )
     documents_processed: int | None = Field(
         default=None,
         ge=0,
