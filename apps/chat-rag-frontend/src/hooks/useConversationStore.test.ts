@@ -282,6 +282,57 @@ describe("useConversationStore", () => {
     expect(result.current.previous).toHaveLength(0);
   });
 
+  it("keeps previous chats sorted by createdAt desc across select (#273)", () => {
+    const older = {
+      id: "c-old",
+      createdAt: 1_700_000_000_001,
+      messages: [userMessage("old")],
+    };
+    const mid = {
+      id: "c-mid",
+      createdAt: 1_700_000_000_002,
+      messages: [userMessage("mid")],
+    };
+    const newer = {
+      id: "c-new",
+      createdAt: 1_700_000_000_003,
+      messages: [userMessage("new")],
+    };
+    localStorage.setItem(
+      CHAT_HISTORY_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        active: {
+          id: "c-active",
+          createdAt: 1_700_000_000_004,
+          messages: [userMessage("active")],
+        },
+        // Deliberately scrambled vs createdAt order
+        previous: [mid, newer, older],
+      }),
+    );
+
+    const { result } = renderHook(() => useConversationStore());
+    expect(result.current.previous.map((c) => c.id)).toEqual([
+      "c-new",
+      "c-mid",
+      "c-old",
+    ]);
+
+    act(() => {
+      result.current.selectConversation("c-mid");
+    });
+    // Active (newest createdAt) archives into previous; list stays createdAt desc.
+    expect(result.current.active.id).toBe("c-mid");
+    expect(result.current.previous.map((c) => c.id)).toEqual([
+      "c-active",
+      "c-new",
+      "c-old",
+    ]);
+    const createdAts = result.current.previous.map((c) => c.createdAt);
+    expect(createdAts).toEqual([...createdAts].sort((a, b) => b - a));
+  });
+
   it("archives a non-empty active conversation when selecting a previous one", () => {
     const { result } = renderHook(() => useConversationStore());
     act(() => {
