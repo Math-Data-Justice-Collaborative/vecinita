@@ -88,6 +88,7 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
   const downloadPollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const downloadPollStartedAt = useRef<number | null>(null);
   const expandedFamiliesRef = useRef<Set<string>>(new Set());
+  const mountedRef = useRef(true);
 
   const clearDownloadPoll = useCallback(() => {
     if (downloadPollTimer.current !== null) {
@@ -97,12 +98,22 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
     downloadPollStartedAt.current = null;
   }, []);
 
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      clearDownloadPoll();
+    };
+  }, [clearDownloadPoll]);
+
   const refreshModelsFromApi = useCallback(async (): Promise<
     PlaygroundModelSummaryApi[]
   > => {
     const client = requireCorpusConfig();
     const data = await fetchPlaygroundModels(client);
-    setModels(data.items);
+    if (mountedRef.current) {
+      setModels(data.items);
+    }
     return data.items;
   }, []);
 
@@ -110,7 +121,9 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
     const client = requireCorpusConfig();
     const data = await fetchPlaygroundCatalogFamilies(client);
     const slugs = data.families.map((family) => family.slug);
-    setCatalogFamilies(slugs);
+    if (mountedRef.current) {
+      setCatalogFamilies(slugs);
+    }
     return slugs;
   }, []);
 
@@ -121,15 +134,21 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
     try {
       const client = requireCorpusConfig();
       const data = await fetchPlaygroundCatalogFamilyTags(client, slug);
-      setFamilyTags((current) => ({ ...current, [slug]: data.tags }));
+      if (mountedRef.current) {
+        setFamilyTags((current) => ({ ...current, [slug]: data.tags }));
+      }
     } catch (err) {
-      setFamilyTagsError((current) => ({
-        ...current,
-        [slug]:
-          err instanceof Error ? err.message : "Failed to load model tags",
-      }));
+      if (mountedRef.current) {
+        setFamilyTagsError((current) => ({
+          ...current,
+          [slug]:
+            err instanceof Error ? err.message : "Failed to load model tags",
+        }));
+      }
     } finally {
-      setFamilyTagsLoading((current) => ({ ...current, [slug]: false }));
+      if (mountedRef.current) {
+        setFamilyTagsLoading((current) => ({ ...current, [slug]: false }));
+      }
     }
   }, []);
 
@@ -145,11 +164,15 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
       await refreshModelsFromApi();
       await refreshExpandedFamilyTags();
     } catch (err) {
-      setModelsError(
-        err instanceof Error ? err.message : "Failed to load models",
-      );
+      if (mountedRef.current) {
+        setModelsError(
+          err instanceof Error ? err.message : "Failed to load models",
+        );
+      }
     } finally {
-      setModelsLoading(false);
+      if (mountedRef.current) {
+        setModelsLoading(false);
+      }
     }
   }, [refreshExpandedFamilyTags, refreshModelsFromApi]);
 
@@ -160,13 +183,17 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
       await refreshCatalogFromApi();
       await refreshExpandedFamilyTags();
     } catch (err) {
-      setCatalogError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load playground catalog",
-      );
+      if (mountedRef.current) {
+        setCatalogError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load playground catalog",
+        );
+      }
     } finally {
-      setCatalogLoading(false);
+      if (mountedRef.current) {
+        setCatalogLoading(false);
+      }
     }
   }, [refreshCatalogFromApi, refreshExpandedFamilyTags]);
 
@@ -183,7 +210,9 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
         const elapsed = Date.now() - downloadPollStartedAt.current;
         if (elapsed >= MODEL_PULL_TIMEOUT_MS) {
           clearDownloadPoll();
-          setDownloadStatus("timeout");
+          if (mountedRef.current) {
+            setDownloadStatus("timeout");
+          }
           return;
         }
         try {
@@ -194,15 +223,19 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
           );
           if (ready) {
             clearDownloadPoll();
-            setDownloadStatus("success");
+            if (mountedRef.current) {
+              setDownloadStatus("success");
+            }
             return;
           }
         } catch (err) {
           clearDownloadPoll();
-          setDownloadStatus("error");
-          setDownloadError(
-            err instanceof Error ? err.message : "Model list poll failed",
-          );
+          if (mountedRef.current) {
+            setDownloadStatus("error");
+            setDownloadError(
+              err instanceof Error ? err.message : "Model list poll failed",
+            );
+          }
           return;
         }
         downloadPollTimer.current = setTimeout(() => {
