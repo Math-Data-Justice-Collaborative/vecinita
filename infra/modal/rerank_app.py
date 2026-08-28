@@ -91,7 +91,8 @@ def rerank_api():
         if not isinstance(passages_obj, list):
             return JSONResponse({"detail": "passages must be list"}, status_code=422)
         passages = [str(p) for p in passages_obj]
-        scores = service.score_pairs.remote(query, passages)
+        # Non-blocking Modal call — sync Function.remote saturates ASGI (BUG-2026-08-27).
+        scores = await service.score_pairs.remote.aio(query, passages)
         return JSONResponse({"scores": scores})
 
     return Starlette(

@@ -164,25 +164,28 @@ export function isDoneEvent(
   return "done" in event;
 }
 
-/** User-facing message when all cold-start retries are exhausted. */
+/**
+ * User-facing message when all cold-start retries are exhausted (#274).
+ * Mid-retry UX stays on ``coldStartStatus``; final copy must be ops-accurate
+ * (not perpetual “still starting”) when Modal/ChatRAG stay down.
+ */
 export function formatAskFailureMessage(
   error: unknown,
   locale: Locale,
 ): string {
   if (error instanceof AskStreamError && error.status !== undefined) {
-    if (TRANSIENT_ASK_STATUSES.has(error.status)) {
-      return t(locale, "askStillStarting");
-    }
     if (error.status === 401 || error.status === 403) {
       return t(locale, "askUnauthorized");
     }
-    if (error.status >= 500) {
+    // Exhausted 502/503/504 and other 5xx → unavailable (not “still starting”).
+    if (TRANSIENT_ASK_STATUSES.has(error.status) || error.status >= 500) {
       return t(locale, "askServerError");
     }
     return t(locale, "requestFailed");
   }
   if (error instanceof TypeError) {
-    return t(locale, "askStartingWait");
+    // Failed to fetch / UH after retries — same ops-visible unavailable copy.
+    return t(locale, "askServerError");
   }
   if (error instanceof Error) {
     return t(locale, "requestFailed");

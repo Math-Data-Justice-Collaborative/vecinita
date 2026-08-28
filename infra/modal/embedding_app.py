@@ -204,8 +204,12 @@ def embedding_api():
         )
 
     async def warm(_request: Request) -> JSONResponse:
-        """Boot EmbeddingService during user think-time (S001 T11)."""
-        _ = service.embed_texts.remote(["warmup"])
+        """Boot EmbeddingService during user think-time (S001 T11).
+
+        Fire-and-forget via ``.spawn()`` so the ASGI worker is not held while
+        the class container cold-starts (BUG-2026-08-27 queue saturation).
+        """
+        _ = service.embed_texts.spawn(["warmup"])
         return JSONResponse({"status": "ok"})
 
     async def embed(request: Request) -> JSONResponse:
@@ -214,7 +218,8 @@ def embedding_api():
             item = EmbedRequest.model_validate(payload)
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=422)
-        vectors = service.embed_texts.remote([item.text])
+        # ``.aio`` keeps the ASGI event loop free (BUG-2026-08-27 / #275).
+        vectors = await service.embed_texts.remote.aio([item.text])
         return JSONResponse({"embedding": vectors[0]})
 
     async def embed_batch(request: Request) -> JSONResponse:
@@ -223,7 +228,7 @@ def embedding_api():
             item = EmbedBatchRequest.model_validate(payload)
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=422)
-        vectors = service.embed_texts.remote(item.texts)
+        vectors = await service.embed_texts.remote.aio(item.texts)
         return JSONResponse({"embeddings": vectors})
 
     return Starlette(
