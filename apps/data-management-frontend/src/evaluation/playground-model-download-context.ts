@@ -106,51 +106,61 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
     };
   }, [clearDownloadPoll]);
 
+  /** Avoid setState after unmount (CI flake: window is not defined). */
+  const runIfMounted = useCallback((update: () => void): void => {
+    if (mountedRef.current) {
+      update();
+    }
+  }, []);
+
   const refreshModelsFromApi = useCallback(async (): Promise<
     PlaygroundModelSummaryApi[]
   > => {
     const client = requireCorpusConfig();
     const data = await fetchPlaygroundModels(client);
-    if (mountedRef.current) {
+    runIfMounted(() => {
       setModels(data.items);
-    }
+    });
     return data.items;
-  }, []);
+  }, [runIfMounted]);
 
   const refreshCatalogFromApi = useCallback(async (): Promise<string[]> => {
     const client = requireCorpusConfig();
     const data = await fetchPlaygroundCatalogFamilies(client);
     const slugs = data.families.map((family) => family.slug);
-    if (mountedRef.current) {
+    runIfMounted(() => {
       setCatalogFamilies(slugs);
-    }
+    });
     return slugs;
-  }, []);
+  }, [runIfMounted]);
 
-  const loadFamilyTags = useCallback(async (slug: string) => {
-    expandedFamiliesRef.current.add(slug);
-    setFamilyTagsLoading((current) => ({ ...current, [slug]: true }));
-    setFamilyTagsError((current) => ({ ...current, [slug]: null }));
-    try {
-      const client = requireCorpusConfig();
-      const data = await fetchPlaygroundCatalogFamilyTags(client, slug);
-      if (mountedRef.current) {
-        setFamilyTags((current) => ({ ...current, [slug]: data.tags }));
+  const loadFamilyTags = useCallback(
+    async (slug: string) => {
+      expandedFamiliesRef.current.add(slug);
+      setFamilyTagsLoading((current) => ({ ...current, [slug]: true }));
+      setFamilyTagsError((current) => ({ ...current, [slug]: null }));
+      try {
+        const client = requireCorpusConfig();
+        const data = await fetchPlaygroundCatalogFamilyTags(client, slug);
+        runIfMounted(() => {
+          setFamilyTags((current) => ({ ...current, [slug]: data.tags }));
+        });
+      } catch (err) {
+        runIfMounted(() => {
+          setFamilyTagsError((current) => ({
+            ...current,
+            [slug]:
+              err instanceof Error ? err.message : "Failed to load model tags",
+          }));
+        });
+      } finally {
+        runIfMounted(() => {
+          setFamilyTagsLoading((current) => ({ ...current, [slug]: false }));
+        });
       }
-    } catch (err) {
-      if (mountedRef.current) {
-        setFamilyTagsError((current) => ({
-          ...current,
-          [slug]:
-            err instanceof Error ? err.message : "Failed to load model tags",
-        }));
-      }
-    } finally {
-      if (mountedRef.current) {
-        setFamilyTagsLoading((current) => ({ ...current, [slug]: false }));
-      }
-    }
-  }, []);
+    },
+    [runIfMounted],
+  );
 
   const refreshExpandedFamilyTags = useCallback(async () => {
     const slugs = [...expandedFamiliesRef.current];
@@ -164,17 +174,17 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
       await refreshModelsFromApi();
       await refreshExpandedFamilyTags();
     } catch (err) {
-      if (mountedRef.current) {
+      runIfMounted(() => {
         setModelsError(
           err instanceof Error ? err.message : "Failed to load models",
         );
-      }
+      });
     } finally {
-      if (mountedRef.current) {
+      runIfMounted(() => {
         setModelsLoading(false);
-      }
+      });
     }
-  }, [refreshExpandedFamilyTags, refreshModelsFromApi]);
+  }, [refreshExpandedFamilyTags, refreshModelsFromApi, runIfMounted]);
 
   const refreshCatalog = useCallback(async () => {
     setCatalogLoading(true);
@@ -183,19 +193,19 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
       await refreshCatalogFromApi();
       await refreshExpandedFamilyTags();
     } catch (err) {
-      if (mountedRef.current) {
+      runIfMounted(() => {
         setCatalogError(
           err instanceof Error
             ? err.message
             : "Failed to load playground catalog",
         );
-      }
+      });
     } finally {
-      if (mountedRef.current) {
+      runIfMounted(() => {
         setCatalogLoading(false);
-      }
+      });
     }
-  }, [refreshCatalogFromApi, refreshExpandedFamilyTags]);
+  }, [refreshCatalogFromApi, refreshExpandedFamilyTags, runIfMounted]);
 
   useEffect(() => {
     void refreshModels();
@@ -210,9 +220,9 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
         const elapsed = Date.now() - downloadPollStartedAt.current;
         if (elapsed >= MODEL_PULL_TIMEOUT_MS) {
           clearDownloadPoll();
-          if (mountedRef.current) {
+          runIfMounted(() => {
             setDownloadStatus("timeout");
-          }
+          });
           return;
         }
         try {
@@ -223,19 +233,19 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
           );
           if (ready) {
             clearDownloadPoll();
-            if (mountedRef.current) {
+            runIfMounted(() => {
               setDownloadStatus("success");
-            }
+            });
             return;
           }
         } catch (err) {
           clearDownloadPoll();
-          if (mountedRef.current) {
+          runIfMounted(() => {
             setDownloadStatus("error");
             setDownloadError(
               err instanceof Error ? err.message : "Model list poll failed",
             );
-          }
+          });
           return;
         }
         downloadPollTimer.current = setTimeout(() => {
@@ -246,7 +256,12 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
         void poll();
       }, MODEL_PULL_POLL_INTERVAL_MS);
     },
-    [clearDownloadPoll, refreshExpandedFamilyTags, refreshModelsFromApi],
+    [
+      clearDownloadPoll,
+      refreshExpandedFamilyTags,
+      refreshModelsFromApi,
+      runIfMounted,
+    ],
   );
 
   const downloadModel = useCallback(
@@ -262,13 +277,15 @@ export function usePlaygroundModelDownloadState(): UsePlaygroundModelDownloadRes
         scheduleDownloadPoll(tag);
       } catch (err) {
         clearDownloadPoll();
-        setDownloadStatus("error");
-        setDownloadError(
-          err instanceof Error ? err.message : "Download failed",
-        );
+        runIfMounted(() => {
+          setDownloadStatus("error");
+          setDownloadError(
+            err instanceof Error ? err.message : "Download failed",
+          );
+        });
       }
     },
-    [clearDownloadPoll, scheduleDownloadPoll],
+    [clearDownloadPoll, runIfMounted, scheduleDownloadPoll],
   );
 
   const resetDownloadStatus = useCallback(() => {
