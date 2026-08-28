@@ -177,7 +177,14 @@ class EmbeddingService:
         return self._backend.embed(texts)
 
 
-@app.function(image=image, memory=EMBED_MEMORY_MIB, secrets=_EMBED_SECRETS)
+@app.function(
+    image=image,
+    memory=EMBED_MEMORY_MIB,
+    secrets=_EMBED_SECRETS,
+    # Keep one ASGI worker so /health is not stuck behind cold import of
+    # sentence_transformers/fastembed (image.imports) after app stop/drain.
+    min_containers=1,
+)
 @modal.asgi_app()
 def embedding_api():
     from pydantic import BaseModel, ConfigDict, Field, ValidationError
