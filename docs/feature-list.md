@@ -83,7 +83,7 @@
 | F78 | Corpus change automations | Live enabled (EV-031) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133/M135 |
 | F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
 | F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
-| F83 | Distinct staging environment (DO + Supabase + Modal) | Planned | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset | EV-staging-do-supabase; ADR-054 |
+| F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset | EV-staging-do-supabase; ADR-054 |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 

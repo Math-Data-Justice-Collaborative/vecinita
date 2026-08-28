@@ -64,3 +64,7 @@ data/eval-experiments/
 # Security static analysis (local tool installs + reports)
 .tools/security/
 .security-reports/
+.staging-db-url.local
+.staging-supabase-db-pass.local
+.staging-supabase-ref.local
+.staging-supabase-keys.local

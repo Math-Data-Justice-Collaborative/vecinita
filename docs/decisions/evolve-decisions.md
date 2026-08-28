@@ -1346,4 +1346,11 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | EV-STG-D5 | Feature | **F83**; ADR-054 |
 | EV-STG-D6 | Modal auth | Reuse `vecinita` token; `modal environment create staging` + web suffix `staging` |
 
+### Provision closeout (2026-08-28)
+
+- Staging DO apps + `vecinita-staging-db` + Modal Environment + Supabase `camkatfbjguwvymfgdme`
+- H1–H5 PASS; ruleset `21766359`; ADR-049 interim banner flipped in runbook
+- **EV-STG-D7 (open):** DB cost — keep separate clusters (default) vs one cluster/two DBs;
+  also whether to destroy unused DO DB `vecinita-staging` (orphan vs `vecinita-staging-db`)
+
 **Cites:** [Corpus: product] §F83 [Corpus: staging] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]

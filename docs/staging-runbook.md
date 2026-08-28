@@ -10,20 +10,16 @@
 
 | Role | Resources |
 |------|-----------|
-| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging`; Modal workspace **`vecinita`** Environment **`staging`** |
-| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`); Modal **`vecinita`** / **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
+| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging` (`camkatfbjguwvymfgdme`); Modal workspace **`vecinita`** Environment **`staging`** |
+| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`; corpus DB historically `vecinita-staging-restored-20260701`); Modal **`vecinita`** / **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
 
 Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
 live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`).
 
-### Until staging H1–H5 pass (ADR-049 interim)
-
-If a **distinct** non-prod stack is not yet healthy, DO apps/DB still named “staging” remain
-the **live / production** surface (`env_role: staging_as_live`). Skills and operators must:
-
-- Say **live/prod** in cutover AskQuestions and smokes — do not imply a safer staging-only target.
-- Keep corpus/promote approval gates (`no-live-prod-corpus-push`).
-- Cite [ADR-049](adr/ADR-049-single-env-staging-as-live.md).
+**Operational status (2026-08-28):** Distinct staging H1–H5 passed. Resolve `env_role` as
+`staging` or `prod` — do **not** use `staging_as_live` for the new `vecinita-staging-*`
+stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **prod**.
+[ADR-049](adr/ADR-049-single-env-staging-as-live.md) is historical for the single-env era.
 
 ## Branch protection / merge gate (F83 / ADR-050 / ADR-054)
 

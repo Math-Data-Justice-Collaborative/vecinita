@@ -14,7 +14,8 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | `staging` | `vecinita-staging-*` apps + `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** (web suffix `staging`) |
 | `prod` | Pre-existing sole stack | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** |
 
-Until staging is provisioned and H1–H5 pass, the sole stack remains `staging_as_live` (ADR-049).
+Distinct staging was provisioned 2026-08-28 (H1–H5 PASS). Use `env_role` `staging` |
+`prod` per ADR-054; ADR-049 remains historical for the former single-env era.
 Merge to `main` requires CI + staging deploy/smoke (ruleset; ADR-050/054). GitHub Environments:
 `staging` (pre-merge) and `production` (post-merge CD).
 

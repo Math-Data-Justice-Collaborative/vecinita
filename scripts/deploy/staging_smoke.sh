@@ -55,20 +55,33 @@ run_h3() {
 
   RAN=$((RAN + 1))
   echo "H3: Sample ask (+ AC-C6 latency sample)"
-  start_ms="$(date +%s%3N)"
-  curl -fsS -X POST "${chat_url%/}/api/v1/ask" \
-    -H 'Content-Type: application/json' \
-    -d '{"question":"What are the food pantry hours?"}' \
-    | tee /tmp/vecinita-ask.json
-  end_ms="$(date +%s%3N)"
-  elapsed_ms=$((end_ms - start_ms))
-  python3 -c "
+  # Portable ms timing (macOS BSD date has no %3N).
+  python3 - <<'PY'
 import json
-p=json.load(open('/tmp/vecinita-ask.json'))
-assert p.get('answer'), 'missing answer'
-assert p.get('language') in ('en','es'), p
-print('OK: ask returned answer in', p['language'])
-"
+import os
+import time
+import urllib.request
+
+url = os.environ["VECINITA_STAGING_CHAT_URL"].rstrip("/") + "/api/v1/ask"
+req = urllib.request.Request(
+    url,
+    data=b'{"question":"What are the food pantry hours?"}',
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+t0 = time.perf_counter()
+with urllib.request.urlopen(req, timeout=120) as resp:
+    raw = resp.read()
+elapsed_ms = int((time.perf_counter() - t0) * 1000)
+open("/tmp/vecinita-ask.json", "wb").write(raw)
+open("/tmp/vecinita-ask-latency-ms.txt", "w", encoding="utf-8").write(str(elapsed_ms))
+payload = json.loads(raw)
+assert payload.get("answer"), "missing answer"
+assert payload.get("language") in ("en", "es"), payload
+print(f"OK: ask returned answer in {payload['language']}")
+print(json.dumps(payload))
+PY
+  elapsed_ms="$(cat /tmp/vecinita-ask-latency-ms.txt)"
   echo "H3: sample ask latency ${elapsed_ms}ms (informative; p95 gate: uv run pytest tests/smoke/test_staging_latency.py -m live)"
 }
 

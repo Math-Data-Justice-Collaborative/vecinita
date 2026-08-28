@@ -49,6 +49,18 @@ on DigitalOcean, Supabase, and Modal.
   `vecinita-staging`.
 - Skills/AskQuestions must resolve `env_role` before cutover.
 
+### Cost notes (operator 2026-08-28)
+
+| Layer | Shared today? | Cheaper merge option | Risk |
+|-------|---------------|----------------------|------|
+| Modal | **Yes** — one workspace, Environments `main` / `staging` | Already optimal | Low |
+| DO Postgres | **No** — separate managed clusters | One cluster, two logical DBs (`prod` / `staging`) | Shared blast radius, noisy neighbor, harder firewall; not default |
+| Supabase Auth | **No** — separate projects | Keep separate (free tier OK for staging) | Shared JWT/users if merged — rejected |
+
+Do **not** put staging and prod corpus on the same logical database. Immediate savings without
+architecture change: destroy unused orphan clusters (e.g. leftover `vecinita-staging` if not
+referenced) after AskQuestion confirm.
+
 ## Alternatives considered
 
 | Alternative | Why not |
@@ -57,6 +69,8 @@ on DigitalOcean, Supabase, and Modal.
 | Share Environment with env-prefixed secret names only | No deploy isolation; Environments give native secret/volume/app isolation |
 | Rename current stack to staging and build new prod | Higher cutover risk; rejected at intake |
 | Branch protection without staging smoke | Does not meet “staging passes before main” |
+| One DO Postgres cluster for both envs (two DBs) | Possible cost cut; deferred — isolation preferred until AskQuestion (EV-STG-D7) |
+| One Supabase project for staging+prod Auth | Same user pool / JWT issuer — unsafe |
 
 ## References
 
