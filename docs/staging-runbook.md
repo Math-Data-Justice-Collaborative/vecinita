@@ -10,8 +10,8 @@
 
 | Role | Resources |
 |------|-----------|
-| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging`; Modal workspace **`vecinita-staging`** |
-| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`); Modal **`vecinita`**; Supabase ref `cfuvghdsuwactfeamtym` |
+| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging`; Modal workspace **`vecinita`** Environment **`staging`** |
+| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`); Modal **`vecinita`** / **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
 
 Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
 live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`).
@@ -120,9 +120,26 @@ Database migrations are **not** automated — run `alembic upgrade head` per the
    uv run python -c "from vecinita_database.seeds.load import load_corpus; load_corpus()"
    ```
 
-3. **Modal** (US workspace) — embedding, data-management, LLM:
+3. **Modal** (workspace `vecinita`) — embedding, data-management, LLM:
 
+   **One-time (staging Environment):**
    ```bash
+   modal profile activate vecinita   # or existing MODAL_TOKEN_* for workspace vecinita
+   modal environment create staging
+   modal environment update staging --set-web-suffix staging
+   ```
+
+   **Deploy staging:**
+   ```bash
+   export VECINITA_MODAL_WORKSPACE=vecinita
+   export MODAL_ENVIRONMENT=staging
+   bash scripts/deploy/modal.sh
+   ```
+
+   **Deploy prod** (Environment `main`):
+   ```bash
+   export VECINITA_MODAL_WORKSPACE=vecinita
+   unset MODAL_ENVIRONMENT   # or export MODAL_ENVIRONMENT=main
    bash scripts/deploy/modal.sh
    ```
 

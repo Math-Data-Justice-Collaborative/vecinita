@@ -15,7 +15,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 |----------|------|---------|----------|-------------|
 | `DATABASE_URL` | string | — | Yes (DO backends only) | Postgres connection; **not** on Modal workers |
 | `VECINITA_ENV` | string | `development` | No | `development` \| `staging` \| `production` |
-| `VECINITA_MODAL_WORKSPACE` | string | `vecinita` | No (required for dual-env deploy) | Modal workspace name: prod `vecinita`, staging `vecinita-staging` (ADR-054 / F83). Deploy scripts must not hard-fail other values when set intentionally. |
+| `VECINITA_MODAL_WORKSPACE` | string | `vecinita` | No | Modal workspace — always **`vecinita`** for prod and staging (ADR-054 / F83). |
+| `MODAL_ENVIRONMENT` | string | `main` | No (set for staging deploy) | Modal Environment name: prod `main`, staging `staging`. Alias: `VECINITA_MODAL_ENVIRONMENT`. Passed as `modal deploy --env`. |
 | `VECINITA_LOG_LEVEL` | string | `INFO` | No | Logging level |
 | `VECINITA_LOG_RETENTION_DAYS` | int | `7` | No | Max retention; no raw prompts in persistent logs |
 

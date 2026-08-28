@@ -443,7 +443,7 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 
 - [ ] **AC-ST1**: `env_role` resolves to `staging` or `prod` (not `staging_as_live`) once staging H1–H5 pass (ADR-054).
 - [ ] **AC-ST2**: Staging DO apps + `vecinita-staging-db` healthy; H1–H5 pass without touching prod DB (UJ-087, TC-294).
-- [ ] **AC-ST3**: Staging Modal workspace is `vecinita-staging`; URLs/tokens isolated from prod `vecinita` (TC-295).
+- [ ] **AC-ST3**: Staging Modal uses Environment `staging` (web suffix) in workspace `vecinita`; URLs use `vecinita-staging--` prefix; secrets isolated from Environment `main` (TC-295).
 - [ ] **AC-ST4**: Staging Supabase project distinct; staging admin FE uses staging Auth only (TC-296).
 - [ ] **AC-ST5**: GitHub ruleset on `main` requires CI + staging deploy/smoke for PR tip SHA (TC-297).
 - [ ] **AC-ST6**: ADR-049 operational exit documented; runbook describes staging→prod path (ADR-054).

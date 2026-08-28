@@ -81,17 +81,17 @@ def test_validate_rejects_wrong_rerank_app_host() -> None:
         )
 
 
-def test_validate_accepts_staging_workspace_embed_url() -> None:
-    """F83 / ADR-054 — staging Modal workspace prefix vecinita-staging--."""
+def test_validate_accepts_staging_env_embed_url() -> None:
+    """F83 / ADR-054 — Modal Environment staging web suffix → vecinita-staging--."""
     validate_modal_service_url("VECINITA_MODAL_EMBED_URL", STAGING_EMBED)
 
 
-def test_validate_accepts_staging_workspace_llm_urls() -> None:
+def test_validate_accepts_staging_env_llm_urls() -> None:
     validate_modal_service_url("VECINITA_MODAL_LLM_URL", STAGING_LLM)
     validate_modal_service_url("VECINITA_MODAL_LLM_PLAYGROUND_URL", STAGING_LLM_PLAYGROUND)
 
 
-def test_validate_accepts_staging_workspace_rerank_url() -> None:
+def test_validate_accepts_staging_env_rerank_url() -> None:
     validate_modal_service_url("VECINITA_MODAL_RERANK_URL", STAGING_RERANK)
 
 

@@ -20,7 +20,7 @@ Calling that surface “staging” caused false safety and ambiguous prod-target
    hostnames still contain `staging`.
 3. Do **not** imply a safer staging-only cutover when none exists.
 4. When a true second environment is provisioned later, resume separate staging→prod paths.
-   **Implemented by ADR-054 / F83** (DO + Supabase + Modal workspace `vecinita-staging`).
+   **Implemented by ADR-054 / F83** (DO + Supabase + Modal Environment `staging` in workspace `vecinita`).
    Until staging H1–H5 pass and operators flip docs/CD, continue treating the sole stack as
    live under `staging_as_live`.
 

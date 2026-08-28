@@ -1583,8 +1583,8 @@ translating the user's language away.
 
 **Actor**: Operator / maintainer
 
-**Goal**: Deploy and smoke a **true staging** stack (DO + Supabase + Modal workspace
-`vecinita-staging`), then merge to `main` only when CI and staging smoke are green.
+**Goal**: Deploy and smoke a **true staging** stack (DO + Supabase + Modal Environment
+`staging` in workspace `vecinita`), then merge to `main` only when CI and staging smoke are green.
 
 **Features**: F83 — EV-staging-do-supabase; ADR-054
 
@@ -1595,7 +1595,8 @@ prod stack treated as `prod`; no live corpus mutation without AskQuestion.
 
 1. Confirm `env_role` target is staging for this deploy (not prod / not staging_as_live).
 2. Deploy or update staging DO apps + migrate/seed staging DB.
-3. Deploy Modal apps into workspace `vecinita-staging`; wire staging secrets only.
+3. Deploy Modal apps with `MODAL_ENVIRONMENT=staging` (same workspace `vecinita`); wire
+   Environment-scoped staging secrets only.
 4. Point staging admin FE at staging Supabase project; run H1–H5.
 5. Open PR to `main`; observe required checks: CI + staging smoke for tip SHA.
 6. Merge only when both green; prod CD runs post-merge on Environment `production`.

@@ -10,31 +10,33 @@
 
 Run commands from the **repo root** with Modal CLI authenticated (`modal token new`).
 
-## Workspace (required)
+## Workspace + Environment (required)
 
-| Environment | Modal workspace | Notes |
-|-------------|-----------------|-------|
-| **prod** | **`vecinita`** | Default for CD on `main` / production Environment |
-| **staging** | **`vecinita-staging`** | Distinct project (ADR-054 / F83); separate tokens |
+| Role | Modal workspace | Modal Environment | Web URL source prefix |
+|------|-----------------|-------------------|------------------------|
+| **prod** | **`vecinita`** | **`main`** (default) | `vecinita--` |
+| **staging** | **`vecinita`** | **`staging`** (web suffix `staging`) | `vecinita-staging--` |
 
-Set `VECINITA_MODAL_WORKSPACE` before deploy scripts (`scripts/modal_ensure_workspace.sh`).
-Do **not** deploy staging apps into `vecinita` or prod apps into `vecinita-staging`.
+One workspace, two [Environments](https://modal.com/docs/guide/environments) (ADR-054 / F83).
+Same App names; secrets and volumes are Environment-scoped.
 
 ```bash
-# Prod
+# Prod (Environment main)
 export VECINITA_MODAL_WORKSPACE=vecinita
-modal profile activate vecinita   # or token scoped to vecinita
+export MODAL_ENVIRONMENT=main   # or leave unset
 bash scripts/deploy/modal.sh
 
-# Staging (after Build gate / F83 provision)
-export VECINITA_MODAL_WORKSPACE=vecinita-staging
-# modal token / profile for vecinita-staging only
+# Staging
+export VECINITA_MODAL_WORKSPACE=vecinita
+export MODAL_ENVIRONMENT=staging
+# One-time: modal environment create staging
+#           modal environment update staging --set-web-suffix staging
 bash scripts/deploy/modal.sh
 ```
 
-Deployed URLs use the workspace prefix, e.g.  
+Deployed URLs:
 `https://vecinita--vecinita-embedding-embedding-api.modal.run` (prod) vs  
-`https://vecinita-staging--vecinita-embedding-embedding-api.modal.run` (staging).
+`https://vecinita-staging--vecinita-embedding-embedding-api.modal.run` (staging env suffix).
 
 To retire mistaken deploys on another workspace:
 

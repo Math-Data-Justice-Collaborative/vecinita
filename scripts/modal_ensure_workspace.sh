@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 # Ensure Modal CLI uses the vecinita workspace (not fontface/cogni-chem).
+# Staging uses the same workspace with MODAL_ENVIRONMENT=staging (ADR-054 / F83).
 # Source from deploy/staging scripts: source "$(dirname "$0")/modal_ensure_workspace.sh"
 set -euo pipefail
 
 REQUIRED="${VECINITA_MODAL_WORKSPACE:-vecinita}"
+
+if [[ "$REQUIRED" == "vecinita-staging" ]]; then
+  echo "ERROR: Modal workspace 'vecinita-staging' is retired (ADR-054 amend)." >&2
+  echo "Use workspace 'vecinita' + MODAL_ENVIRONMENT=staging instead." >&2
+  exit 1
+fi
 
 if ! command -v modal >/dev/null 2>&1; then
   echo "modal CLI not found. Install: pip install modal" >&2
@@ -74,4 +81,9 @@ else
   fi
 
   echo "==> Modal workspace: ${REQUIRED}"
+fi
+
+MODAL_ENV="${MODAL_ENVIRONMENT:-${VECINITA_MODAL_ENVIRONMENT:-}}"
+if [[ -n "${MODAL_ENV}" ]]; then
+  echo "==> Modal Environment: ${MODAL_ENV} (MODAL_ENVIRONMENT)"
 fi

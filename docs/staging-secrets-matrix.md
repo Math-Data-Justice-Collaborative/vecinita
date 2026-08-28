@@ -9,20 +9,22 @@ Environments** — never commit to git.
 
 ## Dual environment (ADR-054)
 
-| Env | DO apps | Postgres | Supabase | Modal workspace | GitHub Environment |
-|-----|---------|----------|----------|-----------------|-------------------|
-| **staging** | `vecinita-staging-*` (short names ≤32: `write-api`, `chat-api`, `chat-fe`, `admin-fe`) | `vecinita-staging-db` | project `vecinita-staging` | **`vecinita-staging`** | `staging` |
-| **prod** | current sole stack (legacy names OK) | current managed DB | ref `cfuvghdsuwactfeamtym` | **`vecinita`** | `production` |
+| Env | DO apps | Postgres | Supabase | Modal | GitHub Environment |
+|-----|---------|----------|----------|-------|-------------------|
+| **staging** | `vecinita-staging-*` (short names ≤32: `write-api`, `chat-api`, `chat-fe`, `admin-fe`) | `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** | `staging` |
+| **prod** | current sole stack (legacy names OK) | current managed DB | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** | `production` |
 
 Use **separate** secret values per environment (never point staging apps at prod
-`DATABASE_URL` or prod Modal tokens). Suggested GitHub secret suffixes: `*_STAGING` on
-Environment `staging`; unsuffixed or `*_PROD` on `production`.
+`DATABASE_URL` or prod Modal Environment `main` secrets). Same Modal workspace token may
+deploy both Environments; Modal Secrets are Environment-scoped. Suggested GitHub secret
+suffixes: `*_STAGING` on Environment `staging`; unsuffixed or `*_PROD` on `production`.
 
 | Variable / secret | Staging notes |
 |-------------------|---------------|
 | `VECINITA_ENV` | `staging` on staging apps; `production` on prod |
-| `VECINITA_MODAL_WORKSPACE` | `vecinita-staging` vs `vecinita` (deploy scripts) |
-| `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Staging Environment tokens must authenticate **only** to `vecinita-staging` |
+| `VECINITA_MODAL_WORKSPACE` | Always **`vecinita`** (both envs) |
+| `MODAL_ENVIRONMENT` | `staging` for staging deploys; `main` (or unset) for prod |
+| `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Workspace `vecinita` token (same OK for GH Env staging + production) |
 | `SUPABASE_URL` / keys / project ref | Staging project only on staging admin FE + write API |
 | `DATABASE_URL` | Staging Postgres only on staging DO backends (never Modal) |
 

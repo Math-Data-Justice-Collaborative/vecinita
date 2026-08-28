@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import re
 
-# Prod workspace ``vecinita`` or staging workspace ``vecinita-staging`` (F83 / ADR-054).
+# Prod workspace ``vecinita`` (Environment main) or staging Environment web suffix
+# ``staging`` → host source ``vecinita-staging--`` (F83 / ADR-054).
 _WS = r"(?:vecinita-staging|vecinita)"
 _EMBED_HOST_PATTERN = re.compile(rf"{_WS}--vecinita-embedding")
 _LLM_HOST_PATTERN = re.compile(rf"{_WS}--vecinita-llm(?!-playground)")
@@ -31,8 +32,8 @@ def validate_modal_service_url(key: str, url: str) -> None:
         raise ValueError(msg)
     if "fontface--" in trimmed:
         msg = (
-            f"{key} must use the vecinita-- or vecinita-staging-- Modal workspace "
-            + f"prefix, not fontface-- (got {trimmed!r})"
+            f"{key} must use the vecinita-- (prod) or vecinita-staging-- (Modal Environment "
+            + f"staging) URL source prefix, not fontface-- (got {trimmed!r})"
         )
         raise ValueError(msg)
     normalized = trimmed.rstrip("/")

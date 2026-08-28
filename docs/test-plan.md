@@ -1795,10 +1795,10 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: Staging URLs / `VECINITA_STAGING_*` env; smoke scripts from staging-runbook.
 - **Expected**: H1–H5 pass; prod DB unchanged (AC-ST2).
 
-### TC-295: Staging Modal workspace isolation (F83)
-- **Objective**: Staging Modal tokens/workspace are `vecinita-staging` only.
-- **Input**: `VECINITA_MODAL_WORKSPACE=vecinita-staging`; staging embed/LLM base URLs.
-- **Expected**: Workspace prefix ≠ prod `vecinita--`; no shared secret accidental cross-wire (AC-ST3).
+### TC-295: Staging Modal Environment isolation (F83)
+- **Objective**: Staging Modal Apps live in Environment `staging` (workspace `vecinita`); secrets not shared with `main`.
+- **Input**: `MODAL_ENVIRONMENT=staging`; `VECINITA_MODAL_WORKSPACE=vecinita`; staging embed/LLM base URLs (`vecinita-staging--` web suffix).
+- **Expected**: URL source prefix ≠ prod `vecinita--`; Environment-scoped secrets (AC-ST3).
 
 ### TC-296: Staging Supabase project isolation (F83)
 - **Objective**: Staging admin Auth uses staging Supabase project ref/keys only.

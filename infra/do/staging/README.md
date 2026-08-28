@@ -16,7 +16,8 @@ uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all --env stag
 uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend
 ```
 
-Modal workspace for this env: **`vecinita-staging`** (`VECINITA_MODAL_WORKSPACE`).
+Modal workspace for this env: **`vecinita`** with Environment **`staging`**
+(`MODAL_ENVIRONMENT=staging`; web suffix → URL prefix `vecinita-staging--`).
 Secrets: [docs/staging-secrets-matrix.md](../../docs/staging-secrets-matrix.md) §Dual environment.
 
 Prod specs remain under `infra/do/*.yaml` (legacy names; treat as **prod** per ADR-054).

@@ -2,8 +2,9 @@
 # Required check name for branch ruleset: job ``staging-smoke`` (check name "staging-smoke").
 #
 # Prerequisites (GitHub Environment ``staging``):
-#   DIGITALOCEAN_TOKEN, MODAL_TOKEN_ID, MODAL_TOKEN_SECRET (workspace vecinita-staging),
+#   DIGITALOCEAN_TOKEN, MODAL_TOKEN_ID, MODAL_TOKEN_SECRET (workspace vecinita),
 #   DATABASE_URL (staging Postgres), staging Modal/DO URL secrets, SUPABASE_* staging.
+#   Modal Environment ``staging`` must exist (web suffix ``staging``).
 #
 # Until Environment secrets exist, this workflow fails closed so merges stay blocked.
 name: Deploy Staging
@@ -22,7 +23,8 @@ permissions:
   checks: write
 
 env:
-  VECINITA_MODAL_WORKSPACE: vecinita-staging
+  VECINITA_MODAL_WORKSPACE: vecinita
+  MODAL_ENVIRONMENT: staging
 
 jobs:
   deploy-staging:
@@ -84,10 +86,11 @@ jobs:
       - name: Sync dependencies
         run: uv sync --group dev
 
-      - name: Deploy Modal apps to vecinita-staging
+      - name: Deploy Modal apps to Environment staging
         run: |
           set -euo pipefail
-          export VECINITA_MODAL_WORKSPACE=vecinita-staging
+          export VECINITA_MODAL_WORKSPACE=vecinita
+          export MODAL_ENVIRONMENT=staging
           bash scripts/deploy/modal.sh
 
       - name: Ensure staging DO apps exist
