@@ -140,7 +140,26 @@ def test_warm_modal_url_posts_to_warm_path() -> None:
     """Test warm modal url posts to warm path."""
     with patch("vecinita_chat_rag_backend.app.httpx.post") as mock_post:
         _warm_modal_url("http://llm.test", timeout_s=30.0)
-    mock_post.assert_called_once_with("http://llm.test/warm", timeout=30.0)
+    mock_post.assert_called_once_with(
+        "http://llm.test/warm",
+        timeout=30.0,
+        headers={},
+    )
+
+
+def test_warm_modal_url_posts_llm_proxy_header() -> None:
+    """LLM /warm requires X-Vecinita-Proxy-Key (BUG-2026-08-27 / RD-165)."""
+    with patch("vecinita_chat_rag_backend.app.httpx.post") as mock_post:
+        _warm_modal_url(
+            "http://llm.test",
+            timeout_s=30.0,
+            headers={"X-Vecinita-Proxy-Key": "secret"},
+        )
+    mock_post.assert_called_once_with(
+        "http://llm.test/warm",
+        timeout=30.0,
+        headers={"X-Vecinita-Proxy-Key": "secret"},
+    )
 
 
 def test_warm_modal_services_warms_embed_and_llm_in_parallel() -> None:
@@ -150,10 +169,15 @@ def test_warm_modal_services_warms_embed_and_llm_in_parallel() -> None:
             "http://embed.test",
             "http://llm.test",
             request_timeout_s=120.0,
+            llm_proxy_key="proxy-secret",
         )
     assert mock_warm.call_count == _WARM_SERVICE_COUNT
     mock_warm.assert_any_call("http://embed.test", timeout_s=120.0)
-    mock_warm.assert_any_call("http://llm.test", timeout_s=120.0)
+    mock_warm.assert_any_call(
+        "http://llm.test",
+        timeout_s=120.0,
+        headers={"X-Vecinita-Proxy-Key": "proxy-secret"},
+    )
 
 
 def test_warm_modal_services_skips_when_urls_missing() -> None:
@@ -173,12 +197,25 @@ def test_warm_modal_services_warms_embed_only() -> None:
 def test_warm_modal_services_warms_llm_only() -> None:
     """Test warm modal services warms llm only."""
     with patch("vecinita_chat_rag_backend.app._warm_modal_url") as mock_warm:
-        _warm_modal_services(None, "http://llm.test", request_timeout_s=30.0)
-    mock_warm.assert_called_once_with("http://llm.test", timeout_s=30.0)
+        _warm_modal_services(
+            None,
+            "http://llm.test",
+            request_timeout_s=30.0,
+            llm_proxy_key="k",
+        )
+    mock_warm.assert_called_once_with(
+        "http://llm.test",
+        timeout_s=30.0,
+        headers={"X-Vecinita-Proxy-Key": "k"},
+    )
 
 
-def test_warm_modal_endpoint_schedules_background_warm(client: TestClient) -> None:
-    """Test warm modal endpoint schedules background warm."""
+def test_warm_modal_endpoint_schedules_background_warm(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test warm modal endpoint schedules background warm with LLM proxy key."""
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "test-proxy-key")
     with patch("vecinita_chat_rag_backend.app._warm_modal_services") as mock_warm:
         response = client.post("/api/v1/warm")
     assert response.status_code == HTTPStatus.OK
@@ -187,6 +224,7 @@ def test_warm_modal_endpoint_schedules_background_warm(client: TestClient) -> No
         "http://embed.test",
         "http://llm.test",
         request_timeout_s=10.0,
+        llm_proxy_key="test-proxy-key",
     )
 
 

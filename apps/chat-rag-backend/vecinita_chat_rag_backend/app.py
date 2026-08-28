@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from http import HTTPStatus
@@ -67,10 +68,19 @@ def _check_dependency(url: str | None, path: str = "/health") -> str:
         return "ok" if response.status_code == HTTPStatus.OK else "error"
 
 
-def _warm_modal_url(url: str, *, timeout_s: float) -> None:
+def _warm_modal_url(
+    url: str,
+    *,
+    timeout_s: float,
+    headers: dict[str, str] | None = None,
+) -> None:
     """Best-effort POST /warm on one Modal app; failures are ignored (S001 T11)."""
     with contextlib.suppress(Exception):
-        _ = httpx.post(f"{url.rstrip('/')}/warm", timeout=timeout_s)
+        _ = httpx.post(
+            f"{url.rstrip('/')}/warm",
+            timeout=timeout_s,
+            headers=headers or {},
+        )
 
 
 def _warm_modal_services(
@@ -78,13 +88,23 @@ def _warm_modal_services(
     llm_url: str | None,
     *,
     request_timeout_s: float,
+    llm_proxy_key: str | None = None,
 ) -> None:
     """Boot Modal EmbeddingService and LlmService in parallel during user think-time."""
+    llm_headers: dict[str, str] | None = None
+    if llm_proxy_key:
+        # RD-165 — vecinita-llm /warm requires X-Vecinita-Proxy-Key (BUG-2026-08-27).
+        llm_headers = {"X-Vecinita-Proxy-Key": llm_proxy_key}
     with ThreadPoolExecutor(max_workers=2) as executor:
         if embed_url:
             _ = executor.submit(_warm_modal_url, embed_url, timeout_s=request_timeout_s)
         if llm_url:
-            _ = executor.submit(_warm_modal_url, llm_url, timeout_s=request_timeout_s)
+            _ = executor.submit(
+                _warm_modal_url,
+                llm_url,
+                timeout_s=request_timeout_s,
+                headers=llm_headers,
+            )
 
 
 def _source_payload(sources: list[Source]) -> list[dict[str, object]]:
@@ -173,6 +193,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             cfg.embed_url,
             cfg.llm_url,
             request_timeout_s=cfg.request_timeout_s,
+            llm_proxy_key=os.environ.get("VECINITA_MODAL_PROXY_KEY"),
         )
         return {"status": "warming"}
 

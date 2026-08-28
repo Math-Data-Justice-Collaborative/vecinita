@@ -43,24 +43,24 @@ describe("stream event type guards", () => {
   });
 });
 
-describe("formatAskFailureMessage i18n (PR #60 review)", () => {
-  it("returns Spanish cold-start copy when locale is es", () => {
+describe("formatAskFailureMessage i18n (PR #60 review / #274)", () => {
+  it("returns Spanish unavailable copy after exhausted retries (not perpetual starting)", () => {
     expect(
       formatAskFailureMessage(new TypeError("Failed to fetch"), "es"),
-    ).toMatch(/asistente se está iniciando/i);
+    ).toMatch(/no está disponible temporalmente/i);
     expect(
       formatAskFailureMessage(new AskStreamError("timeout", 504), "es"),
-    ).toMatch(/aún se está iniciando/i);
+    ).toMatch(/no está disponible temporalmente/i);
     expect(formatAskFailureMessage("unknown", "es")).toBe("La solicitud falló");
   });
 
-  it("returns English cold-start copy when locale is en", () => {
+  it("returns English unavailable copy after exhausted retries (BUG-2026-08-27)", () => {
     expect(
       formatAskFailureMessage(new TypeError("Failed to fetch"), "en"),
-    ).toMatch(/assistant is starting up/i);
+    ).toMatch(/temporarily unavailable/i);
     expect(
       formatAskFailureMessage(new AskStreamError("timeout", 503), "en"),
-    ).toMatch(/still starting up/i);
+    ).toMatch(/temporarily unavailable/i);
     expect(formatAskFailureMessage("unknown", "en")).toBe("Request failed");
   });
 

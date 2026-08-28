@@ -479,7 +479,7 @@ def fastapi_app():
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
         try:
-            loaded = service.warm_model.remote(payload.model_id)
+            loaded = await service.warm_model.remote.aio(payload.model_id)
         except RuntimeError as exc:
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_GATEWAY)
         return JSONResponse(
@@ -526,7 +526,7 @@ def fastapi_app():
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=422)
         try:
-            text = service.complete.remote(
+            text = await service.complete.remote.aio(
                 payload.prompt,
                 max_tokens=payload.max_tokens,
                 temperature=payload.temperature,
