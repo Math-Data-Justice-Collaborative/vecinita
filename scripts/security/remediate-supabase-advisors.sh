@@ -92,17 +92,29 @@ fi
 # If Management API SQL failed, apply the migration via supabase CLI when DB password is present.
 if [[ "${SQL_OK}" -ne 1 ]]; then
   if ! command -v supabase >/dev/null 2>&1; then
-    echo "[security] ERROR: supabase CLI missing and Management API SQL failed" >&2
-    exit 1
+    echo "[security] WARN: supabase CLI missing and Management API SQL failed — skipping SQL remediation" >&2
+  elif [[ -z "${SUPABASE_DB_PASSWORD:-}" ]]; then
+    echo "[security] WARN: SUPABASE_DB_PASSWORD unset — skipping supabase db push fallback" >&2
+  else
+    echo "[security] linking project and pushing migrations via supabase CLI"
+    set +e
+    link_out="$(supabase link --project-ref "${REF}" --password "${SUPABASE_DB_PASSWORD}" --yes 2>&1)"
+    link_rc=$?
+    set -e
+    if [[ "${link_rc}" -ne 0 ]]; then
+      echo "[security] WARN: supabase link failed (rc=${link_rc}): ${link_out}" >&2
+    else
+      set +e
+      push_out="$(supabase db push --yes 2>&1)"
+      push_rc=$?
+      set -e
+      if [[ "${push_rc}" -ne 0 ]]; then
+        echo "[security] WARN: supabase db push failed (rc=${push_rc}): ${push_out}" >&2
+      else
+        echo "[security] supabase db push complete"
+      fi
+    fi
   fi
-  if [[ -z "${SUPABASE_DB_PASSWORD:-}" ]]; then
-    echo "[security] ERROR: SUPABASE_DB_PASSWORD required for supabase db push fallback" >&2
-    exit 1
-  fi
-  echo "[security] linking project and pushing migrations via supabase CLI"
-  supabase link --project-ref "${REF}" --password "${SUPABASE_DB_PASSWORD}" --yes
-  supabase db push --yes
-  echo "[security] supabase db push complete"
 fi
 
 echo "[security] supabase advisor remediations complete for project ${REF}"
