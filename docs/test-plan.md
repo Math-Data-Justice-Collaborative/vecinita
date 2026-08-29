@@ -1864,6 +1864,8 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 **Workflow:** `.github/workflows/ci.yml` (created in **06-tech-tooling**; unit/coverage split S027-D34).
 
+**Job timeouts (EV-034 / #292):** Every job in `ci.yml`, `deploy-preflight.yml`, and `deploy-staging.yml` sets `timeout-minutes: 15` so a hung runner cannot block the merge gate indefinitely.
+
 ## Open Questions
 
 - Exact DO internal write API test harness (shared fixture with integration tests).

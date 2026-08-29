@@ -30,6 +30,7 @@ jobs:
   deploy-staging:
     name: deploy-staging
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: staging
     outputs:
       chat_url: ${{ steps.urls.outputs.chat_url }}
@@ -128,6 +129,7 @@ jobs:
   staging-smoke:
     name: staging-smoke
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: deploy-staging
     environment: staging
     env:
