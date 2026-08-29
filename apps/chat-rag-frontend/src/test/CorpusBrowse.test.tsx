@@ -254,6 +254,27 @@ describe("CorpusBrowse", () => {
     unmount();
     resolveTags?.({ tags: [] });
   });
+
+  it("#246: list scroll region shares full corpus panel content width", async () => {
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+    await screen.findByTestId("corpus-list");
+
+    const browse = document.querySelector(".corpus-browse");
+    const scroll = screen.getByTestId("corpus-list-scroll");
+    const list = screen.getByTestId("corpus-list");
+    const toolbar = document.querySelector(".corpus-toolbar");
+    const search = document.querySelector(".corpus-search");
+
+    expect(browse).toBeTruthy();
+    expect(toolbar).toBeTruthy();
+    expect(search).toBeTruthy();
+    expect(scroll).toContainElement(list);
+    expect(scroll.className).toMatch(/corpus-list-scroll/);
+    // Scroll lives inside the panel; panel owns max-width, scroll is full width of it.
+    expect(browse?.contains(scroll)).toBe(true);
+    expect(browse?.contains(toolbar)).toBe(true);
+    expect(browse?.contains(search)).toBe(true);
+  });
 });
 
 describe("Tag chips in chat", () => {

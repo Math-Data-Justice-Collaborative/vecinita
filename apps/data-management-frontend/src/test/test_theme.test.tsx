@@ -87,6 +87,28 @@ describe("ThemeProvider and ThemeToggle", () => {
     expect(screen.getByTestId("current-theme")).toHaveTextContent("dark");
   });
 
+  it("#244: sun/moon icons share a centered relative stack (vertical align)", () => {
+    localStorage.setItem("vecinita-ui-theme", "dark");
+    renderWithProviders(
+      <ThemeProvider>
+        <ThemeToggle />
+      </ThemeProvider>,
+    );
+
+    const stack = screen.getByTestId("theme-toggle-icon-stack");
+    expect(stack.className).toMatch(/relative/);
+    expect(stack.className).toMatch(/items-center/);
+    expect(stack.className).toMatch(/justify-center/);
+
+    const sun = stack.querySelector("svg.lucide-sun");
+    const moon = stack.querySelector("svg.lucide-moon");
+    expect(sun).toBeTruthy();
+    expect(moon).toBeTruthy();
+    expect(moon?.className.baseVal ?? moon?.getAttribute("class") ?? "").toMatch(
+      /absolute/,
+    );
+  });
+
   it("throws when useTheme is used outside ThemeProvider", () => {
     const consoleError = vi
       .spyOn(console, "error")
