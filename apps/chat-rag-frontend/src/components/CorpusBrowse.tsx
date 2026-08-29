@@ -147,25 +147,27 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
 
       {loading ? <p role="status">{t(locale, "loadingDocuments")}</p> : null}
 
-      <ul className="corpus-list" data-testid="corpus-list">
-        {items.map((item) => (
-          <li key={item.document_id} className="corpus-item">
-            <h2>{item.title ?? t(locale, "untitledDocument")}</h2>
-            <p className="corpus-tags">
-              {item.tags.map((tag) => tag.label).join(", ") ||
-                t(locale, "noTags")}
-            </p>
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="corpus-source-link"
-            >
-              {t(locale, "openSource")}
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div className="corpus-list-scroll" data-testid="corpus-list-scroll">
+        <ul className="corpus-list" data-testid="corpus-list">
+          {items.map((item) => (
+            <li key={item.document_id} className="corpus-item">
+              <h2>{item.title ?? t(locale, "untitledDocument")}</h2>
+              <p className="corpus-tags">
+                {item.tags.map((tag) => tag.label).join(", ") ||
+                  t(locale, "noTags")}
+              </p>
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="corpus-source-link"
+              >
+                {t(locale, "openSource")}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div className="corpus-pagination">
         <button
