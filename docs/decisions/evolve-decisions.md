@@ -1355,3 +1355,32 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
   One-cluster/two-DB merge deferred. Orphan deleted (`cb528db3-…`).
 
 **Cites:** [Corpus: product] §F83 [Corpus: staging] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
+
+---
+
+## Cycle EV-033-stage-before-main — Stage before Main rule + GH tracking
+
+**Title:** Enforce Stage→Main via agent rule and GitHub ticket alignment  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-033-stage-before-main`  
+**Status:** implementing (Build gate open; rule + #288/#289 shipped)  
+**Date:** 2026-08-29
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-033-D0 | Goal | Align docs + always-applied rule + #212 to ADR-054 (not `stage` branch) |
+| EV-033-D1 | GH tracking | Rewrite #212; children (A) rule (B) docs/CORPUS |
+| EV-033-D2 | Acceptance | AC-ST8 + TC-298 |
+| EV-033-D3 | Rule | `.cursor/rules/stage-before-main.mdc` alwaysApply |
+| EV-033-D4 | Model | PR tip → `staging-smoke` → merge `main` → prod CD |
+| EV-033-D5 | Out | No new DO/Modal; keep ruleset `21766359`; no live corpus mutate |
+| EV-033-D6 | Verify waiver | `inline-documentation` FAIL waived — pre-existing repo-wide; not introduced by EV-033 |
+
+**Cites:** [Corpus: feature-list.md §F83] [Corpus: staging] [Corpus: acceptance] [Corpus: tests] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Spec: docs/adr/ADR-050-ci-cd-blocks-live-deploy.md]
+
+### Build closeout (2026-08-29)
+
+- Rule + TC-298 + #212 rewrite; children #288/#289 closed
+- Implementing verify: **ACCEPTED WITH WAIVER** — `inline-documentation` FAIL is repo-wide pre-existing (341 missing); not introduced by EV-033 (EV-033-D6, mirrors EV-staging waiver)
+- PR: pending on `evolve/EV-033-stage-before-main`

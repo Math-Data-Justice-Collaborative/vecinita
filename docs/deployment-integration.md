@@ -1,7 +1,7 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-28 (EV-staging-do-supabase / F83 / ADR-054 — dual-env)
+> **Last updated**: 2026-08-29 (EV-033 Stage→Main rule + F83 / ADR-054)
 
 ## Overview
 
@@ -17,7 +17,9 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 Distinct staging was provisioned 2026-08-28 (H1–H5 PASS). Use `env_role` `staging` |
 `prod` per ADR-054; ADR-049 remains historical for the former single-env era.
 Merge to `main` requires CI + staging deploy/smoke (ruleset; ADR-050/054). GitHub Environments:
-`staging` (pre-merge) and `production` (post-merge CD).
+`staging` (pre-merge) and `production` (post-merge CD). Agents: always-applied
+`.cursor/rules/stage-before-main.mdc` (EV-033 / AC-ST8); tracking **#212**. No GitHub
+`stage` branch — promotion is PR tip → `staging-smoke` → `main`.
 
 ## Services
 

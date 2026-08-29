@@ -21,15 +21,23 @@ live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`
 stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **prod**.
 [ADR-049](adr/ADR-049-single-env-staging-as-live.md) is historical for the single-env era.
 
-## Branch protection / merge gate (F83 / ADR-050 / ADR-054)
+## Branch protection / merge gate (F83 / ADR-050 / ADR-054 / EV-033)
 
 `main` must use a GitHub **ruleset** (or classic branch protection) that requires:
 
-1. Project CI green for the PR tip SHA (`ci.yml` / `ci-success`)
-2. **Staging deploy + H1–H5 smoke** green for that same SHA (GitHub Environment `staging`)
+1. Project CI green for the PR tip SHA (`CI success` from `ci.yml`)
+2. **Staging deploy + H1–H5 smoke** green for that same SHA (`staging-smoke`, GitHub Environment `staging`)
 
 Do not merge to `main` when either check is red/missing unless an explicit waiver AskQuestion.
 Prefer Environments: `staging` (PR / pre-merge) and `production` (post-merge CD on `main`).
+
+**Agent rule:** Always-applied `.cursor/rules/stage-before-main.mdc` (EV-033 / AC-ST8) — agents
+must not treat PRs as merge-ready or open/merge to `main` without those checks (or a recorded
+waiver). Distinct from `.cursor/rules/ci-after-push.mdc` (watch CI **after** push).
+
+**Promotion model:** PR tip SHA → staging deploy/smoke → merge `main` → prod CD. There is **no**
+protected GitHub `stage` branch in the current topology (ADR-054). Issue **#212** tracks this
+gate (agent rule + docs); do not reintroduce a `stage` branch without a new Decision.
 
 ## CI/CD before promote (RET-002 / ADR-050)
 

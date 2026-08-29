@@ -1586,10 +1586,11 @@ translating the user's language away.
 **Goal**: Deploy and smoke a **true staging** stack (DO + Supabase + Modal Environment
 `staging` in workspace `vecinita`), then merge to `main` only when CI and staging smoke are green.
 
-**Features**: F83 — EV-staging-do-supabase; ADR-054
+**Features**: F83 — EV-staging-do-supabase; EV-033 Stage→Main rule; ADR-054
 
 **Preconditions**: Staging resources provisioned (or being provisioned in Build band);
 prod stack treated as `prod`; no live corpus mutation without AskQuestion.
+Agents follow `.cursor/rules/stage-before-main.mdc` (always-applied).
 
 **Steps**:
 
@@ -1600,10 +1601,11 @@ prod stack treated as `prod`; no live corpus mutation without AskQuestion.
 4. Point staging admin FE at staging Supabase project; run H1–H5.
 5. Open PR to `main`; observe required checks: CI + staging smoke for tip SHA.
 6. Merge only when both green; prod CD runs post-merge on Environment `production`.
+7. Do **not** use a GitHub `stage` branch as the promotion path (ADR-054 / EV-033-D4).
 
-**Acceptance**: AC-ST1–AC-ST7; TC-294–TC-297.
+**Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298.
 
-**Automated tests**: smoke/live gated (`tests/smoke/…`); ruleset contract test in Build.
+**Automated tests**: smoke/live gated (`tests/smoke/…`); ruleset + rule file checks (TC-297/298).
 
 **E2E tier**: staging (T2/T3) after provision.
 

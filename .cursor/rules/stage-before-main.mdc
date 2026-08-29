@@ -1,0 +1,34 @@
+---
+description: PRs must pass staging before merge to main (F83 / ADR-054)
+alwaysApply: true
+---
+
+# Stage before Main
+
+[Corpus: feature-list.md §F83] [Corpus: staging]
+[Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
+[Spec: docs/adr/ADR-050-ci-cd-blocks-live-deploy.md]
+
+## Do
+
+1. Treat promotion as: **PR tip SHA → staging deploy + H1–H5 (`staging-smoke`) → merge
+   `main` → prod CD**. Required checks: `CI success` + `staging-smoke` (ruleset
+   `main-requires-ci-and-staging-smoke`).
+2. Before opening a PR as ready / merging to `main` / declaring ship: confirm those checks
+   are green for the tip SHA (or obtain an explicit AskQuestion **waiver** and record it).
+3. Cite tracking issue **#212** (and children) when updating Stage→Main process.
+4. Keep staging Environment secrets isolated from prod; follow `no-live-prod-corpus-push`.
+
+## Do not
+
+- Merge or ask to merge to `main` when `staging-smoke` or `CI success` is red/missing
+  without a recorded waiver.
+- Invent a GitHub **`stage` branch** promotion path (not current topology).
+- Confuse this with `ci-after-push.mdc` (post-push watch) — both apply; this rule is the
+  **pre-merge Stage gate**.
+- Enable live prod corpus mutate / FT promote / automation without AskQuestion.
+
+## Waiver
+
+AskQuestion `[Decision]` only. Options must include defer / runbook-only. Record waiver in
+PR body or session HANDOFF.
