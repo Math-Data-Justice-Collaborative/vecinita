@@ -1362,7 +1362,7 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 
 **Title:** Enforce Stage→Main via agent rule and GitHub ticket alignment  
 **Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-033-stage-before-main`  
-**Status:** implementing (Build gate open; rule + #288/#289 shipped)  
+**Status:** closed (merged) — PR [#290](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/290) @ `4a4083ab`; #212 closed  
 **Date:** 2026-08-29
 
 ### Intake / requirements
