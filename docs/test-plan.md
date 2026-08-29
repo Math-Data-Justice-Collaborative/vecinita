@@ -1810,6 +1810,14 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: GitHub ruleset / branch protection API or UI export.
 - **Expected**: Required checks include CI success job and staging Environment smoke (AC-ST5).
 
+### TC-298: Stage before Main agent rule + ticket tracking (F83, EV-033)
+- **Objective**: Agents and maintainers share one Stage→Main policy with GH tracking.
+- **Input**: `.cursor/rules/stage-before-main.mdc`; GitHub #212 (+ children); ruleset API.
+- **Expected**: Rule exists with `alwaysApply: true`; cites F83/ADR-054; requires tip SHA
+  `CI success` + `staging-smoke` before merge-ready/`main`; waivers only via AskQuestion;
+  #212 describes ADR-054 PR→staging→`main` path (not a protected `stage` branch);
+  ruleset checks unchanged (AC-ST8).
+
 ### F31 coverage gate — gated components
 
 Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-coverage`.

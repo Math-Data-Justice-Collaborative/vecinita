@@ -26,7 +26,7 @@ define or be updated to define that behavior — or carry an explicit waiver cit
 | data-flow | [data-flow.md](data-flow.md) | Runtime data paths |
 | deploy | [deploy-checklist.md](deploy-checklist.md) | Deploy checklist |
 | deploy-integration | [deployment-integration.md](deployment-integration.md) | Modal / DO / hybrid wiring |
-| staging | [staging-runbook.md](staging-runbook.md) | Staging ops + corpus protection |
+| staging | [staging-runbook.md](staging-runbook.md) | Staging ops + corpus protection; Stage→Main merge gate (F83 / EV-033) |
 | typing | [typing-policy.md](typing-policy.md) | Python/TS typing (ADR-018) |
 | adr | [adr/README.md](adr/README.md) + `adr/ADR-*.md` | Architecture decisions |
 | decisions | [decisions/](decisions/) + [decisions.md](decisions.md) | Interview / evolve decision logs |
@@ -80,6 +80,7 @@ Pack skills load from **engineering-memory** plugin (`evolve`, `spec-*`, `build-
 | Build band (`build-build`, `build-verify-*`, …) | cited Spec Source rows + tests |
 | QA / verify (`build-qa`, `build-verify-impl`, …) | tests, acceptance, journeys (if UI), product |
 | Deploy (`build-verify-deploy`, `build-deploy-smoke`) | deploy, deploy-integration, staging |
+| Agent merge / PR-to-main | staging, deploy-integration, acceptance (AC-ST5/AC-ST8) |
 | `hotfix` | product + system-spec + rows for the failing surface |
 | `build-health` | deploy-integration, staging |
 

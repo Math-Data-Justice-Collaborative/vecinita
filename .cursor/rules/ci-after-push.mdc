@@ -8,6 +8,11 @@ alwaysApply: true
 **A push is not done until required workflows are green** on that branch. Do not end the
 session, open a PR as ready, or mark work complete after `git push` without watching.
 
+**Stage before Main (pre-merge):** PRs targeting `main` must also pass **`staging-smoke`**
+(plus `CI success`) before merge — see always-applied
+`.cursor/rules/stage-before-main.mdc` (F83 / ADR-054 / EV-033 / AC-ST8). This file covers
+**post-push** watch; that rule covers **pre-merge Stage→Main**.
+
 ## Workflows (by branch)
 
 | Branch | Workflows | Must pass |
