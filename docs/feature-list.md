@@ -83,6 +83,7 @@
 | F78 | Corpus change automations | Live enabled (EV-031) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133/M135 |
 | F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
 | F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
+| F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset | EV-staging-do-supabase; ADR-054 |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -1552,6 +1553,23 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Ship gate**: Wiring ships with flag default-off; **live `VECINITA_RAG_OUTPUT_VERIFY=true`**
   after F36 / `rag-regression` non-regression + operator approval (S034-D10 / AC-OV7).
 - **Source**: EV-030; GitHub #84; ADR-033 §9; ADR-009 / ADR-037.
+
+### F83: Distinct staging environment (DO + Supabase + Modal)
+
+- **What it does**: Provisions a **true non-prod staging** stack that mirrors production:
+  DigitalOcean apps + Managed Postgres, Supabase Auth project, and Modal Apps in the same
+  workspace **`vecinita`** under Modal Environment **`staging`** (web suffix `staging`;
+  native Environments). Restores staging→prod paths and ends operational use of
+  `staging_as_live` (ADR-049) once staging is healthy. Requires GitHub ruleset so merges to
+  `main` need CI **and** staging deploy + H1–H5 smoke.
+- **Inputs**: Operator tokens (DO, Modal workspace `vecinita`, Supabase); GitHub Environments
+  `staging` / `production`; seed corpus for staging DB only.
+- **Outputs**: Distinct staging URLs; `env_role: staging` \| `prod`; ADR-054; updated
+  runbook/secrets/CD.
+- **Acceptance**: AC-ST1–AC-ST7; TC-294–TC-297; UJ-087.
+- **Out of scope**: Live corpus clone without AskQuestion; Modal provision during Spec band
+  (Build gate); full hostname rename of legacy prod apps in one cutover.
+- **Source**: EV-staging-do-supabase; ADR-054; ADR-049 exit; ADR-050.
 
 ## Planned / Deferred (post-v1)
 

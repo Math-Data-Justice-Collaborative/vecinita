@@ -1,10 +1,34 @@
 # Staging secrets matrix
 
-> **Project**: Vecinita staging  
-> **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 planned secrets; prior S010/EV-011 F39 M80)
+> **Project**: Vecinita  
+> **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010, **ADR-054 / F83**  
+> **Last updated**: 2026-08-28 (EV-staging-do-supabase dual-env)
 
-Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
+Store values in **DigitalOcean App Platform** secrets, **Modal** secrets, or **GitHub
+Environments** — never commit to git.
+
+## Dual environment (ADR-054)
+
+| Env | DO apps | Postgres | Supabase | Modal | GitHub Environment |
+|-----|---------|----------|----------|-------|-------------------|
+| **staging** | `vecinita-staging-*` (short names ≤32: `write-api`, `chat-api`, `chat-fe`, `admin-fe`) | `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** | `staging` |
+| **prod** | current sole stack (legacy names OK) | current managed DB | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** | `production` |
+
+Use **separate** secret values per environment (never point staging apps at prod
+`DATABASE_URL` or prod Modal Environment `main` secrets). Same Modal workspace token may
+deploy both Environments; Modal Secrets are Environment-scoped. Suggested GitHub secret
+suffixes: `*_STAGING` on Environment `staging`; unsuffixed or `*_PROD` on `production`.
+
+| Variable / secret | Staging notes |
+|-------------------|---------------|
+| `VECINITA_ENV` | `staging` on staging apps; `production` on prod |
+| `VECINITA_MODAL_WORKSPACE` | Always **`vecinita`** (both envs) |
+| `MODAL_ENVIRONMENT` | `staging` for staging deploys; `main` (or unset) for prod |
+| `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Workspace `vecinita` token (same OK for GH Env staging + production) |
+| `SUPABASE_URL` / keys / project ref | Staging project only on staging admin FE + write API |
+| `DATABASE_URL` | Staging Postgres only on staging DO backends (never Modal) |
+
+**Forbidden on Modal (both envs):** `DATABASE_URL` (ADR-007).
 
 ## DigitalOcean — ChatRAG Backend
 

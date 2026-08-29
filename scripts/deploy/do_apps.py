@@ -34,6 +34,50 @@ DEFAULT_SPECS = [
     ROOT / "infra/do/chat-rag-frontend.yaml",
     ROOT / "infra/do/data-management-frontend.yaml",
 ]
+STAGING_SPECS = [
+    ROOT / "infra/do/staging/internal-write-api.yaml",
+    ROOT / "infra/do/staging/chat-rag-backend.yaml",
+    ROOT / "infra/do/staging/chat-rag-frontend.yaml",
+    ROOT / "infra/do/staging/data-management-frontend.yaml",
+]
+PROD_APP_NAMES = [
+    "vecinita-internal-write-api",
+    "vecinita-chat-rag-backend",
+    "vecinita-admin-frontend",
+    "vecinita-chat-rag-frontend",
+]
+STAGING_APP_NAMES = [
+    "vecinita-staging-write-api",
+    "vecinita-staging-chat-api",
+    "vecinita-staging-admin-fe",
+    "vecinita-staging-chat-fe",
+]
+
+# Staging short names → same secret key sets as prod counterparts (F83).
+_CHAT_BACKEND_NAMES = frozenset({"vecinita-chat-rag-backend", "vecinita-staging-chat-api"})
+_WRITE_API_NAMES = frozenset({"vecinita-internal-write-api", "vecinita-staging-write-api"})
+_CHAT_FE_NAMES = frozenset({"vecinita-chat-rag-frontend", "vecinita-staging-chat-fe"})
+_ADMIN_FE_NAMES = frozenset({"vecinita-admin-frontend", "vecinita-staging-admin-fe"})
+
+
+def specs_for_env(env: str) -> list[Path]:
+    """Return App Platform YAML paths for ``prod`` or ``staging`` (ADR-054)."""
+    if env == "prod":
+        return list(DEFAULT_SPECS)
+    if env == "staging":
+        return list(STAGING_SPECS)
+    msg = f"env must be 'prod' or 'staging' (got {env!r})"
+    raise ValueError(msg)
+
+
+def app_names_for_env(env: str) -> list[str]:
+    """Return DO app ``name`` fields for ``prod`` or ``staging``."""
+    if env == "prod":
+        return list(PROD_APP_NAMES)
+    if env == "staging":
+        return list(STAGING_APP_NAMES)
+    msg = f"env must be 'prod' or 'staging' (got {env!r})"
+    raise ValueError(msg)
 
 
 def _client():
@@ -108,14 +152,14 @@ def cmd_create(client, spec_path: Path) -> int:
     return 0
 
 
-def cmd_create_all(client) -> int:
+def cmd_create_all(client, *, env: str = "prod") -> int:
     rc = 0
-    for path in DEFAULT_SPECS:
+    for path in specs_for_env(env):
         if not path.is_file():
             print(f"SKIP missing spec: {path}", file=sys.stderr)
             rc = 1
             continue
-        print(f"==> {path.name}")
+        print(f"==> [{env}] {path}")
         try:
             _ = cmd_create(client, path)
         except SystemExit as exc:
@@ -177,7 +221,7 @@ def cmd_sync_secrets(client, name: str) -> int:
     if not app:
         raise SystemExit(f"No app named {name!r}")
     spec = app.get("spec") or {}
-    if name == "vecinita-chat-rag-backend":
+    if name in _CHAT_BACKEND_NAMES:
         _apply_env_from_os(
             spec,
             [
@@ -195,7 +239,7 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_STATS_ENABLED",
             ],
         )
-    elif name == "vecinita-internal-write-api":
+    elif name in _WRITE_API_NAMES:
         _apply_env_from_os(
             spec,
             [
@@ -229,9 +273,9 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID",
             ],
         )
-    elif name == "vecinita-chat-rag-frontend":
+    elif name in _CHAT_FE_NAMES:
         _apply_env_from_os(spec, ["VITE_VECINITA_CHAT_API_URL"], scope="BUILD_TIME")
-    elif name == "vecinita-admin-frontend":
+    elif name in _ADMIN_FE_NAMES:
         _apply_env_from_os(
             spec,
             [
@@ -250,17 +294,12 @@ def cmd_sync_secrets(client, name: str) -> int:
     return 0
 
 
-def cmd_sync_all_secrets(client) -> int:
-    """Push env vars from shell into all four Vecinita DO apps."""
-    names = [
-        "vecinita-internal-write-api",
-        "vecinita-chat-rag-backend",
-        "vecinita-admin-frontend",
-        "vecinita-chat-rag-frontend",
-    ]
+def cmd_sync_all_secrets(client, *, env: str = "prod") -> int:
+    """Push env vars from shell into all four Vecinita DO apps for ``env``."""
+    names = app_names_for_env(env)
     rc = 0
     for name in names:
-        print(f"==> sync-secrets {name}")
+        print(f"==> sync-secrets [{env}] {name}")
         try:
             _ = cmd_sync_secrets(client, name)
         except SystemExit as exc:
@@ -269,46 +308,62 @@ def cmd_sync_all_secrets(client) -> int:
     return rc
 
 
-def cmd_urls(client, *, include_frontends: bool = False) -> int:
-    """Print staging smoke / connectivity env hints for vecinita-* apps."""
+def cmd_urls(client, *, env: str = "prod", include_frontends: bool = False) -> int:
+    """Print smoke / connectivity env hints for the selected env's apps."""
     apps = _iter_apps(client)
     by_name = {(a.get("spec") or {}).get("name"): a for a in apps}
-    chat = by_name.get("vecinita-chat-rag-backend")
-    write = by_name.get("vecinita-internal-write-api")
-    chat_fe = by_name.get("vecinita-chat-rag-frontend")
-    admin_fe = by_name.get("vecinita-admin-frontend")
+    if env == "staging":
+        chat_key, write_key = "vecinita-staging-chat-api", "vecinita-staging-write-api"
+        chat_fe_key, admin_fe_key = "vecinita-staging-chat-fe", "vecinita-staging-admin-fe"
+        prefix = "VECINITA_STAGING"
+    else:
+        chat_key, write_key = "vecinita-chat-rag-backend", "vecinita-internal-write-api"
+        chat_fe_key, admin_fe_key = "vecinita-chat-rag-frontend", "vecinita-admin-frontend"
+        # Legacy export names still say STAGING for the sole/prod stack smoke scripts.
+        prefix = "VECINITA_STAGING"
+    chat = by_name.get(chat_key)
+    write = by_name.get(write_key)
+    chat_fe = by_name.get(chat_fe_key)
+    admin_fe = by_name.get(admin_fe_key)
     found = False
     if chat:
         url = chat.get("default_ingress") or chat.get("live_url")
         if url:
-            print(f"export VECINITA_STAGING_CHAT_URL={url}")
+            print(f"export {prefix}_CHAT_URL={url}")
             found = True
     if write:
         url = write.get("default_ingress") or write.get("live_url")
         if url:
-            print(f"export VECINITA_STAGING_WRITE_URL={url}")
+            print(f"export {prefix}_WRITE_URL={url}")
             found = True
     if include_frontends:
         if chat_fe:
             url = chat_fe.get("default_ingress") or chat_fe.get("live_url")
             if url:
-                print(f"export VECINITA_STAGING_CHAT_FRONTEND_URL={url}")
+                print(f"export {prefix}_CHAT_FRONTEND_URL={url}")
                 found = True
         if admin_fe:
             url = admin_fe.get("default_ingress") or admin_fe.get("live_url")
             if url:
-                print(f"export VECINITA_STAGING_ADMIN_FRONTEND_URL={url}")
+                print(f"export {prefix}_ADMIN_FRONTEND_URL={url}")
                 found = True
+        modal_hint = (
+            "https://vecinita-staging--vecinita-data-management-fastapi-app.modal.run"
+            if env == "staging"
+            else "https://vecinita--vecinita-data-management-fastapi-app.modal.run"
+        )
         print(
             "# Modal admin API (set manually after modal deploy):",
             file=sys.stderr,
         )
         print(
-            "# export VECINITA_STAGING_ADMIN_API_URL=https://vecinita--vecinita-data-management-fastapi-app.modal.run",
+            f"# export {prefix}_ADMIN_API_URL={modal_hint}",
             file=sys.stderr,
         )
     if not found:
-        print("# No vecinita apps found — run create-all first.", file=sys.stderr)
+        print(
+            f"# No {env} vecinita apps found — run create-all --env {env} first.", file=sys.stderr
+        )
         return 1
     return 0
 
@@ -319,10 +374,25 @@ def main() -> int:
     _ = sub.add_parser("list", help="List all apps (id, name, phase, ingress)")
     p_create = sub.add_parser("create", help="Create app from YAML spec")
     _ = p_create.add_argument("--spec", type=Path, required=True)
-    _ = sub.add_parser("create-all", help="Create all four infra/do/*.yaml apps (idempotent)")
+    p_create_all = sub.add_parser(
+        "create-all",
+        help="Create all four apps for --env prod|staging (idempotent)",
+    )
+    _ = p_create_all.add_argument(
+        "--env",
+        choices=("prod", "staging"),
+        default="prod",
+        help="Target environment (default: prod = infra/do/*.yaml)",
+    )
     p_dep = sub.add_parser("deploy", help="Trigger deployment for existing app by spec name")
     _ = p_dep.add_argument("--name", required=True, help="App spec name field")
     p_urls = sub.add_parser("urls", help="Print VECINITA_STAGING_* export lines")
+    _ = p_urls.add_argument(
+        "--env",
+        choices=("prod", "staging"),
+        default="prod",
+        help="Which DO app set to print URLs for",
+    )
     _ = p_urls.add_argument(
         "--frontend",
         action="store_true",
@@ -330,9 +400,15 @@ def main() -> int:
     )
     p_sync = sub.add_parser("sync-secrets", help="Update app spec env from shell")
     _ = p_sync.add_argument("--name", required=True, help="App spec name field")
-    _ = sub.add_parser(
+    p_sync_all = sub.add_parser(
         "sync-all-secrets",
-        help="Update all four Vecinita DO apps from shell env (see infra/do/.env.example)",
+        help="Update all four apps for --env from shell env",
+    )
+    _ = p_sync_all.add_argument(
+        "--env",
+        choices=("prod", "staging"),
+        default="prod",
+        help="Target environment",
     )
     args = parser.parse_args()
     client = _client()
@@ -341,15 +417,19 @@ def main() -> int:
     if args.command == "create":
         return cmd_create(client, args.spec)
     if args.command == "create-all":
-        return cmd_create_all(client)
+        return cmd_create_all(client, env=args.env)
     if args.command == "deploy":
         return cmd_deploy(client, args.name)
     if args.command == "urls":
-        return cmd_urls(client, include_frontends=getattr(args, "frontend", False))
+        return cmd_urls(
+            client,
+            env=args.env,
+            include_frontends=getattr(args, "frontend", False),
+        )
     if args.command == "sync-secrets":
         return cmd_sync_secrets(client, args.name)
     if args.command == "sync-all-secrets":
-        return cmd_sync_all_secrets(client)
+        return cmd_sync_all_secrets(client, env=args.env)
     raise SystemExit(f"Unknown command: {args.command}")
 
 

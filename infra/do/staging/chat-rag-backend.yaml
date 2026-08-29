@@ -1,0 +1,70 @@
+# DigitalOcean App Platform — staging ChatRAG Backend (F83 / ADR-054)
+# Name ≤32 chars. Create: do_apps.py create-all --env staging
+name: vecinita-staging-chat-api
+region: nyc
+features:
+  - buildpack-stack=ubuntu-22
+
+services:
+  - name: api
+    github:
+      repo: Math-Data-Justice-Collaborative/vecinita
+      branch: main
+      deploy_on_push: false
+    source_dir: /
+    environment_slug: python
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 8080
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 10
+    build_command: uv sync --group dev
+    run_command: python3 -m uvicorn vecinita_chat_rag_backend.app:create_app --factory --host 0.0.0.0 --port 8080
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_EMBED_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_LLM_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_PROXY_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_MODAL_RERANK_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_RAG_RERANK_CE
+        scope: RUN_TIME
+        value: "true"
+      - key: VECINITA_RAG_QUERY_REFINE
+        scope: RUN_TIME
+        value: "false"
+      - key: VECINITA_RAG_OUTPUT_VERIFY
+        scope: RUN_TIME
+        value: "false"
+      - key: VECINITA_TOP_K
+        scope: RUN_TIME
+        value: "8"
+      - key: VECINITA_RAG_PACKER
+        scope: RUN_TIME
+        value: "p3"
+      - key: VECINITA_ENV
+        scope: RUN_TIME
+        value: staging
+      - key: VECINITA_CORS_ORIGINS
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_INTERNAL_WRITE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_INTERNAL_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_STATS_ENABLED
+        scope: RUN_TIME
+        value: "true"

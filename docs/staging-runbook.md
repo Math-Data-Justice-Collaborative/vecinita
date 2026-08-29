@@ -4,16 +4,32 @@
 > **Health tiers:** `.cursor/skills/deployment-catalog.md`, `15-service-health`  
 > **Secrets:** [staging-secrets-matrix.md](staging-secrets-matrix.md)
 
-## Env role: staging label vs live (RET-002 / ADR-049)
+## Env role: staging vs prod (ADR-054 / F83)
 
-Until a **distinct** non-prod stack exists, DO apps/DB still named “staging” are the **live /
-production** surface (`env_role: staging_as_live`). Skills and operators must:
+**Target (after dual-env provision):** resolve `env_role` as `staging` or `prod` only.
 
-- Say **live/prod** in cutover AskQuestions and smokes — do not imply a safer staging-only target.
-- Keep corpus/promote approval gates (`no-live-prod-corpus-push`).
-- Cite [ADR-049](adr/ADR-049-single-env-staging-as-live.md).
+| Role | Resources |
+|------|-----------|
+| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging` (`camkatfbjguwvymfgdme`); Modal workspace **`vecinita`** Environment **`staging`** |
+| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`; corpus DB historically `vecinita-staging-restored-20260701`); Modal **`vecinita`** / **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
 
-When a true second environment is provisioned, restore separate staging→prod paths.
+Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
+live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`).
+
+**Operational status (2026-08-28):** Distinct staging H1–H5 passed. Resolve `env_role` as
+`staging` or `prod` — do **not** use `staging_as_live` for the new `vecinita-staging-*`
+stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **prod**.
+[ADR-049](adr/ADR-049-single-env-staging-as-live.md) is historical for the single-env era.
+
+## Branch protection / merge gate (F83 / ADR-050 / ADR-054)
+
+`main` must use a GitHub **ruleset** (or classic branch protection) that requires:
+
+1. Project CI green for the PR tip SHA (`ci.yml` / `ci-success`)
+2. **Staging deploy + H1–H5 smoke** green for that same SHA (GitHub Environment `staging`)
+
+Do not merge to `main` when either check is red/missing unless an explicit waiver AskQuestion.
+Prefer Environments: `staging` (PR / pre-merge) and `production` (post-merge CD on `main`).
 
 ## CI/CD before promote (RET-002 / ADR-050)
 
@@ -100,9 +116,26 @@ Database migrations are **not** automated — run `alembic upgrade head` per the
    uv run python -c "from vecinita_database.seeds.load import load_corpus; load_corpus()"
    ```
 
-3. **Modal** (US workspace) — embedding, data-management, LLM:
+3. **Modal** (workspace `vecinita`) — embedding, data-management, LLM:
 
+   **One-time (staging Environment):**
    ```bash
+   modal profile activate vecinita   # or existing MODAL_TOKEN_* for workspace vecinita
+   modal environment create staging
+   modal environment update staging --set-web-suffix staging
+   ```
+
+   **Deploy staging:**
+   ```bash
+   export VECINITA_MODAL_WORKSPACE=vecinita
+   export MODAL_ENVIRONMENT=staging
+   bash scripts/deploy/modal.sh
+   ```
+
+   **Deploy prod** (Environment `main`):
+   ```bash
+   export VECINITA_MODAL_WORKSPACE=vecinita
+   unset MODAL_ENVIRONMENT   # or export MODAL_ENVIRONMENT=main
    bash scripts/deploy/modal.sh
    ```
 

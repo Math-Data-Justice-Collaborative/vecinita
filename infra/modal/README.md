@@ -10,18 +10,33 @@
 
 Run commands from the **repo root** with Modal CLI authenticated (`modal token new`).
 
-## Workspace (required)
+## Workspace + Environment (required)
 
-All Vecinita Modal apps must deploy to the **`vecinita`** workspace — not `fontface` or other profiles.
+| Role | Modal workspace | Modal Environment | Web URL source prefix |
+|------|-----------------|-------------------|------------------------|
+| **prod** | **`vecinita`** | **`main`** (default) | `vecinita--` |
+| **staging** | **`vecinita`** | **`staging`** (web suffix `staging`) | `vecinita-staging--` |
+
+One workspace, two [Environments](https://modal.com/docs/guide/environments) (ADR-054 / F83).
+Same App names; secrets and volumes are Environment-scoped.
 
 ```bash
-modal profile activate vecinita
-# or rely on deploy scripts (they call scripts/modal_ensure_workspace.sh):
+# Prod (Environment main)
+export VECINITA_MODAL_WORKSPACE=vecinita
+export MODAL_ENVIRONMENT=main   # or leave unset
+bash scripts/deploy/modal.sh
+
+# Staging
+export VECINITA_MODAL_WORKSPACE=vecinita
+export MODAL_ENVIRONMENT=staging
+# One-time: modal environment create staging
+#           modal environment update staging --set-web-suffix staging
 bash scripts/deploy/modal.sh
 ```
 
-Deployed URLs use the workspace prefix, e.g.  
-`https://vecinita--vecinita-embedding-embedding-api.modal.run`
+Deployed URLs:
+`https://vecinita--vecinita-embedding-embedding-api.modal.run` (prod) vs  
+`https://vecinita-staging--vecinita-embedding-embedding-api.modal.run` (staging env suffix).
 
 To retire mistaken deploys on another workspace:
 

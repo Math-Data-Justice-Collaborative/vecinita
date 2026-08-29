@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import re
 
-_EMBED_HOST_PATTERN = re.compile(r"vecinita--vecinita-embedding")
-_LLM_HOST_PATTERN = re.compile(r"vecinita--vecinita-llm(?!-playground)")
-_LLM_PLAYGROUND_HOST_PATTERN = re.compile(r"vecinita--vecinita-llm-playground")
-_RERANK_HOST_PATTERN = re.compile(r"vecinita--vecinita-rerank")
+# Prod workspace ``vecinita`` (Environment main) or staging Environment web suffix
+# ``staging`` → host source ``vecinita-staging--`` (F83 / ADR-054).
+_WS = r"(?:vecinita-staging|vecinita)"
+_EMBED_HOST_PATTERN = re.compile(rf"{_WS}--vecinita-embedding")
+_LLM_HOST_PATTERN = re.compile(rf"{_WS}--vecinita-llm(?!-playground)")
+_LLM_PLAYGROUND_HOST_PATTERN = re.compile(rf"{_WS}--vecinita-llm-playground")
+_RERANK_HOST_PATTERN = re.compile(rf"{_WS}--vecinita-rerank")
 
 _MODAL_URL_KEYS = frozenset(
     {
@@ -29,8 +32,8 @@ def validate_modal_service_url(key: str, url: str) -> None:
         raise ValueError(msg)
     if "fontface--" in trimmed:
         msg = (
-            f"{key} must use the vecinita-- Modal workspace prefix, not fontface-- "
-            + f"(got {trimmed!r})"
+            f"{key} must use the vecinita-- (prod) or vecinita-staging-- (Modal Environment "
+            + f"staging) URL source prefix, not fontface-- (got {trimmed!r})"
         )
         raise ValueError(msg)
     normalized = trimmed.rstrip("/")
@@ -40,14 +43,15 @@ def validate_modal_service_url(key: str, url: str) -> None:
     if key == "VECINITA_MODAL_EMBED_URL" and not _EMBED_HOST_PATTERN.search(trimmed):
         msg = (
             f"{key} should target the vecinita-embedding app "
-            + f"(expected host containing vecinita--vecinita-embedding; got {trimmed!r})"
+            + "(expected host containing vecinita--vecinita-embedding or "
+            + f"vecinita-staging--vecinita-embedding; got {trimmed!r})"
         )
         raise ValueError(msg)
     if key == "VECINITA_MODAL_LLM_URL" and not _LLM_HOST_PATTERN.search(trimmed):
         msg = (
-            f"{key} should target the prod vecinita-llm app "
-            + "(expected host containing vecinita--vecinita-llm without -playground; "
-            + f"got {trimmed!r})"
+            f"{key} should target the prod/staging vecinita-llm app "
+            + "(expected host containing vecinita[--staging]--vecinita-llm without "
+            + f"-playground; got {trimmed!r})"
         )
         raise ValueError(msg)
     if key == "VECINITA_MODAL_LLM_PLAYGROUND_URL" and not _LLM_PLAYGROUND_HOST_PATTERN.search(
@@ -55,13 +59,15 @@ def validate_modal_service_url(key: str, url: str) -> None:
     ):
         msg = (
             f"{key} should target the vecinita-llm-playground app "
-            + f"(expected host containing vecinita--vecinita-llm-playground; got {trimmed!r})"
+            + "(expected host containing vecinita[--staging]--vecinita-llm-playground; "
+            + f"got {trimmed!r})"
         )
         raise ValueError(msg)
     if key == "VECINITA_MODAL_RERANK_URL" and not _RERANK_HOST_PATTERN.search(trimmed):
         msg = (
             f"{key} should target the vecinita-rerank app "
-            + f"(expected host containing vecinita--vecinita-rerank; got {trimmed!r})"
+            + "(expected host containing vecinita[--staging]--vecinita-rerank; "
+            + f"got {trimmed!r})"
         )
         raise ValueError(msg)
 

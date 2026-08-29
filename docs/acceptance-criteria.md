@@ -438,3 +438,13 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 #### F80 playground eval (AC-FT10)
 
 - [x] **AC-FT10**: `vecinita-llm-finetune` deployed via CD; `VECINITA_FINETUNE_ENABLED=true`; prod adapter pin empty; playground eval path works (TC-292, TC-293). **Signed off M135 2026-08-25 (M134 evidence).**
+
+### EV-staging-do-supabase — Distinct staging (F83 / ADR-054)
+
+- [x] **AC-ST1**: `env_role` resolves to `staging` or `prod` (not `staging_as_live`) once staging H1–H5 pass (ADR-054). — runbook flipped 2026-08-28
+- [x] **AC-ST2**: Staging DO apps + `vecinita-staging-db` healthy; H1–H5 pass without touching prod DB (UJ-087, TC-294). — smoke PASS; prod docs count unchanged
+- [x] **AC-ST3**: Staging Modal uses Environment `staging` (web suffix) in workspace `vecinita`; URLs use `vecinita-staging--` prefix; secrets isolated from Environment `main` (TC-295).
+- [x] **AC-ST4**: Staging Supabase project distinct; staging admin FE uses staging Auth only (TC-296). — ref `camkatfbjguwvymfgdme`
+- [x] **AC-ST5**: GitHub ruleset on `main` requires CI + staging deploy/smoke for PR tip SHA (TC-297). — ruleset `21766359`
+- [x] **AC-ST6**: ADR-049 operational exit documented; runbook describes staging→prod path (ADR-054).
+- [x] **AC-ST7**: No operator `*-spec.yaml` or secrets committed.

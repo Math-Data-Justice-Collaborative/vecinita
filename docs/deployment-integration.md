@@ -1,11 +1,23 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — automations, freshness, LoRA FT stub)
+> **Last updated**: 2026-08-28 (EV-staging-do-supabase / F83 / ADR-054 — dual-env)
 
 ## Overview
 
 Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, internal write API, both frontends, and **Managed Postgres**; **Modal** (US workspace) for Data Management ASGI, ingest workers, FastEmbed, and **vLLM** (primary LLM per RD-021). Modal workers **do not** hold `DATABASE_URL`; they call the DO internal write API.
+
+### Environments (ADR-054 / F83)
+
+| `env_role` | DO | Supabase | Modal |
+|------------|----|----------|-------|
+| `staging` | `vecinita-staging-*` apps + `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** (web suffix `staging`) |
+| `prod` | Pre-existing sole stack | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** |
+
+Distinct staging was provisioned 2026-08-28 (H1–H5 PASS). Use `env_role` `staging` |
+`prod` per ADR-054; ADR-049 remains historical for the former single-env era.
+Merge to `main` requires CI + staging deploy/smoke (ruleset; ADR-050/054). GitHub Environments:
+`staging` (pre-merge) and `production` (post-merge CD).
 
 ## Services
 
