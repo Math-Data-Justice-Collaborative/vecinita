@@ -203,7 +203,7 @@ def _top_errors(*, engine: Engine, since: datetime) -> list[MetricsTopError]:
         mapped = mapping_row(row)
         workload = row_str(mapped, "workload")
         if workload not in {"chat", "embed"}:
-            continue
+            continue  # pragma: no cover — defensive; CHECK constraint prevents
         out.append(
             MetricsTopError(
                 workload=cast("Literal['chat', 'embed']", workload),
@@ -311,7 +311,7 @@ def _ingest_timeseries(
         succeeded = row_int(mapped, "succeeded")
         failed = row_int(mapped, "failed")
         bucket_t = mapped["bucket"]
-        if not isinstance(bucket_t, datetime):
+        if not isinstance(bucket_t, datetime):  # pragma: no cover
             continue
         buckets.append(
             MetricsTimeseriesBucket(
@@ -370,7 +370,7 @@ def _event_timeseries(
         succeeded = row_int(mapped, "succeeded")
         failed = row_int(mapped, "failed")
         bucket_t = mapped["bucket"]
-        if not isinstance(bucket_t, datetime):
+        if not isinstance(bucket_t, datetime):  # pragma: no cover
             continue
         buckets.append(
             MetricsTimeseriesBucket(

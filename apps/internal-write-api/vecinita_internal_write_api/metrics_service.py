@@ -81,9 +81,9 @@ def fetch_metric_event(*, engine: Engine, event_id: UUID) -> MetricsEventRecord:
     mapped = mapping_row(row)
     workload_raw = row_str(mapped, "workload")
     outcome_raw = row_str(mapped, "outcome")
-    if workload_raw not in {"chat", "embed"}:
+    if workload_raw not in {"chat", "embed"}:  # pragma: no cover — DB CHECK
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="bad_row")
-    if outcome_raw not in {"success", "failure", "no_context"}:
+    if outcome_raw not in {"success", "failure", "no_context"}:  # pragma: no cover — DB CHECK
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="bad_row")
     return MetricsEventRecord(
         event_id=scalar_uuid(mapped["id"]),

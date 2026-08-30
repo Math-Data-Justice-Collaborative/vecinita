@@ -280,6 +280,8 @@ describe("UJ-088 Monitoring page (TC-303, TC-304, F84)", () => {
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
         const url = fetchInputUrl(input);
         if (url.includes("/internal/v1/metrics/")) {
+          // Intentionally not an Error — covers MonitoringPage non-Error catch.
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- test fixture
           return Promise.reject("boom");
         }
         if (url.includes("/internal/v1/stats")) {
