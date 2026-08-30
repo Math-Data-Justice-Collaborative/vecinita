@@ -608,6 +608,58 @@ paths:
                 $ref: "#/components/schemas/TopServedResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /metrics/events:
+    post:
+      operationId: createMetricsEvent
+      summary: Ingest privacy-safe operational metric event (F84 / ADR-055)
+      description: >
+        Fire-and-forget chat/embed outcome events. extraProperties forbidden —
+        never accept question/answer/prompt/message.
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MetricsEventRequest"
+      responses:
+        "202":
+          description: Acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsEventAccepted"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          description: Validation error (forbidden fields or invalid body)
+  /metrics/events/{event_id}:
+    get:
+      operationId: getMetricsEvent
+      summary: Read one operational metric event by id (F84)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Allow-listed event fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsEventRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Unknown event_id
   /stats/summary:
     get:
       operationId: getStatsSummary
@@ -2316,6 +2368,78 @@ components:
           type: boolean
         count:
           type: integer
+    MetricsEventRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - workload
+        - outcome
+        - latency_ms
+      properties:
+        workload:
+          type: string
+          enum: [chat, embed]
+        outcome:
+          type: string
+          enum: [success, failure, no_context]
+        latency_ms:
+          type: integer
+          minimum: 0
+        error_code:
+          type: string
+          maxLength: 128
+          nullable: true
+        locale:
+          type: string
+          maxLength: 8
+          nullable: true
+        job_id:
+          type: string
+          maxLength: 128
+          nullable: true
+    MetricsEventAccepted:
+      type: object
+      required:
+        - acknowledged
+        - event_id
+      properties:
+        acknowledged:
+          type: boolean
+        event_id:
+          type: string
+          format: uuid
+    MetricsEventRecord:
+      type: object
+      required:
+        - event_id
+        - workload
+        - outcome
+        - latency_ms
+        - created_at
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        workload:
+          type: string
+          enum: [chat, embed]
+        outcome:
+          type: string
+          enum: [success, failure, no_context]
+        latency_ms:
+          type: integer
+        error_code:
+          type: string
+          nullable: true
+        locale:
+          type: string
+          nullable: true
+        job_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
     TopServedResponse:
       type: object
       required:

@@ -457,6 +457,39 @@ class StatsServedResponse(BaseModel):
     acknowledged: bool = True
 
 
+class MetricsEventRequest(BaseModel):
+    """POST /internal/v1/metrics/events — privacy-safe operational event (F84 / ADR-055)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    workload: Literal["chat", "embed"]
+    outcome: Literal["success", "failure", "no_context"]
+    latency_ms: int = Field(..., ge=0)
+    error_code: str | None = Field(default=None, max_length=128)
+    locale: str | None = Field(default=None, max_length=8)
+    job_id: str | None = Field(default=None, max_length=128)
+
+
+class MetricsEventAccepted(BaseModel):
+    """202 response for metrics event ingest."""
+
+    acknowledged: bool = True
+    event_id: UUID
+
+
+class MetricsEventRecord(BaseModel):
+    """GET /internal/v1/metrics/events/{event_id} — allow-listed fields only."""
+
+    event_id: UUID
+    workload: Literal["chat", "embed"]
+    outcome: Literal["success", "failure", "no_context"]
+    latency_ms: int
+    error_code: str | None = None
+    locale: str | None = None
+    job_id: str | None = None
+    created_at: datetime
+
+
 class TopServedItem(BaseModel):
     """Single row in GET /internal/v1/stats/top-served."""
 
