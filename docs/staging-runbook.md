@@ -242,13 +242,28 @@ from monitoring tools.
 ### Bring-up (operator)
 
 ```bash
-# On staging Droplet after cloning this tree:
-cd infra/observability
-cp .env.example .env   # set GRAFANA_ADMIN_PASSWORD + webhook URL
-# Render alertmanager.yml webhook URL per README
-docker compose up -d
+# Auth: DIGITALOCEAN_TOKEN in repo-root .env (gitignored), or doctl auth init
+set -a && source .env && set +a
+export DIGITALOCEAN_ACCESS_TOKEN="$DIGITALOCEAN_TOKEN"
+bash scripts/deploy/create_staging_obs_droplet.sh
+
+# On Droplet (after create):
+# rsync infra/observability/ root@<ip>:/opt/vecinita-obs/
+# cp .env.example .env  # set GRAFANA_ADMIN_PASSWORD
+# docker compose up -d
 # Complete CHECKLIST-tc305-tc306.md
 ```
+
+**Live (2026-08-30):** Droplet `vecinita-staging-obs` / `159.203.137.236` (nyc3).
+Services bind loopback — tunnel Grafana:
+
+```bash
+ssh -L 3000:127.0.0.1:3000 root@159.203.137.236
+# then open http://127.0.0.1:3000  (password in /opt/vecinita-obs/.env on host)
+```
+
+TC-306 drill: Alertmanager → compose `webhook-sink` received synthetic alert with no
+chat content fields (PASS). Replace sink URL with a real staging webhook when ready.
 
 ## Troubleshooting
 

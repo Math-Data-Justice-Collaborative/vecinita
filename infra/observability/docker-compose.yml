@@ -33,8 +33,7 @@ services:
     depends_on:
       - loki
     restart: unless-stopped
-    cap_drop:
-      - ALL
+    # Alloy needs write to its data dir; keep no-new-privileges only.
     security_opt:
       - no-new-privileges:true
 
@@ -68,9 +67,20 @@ services:
       - alertmanager_data:/alertmanager
     ports:
       - "127.0.0.1:9093:9093"
-    environment:
-      # Substituted at deploy via envsubst or bind-mounted rendered config.
-      VECINITA_ALERTMANAGER_WEBHOOK_URL: ${VECINITA_ALERTMANAGER_WEBHOOK_URL:-http://127.0.0.1:9/dev-null}
+    depends_on:
+      - webhook-sink
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # Local sink for TC-306 drills (staging only). Replace URL with
+  # VECINITA_ALERTMANAGER_WEBHOOK_URL for a real receiver.
+  webhook-sink:
+    image: mendhak/http-https-echo:31
+    ports:
+      - "127.0.0.1:9999:8080"
     restart: unless-stopped
     cap_drop:
       - ALL

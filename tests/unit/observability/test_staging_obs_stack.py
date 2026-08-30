@@ -26,6 +26,7 @@ EXPECTED_IMAGE_PINS: dict[str, str] = {
     "alloy": "grafana/alloy:v1.8.3",
     "prometheus": "prom/prometheus:v2.55.1",
     "alertmanager": "prom/alertmanager:v0.28.1",
+    "webhook-sink": "mendhak/http-https-echo:31",
 }
 
 

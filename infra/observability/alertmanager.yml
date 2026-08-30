@@ -15,7 +15,7 @@ route:
 receivers:
   - name: staging-webhook
     webhook_configs:
-      - url: "http://127.0.0.1:9/dev-null"
+      - url: "http://webhook-sink:8080/"
         send_resolved: true
         max_alerts: 10
         http_config:

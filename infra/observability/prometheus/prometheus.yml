@@ -13,12 +13,12 @@ rule_files:
   - /etc/prometheus/alert-rules.yml
 
 scrape_configs:
-  # Operators replace these targets with staging DO app health URLs.
+  # Staging DO App Platform health probes (F84).
   - job_name: do-internal-write-api
     metrics_path: /health
     scheme: https
     static_configs:
-      - targets: ["example-invalid.ondigitalocean.app"]
+      - targets: ["vecinita-staging-write-api-w7eol.ondigitalocean.app"]
         labels:
           service: internal-write-api
           env: staging
@@ -27,7 +27,7 @@ scrape_configs:
     metrics_path: /health
     scheme: https
     static_configs:
-      - targets: ["example-invalid.ondigitalocean.app"]
+      - targets: ["vecinita-staging-chat-api-tobwu.ondigitalocean.app"]
         labels:
           service: chat-rag
           env: staging

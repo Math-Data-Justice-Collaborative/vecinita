@@ -220,8 +220,14 @@ Python runtime). Image pins (M139):
 | Grafana Alloy | `grafana/alloy:v1.8.3` | Log shipper; drops prompt-like JSON keys |
 | Prometheus | `prom/prometheus:v2.55.1` | Scrape + alert rules |
 | Alertmanager | `prom/alertmanager:v0.28.1` | Webhook via `VECINITA_ALERTMANAGER_WEBHOOK_URL` |
+| Webhook sink (staging drill) | `mendhak/http-https-echo:31` | Local TC-306 receiver; replace with real webhook URL |
 
 No new Python PyPI deps required for F84 metrics APIs (FastAPI + SQLAlchemy existing).
+
+**Staging Droplet (EV-036-D13, 2026-08-30):** `vecinita-staging-obs` (`s-1vcpu-1gb`, nyc3).
+Compose lives at `/opt/vecinita-obs` on the host. Grafana/Loki/AM bind **127.0.0.1** —
+use SSH tunnel. Create helper: `scripts/deploy/create_staging_obs_droplet.sh`
+(auth via `DIGITALOCEAN_TOKEN` / `DIGITALOCEAN_ACCESS_TOKEN`).
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)
 
