@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import pytest
 
+from tests.helpers.json_response import json_str, response_json_object
 from tests.unit.internal_write_api.conftest import auth_headers
 
 if TYPE_CHECKING:
@@ -31,17 +32,16 @@ def test_metrics_events_accepts_chat_outcome(write_client: TestClient) -> None:
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.ACCEPTED
-    body = response.json()
+    body = response_json_object(response)
     assert body["acknowledged"] is True
-    assert isinstance(body["event_id"], str)
-    event_id = body["event_id"]
+    event_id = json_str(body, "event_id")
 
     get_resp = write_client.get(
         f"/internal/v1/metrics/events/{event_id}",
         headers=auth_headers(),
     )
     assert get_resp.status_code == HTTPStatus.OK
-    got = get_resp.json()
+    got = response_json_object(get_resp)
     assert got["event_id"] == event_id
     assert got["workload"] == "chat"
     assert got["outcome"] == "success"
@@ -66,13 +66,15 @@ def test_metrics_events_accepts_embed_with_job_id(write_client: TestClient) -> N
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.ACCEPTED
-    body = response.json()
+    body = response_json_object(response)
     assert body["acknowledged"] is True
 
-    got = write_client.get(
-        f"/internal/v1/metrics/events/{body['event_id']}",
-        headers=auth_headers(),
-    ).json()
+    got = response_json_object(
+        write_client.get(
+            f"/internal/v1/metrics/events/{json_str(body, 'event_id')}",
+            headers=auth_headers(),
+        ),
+    )
     assert got["workload"] == "embed"
     assert got["outcome"] == "failure"
     assert got["error_code"] == "EmbedClientError"

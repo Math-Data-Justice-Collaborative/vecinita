@@ -29,9 +29,13 @@ EXPECTED_IMAGE_PINS: dict[str, str] = {
     "webhook-sink": "mendhak/http-https-echo:31",
 }
 
+# AC-MON6: staging Loki retention window (hours).
+LOKI_RETENTION_MIN_HOURS = 24
+LOKI_RETENTION_MAX_HOURS = 168  # 7 days
+
 
 def _load_yaml(path: Path) -> object:
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw = cast("object", yaml.safe_load(path.read_text(encoding="utf-8")))
     assert raw is not None
     return raw
 
@@ -57,8 +61,8 @@ def test_loki_retention_is_short_window_tc305() -> None:
     retention = str(limits["retention_period"])
     assert retention.endswith("h")
     hours = int(retention.removesuffix("h"))
-    assert hours <= 168
-    assert hours >= 24
+    assert hours <= LOKI_RETENTION_MAX_HOURS
+    assert hours >= LOKI_RETENTION_MIN_HOURS
 
 
 def test_alloy_pipeline_drops_forbidden_content_keys_tc305() -> None:

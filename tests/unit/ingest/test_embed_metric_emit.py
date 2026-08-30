@@ -96,7 +96,7 @@ class _WriteClient:
         tags: list[TagInput],
     ) -> TagPatchResponse:
         _ = (document_id, tags)
-        return TagPatchResponse(document_id=document_id, tags=[])
+        return TagPatchResponse(tags=[])
 
 
 def _fetch(url: str) -> ScrapedDocument:

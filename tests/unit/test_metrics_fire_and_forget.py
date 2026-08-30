@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from http import HTTPStatus
+from typing import cast
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -13,6 +14,7 @@ from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import AskStreamSession
 from vecinita_rag.types import RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest, AskResponse, Source
+from vecinita_shared_schemas.json_types import as_json_object
 
 pytestmark = pytest.mark.unit
 
@@ -78,10 +80,10 @@ def test_ask_fires_chat_metric_without_question_answer(client: TestClient) -> No
     metric_calls = [
         call
         for call in post_mock.call_args_list
-        if call.args and "metrics/events" in str(call.args[0])
+        if call.args and "metrics/events" in str(cast("object", call.args[0]))
     ]
     assert len(metric_calls) == 1
-    payload = metric_calls[0].kwargs["json"]
+    payload = as_json_object(cast("object", metric_calls[0].kwargs.get("json")))
     assert payload["workload"] == "chat"
     assert payload["outcome"] == "success"
     assert "question" not in payload

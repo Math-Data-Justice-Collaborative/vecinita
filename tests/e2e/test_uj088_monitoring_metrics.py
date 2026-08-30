@@ -6,6 +6,12 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+from tests.helpers.json_response import (
+    json_list,
+    json_object_get,
+    json_str,
+    response_json_object,
+)
 from tests.unit.internal_write_api.conftest import auth_headers
 
 if TYPE_CHECKING:
@@ -25,17 +31,17 @@ def test_uj088_metrics_summary_and_timeseries(write_client: TestClient) -> None:
         headers=auth_headers(),
     )
     assert create.status_code == HTTPStatus.ACCEPTED
-    event_id = create.json()["event_id"]
-    assert isinstance(event_id, str)
+    event_id = json_str(response_json_object(create), "event_id")
 
     summary = write_client.get(
         "/internal/v1/metrics/summary?window=24h",
         headers=auth_headers(),
     )
     assert summary.status_code == HTTPStatus.OK
-    body = summary.json()
+    body = response_json_object(summary)
     assert body["window"] == "24h"
-    assert body["workloads"]["chat"]["total"] >= 1
+    chat = json_object_get(json_object_get(body, "workloads"), "chat")
+    assert int(str(chat["total"])) >= 1
     assert "question" not in body
     assert "answer" not in body
 
@@ -44,15 +50,16 @@ def test_uj088_metrics_summary_and_timeseries(write_client: TestClient) -> None:
         headers=auth_headers(),
     )
     assert series.status_code == HTTPStatus.OK
-    assert series.json()["metric"] == "chat_success_rate"
-    assert isinstance(series.json()["buckets"], list)
+    series_body = response_json_object(series)
+    assert series_body["metric"] == "chat_success_rate"
+    assert isinstance(json_list(series_body, "buckets"), list)
 
     got = write_client.get(
         f"/internal/v1/metrics/events/{event_id}",
         headers=auth_headers(),
     )
     assert got.status_code == HTTPStatus.OK
-    record = got.json()
+    record = response_json_object(got)
     assert record["workload"] == "chat"
     assert record["outcome"] == "success"
     assert "question" not in record
@@ -89,11 +96,12 @@ def test_uj088_metrics_events_embed_with_job_id(write_client: TestClient) -> Non
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.ACCEPTED
-    event_id = response.json()["event_id"]
+    event_id = json_str(response_json_object(response), "event_id")
     got = write_client.get(
         f"/internal/v1/metrics/events/{event_id}",
         headers=auth_headers(),
     )
     assert got.status_code == HTTPStatus.OK
-    assert got.json()["job_id"] == job_id
-    assert got.json()["workload"] == "embed"
+    record = response_json_object(got)
+    assert record["job_id"] == job_id
+    assert record["workload"] == "embed"

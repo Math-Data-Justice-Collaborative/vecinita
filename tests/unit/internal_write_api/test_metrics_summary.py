@@ -5,6 +5,11 @@ from __future__ import annotations
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
+from tests.helpers.json_response import (
+    json_list,
+    json_object_get,
+    response_json_object,
+)
 from tests.unit.internal_write_api.conftest import auth_headers
 
 if TYPE_CHECKING:
@@ -29,15 +34,16 @@ def test_metrics_summary_24h_shape(write_client: TestClient) -> None:
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.OK
-    body = response.json()
+    body = response_json_object(response)
     assert body["window"] == "24h"
+    workloads = json_object_get(body, "workloads")
     for key in ("ingest", "chat", "embed"):
-        workload = body["workloads"][key]
+        workload = json_object_get(workloads, key)
         assert "total" in workload
         assert "succeeded" in workload
         assert "failed" in workload
         assert "success_rate" in workload
-    assert body["workloads"]["chat"]["total"] >= 1
+    assert int(str(json_object_get(workloads, "chat")["total"])) >= 1
     assert "question" not in body
     assert "answer" not in body
 
@@ -49,7 +55,7 @@ def test_metrics_summary_7d_ok(write_client: TestClient) -> None:
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.OK
-    assert response.json()["window"] == "7d"
+    assert response_json_object(response)["window"] == "7d"
 
 
 def test_metrics_timeseries_ingest_success_rate(write_client: TestClient) -> None:
@@ -59,10 +65,10 @@ def test_metrics_timeseries_ingest_success_rate(write_client: TestClient) -> Non
         headers=auth_headers(),
     )
     assert response.status_code == HTTPStatus.OK
-    body = response.json()
+    body = response_json_object(response)
     assert body["metric"] == "ingest_success_rate"
     assert body["window"] == "7d"
-    assert isinstance(body["buckets"], list)
+    assert isinstance(json_list(body, "buckets"), list)
 
 
 def test_metrics_summary_rejects_bad_window(write_client: TestClient) -> None:

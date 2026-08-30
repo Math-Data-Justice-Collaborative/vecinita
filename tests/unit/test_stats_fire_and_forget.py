@@ -151,7 +151,7 @@ def test_ask_fires_stats_post(client: TestClient) -> None:
     served_calls = [
         call
         for call in post_mock.call_args_list
-        if call.args and "/internal/v1/stats/served" in str(call.args[0])
+        if call.args and "/internal/v1/stats/served" in str(cast("object", call.args[0]))
     ]
     assert len(served_calls) == 1
     call_args = served_calls[0]
