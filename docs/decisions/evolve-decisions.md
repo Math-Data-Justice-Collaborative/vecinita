@@ -1412,6 +1412,7 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | EV-036-D11 | Prod Grafana | Deferred until cost AskQuestion (ADR-004 ≤$50) |
 | EV-036-D12 | Tech plan | **Approve TP-EV-036** — M136–M140; Droplet s-1vcpu-1gb; no chart npm lib; Modal `metrics_rollup`; defer Modal→Loki ship |
 | EV-036-D13 | Staging Droplet | **Approve create** `s-1vcpu-1gb` (~$6/mo) for Grafana/Loki/Alertmanager (2026-08-30) — blocked until doctl has Droplet scopes |
+| EV-036-D14 | Verify waive | **WAIVE** implementing `inline-documentation` — 348 missing repo-wide; **0** in F84 metrics/monitoring paths (2026-08-30) |
 
 ### Build progress (2026-08-30)
 
@@ -1421,7 +1422,7 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | M137 | done | `7ee8f83c` summary/timeseries + emitters |
 | M138 | done | `0664ae04` admin `/monitoring` UI |
 | M139 | done | `0e4261f6` `infra/observability/` compose + TC-305/306 |
-| M140 | pending | verify band / PR |
+| M140 | done | verify band PASS+waive (D14); `18baaa3a` Droplet follow-ups; `701955a0` typecheck tests |
 | Droplet | **live** | `vecinita-staging-obs` `159.203.137.236` nyc3; TC-306 webhook drill PASS (2026-08-30) |
 
 ### Cross-project Neo4j checkpoint (documenting)
