@@ -104,9 +104,9 @@ describe("ThemeProvider and ThemeToggle", () => {
     const moon = stack.querySelector("svg.lucide-moon");
     expect(sun).toBeTruthy();
     expect(moon).toBeTruthy();
-    expect(moon?.className.baseVal ?? moon?.getAttribute("class") ?? "").toMatch(
-      /absolute/,
-    );
+    expect(
+      moon?.className.baseVal ?? moon?.getAttribute("class") ?? "",
+    ).toMatch(/absolute/);
   });
 
   it("throws when useTheme is used outside ThemeProvider", () => {

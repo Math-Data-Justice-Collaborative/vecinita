@@ -162,6 +162,99 @@ export async function fetchHealthAggregate(
   return parseHealthAggregate(raw);
 }
 
+/** Query windows for F84 Monitoring — docs/api-contract.md §metrics/summary */
+export type MetricsWindow = "1h" | "24h" | "7d" | "30d";
+
+export type MetricsTimeseriesMetric =
+  | "ingest_success_rate"
+  | "chat_success_rate"
+  | "embed_success_rate"
+  | "ingest_volume"
+  | "chat_volume"
+  | "embed_volume";
+
+export interface MetricsWorkloadStats {
+  total: number;
+  succeeded: number;
+  failed: number;
+  success_rate: number;
+  no_context?: number | undefined;
+}
+
+export interface MetricsTopError {
+  workload: "chat" | "embed" | "ingest";
+  error_code: string;
+  count: number;
+}
+
+/** Wire format from GET /internal/v1/metrics/summary — docs/api-contract.md */
+export interface MetricsSummary {
+  window: MetricsWindow;
+  workloads: {
+    ingest: MetricsWorkloadStats;
+    chat: MetricsWorkloadStats;
+    embed: MetricsWorkloadStats;
+  };
+  latency_ms: {
+    chat?: { p50: number; p95: number } | undefined;
+    embed?: { p50: number; p95: number } | undefined;
+  };
+  top_error_codes: MetricsTopError[];
+}
+
+export interface MetricsTimeseriesBucket {
+  t: string;
+  success_rate: number;
+  total: number;
+  failed: number;
+}
+
+/** Wire format from GET /internal/v1/metrics/timeseries */
+export interface MetricsTimeseries {
+  metric: MetricsTimeseriesMetric;
+  window: MetricsWindow;
+  buckets: MetricsTimeseriesBucket[];
+}
+
+export async function fetchMetricsSummary(
+  options: CorpusClientOptions,
+  window: MetricsWindow,
+): Promise<MetricsSummary> {
+  const params = new URLSearchParams({ window });
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/metrics/summary?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Metrics summary failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<MetricsSummary>;
+}
+
+export async function fetchMetricsTimeseries(
+  options: CorpusClientOptions,
+  metric: MetricsTimeseriesMetric,
+  window: MetricsWindow,
+): Promise<MetricsTimeseries> {
+  const params = new URLSearchParams({ metric, window });
+  const response = await fetch(
+    `${options.baseUrl}/internal/v1/metrics/timeseries?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${options.accessToken ?? options.apiKey ?? ""}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Metrics timeseries failed (${String(response.status)})`);
+  }
+  return response.json() as Promise<MetricsTimeseries>;
+}
+
 export interface BulkResult {
   successes: string[];
   failures: { document_id: string; error: string }[];

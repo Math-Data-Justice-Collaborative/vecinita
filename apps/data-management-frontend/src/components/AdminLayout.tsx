@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
+  Activity,
   BarChart3,
   Bot,
   FileText,
@@ -115,6 +116,11 @@ function NavItems({ onClick }: { onClick?: () => void }) {
     { to: "/corpus", label: tr("admin.nav.corpus"), icon: FileText },
     { to: "/jobs", label: tr("admin.nav.jobs"), icon: ListChecks },
     { to: "/health", label: tr("admin.nav.health"), icon: Heart },
+    {
+      to: "/monitoring",
+      label: tr("admin.nav.monitoring"),
+      icon: Activity,
+    },
     {
       to: "/audit",
       label: tr("admin.nav.auditLog"),
