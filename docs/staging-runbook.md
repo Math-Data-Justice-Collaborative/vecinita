@@ -221,6 +221,21 @@ Mark items in [execution-plan.md](sessions/S000-internal-docs-archive/execution-
 | Cost ≤ $50 documented | [docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004](reference.md#cost-monitoring-baseline-adr-004) |
 | Data assets D1–D7 | [data-staging-state.md](data-staging-state.md) — D6/D7 after first Modal deploy |
 
+## EV-036 (F84) — Staging observability (Grafana / Loki / Alertmanager)
+
+**Status:** Specced ([ADR-055](adr/ADR-055-operational-monitoring-grafana-loki.md)); Build deploys staging-only micro stack.
+
+| Piece | Intent |
+|-------|--------|
+| Compose | `infra/observability/` on a **small staging Droplet** (not App Platform) |
+| Grafana | Modal + DO SLO panels; optional `VECINITA_GRAFANA_URL` for operators |
+| Loki | Short-retention structured logs (ADR-004 / F17 allow-list — no prompts) |
+| Alertmanager | ≥1 rule → `VECINITA_ALERTMANAGER_WEBHOOK_URL` (staging secret) |
+| Prod | **Deferred** until cost AskQuestion (ADR-004 ≤$50) |
+
+Do **not** point prod log shippers at staging Loki. Do not enable live prod corpus mutate
+from monitoring tools.
+
 ## Troubleshooting
 
 | Symptom | Likely fix |

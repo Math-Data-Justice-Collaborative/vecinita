@@ -75,6 +75,11 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_REQUEST_TIMEOUT_S` | int | `120` | No | Upstream Modal timeout (cold-start margin; see R5) |
 | `VECINITA_BROWSE_PAGE_SIZE` | int | `20` | No | Default page size for `GET /api/v1/documents` |
 | `VECINITA_STATS_ENABLED` | string | `true` | No | Fire-and-forget stats POST after ask (F28); `false` disables |
+| `VECINITA_METRICS_ENABLED` | string | `true` | No | Fire-and-forget chat/embed metric events (F84); `false` disables |
+| `VECINITA_METRICS_RAW_RETENTION_DAYS` | int | `7` | No | Raw `operation_metrics` retention before rollup (F84 / ADR-055) |
+| `VECINITA_METRICS_HOURLY_RETENTION_DAYS` | int | `90` | No | Hourly rollup retention (F84) |
+| `VECINITA_ALERTMANAGER_WEBHOOK_URL` | string | — | Staging obs | Alertmanager receiver webhook (F84); staging secret only |
+| `VECINITA_GRAFANA_URL` | string | — | Staging obs | Operator link to staging Grafana (optional admin deep-link) |
 | `VECINITA_INTERNAL_WRITE_URL` | string | — | Yes (EV-002) | Internal write API base for stats POST |
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes (EV-002) | Bearer for stats POST; must match write API |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` | int | `10` | No | Hard cap on document tags |
@@ -369,6 +374,9 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_BROWSE_PAGE_SIZE` ≥ 1 and ≤ 100 | Config module |
 | `VECINITA_AUDIT_RETENTION_DAYS` ≥ 0 (0 = forever) | Config module |
 | `VECINITA_STATS_ENABLED` in `true`, `false` | Config module |
+| `VECINITA_METRICS_ENABLED` in `true`, `false` | Config module (ChatRAG / embed emitters, F84) |
+| `VECINITA_METRICS_RAW_RETENTION_DAYS` ≥ 1 and ≤ 30 | Config / rollup job (F84) |
+| `VECINITA_METRICS_HOURLY_RETENTION_DAYS` ≥ 7 and ≤ 365 | Config / rollup job (F84) |
 | `VECINITA_HEALTH_TIMEOUT_MS` ≥ 1000 and ≤ 30000 | Config module (internal-write-api) |
 | Reject unknown `VECINITA_*` in strict mode | Optional dev strictness |
 | No identity fields in public API bodies | OpenAPI + Pydantic models |

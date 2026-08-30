@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-12 (docs sync — scope blurb; TC-252–265 corpus automations / FT)  
+> **Last updated**: 2026-08-29 (EV-036 F84 — TC-299–306 monitoring / Grafana; prior TC-252–265)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -38,7 +38,9 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228 | `tests/ui/chat/uj073-feedback.spec.ts` |
 | UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
-| UJ-076 F36 EN/ES embed promote report | `tests/e2e/test_uj076_embed_promote_report.py` + unit | TC-232–236, TC-239–241 | — (Jobs UI unchanged) |
+| UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
+| UJ-088 Monitoring rates | `tests/e2e/test_uj088_monitoring_metrics.py` | TC-299–TC-304 | Vitest Monitoring page |
+| UJ-089 Staging Grafana/Loki | staging obs checklist / smoke | TC-305–TC-306 | — |
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
 | UJ-078 Relevance-gated sources | `tests/e2e/test_uj078_relevance_sources.py` + unit | TC-245, TC-246, TC-247 | — |
 | UJ-079 Operator display_title | `tests/e2e/test_uj079_display_title.py` + Vitest admin | TC-248, TC-249, TC-250, TC-251 | opt |
@@ -1817,6 +1819,46 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
   `CI success` + `staging-smoke` before merge-ready/`main`; waivers only via AskQuestion;
   #212 describes ADR-054 PR→staging→`main` path (not a protected `stage` branch);
   ruleset checks unchanged (AC-ST8).
+
+### TC-299: Metrics summary windows (UJ-088, F84)
+- **Objective**: `GET /internal/v1/metrics/summary` returns ingest/chat/embed rates for 24h and 7d.
+- **Input**: Admin JWT; seeded jobs + chat/embed outcome events.
+- **Expected**: `200` with per-workload `success_rate`, `total`, `failed`; windows `24h` and `7d` (also accept `1h`/`30d`); no `question`/`answer` fields (AC-MON1).
+
+### TC-300: Metrics timeseries (UJ-088, F84)
+- **Objective**: `GET /internal/v1/metrics/timeseries` returns server-sourced buckets.
+- **Input**: `metric=ingest_success_rate&window=7d` (and chat/embed variants).
+- **Expected**: Ordered buckets with rate + volume; survives client navigation (AC-MON2).
+
+### TC-301: Chat metric emit rejects content (UJ-088, F84, ADR-004)
+- **Objective**: Chat outcome ingest API rejects or strips `question`/`answer`.
+- **Input**: `POST /internal/v1/metrics/events` with forbidden fields.
+- **Expected**: `400`/`422` or fields stripped; nothing persisted with message text (AC-MON4).
+
+### TC-302: Privacy allow-list for metrics tables (F84, F15)
+- **Objective**: New metrics tables are allow-listed; forbidden identity columns absent.
+- **Input**: Schema introspection via `privacy.py` / `tests/privacy/`.
+- **Expected**: Tables listed; no `question`, `answer`, `prompt`, `message`, `user_id`, etc. (AC-MON4).
+
+### TC-303: Monitoring page render + i18n (UJ-088, F84)
+- **Objective**: Admin Monitoring page renders summary cards and chart shell in en/es.
+- **Input**: Vitest with router + mocked metrics APIs.
+- **Expected**: Nav item visible; cards for ingest/chat/embed; window control; no content leaks (AC-MON1, AC-MON5).
+
+### TC-304: Monitoring e2e drill-down to Jobs (UJ-088, F84)
+- **Objective**: API e2e summary + link path to existing Jobs list for failed ingest.
+- **Input**: TestClient write-api + fixtures; optional DM FE Vitest navigation.
+- **Expected**: Failed ingest countable; Jobs tab remains source of truth for job detail (AC-MON3).
+
+### TC-305: Loki / log allow-list (UJ-089, F84, F17)
+- **Objective**: Structured logs shipped to Loki omit prompts/responses at INFO+.
+- **Input**: Sample log lines / unit redaction tests; staging sample query checklist.
+- **Expected**: Allow-listed fields only; retention ≤ configured short window (AC-MON6).
+
+### TC-306: Staging Alertmanager webhook (UJ-089, F84)
+- **Objective**: ≥1 alert rule can POST to staging webhook secret.
+- **Input**: Alertmanager config + test alert or simulated condition.
+- **Expected**: Webhook receives notification; no chat content in payload (AC-MON7–AC-MON8).
 
 ### F31 coverage gate — gated components
 

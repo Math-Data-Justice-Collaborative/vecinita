@@ -449,3 +449,14 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-ST6**: ADR-049 operational exit documented; runbook describes staging→prod path (ADR-054).
 - [x] **AC-ST7**: No operator `*-spec.yaml` or secrets committed.
 - [x] **AC-ST8**: Always-applied cursor rule Stage→Main; GitHub #212 (+ children) track ADR-054 model (not a `stage` branch); agents must not open/merge to `main` without `CI success` + `staging-smoke` (or AskQuestion waiver) (TC-298). — EV-033
+
+### EV-036 — Admin monitoring + staging Grafana/Loki (F84 / ADR-055 / #114)
+
+- [ ] **AC-MON1**: Admin `/monitoring` shows ingest, chat, and embed success rates for ≥ `24h` and `7d` (TC-299, TC-303).
+- [ ] **AC-MON2**: Time-series charts use server aggregates (`GET …/metrics/timeseries`); state survives navigation (TC-300).
+- [ ] **AC-MON3**: Failed ingest remains drill-downable via existing Jobs tab (F32) (TC-304).
+- [ ] **AC-MON4**: No new table/column stores chat message text; metric APIs reject `question`/`answer`; privacy tests pass (TC-301, TC-302).
+- [ ] **AC-MON5**: en/es i18n for Monitoring labels (TC-303).
+- [ ] **AC-MON6**: Staging Loki holds ADR-004 allow-listed structured logs only; short retention (TC-305).
+- [ ] **AC-MON7**: Staging Grafana shows Modal + DO panels (UJ-089).
+- [ ] **AC-MON8**: ≥1 Alertmanager rule notifies staging webhook secret; no chat content in alert payload (TC-306). Prod always-on Grafana deferred (EV-036-D11).

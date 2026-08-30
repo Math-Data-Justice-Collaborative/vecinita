@@ -49,6 +49,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-052](ADR-052-corpus-automation-orchestration.md) | Corpus automation orchestration (triggers + schedule) | Accepted | 04-tech-plan (S030/EV-027 F75–F76; TP2–TP3) |
 | [ADR-053](ADR-053-modal-lora-finetune.md) | Modal LoRA fine-tune + human promote | Accepted | 04-tech-plan (S030/EV-027 F77; TP4–TP6) |
 | [ADR-054](ADR-054-distinct-staging-and-production.md) | Distinct staging + production (DO, Supabase, Modal) | Accepted | EV-staging-do-supabase / F83 |
+| [ADR-055](ADR-055-operational-monitoring-grafana-loki.md) | Operational monitoring metrics + staging Grafana/Loki | Accepted (spec) | EV-036 / F84 / #114 |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost

@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — UJ-080–082; prior S028 UJ-077–079)
+> **Last updated**: 2026-08-29 (EV-036 F84 — UJ-088–089; prior S030 UJ-080–082)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -86,6 +86,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-084 | Approve FT train + human promote | Admin / super-admin | FT job + eval report + llm promote | F80 EV-027 #72 | local |
 | UJ-085 | LLM query refinement gated ask | Community member | ChatRAG ask with F81 enabled | F81 EV-029 #82 | local |
 | UJ-086 | Verified answer with citations | Community member | ChatRAG ask/stream with F82 enabled | F82 EV-030 #84 | local |
+| UJ-088 | View Monitoring success rates (ingest/chat/embed) | Admin operator | DM UI `/monitoring` → write-API metrics | F84 EV-036 #114 | local |
+| UJ-089 | View staging Grafana/Loki + webhook alert | Operator | Staging obs Droplet Grafana/Loki/Alertmanager | F84 EV-036 #114 | staging |
 
 ## Visual journey maps
 
@@ -1608,6 +1610,62 @@ Agents follow `.cursor/rules/stage-before-main.mdc` (always-applied).
 **Automated tests**: smoke/live gated (`tests/smoke/…`); ruleset + rule file checks (TC-297/298).
 
 **E2E tier**: staging (T2/T3) after provision.
+
+---
+
+### UJ-088: View Monitoring success rates (ingest/chat/embed) (F84, #114)
+
+**Actor**: Admin operator
+
+**Goal**: Open the admin **Monitoring** tab and see privacy-safe success rates and trends
+for ingest, chat, and embed for at least 24h and 7d windows; drill failed ingest to Jobs.
+
+**Features**: F84 — EV-036; ADR-055; complements F25/F26/F32
+
+**Preconditions**: Operator authenticated (F34); metrics tables migrated; sample job and
+chat outcome events present (fixtures in local e2e).
+
+**Steps**:
+
+1. Navigate to `/monitoring` from admin nav (en/es labels).
+2. Select window `24h` — summary cards show success % + counts for ingest, chat, embed.
+3. Select window `7d` — cards and time-series update from server aggregates (survive nav).
+4. Open failure breakdown — top `error_code` counts only (no message bodies).
+5. Click through to `/jobs` for a failed ingest job (F32).
+6. Confirm no chat question/answer text appears anywhere on the page or in API responses.
+
+**Acceptance**: AC-MON1–AC-MON5; TC-299–TC-304.
+
+**Automated tests**: `tests/e2e/test_uj088_monitoring_metrics.py`; Vitest Monitoring page.
+
+**E2E tier**: local.
+
+---
+
+### UJ-089: View staging Grafana/Loki + webhook alert (F84)
+
+**Actor**: Operator / maintainer
+
+**Goal**: On **staging only**, open Grafana dashboards for Modal + DO health, search Loki
+without PII, and confirm ≥1 Alertmanager rule can notify a configured webhook.
+
+**Features**: F84 — EV-036; ADR-055; ADR-004 log allow-list
+
+**Preconditions**: Staging obs Droplet with `infra/observability/` compose up; webhook
+secret set; no prod Grafana this cycle.
+
+**Steps**:
+
+1. Open staging Grafana URL (auth via platform secret / basic auth — no visitor PII).
+2. View Modal + DO panels (latency/error proxies from scraped metrics or log-derived rates).
+3. Query Loki for recent structured logs — assert no prompt/answer fields in samples.
+4. Trigger or simulate alert condition → Alertmanager posts to staging webhook URL.
+
+**Acceptance**: AC-MON6–AC-MON8; TC-305–TC-306.
+
+**Automated tests**: runbook checklist + optional smoke; privacy unit for log redaction.
+
+**E2E tier**: staging.
 
 ---
 

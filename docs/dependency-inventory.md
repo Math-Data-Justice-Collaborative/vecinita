@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-07 (S030/EV-027 — Modal FT train pins peft/trl; prior S027 embed)
+> **Last updated**: 2026-08-29 (EV-036 F84 — Grafana/Loki staging stack pins)
 
 ## Runtime dependencies (Python — planned)
 
@@ -207,6 +207,20 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
   do **not** silent-add alternate versions.
   F75/F76 use existing FastAPI / Modal / Postgres / Playwright — no new required runtime deps
   beyond FT train image.
+
+### EV-036 — Staging observability (F84, ADR-055)
+
+Ops stack (staging Droplet compose under `infra/observability/` — **not** DO App Platform
+Python runtime). Pin exact image tags in compose at Build; document here when locked:
+
+| Component | Role | Notes |
+|-----------|------|-------|
+| Grafana OSS | Dashboards (Modal + DO) | Staging only this cycle |
+| Grafana Loki | Log store | Short retention; ADR-004 allow-list |
+| Grafana Alloy or Promtail | Log shipper | From DO apps / optional Modal export |
+| Alertmanager | Alert routing | Webhook via `VECINITA_ALERTMANAGER_WEBHOOK_URL` |
+
+No new Python PyPI deps required for F84 metrics APIs (FastAPI + SQLAlchemy existing).
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)
 
