@@ -75,18 +75,27 @@ export function MonitoringPage() {
           fetchMetricsSummary(client, selected),
           fetchMetricsTimeseries(client, "ingest_success_rate", selected),
         ]);
-        if (!isActive()) return;
+        /* v8 ignore next -- unmount race */
+        if (!isActive()) {
+          return;
+        }
         setSummary(summaryData);
         setTimeseries(seriesData);
       } catch (err) {
-        if (!isActive()) return;
+        /* v8 ignore next -- unmount race */
+        if (!isActive()) {
+          return;
+        }
         setError(
           err instanceof Error
             ? err.message
             : tr("admin.monitoring.loadFailed"),
         );
       } finally {
-        if (isActive()) setLoading(false);
+        /* v8 ignore next -- unmount race */
+        if (isActive()) {
+          setLoading(false);
+        }
       }
     },
     [tr],
@@ -100,40 +109,36 @@ export function MonitoringPage() {
     };
   }, [load, window]);
 
-  if (loading && !summary) {
+  if (!summary) {
     return (
       <div className="space-y-6" data-testid="monitoring-page">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
             {tr("admin.monitoring.title")}
           </h2>
-          <p className="text-muted-foreground">
-            {tr("admin.monitoring.subtitle")}
+          {error == null ? (
+            <p className="text-muted-foreground">
+              {tr("admin.monitoring.subtitle")}
+            </p>
+          ) : null}
+        </div>
+        {error != null ? (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
           </p>
-        </div>
-        <p className="text-muted-foreground">{tr("shared.loading")}</p>
+        ) : (
+          <p className="text-muted-foreground">{tr("shared.loading")}</p>
+        )}
       </div>
     );
   }
 
-  if (error && !summary) {
-    return (
-      <div className="space-y-6" data-testid="monitoring-page">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {tr("admin.monitoring.title")}
-          </h2>
-        </div>
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      </div>
-    );
+  /* v8 ignore next -- timeseries is set atomically with summary */
+  if (timeseries == null) {
+    return null;
   }
 
-  if (!summary) return null;
-
-  const buckets = timeseries?.buckets ?? [];
+  const buckets = timeseries.buckets;
 
   return (
     <div className="space-y-6" data-testid="monitoring-page">
@@ -170,7 +175,10 @@ export function MonitoringPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => void load(() => true, window)}
+            data-testid="monitoring-refresh"
+            onClick={() => {
+              void load(() => true, window);
+            }}
             disabled={loading}
             aria-label={tr("admin.monitoring.refreshAria")}
           >

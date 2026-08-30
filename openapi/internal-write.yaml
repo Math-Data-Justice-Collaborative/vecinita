@@ -2555,6 +2555,7 @@ components:
             $ref: "#/components/schemas/MetricsLatencyPercentiles"
         top_error_codes:
           type: array
+          maxItems: 50
           items:
             $ref: "#/components/schemas/MetricsTopError"
     MetricsTimeseriesBucket:
@@ -2581,6 +2582,7 @@ components:
           enum: [1h, 24h, 7d, 30d]
         buckets:
           type: array
+          maxItems: 500
           items:
             $ref: "#/components/schemas/MetricsTimeseriesBucket"
     TopServedResponse:

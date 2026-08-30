@@ -236,4 +236,265 @@ describe("UJ-088 Monitoring page (TC-303, TC-304, F84)", () => {
     });
     expect(screen.getByTestId("monitoring-timeseries")).toBeInTheDocument();
   });
+
+  it("shows load error when metrics summary fetch fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/metrics/")) {
+          return Promise.reject(new Error("metrics unavailable"));
+        }
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              total_documents: 0,
+              total_chunks: 0,
+              tag_distribution: [],
+              language_breakdown: {},
+              recent_activity: [],
+              top_served: [],
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    await renderAppRoutesReady("/monitoring");
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "metrics unavailable",
+      );
+    });
+    expect(
+      screen.queryByTestId("monitoring-card-ingest"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows loadFailed copy when fetch rejects a non-Error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/metrics/")) {
+          return Promise.reject("boom");
+        }
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              total_documents: 0,
+              total_chunks: 0,
+              tag_distribution: [],
+              language_breakdown: {},
+              recent_activity: [],
+              top_served: [],
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    await renderAppRoutesReady("/monitoring");
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Failed to load monitoring metrics",
+      );
+    });
+  });
+
+  it("renders empty chart and errors placeholders when series/errors are empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/metrics/summary")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              ...SUMMARY_24H,
+              top_error_codes: [],
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/metrics/timeseries")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              metric: "ingest_success_rate",
+              window: "24h",
+              buckets: [],
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              total_documents: 0,
+              total_chunks: 0,
+              tag_distribution: [],
+              language_breakdown: {},
+              recent_activity: [],
+              top_served: [],
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    await renderAppRoutesReady("/monitoring");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("monitoring-timeseries")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("monitoring-timeseries")).toHaveTextContent(
+      "No time-series data for this window.",
+    );
+    expect(screen.getByTestId("monitoring-errors")).toHaveTextContent(
+      "No error codes in this window.",
+    );
+  });
+
+  it("omits no-context row when chat stats lack no_context", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/metrics/summary")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              ...SUMMARY_24H,
+              workloads: {
+                ...SUMMARY_24H.workloads,
+                chat: {
+                  total: 10,
+                  succeeded: 10,
+                  failed: 0,
+                  success_rate: 1,
+                },
+              },
+            }),
+          });
+        }
+        if (url.includes("/internal/v1/metrics/timeseries")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => TIMESERIES,
+          });
+        }
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              total_documents: 0,
+              total_chunks: 0,
+              tag_distribution: [],
+              language_breakdown: {},
+              recent_activity: [],
+              top_served: [],
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    await renderAppRoutesReady("/monitoring");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("monitoring-card-chat")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("monitoring-card-chat").textContent).not.toMatch(
+      /no.context/i,
+    );
+  });
+
+  it("cancels in-flight load when navigating away before metrics resolve", async () => {
+    let resolveSummary: ((value: unknown) => void) | undefined;
+    const summaryPromise = new Promise((resolve) => {
+      resolveSummary = resolve;
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/metrics/summary")) {
+          return summaryPromise.then((body) => ({
+            ok: true,
+            json: async () => body,
+          }));
+        }
+        if (url.includes("/internal/v1/metrics/timeseries")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => TIMESERIES,
+          });
+        }
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              total_documents: 0,
+              total_chunks: 0,
+              tag_distribution: [],
+              language_breakdown: {},
+              recent_activity: [],
+              top_served: [],
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+
+    await renderAppRoutesReady("/monitoring");
+    expect(screen.getByTestId("monitoring-page")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("link", { name: /dashboard/i }));
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /dashboard/i, level: 2 }),
+      ).toBeInTheDocument();
+    });
+
+    resolveSummary?.(SUMMARY_24H);
+
+    // Stale load must not crash; dashboard remains.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /dashboard/i, level: 2 }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("refreshes metrics when refresh is clicked", async () => {
+    await renderAppRoutesReady("/monitoring");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("monitoring-card-ingest")).toBeInTheDocument();
+    });
+
+    const fetchMock = vi.mocked(fetch);
+    const before = fetchMock.mock.calls.filter((call) =>
+      fetchInputUrl(call[0]).includes("/metrics/summary"),
+    ).length;
+
+    fireEvent.click(screen.getByTestId("monitoring-refresh"));
+
+    await waitFor(() => {
+      const after = fetchMock.mock.calls.filter((call) =>
+        fetchInputUrl(call[0]).includes("/metrics/summary"),
+      ).length;
+      expect(after).toBeGreaterThan(before);
+    });
+  });
 });

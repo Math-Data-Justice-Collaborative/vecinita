@@ -23,3 +23,8 @@ d674aea4-ba8b-454b-bb97-88a772ea33f0
 # Response body undefined schema (v3): flags operation responses that correctly
 # $ref components/responses/* (shared error bodies). Content lives on the $ref.
 a92be1d5-d762-484a-86d6-8cd0907ba100
+#
+# --- Staging observability Droplet (F84 / ADR-055) ---
+# Volume Has Sensitive Host Directory: Alloy mounts host /var/log:ro for staging
+# syslog/journal shipping only; Grafana UI stays loopback. Not a secret path.
+1c1325ff-831d-43a1-973e-839ae57dfcc0
