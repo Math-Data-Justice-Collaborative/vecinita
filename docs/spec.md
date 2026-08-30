@@ -172,6 +172,9 @@ Five deployable applications share Postgres (pgvector) and internal packages; **
   | Method | Path | Feature |
   |--------|------|---------|
   | GET | `/internal/v1/stats/summary` | F25 — aggregated dashboard stats |
+  | GET | `/internal/v1/metrics/summary` | F84 — operational success rates |
+  | GET | `/internal/v1/metrics/timeseries` | F84 — metrics time-series |
+  | POST | `/internal/v1/metrics/events` | F84 — chat/embed outcome events |
   | POST | `/internal/v1/stats/served` | F28 — increment serving counter |
   | GET | `/internal/v1/stats/top-served` | F28 — top served documents |
   | DELETE | `/internal/v1/documents/bulk` | F27 — bulk delete |
@@ -370,6 +373,9 @@ Allowed domains: `documents`, `chunks`, `embeddings`, `jobs`, `config`, `tags`, 
 | Internal write | GET | `/internal/v1/corpus/tree` | Nested corpus hierarchy (F61) |
 | Data Mgmt (Modal) | GET | `/jobs/{id}/tree` | Job result tree nodes (F60/F61) |
 | Internal write | GET | `/internal/v1/stats/summary` | Dashboard aggregated stats (F25) |
+| Internal write | GET | `/internal/v1/metrics/summary` | Operational success rates ingest/chat/embed (F84) |
+| Internal write | GET | `/internal/v1/metrics/timeseries` | Metrics time-series buckets (F84) |
+| Internal write | POST | `/internal/v1/metrics/events` | Privacy-safe chat/embed outcome events (F84) |
 | Internal write | POST | `/internal/v1/stats/served` | Increment serving counter (F28) |
 | Internal write | GET | `/internal/v1/stats/top-served` | Top served documents (F28) |
 | Internal write | DELETE | `/internal/v1/documents/bulk` | Bulk delete (F27) |

@@ -221,6 +221,50 @@ Mark items in [execution-plan.md](sessions/S000-internal-docs-archive/execution-
 | Cost ≤ $50 documented | [docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004](reference.md#cost-monitoring-baseline-adr-004) |
 | Data assets D1–D7 | [data-staging-state.md](data-staging-state.md) — D6/D7 after first Modal deploy |
 
+## EV-036 (F84) — Staging observability (Grafana / Loki / Alertmanager)
+
+**Status:** Compose shipped under [`infra/observability/`](../infra/observability/README.md)
+([ADR-055](adr/ADR-055-operational-monitoring-grafana-loki.md)). Droplet bring-up is
+operator-run (staging only).
+
+| Piece | Intent |
+|-------|--------|
+| Compose | `infra/observability/` on a **small staging Droplet** (`s-1vcpu-1gb`, not App Platform) |
+| Grafana | Modal + DO overview dashboard; optional `VECINITA_GRAFANA_URL` |
+| Loki | Retention **168h**; Alloy drops/redacts prompt-like keys (ADR-004 / F17) |
+| Alertmanager | ≥1 rule → `VECINITA_ALERTMANAGER_WEBHOOK_URL` (staging secret) |
+| Checklist | [`infra/observability/CHECKLIST-tc305-tc306.md`](../infra/observability/CHECKLIST-tc305-tc306.md) (TC-305/306) |
+| Prod | **Deferred** until cost AskQuestion (ADR-004 ≤$50) |
+
+Do **not** point prod log shippers at staging Loki. Do not enable live prod corpus mutate
+from monitoring tools.
+
+### Bring-up (operator)
+
+```bash
+# Auth: DIGITALOCEAN_TOKEN in repo-root .env (gitignored), or doctl auth init
+set -a && source .env && set +a
+export DIGITALOCEAN_ACCESS_TOKEN="$DIGITALOCEAN_TOKEN"
+bash scripts/deploy/create_staging_obs_droplet.sh
+
+# On Droplet (after create):
+# rsync infra/observability/ root@<ip>:/opt/vecinita-obs/
+# cp .env.example .env  # set GRAFANA_ADMIN_PASSWORD
+# docker compose up -d
+# Complete CHECKLIST-tc305-tc306.md
+```
+
+**Live (2026-08-30):** Droplet `vecinita-staging-obs` / `159.203.137.236` (nyc3).
+Services bind loopback — tunnel Grafana:
+
+```bash
+ssh -L 3000:127.0.0.1:3000 root@159.203.137.236
+# then open http://127.0.0.1:3000  (password in /opt/vecinita-obs/.env on host)
+```
+
+TC-306 drill: Alertmanager → compose `webhook-sink` received synthetic alert with no
+chat content fields (PASS). Replace sink URL with a real staging webhook when ready.
+
 ## Troubleshooting
 
 | Symptom | Likely fix |

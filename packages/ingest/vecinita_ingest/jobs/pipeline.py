@@ -5,8 +5,9 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
+import time
 from hashlib import sha256
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Literal, Protocol, cast
 from uuid import UUID
 
 import httpx
@@ -116,6 +117,67 @@ def _lookup_stored_content_hash(write_client: object, url: str) -> str | None:
     return result if isinstance(result, str) else None
 
 
+def _metrics_enabled() -> bool:
+    """VECINITA_METRICS_ENABLED defaults true (F84 / config-spec)."""
+    raw = os.environ.get("VECINITA_METRICS_ENABLED", "true").strip().lower()
+    return raw not in {"0", "false", "no", "off"}
+
+
+def _fire_embed_metric(
+    write_client: object,
+    *,
+    outcome: Literal["success", "failure"],
+    latency_ms: int,
+    job_id: UUID | None,
+    error_code: str | None = None,
+) -> None:
+    """Fire-and-forget privacy-safe embed outcome (F84 / ADR-055). Never sends chunk text."""
+    if not _metrics_enabled():
+        return
+    poster = getattr(write_client, "post_metrics_event", None)
+    if not callable(poster):
+        return
+    with contextlib.suppress(Exception):
+        _ = poster(
+            workload="embed",
+            outcome=outcome,
+            latency_ms=max(0, latency_ms),
+            error_code=error_code,
+            job_id=str(job_id) if job_id is not None else None,
+        )
+
+
+def _embed_batch_with_metric(
+    embed_client: EmbeddingClient,
+    chunks: list[str],
+    *,
+    write_client: object,
+    job_id: UUID | None,
+) -> list[list[float]]:
+    """Call embed_batch and emit a success/failure metric event."""
+    started = time.monotonic()
+    try:
+        vectors = embed_client.embed_batch(chunks)
+    except EmbeddingClientError:
+        latency_ms = int((time.monotonic() - started) * 1000)
+        _fire_embed_metric(
+            write_client,
+            outcome="failure",
+            latency_ms=latency_ms,
+            job_id=job_id,
+            error_code="EmbeddingClientError",
+        )
+        raise
+    latency_ms = int((time.monotonic() - started) * 1000)
+    _fire_embed_metric(
+        write_client,
+        outcome="success",
+        latency_ms=latency_ms,
+        job_id=job_id,
+    )
+    return vectors
+
+
 class DocumentFetcher(Protocol):
     """Callable that fetches a URL and returns normalized page text."""
 
@@ -196,6 +258,7 @@ def _ingest_one_url(  # noqa: PLR0913  # mirrors run_ingest_job stage branches
     vocabulary: list[SeedTag],
     slug_vocab: list[str],
     max_document_tags: int,
+    job_id: UUID | None = None,
 ) -> tuple[DocumentUpsert, bool]:
     """Scrape → chunk → tag → embed one URL. Returns (doc, skipped_unchanged)."""
     scraped = fetcher(url)
@@ -265,7 +328,12 @@ def _ingest_one_url(  # noqa: PLR0913  # mirrors run_ingest_job stage branches
                 source="llm",
             )
 
-    embeddings = embed_client.embed_batch(chunks)
+    embeddings = _embed_batch_with_metric(
+        embed_client,
+        chunks,
+        write_client=write_client,
+        job_id=job_id,
+    )
     chunk_models = [
         ChunkUpsert(chunk_index=index, text=chunk, embedding=vector)
         for index, (chunk, vector) in enumerate(zip(chunks, embeddings, strict=True))
@@ -388,6 +456,7 @@ def run_ingest_job(  # noqa: C901, PLR0912, PLR0913, PLR0915  # ingest stages + 
                     vocabulary=vocabulary,
                     slug_vocab=slug_vocab,
                     max_document_tags=max_document_tags,
+                    job_id=job_id,
                 )
             except EmbeddingClientError as embed_exc:
                 urls_failed_embed += 1

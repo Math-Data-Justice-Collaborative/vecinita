@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-08-24 (EV-029 F45/F81; EV-030 F82 spec #84)
+> **Last updated**: 2026-08-29 (EV-036 F84 monitoring + staging Grafana/Loki #114)
 > **Source**: Standing product specs + evolve deltas; cite [ADR index](adr/README.md) and session decision logs for cycle history.
 
 ## Summary
@@ -84,6 +84,7 @@
 | F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
 | F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
 | F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule | EV-staging-do-supabase; EV-033; ADR-054 |
+| F84 | Admin monitoring dashboard + staging Grafana/Loki/alerts | Planned | Data Management / infra | internal-write-api, chat-rag-backend, DM frontend, database, `infra/observability/` | EV-036 #114; ADR-055 |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -1572,6 +1573,28 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   `stage` branch promotion (deferred; ADR-054 uses PR tip → staging-smoke → `main`).
 - **Source**: EV-staging-do-supabase; EV-033-stage-before-main; ADR-054; ADR-049 exit; ADR-050.
 
+### F84: Admin monitoring + staging Grafana/Loki/alerts (#114)
+
+- **What it does**: Gives operators a dedicated Data Management **Monitoring** tab with
+  privacy-safe success/failure rates and trends for **ingest** (jobs), **chat** (outcome
+  metadata only), and **embed** (pipeline-stage / Modal invoke metrics). Complements F25
+  corpus analytics, F26 point-in-time health, and F32 per-job lists. Also deploys a
+  **staging-only** micro Grafana + Loki + Alertmanager stack (`infra/observability/` on a
+  small Droplet) for Modal/DO SLO panels, short-retention logs (ADR-004 allow-list), and
+  webhook alerts. **Prod always-on Grafana is deferred** until an explicit cost AskQuestion
+  (ADR-004 ≤$50 hard cap).
+- **Inputs**: Existing `jobs` rows; ChatRAG fire-and-forget operational events
+  `{ outcome, latency_ms, error_code?, locale? }` (never `question`/`answer`); embed stage
+  events correlated to ingest `job_id`; admin Supabase JWT; staging obs secrets
+  (`VECINITA_ALERTMANAGER_WEBHOOK_URL`, etc.).
+- **Outputs**: Allow-listed Postgres metrics tables + hourly rollups; admin APIs
+  `GET /internal/v1/metrics/summary` and `…/timeseries`; `/monitoring` UI (en/es); staging
+  Grafana dashboards + Loki + ≥1 Alertmanager rule to a generic webhook.
+- **Acceptance**: AC-MON1–AC-MON8; UJ-088–UJ-089; TC-299–TC-306; ADR-055.
+- **Out of scope**: Chat transcripts/replay; PostHog/Segment identity analytics; per-end-user
+  analytics; PagerDuty; prod Grafana this cycle; full OpenTelemetry APM (P5 remains deferred).
+- **Source**: EV-036-admin-monitoring-grafana; GitHub #114; ADR-004; ADR-055; F17/F25/F26/F32.
+
 ## Planned / Deferred (post-v1)
 
 | # | Feature | Priority | Complexity | Notes |
@@ -1580,7 +1603,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 | P2 | Multimodal / full OCR ingest | Low | High | **F59** covers basic PDF text; full OCR still deferred |
 | P3 | Model fine-tuning on corpus | Low | High | **Superseded in-cycle by F80** (S030/EV-027 #72); was “excluded from v1” |
 | P4 | Advanced admin (bulk reindex, A/B prompts) | Low | Medium | — |
-| P5 | Full APM / OpenTelemetry | Low | Medium | Basic logs in v1 (F17) |
+| P5 | Full APM / OpenTelemetry | Low | Medium | Basic logs in v1 (F17); **F84** adds product metrics + staging Grafana/Loki only — not full APM |
 | P6 | ChatRAG nested corpus UI | Medium | Medium | Deferred — licensing research (S024-D17) |
 
 ## Monorepo layout (confirmed)

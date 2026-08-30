@@ -147,8 +147,14 @@ def test_ask_fires_stats_post(client: TestClient) -> None:
         resp = client.post("/api/v1/ask", json={"question": "test question"})
 
     assert resp.status_code == HTTPStatus.OK
-    post_mock.assert_called_once()
-    call_args = post_mock.call_args
+    assert post_mock.call_count >= 1
+    served_calls = [
+        call
+        for call in post_mock.call_args_list
+        if call.args and "/internal/v1/stats/served" in str(cast("object", call.args[0]))
+    ]
+    assert len(served_calls) == 1
+    call_args = served_calls[0]
     assert call_args is not None
     assert "/internal/v1/stats/served" in call_args.args[0]
     body_obj: object | None = call_args.kwargs.get("json")
@@ -187,6 +193,7 @@ def test_ask_skips_stats_when_disabled(settings: ChatRagSettings) -> None:
         internal_write_url=settings.internal_write_url,
         internal_api_key=settings.internal_api_key,
         stats_enabled=False,
+        metrics_enabled=False,
     )
     app = create_app(
         settings=disabled_settings,

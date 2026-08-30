@@ -262,6 +262,11 @@ See [staging-runbook.md](staging-runbook.md) §Deploy order:
 | H5 | Frontend bundle contains staging URLs |
 | H6 | Browser auth journeys (invite accept) |
 
+**F84 (EV-036):** Product operational metrics live in admin `/monitoring` via
+internal-write-api. Staging Grafana/Loki/Alertmanager is a separate Droplet compose
+stack (`infra/observability/`) — see [ADR-055](adr/ADR-055-operational-monitoring-grafana-loki.md).
+Not a substitute for H1–H5.
+
 ---
 
 ## Authentication model

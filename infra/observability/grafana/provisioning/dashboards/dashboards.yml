@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: vecinita-staging
+    orgId: 1
+    folder: Vecinita
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

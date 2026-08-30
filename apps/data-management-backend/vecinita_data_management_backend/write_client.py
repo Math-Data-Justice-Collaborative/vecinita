@@ -122,6 +122,33 @@ class InternalWriteClient:
         parsed = DocumentContentHashResponse.model_validate(response.json())
         return parsed.content_hash
 
+    def post_metrics_event(  # noqa: PLR0913  # mirrors MetricsEventRequest fields
+        self,
+        *,
+        workload: str,
+        outcome: str,
+        latency_ms: int,
+        error_code: str | None = None,
+        job_id: str | None = None,
+        locale: str | None = None,
+    ) -> None:
+        """Fire-and-forget embed/chat operational metric (F84). Failures are ignored by callers."""
+        response = self._client.post(
+            "/internal/v1/metrics/events",
+            json={
+                "workload": workload,
+                "outcome": outcome,
+                "latency_ms": latency_ms,
+                "error_code": error_code,
+                "job_id": job_id,
+                "locale": locale,
+            },
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"post_metrics_event failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+
     def create_rebuild_run(self, body: dict[str, object]) -> UUID:
         """Create a rebuild_runs row for dry-run / live rebuild tracking (TP-S017-02)."""
         response = self._client.post(

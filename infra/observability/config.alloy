@@ -1,0 +1,72 @@
+// Grafana Alloy — ship host/Docker logs to Loki (F84 / ADR-055).
+// Forbidden content keys (never durable in Loki): question, answer, prompt,
+// message (chat body), messages, raw_prompt, text — redact when present as
+// JSON object fields. Do not strip the logger envelope "message" string used
+// by F17 JsonLogFormatter for operational events (e.g. request_completed).
+// Staging only — do not point prod shippers at this Loki.
+
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+local.file_match "host_logs" {
+  path_targets = [
+    {
+      __path__ = "/var/log/*.log",
+      job      = "host",
+    },
+  ]
+}
+
+loki.source.file "host" {
+  targets    = local.file_match.host_logs.targets
+  forward_to = [loki.process.redact.receiver]
+}
+
+loki.process "redact" {
+  forward_to = [loki.write.staging.receiver]
+
+  stage.labels {
+    values = {
+      job = "job",
+    }
+  }
+
+  // Redact JSON object fields that must never reach Loki (F17 / ADR-004).
+  stage.replace {
+    expression = "(\"question\"\\s*:\\s*\"[^\"]*\")"
+    replace    = "\"question\":\"<redacted>\""
+  }
+
+  stage.replace {
+    expression = "(\"answer\"\\s*:\\s*\"[^\"]*\")"
+    replace    = "\"answer\":\"<redacted>\""
+  }
+
+  stage.replace {
+    expression = "(\"prompt\"\\s*:\\s*\"[^\"]*\")"
+    replace    = "\"prompt\":\"<redacted>\""
+  }
+
+  stage.replace {
+    expression = "(\"raw_prompt\"\\s*:\\s*\"[^\"]*\")"
+    replace    = "\"raw_prompt\":\"<redacted>\""
+  }
+
+  stage.replace {
+    expression = "(\"messages\"\\s*:\\s*\\[[^\\]]*\\])"
+    replace    = "\"messages\":[]"
+  }
+
+  stage.replace {
+    expression = "(\"text\"\\s*:\\s*\"[^\"]*\")"
+    replace    = "\"text\":\"<redacted>\""
+  }
+}
+
+loki.write "staging" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

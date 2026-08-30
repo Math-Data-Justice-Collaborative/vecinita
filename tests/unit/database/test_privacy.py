@@ -11,10 +11,13 @@ from vecinita_database.privacy import (
     find_identity_columns_on_ev002_tables,
     find_identity_columns_on_eval_config_tables,
     find_identity_columns_on_eval_tables,
+    find_identity_columns_on_metrics_tables,
     find_identity_columns_on_tag_tables,
+    find_metrics_content_columns,
     find_missing_ev002_tables,
     find_missing_eval_config_tables,
     find_missing_eval_tables,
+    find_missing_metrics_tables,
     find_missing_tag_tables,
 )
 
@@ -297,3 +300,60 @@ def test_find_identity_columns_on_eval_config_tables_returns_empty_when_complian
         )
 
     assert violations == {}
+
+
+def test_find_missing_metrics_tables_reports_absent_tables() -> None:
+    """F84: missing operation_metrics / metrics_hourly reported."""
+    inspector = FakeInspector(tables=["documents"])
+
+    with (
+        patch("vecinita_database.privacy.create_engine"),
+        patch("vecinita_database.privacy.inspect", return_value=inspector),
+    ):
+        missing = find_missing_metrics_tables("postgresql+psycopg://localhost/db")
+
+    assert missing == {"operation_metrics", "metrics_hourly"}
+
+
+def test_find_identity_columns_on_metrics_tables_reports_violations() -> None:
+    """F84: identity columns on metrics tables are violations."""
+    inspector = FakeInspector(
+        tables=["operation_metrics"],
+        columns={
+            "operation_metrics": [
+                {"name": "id"},
+                {"name": "workload"},
+                {"name": "user_id"},
+            ],
+        },
+    )
+
+    with (
+        patch("vecinita_database.privacy.create_engine"),
+        patch("vecinita_database.privacy.inspect", return_value=inspector),
+    ):
+        violations = find_identity_columns_on_metrics_tables("postgresql+psycopg://localhost/db")
+
+    assert violations["operation_metrics"] == ["user_id"]
+
+
+def test_find_metrics_content_columns_reports_chat_fields() -> None:
+    """F84: question/answer columns on metrics tables are violations."""
+    inspector = FakeInspector(
+        tables=["operation_metrics"],
+        columns={
+            "operation_metrics": [
+                {"name": "id"},
+                {"name": "question"},
+                {"name": "answer"},
+            ],
+        },
+    )
+
+    with (
+        patch("vecinita_database.privacy.create_engine"),
+        patch("vecinita_database.privacy.inspect", return_value=inspector),
+    ):
+        violations = find_metrics_content_columns("postgresql+psycopg://localhost/db")
+
+    assert set(violations["operation_metrics"]) == {"answer", "question"}

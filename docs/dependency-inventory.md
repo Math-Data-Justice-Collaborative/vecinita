@@ -1,7 +1,7 @@
 # Dependency Inventory
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-07 (S030/EV-027 — Modal FT train pins peft/trl; prior S027 embed)
+> **Last updated**: 2026-08-29 (EV-036 F84 — Grafana/Loki staging stack pins)
 
 ## Runtime dependencies (Python — planned)
 
@@ -207,6 +207,27 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
   do **not** silent-add alternate versions.
   F75/F76 use existing FastAPI / Modal / Postgres / Playwright — no new required runtime deps
   beyond FT train image.
+
+### EV-036 — Staging observability (F84, ADR-055)
+
+Ops stack (staging Droplet compose under `infra/observability/` — **not** DO App Platform
+Python runtime). Image pins (M139):
+
+| Component | Image pin | Role |
+|-----------|-----------|------|
+| Grafana OSS | `grafana/grafana:11.6.1` | Dashboards (Modal + DO) — staging only |
+| Grafana Loki | `grafana/loki:3.4.2` | Log store; retention 168h; ADR-004 allow-list |
+| Grafana Alloy | `grafana/alloy:v1.8.3` | Log shipper; drops prompt-like JSON keys |
+| Prometheus | `prom/prometheus:v2.55.1` | Scrape + alert rules |
+| Alertmanager | `prom/alertmanager:v0.28.1` | Webhook via `VECINITA_ALERTMANAGER_WEBHOOK_URL` |
+| Webhook sink (staging drill) | `mendhak/http-https-echo:31` | Local TC-306 receiver; replace with real webhook URL |
+
+No new Python PyPI deps required for F84 metrics APIs (FastAPI + SQLAlchemy existing).
+
+**Staging Droplet (EV-036-D13, 2026-08-30):** `vecinita-staging-obs` (`s-1vcpu-1gb`, nyc3).
+Compose lives at `/opt/vecinita-obs` on the host. Grafana/Loki/AM bind **127.0.0.1** —
+use SSH tunnel. Create helper: `scripts/deploy/create_staging_obs_droplet.sh`
+(auth via `DIGITALOCEAN_TOKEN` / `DIGITALOCEAN_ACCESS_TOKEN`).
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)
 

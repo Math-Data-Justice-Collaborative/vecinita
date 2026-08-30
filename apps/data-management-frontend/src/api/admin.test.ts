@@ -18,6 +18,8 @@ import {
   fetchEvalRuns,
   fetchEvalTimeseries,
   fetchHealthAggregate,
+  fetchMetricsSummary,
+  fetchMetricsTimeseries,
   fetchPlaygroundCatalogFamilies,
   fetchPlaygroundCatalogFamilyTags,
   fetchPlaygroundModels,
@@ -201,6 +203,138 @@ describe("admin API fetch helpers", () => {
       vi.fn().mockResolvedValue(new Response("", { status: 503 })),
     );
     await expect(fetchHealthAggregate(CLIENT)).rejects.toThrow(/503/);
+  });
+
+  it("fetchMetricsSummary requests window query (F84)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        window: "24h",
+        workloads: {
+          ingest: { total: 1, succeeded: 1, failed: 0, success_rate: 1 },
+          chat: { total: 2, succeeded: 2, failed: 0, success_rate: 1 },
+          embed: { total: 3, succeeded: 3, failed: 0, success_rate: 1 },
+        },
+        latency_ms: {},
+        top_error_codes: [],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const summary = await fetchMetricsSummary(CLIENT, "24h");
+    expect(summary.window).toBe("24h");
+    expect(summary.workloads.ingest.total).toBe(1);
+    expect(mockFetchUrl(0)).toContain(
+      "/internal/v1/metrics/summary?window=24h",
+    );
+  });
+
+  it("fetchMetricsSummary throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+    await expect(fetchMetricsSummary(CLIENT, "7d")).rejects.toThrow(/500/);
+  });
+
+  it("fetchMetricsTimeseries requests metric and window (F84)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        metric: "ingest_success_rate",
+        window: "7d",
+        buckets: [
+          {
+            t: "2026-08-29T00:00:00Z",
+            success_rate: 0.9,
+            total: 10,
+            failed: 1,
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const series = await fetchMetricsTimeseries(
+      CLIENT,
+      "ingest_success_rate",
+      "7d",
+    );
+    expect(series.buckets).toHaveLength(1);
+    expect(series.buckets[0]?.success_rate).toBe(0.9);
+    expect(mockFetchUrl(0)).toContain("metric=ingest_success_rate");
+    expect(mockFetchUrl(0)).toContain("window=7d");
+  });
+
+  it("fetchMetricsSummary uses apiKey when accessToken is absent", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        window: "1h",
+        workloads: {
+          ingest: { total: 0, succeeded: 0, failed: 0, success_rate: 0 },
+          chat: { total: 0, succeeded: 0, failed: 0, success_rate: 0 },
+          embed: { total: 0, succeeded: 0, failed: 0, success_rate: 0 },
+        },
+        latency_ms: {},
+        top_error_codes: [],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await fetchMetricsSummary(
+      { baseUrl: "http://localhost:8002", apiKey: "corpus-key" },
+      "1h",
+    );
+    const headers = fetchMock.mock.calls[0]?.[1] as { headers: HeadersInit };
+    expect(headers.headers).toMatchObject({
+      Authorization: "Bearer corpus-key",
+    });
+  });
+
+  it("fetchMetricsTimeseries sends empty bearer when no credentials", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        metric: "embed_success_rate",
+        window: "30d",
+        buckets: [],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await fetchMetricsTimeseries(
+      { baseUrl: "http://localhost:8002" },
+      "embed_success_rate",
+      "30d",
+    );
+    const headers = fetchMock.mock.calls[0]?.[1] as { headers: HeadersInit };
+    expect(headers.headers).toMatchObject({
+      Authorization: "Bearer ",
+    });
+  });
+
+  it("fetchMetricsTimeseries throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 502 })),
+    );
+    await expect(
+      fetchMetricsTimeseries(CLIENT, "embed_success_rate", "1h"),
+    ).rejects.toThrow(/502/);
+  });
+
+  it("fetchMetricsSummary sends empty bearer when no credentials", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        window: "30d",
+        workloads: {
+          ingest: { total: 0, succeeded: 0, failed: 0, success_rate: 0 },
+          chat: { total: 0, succeeded: 0, failed: 0, success_rate: 0 },
+          embed: { total: 0, succeeded: 0, failed: 0, success_rate: 0 },
+        },
+        latency_ms: {},
+        top_error_codes: [],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await fetchMetricsSummary({ baseUrl: "http://localhost:8002" }, "30d");
+    const headers = fetchMock.mock.calls[0]?.[1] as { headers: HeadersInit };
+    expect(headers.headers).toMatchObject({
+      Authorization: "Bearer ",
+    });
   });
 
   it("bulkDeleteDocuments sends document_ids", async () => {

@@ -1384,3 +1384,52 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 - Rule + TC-298 + #212 rewrite; children #288/#289 closed
 - Implementing verify: **ACCEPTED WITH WAIVER** — `inline-documentation` FAIL is repo-wide pre-existing (341 missing); not introduced by EV-033 (EV-033-D6, mirrors EV-staging waiver)
 - PR: pending on `evolve/EV-033-stage-before-main`
+
+---
+
+## Cycle EV-036-admin-monitoring-grafana — Monitoring + staging Grafana/Loki (#114)
+
+**Title:** Admin Monitoring dashboard (privacy-safe) + staging Grafana/Loki/alerts  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-036-admin-monitoring-grafana`  
+**Status:** documenting (draft-docs complete; feasibility next)  
+**Date:** 2026-08-29  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/114
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-036-D1 | Path | Hybrid: admin Monitoring (#114) + staging Grafana/Loki/alerts |
+| EV-036-D2 | Scale | standard (+ tech-plan / verify-tech) |
+| EV-036-D3 | Grafana | Staging-only micro compose `infra/observability/` on small Droplet |
+| EV-036-D4 | Fn | Single **F84** |
+| EV-036-D5 | Alerts | Alertmanager → generic webhook (staging secret) |
+| EV-036-D6 | Route | Dedicated `/monitoring` (F25 stays corpus-only) |
+| EV-036-D7 | Manifest | Feature/Spec/UJ/TC + API/Config/ADR-055/AC/runbook/deps |
+| EV-036-D8 | UI preview | No — interview from docs/#114 |
+| EV-036-D9 | Metrics API host | **internal-write-api** (DO holds `DATABASE_URL`) |
+| EV-036-D10 | Chat emit | Fire-and-forget HTTP after `/ask` — no question/answer |
+| EV-036-D11 | Prod Grafana | Deferred until cost AskQuestion (ADR-004 ≤$50) |
+| EV-036-D12 | Tech plan | **Approve TP-EV-036** — M136–M140; Droplet s-1vcpu-1gb; no chart npm lib; Modal `metrics_rollup`; defer Modal→Loki ship |
+| EV-036-D13 | Staging Droplet | **Approve create** `s-1vcpu-1gb` (~$6/mo) for Grafana/Loki/Alertmanager (2026-08-30) — blocked until doctl has Droplet scopes |
+| EV-036-D14 | Verify waive | **WAIVE** implementing `inline-documentation` — 348 missing repo-wide; **0** in F84 metrics/monitoring paths (2026-08-30) |
+
+### Build progress (2026-08-30)
+
+| Milestone | Status | Commit / notes |
+|-----------|--------|----------------|
+| M136 | done | `fc3338d8` metrics schema + events |
+| M137 | done | `7ee8f83c` summary/timeseries + emitters |
+| M138 | done | `0664ae04` admin `/monitoring` UI |
+| M139 | done | `0e4261f6` `infra/observability/` compose + TC-305/306 |
+| M140 | done | verify band PASS+waive (D14); `18baaa3a` Droplet follow-ups; `701955a0` typecheck tests |
+| Droplet | **live** | `vecinita-staging-obs` `159.203.137.236` nyc3; TC-306 webhook drill PASS (2026-08-30) |
+
+### Cross-project Neo4j checkpoint (documenting)
+
+Retrieve for monitoring/Grafana/privacy returned **no_matches** / sparse advisory only
+(`reports/memory-context.md`). Disposition: **waive** cross-project Pattern adoption this
+cycle; **keep-local** Vecinita ADR-004 / F17 / #114 constraints. Re-check at implementing
+verify with HANDOFF dispositions if new Patterns appear.
+
+**Cites:** [Corpus: product] §F84 [Corpus: ADR-004] [Corpus: journeys] [Corpus: api] [Corpus: tests] [Corpus: staging] [Spec: docs/adr/ADR-055-operational-monitoring-grafana-loki.md]

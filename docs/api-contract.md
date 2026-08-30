@@ -734,6 +734,82 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 }
 ```
 
+### GET `/internal/v1/metrics/summary` (EV-036 / F84)
+
+- **Purpose**: Privacy-safe operational success rates for admin Monitoring (`/monitoring`).
+- **Auth**: Supabase JWT (admin or viewer read).
+- **Query**: `window` ∈ `1h` \| `24h` \| `7d` \| `30d` (required; AC requires at least `24h` and `7d`).
+- **Response** `200`:
+
+```json
+{
+  "window": "24h",
+  "workloads": {
+    "ingest": {"total": 40, "succeeded": 36, "failed": 4, "success_rate": 0.9},
+    "chat": {"total": 120, "succeeded": 118, "failed": 2, "success_rate": 0.983, "no_context": 5},
+    "embed": {"total": 40, "succeeded": 38, "failed": 2, "success_rate": 0.95}
+  },
+  "latency_ms": {
+    "chat": {"p50": 1800, "p95": 4200},
+    "embed": {"p50": 400, "p95": 1200}
+  },
+  "top_error_codes": [
+    {"workload": "ingest", "error_code": "EmbedClientError", "count": 2}
+  ]
+}
+```
+
+- **Forbidden**: Any `question`, `answer`, `prompt`, `message`, or transcript fields.
+- **Behavior**: Ingest rates from `jobs` (`job_type` ingest/retag as documented in ADR-055);
+  chat/embed from allow-listed metric events / rollups.
+
+### GET `/internal/v1/metrics/timeseries` (EV-036 / F84)
+
+- **Purpose**: Time-bucketed success rate and volume for charts.
+- **Auth**: Supabase JWT (admin or viewer read).
+- **Query**: `metric` ∈ `ingest_success_rate` \| `chat_success_rate` \| `embed_success_rate` \|
+  `ingest_volume` \| `chat_volume` \| `embed_volume`; `window` as summary.
+- **Response** `200`:
+
+```json
+{
+  "metric": "ingest_success_rate",
+  "window": "7d",
+  "buckets": [
+    {"t": "ISO8601", "success_rate": 0.92, "total": 10, "failed": 1}
+  ]
+}
+```
+
+### POST `/internal/v1/metrics/events` (EV-036 / F84)
+
+- **Purpose**: Ingest privacy-safe operational events (ChatRAG fire-and-forget; embed stage).
+- **Auth**: `VECINITA_INTERNAL_API_KEY` (service) — not browser.
+- **Request** (chat example):
+
+```json
+{
+  "workload": "chat",
+  "outcome": "success",
+  "latency_ms": 1820,
+  "error_code": null,
+  "locale": "en"
+}
+```
+
+- **Request** (embed example): `{ "workload": "embed", "outcome": "failure", "latency_ms": 900, "error_code": "EmbedClientError", "job_id": "…" }`
+- **Response** `202`: `{ "acknowledged": true, "event_id": "uuid" }`
+- **Reject**: Bodies containing `question`, `answer`, `prompt`, `message`, or message history
+  (`400`/`422`). Fire-and-forget from ChatRAG must not block the ask response on metrics failure
+  (mirror F28 stats posture; `VECINITA_METRICS_ENABLED`).
+
+### GET `/internal/v1/metrics/events/{event_id}` (EV-036 / F84)
+
+- **Purpose**: Read one allow-listed event (write-read parity for POST events).
+- **Auth**: Supabase JWT or internal API key.
+- **Response** `200`: `{ event_id, workload, outcome, latency_ms, error_code?, locale?, job_id?, created_at }`
+- **404**: Unknown id. Never includes chat content fields.
+
 ### DELETE `/internal/v1/documents/bulk` (EV-002 / F27)
 
 - **Purpose**: Bulk delete multiple documents.

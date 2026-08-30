@@ -457,6 +457,97 @@ class StatsServedResponse(BaseModel):
     acknowledged: bool = True
 
 
+class MetricsEventRequest(BaseModel):
+    """POST /internal/v1/metrics/events — privacy-safe operational event (F84 / ADR-055)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    workload: Literal["chat", "embed"]
+    outcome: Literal["success", "failure", "no_context"]
+    latency_ms: int = Field(..., ge=0)
+    error_code: str | None = Field(default=None, max_length=128)
+    locale: str | None = Field(default=None, max_length=8)
+    job_id: str | None = Field(default=None, max_length=128)
+
+
+class MetricsEventAccepted(BaseModel):
+    """202 response for metrics event ingest."""
+
+    acknowledged: bool = True
+    event_id: UUID
+
+
+class MetricsEventRecord(BaseModel):
+    """GET /internal/v1/metrics/events/{event_id} — allow-listed fields only."""
+
+    event_id: UUID
+    workload: Literal["chat", "embed"]
+    outcome: Literal["success", "failure", "no_context"]
+    latency_ms: int
+    error_code: str | None = None
+    locale: str | None = None
+    job_id: str | None = None
+    created_at: datetime
+
+
+class MetricsWorkloadStats(BaseModel):
+    """Per-workload counts for metrics summary."""
+
+    total: int
+    succeeded: int
+    failed: int
+    success_rate: float
+    no_context: int | None = None
+
+
+class MetricsLatencyPercentiles(BaseModel):
+    """Latency percentiles in milliseconds."""
+
+    p50: int
+    p95: int
+
+
+class MetricsTopError(BaseModel):
+    """Top error code count (no message bodies)."""
+
+    workload: Literal["chat", "embed", "ingest"]
+    error_code: str
+    count: int
+
+
+class MetricsSummaryResponse(BaseModel):
+    """GET /internal/v1/metrics/summary."""
+
+    window: Literal["1h", "24h", "7d", "30d"]
+    workloads: dict[str, MetricsWorkloadStats]
+    latency_ms: dict[str, MetricsLatencyPercentiles]
+    top_error_codes: list[MetricsTopError]
+
+
+class MetricsTimeseriesBucket(BaseModel):
+    """One timeseries bucket."""
+
+    t: datetime
+    success_rate: float
+    total: int
+    failed: int
+
+
+class MetricsTimeseriesResponse(BaseModel):
+    """GET /internal/v1/metrics/timeseries."""
+
+    metric: Literal[
+        "ingest_success_rate",
+        "chat_success_rate",
+        "embed_success_rate",
+        "ingest_volume",
+        "chat_volume",
+        "embed_volume",
+    ]
+    window: Literal["1h", "24h", "7d", "30d"]
+    buckets: list[MetricsTimeseriesBucket]
+
+
 class TopServedItem(BaseModel):
     """Single row in GET /internal/v1/stats/top-served."""
 
