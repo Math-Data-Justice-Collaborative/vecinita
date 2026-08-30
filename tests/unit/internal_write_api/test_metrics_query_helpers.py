@@ -11,7 +11,6 @@ import pytest
 from fastapi import HTTPException
 from vecinita_internal_write_api import metrics_query
 from vecinita_internal_write_api.metrics_query import (
-    _latency_for,
     fetch_metrics_summary,
     fetch_metrics_timeseries,
     parse_metrics_metric,
@@ -31,7 +30,7 @@ def test_parse_metrics_window_accepts(window: str) -> None:
 def test_parse_metrics_window_rejects() -> None:
     """Unknown window → 422."""
     with pytest.raises(HTTPException) as exc:
-        parse_metrics_window("year")
+        _ = parse_metrics_window("year")
     assert exc.value.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
@@ -54,7 +53,7 @@ def test_parse_metrics_metric_accepts(metric: str) -> None:
 def test_parse_metrics_metric_rejects() -> None:
     """Unknown metric → 422."""
     with pytest.raises(HTTPException) as exc:
-        parse_metrics_metric("latency_p99")
+        _ = parse_metrics_metric("latency_p99")
     assert exc.value.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
@@ -95,12 +94,9 @@ def test_fetch_metrics_timeseries_matrix(
     assert isinstance(body.buckets, list)
 
 
-def test_latency_none_when_no_rows_in_window(engine: Engine) -> None:
-    """Empty percentile query returns None; summary omits latency keys."""
+def test_summary_omits_latency_when_window_has_no_rows(engine: Engine) -> None:
+    """Summary with a future window start leaves latency_ms empty."""
     future = datetime.now(tz=UTC) + timedelta(days=30)
-    assert _latency_for(engine=engine, since=future, workload="chat") is None
-    assert _latency_for(engine=engine, since=future, workload="embed") is None
-
     with patch.object(metrics_query, "_window_start", return_value=future):
         body = fetch_metrics_summary(engine=engine, window="1h")
     assert body.latency_ms == {}
