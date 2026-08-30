@@ -223,18 +223,32 @@ Mark items in [execution-plan.md](sessions/S000-internal-docs-archive/execution-
 
 ## EV-036 (F84) — Staging observability (Grafana / Loki / Alertmanager)
 
-**Status:** Specced ([ADR-055](adr/ADR-055-operational-monitoring-grafana-loki.md)); Build deploys staging-only micro stack.
+**Status:** Compose shipped under [`infra/observability/`](../infra/observability/README.md)
+([ADR-055](adr/ADR-055-operational-monitoring-grafana-loki.md)). Droplet bring-up is
+operator-run (staging only).
 
 | Piece | Intent |
 |-------|--------|
-| Compose | `infra/observability/` on a **small staging Droplet** (not App Platform) |
-| Grafana | Modal + DO SLO panels; optional `VECINITA_GRAFANA_URL` for operators |
-| Loki | Short-retention structured logs (ADR-004 / F17 allow-list — no prompts) |
+| Compose | `infra/observability/` on a **small staging Droplet** (`s-1vcpu-1gb`, not App Platform) |
+| Grafana | Modal + DO overview dashboard; optional `VECINITA_GRAFANA_URL` |
+| Loki | Retention **168h**; Alloy drops/redacts prompt-like keys (ADR-004 / F17) |
 | Alertmanager | ≥1 rule → `VECINITA_ALERTMANAGER_WEBHOOK_URL` (staging secret) |
+| Checklist | [`infra/observability/CHECKLIST-tc305-tc306.md`](../infra/observability/CHECKLIST-tc305-tc306.md) (TC-305/306) |
 | Prod | **Deferred** until cost AskQuestion (ADR-004 ≤$50) |
 
 Do **not** point prod log shippers at staging Loki. Do not enable live prod corpus mutate
 from monitoring tools.
+
+### Bring-up (operator)
+
+```bash
+# On staging Droplet after cloning this tree:
+cd infra/observability
+cp .env.example .env   # set GRAFANA_ADMIN_PASSWORD + webhook URL
+# Render alertmanager.yml webhook URL per README
+docker compose up -d
+# Complete CHECKLIST-tc305-tc306.md
+```
 
 ## Troubleshooting
 

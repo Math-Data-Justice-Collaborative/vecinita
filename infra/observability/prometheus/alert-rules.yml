@@ -1,0 +1,26 @@
+# Staging alert rules — no chat content in labels/annotations (F84 / TC-306).
+
+groups:
+  - name: vecinita-staging-health
+    rules:
+      - alert: VecinitaStagingTargetDown
+        expr: up{env="staging"} == 0
+        for: 10m
+        labels:
+          severity: warning
+          workload: health
+        annotations:
+          summary: "Staging scrape target down ({{ $labels.service }})"
+          description: "Prometheus cannot scrape {{ $labels.job }} for 10m."
+
+      - alert: VecinitaStagingIngestJobsUnhealthy
+        # Placeholder: wire to metrics exporter when available. Fires when the
+        # ingest health job label is explicitly absent after scrape failure.
+        expr: absent(up{job="do-internal-write-api", env="staging"}) == 1
+        for: 15m
+        labels:
+          severity: warning
+          workload: ingest
+        annotations:
+          summary: "Staging ingest/write-api health signal absent"
+          description: "No up series for do-internal-write-api — check staging DO app."

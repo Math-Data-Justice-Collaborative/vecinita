@@ -211,14 +211,15 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
 ### EV-036 — Staging observability (F84, ADR-055)
 
 Ops stack (staging Droplet compose under `infra/observability/` — **not** DO App Platform
-Python runtime). Pin exact image tags in compose at Build; document here when locked:
+Python runtime). Image pins (M139):
 
-| Component | Role | Notes |
-|-----------|------|-------|
-| Grafana OSS | Dashboards (Modal + DO) | Staging only this cycle |
-| Grafana Loki | Log store | Short retention; ADR-004 allow-list |
-| Grafana Alloy or Promtail | Log shipper | From DO apps / optional Modal export |
-| Alertmanager | Alert routing | Webhook via `VECINITA_ALERTMANAGER_WEBHOOK_URL` |
+| Component | Image pin | Role |
+|-----------|-----------|------|
+| Grafana OSS | `grafana/grafana:11.6.1` | Dashboards (Modal + DO) — staging only |
+| Grafana Loki | `grafana/loki:3.4.2` | Log store; retention 168h; ADR-004 allow-list |
+| Grafana Alloy | `grafana/alloy:v1.8.3` | Log shipper; drops prompt-like JSON keys |
+| Prometheus | `prom/prometheus:v2.55.1` | Scrape + alert rules |
+| Alertmanager | `prom/alertmanager:v0.28.1` | Webhook via `VECINITA_ALERTMANAGER_WEBHOOK_URL` |
 
 No new Python PyPI deps required for F84 metrics APIs (FastAPI + SQLAlchemy existing).
 

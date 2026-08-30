@@ -1,0 +1,24 @@
+# Alertmanager — staging webhook only (F84 / AC-MON8).
+# Render webhook URL from VECINITA_ALERTMANAGER_WEBHOOK_URL before deploy
+# (see README.md). Default below is a local sink for compose validation.
+
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: staging-webhook
+  group_by: ["alertname", "severity"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: staging-webhook
+    webhook_configs:
+      - url: "http://127.0.0.1:9/dev-null"
+        send_resolved: true
+        max_alerts: 10
+        http_config:
+          follow_redirects: false
+
+inhibit_rules: []
