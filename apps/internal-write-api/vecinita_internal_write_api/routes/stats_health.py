@@ -12,6 +12,8 @@ from vecinita_shared_schemas.internal_write import (
     MetricsEventAccepted,
     MetricsEventRecord,
     MetricsEventRequest,
+    MetricsSummaryResponse,
+    MetricsTimeseriesResponse,
     StatsServedRequest,
     StatsServedResponse,
     StatsSummaryResponse,
@@ -20,6 +22,12 @@ from vecinita_shared_schemas.internal_write import (
 
 from vecinita_internal_write_api.deps import WriteActorDep
 from vecinita_internal_write_api.health_service import aggregate_health
+from vecinita_internal_write_api.metrics_query import (
+    fetch_metrics_summary,
+    fetch_metrics_timeseries,
+    parse_metrics_metric,
+    parse_metrics_window,
+)
 from vecinita_internal_write_api.metrics_service import fetch_metric_event, record_metric_event
 from vecinita_internal_write_api.stats_service import (
     fetch_stats_summary,
@@ -84,3 +92,26 @@ def register_stats_health_routes(app: FastAPI, *, engine: Engine) -> None:
     )
     def metrics_events_get(event_id: UUID) -> MetricsEventRecord:  # pyright: ignore[reportUnusedFunction]
         return fetch_metric_event(engine=engine, event_id=event_id)
+
+    @app.get(
+        "/internal/v1/metrics/summary",
+        response_model=MetricsSummaryResponse,
+        dependencies=[Depends(require_authenticated)],
+    )
+    def metrics_summary(window: str = "24h") -> MetricsSummaryResponse:  # pyright: ignore[reportUnusedFunction]
+        return fetch_metrics_summary(engine=engine, window=parse_metrics_window(window))
+
+    @app.get(
+        "/internal/v1/metrics/timeseries",
+        response_model=MetricsTimeseriesResponse,
+        dependencies=[Depends(require_authenticated)],
+    )
+    def metrics_timeseries(  # pyright: ignore[reportUnusedFunction]
+        metric: str,
+        window: str = "7d",
+    ) -> MetricsTimeseriesResponse:
+        return fetch_metrics_timeseries(
+            engine=engine,
+            metric=parse_metrics_metric(metric),
+            window=parse_metrics_window(window),
+        )

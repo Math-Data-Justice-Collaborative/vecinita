@@ -147,6 +147,42 @@ def _fire_stats(
         )
 
 
+def _fire_chat_metric(  # noqa: PLR0913  # fire-and-forget needs URL/key/outcome fields
+    *,
+    latency_ms: int,
+    sources: list[Source],
+    locale: str | None,
+    internal_write_url: str | None,
+    internal_api_key: str | None,
+    metrics_enabled: bool = True,
+    outcome: str = "success",
+    error_code: str | None = None,
+) -> None:
+    """Fire-and-forget privacy-safe chat outcome event (F84). Never sends question/answer."""
+    if not metrics_enabled or not internal_write_url:
+        return
+    resolved_outcome = outcome
+    if outcome == "success" and not sources:
+        resolved_outcome = "no_context"
+    headers: dict[str, str] = {}
+    if internal_api_key:
+        headers["Authorization"] = f"Bearer {internal_api_key}"
+    payload: dict[str, object] = {
+        "workload": "chat",
+        "outcome": resolved_outcome,
+        "latency_ms": max(0, latency_ms),
+        "error_code": error_code,
+        "locale": locale,
+    }
+    with contextlib.suppress(Exception):
+        _ = httpx.post(
+            f"{internal_write_url.rstrip('/')}/internal/v1/metrics/events",
+            json=payload,
+            headers=headers,
+            timeout=5.0,
+        )
+
+
 def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route handlers inline
     *,
     settings: ChatRagSettings | None = None,
@@ -238,11 +274,20 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 detail="Upstream unavailable",
             ) from exc
         estimate = _energy_for_duration(time.perf_counter() - started, cfg)
+        latency_ms = int((time.perf_counter() - started) * 1000)
         _fire_stats(
             result.sources,
             cfg.internal_write_url,
             cfg.internal_api_key,
             stats_enabled=cfg.stats_enabled,
+        )
+        _fire_chat_metric(
+            latency_ms=latency_ms,
+            sources=result.sources,
+            locale=result.language,
+            internal_write_url=cfg.internal_write_url,
+            internal_api_key=cfg.internal_api_key,
+            metrics_enabled=cfg.metrics_enabled,
         )
         return result.model_copy(update={"energy_estimate": estimate})
 
@@ -272,6 +317,20 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 "energy_estimate": estimate.model_dump(mode="json"),
             }
             yield f"data: {json.dumps(done_payload)}\n\n"
+            _fire_stats(
+                session.sources,
+                cfg.internal_write_url,
+                cfg.internal_api_key,
+                stats_enabled=cfg.stats_enabled,
+            )
+            _fire_chat_metric(
+                latency_ms=int((time.perf_counter() - started) * 1000),
+                sources=session.sources,
+                locale=body.language,
+                internal_write_url=cfg.internal_write_url,
+                internal_api_key=cfg.internal_api_key,
+                metrics_enabled=cfg.metrics_enabled,
+            )
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 

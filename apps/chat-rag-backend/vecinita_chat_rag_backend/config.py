@@ -181,6 +181,7 @@ class ChatRagSettings:
     internal_write_url: str | None = None
     internal_api_key: str | None = None
     stats_enabled: bool = True
+    metrics_enabled: bool = True
     llm_model_id: str | None = None
     fallback_top_k: int = DEFAULT_EVAL_TOP_K
     fallback_min_retrieval_score: float = DEFAULT_EVAL_MIN_RETRIEVAL_SCORE
@@ -266,6 +267,7 @@ class ChatRagSettings:
             internal_write_url=os.environ.get("VECINITA_INTERNAL_WRITE_URL"),
             internal_api_key=os.environ.get("VECINITA_INTERNAL_API_KEY"),
             stats_enabled=_bool_env("VECINITA_STATS_ENABLED", default=True),
+            metrics_enabled=_bool_env("VECINITA_METRICS_ENABLED", default=True),
             llm_model_id=os.environ.get("VECINITA_LLM_MODEL_ID")
             or os.environ.get("VECINITA_OLLAMA_MODEL_ID", DEFAULT_EVAL_MODEL_ID),
             fallback_top_k=_int_env("VECINITA_RAG_CONFIG_FALLBACK_TOP_K", DEFAULT_EVAL_TOP_K),
