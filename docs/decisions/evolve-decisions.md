@@ -1580,6 +1580,37 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 ---
 
+## Cycle EV-212-stage-promote — Promote `stage` → `main` + close #212
+
+**Title:** Land deferred Stage→Main promote; align #212; flip staging write-api to `main`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-212-stage-promote`  
+**Status:** implementing (Build gate open 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/212
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-212-D0 | Goal | Promote PR `stage`→`main`; close #212; flip staging write-api to `main` |
+| EV-212-D1 | Scale | micro (no tech-plan / qa / e2e) |
+| EV-212-D2 | AC | Approve AC-1…AC-6 (promote + checks + merge + DO flip + close #212 + no secret leaks) |
+| EV-212-D3 | Out | Redesign Stage→Main; live prod corpus mutate; flip apps already on `main` |
+| EV-212-D4 | Merge | AskQuestion before merge; no force-push |
+| EV-212-D5 | Gate | Open Build — commit docs → promote PR → CI + staging-smoke → merge AskQuestion |
+
+### Spec deltas (draft-docs)
+
+| Artifact | Change |
+|----------|--------|
+| GitHub #212 | Body rewritten to EV-036-D15 two-hop + EV-212 closeout |
+| `docs/staging-runbook.md` | Post-promote DO staging branch flip-back note |
+| Session AC | `reports/requirements.md` |
+
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Decision: EV-036-D15] ADR-054 / ADR-050
+
+---
+
 ## EV-feedback-notify-secrets — Staging Resend notify enable (2026-08-31)
 
 **Title:** Enable feedback Resend notify secrets on staging write-api  

@@ -44,6 +44,12 @@ feature→`stage` hop. When `stage` does not exist yet: AskQuestion to create it
 before the first integration PR (do not silently PR to `main`). Smoke on the tip SHA remains
 required for any `main` merge (ADR-054 / #212).
 
+**After promote (DO staging deploy branches):** Staging apps normally track **`main`**. If an
+app was temporarily pointed at `stage` (e.g. `vecinita-staging-write-api` for pre-promote
+smoke), flip its GitHub deploy `branch` back to **`main`** after the promote PR merges so
+staging stays aligned with production CD. Do not leave staging permanently on `stage`
+unless an AskQuestion records that exception.
+
 ## CI/CD before promote (RET-002 / ADR-050)
 
 Tip SHA must be **green** before deploy-ready, promote, or cutover:
