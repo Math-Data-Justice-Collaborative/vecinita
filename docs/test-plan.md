@@ -1812,13 +1812,15 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: GitHub ruleset / branch protection API or UI export.
 - **Expected**: Required checks include CI success job and staging Environment smoke (AC-ST5).
 
-### TC-298: Stage before Main agent rule + ticket tracking (F83, EV-033)
+### TC-298: Stage before Main agent rule + ticket tracking (F83, EV-033 / EV-036-D15)
 - **Objective**: Agents and maintainers share one Stage→Main policy with GH tracking.
-- **Input**: `.cursor/rules/stage-before-main.mdc`; GitHub #212 (+ children); ruleset API.
-- **Expected**: Rule exists with `alwaysApply: true`; cites F83/ADR-054; requires tip SHA
-  `CI success` + `staging-smoke` before merge-ready/`main`; waivers only via AskQuestion;
-  #212 describes ADR-054 PR→staging→`main` path (not a protected `stage` branch);
-  ruleset checks unchanged (AC-ST8).
+- **Input**: `.cursor/rules/stage-before-main.mdc`; `.github/workflows/ci.yml`; GitHub #212
+  (+ children); ruleset API.
+- **Expected**: Rule exists with `alwaysApply: true`; cites F83/ADR-054/EV-036-D15; when
+  `origin/stage` exists, feature/evolve PRs use `--base stage` and `ci.yml` runs on
+  `pull_request`/`push` for `stage`; promote `stage`→`main` requires tip SHA `CI success` +
+  `staging-smoke` (smoke on main-bound PRs only); waivers only via AskQuestion; ruleset
+  checks unchanged (AC-ST8).
 
 ### TC-299: Metrics summary windows (UJ-088, F84)
 - **Objective**: `GET /internal/v1/metrics/summary` returns ingest/chat/embed rates for 24h and 7d.

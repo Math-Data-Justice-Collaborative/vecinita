@@ -38,10 +38,11 @@ branch exists, (2) not treat PRs as merge-ready or open/merge to `main` without 
 (watch CI **after** push).
 
 **Promotion model (EV-036-D15):** When `origin/stage` exists:
-**feature branch → PR into `stage` → staging deploy/smoke → PR `stage`→`main` → prod CD**.
-When `stage` does not exist yet: AskQuestion to create it from `main` before the first
-integration PR (do not silently PR to `main`). Staging Environment smoke on the tip SHA
-remains required for any `main` merge (ADR-054 / #212).
+**feature branch → PR into `stage` (CI) → promote PR `stage`→`main` (CI + `staging-smoke`) → prod CD**.
+`staging-smoke` runs on PRs targeting **`main`** (`deploy-staging.yml`), not on the
+feature→`stage` hop. When `stage` does not exist yet: AskQuestion to create it from `main`
+before the first integration PR (do not silently PR to `main`). Smoke on the tip SHA remains
+required for any `main` merge (ADR-054 / #212).
 
 ## CI/CD before promote (RET-002 / ADR-050)
 

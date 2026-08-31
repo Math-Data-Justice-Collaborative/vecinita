@@ -19,9 +19,9 @@ Distinct staging was provisioned 2026-08-28 (H1–H5 PASS). Use `env_role` `stag
 Merge to `main` requires CI + staging deploy/smoke (ruleset; ADR-050/054). GitHub Environments:
 `staging` (pre-merge) and `production` (post-merge CD). Agents: always-applied
 `.cursor/rules/stage-before-main.mdc` (EV-033 / AC-ST8 / EV-036-D15); tracking **#212**.
-**PR into `stage` first** when `origin/stage` exists; then `stage`→`main` after
-`staging-smoke`. If `stage` is missing, AskQuestion to create it (do not default the
-first integration PR to `main`).
+**PR into `stage` first** when `origin/stage` exists (CI on that hop); then promote
+`stage`→`main` with CI + `staging-smoke` on the main-bound PR. If `stage` is missing,
+AskQuestion to create it (do not default the first integration PR to `main`).
 
 ## Services
 

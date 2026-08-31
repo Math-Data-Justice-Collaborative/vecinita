@@ -1569,9 +1569,11 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212.
 - **Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298; UJ-087.
 - **Out of scope**: Live corpus clone without AskQuestion; Modal provision during Spec band
-  (Build gate); full hostname rename of legacy prod apps in one cutover; separate GitHub
-  `stage` branch promotion (deferred; ADR-054 uses PR tip → staging-smoke → `main`).
-- **Source**: EV-staging-do-supabase; EV-033-stage-before-main; ADR-054; ADR-049 exit; ADR-050.
+  (Build gate); full hostname rename of legacy prod apps in one cutover.
+- **Promotion (EV-036-D15)**: When `origin/stage` exists — feature→`stage` (CI) then
+  promote `stage`→`main` (CI + `staging-smoke`). Smoke remains on main-bound PRs (ADR-054).
+- **Source**: EV-staging-do-supabase; EV-033-stage-before-main; EV-036-D15; ADR-054;
+  ADR-049 exit; ADR-050.
 
 ### F84: Admin monitoring + staging Grafana/Loki/alerts (#114)
 

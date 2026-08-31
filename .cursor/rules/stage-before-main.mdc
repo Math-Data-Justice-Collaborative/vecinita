@@ -23,19 +23,23 @@ alwaysApply: true
      rationale). Do **not** silently open the first integration PR to `main`.
 2. Open work as: **feature branch → `stage`** (when available). Never open that first
    PR directly to `main` while `stage` exists.
-3. Promote with a **second** PR: **`stage` → `main`** only after `CI success` +
+3. Merge feature work into **`stage`** only when **CI** is green on that PR (see
+   `ci.yml` triggers for `stage`). Do **not** expect `staging-smoke` on the
+   feature→`stage` hop — that check runs on PRs targeting **`main`**.
+4. Promote with a **second** PR: **`stage` → `main`** only when `CI success` +
    `staging-smoke` are green for the tip SHA (ruleset
    `main-requires-ci-and-staging-smoke`).
-4. Before marking either PR ready / merging / declaring ship: confirm required checks
+5. Before marking either PR ready / merging / declaring ship: confirm required checks
    for that tip SHA (or an explicit AskQuestion **waiver**, recorded).
-5. Cite tracking issue **#212** when updating Stage→Main process.
-6. Keep staging Environment secrets isolated from prod; follow `no-live-prod-corpus-push`.
+6. Cite tracking issue **#212** when updating Stage→Main process.
+7. Keep staging Environment secrets isolated from prod; follow `no-live-prod-corpus-push`.
 
 ### B — Staging Environment gate (always)
 
-Promotion evidence remains: **tip SHA → staging deploy + H1–H5 (`staging-smoke`) →
-merge `main` → prod CD**. Required checks on `main`-bound PRs: `CI success` +
-`staging-smoke`.
+Promotion evidence remains: **promote PR tip SHA → staging deploy + H1–H5
+(`staging-smoke` on PRs targeting `main`) → merge `main` → prod CD**. Required
+checks on `main`-bound PRs: `CI success` + `staging-smoke`. Feature→`stage` PRs
+require **CI** only.
 
 ## Do not
 
