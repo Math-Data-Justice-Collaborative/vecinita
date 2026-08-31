@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010, **ADR-054 / F83**  
-> **Last updated**: 2026-08-28 (EV-staging-do-supabase dual-env)
+> **Last updated**: 2026-08-31 (EV-305 dual Resend path)
 
 Store values in **DigitalOcean App Platform** secrets, **Modal** secrets, or **GitHub
 Environments** — never commit to git.
@@ -27,6 +27,30 @@ suffixes: `*_STAGING` on Environment `staging`; unsuffixed or `*_PROD` on `produ
 | `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Workspace `vecinita` token (same OK for GH Env staging + production) |
 | `SUPABASE_URL` / keys / project ref | Staging project only on staging admin FE + write API |
 | `DATABASE_URL` | Staging Postgres only on staging DO backends (never Modal) |
+| `RESEND_API_KEY` / `RESEND_SENDER_EMAIL` / `SUPABASE_SMTP_PASS` | **Distinct values per env** (EV-305 / #305). Same Resend **account** OK; staging uses its own API key + From (e.g. `noreply+staging@josephcmcg.com`). Never reuse the prod `re_` key on staging Modal / write-api / staging Supabase SMTP. |
+
+## Dual Resend path (EV-305 / #305–#309)
+
+Same Resend account; **isolated path** = separate API key + staging sender under that account
+(ADR-054). Env **names** stay `RESEND_API_KEY`, `RESEND_SENDER_EMAIL`, `SUPABASE_SMTP_PASS`.
+
+| Surface | Staging value | Prod value |
+|---------|---------------|------------|
+| Resend API key | Staging-only `re_…` (GH Env `staging`, Modal env `staging`, staging write-api) | Prod `re_…` (GH Env `production`, Modal `main`, prod write-api) |
+| `RESEND_SENDER_EMAIL` / SMTP `admin_email` | Staging local-part on verified domain (e.g. `noreply+staging@josephcmcg.com`) | Prod From (e.g. `noreply@josephcmcg.com`) |
+| `SUPABASE_SMTP_PASS` | = staging Resend key → **staging** Supabase project | = prod Resend key → **prod** Supabase project |
+| Feedback notify To | `VECINITA_FEEDBACK_NOTIFY_EMAIL` on staging write-api only until prod AskQuestion | Prod write-api — AskQuestion required |
+
+**Operator provision (#306):** Resend dashboard → create API key labeled staging → add/verify
+staging From on the existing domain (plus-addressing preferred; no new DNS subdomain required)
+→ store in operator `.env` / GH Environment `staging` (never commit).
+
+**Wire (#307):** sync staging Modal DM (`MODAL_ENVIRONMENT=staging`), `vecinita-staging-write-api`,
+and staging Supabase SMTP pass from the staging key only. Confirm Resend dashboard traffic for
+test-send / notify attributes to the staging key.
+
+**Docs (#309):** this table + staging-runbook §Dual Resend. **E2E (#308):** after notify code is
+on the staging image (#212), POST feedback → inbox + staging-key traffic.
 
 **Forbidden on Modal (both envs):** `DATABASE_URL` (ADR-007).
 
@@ -237,8 +261,8 @@ Non-secret defaults also live in `infra/vecinita.yaml` (`chat_rag.energy_*`, `fe
 | `VECINITA_FEEDBACK_RETENTION_DAYS` | Internal write API | No (default 90) | F68 feedback purge horizon |
 | `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | Internal write API | No | Optional webhook URL on new feedback (#214) |
 | `VECINITA_FEEDBACK_NOTIFY_EMAIL` | Internal write API | No | Optional operator To address for Resend notify (#214) |
-| `RESEND_API_KEY` | Internal write API (optional; also Modal DM) | No for feedback | Needed when feedback email notify is enabled (#214); already on Modal DM for F35 |
-| `RESEND_SENDER_EMAIL` | Internal write API (optional; also Modal DM) | No for feedback | Verified From for feedback notify (#214) |
+| `RESEND_API_KEY` | Internal write API (optional; also Modal DM) | No for feedback | Needed when feedback email notify is enabled (#214). **Per-environment** value (EV-305) — staging write-api / Modal DM must use the **staging** Resend key, not prod. |
+| `RESEND_SENDER_EMAIL` | Internal write API (optional; also Modal DM) | No for feedback | Verified From for feedback notify (#214). Staging: e.g. `noreply+staging@josephcmcg.com` (EV-305). |
 | `SUPABASE_SECRET_KEY` | **DO internal-write-api** (+ Modal DM) | Yes for F69 live enrich | Read-time `actor_email` on `GET /internal/v1/audit` |
 
 ## EV-006 (F35) — Admin user management + Resend SMTP (#75)
@@ -252,8 +276,8 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 | `SUPABASE_SECRET_KEY` | **Modal data-management ASGI** (F35 `/admin/users*`) **and** **DO internal-write-api** (F69 audit `actor_email` enrich) | Yes (F35); Yes (F69 on write API) | Supabase Admin API. **Server-side only** — never in any `VITE_*` build. Modal remains primary for user-mgmt (ADR-030); write API needs the same key for read-time audit enrich (EV-024 / #170). |
 | `VECINITA_INTERNAL_WRITE_URL` | Modal data-management ASGI | Yes (F35) | Base URL for audit ingest (`POST /internal/v1/audit/event`) |
 | `VECINITA_INTERNAL_API_KEY` | Modal data-management ASGI | Yes (F35) | Service key for audit ingest calls |
-| `RESEND_API_KEY` | **Modal data-management ASGI only** | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) for `POST /admin/email/test` (Resend REST). Server-side only. (TP-S005-22) |
-| `RESEND_SENDER_EMAIL` | Modal data-management ASGI | Yes (F35 test-send) | Verified Resend sender (= `[auth.email.smtp] admin_email`) used as test-send `from`. (TP-S005-22) |
+| `RESEND_API_KEY` | **Modal data-management ASGI only** | Yes (F35 test-send) | Resend API key (**same value as that environment’s** `SUPABASE_SMTP_PASS`) for `POST /admin/email/test` (Resend REST). Server-side only. Staging Modal Environment ≠ prod key (EV-305 / #305). (TP-S005-22) |
+| `RESEND_SENDER_EMAIL` | Modal data-management ASGI | Yes (F35 test-send) | Verified Resend sender (= that env’s `[auth.email.smtp] admin_email`) used as test-send `from`. (TP-S005-22; EV-305) |
 | `VITE_VECINITA_IDLE_TIMEOUT_MIN` | DM frontend build (`VITE_*`) | No (default 30) | Idle auto-logout minutes (TP-S005-17) |
 | `VITE_VECINITA_IDLE_WARNING_SEC` | DM frontend build (`VITE_*`) | No (default 60) | Idle warning countdown seconds (TP-S005-17) |
 
@@ -261,9 +285,9 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 
 | Variable / item | Where | Required | Description |
 |-----------------|-------|----------|-------------|
-| `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase project env | Yes (prod) | Resend API key; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)` |
-| Verified Resend sending domain | Resend dashboard (operator) | Yes (prod) | SPF/DKIM-verified domain for `admin_email`/sender (RD-090) |
-| Sender address + name | `config.toml` `[auth.email.smtp]` | Yes (prod) | e.g. `noreply@josephcmcg.com` (verified Resend domain), "Vecinita Admin" |
+| `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase project env | Yes (prod); staging project separately | Resend API key for **that** Supabase project; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)`. Staging project must use staging Resend key (EV-305). |
+| Verified Resend sending domain | Resend dashboard (operator) | Yes (prod + staging path) | SPF/DKIM-verified domain for `admin_email`/sender (RD-090). One domain OK for both paths. |
+| Sender address + name | `config.toml` `[auth.email.smtp]` / dashboard | Yes | Prod e.g. `noreply@josephcmcg.com`; staging e.g. `noreply+staging@josephcmcg.com` (EV-305 A1) |
 
 ### Per-environment .env files (master = repo-root `prod.env`, gitignored)
 

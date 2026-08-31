@@ -615,6 +615,64 @@ See [no-live-prod-corpus-push.mdc](../.cursor/rules/no-live-prod-corpus-push.mdc
 
 **Rollback:** kill-switch ON → `*_ENABLED=false` → DO redeploy → H1–H5.
 
+## Feedback operator notify — Resend (F68 / #214)
+
+Code ships with EV-214. Email notify stays **off** until secrets are set on internal-write.
+
+| Variable | Role |
+|----------|------|
+| `VECINITA_FEEDBACK_NOTIFY_EMAIL` | Operator **To** inbox |
+| `RESEND_API_KEY` | Resend API key for **this environment** (same value as that env’s Modal DM / SMTP pass — EV-305) |
+| `RESEND_SENDER_EMAIL` | Verified **From** for this env (staging e.g. `noreply+staging@josephcmcg.com`; prod e.g. `noreply@josephcmcg.com`) |
+| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | Optional; leave unset for email-only |
+
+### Dual Resend path (EV-305 / #305)
+
+Same Resend **account**; staging and prod use **different API keys** and From addresses.
+Do **not** put the prod `re_` key on staging Modal, staging write-api, or staging Supabase SMTP.
+See [staging-secrets-matrix.md](staging-secrets-matrix.md) §Dual Resend path.
+
+**Provision staging key (#306):** Resend dashboard → API key labeled staging → add From
+`noreply+staging@josephcmcg.com` on the verified domain → store in operator `.env` / GH Env
+`staging` only.
+
+**Wire stacks (#307):** sync staging Modal DM (`MODAL_ENVIRONMENT=staging`),
+`vecinita-staging-write-api`, and staging Supabase `SUPABASE_SMTP_PASS` from the staging key.
+Replace any prior staging `RESEND_*` that still matched prod (EV-feedback-notify-secrets).
+
+> **Warning:** Root `supabase/config.toml` is **prod-oriented** (`site_url` / redirects /
+> `admin_email`). Do **not** run `supabase config push --project-ref camkatfbjguwvymfgdme`
+> from the repo root without a staging override workdir (staging admin FE URLs +
+> `noreply+staging@…` From). A bare push overwrites staging Auth redirects with prod
+> (caught and restored in EV-305).
+
+### Staging enable
+
+1. AskQuestion approve staging (EV-feedback-notify-secrets / EV-305).
+2. Ensure **staging** `RESEND_*` + `VECINITA_FEEDBACK_NOTIFY_EMAIL` in operator `.env` (not prod key).
+3. Sync **staging only**:
+
+```bash
+set -a && source .env && set +a
+uv run --with pydo --with pyyaml scripts/deploy/do_apps.py \
+  sync-secrets --name vecinita-staging-write-api
+```
+
+4. Smoke (#308): after notify code is on the staging image (#212 promote or temp branch),
+   `POST` anonymous feedback to staging write-api → Resend delivery to the To inbox.
+   Confirm Resend dashboard traffic on the **staging** key. Notify failure must not roll back
+   the store (ADR-046).
+
+### Prod enable
+
+**AskQuestion required** before syncing `vecinita-internal-write-api`. Do not copy staging
+values to prod without an explicit approve.
+
+[Corpus: feature-list.md §F68]
+[Spec: docs/adr/ADR-046-anonymous-community-feedback.md]
+[Corpus: staging-secrets-matrix]
+[Corpus: ADR-054] #305 #306 #307 #308 #309
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  

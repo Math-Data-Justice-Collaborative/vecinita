@@ -1578,3 +1578,47 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: feature-list.md §F68] [Corpus: ADR-046] [Corpus: ADR-004] [Corpus: tests] #214 #186
 
+---
+
+## EV-feedback-notify-secrets — Staging Resend notify enable (2026-08-31)
+
+**Title:** Enable feedback Resend notify secrets on staging write-api  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-feedback-notify-secrets`  
+**Status:** in_progress (Build)  
+**Date:** 2026-08-31  
+**Parent:** EV-214 HANDOFF leftover
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-FNS-D1 | Channel | Resend email (webhook deferred) |
+| EV-FNS-D2 | Target | Staging `vecinita-staging-write-api` only |
+| EV-FNS-D3 | To inbox | GitHub account email (`joseph.c.mcg@gmail.com`) — `.env` had no To |
+| EV-FNS-D4 | Prod | Deferred — separate AskQuestion |
+| EV-FNS-D5 | Infra | YAML SECRET placeholders + `do_apps.py` sync keys |
+
+**Cites:** [Corpus: feature-list.md §F68] [Corpus: ADR-046] [Corpus: staging]
+
+---
+
+## EV-305-staging-resend — Dual Resend path (same account) (2026-08-31)
+
+**Title:** Separate staging Resend path from prod (isolated key + sender)  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-305-staging-resend`  
+**Status:** documenting (Spec band)  
+**Date:** 2026-08-31  
+**Epic:** [#305](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/305) · children #306–#309
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-305-D1 | Resend account | Same account/environment OK — not a second Resend org |
+| EV-305-D2 | Isolation | Distinct API key + staging From under that account |
+| EV-305-D3 | Staging From | Same verified domain, local-part `noreply+staging@josephcmcg.com` (A1) |
+| EV-305-D4 | Secret names | Keep `RESEND_API_KEY` / `RESEND_SENDER_EMAIL` / `SUPABASE_SMTP_PASS`; distinct values per GH/Modal/Supabase env (B1) |
+| EV-305-D5 | Soft epic | Independent PRs per child #306–#309; no mega-PR |
+| EV-305-D6 | New Fn | None — F35/F68 hardening under F83 / ADR-054 |
+| EV-305-D7 | Out | Prod key rotate; prod feedback notify; visitor PII |
+
+**Docs delta:** `staging-secrets-matrix.md` §Dual Resend · `staging-runbook.md` feedback · `config-spec.md` F35 Resend rows · `infra/resend/.env.example`
+
+**Cites:** [Corpus: ADR-054] [Corpus: feature-list.md §F35] [Corpus: feature-list.md §F68] [Corpus: staging] #305
+
