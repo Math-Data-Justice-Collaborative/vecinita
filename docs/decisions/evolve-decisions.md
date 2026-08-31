@@ -1507,10 +1507,11 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Title:** Standing staff/ops checklist for ChatRAG + Admin UX copy changes  
 **Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-297-staff-copy-runbook`  
-**Status:** implementing (gate open 2026-08-31 — operator **a**)  
+**Status:** completed (merged PR #300 → `stage` 2026-08-31)  
 **Date:** 2026-08-31  
-**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/297  
-**Parent:** EV-037-D1 / #199 (waiver lifted)
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/297 (CLOSED)  
+**Parent:** EV-037-D1 / #199 (waiver lifted)  
+**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/300
 
 ### Requirements decisions
 
