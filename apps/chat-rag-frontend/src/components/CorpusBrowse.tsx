@@ -7,7 +7,7 @@ import {
   type TagFacet,
 } from "../api/browse";
 import { useLocale } from "../hooks/useLocale";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 
 type CorpusBrowseProps = {
   onNavigateHome: () => void;
@@ -35,7 +35,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         }
       } catch {
         if (!cancelled) {
-          setError(t(locale, "loadTagsFailed"));
+          setError(t(locale, "chat.loadTagsFailed"));
         }
       }
     }
@@ -63,7 +63,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         }
       } catch {
         if (!cancelled) {
-          setError(t(locale, "loadDocumentsFailed"));
+          setError(t(locale, "chat.loadDocumentsFailed"));
         }
       } finally {
         if (!cancelled) {
@@ -96,16 +96,16 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
   return (
     <section
       className="corpus-browse"
-      aria-label={t(locale, "corpusBrowseLabel")}
+      aria-label={t(locale, "chat.corpusBrowseLabel")}
     >
       <div className="corpus-toolbar">
         <button type="button" className="secondary" onClick={onNavigateHome}>
-          {t(locale, "backToChat")}
+          {t(locale, "chat.backToChat")}
         </button>
       </div>
 
       <form className="corpus-search" onSubmit={handleSearch}>
-        <label htmlFor="corpus-search">{t(locale, "searchLabel")}</label>
+        <label htmlFor="corpus-search">{t(locale, "chat.searchLabel")}</label>
         <input
           id="corpus-search"
           type="search"
@@ -114,7 +114,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
             setQuery(event.target.value);
             setPage(1);
           }}
-          placeholder={t(locale, "searchPlaceholder")}
+          placeholder={t(locale, "chat.searchPlaceholder")}
         />
       </form>
 
@@ -145,16 +145,18 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         </p>
       ) : null}
 
-      {loading ? <p role="status">{t(locale, "loadingDocuments")}</p> : null}
+      {loading ? (
+        <p role="status">{t(locale, "chat.loadingDocuments")}</p>
+      ) : null}
 
       <div className="corpus-list-scroll" data-testid="corpus-list-scroll">
         <ul className="corpus-list" data-testid="corpus-list">
           {items.map((item) => (
             <li key={item.document_id} className="corpus-item">
-              <h2>{item.title ?? t(locale, "untitledDocument")}</h2>
+              <h2>{item.title ?? t(locale, "chat.untitledDocument")}</h2>
               <p className="corpus-tags">
                 {item.tags.map((tag) => tag.label).join(", ") ||
-                  t(locale, "noTags")}
+                  t(locale, "chat.noTags")}
               </p>
               <a
                 href={item.url}
@@ -162,7 +164,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
                 rel="noopener noreferrer"
                 data-testid="corpus-source-link"
               >
-                {t(locale, "openSource")}
+                {t(locale, "chat.openSource")}
               </a>
             </li>
           ))}
@@ -178,9 +180,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
             setPage((current) => Math.max(1, current - 1));
           }}
         >
-          {t(locale, "previous")}
+          {t(locale, "shared.previous")}
         </button>
-        <span>{t(locale, "pagination", page, totalPages, total)}</span>
+        <span>{t(locale, "shared.pagination", page, totalPages, total)}</span>
         <button
           type="button"
           className="secondary"
@@ -189,7 +191,7 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
             setPage((current) => current + 1);
           }}
         >
-          {t(locale, "next")}
+          {t(locale, "shared.next")}
         </button>
       </div>
     </section>
