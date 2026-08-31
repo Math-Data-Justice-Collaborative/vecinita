@@ -1469,3 +1469,35 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: product] [Corpus: ADR-004] #199 #193 #214 #296 #297
 
+---
+
+## Cycle EV-296-chatrag-frontend-i18n — Consolidate ChatRAG messages (#296)
+
+**Title:** Move ChatRAG visitor UI strings into `packages/frontend-i18n`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-296-chatrag-frontend-i18n`  
+**Status:** documenting (gate closed)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/296  
+**Parent:** EV-037-D2 / #199
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-296-R1 | Key shape | `chat.<camelCase>` (e.g. `chat.welcomeHeading`) |
+| EV-296-R2 | Call sites | Update all ChatRAG call sites to package `t(locale, "chat.*")` in the same PR (operator `B:B` → option 2) |
+| EV-296-R3 | Pairing guard | Full package EN/ES string-key set equality (TC-307) |
+| EV-296-R4 | Pagination | Use existing `shared.pagination` (do not invent `chat.pagination`) |
+| EV-296-R5 | Out | CMS; polish rewrites; `coldstart/facts.ts`; #297 runbook body; #214 polish |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/feature-list.md` §F31 | ChatRAG catalog ownership bullet |
+| `docs/CORPUS.md` | `[Corpus: frontend-i18n]` satellite path |
+| `docs/test-plan.md` | TC-307; TC-067/069 cross-links |
+| Session `reports/requirements-delta.md` | Full AC |
+
+**Cites:** [Corpus: product] [Corpus: feature-list.md §F31] [Corpus: frontend-i18n] [Corpus: tests] #296 #297
+

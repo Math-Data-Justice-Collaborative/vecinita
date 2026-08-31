@@ -2,7 +2,7 @@ import { citationHref } from "vecinita-frontend-ui";
 
 import type { Source } from "../api/types";
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 import { dedupeSources } from "./dedupeSources";
 
 interface SourceListProps {
@@ -20,17 +20,18 @@ export function SourceList({ sources, locale }: SourceListProps) {
     return null;
   }
 
-  const tip = t(locale, "relevanceTip");
+  const tip = t(locale, "chat.relevanceTip");
 
   return (
     <aside className="sources" data-testid="source-list">
-      <h3>{t(locale, "sourcesHeading")}</h3>
+      <h3>{t(locale, "chat.sourcesHeading")}</h3>
       <ul>
         {unique.map((source) => {
           const href = citationHref(source.url);
-          const label = source.title ?? source.url ?? t(locale, "corpusChunk");
+          const label =
+            source.title ?? source.url ?? t(locale, "chat.corpusChunk");
           const percent = formatRelevancePercent(source.score);
-          const scoreLabel = t(locale, "relevancePercent").replace(
+          const scoreLabel = t(locale, "chat.relevancePercent").replace(
             "{n}",
             String(percent),
           );
@@ -41,7 +42,7 @@ export function SourceList({ sources, locale }: SourceListProps) {
                   {source.title ?? href}
                 </a>
               ) : (
-                <span>{label || t(locale, "corpusChunk")}</span>
+                <span>{label || t(locale, "chat.corpusChunk")}</span>
               )}{" "}
               <span
                 className="source-score"

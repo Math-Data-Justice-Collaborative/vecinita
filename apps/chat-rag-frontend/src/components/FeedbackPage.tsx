@@ -2,16 +2,16 @@ import { useState, type FormEvent } from "react";
 
 import { submitFeedback, type FeedbackCategory } from "../api/feedback";
 import type { Locale } from "../hooks/useLocale.types";
-import { t, type MessageKey } from "../i18n/messages";
+import { t, type StringMessageKey } from "vecinita-frontend-i18n";
 
 const CATEGORIES: readonly {
   value: FeedbackCategory;
-  labelKey: Exclude<MessageKey, "pagination">;
+  labelKey: StringMessageKey;
 }[] = [
-  { value: "bug", labelKey: "feedbackCategory_bug" },
-  { value: "wrong_answer", labelKey: "feedbackCategory_wrong_answer" },
-  { value: "suggestion", labelKey: "feedbackCategory_suggestion" },
-  { value: "other", labelKey: "feedbackCategory_other" },
+  { value: "bug", labelKey: "chat.feedbackCategory_bug" },
+  { value: "wrong_answer", labelKey: "chat.feedbackCategory_wrong_answer" },
+  { value: "suggestion", labelKey: "chat.feedbackCategory_suggestion" },
+  { value: "other", labelKey: "chat.feedbackCategory_other" },
 ];
 
 type FeedbackPageProps = {
@@ -30,7 +30,7 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
     event.preventDefault();
     const trimmed = message.trim();
     if (!trimmed) {
-      setError(t(locale, "feedbackMessageRequired"));
+      setError(t(locale, "chat.feedbackMessageRequired"));
       return;
     }
     setSubmitting(true);
@@ -44,7 +44,7 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
       setSuccess(true);
       setMessage("");
     } catch {
-      setError(t(locale, "feedbackSubmitFailed"));
+      setError(t(locale, "chat.feedbackSubmitFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -54,7 +54,7 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
     <section
       className="feedback-page"
       data-testid="feedback-page"
-      aria-label={t(locale, "feedbackTitle")}
+      aria-label={t(locale, "chat.feedbackTitle")}
     >
       <button
         type="button"
@@ -62,17 +62,19 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
         onClick={onNavigateHome}
         data-testid="feedback-back"
       >
-        {t(locale, "backToChat")}
+        {t(locale, "chat.backToChat")}
       </button>
-      <h2>{t(locale, "feedbackTitle")}</h2>
-      <p className="feedback-privacy">{t(locale, "feedbackPrivacyNote")}</p>
+      <h2>{t(locale, "chat.feedbackTitle")}</h2>
+      <p className="feedback-privacy">
+        {t(locale, "chat.feedbackPrivacyNote")}
+      </p>
       {success ? (
         <p
           className="feedback-success"
           data-testid="feedback-success"
           role="status"
         >
-          {t(locale, "feedbackSuccess")}
+          {t(locale, "chat.feedbackSuccess")}
         </p>
       ) : null}
       <form
@@ -80,7 +82,7 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
         onSubmit={(event) => void onSubmit(event)}
       >
         <label htmlFor="feedback-category">
-          {t(locale, "feedbackCategoryLabel")}
+          {t(locale, "chat.feedbackCategoryLabel")}
         </label>
         <select
           id="feedback-category"
@@ -97,7 +99,7 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
           ))}
         </select>
         <label htmlFor="feedback-message">
-          {t(locale, "feedbackMessageLabel")}
+          {t(locale, "chat.feedbackMessageLabel")}
         </label>
         <textarea
           id="feedback-message"
@@ -125,8 +127,8 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
           disabled={submitting}
         >
           {submitting
-            ? t(locale, "feedbackSubmitting")
-            : t(locale, "feedbackSubmit")}
+            ? t(locale, "chat.feedbackSubmitting")
+            : t(locale, "chat.feedbackSubmit")}
         </button>
       </form>
     </section>

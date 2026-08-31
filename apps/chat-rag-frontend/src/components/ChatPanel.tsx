@@ -16,7 +16,7 @@ import { requireChatApiConfig } from "../config";
 import { useLocale } from "../hooks/useLocale";
 import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
 import { useConversationStore } from "../hooks/useConversationStore";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 import { ColdStartWait } from "./ColdStartWait";
 import { parseEnergyEstimate } from "../api/energyEstimate";
 import { EnergyEstimatePanel } from "./EnergyEstimatePanel";
@@ -158,13 +158,15 @@ function ChatPanelView({
     <section
       className="chat-panel"
       data-empty={isEmpty}
-      aria-label={t(locale, "chatPanelLabel")}
+      aria-label={t(locale, "chat.chatPanelLabel")}
     >
       <div className="message-list" data-testid="message-list">
         {isEmpty ? (
           <div className="welcome">
-            <h2 className="welcome-heading">{t(locale, "welcomeHeading")}</h2>
-            <p className="empty-hint">{t(locale, "emptyHint")}</p>
+            <h2 className="welcome-heading">
+              {t(locale, "chat.welcomeHeading")}
+            </h2>
+            <p className="empty-hint">{t(locale, "chat.emptyHint")}</p>
           </div>
         ) : (
           messages.map((msg) => (
@@ -175,8 +177,8 @@ function ChatPanelView({
             >
               <p className="message-role">
                 {msg.role === "user"
-                  ? t(locale, "roleUser")
-                  : t(locale, "roleAssistant")}
+                  ? t(locale, "chat.roleUser")
+                  : t(locale, "chat.roleAssistant")}
               </p>
               <p className="message-content">
                 {msg.content || (loading ? "…" : "")}
@@ -208,7 +210,7 @@ function ChatPanelView({
           <SuggestedQuestions locale={locale} onSelect={setQuestion} />
         ) : null}
         <label className="sr-only" htmlFor="question">
-          {t(locale, "yourQuestion")}
+          {t(locale, "chat.yourQuestion")}
         </label>
         <div className="chat-input-row">
           <textarea
@@ -220,7 +222,7 @@ function ChatPanelView({
               setQuestion(e.target.value);
             }}
             disabled={loading}
-            placeholder={t(locale, "questionPlaceholder")}
+            placeholder={t(locale, "chat.questionPlaceholder")}
           />
           <div className="form-actions">
             <button
@@ -236,7 +238,7 @@ function ChatPanelView({
               >
                 <span aria-hidden="true">➤</span>
               </ActionIcon>{" "}
-              {loading ? t(locale, "asking") : t(locale, "ask")}
+              {loading ? t(locale, "chat.asking") : t(locale, "chat.ask")}
             </button>
             <button
               type="button"
@@ -248,7 +250,7 @@ function ChatPanelView({
               <ActionIcon motion="press" pending={false}>
                 <span aria-hidden="true">⌫</span>
               </ActionIcon>{" "}
-              {t(locale, "clearHistory")}
+              {t(locale, "chat.clearHistory")}
             </button>
           </div>
         </div>

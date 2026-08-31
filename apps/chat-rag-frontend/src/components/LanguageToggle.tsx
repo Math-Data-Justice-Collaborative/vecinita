@@ -1,8 +1,7 @@
 import { Tooltip } from "vecinita-frontend-ui";
-import { t as i18nT } from "vecinita-frontend-i18n";
+import { t } from "vecinita-frontend-i18n";
 
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
 
 type LanguageToggleProps = {
   locale: Locale;
@@ -11,12 +10,12 @@ type LanguageToggleProps = {
 
 export function LanguageToggle({ locale, onChange }: LanguageToggleProps) {
   return (
-    <Tooltip content={i18nT(locale, "shared.tooltip.languageToggle")}>
+    <Tooltip content={t(locale, "shared.tooltip.languageToggle")}>
       <div
         className="language-toggle"
         data-testid="language-toggle"
         role="group"
-        aria-label={t(locale, "languageGroupLabel")}
+        aria-label={t(locale, "shared.languageGroupLabel")}
         tabIndex={0}
       >
         <button

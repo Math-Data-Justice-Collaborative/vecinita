@@ -432,6 +432,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Dot-prefixed keys resolve for both locales; pagination helper formats correctly.
 - **Input**: Call `t("en", "shared.pagination", 1, 3, 42)` and Spanish equivalent.
 - **Expected**: Typed keys compile; EN/ES strings differ; unknown keys caught at typecheck.
+- **Related**: TC-307 — full EN/ES key-set equality for all package string keys (EV-296 / #296).
 
 ### TC-068: frontend-ui shared components render (F31)
 
@@ -443,7 +444,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: ChatRAG tests pass using shared packages (regression for BUG-2026-06-05 language toggle).
 - **Input**: Run migrated `test_bug_2026_06_05_language_toggle_i18n.test.tsx` (or successor) against shared imports.
-- **Expected**: Same behavior as pre-migration; no app-local duplicate `messages.ts`.
+- **Expected**: Same behavior as pre-migration; no app-local duplicate string catalog (`messages.ts` may re-export package `t`/types only). EV-296 / #296 completes visitor `chat.*` consolidation into `frontend-i18n`.
 
 ### TC-070: Intl timestamp formatting per UI locale (UJ-022, AC-F4, F31)
 
@@ -1861,6 +1862,11 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Objective**: ≥1 alert rule can POST to staging webhook secret.
 - **Input**: Alertmanager config + test alert or simulated condition.
 - **Expected**: Webhook receives notification; no chat content in payload (AC-MON7–AC-MON8).
+
+### TC-307: frontend-i18n EN/ES key-set equality (F31, EV-296 / #296)
+- **Objective**: Every string key in `packages/frontend-i18n` exists in both `en` and `es` tables (no orphans).
+- **Input**: Vitest in `packages/frontend-i18n` comparing `Object.keys(enStrings)` vs `Object.keys(esStrings)` (or exported equivalents).
+- **Expected**: Key sets equal; ChatRAG visitor strings present under `chat.*`; no divergent app-local string catalog for moved keys (TC-069).
 
 ### F31 coverage gate — gated components
 

@@ -1,6 +1,6 @@
 import type { TagFacet } from "../api/browse";
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 
 type TagFilterChipsProps = {
   tags: TagFacet[];
@@ -21,7 +21,7 @@ export function TagFilterChips({
     <div
       className="tag-chips"
       data-testid="tag-filter-chips"
-      aria-label={t(locale, "filterByTopic")}
+      aria-label={t(locale, "chat.filterByTopic")}
     >
       {visibleTags.map((tag) => {
         const active = selected.includes(tag.slug);
