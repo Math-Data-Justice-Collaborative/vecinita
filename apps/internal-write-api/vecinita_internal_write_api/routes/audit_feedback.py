@@ -26,6 +26,10 @@ from vecinita_internal_write_api.audit import cleanup_audit_log, emit_audit_even
 from vecinita_internal_write_api.audit_service import fetch_audit_log
 from vecinita_internal_write_api.deps import WriteActorDep
 from vecinita_internal_write_api.feedback import cleanup_feedback, insert_feedback, list_feedback
+from vecinita_internal_write_api.feedback_notify import (
+    FeedbackNotifyPayload,
+    notify_feedback_operators,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -133,7 +137,17 @@ def register_audit_feedback_routes(app: FastAPI, *, engine: Engine) -> None:
                 detail=exc.errors(),
             ) from exc
         with engine.begin() as conn:
-            return insert_feedback(conn, body)
+            created = insert_feedback(conn, body)
+        notify_feedback_operators(
+            FeedbackNotifyPayload(
+                id=str(created.id),
+                category=body.category,
+                locale=body.locale,
+                created_at=created.created_at,
+                message=body.message,
+            )
+        )
+        return created
 
     @app.get(
         "/internal/v1/feedback",

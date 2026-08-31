@@ -65,9 +65,16 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
         {t(locale, "chat.backToChat")}
       </button>
       <h2>{t(locale, "chat.feedbackTitle")}</h2>
-      <p className="feedback-privacy">
-        {t(locale, "chat.feedbackPrivacyNote")}
+      <p className="feedback-intro" data-testid="feedback-intro">
+        {t(locale, "chat.feedbackIntro")}
       </p>
+      <aside
+        className="feedback-privacy"
+        data-testid="feedback-privacy-notice"
+        role="note"
+      >
+        {t(locale, "chat.feedbackPrivacyNote")}
+      </aside>
       {success ? (
         <p
           className="feedback-success"
@@ -79,6 +86,7 @@ export function FeedbackPage({ locale, onNavigateHome }: FeedbackPageProps) {
       ) : null}
       <form
         className="feedback-form"
+        data-testid="feedback-form"
         onSubmit={(event) => void onSubmit(event)}
       >
         <label htmlFor="feedback-category">

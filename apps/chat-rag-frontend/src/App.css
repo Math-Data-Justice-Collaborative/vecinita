@@ -770,7 +770,19 @@ button.secondary:hover:not(:disabled) {
 }
 
 .feedback-privacy {
-  opacity: 0.85;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid var(--accent, #2f6f4e);
+  background: color-mix(in srgb, var(--accent, #2f6f4e) 12%, transparent);
+  opacity: 1;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.feedback-intro {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
 }
 
 .feedback-success {
