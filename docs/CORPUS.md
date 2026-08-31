@@ -97,3 +97,4 @@ are **opt-in** — cite by path when touched; add a CORPUS row only if they beco
 If a needed row or authoritative section is absent: **AskQuestion** per
 `.cursor/rules/doc-corpus-citation.mdc` — add docs (recommended), waive with
 `[Corpus: WAIVED — …]`, defer, or re-scope. Do not invent normative text silently.
+| consumer-gates | [policies/CONSUMER-GATES.md](policies/CONSUMER-GATES.md) | EV-049 plugin-consumer security/quality/exact pins |

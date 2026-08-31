@@ -229,3 +229,7 @@ ci-push-py: ## Python tests + unit coverage in one Postgres session (compose tor
 	$(WITH_POSTGRES) bash scripts/ci/run_pytest_ci_push.sh
 
 ci-pr-ready: ci-push ## Alias — run before marking a PR ready for review
+
+# EV-049 / ADR-037 — exact dependency pins
+check-exact-pins: ## Fail on ranged direct deps (allowlist: config/exact-pins-allowlist.txt)
+	python3 scripts/ci/check-exact-pins.py
