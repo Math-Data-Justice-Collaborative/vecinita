@@ -448,7 +448,7 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-ST5**: GitHub ruleset on `main` requires CI + staging deploy/smoke for PR tip SHA (TC-297). — ruleset `21766359`
 - [x] **AC-ST6**: ADR-049 operational exit documented; runbook describes staging→prod path (ADR-054).
 - [x] **AC-ST7**: No operator `*-spec.yaml` or secrets committed.
-- [x] **AC-ST8**: Always-applied cursor rule Stage→Main; GitHub #212 (+ children) track ADR-054 model (not a `stage` branch); agents must not open/merge to `main` without `CI success` + `staging-smoke` (or AskQuestion waiver) (TC-298). — EV-033
+- [x] **AC-ST8**: Always-applied cursor rule Stage→Main; GitHub #212 (+ children) track ADR-054 + EV-036-D15: when `origin/stage` exists, feature/evolve PRs target **`stage` first** (CI required); promote via `stage`→`main` only with `CI success` + `staging-smoke` (or AskQuestion waiver) (TC-298). — EV-033 / EV-036-D15
 
 ### EV-036 — Admin monitoring + staging Grafana/Loki (F84 / ADR-055 / #114)
 

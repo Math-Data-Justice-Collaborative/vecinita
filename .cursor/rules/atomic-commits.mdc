@@ -67,13 +67,17 @@ Prefer an English slug; optional tracking tokens are fine when they help uniquen
 
 | Change type | Branch pattern | Base |
 |-------------|----------------|------|
-| Feature / milestone | `feat/{english-slug}` | `main` or phase branch |
-| Bug fix (hotfix) | `fix/{english-slug}` | `main` |
-| Docs-only change | `docs/{english-slug}` | `main` |
-| Skill / tooling | `chore/{english-slug}` | `main` |
-| Infra / deploy | `infra/{english-slug}` | `main` |
-| Evolve cycle | `evolve/{cycle-id}-{english-slug}` | `main` |
-| Phase | `phase/{n}-{english-slug}` | `main` |
+| Feature / milestone | `feat/{english-slug}` | `stage` when available; else phase branch / AskQuestion |
+| Bug fix (hotfix) | `fix/{english-slug}` | Prefer `stage`; `main` only via AskQuestion |
+| Docs-only change | `docs/{english-slug}` | `stage` when available |
+| Skill / tooling | `chore/{english-slug}` | `stage` when available |
+| Infra / deploy | `infra/{english-slug}` | `stage` when available |
+| Evolve cycle | `evolve/{cycle-id}-{english-slug}` | `stage` when available |
+| Phase | `phase/{n}-{english-slug}` | `stage` when available |
+| Promote to prod | `stage` (or promote PR) | `main` (second PR only) |
+
+**PR base must:** When `origin/stage` exists, open integration PRs with `--base stage`
+(see `stage-before-main.mdc` / EV-036-D15). Do not PR feature work straight to `main`.
 
 - Create the branch before starting the first task of a milestone.
 - Record every branch in `workflow-state.yaml` §`git_history.branches`.
@@ -88,7 +92,8 @@ When all tasks in a milestone are complete:
 
 1. Verify all milestone tasks are `completed` in the execution plan
 2. Run tests, linter, typechecker — all must pass
-3. Create a PR from the milestone branch to the phase branch
+3. Create a PR from the milestone branch to **`stage`** when `origin/stage` exists;
+   otherwise to the phase branch / AskQuestion. Prefer `--base stage` (EV-036-D15).
 4. PR title: short English **behavior** name — e.g. `Monorepo scaffold` or
    `Corpus automations catch-up (F75)`. Optional cite in parentheses; do not lead with
    `[M1]`, `[EV-027]`, or `W1`
@@ -106,14 +111,20 @@ When all milestones in a phase are complete and the phase gate check passes:
 
 1. Verify phase gate criteria are met (see Phase Gate Check in execution plan)
 2. Record the gate check in the Phase Gate Log
-3. Create a PR from the phase branch to main
-4. PR title: short English phase **behavior** name — e.g. `Foundation phase` or
+3. Create a PR from the phase branch to **`stage`** when that branch exists; otherwise
+   AskQuestion (create `stage` / waive). Do **not** default major PRs to `main` while
+   `stage` is available (`stage-before-main.mdc`). Merge into `stage` when **CI** is green
+   on that PR (`staging-smoke` is not required on the feature→`stage` hop).
+4. Open a **promote** PR `stage` → `main` — never skip the stage hop when `stage` exists.
+   Merge promote only when **CI** + **`staging-smoke`** are green (smoke runs on PRs
+   targeting `main` via `deploy-staging.yml`).
+5. PR title: short English phase **behavior** name — e.g. `Foundation phase` or
    `Corpus tags and browse (EV-001)`. Avoid leading with only `Phase 1:` / `EV-NNN` unless
    paired with a readable name
-5. PR body includes: gate check results, milestone summaries, test results (English first;
+6. PR body includes: gate check results, milestone summaries, test results (English first;
    IDs as citations)
-6. Present the PR to the user for review — do not merge without approval
-7. After recording the PR in the PR Plan table, continue runnable work in the same session when
+7. Present the PR to the user for review — do not merge without approval
+8. After recording the PR in the PR Plan table, continue runnable work in the same session when
    `build-execution.mdc` allows (unless the user asked to stop at each PR)
 
 After creating a PR, update the PR Plan table in the execution plan with the PR URL

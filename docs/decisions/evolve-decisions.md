@@ -1413,6 +1413,7 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | EV-036-D12 | Tech plan | **Approve TP-EV-036** — M136–M140; Droplet s-1vcpu-1gb; no chart npm lib; Modal `metrics_rollup`; defer Modal→Loki ship |
 | EV-036-D13 | Staging Droplet | **Approve create** `s-1vcpu-1gb` (~$6/mo) for Grafana/Loki/Alertmanager (2026-08-30) — blocked until doctl has Droplet scopes |
 | EV-036-D14 | Verify waive | **WAIVE** implementing `inline-documentation` — 348 missing repo-wide; **0** in F84 metrics/monitoring paths (2026-08-30) |
+| EV-036-D15 | PR base | **Always PR into `stage` first** when `origin/stage` exists; promote via second PR `stage`→`main` after CI + `staging-smoke`. If `stage` missing: AskQuestion to create (do not silently PR to `main`). Hotfix→`main` only via AskQuestion. Supersedes prior “no stage branch” guidance in EV-033 docs. |
 
 ### Build progress (2026-08-30)
 
