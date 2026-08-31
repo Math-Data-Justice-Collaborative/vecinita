@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Engineering memory hook — always uses engineering-memory venv Python.
-# [Corpus: skill-integration] [Corpus: hook-contract]
+# Engineering memory hook — resolve Python: checkout .venv then PATH (F73).
+# [Corpus: skill-integration] [Corpus: product §F73] [Corpus: hook-contract]
 set -euo pipefail
 
 BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,11 +13,51 @@ else
   ROOT="${HOME}/Documents/GitHub/spec-dev-knowledge-graph"
 fi
 
-PY="$ROOT/packages/engineering-memory/.venv/bin/python"
-CLI="$BIN/memory_hook_cli.py"
+# Resolve interpreter: checkout .venv → PATH (importable engineering_memory) → fail.
+_resolve_em_python() {
+  local root="$1"
+  local venv_py="$root/packages/engineering-memory/.venv/bin/python"
+  if [[ -x "$venv_py" ]]; then
+    printf '%s\n' "$venv_py"
+    return 0
+  fi
 
-if [[ ! -x "$PY" ]]; then
-  echo "memory-hook: venv not found at $PY — see docs/deploy.md §Install" >&2
+  local em_bin shebang interp
+  if em_bin="$(command -v engineering-memory 2>/dev/null)"; then
+    if [[ -f "$em_bin" ]]; then
+      shebang="$(head -n 1 "$em_bin" 2>/dev/null || true)"
+      if [[ "$shebang" == "#!"* ]]; then
+        shebang="${shebang#\#\!}"
+        shebang="${shebang#"${shebang%%[![:space:]]*}"}"
+        if [[ "$shebang" == /usr/bin/env\ * ]]; then
+          interp="$(command -v "${shebang#/usr/bin/env }" 2>/dev/null || true)"
+        else
+          interp="${shebang%%[[:space:]]*}"
+        fi
+        if [[ -n "${interp:-}" && -x "$interp" ]] \
+          && "$interp" -c "import engineering_memory" 2>/dev/null; then
+          printf '%s\n' "$interp"
+          return 0
+        fi
+      fi
+    fi
+  fi
+
+  local py
+  for py in python3 python; do
+    if command -v "$py" >/dev/null 2>&1 \
+      && "$py" -c "import engineering_memory" 2>/dev/null; then
+      command -v "$py"
+      return 0
+    fi
+  done
+  return 1
+}
+
+CLI="$BIN/memory_hook_cli.py"
+if ! PY="$(_resolve_em_python "$ROOT")"; then
+  echo "memory-hook: no engineering-memory Python (checkout .venv missing and PATH import failed)" >&2
+  echo "memory-hook: see docs/deploy.md §System-wide CLI (uv tool / pipx) or create packages/engineering-memory/.venv" >&2
   exit 1
 fi
 
