@@ -1653,3 +1653,26 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: ADR-054] [Corpus: feature-list.md §F35] [Corpus: feature-list.md §F68] [Corpus: staging] #305
 
+
+---
+
+## EV-313-prod-gpu-snapshots — Prod-only GPU snapshots (#313) (2026-08-31)
+
+**Title:** Re-enable Modal GPU memory snapshots on pinned prod `vecinita-llm`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-313-prod-gpu-snapshots`  
+**Status:** documenting (Spec band)  
+**Date:** 2026-08-31  
+**Epic:** [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311) · slice [#313](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/313)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-313-D1 | Kill-switch | `VECINITA_LLM_GPU_SNAPSHOT`; unset = false until staging green |
+| EV-313-D2 | LoRA | Minimal post-restore resolve in #313 Build (cite #316); base-only snapshot |
+| EV-313-D3 | New Fn | None — ADR-022 amendment; not F40/F64 |
+| EV-313-D4 | Playground | Snapshots remain off |
+| EV-313-D5 | SLO | Honest Useful/Green/Red bands; no silent “sub-second” claim |
+| EV-313-D6 | Prod enable | Staging evidence + AskQuestion |
+
+**Docs delta:** ADR-022 amendment · `config-spec.md` · `infra/modal/README.md` · `adr/README.md` · `CORPUS.md` cite · `test-plan.md` TC-313-01/02 · this log
+
+**Cites:** [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Corpus: ADR-037] [Corpus: ADR-004] [Corpus: ADR-053] [Corpus: config] #313 #311 #316

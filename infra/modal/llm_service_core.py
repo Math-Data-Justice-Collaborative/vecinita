@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Iterator
+from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
@@ -31,6 +32,7 @@ class LlmServiceCore:
         self._loaded_model_arg = None
         self._loaded_cache_key = None
         self._lora_request = None
+        self._snapshot_mode = False
 
     def unload_model(self) -> None:
         from infra.modal.llm_app import _shutdown_vllm_engine
@@ -40,6 +42,66 @@ class LlmServiceCore:
         self._loaded_model_arg = None
         self._loaded_cache_key = None
         self._lora_request = None
+        self._snapshot_mode = False
+
+    def _snapshot_enter_build(self) -> None:
+        """``snap=True``: load pinned base (+ LoRA capacity), warm, Level-1 sleep (ADR-022)."""
+        from infra.modal.llm_app import (
+            MODEL_ID,
+            _llm_engine_kwargs,
+            max_model_len_for,
+        )
+        from vecinita_shared_schemas.finetune import DEFAULT_LORA_MAX_RANK
+        from vllm import LLM, SamplingParams
+
+        self._llm = None
+        self._loaded_model_arg = None
+        self._loaded_cache_key = None
+        self._lora_request = None
+        # enable_lora without a pinned adapter so restore can bind promote without rebuild.
+        engine_kwargs = dict(
+            _llm_engine_kwargs(max_model_len=max_model_len_for(MODEL_ID), model=MODEL_ID)
+        )
+        engine_kwargs["enable_lora"] = True
+        engine_kwargs["max_loras"] = 1
+        engine_kwargs["max_lora_rank"] = DEFAULT_LORA_MAX_RANK
+        self._llm = LLM(**engine_kwargs)
+        self._loaded_model_arg = MODEL_ID
+        params = SamplingParams(max_tokens=1)
+        # Tiny + RAG-sized warmups move JIT/graph work into snapshot creation.
+        _ = self._llm.generate(["warmup"], params)
+        rag_ish = "Context:\n" + ("x " * 400) + "\nQuestion: what is this?\nAnswer:"
+        _ = self._llm.generate([rag_ish], params)
+        sleep = getattr(self._llm, "sleep", None)
+        if callable(sleep):
+            _ = sleep(level=1)
+        self._snapshot_mode = True
+
+    def _snapshot_enter_restore(self) -> None:
+        """``snap=False``: wake engine and bind current promoted LoRA (#316)."""
+        llm = getattr(self, "_llm", None)
+        if llm is not None:
+            wake = getattr(llm, "wake_up", None)
+            if callable(wake):
+                _ = wake()
+        self._bind_lora_after_restore()
+        self._snapshot_mode = True
+
+    def _bind_lora_after_restore(self) -> None:
+        """Resolve promoted adapter after snapshot restore (Volume mutate ≠ snap invalidate)."""
+        from infra.modal.llm_app import (
+            MODEL_ID,
+            _adapter_load_for_role,
+            _build_lora_request,
+        )
+
+        adapter_id, adapter_dir = _adapter_load_for_role(self.serve_role)
+        if adapter_id is not None and adapter_dir is not None and not Path(adapter_dir).is_dir():
+            msg = f"promoted LoRA adapter missing on volume: {adapter_id} ({adapter_dir})"
+            raise RuntimeError(msg)
+        self._lora_request = _build_lora_request(adapter_id, adapter_dir)
+        self._loaded_model_arg = MODEL_ID
+        self._loaded_cache_key = (MODEL_ID, adapter_id)
 
     def _ensure_model_loaded(self, model_id: str | None) -> None:
         from infra.modal.llm_app import (
@@ -52,6 +114,28 @@ class LlmServiceCore:
         )
         from vecinita_shared_schemas.finetune import merge_lora_engine_kwargs
         from vllm import LLM, SamplingParams
+
+        if getattr(self, "_snapshot_mode", False) and self._llm is not None:
+            # Refresh LoRA pin without rebuilding the snapped base engine.
+            adapter_id, adapter_dir = _adapter_load_for_role(self.serve_role)
+            cache_key = (
+                _resolve_vllm_model_arg(
+                    None,
+                    allow_model_reload=self.allow_model_reload,
+                ),
+                adapter_id,
+            )
+            if getattr(self, "_loaded_cache_key", None) != cache_key:
+                if (
+                    adapter_id is not None
+                    and adapter_dir is not None
+                    and not Path(adapter_dir).is_dir()
+                ):
+                    msg = f"promoted LoRA adapter missing on volume: {adapter_id} ({adapter_dir})"
+                    raise RuntimeError(msg)
+                self._lora_request = _build_lora_request(adapter_id, adapter_dir)
+                self._loaded_cache_key = cache_key
+            return
 
         if not self.allow_model_reload:
             model_id = None

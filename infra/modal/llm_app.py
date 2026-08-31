@@ -62,6 +62,7 @@ DEFAULT_PLAYGROUND_MODEL_ID: Final[str] = "qwen2.5:1.5b-instruct"
 # Playground app sets ALLOW_MODEL_RELOAD=True on its own module.
 ALLOW_MODEL_RELOAD: Final[bool] = False
 ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
+GPU_SNAPSHOT_ENV = "VECINITA_LLM_GPU_SNAPSHOT"
 _PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
 _PROXY_ENV: Final[str] = "VECINITA_MODAL_PROXY_KEY"
 _MANIFEST_PATH = Path("/models/manifest.json")
@@ -105,6 +106,16 @@ def _enforce_eager_from_env() -> bool:
     """S001 T7 A/B: toggle CUDA graph capture for snapshot cold-start experiments."""
     raw = os.environ.get(ENFORCE_EAGER_ENV, "true").strip().lower()
     return raw not in ("0", "false", "no", "off")
+
+
+def _gpu_snapshot_from_env() -> bool:
+    """ADR-022 EV-313 / #313: prod GPU memory snapshot kill-switch (default off)."""
+    raw = os.environ.get(GPU_SNAPSHOT_ENV, "false").strip().lower()
+    return raw in ("1", "true", "yes", "on")
+
+
+# Evaluated at import/deploy: flip Secret + redeploy to change (TC-313-01).
+_PROD_GPU_SNAPSHOT: Final[bool] = _gpu_snapshot_from_env()
 
 
 LLM_MAX_MODEL_LEN: Final[int] = 2048
@@ -396,8 +407,11 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     volumes={"/models": model_volume, "/adapters": adapters_volume},
     scaledown_window=300,
     timeout=900,
-    # ADR-037: model_id switching requires clean vLLM init — GPU snapshot breaks NCCL on reload.
-    enable_memory_snapshot=False,
+    secrets=_LLM_ASGI_SECRETS,
+    # ADR-022 EV-313: prod-only GPU snapshots behind VECINITA_LLM_GPU_SNAPSHOT (default off).
+    # Playground stays off (ADR-037 reload/NCCL). Flip Secret + redeploy to enable.
+    enable_memory_snapshot=_PROD_GPU_SNAPSHOT,
+    experimental_options=({"enable_gpu_snapshot": True} if _PROD_GPU_SNAPSHOT else {}),
 )
 class LlmService(LlmServiceCore):
     """Prod GPU service — pinned model; LoRA after human promote (ADR-037 / ADR-053)."""
@@ -405,9 +419,23 @@ class LlmService(LlmServiceCore):
     serve_role: ClassVar[ServeRole] = "prod"
     allow_model_reload: ClassVar[bool] = ALLOW_MODEL_RELOAD
 
-    @modal.enter()
-    def load_model(self) -> None:
-        super().load_model()
+    if _PROD_GPU_SNAPSHOT:
+
+        @modal.enter(snap=True)
+        def load_model_for_snapshot(self) -> None:
+            """Build pinned base engine, warm, Level-1 sleep — then Modal captures GPU snap."""
+            self._snapshot_enter_build()
+
+        @modal.enter(snap=False)
+        def restore_after_snapshot(self) -> None:
+            """Wake engine and bind promoted LoRA after restore (base-only snapshot)."""
+            self._snapshot_enter_restore()
+
+    else:
+
+        @modal.enter()
+        def load_model(self) -> None:
+            super().load_model()
 
     @modal.exit()
     def unload_model(self) -> None:

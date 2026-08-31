@@ -1,8 +1,8 @@
 # ADR-022: GPU Memory Snapshots for vLLM cold-start reduction
 
-**Status:** Accepted (S001 P3 — GPU snapshot restore measured ~9s cold vs ~71s creation boot)
-**Stage:** 00-context (S001-modal-cold-start-snapshot)
-**Date:** 2026-06-25
+**Status:** Accepted (S001 P3 measured; **EV-313 / #313** re-enables **prod-only** — see Amendment below)
+**Stage:** 00-context (S001-modal-cold-start-snapshot); amendment EV-313-prod-gpu-snapshots
+**Date:** 2026-06-25; amended 2026-08-31
 
 ## Context
 
@@ -79,10 +79,46 @@ vLLM is explicitly flagged by Modal as needing rewrites.
 - Cold-start latency remains excluded from the p95 < 15s target (RD-017) but must be documented
   for ops either way.
 
+## Amendment — EV-313 / #313 (2026-08-31)
+
+**Trigger:** After ADR-037, prod `LlmService` left `enable_memory_snapshot=False` because
+playground-style **model_id reload** broke NCCL. ADR-037 isolated playground on
+`vecinita-llm-playground`; **prod is pinned** (`allow_model_reload=False`). The reload
+rationale no longer applies to production topology, but the flag was never restored.
+
+**Decision (amended):**
+
+1. **Prod `vecinita-llm` only:** Re-enable GPU memory snapshots behind kill-switch
+   `VECINITA_LLM_GPU_SNAPSHOT` (`true`/`false`; **unset = false** until staging evidence,
+   then staging Secret may set `true`). Wire
+   `enable_memory_snapshot` + GPU snapshot experimental options when the switch is on.
+2. **Lifecycle:** `@modal.enter(snap=True)` — load pinned Qwen, warm (tiny + RAG-sized),
+   vLLM **Level-1 sleep** (weights retained, KV discarded), capture.
+   `@modal.enter(snap=False)` — **wake_up**, then resolve/verify promoted LoRA (**base
+   snapshot only**; do not bake mutable adapters Volume into the snapshot — Volume
+   mutations do **not** invalidate Modal snapshots; see #316 / ADR-053).
+3. **Playground:** Remains `enable_memory_snapshot=False` (reload allowed).
+4. **SLO honesty:** Do not claim ubiquitous sub-second cold-from-zero until re-measured.
+   Planning frontier from #311 research: direct restore **p50 ~1–2s / p95 ~3–10s** until
+   staging proves Green (`p50 <1s`, `p95 <3s`). Ship **Useful** band with documented
+   frontier if Green unmet; **Red** → disable switch and consider Plan B (custom CPU
+   driver) only then.
+5. **Out of this amendment:** always-on T4, playground snapshots, FE prewarm / ASGI thin
+   ingress / scaledown tune / FAQ bypass (sibling #311 children).
+6. **Prod cutover:** Staging evidence first; live prod enable requires AskQuestion
+   (`no-live-prod-corpus-push` does not apply to LLM config, but prod latency cutover
+   still needs explicit approve).
+
+**Kill switches (independent):** `VECINITA_LLM_GPU_SNAPSHOT`, `VECINITA_LLM_ENFORCE_EAGER`,
+LoRA post-restore vs snapshot-bound mode (#316).
+
 ## References
 
 - S001 plan: `docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md`
-- Modal Memory Snapshots: https://modal.com/docs/guide/memory-snapshot
+- Modal Memory Snapshots: https://modal.com/docs/guide/memory-snapshots
 - Modal cold start: https://modal.com/docs/guide/cold-start
-- ADR-004 (cost/sovereignty), ADR-009 (vLLM on T4)
+- ADR-004 (cost/sovereignty), ADR-009 (vLLM on T4), ADR-037 (prod pin / playground),
+  ADR-053 (LoRA promote)
 - BUG-2026-05-22 (cold-start UX), `docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004`
+- Parent latency system: GitHub #311; this slice: #313; LoRA-after-restore: #316
+- Session: `EV-313-prod-gpu-snapshots` (pack session store)

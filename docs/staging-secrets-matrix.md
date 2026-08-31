@@ -140,7 +140,7 @@ on the staging image (#212), POST feedback → inbox + staging-key traffic.
 
 | Secret | Required keys | Used by |
 |--------|---------------|---------|
-| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037 / TP-S010-25) |
+| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY`; optional `VECINITA_LLM_GPU_SNAPSHOT` (`true`/`false`, default off — ADR-022 EV-313 / #313; **redeploy** after change); optional `VECINITA_LLM_ENFORCE_EAGER` | `llm_app.py` **and** `llm_playground_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037 / TP-S010-25). GPU snapshot kill-switch applies to **prod** `LlmService` only. |
 
 Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first),
 or one-shot `bash scripts/deploy/sync_env.sh --modal --apply` (also merges

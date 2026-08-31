@@ -195,9 +195,15 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 
 - **Default model:** `Qwen/Qwen2.5-1.5B-Instruct` (ADR-009); playground tags via `llm_model_registry.py` on the **playground** app
 - **GPU:** NVIDIA T4, `timeout=900s`, `scaledown_window=300` (scale-to-zero)
-- **Volume:** `llm-models` (`/models`, `manifest.json`, `/models/repos/<tag>`)
+- **Volume:** `llm-models` (`/models`, `manifest.json`, `/models/repos/<tag>`); adapters volume for promoted LoRA (ADR-053)
 - **Endpoints:** inference + `/warm` (proxy auth on mutating routes)
 - **Consumer env:** `VECINITA_MODAL_LLM_URL` on DO chat-rag-backend (`packages/llm-client`)
+- **GPU memory snapshots (ADR-022 / EV-313 / #313):** Kill-switch `VECINITA_LLM_GPU_SNAPSHOT`
+  (default **off** until staging evidence). When on: prod-only `enable_memory_snapshot` +
+  vLLM Level-1 sleep before capture / wake on restore; snapshot **base engine only**, resolve
+  LoRA after restore (#316). Snapshot **creation** can take ~70s — prime via `/warm` after
+  deploy (see #315). Do not enable on playground.
+- **Eager A/B:** `VECINITA_LLM_ENFORCE_EAGER` (default `true`) — independent of snapshot switch
 - **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — do not deploy
 
 ## vecinita-llm-playground
@@ -205,6 +211,7 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 - **Role:** Admin list/pull + sandbox eval `model_id` reloads (ADR-037)
 - **Consumer env:** `VECINITA_MODAL_LLM_PLAYGROUND_URL` — never use for ChatRAG
 - **Path aliases:** `GET/POST /models/ollama*` for FE compat
+- **Snapshots:** remain **off** (`enable_memory_snapshot=False`) while model reload is allowed
 
 **Modal secret `vecinita-llm`** (ASGI proxy auth only):
 
