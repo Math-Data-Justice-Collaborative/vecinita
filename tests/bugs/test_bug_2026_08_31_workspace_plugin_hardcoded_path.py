@@ -13,6 +13,9 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from typing import cast
+
+from vecinita_shared_schemas.json_types import as_json_object
 
 _REPO = Path(__file__).resolve().parents[2]
 _HOOK = _REPO / ".cursor" / "hooks" / "register-workspace-plugins.sh"
@@ -44,5 +47,5 @@ def test_register_workspace_plugins_missing_root_returns_empty_paths(
         env=env,
     )
     assert proc.returncode == 0, proc.stderr
-    payload = json.loads(proc.stdout.strip())
+    payload = as_json_object(cast("object", json.loads(proc.stdout.strip())))
     assert payload == {"pluginPaths": []}
