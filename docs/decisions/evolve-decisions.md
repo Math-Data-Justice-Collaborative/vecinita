@@ -1501,3 +1501,34 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: product] [Corpus: feature-list.md §F31] [Corpus: frontend-i18n] [Corpus: tests] #296 #297
 
+---
+
+## Cycle EV-297-staff-copy-runbook — Staff copy-change runbook (#297)
+
+**Title:** Standing staff/ops checklist for ChatRAG + Admin UX copy changes  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-297-staff-copy-runbook`  
+**Status:** documenting (gate closed)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/297  
+**Parent:** EV-037-D1 / #199 (waiver lifted)
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-297-R1 | Path + CORPUS | `docs/runbooks/staff-copy-change.md` + `[Corpus: staff-copy]`; lift EV-037-D1 waiver |
+| EV-297-R2 | Feedback triage owner | Role placeholder + Admin Feedback + #214 |
+| EV-297-R3 | i18n home | `packages/frontend-i18n`; cold-start facts stay in `coldstart/facts.ts` |
+| EV-297-R4 | Proceed | Spec → draft-docs → feasibility → documenting verify |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/runbooks/staff-copy-change.md` | **New** staff/ops checklist |
+| `docs/CORPUS.md` | `[Corpus: staff-copy]` row; waiver lift note |
+| `docs/feature-list.md` §F31 | Point staff path at runbook |
+| `docs/decisions/evolve-decisions.md` | This cycle |
+
+**Cites:** [Corpus: staff-copy] [Corpus: frontend-i18n] [Corpus: ADR-004] [Corpus: ADR-046] [Corpus: ADR-047] #297 #199 #214 #296
+
