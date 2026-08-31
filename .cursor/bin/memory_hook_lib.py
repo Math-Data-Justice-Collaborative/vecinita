@@ -613,6 +613,52 @@ def _summarize_items(items: list[dict[str, Any]], max_items: int = 5) -> list[st
     return lines
 
 
+def _append_similar_applications_section(
+    lines: list[str],
+    *,
+    similar_result: dict[str, Any] | None,
+    retrieve_result: dict[str, Any],
+) -> None:
+    """Append ## Similar applications when peers exist (EV-046 / F139)."""
+    if not similar_result or similar_result.get("status") != "ok":
+        return
+    data = similar_result.get("data") or {}
+    peers = data.get("peers") or []
+    if not peers:
+        return
+    app_type = data.get("application_type") or ""
+    lines.append("## Similar applications")
+    lines.append("")
+    lines.append(f"**application_type:** `{app_type}`")
+    lines.append("")
+    lines.append("### Peer projects")
+    lines.append("")
+    for peer in peers:
+        pid = peer.get("project_id", "?")
+        name = peer.get("name") or pid
+        lines.append(f"- `{pid}` — {name}")
+    lines.append("")
+    items = (retrieve_result.get("data") or {}).get("items") or []
+    peer_hits = [
+        item
+        for item in items
+        if "similar_application_type" in (item.get("match_reasons") or [])
+    ]
+    lines.append("### Top peer knowledge")
+    lines.append("")
+    if peer_hits:
+        lines.extend(_summarize_items(peer_hits))
+    else:
+        lines.append("(no peer knowledge in top retrieve — still record dispositions below)")
+    lines.append("")
+    lines.append("### Dispositions (adopt / waive / keep-local)")
+    lines.append("")
+    lines.append("| Item | Disposition | Rationale |")
+    lines.append("|------|-------------|-----------|")
+    lines.append("| _(fill)_ | | |")
+    lines.append("")
+
+
 def write_memory_context_report(
     report_path: Path,
     *,
@@ -622,6 +668,7 @@ def write_memory_context_report(
     recommend_result: dict[str, Any],
     skip_reason: str | None = None,
     kg_preflight: dict[str, Any] | None = None,
+    similar_result: dict[str, Any] | None = None,
 ) -> None:
     """Write memory-context.md from retrieve and recommend hook results."""
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -689,6 +736,12 @@ def write_memory_context_report(
                 for item in amb[:3]:
                     lines.append(f"- {item.get('kind', 'conflict')}: {item.get('description', '')}")
                 lines.append("")
+
+        _append_similar_applications_section(
+            lines,
+            similar_result=similar_result,
+            retrieve_result=retrieve_result,
+        )
 
     if kg_preflight:
         sync = kg_preflight.get("sync") or {}
@@ -770,6 +823,9 @@ def cmd_session_open(
         recommend_result = _with_service(
             lambda svc: svc.get_recommendations(project_id, query, limit=DEFAULT_LIMIT_RECOMMEND)
         )
+        similar_result = _with_service(
+            lambda svc: svc.list_similar_application_projects(project_id)
+        )
     except Exception as exc:  # noqa: BLE001
         result = {"status": "error", "message": str(exc)}
         write_memory_context_report(
@@ -791,6 +847,7 @@ def cmd_session_open(
         retrieve_result=retrieve_result,
         recommend_result=recommend_result,
         kg_preflight=kg_preflight,
+        similar_result=similar_result,
     )
     retrieve_items = ((retrieve_result.get("data") or {}).get("items") or [])
     recommend_items = ((recommend_result.get("data") or {}).get("recommendations") or [])
@@ -923,6 +980,20 @@ def cmd_session_close(
         data = dict(result.get("data") or {}) if isinstance(result.get("data"), dict) else {}
         data["graphiti_episodic"] = graphiti_episodic
         data["kg_preflight"] = sync_preflight
+        # EV-036 / F91 — guarded auto-promote (fail-open)
+        try:
+            from engineering_memory.ops.promote import run_auto_promote
+
+            if result.get("status") == "ok":
+                promote = _with_service(
+                    lambda svc: run_auto_promote(svc, project_id, session_path)
+                )
+                data["auto_promote"] = promote
+        except Exception as promote_exc:  # noqa: BLE001
+            data["auto_promote"] = {
+                "status": "error",
+                "message": str(promote_exc),
+            }
         result = {**result, "data": data}
         _set_telemetry_result(result)
         _print_json(result)
