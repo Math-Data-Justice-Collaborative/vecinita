@@ -320,6 +320,11 @@
 - [ ] **AC-UX11**: Feedback rows stored in corpus Postgres without PII columns (TC-225, privacy).
 - [ ] **AC-UX12**: ChatRAG Feedback button → page; Admin Feedback list for admin/super-admin (TC-226–227).
 - [ ] **AC-UX13**: Feedback retention purge at **90 days** (TC-228).
+- [ ] **AC-UX18**: ChatRAG Feedback shows bilingual no-PII/sensitive-data notice (callout)
+  above the form before submit; Vitest covers EN + ES (UJ-073, TC-308, F68 / #214).
+- [ ] **AC-UX19**: After successful feedback insert, optional operator webhook and/or Resend
+  email notify fire when configured; notify failure does not roll back the store; unset
+  config → submit still succeeds (UJ-073, TC-309–311, ADR-046 §6, EV-214).
 - [ ] **AC-UX14**: Audit UI/API shows resolved actor email (Supabase) with UUID fallback; read-time only (UJ-074, TC-229, F69 / #170).
 - [ ] **AC-UX15**: `audit_log` schema/writes remain free of email/name (TC-230, AC-A6/U6/E8).
 - [ ] **AC-UX16**: Out of EV-024 without unlock: live Modal power metrics per ask; visitor contact email; mini surveys; auto-attach chat transcripts; denormalized actor names on audit_log; live fleet/traffic car factors.

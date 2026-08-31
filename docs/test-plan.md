@@ -35,7 +35,7 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-070 Energy estimate + guide | `tests/e2e/test_uj070_energy_estimate.py` + Vitest | TC-218, TC-219, TC-220, TC-231 | `tests/ui/chat/uj070-energy.spec.ts` |
 | UJ-071 Icon micro-interactions | Vitest both frontends + `frontend-ui` | TC-221, TC-222 | opt |
 | UJ-072 Bilingual tooltips | Vitest `frontend-ui` + both apps | TC-223, TC-224 | opt |
-| UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228 | `tests/ui/chat/uj073-feedback.spec.ts` |
+| UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228, TC-308–311 | `tests/ui/chat/uj073-feedback.spec.ts` |
 | UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
 | UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
@@ -1867,6 +1867,26 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Objective**: Every string key in `packages/frontend-i18n` exists in both `en` and `es` tables (no orphans).
 - **Input**: Vitest in `packages/frontend-i18n` comparing `Object.keys(enStrings)` vs `Object.keys(esStrings)` (or exported equivalents).
 - **Expected**: Key sets equal; ChatRAG visitor strings present under `chat.*`; no divergent app-local string catalog for moved keys (TC-069).
+
+### TC-308: Feedback privacy notice EN/ES + callout (UJ-073, F68 / #214)
+- **Objective**: Feedback page shows expanded no-PII/sensitive-data notice above the form in both locales; callout is present before submit.
+- **Input**: Vitest FeedbackPage EN + ES; i18n keys in `packages/frontend-i18n`.
+- **Expected**: AC-UX18; notice visible pre-submit; copy discourages private and sensitive data.
+
+### TC-309: Feedback webhook notify when configured (UJ-073, F68 / #214)
+- **Objective**: After successful insert, internal-write POSTs JSON payload to `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` when set.
+- **Input**: Unit/integration with mocked HTTP; payload fields id/category/locale/created_at/message only.
+- **Expected**: Webhook called once on success path; AC-UX19; ADR-046 §6.
+
+### TC-310: Feedback email notify when Resend configured (UJ-073, F68 / #214)
+- **Objective**: After successful insert, Resend email is sent to `VECINITA_FEEDBACK_NOTIFY_EMAIL` when `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` are set.
+- **Input**: Unit/integration with mocked Resend HTTP; body includes message text, not visitor identity fields.
+- **Expected**: Email path fires independently of webhook; AC-UX19.
+
+### TC-311: Feedback notify failure does not roll back store (UJ-073, F68 / #214)
+- **Objective**: Webhook and/or email failure after insert still returns success for the stored row.
+- **Input**: Mocked failing notify transport(s).
+- **Expected**: Persist succeeds; notify error logged; AC-UX19.
 
 ### F31 coverage gate — gated components
 

@@ -235,7 +235,10 @@ Non-secret defaults also live in `infra/vecinita.yaml` (`chat_rag.energy_*`, `fe
 | `VECINITA_ENERGY_GCO2E_PER_KWH` | ChatRAG backend | No (default 386) | F65 intensity constant |
 | `VECINITA_ENERGY_CAR_GCO2E_PER_KM` | ChatRAG backend | No (default 251) | F65 car distance factor |
 | `VECINITA_FEEDBACK_RETENTION_DAYS` | Internal write API | No (default 90) | F68 feedback purge horizon |
-| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | Internal write API | No | Optional notify on new feedback |
+| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | Internal write API | No | Optional webhook URL on new feedback (#214) |
+| `VECINITA_FEEDBACK_NOTIFY_EMAIL` | Internal write API | No | Optional operator To address for Resend notify (#214) |
+| `RESEND_API_KEY` | Internal write API (optional; also Modal DM) | No for feedback | Needed when feedback email notify is enabled (#214); already on Modal DM for F35 |
+| `RESEND_SENDER_EMAIL` | Internal write API (optional; also Modal DM) | No for feedback | Verified From for feedback notify (#214) |
 | `SUPABASE_SECRET_KEY` | **DO internal-write-api** (+ Modal DM) | Yes for F69 live enrich | Read-time `actor_email` on `GET /internal/v1/audit` |
 
 ## EV-006 (F35) — Admin user management + Resend SMTP (#75)
