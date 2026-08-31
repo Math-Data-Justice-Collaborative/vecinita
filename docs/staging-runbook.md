@@ -31,13 +31,17 @@ stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **p
 Do not merge to `main` when either check is red/missing unless an explicit waiver AskQuestion.
 Prefer Environments: `staging` (PR / pre-merge) and `production` (post-merge CD on `main`).
 
-**Agent rule:** Always-applied `.cursor/rules/stage-before-main.mdc` (EV-033 / AC-ST8) — agents
-must not treat PRs as merge-ready or open/merge to `main` without those checks (or a recorded
-waiver). Distinct from `.cursor/rules/ci-after-push.mdc` (watch CI **after** push).
+**Agent rule:** Always-applied `.cursor/rules/stage-before-main.mdc` (EV-033 / AC-ST8 /
+EV-036-D15) — agents must (1) open feature/evolve PRs into **`stage` first** when that
+branch exists, (2) not treat PRs as merge-ready or open/merge to `main` without CI +
+`staging-smoke` (or a recorded waiver). Distinct from `.cursor/rules/ci-after-push.mdc`
+(watch CI **after** push).
 
-**Promotion model:** PR tip SHA → staging deploy/smoke → merge `main` → prod CD. There is **no**
-protected GitHub `stage` branch in the current topology (ADR-054). Issue **#212** tracks this
-gate (agent rule + docs); do not reintroduce a `stage` branch without a new Decision.
+**Promotion model (EV-036-D15):** When `origin/stage` exists:
+**feature branch → PR into `stage` → staging deploy/smoke → PR `stage`→`main` → prod CD**.
+When `stage` does not exist yet: AskQuestion to create it from `main` before the first
+integration PR (do not silently PR to `main`). Staging Environment smoke on the tip SHA
+remains required for any `main` merge (ADR-054 / #212).
 
 ## CI/CD before promote (RET-002 / ADR-050)
 
