@@ -61,6 +61,7 @@ KEYS=(
   SUPABASE_SMTP_PASS   # EV-006 F35 — Resend API key; resolves config.toml env(SUPABASE_SMTP_PASS)
   RESEND_API_KEY       # same value as SUPABASE_SMTP_PASS for Modal test-send
   RESEND_SENDER_EMAIL
+  VECINITA_FEEDBACK_NOTIFY_EMAIL  # F68/#214 optional; only if set in operator env
   # Postgres + cross-service auth (CI alembic + DO/Modal sync)
   DATABASE_URL
   VECINITA_INTERNAL_API_KEY
