@@ -1434,3 +1434,38 @@ cycle; **keep-local** Vecinita ADR-004 / F17 / #114 constraints. Re-check at imp
 verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: product] §F84 [Corpus: ADR-004] [Corpus: journeys] [Corpus: api] [Corpus: tests] [Corpus: staging] [Spec: docs/adr/ADR-055-operational-monitoring-grafana-loki.md]
+
+---
+
+## Cycle EV-037-staff-ux-maintainability — Staff UX maintainability review (#199)
+
+**Title:** Non-technical staff maintainability review of ChatRAG + Admin UX polish  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-037-staff-ux-maintainability`  
+**Status:** completed (Build closed 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/199 (CLOSED)
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-037-D1 | Deliverable | Session report + #199 comment; follow-on issues; no standing staff CMS doc |
+| EV-037-D2 | Follow-ons | Dual-i18n consolidation; staff copy runbook issue; extend/link #214 |
+| EV-037-D3 | Energy | Env for numeric knobs; advisory prose needs PR |
+| EV-037-D4 | Scale | micro |
+| EV-037-D5 | Out | CMS; polish rewrites |
+| EV-037-D6 | Surfaces | #87 #93 #104 #106 #186 #170 |
+
+### Build outputs
+
+| Output | Ref |
+|--------|-----|
+| Session review | `{session}/reports/staff-ux-maintainability-review.md` |
+| Consolidate ChatRAG → frontend-i18n | #296 |
+| Staff copy-change runbook | #297 |
+| Feedback notice/notify (existing) | #214 |
+| Gate | Open Build (operator **a**) |
+| Implementing verify | 5/5 PASS |
+
+**Cites:** [Corpus: product] [Corpus: ADR-004] #199 #193 #214 #296 #297
+
