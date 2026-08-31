@@ -1539,10 +1539,11 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Title:** Stronger bilingual no-PII/sensitive notice, Feedback UI polish, webhook + Resend email notify  
 **Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-214-feedback-polish-notify`  
-**Status:** documenting (gate closed)  
+**Status:** completed (merged PR #303 → `stage` 2026-08-31)  
 **Date:** 2026-08-31  
-**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/214  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/214 (CLOSED)  
 **Branch:** `feat/feedback-polish-notify-214`  
+**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/303  
 **Parent:** EV-037-D2 / staff runbook pointer
 
 ### Requirements decisions
