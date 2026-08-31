@@ -1676,3 +1676,13 @@ verify with HANDOFF dispositions if new Patterns appear.
 **Docs delta:** ADR-022 amendment · `config-spec.md` · `infra/modal/README.md` · `adr/README.md` · `CORPUS.md` cite · `test-plan.md` TC-313-01/02 · this log
 
 **Cites:** [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Corpus: ADR-037] [Corpus: ADR-004] [Corpus: ADR-053] [Corpus: config] #313 #311 #316
+
+### PR review advisories addressed (2026-08-31)
+
+| Advisory | Fix |
+|----------|-----|
+| Misleading “Secret + redeploy” | Docs/comments: kill-switch is **deploy-time** `modal deploy` env |
+| Silent sleep/wake skip | Fail closed with `TypeError` when `sleep`/`wake_up` missing |
+| Proxy key on GPU workers | Prod `LlmService` mounts `vecinita-llm-gpu` only; ASGI keeps `vecinita-llm` |
+
+**Still open (🔴):** ensure staging/prod CD (or operator deploy shell) actually exports `VECINITA_LLM_GPU_SNAPSHOT` when enabling — docs now state the requirement.

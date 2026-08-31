@@ -1951,6 +1951,6 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 ### TC-313-02: Staging cold restore procedure (manual / smoke — non-flaky CI) (EV-313 / #313)
 
 - **Objective**: Documented staging procedure records cold_kind restore vs create vs clean_boot for snapshot on/off.
-- **Setup**: Staging Modal; optional `modal container stop`; authenticated `/warm` then `/generate` or stream.
-- **Expected**: Snapshot-on restore materially faster than snapshot-off clean boot; no NCCL failure; LoRA id/hash matches promote when adapter set (#316).
+- **Setup**: Staging Modal; `export VECINITA_LLM_GPU_SNAPSHOT=true` in the **deploy** shell then `modal deploy infra/modal/llm_app.py` (not Secret-only); optional `modal container stop`; authenticated `/warm` then `/generate` or stream.
+- **Expected**: Snapshot-on restore materially faster than snapshot-off clean boot; no NCCL failure; LoRA id/hash matches promote when adapter set (#316). Missing `sleep`/`wake_up` fails closed (RuntimeError) rather than silent skip.
 - **CI:** Do **not** gate merge on 70s snapshot-create boots; unit TC-313-01 is the CI gate.

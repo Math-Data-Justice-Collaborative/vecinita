@@ -70,7 +70,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MODAL_LLM_PLAYGROUND_URL` | string | — | Yes (admin/eval sandbox, Slice D) | Modal **`vecinita-llm-playground`** base URL — list/pull/eval sandbox (TP-S010-27) |
 | `VECINITA_MODAL_PROXY_KEY` | string | — | Yes (prod) | `X-Vecinita-Proxy-Key` for **all** Modal LLM routes except `/health` (RD-165) |
 | `VECINITA_LLM_MODEL_ID` | string | `qwen2.5:1.5b-instruct` | No | Prod pin on `vecinita-llm`; playground overrides only on playground app (RD-169, TP-S010-25) |
-| `VECINITA_LLM_GPU_SNAPSHOT` | string | `false` | No | Prod `vecinita-llm` only: enable GPU memory snapshots + Level-1 sleep/wake (ADR-022 EV-313 / #313). Unset/`false`/`0`/`off` = off; `true`/`1`/`on` = on. Playground must ignore / stay off. Staging evidence before prod AskQuestion. |
+| `VECINITA_LLM_GPU_SNAPSHOT` | string | `false` | No | Prod `vecinita-llm` only: enable GPU memory snapshots + Level-1 sleep/wake (ADR-022 EV-313 / #313). Unset/`false`/`0`/`off` = off; `true`/`1`/`on` = on. **Must be set in the `modal deploy` environment** (baked into `enable_memory_snapshot` at import); Modal Secret alone does not flip the class. Playground must ignore / stay off. Staging evidence before prod AskQuestion. |
 | `VECINITA_LLM_ENFORCE_EAGER` | string | `true` | No | vLLM `enforce_eager` A/B for CUDA graphs vs snapshot experiments (S001 T7 / ADR-022). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |

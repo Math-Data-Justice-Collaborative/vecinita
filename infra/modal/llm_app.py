@@ -114,7 +114,8 @@ def _gpu_snapshot_from_env() -> bool:
     return raw in ("1", "true", "yes", "on")
 
 
-# Evaluated at import/deploy: flip Secret + redeploy to change (TC-313-01).
+# Fixed at ``modal deploy`` import time (not container Secret runtime). Set
+# ``VECINITA_LLM_GPU_SNAPSHOT`` in the *deploy* environment, then redeploy (TC-313-01).
 _PROD_GPU_SNAPSHOT: Final[bool] = _gpu_snapshot_from_env()
 
 
@@ -306,6 +307,8 @@ adapters_volume = modal.Volume.from_name(ADAPTERS_VOLUME_NAME, create_if_missing
 pull_jobs = modal.Dict.from_name("vecinita-llm-pull-jobs", create_if_missing=True)
 
 _LLM_ASGI_SECRETS = [modal.Secret.from_name("vecinita-llm")]
+# GPU workers: promote pin / eager A/B only — do not mount ASGI proxy key (PR review).
+_LLM_GPU_SECRETS = [modal.Secret.from_name("vecinita-llm-gpu")]
 
 
 def _adapter_load_for_role(role: ServeRole) -> tuple[str | None, str | None]:
@@ -407,9 +410,9 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     volumes={"/models": model_volume, "/adapters": adapters_volume},
     scaledown_window=300,
     timeout=900,
-    secrets=_LLM_ASGI_SECRETS,
+    secrets=_LLM_GPU_SECRETS,
     # ADR-022 EV-313: prod-only GPU snapshots behind VECINITA_LLM_GPU_SNAPSHOT (default off).
-    # Playground stays off (ADR-037 reload/NCCL). Flip Secret + redeploy to enable.
+    # Playground stays off (ADR-037 reload/NCCL). Enable = set env at *modal deploy* time.
     enable_memory_snapshot=_PROD_GPU_SNAPSHOT,
     experimental_options=({"enable_gpu_snapshot": True} if _PROD_GPU_SNAPSHOT else {}),
 )

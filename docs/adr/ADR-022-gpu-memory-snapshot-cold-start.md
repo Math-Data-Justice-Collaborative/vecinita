@@ -89,9 +89,11 @@ rationale no longer applies to production topology, but the flag was never resto
 **Decision (amended):**
 
 1. **Prod `vecinita-llm` only:** Re-enable GPU memory snapshots behind kill-switch
-   `VECINITA_LLM_GPU_SNAPSHOT` (`true`/`false`; **unset = false** until staging evidence,
-   then staging Secret may set `true`). Wire
-   `enable_memory_snapshot` + GPU snapshot experimental options when the switch is on.
+   `VECINITA_LLM_GPU_SNAPSHOT` (`true`/`false`; **unset = false** until staging evidence).
+   The value is read at **`modal deploy` import time** and baked into
+   `enable_memory_snapshot` + enter hooks — set it in the **deploy shell**, then redeploy
+   (Modal container Secrets alone do not flip the flag). Wire GPU snapshot experimental
+   options when the switch is on.
 2. **Lifecycle:** `@modal.enter(snap=True)` — load pinned Qwen, warm (tiny + RAG-sized),
    vLLM **Level-1 sleep** (weights retained, KV discarded), capture.
    `@modal.enter(snap=False)` — **wake_up**, then resolve/verify promoted LoRA (**base

@@ -73,17 +73,23 @@ class LlmServiceCore:
         rag_ish = "Context:\n" + ("x " * 400) + "\nQuestion: what is this?\nAnswer:"
         _ = self._llm.generate([rag_ish], params)
         sleep = getattr(self._llm, "sleep", None)
-        if callable(sleep):
-            _ = sleep(level=1)
+        if not callable(sleep):
+            msg = "vLLM Level-1 sleep is required for GPU memory snapshot capture"
+            raise TypeError(msg)
+        _ = sleep(level=1)
         self._snapshot_mode = True
 
     def _snapshot_enter_restore(self) -> None:
         """``snap=False``: wake engine and bind current promoted LoRA (#316)."""
         llm = getattr(self, "_llm", None)
-        if llm is not None:
-            wake = getattr(llm, "wake_up", None)
-            if callable(wake):
-                _ = wake()
+        if llm is None:
+            msg = "snapshot restore expected a restored vLLM engine before wake_up"
+            raise RuntimeError(msg)
+        wake = getattr(llm, "wake_up", None)
+        if not callable(wake):
+            msg = "vLLM wake_up is required for GPU memory snapshot restore"
+            raise TypeError(msg)
+        _ = wake()
         self._bind_lora_after_restore()
         self._snapshot_mode = True
 

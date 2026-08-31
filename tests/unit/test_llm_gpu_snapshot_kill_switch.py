@@ -82,3 +82,29 @@ def test_playground_remains_snapshot_off() -> None:
             if "enable_memory_snapshot=False" in text:
                 found = True
     assert found, "playground LlmService must set enable_memory_snapshot=False"
+
+
+def test_prod_gpu_class_uses_gpu_secret_not_asgi_proxy_secret() -> None:
+    """Defense-in-depth: GPU workers mount vecinita-llm-gpu, not ASGI proxy secret."""
+    source = LLM_APP.read_text(encoding="utf-8")
+    assert 'Secret.from_name("vecinita-llm-gpu")' in source
+    assert "secrets=_LLM_GPU_SECRETS" in source
+    # Class decorator must not wire ASGI secret onto GPU workers.
+    tree = ast.parse(source)
+    for node in tree.body:
+        if not isinstance(node, ast.ClassDef) or node.name != "LlmService":
+            continue
+        for dec in node.decorator_list:
+            text = ast.unparse(dec)
+            assert "secrets=_LLM_ASGI_SECRETS" not in text
+            assert "secrets=_LLM_GPU_SECRETS" in text
+
+
+def test_kill_switch_docs_require_deploy_time_env() -> None:
+    """Ops docs must say enable_memory_snapshot is fixed at modal deploy import."""
+    source = LLM_APP.read_text(encoding="utf-8")
+    assert "deploy" in source.lower()
+    assert "Flip Secret + redeploy" not in source
+    readme = (REPO_ROOT / "infra" / "modal" / "README.md").read_text(encoding="utf-8")
+    assert "deploy-time" in readme.lower() or "modal deploy" in readme.lower()
+    assert "VECINITA_LLM_GPU_SNAPSHOT" in readme
