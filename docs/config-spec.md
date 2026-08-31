@@ -52,7 +52,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_ENERGY_CAR_GCO2E_PER_DAY` | float | — | No | Optional F65 use-guide % of typical car-day |
 | `VECINITA_ENERGY_CAR_GCO2E_PER_YEAR` | float | — | No | Optional F65 use-guide % of typical car-year |
 | `VECINITA_FEEDBACK_RETENTION_DAYS` | int | `90` | No | F68 purge horizon for `feedback` rows |
-| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | string | — | No | Optional operator notify URL on new feedback |
+| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | string | — | No | Optional operator webhook URL on new feedback (#214) |
+| `VECINITA_FEEDBACK_NOTIFY_EMAIL` | string | — | No | Optional operator inbox for Resend notify on new feedback (#214); requires `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` on internal-write (see F35 Resend rows) |
 | `VECINITA_AUTOMATIONS_ENABLED` | string | `false` | No | F75 master enable (`true`/`false`) |
 | `VECINITA_AUTOMATIONS_KILL_SWITCH` | string | `false` | No | F75/F77 hard stop — no new automation/FT train enqueue when `true` |
 | `VECINITA_AUTOMATIONS_MAX_CONCURRENT` | int | `2` | No | F75 concurrency cap for automation jobs |
@@ -207,8 +208,8 @@ corpus DB stays PII-free.
 | `SUPABASE_SECRET_KEY` | string (secret) | — | Yes (F35) | Supabase Admin API key for `/admin/users*` (invite/list/role/disable/delete/reset/revoke-invite). **Server-side only**; never in browser builds. Previously seed/operator-shell only (F34). |
 | `VECINITA_ADMIN_FRONTEND_URL` | string (URL) | — | Yes (F35 EV-007) | Deployed admin SPA origin **without trailing slash** — used to build `redirect_to` for GoTrue invite/resend/recovery (`{url}/accept-invite`, `{url}/reset-password`). Modal DM backend secret (also used by internal-write-api health aggregator). |
 | `SUPABASE_SMTP_PASS` | string (secret) | — | Yes (F35 prod) | Resend API key; referenced by `[auth.email.smtp] pass = "env(SUPABASE_SMTP_PASS)"` in `config.toml`. Read by Supabase/CLI, **not** by Vecinita backends. |
-| `RESEND_API_KEY` | string (secret) | — | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) read by the **DM backend** for `POST /admin/email/test` (Resend REST). Modal DM secret only. (ADR-031 TP-S005-22) |
-| `RESEND_SENDER_EMAIL` | string | — | Yes (F35 test-send) | Verified Resend sender address (= `[auth.email.smtp] admin_email`) used as the `from` for test sends. Modal DM secret. (ADR-031 TP-S005-22) |
+| `RESEND_API_KEY` | string (secret) | — | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) read by the **DM backend** for `POST /admin/email/test` (Resend REST). Modal DM secret. Also on **internal-write** when F68/#214 feedback email notify is enabled. (ADR-031 TP-S005-22; EV-214) |
+| `RESEND_SENDER_EMAIL` | string | — | Yes (F35 test-send) | Verified Resend sender address (= `[auth.email.smtp] admin_email`) used as the `from` for test sends / feedback notify. Modal DM + optional internal-write. (ADR-031 TP-S005-22; EV-214) |
 
 **Supabase `config.toml` (versioned; synced via `config push`):**
 

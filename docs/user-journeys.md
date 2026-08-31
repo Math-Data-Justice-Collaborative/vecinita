@@ -1166,19 +1166,23 @@ localized tooltip; locale toggle switches tooltip language.
 **Actor**: Community visitor; Admin reviewer
 
 **Goal**: Visitor submits category + message via Feedback page; admin lists it; no email
-field; rows purge after 90 days.
+field; rows purge after 90 days. Stronger bilingual no-PII/sensitive notice (#214); optional
+operator webhook and/or email notify without inventing visitor identity.
 
 **Steps**:
 
 1. ChatRAG: open Feedback from chrome → `/feedback`.
-2. Choose category; enter message; submit — success state.
-3. Confirm request rejects `email` / identity fields.
-4. Admin: open Feedback page; see new row (admin/super-admin).
-5. Retention job deletes rows older than 90 days.
+2. See privacy/sensitive-data notice (callout) and short intro **above** the form (EN/ES).
+3. Choose category; enter message; submit — success state.
+4. Confirm request rejects `email` / identity fields.
+5. When notify env is set, operators receive webhook and/or Resend email with id/category/
+   locale/created_at/message only; when unset or notify fails, submit still succeeds.
+6. Admin: open Feedback page; see new row (admin/super-admin).
+7. Retention job deletes rows older than 90 days.
 
-**Acceptance**: AC-UX10–UX13; TC-225–228.
+**Acceptance**: AC-UX10–UX13, AC-UX18–UX19; TC-225–228, TC-308–311.
 
-**E2E tier**: API e2e + Vitest UI journeys + privacy tests.
+**E2E tier**: API e2e + Vitest UI journeys + privacy tests + notify unit/integration.
 
 ---
 

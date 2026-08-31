@@ -184,6 +184,10 @@ not JWKS; role source = **`app_metadata.role`** (not a `user_roles` table); shar
   `admin_delete_user_sessions` RPC (force sign-out) is committed SQL under `supabase/migrations/`, not
   a package.
 
+- **EV-214 F68/#214:** No new dependencies. Feedback operator notify reuses **`httpx`** for webhook
+  POST and Resend REST (`RESEND_API_KEY` / `RESEND_SENDER_EMAIL` → `VECINITA_FEEDBACK_NOTIFY_EMAIL`)
+  on internal-write — same pattern as DM `email_test.py` (no Resend SDK).
+
 - **EV-015 F41 (TP-S017-09):** No new **required** runtime deps for document store / rebuild /
   shadow promote (Alembic + existing FastAPI/Modal/Jobs/Playwright). Minor deps may be added
   during 07-build if needed — flag here before merge.

@@ -1533,3 +1533,47 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: staff-copy] [Corpus: frontend-i18n] [Corpus: ADR-004] [Corpus: ADR-046] [Corpus: ADR-047] #297 #199 #214 #296
 
+---
+
+## Cycle EV-214-feedback-polish-notify — Feedback polish + operator notify (#214)
+
+**Title:** Stronger bilingual no-PII/sensitive notice, Feedback UI polish, webhook + Resend email notify  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-214-feedback-polish-notify`  
+**Status:** documenting (gate closed)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/214  
+**Branch:** `feat/feedback-polish-notify-214`  
+**Parent:** EV-037-D2 / staff runbook pointer
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-214-D1 | Notify host | After successful insert on internal-write |
+| EV-214-D2 | Webhook | Non-empty `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` |
+| EV-214-D3 | Email | **In cycle** — Resend + `VECINITA_FEEDBACK_NOTIFY_EMAIL` (independent of webhook) |
+| EV-214-D4 | Payload | id, category, locale, created_at, message only |
+| EV-214-D5 | Fail-open | Notify errors must not roll back store |
+| EV-214-D6 | Privacy copy | Expand EN/ES in `packages/frontend-i18n` |
+| EV-214-D7 | UI | Callout + intro above form |
+| EV-214-D8 | AC/TC | AC-UX18–19; TC-308–311; extend UJ-073 |
+| EV-214-D9 | Docs | F68 / ADR-046 / config / secrets / api-contract |
+| EV-214-D10 | Out | Visitor PII; thumbs; transcripts; retention; live prod without AskQuestion |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/feature-list.md` §F68 | #214 notice + notify |
+| `docs/adr/ADR-046-…` | §6 operator notify; notice consequence |
+| `docs/user-journeys.md` §UJ-073 | Notice + notify steps |
+| `docs/acceptance-criteria.md` | AC-UX18–19 |
+| `docs/test-plan.md` | TC-308–311 + UJ map |
+| `docs/api-contract.md` | Public + internal notify detail |
+| `docs/config-spec.md` | `VECINITA_FEEDBACK_NOTIFY_EMAIL` + Resend reuse |
+| `docs/staging-secrets-matrix.md` | Internal-write notify secrets |
+| `docs/dependency-inventory.md` | No new deps (httpx + Resend) |
+| `docs/decisions/evolve-decisions.md` | This cycle |
+
+**Cites:** [Corpus: feature-list.md §F68] [Corpus: ADR-046] [Corpus: ADR-004] [Corpus: tests] #214 #186
+

@@ -214,6 +214,9 @@ optional car-day/year constants; those need not be in the JSON if FE computes fr
 }
 ```
 
+- **Side effects**: Proxies to internal-write insert; optional operator notify is handled
+  there (#214). Client UX must show bilingual no-PII/sensitive notice above the form
+  (AC-UX18).
 - **Errors**: `400` validation / forbidden fields; `503` write path unavailable.
 
 ### GET `/api/v1/documents`
@@ -971,7 +974,14 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 - **Purpose**: Persist feedback row (called by ChatRAG backend).
 - **Auth**: Internal API key.
 - **Body**: Same fields as public feedback (no email).
-- **Side effects**: Insert `feedback` row; optional operator notify.
+- **Side effects**: Insert `feedback` row; then optional operator notify (#214 / ADR-046 §6):
+  - If `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` is set → HTTP POST JSON
+    `{id, category, locale, created_at, message}`.
+  - If `VECINITA_FEEDBACK_NOTIFY_EMAIL` is set and Resend env is configured → email the
+    operator inbox (same payload fields in body text/HTML; no visitor identity fields).
+  - Notify runs after successful commit; failures are logged and must not change the
+    success response for the insert (AC-UX19, TC-309–311).
+- **Response** `201`: `{id, created_at}` (unchanged shape).
 
 ### GET `/internal/v1/feedback` (EV-024 / F68) — Internal Write API
 

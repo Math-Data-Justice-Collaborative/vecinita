@@ -3,7 +3,7 @@
 **Status:** Accepted  
 **Stage:** 01-requirements (EV-024 / S026)  
 **Date:** 2026-08-04  
-**Related:** ADR-004; F68; GitHub #186; S026-D13/D16/D17
+**Related:** ADR-004; F68; GitHub #186 / #214; S026-D13/D16/D17; EV-214-D1–D10
 
 ## Context
 
@@ -25,12 +25,24 @@ contradiction (20a): **no visitor contact email** — message + category only.
    Feedback UI (admin + super-admin only). Optional operator notify (webhook/email to
    operators) must not include visitor PII beyond the message body the user typed.
 5. Privacy tests assert schema has no email/name columns and reject those fields on write.
+6. **Operator notify (#214 / EV-214):** After a successful `feedback` insert on
+   internal-write, optionally notify operators:
+   - **Webhook:** non-empty `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` → HTTP POST JSON
+     (`id`, `category`, `locale`, `created_at`, `message`).
+   - **Email:** non-empty `VECINITA_FEEDBACK_NOTIFY_EMAIL` plus configured Resend
+     (`RESEND_API_KEY`, `RESEND_SENDER_EMAIL`) → send to the operator inbox (not a
+     visitor address). Reuse the existing Resend HTTP pattern (no new vendor SDK).
+   - Channels are independent; either or both may fire. Notify failure must **not**
+     roll back a successful store (log + continue). Missing/disabled config → submit
+     still succeeds.
 
 ## Consequences
 
 - New ADR-004 exception documented here; standing ADR-004 table should link this ADR.
 - Admin Feedback page is in scope for F68 (S026-D17).
-- If product later wants contact email, require a new ADR + explicit consent UI.
+- If product later wants **visitor** contact email, require a new ADR + explicit consent UI.
+- ChatRAG Feedback UI must show a bilingual no-PII / no-sensitive-data notice above the
+  form before submit (#214; AC-UX18).
 
 ## Alternatives rejected
 

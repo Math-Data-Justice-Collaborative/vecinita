@@ -1265,17 +1265,24 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   `feedback` table (anonymous). Admin **Feedback** page (admin+super-admin) lists entries.
   Optional operator notify webhook/email on new row (not visitor identity). **90-day**
   retention + purge. ADR-046 amends ADR-004 for anonymous feedback rows only.
+  **#214 follow-on (EV-214):** stronger bilingual no-PII/sensitive-data notice + UI callout;
+  operator notify implemented on internal-write after successful insert — webhook
+  (`VECINITA_FEEDBACK_NOTIFY_WEBHOOK`) and/or Resend email
+  (`VECINITA_FEEDBACK_NOTIFY_EMAIL` + `RESEND_*`); fail-open (AC-UX18–19, TC-308–311).
 - **Inputs**: Category enum; message text; locale chrome.
-- **Outputs**: Stored feedback rows; admin list; privacy tests.
+- **Outputs**: Stored feedback rows; admin list; privacy tests; optional operator webhook/email.
 - **Protected surfaces**:
   | Surface | Change |
   |---------|--------|
   | `apps/database` | `feedback` migration + purge |
-  | `apps/internal-write-api` | Write/list feedback |
-  | `apps/chat-rag-backend` / frontend | POST + page/button |
+  | `apps/internal-write-api` | Write/list feedback; optional notify (#214) |
+  | `apps/chat-rag-backend` / frontend | POST + page/button; notice polish (#214) |
+  | `packages/frontend-i18n` | EN/ES privacy + intro copy (#214) |
   | `apps/data-management-frontend` / backend | Admin Feedback UI |
-- **Out of scope**: Visitor email/PII; auto-attach chat transcripts; thumbs on messages.
-- **Source**: S026 / EV-024; GitHub #186 / #193; S026-D6/D13/D16/D17; ADR-046.
+- **Out of scope**: Visitor email/PII; auto-attach chat transcripts; thumbs on messages;
+  changing 90-day retention.
+- **Source**: S026 / EV-024; GitHub #186 / #193 / **#214**; S026-D6/D13/D16/D17; ADR-046;
+  EV-214-D1–D10.
 
 ### F69: Admin audit actor username (read-time) (#170)
 
