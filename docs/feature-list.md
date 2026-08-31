@@ -498,9 +498,10 @@
   | `packages/frontend-ui` | `vecinita-frontend-ui` | `LocaleProvider`, `useLocale`, `LanguageToggle`, `ThemeToggle`, `TagFilterChips`, `TagBadge`, `PaginationControls`; minimal shadcn re-exports (Button, Badge, Input, Label, Dialog) |
 - **Admin scope**: ~120+ static strings across Dashboard, Corpus, Health, Audit, bulk dialogs; EN/ES toggle in sidebar footer beside `ThemeToggle` (desktop + mobile sheet).
 - **ChatRAG scope**: Migrate app-local i18n to shared packages; **full Tailwind migration** of ChatRAG layout (not minimal scan-only); consume shared components.
+- **ChatRAG catalog ownership (EV-296 / #296)**: Visitor-facing UI strings live in `packages/frontend-i18n` under **`chat.<camelCase>`** (plus existing `chat.tooltip.*`). ChatRAG must not keep a divergent local string table for moved keys; call sites use package `t(locale, "chat.*")`. Pagination uses `shared.pagination`. Cold-start **facts** may remain in `apps/chat-rag-frontend/src/coldstart/facts.ts` until a separate decision. Staff copy-change path: [runbooks/staff-copy-change.md](runbooks/staff-copy-change.md) (`[Corpus: staff-copy]`, #297).
 - **Limitations**: UI chrome only — corpus document titles, tag labels, URLs, audit JSON payloads, API `error_message`, and health/job status enums remain in source form (R30). No backend or API contract changes. No `Accept-Language` header in F31.
 - **Priority**: High — ship in EV-004 before next deploy.
-- **Source**: EV-004 user interview 2026-06-13; ADR-019, ADR-020 (amended); context-brief §13
+- **Source**: EV-004 user interview 2026-06-13; ADR-019, ADR-020 (amended); context-brief §13; EV-037-D2 / EV-296 (#296)
 
 ### F32: Admin Job Management tab (list jobs)
 
@@ -1264,17 +1265,24 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   `feedback` table (anonymous). Admin **Feedback** page (admin+super-admin) lists entries.
   Optional operator notify webhook/email on new row (not visitor identity). **90-day**
   retention + purge. ADR-046 amends ADR-004 for anonymous feedback rows only.
+  **#214 follow-on (EV-214):** stronger bilingual no-PII/sensitive-data notice + UI callout;
+  operator notify implemented on internal-write after successful insert — webhook
+  (`VECINITA_FEEDBACK_NOTIFY_WEBHOOK`) and/or Resend email
+  (`VECINITA_FEEDBACK_NOTIFY_EMAIL` + `RESEND_*`); fail-open (AC-UX18–19, TC-308–311).
 - **Inputs**: Category enum; message text; locale chrome.
-- **Outputs**: Stored feedback rows; admin list; privacy tests.
+- **Outputs**: Stored feedback rows; admin list; privacy tests; optional operator webhook/email.
 - **Protected surfaces**:
   | Surface | Change |
   |---------|--------|
   | `apps/database` | `feedback` migration + purge |
-  | `apps/internal-write-api` | Write/list feedback |
-  | `apps/chat-rag-backend` / frontend | POST + page/button |
+  | `apps/internal-write-api` | Write/list feedback; optional notify (#214) |
+  | `apps/chat-rag-backend` / frontend | POST + page/button; notice polish (#214) |
+  | `packages/frontend-i18n` | EN/ES privacy + intro copy (#214) |
   | `apps/data-management-frontend` / backend | Admin Feedback UI |
-- **Out of scope**: Visitor email/PII; auto-attach chat transcripts; thumbs on messages.
-- **Source**: S026 / EV-024; GitHub #186 / #193; S026-D6/D13/D16/D17; ADR-046.
+- **Out of scope**: Visitor email/PII; auto-attach chat transcripts; thumbs on messages;
+  changing 90-day retention.
+- **Source**: S026 / EV-024; GitHub #186 / #193 / **#214**; S026-D6/D13/D16/D17; ADR-046;
+  EV-214-D1–D10.
 
 ### F69: Admin audit actor username (read-time) (#170)
 
@@ -1569,9 +1577,11 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212.
 - **Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298; UJ-087.
 - **Out of scope**: Live corpus clone without AskQuestion; Modal provision during Spec band
-  (Build gate); full hostname rename of legacy prod apps in one cutover; separate GitHub
-  `stage` branch promotion (deferred; ADR-054 uses PR tip → staging-smoke → `main`).
-- **Source**: EV-staging-do-supabase; EV-033-stage-before-main; ADR-054; ADR-049 exit; ADR-050.
+  (Build gate); full hostname rename of legacy prod apps in one cutover.
+- **Promotion (EV-036-D15)**: When `origin/stage` exists — feature→`stage` (CI) then
+  promote `stage`→`main` (CI + `staging-smoke`). Smoke remains on main-bound PRs (ADR-054).
+- **Source**: EV-staging-do-supabase; EV-033-stage-before-main; EV-036-D15; ADR-054;
+  ADR-049 exit; ADR-050.
 
 ### F84: Admin monitoring + staging Grafana/Loki/alerts (#114)
 

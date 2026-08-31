@@ -128,7 +128,177 @@ def check(pack: str, root: Path) -> int:
         )
         detail = (proc.stdout or proc.stderr or "").strip().replace("\n", " | ")[:500]
         return finish(proc.returncode == 0, detail or "inline-doc-scan")
+    if pack == "skill-compliance":
+        return check_skill_compliance(root, text)
+    if pack == "cross-project-memory":
+        return check_cross_project_memory(root, text)
+    if pack == "extract-method":
+        return check_extract_method(root, text)
     return finish(False, f"unknown-pack-{pack}")
+
+
+def _session_path() -> Path | None:
+    raw = os.environ.get("VERIFY_SESSION_PATH") or os.environ.get("EM_SESSION_PATH")
+    if not raw:
+        return None
+    path = Path(raw).expanduser().resolve()
+    return path if path.is_dir() else None
+
+
+def check_skill_compliance(root: Path, text: str) -> int:
+    """F76 — HANDOFF must cite memory-context when hooks wrote it."""
+    duty = (
+        "memory-context" in text
+        and (
+            "skill-compliance" in text
+            or "f76" in text
+            or "cite" in text
+            or "handoff evidence" in text
+        )
+    ) or has_any(
+        root,
+        (
+            "docs/decisions/ev-034-requirements-decisions.md",
+            "docs/skill-integration.md",
+        ),
+    )
+    if PHASE == "documenting":
+        return finish(bool(duty), "cite-duty-stated")
+
+    session = _session_path()
+    if session is None:
+        # No live session: require standing docs + pack handoff schema still present
+        pack_handoff = Path(__file__).resolve().parent.parent / "docs" / "handoff-schema.md"
+        schema_ok = False
+        if pack_handoff.is_file():
+            schema_ok = "memory-context" in pack_handoff.read_text(
+                encoding="utf-8", errors="replace"
+            ).lower()
+        return finish(bool(duty and schema_ok), "cite-duty-docs-no-session")
+
+    handoff = session / "HANDOFF.md"
+    memory = session / "reports" / "memory-context.md"
+    if not handoff.is_file():
+        return finish(False, "handoff-missing")
+    body = handoff.read_text(encoding="utf-8", errors="replace").lower()
+    cited = "memory-context" in body or (
+        "kg preflight" in body and ("skip" in body or "skipped" in body)
+    )
+    if memory.is_file() and not cited:
+        return finish(False, "handoff-uncited-while-memory-context-exists")
+    if not memory.is_file():
+        # Hooks skipped: Evidence must still document skip
+        skip_ok = "skip" in body or ("hooks" in body and "disabled" in body)
+        return finish(skip_ok or cited, "memory-context-absent-need-skip-note")
+    return finish(True, "handoff-cites-memory-context")
+
+
+def check_cross_project_memory(root: Path, text: str) -> int:
+    """F108–F109 — Neo4j cross-project checkpoint + dispositions."""
+    duty = (
+        "cross-project-memory" in text
+        or "f107" in text
+        or "f108" in text
+        or "f109" in text
+        or (
+            "cross-project" in text
+            and (
+                "disposition" in text
+                or ("adopt" in text and "waive" in text)
+                or "keep-local" in text
+                or "neo4j" in text
+            )
+        )
+        or has_any(
+            root,
+            (
+                "docs/decisions/ev-040-requirements-decisions.md",
+                "docs/decisions/ev-040-tech-decisions.md",
+            ),
+        )
+        or "cross-project neo4j checkpoint" in text
+    )
+    if PHASE == "documenting":
+        return finish(bool(duty), "cross-project-duty-stated")
+
+    session = _session_path()
+    if session is None:
+        pack_skills = Path(__file__).resolve().parent.parent / "spec-development" / "SKILL.md"
+        skill_ok = False
+        if pack_skills.is_file():
+            st = pack_skills.read_text(encoding="utf-8", errors="replace").lower()
+            skill_ok = "cross-project" in st and (
+                "adopt" in st or "disposition" in st or "f107" in st
+            )
+        return finish(bool(duty and skill_ok), "cross-project-duty-docs-no-session")
+
+    handoff = session / "HANDOFF.md"
+    memory = session / "reports" / "memory-context.md"
+    bodies: list[str] = []
+    if handoff.is_file():
+        bodies.append(handoff.read_text(encoding="utf-8", errors="replace").lower())
+    for path in sorted((session / "reports").glob("*.md")) if (session / "reports").is_dir() else []:
+        try:
+            bodies.append(path.read_text(encoding="utf-8", errors="replace").lower())
+        except OSError:
+            continue
+    joined = "\n".join(bodies)
+    if not joined:
+        return finish(False, "handoff-or-reports-missing")
+
+    skip_ok = (
+        ("skip" in joined and ("neo4j" in joined or "hook" in joined or "retrieve" in joined))
+        or ("memory-context" in joined and "skipped" in joined)
+        or ("kg preflight" in joined and "skip" in joined)
+    )
+    disposed = (
+        ("adopt" in joined or "waive" in joined or "keep-local" in joined or "keep local" in joined)
+        and (
+            "cross-project" in joined
+            or "pattern" in joined
+            or "historical changes" in joined
+            or "disposition" in joined
+        )
+    )
+    if memory.is_file():
+        mem = memory.read_text(encoding="utf-8", errors="replace").lower()
+        if "skipped" in mem or ("skip" in mem and "fail-open" in mem):
+            skip_ok = True
+    if skip_ok or disposed:
+        return finish(True, "cross-project-disposed-or-skip")
+    return finish(False, "cross-project-undisposed")
+
+
+def check_extract_method(root: Path, text: str) -> int:
+    """F75 — refactor-safety bar stated; QA skill names failure modes."""
+    bar = (
+        "refactor" in text
+        or "extract-method" in text
+        or "f75" in text
+        or "refactor-safety" in text
+    )
+    if PHASE == "documenting":
+        return finish(bool(bar), "refactor-bar-stated")
+
+    candidates = [
+        root / ".cursor" / "skills" / "build" / "qa" / "SKILL.md",
+        Path(__file__).resolve().parent.parent / "build" / "qa" / "SKILL.md",
+    ]
+    qa_text = ""
+    for path in candidates:
+        if path.is_file():
+            qa_text = path.read_text(encoding="utf-8", errors="replace").lower()
+            break
+    modes = (
+        "refactor" in qa_text
+        and (
+            "failure mode" in qa_text
+            or "dead call" in qa_text
+            or "characterization" in qa_text
+            or "moved symbol" in qa_text
+        )
+    )
+    return finish(bool(bar and modes), "qa-refactor-failure-modes")
 
 
 def main() -> int:

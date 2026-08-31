@@ -271,6 +271,11 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_FINETUNE_MAX_CONCURRENT",
                 "VECINITA_FINETUNE_MAX_RUNS_PER_DAY",
                 "VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID",
+                # F68 / #214 — optional feedback operator notify (Resend and/or webhook)
+                "VECINITA_FEEDBACK_NOTIFY_EMAIL",
+                "VECINITA_FEEDBACK_NOTIFY_WEBHOOK",
+                "RESEND_API_KEY",
+                "RESEND_SENDER_EMAIL",
             ],
         )
     elif name in _CHAT_FE_NAMES:

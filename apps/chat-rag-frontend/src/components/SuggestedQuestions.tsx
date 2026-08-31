@@ -1,5 +1,5 @@
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 
 type SuggestedQuestionsProps = {
   locale: Locale;
@@ -13,16 +13,16 @@ export function SuggestedQuestions({
   onSelect,
 }: SuggestedQuestionsProps) {
   const questions = [
-    t(locale, "suggestion1"),
-    t(locale, "suggestion2"),
-    t(locale, "suggestion3"),
+    t(locale, "chat.suggestion1"),
+    t(locale, "chat.suggestion2"),
+    t(locale, "chat.suggestion3"),
   ];
 
   return (
     <div
       className="suggested-questions"
       data-testid="suggested-questions"
-      aria-label={t(locale, "suggestedQuestionsLabel")}
+      aria-label={t(locale, "chat.suggestedQuestionsLabel")}
     >
       {questions.map((question) => (
         <button

@@ -1,5 +1,5 @@
 ---
-description: PRs must pass staging before merge to main (F83 / ADR-054)
+description: PRs target stage first when available; staging-smoke before main (F83 / ADR-054)
 alwaysApply: true
 ---
 
@@ -8,27 +8,55 @@ alwaysApply: true
 [Corpus: feature-list.md §F83] [Corpus: staging]
 [Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
 [Spec: docs/adr/ADR-050-ci-cd-blocks-live-deploy.md]
+[Decision: EV-036-D15 — PR into stage first]
 
 ## Do
 
-1. Treat promotion as: **PR tip SHA → staging deploy + H1–H5 (`staging-smoke`) → merge
-   `main` → prod CD**. Required checks: `CI success` + `staging-smoke` (ruleset
+### A — PR base (must)
+
+1. **Resolve the integration base** before `gh pr create`:
+   - If `origin/stage` exists → **base = `stage`** (required for feature / evolve /
+     milestone / chore PRs).
+   - Else if `origin/staging` exists as a **branch** (not only the Environment) →
+     base = `staging`.
+   - Else → **AskQuestion** to create `stage` from current `main` (or waive with
+     rationale). Do **not** silently open the first integration PR to `main`.
+2. Open work as: **feature branch → `stage`** (when available). Never open that first
+   PR directly to `main` while `stage` exists.
+3. Merge feature work into **`stage`** only when **CI** is green on that PR (see
+   `ci.yml` triggers for `stage`). Do **not** expect `staging-smoke` on the
+   feature→`stage` hop — that check runs on PRs targeting **`main`**.
+4. Promote with a **second** PR: **`stage` → `main`** only when `CI success` +
+   `staging-smoke` are green for the tip SHA (ruleset
    `main-requires-ci-and-staging-smoke`).
-2. Before opening a PR as ready / merging to `main` / declaring ship: confirm those checks
-   are green for the tip SHA (or obtain an explicit AskQuestion **waiver** and record it).
-3. Cite tracking issue **#212** (and children) when updating Stage→Main process.
-4. Keep staging Environment secrets isolated from prod; follow `no-live-prod-corpus-push`.
+5. Before marking either PR ready / merging / declaring ship: confirm required checks
+   for that tip SHA (or an explicit AskQuestion **waiver**, recorded).
+6. Cite tracking issue **#212** when updating Stage→Main process.
+7. Keep staging Environment secrets isolated from prod; follow `no-live-prod-corpus-push`.
+
+### B — Staging Environment gate (always)
+
+Promotion evidence remains: **promote PR tip SHA → staging deploy + H1–H5
+(`staging-smoke` on PRs targeting `main`) → merge `main` → prod CD**. Required
+checks on `main`-bound PRs: `CI success` + `staging-smoke`. Feature→`stage` PRs
+require **CI** only.
 
 ## Do not
 
+- Open feature/evolve/milestone PRs with **base `main`** when `origin/stage` (or the
+  repo’s configured integration branch) exists.
 - Merge or ask to merge to `main` when `staging-smoke` or `CI success` is red/missing
   without a recorded waiver.
-- Invent a GitHub **`stage` branch** promotion path (not current topology).
 - Confuse this with `ci-after-push.mdc` (post-push watch) — both apply; this rule is the
-  **pre-merge Stage gate**.
+  **PR base + pre-merge Stage gate**.
 - Enable live prod corpus mutate / FT promote / automation without AskQuestion.
+
+## Hotfix exception
+
+Emergency `fix/*` may target `main` only after AskQuestion. Prefer `stage` even for
+fixes when the branch exists and delay is acceptable.
 
 ## Waiver
 
-AskQuestion `[Decision]` only. Options must include defer / runbook-only. Record waiver in
-PR body or session HANDOFF.
+AskQuestion `[Decision]` only. Options must include defer / runbook-only / create-stage.
+Record waiver in PR body or session HANDOFF.

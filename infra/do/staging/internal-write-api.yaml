@@ -71,3 +71,16 @@ services:
       - key: VECINITA_AUTH_REQUIRED
         scope: RUN_TIME
         value: "true"
+      # F68 / #214 — optional operator notify on anonymous feedback (Resend email)
+      - key: VECINITA_FEEDBACK_NOTIFY_EMAIL
+        scope: RUN_TIME
+        type: SECRET
+      - key: VECINITA_FEEDBACK_NOTIFY_WEBHOOK
+        scope: RUN_TIME
+        type: SECRET
+      - key: RESEND_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: RESEND_SENDER_EMAIL
+        scope: RUN_TIME
+        type: SECRET

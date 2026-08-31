@@ -47,9 +47,12 @@ When personal skills say `[Corpus: tech-spec]`, open **config** + **deps** +
 | OpenAPI (data management) | [../openapi/data-management.yaml](../openapi/data-management.yaml) |
 | OpenAPI (ChatRAG) | [../openapi/chat-rag.yaml](../openapi/chat-rag.yaml) |
 | Changelog | [../CHANGELOG.md](../CHANGELOG.md) |
+| Frontend i18n (EN/ES UI catalog) | [../packages/frontend-i18n/](../packages/frontend-i18n/) — cite `[Corpus: frontend-i18n]` or `[Corpus: feature-list.md §F31]` |
+| Staff copy-change (ChatRAG + Admin UX) | [runbooks/staff-copy-change.md](runbooks/staff-copy-change.md) — cite `[Corpus: staff-copy]` |
 
-Runbooks stay **opt-in** (cite by path): [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md).
+Runbooks stay **opt-in** (cite by path or id): [runbooks/corpus-operator-guide.md](runbooks/corpus-operator-guide.md), [runbooks/staff-copy-change.md](runbooks/staff-copy-change.md) (`[Corpus: staff-copy]`).
 `docs/research-brief.md` is **not** a Vecinita standing doc — `[Corpus: WAIVED — research-brief.md; reason: antibody leftover cite; decided: S031]`.
+The EV-037 waiver for a standing staff-maintainability runbook is **lifted** (EV-297 / #297) — use `[Corpus: staff-copy]` instead of that waiver.
 
 ## Citation examples
 
@@ -94,3 +97,4 @@ are **opt-in** — cite by path when touched; add a CORPUS row only if they beco
 If a needed row or authoritative section is absent: **AskQuestion** per
 `.cursor/rules/doc-corpus-citation.mdc` — add docs (recommended), waive with
 `[Corpus: WAIVED — …]`, defer, or re-scope. Do not invent normative text silently.
+| consumer-gates | [policies/CONSUMER-GATES.md](policies/CONSUMER-GATES.md) | EV-049 plugin-consumer security/quality/exact pins |

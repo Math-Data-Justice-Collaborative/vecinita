@@ -14,8 +14,8 @@
 ## Re-install
 
 ```bash
-EM_ROOT="$HOME/Documents/GitHub/spec-dev-knowledge-graph"
-"$EM_ROOT/cursor-plugin/scripts/install-workspace.sh" "$PWD"
+EM_ENGINEERING_MEMORY_ROOT="${EM_ENGINEERING_MEMORY_ROOT:-$HOME/Documents/GitHub/spec-dev-knowledge-graph}"
+"$EM_ENGINEERING_MEMORY_ROOT/cursor-plugin/scripts/install-workspace.sh" "$PWD"
 ```
 
 Reload Cursor after updates.

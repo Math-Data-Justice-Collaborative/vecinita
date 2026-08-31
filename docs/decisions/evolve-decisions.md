@@ -1413,6 +1413,7 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | EV-036-D12 | Tech plan | **Approve TP-EV-036** — M136–M140; Droplet s-1vcpu-1gb; no chart npm lib; Modal `metrics_rollup`; defer Modal→Loki ship |
 | EV-036-D13 | Staging Droplet | **Approve create** `s-1vcpu-1gb` (~$6/mo) for Grafana/Loki/Alertmanager (2026-08-30) — blocked until doctl has Droplet scopes |
 | EV-036-D14 | Verify waive | **WAIVE** implementing `inline-documentation` — 348 missing repo-wide; **0** in F84 metrics/monitoring paths (2026-08-30) |
+| EV-036-D15 | PR base | **Always PR into `stage` first** when `origin/stage` exists; promote via second PR `stage`→`main` after CI + `staging-smoke`. If `stage` missing: AskQuestion to create (do not silently PR to `main`). Hotfix→`main` only via AskQuestion. Supersedes prior “no stage branch” guidance in EV-033 docs. |
 
 ### Build progress (2026-08-30)
 
@@ -1433,3 +1434,222 @@ cycle; **keep-local** Vecinita ADR-004 / F17 / #114 constraints. Re-check at imp
 verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: product] §F84 [Corpus: ADR-004] [Corpus: journeys] [Corpus: api] [Corpus: tests] [Corpus: staging] [Spec: docs/adr/ADR-055-operational-monitoring-grafana-loki.md]
+
+---
+
+## Cycle EV-037-staff-ux-maintainability — Staff UX maintainability review (#199)
+
+**Title:** Non-technical staff maintainability review of ChatRAG + Admin UX polish  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-037-staff-ux-maintainability`  
+**Status:** completed (Build closed 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/199 (CLOSED)
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-037-D1 | Deliverable | Session report + #199 comment; follow-on issues; no standing staff CMS doc |
+| EV-037-D2 | Follow-ons | Dual-i18n consolidation; staff copy runbook issue; extend/link #214 |
+| EV-037-D3 | Energy | Env for numeric knobs; advisory prose needs PR |
+| EV-037-D4 | Scale | micro |
+| EV-037-D5 | Out | CMS; polish rewrites |
+| EV-037-D6 | Surfaces | #87 #93 #104 #106 #186 #170 |
+
+### Build outputs
+
+| Output | Ref |
+|--------|-----|
+| Session review | `{session}/reports/staff-ux-maintainability-review.md` |
+| Consolidate ChatRAG → frontend-i18n | #296 |
+| Staff copy-change runbook | #297 |
+| Feedback notice/notify (existing) | #214 |
+| Gate | Open Build (operator **a**) |
+| Implementing verify | 5/5 PASS |
+
+**Cites:** [Corpus: product] [Corpus: ADR-004] #199 #193 #214 #296 #297
+
+---
+
+## Cycle EV-296-chatrag-frontend-i18n — Consolidate ChatRAG messages (#296)
+
+**Title:** Move ChatRAG visitor UI strings into `packages/frontend-i18n`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-296-chatrag-frontend-i18n`  
+**Status:** documenting (gate closed)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/296  
+**Parent:** EV-037-D2 / #199
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-296-R1 | Key shape | `chat.<camelCase>` (e.g. `chat.welcomeHeading`) |
+| EV-296-R2 | Call sites | Update all ChatRAG call sites to package `t(locale, "chat.*")` in the same PR (operator `B:B` → option 2) |
+| EV-296-R3 | Pairing guard | Full package EN/ES string-key set equality (TC-307) |
+| EV-296-R4 | Pagination | Use existing `shared.pagination` (do not invent `chat.pagination`) |
+| EV-296-R5 | Out | CMS; polish rewrites; `coldstart/facts.ts`; #297 runbook body; #214 polish |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/feature-list.md` §F31 | ChatRAG catalog ownership bullet |
+| `docs/CORPUS.md` | `[Corpus: frontend-i18n]` satellite path |
+| `docs/test-plan.md` | TC-307; TC-067/069 cross-links |
+| Session `reports/requirements-delta.md` | Full AC |
+
+**Cites:** [Corpus: product] [Corpus: feature-list.md §F31] [Corpus: frontend-i18n] [Corpus: tests] #296 #297
+
+---
+
+## Cycle EV-297-staff-copy-runbook — Staff copy-change runbook (#297)
+
+**Title:** Standing staff/ops checklist for ChatRAG + Admin UX copy changes  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-297-staff-copy-runbook`  
+**Status:** completed (merged PR #300 → `stage` 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/297 (CLOSED)  
+**Parent:** EV-037-D1 / #199 (waiver lifted)  
+**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/300
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-297-R1 | Path + CORPUS | `docs/runbooks/staff-copy-change.md` + `[Corpus: staff-copy]`; lift EV-037-D1 waiver |
+| EV-297-R2 | Feedback triage owner | Role placeholder + Admin Feedback + #214 |
+| EV-297-R3 | i18n home | `packages/frontend-i18n`; cold-start facts stay in `coldstart/facts.ts` |
+| EV-297-R4 | Proceed | Spec → draft-docs → feasibility → documenting verify |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/runbooks/staff-copy-change.md` | **New** staff/ops checklist |
+| `docs/CORPUS.md` | `[Corpus: staff-copy]` row; waiver lift note |
+| `docs/feature-list.md` §F31 | Point staff path at runbook |
+| `docs/decisions/evolve-decisions.md` | This cycle |
+
+**Cites:** [Corpus: staff-copy] [Corpus: frontend-i18n] [Corpus: ADR-004] [Corpus: ADR-046] [Corpus: ADR-047] #297 #199 #214 #296
+
+---
+
+## Cycle EV-214-feedback-polish-notify — Feedback polish + operator notify (#214)
+
+**Title:** Stronger bilingual no-PII/sensitive notice, Feedback UI polish, webhook + Resend email notify  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-214-feedback-polish-notify`  
+**Status:** completed (merged PR #303 → `stage` 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/214 (CLOSED)  
+**Branch:** `feat/feedback-polish-notify-214`  
+**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/303  
+**Parent:** EV-037-D2 / staff runbook pointer
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-214-D1 | Notify host | After successful insert on internal-write |
+| EV-214-D2 | Webhook | Non-empty `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` |
+| EV-214-D3 | Email | **In cycle** — Resend + `VECINITA_FEEDBACK_NOTIFY_EMAIL` (independent of webhook) |
+| EV-214-D4 | Payload | id, category, locale, created_at, message only |
+| EV-214-D5 | Fail-open | Notify errors must not roll back store |
+| EV-214-D6 | Privacy copy | Expand EN/ES in `packages/frontend-i18n` |
+| EV-214-D7 | UI | Callout + intro above form |
+| EV-214-D8 | AC/TC | AC-UX18–19; TC-308–311; extend UJ-073 |
+| EV-214-D9 | Docs | F68 / ADR-046 / config / secrets / api-contract |
+| EV-214-D10 | Out | Visitor PII; thumbs; transcripts; retention; live prod without AskQuestion |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/feature-list.md` §F68 | #214 notice + notify |
+| `docs/adr/ADR-046-…` | §6 operator notify; notice consequence |
+| `docs/user-journeys.md` §UJ-073 | Notice + notify steps |
+| `docs/acceptance-criteria.md` | AC-UX18–19 |
+| `docs/test-plan.md` | TC-308–311 + UJ map |
+| `docs/api-contract.md` | Public + internal notify detail |
+| `docs/config-spec.md` | `VECINITA_FEEDBACK_NOTIFY_EMAIL` + Resend reuse |
+| `docs/staging-secrets-matrix.md` | Internal-write notify secrets |
+| `docs/dependency-inventory.md` | No new deps (httpx + Resend) |
+| `docs/decisions/evolve-decisions.md` | This cycle |
+
+**Cites:** [Corpus: feature-list.md §F68] [Corpus: ADR-046] [Corpus: ADR-004] [Corpus: tests] #214 #186
+
+---
+
+## Cycle EV-212-stage-promote — Promote `stage` → `main` + close #212
+
+**Title:** Land deferred Stage→Main promote; align #212; flip staging write-api to `main`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-212-stage-promote`  
+**Status:** implementing (Build gate open 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/212
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-212-D0 | Goal | Promote PR `stage`→`main`; close #212; flip staging write-api to `main` |
+| EV-212-D1 | Scale | micro (no tech-plan / qa / e2e) |
+| EV-212-D2 | AC | Approve AC-1…AC-6 (promote + checks + merge + DO flip + close #212 + no secret leaks) |
+| EV-212-D3 | Out | Redesign Stage→Main; live prod corpus mutate; flip apps already on `main` |
+| EV-212-D4 | Merge | AskQuestion before merge; no force-push |
+| EV-212-D5 | Gate | Open Build — commit docs → promote PR → CI + staging-smoke → merge AskQuestion |
+
+### Spec deltas (draft-docs)
+
+| Artifact | Change |
+|----------|--------|
+| GitHub #212 | Body rewritten to EV-036-D15 two-hop + EV-212 closeout |
+| `docs/staging-runbook.md` | Post-promote DO staging branch flip-back note |
+| Session AC | `reports/requirements.md` |
+
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Decision: EV-036-D15] ADR-054 / ADR-050
+
+---
+
+## EV-feedback-notify-secrets — Staging Resend notify enable (2026-08-31)
+
+**Title:** Enable feedback Resend notify secrets on staging write-api  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-feedback-notify-secrets`  
+**Status:** in_progress (Build)  
+**Date:** 2026-08-31  
+**Parent:** EV-214 HANDOFF leftover
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-FNS-D1 | Channel | Resend email (webhook deferred) |
+| EV-FNS-D2 | Target | Staging `vecinita-staging-write-api` only |
+| EV-FNS-D3 | To inbox | GitHub account email (`joseph.c.mcg@gmail.com`) — `.env` had no To |
+| EV-FNS-D4 | Prod | Deferred — separate AskQuestion |
+| EV-FNS-D5 | Infra | YAML SECRET placeholders + `do_apps.py` sync keys |
+
+**Cites:** [Corpus: feature-list.md §F68] [Corpus: ADR-046] [Corpus: staging]
+
+---
+
+## EV-305-staging-resend — Dual Resend path (same account) (2026-08-31)
+
+**Title:** Separate staging Resend path from prod (isolated key + sender)  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-305-staging-resend`  
+**Status:** documenting (Spec band)  
+**Date:** 2026-08-31  
+**Epic:** [#305](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/305) · children #306–#309
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-305-D1 | Resend account | Same account/environment OK — not a second Resend org |
+| EV-305-D2 | Isolation | Distinct API key + staging From under that account |
+| EV-305-D3 | Staging From | Same verified domain, local-part `noreply+staging@josephcmcg.com` (A1) |
+| EV-305-D4 | Secret names | Keep `RESEND_API_KEY` / `RESEND_SENDER_EMAIL` / `SUPABASE_SMTP_PASS`; distinct values per GH/Modal/Supabase env (B1) |
+| EV-305-D5 | Soft epic | Independent PRs per child #306–#309; no mega-PR |
+| EV-305-D6 | New Fn | None — F35/F68 hardening under F83 / ADR-054 |
+| EV-305-D7 | Out | Prod key rotate; prod feedback notify; visitor PII |
+
+**Docs delta:** `staging-secrets-matrix.md` §Dual Resend · `staging-runbook.md` feedback · `config-spec.md` F35 Resend rows · `infra/resend/.env.example`
+
+**Cites:** [Corpus: ADR-054] [Corpus: feature-list.md §F35] [Corpus: feature-list.md §F68] [Corpus: staging] #305
+

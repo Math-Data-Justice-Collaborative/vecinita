@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { Conversation } from "../hooks/useConversationStore";
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 import { formatRelativeTime } from "../i18n/relativeTime";
 import { deriveConversationLabel } from "./previousChatsLabel";
 
@@ -34,7 +34,7 @@ export function PreviousChatsList({
   return (
     <section
       className="previous-chats"
-      aria-label={t(locale, "previousChats")}
+      aria-label={t(locale, "chat.previousChats")}
       data-testid="previous-chats"
     >
       <button
@@ -45,12 +45,12 @@ export function PreviousChatsList({
           setExpanded((value) => !value);
         }}
       >
-        {`${t(locale, "previousChats")} (${String(conversations.length)})`}
+        {`${t(locale, "chat.previousChats")} (${String(conversations.length)})`}
       </button>
 
       {expanded ? (
         conversations.length === 0 ? (
-          <p className="empty-hint">{t(locale, "noPreviousChats")}</p>
+          <p className="empty-hint">{t(locale, "chat.noPreviousChats")}</p>
         ) : (
           <>
             <ul
@@ -77,7 +77,7 @@ export function PreviousChatsList({
                   <button
                     type="button"
                     className="previous-chat-delete"
-                    aria-label={t(locale, "deleteConversation")}
+                    aria-label={t(locale, "chat.deleteConversation")}
                     onClick={() => {
                       onDelete(conversation.id);
                     }}
@@ -92,7 +92,7 @@ export function PreviousChatsList({
               className="secondary previous-chats-clear-all"
               onClick={onClearAll}
             >
-              {t(locale, "clearAllHistory")}
+              {t(locale, "chat.clearAllHistory")}
             </button>
           </>
         )

@@ -35,7 +35,7 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-070 Energy estimate + guide | `tests/e2e/test_uj070_energy_estimate.py` + Vitest | TC-218, TC-219, TC-220, TC-231 | `tests/ui/chat/uj070-energy.spec.ts` |
 | UJ-071 Icon micro-interactions | Vitest both frontends + `frontend-ui` | TC-221, TC-222 | opt |
 | UJ-072 Bilingual tooltips | Vitest `frontend-ui` + both apps | TC-223, TC-224 | opt |
-| UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228 | `tests/ui/chat/uj073-feedback.spec.ts` |
+| UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228, TC-308–311 | `tests/ui/chat/uj073-feedback.spec.ts` |
 | UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
 | UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
@@ -432,6 +432,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Dot-prefixed keys resolve for both locales; pagination helper formats correctly.
 - **Input**: Call `t("en", "shared.pagination", 1, 3, 42)` and Spanish equivalent.
 - **Expected**: Typed keys compile; EN/ES strings differ; unknown keys caught at typecheck.
+- **Related**: TC-307 — full EN/ES key-set equality for all package string keys (EV-296 / #296).
 
 ### TC-068: frontend-ui shared components render (F31)
 
@@ -443,7 +444,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: ChatRAG tests pass using shared packages (regression for BUG-2026-06-05 language toggle).
 - **Input**: Run migrated `test_bug_2026_06_05_language_toggle_i18n.test.tsx` (or successor) against shared imports.
-- **Expected**: Same behavior as pre-migration; no app-local duplicate `messages.ts`.
+- **Expected**: Same behavior as pre-migration; no app-local duplicate string catalog (`messages.ts` may re-export package `t`/types only). EV-296 / #296 completes visitor `chat.*` consolidation into `frontend-i18n`.
 
 ### TC-070: Intl timestamp formatting per UI locale (UJ-022, AC-F4, F31)
 
@@ -1812,13 +1813,15 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: GitHub ruleset / branch protection API or UI export.
 - **Expected**: Required checks include CI success job and staging Environment smoke (AC-ST5).
 
-### TC-298: Stage before Main agent rule + ticket tracking (F83, EV-033)
+### TC-298: Stage before Main agent rule + ticket tracking (F83, EV-033 / EV-036-D15)
 - **Objective**: Agents and maintainers share one Stage→Main policy with GH tracking.
-- **Input**: `.cursor/rules/stage-before-main.mdc`; GitHub #212 (+ children); ruleset API.
-- **Expected**: Rule exists with `alwaysApply: true`; cites F83/ADR-054; requires tip SHA
-  `CI success` + `staging-smoke` before merge-ready/`main`; waivers only via AskQuestion;
-  #212 describes ADR-054 PR→staging→`main` path (not a protected `stage` branch);
-  ruleset checks unchanged (AC-ST8).
+- **Input**: `.cursor/rules/stage-before-main.mdc`; `.github/workflows/ci.yml`; GitHub #212
+  (+ children); ruleset API.
+- **Expected**: Rule exists with `alwaysApply: true`; cites F83/ADR-054/EV-036-D15; when
+  `origin/stage` exists, feature/evolve PRs use `--base stage` and `ci.yml` runs on
+  `pull_request`/`push` for `stage`; promote `stage`→`main` requires tip SHA `CI success` +
+  `staging-smoke` (smoke on main-bound PRs only); waivers only via AskQuestion; ruleset
+  checks unchanged (AC-ST8).
 
 ### TC-299: Metrics summary windows (UJ-088, F84)
 - **Objective**: `GET /internal/v1/metrics/summary` returns ingest/chat/embed rates for 24h and 7d.
@@ -1859,6 +1862,31 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Objective**: ≥1 alert rule can POST to staging webhook secret.
 - **Input**: Alertmanager config + test alert or simulated condition.
 - **Expected**: Webhook receives notification; no chat content in payload (AC-MON7–AC-MON8).
+
+### TC-307: frontend-i18n EN/ES key-set equality (F31, EV-296 / #296)
+- **Objective**: Every string key in `packages/frontend-i18n` exists in both `en` and `es` tables (no orphans).
+- **Input**: Vitest in `packages/frontend-i18n` comparing `Object.keys(enStrings)` vs `Object.keys(esStrings)` (or exported equivalents).
+- **Expected**: Key sets equal; ChatRAG visitor strings present under `chat.*`; no divergent app-local string catalog for moved keys (TC-069).
+
+### TC-308: Feedback privacy notice EN/ES + callout (UJ-073, F68 / #214)
+- **Objective**: Feedback page shows expanded no-PII/sensitive-data notice above the form in both locales; callout is present before submit.
+- **Input**: Vitest FeedbackPage EN + ES; i18n keys in `packages/frontend-i18n`.
+- **Expected**: AC-UX18; notice visible pre-submit; copy discourages private and sensitive data.
+
+### TC-309: Feedback webhook notify when configured (UJ-073, F68 / #214)
+- **Objective**: After successful insert, internal-write POSTs JSON payload to `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` when set.
+- **Input**: Unit/integration with mocked HTTP; payload fields id/category/locale/created_at/message only.
+- **Expected**: Webhook called once on success path; AC-UX19; ADR-046 §6.
+
+### TC-310: Feedback email notify when Resend configured (UJ-073, F68 / #214)
+- **Objective**: After successful insert, Resend email is sent to `VECINITA_FEEDBACK_NOTIFY_EMAIL` when `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` are set.
+- **Input**: Unit/integration with mocked Resend HTTP; body includes message text, not visitor identity fields.
+- **Expected**: Email path fires independently of webhook; AC-UX19.
+
+### TC-311: Feedback notify failure does not roll back store (UJ-073, F68 / #214)
+- **Objective**: Webhook and/or email failure after insert still returns success for the stored row.
+- **Input**: Mocked failing notify transport(s).
+- **Expected**: Persist succeeds; notify error logged; AC-UX19.
 
 ### F31 coverage gate — gated components
 

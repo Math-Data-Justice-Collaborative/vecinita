@@ -1,5 +1,5 @@
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 import type { Source, StreamEvent } from "./types";
 
 /** Keep in sync with `vecinita_shared_schemas.transient_http`. */
@@ -175,20 +175,20 @@ export function formatAskFailureMessage(
 ): string {
   if (error instanceof AskStreamError && error.status !== undefined) {
     if (error.status === 401 || error.status === 403) {
-      return t(locale, "askUnauthorized");
+      return t(locale, "chat.askUnauthorized");
     }
     // Exhausted 502/503/504 and other 5xx → unavailable (not “still starting”).
     if (TRANSIENT_ASK_STATUSES.has(error.status) || error.status >= 500) {
-      return t(locale, "askServerError");
+      return t(locale, "chat.askServerError");
     }
-    return t(locale, "requestFailed");
+    return t(locale, "chat.requestFailed");
   }
   if (error instanceof TypeError) {
     // Failed to fetch / UH after retries — same ops-visible unavailable copy.
-    return t(locale, "askServerError");
+    return t(locale, "chat.askServerError");
   }
   if (error instanceof Error) {
-    return t(locale, "requestFailed");
+    return t(locale, "chat.requestFailed");
   }
-  return t(locale, "requestFailed");
+  return t(locale, "chat.requestFailed");
 }
