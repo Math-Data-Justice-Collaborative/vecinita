@@ -8,11 +8,13 @@ Scans:
 Allowlist: config/exact-pins-allowlist.txt (one path:name or glob per line; # comments).
 [Corpus: adr-037] [Corpus: deps]
 """
+
 from __future__ import annotations
 
 import json
 import re
 import sys
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,11 +29,11 @@ def load_allowlist() -> set[str]:
     if not ALLOWLIST_PATH.is_file():
         return set()
     out: set[str] = set()
-    for line in ALLOWLIST_PATH.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
+    for raw in ALLOWLIST_PATH.read_text(encoding="utf-8").splitlines():
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
             continue
-        out.add(line)
+        out.add(stripped)
     return out
 
 
@@ -58,10 +60,10 @@ def check_package_json(path: Path, allow: set[str], violations: list[str]) -> No
             if allowed(allow, rel, name):
                 continue
             s = str(ver).strip()
-            if s.startswith("file:") or s.startswith("workspace:") or s.startswith("link:"):
+            if s.startswith(("file:", "workspace:", "link:")):
                 continue
-            if RANGE_RE.search(s) or s.startswith(">") or s.startswith("<"):
-                # exact: "1.2.3" or "1.2.3+meta" — reject ^1.2.3
+            if RANGE_RE.search(s) or s.startswith((">", "<")):
+                # Exact versions are digit-led without range operators.
                 if s[0].isdigit() and not any(c in s for c in "^~*><"):
                     continue
                 violations.append(f"{rel} {section} {name}={ver!r}")
@@ -69,20 +71,17 @@ def check_package_json(path: Path, allow: set[str], violations: list[str]) -> No
 
 def check_pyproject(path: Path, allow: set[str], violations: list[str]) -> None:
     rel = str(path.relative_to(ROOT))
-    try:
-        import tomllib
-    except ImportError:
-        import tomli as tomllib  # type: ignore
-
     data = tomllib.loads(path.read_text(encoding="utf-8"))
     project = data.get("project") or {}
     deps = list(project.get("dependencies") or [])
     opt = project.get("optional-dependencies") or {}
-    for group, items in [("dependencies", deps), *[(f"optional-dependencies.{k}", v) for k, v in opt.items()]]:
+    for group, items in [
+        ("dependencies", deps),
+        *[(f"optional-dependencies.{k}", v) for k, v in opt.items()],
+    ]:
         for req in items:
-            # strip markers
+            # Strip environment markers; keep name + extras + version.
             base = req.split(";")[0].strip()
-            # name[extras]==ver
             m = re.match(r"^([A-Za-z0-9_.-]+)(\[[^\]]+\])?(.*)$", base)
             if not m:
                 continue
@@ -93,7 +92,7 @@ def check_pyproject(path: Path, allow: set[str], violations: list[str]) -> None:
                 violations.append(f"{rel} {group} {name} (unpinned)")
                 continue
             if PY_RANGE_RE.search(rest) or "," in rest:
-                # allow exact == only
+                # Allow exact equality pins only.
                 if re.fullmatch(r"==[^,<=>~\^\*]+", rest):
                     continue
                 violations.append(f"{rel} {group} {name}{rest!r}")
@@ -102,7 +101,16 @@ def check_pyproject(path: Path, allow: set[str], violations: list[str]) -> None:
 def main() -> int:
     allow = load_allowlist()
     violations: list[str] = []
-    skip_dirs = {".git", "node_modules", ".venv", "venv", ".tools", ".security-reports", "dist", "build"}
+    skip_dirs = {
+        ".git",
+        "node_modules",
+        ".venv",
+        "venv",
+        ".tools",
+        ".security-reports",
+        "dist",
+        "build",
+    }
     for path in ROOT.rglob("package.json"):
         if any(p in skip_dirs for p in path.parts):
             continue

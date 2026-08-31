@@ -232,4 +232,4 @@ ci-pr-ready: ci-push ## Alias — run before marking a PR ready for review
 
 # EV-049 / ADR-037 — exact dependency pins
 check-exact-pins: ## Fail on ranged direct deps (allowlist: config/exact-pins-allowlist.txt)
-	python3 scripts/ci/check-exact-pins.py
+	python3 scripts/ci/check_exact_pins.py
