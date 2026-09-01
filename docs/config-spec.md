@@ -70,6 +70,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MODAL_LLM_PLAYGROUND_URL` | string | — | Yes (admin/eval sandbox, Slice D) | Modal **`vecinita-llm-playground`** base URL — list/pull/eval sandbox (TP-S010-27) |
 | `VECINITA_MODAL_PROXY_KEY` | string | — | Yes (prod) | `X-Vecinita-Proxy-Key` for **all** Modal LLM routes except `/health` (RD-165) |
 | `VECINITA_LLM_MODEL_ID` | string | `qwen2.5:1.5b-instruct` | No | Prod pin on `vecinita-llm`; playground overrides only on playground app (RD-169, TP-S010-25) |
+| `VECINITA_LLM_GPU_SNAPSHOT` | string | `false` | No | Prod `vecinita-llm` only: enable GPU memory snapshots + Level-1 sleep/wake (ADR-022 EV-313 / #313). Unset/`false`/`0`/`off` = off; `true`/`1`/`on` = on. **Must be set in the `modal deploy` environment** (baked into `enable_memory_snapshot` at import); Modal Secret alone does not flip the class. Playground must ignore / stay off. Staging evidence before prod AskQuestion. |
+| `VECINITA_LLM_ENFORCE_EAGER` | string | `true` | No | vLLM `enforce_eager` A/B for CUDA graphs vs snapshot experiments (S001 T7 / ADR-022). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
@@ -382,6 +384,8 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | Reject unknown `VECINITA_*` in strict mode | Optional dev strictness |
 | No identity fields in public API bodies | OpenAPI + Pydantic models |
 | `VECINITA_AUTH_REQUIRED` in `true`, `false` | Config module (admin backends, F34) |
+| `VECINITA_LLM_GPU_SNAPSHOT` in `true`, `false` (also `1`/`0`/`on`/`off` at parse) | Modal `vecinita-llm` prod class only (ADR-022 EV-313 / #313); playground ignores |
+| `VECINITA_LLM_ENFORCE_EAGER` in `true`, `false` (also `1`/`0`/`on`/`off`) | Modal LLM engine kwargs (S001 T7 / ADR-022) |
 | `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |
 | ChatRAG `VECINITA_CORS_ORIGINS` is non-wildcard, frontend origin only | Config / deploy review (F34, RD-079) |
 | `SUPABASE_SECRET_KEY` set on the backend hosting `/admin/users*` | Admin user-mgmt startup (F35); server-side only |

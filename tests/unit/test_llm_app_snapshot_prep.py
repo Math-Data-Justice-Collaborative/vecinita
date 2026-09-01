@@ -105,10 +105,11 @@ def test_load_model_lazy_initializes_state() -> None:
     assert "self._loaded_model_arg = None" in source
 
 
-def test_llm_service_disables_gpu_memory_snapshot() -> None:
-    """ADR-037: GPU snapshot breaks NCCL when switching model_id — snapshot disabled."""
+def test_llm_service_gpu_snapshot_gated_by_kill_switch() -> None:
+    """ADR-022 EV-313: prod snapshot uses kill-switch (not hard-coded False)."""
     source = _llm_app_source()
-    assert "enable_memory_snapshot=False" in source
+    assert "enable_memory_snapshot=_PROD_GPU_SNAPSHOT" in source
+    assert "VECINITA_LLM_GPU_SNAPSHOT" in source
 
 
 def test_max_model_len_supports_golden_eval_prompts() -> None:

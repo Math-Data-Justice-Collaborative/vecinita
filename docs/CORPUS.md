@@ -63,6 +63,7 @@ The EV-037 waiver for a standing staff-maintainability runbook is **lifted** (EV
 [Corpus: feature-list.md §F76]   → freshness (stale threshold / Refresh now)
 [Corpus: feature-list.md §F77]   → LoRA fine-tune + human promote
 [Corpus: feature-list.md §F84]   → admin Monitoring + staging Grafana/Loki (#114)
+[Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md]
 [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
 [Spec: docs/adr/ADR-053-modal-lora-finetune.md]
 [Spec: docs/adr/ADR-055-operational-monitoring-grafana-loki.md]

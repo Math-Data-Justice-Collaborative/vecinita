@@ -140,7 +140,10 @@ on the staging image (#212), POST feedback → inbox + staging-key traffic.
 
 | Secret | Required keys | Used by |
 |--------|---------------|---------|
-| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037 / TP-S010-25) |
+| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` **ASGI only** — proxy auth (ADR-037 / TP-S010-25). Do **not** put GPU snapshot kill-switch here. |
+| **`vecinita-llm-gpu`** | optional `VECINITA_FINETUNE_ADAPTER_ID`; optional `VECINITA_LLM_ENFORCE_EAGER` | Prod `LlmService` GPU class only (no proxy key — PR review defense-in-depth). |
+
+**GPU snapshots (`VECINITA_LLM_GPU_SNAPSHOT`):** deploy-time env for `modal deploy infra/modal/llm_app.py` (default off). Not read from Modal Secrets at container runtime — `enable_memory_snapshot` is baked at deploy import (ADR-022 EV-313 / #313). Staging: `export VECINITA_LLM_GPU_SNAPSHOT=true` then redeploy.
 
 Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first),
 or one-shot `bash scripts/deploy/sync_env.sh --modal --apply` (also merges
@@ -418,11 +421,14 @@ Modal secret name: **`vecinita-llm-finetune`** (`infra/modal/finetune_app.py`).
 | Volume `llm-finetune-adapters` | Yes | Adapter artifacts (Modal Volume, not env) |
 | Volume `llm-models` | Yes | Pinned Qwen base (shared with `vecinita-llm`) |
 
-### Modal — `vecinita-llm` (promote pin)
+### Modal — `vecinita-llm-gpu` (promote pin + eager)
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VECINITA_FINETUNE_ADAPTER_ID` | No | Load adapter after human promote only |
+| `VECINITA_FINETUNE_ADAPTER_ID` | No | Load adapter after human promote only (prod GPU class) |
+| `VECINITA_LLM_ENFORCE_EAGER` | No | vLLM eager A/B (default `true` if unset in sync) |
+
+ASGI proxy key stays on **`vecinita-llm`** only — not mounted on GPU workers.
 
 ### Modal — `vecinita-llm-playground` (pre-promote candidate)
 

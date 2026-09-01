@@ -1940,3 +1940,17 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 - Exact DO internal write API test harness (shared fixture with integration tests).
 - Live Modal staging nightly — deferred.
+
+### TC-313-01: Prod GPU snapshot kill-switch defaults off (EV-313 / #313, ADR-022)
+
+- **Objective**: `VECINITA_LLM_GPU_SNAPSHOT` unset or false keeps prod snapshot path disabled; true enables config gate used by `LlmService`.
+- **Setup**: Unit parse of env helper (no live Modal required).
+- **Expected**: Unset → false; `true`/`1`/`on` → true; playground class remains snapshot-off regardless.
+- **Refs**: [Corpus: config] [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md §Amendment EV-313]
+
+### TC-313-02: Staging cold restore procedure (manual / smoke — non-flaky CI) (EV-313 / #313)
+
+- **Objective**: Documented staging procedure records cold_kind restore vs create vs clean_boot for snapshot on/off.
+- **Setup**: Staging Modal; `export VECINITA_LLM_GPU_SNAPSHOT=true` in the **deploy** shell then `modal deploy infra/modal/llm_app.py` (not Secret-only); optional `modal container stop`; authenticated `/warm` then `/generate` or stream.
+- **Expected**: Snapshot-on restore materially faster than snapshot-off clean boot; no NCCL failure; LoRA id/hash matches promote when adapter set (#316). Missing `sleep`/`wake_up` fails closed (RuntimeError) rather than silent skip.
+- **CI:** Do **not** gate merge on 70s snapshot-create boots; unit TC-313-01 is the CI gate.
