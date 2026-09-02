@@ -16,11 +16,11 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from infra.modal.llm_app import (  # noqa: E402
+from infra.modal.llm_asgi import (  # noqa: E402
     _authorized,  # pyright: ignore[reportPrivateUsage]  # auth helper under test
 )
 
-LLM_APP = _REPO_ROOT / "infra" / "modal" / "llm_app.py"
+LLM_ASGI = _REPO_ROOT / "infra" / "modal" / "llm_asgi.py"
 _PROXY_ENV = "VECINITA_MODAL_PROXY_KEY"
 _PROXY_HEADER = "X-Vecinita-Proxy-Key"
 
@@ -47,11 +47,11 @@ class _Request:
 
 
 def _find_fastapi_handler(name: str) -> ast.AsyncFunctionDef:
-    tree = ast.parse(LLM_APP.read_text(encoding="utf-8"))
+    tree = ast.parse(LLM_ASGI.read_text(encoding="utf-8"))
     for node in ast.walk(tree):
         if isinstance(node, ast.AsyncFunctionDef) and node.name == name:
             return node
-    msg = f"async handler {name} not found in llm_app.py"
+    msg = f"async handler {name} not found in llm_asgi.py"
     raise AssertionError(msg)
 
 

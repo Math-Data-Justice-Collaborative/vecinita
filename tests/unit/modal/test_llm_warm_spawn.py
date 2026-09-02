@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 
 LLM_APP = Path(__file__).resolve().parents[3] / "infra" / "modal" / "llm_app.py"
+LLM_ASGI = Path(__file__).resolve().parents[3] / "infra" / "modal" / "llm_asgi.py"
 EMBED_APP = Path(__file__).resolve().parents[3] / "infra" / "modal" / "embedding_app.py"
 
 
@@ -33,13 +34,13 @@ def test_embedding_warm_uses_spawn_precedent() -> None:
 
 def test_llm_warm_spawns_warm_model_without_awaiting_remote_aio() -> None:
     """TC-318-01: fire-and-forget GPU warm; return promptly (AC-318-01)."""
-    source = LLM_APP.read_text(encoding="utf-8")
+    source = LLM_ASGI.read_text(encoding="utf-8")
     body = _warm_handler_body(source)
     assert "warm_model.spawn(" in body, (
-        "llm_app warm must call warm_model.spawn(...) like embedding_app (EV-318 / #318)"
+        "llm_asgi warm must call warm_model.spawn(...) like embedding_app (EV-318 / #318)"
     )
     assert "await service.warm_model.remote.aio" not in body, (
-        "llm_app warm must not await warm_model.remote.aio for prewarm (holds ASGI)"
+        "llm_asgi warm must not await warm_model.remote.aio for prewarm (holds ASGI)"
     )
     assert '"status": "warming"' in body or '"status":"warming"' in body, (
         "spawn warm should advertise warming (not pretend ready with loaded model_id)"

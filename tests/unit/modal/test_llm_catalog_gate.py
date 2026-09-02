@@ -25,27 +25,27 @@ from infra.modal.llm_app import (  # noqa: E402
     _write_manifest,  # pyright: ignore[reportPrivateUsage]  # catalog gate under test
 )
 
-LLM_APP = _REPO_ROOT / "infra" / "modal" / "llm_app.py"
+LLM_ASGI = _REPO_ROOT / "infra" / "modal" / "llm_asgi.py"
 _UNMAPPED_TAG = "unknown-custom:7b"
 
 
 def _find_fastapi_handler(name: str) -> ast.AsyncFunctionDef:
-    tree = ast.parse(LLM_APP.read_text(encoding="utf-8"))
+    tree = ast.parse(LLM_ASGI.read_text(encoding="utf-8"))
     for node in ast.walk(tree):
         if isinstance(node, ast.AsyncFunctionDef) and node.name == name:
             return node
-    msg = f"async handler {name} not found in llm_app.py"
+    msg = f"async handler {name} not found in llm_asgi.py"
     raise AssertionError(msg)
 
 
 def _handler_source(name: str) -> str:
     """Return the source text of a nested ASGI handler (line-accurate)."""
-    tree = ast.parse(LLM_APP.read_text(encoding="utf-8"))
+    tree = ast.parse(LLM_ASGI.read_text(encoding="utf-8"))
     for node in ast.walk(tree):
         if isinstance(node, ast.AsyncFunctionDef) and node.name == name:
-            lines = LLM_APP.read_text(encoding="utf-8").splitlines()
+            lines = LLM_ASGI.read_text(encoding="utf-8").splitlines()
             return "\n".join(lines[node.lineno - 1 : node.end_lineno])
-    msg = f"async handler {name} not found in llm_app.py"
+    msg = f"async handler {name} not found in llm_asgi.py"
     raise AssertionError(msg)
 
 
@@ -78,11 +78,13 @@ def test_pull_model_gates_unmapped_tag_with_bad_request() -> None:
         + "(TC-141 / TP-S010-26)"
     )
     # Must not spawn until mapping succeeds.
-    spawn_idx = source.find("pull_model_job.spawn")
+    spawn_idx = source.find("spawn_pull_job")
+    if spawn_idx < 0:
+        spawn_idx = source.find("pull_model_job.spawn")
     resolve_idx = source.find("resolve_hf_repo")
-    assert spawn_idx >= 0, "pull_model must still spawn pull_model_job for mapped tags"
+    assert spawn_idx >= 0, "pull_model must still spawn pull job for mapped tags"
     assert 0 <= resolve_idx < spawn_idx, (
-        "resolve_hf_repo must run before pull_model_job.spawn so unmapped tags never enqueue"
+        "resolve_hf_repo must run before pull spawn so unmapped tags never enqueue"
     )
 
 
