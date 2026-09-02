@@ -13,8 +13,9 @@ Prod pin (RD-169 / Slice D): ``ALLOW_MODEL_RELOAD=False`` — request ``model_id
 does not reload the vLLM engine. Sandbox/eval model switches use
 ``vecinita-llm-playground`` (shared ``llm-models`` volume).
 
-F77 LoRA (ADR-053): after human promote, load adapter from volume
-``llm-finetune-adapters`` when ``VECINITA_FINETUNE_ADAPTER_ID`` is set. Playground
+F77 LoRA (ADR-053 / EV-316): after human promote, load adapter from volume
+``llm-finetune-adapters`` when ``VECINITA_FINETUNE_ADAPTER_ID`` is set and verify
+``VECINITA_FINETUNE_ADAPTER_HASH`` (SHA-256) on post-restore. Playground
 uses ``VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID`` for pre-promote candidates.
 """
 
@@ -40,7 +41,10 @@ from infra.modal.llm_service_core import LlmServiceCore
 from infra.modal.repo_paths import MODAL_ROOT_MOUNT, resolve_repo_root
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from vecinita_shared_schemas.finetune import (
+    build_prod_llm_health,
     decide_serve_adapter_id,
+    parse_finetune_adapter_hash,
+    parse_finetune_adapter_id,
     resolve_finetune_adapter_dir,
 )
 
@@ -117,6 +121,23 @@ def _gpu_snapshot_from_env() -> bool:
 # Fixed at ``modal deploy`` import time (not container Secret runtime). Set
 # ``VECINITA_LLM_GPU_SNAPSHOT`` in the *deploy* environment, then redeploy (TC-313-01).
 _PROD_GPU_SNAPSHOT: Final[bool] = _gpu_snapshot_from_env()
+
+
+def _prod_health_payload() -> dict[str, str | None]:
+    """Ready metadata for ``GET /health`` (EV-316 / TC-316-02)."""
+    git_commit = os.environ.get("VECINITA_GIT_COMMIT") or os.environ.get("GITHUB_SHA")
+    if git_commit is not None:
+        git_commit = git_commit.strip() or None
+    try:
+        adapter_hash = parse_finetune_adapter_hash()
+    except ValueError:
+        adapter_hash = None
+    return build_prod_llm_health(
+        base_model_id=DEFAULT_PLAYGROUND_MODEL_ID,
+        adapter_id=parse_finetune_adapter_id(),
+        adapter_hash=adapter_hash,
+        git_commit=git_commit,
+    )
 
 
 LLM_MAX_MODEL_LEN: Final[int] = 2048
@@ -499,7 +520,8 @@ def fastapi_app():
     service = LlmService()
 
     async def health(_: Request) -> JSONResponse:
-        return JSONResponse({"status": "ok"})
+        # Integrity fail-closed is on GPU enter post-restore; /health stays open.
+        return JSONResponse(_prod_health_payload())
 
     async def warm(request: Request) -> JSONResponse:
         if not _authorized(request):

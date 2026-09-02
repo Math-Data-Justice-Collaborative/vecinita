@@ -199,13 +199,17 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 - **Endpoints:** inference + `/warm` (proxy auth on mutating routes)
 - **Consumer env:** `VECINITA_MODAL_LLM_URL` on DO chat-rag-backend (`packages/llm-client`)
 - **GPU memory snapshots (ADR-022 / EV-313 / #313):** Kill-switch `VECINITA_LLM_GPU_SNAPSHOT`
-  (default **off** until staging evidence). The flag is read at **`modal deploy` import
-  time** (baked into `enable_memory_snapshot` / enter hooks) — setting it only in a Modal
-  Secret does **not** enable snapshots. To enable: `export VECINITA_LLM_GPU_SNAPSHOT=true`
-  in the deploy shell, then redeploy `infra/modal/llm_app.py`. When on: prod-only
-  `enable_memory_snapshot` + vLLM Level-1 sleep before capture / wake on restore; snapshot
-  **base engine only**, resolve LoRA after restore (#316). Snapshot **creation** can take
-  ~70s — prime via `/warm` after deploy (see #315). Do not enable on playground.
+  (unset/`false` = off). The flag is read at **`modal deploy` import time** (baked into
+  `enable_memory_snapshot` / enter hooks) — setting it only in a Modal Secret does **not**
+  enable snapshots. **Staging + prod (`main`) enabled 2026-08-31** — keep
+  `export VECINITA_LLM_GPU_SNAPSHOT=true` in the deploy shell whenever redeploying
+  `infra/modal/llm_app.py` for those Environments, or snapshots silently fall off.
+  When on: prod-only `enable_memory_snapshot` + vLLM Level-1 sleep before capture / wake on
+  restore; snapshot **base engine only**, resolve LoRA after restore (#316). Verify adapter
+  with **SHA-256** (`VECINITA_FINETUNE_ADAPTER_HASH`) + `hmac.compare_digest`; kill-switch
+  `VECINITA_LLM_LORA_RESOLVE` (`post_restore` default). Snapshot
+  **creation** can take ~70–100s — prime via `/warm` after deploy (see #315). Do not enable
+  on playground.
 - **Eager A/B:** `VECINITA_LLM_ENFORCE_EAGER` (default `true`) — independent of snapshot switch;
   live on Modal secret `vecinita-llm-gpu` for GPU workers
 - **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — do not deploy
@@ -222,7 +226,7 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 | Secret | Mounted on | Keys |
 |--------|------------|------|
 | `vecinita-llm` | ASGI only | `VECINITA_MODAL_PROXY_KEY` |
-| `vecinita-llm-gpu` | Prod `LlmService` GPU class | `VECINITA_FINETUNE_ADAPTER_ID`, `VECINITA_LLM_ENFORCE_EAGER` (optional) |
+| `vecinita-llm-gpu` | Prod `LlmService` GPU class | `VECINITA_FINETUNE_ADAPTER_ID`, `VECINITA_FINETUNE_ADAPTER_HASH` (optional), `VECINITA_LLM_ENFORCE_EAGER`, `VECINITA_LLM_LORA_RESOLVE` (optional) |
 
 ```bash
 set -a && source prod.env && set +a

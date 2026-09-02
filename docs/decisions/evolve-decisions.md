@@ -1660,9 +1660,10 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Title:** Re-enable Modal GPU memory snapshots on pinned prod `vecinita-llm`  
 **Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-313-prod-gpu-snapshots`  
-**Status:** documenting (Spec band)  
+**Status:** closed (Build + staging TC-313-02 + prod enable)  
 **Date:** 2026-08-31  
-**Epic:** [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311) · slice [#313](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/313)
+**Epic:** [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311) · slice [#313](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/313)  
+**Merge:** [#321](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/321) → `stage` @ `0b08fbeb`
 
 | ID | Topic | Choice |
 |----|-------|--------|
@@ -1672,7 +1673,10 @@ verify with HANDOFF dispositions if new Patterns appear.
 | EV-313-D4 | Playground | Snapshots remain off |
 | EV-313-D5 | SLO | Honest Useful/Green/Red bands; no silent “sub-second” claim |
 | EV-313-D6 | Prod enable | Staging evidence + AskQuestion |
+| EV-313-D7 | Staging cutover | `MODAL_ENVIRONMENT=staging` secret sync (`vecinita-llm-gpu`) + deploy with `VECINITA_LLM_GPU_SNAPSHOT=true`; TC-313-02 PASS (restore log + H1/H3) |
+| EV-313-D8 | Prod cutover | Operator approved option 1; `main` sync + deploy with snapshot **true**; logs show create + restore |
 
+**Evidence:** session `reports/tc-313-02-staging.md`, `reports/tc-313-02-prod-enable.md`  
 **Docs delta:** ADR-022 amendment · `config-spec.md` · `infra/modal/README.md` · `adr/README.md` · `CORPUS.md` cite · `test-plan.md` TC-313-01/02 · this log
 
 **Cites:** [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Corpus: ADR-037] [Corpus: ADR-004] [Corpus: ADR-053] [Corpus: config] #313 #311 #316
@@ -1685,4 +1689,25 @@ verify with HANDOFF dispositions if new Patterns appear.
 | Silent sleep/wake skip | Fail closed with `TypeError` when `sleep`/`wake_up` missing |
 | Proxy key on GPU workers | Prod `LlmService` mounts `vecinita-llm-gpu` only; ASGI keeps `vecinita-llm` |
 
-**Still open (🔴):** ensure staging/prod CD (or operator deploy shell) actually exports `VECINITA_LLM_GPU_SNAPSHOT` when enabling — docs now state the requirement.
+**Ops note:** CD does not auto-export `VECINITA_LLM_GPU_SNAPSHOT`; operators must set it in the deploy shell (or extend CD later). Staging + prod Environments were enabled manually 2026-08-31.
+
+**Next #311 child (recommended):** [#316](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/316) LoRA-after-restore completeness (ready metadata + promote matrix). Alternates: [#314](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/314) latency harness · [#318](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/318) async GPU `/warm` prewarm.
+
+---
+
+## EV-316-lora-post-restore — LoRA after snapshot restore (#316) (2026-08-31)
+
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-316-lora-post-restore`  
+**Ticket:** [#316](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/316) (child of #311)  
+**Intake:** option 2 (RAG preset angles); context option 1; requirements option 1 + **SHA-256** integrity
+
+| ID | Topic | Decision |
+|----|-------|----------|
+| EV-316-D1 | Resolve mode | Default `VECINITA_LLM_LORA_RESOLVE=post_restore`; `snapshot_bound` legacy/debug only |
+| EV-316-D2 | Integrity | **SHA-256** canonical adapter-dir digest; `VECINITA_FINETUNE_ADAPTER_HASH`; `hmac.compare_digest`; reject symlink escape; no MD5/SHA-1/CRC |
+| EV-316-D3 | Fail closed | Mismatch / missing dir → raise before ready |
+| EV-316-D4 | Ready metadata | Extend prod `GET /health` with base_model_id, adapter_id, adapter_hash, snapshot_schema, git_commit |
+| EV-316-D5 | Tests / AC | TC-316-01, TC-316-02; AC-FT11 |
+| EV-316-D6 | Out of scope | UI; baking LoRA into snapshot; #314/#318; F77 promote UX |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-316] [Spec: ADR-053] [Corpus: feature-list.md §F80] [Corpus: config] [Corpus: api] [Corpus: tests] [Corpus: acceptance]

@@ -33,6 +33,8 @@ class LlmServiceCore:
         self._loaded_cache_key = None
         self._lora_request = None
         self._snapshot_mode = False
+        self._adapter_id = None
+        self._adapter_hash = None
 
     def unload_model(self) -> None:
         from infra.modal.llm_app import _shutdown_vllm_engine
@@ -43,6 +45,8 @@ class LlmServiceCore:
         self._loaded_cache_key = None
         self._lora_request = None
         self._snapshot_mode = False
+        self._adapter_id = None
+        self._adapter_hash = None
 
     def _snapshot_enter_build(self) -> None:
         """``snap=True``: load pinned base (+ LoRA capacity), warm, Level-1 sleep (ADR-022)."""
@@ -94,20 +98,43 @@ class LlmServiceCore:
         self._snapshot_mode = True
 
     def _bind_lora_after_restore(self) -> None:
-        """Resolve promoted adapter after snapshot restore (Volume mutate ≠ snap invalidate)."""
+        """Resolve promoted adapter after snapshot restore (Volume mutate ≠ snap invalidate).
+
+        Default ``VECINITA_LLM_LORA_RESOLVE=post_restore``: bind from volume and verify
+        SHA-256 (``VECINITA_FINETUNE_ADAPTER_HASH``) with constant-time compare (EV-316).
+        ``snapshot_bound`` skips integrity verify (legacy/debug only).
+        """
         from infra.modal.llm_app import (
             MODEL_ID,
             _adapter_load_for_role,
             _build_lora_request,
+        )
+        from vecinita_shared_schemas.finetune import (
+            parse_lora_resolve_mode,
+            require_post_restore_adapter_hash,
+            verify_adapter_integrity,
         )
 
         adapter_id, adapter_dir = _adapter_load_for_role(self.serve_role)
         if adapter_id is not None and adapter_dir is not None and not Path(adapter_dir).is_dir():
             msg = f"promoted LoRA adapter missing on volume: {adapter_id} ({adapter_dir})"
             raise RuntimeError(msg)
+
+        mode = parse_lora_resolve_mode()
+        if mode == "post_restore" and adapter_id is not None:
+            expected = require_post_restore_adapter_hash(adapter_id=adapter_id)
+            if adapter_dir is None or expected is None:
+                msg = f"promoted LoRA adapter dir/hash unresolved for {adapter_id}"
+                raise RuntimeError(msg)
+            _ = verify_adapter_integrity(adapter_dir=adapter_dir, expected_hash=expected)
+            self._adapter_hash = expected
+        else:
+            self._adapter_hash = None
+
         self._lora_request = _build_lora_request(adapter_id, adapter_dir)
         self._loaded_model_arg = MODEL_ID
         self._loaded_cache_key = (MODEL_ID, adapter_id)
+        self._adapter_id = adapter_id
 
     def _ensure_model_loaded(self, model_id: str | None) -> None:
         from infra.modal.llm_app import (
