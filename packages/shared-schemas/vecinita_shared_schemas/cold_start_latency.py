@@ -6,7 +6,7 @@ Allow-listed operational fields only — never persist raw prompts or chat conte
 from __future__ import annotations
 
 import math
-from typing import Final, Literal, TypedDict, cast
+from typing import Final, Literal, Required, TypedDict, cast
 
 from vecinita_shared_schemas.json_types import JsonObject
 
@@ -63,7 +63,7 @@ class UnknownColdKindError(ValueError):
 class ColdStartSample(TypedDict, total=False):
     """Validated operational sample for harness JSON / structured logs."""
 
-    cold_kind: ColdKind
+    cold_kind: Required[ColdKind]
     worker_type: str
     git_commit: str
     snapshot_config: str

@@ -30,7 +30,7 @@ def test_validate_accepts_allow_listed_warm_sample() -> None:
         }
     )
     assert sample["cold_kind"] == "warm"
-    assert sample["first_token_ms"] == pytest.approx(520.0)
+    assert sample.get("first_token_ms") == pytest.approx(520.0)
 
 
 @pytest.mark.parametrize("kind", sorted(COLD_KINDS))
@@ -47,14 +47,14 @@ def test_validate_accepts_each_cold_kind(kind: str) -> None:
 def test_validate_rejects_prompt_like_keys(forbidden: str) -> None:
     """ADR-004 / F84 posture — no chat content in harness tags."""
     with pytest.raises(ForbiddenColdStartTagError) as exc:
-        validate_cold_start_sample({"cold_kind": "warm", forbidden: "secret user text"})
+        _ = validate_cold_start_sample({"cold_kind": "warm", forbidden: "secret user text"})
     assert forbidden in str(exc.value)
 
 
 def test_validate_rejects_unknown_cold_kind() -> None:
     """Unknown cold_kind fails closed."""
     with pytest.raises(UnknownColdKindError):
-        validate_cold_start_sample({"cold_kind": "lukewarm", "first_token_ms": 1.0})
+        _ = validate_cold_start_sample({"cold_kind": "lukewarm", "first_token_ms": 1.0})
 
 
 def test_percentile_p50_p95_for_restore_samples() -> None:
