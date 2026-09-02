@@ -111,8 +111,44 @@ rationale no longer applies to production topology, but the flag was never resto
    (`no-live-prod-corpus-push` does not apply to LLM config, but prod latency cutover
    still needs explicit approve).
 
+**Cutover log (EV-313 / 2026-08-31):**
+
+| Environment | `VECINITA_LLM_GPU_SNAPSHOT` | Evidence |
+|-------------|----------------------------|----------|
+| Modal `staging` | `true` (deploy shell) | TC-313-02: `Restoring Function from memory snapshot.`; H1 + warm H3 PASS |
+| Modal `main` (prod) | `true` (deploy shell; AskQuestion approve) | Create + restore log lines; `/health` `/warm` `/generate` PASS |
+
+Playground remains snapshot-off. Flag is **not** stored in Modal Secrets — re-deploy with the
+env set after any CD that omits it.
+
+### Amendment EV-316 — LoRA after restore (integrity)
+
+**Problem:** Modal Volume mutations do **not** invalidate Memory Snapshots. Baking a promoted
+LoRA into the snapshot risks silently serving a stale adapter after promote/rollback.
+
+**Decision (EV-316 / #316):**
+
+1. **Base snapshot only** — `snap=True` loads pinned Qwen with LoRA *capacity* but **no**
+   promoted adapter weights from the mutable volume.
+2. **Post-restore resolve (default)** — `snap=False` → `wake_up` → bind current
+   `VECINITA_FINETUNE_ADAPTER_ID` from volume, then verify integrity.
+3. **Integrity algorithm: SHA-256** (`hashlib.sha256`) over a canonical adapter-dir digest
+   (sorted relative paths; each file contributes `path ‖ NUL ‖ size ‖ NUL ‖ bytes`). Reject
+   symlinks that escape the adapter root. Compare expected
+   `VECINITA_FINETUNE_ADAPTER_HASH` (lowercase hex) with `hmac.compare_digest`. **Do not** use
+   MD5, SHA-1, or CRC for the authoritative pin.
+4. **Fail closed** — missing dir, hash mismatch, or hash set without id → raise before ready;
+   do not serve generate claiming the wrong adapter.
+5. **Ready metadata** on prod `GET /health`: `base_model_id`, `adapter_id`, `adapter_hash`,
+   `snapshot_schema`, `git_commit` (plus `status`).
+6. **Kill-switch** `VECINITA_LLM_LORA_RESOLVE`: `post_restore` (default) \| `snapshot_bound`
+   (legacy/debug only; not recommended when volumes mutate). Independent of
+   `VECINITA_LLM_GPU_SNAPSHOT` and `VECINITA_LLM_ENFORCE_EAGER`.
+7. **Tests:** TC-316-01 (promote-matrix stale-adapter), TC-316-02 (ready + hash fail-closed);
+   AC-FT11.
+
 **Kill switches (independent):** `VECINITA_LLM_GPU_SNAPSHOT`, `VECINITA_LLM_ENFORCE_EAGER`,
-LoRA post-restore vs snapshot-bound mode (#316).
+`VECINITA_LLM_LORA_RESOLVE`.
 
 ## References
 
@@ -123,4 +159,4 @@ LoRA post-restore vs snapshot-bound mode (#316).
   ADR-053 (LoRA promote)
 - BUG-2026-05-22 (cold-start UX), `docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004`
 - Parent latency system: GitHub #311; this slice: #313; LoRA-after-restore: #316
-- Session: `EV-313-prod-gpu-snapshots` (pack session store)
+- Session: `EV-313-prod-gpu-snapshots`; `EV-316-lora-post-restore` (pack session store)

@@ -495,7 +495,26 @@ Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: C
 ### GET `/health`
 
 - **Auth**: May remain open (no proxy key) — probes only.
-- **Response** `200`: `{"status": "ok"}`
+- **Response** `200` (prod `vecinita-llm`, ADR-022 EV-316 / #316):
+
+```json
+{
+  "status": "ok",
+  "base_model_id": "qwen2.5:1.5b-instruct",
+  "adapter_id": null,
+  "adapter_hash": null,
+  "snapshot_schema": "v1",
+  "git_commit": "<short-sha-or-null>"
+}
+```
+
+- When a LoRA is promoted: `adapter_id` and `adapter_hash` (lowercase hex SHA-256 of the
+  canonical adapter-dir digest) are non-null and match the serve pin.
+- **Errors / fail-closed**: container must not become ready for generate if post-restore
+  resolve is on and id/hash verification fails (raise at enter / bind; not a soft `/health`
+  lie claiming a different adapter).
+- Minimal `{"status": "ok"}` remains acceptable for non-prod / playground unless the same
+  metadata is wired for parity.
 
 ### Auth matrix (UJ-049 / TC-142 / RD-165)
 

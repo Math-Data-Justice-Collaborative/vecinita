@@ -429,6 +429,10 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-FT7**: Kill-switch/caps apply to FT train jobs (TC-263). Shared `VECINITA_AUTOMATIONS_KILL_SWITCH` plus `VECINITA_FINETUNE_MAX_CONCURRENT` (default 1) and `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (default 3) — TP5 / RD-348 / S030-D29.
 - [x] **AC-FT8**: Out of F77 without unlock: full-weight FT default; auto-load latest on prod; blind promote without operator review.
 - [x] **AC-FT9**: Rollback path: operator can revert prod to base pin (clear promoted adapter) (UJ-082, TC-265).
+- [x] **AC-FT11**: GPU snapshot restore resolves LoRA post-restore; verifies **SHA-256** adapter
+  content hash (`VECINITA_FINETUNE_ADAPTER_HASH`) with constant-time compare; fail closed on
+  mismatch; `/health` exposes ready metadata; kill-switch `VECINITA_LLM_LORA_RESOLVE`
+  (default `post_restore`) (EV-316 / #316, TC-316-01, TC-316-02, ADR-022).
 
 ### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
 

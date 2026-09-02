@@ -141,9 +141,13 @@ on the staging image (#212), POST feedback → inbox + staging-key traffic.
 | Secret | Required keys | Used by |
 |--------|---------------|---------|
 | **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` **ASGI only** — proxy auth (ADR-037 / TP-S010-25). Do **not** put GPU snapshot kill-switch here. |
-| **`vecinita-llm-gpu`** | optional `VECINITA_FINETUNE_ADAPTER_ID`; optional `VECINITA_LLM_ENFORCE_EAGER` | Prod `LlmService` GPU class only (no proxy key — PR review defense-in-depth). |
+| **`vecinita-llm-gpu`** | optional `VECINITA_FINETUNE_ADAPTER_ID`; optional `VECINITA_FINETUNE_ADAPTER_HASH` (SHA-256 hex); optional `VECINITA_LLM_ENFORCE_EAGER`; optional `VECINITA_LLM_LORA_RESOLVE` | Prod `LlmService` GPU class only (no proxy key — PR review defense-in-depth). |
 
-**GPU snapshots (`VECINITA_LLM_GPU_SNAPSHOT`):** deploy-time env for `modal deploy infra/modal/llm_app.py` (default off). Not read from Modal Secrets at container runtime — `enable_memory_snapshot` is baked at deploy import (ADR-022 EV-313 / #313). Staging: `export VECINITA_LLM_GPU_SNAPSHOT=true` then redeploy.
+**GPU snapshots (`VECINITA_LLM_GPU_SNAPSHOT`):** deploy-time env for `modal deploy infra/modal/llm_app.py`.
+Not read from Modal Secrets at container runtime — `enable_memory_snapshot` is baked at deploy
+import (ADR-022 EV-313 / #313). **Enabled on Modal Environments `staging` and `main` as of
+2026-08-31** — always `export VECINITA_LLM_GPU_SNAPSHOT=true` before redeploying those envs
+(or snapshots silently disable). Playground stays off.
 
 Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first),
 or one-shot `bash scripts/deploy/sync_env.sh --modal --apply` (also merges
@@ -405,6 +409,8 @@ EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy c
 | `VECINITA_FRESHNESS_STALE_DAYS` | No | Stale threshold days (default `30`) |
 | `VECINITA_FINETUNE_ENABLED` | No | F77 feature flag (default `false`) |
 | `VECINITA_FINETUNE_ADAPTER_ID` | No | Promoted LoRA adapter id on prod `vecinita-llm` (empty = base) |
+| `VECINITA_FINETUNE_ADAPTER_HASH` | No | Lowercase hex SHA-256 of promoted adapter dir (ADR-022 EV-316 / #316); empty = base |
+| `VECINITA_LLM_LORA_RESOLVE` | No | `post_restore` (default) \| `snapshot_bound` — LoRA bind after GPU snapshot restore |
 | `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | No | Pre-promote candidate adapter on playground only |
 | `VECINITA_FINETUNE_REQUIRE_APPROVE` | No | Require approve before GPU (default `true`) |
 | `VECINITA_FINETUNE_MAX_CONCURRENT` | No | F77 max concurrent trains (default `1`) |
@@ -426,6 +432,8 @@ Modal secret name: **`vecinita-llm-finetune`** (`infra/modal/finetune_app.py`).
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `VECINITA_FINETUNE_ADAPTER_ID` | No | Load adapter after human promote only (prod GPU class) |
+| `VECINITA_FINETUNE_ADAPTER_HASH` | No | SHA-256 hex of promoted adapter dir (EV-316 / #316) |
+| `VECINITA_LLM_LORA_RESOLVE` | No | `post_restore` (default) \| `snapshot_bound` |
 | `VECINITA_LLM_ENFORCE_EAGER` | No | vLLM eager A/B (default `true` if unset in sync) |
 
 ASGI proxy key stays on **`vecinita-llm`** only — not mounted on GPU workers.

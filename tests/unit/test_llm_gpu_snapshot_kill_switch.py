@@ -63,10 +63,13 @@ def test_prod_snapshot_path_has_snap_true_false_and_sleep() -> None:
 
 
 def test_core_resolves_lora_after_snapshot_restore() -> None:
-    """Base snapshot + post-restore LoRA bind (ADR-022 / #316)."""
+    """Base snapshot + post-restore LoRA bind + SHA-256 verify (ADR-022 / #316)."""
     source = LLM_CORE.read_text(encoding="utf-8")
     assert "bind_lora_after_restore" in source or "_bind_lora_after_restore" in source
     assert "sleep" in source.lower() or "wake_up" in source
+    assert "verify_adapter_integrity" in source
+    assert "parse_lora_resolve_mode" in source
+    assert "sha256" in source.lower() or "ADAPTER_HASH" in source or "adapter_hash" in source
 
 
 def test_playground_remains_snapshot_off() -> None:

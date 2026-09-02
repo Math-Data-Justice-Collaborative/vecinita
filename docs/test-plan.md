@@ -1954,3 +1954,27 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Setup**: Staging Modal; `export VECINITA_LLM_GPU_SNAPSHOT=true` in the **deploy** shell then `modal deploy infra/modal/llm_app.py` (not Secret-only); optional `modal container stop`; authenticated `/warm` then `/generate` or stream.
 - **Expected**: Snapshot-on restore materially faster than snapshot-off clean boot; no NCCL failure; LoRA id/hash matches promote when adapter set (#316). Missing `sleep`/`wake_up` fails closed (RuntimeError) rather than silent skip.
 - **CI:** Do **not** gate merge on 70s snapshot-create boots; unit TC-313-01 is the CI gate.
+
+### TC-316-01: Post-restore LoRA promote matrix — no stale adapter (EV-316 / #316, ADR-022)
+
+- **Objective**: After snapshot restore, serving pin must match current volume + SHA-256 hash;
+  promote A → mutate volume toward B must not report/serve A as B (or B as A).
+- **Setup**: Unit (preferred) or Modal harness: bind path with fixture adapter dirs; set
+  `VECINITA_FINETUNE_ADAPTER_ID` / `VECINITA_FINETUNE_ADAPTER_HASH` for A; mutate files or
+  swap hash expectation to B; invoke post-restore bind.
+- **Expected**: Hash mismatch or missing dir → fail closed (RuntimeError / ready refused);
+  successful bind exposes matching `adapter_id` + `adapter_hash` on `/health`. Default
+  `VECINITA_LLM_LORA_RESOLVE=post_restore`. Algorithm is SHA-256 + `hmac.compare_digest`
+  (not MD5/SHA-1/CRC).
+- **Refs**: [Corpus: feature-list.md §F77] [Spec: ADR-022 §Amendment EV-316] [Corpus: config]
+
+### TC-316-02: Ready metadata + LoRA resolve kill-switch (EV-316 / #316)
+
+- **Objective**: `/health` includes `base_model_id`, `adapter_id`, `adapter_hash`,
+  `snapshot_schema`, `git_commit`; `VECINITA_LLM_LORA_RESOLVE=snapshot_bound` is parsed and
+  documented as non-default.
+- **Setup**: Unit parse of resolve mode + health payload shape (no live Modal required for CI).
+- **Expected**: Default `post_restore`; invalid resolve mode rejected or fail-closed to
+  `post_restore` per implementation (document chosen behavior in config-spec). Metadata
+  fields present on prod health when snapshot path is exercised.
+- **Refs**: [Corpus: api] [Corpus: config] AC-FT11

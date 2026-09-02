@@ -1504,7 +1504,9 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   report (base vs adapter) is shown to the operator; **promote is human judgment only**
   (no automated metric abort) — operator should promote only when they judge better than
   base. Prod `vecinita-llm` loads adapter **only after promote**; playground optional
-  for pre-promote (ADR-053).
+  for pre-promote (ADR-053). With GPU memory snapshots (ADR-022), adapters are resolved
+  **after restore** and verified with **SHA-256** (`VECINITA_FINETUNE_ADAPTER_HASH`,
+  AC-FT11 / #316) — not baked into the snapshot.
 - **Inputs**: Corpus-derived SFT set; operator approve; eval golden/held-out set.
 - **Outputs**: Versioned LoRA adapter; eval report; optional promoted serve.
 - **Protected surfaces**: new `infra/modal/` FT module; `llm_app.py`; llm-client; eval

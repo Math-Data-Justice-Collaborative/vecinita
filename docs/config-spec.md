@@ -61,6 +61,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_FRESHNESS_ENABLED` | string | `false` | No | F76 schedule refresh enable |
 | `VECINITA_FINETUNE_ENABLED` | string | `false` | No | F77 feature flag |
 | `VECINITA_FINETUNE_ADAPTER_ID` | string | — | No | Promoted LoRA adapter id for prod `vecinita-llm` (empty = base; clear to rollback) |
+| `VECINITA_FINETUNE_ADAPTER_HASH` | string | — | No | Lowercase hex **SHA-256** of promoted adapter dir (canonical digest; ADR-022 EV-316 / #316). Empty when base-only. Set with promote; restore compares with `hmac.compare_digest`. |
 | `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | string | — | No | Optional pre-promote LoRA candidate on `vecinita-llm-playground` only (ADR-053; never auto-loads on prod) |
 | `VECINITA_FINETUNE_REQUIRE_APPROVE` | string | `true` | No | F77 train must be approved before GPU (RD-328) |
 | `VECINITA_FINETUNE_MAX_CONCURRENT` | int | `1` | No | F77 max concurrent GPU train jobs (TP5 / RD-348) |
@@ -70,7 +71,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MODAL_LLM_PLAYGROUND_URL` | string | — | Yes (admin/eval sandbox, Slice D) | Modal **`vecinita-llm-playground`** base URL — list/pull/eval sandbox (TP-S010-27) |
 | `VECINITA_MODAL_PROXY_KEY` | string | — | Yes (prod) | `X-Vecinita-Proxy-Key` for **all** Modal LLM routes except `/health` (RD-165) |
 | `VECINITA_LLM_MODEL_ID` | string | `qwen2.5:1.5b-instruct` | No | Prod pin on `vecinita-llm`; playground overrides only on playground app (RD-169, TP-S010-25) |
-| `VECINITA_LLM_GPU_SNAPSHOT` | string | `false` | No | Prod `vecinita-llm` only: enable GPU memory snapshots + Level-1 sleep/wake (ADR-022 EV-313 / #313). Unset/`false`/`0`/`off` = off; `true`/`1`/`on` = on. **Must be set in the `modal deploy` environment** (baked into `enable_memory_snapshot` at import); Modal Secret alone does not flip the class. Playground must ignore / stay off. Staging evidence before prod AskQuestion. |
+| `VECINITA_LLM_GPU_SNAPSHOT` | string | `false` | No | Prod `vecinita-llm` only: enable GPU memory snapshots + Level-1 sleep/wake (ADR-022 EV-313 / #313). Unset/`false`/`0`/`off` = off; `true`/`1`/`on` = on. **Must be set in the `modal deploy` environment** (baked into `enable_memory_snapshot` at import); Modal Secret alone does not flip the class. Playground must ignore / stay off. **Live:** staging + prod Modal Environments enabled 2026-08-31 (EV-313-D7/D8); re-export on every deploy that should keep snapshots on. |
+| `VECINITA_LLM_LORA_RESOLVE` | string | `post_restore` | No | Prod LoRA bind mode when GPU snapshots are used (ADR-022 EV-316 / #316). `post_restore` (default) = resolve+SHA-256-verify after restore; `snapshot_bound` = legacy/debug only (not recommended when adapter volume mutates). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
 | `VECINITA_LLM_ENFORCE_EAGER` | string | `true` | No | vLLM `enforce_eager` A/B for CUDA graphs vs snapshot experiments (S001 T7 / ADR-022). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
@@ -385,6 +387,8 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | No identity fields in public API bodies | OpenAPI + Pydantic models |
 | `VECINITA_AUTH_REQUIRED` in `true`, `false` | Config module (admin backends, F34) |
 | `VECINITA_LLM_GPU_SNAPSHOT` in `true`, `false` (also `1`/`0`/`on`/`off` at parse) | Modal `vecinita-llm` prod class only (ADR-022 EV-313 / #313); playground ignores |
+| `VECINITA_LLM_LORA_RESOLVE` in `post_restore`, `snapshot_bound` | Modal prod LoRA after snapshot restore (ADR-022 EV-316 / #316); default `post_restore` |
+| `VECINITA_FINETUNE_ADAPTER_HASH` empty or 64-char lowercase hex SHA-256 | When set, must pair with `VECINITA_FINETUNE_ADAPTER_ID`; restore fail-closed on mismatch |
 | `VECINITA_LLM_ENFORCE_EAGER` in `true`, `false` (also `1`/`0`/`on`/`off`) | Modal LLM engine kwargs (S001 T7 / ADR-022) |
 | `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |
 | ChatRAG `VECINITA_CORS_ORIGINS` is non-wildcard, frontend origin only | Config / deploy review (F34, RD-079) |
