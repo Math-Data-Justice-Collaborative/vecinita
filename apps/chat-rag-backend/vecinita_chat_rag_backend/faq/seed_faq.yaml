@@ -1,0 +1,92 @@
+# Reviewed FAQ seed (F85 / EV-320 / #79 topics). Operator-replaceable.
+entries:
+  - id: what-is-vecinita
+    language: en
+    variants:
+      - What is Vecinita?
+      - What is VECINA?
+      - What is Vecina?
+    answer: >
+      Vecinita (also called VECINA) is a bilingual community Q&A assistant for
+      watershed and local resource questions. It answers from a curated public corpus
+      and does not require you to create an account.
+  - id: what-is-vecinita-es
+    language: es
+    variants:
+      - ¿Qué es Vecinita?
+      - ¿Qué es VECINA?
+      - ¿Qué es Vecina?
+    answer: >
+      Vecinita (también llamada VECINA) es un asistente bilingüe de preguntas y
+      respuestas sobre la cuenca y recursos locales. Responde desde un corpus público
+      curado y no requiere que cree una cuenta.
+  - id: immigration-status
+    language: en
+    variants:
+      - Do I need immigration status?
+      - Do I need immigration papers?
+      - Is immigration status required?
+    answer: >
+      You do not need to share immigration status to use Vecinita. Questions and
+      answers are not tied to a personal account or identity profile.
+  - id: immigration-status-es
+    language: es
+    variants:
+      - ¿Necesito estatus migratorio?
+      - ¿Necesito papeles de inmigración?
+    answer: >
+      No necesita compartir su estatus migratorio para usar Vecinita. Las preguntas y
+      respuestas no se vinculan a una cuenta personal ni a un perfil de identidad.
+  - id: confidentiality
+    language: en
+    variants:
+      - Is this confidential?
+      - Are my questions private?
+    answer: >
+      Vecinita is designed without server-side chat history tied to your identity.
+      Do not enter sensitive personal data; answers come from public corpus sources.
+  - id: confidentiality-es
+    language: es
+    variants:
+      - ¿Es confidencial?
+      - ¿Mis preguntas son privadas?
+    answer: >
+      Vecinita está diseñada sin historial de chat en el servidor vinculado a su
+      identidad. No ingrese datos personales sensibles; las respuestas provienen de
+      fuentes públicas del corpus.
+  - id: spanish-available
+    language: en
+    variants:
+      - Can I ask in Spanish?
+      - Is Spanish available?
+    answer: >
+      Yes. You can ask in English or Spanish. Set the language preference or let the
+      assistant detect it from your question.
+  - id: spanish-available-es
+    language: es
+    variants:
+      - ¿Puedo preguntar en español?
+      - ¿Hay español disponible?
+    answer: >
+      Sí. Puede preguntar en inglés o en español. Elija el idioma o deje que el
+      asistente lo detecte a partir de su pregunta.
+  - id: watershed-wrwc
+    language: en
+    variants:
+      - What is the watershed?
+      - What is WRWC?
+      - What is the Woonasquatucket River Watershed Council?
+    answer: >
+      The Woonasquatucket River Watershed Council (WRWC) works on watershed health and
+      community resources in the Woonasquatucket River area. Ask Vecinita about
+      specific programs or locations for corpus-backed details.
+  - id: watershed-wrwc-es
+    language: es
+    variants:
+      - ¿Qué es la cuenca?
+      - ¿Qué es WRWC?
+      - ¿Qué es el Woonasquatucket River Watershed Council?
+    answer: >
+      El Woonasquatucket River Watershed Council (WRWC) trabaja en la salud de la
+      cuenca y recursos comunitarios en el área del río Woonasquatucket. Pregunte a
+      Vecinita por programas o lugares específicos para detalles del corpus.

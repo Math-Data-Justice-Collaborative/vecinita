@@ -91,11 +91,27 @@ def test_from_env_builds_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("VECINITA_TOP_K", "3")
     monkeypatch.setenv("VECINITA_MIN_RETRIEVAL_SCORE", "0.3")
     monkeypatch.setenv("VECINITA_STATS_ENABLED", "false")
+    monkeypatch.delenv("VECINITA_FAQ_FASTPATH_ENABLED", raising=False)
+    monkeypatch.delenv("VECINITA_FAQ_STORE_PATH", raising=False)
     settings = ChatRagSettings.from_env()
     assert settings.top_k == _ENV_TOP_K
     assert settings.min_retrieval_score == _ENV_MIN_SCORE
     assert settings.stats_enabled is False
     assert settings.database_url.startswith("postgresql+psycopg://")
+    assert settings.faq_fastpath_enabled is True
+    assert settings.faq_store_path is None
+
+
+def test_from_env_parses_faq_fastpath_kill_switch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """F85: VECINITA_FAQ_FASTPATH_ENABLED=0 and optional store path."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_FAQ_FASTPATH_ENABLED", "0")
+    monkeypatch.setenv("VECINITA_FAQ_STORE_PATH", "/opt/vecinita/seed_faq.yaml")
+    settings = ChatRagSettings.from_env()
+    assert settings.faq_fastpath_enabled is False
+    assert settings.faq_store_path == "/opt/vecinita/seed_faq.yaml"
 
 
 def test_from_env_defaults_top_k_to_eight_when_unset(

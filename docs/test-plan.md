@@ -2066,3 +2066,35 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Setup**: Doc review + optional staging timestamp-gap note in session evidence.
 - **Expected**: No `min_containers`; `buffer_containers` remains 0; prod flip AskQuestion.
 - **Refs**: AC-319-01 · AC-319-03 · UJ-092
+
+### TC-320-01: FAQ normalize + exact match (F85 / EV-320 / #320)
+
+- **Objective**: Normalized variants match; whitespace/case/`?` differences still hit.
+- **Setup**: Unit — FAQ matcher + fixture store (EN/ES entries).
+- **Expected**: Exact/normalized same-language hit returns entry id + answer; different
+  language or paraphrase miss returns no match.
+- **Refs**: [Corpus: feature-list.md §F85] AC-320-01 · UJ-093
+
+### TC-320-02: Ask path bypass skips retrieve + LLM (F85 / EV-320)
+
+- **Objective**: On FAQ hit, ChatRAG does not call embed/retrieve/LLM clients.
+- **Setup**: Unit/service with mocked RAG + LLM; kill-switch on.
+- **Expected**: `AskResponse.answer_path == "faq_bypass"`, `sources == []`,
+  `cache_hit == "none"`; mocks not invoked.
+- **Refs**: AC-320-02 · api-contract
+
+### TC-320-03: Kill-switch forces RAG (F85 / EV-320)
+
+- **Objective**: `VECINITA_FAQ_FASTPATH_ENABLED=false` never bypasses.
+- **Setup**: Unit/service; FAQ variant that would otherwise match.
+- **Expected**: `answer_path == "rag_llm"`; RAG path invoked.
+- **Refs**: AC-320-03 · config-spec
+
+### TC-320-04: API e2e FAQ hit + miss (F85 / EV-320)
+
+- **Objective**: TestClient `POST /api/v1/ask` (and stream) exercises bypass end-to-end.
+- **Setup**: `tests/e2e/` with FAQ fixture loaded; LLM/embed mocked or stubbed.
+- **Expected**: Hit → 200 canned + `answer_path=faq_bypass` + empty sources; miss → RAG
+  contract; stream emits empty sources + answer + done without generate.
+- **Refs**: AC-320-04 · UJ-093 · e2e-coverage.mdc
+

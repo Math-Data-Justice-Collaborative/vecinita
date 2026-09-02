@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-08-29 (EV-036 F84 monitoring + staging Grafana/Loki #114)
+> **Last updated**: 2026-09-02 (EV-320 F85 FAQ fast-path Layer D #320 / #79)
 > **Source**: Standing product specs + evolve deltas; cite [ADR index](adr/README.md) and session decision logs for cycle history.
 
 ## Summary
@@ -85,6 +85,7 @@
 | F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
 | F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule | EV-staging-do-supabase; EV-033; ADR-054 |
 | F84 | Admin monitoring dashboard + staging Grafana/Loki/alerts | Planned | Data Management / infra | internal-write-api, chat-rag-backend, DM frontend, database, `infra/observability/` | EV-036 #114; ADR-055 |
+| F85 | FAQ fast-path (canned answers; skip LLM) | Implemented | ChatRAG | chat-rag-backend, shared-schemas | EV-320 #320 / #79; ADR-022 Layer D |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -1611,6 +1612,26 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Out of scope**: Chat transcripts/replay; PostHog/Segment identity analytics; per-end-user
   analytics; PagerDuty; prod Grafana this cycle; full OpenTelemetry APM (P5 remains deferred).
 - **Source**: EV-036-admin-monitoring-grafana; GitHub #114; ADR-004; ADR-055; F17/F25/F26/F32.
+
+### F85: FAQ fast-path — canned answers skip LLM (#79 / #320)
+
+- **What it does**: For **reviewed** FAQ intents, ChatRAG returns a bilingual canned answer
+  **before** retrieval and Modal LLM, so common asks pay **$0 GPU**. Part of epic #311
+  Layer D (perceived / bypass latency). Complements F40/F64 wait UX and Layer A snapshots;
+  does **not** replace corpus RAG for non-FAQ asks.
+- **Inputs**: Ask `question` + optional `language`; versioned FAQ YAML/JSON store (variants +
+  canonical answer per language); kill-switch `VECINITA_FAQ_FASTPATH_ENABLED` (default true).
+- **Outputs**: On match — canned `answer`, `sources=[]`, `answer_path=faq_bypass`,
+  `cache_hit=none` (distinct from F43 cache). On miss / kill-switch off — unchanged RAG+LLM
+  with `answer_path=rag_llm`. Stream uses the same SSE envelope (empty sources + answer + done).
+- **Matching**: Exact + normalized string (trim, collapse whitespace, casefold, strip trailing
+  punctuation/`?`) against **same-language** variants only. **No** embedding/semantic FAQ
+  similarity this cycle (prefer miss over wrong canned answer).
+- **Acceptance**: AC-320-01–AC-320-05; TC-320-01–TC-320-04; UJ-093; ADR-022 EV-320 amendment.
+- **Out of scope**: Admin hot-load editor (#81); query-router umbrella (#76/#78); semantic FAQ;
+  per-user FAQ cache; always-on GPU; unprompted prod seed/scaledown (ops remain AskQuestion).
+- **Naming**: GitHub **#79** ≠ product **F79** (corpus freshness).
+- **Source**: EV-320; #320 · #79 · #311; ADR-004; ADR-022.
 
 ## Planned / Deferred (post-v1)
 

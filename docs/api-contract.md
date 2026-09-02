@@ -137,6 +137,7 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
   "answer": "string",
   "language": "en | es",
   "cache_hit": "none | exact | semantic | retrieve",
+  "answer_path": "faq_bypass | rag_llm",
   "energy_estimate": {
     "wh": 0.0,
     "g_co2e": 0.0,
@@ -170,12 +171,19 @@ default 8 remains the max default, not a target count).
 `cache_hit` (F43 / EV-017): optional for older clients; **required in OpenAPI** after F43 ships.
 `none` = full generate path; `exact` / `semantic` skip LLM; `retrieve` reuses cached chunks then may still synthesize.
 
+`answer_path` (F85 / EV-320 / #320): **`faq_bypass`** when a reviewed FAQ store match returns a
+canned answer **before** retrieve/LLM (`sources` empty; `cache_hit` remains `none` — distinct
+from F43). **`rag_llm`** (default) for the normal RAG path. Kill-switch
+`VECINITA_FAQ_FASTPATH_ENABLED=false` forces `rag_llm`. Matching is exact/normalized
+same-language only — not F43 semantic cache and not embedding FAQ similarity.
+
 `energy_estimate` (F65 / EV-024): heuristic Wh/gCO₂e from GPU TDP × util × ask wall time
 (defaults: T4 70 W × 0.5 × duration); **not** live Modal power metrics. Always include
 `advisory` that values are approximate. `car_km_equiv` / `car_m_equiv` =
 `g_co2e / VECINITA_ENERGY_CAR_GCO2E_PER_KM` (default **251** g/km ≈ EPA 404 g/mi) —
 primary UI car framing (S026-D22). FE may derive mi from km. Use guide may also show % of
 optional car-day/year constants; those need not be in the JSON if FE computes from config.
+On `faq_bypass`, `energy_estimate` MAY be omitted or zeroed (no GPU wall time).
 
 - **Errors**: `400` validation / forbidden fields; `503` upstream Modal unavailable.
 
@@ -187,6 +195,9 @@ optional car-day/year constants; those need not be in the JSON if FE computes fr
 - **Response**: `text/event-stream` — events: `token`, `sources`, `done`.
   `done` payload may include `cache_hit` (same enum as `/ask`) when F43 is enabled.
   `done` **includes** `energy_estimate` (F65) when EV-024 ships.
+  `done` (and optionally early `sources`) MAY include `answer_path` (F85). On FAQ bypass:
+  emit empty `sources`, answer token(s) (may be a single chunk), then `done` with
+  `answer_path=faq_bypass` — **without** calling Modal generate.
 - **Errors**: Same as `/ask`.
 
 ### POST `/api/v1/warm` (S001 T11 / EV-318 / #318)
