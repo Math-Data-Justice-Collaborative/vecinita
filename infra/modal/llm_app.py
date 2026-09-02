@@ -67,6 +67,10 @@ DEFAULT_PLAYGROUND_MODEL_ID: Final[str] = "qwen2.5:1.5b-instruct"
 ALLOW_MODEL_RELOAD: Final[bool] = False
 ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
 GPU_SNAPSHOT_ENV = "VECINITA_LLM_GPU_SNAPSHOT"
+LLM_SCALEDOWN_WINDOW_ENV = "VECINITA_LLM_SCALEDOWN_WINDOW"
+_DEFAULT_LLM_SCALEDOWN_WINDOW: Final[int] = 300
+_MIN_LLM_SCALEDOWN_WINDOW: Final[int] = 60
+_MAX_LLM_SCALEDOWN_WINDOW: Final[int] = 600
 _PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
 _PROXY_ENV: Final[str] = "VECINITA_MODAL_PROXY_KEY"
 _MANIFEST_PATH = Path("/models/manifest.json")
@@ -118,9 +122,32 @@ def _gpu_snapshot_from_env() -> bool:
     return raw in ("1", "true", "yes", "on")
 
 
+def _scaledown_window_from_env() -> int:
+    """Parse prod GPU scaledown window from deploy-import env (TC-319-01)."""
+    raw = os.environ.get(LLM_SCALEDOWN_WINDOW_ENV)
+    if raw is None:
+        return _DEFAULT_LLM_SCALEDOWN_WINDOW
+    try:
+        window = int(raw.strip())
+    except ValueError as exc:
+        msg = (
+            f"{LLM_SCALEDOWN_WINDOW_ENV} must be an integer between "
+            f"{_MIN_LLM_SCALEDOWN_WINDOW} and {_MAX_LLM_SCALEDOWN_WINDOW} seconds"
+        )
+        raise ValueError(msg) from exc
+    if not _MIN_LLM_SCALEDOWN_WINDOW <= window <= _MAX_LLM_SCALEDOWN_WINDOW:
+        msg = (
+            f"{LLM_SCALEDOWN_WINDOW_ENV} must be between "
+            f"{_MIN_LLM_SCALEDOWN_WINDOW} and {_MAX_LLM_SCALEDOWN_WINDOW} seconds"
+        )
+        raise ValueError(msg)
+    return window
+
+
 # Fixed at ``modal deploy`` import time (not container Secret runtime). Set
 # ``VECINITA_LLM_GPU_SNAPSHOT`` in the *deploy* environment, then redeploy (TC-313-01).
 _PROD_GPU_SNAPSHOT: Final[bool] = _gpu_snapshot_from_env()
+_PROD_SCALEDOWN_WINDOW: Final[int] = _scaledown_window_from_env()
 
 
 def _prod_health_payload() -> dict[str, str | None]:
@@ -429,7 +456,7 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     image=image,
     gpu="T4",
     volumes={"/models": model_volume, "/adapters": adapters_volume},
-    scaledown_window=300,
+    scaledown_window=_PROD_SCALEDOWN_WINDOW,
     timeout=900,
     secrets=_LLM_GPU_SECRETS,
     # ADR-022 EV-313: prod-only GPU snapshots behind VECINITA_LLM_GPU_SNAPSHOT (default off).
