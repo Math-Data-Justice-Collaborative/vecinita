@@ -91,6 +91,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-090 | Mount prewarm races ahead of first ask | Community member | ChatRAG FE mount → `POST /api/v1/warm` → Modal `/warm` spawn | ADR-022 EV-318 #318 | local |
 | UJ-091 | Seed GPU snapshots after LLM deploy | Operator | Staging Modal deploy → seed script → restore-kind samples | ADR-022 EV-315 #315 | staging |
 | UJ-092 | Tune LLM scaledown_window from gaps | Operator | Env + staging evidence → AskQuestion prod flip | ADR-022 EV-319 #319 | staging |
+| UJ-093 | FAQ fast-path canned answer (skip LLM) | Community member | ChatRAG ask/stream → FAQ match → faq_bypass | F85 EV-320 #320 / #79 | local |
 
 ## Visual journey maps
 
@@ -2416,3 +2417,30 @@ follow-up hit rate; easy env revert.
 **E2E tier**: staging (ops).
 
 **Refs**: [Corpus: ADR-022 §Amendment EV-319] [Corpus: ADR-004] [Corpus: config]
+
+### UJ-093: FAQ fast-path canned answer (F85 / EV-320 / #320)
+
+**Actor**: Community member
+
+**Goal**: Ask a reviewed FAQ (e.g. “What is Vecinita?”) and get a consistent canned answer
+**without** waiting on Modal GPU cold start.
+
+**Preconditions**: `VECINITA_FAQ_FASTPATH_ENABLED` true; FAQ store seeded (bilingual YAML);
+ChatRAG backend reachable.
+
+**Steps**:
+
+1. Open ChatRAG; set language EN (or ES).
+2. Submit an exact or normalized FAQ variant from the reviewed store.
+3. Observe answer returns promptly with empty sources and `answer_path=faq_bypass`.
+4. Submit a near-miss / unrelated question → normal RAG+LLM (`answer_path=rag_llm`).
+5. (Operator) Disable kill-switch → all asks use RAG even for FAQ variants.
+
+**Acceptance**: Hit = canned + empty sources + no LLM invoke; miss = RAG; kill-switch off = RAG.
+
+**Automated tests**: TC-320-01–TC-320-04 (unit + API e2e).
+
+**E2E tier**: local (API TestClient); staging smoke optional.
+
+**Refs**: [Corpus: feature-list.md §F85] [Corpus: ADR-022 §Amendment EV-320] [Corpus: api] [Corpus: ADR-004]
+

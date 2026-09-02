@@ -479,6 +479,17 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
   bounds; invalid fails closed; no `min_containers` / `buffer_containers` change (TC-319-01).
 - [ ] **AC-319-03**: Prod default change requires AskQuestion after staging evidence.
 
+### FAQ fast-path Layer D (F85 / EV-320 / #320)
+
+- [ ] **AC-320-01**: Exact + normalized same-language FAQ match only; paraphrase / cross-lang
+  miss → RAG (TC-320-01, UJ-093).
+- [ ] **AC-320-02**: On hit — canned answer, `sources=[]`, `answer_path=faq_bypass`,
+  `cache_hit=none`; no retrieve/LLM invoke (TC-320-02).
+- [ ] **AC-320-03**: Kill-switch `VECINITA_FAQ_FASTPATH_ENABLED=false` forces RAG (TC-320-03).
+- [ ] **AC-320-04**: API e2e covers ask + stream hit/miss (TC-320-04).
+- [ ] **AC-320-05**: Harness/schemas can record `answer_path=faq_bypass` without overloading
+  GPU `cold_kind` (ADR-022 EV-320).
+
 ### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
 
 #### F78 live enable (AC-AU7)

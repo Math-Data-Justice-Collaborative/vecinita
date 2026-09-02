@@ -224,6 +224,29 @@ Health must never allocate T4.
 4. Leave `buffer_containers=0`; do **not** add `min_containers` in this ticket.
 5. Prod default change requires AskQuestion after staging evidence.
 
+### Amendment EV-320 — Layer D FAQ fast-path (#320 / #79 / F85)
+
+**Problem:** True cold-from-zero GPU TTFT cannot be ubiquitous sub-second under ADR-004.
+High-confidence **reviewed** FAQs can skip T4 entirely for a subset of asks.
+
+**Decision (EV-320 / #320 / F85):**
+
+1. **ChatRAG-side bypass** before retrieve/LLM when an exact/normalized **same-language**
+   FAQ variant matches a versioned reviewed store (YAML/JSON). Prefer miss over wrong answer —
+   **no** embedding/semantic FAQ similarity this cycle.
+2. Response metadata: `answer_path ∈ {faq_bypass, rag_llm}` on ask/stream. **Do not** overload
+   GPU `cold_kind` (`warm` / `snapshot_restore` / `snapshot_create` / `clean_boot`) — FAQ is not
+   a cold-start kind. Harness may classify `faq_bypass` via `answer_path` for Layer E dashboards.
+3. On bypass: `sources=[]`, `cache_hit=none` (distinct from F43), **$0 GPU** (no Modal generate).
+4. Kill-switch `VECINITA_FAQ_FASTPATH_ENABLED` (default **true**); store path
+   `VECINITA_FAQ_STORE_PATH` optional override.
+5. Admin hot-load editor (#81) and full query-router umbrella (#76) remain out of scope.
+6. Naming: GitHub **#79** ≠ product **F79** (freshness).
+7. Sibling ops (seed #315 / scaledown #319) stay AskQuestion-gated for prod; staging execute
+   after Build gate with `.env` creds.
+
+**Tests / AC:** TC-320-01–04 · AC-320-01–05 · UJ-093.
+
 ## References
 
 - S001 plan: `docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md`

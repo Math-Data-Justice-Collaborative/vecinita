@@ -419,6 +419,17 @@ components:
             - semantic
             - retrieve
           default: none
+        answer_path:
+          type: string
+          description: >
+            F85 / EV-320 FAQ fast-path. `faq_bypass` = reviewed FAQ canned answer
+            before retrieve/LLM (sources empty; cache_hit stays none).
+            `rag_llm` = normal RAG path. Distinct from F43 cache_hit and from
+            Modal GPU cold_kind stamps (ADR-022).
+          enum:
+            - faq_bypass
+            - rag_llm
+          default: rag_llm
         energy_estimate:
           $ref: "#/components/schemas/EnergyEstimate"
         sources:

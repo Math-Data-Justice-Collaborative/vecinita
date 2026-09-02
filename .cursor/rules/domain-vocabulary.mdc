@@ -27,6 +27,8 @@ messages. Sources: `docs/feature-list.md`, `docs/spec.md`, `docs/api-contract.md
 | **`vecinita-llm`** (prod) | Ollama / `vecinita-ollama` | ADR-037; Ollama is not the live prod path |
 | **`vecinita-llm-playground`** | prod URL for list/pull | Separate playground app (TP-S010-27) |
 | **human promote** (LoRA) | auto-promote / metric abort as gate | F77 / ADR-053 |
+| **FAQ fast-path** / `faq_bypass` | F43 `cache_hit` alone; semantic “FAQ-ish” | F85 / #79 / #320 — reviewed canned answers |
+| **`answer_path`** | overloading GPU `cold_kind` with FAQ | ADR-022 EV-320 — FAQ ≠ cold-start kind |
 
 ## Corpus automations + FT (F75–F77)
 

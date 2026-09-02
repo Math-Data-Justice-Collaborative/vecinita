@@ -91,6 +91,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` | int | `10` | No | Hard cap on document tags |
 | `VECINITA_MAX_TAGS_PER_CHUNK` | int | `5` | No | Hard cap on chunk tags |
 | `VECINITA_TAG_SEED_PATH` | string | `data/fixtures/tags/seed_tags.json` | No | Starter tag vocabulary for LLM + browse facets |
+| `VECINITA_FAQ_FASTPATH_ENABLED` | string | `true` | No | F85 / EV-320: enable reviewed FAQ canned-answer bypass before retrieve/LLM. `false`/`0`/`off` forces `answer_path=rag_llm`. Not F43 cache. |
+| `VECINITA_FAQ_STORE_PATH` | string | (package/default FAQ YAML) | No | Path to versioned bilingual FAQ store (variants + answers). Hot-load editor deferred (#81). |
 
 ### DO internal write API
 
@@ -392,6 +394,8 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_FINETUNE_ADAPTER_HASH` empty or 64-char lowercase hex SHA-256 | When set, must pair with `VECINITA_FINETUNE_ADAPTER_ID`; restore fail-closed on mismatch |
 | `VECINITA_LLM_ENFORCE_EAGER` in `true`, `false` (also `1`/`0`/`on`/`off`) | Modal LLM engine kwargs (S001 T7 / ADR-022) |
 | `VECINITA_LLM_SCALEDOWN_WINDOW` integer seconds in **[60, 600]** (candidates 60/120/300) | Modal `vecinita-llm` prod `LlmService` at deploy-import (ADR-022 EV-319 / #319); invalid fails closed |
+| `VECINITA_FAQ_FASTPATH_ENABLED` in `true`, `false` (also `1`/`0`/`on`/`off`) | ChatRAG ask path (F85 / EV-320); default true |
+| `VECINITA_FAQ_STORE_PATH` non-empty path when override set | ChatRAG FAQ store file (F85); must be readable YAML/JSON |
 | `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |
 | ChatRAG `VECINITA_CORS_ORIGINS` is non-wildcard, frontend origin only | Config / deploy review (F34, RD-079) |
 | `SUPABASE_SECRET_KEY` set on the backend hosting `/admin/users*` | Admin user-mgmt startup (F35); server-side only |

@@ -1753,3 +1753,24 @@ verify with HANDOFF dispositions if new Patterns appear.
 | EV-*-D0 | Feature id | No new Fn — ADR-022 Layers A/B/C under #311 |
 
 **Cites:** [Spec: ADR-022 §Amendment EV-315/EV-317/EV-319] [Corpus: config] [Corpus: tests] [Corpus: acceptance] [Corpus: staging] [Corpus: ADR-004]
+
+---
+
+## EV-320 — FAQ fast-path Layer D (F85) (2026-09-02)
+
+**Session:** `EV-320-chat-rag-wire-faq-fast-path-into-cold-start-late`  
+**Tickets:** [#320](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/320), [#79](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/79) (parent [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311))  
+**Intake / context / requirements:** operator **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-320-D1 | Feature id | **F85** (not F79 freshness) |
+| EV-320-D2 | Match | Exact + normalized; same-language only |
+| EV-320-D3 | Metadata | `answer_path` faq_bypass \| rag_llm; keep `cold_kind` GPU-only |
+| EV-320-D4 | Kill-switch | `VECINITA_FAQ_FASTPATH_ENABLED` default true |
+| EV-320-D5 | UI | No #81 admin editor this cycle; API e2e required |
+| EV-320-D6 | Seed content | In-repo bilingual YAML from #79 topics; replaceable |
+| EV-320-D7 | Ops | Spec first; staging seed+scaledown after gate; prod AskQuestion |
+
+**Cites:** [Corpus: feature-list.md §F85] [Spec: ADR-022 §Amendment EV-320] [Corpus: api] [Corpus: config] [Corpus: tests] [Corpus: ADR-004]
+
