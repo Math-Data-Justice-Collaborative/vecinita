@@ -74,6 +74,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_LLM_GPU_SNAPSHOT` | string | `false` | No | Prod `vecinita-llm` only: enable GPU memory snapshots + Level-1 sleep/wake (ADR-022 EV-313 / #313). Unset/`false`/`0`/`off` = off; `true`/`1`/`on` = on. **Must be set in the `modal deploy` environment** (baked into `enable_memory_snapshot` at import); Modal Secret alone does not flip the class. Playground must ignore / stay off. **Live:** staging + prod Modal Environments enabled 2026-08-31 (EV-313-D7/D8); re-export on every deploy that should keep snapshots on. |
 | `VECINITA_LLM_LORA_RESOLVE` | string | `post_restore` | No | Prod LoRA bind mode when GPU snapshots are used (ADR-022 EV-316 / #316). `post_restore` (default) = resolve+SHA-256-verify after restore; `snapshot_bound` = legacy/debug only (not recommended when adapter volume mutates). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
 | `VECINITA_LLM_ENFORCE_EAGER` | string | `true` | No | vLLM `enforce_eager` A/B for CUDA graphs vs snapshot experiments (S001 T7 / ADR-022). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
+| `VECINITA_LLM_SCALEDOWN_WINDOW` | int (seconds) | `300` | No | Prod `vecinita-llm` `LlmService.scaledown_window` (ADR-022 EV-319 / #319). Candidates **60 / 120 / 300**. **Must be set in the `modal deploy` environment** (baked at import); Modal Secret alone does not retune a already-deployed class decorator. Invalid values fail closed at import. Easy revert: set `300`. Do **not** use for `min_containers` / always-on. Playground may keep hardcoded 300 this cycle. |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
@@ -390,6 +391,7 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_LLM_LORA_RESOLVE` in `post_restore`, `snapshot_bound` | Modal prod LoRA after snapshot restore (ADR-022 EV-316 / #316); default `post_restore` |
 | `VECINITA_FINETUNE_ADAPTER_HASH` empty or 64-char lowercase hex SHA-256 | When set, must pair with `VECINITA_FINETUNE_ADAPTER_ID`; restore fail-closed on mismatch |
 | `VECINITA_LLM_ENFORCE_EAGER` in `true`, `false` (also `1`/`0`/`on`/`off`) | Modal LLM engine kwargs (S001 T7 / ADR-022) |
+| `VECINITA_LLM_SCALEDOWN_WINDOW` integer seconds in **[60, 600]** (candidates 60/120/300) | Modal `vecinita-llm` prod `LlmService` at deploy-import (ADR-022 EV-319 / #319); invalid fails closed |
 | `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |
 | ChatRAG `VECINITA_CORS_ORIGINS` is non-wildcard, frontend origin only | Config / deploy review (F34, RD-079) |
 | `SUPABASE_SECRET_KEY` set on the backend hosting `/admin/users*` | Admin user-mgmt startup (F35); server-side only |

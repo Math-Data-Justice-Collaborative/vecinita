@@ -89,6 +89,8 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-088 | View Monitoring success rates (ingest/chat/embed) | Admin operator | DM UI `/monitoring` → write-API metrics | F84 EV-036 #114 | local |
 | UJ-089 | View staging Grafana/Loki + webhook alert | Operator | Staging obs Droplet Grafana/Loki/Alertmanager | F84 EV-036 #114 | staging |
 | UJ-090 | Mount prewarm races ahead of first ask | Community member | ChatRAG FE mount → `POST /api/v1/warm` → Modal `/warm` spawn | ADR-022 EV-318 #318 | local |
+| UJ-091 | Seed GPU snapshots after LLM deploy | Operator | Staging Modal deploy → seed script → restore-kind samples | ADR-022 EV-315 #315 | staging |
+| UJ-092 | Tune LLM scaledown_window from gaps | Operator | Env + staging evidence → AskQuestion prod flip | ADR-022 EV-319 #319 | staging |
 
 ## Visual journey maps
 
@@ -2363,3 +2365,54 @@ Postgres (EV-012 RD-174/RD-175). Click → `/jobs/:id` summary + link to `/evalu
 **E2E tier**: local (+ staging smoke optional).
 
 **Refs**: [Corpus: ADR-022 §Amendment EV-318] [Corpus: api] [Corpus: feature-list.md §F40]
+
+### UJ-091: Seed GPU snapshots after LLM deploy (EV-315 / #315)
+
+**Actor**: Operator
+
+**Goal**: After staging LLM deploy, prime authenticated GPU `/warm` so the first monitored
+cold path is `snapshot_restore`, not ~70s `snapshot_create`.
+
+**Preconditions**: `VECINITA_LLM_GPU_SNAPSHOT=true` at deploy; proxy key; #314 stamps available.
+
+**Steps**:
+
+1. Deploy `infra/modal/llm_app.py` to staging with snapshots on.
+2. Run `scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop).
+3. Observe `cold_kind` until samples are `snapshot_restore` (fail closed if create persists).
+4. Optionally run `#314` bench smoke; document create latency separately from restore p50/p95.
+5. Prod prime only after AskQuestion (same script, Environment `main`).
+
+**Acceptance**: First monitored restore is restore-kind for expected worker types; CD hard gate
+deferred; no raw prompts in logs.
+
+**Automated tests**: TC-315-01 (unit); TC-315-02 (manual/live).
+
+**E2E tier**: staging (ops).
+
+**Refs**: [Corpus: ADR-022 §Amendment EV-315] [Corpus: staging] [Corpus: ADR-004]
+
+### UJ-092: Tune LLM scaledown_window from inter-ask gaps (EV-319 / #319)
+
+**Actor**: Operator
+
+**Goal**: Choose `scaledown_window` (60/120/300) that cuts idle T4 cost while preserving
+follow-up hit rate; easy env revert.
+
+**Preconditions**: Staging Modal; privacy-safe timestamps only (no prompts).
+
+**Steps**:
+
+1. Collect anonymized inter-ask gaps on staging (or note thin traffic).
+2. Document T4 $/s formula; pick candidate (thin traffic → recommend 120).
+3. Deploy with `VECINITA_LLM_SCALEDOWN_WINDOW=<n>`; validate bounds.
+4. Measure follow-up cold rate (optional #314); AskQuestion before prod default flip.
+5. Revert by setting env back to `300` if needed. No `min_containers`.
+
+**Acceptance**: Formula + chosen window in ADR/runbook; unit parse tests green; prod gated.
+
+**Automated tests**: TC-319-01; TC-319-02 (doc/evidence).
+
+**E2E tier**: staging (ops).
+
+**Refs**: [Corpus: ADR-022 §Amendment EV-319] [Corpus: ADR-004] [Corpus: config]
