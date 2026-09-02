@@ -57,3 +57,8 @@ CVE-2026-12075
 CVE-2026-12061
 CVE-2026-12074
 CVE-2026-78680
+# nltk 3.9.4 hold — additional IDs reported 2026-09 (still no safe 3.10+ under uv .venv).
+CVE-2026-12876
+CVE-2026-81723
+CVE-2026-72818
+CVE-2026-71514
