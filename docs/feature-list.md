@@ -821,10 +821,12 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   | `packages/frontend-i18n` / `frontend-ui` | Optional shared banner/copy if needed |
 - **Related (not F40 UX)**: EV-318 / #318 — Modal LLM `POST /warm` spawn/detach + ChatRAG
   `POST /api/v1/warm` contract (ADR-022 prewarm lever). F40 does **not** own that work.
+  Sibling latency ops (also not F40): EV-315 seed snapshots (#315), EV-317 thin CPU ingress
+  (#317), EV-319 scaledown_window (#319) under ADR-022 / parent #311.
 - **Out of scope (F40)**: Changing Modal spawn semantics (see #318); CMS/API-backed facts;
   admin UI; analytics of which facts were shown; focus/typing warm predictors.
 - **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15);
-  EV-318 coord 2026-09-02.
+  EV-318 coord 2026-09-02; EV-315/317/319 coord 2026-09-02.
 
 ### F41: Corpus re-embed / re-chunk rebuild (migration job)
 

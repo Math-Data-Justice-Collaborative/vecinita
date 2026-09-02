@@ -1732,3 +1732,24 @@ verify with HANDOFF dispositions if new Patterns appear.
 | EV-318-D4 | Feature id | No new Fn — ADR-022 prewarm lever / S001 T11 |
 
 **Cites:** [Spec: ADR-022 §Amendment EV-314/EV-318] [Corpus: api] [Corpus: tests] [Corpus: acceptance] [Corpus: feature-list.md §F40]
+
+---
+
+## EV-315 + EV-317 + EV-319 — Seed snapshots, thin ingress, scaledown (2026-09-02)
+
+**Sessions:** `EV-315-seed-gpu-snapshots`, `EV-317-thin-cpu-ingress`, `EV-319-scaledown-window` (parallel)  
+**Tickets:** [#315](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/315), [#317](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/317), [#319](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/319) (children of #311)  
+**Intake:** operator **1** parallel packaging; requirements **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-315-D1 | Delivery | Staging script + runbook; optional advisory CI — not hard CD gate |
+| EV-315-D2 | Done signal | `#314` `cold_kind` → `snapshot_restore`; fail closed on create |
+| EV-315-D3 | Prod | AskQuestion-gated prime |
+| EV-317-D1 | Depth | Lazy-import + thin ASGI first; CPU snap only if profile warrants |
+| EV-317-D2 | Image | Prefer same image + lazy imports; defer second image |
+| EV-319-D1 | Evidence | Timestamp-only gaps; thin traffic → default **120s** + env revert |
+| EV-319-D2 | Config | `VECINITA_LLM_SCALEDOWN_WINDOW` at deploy-import; no min/buffer containers |
+| EV-*-D0 | Feature id | No new Fn — ADR-022 Layers A/B/C under #311 |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-315/EV-317/EV-319] [Corpus: config] [Corpus: tests] [Corpus: acceptance] [Corpus: staging] [Corpus: ADR-004]

@@ -2012,3 +2012,57 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Expected**: No Modal `/health` used as prewarm; response `{"status":"warming"}`; F40/F64
   residual wait still available.
 - **Refs**: UJ-090 · AC-318-02 · AC-CS6 (wait UX retained)
+
+### TC-315-01: Seed script CLI fail-closed mapping (EV-315 / #315)
+
+- **Objective**: Seed/prime CLI argument parsing and exit codes map create-persists → non-zero.
+- **Setup**: Unit — mock warm/observe; assert exit contract without live Modal.
+- **Expected**: Success when restore-kind observed; fail closed on persistent create-kind.
+- **Refs**: [Spec: ADR-022 §Amendment EV-315] AC-315-01
+
+### TC-315-02: Staging seed after deploy (manual / live — non-flaky CI) (EV-315 / #315)
+
+- **Objective**: After staging LLM deploy + seed, first monitored restore is
+  `snapshot_restore` for expected worker types.
+- **Setup**: Staging Modal with GPU snapshots on; `scripts/ops/seed_gpu_snapshots.py`;
+  optional `#314` bench smoke.
+- **Expected**: Restore-kind samples; create latency documented separately; CI does not
+  require live seed by default.
+- **Refs**: AC-315-01 · AC-315-02 · UJ-091
+
+### TC-317-01: ASGI entry avoids top-level vLLM import (EV-317 / #317)
+
+- **Objective**: Prod LLM ASGI entry module does not import vLLM / heavy GPU internals at
+  load time.
+- **Setup**: Unit/AST scan of ASGI entry (or import-graph test).
+- **Expected**: No top-level vLLM; lazy/split imports only.
+- **Refs**: [Spec: ADR-022 §Amendment EV-317] AC-317-01
+
+### TC-317-02: Health CPU-only; warm spawn preserved (EV-317 / #317)
+
+- **Objective**: `GET /health` stays on CPU Function; `POST /warm` still spawn/detach.
+- **Setup**: Unit — assert ASGI function has no `gpu=`; warm handler still calls `.spawn()`.
+- **Expected**: No T4 for probes; #318 contract retained.
+- **Refs**: AC-317-02 · TC-318-01
+
+### TC-317-03: Optional ingress CPU snapshot (EV-317 / #317 — if enabled)
+
+- **Objective**: If post-thin profile warrants, CPU `enable_memory_snapshot` on ASGI only.
+- **Setup**: Config/unit when feature flag/path enabled; otherwise N/A skip.
+- **Expected**: Snapshot on CPU ingress only; never on T4 ASGI.
+- **Refs**: AC-317-03
+
+### TC-319-01: scaledown_window env parse bounds (EV-319 / #319)
+
+- **Objective**: `VECINITA_LLM_SCALEDOWN_WINDOW` validates int bounds; invalid fails closed.
+- **Setup**: Unit — env parse helper / import-time config.
+- **Expected**: Accepted candidates include 60/120/300; invalid raises or aborts import.
+- **Refs**: [Spec: ADR-022 §Amendment EV-319] AC-319-02 · config-spec
+
+### TC-319-02: Scaledown evidence + formula documented (EV-319 / #319)
+
+- **Objective**: ADR/runbook publish T4 $/s formula; chosen window justified (or thin-traffic
+  → 120 with revert).
+- **Setup**: Doc review + optional staging timestamp-gap note in session evidence.
+- **Expected**: No `min_containers`; `buffer_containers` remains 0; prod flip AskQuestion.
+- **Refs**: AC-319-01 · AC-319-03 · UJ-092

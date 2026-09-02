@@ -181,7 +181,9 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 | `VECINITA_MODAL_PROXY_KEY` | chat-rag-backend, internal-write-api + Modal secrets for **both** LLM apps | `X-Vecinita-Proxy-Key` on **all** LLM routes except `/health` (RD-165) |
 | `VECINITA_LLM_MODEL_ID` | Modal / consumers | Prod pin default (`qwen2.5:1.5b-instruct`) — RD-169 |
 
-**`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.
+**`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**,
+**`scaledown_window`** default **300** (tunable via deploy-time `VECINITA_LLM_SCALEDOWN_WINDOW`,
+ADR-022 EV-319 / #319; candidates 60/120/300).
 Prod app stays pinned; playground app may reload on `model_id` (~60–120s) without stomping ChatRAG.
 Both apps mount **`llm-models`**. **`vecinita-ollama` is deprecated** — do not deploy.
 
