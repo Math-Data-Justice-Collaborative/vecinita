@@ -85,6 +85,12 @@ class LlmServiceCore:
 
     def _snapshot_enter_restore(self) -> None:
         """``snap=False``: wake engine and bind current promoted LoRA (#316)."""
+        import logging
+        import time
+
+        from vecinita_shared_schemas.cold_start_latency import validate_cold_start_sample
+        from vecinita_shared_schemas.json_types import JsonObject
+
         llm = getattr(self, "_llm", None)
         if llm is None:
             msg = "snapshot restore expected a restored vLLM engine before wake_up"
@@ -93,9 +99,24 @@ class LlmServiceCore:
         if not callable(wake):
             msg = "vLLM wake_up is required for GPU memory snapshot restore"
             raise TypeError(msg)
+        t0 = time.perf_counter()
         _ = wake()
+        wake_ms = (time.perf_counter() - t0) * 1000.0
+        t1 = time.perf_counter()
         self._bind_lora_after_restore()
+        adapter_ready_ms = (time.perf_counter() - t1) * 1000.0
         self._snapshot_mode = True
+        stamp: JsonObject = {
+            "cold_kind": "snapshot_restore",
+            "event": "adapter_ready",
+            "wake_ms": wake_ms,
+            "adapter_ready_ms": adapter_ready_ms,
+            "base_model_id": str(getattr(self, "_loaded_model_arg", None) or ""),
+            "adapter_id": getattr(self, "_adapter_id", None),
+            "adapter_hash": getattr(self, "_adapter_hash", None),
+        }
+        validated = validate_cold_start_sample(stamp)
+        logging.getLogger("vecinita.llm").info("cold_start_stamp %s", validated)
 
     def _bind_lora_after_restore(self) -> None:
         """Resolve promoted adapter after snapshot restore (Volume mutate ≠ snap invalidate).
@@ -233,7 +254,25 @@ class LlmServiceCore:
         if lora is not None:
             gen_kwargs["lora_request"] = lora
         generate = self._llm.generate
+        import logging
+        import time
+
+        from vecinita_shared_schemas.cold_start_latency import validate_cold_start_sample
+
+        t0 = time.perf_counter()
         outputs = generate([prompt], params, **gen_kwargs)
+        first_token_ms = (time.perf_counter() - t0) * 1000.0
+        kind = "warm" if getattr(self, "_snapshot_mode", False) else "clean_boot"
+        logging.getLogger("vecinita.llm").info(
+            "cold_start_stamp %s",
+            validate_cold_start_sample(
+                {
+                    "cold_kind": kind,
+                    "event": "first_token",
+                    "first_token_ms": first_token_ms,
+                }
+            ),
+        )
         return outputs[0].outputs[0].text
 
     def _stream_text_deltas(
