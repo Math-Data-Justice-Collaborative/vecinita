@@ -1978,3 +1978,37 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
   `post_restore` per implementation (document chosen behavior in config-spec). Metadata
   fields present on prod health when snapshot path is exercised.
 - **Refs**: [Corpus: api] [Corpus: config] AC-FT11
+
+### TC-314-01: cold_kind tag schema rejects prompts (EV-314 / #314, ADR-004)
+
+- **Objective**: Harness/stamp helpers accept only allow-listed operational tags; reject
+  `question` / `answer` / `prompt` / `message` keys.
+- **Setup**: Unit — construct sample dict with forbidden fields.
+- **Expected**: Validation error or strip/reject; `cold_kind` enum enforced.
+- **Refs**: [Corpus: ADR-004] [Spec: ADR-022 §Amendment EV-314] AC-314-01
+
+### TC-314-02: Cold-start bench smoke N≈20 (manual / live — non-flaky CI) (EV-314 / #314)
+
+- **Objective**: Opt-in script forces cold, runs ~20 restores, emits JSON with p50/p95 and
+  `cold_kind` breakdown; publishable p95 requires separate N≥100 run.
+- **Setup**: Staging Modal; documented `modal container stop`; `scripts/ops/cold_start_bench.py`
+  (or name from tech-plan) with `--n 20`.
+- **Expected**: JSON report written; no raw prompts persisted; CI does **not** require N=100.
+- **Refs**: AC-314-02 · AC-314-03
+
+### TC-318-01: LLM /warm uses spawn/detach (EV-318 / #318)
+
+- **Objective**: Prod Modal ASGI `POST /warm` does not await full `warm_model.remote.aio` load
+  for the prewarm path (spawn/detach like embedding).
+- **Setup**: Unit / bug-style test of warm handler (mock service); assert spawn called and
+  response returned without awaiting load completion.
+- **Expected**: Immediate response contract; proxy key still required.
+- **Refs**: [Corpus: api] BUG-2026-08-27 · AC-318-01
+
+### TC-318-02: ChatRAG mount prewarm hits /api/v1/warm not /health (EV-318 / #318)
+
+- **Objective**: FE mount and ChatRAG warm route prewarm via `/api/v1/warm` → Modal `/warm`.
+- **Setup**: Vitest ChatPanel / `prewarmChatServices`; API e2e or unit for `POST /api/v1/warm`.
+- **Expected**: No Modal `/health` used as prewarm; response `{"status":"warming"}`; F40/F64
+  residual wait still available.
+- **Refs**: UJ-090 · AC-318-02 · AC-CS6 (wait UX retained)

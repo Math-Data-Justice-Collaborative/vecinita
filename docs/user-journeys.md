@@ -88,6 +88,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-086 | Verified answer with citations | Community member | ChatRAG ask/stream with F82 enabled | F82 EV-030 #84 | local |
 | UJ-088 | View Monitoring success rates (ingest/chat/embed) | Admin operator | DM UI `/monitoring` → write-API metrics | F84 EV-036 #114 | local |
 | UJ-089 | View staging Grafana/Loki + webhook alert | Operator | Staging obs Droplet Grafana/Loki/Alertmanager | F84 EV-036 #114 | staging |
+| UJ-090 | Mount prewarm races ahead of first ask | Community member | ChatRAG FE mount → `POST /api/v1/warm` → Modal `/warm` spawn | ADR-022 EV-318 #318 | local |
 
 ## Visual journey maps
 
@@ -2336,3 +2337,29 @@ Postgres (EV-012 RD-174/RD-175). Click → `/jobs/:id` summary + link to `/evalu
 **Automated tests**: Unit + integration (TC-142); optional API E2E if wired through internal-write-api.
 
 **E2E tier**: local.
+
+### UJ-090: Mount prewarm races ahead of first ask (EV-318 / #318)
+
+**Actor**: Community member opening ChatRAG
+
+**Goal**: On SPA mount, fire async GPU prewarm so a normal open→type→ask often hits a ready
+(or restoring) GPU before first token; residual cold still shows F40/F64 wait UX.
+
+**Preconditions**: ChatRAG SPA; Modal embed + prod LLM URLs configured; proxy key on LLM warm.
+
+**Steps**:
+
+1. User loads ChatRAG (ChatPanel mounts).
+2. Client calls `prewarmChatServices` → `POST /api/v1/warm` (not `/health`).
+3. ChatRAG returns `{"status":"warming"}` immediately; background POSTs Modal embed+LLM `/warm`.
+4. LLM Modal `/warm` spawns GPU warm and returns promptly (does not hold ASGI for full load).
+5. User types and asks (UJ-001). If prewarm won: warm path ~0.5–1.1s historically. If lost:
+   F40/F64 ColdStartWait may appear (UJ-052).
+
+**Acceptance**: Mount never uses health as prewarm; spawn semantics on LLM warm; wait UX retained.
+
+**Automated tests**: Vitest mount warm (TC-318-02); unit LLM warm spawn (TC-318-01); API e2e warm.
+
+**E2E tier**: local (+ staging smoke optional).
+
+**Refs**: [Corpus: ADR-022 §Amendment EV-318] [Corpus: api] [Corpus: feature-list.md §F40]
