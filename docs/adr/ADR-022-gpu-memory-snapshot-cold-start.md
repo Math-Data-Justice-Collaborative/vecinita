@@ -179,6 +179,51 @@ baselines and DO-504 regression gates stay anecdotal (S001 n≈3–6; TC-313 smo
 4. Instrument `prewarm_to_ready` via structured logs/harness tags; F84 dimensions deferred.
 5. Playground blocking warm may remain for eval ready semantics this cycle.
 
+### Amendment EV-315 — Seed GPU snapshots after deploy (#315)
+
+**Problem:** Snapshot **creation** can take ~70s; Modal may need 2–3 captures per worker
+type. Without a post-deploy prime, the first real user can pay create instead of restore.
+
+**Decision (EV-315 / #315):**
+
+1. After staging LLM deploy, run opt-in `scripts/ops/seed_gpu_snapshots.py` (or equivalent)
+   that authenticates to Modal `POST /warm` and loops until observed samples are
+   `cold_kind=snapshot_restore` (via #314 stamps/logs) — **fail closed** if create remains.
+2. Document create latency separately from restore percentiles.
+3. Staging: script + runbook this cycle; optional advisory CI only — **not** a hard CD gate.
+4. Prod prime requires AskQuestion; default Environment is staging.
+5. Do not conflate seed primes with FE mount `prewarm_to_ready` (#318).
+
+### Amendment EV-317 — Thin Modal CPU ingress (#317)
+
+**Problem:** Cold path can still pay heavy ASGI import/boot in series with GPU restore.
+Health must never allocate T4.
+
+**Decision (EV-317 / #317):**
+
+1. Lazy-import / thin ASGI entry so vLLM and heavy GPU internals are **not** imported at
+   ASGI module load (S001 T12).
+2. Prefer same image + lazy imports before introducing a second Modal image.
+3. Keep ASGI on **CPU**; preserve `/warm` `.spawn()` (#318).
+4. Optional CPU `enable_memory_snapshot` on ingress **only if** post-thin profiling still
+   shows material ASGI boot cost.
+5. Unit/AST tests guard against top-level vLLM import on the ASGI entry module.
+
+### Amendment EV-319 — Cost-tune `scaledown_window` (#319)
+
+**Problem:** Hardcoded `scaledown_window=300` can dominate idle T4 cost at pilot traffic.
+`buffer_containers` does not fix scale-from-zero; always-on is out of scope.
+
+**Decision (EV-319 / #319):**
+
+1. Document T4 $/s idle formula and monthly idle-tail estimate under ADR-004.
+2. Candidates **60 / 120 / 300** s; prefer **120** as first flip when staging gap data is
+   thin (timestamp-only histogram; no prompts/PII).
+3. Deploy-time env `VECINITA_LLM_SCALEDOWN_WINDOW` (validated int; invalid → fail closed);
+   easy revert to `300`.
+4. Leave `buffer_containers=0`; do **not** add `min_containers` in this ticket.
+5. Prod default change requires AskQuestion after staging evidence.
+
 ## References
 
 - S001 plan: `docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md`
@@ -187,6 +232,8 @@ baselines and DO-504 regression gates stay anecdotal (S001 n≈3–6; TC-313 smo
 - ADR-004 (cost/sovereignty), ADR-009 (vLLM on T4), ADR-037 (prod pin / playground),
   ADR-053 (LoRA promote)
 - BUG-2026-05-22 (cold-start UX), `docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004`
-- Parent latency system: GitHub #311; slices: #313, #316, #314 (harness), #318 (prewarm)
+- Parent latency system: GitHub #311; slices: #313, #316, #314, #318, #315, #317, #319
 - Session: `EV-313-prod-gpu-snapshots`; `EV-316-lora-post-restore`;
-  `EV-314-cold-start-latency-harness`; `EV-318-async-gpu-prewarm` (pack session store)
+  `EV-314-cold-start-latency-harness`; `EV-318-async-gpu-prewarm`;
+  `EV-315-seed-gpu-snapshots`; `EV-317-thin-cpu-ingress`; `EV-319-scaledown-window`
+  (pack session store)

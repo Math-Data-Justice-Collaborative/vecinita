@@ -453,6 +453,32 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [ ] **AC-318-03**: F40/F64 ColdStartWait remains for residual cold (AC-CS*).
 - [ ] **AC-318-04**: `api-contract.md` documents ChatRAG `/api/v1/warm` + Modal spawn semantics.
 
+### Seed GPU snapshots after deploy (EV-315 / #315)
+
+- [ ] **AC-315-01**: Opt-in seed script primes authenticated Modal `/warm` until observed
+  samples are `cold_kind=snapshot_restore` (or exits non-zero if create persists)
+  (TC-315-01, TC-315-02).
+- [ ] **AC-315-02**: Create-path latency documented separately from restore percentiles;
+  staging runbook + `infra/modal/README.md` describe the procedure.
+- [ ] **AC-315-03**: Prod prime is AskQuestion-gated; default Environment is staging;
+  CD hard gate deferred this cycle.
+
+### Thin Modal CPU ingress (EV-317 / #317)
+
+- [ ] **AC-317-01**: ASGI entry does not import vLLM / heavy GPU internals at module load
+  (TC-317-01).
+- [ ] **AC-317-02**: `GET /health` never allocates T4; `/warm` keeps spawn/detach (TC-317-02).
+- [ ] **AC-317-03**: Optional ingress CPU snapshot only after post-thin profile evidence
+  (TC-317-03 if enabled).
+
+### Cost-tune LLM scaledown_window (EV-319 / #319)
+
+- [ ] **AC-319-01**: T4 $/s formula + candidate windows (60/120/300) documented; default flip
+  justified (thin traffic → recommend 120 with env revert) (TC-319-02).
+- [ ] **AC-319-02**: `VECINITA_LLM_SCALEDOWN_WINDOW` parsed at deploy-import with validated
+  bounds; invalid fails closed; no `min_containers` / `buffer_containers` change (TC-319-01).
+- [ ] **AC-319-03**: Prod default change requires AskQuestion after staging evidence.
+
 ### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
 
 #### F78 live enable (AC-AU7)

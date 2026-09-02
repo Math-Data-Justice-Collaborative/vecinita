@@ -208,8 +208,22 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
   restore; snapshot **base engine only**, resolve LoRA after restore (#316). Verify adapter
   with **SHA-256** (`VECINITA_FINETUNE_ADAPTER_HASH`) + `hmac.compare_digest`; kill-switch
   `VECINITA_LLM_LORA_RESOLVE` (`post_restore` default). Snapshot
-  **creation** can take ~70–100s — prime via `/warm` after deploy (see #315). Do not enable
-  on playground.
+  **creation** can take ~70–100s — prime via `/warm` after deploy (see #315 /
+  `scripts/ops/seed_gpu_snapshots.py`). Do not enable on playground.
+- **Post-deploy snapshot seed (EV-315 / #315):** After staging deploy with snapshots on, run
+  `uv run python scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop) until
+  observed samples are `cold_kind=snapshot_restore` (fail closed if create persists). Document
+  create latency separately from restore percentiles. Optional advisory CI only — not a hard
+  CD gate this cycle. Prod prime requires AskQuestion.
+  Example: `uv run python scripts/ops/seed_gpu_snapshots.py --modal-env staging --llm-url "$VECINITA_MODAL_LLM_URL" --proxy-key "$VECINITA_MODAL_PROXY_KEY" --max-primes 3`.
+  Pass real kinds from logs via `--observed-kinds` / `--kinds-file` when available.
+- **Thin CPU ingress (EV-317 / #317):** ASGI stays on CPU; lazy-import so vLLM is not loaded at
+  ASGI module import; keep `/warm` spawn (#318). Optional CPU snapshot on ingress only after
+  profile evidence.
+- **Scaledown window (EV-319 / #319):** Deploy-time `VECINITA_LLM_SCALEDOWN_WINDOW` (60–600s;
+  candidates 60/120/300). Document T4 $/s idle formula; thin traffic → prefer 120 with revert
+  to 300. No `min_containers` / `buffer_containers` in this ticket. Prod default flip =
+  AskQuestion.
 - **Layer E harness (EV-314 / #314):** Opt-in
   `uv run python scripts/ops/cold_start_bench.py --n 20 --output /tmp/cold-smoke.json`
   (use `--n 100` for publishable p95). Forced cold:
