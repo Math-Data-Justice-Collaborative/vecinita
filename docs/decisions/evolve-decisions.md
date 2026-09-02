@@ -1711,3 +1711,24 @@ verify with HANDOFF dispositions if new Patterns appear.
 | EV-316-D6 | Out of scope | UI; baking LoRA into snapshot; #314/#318; F77 promote UX |
 
 **Cites:** [Spec: ADR-022 §Amendment EV-316] [Spec: ADR-053] [Corpus: feature-list.md §F80] [Corpus: config] [Corpus: api] [Corpus: tests] [Corpus: acceptance]
+
+---
+
+## EV-314 + EV-318 — Layer E harness + async GPU prewarm (2026-09-02)
+
+**Sessions:** `EV-314-cold-start-latency-harness`, `EV-318-async-gpu-prewarm` (parallel)  
+**Tickets:** [#314](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/314), [#318](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/318) (children of #311)  
+**Intake:** operator **A** + recommended parallel; context **Proceed with recommended** (1+4+7+10)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-314-D1 | Samples | Staged N≈20 smoke → ≥100 for publishable p95 |
+| EV-314-D2 | Stamps | Modal-only first; DO-receive deferred |
+| EV-314-D3 | Metrics surface | Structured logs + harness JSON; F84 dimensions deferred |
+| EV-314-D4 | Feature id | No new Fn — ADR-022 Layer E |
+| EV-318-D1 | Predictors | Mount-only this cycle |
+| EV-318-D2 | Modal warm | `.spawn()` / detach (mirror embedding); not health-only |
+| EV-318-D3 | F40/F64 | Keep residual wait UX |
+| EV-318-D4 | Feature id | No new Fn — ADR-022 prewarm lever / S001 T11 |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-314/EV-318] [Corpus: api] [Corpus: tests] [Corpus: acceptance] [Corpus: feature-list.md §F40]
