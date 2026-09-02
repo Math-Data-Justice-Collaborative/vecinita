@@ -210,13 +210,6 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
   `VECINITA_LLM_LORA_RESOLVE` (`post_restore` default). Snapshot
   **creation** can take ~70–100s — prime via `/warm` after deploy (see #315). Do not enable
   on playground.
-- **Layer E harness (EV-314 / #314):** Opt-in
-  `uv run python scripts/ops/cold_start_bench.py --n 20 --output /tmp/cold-smoke.json`
-  (use `--n 100` for publishable p95). Forced cold:
-  `modal container stop --env staging --all vecinita-llm` (or pass `--force-cold`).
-  Tags use `cold_kind` ∈ `{warm, snapshot_restore, snapshot_create, clean_boot}` —
-  no raw prompts (ADR-004). Do **not** conflate with `prewarm_to_ready` (#318).
-  15-service-health may cite this script; do not run N=100 inside the skill by default.
 - **Eager A/B:** `VECINITA_LLM_ENFORCE_EAGER` (default `true`) — independent of snapshot switch;
   live on Modal secret `vecinita-llm-gpu` for GPU workers
 - **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — do not deploy
