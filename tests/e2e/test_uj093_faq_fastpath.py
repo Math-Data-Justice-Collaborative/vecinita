@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 from http import HTTPStatus
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pytest
 from fastapi.testclient import TestClient
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
+from vecinita_shared_schemas.json_types import as_json_object
 
 from tests.helpers.json_response import json_str, response_json_object
 
@@ -145,7 +146,7 @@ def test_uj093_stream_faq_hit(faq_client: TestClient) -> None:
         for line in response.iter_lines():
             if not line or not line.startswith("data: "):
                 continue
-            events.append(json.loads(line.removeprefix("data: ")))
+            events.append(as_json_object(cast("object", json.loads(line.removeprefix("data: ")))))
     tokens = [e["token"] for e in events if "token" in e]
     assert tokens
     sources_events = [e for e in events if "sources" in e]

@@ -15,8 +15,8 @@ def test_validate_answer_path_accepts_allow_list() -> None:
 def test_validate_answer_path_rejects_cold_kind_and_prompts() -> None:
     """Do not overload cold_kind or accept prompt-like keys as paths."""
     with pytest.raises(UnknownAnswerPathError):
-        validate_answer_path("snapshot_restore")
+        _ = validate_answer_path("snapshot_restore")
     with pytest.raises(UnknownAnswerPathError):
-        validate_answer_path("warm")
+        _ = validate_answer_path("warm")
     with pytest.raises(UnknownAnswerPathError):
-        validate_answer_path({"question": "x"})
+        _ = validate_answer_path({"question": "x"})

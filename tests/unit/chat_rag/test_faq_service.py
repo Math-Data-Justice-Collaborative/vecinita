@@ -105,3 +105,54 @@ def test_ask_faq_kill_switch_forces_rag() -> None:
     result = service.ask(AskRequest(question="What is Vecinita?", language="en"))
     assert result.answer_path == "rag_llm"
     assert "retrieve" in called
+
+
+def test_stream_ask_faq_hit_skips_llm() -> None:
+    """Stream path also bypasses on FAQ hit (TC-320-02 stream)."""
+    service = ChatRagService(
+        retriever=_BoomRetriever(),  # type: ignore[arg-type]
+        llm_client=_BoomLlm(),  # type: ignore[arg-type]
+        settings=_settings(enabled=True),
+    )
+    session = service.stream_ask(AskRequest(question="What is Vecinita?", language="en"))
+    assert session.answer_path == "faq_bypass"
+    assert session.cache_hit == "none"
+    assert session.sources == []
+    assert "".join(session.tokens)
+
+
+def test_ask_faq_miss_falls_through_to_empty_retrieval() -> None:
+    """Paraphrase miss uses RAG path, not FAQ."""
+    called: list[str] = []
+
+    class _CountingRetriever:
+        def retrieve_chunks(self, *args: object, **kwargs: object) -> list[object]:
+            _ = (args, kwargs)
+            called.append("retrieve")
+            return []
+
+    class _NoopLlm:
+        def generate(self, prompt: str, **kwargs: object) -> str:
+            _ = (prompt, kwargs)
+            msg = "empty retrieval should not call LLM"
+            raise AssertionError(msg)
+
+        def generate_stream(self, prompt: str, **kwargs: object) -> Iterator[str]:
+            _ = (prompt, kwargs)
+            msg = "empty retrieval should not stream LLM"
+            raise AssertionError(msg)
+            yield ""  # pragma: no cover
+
+        def close(self) -> None:
+            return
+
+    service = ChatRagService(
+        retriever=_CountingRetriever(),  # type: ignore[arg-type]
+        llm_client=_NoopLlm(),  # type: ignore[arg-type]
+        settings=_settings(enabled=True),
+    )
+    result = service.ask(
+        AskRequest(question="Where is the nearest quantum flux clinic?", language="en")
+    )
+    assert result.answer_path == "rag_llm"
+    assert "retrieve" in called

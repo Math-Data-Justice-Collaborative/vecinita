@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from vecinita_chat_rag_backend.faq.match import (
     FaqEntry,
     FaqStore,
+    default_faq_store_path,
     load_faq_store,
     match_faq,
     normalize_faq_question,
@@ -65,3 +67,85 @@ def test_load_faq_store_from_yaml_fixture() -> None:
 def test_match_faq_empty_store_misses() -> None:
     """Empty store never matches."""
     assert match_faq(FaqStore(entries=()), "What is Vecinita?", language="en") is None
+
+
+def test_match_faq_empty_normalized_question_misses() -> None:
+    """Punctuation-only input does not match."""
+    store = FaqStore(
+        entries=(
+            FaqEntry(
+                id="what-is-vecinita",
+                language="en",
+                variants=("What is Vecinita?",),
+                answer="ok",
+            ),
+        )
+    )
+    assert match_faq(store, "???", language="en") is None
+    assert normalize_faq_question("   ") == ""
+
+
+def test_load_faq_store_rejects_invalid_shapes(tmp_path: Path) -> None:
+    """Loader fails closed on non-mapping root, missing entries, and bad language."""
+    not_map = tmp_path / "list.yaml"
+    _ = not_map.write_text("- not a mapping\n", encoding="utf-8")
+    with pytest.raises(TypeError, match="mapping"):
+        _ = load_faq_store(not_map)
+
+    no_entries = tmp_path / "no_entries.yaml"
+    _ = no_entries.write_text("entries: {}\n", encoding="utf-8")
+    with pytest.raises(TypeError, match="entries list"):
+        _ = load_faq_store(no_entries)
+
+    bad_lang = tmp_path / "bad_lang.yaml"
+    _ = bad_lang.write_text(
+        "entries:\n  - id: x\n    language: fr\n    variants: [Hi]\n    answer: A\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="must be en"):
+        _ = load_faq_store(bad_lang)
+
+    empty_variants = tmp_path / "empty_variants.yaml"
+    _ = empty_variants.write_text(
+        "entries:\n  - id: x\n    language: en\n    variants: []\n    answer: A\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(TypeError, match="variants"):
+        _ = load_faq_store(empty_variants)
+
+    not_entry_map = tmp_path / "not_entry.yaml"
+    _ = not_entry_map.write_text("entries:\n  - just-a-string\n", encoding="utf-8")
+    with pytest.raises(TypeError, match="FAQ entry must be a mapping"):
+        _ = load_faq_store(not_entry_map)
+
+    whitespace_variants = tmp_path / "ws_variants.yaml"
+    _ = whitespace_variants.write_text(
+        "entries:\n  - id: x\n    language: en\n    variants: ['  ']\n    answer: A\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="no valid string variants"):
+        _ = load_faq_store(whitespace_variants)
+
+    missing_id = tmp_path / "missing_id.yaml"
+    _ = missing_id.write_text(
+        "entries:\n  - language: en\n    variants: [Hi]\n    answer: A\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(TypeError, match="id"):
+        _ = load_faq_store(missing_id)
+
+    empty_answer = tmp_path / "empty_answer.yaml"
+    _ = empty_answer.write_text(
+        "entries:\n  - id: x\n    language: en\n    variants: [Hi]\n    answer: '  '\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(TypeError, match="answer"):
+        _ = load_faq_store(empty_answer)
+
+
+def test_default_faq_store_path_exists() -> None:
+    """Packaged seed YAML is present next to the matcher."""
+    path = default_faq_store_path()
+    assert path.is_file()
+    store = load_faq_store(path)
+    assert store.entries
