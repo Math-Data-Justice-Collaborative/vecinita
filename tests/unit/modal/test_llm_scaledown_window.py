@@ -23,12 +23,12 @@ _ENV_NAME = "VECINITA_LLM_SCALEDOWN_WINDOW"
 def test_scaledown_window_defaults_300_when_env_unset() -> None:
     """Unset VECINITA_LLM_SCALEDOWN_WINDOW → 300 (TC-319-01)."""
     with patch.dict(os.environ, {}, clear=True):
-        assert _scaledown_window_from_env() == 300
+        assert _scaledown_window_from_env() == int("300")
 
 
 @pytest.mark.parametrize("value", ["60", "120", "300", "600"])
 def test_scaledown_window_accepts_valid_bounds(value: str) -> None:
-    """Candidates and bounds inclusive 60–600."""
+    """Candidates and bounds inclusive 60-600."""
     with patch.dict(os.environ, {_ENV_NAME: value}, clear=True):
         assert _scaledown_window_from_env() == int(value)
 
