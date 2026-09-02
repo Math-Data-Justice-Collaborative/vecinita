@@ -36,7 +36,10 @@ def test_scaledown_window_accepts_valid_bounds(value: str) -> None:
 @pytest.mark.parametrize("value", ["59", "601", "abc", "12.5", ""])
 def test_scaledown_window_rejects_invalid(value: str) -> None:
     """Invalid values fail closed with ValueError."""
-    with patch.dict(os.environ, {_ENV_NAME: value}, clear=True), pytest.raises(ValueError):
+    with (
+        patch.dict(os.environ, {_ENV_NAME: value}, clear=True),
+        pytest.raises(ValueError, match=_ENV_NAME),
+    ):
         _ = _scaledown_window_from_env()
 
 
