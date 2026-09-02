@@ -19,7 +19,9 @@ from vecinita_shared_schemas.finetune import (
     build_prod_llm_health,
     parse_finetune_adapter_hash,
     parse_lora_resolve_mode,
+    parse_playground_finetune_adapter_id,
     require_post_restore_adapter_hash,
+    resolve_finetune_adapter_dir,
     sha256_adapter_dir,
     verify_adapter_integrity,
 )
