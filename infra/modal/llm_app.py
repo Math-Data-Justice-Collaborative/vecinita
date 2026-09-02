@@ -524,6 +524,11 @@ def fastapi_app():
         return JSONResponse(_prod_health_payload())
 
     async def warm(request: Request) -> JSONResponse:
+        """Fire-and-forget GPU warm (EV-318 / #318) — mirror embedding ``.spawn()``.
+
+        Do not ``await warm_model.remote.aio`` here: that holds the ASGI worker for the
+        full T4 boot. Readiness is observed on later generate/stream / #314 stamps.
+        """
         if not _authorized(request):
             return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
         raw = await request.body()
@@ -531,17 +536,14 @@ def fastapi_app():
             payload = WarmRequest.model_validate(json.loads(raw)) if raw else WarmRequest()
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
-        try:
-            loaded = await service.warm_model.remote.aio(payload.model_id)
-        except RuntimeError as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_GATEWAY)
-        return JSONResponse(
-            {
-                "status": "ok",
-                "model_id": payload.model_id or DEFAULT_PLAYGROUND_MODEL_ID,
-                "loaded": loaded,
-            }
+        model_id = payload.model_id or DEFAULT_PLAYGROUND_MODEL_ID
+        # Structured tag for #314 vocabulary — not cold TTFT (ADR-004: no prompts).
+        logger.info(
+            "prewarm_spawned cold_kind=warm event=prewarm_to_ready model_id=%s",
+            model_id,
         )
+        _ = service.warm_model.spawn(payload.model_id)
+        return JSONResponse({"status": "warming", "model_id": model_id})
 
     async def list_models(request: Request) -> JSONResponse:
         if not _authorized(request):

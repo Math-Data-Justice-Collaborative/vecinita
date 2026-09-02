@@ -808,8 +808,8 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   rotating bilingual (EN/ES) WRWC / Providence / ways-to-give fun facts plus a short
   “starting up…” status line, a soft donate CTA (`wrwc.org/donate`), and a friendly
   first-party consent banner before remembering which facts were shown (opt-out via HTTP
-  cookie). Extends existing `coldStartStatus` / `prewarmChatServices` client warm only —
-  no Modal/backend latency work.
+  cookie). Extends existing `coldStartStatus` / `prewarmChatServices` client warm —
+  residual wait UX when prewarm loses the race (create/clean boot / cold restore).
 - **Inputs**: Locale; cold-start retry / stream timing; optional `VITE_WRWC_DONATE_URL`
   (default `https://wrwc.org/donate/`); consent choice; seen-fact ids in `localStorage`.
 - **Outputs**: Improved wait UX; device-local preference cookie + seen-facts list (no PII,
@@ -819,9 +819,12 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   |---------|--------|
   | `apps/chat-rag-frontend` | Rotating facts UI, consent banner, donate CTA, warm reuse |
   | `packages/frontend-i18n` / `frontend-ui` | Optional shared banner/copy if needed |
-- **Out of scope**: Modal/backend warm-path changes; CMS/API-backed facts; admin UI;
-  analytics of which facts were shown.
-- **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15).
+- **Related (not F40 UX)**: EV-318 / #318 — Modal LLM `POST /warm` spawn/detach + ChatRAG
+  `POST /api/v1/warm` contract (ADR-022 prewarm lever). F40 does **not** own that work.
+- **Out of scope (F40)**: Changing Modal spawn semantics (see #318); CMS/API-backed facts;
+  admin UI; analytics of which facts were shown; focus/typing warm predictors.
+- **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15);
+  EV-318 coord 2026-09-02.
 
 ### F41: Corpus re-embed / re-chunk rebuild (migration job)
 

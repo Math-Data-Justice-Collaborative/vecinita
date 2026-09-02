@@ -189,6 +189,22 @@ optional car-day/year constants; those need not be in the JSON if FE computes fr
   `done` **includes** `energy_estimate` (F65) when EV-024 ships.
 - **Errors**: Same as `/ask`.
 
+### POST `/api/v1/warm` (S001 T11 / EV-318 / #318)
+
+- **Purpose**: Fire-and-forget prewarm of Modal embedding + prod LLM when ChatRAG UI mounts
+  (`prewarmChatServices`). Overlaps GPU boot with user think-time (ADR-022 primary lever).
+- **Auth**: None (public); same anonymous ChatRAG surface as `/ask`.
+- **Request**: Empty body.
+- **Response** `200`: `{"status": "warming"}` — returns **immediately**; work continues in a
+  background task that POSTs Modal `POST /warm` (embed + LLM with proxy key).
+- **Must not**: Use Modal or ChatRAG `GET /health` as the prewarm trigger (health is
+  liveness-only and does not boot the T4).
+- **Modal LLM contract (EV-318)**: Upstream `POST /warm` MUST detach GPU load via
+  `.spawn()` (mirror embedding) so ASGI is not held for full engine ready; readiness is
+  observed on later generate/stream / structured stamps (#314).
+- **Errors**: Best-effort — failures are swallowed; residual cold uses F40/F64 wait UX.
+- **Refs**: [Corpus: ADR-022] [Corpus: feature-list.md §F40] TC-318-01 · UJ-090
+
 ### POST `/api/v1/feedback` (EV-024 / F68)
 
 - **Purpose**: Anonymous community product feedback (no visitor identity).
@@ -487,9 +503,14 @@ Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: C
 
 ### POST `/warm`
 
-- **Purpose**: Preload / switch model into vLLM engine.
+- **Purpose**: Preload / switch model into vLLM engine (ChatRAG prewarm + eval).
 - **Auth**: Proxy key required (same fail-closed rule as generate).
 - **Request**: optional `{"model_id": "..."}`.
+- **Semantics (EV-318 / #318)**: Prod ASGI `warm` SHALL **spawn/detach** GPU warm work and
+  return promptly (`{"status": "warming"}` or `{"status": "ok", ...}` without awaiting full
+  load). Do **not** `await warm_model.remote.aio(...)` for the fire-and-forget prewarm path
+  (BUG-2026-08-27 / embedding `.spawn()` precedent). Playground/eval may still wait for
+  ready when an operator explicitly needs a blocking warm.
 - **Errors**: `401` unauthorized.
 
 ### GET `/health`

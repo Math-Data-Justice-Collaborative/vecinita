@@ -150,6 +150,35 @@ LoRA into the snapshot risks silently serving a stale adapter after promote/roll
 **Kill switches (independent):** `VECINITA_LLM_GPU_SNAPSHOT`, `VECINITA_LLM_ENFORCE_EAGER`,
 `VECINITA_LLM_LORA_RESOLVE`.
 
+### Amendment EV-314 — Layer E latency harness (#314)
+
+**Problem:** Without `cold_kind`-tagged samples and enough restores for tails, restore/create
+baselines and DO-504 regression gates stay anecdotal (S001 n≈3–6; TC-313 smoke).
+
+**Decision (EV-314 / #314):**
+
+1. Modal LLM emits structured stamps (restore → wake → adapter ready → first token) with
+   ADR-004 allow-listed tags: `cold_kind ∈ {warm, snapshot_restore, snapshot_create,
+   clean_boot}`, worker type, commit, snapshot config, base/adapter ids — **no raw prompts**.
+2. Opt-in `scripts/ops/cold_start_bench.py` (name finalized in tech-plan): forced cold via
+   documented `modal container stop`; staged **N≈20** smoke then **≥100** for publishable p95.
+3. ChatRAG DO-receive stamp and F84 cold_kind dimensions are **deferred**.
+4. Do not conflate `#318` `prewarm_to_ready` with cold TTFT / restore samples.
+5. 15-service-health may cite the script; MUST NOT run N=100 inside the skill by default.
+
+### Amendment EV-318 — Async GPU prewarm (#318)
+
+**Problem:** LLM `POST /warm` awaited `warm_model.remote.aio`, holding ASGI during GPU boot
+(embedding already uses `.spawn()`). Health-only probes never boot the T4.
+
+**Decision (EV-318 / #318):**
+
+1. Prod LLM ASGI `/warm` **spawns/detaches** and returns promptly (mirror embedding).
+2. ChatRAG `POST /api/v1/warm` remains the FE mount prewarm contract (not `/health`).
+3. Predictors this cycle: **mount only**; F40/F64 residual wait UX kept.
+4. Instrument `prewarm_to_ready` via structured logs/harness tags; F84 dimensions deferred.
+5. Playground blocking warm may remain for eval ready semantics this cycle.
+
 ## References
 
 - S001 plan: `docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md`
@@ -158,5 +187,6 @@ LoRA into the snapshot risks silently serving a stale adapter after promote/roll
 - ADR-004 (cost/sovereignty), ADR-009 (vLLM on T4), ADR-037 (prod pin / playground),
   ADR-053 (LoRA promote)
 - BUG-2026-05-22 (cold-start UX), `docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004`
-- Parent latency system: GitHub #311; this slice: #313; LoRA-after-restore: #316
-- Session: `EV-313-prod-gpu-snapshots`; `EV-316-lora-post-restore` (pack session store)
+- Parent latency system: GitHub #311; slices: #313, #316, #314 (harness), #318 (prewarm)
+- Session: `EV-313-prod-gpu-snapshots`; `EV-316-lora-post-restore`;
+  `EV-314-cold-start-latency-harness`; `EV-318-async-gpu-prewarm` (pack session store)
