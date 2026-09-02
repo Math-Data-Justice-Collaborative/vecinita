@@ -142,6 +142,41 @@ def test_load_faq_store_rejects_invalid_shapes(tmp_path: Path) -> None:
     with pytest.raises(TypeError, match="answer"):
         _ = load_faq_store(empty_answer)
 
+    not_list_variants = tmp_path / "not_list_variants.yaml"
+    _ = not_list_variants.write_text(
+        "entries:\n  - id: x\n    language: en\n    variants: Hi\n    answer: A\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(TypeError, match="variants"):
+        _ = load_faq_store(not_list_variants)
+
+    non_string_id = tmp_path / "non_string_id.yaml"
+    _ = non_string_id.write_text(
+        "entries:\n  - id: 1\n    language: en\n    variants: [Hi]\n    answer: A\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(TypeError, match="id"):
+        _ = load_faq_store(non_string_id)
+
+
+def test_load_faq_store_spanish_entry_and_skips_non_string_variants(
+    tmp_path: Path,
+) -> None:
+    """Language es parses; non-string variant items are dropped (TC-320-01)."""
+    path = tmp_path / "es.yaml"
+    _ = path.write_text(
+        "entries:\n  - id: hola\n    language: es\n    variants: [1, '¿Hola?', '  ']\n    answer: Hola\n",
+        encoding="utf-8",
+    )
+    store = load_faq_store(path)
+    assert len(store.entries) == 1
+    entry = store.entries[0]
+    assert entry.language == "es"
+    assert entry.variants == ("¿Hola?",)
+    hit = match_faq(store, "¿Hola?", language="es")
+    assert hit is not None
+    assert hit.answer == "Hola"
+
 
 def test_default_faq_store_path_exists() -> None:
     """Packaged seed YAML is present next to the matcher."""

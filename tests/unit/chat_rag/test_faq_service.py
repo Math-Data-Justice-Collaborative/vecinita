@@ -156,3 +156,29 @@ def test_ask_faq_miss_falls_through_to_empty_retrieval() -> None:
     )
     assert result.answer_path == "rag_llm"
     assert "retrieve" in called
+
+
+def test_ask_faq_spanish_hit_skips_retrieve_and_llm() -> None:
+    """Same-language Spanish variant returns faq_bypass (TC-320-01 / TC-320-02)."""
+    service = ChatRagService(
+        retriever=_BoomRetriever(),  # type: ignore[arg-type]
+        llm_client=_BoomLlm(),  # type: ignore[arg-type]
+        settings=_settings(enabled=True),
+    )
+    result = service.ask(AskRequest(question="¿Qué es Vecinita?", language="es"))
+    assert result.answer_path == "faq_bypass"
+    assert result.language == "es"
+    assert result.sources == []
+    assert "asistente" in result.answer.lower() or "vecinita" in result.answer.lower()
+
+
+def test_ask_faq_without_settings_loads_packaged_seed() -> None:
+    """settings=None still loads the packaged seed and can bypass (F85)."""
+    service = ChatRagService(
+        retriever=_BoomRetriever(),  # type: ignore[arg-type]
+        llm_client=_BoomLlm(),  # type: ignore[arg-type]
+    )
+    result = service.ask(AskRequest(question="What is Vecinita?", language="en"))
+    assert result.answer_path == "faq_bypass"
+    assert result.sources == []
+    assert "vecinita" in result.answer.lower()
