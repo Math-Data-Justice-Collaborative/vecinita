@@ -447,6 +447,81 @@ To restore corpus after accidental data loss:
 
 Reference: [DO PostgreSQL restore from backups](https://docs.digitalocean.com/products/databases/postgresql/how-to/restore-from-backups/).
 
+### Prod → staging corpus mirror (EV-338 / #338)
+
+Use when staging Managed Postgres was emptied (e.g. test-artifact cleanup) and staging
+ChatRAG needs a **community corpus** that matches prod retrieval quality. Prefer this over
+fixture-only `load_corpus()` when parity with live content matters.
+
+[Corpus: staging] [Corpus: feature-list.md §F83] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
+[Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push]
+
+**Hard rules**
+
+| Rule | Detail |
+|------|--------|
+| Prod | **Read-only** — never `TRUNCATE` / restore / write against the prod corpus URL |
+| Staging write | Only after AskQuestion Approve + `VECINITA_ALLOW_CORPUS_RESET=1` and `VECINITA_CORPUS_RESET_ACK=staging-wipe-confirmed` |
+| Hosts | Confirm `VECINITA_STAGING_DATABASE_URL` host ≠ prod `DATABASE_URL` host before any dump target |
+| Artifacts | After restore, zero `example.com` / `fixture://` / localhost document URLs |
+
+**Include tables (ChatRAG retrieval)** — dump in FK-safe order; feasibility / execute may add
+companion tables only if restore requires them:
+
+1. `tags`
+2. `documents`
+3. `chunks`
+4. `embeddings`
+5. `document_tags`
+6. `chunk_tags`
+
+**Exclude (default):** `jobs`, eval_* , `rebuild_runs`, `shadow_chunks`, `shadow_embeddings`,
+automation run tables, operation metrics, feedback. Do not wipe staging jobs history as part of
+this mirror unless a separate AskQuestion says so.
+
+**Procedure (dry-run first)**
+
+1. Resolve hosts (print only hostnames, never paste passwords into docs/tickets):
+
+   ```bash
+   python3 - <<'PY'
+   import os
+   from urllib.parse import urlparse
+   for key in ("VECINITA_STAGING_DATABASE_URL", "DATABASE_URL", "VECINITA_PROD_DATABASE_URL"):
+       raw = os.environ.get(key) or ""
+       if not raw:
+           print(f"{key}: (unset)")
+           continue
+       print(f"{key}: {urlparse(raw).hostname}")
+   PY
+   ```
+
+2. Confirm staging host is the emptied ChatRAG DB; prod host is the live corpus source.
+3. `pg_dump` from **prod** (`--data-only` / table list above; no `--clean` against prod).
+4. On staging: migrations current (`alembic upgrade head`), then restore dump with corpus-reset
+   override set. Prefer truncate/replace of **include** tables only — not a full DB wipe.
+5. Counts: `documents`, `chunks`, `embeddings` all `> 0`.
+6. Test-artifact guard dry-run:
+
+   ```bash
+   uv run python scripts/ops/cleanup_corpus_test_artifacts.py \
+     --database-url "$VECINITA_STAGING_DATABASE_URL"
+   # expect zero matches (or apply cleanup only on staging after ack)
+   ```
+
+7. H2 / H3: `bash scripts/deploy/staging_smoke.sh` (or equivalent) with staging ChatRAG URL.
+8. Record evidence in the active session `evidence/` folder (counts + smoke exit codes).
+
+**Embed model alignment:** Mirrored vectors must match the embed model ChatRAG uses for
+queries. Staging DO apps must set `VECINITA_MODAL_EMBED_URL` to the **`vecinita--`**
+embedding base (same model that produced prod vectors) — not `vecinita-staging--` — or
+retrieval scores collapse (~0.02) and H3 returns the no-context fallback. See
+[staging-secrets-matrix.md](staging-secrets-matrix.md). After correcting the URL, redeploy
+`vecinita-staging-chat-api` (and write-api if ingest uses embed).
+
+**Alternatives:** DO backup restore (section above) when a pre-wipe staging snapshot exists;
+fixture `load_corpus()` for empty/dev-shaped staging only.
+
 ## Modal embed / LLM URLs (DO + GitHub)
 
 Both backend DO apps require **`VECINITA_MODAL_EMBED_URL`** and **`VECINITA_MODAL_LLM_URL`**

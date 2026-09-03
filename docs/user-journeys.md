@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-29 (EV-036 F84 — UJ-088–089; prior S030 UJ-080–082)
+> **Last updated**: 2026-09-03 (EV-338 / #338 — UJ-094 staging corpus mirror; prior EV-036 UJ-088–089)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -92,6 +92,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-091 | Seed GPU snapshots after LLM deploy | Operator | Staging Modal deploy → seed script → restore-kind samples | ADR-022 EV-315 #315 | staging |
 | UJ-092 | Tune LLM scaledown_window from gaps | Operator | Env + staging evidence → AskQuestion prod flip | ADR-022 EV-319 #319 | staging |
 | UJ-093 | FAQ fast-path canned answer (skip LLM) | Community member | ChatRAG ask/stream → FAQ match → faq_bypass | F85 EV-320 #320 / #79 | local |
+| UJ-094 | Re-seed staging corpus from prod mirror | Operator | Prod read-only dump → staging restore → H2/H3 | F83 EV-338 #338 | staging |
 
 ## Visual journey maps
 
@@ -2443,4 +2444,32 @@ ChatRAG backend reachable.
 **E2E tier**: local (API TestClient); staging smoke optional.
 
 **Refs**: [Corpus: feature-list.md §F85] [Corpus: ADR-022 §Amendment EV-320] [Corpus: api] [Corpus: ADR-004]
+
+### UJ-094: Re-seed staging corpus from prod mirror (F83 / EV-338 / #338)
+
+**Actor**: Operator
+
+**Goal**: After staging Postgres was emptied (e.g. test-artifact cleanup), restore a usable
+community corpus so staging ChatRAG H3 asks succeed, without mutating prod.
+
+**Preconditions**: Distinct prod vs staging DB hosts; `pg_dump`/`pg_restore` available;
+corpus-db-safety ack for staging write; staging ChatRAG pointed at staging DB.
+
+**Steps**:
+
+1. Print/compare hostnames for prod source vs `VECINITA_STAGING_DATABASE_URL` (must differ).
+2. Dry-run table list + dump plan; AskQuestion Approve for **staging write only**.
+3. Dump include tables from prod (read-only); restore onto staging with reset ack.
+4. Verify non-empty `documents` / `chunks` / `embeddings`; zero test-artifact URLs.
+5. Run staging H2 (alembic/SELECT) + H3 pantry-style ask; record evidence.
+
+**Acceptance**: Staging corpus non-empty; alembic current; H3 PASS; prod unchanged; runbook
+§Prod → staging corpus mirror followed.
+
+**Automated tests**: TC-321–TC-324 (ops checklist / guard unit where applicable).
+
+**E2E tier**: staging (ops).
+
+**Refs**: [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety]
+[Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
 
