@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-29 (EV-036 F84 — TC-299–306 monitoring / Grafana; prior TC-252–265)  
+> **Last updated**: 2026-09-03 (EV-338 / #338 — TC-321–324 staging corpus mirror; prior TC-320 FAQ)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -39,6 +39,7 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
 | UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
+| UJ-094 Staging corpus mirror from prod | ops checklist + corpus guards | TC-321–TC-324 | — |
 | UJ-088 Monitoring rates | `tests/e2e/test_uj088_monitoring_metrics.py` | TC-299–TC-304 | Vitest Monitoring page |
 | UJ-089 Staging Grafana/Loki | staging obs checklist / smoke | TC-305–TC-306 | — |
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
@@ -2112,4 +2113,33 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Expected**: FAQ sample rejects `cold_kind`; report `answer_path_summary` groups
   percentiles; samples never include question/answer text (ADR-004).
 - **Refs**: AC-320-05 · ADR-022 EV-320 · #314
+
+### TC-321: Staging vs prod host confirmation (EV-338 / #338)
+
+- **Objective**: Operator (or script) refuses restore when staging and prod hosts are identical
+  or unset.
+- **Setup**: Ops checklist / optional unit on URL-host compare helper.
+- **Expected**: Distinct `.ondigitalocean.com` (or equivalent) hostnames; abort if equal.
+- **Refs**: UJ-094 · [Corpus: corpus-db-safety] · staging-runbook §Prod → staging corpus mirror
+
+### TC-322: Post-mirror corpus counts (EV-338 / #338)
+
+- **Objective**: After restore, staging has non-empty retrieval corpus.
+- **Setup**: Staging SQL: `COUNT(*)` on `documents`, `chunks`, `embeddings`.
+- **Expected**: All three counts `> 0`; alembic `current` matches `heads`.
+- **Refs**: UJ-094 · AC staging restore
+
+### TC-323: No test-artifact URLs after mirror (EV-338 / #338)
+
+- **Objective**: Staging managed DB has zero `example.com` / `fixture://` / localhost docs.
+- **Setup**: `scripts/ops/cleanup_corpus_test_artifacts.py` dry-run against staging URL.
+- **Expected**: Zero matches (or cleanup applied only on staging with ack).
+- **Refs**: [Corpus: no-corpus-test-artifacts] · UJ-094
+
+### TC-324: Staging ChatRAG H3 after mirror (EV-338 / #338)
+
+- **Objective**: Staging ask returns answer + language after corpus restore.
+- **Setup**: `POST` staging ChatRAG `/api/v1/ask` pantry-style question (or `staging_smoke` H3).
+- **Expected**: HTTP 200; non-empty `answer`; `language` in `en`/`es`; prod corpus unchanged.
+- **Refs**: UJ-094 · staging-runbook H3 · [Corpus: staging]
 

@@ -1583,12 +1583,16 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   `staging_as_live` (ADR-049) once staging is healthy. Requires GitHub ruleset so merges to
   `main` need CI **and** staging deploy + H1–H5 smoke.
 - **Inputs**: Operator tokens (DO, Modal workspace `vecinita`, Supabase); GitHub Environments
-  `staging` / `production`; seed corpus for staging DB only.
+  `staging` / `production`; seed corpus for staging DB only **or** selective **prod→staging
+  corpus mirror** after AskQuestion (EV-338 / #338 — preferred when staging was wiped and
+  ChatRAG parity with live community content is required).
 - **Outputs**: Distinct staging URLs; `env_role: staging` \| `prod`; ADR-054; updated
   runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212.
-- **Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298; UJ-087.
-- **Out of scope**: Live corpus clone without AskQuestion; Modal provision during Spec band
-  (Build gate); full hostname rename of legacy prod apps in one cutover.
+- **Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298; UJ-087; staging corpus restore AC via UJ-094 /
+  TC-321–TC-324 when mirror path used.
+- **Out of scope**: Live corpus clone **or staging write** without AskQuestion; Modal provision
+  during Spec band (Build gate); full hostname rename of legacy prod apps in one cutover;
+  mutating **prod** during mirror (prod remains read-only).
 - **Promotion (EV-036-D15)**: When `origin/stage` exists — feature→`stage` (CI) then
   promote `stage`→`main` (CI + `staging-smoke`). Smoke remains on main-bound PRs (ADR-054).
 - **Source**: EV-staging-do-supabase; EV-033-stage-before-main; EV-036-D15; ADR-054;
