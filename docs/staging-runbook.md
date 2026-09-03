@@ -513,11 +513,15 @@ this mirror unless a separate AskQuestion says so.
 8. Record evidence in the active session `evidence/` folder (counts + smoke exit codes).
 
 **Embed model alignment:** Mirrored vectors must match the embed model ChatRAG uses for
-queries. Staging DO apps must set `VECINITA_MODAL_EMBED_URL` to the **`vecinita--`**
-embedding base (same model that produced prod vectors) — not `vecinita-staging--` — or
-retrieval scores collapse (~0.02) and H3 returns the no-context fallback. See
-[staging-secrets-matrix.md](staging-secrets-matrix.md). After correcting the URL, redeploy
-`vecinita-staging-chat-api` (and write-api if ingest uses embed).
+queries. Staging DO apps **and** GitHub Environment `staging` secret
+`VECINITA_MODAL_EMBED_URL` must use the **`vecinita--`** embedding base (same model that
+produced prod vectors) — not `vecinita-staging--` — or retrieval scores collapse (~0.02)
+and H3 returns the no-context fallback. See [staging-secrets-matrix.md](staging-secrets-matrix.md).
+Deploy Staging runs `scripts/deploy/check_staging_embed_mirror_align.sh` before secret sync
+(BUG-2026-09-03-staging-embed-url-mirror-regress). After correcting the URL, redeploy
+`vecinita-staging-chat-api` (and write-api if ingest uses embed). Waiver only when staging
+intentionally re-embeds under the staging Modal Environment pin:
+`VECINITA_ALLOW_STAGING_EMBED=1`.
 
 **Alternatives:** DO backup restore (section above) when a pre-wipe staging snapshot exists;
 fixture `load_corpus()` for empty/dev-shaped staging only.

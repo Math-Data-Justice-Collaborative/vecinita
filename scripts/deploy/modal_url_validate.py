@@ -72,13 +72,68 @@ def validate_modal_service_url(key: str, url: str) -> None:
         raise ValueError(msg)
 
 
+def assert_mirrored_staging_embed_url(url: str, *, allow_staging_embed: bool = False) -> None:
+    """Require prod ``vecinita--`` embed when staging DO serves a mirrored prod corpus.
+
+    Staging Modal Environment embed (``vecinita-staging--``) may pin a different model
+    (e.g. BGE) than prod e5. After EV-338 prod→staging mirror, ChatRAG query vectors must
+    come from the same embed app that produced the stored embeddings — see
+    ``docs/staging-runbook.md`` §mirror and BUG-2026-09-03-staging-embed-url-mirror-regress.
+
+    Set ``allow_staging_embed=True`` (or env ``VECINITA_ALLOW_STAGING_EMBED=1``) only when
+    staging intentionally uses a staging-rebuilt corpus under the staging embed pin.
+    """
+    validate_modal_service_url("VECINITA_MODAL_EMBED_URL", url)
+    trimmed = url.strip()
+    if allow_staging_embed:
+        return
+    if "vecinita-staging--" in trimmed:
+        msg = (
+            "VECINITA_MODAL_EMBED_URL for mirrored staging corpus must use the prod "
+            "vecinita--vecinita-embedding host (not vecinita-staging--). "
+            "See docs/staging-runbook.md §Prod → staging corpus mirror. "
+            "Waiver: VECINITA_ALLOW_STAGING_EMBED=1 when staging re-embeds with the "
+            f"staging Modal Environment pin (got {trimmed!r})"
+        )
+        raise ValueError(msg)
+    if "vecinita--vecinita-embedding" not in trimmed:
+        msg = (
+            "VECINITA_MODAL_EMBED_URL for mirrored staging corpus must contain "
+            f"vecinita--vecinita-embedding (got {trimmed!r})"
+        )
+        raise ValueError(msg)
+
+
 def main(argv: list[str] | None = None) -> int:
-    """CLI: validate_modal_service_url KEY URL (exit 0/1)."""
+    """CLI: validate_modal_service_url KEY URL, or mirror-embed check.
+
+    Usage:
+      modal_url_validate.py KEY URL
+      modal_url_validate.py --mirrored-staging-embed URL
+    """
+    import os
     import sys
 
     args = list(sys.argv[1:] if argv is None else argv)
+    if len(args) == 2 and args[0] == "--mirrored-staging-embed":
+        allow = os.environ.get("VECINITA_ALLOW_STAGING_EMBED", "").strip() in {
+            "1",
+            "true",
+            "TRUE",
+            "yes",
+            "YES",
+        }
+        try:
+            assert_mirrored_staging_embed_url(args[1], allow_staging_embed=allow)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        return 0
     if len(args) != 2:
-        print("Usage: modal_url_validate.py KEY URL", file=sys.stderr)
+        print(
+            "Usage: modal_url_validate.py KEY URL | --mirrored-staging-embed URL",
+            file=sys.stderr,
+        )
         return 2
     key, url = args
     try:
