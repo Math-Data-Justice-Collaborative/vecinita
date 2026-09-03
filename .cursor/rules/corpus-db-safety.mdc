@@ -24,7 +24,10 @@ Supabase is auth-only — do not assume corpus is there.
 ## CI
 
 `scripts/check_corpus_reset_guard.sh` is in `make ci-guards` — keep it wired when adding reset paths.
+Also `scripts/check_corpus_test_artifacts_guard.sh` — classifier + cleanup for leftover
+`example.com` / `fixture://` rows ([no-corpus-test-artifacts.mdc](no-corpus-test-artifacts.mdc)).
 
 Skill: `.cursor/skills/corpus-db-safety/SKILL.md`.
 
 Evidence: BUG-2026-07-02 — eval seed TRUNCATE wiped staging corpus when `prod.env` was sourced.
+HF-prod-corpus-test-artifacts — 146 synthetic docs removed from restored corpus (2026-09-03).
