@@ -99,6 +99,16 @@ jobs:
           set -euo pipefail
           uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all --env staging
 
+      - name: Require mirrored-corpus embed URL (vecinita--)
+        # EV-338 / BUG-2026-09-03 — prod→staging mirrored vectors need prod embed pin.
+        # Waiver: set Environment variable VECINITA_ALLOW_STAGING_EMBED=1 only when
+        # staging intentionally re-embeds under Modal Environment staging.
+        env:
+          VECINITA_ALLOW_STAGING_EMBED: ${{ vars.VECINITA_ALLOW_STAGING_EMBED || '' }}
+        run: |
+          set -euo pipefail
+          bash scripts/deploy/check_staging_embed_mirror_align.sh
+
       - name: Sync staging DO secrets
         run: |
           set -euo pipefail

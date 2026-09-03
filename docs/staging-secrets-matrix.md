@@ -59,7 +59,7 @@ on the staging image (#212), POST feedback → inbox + staging-key traffic.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | Managed Postgres connection string (read + pgvector) |
-| `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` **base** URL (**`vecinita--`** prefix; no `/health` suffix) |
+| `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` **base** URL (**`vecinita--`** prefix; no `/health` suffix). **After a prod→staging corpus mirror (EV-338), GitHub Environment `staging` and staging DO apps must keep this on `vecinita--` (same model as prod vectors).** Do **not** point staging ChatRAG at `vecinita-staging--` embed while serving mirrored e5 vectors — scores collapse (~0.02) and H3 returns no-context (BUG-2026-09-03-staging-embed-url-mirror-regress). Deploy Staging fails closed unless `VECINITA_ALLOW_STAGING_EMBED=1`. |
 | `VECINITA_MODAL_LLM_URL` | Yes | Modal `vecinita-llm` base URL |
 | `VECINITA_MODAL_RERANK_URL` | When CE on | Modal `vecinita-rerank` base URL (**`vecinita--vecinita-rerank`** prefix; no `/health` suffix) |
 | `VECINITA_RAG_RERANK_CE` | No (default `false`) | F45 CE rerank; **staging `true`** after Modal deploy + AC-BB9; prod stays `false` (AC-FO4) |
