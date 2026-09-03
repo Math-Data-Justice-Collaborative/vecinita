@@ -2104,3 +2104,12 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
   contract; stream emits empty sources + answer + done without generate.
 - **Refs**: AC-320-04 · UJ-093 · e2e-coverage.mdc
 
+### TC-320-05: Harness stamps answer_path without cold_kind (F85 / EV-320)
+
+- **Objective**: Layer E schemas + `cold_start_bench --mode chat-ask` record
+  `answer_path=faq_bypass|rag_llm` separately from GPU `cold_kind`.
+- **Setup**: Unit — `validate_answer_path_latency_sample` + bench chat-ask with mocked ask.
+- **Expected**: FAQ sample rejects `cold_kind`; report `answer_path_summary` groups
+  percentiles; samples never include question/answer text (ADR-004).
+- **Refs**: AC-320-05 · ADR-022 EV-320 · #314
+

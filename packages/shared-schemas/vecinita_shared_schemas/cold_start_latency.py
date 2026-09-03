@@ -1,13 +1,18 @@
 """Cold-start latency harness tags and percentiles (EV-314 / #314, ADR-004 / ADR-022).
 
 Allow-listed operational fields only — never persist raw prompts or chat content.
+
+EV-320 / F85: ChatRAG FAQ samples use ``answer_path`` (``faq_bypass`` | ``rag_llm``)
+separately from GPU ``cold_kind`` — do not overload snapshot/warm kinds as FAQ.
 """
 
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from typing import Final, Literal, Required, TypedDict, cast
 
+from vecinita_shared_schemas.answer_path import ANSWER_PATHS, AnswerPath
 from vecinita_shared_schemas.json_types import JsonObject
 
 ColdKind = Literal["warm", "snapshot_restore", "snapshot_create", "clean_boot"]
@@ -60,6 +65,14 @@ class UnknownColdKindError(ValueError):
     """Raised when ``cold_kind`` is missing or not in the Layer E enum."""
 
 
+class AnswerPathColdKindConflictError(ValueError):
+    """Raised when FAQ ``answer_path`` is combined with GPU ``cold_kind`` (AC-320-05)."""
+
+
+class UnknownAnswerPathSampleError(ValueError):
+    """Raised when ``answer_path`` is missing or not in the F85 allow-list."""
+
+
 class ColdStartSample(TypedDict, total=False):
     """Validated operational sample for harness JSON / structured logs."""
 
@@ -74,6 +87,16 @@ class ColdStartSample(TypedDict, total=False):
     restore_ms: float
     wake_ms: float
     adapter_ready_ms: float
+    first_token_ms: float
+    queue_ms: float
+    ingress_ms: float
+
+
+class AnswerPathLatencySample(TypedDict, total=False):
+    """ChatRAG Layer E sample stamped by ``answer_path`` (not GPU ``cold_kind``)."""
+
+    answer_path: Required[AnswerPath]
+    event: str
     first_token_ms: float
     queue_ms: float
     ingress_ms: float
@@ -149,3 +172,65 @@ def summarize_latencies(values: list[float]) -> dict[str, float | int]:
         "p50_ms": percentile(values, 50) if values else 0.0,
         "p95_ms": percentile(values, 95) if values else 0.0,
     }
+
+
+_ANSWER_PATH_OPTIONAL_STR: Final[tuple[str, ...]] = ("event",)
+_ANSWER_PATH_OPTIONAL_FLOAT: Final[tuple[str, ...]] = (
+    "first_token_ms",
+    "queue_ms",
+    "ingress_ms",
+)
+
+
+def validate_answer_path_latency_sample(raw: JsonObject) -> AnswerPathLatencySample:
+    """Validate ChatRAG path sample; reject GPU ``cold_kind`` on ``faq_bypass`` (AC-320-05)."""
+    forbidden = sorted(FORBIDDEN_TAG_KEYS.intersection(raw))
+    if forbidden:
+        msg = f"forbidden cold-start tag keys: {', '.join(forbidden)}"
+        raise ForbiddenColdStartTagError(msg)
+
+    path_raw = raw.get("answer_path")
+    if not isinstance(path_raw, str) or path_raw not in ANSWER_PATHS:
+        msg = f"answer_path must be one of {sorted(ANSWER_PATHS)}; got {path_raw!r}"
+        raise UnknownAnswerPathSampleError(msg)
+
+    if path_raw == "faq_bypass" and "cold_kind" in raw:
+        msg = (
+            "faq_bypass must not set cold_kind — FAQ is not a GPU cold-start kind "
+            "(ADR-022 EV-320 / AC-320-05)"
+        )
+        raise AnswerPathColdKindConflictError(msg)
+
+    built: dict[str, object] = {"answer_path": path_raw}
+    for key in _ANSWER_PATH_OPTIONAL_STR:
+        if key not in raw:
+            continue
+        value = raw[key]
+        if not isinstance(value, str):
+            msg = f"{key} must be a string"
+            raise TypeError(msg)
+        built[key] = value
+    for key in _ANSWER_PATH_OPTIONAL_FLOAT:
+        if key not in raw:
+            continue
+        value = raw[key]
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            msg = f"{key} must be a number"
+            raise TypeError(msg)
+        built[key] = float(value)
+    return cast("AnswerPathLatencySample", built)
+
+
+def summarize_by_answer_path(
+    samples: Sequence[JsonObject],
+) -> dict[str, dict[str, float | int]]:
+    """Group ChatRAG harness samples by ``answer_path`` with p50/p95 (Layer E)."""
+    buckets: dict[str, list[float]] = {path: [] for path in sorted(ANSWER_PATHS)}
+    for raw in samples:
+        path = raw.get("answer_path")
+        if not isinstance(path, str) or path not in buckets:
+            continue
+        ft = raw.get("first_token_ms")
+        if isinstance(ft, (int, float)) and not isinstance(ft, bool):
+            buckets[path].append(float(ft))
+    return {path: summarize_latencies(values) for path, values in buckets.items()}
