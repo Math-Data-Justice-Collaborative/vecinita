@@ -67,6 +67,22 @@ bash scripts/deploy/staging_smoke.sh
 Daily DO backups — see `docs/staging-runbook.md` §Corpus protection and
 `scripts/infra/do_verify_staging_backups.sh`.
 
+## Test-artifact leftovers (example.com / fixture://)
+
+Do **not** leave synthetic pytest/e2e documents on managed Postgres. Classifier +
+cleanup:
+
+```bash
+uv run python scripts/ops/cleanup_corpus_test_artifacts.py --database-url "$DATABASE_URL"
+# apply (needs corpus-reset override on DO hosts):
+export VECINITA_ALLOW_CORPUS_RESET=1
+export VECINITA_CORPUS_RESET_ACK=staging-wipe-confirmed
+uv run python scripts/ops/cleanup_corpus_test_artifacts.py --database-url "$DATABASE_URL" --apply
+```
+
+Rule: `.cursor/rules/no-corpus-test-artifacts.mdc`. CI:
+`scripts/check_corpus_test_artifacts_guard.sh`.
+
 ## Related
 
 - [do-secrets-sync](../do-secrets-sync/SKILL.md) — same `prod.env` file, different risk
