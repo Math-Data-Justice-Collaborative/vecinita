@@ -17,6 +17,20 @@ _BODY = (
 )
 _TLS_HANDSHAKE_MSG = "SSL handshake failure"
 _EXPECTED_UA_RETRY_ATTEMPTS = 2
+_WINDOWS_CHROME_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    + "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+)
+_MAC_CHROME_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    + "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+)
+_SG_CAPTCHA_BODY = (
+    '<html><head><meta http-equiv="refresh" '
+    + 'content="0;/.well-known/sgcaptcha/?r=%2F&y=ipc:1.2.3.4:1">'
+    + "</meta></head></html>"
+)
+_EXPECTED_UA_RETRY_ATTEMPTS_ALL = 3
 
 
 def test_alternate_www_url_adds_www_for_apex_host() -> None:
@@ -155,3 +169,67 @@ def test_fetch_url_raises_tls_handshake_failed_without_www_recovery() -> None:
     with pytest.raises(ScrapeFetchError) as exc_info:
         _ = fetch_url("https://blocked.example/", client=client)
     assert exc_info.value.error_code == "tls_handshake_failed"
+
+
+def test_fetch_url_retries_mac_chrome_after_windows_ua_403() -> None:
+    """TC-258 / BUG-2026-09-02: Windows Chrome 403 retries Mac Chrome before fail."""
+    attempts: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        user_agent = str(request.headers.get("user-agent") or "")
+        attempts.append(user_agent)
+        if "VecinitaBot" in user_agent or user_agent == _WINDOWS_CHROME_UA:
+            return httpx.Response(403, text="Forbidden")
+        if user_agent == _MAC_CHROME_UA:
+            return httpx.Response(200, text=_BODY)
+        return httpx.Response(403, text="Forbidden")
+
+    transport = httpx.MockTransport(handler)
+    client = httpx.Client(
+        transport=transport,
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    doc = fetch_url("https://rifreeclinic.org/", client=client)
+    assert doc.title == "Community"
+    assert len(attempts) == _EXPECTED_UA_RETRY_ATTEMPTS_ALL
+    assert attempts[1] == _WINDOWS_CHROME_UA
+    assert attempts[2] == _MAC_CHROME_UA
+
+
+def test_fetch_url_rejects_siteground_captcha_header() -> None:
+    """TC-258 / BUG-2026-09-02: sg-captcha challenge header is host_waf_blocked."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            202,
+            text=_SG_CAPTCHA_BODY,
+            headers={"sg-captcha": "challenge"},
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = httpx.Client(
+        transport=transport,
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    with pytest.raises(ScrapeFetchError) as exc_info:
+        _ = fetch_url("https://rifreeclinic.org/", client=client)
+    assert exc_info.value.error_code == "host_waf_blocked"
+
+
+def test_fetch_url_rejects_siteground_captcha_body_without_header() -> None:
+    """TC-258: /.well-known/sgcaptcha/ body alone is treated as WAF block."""
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, text=_SG_CAPTCHA_BODY)
+
+    transport = httpx.MockTransport(handler)
+    client = httpx.Client(
+        transport=transport,
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    with pytest.raises(ScrapeFetchError) as exc_info:
+        _ = fetch_url("https://rifreeclinic.org/", client=client)
+    assert exc_info.value.error_code == "host_waf_blocked"

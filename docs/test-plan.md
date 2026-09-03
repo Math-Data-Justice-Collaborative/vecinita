@@ -202,9 +202,15 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 ### TC-258: Scrape host fallbacks (F7, EV-249 / #249)
 
-- **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries alternate browser headers; stable operator `error_code` when blocked.
-- **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with VecinitaBot UA + success with Chrome UA; all 403.
-- **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with `tls_handshake_failed` or `host_waf_blocked` when exhausted.
+- **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries
+  ordered browser UAs (Windows then Mac Chrome); SiteGround captcha interstitials
+  are WAF blocks; stable operator `error_code` when blocked (BUG-2026-09-02).
+- **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with
+  VecinitaBot/Windows UA + success with Mac Chrome UA; all 403; `sg-captcha`
+  challenge 202.
+- **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with
+  `tls_handshake_failed` or `host_waf_blocked` when exhausted (never empty success
+  on captcha).
 
 ### TC-259: Suggested question chips (UJ-081, F1, EV-216 / #216)
 

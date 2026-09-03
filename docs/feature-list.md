@@ -160,9 +160,12 @@
   (`Loading… Sign in`) fail with `drive_auth_required` and are **not** upserted. Private,
   folder-only, and login-required links are unsupported — upload the file or paste an export
   URL. Multi-URL ingest soft-fails per URL with a browser-like User-Agent (#243).
-  Apex hosts with broken TLS may retry `www.` (#249). Persistent `403` from
-  datacenter IPs surfaces `host_waf_blocked`; TLS without recovery surfaces
-  `tls_handshake_failed` (operator-visible in job metrics).
+  Apex hosts with broken TLS may retry `www.` (#249). Persistent `403` retries
+  ordered browser UAs (Windows then Mac Chrome) before surfacing
+  `host_waf_blocked` (#249 / BUG-2026-09-02). SiteGround captcha interstitials
+  (`sg-captcha` / `/.well-known/sgcaptcha/`) are treated as WAF blocks, not empty
+  successful scrapes. TLS without recovery surfaces `tls_handshake_failed`
+  (operator-visible in job metrics).
 - **Source**: User interview 01-requirements; #235 / #243
 
 ### F8: Ingest job queue & status API
