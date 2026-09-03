@@ -6,7 +6,14 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_validator,
+    model_validator,
+)
 
 from vecinita_shared_schemas.eval_config import EvalConfig, EvalConfigPartial, EvalRunMode
 from vecinita_shared_schemas.json_types import JsonObject
@@ -32,6 +39,15 @@ class ChunkUpsert(BaseModel):
     chunk_index: int = Field(..., ge=0)
     text: str
     embedding: list[float] = Field(..., min_length=384, max_length=384)
+
+    @field_validator("text")
+    @classmethod
+    def reject_nul_bytes(cls, value: str) -> str:
+        """Postgres text cannot store NUL (BUG-2026-09-03)."""
+        if "\x00" in value:
+            msg = "chunk text must not contain NUL (0x00) bytes"
+            raise ValueError(msg)
+        return value
 
 
 class ChunkDetail(BaseModel):
@@ -67,6 +83,15 @@ class DocumentUpsert(BaseModel):
     tags: list[TagInput] | None = Field(default=None, max_length=10)
     paired_document_id: UUID | None = None
     publish_status: PublishStatus = "published"
+
+    @field_validator("body_text")
+    @classmethod
+    def reject_nul_bytes_in_body(cls, value: str | None) -> str | None:
+        """Postgres text cannot store NUL (BUG-2026-09-03 Drive PDF binary)."""
+        if value is not None and "\x00" in value:
+            msg = "body_text must not contain NUL (0x00) bytes"
+            raise ValueError(msg)
+        return value
 
     @model_validator(mode="after")
     def require_chunks_or_body_text(self) -> DocumentUpsert:

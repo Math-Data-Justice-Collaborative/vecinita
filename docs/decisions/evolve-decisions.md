@@ -1774,3 +1774,23 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: feature-list.md §F85] [Spec: ADR-022 §Amendment EV-320] [Corpus: api] [Corpus: config] [Corpus: tests] [Corpus: ADR-004]
 
+
+---
+
+## EV-338 — Staging corpus re-seed from prod (2026-09-03)
+
+**Session:** `EV-338-staging-reseed-from-prod`  
+**Ticket:** [#338](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/338)  
+**Intake / context / requirements:** operator **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-338-D1 | Feature id | **F83 / ADR-054** ops — no new Fn |
+| EV-338-D2 | Method | Selective `pg_dump`/`pg_restore` corpus tables (prod read-only → staging) |
+| EV-338-D3 | Tables | Include documents/chunks/embeddings/tags/document_tags/chunk_tags; exclude jobs/metrics/eval/shadow |
+| EV-338-D4 | Docs | staging-runbook §Prod → staging corpus mirror; UJ-094; TC-321–324 |
+| EV-338-D5 | Safety | Staging write AskQuestion + corpus-db-safety ack; never mutate prod |
+| EV-338-D6 | Done | Non-empty staging corpus + alembic heads + H3 + zero test-artifact URLs |
+
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push] [Spec: ADR-054]
+

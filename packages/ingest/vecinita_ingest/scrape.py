@@ -206,6 +206,26 @@ def _reject_drive_shell_if_needed(*, source_url: str, text: str) -> None:
         raise DriveFetchError(msg, error_code="drive_auth_required")
 
 
+def _response_looks_like_pdf(
+    content: bytes,
+    *,
+    content_type: str,
+    final_url: str,
+) -> bool:
+    """True when headers, URL suffix, or PDF magic indicate a PDF body.
+
+    Drive ``uc?export=download`` often returns ``application/octet-stream`` without a
+    ``.pdf`` suffix (BUG-2026-09-03).
+    """
+    if "application/pdf" in content_type:
+        return True
+    if final_url.lower().split("?", 1)[0].endswith(".pdf"):
+        return True
+    # %PDF-1.x magic (allow leading whitespace / BOM noise)
+    head = content.lstrip()[:8]
+    return head.startswith(b"%PDF")
+
+
 def _document_from_response(
     response: httpx.Response,
     *,
@@ -214,12 +234,15 @@ def _document_from_response(
     content_type = (response.headers.get("content-type") or "").lower()
     final_url = str(response.url)
     drive = is_google_drive_url(original_url)
+    content = response.content
 
-    if drive and ("application/pdf" in content_type or final_url.lower().endswith(".pdf")):
+    if _response_looks_like_pdf(content, content_type=content_type, final_url=final_url):
         try:
-            text = extract_pdf_text(response.content)
+            text = extract_pdf_text(content)
         except PdfExtractError as exc:
-            raise DriveFetchError(str(exc), error_code="drive_unsupported") from exc
+            if drive:
+                raise DriveFetchError(str(exc), error_code="drive_unsupported") from exc
+            raise ScrapeFetchError(str(exc), error_code="pdf_extract_failed") from exc
         return ScrapedDocument(url=original_url, title=None, text=text)
 
     if drive and ("text/plain" in content_type or "text/csv" in content_type):
