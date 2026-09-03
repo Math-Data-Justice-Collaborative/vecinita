@@ -13,8 +13,9 @@ Prod pin (RD-169 / Slice D): ``ALLOW_MODEL_RELOAD=False`` — request ``model_id
 does not reload the vLLM engine. Sandbox/eval model switches use
 ``vecinita-llm-playground`` (shared ``llm-models`` volume).
 
-F77 LoRA (ADR-053): after human promote, load adapter from volume
-``llm-finetune-adapters`` when ``VECINITA_FINETUNE_ADAPTER_ID`` is set. Playground
+F77 LoRA (ADR-053 / EV-316): after human promote, load adapter from volume
+``llm-finetune-adapters`` when ``VECINITA_FINETUNE_ADAPTER_ID`` is set and verify
+``VECINITA_FINETUNE_ADAPTER_HASH`` (SHA-256) on post-restore. Playground
 uses ``VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID`` for pre-promote candidates.
 """
 
@@ -25,8 +26,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import uuid
-from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Final, Literal
 
@@ -38,9 +37,12 @@ from infra.modal.llm_model_registry import (
 )
 from infra.modal.llm_service_core import LlmServiceCore
 from infra.modal.repo_paths import MODAL_ROOT_MOUNT, resolve_repo_root
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field
 from vecinita_shared_schemas.finetune import (
+    build_prod_llm_health,
     decide_serve_adapter_id,
+    parse_finetune_adapter_hash,
+    parse_finetune_adapter_id,
     resolve_finetune_adapter_dir,
 )
 
@@ -62,6 +64,11 @@ DEFAULT_PLAYGROUND_MODEL_ID: Final[str] = "qwen2.5:1.5b-instruct"
 # Playground app sets ALLOW_MODEL_RELOAD=True on its own module.
 ALLOW_MODEL_RELOAD: Final[bool] = False
 ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
+GPU_SNAPSHOT_ENV = "VECINITA_LLM_GPU_SNAPSHOT"
+LLM_SCALEDOWN_WINDOW_ENV = "VECINITA_LLM_SCALEDOWN_WINDOW"
+_DEFAULT_LLM_SCALEDOWN_WINDOW: Final[int] = 300
+_MIN_LLM_SCALEDOWN_WINDOW: Final[int] = 60
+_MAX_LLM_SCALEDOWN_WINDOW: Final[int] = 600
 _PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
 _PROXY_ENV: Final[str] = "VECINITA_MODAL_PROXY_KEY"
 _MANIFEST_PATH = Path("/models/manifest.json")
@@ -105,6 +112,57 @@ def _enforce_eager_from_env() -> bool:
     """S001 T7 A/B: toggle CUDA graph capture for snapshot cold-start experiments."""
     raw = os.environ.get(ENFORCE_EAGER_ENV, "true").strip().lower()
     return raw not in ("0", "false", "no", "off")
+
+
+def _gpu_snapshot_from_env() -> bool:
+    """ADR-022 EV-313 / #313: prod GPU memory snapshot kill-switch (default off)."""
+    raw = os.environ.get(GPU_SNAPSHOT_ENV, "false").strip().lower()
+    return raw in ("1", "true", "yes", "on")
+
+
+def _scaledown_window_from_env() -> int:
+    """Parse prod GPU scaledown window from deploy-import env (TC-319-01)."""
+    raw = os.environ.get(LLM_SCALEDOWN_WINDOW_ENV)
+    if raw is None:
+        return _DEFAULT_LLM_SCALEDOWN_WINDOW
+    try:
+        window = int(raw.strip())
+    except ValueError as exc:
+        msg = (
+            f"{LLM_SCALEDOWN_WINDOW_ENV} must be an integer between "
+            f"{_MIN_LLM_SCALEDOWN_WINDOW} and {_MAX_LLM_SCALEDOWN_WINDOW} seconds"
+        )
+        raise ValueError(msg) from exc
+    if not _MIN_LLM_SCALEDOWN_WINDOW <= window <= _MAX_LLM_SCALEDOWN_WINDOW:
+        msg = (
+            f"{LLM_SCALEDOWN_WINDOW_ENV} must be between "
+            f"{_MIN_LLM_SCALEDOWN_WINDOW} and {_MAX_LLM_SCALEDOWN_WINDOW} seconds"
+        )
+        raise ValueError(msg)
+    return window
+
+
+# Fixed at ``modal deploy`` import time (not container Secret runtime). Set
+# ``VECINITA_LLM_GPU_SNAPSHOT`` in the *deploy* environment, then redeploy (TC-313-01).
+_PROD_GPU_SNAPSHOT: Final[bool] = _gpu_snapshot_from_env()
+_PROD_SCALEDOWN_WINDOW: Final[int] = _scaledown_window_from_env()
+
+
+def _prod_health_payload() -> dict[str, str | None]:
+    """Ready metadata for ``GET /health`` (EV-316 / TC-316-02)."""
+    git_commit = os.environ.get("VECINITA_GIT_COMMIT") or os.environ.get("GITHUB_SHA")
+    if git_commit is not None:
+        git_commit = git_commit.strip() or None
+    try:
+        adapter_hash = parse_finetune_adapter_hash()
+    except ValueError:
+        adapter_hash = None
+    return build_prod_llm_health(
+        base_model_id=DEFAULT_PLAYGROUND_MODEL_ID,
+        adapter_id=parse_finetune_adapter_id(),
+        adapter_hash=adapter_hash,
+        git_commit=git_commit,
+    )
 
 
 LLM_MAX_MODEL_LEN: Final[int] = 2048
@@ -295,6 +353,8 @@ adapters_volume = modal.Volume.from_name(ADAPTERS_VOLUME_NAME, create_if_missing
 pull_jobs = modal.Dict.from_name("vecinita-llm-pull-jobs", create_if_missing=True)
 
 _LLM_ASGI_SECRETS = [modal.Secret.from_name("vecinita-llm")]
+# GPU workers: promote pin / eager A/B only — do not mount ASGI proxy key (PR review).
+_LLM_GPU_SECRETS = [modal.Secret.from_name("vecinita-llm-gpu")]
 
 
 def _adapter_load_for_role(role: ServeRole) -> tuple[str | None, str | None]:
@@ -394,10 +454,13 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     image=image,
     gpu="T4",
     volumes={"/models": model_volume, "/adapters": adapters_volume},
-    scaledown_window=300,
+    scaledown_window=_PROD_SCALEDOWN_WINDOW,
     timeout=900,
-    # ADR-037: model_id switching requires clean vLLM init — GPU snapshot breaks NCCL on reload.
-    enable_memory_snapshot=False,
+    secrets=_LLM_GPU_SECRETS,
+    # ADR-022 EV-313: prod-only GPU snapshots behind VECINITA_LLM_GPU_SNAPSHOT (default off).
+    # Playground stays off (ADR-037 reload/NCCL). Enable = set env at *modal deploy* time.
+    enable_memory_snapshot=_PROD_GPU_SNAPSHOT,
+    experimental_options=({"enable_gpu_snapshot": True} if _PROD_GPU_SNAPSHOT else {}),
 )
 class LlmService(LlmServiceCore):
     """Prod GPU service — pinned model; LoRA after human promote (ADR-037 / ADR-053)."""
@@ -405,9 +468,23 @@ class LlmService(LlmServiceCore):
     serve_role: ClassVar[ServeRole] = "prod"
     allow_model_reload: ClassVar[bool] = ALLOW_MODEL_RELOAD
 
-    @modal.enter()
-    def load_model(self) -> None:
-        super().load_model()
+    if _PROD_GPU_SNAPSHOT:
+
+        @modal.enter(snap=True)
+        def load_model_for_snapshot(self) -> None:
+            """Build pinned base engine, warm, Level-1 sleep — then Modal captures GPU snap."""
+            self._snapshot_enter_build()
+
+        @modal.enter(snap=False)
+        def restore_after_snapshot(self) -> None:
+            """Wake engine and bind promoted LoRA after restore (base-only snapshot)."""
+            self._snapshot_enter_restore()
+
+    else:
+
+        @modal.enter()
+        def load_model(self) -> None:
+            super().load_model()
 
     @modal.exit()
     def unload_model(self) -> None:
@@ -460,109 +537,20 @@ class LlmService(LlmServiceCore):
 )
 @modal.asgi_app()
 def fastapi_app():
-    """Starlette ASGI — health, generate, model list/pull (ADR-037 unified surface)."""
-    from starlette.applications import Starlette
-    from starlette.responses import JSONResponse, StreamingResponse
-    from starlette.routing import Route
+    """Starlette ASGI — thin CPU ingress (EV-317); GPU via LlmService methods."""
+    from infra.modal.llm_asgi import AsgiRouteDeps, build_prod_asgi_app
 
-    service = LlmService()
+    def _spawn_pull(job_id: str, model_id: str) -> None:
+        _ = pull_model_job.spawn(job_id, model_id)
 
-    async def health(_: Request) -> JSONResponse:
-        return JSONResponse({"status": "ok"})
-
-    async def warm(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        raw = await request.body()
-        try:
-            payload = WarmRequest.model_validate(json.loads(raw)) if raw else WarmRequest()
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
-        try:
-            loaded = await service.warm_model.remote.aio(payload.model_id)
-        except RuntimeError as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_GATEWAY)
-        return JSONResponse(
-            {
-                "status": "ok",
-                "model_id": payload.model_id or DEFAULT_PLAYGROUND_MODEL_ID,
-                "loaded": loaded,
-            }
-        )
-
-    async def list_models(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        return JSONResponse(_list_models_payload())
-
-    async def pull_model(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        try:
-            payload = PullRequest.model_validate(json.loads(await request.body()))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
-        try:
-            resolve_hf_repo(payload.model_id)
-        except ValueError as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_REQUEST)
-        job_id = str(uuid.uuid4())
-        _ = pull_model_job.spawn(job_id, payload.model_id)
-        _register_pending_model(payload.model_id)
-        return JSONResponse(
-            {
-                "job_id": job_id,
-                "model_id": payload.model_id,
-                "status": "pulling",
-            },
-            status_code=HTTPStatus.ACCEPTED,
-        )
-
-    async def generate(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        try:
-            payload = GenerateRequest.model_validate(json.loads(await request.body()))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=422)
-        try:
-            text = await service.complete.remote.aio(
-                payload.prompt,
-                max_tokens=payload.max_tokens,
-                temperature=payload.temperature,
-                model_id=payload.model_id,
-            )
-        except RuntimeError as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_GATEWAY)
-        return JSONResponse({"text": text})
-
-    async def generate_stream(request: Request) -> StreamingResponse | JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        try:
-            payload = GenerateRequest.model_validate(json.loads(await request.body()))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=422)
-
-        def event_stream():
-            for token in service.stream_tokens.remote_gen(
-                payload.prompt,
-                max_tokens=payload.max_tokens,
-                temperature=payload.temperature,
-                model_id=payload.model_id,
-            ):
-                yield f"data: {json.dumps({'token': token})}\n\n"
-            yield f"data: {json.dumps({'done': True})}\n\n"
-
-        return StreamingResponse(event_stream(), media_type="text/event-stream")
-
-    return Starlette(
-        routes=[
-            Route("/health", health, methods=["GET"]),
-            Route("/warm", warm, methods=["POST"]),
-            Route("/models/ollama", list_models, methods=["GET"]),
-            Route("/models/ollama/pull", pull_model, methods=["POST"]),
-            Route("/generate", generate, methods=["POST"]),
-            Route("/generate/stream", generate_stream, methods=["POST"]),
-        ]
+    return build_prod_asgi_app(
+        LlmService(),
+        AsgiRouteDeps(
+            health_payload=_prod_health_payload,
+            list_models_payload=_list_models_payload,
+            resolve_hf_repo=resolve_hf_repo,
+            register_pending_model=_register_pending_model,
+            spawn_pull_job=_spawn_pull,
+            default_model_id=DEFAULT_PLAYGROUND_MODEL_ID,
+        ),
     )

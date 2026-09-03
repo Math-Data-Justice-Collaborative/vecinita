@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Literal, cast
 
@@ -34,11 +35,18 @@ from vecinita_tagging.llm_client import LlmTagClient
 from vecinita_tagging.vocabulary import load_seed_vocabulary, vocabulary_slugs
 
 from vecinita_chat_rag_backend.db import create_app_engine
+from vecinita_chat_rag_backend.faq.match import (
+    FaqStore,
+    default_faq_store_path,
+    load_faq_store,
+    match_faq,
+)
 from vecinita_chat_rag_backend.rag_production_config import load_active_rag_config
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
     from vecinita_rag.rerank import CrossEncoderScorer
+    from vecinita_shared_schemas.answer_path import AnswerPath
 
     from vecinita_chat_rag_backend.config import ChatRagSettings
 
@@ -75,6 +83,7 @@ def _to_ask_response(
     result: RagAnswer,
     *,
     cache_hit: CacheHit = "none",
+    answer_path: AnswerPath = "rag_llm",
 ) -> AskResponse:
     sources = [
         Source(
@@ -96,6 +105,7 @@ def _to_ask_response(
         language=language,
         sources=sources,
         cache_hit=cache_hit,
+        answer_path=answer_path,
     )
 
 
@@ -136,11 +146,12 @@ class _FaithfulnessLlmAdapter:
 
 @dataclass
 class AskStreamSession:
-    """SSE ingredients: sources, cache_hit, and token iterator (F43)."""
+    """SSE ingredients: sources, cache_hit, answer_path, and token iterator (F43 / F85)."""
 
     sources: list[Source]
     cache_hit: CacheHit
     tokens: Iterator[str]
+    answer_path: AnswerPath = "rag_llm"
 
 
 class ChatRagService:
@@ -169,12 +180,14 @@ class ChatRagService:
         self._config_engine = config_engine
         self._answer_cache = answer_cache
         self._ce_scorer = ce_scorer
+        self._faq_store: FaqStore | None = None
         if self._answer_cache is None and settings is not None and settings.rag_cache:
             self._answer_cache = AnswerCache(
                 ttl_s=settings.rag_cache_ttl_s,
                 max_entries=settings.rag_cache_max_entries,
                 semantic_threshold=settings.rag_cache_semantic_threshold,
             )
+        self._load_faq_store()
 
     @classmethod
     def from_settings(cls, settings: ChatRagSettings) -> ChatRagService:
@@ -224,6 +237,33 @@ class ChatRagService:
             settings=settings,
             config_engine=config_engine,
             ce_scorer=ce_scorer,
+        )
+
+    def _load_faq_store(self) -> None:
+        """Load reviewed FAQ YAML when fast-path is enabled."""
+        enabled = True if self._settings is None else self._settings.faq_fastpath_enabled
+        if not enabled:
+            self._faq_store = None
+            return
+        path_raw = None if self._settings is None else self._settings.faq_store_path
+        path = Path(path_raw) if path_raw else default_faq_store_path()
+        self._faq_store = load_faq_store(path)
+
+    def _try_faq_bypass(self, request: AskRequest) -> AskResponse | None:
+        """Return canned FAQ response when a same-language reviewed variant matches."""
+        if self._faq_store is None:
+            return None
+        language_raw = self._effective_language(request)
+        language: Literal["en", "es"] = "es" if language_raw == "es" else "en"
+        hit = match_faq(self._faq_store, request.question, language=language)
+        if hit is None:
+            return None
+        return AskResponse(
+            answer=hit.answer,
+            language=language,
+            sources=[],
+            cache_hit="none",
+            answer_path="faq_bypass",
         )
 
     def _effective_language(self, request: AskRequest) -> str:
@@ -436,6 +476,9 @@ class ChatRagService:
 
     def ask(self, request: AskRequest) -> AskResponse:
         """Retrieve context and generate a non-streaming answer (F43 cache cascade)."""
+        faq = self._try_faq_bypass(request)
+        if faq is not None:
+            return faq
         production = self._production_config()
         language = self._effective_language(request)
         if not self._cache_enabled():
@@ -527,6 +570,14 @@ class ChatRagService:
 
     def stream_ask(self, request: AskRequest) -> AskStreamSession:
         """Prepare SSE stream with sources and cache_hit (F43)."""
+        faq = self._try_faq_bypass(request)
+        if faq is not None:
+            return AskStreamSession(
+                sources=[],
+                cache_hit="none",
+                tokens=iter((faq.answer,)),
+                answer_path="faq_bypass",
+            )
         production = self._production_config()
         language = self._effective_language(request)
         if not self._cache_enabled():

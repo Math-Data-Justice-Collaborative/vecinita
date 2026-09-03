@@ -34,10 +34,20 @@ DEFAULT_SCRAPE_USER_AGENT: Final[str] = (
     + "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 )
 _HTTP_FORBIDDEN: Final[int] = 403
-_FALLBACK_SCRAPE_USER_AGENT: Final[str] = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-    + "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+# Ordered WAF retries after default VecinitaBot UA (#249 / BUG-2026-09-02).
+# Some SiteGround hosts block the Windows Chrome identity but accept Mac Chrome.
+_FALLBACK_SCRAPE_USER_AGENTS: Final[tuple[str, ...]] = (
+    (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        + "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    ),
+    (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+        + "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    ),
 )
+# Back-compat alias for callers/tests that referenced the first fallback UA.
+_FALLBACK_SCRAPE_USER_AGENT: Final[str] = _FALLBACK_SCRAPE_USER_AGENTS[0]
 
 
 class ScrapeFetchError(Exception):
@@ -65,10 +75,10 @@ def scrape_headers() -> dict[str, str]:
     }
 
 
-def _fallback_scrape_headers() -> dict[str, str]:
+def _fallback_scrape_headers(user_agent: str | None = None) -> dict[str, str]:
     """Browser headers without VecinitaBot identity for WAF retry (#249)."""
     return {
-        "User-Agent": _FALLBACK_SCRAPE_USER_AGENT,
+        "User-Agent": user_agent or _FALLBACK_SCRAPE_USER_AGENT,
         "Accept": scrape_headers()["Accept"],
         "Accept-Language": "en-US,en;q=0.9",
         "Upgrade-Insecure-Requests": "1",
@@ -77,6 +87,14 @@ def _fallback_scrape_headers() -> dict[str, str]:
         "Sec-Fetch-Site": "none",
         "Sec-Fetch-User": "?1",
     }
+
+
+def _waf_retry_header_sets() -> list[dict[str, str]]:
+    """Default scrape headers plus ordered non-bot UA fallbacks."""
+    return [
+        scrape_headers(),
+        *(_fallback_scrape_headers(user_agent=ua) for ua in _FALLBACK_SCRAPE_USER_AGENTS),
+    ]
 
 
 def alternate_www_url(url: str) -> str | None:
@@ -214,6 +232,24 @@ def _document_from_response(
     return doc
 
 
+def _is_waf_challenge_response(response: httpx.Response) -> bool:
+    """True when the host returned a bot/CAPTCHA interstitial (e.g. SiteGround)."""
+    sg_captcha = str(response.headers.get("sg-captcha") or "").lower()
+    if sg_captcha == "challenge":
+        return True
+    # Small meta-refresh shells also appear without the header on some edges.
+    snippet = response.text[:2000].lower()
+    return "/.well-known/sgcaptcha/" in snippet
+
+
+def _raise_for_scrape_status(response: httpx.Response) -> None:
+    """Raise HTTP errors and treat WAF captcha interstitials as retryable blocks."""
+    if _is_waf_challenge_response(response):
+        msg = f"Client error '403 Forbidden' for url '{response.url}' " + "(WAF captcha challenge)"
+        raise httpx.HTTPStatusError(msg, request=response.request, response=response)
+    _ = response.raise_for_status()
+
+
 def _fetch_url_once(
     url: str,
     *,
@@ -223,7 +259,7 @@ def _fetch_url_once(
     if is_google_drive_url(url):
         fetch_target = rewrite_drive_fetch_url(url)
     response = client.get(fetch_target)
-    _ = response.raise_for_status()
+    _raise_for_scrape_status(response)
     return _document_from_response(response, original_url=url)
 
 
@@ -236,7 +272,7 @@ def _fetch_with_headers(
     request = client.build_request("GET", url)
     request.headers.update(headers)
     response = client.send(request, follow_redirects=True)
-    _ = response.raise_for_status()
+    _raise_for_scrape_status(response)
     return _document_from_response(response, original_url=url)
 
 
@@ -275,7 +311,7 @@ def fetch_url(
         if www_url is not None:
             url_candidates.append(www_url)
 
-        header_sets: list[dict[str, str]] = [scrape_headers(), _fallback_scrape_headers()]
+        header_sets = _waf_retry_header_sets()
 
         last_connect: httpx.ConnectError | None = None
         last_forbidden: httpx.HTTPStatusError | None = None
@@ -290,7 +326,9 @@ def fetch_url(
                     last_connect = exc
                     break
                 except httpx.HTTPStatusError as exc:
-                    if exc.response.status_code == _HTTP_FORBIDDEN:
+                    if exc.response.status_code == _HTTP_FORBIDDEN or _is_waf_challenge_response(
+                        exc.response
+                    ):
                         last_forbidden = exc
                         continue
                     raise

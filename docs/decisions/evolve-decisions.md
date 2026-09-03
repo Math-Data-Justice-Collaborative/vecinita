@@ -1653,3 +1653,124 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: ADR-054] [Corpus: feature-list.md §F35] [Corpus: feature-list.md §F68] [Corpus: staging] #305
 
+
+---
+
+## EV-313-prod-gpu-snapshots — Prod-only GPU snapshots (#313) (2026-08-31)
+
+**Title:** Re-enable Modal GPU memory snapshots on pinned prod `vecinita-llm`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-313-prod-gpu-snapshots`  
+**Status:** closed (Build + staging TC-313-02 + prod enable)  
+**Date:** 2026-08-31  
+**Epic:** [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311) · slice [#313](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/313)  
+**Merge:** [#321](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/321) → `stage` @ `0b08fbeb`
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-313-D1 | Kill-switch | `VECINITA_LLM_GPU_SNAPSHOT`; unset = false until staging green |
+| EV-313-D2 | LoRA | Minimal post-restore resolve in #313 Build (cite #316); base-only snapshot |
+| EV-313-D3 | New Fn | None — ADR-022 amendment; not F40/F64 |
+| EV-313-D4 | Playground | Snapshots remain off |
+| EV-313-D5 | SLO | Honest Useful/Green/Red bands; no silent “sub-second” claim |
+| EV-313-D6 | Prod enable | Staging evidence + AskQuestion |
+| EV-313-D7 | Staging cutover | `MODAL_ENVIRONMENT=staging` secret sync (`vecinita-llm-gpu`) + deploy with `VECINITA_LLM_GPU_SNAPSHOT=true`; TC-313-02 PASS (restore log + H1/H3) |
+| EV-313-D8 | Prod cutover | Operator approved option 1; `main` sync + deploy with snapshot **true**; logs show create + restore |
+
+**Evidence:** session `reports/tc-313-02-staging.md`, `reports/tc-313-02-prod-enable.md`  
+**Docs delta:** ADR-022 amendment · `config-spec.md` · `infra/modal/README.md` · `adr/README.md` · `CORPUS.md` cite · `test-plan.md` TC-313-01/02 · this log
+
+**Cites:** [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Corpus: ADR-037] [Corpus: ADR-004] [Corpus: ADR-053] [Corpus: config] #313 #311 #316
+
+### PR review advisories addressed (2026-08-31)
+
+| Advisory | Fix |
+|----------|-----|
+| Misleading “Secret + redeploy” | Docs/comments: kill-switch is **deploy-time** `modal deploy` env |
+| Silent sleep/wake skip | Fail closed with `TypeError` when `sleep`/`wake_up` missing |
+| Proxy key on GPU workers | Prod `LlmService` mounts `vecinita-llm-gpu` only; ASGI keeps `vecinita-llm` |
+
+**Ops note:** CD does not auto-export `VECINITA_LLM_GPU_SNAPSHOT`; operators must set it in the deploy shell (or extend CD later). Staging + prod Environments were enabled manually 2026-08-31.
+
+**Next #311 child (recommended):** [#316](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/316) LoRA-after-restore completeness (ready metadata + promote matrix). Alternates: [#314](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/314) latency harness · [#318](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/318) async GPU `/warm` prewarm.
+
+---
+
+## EV-316-lora-post-restore — LoRA after snapshot restore (#316) (2026-08-31)
+
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-316-lora-post-restore`  
+**Ticket:** [#316](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/316) (child of #311)  
+**Intake:** option 2 (RAG preset angles); context option 1; requirements option 1 + **SHA-256** integrity
+
+| ID | Topic | Decision |
+|----|-------|----------|
+| EV-316-D1 | Resolve mode | Default `VECINITA_LLM_LORA_RESOLVE=post_restore`; `snapshot_bound` legacy/debug only |
+| EV-316-D2 | Integrity | **SHA-256** canonical adapter-dir digest; `VECINITA_FINETUNE_ADAPTER_HASH`; `hmac.compare_digest`; reject symlink escape; no MD5/SHA-1/CRC |
+| EV-316-D3 | Fail closed | Mismatch / missing dir → raise before ready |
+| EV-316-D4 | Ready metadata | Extend prod `GET /health` with base_model_id, adapter_id, adapter_hash, snapshot_schema, git_commit |
+| EV-316-D5 | Tests / AC | TC-316-01, TC-316-02; AC-FT11 |
+| EV-316-D6 | Out of scope | UI; baking LoRA into snapshot; #314/#318; F77 promote UX |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-316] [Spec: ADR-053] [Corpus: feature-list.md §F80] [Corpus: config] [Corpus: api] [Corpus: tests] [Corpus: acceptance]
+
+---
+
+## EV-314 + EV-318 — Layer E harness + async GPU prewarm (2026-09-02)
+
+**Sessions:** `EV-314-cold-start-latency-harness`, `EV-318-async-gpu-prewarm` (parallel)  
+**Tickets:** [#314](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/314), [#318](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/318) (children of #311)  
+**Intake:** operator **A** + recommended parallel; context **Proceed with recommended** (1+4+7+10)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-314-D1 | Samples | Staged N≈20 smoke → ≥100 for publishable p95 |
+| EV-314-D2 | Stamps | Modal-only first; DO-receive deferred |
+| EV-314-D3 | Metrics surface | Structured logs + harness JSON; F84 dimensions deferred |
+| EV-314-D4 | Feature id | No new Fn — ADR-022 Layer E |
+| EV-318-D1 | Predictors | Mount-only this cycle |
+| EV-318-D2 | Modal warm | `.spawn()` / detach (mirror embedding); not health-only |
+| EV-318-D3 | F40/F64 | Keep residual wait UX |
+| EV-318-D4 | Feature id | No new Fn — ADR-022 prewarm lever / S001 T11 |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-314/EV-318] [Corpus: api] [Corpus: tests] [Corpus: acceptance] [Corpus: feature-list.md §F40]
+
+---
+
+## EV-315 + EV-317 + EV-319 — Seed snapshots, thin ingress, scaledown (2026-09-02)
+
+**Sessions:** `EV-315-seed-gpu-snapshots`, `EV-317-thin-cpu-ingress`, `EV-319-scaledown-window` (parallel)  
+**Tickets:** [#315](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/315), [#317](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/317), [#319](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/319) (children of #311)  
+**Intake:** operator **1** parallel packaging; requirements **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-315-D1 | Delivery | Staging script + runbook; optional advisory CI — not hard CD gate |
+| EV-315-D2 | Done signal | `#314` `cold_kind` → `snapshot_restore`; fail closed on create |
+| EV-315-D3 | Prod | AskQuestion-gated prime |
+| EV-317-D1 | Depth | Lazy-import + thin ASGI first; CPU snap only if profile warrants |
+| EV-317-D2 | Image | Prefer same image + lazy imports; defer second image |
+| EV-319-D1 | Evidence | Timestamp-only gaps; thin traffic → default **120s** + env revert |
+| EV-319-D2 | Config | `VECINITA_LLM_SCALEDOWN_WINDOW` at deploy-import; no min/buffer containers |
+| EV-*-D0 | Feature id | No new Fn — ADR-022 Layers A/B/C under #311 |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-315/EV-317/EV-319] [Corpus: config] [Corpus: tests] [Corpus: acceptance] [Corpus: staging] [Corpus: ADR-004]
+
+---
+
+## EV-320 — FAQ fast-path Layer D (F85) (2026-09-02)
+
+**Session:** `EV-320-chat-rag-wire-faq-fast-path-into-cold-start-late`  
+**Tickets:** [#320](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/320), [#79](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/79) (parent [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311))  
+**Intake / context / requirements:** operator **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-320-D1 | Feature id | **F85** (not F79 freshness) |
+| EV-320-D2 | Match | Exact + normalized; same-language only |
+| EV-320-D3 | Metadata | `answer_path` faq_bypass \| rag_llm; keep `cold_kind` GPU-only |
+| EV-320-D4 | Kill-switch | `VECINITA_FAQ_FASTPATH_ENABLED` default true |
+| EV-320-D5 | UI | No #81 admin editor this cycle; API e2e required |
+| EV-320-D6 | Seed content | In-repo bilingual YAML from #79 topics; replaceable |
+| EV-320-D7 | Ops | Spec first; staging seed+scaledown after gate; prod AskQuestion |
+
+**Cites:** [Corpus: feature-list.md §F85] [Spec: ADR-022 §Amendment EV-320] [Corpus: api] [Corpus: config] [Corpus: tests] [Corpus: ADR-004]
+

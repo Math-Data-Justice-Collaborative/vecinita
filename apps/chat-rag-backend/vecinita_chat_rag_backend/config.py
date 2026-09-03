@@ -212,6 +212,9 @@ class ChatRagSettings:
     energy_gpu_util: float = 0.5
     energy_gco2e_per_kwh: float = 386.0
     energy_car_gco2e_per_km: float = 251.0
+    # F85 / EV-320 FAQ fast-path
+    faq_fastpath_enabled: bool = True
+    faq_store_path: str | None = None
 
     @classmethod
     def from_env(cls) -> ChatRagSettings:
@@ -319,4 +322,6 @@ class ChatRagSettings:
             energy_gpu_util=_float_env("VECINITA_ENERGY_GPU_UTIL", 0.5),
             energy_gco2e_per_kwh=_float_env("VECINITA_ENERGY_GCO2E_PER_KWH", 386.0),
             energy_car_gco2e_per_km=_float_env("VECINITA_ENERGY_CAR_GCO2E_PER_KM", 251.0),
+            faq_fastpath_enabled=_bool_env("VECINITA_FAQ_FASTPATH_ENABLED", default=True),
+            faq_store_path=os.environ.get("VECINITA_FAQ_STORE_PATH"),
         )

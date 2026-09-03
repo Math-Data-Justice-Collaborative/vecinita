@@ -137,6 +137,7 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
   "answer": "string",
   "language": "en | es",
   "cache_hit": "none | exact | semantic | retrieve",
+  "answer_path": "faq_bypass | rag_llm",
   "energy_estimate": {
     "wh": 0.0,
     "g_co2e": 0.0,
@@ -170,12 +171,19 @@ default 8 remains the max default, not a target count).
 `cache_hit` (F43 / EV-017): optional for older clients; **required in OpenAPI** after F43 ships.
 `none` = full generate path; `exact` / `semantic` skip LLM; `retrieve` reuses cached chunks then may still synthesize.
 
+`answer_path` (F85 / EV-320 / #320): **`faq_bypass`** when a reviewed FAQ store match returns a
+canned answer **before** retrieve/LLM (`sources` empty; `cache_hit` remains `none` — distinct
+from F43). **`rag_llm`** (default) for the normal RAG path. Kill-switch
+`VECINITA_FAQ_FASTPATH_ENABLED=false` forces `rag_llm`. Matching is exact/normalized
+same-language only — not F43 semantic cache and not embedding FAQ similarity.
+
 `energy_estimate` (F65 / EV-024): heuristic Wh/gCO₂e from GPU TDP × util × ask wall time
 (defaults: T4 70 W × 0.5 × duration); **not** live Modal power metrics. Always include
 `advisory` that values are approximate. `car_km_equiv` / `car_m_equiv` =
 `g_co2e / VECINITA_ENERGY_CAR_GCO2E_PER_KM` (default **251** g/km ≈ EPA 404 g/mi) —
 primary UI car framing (S026-D22). FE may derive mi from km. Use guide may also show % of
 optional car-day/year constants; those need not be in the JSON if FE computes from config.
+On `faq_bypass`, `energy_estimate` MAY be omitted or zeroed (no GPU wall time).
 
 - **Errors**: `400` validation / forbidden fields; `503` upstream Modal unavailable.
 
@@ -187,7 +195,26 @@ optional car-day/year constants; those need not be in the JSON if FE computes fr
 - **Response**: `text/event-stream` — events: `token`, `sources`, `done`.
   `done` payload may include `cache_hit` (same enum as `/ask`) when F43 is enabled.
   `done` **includes** `energy_estimate` (F65) when EV-024 ships.
+  `done` (and optionally early `sources`) MAY include `answer_path` (F85). On FAQ bypass:
+  emit empty `sources`, answer token(s) (may be a single chunk), then `done` with
+  `answer_path=faq_bypass` — **without** calling Modal generate.
 - **Errors**: Same as `/ask`.
+
+### POST `/api/v1/warm` (S001 T11 / EV-318 / #318)
+
+- **Purpose**: Fire-and-forget prewarm of Modal embedding + prod LLM when ChatRAG UI mounts
+  (`prewarmChatServices`). Overlaps GPU boot with user think-time (ADR-022 primary lever).
+- **Auth**: None (public); same anonymous ChatRAG surface as `/ask`.
+- **Request**: Empty body.
+- **Response** `200`: `{"status": "warming"}` — returns **immediately**; work continues in a
+  background task that POSTs Modal `POST /warm` (embed + LLM with proxy key).
+- **Must not**: Use Modal or ChatRAG `GET /health` as the prewarm trigger (health is
+  liveness-only and does not boot the T4).
+- **Modal LLM contract (EV-318)**: Upstream `POST /warm` MUST detach GPU load via
+  `.spawn()` (mirror embedding) so ASGI is not held for full engine ready; readiness is
+  observed on later generate/stream / structured stamps (#314).
+- **Errors**: Best-effort — failures are swallowed; residual cold uses F40/F64 wait UX.
+- **Refs**: [Corpus: ADR-022] [Corpus: feature-list.md §F40] TC-318-01 · UJ-090
 
 ### POST `/api/v1/feedback` (EV-024 / F68)
 
@@ -487,15 +514,39 @@ Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: C
 
 ### POST `/warm`
 
-- **Purpose**: Preload / switch model into vLLM engine.
+- **Purpose**: Preload / switch model into vLLM engine (ChatRAG prewarm + eval).
 - **Auth**: Proxy key required (same fail-closed rule as generate).
 - **Request**: optional `{"model_id": "..."}`.
+- **Semantics (EV-318 / #318)**: Prod ASGI `warm` SHALL **spawn/detach** GPU warm work and
+  return promptly (`{"status": "warming"}` or `{"status": "ok", ...}` without awaiting full
+  load). Do **not** `await warm_model.remote.aio(...)` for the fire-and-forget prewarm path
+  (BUG-2026-08-27 / embedding `.spawn()` precedent). Playground/eval may still wait for
+  ready when an operator explicitly needs a blocking warm.
 - **Errors**: `401` unauthorized.
 
 ### GET `/health`
 
 - **Auth**: May remain open (no proxy key) — probes only.
-- **Response** `200`: `{"status": "ok"}`
+- **Response** `200` (prod `vecinita-llm`, ADR-022 EV-316 / #316):
+
+```json
+{
+  "status": "ok",
+  "base_model_id": "qwen2.5:1.5b-instruct",
+  "adapter_id": null,
+  "adapter_hash": null,
+  "snapshot_schema": "v1",
+  "git_commit": "<short-sha-or-null>"
+}
+```
+
+- When a LoRA is promoted: `adapter_id` and `adapter_hash` (lowercase hex SHA-256 of the
+  canonical adapter-dir digest) are non-null and match the serve pin.
+- **Errors / fail-closed**: container must not become ready for generate if post-restore
+  resolve is on and id/hash verification fails (raise at enter / bind; not a soft `/health`
+  lie claiming a different adapter).
+- Minimal `{"status": "ok"}` remains acceptable for non-prod / playground unless the same
+  metadata is wired for parity.
 
 ### Auth matrix (UJ-049 / TC-142 / RD-165)
 

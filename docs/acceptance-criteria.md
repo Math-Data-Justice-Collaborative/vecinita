@@ -189,7 +189,7 @@
 - [ ] **AC-CS3**: Soft donate CTA under the fact links to `https://wrwc.org/donate/` (or `VITE_WRWC_DONATE_URL`) in a new tab (TC-159).
 - [ ] **AC-CS4**: Friendly consent banner before remembering seen facts; Accept / No thanks; facts may rotate either way; memory only after Accept (TC-158, ADR-039).
 - [ ] **AC-CS5**: Accept persists seen-fact ids in `localStorage` (`vecinita.chat.coldstart.facts.v1`) and sets first-party consent cookie; No thanks sets opt-out cookie and does not persist seen ids (TC-158).
-- [ ] **AC-CS6**: Wait UX clears on first token or final error; existing cold-start failure copy unchanged; FE `/warm` via `prewarmChatServices` only — no Modal/backend changes (RD-184).
+- [ ] **AC-CS6**: Wait UX clears on first token or final error; existing cold-start failure copy unchanged; FE mount still calls `prewarmChatServices` → ChatRAG `/api/v1/warm` (Modal spawn per #318; residual wait UX unchanged) (RD-184, EV-318).
 - [ ] **AC-CS7**: Cookie/storage are not required by ChatRAG APIs and are not sent as ask/stream auth (ADR-039, RD-185).
 - [ ] **AC-CS8**: Playwright T0-ui covers wait UX + consent interaction (TC-160); Vitest covers TC-156–159.
 
@@ -429,6 +429,66 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-FT7**: Kill-switch/caps apply to FT train jobs (TC-263). Shared `VECINITA_AUTOMATIONS_KILL_SWITCH` plus `VECINITA_FINETUNE_MAX_CONCURRENT` (default 1) and `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (default 3) — TP5 / RD-348 / S030-D29.
 - [x] **AC-FT8**: Out of F77 without unlock: full-weight FT default; auto-load latest on prod; blind promote without operator review.
 - [x] **AC-FT9**: Rollback path: operator can revert prod to base pin (clear promoted adapter) (UJ-082, TC-265).
+- [x] **AC-FT11**: GPU snapshot restore resolves LoRA post-restore; verifies **SHA-256** adapter
+  content hash (`VECINITA_FINETUNE_ADAPTER_HASH`) with constant-time compare; fail closed on
+  mismatch; `/health` exposes ready metadata; kill-switch `VECINITA_LLM_LORA_RESOLVE`
+  (default `post_restore`) (EV-316 / #316, TC-316-01, TC-316-02, ADR-022).
+
+### Cold-start Layer E harness (EV-314 / #314)
+
+- [ ] **AC-314-01**: Stamp/tag helpers enforce `cold_kind` enum + ADR-004 allow-list; reject
+  raw prompt fields (TC-314-01).
+- [ ] **AC-314-02**: Opt-in bench script supports staged N≈20 smoke and N≥100 publish mode;
+  forced-cold procedure documented (TC-314-02).
+- [ ] **AC-314-03**: Standing docs define DO-504 / restore p95 regression gate language vs
+  published baseline; do not claim statistical percentiles below N=100.
+- [ ] **AC-314-04**: Vocabulary separates `prewarm_to_ready` (#318) from cold TTFT / restore.
+
+### Async GPU prewarm (EV-318 / #318)
+
+- [ ] **AC-318-01**: Prod LLM `POST /warm` spawns/detaches GPU warm and returns promptly
+  (TC-318-01).
+- [ ] **AC-318-02**: ChatRAG mount prewarm uses `POST /api/v1/warm` → Modal `/warm`, not
+  `/health` (TC-318-02, UJ-090).
+- [ ] **AC-318-03**: F40/F64 ColdStartWait remains for residual cold (AC-CS*).
+- [ ] **AC-318-04**: `api-contract.md` documents ChatRAG `/api/v1/warm` + Modal spawn semantics.
+
+### Seed GPU snapshots after deploy (EV-315 / #315)
+
+- [ ] **AC-315-01**: Opt-in seed script primes authenticated Modal `/warm` until observed
+  samples are `cold_kind=snapshot_restore` (or exits non-zero if create persists)
+  (TC-315-01, TC-315-02).
+- [ ] **AC-315-02**: Create-path latency documented separately from restore percentiles;
+  staging runbook + `infra/modal/README.md` describe the procedure.
+- [ ] **AC-315-03**: Prod prime is AskQuestion-gated; default Environment is staging;
+  CD hard gate deferred this cycle.
+
+### Thin Modal CPU ingress (EV-317 / #317)
+
+- [ ] **AC-317-01**: ASGI entry does not import vLLM / heavy GPU internals at module load
+  (TC-317-01).
+- [ ] **AC-317-02**: `GET /health` never allocates T4; `/warm` keeps spawn/detach (TC-317-02).
+- [ ] **AC-317-03**: Optional ingress CPU snapshot only after post-thin profile evidence
+  (TC-317-03 if enabled).
+
+### Cost-tune LLM scaledown_window (EV-319 / #319)
+
+- [ ] **AC-319-01**: T4 $/s formula + candidate windows (60/120/300) documented; default flip
+  justified (thin traffic → recommend 120 with env revert) (TC-319-02).
+- [ ] **AC-319-02**: `VECINITA_LLM_SCALEDOWN_WINDOW` parsed at deploy-import with validated
+  bounds; invalid fails closed; no `min_containers` / `buffer_containers` change (TC-319-01).
+- [ ] **AC-319-03**: Prod default change requires AskQuestion after staging evidence.
+
+### FAQ fast-path Layer D (F85 / EV-320 / #320)
+
+- [ ] **AC-320-01**: Exact + normalized same-language FAQ match only; paraphrase / cross-lang
+  miss → RAG (TC-320-01, UJ-093).
+- [ ] **AC-320-02**: On hit — canned answer, `sources=[]`, `answer_path=faq_bypass`,
+  `cache_hit=none`; no retrieve/LLM invoke (TC-320-02).
+- [ ] **AC-320-03**: Kill-switch `VECINITA_FAQ_FASTPATH_ENABLED=false` forces RAG (TC-320-03).
+- [ ] **AC-320-04**: API e2e covers ask + stream hit/miss (TC-320-04).
+- [ ] **AC-320-05**: Harness/schemas can record `answer_path=faq_bypass` without overloading
+  GPU `cold_kind` (ADR-022 EV-320).
 
 ### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
 

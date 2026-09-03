@@ -50,6 +50,7 @@ class AskResponse(BaseModel):
     language: Literal["en", "es"]
     sources: list[Source]
     cache_hit: Literal["none", "exact", "semantic", "retrieve"] = "none"
+    answer_path: Literal["faq_bypass", "rag_llm"] = "rag_llm"
     energy_estimate: EnergyEstimate | None = None  # set by ChatRAG app (F65)
 
 

@@ -202,9 +202,15 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 ### TC-258: Scrape host fallbacks (F7, EV-249 / #249)
 
-- **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries alternate browser headers; stable operator `error_code` when blocked.
-- **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with VecinitaBot UA + success with Chrome UA; all 403.
-- **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with `tls_handshake_failed` or `host_waf_blocked` when exhausted.
+- **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries
+  ordered browser UAs (Windows then Mac Chrome); SiteGround captcha interstitials
+  are WAF blocks; stable operator `error_code` when blocked (BUG-2026-09-02).
+- **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with
+  VecinitaBot/Windows UA + success with Mac Chrome UA; all 403; `sg-captcha`
+  challenge 202.
+- **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with
+  `tls_handshake_failed` or `host_waf_blocked` when exhausted (never empty success
+  on captcha).
 
 ### TC-259: Suggested question chips (UJ-081, F1, EV-216 / #216)
 
@@ -1940,3 +1946,161 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 - Exact DO internal write API test harness (shared fixture with integration tests).
 - Live Modal staging nightly — deferred.
+
+### TC-313-01: Prod GPU snapshot kill-switch defaults off (EV-313 / #313, ADR-022)
+
+- **Objective**: `VECINITA_LLM_GPU_SNAPSHOT` unset or false keeps prod snapshot path disabled; true enables config gate used by `LlmService`.
+- **Setup**: Unit parse of env helper (no live Modal required).
+- **Expected**: Unset → false; `true`/`1`/`on` → true; playground class remains snapshot-off regardless.
+- **Refs**: [Corpus: config] [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md §Amendment EV-313]
+
+### TC-313-02: Staging cold restore procedure (manual / smoke — non-flaky CI) (EV-313 / #313)
+
+- **Objective**: Documented staging procedure records cold_kind restore vs create vs clean_boot for snapshot on/off.
+- **Setup**: Staging Modal; `export VECINITA_LLM_GPU_SNAPSHOT=true` in the **deploy** shell then `modal deploy infra/modal/llm_app.py` (not Secret-only); optional `modal container stop`; authenticated `/warm` then `/generate` or stream.
+- **Expected**: Snapshot-on restore materially faster than snapshot-off clean boot; no NCCL failure; LoRA id/hash matches promote when adapter set (#316). Missing `sleep`/`wake_up` fails closed (RuntimeError) rather than silent skip.
+- **CI:** Do **not** gate merge on 70s snapshot-create boots; unit TC-313-01 is the CI gate.
+
+### TC-316-01: Post-restore LoRA promote matrix — no stale adapter (EV-316 / #316, ADR-022)
+
+- **Objective**: After snapshot restore, serving pin must match current volume + SHA-256 hash;
+  promote A → mutate volume toward B must not report/serve A as B (or B as A).
+- **Setup**: Unit (preferred) or Modal harness: bind path with fixture adapter dirs; set
+  `VECINITA_FINETUNE_ADAPTER_ID` / `VECINITA_FINETUNE_ADAPTER_HASH` for A; mutate files or
+  swap hash expectation to B; invoke post-restore bind.
+- **Expected**: Hash mismatch or missing dir → fail closed (RuntimeError / ready refused);
+  successful bind exposes matching `adapter_id` + `adapter_hash` on `/health`. Default
+  `VECINITA_LLM_LORA_RESOLVE=post_restore`. Algorithm is SHA-256 + `hmac.compare_digest`
+  (not MD5/SHA-1/CRC).
+- **Refs**: [Corpus: feature-list.md §F77] [Spec: ADR-022 §Amendment EV-316] [Corpus: config]
+
+### TC-316-02: Ready metadata + LoRA resolve kill-switch (EV-316 / #316)
+
+- **Objective**: `/health` includes `base_model_id`, `adapter_id`, `adapter_hash`,
+  `snapshot_schema`, `git_commit`; `VECINITA_LLM_LORA_RESOLVE=snapshot_bound` is parsed and
+  documented as non-default.
+- **Setup**: Unit parse of resolve mode + health payload shape (no live Modal required for CI).
+- **Expected**: Default `post_restore`; invalid resolve mode rejected or fail-closed to
+  `post_restore` per implementation (document chosen behavior in config-spec). Metadata
+  fields present on prod health when snapshot path is exercised.
+- **Refs**: [Corpus: api] [Corpus: config] AC-FT11
+
+### TC-314-01: cold_kind tag schema rejects prompts (EV-314 / #314, ADR-004)
+
+- **Objective**: Harness/stamp helpers accept only allow-listed operational tags; reject
+  `question` / `answer` / `prompt` / `message` keys.
+- **Setup**: Unit — construct sample dict with forbidden fields.
+- **Expected**: Validation error or strip/reject; `cold_kind` enum enforced.
+- **Refs**: [Corpus: ADR-004] [Spec: ADR-022 §Amendment EV-314] AC-314-01
+
+### TC-314-02: Cold-start bench smoke N≈20 (manual / live — non-flaky CI) (EV-314 / #314)
+
+- **Objective**: Opt-in script forces cold, runs ~20 restores, emits JSON with p50/p95 and
+  `cold_kind` breakdown; publishable p95 requires separate N≥100 run.
+- **Setup**: Staging Modal; documented `modal container stop`; `scripts/ops/cold_start_bench.py`
+  (or name from tech-plan) with `--n 20`.
+- **Expected**: JSON report written; no raw prompts persisted; CI does **not** require N=100.
+- **Refs**: AC-314-02 · AC-314-03
+
+### TC-318-01: LLM /warm uses spawn/detach (EV-318 / #318)
+
+- **Objective**: Prod Modal ASGI `POST /warm` does not await full `warm_model.remote.aio` load
+  for the prewarm path (spawn/detach like embedding).
+- **Setup**: Unit / bug-style test of warm handler (mock service); assert spawn called and
+  response returned without awaiting load completion.
+- **Expected**: Immediate response contract; proxy key still required.
+- **Refs**: [Corpus: api] BUG-2026-08-27 · AC-318-01
+
+### TC-318-02: ChatRAG mount prewarm hits /api/v1/warm not /health (EV-318 / #318)
+
+- **Objective**: FE mount and ChatRAG warm route prewarm via `/api/v1/warm` → Modal `/warm`.
+- **Setup**: Vitest ChatPanel / `prewarmChatServices`; API e2e or unit for `POST /api/v1/warm`.
+- **Expected**: No Modal `/health` used as prewarm; response `{"status":"warming"}`; F40/F64
+  residual wait still available.
+- **Refs**: UJ-090 · AC-318-02 · AC-CS6 (wait UX retained)
+
+### TC-315-01: Seed script CLI fail-closed mapping (EV-315 / #315)
+
+- **Objective**: Seed/prime CLI argument parsing and exit codes map create-persists → non-zero.
+- **Setup**: Unit — mock warm/observe; assert exit contract without live Modal.
+- **Expected**: Success when restore-kind observed; fail closed on persistent create-kind.
+- **Refs**: [Spec: ADR-022 §Amendment EV-315] AC-315-01
+
+### TC-315-02: Staging seed after deploy (manual / live — non-flaky CI) (EV-315 / #315)
+
+- **Objective**: After staging LLM deploy + seed, first monitored restore is
+  `snapshot_restore` for expected worker types.
+- **Setup**: Staging Modal with GPU snapshots on; `scripts/ops/seed_gpu_snapshots.py`;
+  optional `#314` bench smoke.
+- **Expected**: Restore-kind samples; create latency documented separately; CI does not
+  require live seed by default.
+- **Refs**: AC-315-01 · AC-315-02 · UJ-091
+
+### TC-317-01: ASGI entry avoids top-level vLLM import (EV-317 / #317)
+
+- **Objective**: Prod LLM ASGI entry module does not import vLLM / heavy GPU internals at
+  load time.
+- **Setup**: Unit/AST scan of ASGI entry (or import-graph test).
+- **Expected**: No top-level vLLM; lazy/split imports only.
+- **Refs**: [Spec: ADR-022 §Amendment EV-317] AC-317-01
+
+### TC-317-02: Health CPU-only; warm spawn preserved (EV-317 / #317)
+
+- **Objective**: `GET /health` stays on CPU Function; `POST /warm` still spawn/detach.
+- **Setup**: Unit — assert ASGI function has no `gpu=`; warm handler still calls `.spawn()`.
+- **Expected**: No T4 for probes; #318 contract retained.
+- **Refs**: AC-317-02 · TC-318-01
+
+### TC-317-03: Optional ingress CPU snapshot (EV-317 / #317 — if enabled)
+
+- **Objective**: If post-thin profile warrants, CPU `enable_memory_snapshot` on ASGI only.
+- **Setup**: Config/unit when feature flag/path enabled; otherwise N/A skip.
+- **Expected**: Snapshot on CPU ingress only; never on T4 ASGI.
+- **Refs**: AC-317-03
+
+### TC-319-01: scaledown_window env parse bounds (EV-319 / #319)
+
+- **Objective**: `VECINITA_LLM_SCALEDOWN_WINDOW` validates int bounds; invalid fails closed.
+- **Setup**: Unit — env parse helper / import-time config.
+- **Expected**: Accepted candidates include 60/120/300; invalid raises or aborts import.
+- **Refs**: [Spec: ADR-022 §Amendment EV-319] AC-319-02 · config-spec
+
+### TC-319-02: Scaledown evidence + formula documented (EV-319 / #319)
+
+- **Objective**: ADR/runbook publish T4 $/s formula; chosen window justified (or thin-traffic
+  → 120 with revert).
+- **Setup**: Doc review + optional staging timestamp-gap note in session evidence.
+- **Expected**: No `min_containers`; `buffer_containers` remains 0; prod flip AskQuestion.
+- **Refs**: AC-319-01 · AC-319-03 · UJ-092
+
+### TC-320-01: FAQ normalize + exact match (F85 / EV-320 / #320)
+
+- **Objective**: Normalized variants match; whitespace/case/`?` differences still hit.
+- **Setup**: Unit — FAQ matcher + fixture store (EN/ES entries).
+- **Expected**: Exact/normalized same-language hit returns entry id + answer; different
+  language or paraphrase miss returns no match.
+- **Refs**: [Corpus: feature-list.md §F85] AC-320-01 · UJ-093
+
+### TC-320-02: Ask path bypass skips retrieve + LLM (F85 / EV-320)
+
+- **Objective**: On FAQ hit, ChatRAG does not call embed/retrieve/LLM clients.
+- **Setup**: Unit/service with mocked RAG + LLM; kill-switch on.
+- **Expected**: `AskResponse.answer_path == "faq_bypass"`, `sources == []`,
+  `cache_hit == "none"`; mocks not invoked.
+- **Refs**: AC-320-02 · api-contract
+
+### TC-320-03: Kill-switch forces RAG (F85 / EV-320)
+
+- **Objective**: `VECINITA_FAQ_FASTPATH_ENABLED=false` never bypasses.
+- **Setup**: Unit/service; FAQ variant that would otherwise match.
+- **Expected**: `answer_path == "rag_llm"`; RAG path invoked.
+- **Refs**: AC-320-03 · config-spec
+
+### TC-320-04: API e2e FAQ hit + miss (F85 / EV-320)
+
+- **Objective**: TestClient `POST /api/v1/ask` (and stream) exercises bypass end-to-end.
+- **Setup**: `tests/e2e/` with FAQ fixture loaded; LLM/embed mocked or stubbed.
+- **Expected**: Hit → 200 canned + `answer_path=faq_bypass` + empty sources; miss → RAG
+  contract; stream emits empty sources + answer + done without generate.
+- **Refs**: AC-320-04 · UJ-093 · e2e-coverage.mdc
+

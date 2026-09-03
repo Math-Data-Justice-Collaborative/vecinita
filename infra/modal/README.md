@@ -195,9 +195,44 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 
 - **Default model:** `Qwen/Qwen2.5-1.5B-Instruct` (ADR-009); playground tags via `llm_model_registry.py` on the **playground** app
 - **GPU:** NVIDIA T4, `timeout=900s`, `scaledown_window=300` (scale-to-zero)
-- **Volume:** `llm-models` (`/models`, `manifest.json`, `/models/repos/<tag>`)
+- **Volume:** `llm-models` (`/models`, `manifest.json`, `/models/repos/<tag>`); adapters volume for promoted LoRA (ADR-053)
 - **Endpoints:** inference + `/warm` (proxy auth on mutating routes)
 - **Consumer env:** `VECINITA_MODAL_LLM_URL` on DO chat-rag-backend (`packages/llm-client`)
+- **GPU memory snapshots (ADR-022 / EV-313 / #313):** Kill-switch `VECINITA_LLM_GPU_SNAPSHOT`
+  (unset/`false` = off). The flag is read at **`modal deploy` import time** (baked into
+  `enable_memory_snapshot` / enter hooks) — setting it only in a Modal Secret does **not**
+  enable snapshots. **Staging + prod (`main`) enabled 2026-08-31** — keep
+  `export VECINITA_LLM_GPU_SNAPSHOT=true` in the deploy shell whenever redeploying
+  `infra/modal/llm_app.py` for those Environments, or snapshots silently fall off.
+  When on: prod-only `enable_memory_snapshot` + vLLM Level-1 sleep before capture / wake on
+  restore; snapshot **base engine only**, resolve LoRA after restore (#316). Verify adapter
+  with **SHA-256** (`VECINITA_FINETUNE_ADAPTER_HASH`) + `hmac.compare_digest`; kill-switch
+  `VECINITA_LLM_LORA_RESOLVE` (`post_restore` default). Snapshot
+  **creation** can take ~70–100s — prime via `/warm` after deploy (see #315 /
+  `scripts/ops/seed_gpu_snapshots.py`). Do not enable on playground.
+- **Post-deploy snapshot seed (EV-315 / #315):** After staging deploy with snapshots on, run
+  `uv run python scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop) until
+  observed samples are `cold_kind=snapshot_restore` (fail closed if create persists). Document
+  create latency separately from restore percentiles. Optional advisory CI only — not a hard
+  CD gate this cycle. Prod prime requires AskQuestion.
+  Example: `uv run python scripts/ops/seed_gpu_snapshots.py --modal-env staging --llm-url "$VECINITA_MODAL_LLM_URL" --proxy-key "$VECINITA_MODAL_PROXY_KEY" --max-primes 3`.
+  Pass real kinds from logs via `--observed-kinds` / `--kinds-file` when available.
+- **Thin CPU ingress (EV-317 / #317):** ASGI stays on CPU; lazy-import so vLLM is not loaded at
+  ASGI module import; keep `/warm` spawn (#318). Optional CPU snapshot on ingress only after
+  profile evidence.
+- **Scaledown window (EV-319 / #319):** Deploy-time `VECINITA_LLM_SCALEDOWN_WINDOW` (60–600s;
+  candidates 60/120/300). Document T4 $/s idle formula; thin traffic → prefer 120 with revert
+  to 300. No `min_containers` / `buffer_containers` in this ticket. Prod default flip =
+  AskQuestion.
+- **Layer E harness (EV-314 / #314):** Opt-in
+  `uv run python scripts/ops/cold_start_bench.py --n 20 --output /tmp/cold-smoke.json`
+  (use `--n 100` for publishable p95). Forced cold:
+  `modal container stop --env staging --all vecinita-llm` (or pass `--force-cold`).
+  Tags use `cold_kind` ∈ `{warm, snapshot_restore, snapshot_create, clean_boot}` —
+  no raw prompts (ADR-004). Do **not** conflate with `prewarm_to_ready` (#318).
+  15-service-health may cite this script; do not run N=100 inside the skill by default.
+- **Eager A/B:** `VECINITA_LLM_ENFORCE_EAGER` (default `true`) — independent of snapshot switch;
+  live on Modal secret `vecinita-llm-gpu` for GPU workers
 - **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — do not deploy
 
 ## vecinita-llm-playground
@@ -205,13 +240,22 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
 - **Role:** Admin list/pull + sandbox eval `model_id` reloads (ADR-037)
 - **Consumer env:** `VECINITA_MODAL_LLM_PLAYGROUND_URL` — never use for ChatRAG
 - **Path aliases:** `GET/POST /models/ollama*` for FE compat
+- **Snapshots:** remain **off** (`enable_memory_snapshot=False`) while model reload is allowed
 
-**Modal secret `vecinita-llm`** (ASGI proxy auth only):
+**Modal secrets**
+
+| Secret | Mounted on | Keys |
+|--------|------------|------|
+| `vecinita-llm` | ASGI only | `VECINITA_MODAL_PROXY_KEY` |
+| `vecinita-llm-gpu` | Prod `LlmService` GPU class | `VECINITA_FINETUNE_ADAPTER_ID`, `VECINITA_FINETUNE_ADAPTER_HASH` (optional), `VECINITA_LLM_ENFORCE_EAGER`, `VECINITA_LLM_LORA_RESOLVE` (optional) |
 
 ```bash
 set -a && source prod.env && set +a
 modal profile activate vecinita
 bash scripts/deploy/sync_llm_secret.sh --apply
+# Enable snapshots (staging): export in *this* shell, then deploy
+export VECINITA_LLM_GPU_SNAPSHOT=true
+modal deploy infra/modal/llm_app.py
 ```
 
 Key: `VECINITA_MODAL_PROXY_KEY` — must match DO `VECINITA_MODAL_PROXY_KEY` on internal-write-api.

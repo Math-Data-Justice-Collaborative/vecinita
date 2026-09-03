@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_LLM_APP = _REPO_ROOT / "infra" / "modal" / "llm_app.py"
+_LLM_ASGI = _REPO_ROOT / "infra" / "modal" / "llm_asgi.py"
 _WRITE_API_PKG = _REPO_ROOT / "apps" / "internal-write-api" / "vecinita_internal_write_api"
 _LLM_CLIENT = _REPO_ROOT / "packages" / "llm-client" / "vecinita_llm_client" / "client.py"
 
@@ -37,10 +37,10 @@ def _string_constants(tree: ast.AST) -> set[str]:
 
 def test_modal_llm_app_keeps_ollama_path_aliases() -> None:
     """Modal ASGI must keep GET/POST ``/models/ollama*`` aliases (RD-166)."""
-    tree = ast.parse(_LLM_APP.read_text(encoding="utf-8"))
+    tree = ast.parse(_LLM_ASGI.read_text(encoding="utf-8"))
     constants = _string_constants(tree)
     missing = _MODAL_ALIAS_PATHS - constants
-    assert not missing, f"llm_app.py missing path aliases: {sorted(missing)}"
+    assert not missing, f"llm_asgi.py missing path aliases: {sorted(missing)}"
 
 
 def test_internal_write_api_keeps_ollama_path_aliases() -> None:

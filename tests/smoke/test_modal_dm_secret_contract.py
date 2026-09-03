@@ -32,3 +32,27 @@ def test_data_management_modal_app_docstring_references_secret_key() -> None:
     text = DM_MODAL_APP.read_text(encoding="utf-8")
     assert "SUPABASE_SECRET_KEY" in text
     assert "EV-006" in text or "F35" in text
+
+
+def test_sync_modal_secret_script_requires_data_mgmt_url() -> None:
+    """F75/F76 schedule self-enqueue needs VECINITA_MODAL_DATA_MGMT_URL on Modal secret.
+
+    [Corpus: feature-list.md §F75 §F76]
+    [Spec: docs/staging-secrets-matrix.md §Modal — Data management]
+    """
+    text = SYNC_MODAL_SECRET.read_text(encoding="utf-8")
+    required_block = text.split("OPTIONAL_KEYS=", 1)[0]
+    assert "VECINITA_MODAL_DATA_MGMT_URL" in required_block
+    assert "REQUIRED_KEYS" in required_block
+
+
+def test_modal_env_example_documents_data_mgmt_url() -> None:
+    """infra/modal/.env.example lists DATA_MGMT_URL for schedule job enqueue."""
+    text = MODAL_ENV_EXAMPLE.read_text(encoding="utf-8")
+    assert "VECINITA_MODAL_DATA_MGMT_URL" in text
+
+
+def test_data_management_modal_app_docstring_references_data_mgmt_url() -> None:
+    """Scheduled freshness tick documents self-URL for ModalJobsEnqueueClient."""
+    text = DM_MODAL_APP.read_text(encoding="utf-8")
+    assert "VECINITA_MODAL_DATA_MGMT_URL" in text

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
+from sqlalchemy.exc import IntegrityError
 from vecinita_shared_schemas.auth import require_authenticated, require_service
 from vecinita_shared_schemas.data_management import CorpusTreeResponse
 from vecinita_shared_schemas.internal_write import (
@@ -46,6 +48,21 @@ from vecinita_internal_write_api.jobs_client import DataManagementJobsClient
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
+_logger = logging.getLogger(__name__)
+
+
+def _batch_upsert_error_detail(exc: BaseException) -> dict[str, str]:
+    """Stable operator-facing error payload for batch upsert failures."""
+    if isinstance(exc, IntegrityError):
+        return {
+            "error_code": "batch_upsert_integrity_error",
+            "error_type": type(exc).__name__,
+        }
+    return {
+        "error_code": "batch_upsert_failed",
+        "error_type": type(exc).__name__,
+    }
+
 
 def register_document_routes(
     app: FastAPI,
@@ -61,13 +78,20 @@ def register_document_routes(
     )
     def batch_upsert(body: BatchUpsertRequest, actor: WriteActorDep) -> BatchUpsertResponse:  # pyright: ignore[reportUnusedFunction]
         actor_id, actor_role = actor
-        return batch_upsert_documents(
-            engine=engine,
-            jobs_client=retag_jobs,
-            body=body,
-            actor_id=actor_id,
-            actor_role=actor_role,
-        )
+        try:
+            return batch_upsert_documents(
+                engine=engine,
+                jobs_client=retag_jobs,
+                body=body,
+                actor_id=actor_id,
+                actor_role=actor_role,
+            )
+        except Exception as exc:
+            _logger.exception("batch_upsert failed")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=_batch_upsert_error_detail(exc),
+            ) from exc
 
     @app.get(
         "/internal/v1/documents/content-hash",

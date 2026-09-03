@@ -314,6 +314,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             done_payload = {
                 "done": True,
                 "cache_hit": session.cache_hit,
+                "answer_path": session.answer_path,
                 "energy_estimate": estimate.model_dump(mode="json"),
             }
             yield f"data: {json.dumps(done_payload)}\n\n"
