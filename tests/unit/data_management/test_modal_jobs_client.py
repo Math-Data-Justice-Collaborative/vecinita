@@ -35,6 +35,40 @@ def test_modal_jobs_client_requires_url_and_proxy_key(
         _ = ModalJobsEnqueueClient()
 
 
+def test_modal_jobs_client_defaults_service_authorization_from_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Schedule/self-enqueue uses VECINITA_INTERNAL_API_KEY when Authorization omitted.
+
+    POST /jobs requires proxy key + admin JWT or internal service key when
+    VECINITA_AUTH_REQUIRED=true (F79 / resolve_operator_or_service).
+    [Corpus: feature-list.md §F75 §F76]
+    """
+    monkeypatch.setenv("VECINITA_MODAL_DATA_MGMT_URL", "https://dm.example")
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "proxy-secret")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "internal-service-key")
+    job_id = uuid4()
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
+
+    transport = httpx.MockTransport(handler)
+    http_client = httpx.Client(transport=transport, base_url="https://dm.example")
+    client = ModalJobsEnqueueClient(http_client=http_client)
+    try:
+        result = client.enqueue_freshness_refresh(DOC_ID, force=False)
+    finally:
+        client.close()
+        http_client.close()
+
+    assert result == job_id
+    assert len(seen) == 1
+    assert seen[0].headers["X-Vecinita-Proxy-Key"] == "proxy-secret"
+    assert seen[0].headers["Authorization"] == "Bearer internal-service-key"
+
+
 def test_modal_jobs_client_enqueue_success_and_auth_header(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -128,6 +128,7 @@ on the staging image (#212), POST feedback → inbox + staging-key traffic.
 | `VECINITA_MODAL_PROXY_KEY` | Yes | ASGI `requires_proxy_auth` |
 | `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` base URL — used by ingest workers |
 | `VECINITA_MODAL_LLM_URL` | Yes (EV-001) | Modal `vecinita-llm` base URL — LLM tagging at ingest |
+| `VECINITA_MODAL_DATA_MGMT_URL` | Yes (F75/F76) | Self ASGI base URL — `daily_corpus_automations` enqueue via `ModalJobsEnqueueClient` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Admin frontend origin; redeploy after change |
 | `VECINITA_LLM_TAG_MAX_TOKENS` | No | Default `128` — EV-001 LLM tag generation token limit |
 | `VECINITA_TAG_SEED_PATH` | No | Default `data/fixtures/tags/seed_tags.json` — EV-001 tag vocabulary path |
