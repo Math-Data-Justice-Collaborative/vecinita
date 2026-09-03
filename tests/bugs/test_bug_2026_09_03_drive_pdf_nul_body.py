@@ -11,7 +11,7 @@ from pathlib import Path
 import httpx
 import pytest
 from vecinita_ingest.drive import DriveFetchError
-from vecinita_ingest.scrape import fetch_url, scrape_headers
+from vecinita_ingest.scrape import ScrapeFetchError, fetch_url, scrape_headers
 
 _FIXTURES = Path(__file__).resolve().parents[2] / "data" / "fixtures" / "ingest"
 _DRIVE_VIEW = "https://drive.google.com/file/d/FILEID/view"
@@ -61,3 +61,45 @@ def test_bug_2026_09_03_drive_pdf_octet_stream_empty_soft_fails() -> None:
     with pytest.raises(DriveFetchError) as exc_info:
         _ = fetch_url("https://drive.google.com/file/d/EMPTY/view", client=client)
     assert exc_info.value.error_code == "drive_unsupported"
+
+
+def test_bug_2026_09_03_public_pdf_url_suffix_extracts_text() -> None:
+    """Non-Drive .pdf URLs use pypdf even when content-type is generic."""
+    text_pdf = (_FIXTURES / "sample-text.pdf").read_bytes()
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            content=text_pdf,
+            headers={"content-type": "application/octet-stream"},
+        )
+
+    client = httpx.Client(
+        transport=httpx.MockTransport(handler),
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    doc = fetch_url("https://example.com/resources/guide.pdf", client=client)
+    assert "Hello PDF" in doc.text
+    assert not doc.text.startswith("%PDF")
+
+
+def test_bug_2026_09_03_public_empty_pdf_raises_pdf_extract_failed() -> None:
+    """Non-Drive empty PDF soft-fails with pdf_extract_failed (not Drive code)."""
+    empty_pdf = (_FIXTURES / "empty.pdf").read_bytes()
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            content=empty_pdf,
+            headers={"content-type": "application/octet-stream"},
+        )
+
+    client = httpx.Client(
+        transport=httpx.MockTransport(handler),
+        headers=scrape_headers(),
+        follow_redirects=True,
+    )
+    with pytest.raises(ScrapeFetchError) as exc_info:
+        _ = fetch_url("https://example.com/empty.pdf", client=client)
+    assert exc_info.value.error_code == "pdf_extract_failed"
