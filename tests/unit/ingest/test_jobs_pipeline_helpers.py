@@ -65,6 +65,22 @@ def test_raise_from_url_failures_maps_waf_to_scrape_error() -> None:
         )
 
 
+def test_raise_from_url_failures_maps_pdf_extract_to_scrape_error() -> None:
+    """pdf_extract_failed soft-fails map to ScrapeFetchError."""
+    with pytest.raises(ScrapeFetchError) as exc_info:
+        _raise_from_url_failures(
+            [
+                {
+                    "url": "https://example.com/empty.pdf",
+                    "error_code": "pdf_extract_failed",
+                    "error_message": "PDF has no extractable text",
+                }
+            ]
+        )
+    assert exc_info.value.error_code == "pdf_extract_failed"
+    assert "no extractable" in str(exc_info.value)
+
+
 def test_raise_from_url_failures_maps_tls_to_scrape_error() -> None:
     """tls_handshake_failed soft-fails map to ScrapeFetchError."""
     with pytest.raises(ScrapeFetchError, match="TLS"):

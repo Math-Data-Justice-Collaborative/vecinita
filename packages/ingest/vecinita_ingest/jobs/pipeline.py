@@ -102,7 +102,7 @@ def _raise_from_url_failures(url_failures: list[dict[str, str]]) -> None:
     message = first["error_message"]
     if code in {"drive_auth_required", "drive_unsupported"}:
         raise DriveFetchError(message, error_code=code)
-    if code in {"host_waf_blocked", "tls_handshake_failed"}:
+    if code in {"host_waf_blocked", "tls_handshake_failed", "pdf_extract_failed"}:
         raise ScrapeFetchError(message, error_code=code)
     msg = f"all URLs failed; first: {message}"
     raise ValueError(msg)
