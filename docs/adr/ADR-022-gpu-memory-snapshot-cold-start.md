@@ -236,7 +236,9 @@ High-confidence **reviewed** FAQs can skip T4 entirely for a subset of asks.
    **no** embedding/semantic FAQ similarity this cycle.
 2. Response metadata: `answer_path ∈ {faq_bypass, rag_llm}` on ask/stream. **Do not** overload
    GPU `cold_kind` (`warm` / `snapshot_restore` / `snapshot_create` / `clean_boot`) — FAQ is not
-   a cold-start kind. Harness may classify `faq_bypass` via `answer_path` for Layer E dashboards.
+   a cold-start kind. Harness may classify `faq_bypass` via `answer_path` for Layer E dashboards
+   (`validate_answer_path_latency_sample` + `cold_start_bench.py --mode chat-ask`; TC-320-05 /
+   AC-320-05).
 3. On bypass: `sources=[]`, `cache_hit=none` (distinct from F43), **$0 GPU** (no Modal generate).
 4. Kill-switch `VECINITA_FAQ_FASTPATH_ENABLED` (default **true**); store path
    `VECINITA_FAQ_STORE_PATH` optional override.
@@ -245,7 +247,7 @@ High-confidence **reviewed** FAQs can skip T4 entirely for a subset of asks.
 7. Sibling ops (seed #315 / scaledown #319) stay AskQuestion-gated for prod; staging execute
    after Build gate with `.env` creds.
 
-**Tests / AC:** TC-320-01–04 · AC-320-01–05 · UJ-093.
+**Tests / AC:** TC-320-01–05 · AC-320-01–05 · UJ-093.
 
 ## References
 
