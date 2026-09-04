@@ -81,7 +81,7 @@ def _post_chat_ask(
     return payload
 
 
-def _force_cold(*, app_name: str, environment: str) -> None:
+def force_cold(*, app_name: str, environment: str) -> None:
     """Stop running containers for ``app_name`` so the next call is a cold restore.
 
     Modal CLI 1.5+ requires ``container list -e ENV --json`` then
@@ -271,7 +271,7 @@ def _run_generate(args: argparse.Namespace) -> int:
     for index in range(args.n):
         if args.force_cold:
             try:
-                _force_cold(app_name=args.modal_app, environment=args.modal_env)
+                force_cold(app_name=args.modal_app, environment=args.modal_env)
             except RuntimeError as exc:
                 print(f"force-cold failed: {exc}", file=sys.stderr)
                 return 1

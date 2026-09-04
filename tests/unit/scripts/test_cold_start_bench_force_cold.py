@@ -61,7 +61,7 @@ def test_force_cold_lists_env_then_stops_matching_app_containers(
         return _FakeCompleted(1, "", "unexpected")
 
     monkeypatch.setattr(bench.subprocess, "run", fake_run)
-    bench._force_cold(app_name=_LLM_APP, environment=_ENV)  # noqa: SLF001
+    bench.force_cold(app_name=_LLM_APP, environment=_ENV)
 
     assert calls[0] == [
         "modal",
@@ -94,7 +94,7 @@ def test_force_cold_raises_when_list_fails(monkeypatch: pytest.MonkeyPatch) -> N
 
     monkeypatch.setattr(bench.subprocess, "run", fake_run)
     with pytest.raises(RuntimeError, match="container list"):
-        bench._force_cold(app_name=_LLM_APP, environment=_ENV)  # noqa: SLF001
+        bench.force_cold(app_name=_LLM_APP, environment=_ENV)
 
 
 def test_force_cold_ignores_already_stopped(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -114,7 +114,7 @@ def test_force_cold_ignores_already_stopped(monkeypatch: pytest.MonkeyPatch) -> 
         return _FakeCompleted(1, "", f"Container '{_CID_A}' is already stopped.")
 
     monkeypatch.setattr(bench.subprocess, "run", fake_run)
-    bench._force_cold(app_name=_LLM_APP, environment=_ENV)  # noqa: SLF001
+    bench.force_cold(app_name=_LLM_APP, environment=_ENV)
 
 
 def test_force_cold_raises_when_stop_fails(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -135,4 +135,4 @@ def test_force_cold_raises_when_stop_fails(monkeypatch: pytest.MonkeyPatch) -> N
 
     monkeypatch.setattr(bench.subprocess, "run", fake_run)
     with pytest.raises(RuntimeError, match="container stop"):
-        bench._force_cold(app_name=_LLM_APP, environment=_ENV)  # noqa: SLF001
+        bench.force_cold(app_name=_LLM_APP, environment=_ENV)
