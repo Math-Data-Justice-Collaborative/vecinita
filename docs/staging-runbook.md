@@ -276,6 +276,48 @@ ssh -L 3000:127.0.0.1:3000 root@159.203.137.236
 TC-306 drill: Alertmanager → compose `webhook-sink` received synthetic alert with no
 chat content fields (PASS). Replace sink URL with a real staging webhook when ready.
 
+## EV-311 — Close cold-start umbrella on evidence (#311)
+
+**Status:** Spec locked 2026-09-04 (close on evidence; defer #315/#317/#319).  
+**ADR:** [ADR-022 §Amendment EV-311](adr/ADR-022-gpu-memory-snapshot-cold-start.md).
+
+### Procedure (staging only)
+
+```bash
+# Requires Modal CLI auth + staging LLM URL + proxy key (never commit secrets)
+export MODAL_ENVIRONMENT=staging
+# Optional: ensure snapshots stay on at next deploy (deploy-shell env, not Secret alone)
+# export VECINITA_LLM_GPU_SNAPSHOT=true
+
+# Restore smoke (TC-311-01 / TC-314-02) — synthetic prompts only
+# --force-cold lists staging containers then stops vecinita-llm ids (Modal CLI 1.5+)
+uv run python scripts/ops/cold_start_bench.py \
+  --n 20 --force-cold --modal-env staging \
+  --llm-url "$VECINITA_STAGING_MODAL_LLM_URL" \
+  --proxy-key "$VECINITA_MODAL_PROXY_KEY" \
+  --output ~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-311-infra-sub-second-chatrag-latency-on-cheap-server/evidence/cold-smoke.json
+
+# Optional publishable p95
+# uv run python scripts/ops/cold_start_bench.py --n 100 --force-cold --output …/cold-p95.json
+
+# E2E ChatRAG ask path (TC-311-02) — staging ChatRAG URL
+uv run python scripts/ops/cold_start_bench.py --mode chat-ask \
+  --chat-url "$VECINITA_STAGING_CHAT_URL" --n 5 \
+  --output …/chat-ask-smoke.json
+# and/or: bash scripts/deploy/staging_smoke.sh (H3)
+```
+
+### Close rules
+
+| Band | Action |
+|------|--------|
+| **Green** (restore p50 &lt;1s, p95 &lt;3s) | Fill ADR frontier table; close #311 |
+| **Useful** (planning band ~1–2s / ~3–10s; no 504) | Fill frontier; close #311 with honest Useful cite |
+| **Red** | Do **not** close; investigate / consider snapshot disable |
+
+Do **not** `modal container stop` on prod Environment `main` without AskQuestion.  
+Deferred backlog: #315 seed · #317 thin ingress · #319 scaledown.
+
 ## Troubleshooting
 
 | Symptom | Likely fix |

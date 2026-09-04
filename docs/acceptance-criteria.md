@@ -490,6 +490,18 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-320-05**: Harness/schemas can record `answer_path=faq_bypass` without overloading
   GPU `cold_kind` (ADR-022 EV-320 / TC-320-05).
 
+### EV-311 — Close cold-start umbrella on evidence (#311)
+
+- [ ] **AC-311-01**: Staging restore bench (N≈20 smoke; optional N≥100) via
+  `scripts/ops/cold_start_bench.py --force-cold` writes JSON with `cold_kind` breakdown; no
+  raw prompts (TC-311-01, TC-314-02).
+- [ ] **AC-311-02**: Staging ChatRAG E2E cold/ask path recorded (bench `chat-ask` and/or H3);
+  never silent DO 504 (TC-311-02).
+- [ ] **AC-311-03**: ADR-022 EV-311 frontier table filled with measured p50/p95 + Green/Useful/Red
+  band; Useful close allowed when Green unmet; Red blocks close.
+- [ ] **AC-311-04**: Staging-runbook + `infra/modal/README.md` describe the close procedure;
+  #315/#317/#319 explicitly deferred (not blocking).
+
 ### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
 
 #### F78 live enable (AC-AU7)

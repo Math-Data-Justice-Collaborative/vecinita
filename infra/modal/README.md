@@ -226,11 +226,15 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
   AskQuestion.
 - **Layer E harness (EV-314 / #314):** Opt-in
   `uv run python scripts/ops/cold_start_bench.py --n 20 --output /tmp/cold-smoke.json`
-  (use `--n 100` for publishable p95). Forced cold:
-  `modal container stop --env staging --all vecinita-llm` (or pass `--force-cold`).
+  (use `--n 100` for publishable p95). Forced cold (`--force-cold`):
+  `modal container list -e staging --json` then `modal container stop <id> -y` for
+  matching `vecinita-llm` containers (Modal CLI 1.5+; harness does this).
   Tags use `cold_kind` ∈ `{warm, snapshot_restore, snapshot_create, clean_boot}` —
   no raw prompts (ADR-004). Do **not** conflate with `prewarm_to_ready` (#318).
   15-service-health may cite this script; do not run N=100 inside the skill by default.
+- **Umbrella close (EV-311 / #311):** Re-baseline staging restore + ChatRAG E2E; publish
+  Green/Useful/Red frontier in ADR-022 EV-311; see
+  [`docs/staging-runbook.md` §EV-311](../../docs/staging-runbook.md). Defer #315/#317/#319.
 - **Eager A/B:** `VECINITA_LLM_ENFORCE_EAGER` (default `true`) — independent of snapshot switch;
   live on Modal secret `vecinita-llm-gpu` for GPU workers
 - **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — do not deploy
