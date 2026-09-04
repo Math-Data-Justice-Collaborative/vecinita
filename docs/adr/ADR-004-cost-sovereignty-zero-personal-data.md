@@ -51,6 +51,8 @@ Prior sibling designs used Supabase Auth, admin invites, and optional chat/sessi
 - No paid third-party embedding/chat APIs in default architecture.
 - Budget alerts at 80% / 100% of $50 cap; monthly cost review in deploy smoke.
 
+**Amendment (EV-323 / #323 — 2026-09-04):** The **≤ $50 hard cap** applies to **Vecinita-attributable** infrastructure (DigitalOcean App Platform + Vecinita managed DBs/obs, Modal workspace apps, Supabase admin projects). Shared DO **team** invoices may include other products (e.g. metar-iwxxm DOKS, empiric); those are **out of** the Vecinita envelope unless an explicit Decision expands scope. Prefer **scale-to-zero** on Modal CPU/GPU: avoid `min_containers=1` on embedding/LLM except with a documented latency tradeoff and AskQuestion. Staging and prod environments both stay (ADR-054); reduce cost by trim/compress, not by deleting an environment. Live baseline procedure: DO billing API + `modal billing` + Supabase management PAT — see #323 / EV-323 session reports.
+
 ## Consequences
 
 - **R5 resolved:** No identity auth in Vecinita — infrastructure gates only.

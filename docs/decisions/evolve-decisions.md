@@ -1820,3 +1820,24 @@ after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226m
 
 **Cites:** [Spec: ADR-022 §Amendment EV-311] [Corpus: acceptance] [Corpus: tests] [Corpus: staging] [Corpus: ADR-004] #311
 
+---
+
+## EV-323 — Full-stack cost reduce (keep staging+prod) (#323) (2026-09-04)
+
+**Session:** `EV-323-infra-cost-reduce-full-stack`  
+**Ticket:** [#323](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/323)  
+**Intake:** operator **recommended** (analyze + execute via `.env`; ≤$50; standard)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-323-D1 | Billing scope | **Vecinita-attributable only** (exclude metar/empiric on shared DO team) |
+| EV-323-D2 | Environments | Keep staging + prod (ADR-054); trim/compress only |
+| EV-323-D3 | Target | Full-stack ≤ **$50/mo** Vecinita envelope (ADR-004 hard) |
+| EV-323-D4 | Orphan DB | `vecinita-staging-restored-20260701` = delete **candidate**; AskQuestion before destroy |
+| EV-323-D5 | Supabase | Operator supplies management PAT (org/project read) for plan metering |
+| EV-323-D6 | Execute | Staging first; prod size/plan/auth mutate = AskQuestion |
+| EV-323-D7 | UI | N/A |
+| EV-323-D8 | New Fn | None — ops under ADR-004 / ADR-054 / #323 |
+
+**Cites:** [Corpus: ADR-004] [Corpus: ADR-054] [Corpus: staging] #323 #319
+
