@@ -1841,3 +1841,17 @@ after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226m
 
 **Cites:** [Corpus: ADR-004] [Corpus: ADR-054] [Corpus: staging] #323 #319
 
+---
+
+## EV-323 follow-up — DO projects + DB naming (2026-09-04)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-323-D9 | DO projects | [first-project](https://cloud.digitalocean.com/projects/2621c952-fc44-4b89-a15b-aa4164664db4/resources) = **staging**; project **vecinita** = **prod** |
+| EV-323-D10 | “Orphan” DB | **Cancel destroy** — `vecinita-staging-restored-20260701` is **live prod** corpus (ChatRAG + write API; 119 docs) |
+| EV-323-D11 | Cluster rename | **Impossible on DO managed DB** — document alias `vecinita-prod-db` in runbooks; host FQDN stays |
+| EV-323-D12 | Staging DB | Keep `vecinita-staging-db` as staging corpus |
+| EV-323-D13 | `vecinita-staging-obs` | Pending AskQuestion (Grafana/Loki droplet ~$6/mo; ports unreachable from public net) |
+
+**Cites:** [Corpus: ADR-004] [Corpus: ADR-055] [Corpus: staging] #323
+
