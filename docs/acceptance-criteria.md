@@ -455,12 +455,12 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 
 ### Seed GPU snapshots after deploy (EV-315 / #315)
 
-- [ ] **AC-315-01**: Opt-in seed script primes authenticated Modal `/warm` until observed
+- [x] **AC-315-01**: Opt-in seed script primes authenticated Modal `/warm` until observed
   samples are `cold_kind=snapshot_restore` (or exits non-zero if create persists)
-  (TC-315-01, TC-315-02).
-- [ ] **AC-315-02**: Create-path latency documented separately from restore percentiles;
+  (TC-315-01, TC-315-02). Live `/warm` alone fails closed without kinds evidence.
+- [x] **AC-315-02**: Create-path latency documented separately from restore percentiles;
   staging runbook + `infra/modal/README.md` describe the procedure.
-- [ ] **AC-315-03**: Prod prime is AskQuestion-gated; default Environment is staging;
+- [x] **AC-315-03**: Prod prime is AskQuestion-gated; default Environment is staging;
   CD hard gate deferred this cycle.
 
 ### Thin Modal CPU ingress (EV-317 / #317)

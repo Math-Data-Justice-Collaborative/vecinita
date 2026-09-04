@@ -211,12 +211,14 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
   **creation** can take ~70–100s — prime via `/warm` after deploy (see #315 /
   `scripts/ops/seed_gpu_snapshots.py`). Do not enable on playground.
 - **Post-deploy snapshot seed (EV-315 / #315):** After staging deploy with snapshots on, run
-  `uv run python scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop) until
-  observed samples are `cold_kind=snapshot_restore` (fail closed if create persists). Document
-  create latency separately from restore percentiles. Optional advisory CI only — not a hard
-  CD gate this cycle. Prod prime requires AskQuestion.
-  Example: `uv run python scripts/ops/seed_gpu_snapshots.py --modal-env staging --llm-url "$VECINITA_MODAL_LLM_URL" --proxy-key "$VECINITA_MODAL_PROXY_KEY" --max-primes 3`.
-  Pass real kinds from logs via `--observed-kinds` / `--kinds-file` when available.
+  `uv run python scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop), then evaluate
+  observed `cold_kind` from Modal logs via `--kinds-file` / `--observed-kinds`. Live `/warm`
+  alone exits **non-zero** until restore evidence is supplied (fail closed). Document create
+  latency separately from restore percentiles. Optional advisory CI only — not a hard CD gate.
+  Prod prime requires AskQuestion. Full steps: `docs/staging-runbook.md` §EV-315.
+  Example:
+  `uv run python scripts/ops/seed_gpu_snapshots.py --modal-env staging --llm-url "$VECINITA_STAGING_MODAL_LLM_URL" --proxy-key "$VECINITA_MODAL_PROXY_KEY" --max-primes 3`
+  then `… --kinds-file /tmp/llm-logs.txt`.
 - **Thin CPU ingress (EV-317 / #317):** ASGI stays on CPU; lazy-import so vLLM is not loaded at
   ASGI module import; keep `/warm` spawn (#318). Optional CPU snapshot on ingress only after
   profile evidence.

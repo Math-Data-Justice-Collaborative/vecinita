@@ -278,7 +278,7 @@ chat content fields (PASS). Replace sink URL with a real staging webhook when re
 
 ## EV-311 — Close cold-start umbrella on evidence (#311)
 
-**Status:** Spec locked 2026-09-04 (close on evidence; defer #315/#317/#319).  
+**Status:** Spec locked 2026-09-04 (close on evidence).  
 **ADR:** [ADR-022 §Amendment EV-311](adr/ADR-022-gpu-memory-snapshot-cold-start.md).
 
 ### Procedure (staging only)
@@ -288,6 +288,8 @@ chat content fields (PASS). Replace sink URL with a real staging webhook when re
 export MODAL_ENVIRONMENT=staging
 # Optional: ensure snapshots stay on at next deploy (deploy-shell env, not Secret alone)
 # export VECINITA_LLM_GPU_SNAPSHOT=true
+
+# After LLM deploy: seed snapshots first (EV-315 / TC-315-02) — see §EV-315 below
 
 # Restore smoke (TC-311-01 / TC-314-02) — synthetic prompts only
 # --force-cold lists staging containers then stops vecinita-llm ids (Modal CLI 1.5+)
@@ -316,7 +318,50 @@ uv run python scripts/ops/cold_start_bench.py --mode chat-ask \
 | **Red** | Do **not** close; investigate / consider snapshot disable |
 
 Do **not** `modal container stop` on prod Environment `main` without AskQuestion.  
-Deferred backlog: #315 seed · #317 thin ingress · #319 scaledown.
+Related ops: [§EV-315](#ev-315--seed-gpu-snapshots-after-deploy-315) seed · #317 thin ingress · #319 scaledown.
+
+## EV-315 — Seed GPU snapshots after deploy (#315)
+
+**Goal:** After staging LLM deploy (GPU snapshots on), prime authenticated `/warm` so the
+first real user hits **restore**, not ~70s **create**.  
+**ADR:** [ADR-022 §Amendment EV-315](adr/ADR-022-gpu-memory-snapshot-cold-start.md).  
+**Prod:** AskQuestion before any prod prime (default Environment is staging).  
+**CI:** Optional advisory only — not a hard CD gate.
+
+### Procedure (staging)
+
+```bash
+source .env   # or export VECINITA_STAGING_MODAL_LLM_URL + VECINITA_MODAL_PROXY_KEY
+export MODAL_ENVIRONMENT=staging
+
+# 1) Trigger captures (side effect). Exit 1 without kinds is expected (fail-closed).
+uv run python scripts/ops/seed_gpu_snapshots.py \
+  --modal-env staging \
+  --llm-url "$VECINITA_STAGING_MODAL_LLM_URL" \
+  --proxy-key "$VECINITA_MODAL_PROXY_KEY" \
+  --max-primes 3
+
+# 2) Capture cold_kind stamps from Modal logs (create latency is separate from restore p50/p95)
+modal app logs vecinita-llm -e staging --tail 500 --timestamps > /tmp/vecinita-llm-seed-logs.txt
+# Evidence lines (either is enough for --kinds-file):
+#   cold_start_stamp … 'cold_kind': 'snapshot_restore'
+#   Restoring Function from memory snapshot.
+#   Creating memory snapshot…  (create path — document latency separately)
+
+# 3) Fail-closed evaluate (exit 0 only when snapshot_restore observed)
+uv run python scripts/ops/seed_gpu_snapshots.py --kinds-file /tmp/vecinita-llm-seed-logs.txt
+```
+
+Document **create** wall time separately from restore percentiles (Layer E / #314 harness).
+Do not conflate seed primes with FE mount `prewarm_to_ready` (#318).
+
+### Pass / fail
+
+| Result | Meaning |
+|--------|---------|
+| Exit 0 on `--kinds-file` / `--observed-kinds` | Restore-kind observed (TC-315-02) |
+| Exit 1 after live `/warm` only | Expected until kinds supplied — not a silent PASS |
+| Create-only kinds | Fail closed; re-prime / investigate snapshots |
 
 ## Troubleshooting
 
