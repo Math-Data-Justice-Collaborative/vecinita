@@ -2114,6 +2114,25 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
   percentiles; samples never include question/answer text (ADR-004).
 - **Refs**: AC-320-05 · ADR-022 EV-320 · #314
 
+### TC-311-01: Staging restore frontier smoke (EV-311 / #311)
+
+- **Objective**: Re-baseline Modal GPU restore latency for umbrella close.
+- **Setup**: Staging; `VECINITA_LLM_GPU_SNAPSHOT=true` deployed; opt-in
+  `uv run python scripts/ops/cold_start_bench.py --n 20 --force-cold --output …`
+  (optional `--n 100` for publishable p95). Synthetic prompts only.
+- **Expected**: JSON report; `cold_kind` breakdown; classify Green / Useful / Red per
+  ADR-022 EV-311; CI does not require live N=20/100.
+- **Refs**: AC-311-01 · AC-311-03 · TC-314-02 · [Spec: ADR-022 §Amendment EV-311]
+
+### TC-311-02: Staging ChatRAG E2E ask under latency stack (EV-311 / #311)
+
+- **Objective**: End-to-end staging ask does not silent-504; record latency vs restore path.
+- **Setup**: Staging ChatRAG URL; `cold_start_bench.py --mode chat-ask` and/or smoke H3 after
+  optional force-cold on `vecinita-llm`.
+- **Expected**: 200 (or documented stream tokens); no gateway 504; latency noted in session
+  evidence (not claimed as Green restore p50 unless measured on `/generate`).
+- **Refs**: AC-311-02 · H3 · [Corpus: staging]
+
 ### TC-321: Staging vs prod host confirmation (EV-338 / #338)
 
 - **Objective**: Operator (or script) refuses restore when staging and prod hosts are identical

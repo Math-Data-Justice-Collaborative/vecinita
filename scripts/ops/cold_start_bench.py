@@ -82,18 +82,76 @@ def _post_chat_ask(
 
 
 def _force_cold(*, app_name: str, environment: str) -> None:
-    """Documented staging procedure: stop running containers so the next call restores cold."""
-    cmd = [
+    """Stop running containers for ``app_name`` so the next call is a cold restore.
+
+    Modal CLI 1.5+ requires ``container list -e ENV --json`` then
+    ``container stop CONTAINER_ID -y`` (no ``--all`` / app-name stop).
+    Fail closed on list/stop errors so warm samples are not mislabeled as restores.
+    """
+    list_cmd = [
         "modal",
         "container",
-        "stop",
-        "--env",
+        "list",
+        "-e",
         environment,
-        "--all",
-        app_name,
+        "--json",
     ]
-    print(f"+ {' '.join(cmd)}", file=sys.stderr)
-    _ = subprocess.run(cmd, check=False)
+    print(f"+ {' '.join(list_cmd)}", file=sys.stderr)
+    listed = subprocess.run(
+        list_cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if listed.returncode != 0:
+        err = (listed.stderr or listed.stdout or "").strip() or "unknown error"
+        msg = f"modal container list failed (exit {listed.returncode}): {err}"
+        raise RuntimeError(msg)
+
+    try:
+        raw: object = json.loads(listed.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        msg = "modal container list returned non-JSON"
+        raise RuntimeError(msg) from exc
+    if not isinstance(raw, list):
+        msg = "modal container list JSON must be an array"
+        raise TypeError(msg)
+
+    container_ids: list[str] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("app_name")
+        cid = item.get("container_id")
+        if name == app_name and isinstance(cid, str) and cid:
+            container_ids.append(cid)
+
+    if not container_ids:
+        print(
+            f"no running containers for app={app_name!r} env={environment!r}",
+            file=sys.stderr,
+        )
+        return
+
+    for container_id in container_ids:
+        stop_cmd = ["modal", "container", "stop", container_id, "-y"]
+        print(f"+ {' '.join(stop_cmd)}", file=sys.stderr)
+        stopped = subprocess.run(
+            stop_cmd,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if stopped.returncode != 0:
+            err = (stopped.stderr or stopped.stdout or "").strip() or "unknown error"
+            # Race: container may finish stopping between list and stop.
+            if "already stopped" in err.lower():
+                print(f"container {container_id} already stopped", file=sys.stderr)
+                continue
+            msg = (
+                f"modal container stop failed for {container_id} (exit {stopped.returncode}): {err}"
+            )
+            raise RuntimeError(msg)
 
 
 def _one_generate_sample(
@@ -207,15 +265,16 @@ def _run_generate(args: argparse.Namespace) -> int:
         print("Need --llm-url and --proxy-key (or env)", file=sys.stderr)
         return 2
 
-    if args.force_cold:
-        _force_cold(app_name=args.modal_app, environment=args.modal_env)
-
     generate_url = f"{args.llm_url.rstrip('/')}/generate"
     samples: list[dict[str, object]] = []
     latencies: list[float] = []
     for index in range(args.n):
-        if args.force_cold and index > 0:
-            _force_cold(app_name=args.modal_app, environment=args.modal_env)
+        if args.force_cold:
+            try:
+                _force_cold(app_name=args.modal_app, environment=args.modal_env)
+            except RuntimeError as exc:
+                print(f"force-cold failed: {exc}", file=sys.stderr)
+                return 1
         try:
             sample = _one_generate_sample(
                 generate_url=generate_url,
@@ -237,10 +296,12 @@ def _run_generate(args: argparse.Namespace) -> int:
         "mode": "generate",
         "n": args.n,
         "cold_kind": args.cold_kind,
+        "force_cold": bool(args.force_cold),
         "publishable_p95": args.n >= _PUBLISH_N,
         "note": (
             "Statistical p95 requires n>=100 (AC-314-03). "
-            "Do not conflate with prewarm_to_ready (#318)."
+            "Do not conflate with prewarm_to_ready (#318). "
+            "force_cold uses modal container list+stop (CLI 1.5+; EV-311)."
         ),
         "summary": summary,
         "samples": samples,

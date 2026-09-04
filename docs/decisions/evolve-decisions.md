@@ -1794,3 +1794,29 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push] [Spec: ADR-054]
 
+---
+
+## EV-311 — Close cold-start umbrella on evidence (#311) (2026-09-04)
+
+**Session:** `EV-311-infra-sub-second-chatrag-latency-on-cheap-server`  
+**Ticket:** [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311)  
+**Filter:** open + `priority:high` only  
+**Intake / requirements:** operator **recommended** (close on evidence; defer #315/#317/#319)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-311-D1 | Scope | Close umbrella on evidence; no #315/#317/#319 impl this cycle |
+| EV-311-D2 | Env | Staging Modal forced-cold only; prod cite EV-313 (no prod stop without AskQuestion) |
+| EV-311-D3 | Harness | `cold_start_bench.py` generate + `--force-cold`; N≈20 smoke; optional N≥100 |
+| EV-311-D4 | E2E | Staging ChatRAG `chat-ask` and/or H3; never silent 504 |
+| EV-311-D5 | SLO | Green / Useful / Red per ADR-022; Useful + documented frontier may close |
+| EV-311-D6 | Docs | ADR-022 EV-311 frontier table + staging-runbook + modal README; session research note |
+| EV-311-D7 | UI | Docs/repo only (no UI feature interview) |
+| EV-311-D8 | New Fn | None — latency system already in ADR-022 / F40/F64/F85 |
+
+**Build evidence (2026-09-04):** Force-cold harness fixed for Modal CLI 1.5+. Staging restore
+after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226ms).
+**Do not close #311** until restore enters Useful/Green or AskQuestion waiver.
+
+**Cites:** [Spec: ADR-022 §Amendment EV-311] [Corpus: acceptance] [Corpus: tests] [Corpus: staging] [Corpus: ADR-004] #311
+
