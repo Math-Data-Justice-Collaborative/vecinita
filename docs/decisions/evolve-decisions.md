@@ -1855,3 +1855,22 @@ after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226m
 
 **Cites:** [Corpus: ADR-004] [Corpus: ADR-055] [Corpus: staging] #323
 
+## EV-354 — Staging idle cost posture (#354) (2026-09-05)
+
+**Session:** `EV-354-staging-cost-effectiveness`  
+**Ticket:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/354
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-354-D1 | Feature mapping | **F83 delta** (no new Fn) |
+| EV-354-D2 | Lever package | A+B+C+D — Modal idle + obs off + warm-before-smoke |
+| EV-354-D3 | Modal extras | Keep playground / FT / rerank **deployed**, scale-to-zero |
+| EV-354-D4 | Warm path | CI (`deploy-staging.yml`) + runbook helper |
+| EV-354-D5 | $ target | Soft — document staging-attributable delta |
+| EV-354-D6 | Prod DB alias | Do **not** destroy `vecinita-staging-restored-20260701` (EV-323-D10) |
+| EV-354-D7 | Shared Postgres | Still deferred (EV-STG-D7) |
+| EV-354-D8 | UI | N/A |
+
+**Acceptance:** AC-ST9–AC-ST14 · UJ-095 · TC-325–TC-327  
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Spec: ADR-054] [Corpus: ADR-004]
+

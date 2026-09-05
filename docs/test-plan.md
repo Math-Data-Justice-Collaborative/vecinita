@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-09-03 (EV-338 / #338 — TC-321–324 staging corpus mirror; prior TC-320 FAQ)  
+> **Last updated**: 2026-09-05 (EV-354 / #354 — TC-325–327 staging idle + warm-before-smoke; prior EV-338 TC-321–324)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -40,6 +40,7 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
 | UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
 | UJ-094 Staging corpus mirror from prod | ops checklist + corpus guards | TC-321–TC-324 | — |
+| UJ-095 Cold staging + warm-before-smoke | config unit + CI/helper contract | TC-325–TC-327 | — |
 | UJ-088 Monitoring rates | `tests/e2e/test_uj088_monitoring_metrics.py` | TC-299–TC-304 | Vitest Monitoring page |
 | UJ-089 Staging Grafana/Loki | staging obs checklist / smoke | TC-305–TC-306 | — |
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
@@ -2161,4 +2162,31 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Setup**: `POST` staging ChatRAG `/api/v1/ask` pantry-style question (or `staging_smoke` H3).
 - **Expected**: HTTP 200; non-empty `answer`; `language` in `en`/`es`; prod corpus unchanged.
 - **Refs**: UJ-094 · staging-runbook H3 · [Corpus: staging]
+
+### TC-325: Staging embed min_containers resolves to 0 (EV-354 / #354)
+
+- **Objective**: Staging Modal embedding idle posture uses `VECINITA_EMBED_MIN_CONTAINERS=0`
+  (or unset → 0); never silently force always-warm on staging.
+- **Setup**: Unit on `_embed_min_containers_from_env` / deploy-import resolution; staging
+  deploy env documented in secrets matrix / runbook.
+- **Expected**: Default and staging-intended value is `0`; invalid values fail closed.
+- **Refs**: AC-ST9 · UJ-095 · [Corpus: config] · EV-323 / #323
+
+### TC-326: Warm-before-smoke helper or workflow step (EV-354 / #354)
+
+- **Objective**: Promote path can warm staging Modal services before H1–H5 so cold idle
+  does not flake `staging-smoke`.
+- **Setup**: Documented script and/or `deploy-staging.yml` step before smoke pytest;
+  unit or contract test that the warm entrypoint exists and is referenced.
+- **Expected**: Warm step is invocable; smoke job still runs H1–H5 afterward; timeout
+  budget accounts for cold start.
+- **Refs**: AC-ST10 · AC-ST12 · UJ-095 · `.github/workflows/deploy-staging.yml`
+
+### TC-327: Obs droplet default powered off (EV-354 / #354)
+
+- **Objective**: Runbook states staging Grafana/Loki droplet defaults **off** (EV-323-D13);
+  power-on is drill-only.
+- **Setup**: Docs guard or checklist assert in runbook §EV-036 / idle posture.
+- **Expected**: Default cost posture = powered off; recreate/destroy still AskQuestion.
+- **Refs**: AC-ST11 · UJ-095 · [Corpus: staging] · ADR-055
 

@@ -16,6 +16,33 @@
 Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
 live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`).
 
+### Idle cost posture (EV-354 / #354 / AC-ST9–14)
+
+Default staging to **cheap when idle**, still effective for Stage→Main:
+
+| Lever | Default |
+|-------|---------|
+| Modal Environment `staging` embed | `VECINITA_EMBED_MIN_CONTAINERS=0` (scale-to-zero) |
+| Staging LLM / playground / FT / rerank | Deployed; scale-to-zero (not always-warm) |
+| Obs droplet `vecinita-staging-obs` | **Powered off** until Grafana/Loki drill (EV-323-D13) |
+| Promote smoke | **Warm** Modal services, then H1–H5 / `staging-smoke` (UJ-095) |
+
+Soft target: maximize safe idle savings and document delta — no hard staging-only $ cap.
+Do **not** destroy `vecinita-staging-restored-20260701` (prod DB display name — EV-323-D10).
+
+**Warm-before-smoke (operator or CI):**
+
+```bash
+# Staging Modal URLs + proxy key from secrets matrix (never commit keys)
+export MODAL_ENVIRONMENT=staging
+uv run python scripts/ops/warm_staging_for_smoke.py
+bash scripts/deploy/staging_smoke.sh
+# or: uv run pytest tests/smoke/test_staging_health.py -m live -q
+```
+
+CI: `deploy-staging.yml` `staging-smoke` runs `scripts/ops/warm_staging_for_smoke.py`
+before H1–H3 (TC-326 / UJ-095).
+
 **Operational status (2026-08-28):** Distinct staging H1–H5 passed. Resolve `env_role` as
 `staging` or `prod` — do **not** use `staging_as_live` for the new `vecinita-staging-*`
 stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **prod**.

@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-09-03 (EV-338 / #338 — UJ-094 staging corpus mirror; prior EV-036 UJ-088–089)
+> **Last updated**: 2026-09-05 (EV-354 / #354 — UJ-095 warm-before-smoke; prior EV-338 UJ-094)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -93,6 +93,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-092 | Tune LLM scaledown_window from gaps | Operator | Env + staging evidence → AskQuestion prod flip | ADR-022 EV-319 #319 | staging |
 | UJ-093 | FAQ fast-path canned answer (skip LLM) | Community member | ChatRAG ask/stream → FAQ match → faq_bypass | F85 EV-320 #320 / #79 | local |
 | UJ-094 | Re-seed staging corpus from prod mirror | Operator | Prod read-only dump → staging restore → H2/H3 | F83 EV-338 #338 | staging |
+| UJ-095 | Promote with cold staging + warm-before-smoke | Operator | Idle staging → warm Modal → H1–H5 / `staging-smoke` → merge `main` | F83 EV-354 #354 | staging |
 
 ## Visual journey maps
 
@@ -2472,4 +2473,38 @@ corpus-db-safety ack for staging write; staging ChatRAG pointed at staging DB.
 
 **Refs**: [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety]
 [Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
+
+---
+
+### UJ-095: Promote with cold staging + warm-before-smoke (F83 / EV-354 / #354)
+
+**Actor**: Operator / maintainer
+
+**Goal**: Keep staging Modal **idle (scale-to-zero)** for cost, then still pass
+`staging-smoke` / H1–H5 on a promote PR by warming required services first.
+
+**Features**: F83 delta — EV-354; ADR-054 cost posture; related EV-323 idle levers
+
+**Preconditions**: Distinct staging stack healthy; `VECINITA_EMBED_MIN_CONTAINERS=0` on
+staging Modal; obs droplet powered off unless drilling Grafana; no prod secret cross-wire.
+
+**Steps**:
+
+1. Leave staging Modal apps cold between promotes (embed/LLM/playground/FT/rerank not
+   always-warm).
+2. Open promote PR `stage`→`main` (or main-bound PR that runs `staging-smoke`).
+3. CI or operator runs **warm-before-smoke** (hit staging embed/LLM `/warm` or documented
+   helper) then H1–H5.
+4. Merge only when CI + `staging-smoke` green (AC-ST5/AC-ST8/AC-ST12).
+5. Do not power on obs droplet unless monitoring drill needed (AC-ST11).
+
+**Acceptance**: AC-ST9–AC-ST14; TC-325–TC-327.
+
+**Automated tests**: TC-325 (config unit); TC-326 (warm helper / workflow contract);
+TC-327 (runbook/docs guard); live smoke after warm (Build).
+
+**E2E tier**: staging (T2) — smoke path; no UI.
+
+**Refs**: [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: ADR-004]
+[Spec: docs/adr/ADR-054-distinct-staging-and-production.md] #354
 

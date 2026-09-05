@@ -527,6 +527,15 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-ST7**: No operator `*-spec.yaml` or secrets committed.
 - [x] **AC-ST8**: Always-applied cursor rule Stage→Main; GitHub #212 (+ children) track ADR-054 + EV-036-D15: when `origin/stage` exists, feature/evolve PRs target **`stage` first** (CI required); promote via `stage`→`main` only with `CI success` + `staging-smoke` (or AskQuestion waiver) (TC-298). — EV-033 / EV-036-D15
 
+### EV-354 — Staging idle cost posture (F83 delta / #354)
+
+- [ ] **AC-ST9**: Staging Modal embedding uses `VECINITA_EMBED_MIN_CONTAINERS=0` (or unset→0); no always-warm staging embedding (TC-325).
+- [ ] **AC-ST10**: Staging LLM, playground, FT, and rerank remain deployed but scale-to-zero (no always-warm); optional warm before smoke (UJ-095, TC-326).
+- [ ] **AC-ST11**: Staging obs droplet default is **powered off**; runbook documents power-on only for Grafana/Loki drills (TC-327; EV-323-D13).
+- [ ] **AC-ST12**: `staging-smoke` / H1–H5 still pass after idle posture (warm preamble allowed in CI/helper) (UJ-095, TC-326).
+- [ ] **AC-ST13**: Staging-attributable cost delta documented (soft target — maximize safe idle savings; no hard staging-only $ cap) (EV-354).
+- [ ] **AC-ST14**: No staging→prod secret cross-wire; prod DB alias `vecinita-staging-restored-20260701` not destroyed this cycle (EV-323-D10).
+
 ### EV-036 — Admin monitoring + staging Grafana/Loki (F84 / ADR-055 / #114)
 
 - [ ] **AC-MON1**: Admin `/monitoring` shows ingest, chat, and embed success rates for ≥ `24h` and `7d` (TC-299, TC-303).
